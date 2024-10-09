@@ -63,5 +63,6 @@
     HksMalloc;
     HksFreeKeyAliasSet;
     HksRenameKeyAlias;
+    HksChangeStorageLevel;
   local: *;
 };

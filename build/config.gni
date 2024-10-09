@@ -102,4 +102,7 @@ declare_args() {
 
   # whether enable huks hdi in system in standard
   huks_enable_hdi_in_standard = true
+
+  # trusted list for change storage level
+  huks_change_storage_level_config = "{ 0, 3333 }"
 }

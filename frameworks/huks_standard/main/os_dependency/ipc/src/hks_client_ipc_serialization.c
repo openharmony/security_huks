@@ -584,7 +584,7 @@ int32_t HksRenameKeyAliasPack(const struct HksBlob *oldKeyAlias, const struct Hk
     do {
         ret = CopyBlobToBuffer(oldKeyAlias, destData, &offset);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy oldKeyAlias failed");
-        
+
         ret = CopyBlobToBuffer(newKeyAlias, destData, &offset);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy newKeyAlias failed");
 
@@ -592,4 +592,18 @@ int32_t HksRenameKeyAliasPack(const struct HksBlob *oldKeyAlias, const struct Hk
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy paramSet failed");
     } while (0);
     return ret;
+}
+int32_t HksChangeStorageLevelPack(struct HksBlob *destData, const struct HksBlob *keyAlias,
+    const struct HksParamSet *srcParamSet, const struct HksParamSet *destParamSet)
+{
+    uint32_t offset = 0;
+    int32_t ret = CopyBlobToBuffer(keyAlias, destData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy keyAlias failed")
+
+    ret = CopyParamSetToBuffer(srcParamSet, destData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy srcParamSet failed")
+
+    ret = CopyParamSetToBuffer(destParamSet, destData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy destParamSet failed")
+    return HKS_SUCCESS;
 }

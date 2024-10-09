@@ -970,3 +970,36 @@ void HksIpcServiceRenameKeyAlias(const struct HksBlob *srcData, const uint8_t *c
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
 }
+
+void HksIpcChangeStorageLevel(const struct HksBlob *srcData, const uint8_t *context)
+{
+    struct HksBlob keyAlias = { 0, NULL };
+    struct HksParamSet *srcParamSet = NULL;
+    struct HksParamSet *destParamSet = NULL;
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    int32_t ret;
+
+    do {
+        ret = HksChangeStorageLevelUnpack(srcData, &keyAlias, &srcParamSet, &destParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksChangeStorageLevelUnpack Ipc fail")
+
+        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(srcParamSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "srcParamSet HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(destParamSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "destParamSet HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksServiceChangeStorageLevel(&processInfo, &keyAlias, srcParamSet, destParamSet);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceChangeStorageLevel fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HksSendResponse(context, ret, NULL);
+
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+}

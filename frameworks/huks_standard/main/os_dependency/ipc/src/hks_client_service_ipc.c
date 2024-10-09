@@ -884,7 +884,7 @@ int32_t HksClientRenameKeyAlias(const struct HksBlob *oldKeyAlias, const struct 
 
         ret = HksCheckIpcRenameKeyAlias(oldKeyAlias, newParamSet, newKeyAlias);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIpcRenameKeyAlias failed!")
-        
+
         inBlob.size = sizeof(oldKeyAlias->size) + ALIGN_SIZE(oldKeyAlias->size) +
             sizeof(newKeyAlias->size) + ALIGN_SIZE(newKeyAlias->size) +
             ALIGN_SIZE(newParamSet->paramSetSize);
@@ -898,6 +898,29 @@ int32_t HksClientRenameKeyAlias(const struct HksBlob *oldKeyAlias, const struct 
         ret = HksSendRequest(HKS_MSG_RENAME_KEY_ALIAS, &inBlob, NULL, newParamSet);
     } while (0);
     HksFreeParamSet(&newParamSet);
+    HKS_FREE_BLOB(inBlob);
+    return ret;
+}
+int32_t HksClientChangeStorageLevel(const struct HksBlob *keyAlias, const struct HksParamSet *srcParamSet,
+    const struct HksParamSet *destParamSet)
+{
+    int32_t ret = HksCheckIpcChangeStorageLevel(keyAlias, srcParamSet, destParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckIpcChangeStorageLevel fail")
+
+    struct HksBlob inBlob = { 0, NULL };
+    inBlob.size = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + ALIGN_SIZE(srcParamSet->paramSetSize) +
+        ALIGN_SIZE(destParamSet->paramSetSize);
+    inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
+    HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
+
+    do {
+        ret = HksChangeStorageLevelPack(&inBlob, keyAlias, srcParamSet, destParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksChangeStorageLevelPack fail")
+
+        ret = HksSendRequest(HKS_MSG_CHANGE_STORAGE_LEVEL, &inBlob, NULL, srcParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
     HKS_FREE_BLOB(inBlob);
     return ret;
 }
