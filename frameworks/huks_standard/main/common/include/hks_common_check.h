@@ -54,6 +54,12 @@ int32_t HksCheckBlob2AndParamSet(const struct HksBlob *data1, const struct HksBl
 
 int32_t HksCheckBlobAndParamSet(const struct HksBlob *data, const struct HksParamSet *paramSet);
 
+int32_t HksCheckBlobAndParamSet2(const struct HksBlob *data, const struct HksParamSet *paramSet1,
+    const struct HksParamSet *paramSet2);
+
+int32_t HksCheckBlob2AndParamSet2(const struct HksBlob *data1, const struct HksBlob *data2,
+    const struct HksParamSet *paramSet1, const struct HksParamSet *paramSet2);
+
 int32_t HksGetDigestLen(uint32_t digest, uint32_t *digestLen);
 
 int32_t HksCheckAesAeMode(const struct HksParamSet *paramSet, bool *isAes, bool *isAeMode);
