@@ -37,7 +37,7 @@ static uint32_t g_signVerifyEccPolicyTag[] = { HKS_TAG_ALGORITHM, HKS_TAG_DIGEST
 static uint32_t g_signVerifyEd25519PolicyTag[] = { HKS_TAG_PURPOSE };
 static uint32_t g_macPolicyTag[] = { HKS_TAG_DIGEST, HKS_TAG_PURPOSE };
 static uint32_t g_macSm3PolicyTag[] = { HKS_TAG_ALGORITHM, HKS_TAG_DIGEST, HKS_TAG_PURPOSE };
-static uint32_t g_macCmacPolicyTag[] = { HKS_TAG_ALGORITHM, HKS_TAG_PURPOSE };
+static uint32_t g_macCmacPolicyTag[] = { HKS_TAG_BLOCK_MODE, HKS_TAG_PADDING, HKS_TAG_PURPOSE };
 static uint32_t g_derivePolicyTag[] = { HKS_TAG_DIGEST, HKS_TAG_PURPOSE };
 static uint32_t g_agreePolicyTag[] = { HKS_TAG_PURPOSE };
 
