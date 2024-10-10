@@ -74,6 +74,40 @@ static int32_t TranslateToInnerCurve25519Format(const uint32_t alg, const struct
 }
 #endif
 
+static int32_t HksSymmetricKeySizeCheck(
+    struct HksParam *algParam, const struct HksBlob *key, struct HksBlob *outKey)
+{
+    switch (algParam->uint32Param) {
+        case HKS_ALG_AES:
+            if ((key->size != HKS_KEY_BYTES(HKS_AES_KEY_SIZE_128)) &&
+                (key->size != HKS_KEY_BYTES(HKS_AES_KEY_SIZE_192)) &&
+                (key->size != HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256))) {
+                HKS_LOG_E("invalid input key size: %" LOG_PUBLIC "u", key->size);
+                return HKS_ERROR_INVALID_KEY_INFO;
+            }
+            break;
+        case HKS_ALG_DES:
+            if (key->size != HKS_KEY_BYTES(HKS_DES_KEY_SIZE_64)) {
+                HKS_LOG_E("invalid input key size: %" LOG_PUBLIC "u", key->size);
+                return HKS_ERROR_INVALID_KEY_INFO;
+            }
+            break;
+        case HKS_ALG_3DES:
+            if ((key->size != HKS_KEY_BYTES(HKS_3DES_KEY_SIZE_128)) &&
+                (key->size != HKS_KEY_BYTES(HKS_3DES_KEY_SIZE_192))) {
+                HKS_LOG_E("invalid input key size: %" LOG_PUBLIC "u", key->size);
+                return HKS_ERROR_INVALID_KEY_INFO;
+            }
+            break;
+        default:
+            HKS_LOG_E("invalid input key algParam: %" LOG_PUBLIC "u", algParam->uint32Param);
+            return HKS_ERROR_INVALID_ALGORITHM;
+    }
+
+    return CopyToInnerKey(key, outKey);
+}
+
+
 int32_t GetHksPubKeyInnerFormat(const struct HksParamSet *paramSet,
     const struct HksBlob *key, struct HksBlob *outKey)
 {
@@ -88,14 +122,11 @@ int32_t GetHksPubKeyInnerFormat(const struct HksParamSet *paramSet,
 
     switch (algParam->uint32Param) {
 #if defined(HKS_SUPPORT_HMAC_C) || defined(HKS_SUPPORT_SM3_C) || defined(HKS_SUPPORT_SM4_C) || \
-    defined(HKS_SUPPORT_AES_C)
+    defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_DES_C) || defined(HKS_SUPPORT_3DES_C)
         case HKS_ALG_AES:
-            if ((key->size != HKS_KEY_BYTES(HKS_AES_KEY_SIZE_128)) &&
-                (key->size != HKS_KEY_BYTES(HKS_AES_KEY_SIZE_192)) &&
-                (key->size != HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256))) {
-                HKS_LOG_E("invalid input key size: %" LOG_PUBLIC "u", key->size);
-                return HKS_ERROR_INVALID_KEY_INFO;
-            } /* fall-through */
+        case HKS_ALG_DES:
+        case HKS_ALG_3DES:
+            return HksSymmetricKeySizeCheck(algParam, key, outKey);
         case HKS_ALG_HMAC:
         case HKS_ALG_SM3:
         case HKS_ALG_SM4:

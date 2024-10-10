@@ -160,6 +160,14 @@ static int32_t AesCbcNoPaddingCryptInit(void **cryptoCtx, const struct HksBlob *
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
+    struct HksCipherParam *iv = (struct HksCipherParam *)(usageSpec->algParam);
+    if (iv->iv.size != HKS_AES_CBC_NOPADDING_IV_SIZE) {
+        HKS_LOG_E("initialize iv fail");
+        mbedtls_aes_free(ctx);
+        HKS_FREE(ctx);
+        return HKS_ERROR_INVALID_IV;
+    }
+
     struct HksMbedtlsAesCtx *outCtx = (struct HksMbedtlsAesCtx *)HksMalloc(sizeof(HksMbedtlsAesCtx));
     if (outCtx == NULL) {
         HKS_LOG_E("initialize outCtx fail");
@@ -171,7 +179,6 @@ static int32_t AesCbcNoPaddingCryptInit(void **cryptoCtx, const struct HksBlob *
     outCtx->append = (void *)ctx;
     outCtx->mode = usageSpec->mode;
     outCtx->padding = usageSpec->padding;
-    struct HksCipherParam *iv = (struct HksCipherParam *)(usageSpec->algParam);
     (void)memcpy_s(outCtx->iv, HKS_AES_CBC_NOPADDING_IV_SIZE, iv->iv.data, HKS_AES_CBC_NOPADDING_IV_SIZE);
 
     *cryptoCtx = (void *)outCtx;

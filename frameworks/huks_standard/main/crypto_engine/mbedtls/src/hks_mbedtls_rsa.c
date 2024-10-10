@@ -34,6 +34,7 @@
 
 #include "hks_log.h"
 #include "hks_mbedtls_common.h"
+#include "hks_common_check.h"
 #include "hks_mem.h"
 #include "hks_template.h"
 
@@ -42,6 +43,13 @@
 #define MBEDTLS_RSA_PUBLIC	0
 #define MBEDTLS_RSA_PRIVATE	1
 #define HKS_RSA_KEYSIZE_CNT 8
+#define MBEDTLS_RSA_PSS_DIGEST_NUM 2
+
+typedef struct HksMbedtlsSignVerifyParam {
+    uint32_t mbedtlsAlg;
+    int32_t padding;
+    uint32_t pssSaltLen;
+} HksMbedtlsSignVerifyParam;
 
 static int32_t RsaCheckKeySize(const uint32_t keySize)
 {
@@ -384,6 +392,67 @@ static int32_t HksToMbedtlsSignPadding(uint32_t hksPadding, int32_t *padding)
     return HKS_SUCCESS;
 }
 
+static int32_t HksToMbedtlsRsaSetPssSaltLen(const struct HksBlob *key, const uint32_t digest,
+    const uint32_t hksPssSaltLen, HksMbedtlsSignVerifyParam *param)
+{
+    const struct KeyMaterialRsa *keyMaterial = (struct KeyMaterialRsa *)(key->data);
+    uint32_t digestLen = 0;
+    int32_t ret = HksGetDigestLen(digest, &digestLen);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret);
+    int32_t saltLen = 0;
+
+    switch (hksPssSaltLen) {
+        case HKS_RSA_PSS_SALTLEN_DIGEST:
+            saltLen = digestLen;
+            break;
+        case HKS_RSA_PSS_SALTLEN_MAX:
+            saltLen = (keyMaterial->keySize / HKS_BITS_PER_BYTE) - digestLen - MBEDTLS_RSA_PSS_DIGEST_NUM;
+            if (saltLen < 0) {
+                return HKS_ERROR_INVALID_KEY_SIZE;
+            }
+            break;
+        default:
+            return HKS_ERROR_NOT_SUPPORTED;
+    }
+    param->pssSaltLen = saltLen;
+
+    return HKS_SUCCESS;
+}
+
+static int32_t HksMbedtlsRsaSignHandle(mbedtls_rsa_context *ctx, mbedtls_ctr_drbg_context *ctrDrbg,
+    HksMbedtlsSignVerifyParam *signParam, const struct HksBlob *message, struct HksBlob *signature)
+{
+    int32_t ret = HKS_SUCCESS;
+    if (signParam->padding == MBEDTLS_RSA_PKCS_V21) {
+        // 支持传入saltlen
+        ret = mbedtls_rsa_rsassa_pss_sign_ext(ctx, mbedtls_ctr_drbg_random, ctrDrbg,
+            (mbedtls_md_type_t)signParam->mbedtlsAlg, message->size, message->data, signParam->pssSaltLen,
+            signature->data);
+    } else {
+        ret = mbedtls_rsa_pkcs1_sign(ctx, mbedtls_ctr_drbg_random, ctrDrbg,
+            (mbedtls_md_type_t)signParam->mbedtlsAlg, message->size, message->data, signature->data);
+    }
+
+    return ret;
+}
+
+static int32_t HksMbedtlsRsaVerifyHandle(mbedtls_rsa_context *ctx, mbedtls_ctr_drbg_context *ctrDrbg,
+    HksMbedtlsSignVerifyParam *verifyParam, const struct HksBlob *message, struct HksBlob *signature)
+{
+    int32_t ret = HKS_SUCCESS;
+    if (verifyParam->padding == MBEDTLS_RSA_PKCS_V21) {
+        // 支持传入saltlen
+        ret = mbedtls_rsa_rsassa_pss_verify_ext(ctx, (mbedtls_md_type_t)verifyParam->mbedtlsAlg,
+            message->size, message->data, (mbedtls_md_type_t)verifyParam->mbedtlsAlg, verifyParam->pssSaltLen,
+            signature->data);
+    } else {
+        ret = mbedtls_rsa_pkcs1_verify(ctx,
+            (mbedtls_md_type_t)verifyParam->mbedtlsAlg, message->size, message->data, signature->data);
+    }
+
+    return ret;
+}
+
 static int32_t HksMbedtlsRsaSignVerify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const bool sign, struct HksBlob *signature)
 {
@@ -404,16 +473,22 @@ static int32_t HksMbedtlsRsaSignVerify(const struct HksBlob *key, const struct H
     mbedtls_rsa_context ctx;
     (void)memset_s(&ctx, sizeof(mbedtls_rsa_context), 0, sizeof(mbedtls_rsa_context));
     mbedtls_rsa_init(&ctx);
+    mbedtls_rsa_set_padding(&ctx, padding, (mbedtls_md_type_t)mbedtlsAlg);
+    HksMbedtlsSignVerifyParam mbedtlsSignVerifyParam = { 0 };
+    if (padding == MBEDTLS_RSA_PKCS_V21) {
+        ret = HksToMbedtlsRsaSetPssSaltLen(key, usageSpec->digest, usageSpec->pssSaltLenType, &mbedtlsSignVerifyParam);
+        HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    }
+    mbedtlsSignVerifyParam.mbedtlsAlg = mbedtlsAlg;
+    mbedtlsSignVerifyParam.padding = padding;
 
     do {
         ret = RsaKeyMaterialToCtx(key, sign, &ctx); /* sign need private exponent (d) */
         HKS_IF_NOT_SUCC_BREAK(ret)
         if (sign) {
-            ret = mbedtls_rsa_pkcs1_sign(&ctx, mbedtls_ctr_drbg_random, &ctrDrbg,
-                (mbedtls_md_type_t)mbedtlsAlg, message->size, message->data, signature->data);
+            ret = HksMbedtlsRsaSignHandle(&ctx, &ctrDrbg, &mbedtlsSignVerifyParam, message, signature);
         } else {
-            ret = mbedtls_rsa_pkcs1_verify(&ctx,
-                (mbedtls_md_type_t)mbedtlsAlg, message->size, message->data, signature->data);
+            ret = HksMbedtlsRsaVerifyHandle(&ctx, &ctrDrbg, &mbedtlsSignVerifyParam, message, signature);
         }
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls rsa sign/verify failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);

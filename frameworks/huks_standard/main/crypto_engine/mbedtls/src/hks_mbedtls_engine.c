@@ -100,9 +100,9 @@ void HksCryptoHalHmacFreeCtx(void **ctx)
 }
 
 #ifdef HKS_SUPPORT_CMAC_C
-int32_t HksCryptoHalCmacInit(const struct HksBlob *key, uint32_t digestAlg, void **ctx)
+int32_t HksCryptoHalCmacInit(const struct HksBlob *key, void **ctx, const struct HksUsageSpec *usageSpec)
 {
-    if (CheckBlob(key) != HKS_SUCCESS || ctx == NULL) {
+    if (CheckBlob(key) != HKS_SUCCESS || ctx == NULL || usageSpec == NULL) {
         HKS_LOG_E("Crypt Hal Cmac init msg is NULL");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -110,12 +110,12 @@ int32_t HksCryptoHalCmacInit(const struct HksBlob *key, uint32_t digestAlg, void
     CmacInit func = (CmacInit)GetAbility(HKS_CRYPTO_ABILITY_CMAC_INIT);
     HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
 
-    return func(ctx, key, digestAlg);
+    return func(ctx, key, usageSpec);
 }
 
-int32_t HksCryptoHalCmacUpdate(const struct HksBlob *chunk, void *ctx)
+int32_t HksCryptoHalCmacUpdate(const struct HksBlob *chunk, void *ctx, const struct HksUsageSpec *usageSpec)
 {
-    if (CheckBlob(chunk) != HKS_SUCCESS || ctx == NULL) {
+    if (CheckBlob(chunk) != HKS_SUCCESS || ctx == NULL || usageSpec == NULL) {
         HKS_LOG_E("Crypt Hal Cmac update chunk is invalid param");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -123,12 +123,13 @@ int32_t HksCryptoHalCmacUpdate(const struct HksBlob *chunk, void *ctx)
     CmacUpdate func = (CmacUpdate)GetAbility(HKS_CRYPTO_ABILITY_CMAC_UPDATE);
     HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
 
-    return func(ctx, chunk);
+    return func(ctx, chunk, usageSpec);
 }
 
-int32_t HksCryptoHalCmacFinal(const struct HksBlob *msg, void **ctx, struct HksBlob *mac)
+int32_t HksCryptoHalCmacFinal(
+    const struct HksBlob *msg, void **ctx, struct HksBlob *mac, const struct HksUsageSpec *usageSpec)
 {
-    if (msg == NULL || ctx == NULL || *ctx == NULL || CheckBlob(mac) != HKS_SUCCESS) {
+    if (msg == NULL || ctx == NULL || *ctx == NULL || usageSpec == NULL || CheckBlob(mac) != HKS_SUCCESS) {
         HKS_LOG_E("Crypt Hal Cmac final msg or mac is NULL");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -136,7 +137,7 @@ int32_t HksCryptoHalCmacFinal(const struct HksBlob *msg, void **ctx, struct HksB
     CmacFinal func = (CmacFinal)GetAbility(HKS_CRYPTO_ABILITY_CMAC_FINAL);
     HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
 
-    return func(ctx, msg, mac);
+    return func(ctx, msg, mac, usageSpec);
 }
 
 void HksCryptoHalCmacFreeCtx(void **ctx)
