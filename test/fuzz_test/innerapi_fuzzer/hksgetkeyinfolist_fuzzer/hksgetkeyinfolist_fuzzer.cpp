@@ -31,19 +31,21 @@ namespace Hks {
 
 int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
 {
-    if (data == nullptr || size < ALIAS_SIZE + sizeof(uint32_t)) {
+    uint32_t listCount = 5;
+    if (data == nullptr || size < ALIAS_SIZE * listCount) {
         return -1;
     }
 
-    uint32_t listCount = *ReadData<uint32_t *>(data, size, sizeof(uint32_t));
-    struct HksKeyInfo keyInfoList = {
-        .alias = { ALIAS_SIZE, ReadData<uint8_t *>(data, size, ALIAS_SIZE) },
-        .paramSet = nullptr
-    };
+    struct HksKeyInfo keyInfoList[listCount];
+    for (uint32_t i = 0; i < listCount; i++) {
+        keyInfoList[i].alias = { ALIAS_SIZE, ReadData<uint8_t *>(data, size, ALIAS_SIZE) };
+    }
     WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
-    keyInfoList.paramSet = ps.s;
+    for (uint32_t i = 0; i < listCount; i++) {
+        keyInfoList[i].paramSet = ps.s;
+    }
 
-    [[maybe_unused]] int ret = HksGetKeyInfoList(ps.s, &keyInfoList, &listCount);
+    [[maybe_unused]] int ret = HksGetKeyInfoList(ps.s, keyInfoList, &listCount);
 
     return 0;
 }
