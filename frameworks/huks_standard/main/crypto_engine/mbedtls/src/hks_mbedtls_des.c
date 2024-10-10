@@ -122,6 +122,14 @@ static int32_t DesCbcNoPaddingCryptInit(
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
+    struct HksCipherParam *iv = (struct HksCipherParam *)(usageSpec->algParam);
+    if (iv->iv.size != HKS_DES_CBC_NOPADDING_IV_SIZE) {
+        HKS_LOG_E("initialize iv fail");
+        mbedtls_des_free(ctx);
+        HKS_FREE(ctx);
+        return HKS_ERROR_INVALID_IV;
+    }
+
     struct HksMbedtlsDesCtx *outCtx = (struct HksMbedtlsDesCtx *)HksMalloc(sizeof(struct HksMbedtlsDesCtx));
     if (outCtx == NULL) {
         HKS_LOG_E("initialize outCtx fail");
@@ -133,8 +141,6 @@ static int32_t DesCbcNoPaddingCryptInit(
     outCtx->append = (void *)ctx;
     outCtx->mode = usageSpec->mode;
     outCtx->padding = usageSpec->padding;
-
-    struct HksCipherParam *iv = (struct HksCipherParam *)(usageSpec->algParam);
     (void)memcpy_s(outCtx->iv, HKS_DES_CBC_NOPADDING_IV_SIZE, iv->iv.data, HKS_DES_CBC_NOPADDING_IV_SIZE);
 
     *cryptoCtx = (void *)outCtx;

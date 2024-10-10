@@ -184,22 +184,32 @@ static bool HksIsAlgorithmSm4(const struct HksParamSet *paramSet)
 }
 
 #ifdef HKS_SUPPORT_3DES_C
-static bool HksIsAlgorithm3DES(const struct HksParamSet *paramSet)
+static bool HksIsNeedIv3DES(const struct HksParamSet *paramSet)
 {
     struct HksParam *algParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "check 3DES get alg param failed!")
-    return (algParam->uint32Param == HKS_ALG_3DES);
+
+    struct HksParam *modeParam = NULL;
+    ret = HksGetParam(paramSet, HKS_TAG_BLOCKMODE, &modeParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "check 3DES get block mode param failed!")
+
+    return ((algParam->uint32Param == HKS_ALG_3DES) && (modeParam->uint32Param == HKS_MODE_CBC));
 }
 #endif
 
 #ifdef HKS_SUPPORT_DES_C
-static bool HksIsAlgorithmDES(const struct HksParamSet *paramSet)
+static bool HksIsNeedIvDES(const struct HksParamSet *paramSet)
 {
     struct HksParam *algParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "check DES get alg param failed!")
-    return (algParam->uint32Param == HKS_ALG_DES);
+
+    struct HksParam *modeParam = NULL;
+    ret = HksGetParam(paramSet, HKS_TAG_BLOCKMODE, &modeParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "check DES get block mode param failed!")
+
+    return ((algParam->uint32Param == HKS_ALG_DES) && (modeParam->uint32Param == HKS_MODE_CBC));
 }
 #endif
 
@@ -223,11 +233,11 @@ int32_t HksBuildCipherUsageSpec(
     if (HksIsAlgorithmSm4(paramSet)) { // is sm4
         ret = HksFillIvParam(paramSet, usageSpec);
 #ifdef HKS_SUPPORT_3DES_C
-    } else if (HksIsAlgorithm3DES(paramSet)) { // is 3des
+    } else if (HksIsNeedIv3DES(paramSet)) { // is 3des
         ret = HksFillIvParam(paramSet, usageSpec);
 #endif
 #ifdef HKS_SUPPORT_DES_C
-    } else if (HksIsAlgorithmDES(paramSet)) { // is des
+    } else if (HksIsNeedIvDES(paramSet)) { // is des
         ret = HksFillIvParam(paramSet, usageSpec);
 #endif
     } else if (!isAes) { // not sm4, not aes

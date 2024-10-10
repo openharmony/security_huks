@@ -50,6 +50,7 @@
 #define HKS_RSA_OAEP_DIGEST_NUM          2
 #define HKS_SM2_C1_LEN_NUM               2
 #define HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE  16
+#define HKS_BLOCK_CIPHER_DES_CBC_BLOCK_SIZE 8
 #define HKS_TEMP_SIZE                    32
 #define MAX_BUF_SIZE                     (5 * 1024 * 1024)
 #define HKS_AES_GCM_NONCE_LEN            12
@@ -136,19 +137,23 @@ static int32_t CheckAesCipherAead(bool isEncrypt, const struct HksBlob *inData,
     return HKS_SUCCESS;
 }
 
-static int32_t CheckBlockCipherOther(uint32_t mode, bool isEncrypt, uint32_t padding, const struct HksBlob *inData,
-    const struct HksBlob *outData)
+static int32_t CheckBlockCipherOther(uint32_t mode, bool isEncrypt, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *inData, const struct HksBlob *outData)
 {
     uint32_t paddingSize = 0;
 
     if (isEncrypt) {
-        if (padding == HKS_PADDING_NONE) {
-            if ((mode == HKS_MODE_CBC || mode == HKS_MODE_ECB) && inData->size % HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE != 0) {
+        uint32_t blockSize = HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE;
+        if (usageSpec->algType == HKS_ALG_DES || usageSpec->algType == HKS_ALG_3DES) {
+            blockSize = HKS_BLOCK_CIPHER_DES_CBC_BLOCK_SIZE;
+        }
+        if (usageSpec->padding == HKS_PADDING_NONE) {
+            if ((mode == HKS_MODE_CBC || mode == HKS_MODE_ECB) && inData->size % blockSize != 0) {
                 HKS_LOG_E("encrypt cbc or ecb no-padding, invalid inSize: %" LOG_PUBLIC "u", inData->size);
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
         } else {
-            paddingSize = HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE - inData->size % HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE;
+            paddingSize = blockSize - inData->size % blockSize;
             if (inData->size > (UINT32_MAX - paddingSize)) {
                 HKS_LOG_E("encrypt, invalid inData size: %" LOG_PUBLIC "u", inData->size);
                 return HKS_ERROR_INVALID_ARGUMENT;
@@ -173,7 +178,6 @@ static int32_t CheckBlockCipherOther(uint32_t mode, bool isEncrypt, uint32_t pad
 static int32_t CheckBlockCipherData(bool isEncrypt, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *inData, const struct HksBlob *outData)
 {
-    const uint32_t padding = usageSpec->padding;
     const uint32_t mode = usageSpec->mode;
     const uint32_t alg = usageSpec->algType;
     int32_t ret = HKS_ERROR_NOT_SUPPORTED;
@@ -184,10 +188,10 @@ static int32_t CheckBlockCipherData(bool isEncrypt, const struct HksUsageSpec *u
         }
     } else if (mode == HKS_MODE_CFB || mode == HKS_MODE_OFB) {
         if (alg == HKS_ALG_SM4) {
-            ret = CheckBlockCipherOther(mode, isEncrypt, padding, inData, outData);
+            ret = CheckBlockCipherOther(mode, isEncrypt, usageSpec, inData, outData);
         }
     } else if (mode == HKS_MODE_CBC || mode == HKS_MODE_CTR || mode == HKS_MODE_ECB) {
-        ret = CheckBlockCipherOther(mode, isEncrypt, padding, inData, outData);
+        ret = CheckBlockCipherOther(mode, isEncrypt, usageSpec, inData, outData);
     }
 
     return ret;
@@ -269,7 +273,7 @@ static int32_t HmacAuth(const struct HuksKeyNode *keyNode, const struct HksParam
     if (algParam->uint32Param == HKS_ALG_HMAC) {
         return HksThreeStageAuth(HKS_AUTH_ID_MAC_HMAC, keyNode);
 #ifdef HKS_SUPPORT_CMAC_C
-    } else if (algParam->uint32Param == HKS_ALG_3DES) {  // CMACinit校验密钥算法，只支持3DES
+    } else if (algParam->uint32Param == HKS_ALG_CMAC) {
         return HksThreeStageAuth(HKS_AUTH_ID_MAC_CMAC, keyNode);
 #endif
     } else if (algParam->uint32Param == HKS_ALG_SM3) {
@@ -1973,9 +1977,16 @@ int32_t HksCoreMacThreeStageInit(const struct HuksKeyNode *keyNode, const struct
         struct HksParam *algParam = NULL;
         ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append hmac get alg param failed!");
-        if (algParam->uint32Param == HKS_ALG_3DES) {  // CMACinit阶段校验密钥，只支持3DES
+        if (algParam->uint32Param == HKS_ALG_CMAC) {
 #ifdef HKS_SUPPORT_CMAC_C
-            ret = HksCryptoHalCmacInit(&rawKey, alg, &ctx);
+            struct HksUsageSpec usageSpec = {0};
+            HksFillUsageSpec(paramSet, &usageSpec);
+            ret = HksFillIvParam(paramSet, &usageSpec);
+            if (ret != HKS_SUCCESS) {
+                HKS_LOG_E("fill Iv failed!");
+                break;
+            }
+            ret = HksCryptoHalCmacInit(&rawKey, &ctx, &usageSpec);
 #endif
         } else {
             ret = HksCryptoHalHmacInit(&rawKey, alg, &ctx);
@@ -2009,7 +2020,9 @@ int32_t HksCoreMacThreeStageUpdate(const struct HuksKeyNode *keyNode, const stru
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append hmac get alg param failed!");
     if (algParam->uint32Param == HKS_ALG_CMAC) {
 #ifdef HKS_SUPPORT_CMAC_C
-        ret = HksCryptoHalCmacUpdate(srcData, ctx);
+        struct HksUsageSpec usageSpec = {0};
+        HksFillUsageSpec(paramSet, &usageSpec);
+        ret = HksCryptoHalCmacUpdate(srcData, ctx, &usageSpec);
 #endif
     } else {
         ret = HksCryptoHalHmacUpdate(srcData, ctx);
@@ -2054,7 +2067,9 @@ int32_t HksCoreMacThreeStageFinish(const struct HuksKeyNode *keyNode, const stru
 
     if (algParam->uint32Param == HKS_ALG_CMAC) {
 #ifdef HKS_SUPPORT_CMAC_C
-        ret = HksCryptoHalCmacFinal(inData, &ctx, outData);
+        struct HksUsageSpec usageSpec = {0};
+        HksFillUsageSpec(paramSet, &usageSpec);
+        ret = HksCryptoHalCmacFinal(inData, &ctx, outData, &usageSpec);
 #endif
     } else {
         ret = HksCryptoHalHmacFinal(inData, &ctx, outData);
