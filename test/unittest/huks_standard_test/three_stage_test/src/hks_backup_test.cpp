@@ -492,7 +492,7 @@ HWTEST_F(HksBackupTest, HksBackupPartTest007, TestSize.Level0)
     ret = HksFileRemove(STORE_PATH, KEY_ALIAS);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
-    uint8_t deriveText[COMMON_SIZE] = { 0 };
+    uint8_t deriveText[DERIVE_KEY_SIZE_48] = { 0 };
     struct HksBlob deriveBlob = { .size = HKS_ARRAY_SIZE(deriveText), .data = deriveText };
     ret = HksDeriveKey(paramSet1, &keyAlias, &deriveBlob);
     ASSERT_EQ(ret, HKS_SUCCESS);
@@ -525,7 +525,7 @@ HWTEST_F(HksBackupTest, HksBackupPartTest008, TestSize.Level0)
     ret = HksModifyKey();
     ASSERT_EQ(ret, HKS_SUCCESS);
 
-    uint8_t deriveText[COMMON_SIZE] = { 0 };
+    uint8_t deriveText[DERIVE_KEY_SIZE_48] = { 0 };
     struct HksBlob deriveBlob = { .size = HKS_ARRAY_SIZE(deriveText), .data = deriveText };
     ret = HksDeriveKey(paramSet1, &keyAlias, &deriveBlob);
     ASSERT_EQ(ret, HKS_SUCCESS);
