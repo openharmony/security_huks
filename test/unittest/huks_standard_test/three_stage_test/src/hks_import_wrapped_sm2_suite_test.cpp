@@ -118,6 +118,7 @@ namespace Unittest::ImportWrappedKey {
         {.tag = HKS_TAG_DIGEST,
             .uint32Param = HKS_DIGEST_SM3},
         {.tag = HKS_TAG_DERIVE_KEY_SIZE,
+            // wrong value, size should be in bytes, which is HKS_KEY_BYTES(HKS_SM4_KEY_SIZE_128)
             .uint32Param = HKS_SM4_KEY_SIZE_128},
         {.tag = HKS_TAG_INFO,
             .blob = {
@@ -132,6 +133,7 @@ namespace Unittest::ImportWrappedKey {
         {.tag = HKS_TAG_DIGEST,
             .uint32Param = HKS_DIGEST_SM3},
         {.tag = HKS_TAG_DERIVE_KEY_SIZE,
+            // wrong value, size should be in bytes, which is HKS_KEY_BYTES(HKS_SM4_KEY_SIZE_128)
             .uint32Param = HKS_SM4_KEY_SIZE_128},
         {.tag = HKS_TAG_INFO,
             .blob = {
