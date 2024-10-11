@@ -508,22 +508,28 @@ static void DeleteRsaAsyncContext(napi_env env, RsaAsyncContext *context)
 
     CIPHER_FREE_PTR(context->callback);
 
-    CIPHER_FREE_PTR(context->textIn->data);
-    CIPHER_FREE_PTR(context->textIn);
-
-    if (context->textOut->data != nullptr) {
-        (void)memset_s(context->textOut->data, context->textOut->length, 0, context->textOut->length);
+    if (context->textIn != nullptr) {
+        CIPHER_FREE_PTR(context->textIn->data);
+        CIPHER_FREE_PTR(context->textIn);
     }
-    CIPHER_FREE_PTR(context->textOut->data);
-    CIPHER_FREE_PTR(context->textOut);
 
-    CIPHER_FREE_PTR(context->rsaKey->trans);
-    CIPHER_FREE_PTR(context->rsaKey->action);
-    if (context->rsaKey->key != nullptr) {
-        (void)memset_s(context->rsaKey->key, context->rsaKey->keyLen, 0, context->rsaKey->keyLen);
+    if (context->textOut != nullptr) {
+        if (context->textOut->data != nullptr) {
+            (void)memset_s(context->textOut->data, context->textOut->length, 0, context->textOut->length);
+            CIPHER_FREE_PTR(context->textOut->data);
+        }
+        CIPHER_FREE_PTR(context->textOut);
     }
-    CIPHER_FREE_PTR(context->rsaKey->key);
-    CIPHER_FREE_PTR(context->rsaKey);
+
+    if (context->rsaKey != nullptr) {
+        CIPHER_FREE_PTR(context->rsaKey->trans);
+        CIPHER_FREE_PTR(context->rsaKey->action);
+        if (context->rsaKey->key != nullptr) {
+            (void)memset_s(context->rsaKey->key, context->rsaKey->keyLen, 0, context->rsaKey->keyLen);
+            CIPHER_FREE_PTR(context->rsaKey->key);
+        }
+        CIPHER_FREE_PTR(context->rsaKey);
+    }
 }
 
 static void DeleteAesAsyncContext(napi_env env, AesAsyncContext *context)
