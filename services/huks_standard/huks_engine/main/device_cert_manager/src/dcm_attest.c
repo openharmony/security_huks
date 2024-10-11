@@ -1250,7 +1250,11 @@ static int32_t ReadCertOrKey(const uint8_t *inData, uint32_t size, struct HksBlo
     uint8_t *data = HksMalloc(size);
     HKS_IF_NULL_LOGE_RETURN(data, HKS_ERROR_MALLOC_FAIL, "malloc data fail\n")
 
-    (void)memcpy_s(data, size, inData, size);
+    if (memcpy_s(data, size, inData, size) != EOK) {
+        HKS_LOG_E("copy data failed!");
+        free(data);
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
     out->size = size;
     out->data = data;
     return HKS_SUCCESS;
@@ -1395,10 +1399,16 @@ static int32_t CopyBlobToBuffer(const struct HksBlob *blob, struct HksBlob *buf)
     if (buf->size < sizeof(blob->size) + ALIGN_SIZE(blob->size)) {
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
-    (void)memcpy_s(buf->data, buf->size, &blob->size, sizeof(blob->size));
+    if (memcpy_s(buf->data, buf->size, &blob->size, sizeof(blob->size)) != EOK) {
+        HKS_LOG_E("copy buf data failed!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
     buf->data += sizeof(blob->size);
     buf->size -= sizeof(blob->size);
-    (void)memcpy_s(buf->data, buf->size, blob->data, blob->size);
+    if (memcpy_s(buf->data, buf->size, blob->data, blob->size) != EOK) {
+        HKS_LOG_E("copy buf data failed!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
     buf->data += ALIGN_SIZE(blob->size);
     buf->size -= ALIGN_SIZE(blob->size);
     return HKS_SUCCESS;

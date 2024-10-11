@@ -490,7 +490,11 @@ static int32_t DeleteKey(uint32_t keyOffset)
             return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
         /* clear the last buffer */
-        (void)memset_s(g_storageImageBuffer.data + keyInfoHead->totalLen - keyInfoLen, keyInfoLen, 0, keyInfoLen);
+        if (memset_s(g_storageImageBuffer.data + keyInfoHead->totalLen - keyInfoLen, keyInfoLen, 0,
+            keyInfoLen) != EOK) {
+            HKS_LOG_E("memset storageImageBuffer data failed!");
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
+        }
     }
     keyInfoHead->keyCount -= 1;
     keyInfoHead->totalLen -= keyInfoLen;

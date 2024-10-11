@@ -69,7 +69,10 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    (void)memcpy_s(outBlob->data, outBlob->size, outData, outLen);
+    if (memcpy_s(outBlob->data, outBlob->size, outData, outLen) != EOK) {
+        HKS_LOG_E("copy outBlob data failed!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
     outBlob->size = outLen;
     return HKS_SUCCESS;
 }

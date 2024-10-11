@@ -271,8 +271,11 @@ HKS_API_EXPORT int32_t HksAddParams(struct HksParamSet *paramSet,
             }
             paramSet->paramSetSize += params[i].blob.size;
         }
-        (void)memcpy_s(&paramSet->params[paramSet->paramsCnt++], sizeof(struct HksParam), &params[i],
-            sizeof(struct HksParam));
+        if (memcpy_s(&paramSet->params[paramSet->paramsCnt++], sizeof(struct HksParam), &params[i],
+            sizeof(struct HksParam)) != EOK) {
+            HKS_LOG_E("copy paramSet failed!");
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
+        }
     }
     return HKS_SUCCESS;
 }
