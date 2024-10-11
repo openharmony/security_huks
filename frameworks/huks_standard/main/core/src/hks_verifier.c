@@ -509,7 +509,8 @@ static int32_t FillAttestExtendParamSet(uint8_t *data, uint32_t length,
         ret = ExtractTlvDataAndHeadSize(tmp, leftSize, &value, &valueLength, &headSize);
         if (ret != HKS_SUCCESS || valueLength > (leftSize - headSize)
             || leftSize < ASN_1_MIN_HEADER_LEN) {
-            HKS_LOG_E("get claim count fail");
+            HKS_FREE(value);
+            HKS_LOG_E("get claim count fail, the length of claim or the value of leftSize can be wrong, too");
             return HKS_ERROR_INVALID_ARGUMENT;
         }
 
@@ -543,8 +544,9 @@ static int32_t FillAttestExtendInfo(uint8_t *data, uint32_t length, struct HksPa
     uint32_t len;
     int32_t ret = ExtractTlvDataAndHeadSize(data, length, &version, &len, NULL);
     if (ret != HKS_SUCCESS || len != sizeof(uint8_t)) {
-        HKS_LOG_E("get version fail");
-        return ret;
+        HKS_FREE(version);
+        HKS_LOG_E("get version fail or length is not equal to sizeof(uint8_t)");
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     ret = FillAttestExtendParamSet(data + TLV_VERSION_NEED_SIZE, length - TLV_VERSION_NEED_SIZE,
