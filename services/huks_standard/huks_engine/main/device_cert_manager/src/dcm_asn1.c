@@ -79,7 +79,10 @@ static int32_t Asn1InsertValue(struct HksBlob *buf, struct HksAsn1Obj *obj, cons
         HKS_LOG_E("memmove_s failed");
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
-    (void)memcpy_s(buf->data, buf->size, header.data, header.size);
+    if (memcpy_s(buf->data, buf->size, header.data, header.size) != EOK) {
+        HKS_LOG_E("copy buf data failed!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
     buf->data += outSize;
     buf->size -= outSize;
     if (obj != NULL) {

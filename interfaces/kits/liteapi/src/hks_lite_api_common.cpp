@@ -354,7 +354,12 @@ int32_t HksParseHandle(const JSIValue* args, uint32_t index, struct HksBlob *out
     if (outHandle->data == nullptr) {
         return HKS_ERROR_MALLOC_FAIL;
     }
-    (void)memcpy_s(outHandle->data, sizeof(uint64_t), &handle, sizeof(uint64_t));
+    if (memcpy_s(outHandle->data, sizeof(uint64_t), &handle, sizeof(uint64_t)) != EOK) {
+        HKS_LOG_E("copy outHandle data failed!");
+        outHandle->size = 0;
+        free(outHandle->data);
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
     outHandle->size = sizeof(uint64_t);
     return HKS_SUCCESS;
 }

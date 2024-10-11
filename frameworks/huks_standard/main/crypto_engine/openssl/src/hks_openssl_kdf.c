@@ -139,34 +139,34 @@ int32_t HksOpensslSmKdf(const struct HksBlob *mainKey, const struct HksKeySpec *
         return HKS_ERROR_MALLOC_FAIL;
     }
     (void)memcpy_s(inputHashBlob.data, inputHashBlob.size, appendedKeyData.data, appendedKeyData.size);
-
     uint8_t digestDataArray[HKS_DIGEST_SM3_LEN] = { 0 };
     unsigned int digestLength = HKS_DIGEST_SM3_LEN;
     struct HksBlob cdgstBlob = {digestLength, digestDataArray};
     unsigned int index = (derivedKey->size - 1) / HKS_DIGEST_SM3_LEN + 1; // round up
     unsigned char counterBytes[HKS_BYTE_PER_INT] = { 0 };
     unsigned int counter = HKS_START_NUM;
-    for (unsigned int i = 0; i < index; i++) {
-        for (unsigned int j = HKS_START_NUM; j <= HKS_BYTE_PER_INT; j++) {
-            counterBytes[j - 1] = (counter >> (HKS_BITS_PER_INT - HKS_BITS_PER_BYTE * j)) & 0xFF;
+    do {
+        for (unsigned int i = 0; i < index; i++) {
+            for (unsigned int j = HKS_START_NUM; j <= HKS_BYTE_PER_INT; j++) {
+                counterBytes[j - 1] = (counter >> (HKS_BITS_PER_INT - HKS_BITS_PER_BYTE * j)) & 0xFF;
+            }
+            (void)memcpy_s(inputHashBlob.data + appendedKeyData.size, HKS_BYTE_PER_INT, counterBytes, HKS_BYTE_PER_INT);
+            ret = HksOpensslHash(HKS_DIGEST_SM3, &inputHashBlob, &cdgstBlob);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Hash data failed!");
+            if ((i == (index - 1)) && (derivedKey->size % HKS_DIGEST_SM3_LEN != 0)) {
+                digestLength = (derivedKey->size) % HKS_DIGEST_SM3_LEN;
+            }
+            if (memcpy_s(derivedKey->data + HKS_DIGEST_SM3_LEN * i,
+                         digestLength, cdgstBlob.data, digestLength) != EOK) {
+                ret = HKS_ERROR_INSUFFICIENT_MEMORY;
+                HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "memcp derivedkey data failed!");
+            }
+            counter++;
         }
-        (void)memcpy_s(inputHashBlob.data + appendedKeyData.size, HKS_BYTE_PER_INT,
-            counterBytes, HKS_BYTE_PER_INT);
-        if (HksOpensslHash(HKS_DIGEST_SM3, &inputHashBlob, &cdgstBlob) != HKS_SUCCESS) {
-            HKS_LOG_E("Hash data failed.");
-            HKS_FREE_BLOB(appendedKeyData);
-            HKS_FREE_BLOB(inputHashBlob);
-            return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-        }
-        if ((i == (index - 1)) && (derivedKey->size % HKS_DIGEST_SM3_LEN != 0)) {
-            digestLength = (derivedKey->size) % HKS_DIGEST_SM3_LEN;
-        }
-        (void)memcpy_s(derivedKey->data + HKS_DIGEST_SM3_LEN * i, digestLength, cdgstBlob.data, digestLength);
-        counter++;
-    }
+    } while (0);
     HKS_FREE_BLOB(appendedKeyData);
     HKS_FREE_BLOB(inputHashBlob);
-    HKS_LOG_I("HksOpensslSmKdf success.");
-    return HKS_SUCCESS;
+    HKS_IF_NOT_SUCC_RETURN(ret, ret);
+    return ret;
 }
 #endif /* HKS_SUPPORT_KDF_SM3 */

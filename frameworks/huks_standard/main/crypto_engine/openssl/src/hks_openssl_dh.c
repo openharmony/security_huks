@@ -192,7 +192,11 @@ int32_t HksOpensslGetDhPubKey(const struct HksBlob *input, struct HksBlob *outpu
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    (void)memcpy_s(output->data, output->size, input->data, sizeof(struct KeyMaterialDh) + keyMaterial->pubKeySize);
+    if (memcpy_s(output->data, output->size, input->data, sizeof(struct KeyMaterialDh) +
+        keyMaterial->pubKeySize) != EOK) {
+        HKS_LOG_E("copy output data failed!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
     ((struct KeyMaterialDh *)output->data)->priKeySize = 0;
     ((struct KeyMaterialDh *)output->data)->reserved = 0;
     output->size = sizeof(struct KeyMaterialDh) + keyMaterial->pubKeySize;

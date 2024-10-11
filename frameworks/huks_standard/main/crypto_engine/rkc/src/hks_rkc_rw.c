@@ -105,7 +105,10 @@ int32_t ExtractFieldFromBuffer(const struct HksBlob *srcBlob, uint32_t *srcOffse
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    (void)memcpy_s(dest, destSize, srcBlob->data + *srcOffset, destSize);
+    if (memcpy_s(dest, destSize, srcBlob->data + *srcOffset, destSize) != EOK) {
+        HKS_LOG_E("copy dest failed!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
     *srcOffset += destSize;
     return HKS_SUCCESS;
 }

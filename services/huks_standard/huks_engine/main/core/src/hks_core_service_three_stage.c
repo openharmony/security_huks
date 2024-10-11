@@ -1771,7 +1771,10 @@ static int32_t DoBuildKeyBlobOrGetOutDataAction(const struct HksParamSet *paramS
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
     outData->size = restoreData->size;
-    (void)memcpy_s(outData->data, outData->size, restoreData->data, outData->size);
+    if (memcpy_s(outData->data, outData->size, restoreData->data, outData->size) != EOK) {
+        HKS_LOG_E("copy outData data failed!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
     return HKS_SUCCESS;
 }
 
