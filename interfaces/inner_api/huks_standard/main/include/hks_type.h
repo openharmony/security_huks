@@ -58,7 +58,7 @@ extern "C" {
 #define MAX_KEY_SIZE 2048
 #define HKS_AE_TAG_LEN 16
 #define HKS_AE_NONCE_LEN 12
-#define HKS_MAX_KEY_ALIAS_LEN 64
+#define HKS_MAX_KEY_ALIAS_LEN 128
 #define HKS_MAX_PROCESS_NAME_LEN 50
 #define HKS_MAX_RANDOM_LEN 1024
 #define HKS_KEY_BYTES(keySize) (((keySize) + HKS_BITS_PER_BYTE - 1) / HKS_BITS_PER_BYTE)
