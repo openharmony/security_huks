@@ -120,8 +120,12 @@ int32_t FfiOHOSListAliases(const struct HksParamSet *paramSet, uint32_t *retAlia
     struct HksKeyAliasSet *outSet = NULL;
     int32_t result = HksListAliases(paramSet, &outSet);
     if (result == HKS_SUCCESS) {
+        // Though HKS_SUCCESS, when query result is empty, `outSet` is still NULL.
+        if (outSet == NULL) {
+            return HKS_SUCCESS;
+        }
         *retAliasesCnt = outSet->aliasesCnt;
-        // ATTENSION: aliases will be released by caller
+        // ATTENTION: aliases will be released by caller
         *retAliases = outSet->aliases;
         free(outSet);
     }
