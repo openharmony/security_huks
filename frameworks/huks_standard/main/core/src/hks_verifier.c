@@ -544,8 +544,9 @@ static int32_t FillAttestExtendInfo(uint8_t *data, uint32_t length, struct HksPa
     uint32_t len;
     int32_t ret = ExtractTlvDataAndHeadSize(data, length, &version, &len, NULL);
     if (ret != HKS_SUCCESS || len != sizeof(uint8_t)) {
-        HKS_LOG_E("get version fail");
-        return ret;
+        HKS_FREE(version);
+        HKS_LOG_E("get version fail or length is not equal to sizeof(uint8_t)");
+        return (ret == HKS_SUCCESS) ? HKS_ERROR_INVALID_ARGUMENT : ret;
     }
 
     ret = FillAttestExtendParamSet(data + TLV_VERSION_NEED_SIZE, length - TLV_VERSION_NEED_SIZE,
