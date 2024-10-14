@@ -103,7 +103,12 @@ napi_value GetUint8Array(napi_env env, napi_value object, HksBlob &arrayBlob)
     (void)memcpy_s(arrayBlob.data, length, rawData, length);
     arrayBlob.size = static_cast<uint32_t>(length);
 
-    return GetInt32(env, 0);
+    napi_value result = GetInt32(env, 0);
+    if (result == nullptr) {
+        memset_s(arrayBlob.data, length, 0, length);
+        HKS_FREE_BLOB(arrayBlob);
+    }
+    return result;
 }
 
 static napi_value GetHksParam(napi_env env, napi_value object, HksParam &param)
