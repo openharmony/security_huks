@@ -275,11 +275,7 @@ int32_t HksGetKeyParamSetUnpack(const struct HksBlob *srcData, struct HksBlob *k
     }
 
     ret = GetParamSetFromBuffer(paramSetIn, srcData, &offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get paramSet failed, ret =%" LOG_PUBLIC "d", ret);
-        HKS_FREE(paramSetOut);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get paramSet failed")
     return ret;
 }
 
