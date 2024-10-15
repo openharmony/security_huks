@@ -361,9 +361,11 @@ static int32_t DeriveKeyByFactor(const struct HksBlob *wrappedKeyData, struct Hk
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "derive kek2 data failed!") ;
     } while (0);
 
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "derive key by factor failed");
-    HKS_FREE(deriveKek1->data);
-    HKS_FREE(deriveKek2->data);
+    if (ret != HKS_SUCCESS) {
+        HKS_FREE(deriveKek1->data);
+        HKS_FREE(deriveKek2->data);
+        return ret;
+    }
     *partOffset = offset;
     return HKS_SUCCESS;
 }
