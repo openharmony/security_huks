@@ -274,83 +274,10 @@ static int32_t CopyDeToTmpPathIfNeed(void)
     return HKS_SUCCESS;
 }
 
-static int ProcessRdbCeToDeUpgrade(const char *filePath, const struct stat *st, int typeFlag, struct FTW *ftw)
-{
-    (void)st;
-    if (typeFlag != FTW_F) {
-        HKS_LOG_D("%" LOG_PUBLIC "s not a file", filePath);
-        return 0;
-    }
-
-    char *alias = NULL;
-    char *path = NULL;
-    struct HksBlob fileContent = { 0 };
-    int32_t ret;
-    do {
-        ret = SplitPath(filePath, ftw, &path, &alias);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "split filePath failed.")
-
-        if (!HksIsRdbDeKey(alias)) {
-            // Not rdb key file, break and do nothing.
-            break;
-        }
-
-        HKS_LOG_I("Find rdb key file in %" LOG_PUBLIC "s.", path);
-
-        ret = GetFileContent(path, alias, &fileContent);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get file content failed.")
-
-        struct HksUpgradeFileTransferInfo info = { 0 };
-        ret = HksParseConfig(alias, &fileContent, &info);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksParseConfig failed, path is %" LOG_PUBLIC "s", filePath);
-            break;
-        }
-        if (info.skipTransfer) {
-            HKS_LOG_I("file %" LOG_PUBLIC "s should skip transfer.", filePath);
-            break;
-        }
-        HKS_IF_NOT_SUCC_LOGE(TransferFile(alias, path, &fileContent, &info), "TransferFile failed!")
-    } while (false);
-    HKS_FREE(path);
-    HKS_FREE(alias);
-    HKS_FREE_BLOB(fileContent);
-
-    // Continue to traverse files.
-    return 0;
-}
-
-const char * const HUKS_CE_ROOT_PATH = "/data/service/el2";
-const char * const HUKS_SERVICE_SUB_PATH = "huks_service";
-
-// Copy the rdb key in ce into DE.
-ENABLE_CFI(static int32_t CopyRdbCeToDePathIfNeed(void))
-{
-    char huksCePath[HKS_MAX_DIRENT_FILE_LEN] = { 0 };
-    int32_t offset = sprintf_s(huksCePath, HKS_MAX_DIRENT_FILE_LEN, "%s/%u/%s", HUKS_CE_ROOT_PATH, g_frontUserId,
-        HUKS_SERVICE_SUB_PATH);
-    if (offset <= 0) {
-        HKS_LOG_E("get huks ce path failed.");
-        // The mem buffer if absolutely enough so the sprintf_s will success.
-        return HKS_ERROR_BAD_STATE;
-    }
-
-    // depth first and ignore soft link
-    int nftwRet = nftw(huksCePath, ProcessRdbCeToDeUpgrade, OPEN_FDS, FTW_DEPTH | FTW_PHYS);
-    HKS_LOG_I("call nftw result is %" LOG_PUBLIC "d.", nftwRet);
-
-    return HKS_SUCCESS;
-}
-
 int32_t HksUpgradeFileTransferOnPowerOn(void)
 {
     WritePerformanceEvent(HUKS_TRANSFER_KEY);
     CopyDeToTmpPathIfNeed();
-    int32_t ret = CopyRdbCeToDePathIfNeed();
-    // If the ret is fail, continue to upgrade next step instead of return.
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("CopyRdbCeToDePathIfNeed failed, ret is %" LOG_PUBLIC "d.", ret);
-    }
     return UpgradeFileTransfer();
 }
 
