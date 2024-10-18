@@ -162,6 +162,8 @@ static int32_t RsaLoadPrivateKey(mbedtls_pk_context *pk, const unsigned char *ke
         mbedtls_rsa_set_padding(rsa, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA256);
         (void)memset_s(finalKey, finalKeyLen, 0, finalKeyLen);
         free(finalKey);
+        mbedtls_ctr_drbg_free(&ctrDrbg);
+        mbedtls_entropy_free(&entropy);
         return ERROR_SUCCESS;
     } while (0);
 
