@@ -873,7 +873,7 @@ int32_t HksListAliasesByProcessName(const struct HksStoreFileInfo *fileInfo, str
 #endif
 
 int32_t HksStoreRenameKeyAlias(const struct HksStoreFileInfo *oldFileInfo,
-    const struct HksStoreFileInfo *newFileInfo, bool isCopy)
+    const struct HksStoreFileInfo *newFileInfo, const struct HksStoreMaterial *oldMaterial, bool isCopy)
 {
     int32_t ret;
     do {
@@ -886,7 +886,7 @@ int32_t HksStoreRenameKeyAlias(const struct HksStoreFileInfo *oldFileInfo,
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks copy old key blob failed, ret = %" LOG_PUBLIC "d.", ret)
 #endif
         if (!isCopy) {
-            ret = HksStoreDeleteKeyBlob(oldFileInfo);
+            ret = HksStoreDeleteKeyBlob(oldFileInfo, oldMaterial);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks delete key blob failed, ret = %" LOG_PUBLIC "d.", ret)
         }
     } while (0);
