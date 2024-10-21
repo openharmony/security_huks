@@ -28,7 +28,7 @@
 #include "hks_file_operator.h"
 using namespace testing::ext;
 namespace {
-class HksRenameKeyAliasTest : public testing::Test {
+class HksRenameKeyAliasPart1Test : public testing::Test {
 public:
     static void SetUpTestCase(void);
 
@@ -39,25 +39,23 @@ public:
     void TearDown();
 };
 
-void HksRenameKeyAliasTest::SetUpTestCase(void)
+void HksRenameKeyAliasPart1Test::SetUpTestCase(void)
 {
 }
 
-void HksRenameKeyAliasTest::TearDownTestCase(void)
+void HksRenameKeyAliasPart1Test::TearDownTestCase(void)
 {
 }
 
-void HksRenameKeyAliasTest::SetUp()
+void HksRenameKeyAliasPart1Test::SetUp()
 {
 }
 
-void HksRenameKeyAliasTest::TearDown()
+void HksRenameKeyAliasPart1Test::TearDown()
 {
 }
 
-static const uint32_t USER_ID_INT = 0;
-
-static int32_t TestGenerateKey(const struct HksBlob *keyAlias)
+static int32_t TestGenerateKey(const struct HksBlob *keyAlias, uint32_t storageLevel)
 {
     struct HksParam tmpParams[] = {
         { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
@@ -68,7 +66,7 @@ static int32_t TestGenerateKey(const struct HksBlob *keyAlias)
         { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_VERIFY },
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
         { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
-        { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = storageLevel },
     };
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = HksInitParamSet(&paramSet);
@@ -147,11 +145,11 @@ static int32_t SetIdsToken()
 #endif
 
 /**
- * @tc.name: HksRenameKeyAliasTest.HksRenameKeyAliasTest001
+ * @tc.name: HksRenameKeyAliasPart1Test.HksRenameKeyAliasPart1Test001
  * @tc.desc: Rename the key and keep the old one;
  * @tc.type: FUNC
  */
-HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest001, TestSize.Level0)
+HWTEST_F(HksRenameKeyAliasPart1Test, HksRenameKeyAliasPart1Test001, TestSize.Level0)
 {
 #ifdef HKS_INTERACT_ABILITY
     SetIdsToken();
@@ -159,7 +157,7 @@ HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest001, TestSize.Level0)
     const char *alias = "oldAlias001";
     struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
     
-    int32_t ret = TestGenerateKey(&keyAlias);
+    int32_t ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_DE);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestGenerateKey ret is " << ret;
 
     struct HksParamSet *paramSet = nullptr;
@@ -172,7 +170,6 @@ HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest001, TestSize.Level0)
     struct HksParamSet *renameParamSet = NULL;
     struct HksParam paramArr[] = {
         {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
-        {.tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = USER_ID_INT},
         {.tag = HKS_TAG_IS_COPY_NEW_KEY, .boolParam = true},
     };
     ret = BuildParamSetWithParam(&renameParamSet, paramArr, sizeof(paramArr) / sizeof(paramArr[0]));
@@ -197,11 +194,11 @@ HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest001, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksRenameKeyAliasTest.HksRenameKeyAliasTest002
+ * @tc.name: HksRenameKeyAliasPart1Test.HksRenameKeyAliasPart1Test002
  * @tc.desc: Rename the key and remove the old one;
  * @tc.type: FUNC
  */
-HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest002, TestSize.Level0)
+HWTEST_F(HksRenameKeyAliasPart1Test, HksRenameKeyAliasPart1Test002, TestSize.Level0)
 {
 #ifdef HKS_INTERACT_ABILITY
     SetIdsToken();
@@ -209,7 +206,7 @@ HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest002, TestSize.Level0)
     const char *alias = "oldAlias002";
     struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
     
-    int32_t ret = TestGenerateKey(&keyAlias);
+    int32_t ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_DE);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestGenerateKey ret is " << ret;
 
     struct HksParamSet *paramSet = nullptr;
@@ -222,7 +219,6 @@ HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest002, TestSize.Level0)
     struct HksParamSet *renameParamSet = NULL;
     struct HksParam paramArr[] = {
         {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
-        {.tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = USER_ID_INT},
     };
     ret = BuildParamSetWithParam(&renameParamSet, paramArr, sizeof(paramArr) / sizeof(paramArr[0]));
     EXPECT_EQ(ret, HKS_SUCCESS);
@@ -245,11 +241,11 @@ HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest002, TestSize.Level0)
 
 static const char *STORE_PATH = "/data/service/el1/public/huks_service/maindata/0/0/key/";
 /**
- * @tc.name: HksRenameKeyAliasTest.HksRenameKeyAliasTest003
+ * @tc.name: HksRenameKeyAliasPart1Test.HksRenameKeyAliasPart1Test003
  * @tc.desc: If the main key is lost, the renaming is still successful;
  * @tc.type: FUNC
  */
-HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest003, TestSize.Level0)
+HWTEST_F(HksRenameKeyAliasPart1Test, HksRenameKeyAliasPart1Test003, TestSize.Level0)
 {
 #ifdef HKS_INTERACT_ABILITY
     SetIdsToken();
@@ -257,7 +253,7 @@ HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest003, TestSize.Level0)
     const char *alias = "oldAlias003";
     struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
     
-    int32_t ret = TestGenerateKey(&keyAlias);
+    int32_t ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_DE);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestGenerateKey ret is " << ret;
     
     struct HksParamSet *paramSet = nullptr;
@@ -273,7 +269,6 @@ HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest003, TestSize.Level0)
     struct HksParamSet *renameParamSet = NULL;
     struct HksParam paramArr[] = {
         {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
-        {.tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = USER_ID_INT},
         {.tag = HKS_TAG_IS_COPY_NEW_KEY, .boolParam = true},
     };
     ret = BuildParamSetWithParam(&renameParamSet, paramArr, sizeof(paramArr) / sizeof(paramArr[0]));
@@ -296,11 +291,11 @@ HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest003, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksRenameKeyAliasTest.HksRenameKeyAliasTest004
+ * @tc.name: HksRenameKeyAliasPart1Test.HksRenameKeyAliasPart1Test004
  * @tc.desc: The old key is lost, the renaming is failed;
  * @tc.type: FUNC
  */
-HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest004, TestSize.Level2)
+HWTEST_F(HksRenameKeyAliasPart1Test, HksRenameKeyAliasPart1Test004, TestSize.Level2)
 {
 #ifdef HKS_INTERACT_ABILITY
     SetIdsToken();
@@ -308,7 +303,7 @@ HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest004, TestSize.Level2)
     const char *alias = "oldAlias004";
     struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
     
-    int32_t ret = TestGenerateKey(&keyAlias);
+    int32_t ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_DE);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestGenerateKey ret is " << ret;
 
     struct HksParamSet *paramSet = nullptr;
@@ -324,7 +319,6 @@ HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest004, TestSize.Level2)
     struct HksParamSet *renameParamSet = NULL;
     struct HksParam paramArr[] = {
         {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
-        {.tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = USER_ID_INT},
         {.tag = HKS_TAG_IS_COPY_NEW_KEY, .boolParam = true},
     };
     ret = BuildParamSetWithParam(&renameParamSet, paramArr, sizeof(paramArr) / sizeof(paramArr[0]));
@@ -345,11 +339,11 @@ HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest004, TestSize.Level2)
 }
 
 /**
- * @tc.name: HksRenameKeyAliasTest.HksRenameKeyAliasTest005
+ * @tc.name: HksRenameKeyAliasPart1Test.HksRenameKeyAliasPart1Test005
  * @tc.desc: A new key with the same name exists, the renaming is faild;
  * @tc.type: FUNC
  */
-HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest005, TestSize.Level1)
+HWTEST_F(HksRenameKeyAliasPart1Test, HksRenameKeyAliasPart1Test005, TestSize.Level1)
 {
 #ifdef HKS_INTERACT_ABILITY
     SetIdsToken();
@@ -359,9 +353,9 @@ HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest005, TestSize.Level1)
     struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
     struct HksBlob keyAlias2 = { strlen(alias2), (uint8_t *)alias2 };
     
-    int32_t ret = TestGenerateKey(&keyAlias);
+    int32_t ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_DE);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestGenerateKey keyAlias ret is " << ret;
-    ret = TestGenerateKey(&keyAlias2);
+    ret = TestGenerateKey(&keyAlias2, HKS_AUTH_STORAGE_LEVEL_DE);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestGenerateKey keyAlias2 ret is " << ret;
     
     struct HksParamSet *paramSet = nullptr;
@@ -375,7 +369,6 @@ HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest005, TestSize.Level1)
     struct HksParamSet *renameParamSet = NULL;
     struct HksParam paramArr[] = {
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
-        { .tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = USER_ID_INT},
         { .tag = HKS_TAG_IS_COPY_NEW_KEY, .boolParam = true},
     };
     ret = BuildParamSetWithParam(&renameParamSet, paramArr, sizeof(paramArr) / sizeof(paramArr[0]));
@@ -393,11 +386,11 @@ HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest005, TestSize.Level1)
 }
 
 /**
- * @tc.name: HksRenameKeyAliasTest.HksRenameKeyAliasTest006
+ * @tc.name: HksRenameKeyAliasPart1Test.HksRenameKeyAliasPart1Test006
  * @tc.desc: The renameParamSet has incorrect parameters, the renaming is faild;
  * @tc.type: FUNC
  */
-HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest006, TestSize.Level0)
+HWTEST_F(HksRenameKeyAliasPart1Test, HksRenameKeyAliasPart1Test006, TestSize.Level0)
 {
 #ifdef HKS_INTERACT_ABILITY
     SetIdsToken();
@@ -405,7 +398,7 @@ HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest006, TestSize.Level0)
     const char *alias = "oldAlias006";
     struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
     
-    int32_t ret = TestGenerateKey(&keyAlias);
+    int32_t ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_DE);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestGenerateKey keyAlias ret is " << ret;
     
     struct HksParamSet *paramSet = nullptr;
@@ -436,11 +429,11 @@ HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest006, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksRenameKeyAliasTest.HksRenameKeyAliasTest007
+ * @tc.name: HksRenameKeyAliasPart1Test.HksRenameKeyAliasPart1Test007
  * @tc.desc: The old and new name of the key are the same, the renaming is faild;
  * @tc.type: FUNC
  */
-HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest007, TestSize.Level0)
+HWTEST_F(HksRenameKeyAliasPart1Test, HksRenameKeyAliasPart1Test007, TestSize.Level0)
 {
 #ifdef HKS_INTERACT_ABILITY
     SetIdsToken();
@@ -448,7 +441,7 @@ HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest007, TestSize.Level0)
     const char *alias = "oldAlias007";
     struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
     
-    int32_t ret = TestGenerateKey(&keyAlias);
+    int32_t ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_DE);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestGenerateKey keyAlias ret is " << ret;
     
     struct HksParamSet *paramSet = nullptr;
@@ -460,7 +453,6 @@ HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest007, TestSize.Level0)
     struct HksParamSet *renameParamSet = NULL;
     struct HksParam paramArr[] = {
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
-        { .tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = USER_ID_INT},
         { .tag = HKS_TAG_IS_COPY_NEW_KEY, .boolParam = true},
     };
     ret = BuildParamSetWithParam(&renameParamSet, paramArr, sizeof(paramArr) / sizeof(paramArr[0]));
@@ -469,6 +461,204 @@ HWTEST_F(HksRenameKeyAliasTest, HksRenameKeyAliasTest007, TestSize.Level0)
     struct HksBlob newKeyAlias = { strlen(alias2), (uint8_t *)alias2 };
     ret = HksRenameKeyAlias(&keyAlias, renameParamSet, &newKeyAlias);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksRenameKeyAlias ret is " << ret;
+
+    ret = HksDeleteKey(&keyAlias, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&renameParamSet);
+}
+
+/**
+ * @tc.name: HksRenameKeyAliasPart1Test.HksRenameKeyAliasPart1Test008
+ * @tc.desc: The keyAlias size is 128, the renaming success;
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksRenameKeyAliasPart1Test, HksRenameKeyAliasPart1Test008, TestSize.Level0)
+{
+#ifdef HKS_INTERACT_ABILITY
+    SetIdsToken();
+#endif
+    const char *alias = "oldAlias008";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    
+    int32_t ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_DE);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "TestGenerateKey keyAlias ret is " << ret;
+    
+    struct HksParamSet *paramSet = nullptr;
+    struct HksParam storageLevel = { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE };
+    ret = BuildParamSetWithParam(&paramSet, &storageLevel, sizeof(storageLevel) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    ret = HksKeyExist(&keyAlias, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Hks get generate key failed, ret is " << ret;
+    struct HksParamSet *renameParamSet = NULL;
+    struct HksParam paramArr[] = {
+        { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+        { .tag = HKS_TAG_IS_COPY_NEW_KEY, .boolParam = true},
+    };
+    ret = BuildParamSetWithParam(&renameParamSet, paramArr, sizeof(paramArr) / sizeof(paramArr[0]));
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    const char *alias2 = "newAlias128newAlias128newAlias128newAlias128newAlias128newAlias1"
+                         "28newAlias128newAlias128newAlias128newAlias128newAlias128newAlia";
+    struct HksBlob newKeyAlias = { strlen(alias2), (uint8_t *)alias2 };
+    ret = HksRenameKeyAlias(&keyAlias, renameParamSet, &newKeyAlias);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksRenameKeyAlias ret is " << ret;
+
+    ret = HksDeleteKey(&keyAlias, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    ret = HksDeleteKey(&newKeyAlias, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&renameParamSet);
+}
+
+/**
+ * @tc.name: HksRenameKeyAliasPart1Test.HksRenameKeyAliasPart1Test009
+ * @tc.desc: The keyAlias size is 129, the renaming failed;
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksRenameKeyAliasPart1Test, HksRenameKeyAliasPart1Test009, TestSize.Level0)
+{
+#ifdef HKS_INTERACT_ABILITY
+    SetIdsToken();
+#endif
+    const char *alias = "oldAlias009";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    
+    int32_t ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_DE);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "TestGenerateKey keyAlias ret is " << ret;
+    
+    struct HksParamSet *paramSet = nullptr;
+    struct HksParam storageLevel = { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE };
+    ret = BuildParamSetWithParam(&paramSet, &storageLevel, sizeof(storageLevel) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    ret = HksKeyExist(&keyAlias, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Hks get generate key failed, ret is " << ret;
+    struct HksParamSet *renameParamSet = NULL;
+    struct HksParam paramArr[] = {
+        { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+        { .tag = HKS_TAG_IS_COPY_NEW_KEY, .boolParam = true},
+    };
+    ret = BuildParamSetWithParam(&renameParamSet, paramArr, sizeof(paramArr) / sizeof(paramArr[0]));
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    const char *alias2 = "AnewAlias128newAlias128newAlias128newAlias128newAlias128newAlias1"
+                         "28newAlias128newAlias128newAlias128newAlias128newAlias128newAlia";
+    struct HksBlob newKeyAlias = { strlen(alias2), (uint8_t *)alias2 };
+    ret = HksRenameKeyAlias(&keyAlias, renameParamSet, &newKeyAlias);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksRenameKeyAlias ret is " << ret;
+
+    ret = HksDeleteKey(&keyAlias, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&renameParamSet);
+}
+
+/**
+ * @tc.name: HksRenameKeyAliasPart1Test.HksRenameKeyAliasPart1Test010
+ * @tc.desc: The keyAlias is null, the renaming failed;
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksRenameKeyAliasPart1Test, HksRenameKeyAliasPart1Test0010, TestSize.Level0)
+{
+#ifdef HKS_INTERACT_ABILITY
+    SetIdsToken();
+#endif
+    const char *alias = "oldAlias010";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    
+    int32_t ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_DE);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "TestGenerateKey keyAlias ret is " << ret;
+    
+    struct HksParamSet *paramSet = nullptr;
+    struct HksParam storageLevel = { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE };
+    ret = BuildParamSetWithParam(&paramSet, &storageLevel, sizeof(storageLevel) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    ret = HksKeyExist(&keyAlias, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Hks get generate key failed, ret is " << ret;
+    struct HksParamSet *renameParamSet = NULL;
+    struct HksParam paramArr[] = {
+        { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+        { .tag = HKS_TAG_IS_COPY_NEW_KEY, .boolParam = true},
+    };
+    ret = BuildParamSetWithParam(&renameParamSet, paramArr, sizeof(paramArr) / sizeof(paramArr[0]));
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    struct HksBlob newKeyAlias = { 0, NULL };
+    ret = HksRenameKeyAlias(&keyAlias, renameParamSet, &newKeyAlias);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksRenameKeyAlias ret is " << ret;
+
+    ret = HksDeleteKey(&keyAlias, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&renameParamSet);
+}
+
+/**
+ * @tc.name: HksRenameKeyAliasPart1Test.HksRenameKeyAliasPart1Test011
+ * @tc.desc: The keyAlias size is 0, the renaming failed;
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksRenameKeyAliasPart1Test, HksRenameKeyAliasPart1Test0011, TestSize.Level0)
+{
+#ifdef HKS_INTERACT_ABILITY
+    SetIdsToken();
+#endif
+    const char *alias = "oldAlias011";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    
+    int32_t ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_DE);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "TestGenerateKey keyAlias ret is " << ret;
+    
+    struct HksParamSet *paramSet = nullptr;
+    struct HksParam storageLevel = { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE };
+    ret = BuildParamSetWithParam(&paramSet, &storageLevel, sizeof(storageLevel) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    ret = HksKeyExist(&keyAlias, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Hks get generate key failed, ret is " << ret;
+    struct HksParamSet *renameParamSet = NULL;
+    struct HksParam paramArr[] = {
+        { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+        { .tag = HKS_TAG_IS_COPY_NEW_KEY, .boolParam = true},
+    };
+    ret = BuildParamSetWithParam(&renameParamSet, paramArr, sizeof(paramArr) / sizeof(paramArr[0]));
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    const char *alias2 = "";
+    struct HksBlob newKeyAlias = { strlen(alias2), (uint8_t *)alias2 };
+    ret = HksRenameKeyAlias(&keyAlias, renameParamSet, &newKeyAlias);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksRenameKeyAlias ret is " << ret;
+
+    ret = HksDeleteKey(&keyAlias, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&renameParamSet);
+}
+
+/**
+ * @tc.name: HksRenameKeyAliasPart1Test.HksRenameKeyAliasPart1Test012
+ * @tc.desc: The rename paramset is null, the renaming failed;
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksRenameKeyAliasPart1Test, HksRenameKeyAliasPart1Test0012, TestSize.Level0)
+{
+#ifdef HKS_INTERACT_ABILITY
+    SetIdsToken();
+#endif
+    const char *alias = "oldAlias012";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    
+    int32_t ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_DE);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "TestGenerateKey keyAlias ret is " << ret;
+    
+    struct HksParamSet *paramSet = nullptr;
+    struct HksParam storageLevel = { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE };
+    ret = BuildParamSetWithParam(&paramSet, &storageLevel, sizeof(storageLevel) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    ret = HksKeyExist(&keyAlias, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Hks get generate key failed, ret is " << ret;
+    struct HksParamSet *renameParamSet = NULL;
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    const char *alias2 = "";
+    struct HksBlob newKeyAlias = { strlen(alias2), (uint8_t *)alias2 };
+    ret = HksRenameKeyAlias(&keyAlias, renameParamSet, &newKeyAlias);
+    EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksRenameKeyAlias ret is " << ret;
 
     ret = HksDeleteKey(&keyAlias, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
