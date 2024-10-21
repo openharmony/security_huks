@@ -77,7 +77,7 @@ int32_t HksStorageCopyKeyBlobFile(const char *srcPath, const char *srcFileName,
     const char *destPath, const char *destFileName);
 
 int32_t HksStoreRenameKeyAlias(const struct HksStoreFileInfo *oldFileInfo,
-    const struct HksStoreFileInfo *newFileInfo, bool isCopy);
+    const struct HksStoreFileInfo *newFileInfo, const struct HksStoreMaterial *oldMaterial, bool isCopy);
 
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
 int32_t HksIsOldKeyPathCleared(uint32_t *keyCount);
