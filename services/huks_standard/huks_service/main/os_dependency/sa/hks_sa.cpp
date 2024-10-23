@@ -349,18 +349,17 @@ void MoveMineOldFile(const char *oldDir, const char *newDir)
         std::error_code errCode{};
         std::filesystem::create_directory(newDir, errCode);
         if (errCode.value() != 0) {
-            HKS_LOG_E("create_directory %" LOG_PUBLIC "s failed %" LOG_PUBLIC "s", newPath, errCode.message().c_str());
+            HKS_LOG_E("create_directory newDir failed %" LOG_PUBLIC "s", errCode.message().c_str());
         }
         std::filesystem::copy(curPath, newPath,
             std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing, errCode);
         if (errCode.value() != 0) {
-            HKS_LOG_E("copy %" LOG_PUBLIC "s to %" LOG_PUBLIC "s failed %" LOG_PUBLIC "s",
-                curPath, newPath, errCode.message().c_str());
+            HKS_LOG_E("copy curPath to newPath failed %" LOG_PUBLIC "s", errCode.message().c_str());
             break;
         }
         std::filesystem::remove_all(curPath, errCode);
         if (errCode.value() != 0) {
-            HKS_LOG_E("remove_all %" LOG_PUBLIC "s failed %" LOG_PUBLIC "s", curPath, errCode.message().c_str());
+            HKS_LOG_E("remove_all curPath failed %" LOG_PUBLIC "s", errCode.message().c_str());
         }
     }
     closedir(dir);
@@ -372,24 +371,23 @@ void MoveDirectoryTree(const char *oldDir, const char *newDir)
     std::error_code errCode{};
     std::filesystem::create_directory(newDir, errCode);
     if (errCode.value() != 0) {
-        HKS_LOG_E("create_directory %" LOG_PUBLIC "s failed %" LOG_PUBLIC "s", newDir, errCode.message().c_str());
+        HKS_LOG_E("create_directory newDir failed %" LOG_PUBLIC "s", errCode.message().c_str());
     } else {
-        HKS_LOG_I("create_directory %" LOG_PUBLIC "s ok!", newDir);
+        HKS_LOG_I("create_directory newDir ok!");
     }
     std::filesystem::copy(oldDir, newDir,
         std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing, errCode);
     if (errCode.value() != 0) {
-        HKS_LOG_E("copy %" LOG_PUBLIC "s to %" LOG_PUBLIC "s failed %" LOG_PUBLIC "s",
-            oldDir, newDir, errCode.message().c_str());
+        HKS_LOG_E("copy oldDir to newDir failed %" LOG_PUBLIC "s", errCode.message().c_str());
         return;
     }
-    HKS_LOG_I("copy %" LOG_PUBLIC "s to %" LOG_PUBLIC "s ok!", oldDir, newDir);
+    HKS_LOG_I("copy oldDir to newDir ok!");
     std::filesystem::remove_all(oldDir, errCode);
     if (errCode.value() != 0) {
-        HKS_LOG_E("remove_all %" LOG_PUBLIC "s failed %" LOG_PUBLIC "s", oldDir, errCode.message().c_str());
+        HKS_LOG_E("remove_all oldDir failed %" LOG_PUBLIC "s", errCode.message().c_str());
         return;
     }
-    HKS_LOG_I("remove_all %" LOG_PUBLIC "s ok!", oldDir);
+    HKS_LOG_I("remove_all oldDir ok!");
 }
 
 void HksService::OnStart()

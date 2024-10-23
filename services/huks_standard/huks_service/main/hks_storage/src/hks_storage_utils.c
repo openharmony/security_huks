@@ -280,9 +280,9 @@ void FileInfoFree(struct HksStoreFileInfo *fileInfo)
  *                              |<- anonymous len ->||<- suffix len ->|
  *           |<----------------- keyAlias len ----------------------->|
  */
-int32_t RecordKeyOperation(uint32_t operation, const char *path, const char *keyAlias)
+int32_t RecordKeyOperation(uint32_t operation, const struct HksStoreMaterial *material, const char *keyAlias)
 {
-    (void)path;
+    (void)material;
     uint32_t bufSize = strlen(keyAlias) + 1;
     char *outKeyAlias = (char *)HksMalloc(bufSize);
     HKS_IF_NULL_RETURN(outKeyAlias, HKS_ERROR_MALLOC_FAIL)
@@ -306,15 +306,19 @@ int32_t RecordKeyOperation(uint32_t operation, const char *path, const char *key
     int32_t ret = HKS_SUCCESS;
     switch (operation) {
         case KEY_OPERATION_SAVE:
-            HKS_LOG_I("generate key, storage path: %" LOG_PUBLIC "s, key alias: %" LOG_PUBLIC "s",
-                path, outKeyAlias);
+            HKS_LOG_I("generate key, storage userid: %" LOG_PUBLIC "s, uid: %" LOG_PUBLIC "s, "
+                "storage level: %" LOG_PUBLIC "u, key alias: %" LOG_PUBLIC "s",
+                material->userIdPath, material->uidPath, material->pathType, outKeyAlias);
             break;
         case KEY_OPERATION_GET:
-            HKS_LOG_I("use key, storage path: %" LOG_PUBLIC "s, key alias: %" LOG_PUBLIC "s", path, outKeyAlias);
+            HKS_LOG_I("use key, storage userid: %" LOG_PUBLIC "s, uid: %" LOG_PUBLIC "s, "
+                "storage level: %" LOG_PUBLIC "u, key alias: %" LOG_PUBLIC "s",
+                material->userIdPath, material->uidPath, material->pathType, outKeyAlias);
             break;
         case KEY_OPERATION_DELETE:
-            HKS_LOG_I("delete key, storage path: %" LOG_PUBLIC "s, key alias: %" LOG_PUBLIC "s",
-                path, outKeyAlias);
+            HKS_LOG_I("delete key, storage userid: %" LOG_PUBLIC "s, uid: %" LOG_PUBLIC "s, "
+                "storage level: %" LOG_PUBLIC "u, key alias: %" LOG_PUBLIC "s",
+                material->userIdPath, material->uidPath, material->pathType, outKeyAlias);
             break;
         default:
             ret = HKS_ERROR_INVALID_ARGUMENT;
