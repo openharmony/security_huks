@@ -29,7 +29,10 @@ ohos_static_library("libhuks_upgrade_file_transfer_static") {
     "src/hks_file_transfer.c",
   ]
 
-  include_dirs = [ "../../core/include" ]
+  include_dirs = [
+    "../../core/include",
+    "../../hks_storage/include",
+  ]
 
   deps = [
     "../../../../../../frameworks/huks_standard/main/common:libhuks_common_standard_static",

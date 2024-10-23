@@ -95,7 +95,7 @@ ENABLE_CFI(static int32_t HksCreatePluginProxy(void))
     return ret;
 }
 
-static int32_t RetryLoadPlugin(void)
+int32_t RetryLoadPlugin(void)
 {
     if (HksCreatePluginProxy() != HKS_SUCCESS) {
         HKS_LOG_E("Failed to create the plugin again.");
@@ -124,12 +124,6 @@ int32_t HksInitPluginProxy(void)
 
 int32_t HksPluginOnRemoteRequest(uint32_t code, void *data, void *reply, void *option)
 {
-    int32_t ret = RetryLoadPlugin();
-    if (ret != HKS_SUCCESS) {
-        HksSendResponse(reinterpret_cast<const uint8_t *>(&reply), ret, nullptr);
-        return HKS_SUCCESS; // send error code by IPC.
-    }
-
     return g_pluginProxy->hksPluginOnRemoteRequest(code, data, reply, option);
 }
 
