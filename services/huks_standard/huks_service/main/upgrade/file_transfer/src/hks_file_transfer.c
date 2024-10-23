@@ -152,7 +152,8 @@ static int32_t TransferFile(const char *alias, const char *oldPath, const struct
         }
 
         // The result of the info record dose not need to take into consideration.
-        HKS_LOG_I("transfer key, storage userid: %" LOG_PUBLIC "d, uid: %" LOG_PUBLIC "d", info->userId, info->uid);
+        HKS_LOG_I("transfer key, storage userid: %" LOG_PUBLIC "d, uid: %" LOG_PUBLIC "d, alias: %" LOG_PUBLIC "s",
+            info->userId, info->uid, alias);
 
         ret = HksFileWrite(newPath, alias, 0, fileContent->data, fileContent->size);
         if (ret != HKS_SUCCESS) {
@@ -229,13 +230,13 @@ static int ProcessFileUpgrade(const char *filePath, const struct stat *st, int t
         struct HksUpgradeFileTransferInfo info = { 0 };
         ret = HksParseConfig(alias, &fileContent, &info);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksParseConfig failed, userid: %" LOG_PUBLIC "d, uid: %" LOG_PUBLIC "d",
-                info.userId, info.uid);
+            HKS_LOG_E("HksParseConfig failed, userid: %" LOG_PUBLIC "d, uid: %" LOG_PUBLIC "d, "
+                "alias: %" LOG_PUBLIC "s", info.userId, info.uid, alias);
             break;
         }
         if (info.skipTransfer) {
-            HKS_LOG_I("file should skip transfer, userid: %" LOG_PUBLIC "d, uid: %" LOG_PUBLIC "d",
-                info.userId, info.uid);
+            HKS_LOG_I("file should skip transfer, userid: %" LOG_PUBLIC "d, uid: %" LOG_PUBLIC "d, "
+                "alias: %" LOG_PUBLIC "s", info.userId, info.uid, alias);
             break;
         }
         HKS_IF_NOT_SUCC_LOGE(TransferFile(alias, path, &fileContent, &info), "TransferFile failed!")
