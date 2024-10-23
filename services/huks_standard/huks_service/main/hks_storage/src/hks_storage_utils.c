@@ -280,51 +280,60 @@ void FileInfoFree(struct HksStoreFileInfo *fileInfo)
  *                              |<- anonymous len ->||<- suffix len ->|
  *           |<----------------- keyAlias len ----------------------->|
  */
-int32_t RecordKeyOperation(uint32_t operation, const struct HksStoreMaterial *material, const char *keyAlias)
+int32_t AnonymizeKeyAlias(const char *keyAlias, char **anonymousKeyAlias)
 {
-    (void)material;
     uint32_t bufSize = strlen(keyAlias) + 1;
-    char *outKeyAlias = (char *)HksMalloc(bufSize);
-    HKS_IF_NULL_RETURN(outKeyAlias, HKS_ERROR_MALLOC_FAIL)
+    *anonymousKeyAlias = (char *)HksMalloc(bufSize);
+    HKS_IF_NULL_RETURN(*anonymousKeyAlias, HKS_ERROR_MALLOC_FAIL)
 
-    (void)memset_s(outKeyAlias, bufSize, 0, bufSize);
+    (void)memset_s(*anonymousKeyAlias, bufSize, 0, bufSize);
 
     uint32_t keyAliasLen = strlen(keyAlias);
     uint32_t anoyLen = (keyAliasLen + 1) / 2;
     uint32_t suffixLen = anoyLen / 2;
-    outKeyAlias[0] = keyAlias[0]; // keyAliasLen > 0;
+    (*anonymousKeyAlias)[0] = keyAlias[0]; // keyAliasLen > 0;
     for (uint32_t i = 1; i < keyAliasLen; ++i) {
         if ((keyAliasLen < (i + 1 + anoyLen + suffixLen)) &&
             ((i + 1 + suffixLen) <= keyAliasLen)) {
-            outKeyAlias[i] = '*';
+            (*anonymousKeyAlias)[i] = '*';
         } else {
-            outKeyAlias[i] = keyAlias[i];
+            (*anonymousKeyAlias)[i] = keyAlias[i];
         }
     }
-    outKeyAlias[keyAliasLen] = '\0';
+    (*anonymousKeyAlias)[keyAliasLen] = '\0';
+    return HKS_SUCCESS;
+}
 
+int32_t RecordKeyOperation(uint32_t operation, const struct HksStoreMaterial *material, const char *keyAlias)
+{
+    (void)material;
     int32_t ret = HKS_SUCCESS;
+
+    char *anonymousKeyAlias = NULL;
+    ret = AnonymizeKeyAlias(keyAlias, &anonymousKeyAlias);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get anonymous key alias failed");
+
     switch (operation) {
         case KEY_OPERATION_SAVE:
             HKS_LOG_I("generate key, storage userid: %" LOG_PUBLIC "s, uid: %" LOG_PUBLIC "s, "
                 "storage level: %" LOG_PUBLIC "u, key alias: %" LOG_PUBLIC "s",
-                material->userIdPath, material->uidPath, material->pathType, outKeyAlias);
+                material->userIdPath, material->uidPath, material->pathType, anonymousKeyAlias);
             break;
         case KEY_OPERATION_GET:
             HKS_LOG_I("use key, storage userid: %" LOG_PUBLIC "s, uid: %" LOG_PUBLIC "s, "
                 "storage level: %" LOG_PUBLIC "u, key alias: %" LOG_PUBLIC "s",
-                material->userIdPath, material->uidPath, material->pathType, outKeyAlias);
+                material->userIdPath, material->uidPath, material->pathType, anonymousKeyAlias);
             break;
         case KEY_OPERATION_DELETE:
             HKS_LOG_I("delete key, storage userid: %" LOG_PUBLIC "s, uid: %" LOG_PUBLIC "s, "
                 "storage level: %" LOG_PUBLIC "u, key alias: %" LOG_PUBLIC "s",
-                material->userIdPath, material->uidPath, material->pathType, outKeyAlias);
+                material->userIdPath, material->uidPath, material->pathType, anonymousKeyAlias);
             break;
         default:
             ret = HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    HKS_FREE(outKeyAlias);
+    HKS_FREE(anonymousKeyAlias);
     return ret;
 }
 
