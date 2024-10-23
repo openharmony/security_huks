@@ -47,7 +47,7 @@
 
 static void ChangeDirAndFilesPerm(const char *path)
 {
-    HKS_LOG_E("enter ChangeDirAndFilesPerm %" LOG_PUBLIC "s", path);
+    HKS_LOG_E("enter ChangeDirAndFilesPerm");
     DIR *dir;
     struct dirent *ptr;
     dir = opendir(path);

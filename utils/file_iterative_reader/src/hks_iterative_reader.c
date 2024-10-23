@@ -137,7 +137,7 @@ static int32_t HksGetOldStoreFileInfo(const char *path, struct HksReadFileInfoLi
 {
     DIR *dir = opendir(path);
     if (dir == NULL) {
-        HKS_LOG_E("open dir %" LOG_PUBLIC "s failed.", path);
+        HKS_LOG_E("open dir failed");
         return HKS_ERROR_MAKE_DIR_FAIL;
     }
     struct dirent *ptr;
@@ -154,8 +154,7 @@ static int32_t HksGetOldStoreFileInfo(const char *path, struct HksReadFileInfoLi
                 HKS_LOG_E("construct src and target path failed!");
                 break;
             }
-            HKS_IF_NOT_SUCC_LOGE_BREAK(HksGetOldStoreFileInfo(subPath, infos),
-                "HksGetOldStoreFileInfo failed, path is %" LOG_PUBLIC "s", subPath)
+            HKS_IF_NOT_SUCC_LOGE_BREAK(HksGetOldStoreFileInfo(subPath, infos), "HksGetOldStoreFileInfo failed")
         } else {
             AppendFilePath(path, ptr->d_name, infos);
         }
