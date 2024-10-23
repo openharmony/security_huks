@@ -20,6 +20,7 @@
 #endif
 
 #include "hks_ability.h"
+#include "hks_core_ability.h"
 
 #include "hks_crypto_ed25519.h"
 #include "hks_log.h"
@@ -31,7 +32,6 @@
 #include "hks_mbedtls_ecc.h"
 #include "hks_mbedtls_ecdh.h"
 #include "hks_mbedtls_ecdsa.h"
-#include "hks_mbedtls_get_main_key.h"
 #include "hks_mbedtls_hash.h"
 #include "hks_mbedtls_hmac.h"
 #include "hks_mbedtls_kdf.h"
@@ -216,12 +216,7 @@ static void RegisterAbilityBnExpMod(void)
 #endif
 }
 
-static void RegisterAbilityGetMainKey(void)
-{
-    (void)RegisterAbility(HKS_CRYPTO_ABILITY_GET_MAIN_KEY, (void *)HksMbedtlsGetMainKey);
-}
-
-int32_t HksCryptoAbilityInit(void)
+int32_t HksCryptoAbilityInitBase(void)
 {
     RegisterAbilityGenerateKey();
     RegisterAbilityGetPublicKey();
@@ -235,6 +230,5 @@ int32_t HksCryptoAbilityInit(void)
     RegisterAbilityHash();
     RegisterAbilityFillRandom();
     RegisterAbilityBnExpMod();
-    RegisterAbilityGetMainKey();
     return HKS_SUCCESS;
 }

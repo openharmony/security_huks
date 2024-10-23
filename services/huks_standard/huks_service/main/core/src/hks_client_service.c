@@ -25,9 +25,11 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "hks_type.h"
-#include "hks_base_check.h" // for HksAttestIsAnonymous
+#include "hks_base_check.h"
 #include "hks_client_check.h"
+#ifdef HKS_SUPPORT_API_ATTEST_KEY
 #include "hks_client_service_dcm.h"
+#endif
 #include "hks_client_service_util.h"
 #include "hks_common_check.h"
 #include "hks_hitrace.h"
