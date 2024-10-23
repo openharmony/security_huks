@@ -115,8 +115,8 @@ static int32_t ConstructNewFilePath(const char *alias, const struct HksUpgradeFi
     return ret;
 }
 
-static int32_t TransferFile(const char *alias, const char *oldPath, const struct HksBlob *fileContent,
-    const struct HksUpgradeFileTransferInfo *info)
+static int32_t TransferFile(const char *alias, const char *anonymousKeyAlias, const char *oldPath,
+    const struct HksBlob *fileContent, const struct HksUpgradeFileTransferInfo *info)
 {
     int32_t ret;
     char *newPath = NULL;
@@ -153,7 +153,7 @@ static int32_t TransferFile(const char *alias, const char *oldPath, const struct
 
         // The result of the info record dose not need to take into consideration.
         HKS_LOG_I("transfer key, storage userid: %" LOG_PUBLIC "d, uid: %" LOG_PUBLIC "d, alias: %" LOG_PUBLIC "s",
-            info->userId, info->uid, alias);
+            info->userId, info->uid, anonymousKeyAlias);
 
         ret = HksFileWrite(newPath, alias, 0, fileContent->data, fileContent->size);
         if (ret != HKS_SUCCESS) {
@@ -218,11 +218,15 @@ static int ProcessFileUpgrade(const char *filePath, const struct stat *st, int t
     }
     char *alias = NULL;
     char *path = NULL;
+    char *anonymousKeyAlias = NULL;
     struct HksBlob fileContent = { 0 };
     int32_t ret;
     do {
         ret = SplitPath(filePath, ftw, &path, &alias);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "split filePath failed.")
+
+        ret = AnonymizeKeyAlias(alias, &anonymousKeyAlias);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get anonymous key alias failed.")
 
         ret = GetFileContent(path, alias, &fileContent);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get file content failed.")
@@ -231,18 +235,19 @@ static int ProcessFileUpgrade(const char *filePath, const struct stat *st, int t
         ret = HksParseConfig(alias, &fileContent, &info);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksParseConfig failed, userid: %" LOG_PUBLIC "d, uid: %" LOG_PUBLIC "d, "
-                "alias: %" LOG_PUBLIC "s", info.userId, info.uid, alias);
+                "alias: %" LOG_PUBLIC "s", info.userId, info.uid, anonymousKeyAlias);
             break;
         }
         if (info.skipTransfer) {
             HKS_LOG_I("file should skip transfer, userid: %" LOG_PUBLIC "d, uid: %" LOG_PUBLIC "d, "
-                "alias: %" LOG_PUBLIC "s", info.userId, info.uid, alias);
+                "alias: %" LOG_PUBLIC "s", info.userId, info.uid, anonymousKeyAlias);
             break;
         }
-        HKS_IF_NOT_SUCC_LOGE(TransferFile(alias, path, &fileContent, &info), "TransferFile failed!")
+        HKS_IF_NOT_SUCC_LOGE(TransferFile(alias, anonymousKeyAlias, path, &fileContent, &info), "TransferFile failed!")
     } while (false);
     HKS_FREE(path);
     HKS_FREE(alias);
+    HKS_FREE(anonymousKeyAlias);
     HKS_FREE_BLOB(fileContent);
 
     // continue to traverse files
