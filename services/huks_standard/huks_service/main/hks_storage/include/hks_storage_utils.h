@@ -114,6 +114,8 @@ int32_t HksGetFileInfo(const struct HksStoreMaterial *material, struct HksStoreF
 int32_t CheckSpecificUserIdAndStorageLevel(const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet);
 
+int32_t AnonymizeKeyAlias(const char *keyAlias, char **anonymousKeyAlias);
+
 #ifdef __cplusplus
 }
 #endif
