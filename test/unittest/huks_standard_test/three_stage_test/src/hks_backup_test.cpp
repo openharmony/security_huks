@@ -133,7 +133,7 @@ static const struct HksParam g_verifyParams[] = {
 static const struct HksParam g_agreeParams[] = {
     { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DH },
     { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
-    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_DH_KEY_SIZE_4096 },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_DH_KEY_SIZE_2048 },
     { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
 };
 
@@ -419,7 +419,7 @@ HWTEST_F(HksBackupTest, HksBackupPartTest005, TestSize.Level0)
     ret = HksGenerateKey(&keyAlias, paramSet0, nullptr);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
-    uint8_t pubKeyText[HKS_DH_KEY_SIZE_4096] = { 0 };
+    uint8_t pubKeyText[HKS_DH_KEY_SIZE_2048] = { 0 };
     struct HksBlob pubKey = { .size = HKS_ARRAY_SIZE(pubKeyText), .data = pubKeyText };
     ret = HksExportPublicKey(&keyAlias, paramSet0, &pubKey);
     ASSERT_EQ(ret, HKS_SUCCESS);
@@ -452,7 +452,7 @@ HWTEST_F(HksBackupTest, HksBackupPartTest006, TestSize.Level0)
     ret = HksGenerateKey(&keyAlias, paramSet0, nullptr);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
-    uint8_t pubKeyText[HKS_DH_KEY_SIZE_4096] = { 0 };
+    uint8_t pubKeyText[HKS_DH_KEY_SIZE_2048] = { 0 };
     struct HksBlob pubKey = { .size = HKS_ARRAY_SIZE(pubKeyText), .data = pubKeyText };
     ret = HksExportPublicKey(&keyAlias, paramSet0, &pubKey);
     ASSERT_EQ(ret, HKS_SUCCESS);
