@@ -567,6 +567,11 @@ static napi_value JSCipherRsa(napi_env env, napi_callback_info info)
     auto rsaAsyncContext = new RsaAsyncContext();
 
     rsaAsyncContext->ret = GetRsaInput(env, argv[0], rsaAsyncContext);
+    if (rsaAsyncContext->ret != ERROR_SUCCESS) {
+        DeleteRsaAsyncContext(env, rsaAsyncContext);
+        CIPHER_LOG_E("Failed to get rsa input.");
+        return nullptr;
+    }
 
     napi_value resource = nullptr;
     napi_create_string_utf8(env, "JSCipherRsa", NAPI_AUTO_LENGTH, &resource);
@@ -609,6 +614,11 @@ static napi_value JSCipherAes(napi_env env, napi_callback_info info)
     auto aesAsyncContext = new AesAsyncContext();
 
     aesAsyncContext->ret = GetAesInput(env, argv[0], aesAsyncContext);
+    if (aesAsyncContext->ret != ERROR_SUCCESS) {
+        DeleteAesAsyncContext(env, aesAsyncContext);
+        CIPHER_LOG_E("Failed to get aes input.");
+        return nullptr;
+    }
 
     napi_value resource = nullptr;
     napi_create_string_utf8(env, "JSCipherAes", NAPI_AUTO_LENGTH, &resource);
