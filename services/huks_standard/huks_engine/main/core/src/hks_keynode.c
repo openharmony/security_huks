@@ -19,16 +19,15 @@
 
 #include <stddef.h>
 
-#include "hks_core_service.h"
 #include "hks_crypto_hal.h"
 #include "hks_keyblob.h"
 #include "hks_log.h"
 #include "hks_mem.h"
-#include "hks_mutex.h"
 #include "hks_param.h"
 #include "hks_template.h"
 #include "securec.h"
 #include "hks_util.h"
+#include "hks_type_inner.h"
 
 #define S_TO_MS 1000
 #define MAX_RETRY_CHECK_UNIQUE_HANDLE_TIME 10
@@ -43,6 +42,38 @@
 
 static struct DoubleList g_keyNodeList = { &g_keyNodeList, &g_keyNodeList };
 static uint32_t g_keyNodeCount = 0;
+static HksMutex *g_huksMutex = NULL;  /* global mutex using in keynode */
+
+HksMutex *HksGetHuksMutex(void)
+{
+    if (g_huksMutex == NULL) {
+        HKS_LOG_E("Hks mutex init failed, reinit!");
+        g_huksMutex = HksMutexCreate();
+        HKS_IF_NULL_LOGE_RETURN(g_huksMutex, NULL, "Hks mutex reinit failed!")
+    }
+
+    return g_huksMutex;
+}
+
+int32_t HksInitHuksMutex(void)
+{
+    if (g_huksMutex == NULL) {
+        g_huksMutex = HksMutexCreate();
+        if (g_huksMutex == NULL) {
+            HKS_LOG_E("create huks mutex failed!");
+            return HKS_ERROR_NULL_POINTER;
+        }
+    }
+    return HKS_SUCCESS;
+}
+
+void HksDestroyHuksMutex(void)
+{
+    if (g_huksMutex != NULL) {
+        HksMutexClose(g_huksMutex);
+        g_huksMutex = NULL;
+    }
+}
 
 static void FreeKeyBlobParamSet(struct HksParamSet **paramSet)
 {
@@ -369,7 +400,7 @@ static bool DeleteFirstKeyNode(void)
 static int32_t AddKeyNode(struct HuksKeyNode *keyNode, uint32_t tokenId)
 {
     int32_t ret = HKS_SUCCESS;
-    HksMutexLock(HksCoreGetHuksMutex());
+    HksMutexLock(HksGetHuksMutex());
     do {
         DeleteFirstTimeOutBatchKeyNode();
 
@@ -390,7 +421,7 @@ static int32_t AddKeyNode(struct HuksKeyNode *keyNode, uint32_t tokenId)
         HKS_LOG_I("add keynode count:%" LOG_PUBLIC "u", g_keyNodeCount);
     } while (0);
 
-    HksMutexUnlock(HksCoreGetHuksMutex());
+    HksMutexUnlock(HksGetHuksMutex());
     return ret;
 }
 
@@ -534,29 +565,29 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
 struct HuksKeyNode *HksQueryKeyNode(uint64_t handle)
 {
     struct HuksKeyNode *keyNode = NULL;
-    HksMutexLock(HksCoreGetHuksMutex());
+    HksMutexLock(HksGetHuksMutex());
     HKS_DLIST_ITER(keyNode, &g_keyNodeList) {
         if (keyNode != NULL && keyNode->handle == handle) {
-            HksMutexUnlock(HksCoreGetHuksMutex());
+            HksMutexUnlock(HksGetHuksMutex());
             return keyNode;
         }
     }
-    HksMutexUnlock(HksCoreGetHuksMutex());
+    HksMutexUnlock(HksGetHuksMutex());
     return NULL;
 }
 
 void HksDeleteKeyNode(uint64_t handle)
 {
     struct HuksKeyNode *keyNode = NULL;
-    HksMutexLock(HksCoreGetHuksMutex());
+    HksMutexLock(HksGetHuksMutex());
     HKS_DLIST_ITER(keyNode, &g_keyNodeList) {
         if (keyNode != NULL && keyNode->handle == handle) {
             DeleteKeyNodeFree(keyNode);
-            HksMutexUnlock(HksCoreGetHuksMutex());
+            HksMutexUnlock(HksGetHuksMutex());
             return;
         }
     }
-    HksMutexUnlock(HksCoreGetHuksMutex());
+    HksMutexUnlock(HksGetHuksMutex());
 }
 
 // free batch update keynode
