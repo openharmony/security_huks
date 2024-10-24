@@ -77,7 +77,7 @@ static char *MallocDecodeData(const char *text, size_t *olen)
     if (mbedtls_base64_decode((unsigned char *)decData, decodeLen + 1, olen,
         (const unsigned char *)text, strlen(text)) != 0) {
         free(decData);
-        CIPHER_LOG_E("decode data failed, text:%s.", text);
+        CIPHER_LOG_E("decode data failed.");
         return NULL;
     }
     return decData;
@@ -330,6 +330,7 @@ int32_t InitAesCryptData(const char *action, const char *text, const char *key, 
     ret = InitAesCryptContext(key, iv, aesCryptCxt);
     if (ret != 0) {
         CIPHER_LOG_E("fill aes crypt context failed.");
+        DeinitAesCryptData(aesCryptCxt);
         return ERROR_CODE_GENERAL;
     }
     return ERROR_SUCCESS;
