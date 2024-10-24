@@ -47,7 +47,7 @@ int32_t HksCoreGetMainKey(const struct HksBlob *message, struct HksBlob *mainKey
 #ifndef _HARDWARE_ROOT_KEY_
 
 #ifdef L2_STANDARD
-    return L2CoreGetMainKey(mainKey)
+    return L2CoreGetMainKey(mainKey);
 #else
    return HksRkcGetMainKey(mainKey);
 #endif
