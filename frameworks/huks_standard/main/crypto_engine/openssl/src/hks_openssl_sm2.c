@@ -148,8 +148,16 @@ int32_t HksOpensslSm2GenerateKey(const struct HksKeySpec *spec, struct HksBlob *
 }
 #endif
 
-static int GetSm2Modules(const struct HksBlob *keyBlob, struct KeyMaterialEcc *out)
+static int GetSm2Modules(const struct HksBlob *keyBlob, struct KeyMaterialEcc **out)
 {
+    if (CheckBlob(keyBlob) != HKS_SUCCESS) {
+        HKS_LOG_E("invalid keyBlob");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    if (keyBlob->size < sizeof(struct KeyMaterialEcc)) {
+        HKS_LOG_E("invalid keyBlob size %" LOG_PUBLIC "u", keyBlob->size);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
     struct KeyMaterialEcc *keyMaterial = (struct KeyMaterialEcc *)keyBlob->data;
     HKS_LOG_I("keySize = %" LOG_PUBLIC "u, xSize = %" LOG_PUBLIC "u, ySize = %" LOG_PUBLIC "u, zSize = %" LOG_PUBLIC
         "u", keyMaterial->keySize, keyMaterial->xSize, keyMaterial->ySize, keyMaterial->zSize);
@@ -164,11 +172,15 @@ static int GetSm2Modules(const struct HksBlob *keyBlob, struct KeyMaterialEcc *o
         HKS_LOG_E("invalid size");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    *out = *keyMaterial;
+    if (keyBlob->size < sizeof(struct KeyMaterialEcc) + keyMaterial->xSize + keyMaterial->ySize + keyMaterial->zSize) {
+        HKS_LOG_E("invalid keyBlob size %" LOG_PUBLIC "u", keyBlob->size);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    *out = keyMaterial;
     return HKS_SUCCESS;
 }
 
-static int32_t PushPubKeyToParam(const uint8_t *keyPair, const struct KeyMaterialEcc *size,
+static int32_t PushPubKeyToParam(const struct KeyMaterialEcc *material,
     uint32_t fullSize, uint8_t *uncompressedPublicKey, OSSL_PARAM_BLD *paramBld)
 {
     HKS_LOG_I("begin PushPubKeyToParam");
@@ -178,17 +190,18 @@ static int32_t PushPubKeyToParam(const uint8_t *keyPair, const struct KeyMateria
     // You can supply the key as an uncompressed public key simply be concatenating the byte "04",
     // the x co-ord (padded to the appropriate size if necessary) and the y co-cord (also padded as appropriate).
 
-    // NOTICE! x size and y size are smaller than or equal to HKS_KEY_BYTES(size->keySize)
-    // e.g. assuming that HKS_KEY_BYTES(size->keySize) is 32, x size might be 32, 31, 30, etc.
+    // NOTICE! x size and y size are smaller than or equal to HKS_KEY_BYTES(material->keySize)
+    // e.g. assuming that HKS_KEY_BYTES(material->keySize) is 32, x size might be 32, 31, 30, etc.
     uncompressedPublicKey[0] = POINT_CONVERSION_UNCOMPRESSED;
-    errno_t memRet = memcpy_s(uncompressedPublicKey + 1 + HKS_KEY_BYTES(size->keySize) - size->xSize, size->xSize,
-        keyPair + sizeof(struct KeyMaterialEcc), size->xSize);
+    errno_t memRet = memcpy_s(
+        uncompressedPublicKey + 1 + HKS_KEY_BYTES(material->keySize) - material->xSize, material->xSize,
+        (const uint8_t *)(material) + sizeof(struct KeyMaterialEcc), material->xSize);
     if (memRet != EOK) {
         HKS_LOG_E("copy x fail");
         return HKS_ERROR_BAD_STATE;
     }
-    memRet = memcpy_s(uncompressedPublicKey + fullSize - size->ySize, size->ySize,
-        keyPair + sizeof(struct KeyMaterialEcc) + size->xSize, size->ySize);
+    memRet = memcpy_s(uncompressedPublicKey + fullSize - material->ySize, material->ySize,
+        (const uint8_t *)(material) + sizeof(struct KeyMaterialEcc) + material->xSize, material->ySize);
     if (memRet != EOK) {
         HKS_LOG_E("copy y fail");
         return HKS_ERROR_BAD_STATE;
@@ -204,8 +217,7 @@ static int32_t PushPubKeyToParam(const uint8_t *keyPair, const struct KeyMateria
 }
 
 // Notice: you must call OSSL_PARAM_free after using the return value.
-static OSSL_PARAM *ConstructSm2ParamsFromRawKey(
-    uint8_t *keyPair, const struct KeyMaterialEcc *size, enum HksKeyPurpose keyPurpose)
+static OSSL_PARAM *ConstructSm2ParamsFromRawKey(const struct KeyMaterialEcc *material, enum HksKeyPurpose keyPurpose)
 {
     // publicXSize publicYSize privateSize lengthes all are not greater than HKS_MAX_KEY_LEN
     // have been checked in GetSm2Modules
@@ -223,23 +235,23 @@ static OSSL_PARAM *ConstructSm2ParamsFromRawKey(
         }
 
         // push public key if it is present
-        if (size->xSize != 0 && size->ySize != 0) {
+        if (material->xSize != 0 && material->ySize != 0) {
             // sizes have been checked in GetSm2Modules
-            uint32_t fullSize = 1 + HKS_KEY_BYTES(size->keySize) + HKS_KEY_BYTES(size->keySize);
+            uint32_t fullSize = 1 + HKS_KEY_BYTES(material->keySize) + HKS_KEY_BYTES(material->keySize);
             uncompressedPublicKey = HksMalloc(fullSize);
             HKS_IF_NULL_LOGE_BREAK(uncompressedPublicKey, "uncompressedPublicKey HksMalloc NULL")
-            ret = PushPubKeyToParam(keyPair, size, fullSize, uncompressedPublicKey, paramBld);
+            ret = PushPubKeyToParam(material, fullSize, uncompressedPublicKey, paramBld);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "PushPubKeyToParam failed %" LOG_PUBLIC "d", ret)
         }
 
         // push private key if required
         if ((keyPurpose == HKS_KEY_PURPOSE_DECRYPT) || (keyPurpose == HKS_KEY_PURPOSE_SIGN)) {
-            if (size->zSize == 0) {
+            if (material->zSize == 0) {
                 HKS_LOG_E("decrypt or sign but private key empty");
                 break;
             }
-            priBn = BN_bin2bn(keyPair + sizeof(struct KeyMaterialEcc) + size->xSize + size->ySize,
-                size->zSize, NULL);
+            priBn = BN_bin2bn((const uint8_t *)(material) + sizeof(struct KeyMaterialEcc) +
+                material->xSize + material->ySize, material->zSize, NULL);
             HKS_IF_NULL_LOGE_BREAK(priBn, "BN_bin2bn fail%" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()))
             ret = OSSL_PARAM_BLD_push_BN(paramBld, OSSL_PKEY_PARAM_PRIV_KEY, priBn);
             if (ret != HKS_OPENSSL_SUCCESS) {
@@ -261,15 +273,14 @@ static OSSL_PARAM *ConstructSm2ParamsFromRawKey(
 static EVP_PKEY *Sm2InitKey(const struct HksBlob *keyBlob, enum HksKeyPurpose keyPurpose)
 {
     /* get ecc pubX,pubY,pri */
-    uint8_t *keyPair = keyBlob->data;
-    struct KeyMaterialEcc keyMaterial = {0};
+    struct KeyMaterialEcc *keyMaterial = NULL;
 
     HKS_IF_NOT_SUCC_LOGE_RETURN(GetSm2Modules(keyBlob, &keyMaterial),
         NULL, "get sm2 key modules is failed")
 
     EVP_PKEY *sm2EvpPkey = NULL;
     HKS_LOG_I("begin ConstructSm2ParamsFromRawKey");
-    OSSL_PARAM *params = ConstructSm2ParamsFromRawKey(keyPair, &keyMaterial, keyPurpose);
+    OSSL_PARAM *params = ConstructSm2ParamsFromRawKey(keyMaterial, keyPurpose);
     if (params == NULL) {
         HKS_LOG_E("ConstructSm2ParamsFromRawKey failed");
         return NULL;
