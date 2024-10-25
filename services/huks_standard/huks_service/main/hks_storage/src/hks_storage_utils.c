@@ -110,6 +110,9 @@ int32_t ConstructPlainName(const struct HksBlob *blob, char *targetName, uint32_
     }
 
     uint32_t count = 0;
+    if (nameLen <= 1) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
     for (uint32_t i = 0; i < blob->size; ++i) {
         if (count >= (nameLen - 1)) { /* nameLen can be guaranteed to be greater than 1 */
             return HKS_ERROR_INSUFFICIENT_DATA;
@@ -128,6 +131,9 @@ int32_t ConstructPlainName(const struct HksBlob *blob, char *targetName, uint32_
 int32_t ConstructName(const struct HksBlob *blob, char *targetName, uint32_t nameLen)
 {
     uint32_t count = 0;
+    if (nameLen <= 1) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
 
     for (uint32_t i = 0; i < blob->size; ++i) {
         if (count >= (nameLen - 1)) { /* nameLen can be guaranteed to be greater than 1 */
@@ -199,6 +205,10 @@ int32_t GetPath(const char *path, const char *name, char *targetPath, uint32_t p
     if (strncpy_s(targetPath, pathLen, path, strlen(path)) != EOK) {
         HKS_LOG_E("strncpy path failed");
         return HKS_ERROR_BAD_STATE;
+    }
+
+    if (strlen(targetPath) <= 0) {
+        return HKS_ERROR_INTERNAL_ERROR;
     }
 
     if (targetPath[strlen(targetPath) - 1] != '/') {
