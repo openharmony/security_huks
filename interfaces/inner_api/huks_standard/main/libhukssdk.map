@@ -63,5 +63,6 @@
     HksConvertErrCode;
     HksMalloc;
     HksFreeKeyAliasSet;
+    HksRenameKeyAlias;
   local: *;
 };
