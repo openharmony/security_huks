@@ -373,6 +373,14 @@ static int32_t AesCbcPkcs7CryptInit(void **cryptoCtx, const struct HksBlob *key,
     }
 
     const struct HksCipherParam *cipherParam = (struct HksCipherParam *)(usageSpec->algParam);
+    ret = mbedtls_cipher_set_padding_mode(cbcPkcs7ctx, MBEDTLS_PADDING_PKCS7);
+    if (ret != HKS_MBEDTLS_SUCCESS) {
+        HKS_LOG_E("Mbedtls cbc pkcs7 set padding mode failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
+        mbedtls_cipher_free(cbcPkcs7ctx);
+        HKS_FREE(cbcPkcs7ctx);
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+
     ret = mbedtls_cipher_set_iv(cbcPkcs7ctx, cipherParam->iv.data, cipherParam->iv.size);
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Mbedtls cbc pkcs7 set iv failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
