@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#ifndef USE_HISI_MBED
 #include "mbedtls/compat-2.x.h"
+#endif
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
 #else

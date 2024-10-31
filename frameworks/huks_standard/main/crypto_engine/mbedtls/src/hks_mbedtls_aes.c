@@ -612,8 +612,13 @@ static int32_t AesEncryptGcmInit(void **cryptoCtx, const struct HksUsageSpec *us
     }
 
     const struct HksAeadParam *aeadParam = (struct HksAeadParam *)(usageSpec->algParam);
+#ifdef USE_HISI_MBED
+    ret = mbedtls_gcm_starts(gcmCtx, MBEDTLS_GCM_ENCRYPT, aeadParam->nonce.data,
+        aeadParam->nonce.size, aeadParam->aad.data, aeadParam->aad.size);
+#else
     ret = mbedtls_gcm_starts(gcmCtx, MBEDTLS_GCM_ENCRYPT, aeadParam->nonce.data,
         aeadParam->nonce.size);
+#endif
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Mbedtls aes gcm start failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         mbedtls_gcm_free(gcmCtx);
@@ -636,6 +641,49 @@ static int32_t AesEncryptGcmInit(void **cryptoCtx, const struct HksUsageSpec *us
     return ret;
 }
 
+static int32_t MbedtlsGcmUpdate(mbedtls_gcm_context *gcmCtx, const struct HksBlob *message,
+    struct HksBlob *cipherText, bool isEncrypt)
+{
+    int32_t ret;
+#ifdef USE_HISI_MBED
+    ret = mbedtls_gcm_update(gcmCtx, message->size, message->data, cipherText->data);
+#else
+    size_t size = 0;
+    ret = mbedtls_gcm_update(gcmCtx, message->data, message->size, cipherText->data, cipherText->size, &size);
+#endif
+    if (ret != HKS_MBEDTLS_SUCCESS) {
+        if (isEncrypt) {
+            HKS_LOG_E("Mbedtls aes gcm encrypt update failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
+        } else {
+            HKS_LOG_E("Mbedtls aes gcm decrypt update failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
+        }
+        (void)memset_s(cipherText->data, cipherText->size, 0, cipherText->size);
+        ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+    return ret;
+}
+
+static int32_t MbedtlsGcmFinish(mbedtls_gcm_context *gcmCtx, uint8_t *tagAeadData, uint32_t tagAeadSize, bool isEncrypt)
+{
+    int32_t ret;
+#ifdef USE_HISI_MBED
+    ret = mbedtls_gcm_finish(gcmCtx, tagAeadData, tagAeadSize);
+#else
+    size_t size = 0;
+    ret = mbedtls_gcm_finish(gcmCtx, tagAeadData, tagAeadSize, &size, tagAeadData, tagAeadSize);
+#endif
+    if (ret != HKS_MBEDTLS_SUCCESS) {
+        if (isEncrypt) {
+            HKS_LOG_E("Mbedtls aes gcm encrypt update failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
+        } else {
+            HKS_LOG_E("Mbedtls aes gcm decrypt update failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
+        }
+        (void)memset_s(tagAeadData, tagAeadSize, 0, tagAeadSize);
+        ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+    return ret;
+}
+
 static int32_t AesEncryptGcmUpdate(void *cryptoCtx, const uint8_t padding, const struct HksBlob *message,
     struct HksBlob *cipherText)
 {
@@ -645,16 +693,10 @@ static int32_t AesEncryptGcmUpdate(void *cryptoCtx, const uint8_t padding, const
     mbedtls_gcm_context *gcmCtx = (mbedtls_gcm_context *)aesCtx->append;
     HKS_IF_NULL_LOGE_RETURN(gcmCtx, HKS_ERROR_NULL_POINTER, "GcmUpdate gcmCtx is null")
 
-    size_t size = 0;
-    int32_t ret = mbedtls_gcm_update(gcmCtx, message->data, message->size, cipherText->data, cipherText->size, &size);
-    if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("Mbedtls aes gcm encryot update failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
-        (void)memset_s(cipherText->data, cipherText->size, 0, cipherText->size);
-        ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    } else {
+    int32_t ret = MbedtlsGcmUpdate(gcmCtx, message, cipherText, true);
+    if (ret == HKS_MBEDTLS_SUCCESS) {
         cipherText->size = message->size;
     }
-
     return ret;
 }
 
@@ -672,23 +714,14 @@ static int32_t AesEncryptGcmFinal(void **cryptoCtx, const struct HksBlob *messag
     int32_t ret;
     do {
         if (message->size != 0) {
-            size_t size = 0;
-            ret = mbedtls_gcm_update(gcmCtx, message->data, message->size, cipherText->data, cipherText->size, &size);
+            ret = MbedtlsGcmUpdate(gcmCtx, message, cipherText, true);
             if (ret != HKS_MBEDTLS_SUCCESS) {
-                HKS_LOG_E("Mbedtls aes gcm encryot failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
-                (void)memset_s(cipherText->data, cipherText->size, 0, cipherText->size);
-                ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
                 break;
             }
         }
         cipherText->size = message->size;
-
-        size_t size = 0;
-        ret = mbedtls_gcm_finish(gcmCtx, tagAead->data, tagAead->size, &size, tagAead->data, tagAead->size);
+        ret = MbedtlsGcmFinish(gcmCtx, tagAead->data, tagAead->size, true);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls aes gcm encryot failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
-            (void)memset_s(tagAead->data, tagAead->size, 0, tagAead->size);
-            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
         }
     } while (0);
@@ -755,8 +788,13 @@ static int32_t AesDecryptGcmInit(void **cryptoCtx, const struct HksBlob *key, co
     }
 
     const struct HksAeadParam *aeadParam = (struct HksAeadParam *)(usageSpec->algParam);
+#ifdef USE_HISI_MBED
+    ret = mbedtls_gcm_starts(gcmCtx, MBEDTLS_GCM_DECRYPT, aeadParam->nonce.data,
+        aeadParam->nonce.size, aeadParam->aad.data, aeadParam->aad.size);
+#else
     ret = mbedtls_gcm_starts(gcmCtx, MBEDTLS_GCM_DECRYPT, aeadParam->nonce.data,
         aeadParam->nonce.size);
+#endif
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Mbedtls aes gcm start failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         mbedtls_gcm_free(gcmCtx);
@@ -785,15 +823,11 @@ static int32_t AesDecryptGcmUpdate(void *cryptoCtx,
     mbedtls_gcm_context *gcmCtx = (mbedtls_gcm_context *)aesCtx->append;
     HKS_IF_NULL_LOGE_RETURN(gcmCtx, HKS_FAILURE, "GcmUpdate gcmCtx is null")
 
-    size_t size = 0;
-    int32_t ret = mbedtls_gcm_update(gcmCtx, message->data, message->size, cipherText->data, cipherText->size, &size);
-    if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("Mbedtls aes gcm decrypt update failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
-        (void)memset_s(cipherText->data, cipherText->size, 0, cipherText->size);
-        ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    } else {
+    int32_t ret = MbedtlsGcmUpdate(gcmCtx, message, cipherText, false);
+    if (ret == HKS_MBEDTLS_SUCCESS) {
         cipherText->size = message->size;
     }
+
     return ret;
 }
 
@@ -811,24 +845,16 @@ static int32_t AesDecryptGcmFinal(void **cryptoCtx, const struct HksBlob *messag
     int32_t ret;
     do {
         if (message->size != 0) {
-            size_t size = 0;
-            ret = mbedtls_gcm_update(gcmCtx, message->data, message->size, cipherText->data, cipherText->size, &size);
+            ret = MbedtlsGcmUpdate(gcmCtx, message, cipherText, false);
             if (ret != HKS_MBEDTLS_SUCCESS) {
-                HKS_LOG_E("Mbedtls aes gcm decrypt update failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
-                (void)memset_s(cipherText->data, cipherText->size, 0, cipherText->size);
-                ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
                 break;
             }
         }
         cipherText->size = message->size;
 
         uint8_t check_tag[16];
-        size_t size = 0;
-        ret =  mbedtls_gcm_finish(gcmCtx, check_tag, tagAead->size, &size, check_tag, tagAead->size);
+        ret = MbedtlsGcmFinish(gcmCtx, check_tag, tagAead->size, false);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls aes gcm decrypt failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
-            (void)memset_s(cipherText->data, cipherText->size, 0, cipherText->size);
-            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
         }
 
