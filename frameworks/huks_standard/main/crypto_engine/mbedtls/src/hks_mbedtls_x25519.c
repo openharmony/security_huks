@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+#ifdef USE_HISI_MBED
+#define MBEDTLS_PRIVATE(member) member
+#endif
+
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
 #else
