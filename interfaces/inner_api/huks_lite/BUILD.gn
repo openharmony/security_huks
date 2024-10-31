@@ -151,7 +151,7 @@ if (ohos_kernel_type == "liteos_m") {
       if (huks_dependency_mbedtls_path != "") {
         deps += [ huks_dependency_mbedtls_path ]
       } else {
-        deps += [ "//third_party/mbedtls:mbedtls_static" ]
+        deps += [ "//third_party/mbedtls" ]
       }
     }
 
