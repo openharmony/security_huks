@@ -1043,4 +1043,79 @@ HWTEST_F(HksChangeStorageLevelTest, HksChangeStorageLevelTest020, TestSize.Level
     HksFreeParamSet(&srcParamSet);
     HksFreeParamSet(&desParamSet);
 }
+
+/**
+ * @tc.name: HksChangeStorageLevelTest.HksChangeStorageLevelTest021
+ * @tc.desc: upgrade DE to CE
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksChangeStorageLevelTest, HksChangeStorageLevelTest021, TestSize.Level0)
+{
+    HKS_LOG_I("Enter HksChangeStorageLevelTest021");
+
+    int32_t ret;
+#ifdef HKS_INTERACT_ABILITY
+    ret = SetIdsToken();
+    EXPECT_EQ(ret, HKS_SUCCESS);
+#endif
+
+    char tmpKeyAlias[] = "HksChangeStorageLevelTest021";
+    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksParamSet *srcParamSet = nullptr;
+    ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+
+    ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksGenerateKey failed.";
+
+    struct HksParamSet *desParamSet = nullptr;
+    ret = InitParamSet(&desParamSet, g_params002, sizeof(g_params002) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+
+    keyAlias.size = 130;
+    ret = HksChangeStorageLevel(&keyAlias, srcParamSet, desParamSet);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksChangeStorageLevel failed.";
+
+    keyAlias.size = strlen(tmpKeyAlias);
+    ret = HksDeleteKey(&keyAlias, srcParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksDeleteKey failed.";
+
+    HksFreeParamSet(&srcParamSet);
+    HksFreeParamSet(&desParamSet);
+}
+
+/**
+ * @tc.name: HksChangeStorageLevelTest.HksChangeStorageLevelTest022
+ * @tc.desc: upgrade DE to CE, src key exist, des key not exist, delete src key fail
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksChangeStorageLevelTest, HksChangeStorageLevelTest022, TestSize.Level0)
+{
+    HKS_LOG_I("Enter HksChangeStorageLevelTest022");
+
+    int32_t ret;
+#ifdef HKS_INTERACT_ABILITY
+    ret = SetIdsToken();
+    EXPECT_EQ(ret, HKS_SUCCESS);
+#endif
+
+    char tmpKeyAlias[] = "HksChangeStorageLevelTest022";
+    const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksParamSet *srcParamSet = nullptr;
+    ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+
+    ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksGenerateKey failed.";
+
+    struct HksParamSet *desParamSet = nullptr;
+    ret = InitParamSet(&desParamSet, g_params002, sizeof(g_params002) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+
+    ret = HksChangeStorageLevel(&keyAlias, srcParamSet, desParamSet);
+    EXPECT_EQ(ret, HKS_ERROR_KEY_CLEAR_FAILED) << "HksChangeStorageLevel failed.";
+
+    HksFreeParamSet(&srcParamSet);
+    HksFreeParamSet(&desParamSet);
+}
 }
