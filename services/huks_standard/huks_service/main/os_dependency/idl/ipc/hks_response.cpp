@@ -50,14 +50,19 @@
 #endif // HAS_OS_ACCOUNT_PART
 
 using namespace OHOS;
-
 #ifndef HAS_OS_ACCOUNT_PART
 constexpr static int UID_TRANSFORM_DIVISOR = 200000;
-static void GetOsAccountIdFromUid(int uid, int &osAccountId)
-{
-    osAccountId = uid / UID_TRANSFORM_DIVISOR;
-}
 #endif // HAS_OS_ACCOUNT_PART
+int HksGetOsAccountIdFromUid(int uid)
+{
+#ifdef HAS_OS_ACCOUNT_PART
+    int accountId = 0;
+    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, accountId);
+    return accountId;
+#else // HAS_OS_ACCOUNT_PART
+    return uid / UID_TRANSFORM_DIVISOR;
+#endif // HAS_OS_ACCOUNT_PART
+}
 
 void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlob *response)
 {
@@ -92,16 +97,8 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
     processInfo->processName.size = sizeof(callingUid);
     processInfo->processName.data = name;
     processInfo->uidInt = callingUid;
-    int userId = 0;
-#ifdef HAS_OS_ACCOUNT_PART
-    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
-#else // HAS_OS_ACCOUNT_PART
-    GetOsAccountIdFromUid(callingUid, userId);
-#endif // HAS_OS_ACCOUNT_PART
 
-    HKS_LOG_I("Get callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC "d, sessionId = %" LOG_PUBLIC "u",
-        callingUid, userId, g_sessionId);
-
+    int userId = HksGetOsAccountIdFromUid(callingUid);
     uint32_t size;
     if (userId == 0) {
         size = strlen("0");

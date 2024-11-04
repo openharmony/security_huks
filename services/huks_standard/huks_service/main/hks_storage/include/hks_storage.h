@@ -52,7 +52,8 @@ int32_t HksStoreIsKeyBlobExist(const struct HksStoreFileInfo *fileInfo);
 int32_t HksStoreGetKeyBlob(const struct HksStoreInfo *fileInfoPath, const struct HksStoreMaterial *material,
     struct HksBlob *keyBlob);
 
-int32_t HksStoreGetKeyBlobSize(const struct HksStoreInfo *fileInfoPath, uint32_t *keyBlobSize);
+int32_t HksStoreGetKeyBlobSize(const struct HksStoreInfo *fileInfoPath, const struct HksStoreMaterial *material,
+    uint32_t *keyBlobSize);
 
 int32_t HksGetKeyCountByProcessName(const struct HksStoreFileInfo *fileInfo, uint32_t *fileCount);
 

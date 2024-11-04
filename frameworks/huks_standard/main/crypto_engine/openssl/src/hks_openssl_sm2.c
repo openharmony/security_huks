@@ -120,7 +120,7 @@ int32_t HksOpensslSm2GenerateKey(const struct HksKeySpec *spec, struct HksBlob *
 
     EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_SM2, NULL);
     if (!ctx) {
-        HKS_LOG_E("ctx NULL %s", ERR_reason_error_string(ERR_get_error()));
+        HKS_LOG_E("ctx NULL %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     int ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
@@ -128,12 +128,14 @@ int32_t HksOpensslSm2GenerateKey(const struct HksKeySpec *spec, struct HksBlob *
     do {
         int osRet = EVP_PKEY_keygen_init(ctx);
         if (osRet != HKS_OPENSSL_SUCCESS) {
-            HKS_LOG_E("EVP_PKEY_keygen_init ret = %d %s", osRet, ERR_reason_error_string(ERR_get_error()));
+            HKS_LOG_E("EVP_PKEY_keygen_init ret = %" LOG_PUBLIC "d %" LOG_PUBLIC "s",
+                osRet, ERR_reason_error_string(ERR_get_error()));
             break;
         }
         osRet = EVP_PKEY_keygen(ctx, &pkey);
         if (osRet != HKS_OPENSSL_SUCCESS) {
-            HKS_LOG_E("EVP_PKEY_keygen ret = %d %s", osRet, ERR_reason_error_string(ERR_get_error()));
+            HKS_LOG_E("EVP_PKEY_keygen ret = %" LOG_PUBLIC "d %" LOG_PUBLIC "s",
+                osRet, ERR_reason_error_string(ERR_get_error()));
             break;
         }
         ret = EvpPkeyToKeyMaterialEc(spec, pkey, key);

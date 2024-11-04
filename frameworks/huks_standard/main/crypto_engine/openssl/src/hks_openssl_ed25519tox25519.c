@@ -381,7 +381,7 @@ int32_t ConvertPrivX25519FromED25519(const struct HksBlob *keyIn, struct HksBlob
     uint32_t tmpSize = sizeof(struct KeyMaterial25519) + CURVE25519_KEY_LEN;
     uint32_t totalSize = sizeof(struct KeyMaterial25519) + CURVE25519_KEY_LEN * 2; // 2: private key and public key
     if (keyIn->size < totalSize || keyOut->size < tmpSize) {
-        HKS_LOG_E("Invalid keyInSize=%u or keyOutSize=%u", keyIn->size, keyOut->size);
+        HKS_LOG_E("Invalid keyInSize=%" LOG_PUBLIC "u or keyOutSize=%" LOG_PUBLIC "u", keyIn->size, keyOut->size);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     struct KeyMaterial25519 *keyMaterialOut = (struct KeyMaterial25519 *)keyOut->data;
