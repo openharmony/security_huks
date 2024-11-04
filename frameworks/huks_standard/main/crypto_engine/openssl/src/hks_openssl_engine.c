@@ -546,7 +546,7 @@ int32_t GetBnBinpadFromPkey(const EVP_PKEY *pkey, const char *keyName, struct Hk
         }
         out->data = HksMalloc(len);
         if (!out->data) {
-            HKS_LOG_E("HksMalloc %d failed", len);
+            HKS_LOG_E("HksMalloc %" LOG_PUBLIC "d failed", len);
             break;
         }
         osRet = BN_bn2binpad(bn, out->data, len);

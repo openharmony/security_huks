@@ -51,7 +51,7 @@ int32_t SensitivePermissionCheck(const char *permission)
         HKS_LOG_I("Check Permission success!");
         return HKS_SUCCESS;
     } else {
-        HKS_LOG_E("Check Permission failed!%" LOG_PUBLIC "s", permission);
+        HKS_LOG_E("Check Permission failed!%" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", permission, result);
         return HKS_ERROR_NO_PERMISSION;
     }
 }

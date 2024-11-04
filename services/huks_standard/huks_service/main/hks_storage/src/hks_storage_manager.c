@@ -449,11 +449,11 @@ int32_t HksManageStoreGetKeyBlobSize(const struct HksProcessInfo *processInfo, c
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks construct store file info failed, ret = %" LOG_PUBLIC "d.", ret)
 
         if (storageType != HKS_STORAGE_TYPE_BAK_KEY) {
-            ret = HksStoreGetKeyBlobSize(&fileInfo.mainPath, keyBlobSize);
+            ret = HksStoreGetKeyBlobSize(&fileInfo.mainPath, &material, keyBlobSize);
         }
 #ifdef SUPPORT_STORAGE_BACKUP
         else {
-            ret = HksStoreGetKeyBlobSize(&fileInfo.bakPath, keyBlobSize);
+            ret = HksStoreGetKeyBlobSize(&fileInfo.bakPath, &material, keyBlobSize);
         }
 #endif
 #endif

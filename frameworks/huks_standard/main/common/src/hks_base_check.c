@@ -2021,7 +2021,7 @@ static int32_t CheckOptionalParams(bool needCheck, bool isAbsent, uint32_t input
     if (needCheck) {
         if (!isAbsent) {
             if (HksCheckValue(inputValue, expectValue, expectCnt) != HKS_SUCCESS) {
-                HKS_LOG_E("CheckOptionalParams invalid argument, %d", inputValue);
+                HKS_LOG_E("CheckOptionalParams invalid argument, %" LOG_PUBLIC "u", inputValue);
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
         }
@@ -2051,7 +2051,7 @@ int32_t HksCheckOptionalParam(uint32_t tag, uint32_t alg, uint32_t purpose, bool
     if (((purpose & HKS_KEY_PURPOSE_DERIVE) != 0) || ((purpose & HKS_KEY_PURPOSE_MAC) != 0)) {
         if ((alg != HKS_ALG_AES) && (alg != HKS_ALG_DES) && (alg != HKS_ALG_3DES) &&
             (alg != HKS_ALG_HMAC) && (alg != HKS_ALG_CMAC) && (alg != HKS_ALG_SM3)) {
-            HKS_LOG_E("check mac or derive, not aes alg, alg: %u", alg);
+            HKS_LOG_E("check mac or derive, not aes alg, alg: %" LOG_PUBLIC "u", alg);
             return HKS_ERROR_INVALID_PURPOSE;
         }
         if (purpose == HKS_KEY_PURPOSE_DERIVE) {
@@ -2083,7 +2083,7 @@ int32_t HksCheckOptionalParam(uint32_t tag, uint32_t alg, uint32_t purpose, bool
                 "check param fail:0x%" LOG_PUBLIC "x failed", HKS_TAG_PADDING);
             break;
         default:
-            HKS_LOG_E("invalid tag: %d", tag);
+            HKS_LOG_E("invalid tag: %" LOG_PUBLIC "u", tag);
             ret = HKS_FAILURE;
     }
     return ret;

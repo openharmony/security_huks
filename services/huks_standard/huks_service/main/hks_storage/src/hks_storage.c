@@ -337,12 +337,16 @@ int32_t HksStoreGetKeyBlob(const struct HksStoreInfo *fileInfoPath, const struct
     return ret;
 }
 
-int32_t HksStoreGetKeyBlobSize(const struct HksStoreInfo *fileInfoPath, uint32_t *keyBlobSize)
+int32_t HksStoreGetKeyBlobSize(const struct HksStoreInfo *fileInfoPath, const struct HksStoreMaterial *material,
+    uint32_t *keyBlobSize)
 {
     int32_t ret;
     do {
         ret = GetKeyBlobSize(fileInfoPath, keyBlobSize);
-        HKS_IF_NOT_SUCC_LOGE(ret, "hks get keyblob size failed, ret = %" LOG_PUBLIC "d.", ret)
+        if (ret != HKS_SUCCESS) {
+            RecordKeyOperation(KEY_OPERATION_CHECK, material, fileInfoPath->fileName);
+            HKS_LOG_E("hks get keyblob size failed, ret = %" LOG_PUBLIC "d.", ret);
+        }
     } while (0);
 
     return ret;
