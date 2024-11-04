@@ -99,6 +99,38 @@ int32_t HksCheckBlobAndParamSet(const struct HksBlob *data, const struct HksPara
     return HksCheckParamSetValidity(paramSet);
 }
 
+int32_t HksCheckBlobAndParamSet2(const struct HksBlob *data, const struct HksParamSet *paramSet1,
+    const struct HksParamSet *paramSet2)
+{
+    int32_t ret = CheckBlob(data);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    ret = HksCheckParamSetValidity(paramSet1);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    ret = HksCheckParamSetValidity(paramSet2);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksCheckBlob2AndParamSet2(const struct HksBlob *data1, const struct HksBlob *data2,
+    const struct HksParamSet *paramSet1, const struct HksParamSet *paramSet2)
+{
+    int32_t ret = CheckBlob(data1);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    ret = CheckBlob(data2);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    ret = HksCheckParamSetValidity(paramSet1);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    ret = HksCheckParamSetValidity(paramSet2);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    return HKS_SUCCESS;
+}
+
 int32_t HksGetDigestLen(uint32_t digest, uint32_t *digestLen)
 {
     switch (digest) {
