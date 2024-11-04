@@ -86,6 +86,9 @@ if (os_level == "standard") {
       deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static" ]
     }
 
+    cflags = [
+      "-DHUKS_CHANGE_STORAGE_LEVEL_CONFIG=${huks_change_storage_level_config}",
+    ]
     complete_static_lib = true
 
     branch_protector_ret = "pac_ret"

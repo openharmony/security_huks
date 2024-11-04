@@ -148,6 +148,7 @@ static uint32_t g_validTags[] = {
     HKS_TAG_OWNER_ID,
     HKS_TAG_OWNER_TYPE,
     HKS_TAG_AGREE_PUBKEY_TYPE,
+    HKS_TAG_IS_CHANGE_STORAGE_LEVEL,
 };
 
 HKS_API_EXPORT enum HksTagType GetTagType(enum HksTag tag)

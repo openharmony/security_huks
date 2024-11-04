@@ -368,6 +368,16 @@ HKS_API_EXPORT int32_t HksListAliases(const struct HksParamSet *paramSet, struct
 HKS_API_EXPORT int32_t HksRenameKeyAlias(const struct HksBlob *oldKeyAlias, const struct HksParamSet *paramSet,
     const struct HksBlob *newKeyAlias);
 
+/**
+ * @brief Change key storage level
+ * @param keyAlias key alias
+ * @param srcParamSet required source parameter set
+ * @param destParamSet required destination parameter set
+ * @return error code, see hks_type.h
+ */
+HKS_API_EXPORT int32_t HksChangeStorageLevel(const struct HksBlob *keyAlias, const struct HksParamSet *srcParamSet,
+    const struct HksParamSet *destParamSet);
+
 #ifdef __cplusplus
 }
 #endif

@@ -594,7 +594,7 @@ int32_t HksRenameKeyAliasUnpack(const struct HksBlob *srcData, struct HksBlob *o
     do {
         ret = GetBlobFromBuffer(oldKeyAlias, srcData, &offset);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get oldKeyAlias failed!");
-        
+
         ret = GetBlobFromBuffer(newKeyAlias, srcData, &offset);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get newKeyAlias failed!");
 
@@ -602,4 +602,20 @@ int32_t HksRenameKeyAliasUnpack(const struct HksBlob *srcData, struct HksBlob *o
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get paramSet failed!");
     } while (0);
     return ret;
+}
+
+int32_t HksChangeStorageLevelUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
+    struct HksParamSet **srcParamSet, struct HksParamSet **destParamSet)
+{
+    uint32_t offset = 0;
+    int32_t ret = GetBlobFromBuffer(keyAlias, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyAlias failed")
+
+    ret = GetParamSetFromBuffer(srcParamSet, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get srcParamSet failed")
+
+    ret = GetParamSetFromBuffer(destParamSet, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get destParamSet failed")
+
+    return HKS_SUCCESS;
 }
