@@ -772,3 +772,16 @@ HKS_API_EXPORT int32_t HksRenameKeyAlias(const struct HksBlob *oldKeyAlias, cons
     HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 }
+
+HKS_API_EXPORT int32_t HksChangeStorageLevel(const struct HksBlob *keyAlias, const struct HksParamSet *srcParamSet,
+    const struct HksParamSet *destParamSet)
+{
+    HKS_LOG_D("enter %" LOG_PUBLIC "s", __func__);
+    if (keyAlias == NULL || srcParamSet == NULL || destParamSet == NULL) {
+        HKS_LOG_E("the pointer param entered is invalid");
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientChangeStorageLevel(keyAlias, srcParamSet, destParamSet);
+    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    return ret;
+}

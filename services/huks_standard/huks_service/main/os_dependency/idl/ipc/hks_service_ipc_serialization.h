@@ -80,6 +80,9 @@ int32_t HksListAliasesPackFromService(const struct HksKeyAliasSet *aliasSet, str
 int32_t HksRenameKeyAliasUnpack(const struct HksBlob *srcData, struct HksBlob *oldKeyAlias,
     struct HksBlob *newKeyAlias, struct HksParamSet **paramSet);
 
+int32_t HksChangeStorageLevelUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
+    struct HksParamSet **srcParamSet, struct HksParamSet **destParamSet);
+
 #ifdef __cplusplus
 }
 #endif

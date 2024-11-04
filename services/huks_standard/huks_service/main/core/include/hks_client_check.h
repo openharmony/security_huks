@@ -81,6 +81,11 @@ int32_t HksCheckOldKeyExist(const struct HksProcessInfo *processInfo, const stru
 int32_t HksCheckNewKeyNotExist(const struct HksProcessInfo *processInfo, const struct HksBlob *newKeyAlias,
     const struct HksParamSet *paramSet);
 
+int32_t HksCheckProcessInConfigList(const struct HksBlob *processName);
+
+int32_t HksCheckChangeStorageLevelParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
+    const struct HksParamSet *srcParamSet, const struct HksParamSet *destParamSet);
+
 #ifdef __cplusplus
 }
 #endif
