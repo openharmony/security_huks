@@ -137,6 +137,10 @@ config("soft_huks_config") {
   cflags += [ "-flto" ]
 
   cflags += [ "-D_DEFAULT_SOURCE" ]
+
+  cflags += [
+    "-DHUKS_CHANGE_STORAGE_LEVEL_CONFIG=${huks_change_storage_level_config}",
+  ]
 }
 config("hilog_dir") {
   include_dirs = []

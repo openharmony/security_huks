@@ -93,6 +93,9 @@ int32_t HksClientListAliases(const struct HksParamSet *paramSet, struct HksKeyAl
 int32_t HksClientRenameKeyAlias(const struct HksBlob *oldKeyAlias, const struct HksParamSet *paramSet,
     const struct HksBlob *newKeyAlias);
 
+int32_t HksClientChangeStorageLevel(const struct HksBlob *keyAlias, const struct HksParamSet *srcParamSet,
+    const struct HksParamSet *destParamSet);
+
 #ifdef __cplusplus
 }
 #endif
