@@ -271,7 +271,11 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
     uint64_t enterTime = 0;
     (void)HksElapsedRealTime(&enterTime);
     g_sessionId++;
-    HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "d, sessionId = %" LOG_PUBLIC "u", code, g_sessionId);
+    auto callingUid = IPCSkeleton::GetCallingUid();
+    int userId = HksGetOsAccountIdFromUid(callingUid);
+
+    HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "u,  callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC
+        "d, sessionId = %" LOG_PUBLIC "u", code, callingUid, userId, g_sessionId);
 
     // judge whether is upgrading, wait for upgrade finished
     if (HksWaitIfPowerOnUpgrading() != HKS_SUCCESS) {

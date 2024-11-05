@@ -99,7 +99,7 @@ HKS_API_EXPORT int32_t HksRefreshKeyInfo(void)
 #ifndef _CUT_AUTHENTICATE_
     HKS_LOG_D("enter refresh key info");
     int32_t ret = HksClientRefreshKeyInfo();
-    HKS_LOG_D("leave refresh key info, result = %" LOG_PUBLIC "d", ret);
+    HKS_LOG_I("leave refresh key info, result = %" LOG_PUBLIC "d", ret);
     return ret;
 #else
     return HKS_ERROR_API_NOT_SUPPORTED;
@@ -118,7 +118,7 @@ HKS_API_EXPORT int32_t HksGenerateKey(const struct HksBlob *keyAlias,
             return HKS_ERROR_NULL_POINTER;
         }
         ret = HksLocalGenerateKey(paramSetIn, paramSetOut);
-        HKS_LOG_D("leave generate temp key, result = %" LOG_PUBLIC "d", ret);
+        HKS_LOG_I("leave generate temp key, result = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -127,7 +127,7 @@ HKS_API_EXPORT int32_t HksGenerateKey(const struct HksBlob *keyAlias,
         return HKS_ERROR_NULL_POINTER;
     }
     ret = HksClientGenerateKey(keyAlias, paramSetIn, paramSetOut);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 #else
     (void)keyAlias;
@@ -146,7 +146,7 @@ HKS_API_EXPORT int32_t HksImportKey(const struct HksBlob *keyAlias,
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = HksImportKeyAdapter(keyAlias, paramSet, key);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 #else
     (void)keyAlias;
@@ -165,7 +165,7 @@ HKS_API_EXPORT int32_t HksImportWrappedKey(const struct HksBlob *keyAlias, const
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = HksClientImportWrappedKey(keyAlias, wrappingKeyAlias, paramSet, wrappedKeyData);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 #else
     (void)keyAlias;
@@ -185,7 +185,7 @@ HKS_API_EXPORT int32_t HksExportPublicKey(const struct HksBlob *keyAlias,
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = HksExportPublicKeyAdapter(keyAlias, paramSet, key);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 #else
     (void)keyAlias;
@@ -201,7 +201,7 @@ HKS_API_EXPORT int32_t HksDeleteKey(const struct HksBlob *keyAlias, const struct
     HKS_LOG_D("enter %" LOG_PUBLIC "s", __func__);
     HKS_IF_NULL_RETURN(keyAlias, HKS_ERROR_NULL_POINTER)
     int32_t ret = HksClientDeleteKey(keyAlias, paramSet);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 #else
     (void)keyAlias;
@@ -219,7 +219,7 @@ HKS_API_EXPORT int32_t HksGetKeyParamSet(const struct HksBlob *keyAlias,
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = HksClientGetKeyParamSet(keyAlias, paramSetIn, paramSetOut);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 #else
     (void)keyAlias;
@@ -235,7 +235,7 @@ HKS_API_EXPORT int32_t HksKeyExist(const struct HksBlob *keyAlias, const struct 
     HKS_LOG_D("enter %" LOG_PUBLIC "s", __func__);
     HKS_IF_NULL_RETURN(keyAlias, HKS_ERROR_NULL_POINTER)
     int32_t ret = HksClientKeyExist(keyAlias, paramSet);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 #else
     (void)keyAlias;
@@ -250,7 +250,7 @@ HKS_API_EXPORT int32_t HksGenerateRandom(const struct HksParamSet *paramSet, str
     HKS_LOG_D("enter %" LOG_PUBLIC "s", __func__);
     HKS_IF_NULL_RETURN(random, HKS_ERROR_NULL_POINTER)
     int32_t ret = HksClientGenerateRandom(random, paramSet);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 #else
     (void)paramSet;
@@ -275,7 +275,7 @@ HKS_API_EXPORT int32_t HksSign(const struct HksBlob *key, const struct HksParamS
     }
 
     ret = HksClientSign(key, paramSet, srcData, signature);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 #else
     (void)key;
@@ -299,11 +299,11 @@ HKS_API_EXPORT int32_t HksVerify(const struct HksBlob *key, const struct HksPara
     int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_KEY_ALIAS, &isKeyAlias);
     if ((ret == HKS_SUCCESS) && (!isKeyAlias->boolParam)) {
         ret = HksLocalVerify(key, paramSet, srcData, signature);
-        HKS_LOG_D("leave verify with plain key, result = %" LOG_PUBLIC "d", ret);
+        HKS_LOG_I("leave verify with plain key, result = %" LOG_PUBLIC "d", ret);
         return ret;
     }
     ret = HksClientVerify(key, paramSet, srcData, signature);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 #else
     (void)key;
@@ -327,12 +327,12 @@ HKS_API_EXPORT int32_t HksEncrypt(const struct HksBlob *key, const struct HksPar
     int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_KEY_ALIAS, &isKeyAlias);
     if ((ret == HKS_SUCCESS) && (!isKeyAlias->boolParam)) {
         ret = HksLocalEncrypt(key, paramSet, plainText, cipherText);
-        HKS_LOG_D("leave encrypt with plain key, result = %" LOG_PUBLIC "d", ret);
+        HKS_LOG_I("leave encrypt with plain key, result = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 #ifndef _CUT_AUTHENTICATE_
     ret = HksClientEncrypt(key, paramSet, plainText, cipherText);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 #else
     return HKS_ERROR_NOT_SUPPORTED;
@@ -359,12 +359,12 @@ HKS_API_EXPORT int32_t HksDecrypt(const struct HksBlob *key, const struct HksPar
     int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_KEY_ALIAS, &isKeyAlias);
     if ((ret == HKS_SUCCESS) && (!isKeyAlias->boolParam)) {
         ret = HksLocalDecrypt(key, paramSet, cipherText, plainText);
-        HKS_LOG_D("leave decrypt with plain key, result = %" LOG_PUBLIC "d", ret);
+        HKS_LOG_I("leave decrypt with plain key, result = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 #ifndef _CUT_AUTHENTICATE_
     ret = HksClientDecrypt(key, paramSet, cipherText, plainText);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 #else
     return HKS_ERROR_NOT_SUPPORTED;
@@ -391,12 +391,12 @@ HKS_API_EXPORT int32_t HksAgreeKey(const struct HksParamSet *paramSet, const str
     int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_KEY_ALIAS, &isKeyAlias);
     if ((ret == HKS_SUCCESS) && (!isKeyAlias->boolParam)) {
         ret = HksLocalAgreeKey(paramSet, privateKey, peerPublicKey, agreedKey);
-        HKS_LOG_D("leave agree key with plain key, result = %" LOG_PUBLIC "d", ret);
+        HKS_LOG_I("leave agree key with plain key, result = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
     ret = HksAgreeKeyAdapter(paramSet, privateKey, peerPublicKey, agreedKey);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 #else
     (void)paramSet;
@@ -420,12 +420,12 @@ HKS_API_EXPORT int32_t HksDeriveKey(const struct HksParamSet *paramSet, const st
     int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_KEY_ALIAS, &isKeyAlias);
     if ((ret == HKS_SUCCESS) && (!isKeyAlias->boolParam)) {
         ret = HksLocalDeriveKey(paramSet, mainKey, derivedKey);
-        HKS_LOG_D("leave derive key with plain key, result = %" LOG_PUBLIC "d", ret);
+        HKS_LOG_I("leave derive key with plain key, result = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 #ifndef _CUT_AUTHENTICATE_
     ret = HksClientDeriveKey(paramSet, mainKey, derivedKey);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 #else
     return HKS_ERROR_NOT_SUPPORTED;
@@ -451,12 +451,12 @@ HKS_API_EXPORT int32_t HksMac(const struct HksBlob *key, const struct HksParamSe
     int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_KEY_ALIAS, &isKeyAlias);
     if ((ret == HKS_SUCCESS) && (!isKeyAlias->boolParam)) {
         ret = HksLocalMac(key, paramSet, srcData, mac);
-        HKS_LOG_D("leave mac with plain key, result = %" LOG_PUBLIC "d", ret);
+        HKS_LOG_I("leave mac with plain key, result = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 #ifndef _CUT_AUTHENTICATE_
     ret = HksClientMac(key, paramSet, srcData, mac);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 #else
     return HKS_ERROR_NOT_SUPPORTED;
@@ -479,7 +479,7 @@ HKS_API_EXPORT int32_t HksHash(const struct HksParamSet *paramSet,
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = HksLocalHash(paramSet, srcData, hash);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 #else
     (void)paramSet;
@@ -498,7 +498,7 @@ HKS_API_EXPORT int32_t HksGetKeyInfoList(const struct HksParamSet *paramSet,
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = HksClientGetKeyInfoList(paramSet, keyInfoList, listCount);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 #else
     (void)paramSet;
@@ -566,7 +566,7 @@ HKS_API_EXPORT int32_t HksAttestKey(const struct HksBlob *keyAlias, const struct
 
     ret = HksClientAttestKey(keyAlias, newParamSet, certChain, false);
     HksFreeParamSet(&newParamSet);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 #else
     (void)keyAlias;
@@ -593,7 +593,7 @@ HKS_API_EXPORT int32_t HksAnonAttestKey(const struct HksBlob *keyAlias, const st
 
     ret = HksClientAttestKey(keyAlias, newParamSet, certChain, true);
     HksFreeParamSet(&newParamSet);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 #else
     (void)keyAlias;
@@ -642,7 +642,7 @@ HKS_API_EXPORT int32_t HksBnExpMod(struct HksBlob *x, const struct HksBlob *a,
     }
 
     int32_t ret = HksLocalBnExpMod(x, a, e, n);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 #else
     (void)x;
@@ -671,7 +671,7 @@ HKS_API_EXPORT int32_t HksValidateCertChain(const struct HksCertChain *certChain
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = HksClientValidateCertChain(certChain, paramSetOut);
-    HKS_LOG_D("leave validate cert chain, result = %" LOG_PUBLIC "d", ret);
+    HKS_LOG_I("leave validate cert chain, result = %" LOG_PUBLIC "d", ret);
     return ret;
 #else
     (void)certChain;
@@ -690,7 +690,7 @@ HKS_API_EXPORT int32_t HksInit(const struct HksBlob *keyAlias, const struct HksP
     }
 
     int32_t ret = HksClientInit(keyAlias, paramSet, handle, token);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 }
 
@@ -704,7 +704,7 @@ HKS_API_EXPORT int32_t HksUpdate(const struct HksBlob *handle, const struct HksP
     }
 
     int32_t ret = HksClientUpdate(handle, paramSet, inData, outData);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 }
 
@@ -718,7 +718,7 @@ HKS_API_EXPORT int32_t HksFinish(const struct HksBlob *handle, const struct HksP
     }
 
     int32_t ret = HksClientFinish(handle, paramSet, inData, outData);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 }
 
@@ -731,7 +731,7 @@ HKS_API_EXPORT int32_t HksAbort(const struct HksBlob *handle, const struct HksPa
     }
 
     int32_t ret = HksClientAbort(handle, paramSet);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 }
 
@@ -742,7 +742,7 @@ HKS_API_EXPORT int32_t HksListAliases(const struct HksParamSet *paramSet, struct
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = HksClientListAliases(paramSet, outData);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 }
 
@@ -754,7 +754,7 @@ HKS_API_EXPORT int32_t HksRenameKeyAlias(const struct HksBlob *oldKeyAlias, cons
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = HksClientRenameKeyAlias(oldKeyAlias, paramSet, newKeyAlias);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 }
 
@@ -767,6 +767,6 @@ HKS_API_EXPORT int32_t HksChangeStorageLevel(const struct HksBlob *keyAlias, con
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = HksClientChangeStorageLevel(keyAlias, srcParamSet, destParamSet);
-    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 }

@@ -224,7 +224,7 @@ void HksIpcServiceDeleteKey(const struct HksBlob *srcData, const uint8_t *contex
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksServiceDeleteKey(&processInfo, &keyAlias, paramSet);
-        HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceDeleteKey fail")
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceDeleteKey fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     HksSendResponse(context, ret, NULL);
@@ -358,7 +358,7 @@ void HksIpcServiceSign(const struct HksBlob *srcData, const uint8_t *context)
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksServiceSign(&processInfo, &keyAlias, inParamSet, &unsignedData, &signature);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceSign fail")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceSign fail, ret = %" LOG_PUBLIC "d", ret)
 
         HksSendResponse(context, ret, &signature);
     } while (0);
@@ -392,7 +392,7 @@ void HksIpcServiceVerify(const struct HksBlob *srcData, const uint8_t *context)
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksServiceVerify(&processInfo, &keyAlias, inParamSet, &unsignedData, &signature);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceVerify fail")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceVerify fail ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     HksSendResponse(context, ret, NULL);
@@ -421,7 +421,7 @@ void HksIpcServiceEncrypt(const struct HksBlob *srcData, const uint8_t *context)
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksServiceEncrypt(&processInfo, &keyAlias, inParamSet, &plainText, &cipherText);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceEncrypt fail")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceEncrypt fail, ret = %" LOG_PUBLIC "d", ret)
 
         HksSendResponse(context, ret, &cipherText);
     } while (0);
@@ -455,7 +455,7 @@ void HksIpcServiceDecrypt(const struct HksBlob *srcData, const uint8_t *context)
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksServiceDecrypt(&processInfo, &keyAlias, inParamSet, &cipherText, &plainText);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceDecrypt fail")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceDecrypt fail, ret = %" LOG_PUBLIC "d", ret)
 
         HksSendResponse(context, ret, &plainText);
     } while (0);
@@ -928,7 +928,7 @@ void HksIpcServiceListAliases(const struct HksBlob *srcData, const uint8_t *cont
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceListAliases fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksListAliasesPackFromService(keyAliasSet, &outBlob);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksListAliasesPackFromService fail")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksListAliasesPackFromService fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     // query success and key size is not 0
@@ -962,7 +962,7 @@ void HksIpcServiceRenameKeyAlias(const struct HksBlob *srcData, const uint8_t *c
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksServiceRenameKeyAlias(&processInfo, &oldKeyAlias, paramSet, &newKeyAlias);
-        HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceRenameKeyAliasy fail")
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceRenameKeyAliasy fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     HksSendResponse(context, ret, NULL);

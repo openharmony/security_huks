@@ -270,7 +270,7 @@ static int32_t CopyDeToTmpPathIfNeed(void)
     }
     int32_t ret = rename(HKS_KEY_STORE_PATH, HKS_KEY_STORE_TMP_PATH);
     if (ret != 0) {
-        HKS_LOG_E("move de file path to old file path failed, error code is %" LOG_PUBLIC "d.", errno);
+        HKS_LOG_ERRNO("move de file path to old file path failed, ret =",  HKS_ERROR_MAKE_DIR_FAIL);
         return HKS_ERROR_MAKE_DIR_FAIL;
     }
     ret = HksMakeDir(HKS_KEY_STORE_PATH);

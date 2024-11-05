@@ -199,7 +199,7 @@ static int32_t HksCoreInitProcess(const struct HuksKeyNode *keyNode, const struc
     }
 
     if (ret != HKS_SUCCESS || i == size) {
-        HKS_LOG_E("CoreInit failed, pur : %u, ret : %d", pur, ret);
+        HKS_LOG_E("CoreInit failed, pur : %" LOG_PUBLIC "u, ret : %" LOG_PUBLIC "d", pur, ret);
         ret = ((i == size) ? HKS_ERROR_INVALID_ARGUMENT : ret);
     }
     return ret;

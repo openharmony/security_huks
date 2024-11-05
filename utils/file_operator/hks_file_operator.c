@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <sys/stat.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "hks_log.h"
@@ -93,6 +94,9 @@ static int32_t IsValidPath(const char *path)
 static int32_t IsFileExist(const char *fileName)
 {
     if (access(fileName, F_OK) != 0) {
+        if (errno != ENOENT) {
+            HKS_LOG_ERRNO("Check IsFileExist fail!", HKS_ERROR_OPEN_FILE_FAIL);
+        }
         return HKS_ERROR_NOT_EXIST;
     }
 
@@ -121,9 +125,19 @@ static int32_t FileRead(const char *fileName, uint32_t offset, struct HksBlob *b
             HKS_LOG_E("Check Permission failed!");
             return HKS_ERROR_NO_PERMISSION;
         }
-        HKS_LOG_E("open file fail, errno = 0x%" LOG_PUBLIC "x", errno);
+        HKS_LOG_ERRNO("open file fail,", HKS_ERROR_OPEN_FILE_FAIL);
         return HKS_ERROR_OPEN_FILE_FAIL;
     }
+
+    // Print file time info
+    struct stat fileStat;
+    (void)memset_s(&fileStat, sizeof(fileStat), 0, sizeof(fileStat));
+    if (stat(fileName, &fileStat) != 0) {
+        HKS_LOG_ERRNO("file stat fail,", HKS_ERROR_OPEN_FILE_FAIL);
+        return HKS_ERROR_OPEN_FILE_FAIL;
+    }
+    HKS_LOG_I("File ctime: %" LOG_PUBLIC "s, mtime: %" LOG_PUBLIC "s",
+        ctime(&fileStat.st_ctime), ctime(&fileStat.st_mtime));
 
     uint32_t len = fread(blob->data, 1, blob->size, fp);
     if (fclose(fp) < 0) {
@@ -141,7 +155,7 @@ static uint32_t FileSize(const char *fileName)
     struct stat fileStat;
     (void)memset_s(&fileStat, sizeof(fileStat), 0, sizeof(fileStat));
     if (stat(fileName, &fileStat) != 0) {
-        HKS_LOG_E("file stat fail, errno = 0x%" LOG_PUBLIC "x", errno);
+        HKS_LOG_ERRNO("file stat fail,", HKS_ERROR_OPEN_FILE_FAIL);
         return 0;
     }
 
@@ -228,6 +242,7 @@ static int32_t FileRemove(const char *fileName)
 
     struct stat tmp;
     if (stat(fileName, &tmp) != 0) {
+        HKS_LOG_ERRNO("file stat fail,", HKS_ERROR_OPEN_FILE_FAIL);
         return HKS_ERROR_INTERNAL_ERROR;
     }
 
@@ -236,7 +251,7 @@ static int32_t FileRemove(const char *fileName)
     }
 
     if ((unlink(fileName) != 0) && (errno != ENOENT)) {
-        HKS_LOG_E("failed to remove file: errno = 0x%" LOG_PUBLIC "x", errno);
+        HKS_LOG_ERRNO("unlink fail,", HKS_ERROR_REMOVE_FILE_FAIL);
         return HKS_ERROR_REMOVE_FILE_FAIL;
     }
 
@@ -299,6 +314,7 @@ int32_t HksMakeDir(const char *path)
             case EEXIST:
                 return HKS_ERROR_ALREADY_EXISTS;
             default:
+                HKS_LOG_ERRNO("mkdir fail, ret = ", HKS_ERROR_MAKE_DIR_FAIL);
                 return HKS_ERROR_MAKE_DIR_FAIL;
         }
     }
@@ -347,7 +363,7 @@ int32_t HksRemoveDir(const char *dirPath)
     struct stat fileStat;
     int32_t ret = stat(dirPath, &fileStat);
     if (ret != 0) {
-        HKS_LOG_E("file stat failed");
+        HKS_LOG_ERRNO("file stat failed", HKS_ERROR_OPEN_FILE_FAIL);
         return HKS_FAILURE;
     }
 
