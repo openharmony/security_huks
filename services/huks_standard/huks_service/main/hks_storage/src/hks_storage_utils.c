@@ -329,6 +329,11 @@ int32_t RecordKeyOperation(uint32_t operation, const struct HksStoreMaterial *ma
                 "storage level: %" LOG_PUBLIC "u, key alias: %" LOG_PUBLIC "s",
                 material->userIdPath, material->uidPath, material->pathType, anonymousKeyAlias);
             break;
+        case KEY_OPERATION_CHECK:
+            HKS_LOG_I("check key, storage userid: %" LOG_PUBLIC "s, uid: %" LOG_PUBLIC "s, "
+                "storage level: %" LOG_PUBLIC "u, key alias: %" LOG_PUBLIC "s",
+                material->userIdPath, material->uidPath, material->pathType, anonymousKeyAlias);
+            break;
         default:
             ret = HKS_ERROR_INVALID_ARGUMENT;
     }

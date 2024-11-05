@@ -1193,7 +1193,9 @@ int32_t HksServiceDeleteKey(const struct HksProcessInfo *processInfo, const stru
 #endif
 
 #ifdef L2_STANDARD
-    HksReport(__func__, processInfo, NULL, ret);
+    if (ret != HKS_ERROR_NOT_EXIST) {
+        HksReport(__func__, processInfo, NULL, ret);
+    }
 #endif
 
     return ret;
@@ -1229,7 +1231,9 @@ int32_t HksServiceKeyExist(const struct HksProcessInfo *processInfo, const struc
 #endif
 
 #ifdef L2_STANDARD
-    HksReport(__func__, processInfo, NULL, ret);
+    if (ret != HKS_ERROR_NOT_EXIST) {
+        HksReport(__func__, processInfo, NULL, ret);
+    }
 #endif
 
     return ret;

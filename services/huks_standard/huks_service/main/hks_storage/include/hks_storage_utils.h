@@ -87,6 +87,7 @@ enum KeyOperation {
     KEY_OPERATION_SAVE = 0,
     KEY_OPERATION_GET = 1,
     KEY_OPERATION_DELETE = 2,
+    KEY_OPERATION_CHECK = 3,
 };
 
 int32_t ConstructPlainName(const struct HksBlob *blob, char *targetName, uint32_t nameLen);
