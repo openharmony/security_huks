@@ -60,6 +60,9 @@ int32_t HksCheckIpcListAliases(const struct HksParamSet *paramSet);
 int32_t HksCheckIpcRenameKeyAlias(const struct HksBlob *oldKeyAlias, const struct HksParamSet *paramSet,
     const struct HksBlob *newKeyAlias);
 
+int32_t HksCheckIpcChangeStorageLevel(const struct HksBlob *keyAlias, const struct HksParamSet *srcParamSet,
+    const struct HksParamSet *destParamSet);
+
 #ifdef __cplusplus
 }
 #endif

@@ -282,3 +282,22 @@ int32_t HksCheckIpcRenameKeyAlias(const struct HksBlob *oldKeyAlias, const struc
     }
     return HKS_SUCCESS;
 }
+
+int32_t HksCheckIpcChangeStorageLevel(const struct HksBlob *keyAlias, const struct HksParamSet *srcParamSet,
+    const struct HksParamSet *destParamSet)
+{
+    int32_t ret = HksCheckBlobAndParamSet2(keyAlias, srcParamSet, destParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check keyAlias or paramSet failed")
+
+    if (keyAlias->size > MAX_PROCESS_SIZE) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    if ((sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + ALIGN_SIZE(srcParamSet->paramSetSize) +
+        ALIGN_SIZE(destParamSet->paramSetSize)) > MAX_PROCESS_SIZE) {
+        HKS_LOG_E("ipc change storage level check size failed");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    return HKS_SUCCESS;
+}
