@@ -71,6 +71,8 @@ void HksIpcServiceListAliases(const struct HksBlob *srcData, const uint8_t *cont
 
 void HksIpcServiceRenameKeyAlias(const struct HksBlob *srcData, const uint8_t *context);
 
+void HksIpcChangeStorageLevel(const struct HksBlob *srcData, const uint8_t *context);
+
 #ifdef __cplusplus
 }
 #endif

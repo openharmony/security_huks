@@ -117,6 +117,9 @@ int32_t HksServiceListAliases(const struct HksProcessInfo *processInfo, const st
 int32_t HksServiceRenameKeyAlias(const struct HksProcessInfo *processInfo, const struct HksBlob *oldKeyAlias,
     const struct HksParamSet *paramSet, const struct HksBlob *newKeyAlias);
 
+int32_t HksServiceChangeStorageLevel(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *srcParamSet, const struct HksParamSet *destParamSet);
+
 #ifdef __cplusplus
 }
 #endif
