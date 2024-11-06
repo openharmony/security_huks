@@ -91,7 +91,7 @@ namespace Security {
 namespace Hks {
 std::shared_ptr<SystemEventSubscriber> SystemEventObserver::systemEventSubscriber_ = nullptr;
 std::shared_ptr<SystemEventSubscriber> SystemEventObserver::backUpEventSubscriber_ = nullptr;
-const static std::string RESTORE_EVENT_NAME = "COMMON_EVENT_RESTORE_START";
+const static std::string RESTORE_EVENT_NAME = "usual.event.RESTORE_START";
 const int32_t BACKUP_UID = 1089;
 
 void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData &data)
