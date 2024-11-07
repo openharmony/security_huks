@@ -70,6 +70,7 @@ ohos_unittest("huks_UT_test") {
     "src/hks_rename_part1_test.cpp",
 
     # "src/hks_rename_part2_test.cpp",
+    # "src/hks_rename_part3_test.cpp",
     "src/hks_three_stage_test_common.c",
     "src/hks_x25519_agree_test.cpp",
     "src/symmetric_alg_test/hks_aes_cipher_ccm_test.cpp",
