@@ -29,7 +29,8 @@ namespace Hks {
 
 int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
 {
-    if (data == nullptr || size < sizeof(uint32_t)) {
+    (void)size;
+    if (data == nullptr) {
         return -1;
     }
 
