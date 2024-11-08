@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "hks_type_enum.h"
 #ifndef _CUT_AUTHENTICATE_
 
 #ifdef HKS_CONFIG_FILE
@@ -877,7 +878,8 @@ int32_t HksListAliasesByProcessName(const struct HksStoreFileInfo *fileInfo, str
 #endif
 
 int32_t HksStoreRenameKeyAlias(const struct HksStoreFileInfo *oldFileInfo,
-    const struct HksStoreFileInfo *newFileInfo, const struct HksStoreMaterial *oldMaterial, bool isCopy)
+    const struct HksStoreFileInfo *newFileInfo, const struct HksStoreMaterial *oldMaterial,
+    const struct HksStoreMaterial *newMaterial, bool isCopy)
 {
     int32_t ret;
     do {
@@ -887,11 +889,27 @@ int32_t HksStoreRenameKeyAlias(const struct HksStoreFileInfo *oldFileInfo,
 #ifdef SUPPORT_STORAGE_BACKUP
         ret = CopyKeyBlobFromSrc(oldFileInfo->bakPath.path, oldFileInfo->bakPath.fileName,
             newFileInfo->bakPath.path, newFileInfo->bakPath.fileName);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks copy old key blob failed, ret = %" LOG_PUBLIC "d.", ret)
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_I("Copy the old backup key failed, try to copy the new main key");
+            ret = CopyKeyBlobFromSrc(newFileInfo->mainPath.path, newFileInfo->mainPath.fileName,
+                newFileInfo->bakPath.path, newFileInfo->bakPath.fileName);
+            if (ret != HKS_SUCCESS) {
+                HKS_LOG_E("rename back key failed, try to delet the new main key. ret = %" LOG_PUBLIC "d.", ret);
+                ret = HksStoreDeleteKeyBlob(newFileInfo, newMaterial);
+                HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "delet the new key failed, ret = %" LOG_PUBLIC "d.", ret)
+                ret = HKS_ERROR_CORRUPT_FILE;
+                break;
+            }
+        }
 #endif
         if (!isCopy) {
             ret = HksStoreDeleteKeyBlob(oldFileInfo, oldMaterial);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks delete key blob failed, ret = %" LOG_PUBLIC "d.", ret)
+            if (ret != HKS_SUCCESS) {
+                HKS_LOG_I("Delete the old key failed, need to delete the new key");
+                ret = HksStoreDeleteKeyBlob(newFileInfo, newMaterial);
+                HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks delete new key blob failed, ret = %" LOG_PUBLIC "d.", ret)
+                ret = HKS_ERROR_REMOVE_FILE_FAIL;
+            }
         }
     } while (0);
     return ret;
