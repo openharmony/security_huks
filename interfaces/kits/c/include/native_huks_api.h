@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef NATIVE_HUKS_API_H
-#define NATIVE_HUKS_API_H
-
 /**
  * @addtogroup HuksKeyApi
  * @{
@@ -39,6 +36,9 @@
  * @since 9
  * @version 1.0
  */
+
+#ifndef NATIVE_HUKS_API_H
+#define NATIVE_HUKS_API_H
 
 #include "native_huks_type.h"
 
@@ -287,7 +287,7 @@ struct OH_Huks_Result OH_Huks_AnonAttestKeyItem(const struct OH_Huks_Blob *keyAl
  * @param handle Indicates the pointer to the handle of the key session obtained.
  *    This handle is required for subsequent operations, including {@link OH_Huks_UpdateSession},
  * {@link OH_Huks_FinishSession}, and {@link OH_Huks_AbortSession}.
- * @param challenge Indicates the pointer to the challenge value obtained.
+ * @param token Pointer to the token used for key access control.
  * @return {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} 0 - If the operation is successful.
  *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 401 - If keyAlias or paramSet or handle or
  *         token is invalid.
