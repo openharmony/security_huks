@@ -134,6 +134,10 @@ static int32_t FileRead(const char *fileName, uint32_t offset, struct HksBlob *b
     (void)memset_s(&fileStat, sizeof(fileStat), 0, sizeof(fileStat));
     if (stat(fileName, &fileStat) != 0) {
         HKS_LOG_ERRNO("file stat fail,", HKS_ERROR_OPEN_FILE_FAIL);
+        if (fclose(fp) < 0) {
+            HKS_LOG_E("failed to close file, errno = 0x%" LOG_PUBLIC "x", errno);
+            return HKS_ERROR_OPEN_FILE_FAIL;
+        }
         return HKS_ERROR_OPEN_FILE_FAIL;
     }
     HKS_LOG_I("File ctime: %" LOG_PUBLIC "s, mtime: %" LOG_PUBLIC "s",
