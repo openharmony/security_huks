@@ -30,9 +30,7 @@ namespace Hks {
 int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
 {
     (void)size;
-    if (data == nullptr) {
-        return -1;
-    }
+    (void)data;
 
     [[maybe_unused]] int ret = HksInitialize();
 
