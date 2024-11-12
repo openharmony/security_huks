@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef NATIVE_HUKS_PARAM_H
-#define NATIVE_HUKS_PARAM_H
-
 /**
  * @addtogroup HuksParamSetApi
  * @{
@@ -41,6 +38,9 @@
  * @since 9
  * @version 1.0
  */
+
+#ifndef NATIVE_HUKS_PARAM_H
+#define NATIVE_HUKS_PARAM_H
 
 #include "native_huks_type.h"
 
