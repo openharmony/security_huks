@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef NATIVE_OH_HUKS_TYPE_H
-#define NATIVE_OH_HUKS_TYPE_H
-
 /**
  * @addtogroup HuksTypeApi
  * @{
@@ -37,6 +34,9 @@
  * @since 9
  * @version 1.0
  */
+
+#ifndef NATIVE_OH_HUKS_TYPE_H
+#define NATIVE_OH_HUKS_TYPE_H
 
 #include <stdbool.h>
 #include <stdint.h>
