@@ -956,4 +956,51 @@ HWTEST_F(HksRenameKeyAliasPart1Test, HksRenameKeyAliasPart1Test026, TestSize.Lev
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&renameParamSet);
 }
+
+/**
+ * @tc.name: HksRenameKeyAliasPart1Test.HksRenameKeyAliasPart1Test027
+ * @tc.desc: If the backup key is lost, the renaming is still successful;
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksRenameKeyAliasPart1Test, HksRenameKeyAliasPart1Test027, TestSize.Level0)
+{
+    const char *alias = "oldAlias027";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    
+    int32_t ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_DE);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "TestGenerateKey ret is " << ret;
+    
+    struct HksParamSet *paramSet = nullptr;
+    struct HksParam storageLevel = { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE };
+    ret = BuildParamSetWithParam(&paramSet, &storageLevel, sizeof(storageLevel) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    ret = HksKeyExist(&keyAlias, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Hks get generate key failed, ret is " << ret;
+
+    ret = HksFileRemove(STORE_BACKUP_PATH, alias);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *renameParamSet = NULL;
+    struct HksParam paramArr[] = {
+        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+        {.tag = HKS_TAG_IS_COPY_NEW_KEY, .boolParam = true},
+    };
+    ret = BuildParamSetWithParam(&renameParamSet, paramArr, sizeof(paramArr) / sizeof(paramArr[0]));
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    const char *alias2 = "newKeyAlias027";
+    struct HksBlob newKeyAlias = { strlen(alias2), (uint8_t *)alias2 };
+    ret = HksRenameKeyAlias(&keyAlias, renameParamSet, &newKeyAlias);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksRenameKeyAlias ret is " << ret;
+
+    ret = HksKeyExist(&keyAlias, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "old key exit, delet failed, ret is " << ret;
+    ret = HksKeyExist(&newKeyAlias, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "new key is not exit, ret is " << ret;
+    ret = HksDeleteKey(&keyAlias, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    ret = HksDeleteKey(&newKeyAlias, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&renameParamSet);
+}
 }
