@@ -168,7 +168,7 @@ HWTEST_F(HksRenameKeyAliasPart2Test, HksRenameKeyAliasPart2Test0013, TestSize.Le
         { .tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = USER_ID_INT },
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_CE },
     };
-    ret = BuildParamSetWithParam(&paramSet, &storageLevel, sizeof(storageLevel) / sizeof(storageLevel[0]));
+    ret = BuildParamSetWithParam(&paramSet, storageLevel, sizeof(storageLevel) / sizeof(storageLevel[0]));
     EXPECT_EQ(ret, HKS_SUCCESS);
     ret = HksKeyExist(&keyAlias, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Hks get generate key failed, ret is " << ret;
@@ -215,7 +215,7 @@ HWTEST_F(HksRenameKeyAliasPart2Test, HksRenameKeyAliasPart2Test0014, TestSize.Le
         { .tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = USER_ID_INT },
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_ECE },
     };
-    ret = BuildParamSetWithParam(&paramSet, &storageLevel, sizeof(storageLevel) / sizeof(storageLevel[0]));
+    ret = BuildParamSetWithParam(&paramSet, storageLevel, sizeof(storageLevel) / sizeof(storageLevel[0]));
     EXPECT_EQ(ret, HKS_SUCCESS);
     ret = HksKeyExist(&keyAlias, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Hks get generate key failed, ret is " << ret;
