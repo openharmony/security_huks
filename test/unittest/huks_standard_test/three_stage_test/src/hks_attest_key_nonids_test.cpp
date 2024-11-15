@@ -485,4 +485,214 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest013, TestSize.Level0)
     ret = HksDeleteKeyForDe(&g_keyAlias, NULL);
     ASSERT_EQ(ret, HKS_SUCCESS);
 }
+
+/**
+ * @tc.name: HksAttestKeyNonIdsTest.HksAttestKeyNonIdsTest014
+ * @tc.desc: attest with x25519.
+ * @tc.type: FUNC
+ * @tc.require: issueI5NY0L
+ */
+HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest014, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = nullptr;
+    HksCertChain *certChain = nullptr;
+    HKS_LOG_I("enter HksAttestKeyNonIdsTest014");
+    const struct HksParam tmpParams[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_X25519 },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_CURVE25519_KEY_SIZE_256 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
+    };
+    int32_t ret = TestGenerateKeyCommon(&g_keyAlias, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
+    const struct HksTestCertChain certParam = { true, true, true, g_size };
+    (void)ConstructDataToCertChain(&certChain, &certParam);
+    ret = HksAttestKeyForDe(&g_keyAlias, paramSet, certChain);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_I("HksAttestKey fail, ret is %" LOG_PUBLIC "d!", ret);
+    }
+    ASSERT_EQ(ret, HKS_ERROR_NO_PERMISSION);
+
+    FreeCertChain(&certChain, certChain->certsCount);
+    HksFreeParamSet(&paramSet);
+    ret = HksDeleteKeyForDe(&g_keyAlias, NULL);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksAttestKeyNonIdsTest.HksAttestKeyNonIdsTest015
+ * @tc.desc: attest with x25519.
+ * @tc.type: FUNC
+ * @tc.require: issueI5NY0L
+ */
+HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest015, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = nullptr;
+    HksCertChain *certChain = nullptr;
+    HKS_LOG_I("enter HksAttestKeyNonIdsTest015");
+    const struct HksParam tmpParams[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_X25519 },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_CURVE25519_KEY_SIZE_256 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
+    };
+    int32_t ret = TestGenerateKeyCommon(&g_keyAlias, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
+    const struct HksTestCertChain certParam = { true, true, true, g_size };
+    (void)ConstructDataToCertChain(&certChain, &certParam);
+    ret = HksAnonAttestKeyForDe(&g_keyAlias, paramSet, certChain);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_I("HksAnonAttestKey fail, ret is %" LOG_PUBLIC "d!", ret);
+    }
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    FreeCertChain(&certChain, certChain->certsCount);
+    HksFreeParamSet(&paramSet);
+    ret = HksDeleteKeyForDe(&g_keyAlias, NULL);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksAttestKeyNonIdsTest.HksAttestKeyNonIdsTest016
+ * @tc.desc: attest with x25519.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest016, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = nullptr;
+    HksCertChain *certChain = nullptr;
+    HKS_LOG_I("enter HksAttestKeyNonIdsTest016");
+    const struct HksParam tmpParams[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_X25519 },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_CURVE25519_KEY_SIZE_256 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
+    };
+    int32_t ret = TestGenerateKeyCommon(&g_keyAlias, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    const struct HksTestCertChain certParam = { true, true, true, g_size };
+    ret = ConstructDataToCertChain(&certChain, &certParam);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    const struct OH_Huks_Blob oh_g_keyAlias = { sizeof(ALIAS), (uint8_t *)ALIAS };
+    struct HksParamSet *newParamSet = nullptr;
+    ret = ConstructNewParamSet(paramSet, &newParamSet);
+    ret = OH_Huks_AnonAttestKeyItem(&oh_g_keyAlias, (struct OH_Huks_ParamSet *) newParamSet,
+        (struct OH_Huks_CertChain *) certChain).errorCode;
+    HKS_LOG_I("OH_Huks_AnonAttestKeyItem, ret is %" LOG_PUBLIC "d!", ret);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    for (uint32_t i = 0; i < certChain->certsCount; i++) {
+        printf("Get certChain[%d]:\n %s \n", i, certChain->certs[i].data);
+    }
+    FreeCertChain(&certChain, certChain->certsCount);
+    HksFreeParamSet(&newParamSet);
+    HksFreeParamSet(&paramSet);
+    ret = HksDeleteKeyForDe(&g_keyAlias, NULL);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksAttestKeyNonIdsTest.HksAttestKeyNonIdsTest017
+ * @tc.desc: attest with ed25519.
+ * @tc.type: FUNC
+ * @tc.require: issueI5NY0L
+ */
+HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest017, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = nullptr;
+    HksCertChain *certChain = nullptr;
+    HKS_LOG_I("enter HksAttestKeyNonIdsTest017");
+    const struct HksParam tmpParams[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ED25519 },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_CURVE25519_KEY_SIZE_256 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_VERIFY },
+    };
+    int32_t ret = TestGenerateKeyCommon(&g_keyAlias, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
+    const struct HksTestCertChain certParam = { true, true, true, g_size };
+    (void)ConstructDataToCertChain(&certChain, &certParam);
+    ret = HksAttestKeyForDe(&g_keyAlias, paramSet, certChain);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_I("HksAttestKey fail, ret is %" LOG_PUBLIC "d!", ret);
+    }
+    ASSERT_EQ(ret, HKS_ERROR_NO_PERMISSION);
+
+    FreeCertChain(&certChain, certChain->certsCount);
+    HksFreeParamSet(&paramSet);
+    ret = HksDeleteKeyForDe(&g_keyAlias, NULL);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksAttestKeyNonIdsTest.HksAttestKeyNonIdsTest018
+ * @tc.desc: attest with ed25519.
+ * @tc.type: FUNC
+ * @tc.require: issueI5NY0L
+ */
+HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest018, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = nullptr;
+    HksCertChain *certChain = nullptr;
+    HKS_LOG_I("enter HksAttestKeyNonIdsTest018");
+    const struct HksParam tmpParams[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ED25519 },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_CURVE25519_KEY_SIZE_256 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_VERIFY },
+    };
+    int32_t ret = TestGenerateKeyCommon(&g_keyAlias, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
+    const struct HksTestCertChain certParam = { true, true, true, g_size };
+    (void)ConstructDataToCertChain(&certChain, &certParam);
+    ret = HksAnonAttestKeyForDe(&g_keyAlias, paramSet, certChain);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_I("HksAnonAttestKey fail, ret is %" LOG_PUBLIC "d!", ret);
+    }
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    FreeCertChain(&certChain, certChain->certsCount);
+    HksFreeParamSet(&paramSet);
+    ret = HksDeleteKeyForDe(&g_keyAlias, NULL);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksAttestKeyNonIdsTest.HksAttestKeyNonIdsTest019
+ * @tc.desc: attest with ed25519.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest019, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = nullptr;
+    HksCertChain *certChain = nullptr;
+    HKS_LOG_I("enter HksAttestKeyNonIdsTest019");
+    const struct HksParam tmpParams[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ED25519 },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_CURVE25519_KEY_SIZE_256 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_VERIFY },
+    };
+    int32_t ret = TestGenerateKeyCommon(&g_keyAlias, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    const struct HksTestCertChain certParam = { true, true, true, g_size };
+    ret = ConstructDataToCertChain(&certChain, &certParam);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    const struct OH_Huks_Blob oh_g_keyAlias = { sizeof(ALIAS), (uint8_t *)ALIAS };
+    struct HksParamSet *newParamSet = nullptr;
+    ret = ConstructNewParamSet(paramSet, &newParamSet);
+    ret = OH_Huks_AnonAttestKeyItem(&oh_g_keyAlias, (struct OH_Huks_ParamSet *) newParamSet,
+        (struct OH_Huks_CertChain *) certChain).errorCode;
+    HKS_LOG_I("OH_Huks_AnonAttestKeyItem, ret is %" LOG_PUBLIC "d!", ret);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    for (uint32_t i = 0; i < certChain->certsCount; i++) {
+        printf("Get certChain[%d]:\n %s \n", i, certChain->certs[i].data);
+    }
+    FreeCertChain(&certChain, certChain->certsCount);
+    HksFreeParamSet(&newParamSet);
+    HksFreeParamSet(&paramSet);
+    ret = HksDeleteKeyForDe(&g_keyAlias, NULL);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+}
 }

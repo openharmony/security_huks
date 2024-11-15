@@ -1316,7 +1316,8 @@ static void FreeAttestSpec(struct HksAttestSpec **attestSpec)
 static int32_t CheckAttestUsageSpec(const struct HksUsageSpec *usageSpec)
 {
     if ((usageSpec->algType != HKS_ALG_RSA) && (usageSpec->algType != HKS_ALG_ECC) &&
-        (usageSpec->algType != HKS_ALG_X25519) && (usageSpec->algType != HKS_ALG_SM2)) {
+        (usageSpec->algType != HKS_ALG_X25519) && (usageSpec->algType != HKS_ALG_SM2) &&
+        (usageSpec->algType != HKS_ALG_ED25519)) {
             HKS_LOG_E("invalid alg %" LOG_PUBLIC "u\n", usageSpec->algType);
             return HKS_ERROR_INVALID_ARGUMENT;
     }

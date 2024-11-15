@@ -49,6 +49,9 @@ DECLARE_OID(g_rsaEn);
 static uint8_t g_x25519Tag[] = { 0x06, 0x03, 0x2B, 0x65, 0x6E };
 DECLARE_OID(g_x25519);
 
+static uint8_t g_ed25519Tag[] = { 0x06, 0x03, 0x2B, 0x65, 0x70 };
+DECLARE_OID(g_ed25519);
+
 #define ENCODED_SEC_LEVEL_SIZE 3
 static uint32_t EncodeSecurityLevel(uint8_t *out, uint32_t level)
 {
@@ -195,7 +198,8 @@ static int32_t GetRsaPublicKey(struct HksBlob *key, const struct HksPubKeyInfo *
     return DcmAsn1WriteFinal(key, &seqDataBlob);
 }
 
-static int32_t GetX25519PublicKey(struct HksBlob *key, const struct HksPubKeyInfo *info)
+static int32_t GetCurve25519PublicKey(struct HksBlob *key, const struct HksPubKeyInfo *info,
+    struct HksAsn1Blob *curve25519Oid)
 {
     struct HksBlob tmp = *key;
     tmp.data += ASN_1_MAX_HEADER_LEN;
@@ -205,8 +209,7 @@ static int32_t GetX25519PublicKey(struct HksBlob *key, const struct HksPubKeyInf
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
-    struct HksAsn1Blob x25519Oid = { ASN_1_TAG_TYPE_SEQ, g_x25519Oid.size, g_x25519Oid.data };
-    int32_t ret = DcmAsn1InsertValue(&tmp, NULL, &x25519Oid);
+    int32_t ret = DcmAsn1InsertValue(&tmp, NULL, curve25519Oid);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert oid value fail\n")
 
     uint8_t *publicKey = (uint8_t *)(info + 1);
@@ -218,6 +221,25 @@ static int32_t GetX25519PublicKey(struct HksBlob *key, const struct HksPubKeyInf
     uint32_t seqSize = tmp.data - seqData;
     struct HksAsn1Blob seqDataBlob = { ASN_1_TAG_TYPE_SEQ, seqSize, seqData };
     return DcmAsn1WriteFinal(key, &seqDataBlob);
+}
+
+static int32_t GetX25519PublicKey(struct HksBlob *key, const struct HksPubKeyInfo *info)
+{
+    struct HksAsn1Blob x25519Oid = { ASN_1_TAG_TYPE_SEQ, g_x25519Oid.size, g_x25519Oid.data };
+    int32_t ret = GetCurve25519PublicKey(key, info, &x25519Oid);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get x25519 public key fail");
+    }
+    return ret;
+}
+static int32_t GetEd25519PublicKey(struct HksBlob *key, const struct HksPubKeyInfo *info)
+{
+    struct HksAsn1Blob ed25519Oid = { ASN_1_TAG_TYPE_SEQ, g_ed25519Oid.size, g_ed25519Oid.data };
+    int32_t ret = GetCurve25519PublicKey(key, info, &ed25519Oid);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get ed25519 public key fail");
+    }
+    return ret;
 }
 
 static int32_t GetSm2PublicKey(struct HksBlob *key, const struct HksPubKeyInfo *info)
@@ -242,6 +264,8 @@ int32_t DcmGetPublicKey(struct HksBlob *key, const struct HksPubKeyInfo *info, c
         return GetEcPublicKey(key, info);
     } else if (info->keyAlg == HKS_ALG_X25519) {
         return GetX25519PublicKey(key, info);
+    } else if (info->keyAlg == HKS_ALG_ED25519) {
+        return GetEd25519PublicKey(key, info);
     } else if (info->keyAlg == HKS_ALG_SM2) {
         return GetSm2PublicKey(key, info);
     } else {
