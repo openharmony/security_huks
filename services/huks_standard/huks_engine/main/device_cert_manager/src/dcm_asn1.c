@@ -134,7 +134,6 @@ static int32_t Asn1GetObj(struct HksBlob *next, struct HksAsn1Obj *obj, const st
     uint8_t *buf = data->data;
     uint32_t length = 0;
     obj->header.data = buf;
-    HKS_IF_NULL_LOGE_RETURN(buf, HKS_ERROR_INVALID_ARGUMENT, "invalid input param");
     HKS_ASN1_DECODE_BYTE(buf, obj->header.type);
     if (buf[0] < ASN_1_MIN_VAL_1_EXTRA_LEN_BYTE) {
         HKS_ASN1_DECODE_BYTE(buf, length);
