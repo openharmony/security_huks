@@ -165,6 +165,9 @@ int32_t HksFillIvParam(const struct HksParamSet *paramSet, struct HksUsageSpec *
 {
     struct HksParam *ivParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_IV, &ivParam);
+    if (ret != HKS_SUCCESS && usageSpec->mode == HKS_MODE_ECB) {
+        return HKS_SUCCESS;
+    }
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "cipher get iv param failed!")
 
     struct HksCipherParam *param = (struct HksCipherParam *)HksMalloc(sizeof(struct HksCipherParam));
