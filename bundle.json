@@ -86,7 +86,8 @@
           "openssl",
           "bounds_checking_function",
           "mbedtls",
-          "cJSON"
+          "cJSON",
+          "init"
         ]
       },
       "build": {
@@ -96,6 +97,7 @@
             "//base/security/huks:fwk_group"
           ],
           "service_group": [
+            "//base/security/huks/etc:param_files",
             "//base/security/huks:service_group"
           ]
         },
