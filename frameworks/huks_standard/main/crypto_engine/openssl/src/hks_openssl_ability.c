@@ -23,10 +23,12 @@
 
 #include "hks_ability.h"
 #include "hks_core_ability.h"
+#include "hks_openssl_3des.h"
 #include "hks_openssl_aes.h"
 #include "hks_openssl_bn.h"
 #include "hks_openssl_common.h"
 #include "hks_openssl_curve25519.h"
+#include "hks_openssl_des.h"
 #include "hks_openssl_dh.h"
 #include "hks_openssl_dsa.h"
 #include "hks_openssl_ecc.h"
@@ -73,6 +75,12 @@ static void RegisterAbilityGenerateKey(void)
 #endif
 #if defined(HKS_SUPPORT_SM4_C) && defined(HKS_SUPPORT_SM4_GENERATE_KEY)
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_GENERATE_KEY(HKS_ALG_SM4), HksOpensslSm4GenerateKey);
+#endif
+#if defined(HKS_SUPPORT_DES_C) && defined(HKS_SUPPORT_DES_GENERATE_KEY)
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_GENERATE_KEY(HKS_ALG_DES), HksOpensslDesGenerateKey);
+#endif
+#if defined(HKS_SUPPORT_3DES_C) && defined(HKS_SUPPORT_3DES_GENERATE_KEY)
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_GENERATE_KEY(HKS_ALG_3DES), HksOpenssl3DesGenerateKey);
 #endif
 }
 
@@ -169,6 +177,26 @@ static void RegisterAbilityEncrypt(void)
 #ifdef HKS_SUPPORT_SM2_ENCRYPT_DECRYPT
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT(HKS_ALG_SM2), HksOpensslSm2Encrypt);
 #endif
+#ifdef HKS_SUPPORT_DES_C
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_INIT(HKS_ALG_DES),
+        (void *)HksOpensslDesCryptoInit);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_UPDATE(HKS_ALG_DES),
+        (void *)HksOpensslDesCryptoUpdate);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_FINAL(HKS_ALG_DES),
+        (void *)HksOpensslDesCryptoFinal);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_FREE_CTX(HKS_ALG_DES),
+        (void *)HksOpensslDesHalFreeCtx);
+#endif
+#ifdef HKS_SUPPORT_3DES_C
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_INIT(HKS_ALG_3DES),
+        (void *)HksOpenssl3DesCryptoInit);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_UPDATE(HKS_ALG_3DES),
+        (void *)HksOpenssl3DesCryptoUpdate);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_FINAL(HKS_ALG_3DES),
+        (void *)HksOpenssl3DesCryptoFinal);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_FREE_CTX(HKS_ALG_3DES),
+        (void *)HksOpenssl3DesHalFreeCtx);
+#endif
 }
 
 static void RegisterAbilityDecrypt(void)
@@ -200,6 +228,26 @@ static void RegisterAbilityDecrypt(void)
 #endif
 #ifdef HKS_SUPPORT_SM2_ENCRYPT_DECRYPT
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT(HKS_ALG_SM2), HksOpensslSm2Decrypt);
+#endif
+#ifdef HKS_SUPPORT_DES_C
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_INIT(HKS_ALG_DES),
+        (void *)HksOpensslDesCryptoInit);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_UPDATE(HKS_ALG_DES),
+        (void *)HksOpensslDesCryptoUpdate);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_FINAL(HKS_ALG_DES),
+        (void *)HksOpensslDesCryptoFinal);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_FREE_CTX(HKS_ALG_DES),
+        (void *)HksOpensslDesHalFreeCtx);
+#endif
+#ifdef HKS_SUPPORT_3DES_C
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_INIT(HKS_ALG_3DES),
+        (void *)HksOpenssl3DesCryptoInit);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_UPDATE(HKS_ALG_3DES),
+        (void *)HksOpenssl3DesCryptoUpdate);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_FINAL(HKS_ALG_3DES),
+        (void *)HksOpenssl3DesCryptoFinal);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_FREE_CTX(HKS_ALG_3DES),
+        (void *)HksOpenssl3DesHalFreeCtx);
 #endif
 }
 

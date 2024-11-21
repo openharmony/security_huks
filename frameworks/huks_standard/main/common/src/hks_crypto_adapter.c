@@ -194,7 +194,7 @@ static bool HksIsNeedIv3DES(const struct HksParamSet *paramSet)
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "check 3DES get alg param failed!")
 
     struct HksParam *modeParam = NULL;
-    ret = HksGetParam(paramSet, HKS_TAG_BLOCKMODE, &modeParam);
+    ret = HksGetParam(paramSet, HKS_TAG_BLOCK_MODE, &modeParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "check 3DES get block mode param failed!")
 
     return ((algParam->uint32Param == HKS_ALG_3DES) && (modeParam->uint32Param == HKS_MODE_CBC));
@@ -209,7 +209,7 @@ static bool HksIsNeedIvDES(const struct HksParamSet *paramSet)
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "check DES get alg param failed!")
 
     struct HksParam *modeParam = NULL;
-    ret = HksGetParam(paramSet, HKS_TAG_BLOCKMODE, &modeParam);
+    ret = HksGetParam(paramSet, HKS_TAG_BLOCK_MODE, &modeParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "check DES get block mode param failed!")
 
     return ((algParam->uint32Param == HKS_ALG_DES) && (modeParam->uint32Param == HKS_MODE_CBC));
