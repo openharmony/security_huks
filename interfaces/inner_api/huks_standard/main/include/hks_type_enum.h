@@ -149,6 +149,8 @@ enum HksKeySize {
     HKS_DES_KEY_SIZE_64 = 64,
     HKS_3DES_KEY_SIZE_128 = 128,
     HKS_3DES_KEY_SIZE_192 = 192,
+
+    HKS_CMAC_KEY_SIZE_128 = 128,
 };
 
 /**

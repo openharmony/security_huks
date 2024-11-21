@@ -32,11 +32,13 @@ if (os_level == "standard") {
     public_configs = [ ":huks_config" ]
 
     sources = [
+      "src/hks_openssl_3des.c",
       "src/hks_openssl_ability.c",
       "src/hks_openssl_aes.c",
       "src/hks_openssl_bn.c",
       "src/hks_openssl_common.c",
       "src/hks_openssl_curve25519.c",
+      "src/hks_openssl_des.c",
       "src/hks_openssl_dh.c",
       "src/hks_openssl_dsa.c",
       "src/hks_openssl_ecc.c",
