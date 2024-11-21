@@ -21,7 +21,7 @@
 #include <set>
 #include <string_ex.h>
 #include <system_ability_definition.h>
-
+#include "parameters.h"
 #include "hks_client_service.h"
 #include "hks_dcm_callback_handler.h"
 #include "hks_ipc_service.h"
@@ -64,6 +64,9 @@ uint32_t g_sessionId = 0;
 namespace OHOS {
 namespace Security {
 namespace Hks {
+
+const std::string BOOTEVENT_HUKSSERVICE_READY = "bootevent.huksService.ready";
+
 REGISTER_SYSTEM_ABILITY_BY_ID(HksService, SA_ID_KEYSTORE_SERVICE, true);
 
 std::mutex HksService::instanceLock;
@@ -190,6 +193,10 @@ bool HksService::Init()
     HKS_LOG_I("HksService::Init Publish service success");
     registerToService_ = true;
 
+    if (!system::GetBoolParameter(BOOTEVENT_HUKSSERVICE_READY.c_str(), false)) {
+        system::SetParameter(BOOTEVENT_HUKSSERVICE_READY.c_str(), "true");
+        HKS_LOG_E("set bootevent.huksService.ready true");
+    }
     HKS_LOG_I("HksService::Init success.");
     return true;
 }
