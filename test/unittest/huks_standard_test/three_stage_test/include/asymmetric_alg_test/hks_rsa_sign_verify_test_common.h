@@ -21,9 +21,15 @@
 #include "hks_three_stage_test_common.h"
 namespace Unittest::RsaSignVerify {
 static const uint32_t RSA_COMMON_SIZE = 1024;
+static const uint32_t RSA_FLEX_KEY_SIZE_1536 = 1536;
+static const uint32_t RSA_INVALID_FLEX_KEY_SIZE_1540 = 1540;
 static const std::string g_inData = "Hks_RSA_Sign_Verify_Test_0000000000000000000000000000000000000000000000000000000"
                                     "00000000000000000000000000000000000000000000000000000000000000000000000000000000"
                                     "0000000000000000000000000000000000000000000000000000000000000000000000000_string";
+static struct HksBlob inData = {
+    (uint32_t)g_inData.length(),
+    const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
+};
 
 int32_t HksRsaSignVerifyTestNormalCase(struct HksBlob keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet);
@@ -42,5 +48,9 @@ int32_t HksTestSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet
     struct HksBlob *outData, bool isSign);
 int32_t HksRsaSignVerifyTestParamPSSaltLenFailureCase(struct HksBlob keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet);
+int32_t HksRsaSignTest(struct HksBlob *keyAlias, struct HksParamSet *signParamSet, struct HksBlob *plaintext,
+    struct HksBlob *signature);
+int32_t HksRsaVerifyTest(struct HksBlob *keyAlias, struct HksParamSet *verifyParamSet, struct HksBlob *plaintext,
+    struct HksBlob *signature, struct HksBlob *outData);
 } // namespace Unittest::RsaSignVerify
 #endif // HKS_RSA_SIGN_VERIFY_TEST_COMMON_H

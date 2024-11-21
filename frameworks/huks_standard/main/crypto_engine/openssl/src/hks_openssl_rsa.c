@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,12 @@
 
 static int32_t RsaGenKeyCheckParam(const struct HksKeySpec *spec)
 {
+#ifdef HKS_SUPPORT_RSA_C_FLEX_KEYSIZE
+    if (spec->keyLen > HKS_RSA_KEY_SIZE_1024 && spec->keyLen < HKS_RSA_KEY_SIZE_2048 &&
+        spec->keyLen % HKS_RSA_KEY_BLOCK_SIZE == 0) {
+        return HKS_SUCCESS;
+    }
+#endif
     switch (spec->keyLen) {
         case HKS_RSA_KEY_SIZE_512:
         case HKS_RSA_KEY_SIZE_768:
