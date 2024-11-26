@@ -68,7 +68,7 @@ REGISTER_SYSTEM_ABILITY_BY_ID(HksService, SA_ID_KEYSTORE_SERVICE, true);
 std::mutex HksService::instanceLock;
 sptr<HksService> HksService::instance;
 const uint32_t MAX_MALLOC_LEN = 1 * 1024 * 1024; /* max malloc size 1 MB */
-#define HUKS_IPC_THREAD_NUM 2
+#define HUKS_IPC_THREAD_NUM 16
 #ifdef SUPPORT_COMMON_EVENT
 const uint32_t MAX_DELAY_TIMES = 100;
 #endif
