@@ -102,6 +102,7 @@ void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData
     constexpr const char* UID = "uid";
     std::string action = want.GetAction();
 
+#ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
     // judge whether is upgrading, wait for upgrade finished
     if (HksWaitIfPowerOnUpgrading() != HKS_SUCCESS) {
         HKS_LOG_E("wait on upgrading failed.");
