@@ -304,12 +304,14 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
     HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "u,  callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC
         "d, sessionId = %" LOG_PUBLIC "u", code, callingUid, userId, g_sessionId);
 
+#ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
     // judge whether is upgrading, wait for upgrade finished
     if (HksWaitIfPowerOnUpgrading() != HKS_SUCCESS) {
         HKS_LOG_E("wait on upgrading failed.");
         return HW_SYSTEM_ERROR;
     }
     OHOS::Utils::UniqueReadGuard<OHOS::Utils::RWLock> readGuard(g_upgradeOrRequestLock);
+#endif
 
     if (code < HksIpcInterfaceCode::HKS_MSG_BASE || code >= HksIpcInterfaceCode::HKS_MSG_MAX) {
         int32_t ret = RetryLoadPlugin();
