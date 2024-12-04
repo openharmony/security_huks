@@ -304,6 +304,7 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         return HW_SYSTEM_ERROR;
     }
     OHOS::Utils::UniqueReadGuard<OHOS::Utils::RWLock> readGuard(g_upgradeOrRequestLock);
+#endif
 
     if (code < HksIpcInterfaceCode::HKS_MSG_BASE || code >= HksIpcInterfaceCode::HKS_MSG_MAX) {
         int32_t ret = RetryLoadPlugin();
