@@ -281,6 +281,9 @@ static void ProcessRemoteRequest(uint32_t code, MessageParcel &data, MessageParc
 
 int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
+#ifdef L2_STANDARD
+    HksClearThreadErrorMsg();
+#endif
     g_requestMutex.lock();
 
     if (HksIpcCounter::count >= HUKS_IPC_THREAD_NUM_LIMIT && g_asyncCodeSet.count(code) == 1) {

@@ -575,7 +575,7 @@ int32_t HksClientGetKeyInfoList(const struct HksParamSet *paramSet, struct HksKe
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetKeyInfoListPack fail")
 
         ret = HksSendRequest(HKS_MSG_GET_KEY_INFO_LIST, &inBlob, &outBlob, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest result is fail")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest result is fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksGetKeyInfoListUnpackFromService(&outBlob, listCount, keyInfoList);
     } while (0);
@@ -754,7 +754,7 @@ int32_t HksClientUpdate(const struct HksBlob *handle, const struct HksParamSet *
     };
     ret = HksSendRequest(HKS_MSG_UPDATE, &parcelBlob, outData, paramSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksParamSet send fail");
+        HKS_LOG_E("HksParamSet send fail, ret = %" LOG_PUBLIC "d", ret);
         HksFreeParamSet(&sendParamSet);
         return ret;
     }
@@ -786,7 +786,7 @@ int32_t HksClientFinish(const struct HksBlob *handle, const struct HksParamSet *
     };
     ret = HksSendRequest(HKS_MSG_FINISH, &parcelBlob, outData, paramSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksParamSet send fail");
+        HKS_LOG_E("HksParamSet send fail, ret = %" LOG_PUBLIC "d", ret);
         HksFreeParamSet(&sendParamSet);
         return ret;
     }
@@ -815,7 +815,7 @@ int32_t HksClientAbort(const struct HksBlob *handle, const struct HksParamSet *p
     };
     ret = HksSendRequest(HKS_MSG_ABORT, &parcelBlob, NULL, paramSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksParamSet send fail");
+        HKS_LOG_E("HksParamSet send fail, ret = %" LOG_PUBLIC "d", ret);
         HksFreeParamSet(&sendParamSet);
         return ret;
     }
@@ -857,7 +857,7 @@ int32_t HksClientListAliases(const struct HksParamSet *paramSet, struct HksKeyAl
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksListAliasesPack fail")
 
         ret = HksSendRequest(HKS_MSG_LIST_ALIASES, &inBlob, &outBlob, paramSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret);
 
         ret = HksListAliasesUnpackFromService(&outBlob, outData);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksListAliasesUnpackFromService fail")

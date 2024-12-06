@@ -41,6 +41,7 @@ if (os_level == "standard") {
       "src/hks_check_paramset.c",
       "src/hks_common_check.c",
       "src/hks_crypto_adapter.c",
+      "src/hks_error_msg.c",
       "src/hks_param.c",
       "src/hks_tags_type_manager.c",
     ]
@@ -82,6 +83,7 @@ if (os_level == "standard") {
       "src/hks_check_paramset.c",
       "src/hks_common_check.c",
       "src/hks_crypto_adapter.c",
+      "src/hks_error_msg.c",
       "src/hks_param.c",
       "src/hks_tags_type_manager.c",
     ]

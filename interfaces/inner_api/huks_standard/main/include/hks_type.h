@@ -87,6 +87,7 @@ extern "C" {
 #define HKS_KEY_BLOB_AT_KEY_BYTES 32
 
 #define HKS_MAX_KEY_ALIAS_COUNT 2048
+#define MAX_ERROR_MESSAGE_LEN 512
 
 /**
  * @brief hks blob
@@ -322,6 +323,17 @@ struct HksStoreKeyInfo {
     uint16_t domain;
     uint8_t aliasSize;
     uint8_t authIdSize;
+};
+
+struct ErrorInfoHead {
+    int32_t version;
+    int32_t innerErrCode;
+    int32_t outterErrCode;
+};
+
+struct ErrorInfo {
+    struct ErrorInfoHead head;
+    char erMsg[MAX_ERROR_MESSAGE_LEN + 1];
 };
 
 /**
