@@ -13,7 +13,11 @@
  * limitations under the License.
  */
 
+#include <cstdint>
 #include <gtest/gtest.h>
+#include <gtest/hwext/gtest-multithread.h>
+#include <sstream>
+#include <string>
 
 #include "hks_rename_test.h"
 #include "hks_api.h"
@@ -27,6 +31,7 @@
 #include "token_setproc.h"
 #include "hks_file_operator.h"
 using namespace testing::ext;
+using namespace testing::mt;
 namespace {
 class HksRenameKeyAliasPart3Test : public testing::Test {
 public:
@@ -173,7 +178,7 @@ HWTEST_F(HksRenameKeyAliasPart3Test, HksRenameKeyAliasPart3Test0013, TestSize.Le
     ret = HksKeyExist(&keyAlias, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Hks get generate key failed, ret is " << ret;
 
-    struct HksParamSet *renameParamSet = NULL;
+    struct HksParamSet *renameParamSet = nullptr;
     struct HksParam paramArr[] = {
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_CE },
         { .tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = USER_ID_INT },
@@ -220,7 +225,7 @@ HWTEST_F(HksRenameKeyAliasPart3Test, HksRenameKeyAliasPart3Test0014, TestSize.Le
     ret = HksKeyExist(&keyAlias, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Hks get generate key failed, ret is " << ret;
 
-    struct HksParamSet *renameParamSet = NULL;
+    struct HksParamSet *renameParamSet = nullptr;
     struct HksParam paramArr[] = {
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_ECE },
         { .tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = USER_ID_INT },
@@ -267,7 +272,7 @@ HWTEST_F(HksRenameKeyAliasPart3Test, HksRenameKeyAliasPart3Test0015, TestSize.Le
     ret = HksKeyExist(&keyAlias, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Hks get generate key failed, ret is " << ret;
 
-    struct HksParamSet *renameParamSet = NULL;
+    struct HksParamSet *renameParamSet = nullptr;
     struct HksParam paramArr[] = {
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_CE },
         { .tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = USER_ID_INT },
@@ -312,7 +317,7 @@ HWTEST_F(HksRenameKeyAliasPart3Test, HksRenameKeyAliasPart3Test0016, TestSize.Le
     ret = HksKeyExist(&keyAlias, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Hks get generate key failed, ret is " << ret;
 
-    struct HksParamSet *renameParamSet = NULL;
+    struct HksParamSet *renameParamSet = nullptr;
     struct HksParam paramArr[] = {
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_ECE },
         { .tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = USER_ID_INT },
@@ -358,6 +363,81 @@ HWTEST_F(HksRenameKeyAliasPart3Test, HksRenameKeyAliasPart3Test020, TestSize.Lev
     EXPECT_EQ(ret, HKS_SUCCESS) << "Hks get generate key failed, ret is " << ret;;
 
     EXPECT_EQ(ret, HKS_SUCCESS);
+    HksFreeParamSet(&paramSet);
+}
+
+void MultiThreadRename()
+{
+    std::thread::id thisId = std::this_thread::get_id();
+    std::ostringstream oss;
+    oss << thisId;
+    std::string thisIdStr = oss.str();
+
+    const char *alias = "oldKeyAlias028";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    struct HksParamSet *paramSet = nullptr;
+    struct HksParam storageLevel[] = {
+        { .tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = USER_ID_INT },
+        { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_ECE },
+    };
+    int32_t ret = BuildParamSetWithParam(&paramSet, storageLevel, sizeof(storageLevel) / sizeof(storageLevel[0]));
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    std::string rands = "newAlias028" + thisIdStr;
+    const char *alias2 = rands.c_str();
+    struct HksParamSet *renameParamSet = nullptr;
+    struct HksParam paramArr[] = {
+        { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_ECE },
+        { .tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = USER_ID_INT },
+        { .tag = HKS_TAG_IS_COPY_NEW_KEY, .boolParam = true },
+    };
+    ret = BuildParamSetWithParam(&renameParamSet, paramArr, sizeof(paramArr) / sizeof(paramArr[0]));
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    struct HksBlob newKeyAlias = { strlen(alias2), (uint8_t *)alias2 };
+    ret = HksRenameKeyAlias(&keyAlias, renameParamSet, &newKeyAlias);
+    if (ret == HKS_SUCCESS) {
+        HKS_LOG_E("rename success!!");
+    } else {
+        HKS_LOG_E("rename failed!!");
+    }
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksRenameKeyAlias ret is " << ret;
+
+    ret = HksDeleteKey(&newKeyAlias, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&renameParamSet);
+}
+
+/**
+ * @tc.name: HksRenameKeyAliasPart3Test.HksRenameKeyAliasPart3Test028
+ * @tc.desc: GenerateKey for HksRenameKeyAliasPart2Test028
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksRenameKeyAliasPart3Test, HksRenameKeyAliasPart3Test028, TestSize.Level0)
+{
+#ifdef HKS_INTERACT_ABILITY
+    SetIdsToken();
+#endif
+    const char *alias = "oldKeyAlias028";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    
+    int32_t ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_ECE);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "TestGenerateKey ret is " << ret;
+
+    struct HksParamSet *paramSet = nullptr;
+    struct HksParam storageLevel[] = {
+        { .tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = USER_ID_INT },
+        { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_ECE },
+    };
+    ret = BuildParamSetWithParam(&paramSet, storageLevel, sizeof(storageLevel) / sizeof(storageLevel[0]));
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    ret = HksKeyExist(&keyAlias, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Hks get generate key failed, ret is " << ret;;
+
+    testing::mt::SET_THREAD_NUM(100);
+    GTEST_RUN_TASK(MultiThreadRename);
+
     HksFreeParamSet(&paramSet);
 }
 }
