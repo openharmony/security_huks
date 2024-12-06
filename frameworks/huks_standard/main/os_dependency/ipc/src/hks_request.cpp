@@ -49,32 +49,50 @@ static sptr<IRemoteObject> GetHksProxy()
 static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob)
 {
     int32_t ret = reply.ReadInt32();
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     uint32_t outLen = 0;
     if (!reply.ReadUint32(outLen) || outLen == 0) {
         if (outBlob != nullptr) {
             outBlob->size = 0;
         }
-        return ret;
     }
+    if (outLen != 0) {
+        if (CheckBlob(outBlob) != HKS_SUCCESS) {
+            return (ret == HKS_SUCCESS) ? HKS_ERROR_INVALID_ARGUMENT : ret;
+        }
+        const uint8_t *outData = reply.ReadBuffer(outLen);
+        if (outData == NULL) {
+            return (ret == HKS_SUCCESS) ? HKS_ERROR_IPC_MSG_FAIL : ret;
+        }
 
-    HKS_IF_NOT_SUCC_RETURN(CheckBlob(outBlob), HKS_ERROR_INVALID_ARGUMENT)
-
-    const uint8_t *outData = reply.ReadBuffer(outLen);
-    HKS_IF_NULL_RETURN(outData, HKS_ERROR_IPC_MSG_FAIL)
-
-    if (outBlob->size < outLen) {
-        HKS_LOG_E("outBlob size[%" LOG_PUBLIC "u] smaller than outLen[%" LOG_PUBLIC "u]", outBlob->size, outLen);
-        return HKS_ERROR_BUFFER_TOO_SMALL;
+        if (ret == HKS_SUCCESS) {
+            if (outBlob->size < outLen) {
+                HKS_LOG_E("outBlob size[%" LOG_PUBLIC "u] smaller than outLen[%" LOG_PUBLIC "u]",
+                    outBlob->size, outLen);
+                return (ret == HKS_SUCCESS) ? HKS_ERROR_BUFFER_TOO_SMALL : ret;
+            }
+            if (memcpy_s(outBlob->data, outBlob->size, outData, outLen) != EOK) {
+                HKS_LOG_E("copy outBlob data failed!");
+                return (ret == HKS_SUCCESS) ? HKS_ERROR_INSUFFICIENT_MEMORY : ret;
+            }
+            outBlob->size = outLen;
+        }
     }
-
-    if (memcpy_s(outBlob->data, outBlob->size, outData, outLen) != EOK) {
-        HKS_LOG_E("copy outBlob data failed!");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
+#ifdef L2_STANDARD
+    uint32_t errMsgLen = 0;
+    if (reply.ReadUint32(errMsgLen) && errMsgLen != 0 && errMsgLen < MAX_ERROR_MESSAGE_LEN) {
+        HKS_LOG_I("reply get errMsgLen = %u", errMsgLen);
+        const uint8_t *errMsg = reply.ReadUnpadBuffer(errMsgLen);
+        if (errMsg == NULL) {
+            HKS_LOG_E("[ipc error] read errorMsg");
+            return ret;
+        }
+        HksAppendThreadErrMsg(errMsg, errMsgLen);
     }
-    outBlob->size = outLen;
-    return HKS_SUCCESS;
+    PrintErrorMsg();
+#endif
+
+    return ret;
 }
 
 static int32_t HksSendAnonAttestRequestAndWaitAsyncReply(MessageParcel &data, const struct HksParamSet *paramSet,
@@ -124,6 +142,9 @@ static int32_t HksSendAnonAttestRequestAndWaitAsyncReply(MessageParcel &data, co
 int32_t HksSendRequest(enum HksIpcInterfaceCode type, const struct HksBlob *inBlob,
     struct HksBlob *outBlob, const struct HksParamSet *paramSet)
 {
+#ifdef L2_STANDARD
+    HksClearThreadErrorMsg();
+#endif
     enum HksSendType sendType = HKS_SEND_TYPE_SYNC;
     struct HksParam *sendTypeParam = nullptr;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_ASYNCHRONIZED, &sendTypeParam);

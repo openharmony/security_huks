@@ -770,3 +770,13 @@ HKS_API_EXPORT int32_t HksChangeStorageLevel(const struct HksBlob *keyAlias, con
     HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 }
+
+HKS_API_EXPORT const char *HksGetErrorMsg(void)
+{
+    HKS_LOG_D("enter %" LOG_PUBLIC "s", __func__);
+
+#ifdef L2_STANDARD
+    return HksGetThreadErrorMsg();
+#endif
+    return NULL;
+}
