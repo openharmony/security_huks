@@ -236,7 +236,7 @@ int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t 
 
     struct HksParam *userAuthTypeParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_USER_AUTH_TYPE, &userAuthTypeParam);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NOT_SUPPORTED, "no user auth type param: not support user auth!")
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, HKS_ERROR_NOT_SUPPORTED, "no user auth type param: not support user auth!")
 
     struct HksParam *accessTypeParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_KEY_AUTH_ACCESS_TYPE, &accessTypeParam);
@@ -285,7 +285,7 @@ int32_t HksCheckUserAuthKeyPurposeValidity(const struct HksParamSet *paramSet)
     // step 2. Judge whether the user auth key purpose is set.
     struct HksParam *userAuthKeyPurposeParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_AUTH_PURPOSE, &userAuthKeyPurposeParam);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_SUCCESS, "not set key auth purpose: default need user auth access control!")
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, HKS_SUCCESS, "not set key auth purpose: default need user auth access control!")
 
     // step 3. Judge whether the user auth key purpose is within the range of alogrithm key purpose.
     struct HksParam *keyPurposeParam = NULL;

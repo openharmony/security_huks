@@ -64,5 +64,6 @@
     HksFreeKeyAliasSet;
     HksRenameKeyAlias;
     HksChangeStorageLevel;
+    HksGetErrorMsg;
   local: *;
 };

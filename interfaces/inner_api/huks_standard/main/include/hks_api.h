@@ -368,6 +368,12 @@ HKS_API_EXPORT int32_t HksRenameKeyAlias(const struct HksBlob *oldKeyAlias, cons
 HKS_API_EXPORT int32_t HksChangeStorageLevel(const struct HksBlob *keyAlias, const struct HksParamSet *srcParamSet,
     const struct HksParamSet *destParamSet);
 
+/**
+ * @brief get huks inner error log
+ * @return error huks message
+ */
+HKS_API_EXPORT const char *HksGetErrorMsg(void);
+
 #ifdef __cplusplus
 }
 #endif

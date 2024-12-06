@@ -80,6 +80,19 @@ void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlo
         HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(reply->WriteUint32(response->size));
         HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(reply->WriteBuffer(response->data, static_cast<size_t>(response->size)));
     }
+#ifdef L2_STANDARD
+    uint32_t msgLen = HksGetThreadErrorMsgLen();
+    HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(reply->WriteUint32(msgLen));
+
+    if (msgLen != 0) {
+        const char *msg = HksGetThreadErrorMsg();
+        if (!reply->WriteBuffer(msg, static_cast<size_t>(msgLen))) {
+            HKS_LOG_E("WriteBuffer for errMsg fail!");
+            return;
+        }
+    }
+
+#endif
 }
 
 int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *processInfo)

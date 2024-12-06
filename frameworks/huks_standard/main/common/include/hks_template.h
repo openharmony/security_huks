@@ -41,6 +41,18 @@ if ((RESULT) != HKS_SUCCESS) { \
     break; \
 }
 
+#define HKS_IF_NOT_SUCC_LOGI_RETURN(RESULT, ERROR_CODE, LOG_MESSAGE, ...) \
+if ((RESULT) != HKS_SUCCESS) { \
+    HKS_LOG_I(LOG_MESSAGE, ##__VA_ARGS__); \
+    return (ERROR_CODE); \
+}
+
+#define HKS_IF_NOT_SUCC_LOGI_BREAK(RESULT, LOG_MESSAGE, ...) \
+if ((RESULT) != HKS_SUCCESS) { \
+    HKS_LOG_I(LOG_MESSAGE, ##__VA_ARGS__); \
+    break; \
+}
+
 #define HKS_IF_NOT_SUCC_BREAK(RESULT, ...) \
 if ((RESULT) != HKS_SUCCESS) { \
     break; \
@@ -87,7 +99,7 @@ if ((OBJECT) == HKS_NULL_POINTER) { \
 #define HKS_IF_NOT_TRUE_LOGE_RETURN(BOOL_FUNC, ERROR_CODE) \
 do { \
     if (!(BOOL_FUNC)) { \
-        HKS_LOG_E("%{public}s failed!", #BOOL_FUNC); \
+        HKS_LOG_E("%" LOG_PUBLIC "s failed!", #BOOL_FUNC); \
         return ERROR_CODE; \
     } \
 } while (0)
@@ -95,7 +107,7 @@ do { \
 #define HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(BOOL_FUNC) \
 do { \
     if (!(BOOL_FUNC)) { \
-        HKS_LOG_E("%{public}s failed!", #BOOL_FUNC); \
+        HKS_LOG_E("%" LOG_PUBLIC "s failed!", #BOOL_FUNC); \
         return; \
     } \
 } while (0)

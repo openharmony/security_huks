@@ -43,6 +43,7 @@ ohos_unittest("huks_mock_test") {
   include_dirs += [ "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/include" ]
 
   sources += [
+    "//base/security/huks/frameworks/huks_standard/main/common/src/hks_error_msg.c",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency/posix/hks_mem.c",
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_access.c",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/mock/common/src/huks_core_hal_mock.c",
