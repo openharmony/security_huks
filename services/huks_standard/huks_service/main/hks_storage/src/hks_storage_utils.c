@@ -456,7 +456,7 @@ int32_t HksMakeFullDir(const char *path)
                 }
                 ret = HksMakeDir(curPath);
                 if (ret != HKS_SUCCESS && ret != HKS_ERROR_ALREADY_EXISTS) {
-                    HKS_LOG_E("mkdir %" LOG_PUBLIC "s failed.", curPath);
+                    HKS_LOG_E("mkdir %" LOG_PUBLIC "s failed. ret = %" LOG_PUBLIC "d", curPath, ret);
                     break;
                 }
                 ret = HKS_SUCCESS;
@@ -575,9 +575,10 @@ static int32_t GetPathInfo(const struct HksStoreMaterial *material, const char *
     StandardizePath(fileInfoPath->path);
     ret = HksMakeFullDir(fileInfoPath->path);
     if (isUserPath) {
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NO_PERMISSION, "make full dir failed.")
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NO_PERMISSION, "make full dir failed. ret = %"
+            LOG_PUBLIC"d.", ret)
     } else {
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "make full dir failed.")
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "make full dir failed. ret = %" LOG_PUBLIC"d.", ret)
     }
     if (material->keyAliasPath != NULL) {
         if (strstr(material->keyAliasPath, "../") != NULL) {

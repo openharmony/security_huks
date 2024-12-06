@@ -341,7 +341,7 @@ int32_t HksManageStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo, co
 
         ret = HksStoreDeleteKeyBlob(&fileInfo, &material);
 #endif
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks delete key blob failed, ret = %" LOG_PUBLIC "d.", ret)
+        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "hks delete key blob failed, ret = %" LOG_PUBLIC "d.", ret)
     } while (0);
 
     FileInfoFree(&fileInfo);
