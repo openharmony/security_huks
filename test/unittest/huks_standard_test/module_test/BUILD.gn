@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (C) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -218,6 +218,7 @@ ohos_unittest("huks_module_test") {
 
   defines += [
     "UNAVAILABLE_FOR_SM4_GCM",
+    "UNAVAILABLE_FOR_RSA_FLEX",
     "_HUKS_LOG_ENABLE_",
     "L2_STANDARD",
     "HKS_ENABLE_CLEAN_FILE",

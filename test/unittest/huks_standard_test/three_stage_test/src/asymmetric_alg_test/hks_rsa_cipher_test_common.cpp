@@ -174,3 +174,16 @@ int32_t Unittest::RsaCipher::HksRsaCipherTestCaseAbnormal(const struct HksBlob *
     EXPECT_EQ(HksDeleteKeyForDe(&newKeyAlias, encryptParamSet), HKS_SUCCESS) << "Delete ImportKey failed.";
     return ret;
 }
+
+int32_t Unittest::RsaCipher::HksRsaCipherTest(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    uint32_t purpose, const struct HksBlob *inData, struct HksBlob *outData)
+{
+    uint8_t handle[sizeof(uint64_t)] = { 0 };
+    struct HksBlob handleBlob = { sizeof(uint64_t), handle };
+    int32_t ret = HksInitForDe(keyAlias, paramSet, &handleBlob, nullptr);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    return TestUpdateFinish(&handleBlob, paramSet, purpose, inData, outData);
+}
