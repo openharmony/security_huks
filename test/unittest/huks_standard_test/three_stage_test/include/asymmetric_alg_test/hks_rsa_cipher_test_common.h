@@ -20,6 +20,8 @@
 #include "hks_three_stage_test_common.h"
 namespace Unittest::RsaCipher {
 static const uint32_t RSA_COMMON_SIZE = 1024;
+static const uint32_t RSA_FLEX_KEY_SIZE_1536 = 1536;
+static const uint32_t RSA_INVALID_FLEX_KEY_SIZE_1540 = 1540;
 static const std::string g_inData_5   = "RSA_5";
 static const std::string g_inData_12  = "RSA_12_ttttt";
 static const std::string g_inData_14  = "RSA_14_ttttttt";
@@ -29,6 +31,9 @@ static const std::string g_inData_64  = "RSA_64_tttttttttttttttttttttttttttttttt
 static const std::string g_inData_96  = "RSA_96_ttttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
                                         "tttttttttttttttttttttttttttttttt";
 static const std::string g_inData_128 = "RSA_128_tttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
+                                        "tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt";
+static const std::string g_inData_192 = "RSA_192_tttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
+                                        "tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
                                         "tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt";
 static const std::string g_inData_256 = "RSA_256_tttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
                                         "tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
@@ -49,6 +54,15 @@ static const std::string g_inData_512 = "RSA_512_ttttttttttttttttttttttttttttttt
                                         "tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
                                         "tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt";
 
+static struct HksBlob inData_96 = {
+    g_inData_96.length(),
+    const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData_96.c_str()))
+};
+static struct HksBlob inData_192 = {
+    g_inData_192.length(),
+    const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData_192.c_str()))
+};
+
 int32_t HksRsaCipherTestCase(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet, const struct HksBlob *inData);
 int32_t HksRsaCipherTestCaseAbnormal(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
@@ -59,5 +73,7 @@ int32_t HksRsaCipherTestEncryptAbnormal(const struct HksBlob *keyAlias, const st
     const struct HksBlob *inData, struct HksBlob *cipherText);
 int32_t HksRsaCipherTestDecrypt(const struct HksBlob *keyAlias, const struct HksParamSet *decryptParamSet,
     const struct HksBlob *cipherText, struct HksBlob *plainText, const struct HksBlob *inData);
+int32_t HksRsaCipherTest(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet, uint32_t purpose,
+    const struct HksBlob *inData, struct HksBlob *outData);
 } // namespace Unittest::RsaCipher
 #endif // HKS_RSA_COMMON_TEST_COMMON_H
