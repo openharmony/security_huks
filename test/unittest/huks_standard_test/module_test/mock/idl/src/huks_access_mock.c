@@ -183,3 +183,15 @@ ENABLE_CFI(int32_t HuksAccessGenerateRandom(const struct HksParamSet *paramSet, 
 {
     return HksCoreGenerateRandom(paramSet, random);
 }
+
+ENABLE_CFI(int32_t HuksAccessGetErrorInfo(struct HksBlob *errorInfo))
+{
+    (void)errorInfo;
+    return HKS_SUCCESS;
+}
+
+ENABLE_CFI(int32_t HuksAccessGetStatInfo(struct HksBlob *statInfo))
+{
+    (void)statInfo;
+    return HKS_SUCCESS;
+}

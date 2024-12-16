@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,6 +65,7 @@ static void UseHiLog(uint32_t logLevel, const char *log)
             HILOG_INFO(LOG_ENGINE, "%{public}s", log);
             break;
         case HKS_LOG_LEVEL_E:
+        case HKS_LOG_LEVEL_E_IMPORTANT:
             HILOG_ERROR(LOG_ENGINE, "%{public}s", log);
             break;
         case HKS_LOG_LEVEL_W:
@@ -92,11 +93,18 @@ void HksLog(uint32_t logLevel, const char *format, ...)
     }
     UseHiLog(logLevel, buff);
 
-    if (logLevel != HKS_LOG_LEVEL_E || (g_msgLen + buffLen >= MAX_ERROR_MESSAGE_LEN)) { // donot need record
+    if ((logLevel != HKS_LOG_LEVEL_E && logLevel != HKS_LOG_LEVEL_E_IMPORTANT) ||
+        (g_msgLen + (uint32_t)buffLen >= MAX_ERROR_MESSAGE_LEN)) { // donot need record
         return;
     }
 
-    if (g_msgLen != 0) { // append call chain
+    if (g_msgLen == 0 || logLevel == HKS_LOG_LEVEL_E_IMPORTANT) {
+        if (memcpy_s(g_errMsg + g_msgLen, MAX_ERROR_MESSAGE_LEN, buff, buffLen) != EOK) {
+            HILOG_ERROR(LOG_ENGINE, "[HksLog] copy errMsg buff fail!");
+            return;
+        }
+        g_msgLen += (uint32_t)buffLen;
+    } else {
         va_start(ap, format);
         char *funName = va_arg(ap, char *);
         uint32_t lineNo = va_arg(ap, uint32_t);
@@ -109,16 +117,10 @@ void HksLog(uint32_t logLevel, const char *format, ...)
         int32_t offset = sprintf_s(g_errMsg + g_msgLen, MAX_ERROR_MESSAGE_LEN - g_msgLen, " <%s[%u]",
             funName, lineNo);
         if (offset <= 0) {
-            HILOG_ERROR(LOG_ENGINE, "[HksLog] append call chain fail!");
+            HILOG_ERROR(LOG_ENGINE, "[HksLog] append call chain fail! offset: %d", offset);
             return;
         }
-        g_msgLen += offset;
-    } else {
-        if (memcpy_s(g_errMsg, MAX_ERROR_MESSAGE_LEN, buff, buffLen) != EOK) {
-            HILOG_ERROR(LOG_ENGINE, "[HksLog] copy errMsg buff fail!");
-            return;
-        }
-        g_msgLen = buffLen;
+        g_msgLen += (uint32_t)offset;
     }
 }
 

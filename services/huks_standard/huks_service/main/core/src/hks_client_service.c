@@ -93,6 +93,38 @@ static int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct Hk
     return ret;
 }
 
+static void IfNotSuccAppendHdiErrorInfo(int32_t hdiRet)
+{
+    (void)hdiRet;
+#ifdef L2_STANDARD
+    if (hdiRet == HKS_SUCCESS) {
+        return;
+    }
+    uint32_t errInfoSize = sizeof(struct ErrorInfo);
+    uint8_t *errInfo = (uint8_t *)HksMalloc(errInfoSize);
+    if (errInfo == NULL) {
+        return;
+    }
+    struct HksBlob errMsg = {.size =  errInfoSize, .data = errInfo};
+    int32_t ret = HuksAccessGetErrorInfo(&errMsg);
+    HKS_LOG_I("HksAppendThreadErrMsg, ret = %" LOG_PUBLIC "d", ret);
+    if (ret == HKS_ERROR_API_NOT_SUPPORTED) {
+        HKS_FREE(errInfo);
+        return;
+    }
+    uint32_t offset = sizeof(struct ErrorInfoHead);
+    if (ret == HKS_SUCCESS && CheckBlob(&errMsg) == HKS_SUCCESS && errMsg.size > offset) {
+        HksAppendThreadErrMsg((uint8_t *)(errMsg.data + offset), errMsg.size - offset);
+        PrintErrorMsg();
+    } else {
+        HKS_LOG_E("HuksAccessGetErrorInfo fail, ret = %" LOG_PUBLIC "d, errMsg size = %" LOG_PUBLIC "u",
+            ret, errMsg.size);
+    }
+    HKS_FREE(errInfo);
+#endif
+}
+
+
 #ifdef L2_STANDARD
 static int32_t AddSpecificUserIdToParamSet(const struct HksOperation *operation, struct HksParamSet *paramSet)
 {
@@ -373,6 +405,7 @@ static int32_t CheckAndUpgradeKeyIfNeed(const struct HksProcessInfo *processInfo
         }
         newKey.size = MAX_KEY_SIZE;
         ret = HksDoUpgradeKeyAccess(key, paramSet, &newKey);
+        IfNotSuccAppendHdiErrorInfo(ret);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "do upgrade access failed!")
         ret = HksManageStoreKeyBlob(processInfo, paramSet, keyAlias, &newKey, HKS_STORAGE_TYPE_KEY);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "store upgraded key blob failed!")
@@ -966,6 +999,7 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get keyIn failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HuksAccessGenerateKey(keyAlias, newParamSet, &keyIn, &output);
+        IfNotSuccAppendHdiErrorInfo(ret);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "access level generate key failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksManageStoreKeyBlob(processInfo, newParamSet, keyAlias, &output, HKS_STORAGE_TYPE_KEY);
@@ -1026,6 +1060,7 @@ int32_t HksServiceSign(const struct HksProcessInfo *processInfo, const struct Hk
 
         if (ret == HKS_SUCCESS) {
             ret = HuksAccessSign(&keyFromFile, newParamSet, srcData, signature);
+            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #ifdef SUPPORT_STORAGE_BACKUP
         if (ret == HKS_ERROR_CORRUPT_FILE || ret == HKS_ERROR_FILE_SIZE_FAIL || ret == HKS_ERROR_NOT_EXIST) {
@@ -1034,6 +1069,7 @@ int32_t HksServiceSign(const struct HksProcessInfo *processInfo, const struct Hk
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "sign: get bak key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
 
             ret = HuksAccessSign(&keyFromFile, newParamSet, srcData, signature);
+            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #endif
     } while (0);
@@ -1065,6 +1101,7 @@ int32_t HksServiceVerify(const struct HksProcessInfo *processInfo, const struct 
 
         if (ret == HKS_SUCCESS) {
             ret = HuksAccessVerify(&keyFromFile, newParamSet, srcData, signature);
+            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #ifdef SUPPORT_STORAGE_BACKUP
         if (ret == HKS_ERROR_CORRUPT_FILE || ret == HKS_ERROR_FILE_SIZE_FAIL || ret == HKS_ERROR_NOT_EXIST) {
@@ -1073,6 +1110,7 @@ int32_t HksServiceVerify(const struct HksProcessInfo *processInfo, const struct 
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "verify: get bak key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
 
             ret = HuksAccessVerify(&keyFromFile, newParamSet, srcData, signature);
+            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #endif
     } while (0);
@@ -1099,6 +1137,7 @@ int32_t HksServiceEncrypt(const struct HksProcessInfo *processInfo, const struct
 
         if (ret == HKS_SUCCESS) {
             ret = HuksAccessEncrypt(&keyFromFile, newParamSet, plainText, cipherText);
+            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #ifdef SUPPORT_STORAGE_BACKUP
         if (ret == HKS_ERROR_CORRUPT_FILE || ret == HKS_ERROR_FILE_SIZE_FAIL || ret == HKS_ERROR_NOT_EXIST) {
@@ -1107,6 +1146,7 @@ int32_t HksServiceEncrypt(const struct HksProcessInfo *processInfo, const struct
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
                 "encrypt: get bak key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
             ret = HuksAccessEncrypt(&keyFromFile, newParamSet, plainText, cipherText);
+            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #endif
     } while (0);
@@ -1140,6 +1180,7 @@ int32_t HksServiceDecrypt(const struct HksProcessInfo *processInfo, const struct
 
         if (ret == HKS_SUCCESS) {
             ret = HuksAccessDecrypt(&keyFromFile, newParamSet, cipherText, plainText);
+            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #ifdef SUPPORT_STORAGE_BACKUP
         if (ret == HKS_ERROR_CORRUPT_FILE || ret == HKS_ERROR_FILE_SIZE_FAIL || ret == HKS_ERROR_NOT_EXIST) {
@@ -1148,6 +1189,7 @@ int32_t HksServiceDecrypt(const struct HksProcessInfo *processInfo, const struct
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
                 "decrypt: get bak key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
             ret = HuksAccessDecrypt(&keyFromFile, newParamSet, cipherText, plainText);
+            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #endif
     } while (0);
@@ -1256,6 +1298,7 @@ int32_t HksServiceGetKeyParamSet(const struct HksProcessInfo *processInfo, const
 
         if (ret == HKS_SUCCESS) {
             ret = HuksAccessGetKeyProperties(newParamSet, &keyFromFile);
+            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #ifdef SUPPORT_STORAGE_BACKUP
         if (ret == HKS_ERROR_CORRUPT_FILE || ret == HKS_ERROR_FILE_SIZE_FAIL || ret == HKS_ERROR_NOT_EXIST) {
@@ -1264,6 +1307,7 @@ int32_t HksServiceGetKeyParamSet(const struct HksProcessInfo *processInfo, const
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
                 "get key paramSet: get bak key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
             ret = HuksAccessGetKeyProperties(newParamSet, &keyFromFile);
+            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #endif
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
@@ -1307,6 +1351,7 @@ int32_t HksServiceImportKey(const struct HksProcessInfo *processInfo, const stru
 
         struct HksBlob keyOut = { MAX_KEY_SIZE, keyOutBuffer };
         ret = HuksAccessImportKey(keyAlias, key, newParamSet, &keyOut);
+        IfNotSuccAppendHdiErrorInfo(ret);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("access level import public key failed, ret = %" LOG_PUBLIC "d", ret);
             HKS_FREE(keyOutBuffer);
@@ -1376,6 +1421,7 @@ int32_t HksServiceImportWrappedKey(const struct HksProcessInfo *processInfo, con
         }
         struct HksBlob keyOut = { MAX_KEY_SIZE, keyOutBuffer };
         ret = HuksAccessImportWrappedKey(wrappingKeyAlias, &wrappingKeyFromFile, wrappedKeyData, newParamSet, &keyOut);
+        IfNotSuccAppendHdiErrorInfo(ret);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("access level import wrapped key failed, ret = %" LOG_PUBLIC "d", ret);
             HKS_FREE(keyOutBuffer);
@@ -1408,6 +1454,7 @@ int32_t HksServiceExportPublicKey(const struct HksProcessInfo *processInfo, cons
 
         if (ret == HKS_SUCCESS) {
             ret = HuksAccessExportPublicKey(&keyFromFile, newParamSet, key);
+            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #ifdef SUPPORT_STORAGE_BACKUP
         if (ret == HKS_ERROR_CORRUPT_FILE || ret == HKS_ERROR_FILE_SIZE_FAIL || ret == HKS_ERROR_NOT_EXIST) {
@@ -1416,6 +1463,7 @@ int32_t HksServiceExportPublicKey(const struct HksProcessInfo *processInfo, cons
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
                 "export public: get bak key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
             ret = HuksAccessExportPublicKey(&keyFromFile, newParamSet, key);
+            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #endif
     } while (0);
@@ -1451,6 +1499,7 @@ int32_t HksServiceAgreeKey(const struct HksProcessInfo *processInfo, const struc
 
         if (ret == HKS_SUCCESS) {
             ret = HuksAccessAgreeKey(newParamSet, &keyFromFile, peerPublicKey, agreedKey);
+            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #ifdef SUPPORT_STORAGE_BACKUP
         if (ret == HKS_ERROR_CORRUPT_FILE || ret == HKS_ERROR_FILE_SIZE_FAIL || ret == HKS_ERROR_NOT_EXIST) {
@@ -1458,6 +1507,7 @@ int32_t HksServiceAgreeKey(const struct HksProcessInfo *processInfo, const struc
             ret = GetKeyData(processInfo, privateKey, newParamSet, &keyFromFile, HKS_STORAGE_TYPE_BAK_KEY);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "agree: get bak key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
             ret = HuksAccessAgreeKey(newParamSet, &keyFromFile, peerPublicKey, agreedKey);
+            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #endif
     } while (0);
@@ -1489,6 +1539,7 @@ int32_t HksServiceDeriveKey(const struct HksProcessInfo *processInfo, const stru
 
         if (ret == HKS_SUCCESS) {
             ret = HuksAccessDeriveKey(newParamSet, &keyFromFile, derivedKey);
+            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #ifdef SUPPORT_STORAGE_BACKUP
         if (ret == HKS_ERROR_CORRUPT_FILE || ret == HKS_ERROR_FILE_SIZE_FAIL || ret == HKS_ERROR_NOT_EXIST) {
@@ -1496,6 +1547,7 @@ int32_t HksServiceDeriveKey(const struct HksProcessInfo *processInfo, const stru
             ret = GetKeyData(processInfo, mainKey, newParamSet, &keyFromFile, HKS_STORAGE_TYPE_BAK_KEY);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "derive: get bak key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
             ret = HuksAccessDeriveKey(newParamSet, &keyFromFile, derivedKey);
+            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #endif
     } while (0);
@@ -1527,6 +1579,7 @@ int32_t HksServiceMac(const struct HksProcessInfo *processInfo, const struct Hks
 
         if (ret == HKS_SUCCESS) {
             ret = HuksAccessMac(&keyFromFile, newParamSet, srcData, mac);
+            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #ifdef SUPPORT_STORAGE_BACKUP
         if (ret == HKS_ERROR_CORRUPT_FILE || ret == HKS_ERROR_FILE_SIZE_FAIL || ret == HKS_ERROR_NOT_EXIST) {
@@ -1534,6 +1587,7 @@ int32_t HksServiceMac(const struct HksProcessInfo *processInfo, const struct Hks
             ret = GetKeyData(processInfo, key, newParamSet, &keyFromFile, HKS_STORAGE_TYPE_BAK_KEY);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "mac: get bak key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
             ret = HuksAccessMac(&keyFromFile, newParamSet, srcData, mac);
+            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #endif
     } while (0);
@@ -1549,6 +1603,7 @@ int32_t HksServiceInitialize(void)
     int32_t ret;
     do {
         ret = HuksAccessModuleInit();
+        IfNotSuccAppendHdiErrorInfo(ret);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks core service initialize failed! ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksInitPluginProxy();
@@ -1698,6 +1753,7 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddAppInfoToParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
 #endif
             ret = HuksAccessAttestKey(&keyFromFile, newParamSet, certChain);
+            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #ifdef SUPPORT_STORAGE_BACKUP
         if (ret == HKS_ERROR_CORRUPT_FILE || ret == HKS_ERROR_FILE_SIZE_FAIL || ret == HKS_ERROR_NOT_EXIST) {
@@ -1710,6 +1766,7 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
             ret = GetKeyData(processInfo, keyAlias, newParamSet, &keyFromFile, HKS_STORAGE_TYPE_BAK_KEY);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get bak key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
             ret = HuksAccessAttestKey(&keyFromFile, newParamSet, certChain);
+            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #endif
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAttestKey fail, ret = %" LOG_PUBLIC "d.", ret)
@@ -1760,6 +1817,7 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
 
         if (ret == HKS_SUCCESS) {
             ret = HuksAccessInit(&keyFromFile, newParamSet, handle, token);
+            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #ifdef SUPPORT_STORAGE_BACKUP
         if (ret == HKS_ERROR_CORRUPT_FILE || ret == HKS_ERROR_FILE_SIZE_FAIL || ret == HKS_ERROR_NOT_EXIST) {
@@ -1767,6 +1825,7 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
             ret = GetKeyData(processInfo, key, newParamSet, &keyFromFile, HKS_STORAGE_TYPE_BAK_KEY);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get bak key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
             ret = HuksAccessInit(&keyFromFile, newParamSet, handle, token);
+            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #endif
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Huks Init failed, ret = %" LOG_PUBLIC "d", ret)
@@ -1791,6 +1850,12 @@ static int32_t HksServiceCheckBatchUpdateTime(struct HksOperation *operation)
         return HKS_ERROR_INVALID_TIME_OUT;
     }
     return ret;
+}
+
+static void MarkAndDeleteOperation(struct HksOperation *operation, const struct HksBlob *handle)
+{
+    MarkOperationUnUse(operation);
+    DeleteOperation(handle);
 }
 
 int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
@@ -1823,8 +1888,7 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
             ret = HksServiceCheckBatchUpdateTime(operation);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("HksServiceCheckBatchUpdateTime fail, ret = %" LOG_PUBLIC "d", ret);
-                MarkOperationUnUse(operation);
-                DeleteOperation(handle);
+                MarkAndDeleteOperation(operation, handle);
                 operation = NULL;
                 break;
             }
@@ -1836,10 +1900,10 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HuksAccessUpdate(handle, newParamSet, inData, outData);
+        IfNotSuccAppendHdiErrorInfo(ret);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HuksAccessUpdate fail, ret = %" LOG_PUBLIC "d", ret);
-            MarkOperationUnUse(operation);
-            DeleteOperation(handle);
+            MarkAndDeleteOperation(operation, handle);
             operation = NULL;
             break;
         }
@@ -1916,6 +1980,7 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HuksAccessFinish(handle, newParamSet, inData, &output);
+        IfNotSuccAppendHdiErrorInfo(ret);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAccessFinish fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = StoreOrCopyKeyBlob(newParamSet, processInfo, &output, outData, isNeedStorage);
@@ -1926,8 +1991,7 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
     }
     HKS_FREE_BLOB(output);
     if (operation != NULL) {
-        MarkOperationUnUse(operation);
-        DeleteOperation(handle);
+        MarkAndDeleteOperation(operation, handle);
     }
     HksFreeParamSet(&newParamSet);
     HksReportEvent(__func__, &traceId, processInfo, paramSet, ret);
@@ -1960,10 +2024,10 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HuksAccessAbort(handle, newParamSet);
+        IfNotSuccAppendHdiErrorInfo(ret);
         HKS_IF_NOT_SUCC_LOGE(ret, "HuksAccessAbort fail, ret = %" LOG_PUBLIC "d", ret)
 
-        MarkOperationUnUse(operation);
-        DeleteOperation(handle);
+        MarkAndDeleteOperation(operation, handle);
         operation = NULL;
     } while (0);
     MarkOperationUnUse(operation);
@@ -2003,6 +2067,7 @@ int32_t HksServiceGenerateRandom(const struct HksProcessInfo *processInfo, struc
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append process info failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HuksAccessGenerateRandom(newParamSet, random);
+        IfNotSuccAppendHdiErrorInfo(ret);
     } while (0);
 
     HksFreeParamSet(&newParamSet);
@@ -2219,6 +2284,7 @@ int32_t HksServiceChangeStorageLevel(const struct HksProcessInfo *processInfo, c
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "new key malloc failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HuksAccessUpgradeKey(&oldKey, newParamSet, &newKey);
+        IfNotSuccAppendHdiErrorInfo(ret);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "access upgrade key failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksManageStoreKeyBlob(processInfo, newParamSet, keyAlias, &newKey, HKS_STORAGE_TYPE_KEY);
