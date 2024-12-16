@@ -327,8 +327,9 @@ struct HksStoreKeyInfo {
 
 struct ErrorInfoHead {
     int32_t version;
+    int32_t errorType;
     int32_t innerErrCode;
-    int32_t outterErrCode;
+    int32_t extErrCode;
 };
 
 struct ErrorInfo {

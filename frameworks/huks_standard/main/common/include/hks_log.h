@@ -57,6 +57,7 @@
 enum HksLogLevel {
     HKS_LOG_LEVEL_I,
     HKS_LOG_LEVEL_E,
+    HKS_LOG_LEVEL_E_IMPORTANT,
     HKS_LOG_LEVEL_W,
     HKS_LOG_LEVEL_D,
 };
@@ -70,6 +71,9 @@ enum HksLogLevel {
 #define HKS_LOG_E(fmt, ...) \
         HksLog(HKS_LOG_LEVEL_E, " %s[%u]: " fmt, __func__, __LINE__, ##__VA_ARGS__)
 
+#define HKS_LOG_E_IMPORTANT(fmt, ...) \
+        HksLog(HKS_LOG_LEVEL_E_IMPORTANT, " %s[%u]: " fmt, __func__, __LINE__, ##__VA_ARGS__)
+
 #define HKS_LOG_D(fmt, ...) \
         HksLog(HKS_LOG_LEVEL_D, " %s[%u]: " fmt, __func__, __LINE__, ##__VA_ARGS__)
 
@@ -81,6 +85,8 @@ enum HksLogLevel {
                                                                                             __func__, __LINE__, ##arg)
 #define HKS_LOG_E(fmt, arg...) HILOG_ERROR(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", \
                                                                                             __func__, __LINE__, ##arg)
+#define HKS_LOG_E_IMPORTANT(fmt, arg...) HILOG_ERROR(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", \
+                                                                                            __func__, __LINE__, ##arg)
 #define HKS_LOG_D(fmt, arg...) HILOG_DEBUG(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", \
                                                                                             __func__, __LINE__, ##arg)
 #endif // L2_STANDARD
@@ -89,6 +95,7 @@ enum HksLogLevel {
 #define HKS_LOG_I(...)
 #define HKS_LOG_W(...)
 #define HKS_LOG_E(...)
+#define HKS_LOG_E_IMPORTANT(...)
 #define HKS_LOG_D(...)
 #endif //_HUKS_LOG_ENABLE_
 

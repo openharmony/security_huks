@@ -25,8 +25,8 @@
 
 #include "hks_cfi.h"
 #include "huks_hdi.h"
-#include "v1_0/ihuks.h"
-#include "v1_0/ihuks_types.h"
+#include "v1_1/ihuks.h"
+#include "v1_1/ihuks_types.h"
 
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -385,6 +385,39 @@ ENABLE_CFI(int32_t HuksAccessMac(const struct HksBlob *key, const struct HksPara
     return ret;
 }
 
+static int32_t HdiProxyGetErrorInfo(struct HuksBlob *errorInfo)
+{
+    HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->GetErrorInfo, HKS_ERROR_NULL_POINTER,
+        "Init function is null pointer")
+
+    return g_hksHdiProxyInstance->GetErrorInfo(g_hksHdiProxyInstance, errorInfo);
+}
+
+ENABLE_CFI(int32_t HuksAccessGetErrorInfo(struct HksBlob *errorInfo))
+{
+    int32_t ret = HDF_FAILURE;
+    HDI_CONVERTER_FUNC_GETERRORINFO(errorInfo, ret, HdiProxyGetErrorInfo)
+    return ret;
+}
+
+static int32_t HdiProxyGetStatInfo(struct HuksBlob *statInfo)
+{
+    HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->GetStatInfo, HKS_ERROR_NULL_POINTER,
+        "Init function is null pointer")
+
+    return g_hksHdiProxyInstance->GetStatInfo(g_hksHdiProxyInstance, statInfo);
+}
+
+ENABLE_CFI(int32_t HuksAccessGetStatInfo(struct HksBlob *statInfo))
+{
+    int32_t ret = HDF_FAILURE;
+    HDI_CONVERTER_FUNC_GETSTATINFO(statInfo, ret, HdiProxyGetStatInfo)
+    return ret;
+}
 #ifdef HKS_ENABLE_UPGRADE_KEY
 static int32_t HdiProxyUpgradeKey(const struct HuksBlob *oldKey, const struct HuksParamSet *paramSet,
     struct HuksBlob *newKey)

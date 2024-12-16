@@ -255,6 +255,26 @@ ENABLE_CFI(int32_t HuksAccessMac(const struct HksBlob *key, const struct HksPara
     return g_hksHalDevicePtr->HuksHdiMac(key, paramSet, srcData, mac);
 }
 
+ENABLE_CFI(int32_t HuksAccessGetErrorInfo(struct HksBlob *errorInfo))
+{
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiGetErrorInfo, HKS_ERROR_NULL_POINTER,
+        "GetErrorInfo function is null pointer")
+
+    return g_hksHalDevicePtr->HuksHdiGetErrorInfo(errorInfo);
+}
+
+ENABLE_CFI(int32_t HuksAccessGetStatInfo(struct HksBlob *statInfo))
+{
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiGetStatInfo, HKS_ERROR_NULL_POINTER,
+        "GetErrorInfo function is null pointer")
+
+    return g_hksHalDevicePtr->HuksHdiGetStatInfo(statInfo);
+}
+
 #ifdef HKS_ENABLE_UPGRADE_KEY
 ENABLE_CFI(int32_t HuksAccessUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet,
     struct HksBlob *newKey))

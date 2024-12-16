@@ -34,6 +34,11 @@
 #include "securec.h"
 #define REQUIRED_KEY_NOT_AVAILABLE 126
 
+#define UNKNOWN_TYPE (-1)
+#define DE_TYPE 0
+#define CE_TYPE 1
+#define ECE_TYPE 2
+
 static int32_t GetFileName(const char *path, const char *fileName, char *fullFileName, uint32_t fullFileNameLen)
 {
     if (path != NULL) {
@@ -91,11 +96,26 @@ static int32_t IsValidPath(const char *path)
     return HKS_SUCCESS;
 }
 
+static int32_t GetFilePathType(const char *fileName)
+{
+    if (strstr(fileName, "/data/service/el1") != NULL) {
+        return DE_TYPE;
+    }
+#ifdef L2_STANDARD
+    if (strstr(fileName, HKS_CE_ROOT_PATH) != NULL) {
+        return CE_TYPE;
+    } else if (strstr(fileName, HKS_ECE_ROOT_PATH) != NULL) {
+        return ECE_TYPE;
+    }
+#endif
+    return UNKNOWN_TYPE;
+}
+
 static int32_t IsFileExist(const char *fileName)
 {
     if (access(fileName, F_OK) != 0) {
         if (errno != ENOENT) {
-            HKS_LOG_ERRNO("Check IsFileExist fail!", HKS_ERROR_OPEN_FILE_FAIL);
+            HKS_LOG_FILE_OP_ERRNO("Check IsFileExist fail!", GetFilePathType(fileName));
         }
         return HKS_ERROR_NOT_EXIST;
     }
@@ -121,11 +141,12 @@ static int32_t FileRead(const char *fileName, uint32_t offset, struct HksBlob *b
 
     FILE *fp = fopen(filePath, "rb");
     if (fp ==  NULL) {
+        HKS_LOG_FILE_OP_ERRNO("open file fail,", GetFilePathType(filePath));
         if (errno == REQUIRED_KEY_NOT_AVAILABLE) {
             HKS_LOG_E("Check Permission failed!");
             return HKS_ERROR_NO_PERMISSION;
         }
-        HKS_LOG_ERRNO("open file fail,", HKS_ERROR_OPEN_FILE_FAIL);
+        
         return HKS_ERROR_OPEN_FILE_FAIL;
     }
 
@@ -133,7 +154,7 @@ static int32_t FileRead(const char *fileName, uint32_t offset, struct HksBlob *b
     struct stat fileStat;
     (void)memset_s(&fileStat, sizeof(fileStat), 0, sizeof(fileStat));
     if (stat(fileName, &fileStat) != 0) {
-        HKS_LOG_ERRNO("file stat fail,", HKS_ERROR_OPEN_FILE_FAIL);
+        HKS_LOG_FILE_OP_ERRNO("file stat fail,", GetFilePathType(fileName));
         if (fclose(fp) < 0) {
             HKS_LOG_E("failed to close file, errno = 0x%" LOG_PUBLIC "x", errno);
             return HKS_ERROR_OPEN_FILE_FAIL;
@@ -159,7 +180,7 @@ static uint32_t FileSize(const char *fileName)
     struct stat fileStat;
     (void)memset_s(&fileStat, sizeof(fileStat), 0, sizeof(fileStat));
     if (stat(fileName, &fileStat) != 0) {
-        HKS_LOG_ERRNO("file stat fail,", HKS_ERROR_OPEN_FILE_FAIL);
+        HKS_LOG_FILE_OP_ERRNO("file stat fail,", GetFilePathType(fileName));
         return 0;
     }
 
@@ -191,48 +212,48 @@ static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *b
     /* caller function ensures that the folder exists */
     FILE *fp = fopen(filePath, "wb+");
     if (fp ==  NULL) {
+        HKS_LOG_FILE_OP_ERRNO("open file fail,", GetFilePathType(filePath));
         if (errno == REQUIRED_KEY_NOT_AVAILABLE) {
             HKS_LOG_E("Check Permission failed!");
             return HKS_ERROR_NO_PERMISSION;
         }
-        HKS_LOG_E("open file fail, errno = 0x%" LOG_PUBLIC "x", errno);
         return HKS_ERROR_OPEN_FILE_FAIL;
     }
 
     if (chmod(filePath, S_IRUSR | S_IWUSR) < 0) {
-        HKS_LOG_E("chmod file fail, errno = 0x%" LOG_PUBLIC "x", errno);
+        HKS_LOG_FILE_OP_ERRNO("chmod file fail,", GetFilePathType(filePath));
         fclose(fp);
         return HKS_ERROR_OPEN_FILE_FAIL;
     }
 
     uint32_t size = fwrite(buf, 1, len, fp);
     if (size != len) {
-        HKS_LOG_E("write file size fail, errno = 0x%" LOG_PUBLIC "x", errno);
+        HKS_LOG_FILE_OP_ERRNO("write file size fail,", GetFilePathType(filePath));
         fclose(fp);
         return HKS_ERROR_WRITE_FILE_FAIL;
     }
 
     if (fflush(fp) < 0) {
-        HKS_LOG_E("fflush file fail, errno = 0x%" LOG_PUBLIC "x", errno);
+        HKS_LOG_FILE_OP_ERRNO("fflush file fail,", GetFilePathType(filePath));
         fclose(fp);
         return HKS_ERROR_WRITE_FILE_FAIL;
     }
 
     int fd = fileno(fp);
     if (fd < 0) {
-        HKS_LOG_E("fileno fail, errno = 0x%" LOG_PUBLIC "x", errno);
+        HKS_LOG_FILE_OP_ERRNO("fileno fail,", GetFilePathType(filePath));
         fclose(fp);
         return HKS_ERROR_WRITE_FILE_FAIL;
     }
 
     if (fsync(fd) < 0) {
-        HKS_LOG_E("sync file fail, errno = 0x%" LOG_PUBLIC "x", errno);
+        HKS_LOG_FILE_OP_ERRNO("sync file fail,", GetFilePathType(filePath));
         fclose(fp);
         return HKS_ERROR_WRITE_FILE_FAIL;
     }
 
     if (fclose(fp) < 0) {
-        HKS_LOG_E("failed to close file, errno = 0x%" LOG_PUBLIC "x", errno);
+        HKS_LOG_FILE_OP_ERRNO("failed to close file,", GetFilePathType(filePath));
         return HKS_ERROR_CLOSE_FILE_FAIL;
     }
 
@@ -246,16 +267,17 @@ static int32_t FileRemove(const char *fileName)
 
     struct stat tmp;
     if (stat(fileName, &tmp) != 0) {
-        HKS_LOG_ERRNO("file stat fail,", HKS_ERROR_OPEN_FILE_FAIL);
+        HKS_LOG_FILE_OP_ERRNO("file stat fail,", GetFilePathType(fileName));
         return HKS_ERROR_INTERNAL_ERROR;
     }
 
     if (S_ISDIR(tmp.st_mode)) {
+        HKS_LOG_E("Is Dir!");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     if ((unlink(fileName) != 0) && (errno != ENOENT)) {
-        HKS_LOG_ERRNO("unlink fail,", HKS_ERROR_REMOVE_FILE_FAIL);
+        HKS_LOG_FILE_OP_ERRNO("unlink fail,", GetFilePathType(fileName));
         return HKS_ERROR_REMOVE_FILE_FAIL;
     }
 
@@ -318,7 +340,7 @@ int32_t HksMakeDir(const char *path)
             case EEXIST:
                 return HKS_ERROR_ALREADY_EXISTS;
             default:
-                HKS_LOG_ERRNO("mkdir fail, ret = ", HKS_ERROR_MAKE_DIR_FAIL);
+                HKS_LOG_FILE_OP_ERRNO("mkdir fail,", GetFilePathType(path));
                 return HKS_ERROR_MAKE_DIR_FAIL;
         }
     }
@@ -367,7 +389,7 @@ int32_t HksRemoveDir(const char *dirPath)
     struct stat fileStat;
     int32_t ret = stat(dirPath, &fileStat);
     if (ret != 0) {
-        HKS_LOG_ERRNO("file stat failed", HKS_ERROR_OPEN_FILE_FAIL);
+        HKS_LOG_FILE_OP_ERRNO("file stat failed", GetFilePathType(dirPath));
         return HKS_FAILURE;
     }
 
@@ -473,7 +495,10 @@ int32_t HksDeleteDir(const char *path)
     char deletePath[HKS_MAX_FILE_NAME_LEN] = { 0 };
 
     DIR *dir = opendir(path);
-    HKS_IF_NULL_LOGE_RETURN(dir, HKS_ERROR_OPEN_FILE_FAIL, "open dir failed")
+    if (dir == NULL) {
+        HKS_LOG_FILE_OP_ERRNO("open dir failed", GetFilePathType(path));
+        return HKS_ERROR_OPEN_FILE_FAIL;
+    }
     struct dirent *dire = readdir(dir);
     while (dire != NULL) {
         if (strncpy_s(deletePath, sizeof(deletePath), path, strlen(path)) != EOK) {
