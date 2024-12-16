@@ -191,6 +191,18 @@
                  HDI_ADAPTER_PARAM(random, &randomCore));  \
     HDI_CONVERTER_PARAM_OUT_BLOB(randomCore, random)
 
+#define HDI_CONVERTER_FUNC_GETERRORINFO(errorInfo, ret, func)  \
+    struct HuksBlob errorInfoCore = {0};  \
+    HDI_CONVERTER_PARAM_IN_BLOB((errorInfo), errorInfoCore)  \
+    (ret) = (func)(HDI_ADAPTER_PARAM((errorInfo), &errorInfoCore));  \
+    HDI_CONVERTER_PARAM_OUT_BLOB(errorInfoCore, errorInfo)
+
+#define HDI_CONVERTER_FUNC_GETSTATINFO(statInfo, ret, func)  \
+    struct HuksBlob statInfoCore = {0};  \
+    HDI_CONVERTER_PARAM_IN_BLOB((statInfo), statInfoCore)  \
+    (ret) = (func)(HDI_ADAPTER_PARAM((statInfo), &statInfoCore));  \
+    HDI_CONVERTER_PARAM_OUT_BLOB(statInfoCore, statInfo)
+
 #define HDI_CONVERTER_FUNC_SIGN(key, paramSet, srcData, signature, ret, func) \
     struct HuksBlob keyCore = {0}; \
     struct HuksParamSet paramSetCore = {0}; \
@@ -564,6 +576,20 @@ struct HuksHdi {
      */
     int32_t (*HuksHdiExportChipsetPlatformPublicKey)(const struct HksBlob *salt,
         enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey);
+
+    /**
+     * @brief Get the detailed error information.
+     * @param errorInfo indicates the detailed error information
+     * @return error code, see hks_type.h
+     */
+    int32_t (*HuksHdiGetErrorInfo)(struct HksBlob *errorInfo);
+
+    /**
+     * @brief Get the detailed statistic information.
+     * @param errorInfo indicates the detailed statistic information
+     * @return error code, see hks_type.h
+     */
+    int32_t (*HuksHdiGetStatInfo)(struct HksBlob *statInfo);
 };
 
 #endif /* HUKS_HDI_H */

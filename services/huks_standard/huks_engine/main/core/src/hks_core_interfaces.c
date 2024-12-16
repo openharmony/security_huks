@@ -163,6 +163,17 @@ int32_t HuksHdiUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet
     return HksCoreUpgradeKey(oldKey, paramSet, newKey);
 }
 
+int32_t HuksHdiGetErrorInfo(struct HksBlob *errorInfo)
+{
+    (void)errorInfo;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+}
+
+int32_t HuksHdiGetStatInfo(struct HksBlob *statInfo)
+{
+    (void)statInfo;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+}
 #ifdef _STORAGE_LITE_
 int32_t HuksHdiCalcMacHeader(const struct HksParamSet *paramSet, const struct HksBlob *salt,
     const struct HksBlob *srcData, struct HksBlob *mac)
@@ -202,6 +213,8 @@ struct HuksHdi *HuksCreateHdiDevicePtr(void)
     hdiDevicePtr->HuksHdiDeriveKey        = HuksHdiDeriveKey;
     hdiDevicePtr->HuksHdiMac              = HuksHdiMac;
     hdiDevicePtr->HuksHdiUpgradeKey       = HuksHdiUpgradeKey;
+    hdiDevicePtr->HuksHdiGetErrorInfo     = HuksHdiGetErrorInfo;
+    hdiDevicePtr->HuksHdiGetStatInfo      = HuksHdiGetStatInfo;
 #ifdef _STORAGE_LITE_
     hdiDevicePtr->HuksHdiCalcMacHeader    = HuksHdiCalcMacHeader;
 #endif
