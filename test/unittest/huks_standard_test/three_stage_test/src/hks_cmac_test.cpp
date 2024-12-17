@@ -14,6 +14,7 @@
  */
 
 #include "hks_cmac_test.h"
+#include "hks_iso_iec_test_common.h"
 #include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
@@ -23,6 +24,8 @@
 #endif
 
 using namespace testing::ext;
+using namespace Unittest::IsoIec;
+using namespace OHOS::DistributedHardware;
 namespace Unittest::Cmac {
 class HksCmacTest : public testing::Test {
 public:
@@ -54,10 +57,10 @@ void HksCmacTest::TearDown()
 static struct HksParam g_genParams001[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_CMAC
+        .uint32Param = HKS_ALG_3DES
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_CMAC_KEY_SIZE_128
+        .uint32Param = HKS_3DES_KEY_SIZE_128
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_MAC
@@ -69,7 +72,7 @@ static struct HksParam g_cmacParams001[] = {
         .uint32Param = HKS_ALG_CMAC
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_CMAC_KEY_SIZE_128
+        .uint32Param = HKS_3DES_KEY_SIZE_128
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_MAC
@@ -91,7 +94,7 @@ static struct HksParam g_cmacParams001[] = {
 static struct HksParam g_genParams002[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_CMAC
+        .uint32Param = HKS_ALG_3DES
     }, {
         .tag = HKS_TAG_KEY_SIZE,
         .uint32Param = HKS_3DES_KEY_SIZE_192
@@ -104,10 +107,10 @@ static struct HksParam g_genParams002[] = {
 static struct HksParam g_genParams003[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_CMAC
+        .uint32Param = HKS_ALG_3DES
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_CMAC_KEY_SIZE_128
+        .uint32Param = HKS_3DES_KEY_SIZE_128
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_MAC
@@ -119,7 +122,7 @@ static struct HksParam g_cmacParams003[] = {
         .uint32Param = HKS_ALG_CMAC
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_CMAC_KEY_SIZE_128
+        .uint32Param = HKS_3DES_KEY_SIZE_128
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_MAC
@@ -135,10 +138,10 @@ static struct HksParam g_cmacParams003[] = {
 static struct HksParam g_genParams004[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_CMAC
+        .uint32Param = HKS_ALG_3DES
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_CMAC_KEY_SIZE_128
+        .uint32Param = HKS_3DES_KEY_SIZE_128
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_MAC
@@ -150,7 +153,7 @@ static struct HksParam g_cmacParams004[] = {
         .uint32Param = HKS_ALG_CMAC
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_CMAC_KEY_SIZE_128
+        .uint32Param = HKS_3DES_KEY_SIZE_128
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_MAC
@@ -172,10 +175,10 @@ static struct HksParam g_cmacParams004[] = {
 static struct HksParam g_genParams005[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_CMAC
+        .uint32Param = HKS_ALG_3DES
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_CMAC_KEY_SIZE_128
+        .uint32Param = HKS_3DES_KEY_SIZE_128
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_MAC
@@ -187,7 +190,7 @@ static struct HksParam g_cmacParams005[] = {
         .uint32Param = HKS_ALG_CMAC
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_CMAC_KEY_SIZE_128
+        .uint32Param = HKS_3DES_KEY_SIZE_128
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_MAC
@@ -202,6 +205,43 @@ static struct HksParam g_cmacParams005[] = {
         .blob = {
             .size = IV_SIZE_INVALID,
             .data = (uint8_t *)IV_INVALID
+        }
+    }
+};
+
+static struct HksParam g_genParams006[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_3DES
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_3DES_KEY_SIZE_128
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_MAC
+    }
+};
+static struct HksParam g_cmacParams006[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_CMAC
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_3DES_KEY_SIZE_128
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_MAC
+    }, {
+        .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_CBC
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_ISO_IEC_9797_1
+    }, {
+        .tag = HKS_TAG_IV,
+        .blob = {
+            .size = IV_SIZE,
+            .data = (uint8_t *)IV
         }
     }
 };
@@ -240,10 +280,18 @@ HWTEST_F(HksCmacTest, HksCmacTest001, TestSize.Level0)
     ret = InitParamSet(&cmacParamSet, g_cmacParams001, sizeof(g_cmacParams001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
+    int32_t deviceType;
+    ret = HksGetLocalDeviceType(deviceType);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksGetLocalDeviceType failed.";
+
     uint8_t mac[CMAC_COMMON_SIZE] = { 0 };
     struct HksBlob outData = { CMAC_COMMON_SIZE, mac };
     ret = HksCmacTestCase(&keyAlias, cmacParamSet, &inData, &outData);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksCmacTestCase failed.";
+    if (deviceType == DEVICE_TYPE_WATCH) {
+        EXPECT_EQ(ret, HKS_SUCCESS) << "HksCmacTestCase failed.";
+    } else {
+        EXPECT_EQ(ret, HKS_FAILURE) << "HksCmacTestCase failed.";
+    }
 
     ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
@@ -296,7 +344,7 @@ HWTEST_F(HksCmacTest, HksCmacTest003, TestSize.Level0)
     uint8_t mac[CMAC_COMMON_SIZE] = { 0 };
     struct HksBlob outData = { CMAC_COMMON_SIZE, mac };
     ret = HksCmacTestCase(&keyAlias, cmacParamSet, &inData, &outData);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_MODE) << "HksCmacTestCase failed.";
+    EXPECT_EQ(ret, HKS_ERROR_CHECK_GET_MODE_FAIL) << "HksCmacTestCase failed.";
 
     ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
@@ -329,7 +377,7 @@ HWTEST_F(HksCmacTest, HksCmacTest004, TestSize.Level0)
     uint8_t mac[CMAC_COMMON_SIZE] = { 0 };
     struct HksBlob outData = { CMAC_COMMON_SIZE, mac };
     ret = HksCmacTestCase(&keyAlias, cmacParamSet, &inData, &outData);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_PADDING) << "HksCmacTestCase failed.";
+    EXPECT_EQ(ret, HKS_ERROR_CHECK_GET_PADDING_FAIL) << "HksCmacTestCase failed.";
 
     ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
@@ -363,6 +411,48 @@ HWTEST_F(HksCmacTest, HksCmacTest005, TestSize.Level0)
     struct HksBlob outData = { CMAC_COMMON_SIZE, mac };
     ret = HksCmacTestCase(&keyAlias, cmacParamSet, &inData, &outData);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_IV) << "HksCmacTestCase failed.";
+
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&cmacParamSet);
+}
+
+/**
+ * @tc.name: HksCmacTest.HksCmacTest006
+ * @tc.desc: alg-CMAC pur-MAC size-128 mod-CBC pad-ISO_IEC_9797_1 IV-8.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksCmacTest, HksCmacTest006, TestSize.Level0)
+{
+    char tmpKeyAlias[] = "HksCmacKeyAliasTest006";
+    struct HksBlob keyAlias = { (uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, g_genParams006, sizeof(g_genParams006) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+
+    ret = HksImportKeyForDe(&keyAlias, genParamSet, &keyImported);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
+
+    struct HksParamSet *cmacParamSet = nullptr;
+    ret = InitParamSet(&cmacParamSet, g_cmacParams006, sizeof(g_cmacParams006) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+
+    int32_t deviceType;
+    ret = HksGetLocalDeviceType(deviceType);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksGetLocalDeviceType failed.";
+
+    uint8_t mac[CMAC_COMMON_SIZE] = { 0 };
+    struct HksBlob outData = { CMAC_COMMON_SIZE, mac };
+    ret = HksCmacTestCase(&keyAlias, cmacParamSet, &inData, &outData);
+    if (deviceType == DEVICE_TYPE_WATCH) {
+        EXPECT_EQ(ret, HKS_SUCCESS) << "HksCmacTestCase failed.";
+        EXPECT_EQ(HksMemCmp(outData.data, macData.data, outData.size), HKS_SUCCESS) << "outData not equals macData";
+    } else {
+        EXPECT_EQ(ret, HKS_FAILURE) << "HksCmacTestCase failed.";
+    }
 
     ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";

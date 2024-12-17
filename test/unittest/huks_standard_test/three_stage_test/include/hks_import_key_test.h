@@ -20,6 +20,7 @@
 
 namespace Unittest::ImportKeyTest {
 constexpr uint32_t INVALID_AES_KEY_SIZE = 112;
+constexpr uint32_t INVALID_RSA_KEY_SIZE = 1025;
 static uint8_t rsaKeyData[] = {
     0x01, 0x00, 0x00, 0x00,
     0x00, 0x08, 0x00, 0x00,
