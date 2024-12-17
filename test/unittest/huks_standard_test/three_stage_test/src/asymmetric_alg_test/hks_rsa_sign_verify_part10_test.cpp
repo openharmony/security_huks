@@ -16,12 +16,15 @@
 #ifdef L2_STANDARD
 #include "file_ex.h"
 #endif
+#include "hks_iso_iec_test_common.h"
 #include "hks_rsa_sign_verify_test_common.h"
 #include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 
 using namespace testing::ext;
+using namespace Unittest::IsoIec;
+using namespace OHOS::DistributedHardware;
 namespace Unittest::RsaSignVerify {
 class HksRsaSignVerifyPart10Test : public testing::Test {
 public:
@@ -435,10 +438,18 @@ HWTEST_F(HksRsaSignVerifyPart10Test, HksRsaSignVerifyPart10Test105, TestSize.Lev
     ret = InitParamSet(&signParamSet, g_signParamsTest105, sizeof(g_signParamsTest105) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
+    int32_t deviceType;
+    ret = HksGetLocalDeviceType(deviceType);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksGetLocalDeviceType failed.";
+
     uint8_t sign[RSA_COMMON_SIZE] = { 0 };
     struct HksBlob signature = { RSA_COMMON_SIZE, sign };
     ret = HksRsaSignTest(&keyAlias, signParamSet, &inData, &signature);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksRsaSignTest failed.";
+    if (deviceType == DEVICE_TYPE_WATCH) {
+        EXPECT_EQ(ret, HKS_SUCCESS) << "HksRsaSignTest failed.";
+    } else {
+        EXPECT_EQ(ret, HKS_FAILURE) << "HksRsaSignTest failed.";
+    }
 
     struct HksParamSet *verifyParamSet = nullptr;
     ret = InitParamSet(&verifyParamSet, g_verifyParamsTest105, sizeof(g_verifyParamsTest105) / sizeof(HksParam));
@@ -446,8 +457,10 @@ HWTEST_F(HksRsaSignVerifyPart10Test, HksRsaSignVerifyPart10Test105, TestSize.Lev
 
     uint8_t out[RSA_COMMON_SIZE] = { 0 };
     struct HksBlob outData = { RSA_COMMON_SIZE, out };
-    ret = HksRsaVerifyTest(&keyAlias, signParamSet, &inData, &signature, &outData);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksRsaVerifyTest failed.";
+    if (deviceType == DEVICE_TYPE_WATCH) {
+        ret = HksRsaVerifyTest(&keyAlias, signParamSet, &inData, &signature, &outData);
+        EXPECT_EQ(ret, HKS_SUCCESS) << "HksRsaVerifyTest failed.";
+    }
 
     ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";

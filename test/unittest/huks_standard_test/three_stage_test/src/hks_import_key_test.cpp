@@ -757,6 +757,19 @@ const ImportKeyCaseParams HKS_IMPORT_TEST_051_PARAMS = {
     .importKeyResult = HKS_ERROR_INVALID_KEY_INFO,
 };
 
+/* 052: invalid rsa key */
+const ImportKeyCaseParams HKS_IMPORT_TEST_052_PARAMS = {
+    .params =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = INVALID_RSA_KEY_SIZE },
+            { .tag = HKS_TAG_IMPORT_KEY_TYPE, .uint32Param = HKS_KEY_TYPE_KEY_PAIR },
+        },
+    .keySize = INVALID_RSA_KEY_SIZE / HKS_BITS_PER_BYTE,
+    .importKeyResult = HKS_ERROR_INVALID_KEY_SIZE,
+};
+
 static int32_t ImportTest(const ImportKeyCaseParams &testCaseParams)
 {
     struct HksParamSet *importParamSet = nullptr;
@@ -1073,7 +1086,6 @@ HWTEST_F(HksImportKeyTest, HksImportKeyTest046, TestSize.Level0)
     EXPECT_EQ(ImportTestForDh(HKS_IMPORT_TEST_046_PARAMS, dhKeyDataP), HKS_SUCCESS);
 }
 
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
 HWTEST_F(HksImportKeyTest, HksImportKeyTest047, TestSize.Level0)
 {
     EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_047_PARAMS), HKS_SUCCESS);
@@ -1098,5 +1110,9 @@ HWTEST_F(HksImportKeyTest, HksImportKeyTest051, TestSize.Level0)
 {
     EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_051_PARAMS), HKS_SUCCESS);
 }
-#endif
+
+HWTEST_F(HksImportKeyTest, HksImportKeyTest052, TestSize.Level0)
+{
+    EXPECT_EQ(ImportTestForRsa(HKS_IMPORT_TEST_052_PARAMS), HKS_SUCCESS);
+}
 } // namespace Unittest::ImportKeyTest
