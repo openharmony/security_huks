@@ -332,4 +332,40 @@ int32_t HksRSASignVerifyTestAbnormalCaseNoPadding(struct HksBlob keyAlias,
 
     return HKS_SUCCESS;
 }
+
+int32_t HksRsaSignTest(struct HksBlob *keyAlias, struct HksParamSet *signParamSet, struct HksBlob *plaintext,
+    struct HksBlob *signature)
+{
+    uint8_t handle[sizeof(uint64_t)] = {0};
+    struct HksBlob handleBlob = { sizeof(uint64_t), handle };
+    int32_t ret = HksInitForDe(keyAlias, signParamSet, &handleBlob, nullptr);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    ret = HksTestUpdate(&handleBlob, signParamSet, plaintext);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    return HksFinishForDe(&handleBlob, signParamSet, plaintext, signature);
+}
+
+int32_t HksRsaVerifyTest(struct HksBlob *keyAlias, struct HksParamSet *verifyParamSet, struct HksBlob *plaintext,
+    struct HksBlob *signature, struct HksBlob *outData)
+{
+    uint8_t handle[sizeof(uint64_t)] = {0};
+    struct HksBlob handleBlob = { sizeof(uint64_t), handle };
+    int32_t ret = HksInitForDe(keyAlias, verifyParamSet, &handleBlob, nullptr);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    ret = HksTestUpdate(&handleBlob, verifyParamSet, plaintext);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    return HksFinishForDe(&handleBlob, verifyParamSet, signature, outData);
+}
 }

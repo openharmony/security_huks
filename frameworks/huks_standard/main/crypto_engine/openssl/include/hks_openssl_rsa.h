@@ -26,6 +26,7 @@ extern "C" {
 #endif
 
 #define HKS_RSA_KEYPAIR_CNT 3
+#define HKS_RSA_KEY_BLOCK_SIZE 8
 
 #ifdef HKS_SUPPORT_RSA_C
 #ifdef HKS_SUPPORT_RSA_GENERATE_KEY
