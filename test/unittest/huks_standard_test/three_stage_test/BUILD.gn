@@ -103,16 +103,23 @@ ohos_unittest("huks_UT_test") {
       "src/asymmetric_alg_test/hks_ecc_sign_verify_part1_test.cpp",
       "src/asymmetric_alg_test/hks_rsa_cipher_part1_test.cpp",
       "src/asymmetric_alg_test/hks_rsa_cipher_part2_test.cpp",
+      "src/asymmetric_alg_test/hks_rsa_cipher_part6_test.cpp",
+      "src/asymmetric_alg_test/hks_rsa_sign_verify_part10_test.cpp",
       "src/asymmetric_alg_test/hks_rsa_sign_verify_part1_test.cpp",
       "src/asymmetric_alg_test/hks_rsa_sign_verify_part2_test.cpp",
       "src/asymmetric_alg_test/hks_rsa_sign_verify_part3_test.cpp",
       "src/asymmetric_alg_test/hks_rsa_sign_verify_part4_test.cpp",
       "src/hks_import_sign_verify_test.cpp",
+      "src/symmetric_alg_test/hks_3des_cipher_part1_test.cpp",
+      "src/symmetric_alg_test/hks_3des_cipher_test_common.cpp",
+      "src/symmetric_alg_test/hks_des_cipher_part1_test.cpp",
+      "src/symmetric_alg_test/hks_des_cipher_test_common.cpp",
     ]
   } else {
     sources += [
       # "src/hks_change_storage_level_part1_test.cpp",
       "src/hks_change_storage_level_part2_test.cpp",
+      # "src/hks_cmac_test.cpp",
     ]
   }
 

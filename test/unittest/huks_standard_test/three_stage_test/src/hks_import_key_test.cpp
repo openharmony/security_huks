@@ -697,6 +697,66 @@ const ImportKeyCaseParams HKS_IMPORT_TEST_046_PARAMS = {
     .importKeyResult = HKS_ERROR_INVALID_KEY_INFO,
 };
 
+/* 047: des-64-encrypt-decrypt */
+const ImportKeyCaseParams HKS_IMPORT_TEST_047_PARAMS = {
+    .params =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DES },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_DES_KEY_SIZE_64 },
+        },
+    .keySize = HKS_DES_KEY_SIZE_64 / HKS_BITS_PER_BYTE,
+    .importKeyResult = HKS_SUCCESS,
+};
+
+/* 048: des-128-encrypt-decrypt */
+const ImportKeyCaseParams HKS_IMPORT_TEST_048_PARAMS = {
+    .params =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DES },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_3DES_KEY_SIZE_128 },
+        },
+    .keySize = HKS_3DES_KEY_SIZE_128 / HKS_BITS_PER_BYTE,
+    .importKeyResult = HKS_ERROR_INVALID_KEY_INFO,
+};
+
+/* 049: 3des-128-encrypt-decrypt */
+const ImportKeyCaseParams HKS_IMPORT_TEST_049_PARAMS = {
+    .params =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_3DES },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_3DES_KEY_SIZE_128 },
+        },
+    .keySize = HKS_3DES_KEY_SIZE_128 / HKS_BITS_PER_BYTE,
+    .importKeyResult = HKS_SUCCESS,
+};
+
+/* 050: 3des-192-encrypt-decrypt */
+const ImportKeyCaseParams HKS_IMPORT_TEST_050_PARAMS = {
+    .params =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_3DES },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_3DES_KEY_SIZE_192 },
+        },
+    .keySize = HKS_3DES_KEY_SIZE_192 / HKS_BITS_PER_BYTE,
+    .importKeyResult = HKS_SUCCESS,
+};
+
+/* 051: 3des-256-encrypt-decrypt */
+const ImportKeyCaseParams HKS_IMPORT_TEST_051_PARAMS = {
+    .params =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_3DES },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_256 },
+        },
+    .keySize = HKS_AES_KEY_SIZE_256 / HKS_BITS_PER_BYTE,
+    .importKeyResult = HKS_ERROR_INVALID_KEY_INFO,
+};
+
 static int32_t ImportTest(const ImportKeyCaseParams &testCaseParams)
 {
     struct HksParamSet *importParamSet = nullptr;
@@ -1008,20 +1068,35 @@ HWTEST_F(HksImportKeyTest, HksImportKeyTest045, TestSize.Level0)
 HWTEST_F(HksImportKeyTest, HksImportKeyTest046, TestSize.Level0)
 {
     EXPECT_EQ(ImportTestForDh(HKS_IMPORT_TEST_046_PARAMS, dhKeyDataZero), HKS_SUCCESS);
+    EXPECT_EQ(ImportTestForDh(HKS_IMPORT_TEST_046_PARAMS, dhKeyDataOne), HKS_SUCCESS);
+    EXPECT_EQ(ImportTestForDh(HKS_IMPORT_TEST_046_PARAMS, dhKeyDataPMinusOne), HKS_SUCCESS);
+    EXPECT_EQ(ImportTestForDh(HKS_IMPORT_TEST_046_PARAMS, dhKeyDataP), HKS_SUCCESS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 HWTEST_F(HksImportKeyTest, HksImportKeyTest047, TestSize.Level0)
 {
-    EXPECT_EQ(ImportTestForDh(HKS_IMPORT_TEST_046_PARAMS, dhKeyDataOne), HKS_SUCCESS);
+    EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_047_PARAMS), HKS_SUCCESS);
 }
 
 HWTEST_F(HksImportKeyTest, HksImportKeyTest048, TestSize.Level0)
 {
-    EXPECT_EQ(ImportTestForDh(HKS_IMPORT_TEST_046_PARAMS, dhKeyDataPMinusOne), HKS_SUCCESS);
+    EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_048_PARAMS), HKS_SUCCESS);
 }
 
 HWTEST_F(HksImportKeyTest, HksImportKeyTest049, TestSize.Level0)
 {
-    EXPECT_EQ(ImportTestForDh(HKS_IMPORT_TEST_046_PARAMS, dhKeyDataP), HKS_SUCCESS);
+    EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_049_PARAMS), HKS_SUCCESS);
 }
+
+HWTEST_F(HksImportKeyTest, HksImportKeyTest050, TestSize.Level0)
+{
+    EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_050_PARAMS), HKS_SUCCESS);
+}
+
+HWTEST_F(HksImportKeyTest, HksImportKeyTest051, TestSize.Level0)
+{
+    EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_051_PARAMS), HKS_SUCCESS);
+}
+#endif
 } // namespace Unittest::ImportKeyTest
