@@ -75,53 +75,11 @@ int32_t HksOpenssl3DesGenerateKey(const struct HksKeySpec *spec, struct HksBlob 
 }
 #endif /* HKS_SUPPORT_3DES_GENERATE_KEY */
 
-static int32_t Des3CbcCryptInit(void **cryptoCtx, const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
-    const bool encrypt)
-{
-    switch (usageSpec->padding) {
-#ifdef HKS_SUPPORT_3DES_CBC_NOPADDING
-        case HKS_PADDING_NONE:
-            return DesNoPaddingCryptInit(cryptoCtx, key, usageSpec, encrypt);
-#endif
-        default:
-            HKS_LOG_E("Unsupport padding! mode = 0x%" LOG_PUBLIC "X", usageSpec->padding);
-            return HKS_ERROR_INVALID_PADDING;
-    }
-}
-
-static int32_t Des3CbcCryptUpdate(void *cryptoCtx, const uint8_t padding, const struct HksBlob *message,
-    struct HksBlob *cipherText, const bool encrypt)
-{
-    switch (padding) {
-#ifdef HKS_SUPPORT_3DES_CBC_NOPADDING
-        case HKS_PADDING_NONE:
-            return DesNoPaddingCryptUpdate(cryptoCtx, message, encrypt, cipherText);
-#endif
-        default:
-            HKS_LOG_E("Unsupport padding! mode = 0x%" LOG_PUBLIC "X", padding);
-            return HKS_ERROR_INVALID_PADDING;
-    }
-}
-
-static int32_t Des3CbcCryptFinal(void **cryptoCtx, const uint8_t padding, const struct HksBlob *message,
-    struct HksBlob *cipherText, const bool encrypt)
-{
-    switch (padding) {
-#ifdef HKS_SUPPORT_3DES_CBC_NOPADDING
-        case HKS_PADDING_NONE:
-            return DesNoPaddingCryptFinal(cryptoCtx, message, encrypt, cipherText);
-#endif
-        default:
-            HKS_LOG_E("Unsupport padding! mode = 0x%" LOG_PUBLIC "X", padding);
-            return HKS_ERROR_INVALID_PADDING;
-    }
-}
-
-static int32_t Des3EcbCryptInit(void **cryptoCtx, const struct HksBlob *key,
+static int32_t Des3CryptInit(void **cryptoCtx, const struct HksBlob *key,
     const struct HksUsageSpec *usageSpec, const bool encrypt)
 {
     switch (usageSpec->padding) {
-#ifdef HKS_SUPPORT_3DES_ECB_NOPADDING
+#if defined(HKS_SUPPORT_3DES_CBC_NOPADDING) || defined(HKS_SUPPORT_3DES_ECB_NOPADDING)
         case HKS_PADDING_NONE:
             return DesNoPaddingCryptInit(cryptoCtx, key, usageSpec, encrypt);
 #endif
@@ -131,11 +89,11 @@ static int32_t Des3EcbCryptInit(void **cryptoCtx, const struct HksBlob *key,
     }
 }
 
-static int32_t Des3EcbCryptUpdate(void *cryptoCtx, const uint8_t padding, const struct HksBlob *message,
+static int32_t Des3CryptUpdate(void *cryptoCtx, const uint8_t padding, const struct HksBlob *message,
     struct HksBlob *cipherText, const bool encrypt)
 {
     switch (padding) {
-#ifdef HKS_SUPPORT_3DES_ECB_NOPADDING
+#if defined(HKS_SUPPORT_3DES_CBC_NOPADDING) || defined(HKS_SUPPORT_3DES_ECB_NOPADDING)
         case HKS_PADDING_NONE:
             return DesNoPaddingCryptUpdate(cryptoCtx, message, encrypt, cipherText);
 #endif
@@ -145,11 +103,11 @@ static int32_t Des3EcbCryptUpdate(void *cryptoCtx, const uint8_t padding, const 
     }
 }
 
-static int32_t Des3EcbCryptFinal(void **cryptoCtx, const uint8_t padding, const struct HksBlob *message,
+static int32_t Des3CryptFinal(void **cryptoCtx, const uint8_t padding, const struct HksBlob *message,
     struct HksBlob *cipherText, const bool encrypt)
 {
     switch (padding) {
-#ifdef HKS_SUPPORT_3DES_ECB_NOPADDING
+#if defined(HKS_SUPPORT_3DES_CBC_NOPADDING) || defined(HKS_SUPPORT_3DES_ECB_NOPADDING)
         case HKS_PADDING_NONE:
             return DesNoPaddingCryptFinal(cryptoCtx, message, encrypt, cipherText);
 #endif
@@ -159,7 +117,8 @@ static int32_t Des3EcbCryptFinal(void **cryptoCtx, const uint8_t padding, const 
     }
 }
 
-int32_t HksOpenssl3DesEncryptInit(void **cryptoCtx, const struct HksBlob *key, const struct HksUsageSpec *usageSpec)
+int32_t HksOpenssl3DesCryptoInit(void **cryptoCtx, const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const bool encrypt)
 {
     if (Check3DesKeySize(key) != HKS_SUCCESS || cryptoCtx == NULL || usageSpec == NULL) {
         HKS_LOG_E("Invalid 3des keySize = 0x%" LOG_PUBLIC "X", key->size);
@@ -169,11 +128,11 @@ int32_t HksOpenssl3DesEncryptInit(void **cryptoCtx, const struct HksBlob *key, c
     switch (usageSpec->mode) {
 #if defined(HKS_SUPPORT_3DES_CBC_NOPADDING)
         case HKS_MODE_CBC:
-            return Des3CbcCryptInit(cryptoCtx, key, usageSpec, true);
+            return Des3CryptInit(cryptoCtx, key, usageSpec, encrypt);
 #endif
 #if defined(HKS_SUPPORT_3DES_ECB_NOPADDING)
         case HKS_MODE_ECB:
-            return Des3EcbCryptInit(cryptoCtx, key, usageSpec, true);
+            return Des3CryptInit(cryptoCtx, key, usageSpec, encrypt);
 #endif
         default:
             HKS_LOG_E("Unsupport key alg! mode = 0x%" LOG_PUBLIC "X", usageSpec->mode);
@@ -181,7 +140,8 @@ int32_t HksOpenssl3DesEncryptInit(void **cryptoCtx, const struct HksBlob *key, c
     }
 }
 
-int32_t HksOpenssl3DesEncryptUpdate(void *cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText)
+int32_t HksOpenssl3DesCryptoUpdate(void *cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText,
+    const bool encrypt)
 {
     HKS_IF_NULL_LOGE_RETURN(cryptoCtx, HKS_ERROR_INVALID_ARGUMENT, "Openssl 3DES encrypt update param is null")
     struct HksOpensslDesCtx *desEncryptCtx = (struct HksOpensslDesCtx *)cryptoCtx;
@@ -189,113 +149,15 @@ int32_t HksOpenssl3DesEncryptUpdate(void *cryptoCtx, const struct HksBlob *messa
     switch (desEncryptCtx->mode) {
 #if defined(HKS_SUPPORT_3DES_CBC_NOPADDING)
         case HKS_MODE_CBC:
-            return Des3CbcCryptUpdate(cryptoCtx, desEncryptCtx->padding, message, cipherText, true);
+            return Des3CryptUpdate(cryptoCtx, desEncryptCtx->padding, message, cipherText, encrypt);
 #endif
 #if defined(HKS_SUPPORT_3DES_ECB_NOPADDING)
         case HKS_MODE_ECB:
-            return Des3EcbCryptUpdate(cryptoCtx, desEncryptCtx->padding, message, cipherText, true);
+            return Des3CryptUpdate(cryptoCtx, desEncryptCtx->padding, message, cipherText, encrypt);
 #endif
         default:
             HKS_LOG_E("Unsupport key alg! mode = 0x%" LOG_PUBLIC "X", desEncryptCtx->mode);
             return HKS_ERROR_INVALID_MODE;
-    }
-}
-
-int32_t HksOpenssl3DesEncryptFinal(void **cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText)
-{
-    struct HksOpensslDesCtx *desEncryptCtx = (struct HksOpensslDesCtx *)*cryptoCtx;
-    switch (desEncryptCtx->mode) {
-#if defined(HKS_SUPPORT_3DES_CBC_NOPADDING)
-        case HKS_MODE_CBC:
-            return Des3CbcCryptFinal(cryptoCtx, desEncryptCtx->padding, message, cipherText, true);
-#endif
-#if defined(HKS_SUPPORT_3DES_ECB_NOPADDING)
-        case HKS_MODE_ECB:
-            return Des3EcbCryptFinal(cryptoCtx, desEncryptCtx->padding, message, cipherText, true);
-#endif
-        default:
-            HKS_LOG_E("Unsupport key alg! mode = 0x%" LOG_PUBLIC "X", desEncryptCtx->mode);
-            return HKS_ERROR_INVALID_MODE;
-    }
-}
-
-int32_t HksOpenssl3DesDecryptInit(void **cryptoCtx, const struct HksBlob *key, const struct HksUsageSpec *usageSpec)
-{
-    if (Check3DesKeySize(key) != HKS_SUCCESS || cryptoCtx == NULL || usageSpec == NULL) {
-        HKS_LOG_E("Invalid 3des keySize = 0x%" LOG_PUBLIC "X", key->size);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
-    switch (usageSpec->mode) {
-#if defined(HKS_SUPPORT_3DES_CBC_NOPADDING)
-        case HKS_MODE_CBC:
-            return Des3CbcCryptInit(cryptoCtx, key, usageSpec, false);
-#endif
-#if defined(HKS_SUPPORT_3DES_ECB_NOPADDING)
-        case HKS_MODE_ECB:
-            return Des3EcbCryptInit(cryptoCtx, key, usageSpec, false);
-#endif
-        default:
-            HKS_LOG_E("Unsupport key alg! mode = 0x%" LOG_PUBLIC "X", usageSpec->mode);
-            return HKS_ERROR_INVALID_MODE;
-    }
-}
-
-int32_t HksOpenssl3DesDecryptUpdate(void *cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText)
-{
-    HKS_IF_NULL_LOGE_RETURN(cryptoCtx, HKS_ERROR_INVALID_ARGUMENT, "Openssl 3DES decrypt update param is null")
-    struct HksOpensslDesCtx *desDecryptCtx = (struct HksOpensslDesCtx *)cryptoCtx;
-
-    switch (desDecryptCtx->mode) {
-#if defined(HKS_SUPPORT_3DES_CBC_NOPADDING)
-        case HKS_MODE_CBC:
-            return Des3CbcCryptUpdate(cryptoCtx, desDecryptCtx->padding, message, cipherText, false);
-#endif
-#if defined(HKS_SUPPORT_3DES_ECB_NOPADDING)
-        case HKS_MODE_ECB:
-            return Des3EcbCryptUpdate(cryptoCtx, desDecryptCtx->padding, message, cipherText, false);
-#endif
-        default:
-            HKS_LOG_E("Unsupport key alg! mode = 0x%" LOG_PUBLIC "X", desDecryptCtx->mode);
-            return HKS_ERROR_INVALID_MODE;
-    }
-}
-
-int32_t HksOpenssl3DesDecryptFinal(void **cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText)
-{
-    struct HksOpensslDesCtx *desDecryptCtx = (struct HksOpensslDesCtx *)*cryptoCtx;
-    switch (desDecryptCtx->mode) {
-#if defined(HKS_SUPPORT_3DES_CBC_NOPADDING)
-        case HKS_MODE_CBC:
-            return Des3CbcCryptFinal(cryptoCtx, desDecryptCtx->padding, message, cipherText, false);
-#endif
-#if defined(HKS_SUPPORT_3DES_ECB_NOPADDING)
-        case HKS_MODE_ECB:
-            return Des3EcbCryptFinal(cryptoCtx, desDecryptCtx->padding, message, cipherText, false);
-#endif
-        default:
-            HKS_LOG_E("Unsupport key alg! mode = 0x%" LOG_PUBLIC "X", desDecryptCtx->mode);
-            return HKS_ERROR_INVALID_MODE;
-    }
-}
-
-int32_t HksOpenssl3DesCryptoInit(void **cryptoCtx, const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
-    const bool encrypt)
-{
-    if (encrypt) {
-        return HksOpenssl3DesEncryptInit(cryptoCtx, key, usageSpec);
-    } else {
-        return HksOpenssl3DesDecryptInit(cryptoCtx, key, usageSpec);
-    }
-}
-
-int32_t HksOpenssl3DesCryptoUpdate(void *cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText,
-    const bool encrypt)
-{
-    if (encrypt) {
-        return HksOpenssl3DesEncryptUpdate(cryptoCtx, message, cipherText);
-    } else {
-        return HksOpenssl3DesDecryptUpdate(cryptoCtx, message, cipherText);
     }
 }
 
@@ -303,10 +165,19 @@ int32_t HksOpenssl3DesCryptoFinal(void **cryptoCtx, const struct HksBlob *messag
     struct HksBlob *tagAead, const bool encrypt)
 {
     (void)tagAead;
-    if (encrypt) {
-        return HksOpenssl3DesEncryptFinal(cryptoCtx, message, cipherText);
-    } else {
-        return HksOpenssl3DesDecryptFinal(cryptoCtx, message, cipherText);
+    struct HksOpensslDesCtx *desEncryptCtx = (struct HksOpensslDesCtx *)*cryptoCtx;
+    switch (desEncryptCtx->mode) {
+#if defined(HKS_SUPPORT_3DES_CBC_NOPADDING)
+        case HKS_MODE_CBC:
+            return Des3CryptFinal(cryptoCtx, desEncryptCtx->padding, message, cipherText, encrypt);
+#endif
+#if defined(HKS_SUPPORT_3DES_ECB_NOPADDING)
+        case HKS_MODE_ECB:
+            return Des3CryptFinal(cryptoCtx, desEncryptCtx->padding, message, cipherText, encrypt);
+#endif
+        default:
+            HKS_LOG_E("Unsupport key alg! mode = 0x%" LOG_PUBLIC "X", desEncryptCtx->mode);
+            return HKS_ERROR_INVALID_MODE;
     }
 }
 
