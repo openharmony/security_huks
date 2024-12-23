@@ -79,11 +79,6 @@ const EVP_CIPHER *GetBlockCipherType(uint32_t keySize, uint32_t mode,
     const EVP_CIPHER *(*getCtrCipherType)(uint32_t keySize),
     const EVP_CIPHER *(*getEcbCipherType)(uint32_t keySize));
 
-enum {
-    OPENSSL_CTX_PADDING_NONE = 0, /* set chipher padding none */
-    OPENSSL_CTX_PADDING_ENABLE = 1, /* set chipher padding enable */
-};
-
 int32_t OpensslBlockCipherCryptInit(
     const struct HksBlob *key, const struct HksUsageSpec *usageSpec, bool isEncrypt, void **cryptoCtx,
     const EVP_CIPHER *(*getCipherType)(uint32_t keySize, uint32_t mode));
