@@ -18,6 +18,7 @@
 #include <pthread.h>
 #include <stddef.h>
 
+#include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_template.h"
 
@@ -28,36 +29,51 @@ struct HksMutex {
 HksMutex *HksMutexCreate(void)
 {
     HksMutex *mutex = (HksMutex *)HksMalloc(sizeof(HksMutex));
-    if (mutex != NULL) {
-        int result = pthread_mutex_init(&mutex->mutex, NULL);
-        if (result != 0) {
-            HKS_FREE(mutex);
-            mutex = NULL;
-        }
+    if (mutex == NULL) {
+        HKS_LOG_E("HksMalloc HksMutex fail");
+        return NULL;
+    }
+    int result = pthread_mutex_init(&mutex->mutex, NULL);
+    if (result != 0) {
+        HKS_LOG_E("pthread_mutex_init fail %" LOG_PUBLIC "d", result);
+        HKS_FREE(mutex);
+        mutex = NULL;
     }
     return mutex;
 }
 
 int32_t HksMutexLock(HksMutex *mutex)
 {
-    HKS_IF_NULL_RETURN(mutex, 1)
+    HKS_IF_NULL_LOGE_RETURN(mutex, HKS_ERROR_NULL_POINTER, "NULL mutex in HksMutexLock")
 
-    return pthread_mutex_lock(&mutex->mutex);
+    int result = pthread_mutex_lock(&mutex->mutex);
+    if (result != 0) {
+        HKS_LOG_E("pthread_mutex_lock fail %" LOG_PUBLIC "d", result);
+    }
+    return result;
 }
 
 int32_t HksMutexUnlock(HksMutex *mutex)
 {
-    HKS_IF_NULL_RETURN(mutex, 1)
+    HKS_IF_NULL_LOGE_RETURN(mutex, HKS_ERROR_NULL_POINTER, "NULL mutex in HksMutexUnlock")
 
-    return pthread_mutex_unlock(&mutex->mutex);
+    int result = pthread_mutex_unlock(&mutex->mutex);
+    if (result != 0) {
+        HKS_LOG_E("pthread_mutex_unlock fail %" LOG_PUBLIC "d", result);
+    }
+    return result;
 }
 
 void HksMutexClose(HksMutex *mutex)
 {
     if (mutex == NULL) {
+        HKS_LOG_E("NULL mutex in HksMutexClose");
         return;
     }
 
-    pthread_mutex_destroy(&mutex->mutex);
+    int result = pthread_mutex_destroy(&mutex->mutex);
+    if (result != 0) {
+        HKS_LOG_E("pthread_mutex_destroy fail %" LOG_PUBLIC "d", result);
+    }
     HKS_FREE(mutex);
 }
