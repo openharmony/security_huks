@@ -17,6 +17,7 @@
 
 #include "hks_keynode.h"
 
+#include <stdatomic.h>
 #include <stddef.h>
 
 #include "hks_crypto_hal.h"
@@ -41,7 +42,7 @@
 #endif
 
 static struct DoubleList g_keyNodeList = { &g_keyNodeList, &g_keyNodeList };
-static uint32_t g_keyNodeCount = 0;
+static volatile atomic_uint g_keyNodeCount = 0;
 static HksMutex *g_huksMutex = NULL;  /* global mutex using in keynode */
 
 HksMutex *HksGetHuksMutex(void)
@@ -224,8 +225,8 @@ static void DeleteKeyNodeFree(struct HuksKeyNode *keyNode)
     FreeRuntimeParamSet(&keyNode->runtimeParamSet);
     FreeRuntimeParamSet(&keyNode->authRuntimeParamSet);
     HKS_FREE(keyNode);
-    --g_keyNodeCount;
-    HKS_LOG_I("delete keynode count:%" LOG_PUBLIC "u", g_keyNodeCount);
+    atomic_fetch_sub(&g_keyNodeCount, 1);
+    HKS_LOG_I("delete keynode count:%" LOG_PUBLIC "u", atomic_load(&g_keyNodeCount));
 }
 
 static int32_t BuildRuntimeParamSet(const struct HksParamSet *inParamSet, struct HksParamSet **outParamSet)
@@ -277,13 +278,16 @@ static int32_t BuildRuntimeParamSet(const struct HksParamSet *inParamSet, struct
 
 static int32_t HksCheckUniqueHandle(uint64_t handle)
 {
+    HksMutexLock(HksGetHuksMutex());
     struct HuksKeyNode *keyNode = NULL;
     HKS_DLIST_ITER(keyNode, &g_keyNodeList) {
         if ((keyNode != NULL) && (keyNode->handle == handle)) {
             HKS_LOG_E("The handle already exists!");
+            HksMutexUnlock(HksGetHuksMutex());
             return HKS_FAILURE;
         }
     }
+    HksMutexUnlock(HksGetHuksMutex());
     return HKS_SUCCESS;
 }
 
@@ -313,7 +317,7 @@ static int32_t GenerateKeyNodeHandle(uint64_t *handle)
 
 static void DeleteFirstTimeOutBatchKeyNode(void)
 {
-    if (g_keyNodeCount < MAX_KEY_NODES_COUNT) {
+    if (atomic_load(&g_keyNodeCount) < MAX_KEY_NODES_COUNT) {
         return;
     }
     struct HuksKeyNode *keyNode = NULL;
@@ -366,7 +370,7 @@ static bool DeleteFirstKeyNodeForTokenId(uint32_t tokenId)
 
 static int32_t DeleteKeyNodeForTokenIdIfExceedLimit(uint32_t tokenId)
 {
-    if (g_keyNodeCount < MAX_KEY_NODES_EACH_TOKEN_ID) {
+    if (atomic_load(&g_keyNodeCount) < MAX_KEY_NODES_EACH_TOKEN_ID) {
         return HKS_SUCCESS;
     }
     uint32_t ownedNodeCount = 0;
@@ -407,7 +411,7 @@ static int32_t AddKeyNode(struct HuksKeyNode *keyNode, uint32_t tokenId)
         ret = DeleteKeyNodeForTokenIdIfExceedLimit(tokenId);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckKeyNodeEachTokenId fail %" LOG_PUBLIC "d", ret)
 
-        if (g_keyNodeCount >= MAX_KEY_NODES_COUNT) {
+        if (atomic_load(&g_keyNodeCount) >= MAX_KEY_NODES_COUNT) {
             HKS_LOG_E("maximum number of keyNode reached");
             if (!DeleteFirstKeyNode()) {
                 HKS_LOG_E("DeleteFirstKeyNode fail!");
@@ -417,8 +421,8 @@ static int32_t AddKeyNode(struct HuksKeyNode *keyNode, uint32_t tokenId)
         }
 
         AddNodeAtDoubleListTail(&g_keyNodeList, &keyNode->listHead);
-        ++g_keyNodeCount;
-        HKS_LOG_I("add keynode count:%" LOG_PUBLIC "u", g_keyNodeCount);
+        atomic_fetch_add(&g_keyNodeCount, 1);
+        HKS_LOG_I("add keynode count:%" LOG_PUBLIC "u", atomic_load(&g_keyNodeCount));
     } while (0);
 
     HksMutexUnlock(HksGetHuksMutex());
