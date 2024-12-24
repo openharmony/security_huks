@@ -31,6 +31,11 @@ enum HksKeyAlgMode {
     HKS_ALGORITHM_X25519_MODE = 6,
 };
 
+enum {
+    OPENSSL_CTX_PADDING_NONE = 0, /* set chipher padding none */
+    OPENSSL_CTX_PADDING_ENABLE = 1, /* set chipher padding enable */
+};
+
 struct HksKeySpec {
     uint32_t algType;
     uint32_t keyLen;
