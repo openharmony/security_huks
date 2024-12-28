@@ -70,6 +70,7 @@
           "bundle_framework",
           "c_utils",
           "common_event_service",
+          "device_manager",
           "hisysevent",
           "hitrace",
           "hilog",

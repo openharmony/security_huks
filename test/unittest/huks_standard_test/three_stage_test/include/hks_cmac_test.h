@@ -29,10 +29,19 @@ static uint8_t IV_INVALID[IV_SIZE_INVALID] = { 0 };
 static const std::string g_inData = "Hks_CMAC_Test_000000000000000000000000000000000000000000000000000000000000000000"
                                     "00000000000000000000000000000000000000000000000000000000000000000000000000000000"
                                     "0000000000000000000000000000000000000000000000000000000000000000000000000_string";
-
 static struct HksBlob inData = {
     (uint32_t)g_inData.length(),
     const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
 };
+
+uint8_t keyData[16] = {
+    0xBE, 0x61, 0x20, 0xA1, 0x63, 0x4A, 0x7F, 0xEA, 0xD0, 0x3E, 0x2E, 0x40, 0xD3, 0x4F, 0x56, 0x41
+};
+static struct HksBlob keyImported = { 16, keyData };
+
+uint8_t mac0[8] = {
+    0xF9, 0x31, 0xA7, 0x2D, 0x0F, 0xB6, 0x38, 0xE6
+};
+static struct HksBlob macData = { 8, mac0 };
 }
 #endif // HKS_CMAC_TEST_H
