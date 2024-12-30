@@ -15,6 +15,7 @@
 
 #include "hks_keyblob.h"
 
+#include <stdatomic.h>
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -606,7 +607,7 @@ int32_t HksDecryptKeyBlob(const struct HksBlob *aad, struct HksParamSet *paramSe
 
 static HksMutex *g_genAtKeyMutex = NULL;
 static struct HksAuthTokenKey g_cachedAuthTokenKey;
-static volatile bool g_isInitAuthTokenKey = false;
+static volatile atomic_bool g_isInitAuthTokenKey = false;
 
 /* temporarily use default hard-coded AT key by disable HKS_SUPPORT_GET_AT_KEY.
  * while in real scenario,it will generate random only in memory(in TEE)
@@ -654,16 +655,16 @@ static int32_t GenerateAuthTokenKey(void)
 
 int32_t HksCoreInitAuthTokenKey(void)
 {
-    if (g_isInitAuthTokenKey == false) {
+    if (atomic_load(&g_isInitAuthTokenKey) == false) {
         if (GenerateAuthTokenKey() == HKS_SUCCESS) {
             HKS_LOG_I("generate At key success!");
-            g_isInitAuthTokenKey = true;
+            atomic_store(&g_isInitAuthTokenKey, true);
             return HKS_SUCCESS;
         }
     }
 
     HKS_LOG_E("generate auth token key failed at core init stage");
-    g_isInitAuthTokenKey = false;
+    atomic_store(&g_isInitAuthTokenKey, false);
 
     if (g_genAtKeyMutex == NULL) {
         g_genAtKeyMutex = HksMutexCreate();
@@ -681,7 +682,7 @@ void HksCoreDestroyAuthTokenKey(void)
         HksMutexClose(g_genAtKeyMutex);
         g_genAtKeyMutex = NULL;
     }
-    g_isInitAuthTokenKey = false;
+    atomic_store(&g_isInitAuthTokenKey, false);
     (void)memset_s(&g_cachedAuthTokenKey, sizeof(struct HksAuthTokenKey), 0, sizeof(struct HksAuthTokenKey));
 }
 
@@ -689,18 +690,18 @@ int32_t HksGetAuthTokenKey(struct HksAuthTokenKey *authTokenKey)
 {
     HKS_IF_NULL_LOGE_RETURN(authTokenKey, HKS_ERROR_NULL_POINTER, "authTokenKey param is null!")
 
-    if (g_isInitAuthTokenKey == false) {
+    if (atomic_load(&g_isInitAuthTokenKey) == false) {
         (void)HksMutexLock(g_genAtKeyMutex);
 
         // double check for avoid duplicate create in multi thread case
-        if (g_isInitAuthTokenKey == false) {
+        if (atomic_load(&g_isInitAuthTokenKey) == false) {
             if (GenerateAuthTokenKey() != HKS_SUCCESS) {
                 HKS_LOG_E("generate auth token key failed");
                 (void)HksMutexUnlock(g_genAtKeyMutex);
                 return HKS_FAILURE;
             }
             HKS_LOG_I("generate At key success!");
-            g_isInitAuthTokenKey = true;
+            atomic_store(&g_isInitAuthTokenKey, true);
         }
         (void)HksMutexUnlock(g_genAtKeyMutex);
     }
