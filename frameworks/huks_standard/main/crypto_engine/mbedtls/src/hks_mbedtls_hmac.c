@@ -28,6 +28,7 @@
 #include "hks_mbedtls_hmac.h"
 
 #include <mbedtls/md.h>
+#include <securec.h>
 
 #include "hks_common_check.h"
 #include "hks_log.h"

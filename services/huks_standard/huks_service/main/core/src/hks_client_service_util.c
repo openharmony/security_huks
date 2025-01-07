@@ -23,6 +23,8 @@
 #include "hks_template.h"
 #include "hks_storage_manager.h"
 
+#include "securec.h"
+
 #ifdef _STORAGE_LITE_
 #include "hks_storage_adapter.h"
 #endif

@@ -20,6 +20,8 @@
 
 #include "ipc_skeleton.h"
 
+#include <securec.h>
+
 const uint32_t MAX_MALLOC_LEN = 1 * 1024 * 1024; /* max malloc size 1 MB */
 
 static const char *FEATURE_GetName(Feature *feature);

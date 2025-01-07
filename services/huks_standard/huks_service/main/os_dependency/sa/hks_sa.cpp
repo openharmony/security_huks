@@ -18,6 +18,7 @@
 #include <ipc_skeleton.h>
 #include <iservice_registry.h>
 #include <mutex>
+#include <securec.h>
 #include <set>
 #include <string_ex.h>
 #include <system_ability_definition.h>
@@ -72,13 +73,6 @@ REGISTER_SYSTEM_ABILITY_BY_ID(HksService, SA_ID_KEYSTORE_SERVICE, true);
 std::mutex HksService::instanceLock;
 sptr<HksService> HksService::instance;
 const uint32_t MAX_MALLOC_LEN = 1 * 1024 * 1024; /* max malloc size 1 MB */
-
-static std::mutex g_requestMutex {};
-
-const std::set<uint32_t> g_asyncCodeSet = { HKS_MSG_GEN_KEY, HKS_MSG_IMPORT_KEY, HKS_MSG_IMPORT_WRAPPED_KEY };
-constexpr uint32_t HUKS_IPC_THREAD_NUM = 16;
-constexpr uint32_t HUKS_IPC_THREAD_NUM_LIMIT = 14;
-std::atomic_uint32_t HksIpcCounter::count {};
 
 #ifdef SUPPORT_COMMON_EVENT
 const uint32_t MAX_DELAY_TIMES = 100;
@@ -284,18 +278,6 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
 #ifdef L2_STANDARD
     HksClearThreadErrorMsg();
 #endif
-    g_requestMutex.lock();
-
-    if (HksIpcCounter::count >= HUKS_IPC_THREAD_NUM_LIMIT && g_asyncCodeSet.count(code) == 1) {
-        HKS_LOG_E("ipc thread num is insufficient");
-        HksSendResponse(reinterpret_cast<const uint8_t *>(&reply), HUKS_ERR_CODE_SESSION_LIMIT, nullptr);
-        g_requestMutex.unlock();
-        return HUKS_ERR_CODE_SESSION_LIMIT;
-    }
-
-    HksIpcCounter ipcCounter {};
-    g_requestMutex.unlock();
-
     HksInitMemPolicy();
 
     uint64_t enterTime = 0;

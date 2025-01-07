@@ -21,6 +21,7 @@
 #include "iproxy_client.h"
 #include "registry.h"
 
+#include <securec.h>
 #include <unistd.h>
 
 static int32_t SynchronizeOutput(const struct HksIpcHandle *reply, struct HksBlob *outBlob)

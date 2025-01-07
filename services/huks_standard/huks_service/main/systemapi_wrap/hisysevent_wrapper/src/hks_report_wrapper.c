@@ -21,6 +21,8 @@
 #include "hks_type.h"
 #include "hks_type_inner.h"
 
+#include "securec.h"
+
 #define EXTRA_DATA_SIZE 512
 
 #define STRING_TAG_KEY_SIZE "keySize"

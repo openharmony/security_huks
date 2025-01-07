@@ -25,6 +25,8 @@
 #include "hks_storage_adapter.h"
 #include "hks_template.h"
 
+#include <securec.h>
+
 static const char g_deriveKekTag[] = "derive_key";
 static const char g_deriveNonceTag[] = "derive_nonce";
 

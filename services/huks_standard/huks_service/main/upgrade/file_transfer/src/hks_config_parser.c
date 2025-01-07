@@ -16,6 +16,7 @@
 #include "hks_config_parser.h"
 
 #include <inttypes.h>
+#include <securec.h>
 #include <stdint.h>
 #include <string.h>
 #include <unistd.h>
