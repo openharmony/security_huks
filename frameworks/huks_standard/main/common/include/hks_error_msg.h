@@ -27,7 +27,7 @@ void HksClearThreadErrorMsg(void);
 
 void PrintErrorMsg(void);
 
-void HksLog(uint32_t logLevel, const char *format, ...);
+void HksLog(uint32_t logLevel, const char *format, ...) __attribute__((format(printf, 2, 3)));
 
 void HksAppendThreadErrMsg(const uint8_t *buff, uint32_t buffLen);
 

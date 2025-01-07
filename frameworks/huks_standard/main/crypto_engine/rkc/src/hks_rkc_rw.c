@@ -25,6 +25,8 @@
 #include "hks_storage_manager.h"
 #include "hks_template.h"
 
+#include <securec.h>
+
 #define HKS_RKC_HASH_LEN 32         /* the hash value length of root key component */
 #define HKS_KSF_BUF_LEN 258         /* the length of rkc or mk keystore buffer */
 #define USER_ID_ROOT_DEFAULT          "0"

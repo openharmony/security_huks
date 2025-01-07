@@ -26,6 +26,8 @@
 #include "hks_log.h"
 #include "hks_template.h"
 
+#include "securec.h"
+
 #ifdef _CUT_AUTHENTICATE_
 #undef HKS_SUPPORT_RSA_C
 #undef HKS_SUPPORT_ECC_C

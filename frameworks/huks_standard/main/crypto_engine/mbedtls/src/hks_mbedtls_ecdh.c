@@ -32,6 +32,7 @@
 #include <mbedtls/ecdh.h>
 #include <mbedtls/ecp.h>
 #include <mbedtls/entropy.h>
+#include <securec.h>
 
 #include "hks_log.h"
 #include "hks_mbedtls_common.h"

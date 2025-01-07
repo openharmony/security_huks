@@ -25,6 +25,8 @@
 #include "hks_mem.h"
 #include "hks_storage_manager.h"
 
+#include "securec.h"
+
 #ifdef L2_STANDARD
 static const uint32_t CHANGE_STORAGE_LEVEL_CFG_LIST[] = HUKS_CHANGE_STORAGE_LEVEL_CONFIG;
 #endif

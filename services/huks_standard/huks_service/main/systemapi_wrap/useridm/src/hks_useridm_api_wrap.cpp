@@ -151,8 +151,12 @@ void GetSecUserInfoCallbackImplHuks::OnSecUserInfo(const USER_IAM::SecUserInfo &
     HksConditionNotify(condition);
 }
 
-int32_t HksUserIdmGetSecInfo(int32_t userId, struct SecInfoWrap **outSecInfo)
+int32_t HksUserIdmGetSecInfo(int32_t userId, struct SecInfoWrap **outSecInfo) // callback
 {
+    OHOS::Security::Hks::HksIpcCounter counter{};
+    int32_t ret = counter.Wait();
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksIpcCounter::Wait fail %" LOG_PUBLIC "d", ret)
+
     HKS_IF_NULL_LOGE_RETURN(outSecInfo, HKS_ERROR_INVALID_ARGUMENT, "HksUserIdmGetSecInfo arguments invalid!")
 
     HksCondition *condition = HksConditionCreate();
@@ -166,7 +170,7 @@ int32_t HksUserIdmGetSecInfo(int32_t userId, struct SecInfoWrap **outSecInfo)
     }
     std::shared_ptr<USER_IAM::GetSecUserInfoCallback> callback = mCallback;
 
-    int32_t ret = USER_IAM::UserIdmClient::GetInstance().GetSecUserInfo(userId, callback);
+    ret = USER_IAM::UserIdmClient::GetInstance().GetSecUserInfo(userId, callback);
     int32_t waitRet = HksConditionWait(condition);
     if (waitRet != HKS_SUCCESS) {
         HKS_LOG_E("HksConditionWait GetSecUserInfo fail! %" LOG_PUBLIC "d", waitRet);
@@ -207,8 +211,12 @@ void GetCredentialInfoCallbackImplHuks::OnCredentialInfo(const std::vector<USER_
     HksConditionNotify(condition);
 }
 
-int32_t HksUserIdmGetAuthInfoNum(int32_t userId, enum HksUserAuthType hksAuthType, uint32_t *numOfAuthInfo)
+int32_t HksUserIdmGetAuthInfoNum(int32_t userId, enum HksUserAuthType hksAuthType, uint32_t *numOfAuthInfo) // callback
 {
+    OHOS::Security::Hks::HksIpcCounter counter{};
+    int32_t ret = counter.Wait();
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksIpcCounter::Wait fail %" LOG_PUBLIC "d", ret)
+
     HKS_IF_NULL_LOGE_RETURN(numOfAuthInfo, HKS_ERROR_INVALID_ARGUMENT, "HksGetAuthInfo arguments invalid!")
 
     HksCondition *condition = HksConditionCreate();
@@ -224,7 +232,7 @@ int32_t HksUserIdmGetAuthInfoNum(int32_t userId, enum HksUserAuthType hksAuthTyp
 
     enum USER_IAM::AuthType authType;
 
-    int32_t ret = ConvertFromHksAuthType(hksAuthType, &authType);
+    ret = ConvertFromHksAuthType(hksAuthType, &authType);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("ConvertFromHksAuthType failed: %" LOG_PUBLIC "d!", ret);
         HksConditionDestroy(condition);

@@ -30,6 +30,8 @@
 #include <mbedtls/entropy.h>
 #include <mbedtls/gcm.h>
 
+#include <securec.h>
+
 #include "hks_log.h"
 #include "hks_mbedtls_common.h"
 #include "hks_mem.h"

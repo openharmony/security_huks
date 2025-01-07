@@ -34,6 +34,7 @@
 #include "hks_template.h"
 
 #include <crypto/ecx.h>
+#include <securec.h>
 
 #define CRYPTO_SUCCESS 1
 #define ED25519_PRIVATE_KEY_LEN 32

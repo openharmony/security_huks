@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <iostream>
+#include <securec.h>
 
 #include "file_ex.h"
 #include "hks_ability.h"
