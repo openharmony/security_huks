@@ -21,6 +21,8 @@
 
 #include "hks_useridm_api_wrap.h"
 
+#include <array>
+#include <utility>
 #include "hks_condition.h"
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -33,42 +35,52 @@
 
 static constexpr const uint32_t g_maxEnrolledLen = 256;
 
+static constexpr std::array g_supportIamAuthType = {
+    USER_IAM::AuthType::PIN, USER_IAM::AuthType::FACE, USER_IAM::AuthType::FINGERPRINT
+};
+
+static constexpr std::array g_hksIamAuthTypeConvertMap = {
+    std::pair<HksUserAuthType, USER_IAM::AuthType>(HKS_USER_AUTH_TYPE_PIN, USER_IAM::AuthType::PIN),
+    std::pair<HksUserAuthType, USER_IAM::AuthType>(HKS_USER_AUTH_TYPE_FACE, USER_IAM::AuthType::FACE),
+    std::pair<HksUserAuthType, USER_IAM::AuthType>(HKS_USER_AUTH_TYPE_FINGERPRINT, USER_IAM::AuthType::FINGERPRINT),
+};
+
 static int32_t ConvertFromHksAuthType(enum HksUserAuthType hksAuthType, enum USER_IAM::AuthType *authType)
 {
-    switch (hksAuthType) {
-        case HKS_USER_AUTH_TYPE_FACE:
-            *authType = USER_IAM::AuthType::FACE;
-            break;
-        case HKS_USER_AUTH_TYPE_PIN:
-            *authType = USER_IAM::AuthType::PIN;
-            break;
-        case HKS_USER_AUTH_TYPE_FINGERPRINT:
-            *authType = USER_IAM::AuthType::FINGERPRINT;
-            break;
-        default:
-            HKS_LOG_E("Invalid hksAuthType!");
-            return HKS_ERROR_NOT_SUPPORTED;
+    for (auto[hksType, iamType] : g_hksIamAuthTypeConvertMap) {
+        if (hksAuthType == hksType) {
+            *authType = iamType;
+            return HKS_SUCCESS;
+        }
     }
-    return HKS_SUCCESS;
+    HKS_LOG_E("Invalid hksAuthType: %" LOG_PUBLIC "d!", hksAuthType);
+    return HKS_ERROR_NOT_SUPPORTED;
 }
 
-static int32_t ConvertToHksAuthType(enum USER_IAM::AuthType authType, enum HksUserAuthType *hksAuthType)
+static int32_t ConvertToHksAuthType(enum USER_IAM::AuthType iamAuthType, enum HksUserAuthType *hksAuthType)
 {
-    switch (authType) {
-        case USER_IAM::AuthType::FACE:
-            *hksAuthType = HKS_USER_AUTH_TYPE_FACE;
-            break;
-        case USER_IAM::AuthType::PIN:
-            *hksAuthType =  HKS_USER_AUTH_TYPE_PIN;
-            break;
-        case USER_IAM::AuthType::FINGERPRINT:
-            *hksAuthType =  HKS_USER_AUTH_TYPE_FINGERPRINT;
-            break;
-        default:
-            HKS_LOG_E("Invalid authType!");
-            return HKS_ERROR_NOT_SUPPORTED;
+    for (auto[hksType, iamType] : g_hksIamAuthTypeConvertMap) {
+        if (iamAuthType == iamType) {
+            *hksAuthType = hksType;
+            return HKS_SUCCESS;
+        }
     }
-    return HKS_SUCCESS;
+    HKS_LOG_E("Invalid iamAuthType: %" LOG_PUBLIC "d!", iamAuthType);
+    return HKS_ERROR_NOT_SUPPORTED;
+}
+
+static uint32_t GetSupportAuthTypeNum(const USER_IAM::SecUserInfo &info)
+{
+    uint32_t supportAuthNum = 0;
+    for (const USER_IAM::EnrolledInfo &tmp : info.enrolledInfo) {
+        auto it = std::find(g_supportIamAuthType.begin(), g_supportIamAuthType.end(), tmp.authType);
+        if (it != g_supportIamAuthType.end()) {
+            supportAuthNum++;
+        } else {
+            HKS_LOG_E("no support authType: %" LOG_PUBLIC "d!", tmp.authType);
+        }
+    }
+    return supportAuthNum;
 }
 
 class GetSecUserInfoCallbackImplHuks : public USER_IAM::GetSecUserInfoCallback {
@@ -99,8 +111,16 @@ void GetSecUserInfoCallbackImplHuks::OnSecUserInfo(const USER_IAM::SecUserInfo &
             ret = HKS_ERROR_MALLOC_FAIL;
             break;
         }
+
+        uint32_t supportAuthNum = GetSupportAuthTypeNum(info);
+        if (supportAuthNum == 0) {
+            HKS_LOG_E("All enrolledInfos not support!");
+            ret = HKS_ERROR_NOT_SUPPORTED;
+            break;
+        }
+
         (*outSecInfo)->enrolledInfo = static_cast<struct EnrolledInfoWrap *>(
-            HksMalloc(sizeof(struct EnrolledInfoWrap) * info.enrolledInfo.size()));
+            HksMalloc(sizeof(struct EnrolledInfoWrap) * supportAuthNum));
         if ((*outSecInfo)->enrolledInfo == NULL) {
             HKS_LOG_E("Malloc enrolledInfo failed!");
             HKS_FREE(*outSecInfo);
@@ -108,15 +128,17 @@ void GetSecUserInfoCallbackImplHuks::OnSecUserInfo(const USER_IAM::SecUserInfo &
             break;
         }
         (**outSecInfo).secureUid = info.secureUid;
-        (**outSecInfo).enrolledInfoLen = info.enrolledInfo.size();
+        (**outSecInfo).enrolledInfoLen = supportAuthNum;
+        uint32_t hksEnrollIndex = 0;
         for (uint32_t i = 0; i < (**outSecInfo).enrolledInfoLen; ++i) {
             enum HksUserAuthType authType;
-            ret = ConvertToHksAuthType(info.enrolledInfo[i].authType, &authType);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ConvertToHksAuthType failed :%" LOG_PUBLIC "d!", ret)
+            if (ConvertToHksAuthType(info.enrolledInfo[i].authType, &authType) != HKS_SUCCESS) {
+                continue;
+            }
 
-            (**outSecInfo).enrolledInfo[i].authType = authType;
-
-            (**outSecInfo).enrolledInfo[i].enrolledId = info.enrolledInfo[i].enrolledId;
+            (**outSecInfo).enrolledInfo[hksEnrollIndex].authType = authType;
+            (**outSecInfo).enrolledInfo[hksEnrollIndex].enrolledId = info.enrolledInfo[i].enrolledId;
+            hksEnrollIndex++;
         }
     } while (0);
     if (ret != HKS_SUCCESS) {
