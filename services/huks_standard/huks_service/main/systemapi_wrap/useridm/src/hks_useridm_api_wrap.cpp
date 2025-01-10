@@ -21,6 +21,8 @@
 
 #include "hks_useridm_api_wrap.h"
 
+#include <array>
+#include <utility>
 #include "hks_condition.h"
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -46,7 +48,7 @@ static constexpr std::array g_hksIamAuthTypeConvertMap = {
 static int32_t ConvertFromHksAuthType(enum HksUserAuthType hksAuthType, enum USER_IAM::AuthType *authType)
 {
     for (auto[hksType, iamType] : g_hksIamAuthTypeConvertMap) {
-        if(hksAuthType == hksType) {
+        if (hksAuthType == hksType) {
             *authType = iamType;
             return HKS_SUCCESS;
         }
@@ -58,7 +60,7 @@ static int32_t ConvertFromHksAuthType(enum HksUserAuthType hksAuthType, enum USE
 static int32_t ConvertToHksAuthType(enum USER_IAM::AuthType iamAuthType, enum HksUserAuthType *hksAuthType)
 {
     for (auto[hksType, iamType] : g_hksIamAuthTypeConvertMap) {
-        if(iamAuthType == iamType) {
+        if (iamAuthType == iamType) {
             *hksAuthType = hksType;
             return HKS_SUCCESS;
         }
@@ -70,7 +72,7 @@ static int32_t ConvertToHksAuthType(enum USER_IAM::AuthType iamAuthType, enum Hk
 static uint32_t GetSupportAuthTypeNum(const USER_IAM::SecUserInfo &info)
 {
     uint32_t supportAuthNum = 0;
-    for(const USER_IAM::EnrolledInfo &tmp : info.enrolledInfo) {
+    for (const USER_IAM::EnrolledInfo &tmp : info.enrolledInfo) {
         auto it = std::find(g_supportIamAuthType.begin(), g_supportIamAuthType.end(), tmp.authType);
         if (it != g_supportIamAuthType.end()) {
             supportAuthNum++;
