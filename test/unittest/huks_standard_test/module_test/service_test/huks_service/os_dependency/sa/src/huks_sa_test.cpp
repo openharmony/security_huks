@@ -18,6 +18,7 @@
 
 #include "hks_log.h"
 #include "hks_sa.h"
+#include "hks_param.h"
 
 using namespace testing::ext;
 using namespace OHOS;
@@ -62,7 +63,10 @@ HWTEST_F(HksSaTest, HksSaTest001, TestSize.Level0)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
+    struct HksParamSet *tmpParamSetOut = NULL;
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&tmpParamSetOut));
     hksService.OnRemoteRequest(HKS_MSG_GEN_KEY, data, reply, option);
+    HksFreeParamSet(&tmpParamSetOut);
 }
 
 /**
@@ -77,7 +81,10 @@ HWTEST_F(HksSaTest, HksSaTest002, TestSize.Level0)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
+    struct HksParamSet *tmpParamSetOut = NULL;
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&tmpParamSetOut));
     hksService.OnRemoteRequest(HKS_MSG_ATTEST_KEY, data, reply, option);
+    HksFreeParamSet(&tmpParamSetOut);
 }
 
 /**
@@ -92,6 +99,9 @@ HWTEST_F(HksSaTest, HksSaTest003, TestSize.Level0)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
+    struct HksParamSet *tmpParamSetOut = NULL;
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&tmpParamSetOut));
     hksService.OnRemoteRequest(HKS_MSG_ATTEST_KEY_ASYNC_REPLY, data, reply, option);
+    HksFreeParamSet(&tmpParamSetOut);
 }
 }

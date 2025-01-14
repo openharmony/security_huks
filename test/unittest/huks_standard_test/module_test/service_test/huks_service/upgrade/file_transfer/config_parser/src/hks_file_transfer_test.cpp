@@ -55,6 +55,6 @@ void HksFileTransferTest::TearDown()
 HWTEST_F(HksFileTransferTest, HksFileTransferTest001, TestSize.Level0)
 {
     HKS_LOG_I("enter HksFileTransferTest001");
-    HksUpgradeFileTransferOnUserUnlock(100);
+    EXPECT_EQ(HKS_SUCCESS, HksUpgradeFileTransferOnUserUnlock(100));
 }
 }
