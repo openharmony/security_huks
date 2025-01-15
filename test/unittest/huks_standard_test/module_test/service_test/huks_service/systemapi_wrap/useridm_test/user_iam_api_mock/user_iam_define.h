@@ -68,12 +68,12 @@ enum ResultCode : int32_t {
 
 class GetCredentialInfoCallback {
 public:
-    virtual void OnCredentialInfo(const std::vector<CredentialInfo> &infoList) = 0;
+    virtual void OnCredentialInfo(int32_t result, const std::vector<CredentialInfo> &infoList) = 0;
 };
 
 class GetSecUserInfoCallback {
 public:
-    virtual void OnSecUserInfo(const SecUserInfo &info) = 0;
+    virtual void OnSecUserInfo(int32_t result, const SecUserInfo &info) = 0;
 };
 } // namespace UserAuth
 } // namespace UserIam
