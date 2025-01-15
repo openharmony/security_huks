@@ -39,7 +39,7 @@ static SecUserInfo g_userInfo;
 void RunOnCredentialInfo(const std::shared_ptr<GetCredentialInfoCallback>& callback)
 {
     sleep(g_sleepTime);
-    (*callback).OnCredentialInfo(g_credentialInfos);
+    (*callback).OnCredentialInfo(SUCCESS, g_credentialInfos);
 }
 
 static void ConstructCredentialInfo()
@@ -73,7 +73,7 @@ int32_t UserIdmClient::GetCredentialInfo(int32_t userId, AuthType authType,
 void RunOnSecUserInfo(const std::shared_ptr<GetSecUserInfoCallback>& callback)
 {
     sleep(g_sleepTime);
-    (*callback).OnSecUserInfo(g_userInfo);
+    (*callback).OnSecUserInfo(SUCCESS, g_userInfo);
 }
 
 static void ConstructSecUserInfo()
