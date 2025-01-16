@@ -785,7 +785,22 @@ static int32_t CreateTbs(const struct HksBlob *template, const struct HksAttestS
     return ret;
 }
 
-static int32_t GetPrivateKeyMaterial(struct HksBlob *val, struct HksBlob *material)
+/*
+ * pkcs1(rfc8017) defines rsa privateKey struct
+ * RSAPrivateKey ::= SEQUENCE {
+ *    version           Version,
+ *    modulus           INTEGER,  -- n
+ *    publicExponent    INTEGER,  -- e
+ *    privateExponent   INTEGER,  -- d
+ *    prime1            INTEGER,  -- p
+ *    prime2            INTEGER,  -- q
+ *    exponent1         INTEGER,  -- d mod (p-1)
+ *    exponent2         INTEGER,  -- d mod (q-1)
+ *    coefficient       INTEGER,  -- (inverse of q) mod p
+ *    otherPrimeInfos   OtherPrimeInfos OPTIONAL
+ * }
+ */
+static int32_t GetRsaPrivateKeyMaterial(struct HksBlob *val, struct HksBlob *material)
 {
     struct HksAsn1Obj obj = {{0}};
     struct KeyMaterialRsa *keyMaterial = (struct KeyMaterialRsa *)material->data;
@@ -844,23 +859,23 @@ static int32_t StepIntoPrivateKey(const struct HksBlob *key, struct HksBlob *val
     return HKS_SUCCESS;
 }
 
-int32_t HksGetDevicePrivateKey(const struct HksBlob *key, struct HksBlob *out)
+static int32_t HksGetRsaPrivateKey(const struct HksBlob *key, struct HksBlob *out)
 {
     struct HksBlob val = { 0, NULL };
     int32_t ret = StepIntoPrivateKey(key, &val);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "step into private key fail!")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "step into rsa private key fail!")
 
     uint32_t keySize = HKS_RSA_KEY_SIZE_2048;
-    uint32_t materialLen = sizeof(struct KeyMaterialRsa) + keySize / HKS_BITS_PER_BYTE * 3; /* 3 bits are unused */
+    uint32_t materialLen = sizeof(struct KeyMaterialRsa) + keySize / HKS_BITS_PER_BYTE * RSA_KEY_MATERIAL_CNT;
     uint8_t *material = (uint8_t *)HksMalloc(materialLen);
-    HKS_IF_NULL_LOGE_RETURN(material, HKS_ERROR_MALLOC_FAIL, "malloc key materail fail!")
+    HKS_IF_NULL_LOGE_RETURN(material, HKS_ERROR_MALLOC_FAIL, "malloc rsa key materail fail!")
 
     struct HksBlob materialBlob = { materialLen, material };
-    ret = GetPrivateKeyMaterial(&val, &materialBlob);
+    ret = GetRsaPrivateKeyMaterial(&val, &materialBlob);
     if (ret != HKS_SUCCESS) {
         (void)memset_s(material, materialLen, 0, materialLen);
         HKS_FREE(material);
-        HKS_LOG_E("get key materail fail!");
+        HKS_LOG_E("get rsa key materail fail!");
         return ret;
     }
 
@@ -868,6 +883,85 @@ int32_t HksGetDevicePrivateKey(const struct HksBlob *key, struct HksBlob *out)
     out->size = materialBlob.size;
     HKS_LOG_I("prikey size %" LOG_PUBLIC "x", out->size);
 
+    return HKS_SUCCESS;
+}
+
+/*
+ * SEC1 defines ecc privateKey struct
+ * ECPrivateKey ::= SEQUENCE {
+ *   version INTEGER { ecPrivkeyVer1(1) } (ecPrivkeyVer1),
+ *   privateKey OCTET STRING,
+ *   parameters [0] ECDomainParameters {{ SECGCurveNames }} OPTIONAL,
+ *   publicKey [1] BIT STRING OPTIONAL
+ * }
+ */
+static int32_t GetEccPrivateKeyMaterial(const uint32_t keySize, struct HksBlob *val, struct HksBlob *material)
+{
+    struct HksAsn1Obj obj = {0};
+    struct KeyMaterialEcc *keyMaterial = (struct KeyMaterialEcc *)material->data;
+
+    keyMaterial->keyAlg = HKS_ALG_ECC;
+
+    uint32_t offset = sizeof(struct KeyMaterialEcc);
+    int32_t ret = DcmAsn1ExtractTag(val, &obj, val, ASN_1_TAG_TYPE_OCT_STR);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "extract z key fail!")
+
+    if (keySize != obj.value.size) {
+        HKS_LOG_E("ecc pri key size(%u) invalid", obj.value.size);
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+    keyMaterial->keySize = keySize * HKS_BITS_PER_BYTE;
+
+    if (memcpy_s(material->data + offset, material->size - offset, obj.value.data, obj.value.size) != EOK) {
+        HKS_LOG_E("copy x fail!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    keyMaterial->xSize = obj.value.size;
+
+    offset += keyMaterial->xSize;
+    if (memcpy_s(material->data + offset, material->size - offset, obj.value.data, obj.value.size) != EOK) {
+        HKS_LOG_E("copy y fail!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    keyMaterial->ySize = obj.value.size;
+
+    offset += keyMaterial->ySize;
+    if (memcpy_s(material->data + offset, material->size - offset, obj.value.data, obj.value.size) != EOK) {
+        HKS_LOG_E("copy z fail!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    keyMaterial->zSize = obj.value.size;
+
+    offset += keyMaterial->zSize;
+    material->size = offset;
+    return HKS_SUCCESS;
+}
+ 
+static int32_t HksGetEccPrivateKey(const struct HksBlob *key, struct HksBlob *out)
+{
+    struct HksBlob keySeq = { 0, NULL };
+    int32_t ret = StepIntoPrivateKey(key, &keySeq);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("step into ecc private key fail!");
+        return ret;
+    }
+
+    enum HksKeySize keyBitSize =  HKS_ECC_KEY_SIZE_256; /* only 256 ecc-key size */
+    uint32_t materialLen = sizeof(struct KeyMaterialEcc) +  keyBitSize / HKS_BITS_PER_BYTE * ECC_KEY_MATERIAL_CNT;
+    uint8_t *material = (uint8_t *)HksMalloc(materialLen);
+    HKS_IF_NULL_LOGE_RETURN(material, HKS_ERROR_MALLOC_FAIL, "malloc ecc key materail fail!")
+
+    struct HksBlob materialBlob = { materialLen, material };
+    ret = GetEccPrivateKeyMaterial(keyBitSize / HKS_BITS_PER_BYTE, &keySeq, &materialBlob);
+    if (ret != HKS_SUCCESS) {
+        (void)memset_s(material, materialLen, 0, materialLen);
+        HKS_FREE(material);
+        HKS_LOG_E("get ecc key materail fail!");
+        return ret;
+    }
+
+    out->data = materialBlob.data;
+    out->size = materialBlob.size;
     return HKS_SUCCESS;
 }
 
@@ -893,7 +987,7 @@ static int32_t SignTbs(struct HksBlob *sig, const struct HksBlob *tbs, const str
     }
 
     struct HksBlob priKey = { 0, NULL };
-    ret = HksGetDevicePrivateKey(key, &priKey);
+    ret = signAlg == HKS_ALG_RSA ? HksGetRsaPrivateKey(key, &priKey) : HksGetEccPrivateKey(key, &priKey);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get private key failed!")
 
     ret = HksCryptoHalSign(&priKey, &usageSpec, &message, sig);
@@ -1271,6 +1365,12 @@ static int32_t GetCertOrKey(enum HksCertType type, struct HksBlob *out)
             return ReadCertOrKey(g_caCert, sizeof(g_caCert), out);
         case HKS_ROOT_CERT:
             return ReadCertOrKey(g_rootCert, sizeof(g_rootCert), out);
+        case HKS_ANON_CA_KEY:
+            return ReadCertOrKey(g_anonCaKey, sizeof(g_anonCaKey), out);
+        case HKS_ANON_CA_CERT:
+            return ReadCertOrKey(g_anonCaCert, sizeof(g_anonCaCert), out);
+        case HKS_ANON_ROOT_CERT:
+            return ReadCertOrKey(g_anonRootCert, sizeof(g_anonRootCert), out);
         default:
             break;
     }
@@ -1279,11 +1379,20 @@ static int32_t GetCertOrKey(enum HksCertType type, struct HksBlob *out)
 
 static int32_t GetCertAndKey(struct HksAttestSpec *attestSpec)
 {
-    int32_t ret = GetCertOrKey(HKS_DEVICE_CERT, &attestSpec->devCert);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get devCert fail")
+    int32_t ret;
+    if (!attestSpec->isAnonAttest) {
+        ret = GetCertOrKey(HKS_DEVICE_CERT, &attestSpec->devCert);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get devCert fail")
 
-    ret = GetCertOrKey(HKS_DEVICE_KEY, &attestSpec->devKey);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get devKey fail")
+        ret = GetCertOrKey(HKS_DEVICE_KEY, &attestSpec->devKey);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get devKey fail")
+    } else {
+        ret = GetCertOrKey(HKS_ANON_CA_CERT, &attestSpec->devCert);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get anon ca cert fail")
+
+        ret = GetCertOrKey(HKS_ANON_CA_KEY, &attestSpec->devKey);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get anon ca key fail")
+    }
 
     return ret;
 }
@@ -1329,13 +1438,15 @@ static int32_t CheckAttestUsageSpec(const struct HksUsageSpec *usageSpec)
     return HKS_SUCCESS;
 }
 
-static int32_t BuildAttestSpec(const struct HksParamSet *keyNodeParamSet, const struct HksParamSet *paramSet,
-    struct HksBlob *rawKey, struct HksAttestSpec **outAttestSpec)
+static int32_t BuildAttestSpec(bool isAnonAttest, const struct HksParamSet *keyNodeParamSet,
+    const struct HksParamSet *paramSet, struct HksBlob *rawKey, struct HksAttestSpec **outAttestSpec)
 {
     struct HksAttestSpec *attestSpec = HksMalloc(sizeof(struct HksAttestSpec));
     HKS_IF_NULL_LOGE_RETURN(attestSpec, HKS_ERROR_MALLOC_FAIL, "malloc attestSpec fail\n")
 
     (void)memset_s(attestSpec, sizeof(struct HksAttestSpec), 0, sizeof(struct HksAttestSpec));
+
+    attestSpec->isAnonAttest = isAnonAttest;
 
     SetAttestCertValid(&attestSpec->validity);
 
@@ -1432,7 +1543,7 @@ static int32_t FormatAttestChain(const struct HksBlob *attestCert, const struct 
     struct HksBlob *certChain)
 {
     struct HksBlob tmp = *certChain;
-    *((uint32_t *)tmp.data) = HKS_ATTEST_CERT_COUNT;
+    *((uint32_t *)tmp.data) = (!attestSpec->isAnonAttest) ? HKS_ATTEST_CERT_COUNT : HKS_ATTEST_CERT_COUNT - 1;
     tmp.data += sizeof(uint32_t);
     tmp.size -= sizeof(uint32_t);
 
@@ -1442,26 +1553,31 @@ static int32_t FormatAttestChain(const struct HksBlob *attestCert, const struct 
     ret = CopyBlobToBuffer(&attestSpec->devCert, &tmp);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy dev cert fail")
 
-    ret = FormatCertToBuf(HKS_CA_CERT, &tmp);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "format ca cert failed!")
+    if (!attestSpec->isAnonAttest) {
+        ret = FormatCertToBuf(HKS_CA_CERT, &tmp);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "format ca cert failed!")
 
-    ret = FormatCertToBuf(HKS_ROOT_CERT, &tmp);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "format root cert failed!")
+        ret = FormatCertToBuf(HKS_ROOT_CERT, &tmp);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "format root cert failed!")
+    } else {
+        ret = FormatCertToBuf(HKS_ANON_ROOT_CERT, &tmp);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "format anon root cert failed!")
+    }
 
     certChain->size = tmp.data - certChain->data;
     HKS_LOG_I("certChain size after format is %" LOG_PUBLIC "u", certChain->size);
     return HKS_SUCCESS;
 }
 
-int32_t CreateAttestCertChain(const struct HksParamSet *keyNodeParamSet, const struct HksParamSet *paramSet,
-    struct HksBlob *certChain, struct HksBlob *rawKey)
+int32_t CreateAttestCertChain(bool isAnonAttest, const struct HksParamSet *keyNodeParamSet,
+    const struct HksParamSet *paramSet, struct HksBlob *certChain, struct HksBlob *rawKey)
 {
     struct HksAttestSpec *attestSpec = NULL;
-    int32_t ret = BuildAttestSpec(keyNodeParamSet, paramSet, rawKey, &attestSpec);
+    int32_t ret = BuildAttestSpec(isAnonAttest, keyNodeParamSet, paramSet, rawKey, &attestSpec);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "build attest spec failed")
 
     struct HksBlob attestCert;
-    ret = CreateHwAttestCert(attestSpec, &attestCert, HKS_ALG_RSA);
+    ret = CreateHwAttestCert(attestSpec, &attestCert, isAnonAttest ? HKS_ALG_ECC : HKS_ALG_RSA);
     if (ret != HKS_SUCCESS) {
         FreeAttestSpec(&attestSpec);
         HKS_LOG_E("build attest spec failed");
