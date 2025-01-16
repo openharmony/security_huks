@@ -114,14 +114,15 @@ struct HksAttestSpec {
     struct HksBlob attestKey;
     struct HksUsageSpec usageSpec;
     struct ValidPeriod validity;
+    bool isAnonAttest;
 };
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t CreateAttestCertChain(const struct HksParamSet *keyNodeParamSet, const struct HksParamSet *paramSet,
-    struct HksBlob *certChain, struct HksBlob *rawKey);
+int32_t CreateAttestCertChain(bool isAnonAttest, const struct HksParamSet *keyNodeParamSet,
+    const struct HksParamSet *paramSet, struct HksBlob *certChain, struct HksBlob *rawKey);
 
 #ifdef __cplusplus
 }

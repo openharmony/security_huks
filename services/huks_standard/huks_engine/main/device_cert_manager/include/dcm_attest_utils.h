@@ -47,6 +47,10 @@ enum HksCertType {
     HKS_CA_CERT,
     HKS_DEVICE_CERT,
     HKS_DEVICE_KEY,
+
+    HKS_ANON_ROOT_CERT = 100,
+    HKS_ANON_CA_CERT,
+    HKS_ANON_CA_KEY,
 };
 
 enum KmTag {
