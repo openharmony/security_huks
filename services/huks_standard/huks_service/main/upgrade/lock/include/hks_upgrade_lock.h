@@ -16,6 +16,7 @@
 #ifndef HKS_UPGRADE_LOCK_H
 #define HKS_UPGRADE_LOCK_H
 
+#ifdef __cplusplus
 #include <rwlock.h>
 
 namespace OHOS {
@@ -35,5 +36,18 @@ void HksUpgradeOnPowerOnDoneNotifyAll(void);
 }
 }
 }
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void HksUpgradeOrRequestLockRead(void);
+
+void HksUpgradeOrRequestUnlockRead(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // HKS_UPGRADE_LOCK_H

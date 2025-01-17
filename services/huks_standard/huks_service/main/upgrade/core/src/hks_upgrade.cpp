@@ -38,7 +38,7 @@ void HksUpgradeOnUserUnlock(uint32_t userId)
 {
     HKS_LOG_I("enter HksUpgradeOnUserUnlock.");
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
-    g_upgradeOrRequestLock.UnLockRead();
+    HksUpgradeOrRequestUnlockRead();
 
     // Since current thread have owned read lock, the power on upgrade have ended at earlier time,
     // waiting for notify is not necessary.
@@ -53,7 +53,7 @@ void HksUpgradeOnUserUnlock(uint32_t userId)
         }
     }
 
-    g_upgradeOrRequestLock.LockRead();
+    HksUpgradeOrRequestLockRead();
 #endif
     HKS_LOG_I("leave HksUpgradeOnUserUnlock.");
 }

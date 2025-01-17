@@ -90,6 +90,7 @@ if (os_level == "standard") {
 
     include_dirs = [
       "//base/security/huks/frameworks/huks_standard/main/crypto_engine/rkc/include",
+      "//base/security/huks/services/huks_standard/huks_service/main/upgrade/lock/include",
       "../crypto_common/include",
     ]
 

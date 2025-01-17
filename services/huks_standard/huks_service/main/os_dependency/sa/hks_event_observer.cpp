@@ -108,7 +108,7 @@ void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData
         HKS_LOG_E("wait on upgrading failed.");
         return;
     }
-    OHOS::Utils::UniqueReadGuard<OHOS::Utils::RWLock> readGuard(g_upgradeOrRequestLock);
+    HksUpgradeOrRequestLockRead();
 #endif
 
     if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED ||
@@ -136,6 +136,10 @@ void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData
         HKS_LOG_I("user %" LOG_PUBLIC "d unlocked.", userId);
         HksUpgradeOnUserUnlock(userId);
     }
+
+#ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
+    HksUpgradeOrRequestUnlockRead();
+#endif
 
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(processInfo.processName);

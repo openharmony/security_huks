@@ -295,31 +295,41 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         HKS_LOG_E("wait on upgrading failed.");
         return HW_SYSTEM_ERROR;
     }
-    OHOS::Utils::UniqueReadGuard<OHOS::Utils::RWLock> readGuard(g_upgradeOrRequestLock);
+    HksUpgradeOrRequestLockRead();
 #endif
 
     if (code < HksIpcInterfaceCode::HKS_MSG_BASE || code >= HksIpcInterfaceCode::HKS_MSG_MAX) {
         int32_t ret = RetryLoadPlugin();
         if (ret != HKS_SUCCESS) {
             HksSendResponse(reinterpret_cast<const uint8_t *>(&reply), ret, nullptr);
-            return HKS_SUCCESS; // send error code by IPC.
+            ret = HKS_SUCCESS; // send error code by IPC.
+        } else {
+            ret = HksPluginOnRemoteRequest(code, &data, &reply, &option);
         }
-        return HksPluginOnRemoteRequest(code, &data, &reply, &option);
+#ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
+        HksUpgradeOrRequestUnlockRead();
+#endif
+        return ret;
     }
+
+    int retSys;
     // this is the temporary version which comments the descriptor check
     if (HksService::GetDescriptor() != data.ReadInterfaceToken()) {
         HKS_LOG_E("descriptor is diff.");
-        return HW_SYSTEM_ERROR;
+        retSys = HW_SYSTEM_ERROR;
+    } else {
+        ProcessRemoteRequest(code, data, reply);
+        uint64_t leaveTime = 0;
+        (void)HksElapsedRealTime(&leaveTime);
+        HKS_LOG_I("finish code:%" LOG_PUBLIC "d, total cost %" LOG_PUBLIC PRIu64 " ms, sessionId = %"
+            LOG_PUBLIC "u", code, leaveTime - enterTime, g_sessionId);
+        retSys = NO_ERROR;
     }
 
-    ProcessRemoteRequest(code, data, reply);
-
-    uint64_t leaveTime = 0;
-    (void)HksElapsedRealTime(&leaveTime);
-    HKS_LOG_I("finish code:%" LOG_PUBLIC "d, total cost %" LOG_PUBLIC PRIu64 " ms, sessionId = %"
-        LOG_PUBLIC "u", code, leaveTime - enterTime, g_sessionId);
-
-    return NO_ERROR;
+#ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
+    HksUpgradeOrRequestUnlockRead();
+#endif
+    return retSys;
 }
 
 #define OLD_PATH "/data/service/el2/public/huks_service/maindata"
