@@ -86,7 +86,6 @@ private:
 
 void GetSecUserInfoCallbackImplHuks::OnSecUserInfo(int32_t result, const USER_IAM::SecUserInfo &info)
 {
-    static_cast<void>(result);
     int32_t ret = HKS_SUCCESS;
     do {
         if (info.enrolledInfo.size() > g_maxEnrolledLen || info.enrolledInfo.size() == 0) {
