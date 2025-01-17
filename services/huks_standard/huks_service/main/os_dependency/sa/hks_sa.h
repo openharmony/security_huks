@@ -40,21 +40,6 @@ enum ResponseCode {
 
 constexpr int SA_ID_KEYSTORE_SERVICE = 3510;
 
-class HksIpcCounter {
-public:
-    static std::atomic_uint32_t count;
-
-    HksIpcCounter()
-    {
-        count++;
-    }
-
-    ~HksIpcCounter()
-    {
-        count--;
-    }
-};
-
 class HksService : public SystemAbility, public HksStub {
     DECLEAR_SYSTEM_ABILITY(HksService)
 

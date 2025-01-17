@@ -20,6 +20,7 @@
 #include "hks_samgr_server.h"
 #include "hks_template.h"
 
+#include <securec.h>
 #include <string.h>
 
 static char g_userId[] = "0";

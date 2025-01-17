@@ -25,6 +25,8 @@
 #include "hks_storage_manager.h"
 #include "hks_template.h"
 
+#include <securec.h>
+
 static int32_t RkcExtractKsfBufV1(const struct HksBlob *ksfFromFile, struct HksRkcKsfDataV1 *ksfData)
 {
     uint32_t ksfBufOffset = 0;

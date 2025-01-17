@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <securec.h>
 #include <string>
 
 #include <gtest/gtest.h>

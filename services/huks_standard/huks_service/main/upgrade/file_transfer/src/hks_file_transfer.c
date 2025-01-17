@@ -28,6 +28,7 @@
 
 #include <errno.h>
 #include <ftw.h>
+#include <securec.h>
 #include <stdio.h>
 #include <string.h>
 

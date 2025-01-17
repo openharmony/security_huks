@@ -17,6 +17,7 @@
 #include "hks_type.h"
 
 #include <dlfcn.h>
+#include <securec.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <sys/time.h>

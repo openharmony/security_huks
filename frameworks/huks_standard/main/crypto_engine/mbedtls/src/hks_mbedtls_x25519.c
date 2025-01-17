@@ -36,6 +36,7 @@
 #include <mbedtls/ecdh.h>
 #include <mbedtls/ecp.h>
 #include <mbedtls/entropy.h>
+#include <securec.h>
 
 #ifdef HKS_SUPPORT_ED25519_TO_X25519
 #include "hks_crypto_adapter.h"

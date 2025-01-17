@@ -24,6 +24,8 @@
 #include "hks_param.h"
 #include "hks_template.h"
 
+#include <securec.h>
+
 #ifdef HKS_ENABLE_UPGRADE_RKC_DERIVE_ALG
 #include "hks_rkc_v1.h"
 #endif

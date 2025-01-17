@@ -616,6 +616,7 @@ static int32_t BuildUserAuthParamSet(const struct HksParamSet *paramSet, struct 
     return ret;
 }
 
+// callback
 static int32_t AppendUserAuthInfo(const struct HksParamSet *paramSet, int32_t userId, uint32_t authAccessType,
     struct HksParamSet **outParamSet)
 {
@@ -626,7 +627,7 @@ static int32_t AppendUserAuthInfo(const struct HksParamSet *paramSet, int32_t us
 
     struct HksBlob enrolledInfo = { 0, NULL };
     do {
-        ret = HksUserIdmGetSecInfo(userId, &secInfo);
+        ret = HksUserIdmGetSecInfo(userId, &secInfo); // callback
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("get useriam sec info failed ret=%" LOG_PUBLIC "d", ret);
             ret = HKS_ERROR_GET_USERIAM_SECINFO_FAILED;
@@ -660,10 +661,11 @@ static int32_t AppendUserAuthInfo(const struct HksParamSet *paramSet, int32_t us
     return ret;
 }
 
+// callback
 static int32_t CheckIfEnrollAuthInfo(int32_t userId, enum HksUserAuthType authType)
 {
     uint32_t numOfAuthInfo = 0;
-    int32_t ret = HksUserIdmGetAuthInfoNum(userId, authType, &numOfAuthInfo);
+    int32_t ret = HksUserIdmGetAuthInfoNum(userId, authType, &numOfAuthInfo); // callback
     if (ret == HKS_ERROR_CREDENTIAL_NOT_EXIST || numOfAuthInfo == 0) {
         HKS_LOG_E("have not enroll the auth info.");
         return HKS_ERROR_CREDENTIAL_NOT_EXIST;
@@ -672,6 +674,7 @@ static int32_t CheckIfEnrollAuthInfo(int32_t userId, enum HksUserAuthType authTy
     return ret;
 }
 
+// callback
 static int32_t CheckIfUserIamSupportCurType(int32_t userId, uint32_t userAuthType)
 {
     const enum HksUserAuthType userAuthTypes[] = {
@@ -684,13 +687,14 @@ static int32_t CheckIfUserIamSupportCurType(int32_t userId, uint32_t userAuthTyp
         if ((userAuthType & userAuthTypes[i]) == 0) {
             continue;
         }
-        ret = CheckIfEnrollAuthInfo(userId, userAuthTypes[i]);
+        ret = CheckIfEnrollAuthInfo(userId, userAuthTypes[i]); // callback
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
             "no enrolled info of the user auth type: %" LOG_PUBLIC "d.", userAuthTypes[i])
     }
     return HKS_SUCCESS;
 }
 
+// callback
 int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
 {
@@ -720,11 +724,11 @@ int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo
             ret = BuildUserAuthParamSet(paramSet, &userAuthParamSet);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Build UserAuthParamSet failed!")
         } else {
-            ret = CheckIfUserIamSupportCurType(processInfo->userIdInt, userAuthType);
+            ret = CheckIfUserIamSupportCurType(processInfo->userIdInt, userAuthType); // callback
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
                 "UserIAM do not support current user auth or not enrolled cur auth info")
 
-            ret = AppendUserAuthInfo(paramSet, processInfo->userIdInt, authAccessType, &userAuthParamSet);
+            ret = AppendUserAuthInfo(paramSet, processInfo->userIdInt, authAccessType, &userAuthParamSet); // callback
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append secure access info failed!")
         }
         struct HksParamSet *newInfoParamSet = NULL;

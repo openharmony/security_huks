@@ -23,6 +23,7 @@
 
 #include <mbedtls/entropy.h>
 #include <mbedtls/md.h>
+#include <securec.h>
 
 #include "hks_log.h"
 #include "hks_template.h"
