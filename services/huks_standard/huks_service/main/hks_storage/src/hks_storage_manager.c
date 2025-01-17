@@ -39,9 +39,17 @@
 
 #ifdef L2_STANDARD
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
+#include "hks_upgrade_lock.h"
 #ifndef HKS_USE_RKC_IN_STANDARD
 #include "hks_osaccount_check.h"
 #endif
+
+static bool IsDe(const struct HksParamSet *paramSet)
+{
+    struct HksParam *storageLevelParam = NULL;
+    return HksGetParam(paramSet, HKS_TAG_AUTH_STORAGE_LEVEL, &storageLevelParam) == HKS_SUCCESS &&
+        storageLevelParam->uint32Param == HKS_AUTH_STORAGE_LEVEL_DE;
+}
 #endif
 
 static int32_t GetStorageLevelAndStoreUserIdParam(const struct HksProcessInfo* processInfo,
@@ -71,6 +79,18 @@ static int32_t GetStorageLevelAndStoreUserIdParam(const struct HksProcessInfo* p
     return ret;
 }
 #endif
+
+static void UnlockIfDe(__attribute__((unused)) const struct HksParamSet *paramSet)
+{
+#ifdef L2_STANDARD
+#ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
+    if (!IsDe(paramSet)) {
+        return;
+    }
+    HksUpgradeOrRequestUnlockRead();
+#endif
+#endif
+}
 
 #ifdef HKS_ENABLE_LITE_HAP
 #define HKS_LITE_NATIVE_PROCESS_NAME "hks_client"
@@ -291,7 +311,7 @@ int32_t HksManageStoreKeyBlob(const struct HksProcessInfo *processInfo, const st
     const struct HksBlob *keyAlias, const struct HksBlob *keyBlob, uint32_t storageType)
 {
     (void)processInfo;
-    (void)paramSet;
+    UnlockIfDe(paramSet);
 #ifdef SUPPORT_STORAGE_BACKUP
     struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
 #else
@@ -323,7 +343,7 @@ int32_t HksManageStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo, co
     const struct HksBlob *keyAlias, uint32_t storageType)
 {
     (void)processInfo;
-    (void)paramSet;
+    UnlockIfDe(paramSet);
 #ifdef SUPPORT_STORAGE_BACKUP
     struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
 #else
@@ -355,7 +375,7 @@ int32_t HksManageStoreIsKeyBlobExist(const struct HksProcessInfo *processInfo, c
     const struct HksBlob *keyAlias, uint32_t storageType)
 {
     (void)processInfo;
-    (void)paramSet;
+    UnlockIfDe(paramSet);
 #ifdef SUPPORT_STORAGE_BACKUP
     struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
 #else
@@ -387,7 +407,7 @@ int32_t HksManageStoreGetKeyBlob(const struct HksProcessInfo *processInfo, const
     const struct HksBlob *keyAlias, struct HksBlob *keyBlob, uint32_t storageType)
 {
     (void)processInfo;
-    (void)paramSet;
+    UnlockIfDe(paramSet);
 #ifdef SUPPORT_STORAGE_BACKUP
     struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
 #else
@@ -432,7 +452,7 @@ int32_t HksManageStoreGetKeyBlobSize(const struct HksProcessInfo *processInfo, c
     const struct HksBlob *keyAlias, uint32_t *keyBlobSize, uint32_t storageType)
 {
     (void)processInfo;
-    (void)paramSet;
+    UnlockIfDe(paramSet);
 #ifdef SUPPORT_STORAGE_BACKUP
     struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
 #else
@@ -470,6 +490,7 @@ int32_t HksManageStoreGetKeyBlobSize(const struct HksProcessInfo *processInfo, c
 int32_t HksManageGetKeyAliasByProcessName(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     struct HksKeyInfo *keyInfoList, uint32_t *listCount)
 {
+    UnlockIfDe(paramSet);
 #ifdef SUPPORT_STORAGE_BACKUP
     struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
 #else
@@ -497,7 +518,7 @@ int32_t HksManageGetKeyCountByProcessName(const struct HksProcessInfo *processIn
     uint32_t *fileCount)
 {
     (void)processInfo;
-    (void)paramSet;
+    UnlockIfDe(paramSet);
 #ifdef SUPPORT_STORAGE_BACKUP
     struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
 #else
@@ -528,6 +549,7 @@ int32_t HksManageGetKeyCountByProcessName(const struct HksProcessInfo *processIn
 int32_t HksManageListAliasesByProcessName(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     struct HksKeyAliasSet **outData)
 {
+    UnlockIfDe(paramSet);
 #ifdef L2_STANDARD
 #ifdef SUPPORT_STORAGE_BACKUP
     struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
@@ -563,7 +585,7 @@ int32_t HksManageStoreRenameKeyAlias(const struct HksProcessInfo *processInfo,
     const struct HksBlob *newKeyAlias, uint32_t storageType)
 {
     (void)processInfo;
-    (void)paramSet;
+    UnlockIfDe(paramSet);
     struct HksStoreFileInfo oldKeyFileInfo = { { 0 } };
     struct HksStoreFileInfo newKeyFileInfo = { { 0 } };
     struct HksStoreMaterial oldKeyMaterial = { DE_PATH, 0, 0, 0, 0 };

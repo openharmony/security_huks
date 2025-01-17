@@ -61,6 +61,7 @@ if (os_level == "standard") {
       include_dirs += [
         "//base/security/huks/services/huks_standard/huks_service/main/core/include",
         "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/include",
+        "//base/security/huks/services/huks_standard/huks_service/main/upgrade/lock/include",
       ]
       sources += [
         "../rkc/src/hks_rkc.c",
