@@ -23,7 +23,6 @@
 #endif
 
 #include "hks_type.h"
-#include "securec.h"
 #include "hks_plugin_def.h"
 
 #define HANDLE_SIZE              8
@@ -101,6 +100,35 @@ struct HksParamOut {
         struct HksBlob *blob;
     };
 };
+
+enum {
+    HUKS_IPC_THREAD_NUM = 16,
+    HUKS_IPC_THREAD_WITH_CALLBACK_ASYNC_TO_SYNC_PARALLEL_NUM_LIMIT = 7,
+    HUKS_IPC_THREAD_WITH_CALLBACK_ASYNC_TO_SYNC_WAIT_NUM_LIMIT = HUKS_IPC_THREAD_NUM - 2,
+};
+
+#ifndef __LITEOS__ // liteos uses arm-none-eabi-g++, riscv32-unknown-elf-g++, which cannot compile the following.
+#ifdef __cplusplus
+template<typename>
+struct CompileTimeCheck {
+    template <bool> struct CheckImplementation;
+    template <> struct CheckImplementation <true> {
+        static constexpr bool Result() {
+            return true;
+        }
+    };
+    static constexpr bool CheckFunction()
+    {
+        return CheckImplementation< // value MUST be TRUE, otherwise deadlock occurs.
+            HUKS_IPC_THREAD_WITH_CALLBACK_ASYNC_TO_SYNC_PARALLEL_NUM_LIMIT >=
+                HUKS_IPC_THREAD_WITH_CALLBACK_ASYNC_TO_SYNC_WAIT_NUM_LIMIT -
+                HUKS_IPC_THREAD_WITH_CALLBACK_ASYNC_TO_SYNC_PARALLEL_NUM_LIMIT
+            >::Result();
+    }
+};
+static constexpr bool CHECK_ASYNCE_PARALLEL_NUMBR = CompileTimeCheck<void>::CheckFunction();
+#endif
+#endif
 
 struct HksKeyMaterialHeader {
     enum HksKeyAlg keyAlg;

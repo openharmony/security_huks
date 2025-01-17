@@ -17,6 +17,7 @@
 
 #include <cinttypes>
 #include <dlfcn.h>
+#include <securec.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>

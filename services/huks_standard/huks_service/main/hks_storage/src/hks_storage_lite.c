@@ -28,6 +28,8 @@
 
 #include "huks_access.h"
 
+#include <securec.h>
+
 #define HKS_FILE_OFFSET_BASE 0
 #define MAX_STORAGE_SIZE 5120
 #define MAX_BUF_SIZE 65536

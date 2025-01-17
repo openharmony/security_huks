@@ -19,6 +19,8 @@
 #include "hks_mem.h"
 #include "hks_template.h"
 
+#include <securec.h>
+
 static int32_t CopyUint32ToBuffer(uint32_t value, const struct HksBlob *destBlob, uint32_t *destOffset)
 {
     if (*destOffset > destBlob->size) {

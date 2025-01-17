@@ -35,6 +35,8 @@
 #include "hks_template.h"
 #include "hks_type_inner.h"
 
+#include "securec.h"
+
 #ifdef L2_STANDARD
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
 #ifndef HKS_USE_RKC_IN_STANDARD

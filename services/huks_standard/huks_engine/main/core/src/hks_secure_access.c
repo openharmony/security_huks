@@ -1163,7 +1163,7 @@ static int32_t HksCheckCompareProcessName(const struct HksParamSet *blobParamSet
 }
 #endif /** _STORAGE_LITE_ */
 
-int32_t CheckIfNeedIsDevicePasswordSet(const struct HksParamSet *paramSet)
+int32_t CheckIfNeedIsDevicePasswordSet(const struct HksParamSet *paramSet) // callback
 {
 #ifdef HKS_ENABLE_IS_PASSWORD_SET
     struct HksParam *isSetPassword = NULL;
@@ -1180,7 +1180,7 @@ int32_t CheckIfNeedIsDevicePasswordSet(const struct HksParamSet *paramSet)
         }
     }
     uint32_t numOfAuthInfo = 0;
-    ret = HksUserIdmGetAuthInfoNum(userId->int32Param, HKS_USER_AUTH_TYPE_PIN, &numOfAuthInfo);
+    ret = HksUserIdmGetAuthInfoNum(userId->int32Param, HKS_USER_AUTH_TYPE_PIN, &numOfAuthInfo); // callback
     if (ret == HKS_ERROR_CREDENTIAL_NOT_EXIST || numOfAuthInfo == 0) {
         HKS_LOG_E("have not enrolled the pin.");
         return HKS_ERROR_DEVICE_PASSWORD_UNSET;

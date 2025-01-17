@@ -18,6 +18,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <unistd.h>
+#include <securec.h>
 #include <sys/types.h>
 #include <stdio.h>
 

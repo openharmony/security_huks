@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+#ifdef HKS_CONFIG_FILE
+#include HKS_CONFIG_FILE
+#else
+#include "hks_config.h"
+#endif
+
 #include "hks_at_api_wrap.h"
 
 #include <unistd.h>
@@ -24,11 +30,7 @@
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
-#ifdef HKS_CONFIG_FILE
-#include HKS_CONFIG_FILE
-#else
-#include "hks_config.h"
-#endif
+#include "securec.h"
 
 #define ACCESS_TOKEN_SA_ID 3503
 

@@ -26,6 +26,7 @@
 #include <mbedtls/hkdf.h>
 #include <mbedtls/md.h>
 #include <mbedtls/pkcs5.h>
+#include <securec.h>
 
 #include "hks_log.h"
 #include "hks_mbedtls_common.h"
