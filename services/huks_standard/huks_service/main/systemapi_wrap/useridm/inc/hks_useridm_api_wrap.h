@@ -68,9 +68,11 @@ private:
     inline static void LogWarningWait(std::unique_lock<std::mutex> &lck)
     {
         ++waitCount_;
-        HKS_LOG_W("begin wait waitCount_ %" LOG_PUBLIC "u", waitCount_.load());
+        HKS_LOG_W("begin wait waitCount_ %" LOG_PUBLIC "u threadsCount_ %" LOG_PUBLIC "u",
+            waitCount_.load(), threadsCount_.load());
         cv_.wait(lck);
-        HKS_LOG_W("end wait waitCount_ %" LOG_PUBLIC "u", waitCount_.load());
+        HKS_LOG_W("end wait waitCount_ %" LOG_PUBLIC "u threadsCount_ %" LOG_PUBLIC "u",
+            waitCount_.load(), threadsCount_.load());
         --waitCount_;
     }
 
@@ -86,6 +88,10 @@ private:
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+void *HksLockUserIdm(void);
+
+void HksUnlockUserIdm(void *ptr);
 
 // callback
 int32_t HksUserIdmGetSecInfo(int32_t userId, struct SecInfoWrap **outSecInfo);
