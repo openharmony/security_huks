@@ -34,6 +34,28 @@ static const struct SecInfoWrap SecInfoParams[g_paramSidMax] = {
     }
 };
 
+void *HksLockUserIdm(void)
+{
+    auto *cntr = new (std::nothrow) OHOS::Security::Hks::HksIpcCounter();
+    HKS_IF_NULL_LOGE_RETURN(cntr, nullptr, "useridm mock new HksIpcCounter failed")
+    int32_t ret = cntr->Wait();
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("useridm mock HksIpcCounter wait failed %" LOG_PUBLIC "d", ret);
+        delete cntr;
+        return nullptr;
+    }
+    return cntr;
+}
+
+void HksUnlockUserIdm(void *ptr)
+{
+    if (ptr == nullptr) {
+        HKS_LOG_E("useridm mock HksUnlockUserIdm nullptr");
+        return;
+    }
+    delete static_cast<OHOS::Security::Hks::HksIpcCounter *>(ptr);
+}
+
 static int32_t ConvertToHksAuthType(enum USER_IAM::AuthType authType, enum HksUserAuthType *hksAuthType)
 {
     switch (authType) {
