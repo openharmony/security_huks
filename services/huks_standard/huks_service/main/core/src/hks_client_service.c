@@ -724,12 +724,19 @@ int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo
             ret = BuildUserAuthParamSet(paramSet, &userAuthParamSet);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Build UserAuthParamSet failed!")
         } else {
-            ret = CheckIfUserIamSupportCurType(processInfo->userIdInt, userAuthType); // callback
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
-                "UserIAM do not support current user auth or not enrolled cur auth info")
+            void *data = HksLockUserIdm();
+            HKS_IF_NULL_LOGE_RETURN(data, HKS_ERROR_SESSION_REACHED_LIMIT, "HksLockUserIdm fail")
+            do {
+                ret = CheckIfUserIamSupportCurType(processInfo->userIdInt, userAuthType); // callback
+                HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+                    "UserIAM do not support current user auth or not enrolled cur auth info")
 
-            ret = AppendUserAuthInfo(paramSet, processInfo->userIdInt, authAccessType, &userAuthParamSet); // callback
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append secure access info failed!")
+                // callback
+                ret = AppendUserAuthInfo(paramSet, processInfo->userIdInt, authAccessType, &userAuthParamSet);
+                HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append secure access info failed!")
+            } while (false);
+            HksUnlockUserIdm(data);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CheckIfUserIamSupportCurType or AppendUserAuthInfo fail")
         }
         struct HksParamSet *newInfoParamSet = NULL;
         ret = AppendProcessInfoAndDefaultStrategy(userAuthParamSet, processInfo, NULL, &newInfoParamSet);
