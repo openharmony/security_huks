@@ -110,7 +110,7 @@ public:
     GetSecUserInfoCallbackImplHuks(struct SecInfoWrap **mOutSecInfo, HksCondition *mCondition):outSecInfo(mOutSecInfo),
         condition(mCondition) {}
     virtual ~GetSecUserInfoCallbackImplHuks() = default;
-    void OnSecUserInfo(const USER_IAM::SecUserInfo &info) override;
+    void OnSecUserInfo(int32_t result, const USER_IAM::SecUserInfo &info) override;
     volatile bool isCallbacked = false;
 
 private:
@@ -118,7 +118,7 @@ private:
     HksCondition *condition;
 };
 
-void GetSecUserInfoCallbackImplHuks::OnSecUserInfo(const USER_IAM::SecUserInfo &info)
+void GetSecUserInfoCallbackImplHuks::OnSecUserInfo(int32_t result, const USER_IAM::SecUserInfo &info)
 {
     int32_t ret = HKS_SUCCESS;
     do {
@@ -216,14 +216,16 @@ public:
 
     volatile bool isCallbacked = false;
 
-    void OnCredentialInfo(const std::vector<USER_IAM::CredentialInfo> &infoList) override;
+    void OnCredentialInfo(int32_t result, const std::vector<USER_IAM::CredentialInfo> &infoList) override;
 private:
     uint32_t *numOfAuthInfo;
     HksCondition *condition;
 };
 
-void GetCredentialInfoCallbackImplHuks::OnCredentialInfo(const std::vector<USER_IAM::CredentialInfo> &infoList)
+void GetCredentialInfoCallbackImplHuks::OnCredentialInfo(int32_t result,
+    const std::vector<USER_IAM::CredentialInfo> &infoList)
 {
+    static_cast<void>(result);
     *numOfAuthInfo = infoList.size();
     isCallbacked = true;
     HksConditionNotify(condition);
