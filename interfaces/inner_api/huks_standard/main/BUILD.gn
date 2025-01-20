@@ -35,6 +35,7 @@ if (os_level == "standard") {
     innerapi_tags = [
       "platformsdk",
       "sasdk",
+      "chipsetsdk",
     ]
     version_script = "libhukssdk.map"
     public_configs = [ ":huks_config" ]
