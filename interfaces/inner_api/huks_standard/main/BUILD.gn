@@ -35,6 +35,7 @@ if (os_level == "standard") {
     innerapi_tags = [
       "platformsdk",
       "sasdk",
+      "chipsetsdk",
     ]
     version_script = "libhukssdk.map"
     public_configs = [ ":huks_config" ]
@@ -46,9 +47,6 @@ if (os_level == "standard") {
       "//base/security/huks/utils/crypto_adapter",
       "../source",
     ]
-    if (huks_security_level == "software") {
-      defines = [ "HKS_UNTRUSTED_RUNNING_ENV" ]
-    }
     sources = [
       "../source/hks_api.c",
       "../source/hks_api_adapter.c",
