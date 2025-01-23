@@ -23,6 +23,8 @@
 #include <rwlock.h>
 #include <atomic>
 
+static __thread bool g_readLocked = false;
+
 namespace OHOS {
 namespace Security {
 namespace Hks {
@@ -56,4 +58,20 @@ void HksUpgradeOnPowerOnDoneNotifyAll(void)
 }
 }
 }
+}
+
+void HksUpgradeOrRequestLockRead(void)
+{
+    if (!g_readLocked) {
+        OHOS::Security::Hks::g_upgradeOrRequestLock.LockRead();
+        g_readLocked = true;
+    }
+}
+
+void HksUpgradeOrRequestUnlockRead(void)
+{
+    if (g_readLocked) {
+        OHOS::Security::Hks::g_upgradeOrRequestLock.UnLockRead();
+        g_readLocked = false;
+    }
 }
