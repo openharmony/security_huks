@@ -26,6 +26,7 @@ ohos_fuzztest("HksStorageFuzzTest") {
     "//base/security/huks/frameworks/huks_standard/main/common/include/",
     "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src",
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",  # hks_osaccount_check.h
+    "//base/security/huks/services/huks_standard/huks_service/main/upgrade/lock/include",
   ]
 
   configs = [ "../../../../frameworks/config/build:l2_standard_common_config" ]

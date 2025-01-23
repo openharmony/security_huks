@@ -143,6 +143,7 @@ if (os_level == "standard") {
         "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_utils.c",
       ]
     } else {
+      include_dirs += [ "//base/security/huks/services/huks_standard/huks_service/main/upgrade/lock/include" ]
       sources += [
         "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage.c",
         "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_manager.c",

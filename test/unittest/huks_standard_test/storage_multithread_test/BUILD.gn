@@ -57,6 +57,7 @@ ohos_unittest("huks_multithread_test") {
     "//base/security/huks/frameworks/huks_standard/main/common/include",
     "//base/security/huks/services/huks_standard/huks_service/main/core/include",
     "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/include",
+    "//base/security/huks/services/huks_standard/huks_service/main/upgrade/lock/include",
     "//base/security/huks/utils/file_operator",
     "//base/security/huks/utils/mutex",
     "unittest/include",
