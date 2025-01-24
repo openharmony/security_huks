@@ -140,6 +140,9 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
 
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
     processInfo->accessTokenId = static_cast<uint64_t>(IPCSkeleton::GetCallingTokenID());
+    if (processInfo->accessTokenId == 0) {
+        HKS_LOG_E("accessTokenId is zero");
+    }
 #endif
 
     return HKS_SUCCESS;

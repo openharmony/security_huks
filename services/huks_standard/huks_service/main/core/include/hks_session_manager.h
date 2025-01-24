@@ -20,11 +20,13 @@
 #include <stdint.h>
 
 #include "hks_double_list.h"
+#include "hks_event_info.h"
 #include "hks_type_inner.h"
 
 struct HksOperation {
     struct DoubleList listHead;
     struct HksProcessInfo processInfo;
+    HksEventInfo eventInfo;
     uint64_t handle;
     bool abortable;
     uint64_t accessTokenId;

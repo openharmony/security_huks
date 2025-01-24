@@ -127,4 +127,11 @@ do { \
         return HKS_FAILURE; \
     }})
 
+#define HKS_IF_NOT_TRUE_LOGE(RESULT, LOG_MESSAGE, ...) \
+do { \
+    if (!(RESULT)) { \
+        HKS_LOG_I(LOG_MESSAGE, ##__VA_ARGS__); \
+    } \
+} while (0)
+
 #endif /* HKS_TEMPLATE_H */
