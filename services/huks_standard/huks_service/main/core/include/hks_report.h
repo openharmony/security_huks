@@ -22,6 +22,9 @@
 extern "C" {
 #endif
 
+void HksEventReport(const char *funcName, const struct HksProcessInfo *processInfo,
+    const struct HksParamSet *paramSetIn, const struct HksParamSet *reportParamSet, int32_t errorCode);
+
 void HksReport(const char *funcName, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSetIn, int32_t errorCode);
 

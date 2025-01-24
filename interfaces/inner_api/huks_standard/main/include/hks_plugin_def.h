@@ -43,6 +43,8 @@ struct HksProcessInfo {
 
 enum LocalRequestCode {
     CODE_UPGRADE = 1,
+    CODE_FAULT_METRICS = 2,
+    CODE_STATISTICS_METRICS = 3
 };
 
 /**

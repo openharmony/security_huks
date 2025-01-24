@@ -37,6 +37,7 @@
 #include "hks_upgrade_lock.h"
 #include "hks_util.h"
 #include "huks_service_ipc_interface_code.h"
+#include "hks_ha_plugin.h"
 #include "rwlock.h"
 
 #ifdef CONFIG_USE_JEMALLOC_DFX_INTF
@@ -184,6 +185,13 @@ bool HksService::Init()
         HKS_LOG_E("HksService::Init Publish Failed");
         return false;
     }
+
+    HKS_LOG_I("HksHaPlugin_Init: Start initialize plugin");
+    ret = HksHaPluginInit();
+    HKS_LOG_I("HksHaPlugin_Init: End initialize HksHaPlugin");
+    
+    HKS_IF_NOT_SUCC_LOGE(ret, "Init ha plugin failed!");
+    
     HKS_LOG_I("HksService::Init Publish service success");
     registerToService_ = true;
 

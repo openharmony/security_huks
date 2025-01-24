@@ -15,8 +15,15 @@
 
 #include "hks_report.h"
 
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "hks_api.h"
 #include "hks_log.h"
+#include "hks_param.h"
 #include "hks_template.h"
+#include "hks_type.h"
 
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE

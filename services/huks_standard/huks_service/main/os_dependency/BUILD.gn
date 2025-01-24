@@ -32,6 +32,7 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/main/upgrade/core:libhuks_upgrade_core_static",
       "//base/security/huks/services/huks_standard/huks_service/main/upgrade/lock:libhuks_upgrade_lock_static",
       "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
+      "//base/security/huks/services/huks_standard/huks_service/main/ha:libhuks_service_ha_static",
     ]
     public_deps = [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl:libhuks_service_idl_standard_static" ]
 
