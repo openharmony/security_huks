@@ -1031,16 +1031,14 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
         ret = HksManageStoreKeyBlob(processInfo, newParamSet, keyAlias, &output, HKS_STORAGE_TYPE_KEY);
         HKS_IF_NOT_SUCC_LOGE(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
-    int32_t reportRet = PreConstructGenKeyReportParamSet(keyAlias, paramSetIn, enterTime , &output, &reportParamSet);
-    HKS_IF_NOT_SUCC_LOGE(reportRet, "PreConstructGenKeyReportParamSet failed, reportRet = %" LOG_PUBLIC "d", reportRet)
+    (void)PreConstructGenKeyReportParamSet(keyAlias, paramSetIn, enterTime , &output, &reportParamSet);
     HKS_FREE(keyOutBuffer);
     if (keyIn.data != NULL) {
         (void)memset_s(keyIn.data, keyIn.size, 0, keyIn.size);
     }
     HKS_FREE(keyIn.data);
     HksFreeParamSet(&newParamSet);
-    reportRet = ConstructReportParamSet(__func__, processInfo, ret, &reportParamSet);
-    HKS_IF_NOT_SUCC_LOGE(reportRet, "ConstructGenKeyReportParamSet failed, reportRet = %" LOG_PUBLIC "d", reportRet)
+    (void)ConstructReportParamSet(__func__, processInfo, ret, &reportParamSet);
     HksEventReport(__func__, processInfo, paramSetIn, reportParamSet, ret);
     HksFreeParamSet(&reportParamSet);
 #ifdef L2_STANDARD
@@ -1254,11 +1252,8 @@ int32_t HksServiceDeleteKey(const struct HksProcessInfo *processInfo, const stru
         HKS_LOG_E("service delete main key failed, ret = %" LOG_PUBLIC "d", ret);
     }
     struct HksParamSet *reportParamSet = NULL;
-    int32_t reportRet = PreConstructDeleteKeyReportParamSet(keyAlias, paramSet, enterTime, &reportParamSet);
-    HKS_IF_NOT_SUCC_LOGE(reportRet, "PreConstructDeleteKeyReportParamSet failed, reportRet = %" LOG_PUBLIC "d",
-        reportRet)
-    reportRet = ConstructReportParamSet(__func__, processInfo, ret, &reportParamSet);
-    HKS_IF_NOT_SUCC_LOGE(reportRet, "ConstructReportParamSet failed, reportRet = %" LOG_PUBLIC "d", reportRet)
+    (void)PreConstructDeleteKeyReportParamSet(keyAlias, paramSet, enterTime, &reportParamSet);
+    (void)ConstructReportParamSet(__func__, processInfo, ret, &reportParamSet);
     HksEventReport(__func__, processInfo, NULL, reportParamSet, ret);
     HksFreeParamSet(&reportParamSet);
 #ifdef L2_STANDARD
@@ -1313,11 +1308,8 @@ int32_t HksServiceKeyExist(const struct HksProcessInfo *processInfo, const struc
     }
 #endif
     struct HksParamSet *reportParamSet = NULL;
-    int32_t reportRet = PreConstructCheckKeyExitedReportParamSet(keyAlias, paramSet, enterTime,&reportParamSet);
-    HKS_IF_NOT_SUCC_LOGE(reportRet, "PreConstructCheckKeyExitedReportParamSet failed, reportRet = %" LOG_PUBLIC "d",
-        reportRet)
-    reportRet = ConstructReportParamSet(__func__, processInfo, ret, &reportParamSet);
-    HKS_IF_NOT_SUCC_LOGE(reportRet, "ConstructGenKeyReportParamSet failed, reportRet = %" LOG_PUBLIC "d", reportRet)
+    (void)PreConstructCheckKeyExitedReportParamSet(keyAlias, paramSet, enterTime,&reportParamSet);
+    (void)ConstructReportParamSet(__func__, processInfo, ret, &reportParamSet);
     HksEventReport(__func__, processInfo, NULL, reportParamSet, ret);
     HksFreeParamSet(&reportParamSet);
     return ret;
@@ -1374,7 +1366,6 @@ int32_t HksServiceImportKey(const struct HksProcessInfo *processInfo, const stru
 {
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
-    int32_t reportRet;
     struct HksParamSet *reportParamSet = NULL;
     uint64_t enterTime = 0;
     (void)HksElapsedRealTime(&enterTime);
@@ -1404,14 +1395,12 @@ int32_t HksServiceImportKey(const struct HksProcessInfo *processInfo, const stru
         }
         ret = HksManageStoreKeyBlob(processInfo, newParamSet, keyAlias, &keyOut, HKS_STORAGE_TYPE_KEY);
         HKS_IF_NOT_SUCC_LOGE(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
-        reportRet = PreConstructImportKeyReportParamSet(keyAlias, paramSet, enterTime, &keyOut, &reportParamSet);
-        HKS_IF_NOT_SUCC_LOGE(reportRet, "PreConstructGenKeyReportParamSet failed, reportRet = %" LOG_PUBLIC "d", reportRet)
+        (void)PreConstructImportKeyReportParamSet(keyAlias, paramSet, enterTime, &keyOut, &reportParamSet);
         HKS_FREE(keyOutBuffer);
     } while (0);
 
     HksFreeParamSet(&newParamSet);
-    reportRet = ConstructReportParamSet(__func__, processInfo, ret, &reportParamSet);
-    HKS_IF_NOT_SUCC_LOGE(reportRet, "ConstructGenKeyReportParamSet failed, reportRet = %" LOG_PUBLIC "d", reportRet)
+    (void)ConstructReportParamSet(__func__, processInfo, ret, &reportParamSet);
     HksEventReport(__func__, processInfo, paramSet, reportParamSet, ret);
     HksFreeParamSet(&reportParamSet);
     return ret;
@@ -2195,11 +2184,8 @@ int32_t HksServiceListAliases(const struct HksProcessInfo *processInfo, const st
 
     HksFreeParamSet(&newParamSet);
     struct HksParamSet *reportParamSet = NULL;
-    int32_t reportRet = PreConstructListAliasesReportParamSet(paramSet, enterTime, &reportParamSet);
-    HKS_IF_NOT_SUCC_LOGE(reportRet, "PreConstructListAliasesReportParamSet failed, reportRet = %" LOG_PUBLIC "d",
-        reportRet)
-    reportRet = ConstructReportParamSet(__func__, processInfo, ret, &reportParamSet);
-    HKS_IF_NOT_SUCC_LOGE(reportRet, "ConstructReportParamSet failed, reportRet = %" LOG_PUBLIC "d", reportRet)
+    (void)PreConstructListAliasesReportParamSet(paramSet, enterTime, &reportParamSet);
+    (void)ConstructReportParamSet(__func__, processInfo, ret, &reportParamSet);
     HksEventReport(__func__, processInfo, NULL, reportParamSet, ret);
     HksFreeParamSet(&reportParamSet);
     return ret;
@@ -2245,11 +2231,9 @@ int32_t HksServiceRenameKeyAlias(const struct HksProcessInfo *processInfo, const
     }
 
     struct HksParamSet *reportParamSet = NULL;
-    int32_t reportRet = PreConstructRenameReportParamSet(oldKeyAlias, newKeyAlias, paramSet,
+    (void)PreConstructRenameReportParamSet(oldKeyAlias, newKeyAlias, paramSet,
         enterTime, &reportParamSet);
-    HKS_IF_NOT_SUCC_LOGE(reportRet, "PreConstructGenKeyReportParamSet failed, reportRet = %" LOG_PUBLIC "d", reportRet)
-    reportRet = ConstructReportParamSet(__func__, processInfo, ret, &reportParamSet);
-    HKS_IF_NOT_SUCC_LOGE(reportRet, "ConstructGenKeyReportParamSet failed, reportRet = %" LOG_PUBLIC "d", reportRet)
+    (void)ConstructReportParamSet(__func__, processInfo, ret, &reportParamSet);
     HksEventReport(__func__, processInfo, paramSet, reportParamSet, ret);
     HksFreeParamSet(&reportParamSet);
 
