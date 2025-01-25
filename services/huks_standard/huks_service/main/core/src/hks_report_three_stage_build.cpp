@@ -16,7 +16,7 @@
 #include <cstdint>
 #include <string>
 #include <sys/stat.h>
-#include <time.h>
+#include <ctime>
 #include <unordered_map>
 
 #include "hks_event_info.h"
