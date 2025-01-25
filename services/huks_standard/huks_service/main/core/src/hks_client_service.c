@@ -33,6 +33,7 @@
 #ifdef HKS_SUPPORT_API_ATTEST_KEY
 #include "hks_client_service_dcm.h"
 #endif
+#include "hks_client_service_common.h"
 #include "hks_client_service_util.h"
 #include "hks_common_check.h"
 #include "hks_hitrace.h"
@@ -78,32 +79,6 @@
 #ifdef HUKS_ENABLE_SKIP_UPGRADE_KEY_STORAGE_SECURE_LEVEL
 #include "hks_config_parser.h"
 #endif
-
-static int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
-{
-    int32_t ret;
-    struct HksParamSet *newParamSet = NULL;
-
-    do {
-        ret = HksCheckParamSet(paramSet, paramSet->paramSetSize);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check paramSet failed")
-
-        ret = HksFreshParamSet((struct HksParamSet *)paramSet, false);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append fresh paramset failed")
-
-        ret = HksInitParamSet(&newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append init operation param set failed")
-
-        ret = HksAddParams(newParamSet, paramSet->params, paramSet->paramsCnt);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append params failed")
-
-        *outParamSet = newParamSet;
-        return ret;
-    } while (0);
-
-    HksFreeParamSet(&newParamSet);
-    return ret;
-}
 
 static void IfNotSuccAppendHdiErrorInfo(int32_t hdiRet)
 {
@@ -988,6 +963,21 @@ static int32_t StoreOrCopyKeyBlob(const struct HksParamSet *paramSet, const stru
     return ret;
 }
 
+static void HksReportEvent(const char *funcName, const struct HksHitraceId *traceId,
+    const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet, int32_t ret)
+{
+#ifdef L2_STANDARD
+    HksHitraceEnd(traceId);
+    HksReport(funcName, processInfo, paramSet, ret);
+#else
+    (void)funcName;
+    (void)traceId;
+    (void)processInfo;
+    (void)paramSet;
+    (void)ret;
+#endif
+}
+
 int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, struct HksBlob *keyOut)
 {
@@ -1045,30 +1035,9 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
     HksEventReport(__func__, processInfo, paramSetIn, reportParamSet, ret);
     HksFreeParamSet(&reportParamSet);
 #endif
-#ifdef L2_STANDARD
-    HksHitraceEnd(&traceId);
-    HksReport(__func__, processInfo, paramSetIn, ret);
 
-#else
-    (void)traceId;
-#endif
-
+    HksReportEvent(__func__, &traceId, processInfo, paramSetIn, ret);
     return ret;
-}
-
-static void HksReportEvent(const char *funcName, const struct HksHitraceId *traceId,
-    const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet, int32_t ret)
-{
-#ifdef L2_STANDARD
-    HksHitraceEnd(traceId);
-    HksReport(funcName, processInfo, paramSet, ret);
-#else
-    (void)funcName;
-    (void)traceId;
-    (void)processInfo;
-    (void)paramSet;
-    (void)ret;
-#endif
 }
 
 int32_t HksServiceSign(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
@@ -1776,6 +1745,22 @@ static int32_t DcmGenerateCertChainInAttestKey(const struct HksParamSet *paramSe
     return ret;
 }
 
+static void AttestFree(struct HksBlob *keyFromFile, struct HksParamSet **newParamSet,
+    struct HksParamSet **processInfoParamSet, struct HksHitraceId *traceId)
+{
+    HKS_FREE_BLOB(*keyFromFile);
+    HksFreeParamSet(newParamSet);
+    HksFreeParamSet(processInfoParamSet);
+    HksHitraceEnd(traceId);
+}
+
+static int32_t AccessAttestKey(struct HksBlob *keyFromFile, struct HksParamSet *newParamSet, struct HksBlob *certChain)
+{
+    int32_t ret = HuksAccessAttestKey(keyFromFile, newParamSet, certChain);
+    IfNotSuccAppendHdiErrorInfo(ret);
+    return ret;
+}
+
 int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *certChain, const uint8_t *remoteObject)
 {
@@ -1785,11 +1770,9 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
     struct HksBlob keyFromFile = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
     struct HksParamSet *processInfoParamSet = NULL;
-    int32_t ret;
+    int32_t ret = HksCheckAttestKeyParams(&processInfo->processName, keyAlias, paramSet, certChain);
     do {
-        ret = HksCheckAttestKeyParams(&processInfo->processName, keyAlias, paramSet, certChain);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check attest key param fail")
-
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check attest key param fail");
 #ifdef HKS_SUPPORT_GET_BUNDLE_INFO
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &processInfoParamSet);
         HKS_IF_NOT_SUCC_LOGE(ret, "GetKeyAndNewParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
@@ -1803,7 +1786,7 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
             ret = AddAppInfoToParamSet(processInfo, processInfoParamSet, &newParamSet);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddAppInfoToParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
 #endif
-            ret = HuksAccessAttestKey(&keyFromFile, newParamSet, certChain);
+            ret = AccessAttestKey(&keyFromFile, newParamSet, certChain);
             IfNotSuccAppendHdiErrorInfo(ret);
         }
 #ifdef SUPPORT_STORAGE_BACKUP
@@ -1816,25 +1799,18 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
 #endif
             ret = GetKeyData(processInfo, keyAlias, newParamSet, &keyFromFile, HKS_STORAGE_TYPE_BAK_KEY);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get bak key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
-            ret = HuksAccessAttestKey(&keyFromFile, newParamSet, certChain);
-            IfNotSuccAppendHdiErrorInfo(ret);
+            ret = AccessAttestKey(&keyFromFile, newParamSet, certChain);
         }
 #endif
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAttestKey fail, ret = %" LOG_PUBLIC "d.", ret)
         ret = DcmGenerateCertChainInAttestKey(paramSet, remoteObject, certChain, certChainCapacity);
-        HKS_IF_NOT_SUCC_BREAK(ret)
     } while (0);
 #ifdef L2_STANDARD
-    HksEventInfo eventInfo = {};
-    HksGetAttestEventInfo(keyAlias, &keyFromFile, paramSet, processInfo, &eventInfo);
-    HksThreeStageReportInfo info = { ret, 0, HKS_ONE_STAGE, startTime, NULL };
-    (void)HksFreshAndReport(__func__, processInfo, paramSet, &info, &eventInfo);
+    HksAttestReportInfo info = {ret, startTime, __func__};
+    HksGetAttestEventInfo(keyAlias, &keyFromFile, paramSet, processInfo, &info);
 #endif
-    HKS_FREE_BLOB(keyFromFile);
-    HksFreeParamSet(&newParamSet);
-    HksFreeParamSet(&processInfoParamSet);
-    HksHitraceEnd(&traceId);
 
+    AttestFree(&keyFromFile, &newParamSet, &processInfoParamSet, &traceId);
     return ret;
 }
 #else // HKS_SUPPORT_API_ATTEST_KEY
@@ -1913,10 +1889,11 @@ static int32_t HksServiceCheckBatchUpdateTime(struct HksOperation *operation)
     return ret;
 }
 
-static void MarkAndDeleteOperation(struct HksOperation *operation, const struct HksBlob *handle)
+static void MarkAndDeleteOperation(struct HksOperation **operation, const struct HksBlob *handle)
 {
-    MarkOperationUnUse(operation);
+    MarkOperationUnUse(*operation);
     DeleteOperation(handle);
+    *operation = NULL;
 }
 
 int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
@@ -1934,11 +1911,9 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
     int32_t ret;
     do {
         operation = QueryOperationAndMarkInUse(processInfo, handle);
-        if (operation == NULL) {
-            HKS_LOG_E("operationHandle is not exist or being busy");
-            ret = HKS_ERROR_NOT_EXIST;
-            break;
-        }
+        ret = (operation == NULL ? HKS_ERROR_NOT_EXIST : HKS_SUCCESS);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "operationHandle is not exist or being busy")
+
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
         if (operation->accessTokenId != processInfo->accessTokenId) {
             HKS_LOG_E("compare access token id failed, unauthorized calling");
@@ -1951,8 +1926,7 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
             ret = HksServiceCheckBatchUpdateTime(operation);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("HksServiceCheckBatchUpdateTime fail, ret = %" LOG_PUBLIC "d", ret);
-                MarkAndDeleteOperation(operation, handle);
-                operation = NULL;
+                MarkAndDeleteOperation(&operation, handle);
                 break;
             }
         }
@@ -1966,8 +1940,7 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
         IfNotSuccAppendHdiErrorInfo(ret);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HuksAccessUpdate fail, ret = %" LOG_PUBLIC "d", ret);
-            MarkAndDeleteOperation(operation, handle);
-            operation = NULL;
+            MarkAndDeleteOperation(&operation, handle);
             break;
         }
     } while (0);
@@ -2064,7 +2037,7 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
         HksThreeStageReportInfo info = { ret, inData->size, HKS_FINISH, startTime, handle };
         (void)HksThreeStageReport(__func__, processInfo, paramSet, &info, operation);
 #endif
-        MarkAndDeleteOperation(operation, handle);
+        MarkAndDeleteOperation(&operation, handle);
     }
     HksFreeParamSet(&newParamSet);
     HksReportEvent(__func__, &traceId, processInfo, paramSet, ret);
@@ -2103,8 +2076,7 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
         HksThreeStageReportInfo info = { ret, 0, HKS_ABORT, 0, handle };
         (void)HksThreeStageReport(__func__, processInfo, paramSet, &info, operation);
 #endif
-        MarkAndDeleteOperation(operation, handle);
-        operation = NULL;
+        MarkAndDeleteOperation(&operation, handle);
     } while (0);
     MarkOperationUnUse(operation);
     HksFreeParamSet(&newParamSet);
@@ -2152,35 +2124,6 @@ int32_t HksServiceGenerateRandom(const struct HksProcessInfo *processInfo, struc
     HksReport(__func__, processInfo, NULL, ret);
 #endif
 
-    return ret;
-}
-
-int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet, int frontUserId)
-{
-    struct HksParamSet *newParamSet = NULL;
-    int32_t ret;
-    do {
-        if (paramSet != NULL) {
-            ret = AppendToNewParamSet(paramSet, &newParamSet);
-        } else {
-            ret = HksInitParamSet(&newParamSet);
-        }
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init param set failed")
-
-        struct HksParam frontUserIdParam;
-        frontUserIdParam.tag = HKS_TAG_FRONT_USER_ID;
-        frontUserIdParam.int32Param = frontUserId;
-        ret = HksAddParams(newParamSet, &frontUserIdParam, 1);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add frontUserIdParam fail!");
-
-        ret = HksBuildParamSet(&newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build append info failed")
-        *outParamSet = newParamSet;
-    } while (0);
-        if (ret != HKS_SUCCESS) {
-        HksFreeParamSet(&newParamSet);
-        *outParamSet = NULL;
-    }
     return ret;
 }
 

@@ -206,22 +206,26 @@ static void GetAttestInfo(const struct HksParamSet *paramSet, const struct HksBl
 }
 
 int32_t HksGetAttestEventInfo(const struct HksBlob *keyAlias, const struct HksBlob *key,
-    const struct HksParamSet *paramSet, const struct HksProcessInfo *processInfo, HksEventInfo *eventInfo)
+    const struct HksParamSet *paramSet, const struct HksProcessInfo *processInfo, HksAttestReportInfo *info)
 {
-    eventInfo->common.eventId = HKS_EVENT_ATTEST;
-    eventInfo->common.callerInfo.uid = processInfo->uidInt;
+    HksEventInfo eventInfo = {};
+    eventInfo.common.eventId = HKS_EVENT_ATTEST;
+    eventInfo.common.callerInfo.uid = processInfo->uidInt;
 
     struct HksParam *param = nullptr;
     if (HksGetParam(paramSet, HKS_TAG_PURPOSE, &param) == HKS_SUCCESS) {
-        eventInfo->common.operation = param->uint32Param;
-        eventInfo->attestInfo.keyInfo.purpose = param->uint32Param;
+        eventInfo.common.operation = param->uint32Param;
+        eventInfo.attestInfo.keyInfo.purpose = param->uint32Param;
     }
 
     HKS_IF_NULL_LOGE_RETURN(key->data, HKS_ERROR_NULL_POINTER, "key is null")
     struct HksParamSet *keyBlobParamSet = (struct HksParamSet *)key->data;
 
-    GetAttestInfo(paramSet, keyAlias, &(eventInfo->attestInfo));
-    GetAttestInfo(keyBlobParamSet, keyAlias, &(eventInfo->attestInfo));
+    GetAttestInfo(paramSet, keyAlias, &(eventInfo.attestInfo));
+    GetAttestInfo(keyBlobParamSet, keyAlias, &(eventInfo.attestInfo));
+
+    HksThreeStageReportInfo reportInfo = { info->errCode, 0, HKS_ONE_STAGE, info->startTime, nullptr };
+    (void)HksFreshAndReport(info->funcName, processInfo, paramSet, &reportInfo, &eventInfo);
     return HKS_SUCCESS;
 }
 
@@ -389,6 +393,10 @@ int32_t HksThreeStageReport(const char *funcName, const struct HksProcessInfo *p
     HKS_IF_NULL_LOGE_RETURN(info, HKS_ERROR_NULL_POINTER, "three stage report info is null")
 
     if (operation != nullptr) {
+        uint32_t eventId = operation->eventInfo.common.eventId;
+        if (eventId != HKS_EVENT_CRYPTO && eventId != HKS_EVENT_AGREE_DERIVE && eventId != HKS_EVENT_MAC) {
+            return HKS_FAILURE;
+        }
         (void)HksFreshAndReport(funcName, processInfo, paramSet, info, &operation->eventInfo);
         return HKS_SUCCESS;
     }

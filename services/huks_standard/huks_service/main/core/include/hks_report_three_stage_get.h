@@ -28,7 +28,7 @@ extern "C" {
 #endif
 
 int32_t HksGetAttestEventInfo(const struct HksBlob *keyAlias, const struct HksBlob *key,
-    const struct HksParamSet *paramSet, const struct HksProcessInfo *processInfo, HksEventInfo *eventInfo);
+    const struct HksParamSet *paramSet, const struct HksProcessInfo *processInfo, HksAttestReportInfo *info);
 
 int32_t HksGetInitEventInfo(const struct HksBlob *keyAlias, const struct HksBlob *key,
     const struct HksParamSet *paramSet, const struct HksProcessInfo *processInfo, HksEventInfo *eventInfo);

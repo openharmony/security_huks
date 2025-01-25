@@ -34,6 +34,7 @@
 #include "hks_client_check.h"
 #include "hks_client_service_dcm.h"
 #include "hks_client_service.h"
+#include "hks_client_service_common.h"
 #include "hks_cmd_id.h"
 #include "hks_log.h"
 #include "hks_mem.h"

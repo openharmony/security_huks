@@ -45,6 +45,7 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_utils.c",
       "src/hks_client_check.c",
       "src/hks_client_service.c",
+      "src/hks_client_service_common.c",
       "src/hks_client_service_util.c",
       "src/hks_session_manager.c",
     ]
@@ -76,8 +77,8 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_util_standard_static",
-      "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
       "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
+      "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
       "//base/security/huks/utils/list:libhuks_utils_list_static",
       "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
     ]
@@ -106,16 +107,16 @@ if (os_level == "standard") {
     sources += [
       "src/hks_hitrace.c",
       "src/hks_report.c",
+      "src/hks_report_check_key_exited.cpp",
       "src/hks_report_common.cpp",
-      "src/hks_report_generate_key.cpp",
       "src/hks_report_delete_key.cpp",
+      "src/hks_report_generate_key.cpp",
       "src/hks_report_import_key.cpp",
       "src/hks_report_list_aliases.cpp",
       "src/hks_report_rename_key.cpp",
-      "src/hks_report_check_key_exited.cpp",
+      "src/hks_report_three_stage.cpp",
       "src/hks_report_three_stage_build.cpp",
       "src/hks_report_three_stage_get.cpp",
-      "src/hks_report_three_stage.cpp",
     ]
 
     deps += [
@@ -164,6 +165,7 @@ if (os_level == "standard") {
       "../hks_storage/src/hks_storage_utils.c",
       "src/hks_client_check.c",
       "src/hks_client_service.c",
+      "src/hks_client_service_common.c",
       "src/hks_client_service_util.c",
       "src/hks_session_manager.c",
     ]

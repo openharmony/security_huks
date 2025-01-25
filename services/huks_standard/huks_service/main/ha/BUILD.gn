@@ -15,12 +15,12 @@ import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 
 config("libhuks_service_ha_config") {
-  include_dirs = [ 
-    "//base/security/huks/services/huks_standard/huks_service/main/ha/include",
-    "//base/security/huks/services/huks_standard/huks_service/main/core/include",
-    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
-    "//base/security/huks/services/huks_standard/huks_service/main/plugin_proxy/include",
-    ]
+  include_dirs = [
+    "${huks_base_path}services/huks_standard/huks_service/main/ha/include",
+    "${huks_base_path}services/huks_standard/huks_service/main/core/include",
+    "${huks_base_path}interfaces/inner_api/huks_standard/main/include",
+    "${huks_base_path}services/huks_standard/huks_service/main/plugin_proxy/include",
+  ]
 }
 
 ohos_static_library("libhuks_service_ha_static") {
@@ -36,18 +36,17 @@ ohos_static_library("libhuks_service_ha_static") {
 
   subsystem_name = "security"
   part_name = "huks"
-  configs = [
-    "//base/security/huks/frameworks/config/build:l2_standard_common_config",
-  ]
+  configs =
+      [ "${huks_base_path}frameworks/config/build:l2_standard_common_config" ]
   public_configs = [ ":libhuks_service_ha_config" ]
 
-  sources = [ 
+  sources = [
     "src/hks_ha_event_queue.cpp",
+    "src/hks_ha_event_report.cpp",
     "src/hks_ha_plugin.cpp",
-    "src/hks_ha_event_report.cpp"
-    ]
+  ]
 
-  deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
+  deps = [ "${huks_base_path}frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
 
   external_deps = [
     "c_utils:utils",
@@ -60,6 +59,6 @@ ohos_static_library("libhuks_service_ha_static") {
     "-Werror",
   ]
   cflags = cflags_cc
-  
+
   complete_static_lib = true
 }

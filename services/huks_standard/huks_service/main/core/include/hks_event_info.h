@@ -184,6 +184,12 @@ typedef struct HksThreeStageReportInfo {
     const struct HksBlob *handle;
 } HksThreeStageReportInfo;
 
+typedef struct HksAttestReportInfo {
+    int32_t errCode;
+    uint64_t startTime;
+    const char *funcName;
+} HksAttestReportInfo;
+
 #ifdef __cplusplus
 }
 #endif

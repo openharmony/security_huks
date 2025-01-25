@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 
-#include "hks_ha_event_report.h"
-#include "hks_ha_plugin.h"
+#include "hks_client_service_common.h"
+
+#include <stddef.h>
+
 #include "hks_log.h"
-#include "hks_type.h"
-#include "hks_type_inner.h"
 #include "hks_param.h"
 #include "hks_template.h"
-#include "hks_mem.h"
 
-static int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
+int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
 {
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
@@ -48,38 +47,31 @@ static int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct Hk
     return ret;
 }
 
-void HksEventReport(const char *funcName, const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
-    const struct HksParamSet *reportParamSet, int32_t errorCode)
+int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet, int frontUserId)
 {
-    struct HksParam *eventParam = NULL;
-    int32_t ret = HksGetParam(reportParamSet, HKS_TAG_PARAM0_UINT32, &eventParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Failed to get eventparam from reportParamSet");
-        return;
-    }
-
-    uint32_t eventId = eventParam->uint32Param;
-    HKS_LOG_I("eventId in HksEventReport is %u", eventId);
-
     struct HksParamSet *newParamSet = NULL;
-    ret = AppendToNewParamSet(reportParamSet, &newParamSet);
-    if (ret != HKS_SUCCESS) {
-        return;
-    }
-    
-    ret = HksBuildParamSet(&newParamSet);
-    if (ret != HKS_SUCCESS) {
-        return;
-    }
+    int32_t ret;
+    do {
+        if (paramSet != NULL) {
+            ret = AppendToNewParamSet(paramSet, &newParamSet);
+        } else {
+            ret = HksInitParamSet(&newParamSet);
+        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init param set failed")
 
-    HksHaPlugin* pluginInstance = &HksHaPlugin::GetInstance();
-    if (pluginInstance == nullptr) {
-        HKS_LOG_E("HksHaPlugin instance is null");
-        return;
-    }
+        struct HksParam frontUserIdParam;
+        frontUserIdParam.tag = HKS_TAG_FRONT_USER_ID;
+        frontUserIdParam.int32Param = frontUserId;
+        ret = HksAddParams(newParamSet, &frontUserIdParam, 1);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add frontUserIdParam fail!");
 
-    bool enqueueSuccess = HksHaPlugin::GetInstance().Enqueue(eventId, newParamSet);
-    if (!enqueueSuccess) {
-        HKS_LOG_E("Report fault event failed");
+        ret = HksBuildParamSet(&newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build append info failed")
+        *outParamSet = newParamSet;
+    } while (0);
+        if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(&newParamSet);
+        *outParamSet = NULL;
     }
+    return ret;
 }
