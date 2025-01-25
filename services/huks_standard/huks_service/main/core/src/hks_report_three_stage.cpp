@@ -15,7 +15,7 @@
 
 #include "hks_report_three_stage.h"
 
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 #include <unordered_map>
 

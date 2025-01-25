@@ -16,10 +16,9 @@
 #include "hks_report_three_stage_get.h"
 
 #include <cstdint>
-#include <stdint.h>
+#include <ctime>
 #include <string>
 #include <sys/stat.h>
-#include <time.h>
 
 #include "hks_api.h"
 #include "hks_error_msg.h"
@@ -34,13 +33,12 @@
 #include "hks_type_enum.h"
 #include "hks_type_inner.h"
 #include "hks_util.h"
-#include "time.h"
 
 static int32_t GetEventId(const struct HksParamSet *paramSet, HksEventInfo *eventInfo)
 {
     HKS_IF_NULL_LOGE_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "eventInfo is null");
 
-    struct HksParam *purposeParam = NULL;
+    struct HksParam *purposeParam = nullptr;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &purposeParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get purpose param fail")
     eventInfo->common.operation = purposeParam->uint32Param;
@@ -63,7 +61,7 @@ static int32_t GetEventId(const struct HksParamSet *paramSet, HksEventInfo *even
             eventInfo->macInfo.keyInfo.purpose = purposeParam->uint32Param;
             break;
         default:
-        HKS_LOG_E("purpose no need report");
+            HKS_LOG_E("purpose no need report");
             return HKS_ERROR_NOT_SUPPORTED;
     }
     return HKS_SUCCESS;
@@ -293,7 +291,7 @@ static void FreshStatInfo(HksEventStatInfo *statInfo, uint32_t dataSize, enum Hk
     (void)HksElapsedRealTime(&endTime);
     uint32_t cost = 0;
     if (endTime >= startTime) {
-        cost = (uint32_t)(endTime - startTime);
+        cost = static_cast<uint32_t>(endTime - startTime);
     }
 
     switch (stage) {

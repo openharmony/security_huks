@@ -26,6 +26,27 @@
 extern "C" {
 #endif
 
+enum HksEventId {
+    HKS_EVENT_CRYPTO = 1,
+    HKS_EVENT_AGREE_DERIVE = 2,
+    HKS_EVENT_MAC = 3,
+    HKS_EVENT_ATTEST = 4,
+    HKS_EVENT_GENERATE_KEY,
+    HKS_EVENT_CHECK_KEY_EXITED,
+    HKS_EVENT_DELETE_KEY,
+    HKS_EVENT_IMPORT_KEY,
+    HKS_EVENT_LIST_ALIASES,
+    HKS_EVENT_RENAME_KEY
+};
+
+enum HksReportStage {
+    HKS_INIT = 1,
+    HKS_UPDATE = 2,
+    HKS_FINISH = 3,
+    HKS_ABORT = 4,
+    HKS_ONE_STAGE = 5,
+};
+
 typedef struct HksEventKeyAccessInfo {
     uint32_t authType;
     uint32_t accessType;
