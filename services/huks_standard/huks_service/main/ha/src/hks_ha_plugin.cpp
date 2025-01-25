@@ -31,13 +31,13 @@
 #include <cstring>
 
 static HksEventProcMap g_eventProcMap[] = {{
-                                                      HKS_EVENT_CRYPTO,
-                                                      HksParamSetToEventInfoCrypto,
-                                                      HksEventInfoNeedReportCrypto,
-                                                      HksEventInfoIsEqualCrypto,
-                                                      HksEventInfoAddCrypto,
-                                                      HksEventInfoToMapCrypto,
-                                                  },
+        HKS_EVENT_CRYPTO,
+        HksParamSetToEventInfoCrypto,
+        HksEventInfoNeedReportCrypto,
+        HksEventInfoIsEqualCrypto,
+        HksEventInfoAddCrypto,
+        HksEventInfoToMapCrypto,
+    },
     {
         HKS_EVENT_AGREE_DERIVE,
         HksParamSetToEventInfoAgreeDerive,
@@ -304,7 +304,7 @@ int32_t HksHaPlugin::FillEventInfos(uint32_t reportCount, HksEventWithMap *event
 
             HksEventProcMap *procMap = HksEventProcFind(eventsWithMap[count].common.eventId);
             if (procMap == nullptr) {
-                HKS_LOG_E("FillEventInfos: No eventInfoToMap found for eventId %u", eventsWithMap[count].common.eventId);
+                HKS_LOG_E("No eventInfoToMap found for eventId %u", eventsWithMap[count].common.eventId);
                 continue;
             }
 
@@ -386,8 +386,7 @@ int32_t HksHaPlugin::BatchReportEvents(uint32_t reportCount)
         HKS_LOG_I("HksHaPlugin::BatchReportEvents:Finish CallBatchReport");
 
         RemoveReportedEvents(reportCount);
-
-    } while(0);
+    } while (0);
     
     delete[] eventsWithMap;
 

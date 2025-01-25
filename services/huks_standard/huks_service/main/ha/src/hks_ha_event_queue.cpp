@@ -16,7 +16,8 @@
 #include "hks_ha_event_queue.h"
 #include "hks_log.h"
 
-bool HksEventQueue::Enqueue(uint32_t eventId, struct HksParamSet *paramSet) {
+bool HksEventQueue::Enqueue(uint32_t eventId, struct HksParamSet *paramSet)
+{
     std::unique_lock<std::mutex> lock(queueMutex);
 
     HKS_LOG_I("Enqueue is start.................................");
@@ -34,7 +35,8 @@ bool HksEventQueue::Enqueue(uint32_t eventId, struct HksParamSet *paramSet) {
     return true;
 }
 
-bool HksEventQueue::Dequeue(HksEventQueueItem& item) {
+bool HksEventQueue::Dequeue(HksEventQueueItem& item)
+{
     std::unique_lock<std::mutex> lock(queueMutex);
 
     HKS_LOG_I("Dequeue is start.................................");
@@ -52,12 +54,14 @@ bool HksEventQueue::Dequeue(HksEventQueueItem& item) {
     return true;
 }
 
-uint32_t HksEventQueue::Size() const {
+uint32_t HksEventQueue::Size() const
+{
     std::lock_guard<std::mutex> lock(queueMutex);
     return queueItem.size();
 }
 
-bool HksEventQueue::IsEmpty() const {
+bool HksEventQueue::IsEmpty() const
+{
     std::lock_guard<std::mutex> lock(queueMutex);
     return queueItem.empty();
 }

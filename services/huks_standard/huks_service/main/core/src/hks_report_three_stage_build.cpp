@@ -37,7 +37,7 @@ int32_t BuildCommonInfo(const struct HksParamSet *paramSet, struct HksEventInfo 
             HKS_LOG_E("blob size is less than eventInfo");
             return HKS_ERROR_BUFFER_TOO_SMALL;
         }
-        *eventInfo = *static_cast<HksEventInfo *>(param->blob.data);
+        *eventInfo = *reinterpret_cast<HksEventInfo *>(param->blob.data);
     } else {
         return HKS_FAILURE;
     }
