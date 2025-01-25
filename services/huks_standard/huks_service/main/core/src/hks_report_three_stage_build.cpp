@@ -174,7 +174,7 @@ void AgreeDeriveInfoToMap(const HksEventAgreeDeriveInfo *info, std::unordered_ma
 {
     std::unordered_map<std::string, std::string> infoMap = {
         { "iter_count", std::to_string(info->iterCnt) },
-        { "storage_falg", std::to_string(info->storageFlag) },
+        { "storage_flag", std::to_string(info->storageFlag) },
         { "derive_key_size", std::to_string(info->keySize) },
         { "agree_pubkey_type", std::to_string(info->pubKeyType) },
         { "handle_id", std::to_string(info->handleId) },

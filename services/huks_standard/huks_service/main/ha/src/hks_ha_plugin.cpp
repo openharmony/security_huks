@@ -63,7 +63,7 @@ static HksEventProcMap g_eventProcMap[] = {
         HksEventInfoAddAttest,
         HksEventInfoToMapAttest,
     },
-    {   
+    {
         HKS_EVENT_GENERATE_KEY,
         HksParamSetToEventInfoForKeyGen,
         HksEventInfoIsNeedReportForKeyGen,
@@ -79,7 +79,7 @@ static HksEventProcMap g_eventProcMap[] = {
         HksEventInfoAddForImport,
         HksEventInfoToMapForImport,
     },
-    {   
+    {
         HKS_EVENT_DELETE_KEY,
         HksParamSetToEventInfoForDelete,
         HksEventInfoIsNeedReportForDelete,
@@ -87,7 +87,7 @@ static HksEventProcMap g_eventProcMap[] = {
         HksEventInfoAddForDelete,
         HksEventInfoToMapForDelete
     },
-    {   
+    {
         HKS_EVENT_CHECK_KEY_EXITED,
         HksParamSetToEventInfoForCheckKeyExited,
         HksEventInfoIsNeedReportForCheckKeyExited,
@@ -95,7 +95,7 @@ static HksEventProcMap g_eventProcMap[] = {
         HksEventInfoAddForCheckKeyExited,
         HksEventInfoToMapForCheckKeyExited
     },
-    {   
+    {
         HKS_EVENT_RENAME_KEY,
         HksParamSetToEventInfoForRename,
         HksEventInfoIsNeedReportForRename,
@@ -103,7 +103,7 @@ static HksEventProcMap g_eventProcMap[] = {
         HksEventInfoAddForRename,
         HksEventInfoToMapForRename
     },
-    {   
+    {
         HKS_EVENT_LIST_ALIASES,
         HksParamSetToEventInfoForListAliases,
         HksEventInfoIsNeedReportForListAliases,

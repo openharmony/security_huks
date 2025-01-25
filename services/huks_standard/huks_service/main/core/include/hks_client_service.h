@@ -97,9 +97,6 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
 
 void HksServiceDeleteProcessInfo(const struct HksProcessInfo *processInfo);
 
-int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet,
-    struct HksParamSet **outParamSet, int frontUserId);
-
 // callback
 int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
