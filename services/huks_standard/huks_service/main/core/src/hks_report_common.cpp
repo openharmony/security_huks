@@ -57,6 +57,7 @@ HKS_TAG_PARAM6_UINT32 -> renameDstKeyAliasHash
 #define KEY_HASH_OFFSET 8
 #define KEY_HASH_HIGHT 2
 #define KEY_HASH_LOW 1
+
 static int32_t GetHash(const struct HksBlob *data, struct HksBlob *hash)
 {
     struct HksParam hashParams[] = {
@@ -101,15 +102,12 @@ int32_t GetKeyHash(const struct HksBlob *keyAlias, uint16_t *keyHash)
 {
     uint8_t hashData[HASH_SHA256_SIZE] = {0};
     struct HksBlob hash = { HASH_SHA256_SIZE, hashData };
-    
-    int32_t ret = GetHash(keyAlias,  &hash);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyAlias hash failed")
+
     *(keyHash) = 0x00;
     *(keyHash) |= hash.data[hash.size - KEY_HASH_HIGHT] << KEY_HASH_OFFSET;
     *(keyHash) |= hash.data[hash.size - KEY_HASH_LOW];
-    return ret;
+    return HKS_SUCCESS;
 }
-
 
 int32_t AddKeyHash(struct HksParamSet *paramSetOut, const struct HksBlob *keyIn)
 {
