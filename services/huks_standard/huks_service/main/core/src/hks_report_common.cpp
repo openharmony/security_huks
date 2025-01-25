@@ -199,7 +199,7 @@ static int32_t AddProcessInfo(struct HksParamSet *paramSetOut, const struct HksP
             .uint32Param = processInfo->uidInt,
         }
     };
-    int32_t ret = HksAddParams(paramSetOut, params, sizeof(params) / sizeof(params[0]));
+    int32_t ret = HksAddParams(paramSetOut, params, HKS_ARRAY_SIZE(params));
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("AddProcessInfo failed");
     }

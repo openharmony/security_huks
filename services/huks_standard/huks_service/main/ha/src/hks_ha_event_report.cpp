@@ -48,7 +48,7 @@ static int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct Hk
     return ret;
 }
 
-void HksEventReport( const char *funcName, const struct HksProcessInfo *processInfo,const struct HksParamSet *paramSet,
+void HksEventReport( const char *funcName, const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     const struct HksParamSet *reportParamSet, int32_t errorCode)
 {
     struct HksParam *eventParam = NULL;

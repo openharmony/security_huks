@@ -30,7 +30,8 @@
 #include "hks_param.h"
 #include <cstring>
 
-static HksEventProcMap g_eventProcMap[] = {{
+static HksEventProcMap g_eventProcMap[] = {
+    {
         HKS_EVENT_CRYPTO,
         HksParamSetToEventInfoCrypto,
         HksEventInfoNeedReportCrypto,
@@ -62,12 +63,14 @@ static HksEventProcMap g_eventProcMap[] = {{
         HksEventInfoAddAttest,
         HksEventInfoToMapAttest,
     },
-    {HKS_EVENT_GENERATE_KEY,
+    {   
+        HKS_EVENT_GENERATE_KEY,
         HksParamSetToEventInfoForKeyGen,
         HksEventInfoIsNeedReportForKeyGen,
         HksEventInfoIsEqualForKeyGen,
         HksEventInfoAddForKeyGen,
-        HksEventInfoToMapForKeyGen},
+        HksEventInfoToMapForKeyGen
+    },
     {
         HKS_EVENT_IMPORT_KEY,
         HksParamSetToEventInfoForImport,
@@ -76,30 +79,39 @@ static HksEventProcMap g_eventProcMap[] = {{
         HksEventInfoAddForImport,
         HksEventInfoToMapForImport,
     },
-    {HKS_EVENT_DELETE_KEY,
+    {   
+        HKS_EVENT_DELETE_KEY,
         HksParamSetToEventInfoForDelete,
         HksEventInfoIsNeedReportForDelete,
         HksEventInfoIsEqualForDelete,
         HksEventInfoAddForDelete,
-        HksEventInfoToMapForDelete},
-    {HKS_EVENT_CHECK_KEY_EXITED,
+        HksEventInfoToMapForDelete
+    },
+    {   
+        HKS_EVENT_CHECK_KEY_EXITED,
         HksParamSetToEventInfoForCheckKeyExited,
         HksEventInfoIsNeedReportForCheckKeyExited,
         HksEventInfoIsEqualForCheckKeyExited,
         HksEventInfoAddForCheckKeyExited,
-        HksEventInfoToMapForCheckKeyExited},
-    {HKS_EVENT_RENAME_KEY,
+        HksEventInfoToMapForCheckKeyExited
+    },
+    {   
+        HKS_EVENT_RENAME_KEY,
         HksParamSetToEventInfoForRename,
         HksEventInfoIsNeedReportForRename,
         HksEventInfoIsEqualForRename,
         HksEventInfoAddForRename,
-        HksEventInfoToMapForRename},
-    {HKS_EVENT_LIST_ALIASES,
+        HksEventInfoToMapForRename
+    },
+    {   
+        HKS_EVENT_LIST_ALIASES,
         HksParamSetToEventInfoForListAliases,
         HksEventInfoIsNeedReportForListAliases,
         HksEventInfoIsEqualForListAliases,
         HksEventInfoAddForListAliases,
-        HksEventInfoToMapForListAliases}};
+        HksEventInfoToMapForListAliases
+    }
+};
 
 HksHaPlugin::HksHaPlugin() : queue(), stopFlag(false)
 {}
