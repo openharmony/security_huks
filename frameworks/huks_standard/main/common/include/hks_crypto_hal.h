@@ -86,6 +86,7 @@ struct KeyMaterialRsa {
     uint32_t eSize;
     uint32_t dSize;
 };
+#define RSA_KEY_MATERIAL_CNT 3U
 
 struct KeyMaterialEcc {
     enum HksKeyAlg keyAlg;
@@ -94,6 +95,7 @@ struct KeyMaterialEcc {
     uint32_t ySize;
     uint32_t zSize;
 };
+#define ECC_KEY_MATERIAL_CNT 3U
 
 struct KeyMaterialDsa {
     enum HksKeyAlg keyAlg;
