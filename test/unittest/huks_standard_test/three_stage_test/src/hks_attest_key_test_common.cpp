@@ -163,6 +163,53 @@ int32_t ConstructDataToCertChain(struct HksCertChain **certChain,
     return 0;
 }
 
+int32_t ConstructDataToCertChainWithCount(struct HksCertChain **certChain,
+    const struct HksTestCertChain *certChainParam, uint32_t certCount)
+{
+    if (!certChainParam->certChainExist) {
+        return 0;
+    }
+ 
+    *certChain = static_cast<struct HksCertChain *>(HksMalloc(sizeof(struct HksCertChain)));
+    if (*certChain == nullptr) {
+        HKS_LOG_E("malloc fail");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+ 
+    if (!certChainParam->certCountValid) {
+        (*certChain)->certsCount = 0;
+        (*certChain)->certs = nullptr;
+        return 0;
+    }
+ 
+    (*certChain)->certsCount = certCount;
+    if (!certChainParam->certDataExist) {
+        (*certChain)->certs = nullptr;
+        return 0;
+    }
+ 
+    (*certChain)->certs = static_cast<struct HksBlob *>(HksMalloc(sizeof(struct HksBlob) *
+    ((*certChain)->certsCount)));
+    if ((*certChain)->certs == nullptr) {
+        HKS_FREE(*certChain);
+        *certChain = nullptr;
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+ 
+    for (uint32_t i = 0; i < (*certChain)->certsCount; i++) {
+        (*certChain)->certs[i].size = certChainParam->certDataSize;
+        (*certChain)->certs[i].data = static_cast<uint8_t *>(HksMalloc((*certChain)->certs[i].size));
+        if ((*certChain)->certs[i].data == nullptr) {
+            HKS_LOG_E("malloc fail");
+            FreeCertChain(certChain, i);
+            return HKS_ERROR_MALLOC_FAIL;
+        }
+        memset_s((*certChain)->certs[i].data, certChainParam->certDataSize, 0, certChainParam->certDataSize);
+    }
+ 
+    return 0;
+}
+
 static int32_t ValidataAndCompareCertInfo(ParamType type, const struct HksCertChain *certChain,
     struct HksParamSet *paramSet)
 {

@@ -60,6 +60,9 @@ int32_t TestGenerateKeyCommon(const struct HksBlob *keyAlias, const struct HksPa
 int32_t ConstructDataToCertChain(struct HksCertChain **certChain,
     const struct HksTestCertChain *certChainParam);
 
+int32_t ConstructDataToCertChainWithCount(struct HksCertChain **certChain,
+    const struct HksTestCertChain *certChainParam, uint32_t certCount);
+
 int32_t GenerateParamSet(struct HksParamSet **paramSet, const struct HksParam tmpParams[], uint32_t paramCount);
 
 int32_t ValidateCertChainTest(const struct HksCertChain *certChain, const struct HksParam tmpParam[],

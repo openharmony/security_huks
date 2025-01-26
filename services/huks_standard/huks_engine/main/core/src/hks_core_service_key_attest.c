@@ -97,7 +97,18 @@ int32_t HksCoreAttestKey(const struct HksBlob *key, const  struct HksParamSet *p
 
     struct HksBlob rawKey;
     HksGetRawKey(keyNode->paramSet, &rawKey);
-    ret = CreateAttestCertChain(false, keyNode->paramSet, paramSet, certChain, &rawKey);
+    struct HksParam *attestParam = NULL;
+    ret = HksGetParam(paramSet, HKS_TAG_ATTESTATION_MODE, &attestParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get attestation mode failed");
+        return ret;
+    }
+ 
+    if (attestParam->uint32Param == HKS_ATTESTATION_MODE_ANONYMOUS) {
+        ret = CreateAttestCertChain(true, keyNode->paramSet, paramSet, certChain, &rawKey);
+    } else {
+        ret = CreateAttestCertChain(false, keyNode->paramSet, paramSet, certChain, &rawKey);
+    }
     HksFreeKeyNode(&keyNode);
     HKS_FREE_BLOB(rawKey);
     return ret;
