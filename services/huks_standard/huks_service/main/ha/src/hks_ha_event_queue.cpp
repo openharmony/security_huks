@@ -20,7 +20,7 @@ bool HksEventQueue::Enqueue(uint32_t eventId, struct HksParamSet *paramSet)
 {
     std::unique_lock<std::mutex> lock(queueMutex);
 
-    HKS_LOG_I("Enqueue is start.................................");
+    HKS_LOG_I("Enqueue is start");
 
     if (paramSet == nullptr) {
         HKS_LOG_E("HksParamSet is nullptr, cannot enqueue eventId: %u", eventId);
@@ -39,7 +39,7 @@ bool HksEventQueue::Dequeue(HksEventQueueItem& item)
 {
     std::unique_lock<std::mutex> lock(queueMutex);
 
-    HKS_LOG_I("Dequeue is start.................................");
+    HKS_LOG_I("Dequeue is start");
 
     notEmpty.wait(lock, [this]() { return !queueItem.empty(); });
 
