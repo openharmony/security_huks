@@ -37,11 +37,11 @@ int32_t PreConstructImportKeyReportParamSet(const struct HksBlob *keyAlias, cons
     uint64_t startTime, const struct HksBlob *keyIn, struct HksParamSet **paramSetOut)
 {
     if (keyAlias == nullptr || paramSetIn == nullptr) {
-        HKS_LOG_E("PreConstructImportKeyReportParamSet params is null");
+        HKS_LOG_I("PreConstructImportKeyReportParamSet params is null");
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = HksInitParamSet(paramSetOut);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "PreConstructImportKeyReportParamSet InitParamSet failed")
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "PreConstructImportKeyReportParamSet InitParamSet failed")
 
     do {
         ret = PreAddCommonInfo(*paramSetOut, keyAlias, paramSetIn, startTime);
@@ -64,7 +64,7 @@ int32_t PreConstructImportKeyReportParamSet(const struct HksBlob *keyAlias, cons
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add in params failed!")
     }while (0);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("PreConstructImportKeyReportParamSet failed");
+        HKS_LOG_I("PreConstructImportKeyReportParamSet failed");
         HksFreeParamSet(paramSetOut);
     }
     return ret;
@@ -73,14 +73,14 @@ int32_t PreConstructImportKeyReportParamSet(const struct HksBlob *keyAlias, cons
 int32_t HksParamSetToEventInfoForImport(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
 {
     if (paramSetIn == nullptr || eventInfo == nullptr) {
-        HKS_LOG_E("HksParamSetToEventInfoForImport params is null");
+        HKS_LOG_I("HksParamSetToEventInfoForImport params is null");
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
     ret = GetEventKeyInfo(paramSetIn, &(eventInfo->keyInfo));
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "report GetEventKeyInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetEventKeyInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
     struct HksParam *paramToEventInfo = nullptr;
     if (HksGetParam(paramSetIn, HKS_TAG_IMPORT_KEY_TYPE, &paramToEventInfo) == HKS_SUCCESS) {
@@ -120,18 +120,18 @@ int32_t HksEventInfoToMapForImport(const struct HksEventInfo *eventInfo,
     std::unordered_map<std::string, std::string> &reportData)
 {
     if (eventInfo == nullptr) {
-        HKS_LOG_E("HksEventInfoToMapForImport evenInfo is null");
+        HKS_LOG_I("HksEventInfoToMapForImport evenInfo is null");
         return HKS_ERROR_NULL_POINTER;
     }
     auto ret = reportData.insert_or_assign("import_key_type", std::to_string(eventInfo->importInfo.keyType));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert import_key_type failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert import_key_type failed!");
 
     ret = reportData.insert_or_assign("unwrap_algorithm_suit", std::to_string(eventInfo->importInfo.algSuit));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert unwrap_algorithm_suit failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert unwrap_algorithm_suit failed!");
 
     ret = EventInfoToMapKeyInfo(&eventInfo->importInfo.keyInfo, reportData);
     if (!ret.second) {
-        HKS_LOG_E("HksEventInfoToMapForImport failed! reportData insert failed!");
+        HKS_LOG_I("HksEventInfoToMapForImport failed! reportData insert failed!");
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
     return HKS_SUCCESS;

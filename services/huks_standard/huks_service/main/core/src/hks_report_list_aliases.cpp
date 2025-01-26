@@ -36,18 +36,18 @@ int32_t PreConstructListAliasesReportParamSet(const struct HksParamSet *paramSet
     struct HksParamSet **paramSetOut)
 {
     if (paramSetIn == nullptr) {
-        HKS_LOG_E("PreConstructListAliasesReportParamSet params is null");
+        HKS_LOG_I("PreConstructListAliasesReportParamSet params is null");
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = HksInitParamSet(paramSetOut);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "PreConstructListAliasesReportParamSet InitParamSet failed")
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "PreConstructListAliasesReportParamSet InitParamSet failed")
 
     do {
         ret = AddTimeCost(*paramSetOut, startTime);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "PreAddCommonInfo add time cost to paramSetOut failed!")
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "PreAddCommonInfo add time cost to paramSetOut failed!")
 
         ret = HksAddParams(*paramSetOut, paramSetIn->params, paramSetIn->paramsCnt);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "PreAddCommonInfo add paramSetIn params to paramSetOut failed!")
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "PreAddCommonInfo add paramSetIn params to paramSetOut failed!")
 
         struct HksParam params[] = {
             {
@@ -63,7 +63,7 @@ int32_t PreConstructListAliasesReportParamSet(const struct HksParamSet *paramSet
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add in params failed!")
     }while (0);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("PreConstructListAliasesReportParamSet failed");
+        HKS_LOG_I("PreConstructListAliasesReportParamSet failed");
         HksFreeParamSet(paramSetOut);
     }
     return ret;
@@ -72,14 +72,14 @@ int32_t PreConstructListAliasesReportParamSet(const struct HksParamSet *paramSet
 int32_t HksParamSetToEventInfoForListAliases(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
 {
     if (paramSetIn == nullptr || eventInfo == nullptr) {
-        HKS_LOG_E("HksParamSetToEventInfoForListAliases params is null");
+        HKS_LOG_I("HksParamSetToEventInfoForListAliases params is null");
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
     ret = GetEventKeyInfo(paramSetIn, &(eventInfo->keyInfo));
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "report GetEventKeyInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetEventKeyInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
     return ret;
 }
@@ -109,12 +109,12 @@ int32_t HksEventInfoToMapForListAliases(const struct HksEventInfo *eventInfo,
     std::unordered_map<std::string, std::string> &reportData)
 {
     if (eventInfo == nullptr) {
-        HKS_LOG_E("HksEventInfoToMapForImport evenInfo is null");
+        HKS_LOG_I("HksEventInfoToMapForImport evenInfo is null");
         return HKS_ERROR_NULL_POINTER;
     }
     auto ret = EventInfoToMapKeyInfo(&eventInfo->keyInfo, reportData);
     if (!ret.second) {
-        HKS_LOG_E("HksEventInfoToMapForImport failed! reportData insert failed!");
+        HKS_LOG_I("HksEventInfoToMapForImport failed! reportData insert failed!");
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
     return HKS_SUCCESS;

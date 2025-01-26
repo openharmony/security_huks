@@ -68,7 +68,7 @@ static int32_t GetHash(const struct HksBlob *data, struct HksBlob *hash)
     };
     struct HksParamSet *hashParamSet = nullptr;
     int32_t ret = HksInitParamSet(&hashParamSet);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "init paramset failed!")
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "init paramset failed!")
 
     do {
         ret = HksAddParams(hashParamSet, hashParams, HKS_ARRAY_SIZE(hashParams));
@@ -92,16 +92,22 @@ int32_t GetKeyAliasHash(const struct HksBlob *keyAlias, uint8_t *keyAliasHash)
     struct HksBlob hash = { HASH_SHA256_SIZE, hashData };
     
     int32_t ret = GetHash(keyAlias,  &hash);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyAlias hash failed")
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "get keyAlias hash failed")
 
     *keyAliasHash = hash.data[hash.size - 1];
     return ret;
 }
 
-int32_t GetKeyHash(const struct HksBlob *keyAlias, uint16_t *keyHash)
+int32_t GetKeyHash(const struct HksBlob *key, uint16_t *keyHash)
 {
     uint8_t hashData[HASH_SHA256_SIZE] = {0};
     struct HksBlob hash = { HASH_SHA256_SIZE, hashData };
+    if (key->size <= 0 || key->size >= 128) {
+        HKS_LOG_I("no to deal key hash. key size : %" LOG_PUBLIC "d", key->size);
+        return HKS_SUCCESS;
+    }
+    int32_t ret = GetHash(key,  &hash);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "get keyAlias hash failed")
 
     *(keyHash) = 0x00;
     *(keyHash) |= hash.data[hash.size - KEY_HASH_HIGHT] << KEY_HASH_OFFSET;
@@ -113,7 +119,7 @@ int32_t AddKeyHash(struct HksParamSet *paramSetOut, const struct HksBlob *keyIn)
 {
     uint16_t keyHash = 0xFFFF;
     int32_t ret = GetKeyHash(keyIn, &keyHash);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetKeyHash Failed!!")
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "GetKeyHash Failed!!")
     struct HksParam keyParams[] = {
         {
             .tag = HKS_TAG_PARAM5_UINT32,
@@ -122,7 +128,7 @@ int32_t AddKeyHash(struct HksParamSet *paramSetOut, const struct HksBlob *keyIn)
     };
     ret = HksAddParams(paramSetOut, keyParams, HKS_ARRAY_SIZE(keyParams));
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("AddKeyHash failed");
+        HKS_LOG_I("AddKeyHash failed");
     }
     return ret;
 }
@@ -131,14 +137,14 @@ int32_t AddKeyAliasHash(struct HksParamSet *paramSetOut, const struct HksBlob *k
 {
     uint8_t keyAliasHash = 0xFF;
     int32_t ret = GetKeyAliasHash(keyAlias, &keyAliasHash);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetKeyAliasHash Failed!!")
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "GetKeyAliasHash Failed!!")
     struct HksParam hashKeyAliasParam = {
         .tag = paramTag,
         .uint32Param = (uint32_t)keyAliasHash
     };
     ret = HksAddParams(paramSetOut, &hashKeyAliasParam, 1);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("AddKeyAliasHash failed");
+        HKS_LOG_I("AddKeyAliasHash failed");
     }
     return ret;
 }
@@ -152,8 +158,7 @@ static int32_t AddErrorMessage(struct HksParamSet *paramSetOut)
     };
     int32_t ret = HksAddParams(paramSetOut, &param, 1);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("add time cost to paramSetOut failed");
-        HksFreeParamSet(&paramSetOut);
+        HKS_LOG_I("add error msg to paramSetOut failed");
     }
     return ret;
 }
@@ -171,7 +176,7 @@ int32_t AddTimeCost(struct HksParamSet *paramSetOut, uint64_t startTime)
     };
     int32_t ret = HksAddParams(paramSetOut, params, HKS_ARRAY_SIZE(params));
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("add time cost to paramSetOut failed");
+        HKS_LOG_I("add time cost to paramSetOut failed");
     }
     return ret;
 }
@@ -180,13 +185,13 @@ int32_t PreAddCommonInfo(struct HksParamSet *paramSetOut, const struct HksBlob *
     const struct HksParamSet *paramSetIn, uint64_t startTime)
 {
     int32_t ret = AddTimeCost(paramSetOut, startTime);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "PreAddCommonInfo add time cost to paramSetOut failed!")
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "PreAddCommonInfo add time cost to paramSetOut failed!")
 
     ret = AddKeyAliasHash(paramSetOut, keyAlias, HKS_TAG_PARAM4_UINT32);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "PreAddCommonInfo add kayAlias hash to paramSetOut failed!")
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "PreAddCommonInfo add kayAlias hash to paramSetOut failed!")
 
     ret = HksAddParams(paramSetOut, paramSetIn->params, paramSetIn->paramsCnt);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "PreAddCommonInfo add paramSetIn params to paramSetOut failed!")
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "PreAddCommonInfo add paramSetIn params to paramSetOut failed!")
 
     return ret;
 }
@@ -201,7 +206,7 @@ static int32_t AddProcessInfo(struct HksParamSet *paramSetOut, const struct HksP
     };
     int32_t ret = HksAddParams(paramSetOut, params, HKS_ARRAY_SIZE(params));
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("AddProcessInfo failed");
+        HKS_LOG_I("AddProcessInfo failed");
     }
     return ret;
 }
@@ -217,7 +222,7 @@ static int32_t AddFuncName(struct HksParamSet *paramSetOut, const char *funcName
     };
     int32_t ret = HksAddParams(paramSetOut, params, HKS_ARRAY_SIZE(params));
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("AddFuncName failed");
+        HKS_LOG_I("AddFuncName failed");
     }
     return ret;
 }
@@ -226,13 +231,13 @@ static int32_t AddCommonInfo(const char *funcName, const struct HksProcessInfo *
     int32_t errorCode, struct HksParamSet *reportParamSet)
 {
     int32_t ret = AddProcessInfo(reportParamSet, processInfo);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add processInfo to params failed")
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add processInfo to params failed")
 
     ret = AddFuncName(reportParamSet, funcName);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add function name to params failed")
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add function name to params failed")
 
     ret = AddErrorMessage(reportParamSet);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add error message to params failed")
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add error message to params failed")
     return ret;
 }
 
@@ -246,7 +251,7 @@ static enum HksCallerType HksGetCallerType(void)
         case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL:
             return HKS_SA_TYPE;
         default:
-            HKS_LOG_E("Error token type, callerTokenId: %" LOG_PUBLIC "u", callingTokenId);
+            HKS_LOG_I("Error token type, callerTokenId: %" LOG_PUBLIC "u", callingTokenId);
             return HKS_UNIFIED_TYPE;
     }
 }
@@ -260,7 +265,7 @@ int32_t ReportGetCallerName(std::string &callerName)
             int32_t accessTokenRet = OHOS::Security::AccessToken::AccessTokenKit::GetHapTokenInfo(callingTokenId,
                 hapTokenInfo);
             if (accessTokenRet != OHOS::Security::AccessToken::AccessTokenKitRet::RET_SUCCESS) {
-                HKS_LOG_E("GetHapTokenInfo failed, ret: %" LOG_PUBLIC "d", accessTokenRet);
+                HKS_LOG_I("GetHapTokenInfo failed, ret: %" LOG_PUBLIC "d", accessTokenRet);
                 return HKS_ERROR_BAD_STATE;
             }
             callerName = hapTokenInfo.bundleName;
@@ -271,14 +276,14 @@ int32_t ReportGetCallerName(std::string &callerName)
             int32_t accessTokenRet = OHOS::Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(callingTokenId,
                 saTokenInfo);
             if (accessTokenRet != OHOS::Security::AccessToken::AccessTokenKitRet::RET_SUCCESS) {
-                HKS_LOG_E("GetNativeTokenInfo failed, ret: %" LOG_PUBLIC "d", accessTokenRet);
+                HKS_LOG_I("GetNativeTokenInfo failed, ret: %" LOG_PUBLIC "d", accessTokenRet);
                 return HKS_ERROR_BAD_STATE;
             }
             callerName = saTokenInfo.processName;
             return HKS_SUCCESS;
         }
         default: {
-            HKS_LOG_E("Invalid caller Type!");
+            HKS_LOG_I("Invalid caller Type!");
             return HKS_ERROR_BAD_STATE;
         }
     }
@@ -288,11 +293,11 @@ int32_t ConstructReportParamSet(const char *funcName, const struct HksProcessInf
     int32_t errorCode, struct HksParamSet **reportParamSet)
 {
     if (funcName == nullptr || processInfo == nullptr || reportParamSet == nullptr || *reportParamSet == nullptr) {
-        HKS_LOG_E("ConstructReportParamSet params is null");
+        HKS_LOG_I("ConstructReportParamSet params is null");
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = AddCommonInfo(funcName, processInfo, errorCode,  *reportParamSet);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ConstructReportParamSet add common info failed!")
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "ConstructReportParamSet add common info failed!")
 
     do {
         struct HksEventResultInfo resultInfo = {
@@ -327,7 +332,7 @@ int32_t ConstructReportParamSet(const char *funcName, const struct HksProcessInf
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Buil reportParamSet failed")
     } while (0);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("ConstructReportParamSet failed");
+        HKS_LOG_I("ConstructReportParamSet failed");
         HksFreeParamSet(reportParamSet);
     }
     return ret;
@@ -335,8 +340,8 @@ int32_t ConstructReportParamSet(const char *funcName, const struct HksProcessInf
 
 int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
 {
-    HKS_IF_NULL_LOGE_RETURN(paramSetIn, HKS_ERROR_NULL_POINTER, "GetCommonEventInfo paramSetIn is null")
-    HKS_IF_NULL_LOGE_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "GetCommonEventInfo eventInfo is null")
+    HKS_IF_NULL_LOGI_RETURN(paramSetIn, HKS_ERROR_NULL_POINTER, "GetCommonEventInfo paramSetIn is null")
+    HKS_IF_NULL_LOGI_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "GetCommonEventInfo eventInfo is null")
 
     struct HksParam *paramToEventInfo = nullptr;
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM0_UINT32, &paramToEventInfo) == HKS_SUCCESS) {
@@ -344,8 +349,8 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM0_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
-        eventInfo->common.function = (char *)HksMalloc(paramToEventInfo->blob.size);
-        (void)memcpy_s(eventInfo->common.function, paramToEventInfo->blob.size, paramToEventInfo->blob.data,
+        eventInfo->common.function = (char *)HksMalloc(paramToEventInfo->blob.size + 1);
+        (void)memcpy_s(eventInfo->common.function, paramToEventInfo->blob.size + 1, paramToEventInfo->blob.data,
             paramToEventInfo->blob.size);
     }
 
@@ -359,8 +364,8 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM2_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
-        eventInfo->common.callerInfo.name = (char *)HksMalloc(paramToEventInfo->blob.size);
-        (void)memcpy_s(eventInfo->common.callerInfo.name, paramToEventInfo->blob.size, paramToEventInfo->blob.data,
+        eventInfo->common.callerInfo.name = (char *)HksMalloc(paramToEventInfo->blob.size + 1);
+        (void)memcpy_s(eventInfo->common.callerInfo.name, paramToEventInfo->blob.size + 1, paramToEventInfo->blob.data,
             paramToEventInfo->blob.size);
     }
 
@@ -373,8 +378,8 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM0_NULL, &paramToEventInfo) == HKS_SUCCESS) {
-        eventInfo->common.result.errMsg = (char *)HksMalloc(paramToEventInfo->blob.size);
-        (void)memcpy_s(eventInfo->common.result.errMsg, paramToEventInfo->blob.size, paramToEventInfo->blob.data,
+        eventInfo->common.result.errMsg = (char *)HksMalloc(paramToEventInfo->blob.size + 1);
+        (void)memcpy_s(eventInfo->common.result.errMsg, paramToEventInfo->blob.size + 1, paramToEventInfo->blob.data,
             paramToEventInfo->blob.size);
     }
 
@@ -386,8 +391,8 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
 
 int32_t GetEventKeyInfo(const struct HksParamSet *paramSetIn, struct HksEventKeyInfo *keyInfo)
 {
-    HKS_IF_NULL_LOGE_RETURN(paramSetIn, HKS_ERROR_NULL_POINTER, "GetEventKeyInfo paramSetIn is null")
-    HKS_IF_NULL_LOGE_RETURN(keyInfo, HKS_ERROR_NULL_POINTER, "GetEventKeyInfo eventInfo is null")
+    HKS_IF_NULL_LOGI_RETURN(paramSetIn, HKS_ERROR_NULL_POINTER, "GetEventKeyInfo paramSetIn is null")
+    HKS_IF_NULL_LOGI_RETURN(keyInfo, HKS_ERROR_NULL_POINTER, "GetEventKeyInfo eventInfo is null")
     struct HksParam *paramToEventInfo = nullptr;
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM4_UINT32, &paramToEventInfo) == HKS_SUCCESS) {
         keyInfo->aliasHash = paramToEventInfo->uint32Param;
@@ -437,8 +442,8 @@ int32_t GetEventKeyInfo(const struct HksParamSet *paramSetIn, struct HksEventKey
 
 int32_t GetEventKeyAccessInfo(const struct HksParamSet *paramSetIn, struct HksEventKeyAccessInfo *keyAccessInfo)
 {
-    HKS_IF_NULL_LOGE_RETURN(paramSetIn, HKS_ERROR_NULL_POINTER, "GetEventKeyAccessInfo paramSetIn is null")
-    HKS_IF_NULL_LOGE_RETURN(keyAccessInfo, HKS_ERROR_NULL_POINTER, "GetEventKeyAccessInfo eventInfo is null")
+    HKS_IF_NULL_LOGI_RETURN(paramSetIn, HKS_ERROR_NULL_POINTER, "GetEventKeyAccessInfo paramSetIn is null")
+    HKS_IF_NULL_LOGI_RETURN(keyAccessInfo, HKS_ERROR_NULL_POINTER, "GetEventKeyAccessInfo eventInfo is null")
     struct HksParam *paramToEventInfo;
     if (HksGetParam(paramSetIn, HKS_TAG_USER_AUTH_TYPE, &paramToEventInfo) == HKS_SUCCESS) {
         keyAccessInfo->authType = paramToEventInfo->uint32Param;
@@ -482,37 +487,37 @@ std::pair<std::unordered_map<std::string, std::string>::iterator, bool> EventInf
     const struct HksEventKeyInfo *eventKeyInfo, std::unordered_map<std::string, std::string> &reportData)
 {
     auto ret = reportData.insert_or_assign("alias_hash", std::to_string(eventKeyInfo->aliasHash));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert alias hash failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert alias hash failed!");
 
     ret = reportData.insert_or_assign("storage_level", std::to_string(eventKeyInfo->storageLevel));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert storage level failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert storage level failed!");
 
     ret = reportData.insert_or_assign("specific_os_account_id", std::to_string(eventKeyInfo->specificUserId));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert specific_os_account_id failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert specific_os_account_id failed!");
 
     ret = reportData.insert_or_assign("algorithm", std::to_string(eventKeyInfo->alg));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert algorithm failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert algorithm failed!");
 
     ret = reportData.insert_or_assign("purpose", std::to_string(eventKeyInfo->purpose));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert purpose failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert purpose failed!");
 
     ret = reportData.insert_or_assign("key_size", std::to_string(eventKeyInfo->keySize));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert key_size failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert key_size failed!");
 
     ret = reportData.insert_or_assign("key_flag", std::to_string(eventKeyInfo->keyFlag));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert keyFlag failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert keyFlag failed!");
 
     ret = reportData.insert_or_assign("key_hash", std::to_string(eventKeyInfo->keyHash));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert key_hash failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert key_hash failed!");
 
     ret = reportData.insert_or_assign("batch_operation", std::to_string(eventKeyInfo->isBatch));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert batch_operation failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert batch_operation failed!");
 
     ret = reportData.insert_or_assign("batch_purpose", std::to_string(eventKeyInfo->batchPur));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert batch_purpose failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert batch_purpose failed!");
 
     ret = reportData.insert_or_assign("batch_timeout", std::to_string(eventKeyInfo->batchTimeOut));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert batch_timeout failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert batch_timeout failed!");
     return ret;
 }
 
@@ -520,30 +525,30 @@ std::pair<std::unordered_map<std::string, std::string>::iterator, bool> EventInf
     const struct HksEventKeyAccessInfo *eventKeyAccessInfo, std::unordered_map<std::string, std::string> &reportData)
 {
     auto ret = reportData.insert_or_assign("auth_type", std::to_string(eventKeyAccessInfo->authType));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert auth_type failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert auth_type failed!");
 
     ret = reportData.insert_or_assign("access_type", std::to_string(eventKeyAccessInfo->accessType));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert access_type failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert access_type failed!");
 
     ret = reportData.insert_or_assign("challenge_type", std::to_string(eventKeyAccessInfo->challengeType));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert challenge_type failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert challenge_type failed!");
 
     ret = reportData.insert_or_assign("challenge_pos", std::to_string(eventKeyAccessInfo->challengePos));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert challenge_pos failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert challenge_pos failed!");
 
     ret = reportData.insert_or_assign("auth_timeout", std::to_string(eventKeyAccessInfo->authTimeOut));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert auth_timeout failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert auth_timeout failed!");
 
     ret = reportData.insert_or_assign("auth_purpose", std::to_string(eventKeyAccessInfo->authPurpose));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert auth_purpose failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert auth_purpose failed!");
 
     ret = reportData.insert_or_assign("front_os_account_id", std::to_string(eventKeyAccessInfo->frontUserId));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert front_os_account_id failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert front_os_account_id failed!");
 
     ret = reportData.insert_or_assign("auth_mode", std::to_string(eventKeyAccessInfo->authMode));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert auth_mode failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert auth_mode failed!");
 
     ret = reportData.insert_or_assign("need_pwd_set", std::to_string(eventKeyAccessInfo->needPwdSet));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert need_pwd_set failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert need_pwd_set failed!");
     return ret;
 }

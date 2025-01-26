@@ -37,11 +37,11 @@ int32_t PreConstructCheckKeyExitedReportParamSet(const struct HksBlob *keyAlias,
     uint64_t startTime, struct HksParamSet **paramSetOut)
 {
     if (keyAlias == nullptr || paramSetIn == nullptr) {
-        HKS_LOG_E("PreConstructCheckKeyExitedReportParamSet params is null");
+        HKS_LOG_I("PreConstructCheckKeyExitedReportParamSet params is null");
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = HksInitParamSet(paramSetOut);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ConstructGenKeyReportParamSet InitParamSet failed")
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "ConstructGenKeyReportParamSet InitParamSet failed")
 
     do {
         ret = PreAddCommonInfo(*paramSetOut, keyAlias, paramSetIn, startTime);
@@ -61,7 +61,7 @@ int32_t PreConstructCheckKeyExitedReportParamSet(const struct HksBlob *keyAlias,
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add in params failed!")
     }while (0);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("PreConstructCheckKeyExitedReportParamSet failed");
+        HKS_LOG_I("PreConstructCheckKeyExitedReportParamSet failed");
         HksFreeParamSet(paramSetOut);
     }
     return ret;
@@ -70,14 +70,14 @@ int32_t PreConstructCheckKeyExitedReportParamSet(const struct HksBlob *keyAlias,
 int32_t HksParamSetToEventInfoForCheckKeyExited(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
 {
     if (paramSetIn == nullptr || eventInfo == nullptr) {
-        HKS_LOG_E("HksParamSetToEventInfoForCheckKeyExited params is null");
+        HKS_LOG_I("HksParamSetToEventInfoForCheckKeyExited params is null");
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
     ret = GetEventKeyInfo(paramSetIn, &(eventInfo->keyInfo));
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "report GetEventKeyInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetEventKeyInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
     return ret;
 }
@@ -109,12 +109,12 @@ int32_t HksEventInfoToMapForCheckKeyExited(const struct HksEventInfo *eventInfo,
     std::unordered_map<std::string, std::string> &reportData)
 {
     if (eventInfo == nullptr) {
-        HKS_LOG_E("HksEventInfoToMapForCheckKeyExited evenInfo is null");
+        HKS_LOG_I("HksEventInfoToMapForCheckKeyExited evenInfo is null");
         return HKS_ERROR_NULL_POINTER;
     }
     auto ret = EventInfoToMapKeyInfo(&eventInfo->keyInfo, reportData);
     if (!ret.second) {
-        HKS_LOG_E("HksEventInfoToMapForCheckKeyExited failed! reportData insert failed!");
+        HKS_LOG_I("HksEventInfoToMapForCheckKeyExited failed! reportData insert failed!");
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
     return HKS_SUCCESS;

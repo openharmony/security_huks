@@ -36,11 +36,11 @@ int32_t PreConstructGenKeyReportParamSet(const struct HksBlob *keyAlias, const s
     uint64_t startTime, const struct HksBlob *keyIn, struct HksParamSet **paramSetOut)
 {
     if (keyAlias == nullptr || paramSetIn == nullptr) {
-        HKS_LOG_E("PreConstructDeleteKeyReportParamSet params is null");
+        HKS_LOG_I("PreConstructDeleteKeyReportParamSet params is null");
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = HksInitParamSet(paramSetOut);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ConstructGenKeyReportParamSet InitParamSet failed")
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "ConstructGenKeyReportParamSet InitParamSet failed")
 
     do {
         ret = PreAddCommonInfo(*paramSetOut, keyAlias, paramSetIn, startTime);
@@ -63,7 +63,7 @@ int32_t PreConstructGenKeyReportParamSet(const struct HksBlob *keyAlias, const s
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add in params failed!")
     }while (0);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("PreConstructGenKeyReportParamSet failed");
+        HKS_LOG_I("PreConstructGenKeyReportParamSet failed");
         HksFreeParamSet(paramSetOut);
     }
     return ret;
@@ -72,17 +72,17 @@ int32_t PreConstructGenKeyReportParamSet(const struct HksBlob *keyAlias, const s
 int32_t HksParamSetToEventInfoForKeyGen(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
 {
     if (paramSetIn == nullptr || eventInfo == nullptr) {
-        HKS_LOG_E("HksParamSetToEventInfoForKeyGen params is null");
+        HKS_LOG_I("HksParamSetToEventInfoForKeyGen params is null");
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
     ret = GetEventKeyInfo(paramSetIn, &(eventInfo->keyInfo));
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "report GetEventKeyInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetEventKeyInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
     ret = GetEventKeyAccessInfo(paramSetIn, &(eventInfo->keyAccessInfo));
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "report GetEventKeyAccessInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetEventKeyAccessInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
     struct HksParam *paramToEventInfo = nullptr;
     if (HksGetParam(paramSetIn, HKS_TAG_AGREE_ALG, &paramToEventInfo) == HKS_SUCCESS) {
@@ -121,24 +121,24 @@ int32_t HksEventInfoToMapForKeyGen(const struct HksEventInfo *eventInfo,
     std::unordered_map<std::string, std::string> &reportData)
 {
     if (eventInfo == nullptr) {
-        HKS_LOG_E("HksEventInfoToMapForKeyGen evenInfo is null");
+        HKS_LOG_I("HksEventInfoToMapForKeyGen evenInfo is null");
         return HKS_ERROR_NULL_POINTER;
     }
 
     auto ret = reportData.insert_or_assign("agree_alg", std::to_string(eventInfo->generateInfo.agreeAlg));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert agree_alg failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert agree_alg failed!");
 
     ret = reportData.insert_or_assign("agree_pubkey_is_alias", std::to_string(eventInfo->generateInfo.pubKeyIsAlias));
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData insert agree_pubkey_is_alias failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert agree_pubkey_is_alias failed!");
 
     ret = EventInfoToMapKeyInfo(&eventInfo->generateInfo.keyInfo, reportData);
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData EventInfoToMapKeyInfo failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData EventInfoToMapKeyInfo failed!");
 
     ret = EventInfoToMapKeyAccessInfo(&eventInfo->generateInfo.keyAccessInfo, reportData);
-    HKS_IF_NOT_TRUE_LOGE(ret.second, "reportData EventInfoToMapKeyAccessInfo failed!");
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData EventInfoToMapKeyAccessInfo failed!");
 
     if (!ret.second) {
-        HKS_LOG_E("HksEventInfoToMapForKeyGen failed! reportData insert failed!");
+        HKS_LOG_I("HksEventInfoToMapForKeyGen failed! reportData insert failed!");
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
     return HKS_SUCCESS;
