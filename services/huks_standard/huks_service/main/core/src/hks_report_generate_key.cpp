@@ -44,10 +44,10 @@ int32_t PreConstructGenKeyReportParamSet(const struct HksBlob *keyAlias, const s
 
     do {
         ret = PreAddCommonInfo(*paramSetOut, keyAlias, paramSetIn, startTime);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "pre add common info to params failed!")
+        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "pre add common info to params failed!")
 
         ret = AddKeyHash(*paramSetOut, keyIn);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "pre add key hash to params failed!")
+        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "pre add key hash to params failed!")
 
         struct HksParam params[] = {
             {
@@ -60,7 +60,7 @@ int32_t PreConstructGenKeyReportParamSet(const struct HksBlob *keyAlias, const s
             },
         };
         ret = HksAddParams(*paramSetOut, params, HKS_ARRAY_SIZE(params));
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add in params failed!")
+        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "add in params failed!")
     }while (0);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("PreConstructGenKeyReportParamSet failed");

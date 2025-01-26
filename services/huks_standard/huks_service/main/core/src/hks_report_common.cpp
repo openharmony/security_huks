@@ -78,7 +78,7 @@ static int32_t GetHash(const struct HksBlob *data, struct HksBlob *hash)
         HKS_IF_NOT_SUCC_BREAK(ret, "GetHash HksBuildParamSet failed");
 
         ret = HksHash(hashParamSet, data, hash);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hash fail")
+        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "hash fail")
     } while (0);
 
     HksFreeParamSet(&hashParamSet);
@@ -102,13 +102,6 @@ int32_t GetKeyHash(const struct HksBlob *key, uint16_t *keyHash)
 {
     uint8_t hashData[HASH_SHA256_SIZE] = {0};
     struct HksBlob hash = { HASH_SHA256_SIZE, hashData };
-    if (key->size <= 0 || key->size >= 128) {
-        HKS_LOG_I("no to deal key hash. key size : %" LOG_PUBLIC "d", key->size);
-        return HKS_SUCCESS;
-    }
-    int32_t ret = GetHash(key,  &hash);
-    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "get keyAlias hash failed")
-
     *(keyHash) = 0x00;
     *(keyHash) |= hash.data[hash.size - KEY_HASH_HIGHT] << KEY_HASH_OFFSET;
     *(keyHash) |= hash.data[hash.size - KEY_HASH_LOW];
@@ -326,10 +319,10 @@ int32_t ConstructReportParamSet(const char *funcName, const struct HksProcessInf
             }
         };
         ret = HksAddParams(*reportParamSet, params, HKS_ARRAY_SIZE(params));
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add params to reportParamSet failed")
+        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "add params to reportParamSet failed")
 
         ret = HksBuildParamSet(reportParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Buil reportParamSet failed")
+        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "Buil reportParamSet failed")
     } while (0);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("ConstructReportParamSet failed");

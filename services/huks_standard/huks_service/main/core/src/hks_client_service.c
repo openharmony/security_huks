@@ -1787,7 +1787,6 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddAppInfoToParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
 #endif
             ret = AccessAttestKey(&keyFromFile, newParamSet, certChain);
-            IfNotSuccAppendHdiErrorInfo(ret);
         }
 #ifdef SUPPORT_STORAGE_BACKUP
         if (ret == HKS_ERROR_CORRUPT_FILE || ret == HKS_ERROR_FILE_SIZE_FAIL || ret == HKS_ERROR_NOT_EXIST) {
@@ -1869,7 +1868,7 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
     HksEventInfo eventInfo = { };
     (void)HksGetInitEventInfo(keyAlias, &keyFromFile, paramSet, processInfo, &eventInfo);
     HksThreeStageReportInfo info = { ret, 0, HKS_INIT, startTime, handle };
-    (void)HksFreshAndReport(__func__, processInfo, paramSet, &info, &eventInfo);
+    (void)HksServiceInitReport(__func__, processInfo, paramSet, &info, &eventInfo);
 #endif
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
