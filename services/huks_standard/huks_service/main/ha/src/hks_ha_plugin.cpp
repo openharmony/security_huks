@@ -134,7 +134,6 @@ void HksHaPlugin::Destroy()
 
 void HksHaPlugin::StartWorkerThread()
 {
-    HKS_LOG_I("start HksHaPlugin::StartWorkerThread");
     workerThread = std::thread(&HksHaPlugin::WorkerThread, this);
 }
 
@@ -205,14 +204,10 @@ void HksHaPlugin::HandlerReport(HksEventQueueItem item)
     HKS_FREE(eventInfo.common.function);
     HKS_FREE(eventInfo.common.callerInfo.name);
     HKS_FREE(eventInfo.common.result.errMsg);
-
-    HKS_LOG_I("HandlerReport: Completed processing for eventId %u", eventId);
 }
 
 void HksHaPlugin::WorkerThread()
 {
-    HKS_LOG_I("WorkerThread: Thread started");
-
     while (!stopFlag) {
         HksEventQueueItem item;
         bool success = queue.Dequeue(item);
@@ -234,19 +229,15 @@ void HksHaPlugin::WorkerThread()
         HksFreeParamSet(&item.paramSet);
         HKS_LOG_I("WorkerThread: Freed paramSet for eventId %u", item.eventId);
     }
-
-    HKS_LOG_I("WorkerThread: Thread stopped");
 }
 
 void HksHaPlugin::HandleFaultEvent(
     HksEventCommonInfo *eventInfo, std::unordered_map<std::string, std::string> &eventMap)
 {
-    HKS_LOG_I("HksPluginOnLocalRequest HandleFaultEvent is start");
     int32_t ret = HksPluginOnLocalRequest(CODE_FAULT_METRICS, eventInfo, &eventMap);
     if (ret != 0) {
         HKS_LOG_E("Failed to call OnSingleEventRequest: error code %d", ret);
     }
-    HKS_LOG_I("HksPluginOnLocalRequest HandleFaultEvent is End");
 }
 
 uint32_t GetCurrentTimestamp()
@@ -294,14 +285,10 @@ void HksHaPlugin::AddEventCache(uint32_t eventId, struct HksEventInfo *eventInfo
 {
     HksEventCacheNode newNode{eventId, GetCurrentTimestamp(), eventInfo};
     eventCacheList.Add(newNode);
-    HKS_LOG_I("HksHaPlugin::AddEventCache: Added new event cache for eventId=%u, total cache size=%u",
-        eventId,
-        eventCacheList.GetSize());
 }
 
 int32_t HksHaPlugin::FillEventInfos(uint32_t reportCount, HksEventWithMap *eventsWithMap)
 {
-    HKS_LOG_I("enter to FillEventInfos");
     uint32_t count = 0;
 
     HKS_LOG_I("FillEventInfos: Start processing, requested reportCount: %u", reportCount);
@@ -335,8 +322,6 @@ int32_t HksHaPlugin::FillEventInfos(uint32_t reportCount, HksEventWithMap *event
         }
     }
 
-    HKS_LOG_I("FillEventInfos: Processed %u events out of %u requested", count, reportCount);
-
     if (count != reportCount) {
         HKS_LOG_E("FillEventInfos: Mismatch in reportCount and filled events. Filled %u events, expected %u.",
             count, reportCount);
@@ -349,8 +334,6 @@ int32_t HksHaPlugin::FillEventInfos(uint32_t reportCount, HksEventWithMap *event
 
 int32_t HksHaPlugin::CallBatchReport(uint32_t reportCount, HksEventWithMap *eventsWithMap)
 {
-    HKS_LOG_I("HksPluginOnLocalRequest is start");
-    HKS_LOG_I("eventsWithMap size: %u", reportCount);
     int32_t ret = HksPluginOnLocalRequest(CODE_STATISTICS_METRICS, (const void *)eventsWithMap, (void *)&reportCount);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksHaPlugin::CallBatchReport: HksHaPlugin_OnBatchEventRequest failed, error code: %d", ret);
@@ -358,7 +341,6 @@ int32_t HksHaPlugin::CallBatchReport(uint32_t reportCount, HksEventWithMap *even
     } else {
         HKS_LOG_I("HksHaPlugin::CallBatchReport: Successfully reported %u events", reportCount);
     }
-    HKS_LOG_I("HksPluginOnLocalRequest is end");
     return HKS_SUCCESS;
 }
 
@@ -369,54 +351,41 @@ void HksHaPlugin::RemoveReportedEvents(uint32_t reportCount)
 
 int32_t HksHaPlugin::BatchReportEvents(uint32_t reportCount)
 {
-    HKS_LOG_I("enter to BatchReportEvents");
     if (reportCount > eventCacheList.GetSize()) {
         HKS_LOG_I("HksHaPlugin::BatchReportEvents:reportCount > queueSize");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    HKS_LOG_I("HksHaPlugin::BatchReportEvents:Enter BatchReportEvents");
     HksEventWithMap *eventsWithMap = new HksEventWithMap[reportCount];
 
     int32_t ret = HKS_SUCCESS;
     do {
-        HKS_LOG_I("HksHaPlugin::BatchReportEvents:Enter FillEventInfos");
-        HKS_LOG_I("eventsWithMap before fillEventInfos size: %u", reportCount);
         ret = FillEventInfos(reportCount, eventsWithMap);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_I("HksHaPlugin::BatchReportEvents:FillEventInfos fail");
             break;
         }
 
-        HKS_LOG_I("HksHaPlugin::BatchReportEvents:Enter CallBatchReport");
-        HKS_LOG_I("eventsWithMap before CallBatchReport size: %u", reportCount);
         ret = CallBatchReport(reportCount, eventsWithMap);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_I("HksHaPlugin::BatchReportEvents:CallBatchReport fail");
             break;
         }
 
-        HKS_LOG_I("HksHaPlugin::BatchReportEvents:Finish CallBatchReport");
-
         RemoveReportedEvents(reportCount);
     } while (0);
     
     delete[] eventsWithMap;
-
-    HKS_LOG_I("HksHaPlugin::BatchReportEvents:Finish RemoveReportedEvents");
 
     return HKS_SUCCESS;
 }
 
 int32_t HksHaPluginInit(void)
 {
-    HKS_LOG_I("Start initialize plugin");
     HksHaPlugin::GetInstance().StartWorkerThread();
-    HKS_LOG_I("End initialize plugin");
     return HKS_SUCCESS;
 }
 
 void HksHaPluginDestroy()
 {
     HksHaPlugin::GetInstance().Destroy();
-    HKS_LOG_I("HksHaPlugin_Destroy: HA Plugin destroyed successfully.");
 }
