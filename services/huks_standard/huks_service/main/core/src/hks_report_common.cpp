@@ -303,7 +303,7 @@ int32_t ConstructReportParamSet(const char *funcName, const struct HksProcessInf
         (void)timespec_get(&time, TIME_UTC);
         std::string callerName = "Invalid caller name";
         ret = ReportGetCallerName(callerName);
-        HKS_IF_NOT_SUCC_LOGE(ret, "ReportGetCallerName failed")
+        HKS_IF_NOT_SUCC_LOGI(ret, "ReportGetCallerName failed")
         struct HksParam params[] = {
             {
                 .tag = HKS_TAG_PARAM1_BUFFER,

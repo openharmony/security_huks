@@ -69,6 +69,11 @@ if ((RESULT) != HKS_SUCCESS) { \
     HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
 }
 
+#define HKS_IF_NOT_SUCC_LOGI(RESULT, LOG_MESSAGE, ...) \
+if ((RESULT) != HKS_SUCCESS) { \
+    HKS_LOG_I(LOG_MESSAGE, ##__VA_ARGS__); \
+}
+
 #define HKS_IF_NOT_SUCC_RETURN(RESULT, ERROR_CODE) \
 if ((RESULT) != HKS_SUCCESS) { \
     return (ERROR_CODE); \
