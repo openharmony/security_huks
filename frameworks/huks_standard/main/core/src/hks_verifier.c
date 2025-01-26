@@ -622,7 +622,8 @@ static void FreeCertChainInfo(struct HksCertInfo **certs, uint32_t certNum)
 static int32_t CheckCertChainParams(const struct HksCertChain *certChain)
 {
     /* certChain has been checked not null */
-    if ((certChain->certs == NULL) || (certChain->certsCount != HKS_DEFAULT_CERT_CHAIN_CNT)) {
+    if ((certChain->certs == NULL) || (certChain->certsCount > HKS_MAX_CERT_CHAIN_CNT) ||
+        (certChain->certsCount < HKS_MIN_CERT_CHAIN_CNT)) {
         HKS_LOG_E("validate cert chain chain invalid certChain or count");
         return HKS_ERROR_INVALID_ARGUMENT;
     }

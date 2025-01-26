@@ -20,7 +20,8 @@
 
 #include "hks_type.h"
 
-#define HKS_DEFAULT_CERT_CHAIN_CNT 4
+#define HKS_MIN_CERT_CHAIN_CNT 3
+#define HKS_MAX_CERT_CHAIN_CNT 4
 #define MAX_ATTEST_EXTENSION_BUF_LEN 10240 // The value needs to be confirmed
 #define MAX_ATTEST_CLAIM_BUF_LEN 10240 // The value needs to be confirmed
 
