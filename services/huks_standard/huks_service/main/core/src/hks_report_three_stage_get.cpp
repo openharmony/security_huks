@@ -298,6 +298,10 @@ static void FreshStatInfo(HksEventStatInfo *statInfo, uint32_t dataSize, enum Hk
         cost = static_cast<uint32_t>(endTime - startTime);
     }
 
+    if (!IsAdditionOverflow(statInfo->totalCost, cost)) {
+        statInfo->totalCost += cost;
+    }
+
     switch (stage) {
         case HKS_INIT:
             statInfo->initCost = cost;
@@ -394,7 +398,7 @@ int32_t HksThreeStageReport(const char *funcName, const struct HksProcessInfo *p
 
     if (operation != nullptr) {
         uint32_t eventId = operation->eventInfo.common.eventId;
-        if (eventId != HKS_EVENT_CRYPTO && eventId != HKS_EVENT_AGREE_DERIVE && eventId != HKS_EVENT_MAC) {
+        if (!(eventId == HKS_EVENT_CRYPTO || eventId == HKS_EVENT_AGREE_DERIVE || eventId == HKS_EVENT_MAC)) {
             return HKS_FAILURE;
         }
         (void)HksFreshAndReport(funcName, processInfo, paramSet, info, &operation->eventInfo);
