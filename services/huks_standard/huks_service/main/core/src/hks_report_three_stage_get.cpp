@@ -238,16 +238,6 @@ int32_t HksGetInitEventInfo(const struct HksBlob *keyAlias, const struct HksBlob
 
     HKS_IF_NULL_LOGE_RETURN(key->data, HKS_ERROR_NULL_POINTER, "key is null")
     struct HksParamSet *keyBlobParamSet = (struct HksParamSet *)key->data;
-
-    struct HksParam *param = nullptr;
-    if (HksGetParam(keyBlobParamSet, HKS_TAG_ACCESS_TOKEN_ID, &param) == HKS_SUCCESS) {
-        if (processInfo->accessTokenId != param->uint64Param) {
-            // access token id is not sensitive information, no risk
-            HKS_LOG_E_IMPORTANT("token id mismatch, process token id = %" LOG_PUBLIC "llu, key token id = %" LOG_PUBLIC
-                "llu", processInfo->accessTokenId, param->uint64Param);
-        }
-    }
-
     switch (eventInfo->common.eventId) {
         case HKS_EVENT_CRYPTO:
             GetCryptoInfo(paramSet, keyAlias, &eventInfo->cryptoInfo);
