@@ -50,8 +50,8 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
 {
     int32_t ret = reply.ReadInt32();
 
-    uint32_t outLen = 0;
-    if (!reply.ReadUint32(outLen) || outLen == 0) {
+    uint32_t outLen = reply.ReadUint32();
+    if (ret == HKS_SUCCESS && outLen == 0) {
         if (outBlob != nullptr) {
             outBlob->size = 0;
         }
