@@ -34,7 +34,7 @@ int32_t BuildCommonInfo(const struct HksParamSet *paramSet, struct HksEventInfo 
     struct HksParam *param = nullptr;
     if (HksGetParam(paramSet, HKS_TAG_PARAM3_BUFFER, &param) == HKS_SUCCESS) {
         if (param->blob.size < sizeof(HksEventInfo)) {
-            HKS_LOG_E("blob size is less than eventInfo");
+            HKS_LOG_I("blob size is less than eventInfo");
             return HKS_ERROR_BUFFER_TOO_SMALL;
         }
         *eventInfo = *reinterpret_cast<HksEventInfo *>(param->blob.data);
@@ -44,13 +44,13 @@ int32_t BuildCommonInfo(const struct HksParamSet *paramSet, struct HksEventInfo 
 
     if (HksGetParam(paramSet, HKS_TAG_PARAM0_BUFFER, &param) == HKS_SUCCESS) {
         eventInfo->common.function = static_cast<char *>(HksMalloc(param->blob.size));
-        HKS_IF_NULL_LOGE_RETURN(eventInfo->common.function, HKS_ERROR_MALLOC_FAIL, "malloc funcname fail")
+        HKS_IF_NULL_LOGI_RETURN(eventInfo->common.function, HKS_ERROR_MALLOC_FAIL, "malloc funcname fail")
         (void)memcpy_s(eventInfo->common.function, param->blob.size, param->blob.data, param->blob.size);
     }
 
     if (HksGetParam(paramSet, HKS_TAG_PARAM1_BUFFER, &param) == HKS_SUCCESS) {
         if (param->blob.size < sizeof(struct timespec)) {
-            HKS_LOG_E("blob size is less than timespec");
+            HKS_LOG_I("blob size is less than timespec");
             return HKS_ERROR_BUFFER_TOO_SMALL;
         }
         (void)memcpy_s(&eventInfo->common.time, param->blob.size, param->blob.data, param->blob.size);
@@ -58,13 +58,13 @@ int32_t BuildCommonInfo(const struct HksParamSet *paramSet, struct HksEventInfo 
 
     if (HksGetParam(paramSet, HKS_TAG_PARAM2_BUFFER, &param) == HKS_SUCCESS) {
         eventInfo->common.callerInfo.name = static_cast<char *>(HksMalloc(param->blob.size));
-        HKS_IF_NULL_LOGE_RETURN(eventInfo->common.callerInfo.name, HKS_ERROR_MALLOC_FAIL, "malloc processname fail")
+        HKS_IF_NULL_LOGI_RETURN(eventInfo->common.callerInfo.name, HKS_ERROR_MALLOC_FAIL, "malloc processname fail")
         (void)memcpy_s(eventInfo->common.callerInfo.name, param->blob.size, param->blob.data, param->blob.size);
     }
 
     if (HksGetParam(paramSet, HKS_TAG_PARAM0_NULL, &param) == HKS_SUCCESS) {
         eventInfo->common.result.errMsg = static_cast<char *>(HksMalloc(param->blob.size));
-        HKS_IF_NULL_LOGE_RETURN(eventInfo->common.result.errMsg, HKS_ERROR_MALLOC_FAIL, "malloc error msg fail")
+        HKS_IF_NULL_LOGI_RETURN(eventInfo->common.result.errMsg, HKS_ERROR_MALLOC_FAIL, "malloc error msg fail")
         (void)memcpy_s((char *)eventInfo->common.result.errMsg, param->blob.size, param->blob.data, param->blob.size);
     }
 
