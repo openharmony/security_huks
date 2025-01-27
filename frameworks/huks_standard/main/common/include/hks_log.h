@@ -51,6 +51,8 @@
 #endif
 
 #ifdef L2_STANDARD
+#undef LOG_PUBLIC
+#define LOG_PUBLIC
 
 enum HksLogLevel {
     HKS_LOG_LEVEL_I,
@@ -60,23 +62,20 @@ enum HksLogLevel {
     HKS_LOG_LEVEL_D,
 };
 
+#define HKS_LOG_I(fmt, ...) \
+        HksLog(HKS_LOG_LEVEL_I, " %s[%u]: " fmt, __func__, __LINE__, ##__VA_ARGS__)
 
-#define HKS_LOG_I(fmt, arg...) HILOG_INFO(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", \
-                                                                                            __func__, __LINE__, ##arg)
-#define HKS_LOG_W(fmt, arg...) HILOG_WARN(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", \
-                                                                                            __func__, __LINE__, ##arg)
-#define HKS_LOG_E(fmt, arg...) \
-do { \
-        HILOG_ERROR(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", __func__, __LINE__, ##arg); \
-        HksLog(HKS_LOG_LEVEL_E, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt, __func__, __LINE__, ##arg); \
-} while (0)
-#define HKS_LOG_E_IMPORTANT(fmt, arg...) \
-do { \
-        HILOG_ERROR(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", __func__, __LINE__, ##arg); \
-        HksLog(HKS_LOG_LEVEL_E_IMPORTANT, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt, __func__, __LINE__, ##arg); \
-} while (0)
-#define HKS_LOG_D(fmt, arg...) HILOG_DEBUG(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", \
-                                                                                            __func__, __LINE__, ##arg)
+#define HKS_LOG_W(fmt, ...) \
+        HksLog(HKS_LOG_LEVEL_W, " %s[%u]: " fmt, __func__, __LINE__, ##__VA_ARGS__)
+
+#define HKS_LOG_E(fmt, ...) \
+        HksLog(HKS_LOG_LEVEL_E, " %s[%u]: " fmt, __func__, __LINE__, ##__VA_ARGS__)
+
+#define HKS_LOG_E_IMPORTANT(fmt, ...) \
+        HksLog(HKS_LOG_LEVEL_E_IMPORTANT, " %s[%u]: " fmt, __func__, __LINE__, ##__VA_ARGS__)
+
+#define HKS_LOG_D(fmt, ...) \
+        HksLog(HKS_LOG_LEVEL_D, " %s[%u]: " fmt, __func__, __LINE__, ##__VA_ARGS__)
 
 #else // L2_STANDARD
 
