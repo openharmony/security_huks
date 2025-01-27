@@ -107,6 +107,7 @@ static void IfNotSuccAppendHdiErrorInfo(int32_t hdiRet)
     }
     struct HksBlob errMsg = {.size =  errInfoSize, .data = errInfo};
     int32_t ret = HuksAccessGetErrorInfo(&errMsg);
+    HKS_LOG_I("HksAppendThreadErrMsg, ret = %" LOG_PUBLIC "d", ret);
     if (ret == HKS_ERROR_API_NOT_SUPPORTED) {
         HKS_FREE(errInfo);
         return;
