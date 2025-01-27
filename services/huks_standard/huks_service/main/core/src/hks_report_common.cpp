@@ -30,6 +30,7 @@
 #include "securec.h"
 #include "hks_api.h"
 #include "hks_util.h"
+#include <errno.h>
 #include <shared_mutex>
 #include <cstdint>
 #include <string>
@@ -57,6 +58,15 @@ HKS_TAG_PARAM6_UINT32 -> renameDstKeyAliasHash
 #define KEY_HASH_OFFSET 8
 #define KEY_HASH_HIGHT 2
 #define KEY_HASH_LOW 1
+
+void DeConstructReportParamSet(struct HksParamSet **paramSet)
+{
+    if (paramSet == NULL) {
+        HKS_LOG_E("invalid free paramset!");
+        return;
+    }
+    HKS_FREE(*paramSet);
+}
 
 static int32_t GetHash(const struct HksBlob *data, struct HksBlob *hash)
 {
@@ -98,7 +108,7 @@ int32_t GetKeyAliasHash(const struct HksBlob *keyAlias, uint8_t *keyAliasHash)
     return ret;
 }
 
-int32_t GetKeyHash(const struct HksBlob *key, uint16_t *keyHash)
+int32_t GetKeyHash([[maybe_unused]]const struct HksBlob *key, uint16_t *keyHash)
 {
     uint8_t hashData[HASH_SHA256_SIZE] = {0};
     struct HksBlob hash = { HASH_SHA256_SIZE, hashData };
@@ -221,7 +231,7 @@ static int32_t AddFuncName(struct HksParamSet *paramSetOut, const char *funcName
 }
 
 static int32_t AddCommonInfo(const char *funcName, const struct HksProcessInfo *processInfo,
-    int32_t errorCode, struct HksParamSet *reportParamSet)
+    struct HksParamSet *reportParamSet)
 {
     int32_t ret = AddProcessInfo(reportParamSet, processInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add processInfo to params failed")
@@ -289,7 +299,7 @@ int32_t ConstructReportParamSet(const char *funcName, const struct HksProcessInf
         HKS_LOG_I("ConstructReportParamSet params is null");
         return HKS_ERROR_NULL_POINTER;
     }
-    int32_t ret = AddCommonInfo(funcName, processInfo, errorCode,  *reportParamSet);
+    int32_t ret = AddCommonInfo(funcName, processInfo, *reportParamSet);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "ConstructReportParamSet add common info failed!")
 
     do {
@@ -315,7 +325,7 @@ int32_t ConstructReportParamSet(const char *funcName, const struct HksProcessInf
             },
             {
                 .tag = HKS_TAG_PARAM2_BUFFER,
-                .blob.size = callerName.size() + 1, .blob.data = (uint8_t *)callerName.data()
+                .blob.size = callerName.size(), .blob.data = (uint8_t *)callerName.data()
             }
         };
         ret = HksAddParams(*reportParamSet, params, HKS_ARRAY_SIZE(params));
@@ -343,8 +353,10 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM0_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
         eventInfo->common.function = (char *)HksMalloc(paramToEventInfo->blob.size + 1);
-        (void)memcpy_s(eventInfo->common.function, paramToEventInfo->blob.size + 1, paramToEventInfo->blob.data,
-            paramToEventInfo->blob.size);
+        if (eventInfo->common.function != nullptr) {
+            [[maybe_unused]] errno_t ret = memcpy_s(eventInfo->common.function, paramToEventInfo->blob.size + 1,
+            paramToEventInfo->blob.data, paramToEventInfo->blob.size);
+        }
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM1_UINT32, &paramToEventInfo) == HKS_SUCCESS) {
@@ -358,8 +370,10 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM2_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
         eventInfo->common.callerInfo.name = (char *)HksMalloc(paramToEventInfo->blob.size + 1);
-        (void)memcpy_s(eventInfo->common.callerInfo.name, paramToEventInfo->blob.size + 1, paramToEventInfo->blob.data,
-            paramToEventInfo->blob.size);
+        if (eventInfo->common.callerInfo.name != nullptr) {
+            [[maybe_unused]] errno_t ret = memcpy_s(eventInfo->common.callerInfo.name, paramToEventInfo->blob.size + 1,
+            paramToEventInfo->blob.data, paramToEventInfo->blob.size);
+        }
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM2_UINT32, &paramToEventInfo) == HKS_SUCCESS) {
@@ -372,8 +386,10 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM0_NULL, &paramToEventInfo) == HKS_SUCCESS) {
         eventInfo->common.result.errMsg = (char *)HksMalloc(paramToEventInfo->blob.size + 1);
-        (void)memcpy_s(eventInfo->common.result.errMsg, paramToEventInfo->blob.size + 1, paramToEventInfo->blob.data,
-            paramToEventInfo->blob.size);
+        if (eventInfo->common.result.errMsg != nullptr) {
+            [[maybe_unused]] errno_t ret = memcpy_s(eventInfo->common.result.errMsg, paramToEventInfo->blob.size + 1,
+            paramToEventInfo->blob.data, paramToEventInfo->blob.size);
+        }
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM3_UINT32, &paramToEventInfo) == HKS_SUCCESS) {

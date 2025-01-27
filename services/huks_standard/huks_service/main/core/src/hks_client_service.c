@@ -52,7 +52,7 @@
 
 #include "hks_upgrade_key_accesser.h"
 #include "hks_upgrade_helper.h"
-
+#include "hks_ha_event_report.h"
 #include "hks_report_generate_key.h"
 #include "hks_report_delete_key.h"
 #include "hks_report_import_key.h"
@@ -1023,6 +1023,9 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
 #ifdef L2_STANDARD
     struct HksParamSet *reportParamSet = NULL;
     (void)PreConstructGenKeyReportParamSet(keyAlias, paramSetIn, enterTime, &output, &reportParamSet);
+    (void)ConstructReportParamSet(__func__, processInfo, ret, &reportParamSet);
+    HksEventReport(__func__, processInfo, paramSetIn, reportParamSet, ret);
+    DeConstructReportParamSet(&reportParamSet);
 #endif
     HKS_FREE(keyOutBuffer);
     if (keyIn.data != NULL) {
@@ -1030,12 +1033,6 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
     }
     HKS_FREE(keyIn.data);
     HksFreeParamSet(&newParamSet);
-#ifdef L2_STANDARD
-    (void)ConstructReportParamSet(__func__, processInfo, ret, &reportParamSet);
-    HksEventReport(__func__, processInfo, paramSetIn, reportParamSet, ret);
-    HksFreeParamSet(&reportParamSet);
-#endif
-
     HksReportEvent(__func__, &traceId, processInfo, paramSetIn, ret);
     return ret;
 }
@@ -1229,7 +1226,7 @@ int32_t HksServiceDeleteKey(const struct HksProcessInfo *processInfo, const stru
     (void)PreConstructDeleteKeyReportParamSet(keyAlias, paramSet, enterTime, &reportParamSet);
     (void)ConstructReportParamSet(__func__, processInfo, ret, &reportParamSet);
     HksEventReport(__func__, processInfo, NULL, reportParamSet, ret);
-    HksFreeParamSet(&reportParamSet);
+    DeConstructReportParamSet(&reportParamSet);
 #endif
 #ifdef L2_STANDARD
     HksFreeParamSet(&newParamSet);
@@ -1287,7 +1284,7 @@ int32_t HksServiceKeyExist(const struct HksProcessInfo *processInfo, const struc
     (void)PreConstructCheckKeyExitedReportParamSet(keyAlias, paramSet, enterTime, &reportParamSet);
     (void)ConstructReportParamSet(__func__, processInfo, ret, &reportParamSet);
     HksEventReport(__func__, processInfo, NULL, reportParamSet, ret);
-    HksFreeParamSet(&reportParamSet);
+    DeConstructReportParamSet(&reportParamSet);
 #endif
     return ret;
 }
@@ -1383,7 +1380,7 @@ int32_t HksServiceImportKey(const struct HksProcessInfo *processInfo, const stru
 #ifdef L2_STANDARD
     (void)ConstructReportParamSet(__func__, processInfo, ret, &reportParamSet);
     HksEventReport(__func__, processInfo, paramSet, reportParamSet, ret);
-    HksFreeParamSet(&reportParamSet);
+    DeConstructReportParamSet(&reportParamSet);
 #endif
     HksFreeParamSet(&newParamSet);
     return ret;
@@ -2150,7 +2147,7 @@ int32_t HksServiceListAliases(const struct HksProcessInfo *processInfo, const st
     (void)PreConstructListAliasesReportParamSet(paramSet, enterTime, &reportParamSet);
     (void)ConstructReportParamSet(__func__, processInfo, ret, &reportParamSet);
     HksEventReport(__func__, processInfo, NULL, reportParamSet, ret);
-    HksFreeParamSet(&reportParamSet);
+    DeConstructReportParamSet(&reportParamSet);
 #endif
     return ret;
 #else
@@ -2200,7 +2197,7 @@ int32_t HksServiceRenameKeyAlias(const struct HksProcessInfo *processInfo, const
         enterTime, &reportParamSet);
     (void)ConstructReportParamSet(__func__, processInfo, ret, &reportParamSet);
     HksEventReport(__func__, processInfo, paramSet, reportParamSet, ret);
-    HksFreeParamSet(&reportParamSet);
+    DeConstructReportParamSet(&reportParamSet);
 #endif
     return ret;
 }

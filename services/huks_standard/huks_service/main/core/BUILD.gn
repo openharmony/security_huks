@@ -81,6 +81,7 @@ if (os_level == "standard") {
       "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
       "//base/security/huks/utils/list:libhuks_utils_list_static",
       "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
+      "//base/security/huks/services/huks_standard/huks_service/main/ha:libhuks_service_ha_static",
     ]
 
     if (enable_hks_mock) {
