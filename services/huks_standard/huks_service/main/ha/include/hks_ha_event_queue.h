@@ -35,7 +35,7 @@ typedef struct {
 class HksEventQueue {
 public:
     explicit HksEventQueue(uint32_t capacity = MAX_CAPACITY)
-        : queueCapacity(capacity) {}
+        : queueCapacity_(capacity > MAX_CAPACITY ? MAX_CAPACITY : capacity) {}
 
     bool Enqueue(uint32_t eventId, struct HksParamSet *paramSet);
 
@@ -46,9 +46,9 @@ public:
     bool IsEmpty() const;
 
 private:
-    std::queue<HksEventQueueItem> queueItem;
-    uint32_t queueCapacity;
-    mutable std::mutex queueMutex;
+    std::queue<HksEventQueueItem> queueItem_;
+    uint32_t queueCapacity_;
+    mutable std::mutex queueMutex_;
     std::condition_variable notEmpty;
     std::condition_variable notFull;
 };

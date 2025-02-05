@@ -74,13 +74,13 @@ public:
     
     void Add(const HksEventCacheNode& node)
     {
-        std::lock_guard<std::mutex> lock(queueMutex);
+        std::lock_guard<std::mutex> lock(queueMutex_);
         cacheList.emplace_back(node);
     }
     
     bool FindAndUpdate(struct HksEventInfo *eventInfo, HksEventProcMap *procMap)
     {
-        std::lock_guard<std::mutex> lock(queueMutex);
+        std::lock_guard<std::mutex> lock(queueMutex_);
         for (auto& node : cacheList) {
             if (procMap->eventInfoEqual(node.data, eventInfo)) {
                 procMap->eventInfoAdd(node.data, eventInfo);
@@ -89,18 +89,18 @@ public:
         }
         return false;
     }
-
+    
     std::list<HksEventCacheNode>& GetList() { return cacheList; }
     
     uint32_t GetSize() const
     {
-        std::lock_guard<std::mutex> lock(queueMutex);
+        std::lock_guard<std::mutex> lock(queueMutex_);
         return cacheList.size();
     }
     
     void RemoveFront(uint32_t count)
     {
-        std::lock_guard<std::mutex> lock(queueMutex);
+        std::lock_guard<std::mutex> lock(queueMutex_);
         if (count <= cacheList.size()) {
             auto it = cacheList.begin();
             std::advance(it, count);
@@ -110,7 +110,7 @@ public:
 
 private:
     std::list<HksEventCacheNode> cacheList;
-    mutable std::mutex queueMutex;
+    mutable std::mutex queueMutex_;
 };
 
 class HksHaPlugin : public OHOS::Singleton<HksHaPlugin> {
