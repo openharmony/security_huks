@@ -294,9 +294,9 @@ ohos_unittest("huks_module_test") {
   ]
 
   deps = [
+    "//base/security/huks/services/huks_standard/huks_service/main/ha:libhuks_service_ha_static",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/inner_kits_passthrough:libhukssdk_static",
     "//base/security/huks/test/unittest/modify_old_version_key_test_util:huks_modify_old_version_key_util",
-    "//base/security/huks/services/huks_standard/huks_service/main/ha:libhuks_service_ha_static",
   ]
 
   external_deps = [

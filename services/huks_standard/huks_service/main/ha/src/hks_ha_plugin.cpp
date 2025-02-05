@@ -202,22 +202,17 @@ void HksHaPlugin::WorkerThread()
         HksEventQueueItem item;
         bool success = queue.Dequeue(item);
 
-        // 检查停止标志
-        if (stopFlag && !success) {
-            HKS_LOG_I("WorkerThread: Stop signal received, exiting thread");
-            break;
-        }
         if (!success) {
             HKS_LOG_I("WorkerThread: Queue is empty, retrying...");
             continue;
         }
 
         HKS_LOG_I("WorkerThread: Successfully dequeued eventId %" LOG_PUBLIC "u", item.eventId);
-
         HandlerReport(item);
-        HKS_LOG_I("WorkerThread: Event processed for eventId %" LOG_PUBLIC "u", item.eventId);
 
+        HKS_LOG_I("WorkerThread: Event processed for eventId %" LOG_PUBLIC "u", item.eventId);
         HksFreeParamSet(&item.paramSet);
+
         HKS_LOG_I("WorkerThread: Freed paramSet for eventId %" LOG_PUBLIC "u", item.eventId);
     }
 }
@@ -250,7 +245,7 @@ void HksHaPlugin::HandleStatisticEvent(struct HksEventInfo *eventInfo, uint32_t 
             const HksEventCacheNode &firstNode = eventCacheList.cacheList.front();
             uint32_t reportCount = 0;
             bool judge = false;
-            if(((currentTime - firstNode.timestamp) > MAX_CACHE_DURATION) || (currentSize >= MAX_CACHE_SIZE)) {
+            if ((currentTime - firstNode.timestamp) > MAX_CACHE_DURATION || currentSize >= MAX_CACHE_SIZE) {
                 judge = true;
                 reportCount = currentSize;
             }
