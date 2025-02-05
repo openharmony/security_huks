@@ -50,8 +50,8 @@ bool HksEventQueue::Dequeue(HksEventQueueItem& item)
     HKS_LOG_I("Dequeue is start");
 
     // 等待直到队列非空或停止
-    notEmpty.wait(lock, [this]() { 
-        return (!queueItem_.empty()) || stopped_; 
+    notEmpty.wait(lock, [this]() {
+        return (!queueItem_.empty()) || stopped_;
     });
 
     if (stopped_ && queueItem_.empty()) {
@@ -66,7 +66,8 @@ bool HksEventQueue::Dequeue(HksEventQueueItem& item)
     return true;
 }
 
-void HksEventQueue::Stop() {
+void HksEventQueue::Stop()
+{
     std::lock_guard<std::mutex> lock(queueMutex_);
     stopped_ = true;
     // 唤醒所有等待的线程

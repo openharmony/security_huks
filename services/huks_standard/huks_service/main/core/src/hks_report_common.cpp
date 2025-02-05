@@ -355,7 +355,7 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
         eventInfo->common.function = (char *)HksMalloc(paramToEventInfo->blob.size + 1);
         if (eventInfo->common.function != nullptr) {
             (void)memcpy_s(eventInfo->common.function, paramToEventInfo->blob.size,
-            paramToEventInfo->blob.data, paramToEventInfo->blob.size);
+                paramToEventInfo->blob.data, paramToEventInfo->blob.size);
         }
     }
 
@@ -372,7 +372,7 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
         eventInfo->common.callerInfo.name = (char *)HksMalloc(paramToEventInfo->blob.size + 1);
         if (eventInfo->common.callerInfo.name != nullptr) {
             (void)memcpy_s(eventInfo->common.callerInfo.name, paramToEventInfo->blob.size,
-            paramToEventInfo->blob.data, paramToEventInfo->blob.size);
+                paramToEventInfo->blob.data, paramToEventInfo->blob.size);
         }
     }
 
@@ -388,7 +388,7 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
         eventInfo->common.result.errMsg = (char *)HksMalloc(paramToEventInfo->blob.size + 1);
         if (eventInfo->common.result.errMsg != nullptr) {
             (void)memcpy_s(eventInfo->common.result.errMsg, paramToEventInfo->blob.size,
-            paramToEventInfo->blob.data, paramToEventInfo->blob.size);
+                paramToEventInfo->blob.data, paramToEventInfo->blob.size);
         }
     }
 
