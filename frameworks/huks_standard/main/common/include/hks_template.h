@@ -79,6 +79,12 @@ if ((RESULT) != HKS_SUCCESS) { \
     return (ERROR_CODE); \
 }
 
+#define HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(RESULT, LOG_MESSAGE, ...) \
+if ((RESULT) != HKS_SUCCESS) { \
+    HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
+    return; \
+}
+
 #define HKS_IF_NULL_LOGE_RETURN(OBJECT, ERROR_CODE, LOG_MESSAGE, ...) \
 if ((OBJECT) == HKS_NULL_POINTER) { \
     HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \

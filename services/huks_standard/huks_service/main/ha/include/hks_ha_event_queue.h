@@ -45,12 +45,15 @@ public:
 
     bool IsEmpty() const;
 
+    void Stop();
+
 private:
     std::queue<HksEventQueueItem> queueItem_;
     uint32_t queueCapacity_;
     mutable std::mutex queueMutex_;
     std::condition_variable notEmpty;
-    std::condition_variable notFull;
+    // std::condition_variable notFull;
+    bool stopped_;
 };
 #endif
 

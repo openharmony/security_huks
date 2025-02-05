@@ -30,7 +30,7 @@
 #include "securec.h"
 #include "hks_api.h"
 #include "hks_util.h"
-#include <errno.h>
+#include <cerrno>
 #include <shared_mutex>
 #include <cstdint>
 #include <string>
@@ -61,7 +61,7 @@ HKS_TAG_PARAM6_UINT32 -> renameDstKeyAliasHash
 
 void DeConstructReportParamSet(struct HksParamSet **paramSet)
 {
-    if (paramSet == NULL) {
+    if (paramSet == nullptr) {
         HKS_LOG_E("invalid free paramset!");
         return;
     }
@@ -354,7 +354,7 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM0_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
         eventInfo->common.function = (char *)HksMalloc(paramToEventInfo->blob.size + 1);
         if (eventInfo->common.function != nullptr) {
-            [[maybe_unused]] errno_t ret = memcpy_s(eventInfo->common.function, paramToEventInfo->blob.size + 1,
+            (void)memcpy_s(eventInfo->common.function, paramToEventInfo->blob.size,
             paramToEventInfo->blob.data, paramToEventInfo->blob.size);
         }
     }
@@ -371,7 +371,7 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM2_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
         eventInfo->common.callerInfo.name = (char *)HksMalloc(paramToEventInfo->blob.size + 1);
         if (eventInfo->common.callerInfo.name != nullptr) {
-            [[maybe_unused]] errno_t ret = memcpy_s(eventInfo->common.callerInfo.name, paramToEventInfo->blob.size + 1,
+            (void)memcpy_s(eventInfo->common.callerInfo.name, paramToEventInfo->blob.size,
             paramToEventInfo->blob.data, paramToEventInfo->blob.size);
         }
     }
@@ -387,7 +387,7 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM0_NULL, &paramToEventInfo) == HKS_SUCCESS) {
         eventInfo->common.result.errMsg = (char *)HksMalloc(paramToEventInfo->blob.size + 1);
         if (eventInfo->common.result.errMsg != nullptr) {
-            [[maybe_unused]] errno_t ret = memcpy_s(eventInfo->common.result.errMsg, paramToEventInfo->blob.size + 1,
+            (void)memcpy_s(eventInfo->common.result.errMsg, paramToEventInfo->blob.size,
             paramToEventInfo->blob.data, paramToEventInfo->blob.size);
         }
     }
