@@ -36,6 +36,7 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",  # hks_response.h
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",  # hks_osaccount_check.h
       "//base/security/huks/services/huks_standard/huks_service/main/upgrade/lock/include",
+      "//base/security/huks/service/huks_standard/huks_service/main/ha/include",
     ]
 
     sources = [
@@ -156,6 +157,7 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/main/upgrade/lock/include",
       "//base/security/huks/utils/list",
       "//base/security/huks/utils/mutex",
+      "//base/security/huks/service/huks_standard/huks_service/main/ha/include",
     ]
     defines = [ "HKS_ENABLE_CLEAN_FILE" ]
 

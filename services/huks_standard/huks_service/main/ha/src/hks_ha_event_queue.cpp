@@ -18,50 +18,47 @@
 
 bool HksEventQueue::Enqueue(uint32_t eventId, struct HksParamSet *paramSet)
 {
-    std::unique_lock<std::mutex> lock(queueMutex);
-
+    std::unique_lock<std::mutex> lock(queueMutex_);
     HKS_LOG_I("Enqueue is start");
-
     if (paramSet == nullptr) {
-        HKS_LOG_E("HksParamSet is nullptr, cannot enqueue eventId: %u", eventId);
+        HKS_LOG_I("HksParamSet is nullptr, cannot enqueue eventId: %" LOG_PUBLIC "u", eventId);
+        return false;
+    }
+    // TODO 如果当前队列为空，入队后修改标志位，说明后续队列有元素
+    if (queueItem_.size() == queueCapacity_) {
+        HKS_LOG_I("queue is full");
         return false;
     }
 
-    notFull.wait(lock, [this]() { return queueItem.size() < queueCapacity; });
-
-    queueItem.emplace(HksEventQueueItem{eventId, paramSet});
-    notEmpty.notify_one();
-
+    if (queueItem_.empty()) {
+        queueItem_.emplace(HksEventQueueItem{eventId, paramSet});
+        notEmpty.notify_one();
+        return true;
+    }
+    
+    queueItem_.emplace(HksEventQueueItem{eventId, paramSet});
     return true;
 }
 
 bool HksEventQueue::Dequeue(HksEventQueueItem& item)
 {
-    std::unique_lock<std::mutex> lock(queueMutex);
-
+    std::unique_lock<std::mutex> lock(queueMutex_);
     HKS_LOG_I("Dequeue is start");
-
-    notEmpty.wait(lock, [this]() { return !queueItem.empty(); });
-
-    if (queueItem.empty()) {
+    if (queueItem_.empty()) {
         return false;
     }
-
-    item = std::move(queueItem.front());
-    queueItem.pop();
+    item = std::move(queueItem_.front());
+    queueItem_.pop();
     notFull.notify_one();
-
     return true;
 }
 
 uint32_t HksEventQueue::Size() const
 {
-    std::lock_guard<std::mutex> lock(queueMutex);
-    return queueItem.size();
+    return queueItem_.size();
 }
 
 bool HksEventQueue::IsEmpty() const
 {
-    std::lock_guard<std::mutex> lock(queueMutex);
-    return queueItem.empty();
+    return queueItem_.empty();
 }

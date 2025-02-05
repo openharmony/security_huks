@@ -59,7 +59,7 @@ void HksEventReport(const char *funcName, const struct HksProcessInfo *processIn
     }
 
     uint32_t eventId = eventParam->uint32Param;
-    HKS_LOG_I("eventId in HksEventReport is %u", eventId);
+    HKS_LOG_I("eventId in HksEventReport is %" LOG_PUBLIC "u", eventId);
 
     struct HksParamSet *newParamSet = NULL;
     ret = AppendToNewParamSet(reportParamSet, &newParamSet);
@@ -72,14 +72,9 @@ void HksEventReport(const char *funcName, const struct HksProcessInfo *processIn
         return;
     }
 
-    HksHaPlugin* pluginInstance = &HksHaPlugin::GetInstance();
-    if (pluginInstance == nullptr) {
-        HKS_LOG_E("HksHaPlugin instance is null");
-        return;
-    }
-
     bool enqueueSuccess = HksHaPlugin::GetInstance().Enqueue(eventId, newParamSet);
     if (!enqueueSuccess) {
         HKS_LOG_E("Report fault event failed");
+        HksFreeParamSet(&newParamSet);
     }
 }
