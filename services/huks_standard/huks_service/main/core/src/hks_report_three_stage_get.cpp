@@ -76,7 +76,6 @@ static void GetKeyAccessInfo(const struct HksParamSet *paramSet, HksEventKeyAcce
         return;
     }
     info->authType = param->uint32Param;
-    HKS_LOG_I("get auth type param succ");
 
     if (HksGetParam(paramSet, HKS_TAG_KEY_AUTH_ACCESS_TYPE, &param) == HKS_SUCCESS) {
         info->accessType = param->uint32Param;
