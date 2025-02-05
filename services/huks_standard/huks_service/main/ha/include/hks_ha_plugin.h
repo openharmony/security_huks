@@ -33,8 +33,8 @@
 #include <singleton.h>
 
 
-constexpr uint32_t MAX_CACHE_SIZE = 50;
-constexpr time_t MAX_CACHE_DURATION = 3600; // 单位秒
+constexpr uint32_t MAX_CACHE_SIZE = 10;
+constexpr time_t MAX_CACHE_DURATION = 60; // 单位秒
 
 typedef int32_t (*HksParamSetToEventInfo)(const struct HksParamSet *paramSet, struct HksEventInfo *keyInfo);
 
@@ -90,8 +90,6 @@ public:
         return false;
     }
     
-    std::list<HksEventCacheNode>& GetList() { return cacheList; }
-    
     uint32_t GetSize() const
     {
         std::lock_guard<std::mutex> lock(queueMutex_);
@@ -108,8 +106,8 @@ public:
         }
     }
 
-private:
     std::list<HksEventCacheNode> cacheList;
+private:
     mutable std::mutex queueMutex_;
 };
 
@@ -155,7 +153,7 @@ private:
 
     HksEventProcMap* HksEventProcFind(uint32_t eventId);
 
-    void HandlerReport(HksEventQueueItem item);
+    void HandlerReport(HksEventQueueItem &item);
 };
 
 #ifdef __cplusplus

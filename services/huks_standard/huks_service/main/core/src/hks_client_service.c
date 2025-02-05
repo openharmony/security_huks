@@ -52,7 +52,6 @@
 
 #include "hks_upgrade_key_accesser.h"
 #include "hks_upgrade_helper.h"
-#include "hks_ha_event_report.h"
 #include "hks_report_generate_key.h"
 #include "hks_report_delete_key.h"
 #include "hks_report_import_key.h"
@@ -60,6 +59,10 @@
 #include "hks_report_check_key_exited.h"
 #include "hks_report_rename_key.h"
 #include "hks_report_common.h"
+
+#ifdef L2_STANDARD
+#include "hks_ha_event_report.h"
+#endif
 
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
 #include "hks_get_process_info.h"

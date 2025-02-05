@@ -24,19 +24,23 @@ bool HksEventQueue::Enqueue(uint32_t eventId, struct HksParamSet *paramSet)
         HKS_LOG_I("HksParamSet is nullptr, cannot enqueue eventId: %" LOG_PUBLIC "u", eventId);
         return false;
     }
-    // TODO 如果当前队列为空，入队后修改标志位，说明后续队列有元素
-    if (queueItem_.size() == queueCapacity_) {
-        HKS_LOG_I("queue is full");
+
+    // 1. 检查是否已停止
+    if (stopped_) {
+        HKS_LOG_I("Enqueue stopped");
         return false;
     }
 
-    if (queueItem_.empty()) {
-        queueItem_.emplace(HksEventQueueItem{eventId, paramSet});
-        notEmpty.notify_one();
-        return true;
+    // 2. 检查队列是否已满
+    if (queueItem_.size() >= queueCapacity_) {
+        HKS_LOG_I("Queue is full, cannot enqueue eventId: %" LOG_PUBLIC "u", eventId);
+        return false;
     }
     
+    // 3. 入队
     queueItem_.emplace(HksEventQueueItem{eventId, paramSet});
+    HKS_LOG_I("Enqueued eventId %" LOG_PUBLIC "u", eventId);
+    notEmpty.notify_one(); // 唤醒可能等待线程
     return true;
 }
 
@@ -44,13 +48,29 @@ bool HksEventQueue::Dequeue(HksEventQueueItem& item)
 {
     std::unique_lock<std::mutex> lock(queueMutex_);
     HKS_LOG_I("Dequeue is start");
-    if (queueItem_.empty()) {
+
+    // 等待直到队列非空或停止
+    notEmpty.wait(lock, [this]() { 
+        return (!queueItem_.empty()) || stopped_; 
+    });
+
+    if (stopped_ && queueItem_.empty()) {
+        HKS_LOG_I("Dequeue stopped");
         return false;
     }
+
     item = std::move(queueItem_.front());
     queueItem_.pop();
-    notFull.notify_one();
+    HKS_LOG_I("Dequeued eventId %" LOG_PUBLIC "u", item.eventId);
+
     return true;
+}
+
+void HksEventQueue::Stop() {
+    std::lock_guard<std::mutex> lock(queueMutex_);
+    stopped_ = true;
+    // 唤醒所有等待的线程
+    notEmpty.notify_all();
 }
 
 uint32_t HksEventQueue::Size() const

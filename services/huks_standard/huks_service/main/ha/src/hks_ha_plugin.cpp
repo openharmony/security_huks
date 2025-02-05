@@ -124,9 +124,8 @@ HksHaPlugin::~HksHaPlugin()
 
 void HksHaPlugin::Destroy()
 {
-    if (stopFlag) {
-        return;
-    }
+    stopFlag = true;
+    queue.Stop();
 
     StopWorkerThread();
 
@@ -158,29 +157,19 @@ HksEventProcMap *HksHaPlugin::HksEventProcFind(uint32_t eventId)
     return nullptr;
 }
 
-void HksHaPlugin::HandlerReport(HksEventQueueItem item)
+void HksHaPlugin::HandlerReport(HksEventQueueItem &item)
 {
-    if (!item.paramSet) {
-        HKS_LOG_E("HandlerReport: paramSet is null for eventId %u", item.eventId);
-        return;
-    }
+    HKS_IF_NULL_LOGE_RETURN_VOID(item.paramSet, "HandlerReport: paramSet is null for eventId %u", item.eventId);
 
     uint32_t eventId = item.eventId;
     HKS_LOG_I("HandlerReport: Start processing eventId %u", eventId);
 
     auto procMap = HksEventProcFind(eventId);
-    if (!procMap) {
-        HKS_LOG_E("HandlerReport: Event ID %u not found in the eventProcMap", eventId);
-        return;
-    }
-    HKS_LOG_I("HandlerReport: Found eventProcMap for eventId %u", eventId);
+    HKS_IF_NULL_LOGE_RETURN_VOID(procMap, "HandlerReport: Event ID %u not found in the eventProcMap", eventId);
 
     struct HksEventInfo eventInfo {};
     int32_t ret = procMap->eventInfoCreate(item.paramSet, &eventInfo);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HandlerReport: Failed to create HksEventInfo from data for eventId %" LOG_PUBLIC "u", eventId);
-        return;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(ret, "HandlerReport: Failed to create HksEventInfo from data for eventId %" LOG_PUBLIC "u", eventId);
     HKS_LOG_I("HandlerReport: Successfully created HksEventInfo for eventId %" LOG_PUBLIC "u", eventId);
 
     bool needReport = procMap->needReport(&eventInfo);
@@ -197,7 +186,6 @@ void HksHaPlugin::HandlerReport(HksEventQueueItem item)
                 eventId,
                 eventMap.size());
         }
-
         HandleFaultEvent(&eventInfo.common, eventMap);
     } else {
         HKS_LOG_I("HandlerReport: Statistics event detected for eventId %" LOG_PUBLIC "u", eventId);
@@ -210,20 +198,21 @@ void HksHaPlugin::HandlerReport(HksEventQueueItem item)
 
 void HksHaPlugin::WorkerThread()
 {
-    while (!stopFlag) {
+    while (true) {
         HksEventQueueItem item;
         bool success = queue.Dequeue(item);
+
+        // 检查停止标志
+        if (stopFlag && !success) {
+            HKS_LOG_I("WorkerThread: Stop signal received, exiting thread");
+            break;
+        }
         if (!success) {
             HKS_LOG_I("WorkerThread: Queue is empty, retrying...");
             continue;
         }
 
         HKS_LOG_I("WorkerThread: Successfully dequeued eventId %" LOG_PUBLIC "u", item.eventId);
-
-        if (stopFlag) {
-            HKS_LOG_I("WorkerThread: Stop signal received, exiting thread");
-            break;
-        }
 
         HandlerReport(item);
         HKS_LOG_I("WorkerThread: Event processed for eventId %" LOG_PUBLIC "u", item.eventId);
@@ -237,9 +226,7 @@ void HksHaPlugin::HandleFaultEvent(
     HksEventCommonInfo *eventInfo, std::unordered_map<std::string, std::string> &eventMap)
 {
     int32_t ret = HksPluginOnLocalRequest(CODE_FAULT_METRICS, eventInfo, &eventMap);
-    if (ret != 0) {
-        HKS_LOG_E("Failed to call OnSingleEventRequest: error code %" LOG_PUBLIC "d", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(ret, "Failed to call OnSingleEventRequest: error code %" LOG_PUBLIC "d", ret);
 }
 
 uint32_t GetCurrentTimestamp()
@@ -249,10 +236,8 @@ uint32_t GetCurrentTimestamp()
 
 void HksHaPlugin::HandleStatisticEvent(struct HksEventInfo *eventInfo, uint32_t eventId, HksEventProcMap *procMap)
 {
-    if (!eventInfo || !procMap) {
-        HKS_LOG_E("HandleStatisticEvent: Invalid parameters");
-        return;
-    }
+    HKS_IF_NULL_LOGE_RETURN_VOID(eventInfo, "HandleStatisticEvent: Invalid parameters");
+    HKS_IF_NULL_LOGE_RETURN_VOID(procMap, "HandleStatisticEvent: Invalid parameters");
 
     bool found = eventCacheList.FindAndUpdate(eventInfo, procMap);
     if (!found) {
@@ -261,8 +246,8 @@ void HksHaPlugin::HandleStatisticEvent(struct HksEventInfo *eventInfo, uint32_t 
     uint32_t currentSize = eventCacheList.GetSize();
     if (currentSize > 0) {
         time_t currentTime = GetCurrentTimestamp();
-        if (!eventCacheList.GetList().empty()) {
-            const HksEventCacheNode &firstNode = eventCacheList.GetList().front();
+        if (!eventCacheList.cacheList.empty()) {
+            const HksEventCacheNode &firstNode = eventCacheList.cacheList.front();
             uint32_t reportCount = 0;
             bool judge = false;
             if(((currentTime - firstNode.timestamp) > MAX_CACHE_DURATION) || (currentSize >= MAX_CACHE_SIZE)) {
@@ -292,8 +277,8 @@ int32_t HksHaPlugin::FillEventInfos(uint32_t reportCount, HksEventWithMap *event
 
     HKS_LOG_I("FillEventInfos: Start processing, requested reportCount: %" LOG_PUBLIC "u", reportCount);
 
-    for (auto it = eventCacheList.GetList().begin(); it != eventCacheList.GetList().end() && count < reportCount;
-         ++it, ++count) {
+    for (auto it = eventCacheList.cacheList.begin(); it != eventCacheList.cacheList.end() && count < reportCount;
+         ++it) {
         if (it->data) {
             struct HksEventInfo *eventInfo = &(*it->data);
             eventsWithMap[count].common = eventInfo->common;
@@ -354,17 +339,9 @@ int32_t HksHaPlugin::BatchReportEvents(uint32_t reportCount)
     int32_t ret = HKS_SUCCESS;
     do {
         ret = FillEventInfos(reportCount, eventsWithMap);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_I("HksHaPlugin::BatchReportEvents:FillEventInfos fail");
-            break;
-        }
-
+        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "HksHaPlugin::BatchReportEvents:FillEventInfos fail");
         ret = CallBatchReport(reportCount, eventsWithMap);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_I("HksHaPlugin::BatchReportEvents:CallBatchReport fail");
-            break;
-        }
-
+        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "HksHaPlugin::BatchReportEvents:CallBatchReport fail");
         RemoveReportedEvents(reportCount);
     } while (0);
     
