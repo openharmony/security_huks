@@ -1851,7 +1851,7 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
         if (ret == HKS_ERROR_CORRUPT_FILE || ret == HKS_ERROR_FILE_SIZE_FAIL || ret == HKS_ERROR_NOT_EXIST) {
             HKS_FREE_BLOB(keyFromFile);
             ret = GetKeyData(processInfo, keyAlias, newParamSet, &keyFromFile, HKS_STORAGE_TYPE_BAK_KEY);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get bak keyalias and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get bak key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
             ret = HuksAccessInit(&keyFromFile, newParamSet, handle, token);
             IfNotSuccAppendHdiErrorInfo(ret);
         }
@@ -1869,7 +1869,7 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
 #endif
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
-    HksReportEvent(__func__, &traceId, processInfo, paramSet, ret);
+    HksHitraceEnd(&traceId);
     return ret;
 }
 
@@ -1946,7 +1946,7 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
 #endif
     MarkOperationUnUse(operation);
     HksFreeParamSet(&newParamSet);
-    HksReportEvent(__func__, &traceId, processInfo, paramSet, ret);
+    HksHitraceEnd(&traceId);
     return ret;
 }
 
@@ -2036,7 +2036,7 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
         MarkAndDeleteOperation(&operation, handle);
     }
     HksFreeParamSet(&newParamSet);
-    HksReportEvent(__func__, &traceId, processInfo, paramSet, ret);
+    HksHitraceEnd(&traceId);
     return ret;
 }
 
@@ -2076,7 +2076,7 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
     } while (0);
     MarkOperationUnUse(operation);
     HksFreeParamSet(&newParamSet);
-    HksReportEvent(__func__, &traceId, processInfo, paramSet, ret);
+    HksHitraceEnd(&traceId);
     return ret;
 }
 

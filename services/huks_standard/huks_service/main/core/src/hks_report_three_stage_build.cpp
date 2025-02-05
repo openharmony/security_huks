@@ -69,8 +69,6 @@ int32_t BuildCommonInfo(const struct HksParamSet *paramSet, struct HksEventInfo 
     }
 
     eventInfo->common.count = 1;
-    HKS_LOG_I("common build success, eventid = %" LOG_PUBLIC "d, ret = %" LOG_PUBLIC "d", eventInfo->common.eventId,
-        eventInfo->common.result.code);
     return HKS_SUCCESS;
 }
 
