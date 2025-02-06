@@ -241,15 +241,15 @@ int32_t HksGetInitEventInfo(const struct HksBlob *keyAlias, const struct HksBlob
     switch (eventInfo->common.eventId) {
         case HKS_EVENT_CRYPTO:
             GetCryptoInfo(paramSet, keyAlias, &eventInfo->cryptoInfo);
-            GetCryptoInfo(keyBlobParamSet, keyAlias, &eventInfo->cryptoInfo);
+            GetCryptoInfo(keyBlobParamSet, nullptr, &eventInfo->cryptoInfo);
             break;
         case HKS_EVENT_AGREE_DERIVE:
             GetAgreeDeriveInfo(paramSet, keyAlias, &eventInfo->agreeDeriveInfo);
-            GetAgreeDeriveInfo(keyBlobParamSet, keyAlias, &eventInfo->agreeDeriveInfo);
+            GetAgreeDeriveInfo(keyBlobParamSet, nullptr, &eventInfo->agreeDeriveInfo);
             break;
         case HKS_EVENT_MAC:
             GetMacInfo(paramSet, keyAlias, &eventInfo->macInfo);
-            GetMacInfo(keyBlobParamSet, keyAlias, &eventInfo->macInfo);
+            GetMacInfo(keyBlobParamSet, nullptr, &eventInfo->macInfo);
             break;
         default:
             HKS_LOG_I("event id no need report");

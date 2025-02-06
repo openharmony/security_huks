@@ -70,7 +70,6 @@ void HksEventQueue::Stop()
 {
     std::lock_guard<std::mutex> lock(queueMutex_);
     stopped_ = true;
-    // 唤醒所有等待的线程
     notEmpty.notify_all();
 }
 

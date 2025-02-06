@@ -29,4 +29,5 @@ void HksEventReport(const char *funcName, const struct HksProcessInfo *processIn
 #ifdef __cplusplus
 }
 #endif
+
 #endif
