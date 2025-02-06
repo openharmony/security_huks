@@ -169,7 +169,7 @@ void HksHaPlugin::HandlerReport(HksEventQueueItem &item)
 
     struct HksEventInfo eventInfo {};
     int32_t ret = procMap->eventInfoCreate(item.paramSet, &eventInfo);
-    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(ret, "HandlerReport: Failed to create HksEventInfo from data for eventId %" LOG_PUBLIC "u", eventId);
+    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(ret, "Failed to create HksEventInfo for eventId %" LOG_PUBLIC "u", eventId);
     HKS_LOG_I("HandlerReport: Successfully created HksEventInfo for eventId %" LOG_PUBLIC "u", eventId);
 
     bool needReport = procMap->needReport(&eventInfo);
@@ -198,10 +198,9 @@ void HksHaPlugin::HandlerReport(HksEventQueueItem &item)
 
 void HksHaPlugin::WorkerThread()
 {
-    while (true) {
+    while (!stopFlag) {
         HksEventQueueItem item;
         bool success = queue.Dequeue(item);
-
         if (!success) {
             HKS_LOG_I("WorkerThread: Queue is empty, retrying...");
             continue;
