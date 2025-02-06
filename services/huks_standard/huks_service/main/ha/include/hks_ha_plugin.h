@@ -29,9 +29,7 @@
 #include <string>
 #include <cstdint>
 #include <ctime>
-
 #include <singleton.h>
-
 
 constexpr uint32_t MAX_CACHE_SIZE = 10;
 constexpr time_t MAX_CACHE_DURATION = 60; // 单位秒
@@ -69,7 +67,6 @@ typedef struct {
 
 class HksEventCacheList {
 public:
-
     HksEventCacheList() {}
     
     void Add(const HksEventCacheNode& node)
@@ -92,7 +89,6 @@ public:
     
     uint32_t GetSize() const
     {
-        std::lock_guard<std::mutex> lock(queueMutex_);
         return cacheList.size();
     }
     
@@ -168,4 +164,4 @@ void HksHaPluginDestroy(HksHaPlugin *plugin);
 }
 #endif
 
-#endif // HKS_HA_PLUGIN_H
+#endif
