@@ -29,7 +29,7 @@
 #include "hks_type_inner.h"
 #include "securec.h"
 
-int32_t BuildCommonInfo(const struct HksParamSet *paramSet, struct HksEventInfo *eventInfo)
+static int32_t ThreeStageBuildCommonInfo(const struct HksParamSet *paramSet, struct HksEventInfo *eventInfo)
 {
     struct HksParam *param = nullptr;
     if (HksGetParam(paramSet, HKS_TAG_PARAM3_BUFFER, &param) == HKS_SUCCESS) {
@@ -70,6 +70,17 @@ int32_t BuildCommonInfo(const struct HksParamSet *paramSet, struct HksEventInfo 
 
     eventInfo->common.count = 1;
     return HKS_SUCCESS;
+}
+
+int32_t BuildCommonInfo(const struct HksParamSet *paramSet, struct HksEventInfo *eventInfo)
+{
+    int32_t ret = ThreeStageBuildCommonInfo(paramSet, eventInfo);
+    if (ret != HKS_SUCCESS) {
+        HKS_FREE(eventInfo->common.function);
+        HKS_FREE(eventInfo->common.callerInfo.name);
+        HKS_FREE(eventInfo->common.result.errMsg);
+    }
+    return ret;
 }
 
 static bool CheckKeyInfo(const HksEventKeyInfo *keyInfo1, const HksEventKeyInfo *keyInfo2)

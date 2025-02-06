@@ -167,13 +167,13 @@ void HksHaPlugin::HandlerReport(HksEventQueueItem &item)
 
     struct HksEventInfo eventInfo {};
     int32_t ret = procMap->eventInfoCreate(item.paramSet, &eventInfo);
-    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(ret, "Failed to create HksEventInfo for eventId %" LOG_PUBLIC "u", eventId);
+    HKS_IF_NOT_SUCC_LOGE(ret, "Failed to create HksEventInfo for eventId %" LOG_PUBLIC "u", eventId);
 
     bool needReport = procMap->needReport(&eventInfo);
     if (needReport) {
         std::unordered_map<std::string, std::string> eventMap;
         ret = procMap->eventInfoToMap(&eventInfo, eventMap);
-        HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(ret, "Failed to convert HksEventInfo to map"
+        HKS_IF_NOT_SUCC_LOGE(ret, "Failed to convert HksEventInfo to map"
             "for eventId %" LOG_PUBLIC "u", eventId);
         HandleFaultEvent(&eventInfo.common, eventMap);
     } else {
