@@ -115,7 +115,6 @@ void HksEventInfoAddForImport(struct HksEventInfo *dstEventInfo, const struct Hk
     }
 }
 
-
 int32_t HksEventInfoToMapForImport(const struct HksEventInfo *eventInfo,
     std::unordered_map<std::string, std::string> &reportData)
 {
