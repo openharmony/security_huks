@@ -74,6 +74,10 @@ static int32_t ThreeStageBuildCommonInfo(const struct HksParamSet *paramSet, str
 
 int32_t BuildCommonInfo(const struct HksParamSet *paramSet, struct HksEventInfo *eventInfo)
 {
+    if (paramSet == nullptr || eventInfo == nullptr) {
+        HKS_LOG_I("paramset or eventInfo is null");
+        return HKS_ERROR_NULL_POINTER;
+    }
     int32_t ret = ThreeStageBuildCommonInfo(paramSet, eventInfo);
     if (ret != HKS_SUCCESS) {
         HKS_FREE(eventInfo->common.function);
@@ -114,6 +118,10 @@ bool CheckEventCommon(const struct HksEventInfo *info1, const struct HksEventInf
 // add count, dataLen, totalCost
 void AddEventInfoCommon(HksEventInfo *info1, const HksEventInfo *info2)
 {
+    if (info1 == nullptr || info2 == nullptr) {
+        HKS_LOG_I("eventInfo is null");
+        return;
+    }
     info1->common.count++;
     if (!IsAdditionOverflow(info1->common.statInfo.dataLen, info2->common.statInfo.dataLen)) {
         info1->common.statInfo.dataLen += info2->common.statInfo.dataLen;
