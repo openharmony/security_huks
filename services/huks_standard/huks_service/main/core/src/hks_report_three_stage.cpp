@@ -21,8 +21,18 @@
 
 #include "hks_event_info.h"
 #include "hks_report_three_stage_build.h"
+#include "hks_template.h"
 #include "hks_type.h"
 #include "hks_type_enum.h"
+
+static bool NeedReportCommon(const HksEventInfo *eventInfo)
+{
+    if (eventInfo == nullptr) {
+        HKS_LOG_I("paramset or eventInfo is null");
+        return false;
+    }
+    return eventInfo->common.result.code != HKS_SUCCESS;
+}
 
 // crypto
 int32_t HksParamSetToEventInfoCrypto(const struct HksParamSet *paramSet, HksEventInfo *eventInfo)
@@ -32,7 +42,7 @@ int32_t HksParamSetToEventInfoCrypto(const struct HksParamSet *paramSet, HksEven
 
 bool HksEventInfoNeedReportCrypto(const HksEventInfo *eventInfo)
 {
-    return eventInfo->common.result.code != HKS_SUCCESS;
+    return NeedReportCommon(eventInfo);
 }
 
 bool HksEventInfoIsEqualCrypto(const HksEventInfo *info1, const HksEventInfo *info2)
@@ -47,6 +57,7 @@ void HksEventInfoAddCrypto(HksEventInfo *info1, const HksEventInfo *info2)
 
 int32_t HksEventInfoToMapCrypto(const HksEventInfo *info, std::unordered_map<std::string, std::string>& map)
 {
+    HKS_IF_NULL_LOGI_RETURN(info, HKS_ERROR_NULL_POINTER, "eventinfo is null")
     KeyInfoToMap(&(info->cryptoInfo.keyInfo), map);
     KeyAccessInfoToMap(&(info->cryptoInfo.accessCtlInfo), map);
     CryptoInfoToMap(&(info->cryptoInfo), map);
@@ -56,7 +67,7 @@ int32_t HksEventInfoToMapCrypto(const HksEventInfo *info, std::unordered_map<std
 // agree derive
 int32_t HksParamSetToEventInfoAgreeDerive(const struct HksParamSet *paramSet, HksEventInfo *eventInfo)
 {
-    return BuildCommonInfo(paramSet, eventInfo);
+    return NeedReportCommon(eventInfo);
 }
 
 bool HksEventInfoNeedReportAgreeDerive(const HksEventInfo *eventInfo)
@@ -76,6 +87,7 @@ void HksEventInfoAddAgreeDerive(HksEventInfo *info1, const HksEventInfo *info2)
 
 int32_t HksEventInfoToMapAgreeDerive(const HksEventInfo *info, std::unordered_map<std::string, std::string>& map)
 {
+    HKS_IF_NULL_LOGI_RETURN(info, HKS_ERROR_NULL_POINTER, "eventinfo is null")
     KeyInfoToMap(&(info->agreeDeriveInfo.keyInfo), map);
     KeyAccessInfoToMap(&(info->agreeDeriveInfo.accessCtlInfo), map);
     AgreeDeriveInfoToMap(&(info->agreeDeriveInfo), map);
@@ -90,7 +102,7 @@ int32_t HksParamSetToEventInfoMac(const struct HksParamSet *paramSet, HksEventIn
 
 bool HksEventInfoNeedReportMac(const HksEventInfo *eventInfo)
 {
-    return eventInfo->common.result.code != HKS_SUCCESS;
+    return NeedReportCommon(eventInfo);
 }
 
 bool HksEventInfoIsEqualMac(const HksEventInfo *info1, const HksEventInfo *info2)
@@ -105,6 +117,7 @@ void HksEventInfoAddMac(HksEventInfo *info1, const HksEventInfo *info2)
 
 int32_t HksEventInfoToMapMac(const HksEventInfo *info, std::unordered_map<std::string, std::string>& map)
 {
+    HKS_IF_NULL_LOGI_RETURN(info, HKS_ERROR_NULL_POINTER, "eventinfo is null")
     KeyInfoToMap(&(info->macInfo.keyInfo), map);
     KeyAccessInfoToMap(&(info->macInfo.accessCtlInfo), map);
     return HKS_SUCCESS;
@@ -118,7 +131,7 @@ int32_t HksParamSetToEventInfoAttest(const struct HksParamSet *paramSet, HksEven
 
 bool HksEventInfoNeedReportAttest(const HksEventInfo *eventInfo)
 {
-    return eventInfo->common.result.code != HKS_SUCCESS;
+    return NeedReportCommon(eventInfo);
 }
 
 bool HksEventInfoIsEqualAttest(const HksEventInfo *info1, const HksEventInfo *info2)
@@ -133,6 +146,7 @@ void HksEventInfoAddAttest(HksEventInfo *info1, const HksEventInfo *info2)
 
 int32_t HksEventInfoToMapAttest(const HksEventInfo *info, std::unordered_map<std::string, std::string>& map)
 {
+    HKS_IF_NULL_LOGI_RETURN(info, HKS_ERROR_NULL_POINTER, "eventinfo is null")
     KeyInfoToMap(&(info->attestInfo.keyInfo), map);
     AttestInfoToMap(&(info->attestInfo), map);
     return HKS_SUCCESS;
