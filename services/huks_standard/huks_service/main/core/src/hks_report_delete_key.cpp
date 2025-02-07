@@ -58,7 +58,7 @@ int32_t PreConstructDeleteKeyReportParamSet(const struct HksBlob *keyAlias, cons
         };
         ret = HksAddParams(*paramSetOut, params, HKS_ARRAY_SIZE(params));
         HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "add in params failed!")
-    }while (0);
+    } while (0);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("PreConstructDeleteKeyReportParamSet failed");
         HksFreeParamSet(paramSetOut);
