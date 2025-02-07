@@ -365,7 +365,9 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
 
     eventInfo->common.count = 1;
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM1_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
-        eventInfo->common.time = *(struct timespec *)paramToEventInfo->blob.data;
+        if (paramToEventInfo->blob.size == sizeof(struct timespec)) {
+            eventInfo->common.time = *(struct timespec *)paramToEventInfo->blob.data;
+        }
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM2_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
@@ -381,7 +383,9 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM3_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
-        eventInfo->common.result = *(struct HksEventResultInfo*)paramToEventInfo->blob.data;
+        if (paramToEventInfo->blob.size == sizeof(struct HksEventResultInfo)) {
+            eventInfo->common.result = *(struct HksEventResultInfo*)paramToEventInfo->blob.data;
+        }
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM0_NULL, &paramToEventInfo) == HKS_SUCCESS) {
