@@ -124,7 +124,6 @@ public:
     bool Enqueue(uint32_t eventId, struct HksParamSet *paramSet);
 
 private:
-
     HksEventQueue queue;
     std::thread workerThread;
     std::atomic<bool> stopFlag;
