@@ -872,11 +872,18 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest024, TestSize.Level0)
     HKS_LOG_I("enter HksAttestKeyNonIdsTest024");
     int32_t ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
     ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam g_commonParams[] = {
+        { .tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = g_secInfo },
+        { .tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = g_challenge },
+        { .tag = HKS_TAG_ATTESTATION_ID_VERSION_INFO, .blob = g_version },
+        { .tag = HKS_TAG_ATTESTATION_ID_ALIAS, .blob = g_keyAlias },
+        { .tag = HKS_TAG_ATTESTATION_BASE64, .boolParam = true },
+    };
     GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
     const struct HksTestCertChain certParam = { true, true, true, g_size };
  
     (void)ConstructDataToCertChainWithCount(&certChain, &certParam, CERT_COUNT_2);
-    ret = ValidateCertChainTest(certChain, g_commonParams, NON_IDS_BASE64_PARAM);
+    ret = ValidateCertChainTest(certChain, g_commonParams, NON_IDS_PARAM);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
  
     const struct OH_Huks_Blob oh_g_keyAlias = { sizeof(ALIAS), (uint8_t *)ALIAS };
@@ -907,11 +914,18 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest025, TestSize.Level0)
     HKS_LOG_I("enter HksAttestKeyNonIdsTest025");
     int32_t ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
     ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam g_commonParams[] = {
+        { .tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = g_secInfo },
+        { .tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = g_challenge },
+        { .tag = HKS_TAG_ATTESTATION_ID_VERSION_INFO, .blob = g_version },
+        { .tag = HKS_TAG_ATTESTATION_ID_ALIAS, .blob = g_keyAlias },
+        { .tag = HKS_TAG_ATTESTATION_BASE64, .boolParam = true },
+    };
     GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
     const struct HksTestCertChain certParam = { true, true, true, g_size };
  
     (void)ConstructDataToCertChainWithCount(&certChain, &certParam, CERT_COUNT_5);
-    ret = ValidateCertChainTest(certChain, g_commonParams, NON_IDS_BASE64_PARAM);
+    ret = ValidateCertChainTest(certChain, g_commonParams, NON_IDS_PARAM);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
  
     const struct OH_Huks_Blob oh_g_keyAlias = { sizeof(ALIAS), (uint8_t *)ALIAS };
