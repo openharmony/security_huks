@@ -69,7 +69,7 @@ void HksEventReport(const char *funcName, const struct HksProcessInfo *processIn
     
     ret = HksBuildParamSet(&newParamSet);
     if (ret != HKS_SUCCESS) {
-        HksFreeParamSet(&newParamSet)
+        HksFreeParamSet(&newParamSet);
         return;
     }
 
