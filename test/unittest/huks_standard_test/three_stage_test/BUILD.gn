@@ -120,6 +120,11 @@ ohos_unittest("huks_UT_test") {
       # "src/hks_change_storage_level_part1_test.cpp",
       "src/hks_change_storage_level_part2_test.cpp",
       "src/hks_cmac_test.cpp",
+
+      # "src/hks_derive_main_key_part1_test.cpp",
+      # "src/hks_derive_main_key_part2_test.cpp",
+      # "src/hks_derive_main_key_part3_test.cpp",
+      # "src/hks_derive_main_key_test_common.cpp",
       "src/hks_iso_iec_test_common.cpp",
     ]
   }
