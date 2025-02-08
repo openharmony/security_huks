@@ -131,12 +131,11 @@ int32_t HksEventInfoToMapForKeyGen(const struct HksEventInfo *eventInfo,
     ret = reportData.insert_or_assign("agree_pubkey_is_alias", std::to_string(eventInfo->generateInfo.pubKeyIsAlias));
     HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert agree_pubkey_is_alias failed!");
 
-    ret = EventInfoToMapKeyInfo(&eventInfo->generateInfo.keyInfo, reportData);
+    ret = EventInfoToMapKeyInfo(&(eventInfo->generateInfo.keyInfo), reportData);
     HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData EventInfoToMapKeyInfo failed!");
 
-    ret = EventInfoToMapKeyAccessInfo(&eventInfo->generateInfo.keyAccessInfo, reportData);
+    ret = EventInfoToMapKeyAccessInfo(&(eventInfo->generateInfo.keyAccessInfo), reportData);
     HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData EventInfoToMapKeyAccessInfo failed!");
-
     if (!ret.second) {
         HKS_LOG_I("HksEventInfoToMapForKeyGen failed! reportData insert failed!");
         return HKS_ERROR_BUFFER_TOO_SMALL;

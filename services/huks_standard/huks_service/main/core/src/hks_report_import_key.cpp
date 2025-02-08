@@ -128,7 +128,11 @@ int32_t HksEventInfoToMapForImport(const struct HksEventInfo *eventInfo,
     ret = reportData.insert_or_assign("unwrap_algorithm_suit", std::to_string(eventInfo->importInfo.algSuit));
     HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert unwrap_algorithm_suit failed!");
 
-    ret = EventInfoToMapKeyInfo(&eventInfo->importInfo.keyInfo, reportData);
+    ret = EventInfoToMapKeyInfo(&(eventInfo->importInfo.keyInfo), reportData);
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData EventInfoToMapKeyInfo failed!");
+
+    ret = EventInfoToMapKeyAccessInfo(&(eventInfo->importInfo.keyAccessInfo), reportData);
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData EventInfoToMapKeyAccessInfo failed!");
     if (!ret.second) {
         HKS_LOG_I("HksEventInfoToMapForImport failed! reportData insert failed!");
         return HKS_ERROR_BUFFER_TOO_SMALL;
