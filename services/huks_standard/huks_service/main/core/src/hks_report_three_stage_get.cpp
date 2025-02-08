@@ -342,8 +342,8 @@ int32_t HksGetAttestEventInfo(const struct HksBlob *keyAlias, const struct HksBl
     }
 
     struct HksParamSet *keyBlobParamSet = nullptr;
-    if (key != nullptr && key->data != nullptr) {
-        keyBlobParamSet = (struct HksParamSet *)key->data;
+    if (key != nullptr && key->data != nullptr && key->size >= sizeof(struct HksParamSet)) {
+        keyBlobParamSet = reinterpret_cast<struct HksParamSet *>(key->data);
     }
 
     GetAttestInfo(paramSet, keyAlias, &(eventInfo.attestInfo));
@@ -367,8 +367,8 @@ int32_t HksGetInitEventInfo(const struct HksBlob *keyAlias, const struct HksBlob
     eventInfo->common.callerInfo.uid = processInfo->uidInt;
 
     struct HksParamSet *keyBlobParamSet = nullptr;
-    if (key != nullptr && key->data != nullptr) {
-        keyBlobParamSet = (struct HksParamSet *)key->data;
+    if (key != nullptr && key->data != nullptr && key->size >= sizeof(struct HksParamSet)) {
+        keyBlobParamSet = reinterpret_cast<struct HksParamSet *>(key->data);
     }
 
     switch (eventInfo->common.eventId) {
