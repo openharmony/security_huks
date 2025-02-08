@@ -89,7 +89,7 @@ static HksEventProcMap g_eventProcMap[] = {
         HksEventInfoToMapForDelete
     },
     {
-        HKS_EVENT_CHECK_KEY_EXITED,
+        HKS_EVENT_CHECK_KEY_EXISTED,
         HksParamSetToEventInfoForCheckKeyExited,
         HksEventInfoIsNeedReportForCheckKeyExited,
         HksEventInfoIsEqualForCheckKeyExited,

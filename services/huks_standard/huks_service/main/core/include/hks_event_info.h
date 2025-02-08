@@ -32,7 +32,7 @@ enum HksEventId {
     HKS_EVENT_MAC = 3,
     HKS_EVENT_ATTEST = 4,
     HKS_EVENT_GENERATE_KEY,
-    HKS_EVENT_CHECK_KEY_EXITED,
+    HKS_EVENT_CHECK_KEY_EXISTED,
     HKS_EVENT_DELETE_KEY,
     HKS_EVENT_IMPORT_KEY,
     HKS_EVENT_LIST_ALIASES,
@@ -138,7 +138,7 @@ typedef struct HksEventMacInfo {
 typedef struct HksEventAttestInfo {
     HksEventKeyInfo keyInfo;
     uint32_t baseCertType;
-    uint32_t isAnnonymous;
+    uint32_t isAnonymous;
 } HksEventAttestInfo;
 
 typedef struct GenerateInfo {

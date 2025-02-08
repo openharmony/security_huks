@@ -205,7 +205,7 @@ void AgreeDeriveInfoToMap(const HksEventAgreeDeriveInfo *info, std::unordered_ma
 void AttestInfoToMap(const HksEventAttestInfo *attestInfo, std::unordered_map<std::string, std::string>& map)
 {
     std::unordered_map<std::string, std::string> infoMap = {
-        { "is_annonymous_attest", std::to_string(attestInfo->isAnnonymous) },
+        { "is_annonymous_attest", std::to_string(attestInfo->isAnonymous) },
         { "attest_cert_type", std::to_string(attestInfo->baseCertType) },
     };
 

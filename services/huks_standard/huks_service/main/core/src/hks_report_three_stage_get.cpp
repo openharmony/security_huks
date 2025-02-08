@@ -201,7 +201,7 @@ static void GetAttestInfo(const struct HksParamSet *paramSet, const struct HksBl
     }
 
     if (HksGetParam(paramSet, HKS_TAG_ATTESTATION_MODE, &param) == HKS_SUCCESS) {
-        attestInfo->isAnnonymous = param->uint32Param;
+        attestInfo->isAnonymous = param->uint32Param;
     }
 }
 

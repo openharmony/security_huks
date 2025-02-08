@@ -50,11 +50,11 @@ int32_t PreConstructCheckKeyExitedReportParamSet(const struct HksBlob *keyAlias,
         struct HksParam params[] = {
             {
                 .tag = HKS_TAG_PARAM1_UINT32,
-                .uint32Param = HKS_EVENT_CHECK_KEY_EXITED
+                .uint32Param = HKS_EVENT_CHECK_KEY_EXISTED
             },
             {
                 .tag = HKS_TAG_PARAM0_UINT32,
-                .uint32Param = HKS_EVENT_CHECK_KEY_EXITED
+                .uint32Param = HKS_EVENT_CHECK_KEY_EXISTED
             },
         };
         ret = HksAddParams(*paramSetOut, params, HKS_ARRAY_SIZE(params));
