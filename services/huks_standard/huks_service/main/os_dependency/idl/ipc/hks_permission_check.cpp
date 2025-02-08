@@ -94,7 +94,7 @@ int32_t SystemApiPermissionCheck(int callerUserId)
 }
 
 static const uint32_t g_trustedUid[] = {
-    1024, 3333, 7008, 7011, 7023
+    1024, 3333, 7008, 7023
 };
 
 int32_t HksCheckAcrossAccountsPermission(const struct HksParamSet *paramSet, int32_t callerUserId)
