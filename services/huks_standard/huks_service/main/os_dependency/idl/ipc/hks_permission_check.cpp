@@ -33,6 +33,7 @@
 #include "ipc_skeleton.h"
 #include "hks_base_check.h"
 #include "hks_log.h"
+#include "hks_response.h"
 #include "hks_template.h"
 #endif
 #endif
@@ -92,19 +93,42 @@ int32_t SystemApiPermissionCheck(int callerUserId)
     return HKS_SUCCESS;
 }
 
+static const uint32_t g_trustedUid[] = {
+    1024, 3333, 7008, 7011, 7023
+};
+
 int32_t HksCheckAcrossAccountsPermission(const struct HksParamSet *paramSet, int32_t callerUserId)
 {
     struct HksParam *specificUserId = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_SPECIFIC_USER_ID, &specificUserId);
-    if (ret == HKS_SUCCESS) {
-        ret = SystemApiPermissionCheck(callerUserId);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check systemapi permission failed");
-        ret = SensitivePermissionCheck("ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS");
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check interact across local accounts permission failed")
-    } else if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
         return HKS_SUCCESS;
+    } else if (ret != HKS_SUCCESS) {
+        return ret;
     }
-    return ret;
+
+    ret = SystemApiPermissionCheck(callerUserId);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check systemapi permission failed");
+
+    ret = SensitivePermissionCheck("ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS");
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check interact across local accounts permission failed")
+
+    auto callingUid = IPCSkeleton::GetCallingUid();
+    for (uint32_t i = 0; i < HKS_ARRAY_SIZE(g_trustedUid); i++) {
+        if (callingUid == g_trustedUid[i]) {
+            return HKS_SUCCESS;
+        }
+    }
+
+    int32_t frontUserId;
+    ret = HksGetFrontUserId(&frontUserId);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get front user id failed");
+
+    if (specificUserId->int32Param != frontUserId) {
+        HKS_LOG_E("specific user id not equal front user id");
+        return HKS_ERROR_ACCESS_OTHER_USER_KEY;
+    }
+    return HKS_SUCCESS;
 }
 #endif
 #else
