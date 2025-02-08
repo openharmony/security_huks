@@ -58,47 +58,59 @@ void HksAppendThreadErrMsg(const uint8_t *buff, uint32_t buffLen)
     g_msgLen += buffLen;
 }
 
-static void UseHiLog(uint32_t logLevel, const char *log)
+static uint32_t removeSubstring(const char *format, char result[MAX_ERROR_MESSAGE_LEN])
 {
-    switch (logLevel) {
-        case HKS_LOG_LEVEL_I:
-            HILOG_INFO(LOG_ENGINE, "%{public}s", log);
-            break;
-        case HKS_LOG_LEVEL_E:
-        case HKS_LOG_LEVEL_E_IMPORTANT:
-            HILOG_ERROR(LOG_ENGINE, "%{public}s", log);
-            break;
-        case HKS_LOG_LEVEL_W:
-            HILOG_WARN(LOG_ENGINE, "%{public}s", log);
-            break;
-        case HKS_LOG_LEVEL_D:
-            HILOG_DEBUG(LOG_ENGINE, "%{public}s", log);
-            break;
-        default:
-            HILOG_ERROR(LOG_ENGINE, "[HksLog] Error Log Level: %{public}s", log);
-            break;
+    char *pos;
+    int substringLen = strlen(LOG_PUBLIC);
+    if (substringLen == 0) {
+        HILOG_INFO(LOG_ENGINE, "nothing needs to be replaced");
+        return HKS_FAILURE;
     }
+    int i = 0;
+    while ((pos = strstr(format, LOG_PUBLIC)) != NULL) {
+        if (i >= MAX_ERROR_MESSAGE_LEN - 1) {
+            HILOG_INFO(LOG_ENGINE, "error message is too long to fill in");
+            break;
+        }
+        while (format < pos) {
+            result[i++] = *format++;
+        }
+        format = pos + substringLen;
+    }
+    while (*format && i <= MAX_ERROR_MESSAGE_LEN - 1) {
+        result[i++] = *format++;
+    }
+    result[i] = '\0';
+    return HKS_SUCCESS;
 }
 
 void HksLog(uint32_t logLevel, const char *format, ...)
 {
-    char buff[MAX_ERROR_MESSAGE_LEN] = {0};
+#ifndef LOG_PUBLIC
+    return;
+#endif
     va_list ap;
-    va_start(ap, format);
-    int32_t buffLen = vsnprintf_s(buff, MAX_ERROR_MESSAGE_LEN, MAX_ERROR_MESSAGE_LEN - 1, format, ap);
-    va_end(ap);
-    if (buffLen < 0) {
-        HILOG_ERROR(LOG_ENGINE, "[HksLog] vsnprintf_s fail! ret: %{public}d, format:[%{public}s]", buffLen, format);
-        return;
-    }
-    UseHiLog(logLevel, buff);
-
-    if ((logLevel != HKS_LOG_LEVEL_E && logLevel != HKS_LOG_LEVEL_E_IMPORTANT) ||
-        (g_msgLen + (uint32_t)buffLen >= MAX_ERROR_MESSAGE_LEN)) { // donot need record
-        return;
-    }
 
     if (g_msgLen == 0 || logLevel == HKS_LOG_LEVEL_E_IMPORTANT) {
+        char newFormat[MAX_ERROR_MESSAGE_LEN] = {0};
+        if (removeSubstring(format, newFormat) != HKS_SUCCESS) {
+            HILOG_INFO(LOG_ENGINE, "skip to add errMsg");
+            return;
+        }
+        va_start(ap, format);
+        char buff[MAX_ERROR_MESSAGE_LEN] = {0};
+        int32_t buffLen = vsnprintf_s(buff, MAX_ERROR_MESSAGE_LEN, MAX_ERROR_MESSAGE_LEN - 1, newFormat, ap);
+        va_end(ap);
+        if (buffLen < 0) {
+            HILOG_ERROR(LOG_ENGINE, "[HksLog] vsnprintf_s fail! ret: %{public}d, newFormat:[%{public}s]", buffLen,
+                newFormat);
+            return;
+        }
+        if (g_msgLen + (uint32_t)buffLen >= MAX_ERROR_MESSAGE_LEN) {
+            HILOG_INFO(LOG_ENGINE, "errMsg is almost full!");
+            return;
+        }
+
         if (memcpy_s(g_errMsg + g_msgLen, MAX_ERROR_MESSAGE_LEN, buff, buffLen) != EOK) {
             HILOG_ERROR(LOG_ENGINE, "[HksLog] copy errMsg buff fail!");
             return;
@@ -126,9 +138,7 @@ void HksLog(uint32_t logLevel, const char *format, ...)
 
 void PrintErrorMsg(void)
 {
-    if (g_msgLen == 0) {
-        HILOG_INFO(LOG_ENGINE, "[HksLog]: g_errMsg is empty");
-    } else {
+    if (g_msgLen != 0) {
         HILOG_ERROR(LOG_ENGINE, "[HksLog]: g_errMsg [%{public}s]", g_errMsg);
     }
 }
