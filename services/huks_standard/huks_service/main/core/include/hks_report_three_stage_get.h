@@ -36,9 +36,6 @@ int32_t HksGetInitEventInfo(const struct HksBlob *keyAlias, const struct HksBlob
 int32_t HksServiceInitReport(const char *funcName, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const HksThreeStageReportInfo *info, HksEventInfo *eventInfo);
 
-int32_t HksFreshAndReport(const char *funcName, const struct HksProcessInfo *processInfo,
-    const struct HksParamSet *paramSet, const HksThreeStageReportInfo *info, HksEventInfo *eventInfo);
-
 int32_t HksThreeStageReport(const char *funcName, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const HksThreeStageReportInfo *info, struct HksOperation *operation);
 

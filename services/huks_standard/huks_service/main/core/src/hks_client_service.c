@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#include "hks_event_info.h"
-#include "hks_report_three_stage_get.h"
-#include "hks_type_enum.h"
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
 #else
@@ -36,6 +33,7 @@
 #include "hks_client_service_common.h"
 #include "hks_client_service_util.h"
 #include "hks_common_check.h"
+#include "hks_event_info.h"
 #include "hks_hitrace.h"
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -59,6 +57,8 @@
 #include "hks_report_check_key_exited.h"
 #include "hks_report_rename_key.h"
 #include "hks_report_common.h"
+#include "hks_report_three_stage_get.h"
+#include "hks_type_enum.h"
 
 #ifdef L2_STANDARD
 #include "hks_ha_event_report.h"
