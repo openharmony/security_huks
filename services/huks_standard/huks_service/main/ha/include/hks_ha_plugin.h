@@ -32,7 +32,7 @@
 #include <singleton.h>
 
 constexpr uint32_t MAX_CACHE_SIZE = 50;
-constexpr time_t MAX_CACHE_DURATION = 3600; // 单位秒
+constexpr time_t MAX_CACHE_DURATION = 3600; // Unit: seconds
 
 typedef int32_t (*HksParamSetToEventInfo)(const struct HksParamSet *paramSet, struct HksEventInfo *keyInfo);
 
