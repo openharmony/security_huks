@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+#include <cerrno>
+#include <shared_mutex>
+#include <cstdint>
+#include <string>
+#include <sys/stat.h>
+#include <ctime>
 #include "hks_report_common.h"
 #include "hilog/log_c.h"
 #include "hks_event_info.h"
@@ -30,12 +36,6 @@
 #include "securec.h"
 #include "hks_api.h"
 #include "hks_util.h"
-#include <cerrno>
-#include <shared_mutex>
-#include <cstdint>
-#include <string>
-#include <sys/stat.h>
-#include <ctime>
 #include "accesstoken_kit.h"
 #include "hap_token_info.h"
 #include "ipc_skeleton.h"
