@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_client_check.h"
+#include "hks_client_service_util.h"
 
 #include <stddef.h>
 

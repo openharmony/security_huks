@@ -84,7 +84,9 @@ ENABLE_CFI(static int32_t HksCreatePluginProxy(void))
         g_pluginProxy = func();
         HKS_IF_NULL_LOGE_BREAK(g_pluginProxy, "HksGetPluginProxy result is null")
 
+        HKS_LOG_I("hks_plugin_adapter.cpp : create plugin proxy start");
         ret = g_pluginProxy->hksPluginInit(&g_interfaceInst);
+        HKS_LOG_I("hks_plugin_adapter.cpp : create plugin proxy end");
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init plugin failed, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 

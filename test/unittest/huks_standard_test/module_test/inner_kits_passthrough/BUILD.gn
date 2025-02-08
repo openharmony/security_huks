@@ -44,6 +44,7 @@ config("public_huks_config") {
     "//base/security/huks/services/huks_standard/huks_service/main/upgrade/lock/include",
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/at_wrapper/include",
     "//base/security/huks/utils/file_iterative_reader/include",
+    "//base/security/huks/service/huks_standard/huks_service/main/ha/include",
   ]
   if (huks_use_rkc_in_standard) {
     include_dirs += [ "//base/security/huks/frameworks/huks_standard/main/crypto_engine/rkc/include" ]
@@ -181,6 +182,7 @@ ohos_static_library("libhukssdk_static") {
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hitrace_meter_wrapper/include",
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",  # hks_response.h
     "//base/security/huks/services/huks_standard/huks_service/main/plugin_proxy/include",
+    "//base/security/huks/services/huks_standard/huks_service/main/ha/include",
   ]
   deps = []
 
