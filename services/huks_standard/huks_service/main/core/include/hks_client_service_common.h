@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef HKS_REPORT_H
-#define HKS_REPORT_H
+#ifndef HKS_CLIENT_SERVICE_COMMON_H
+#define HKS_CLIENT_SERVICE_COMMON_H
 
-#include "hks_type_inner.h"
+#include "hks_type.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void HksEventReport(const char *funcName, const struct HksProcessInfo *processInfo,
-    const struct HksParamSet *paramSetIn, const struct HksParamSet *reportParamSet, int32_t errorCode);
+int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
 
-void HksReport(const char *funcName, const struct HksProcessInfo *processInfo,
-    const struct HksParamSet *paramSetIn, int32_t errorCode);
+int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet,
+    struct HksParamSet **outParamSet, int frontUserId);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // HKS_RW_LOCK_H
+#endif

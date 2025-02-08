@@ -307,43 +307,30 @@ int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct H
         HKS_FREE(operation);
         return ret;
     }
+    do {
+        ret = ConstructOperationHandle(operationHandle, &(operation->handle));
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "constrtct operation handle failed")
 
-    ret = ConstructOperationHandle(operationHandle, &(operation->handle));
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("constrtct operation handle failed");
-        HKS_FREE_BLOB(operation->processInfo.processName);
-        HKS_FREE_BLOB(operation->processInfo.userId);
-        HKS_FREE(operation);
-        return ret;
-    }
+        operation->abortable = abortable;
+        operation->isInUse = false;
 
-    operation->abortable = abortable;
-    operation->isInUse = false;
-
-    if (paramSet != NULL) {
         ret = HksAddBatchTimeToOperation(paramSet, operation);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("constrtct operation handle failed");
-            HKS_FREE_BLOB(operation->processInfo.processName);
-            HKS_FREE_BLOB(operation->processInfo.userId);
-            HKS_FREE(operation);
-            return ret;
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add batchtime to operation failed")
+
+        struct HksParam *specificUserIdParam = NULL;
+        if (HksGetParam(paramSet, HKS_TAG_SPECIFIC_USER_ID, &specificUserIdParam) == HKS_SUCCESS) {
+            operation->isUserIdPassedDuringInit = true;
+            operation->userIdPassedDuringInit = specificUserIdParam->int32Param;
         }
-    }
 
-    struct HksParam *specificUserIdParam = NULL;
-    if (HksGetParam(paramSet, HKS_TAG_SPECIFIC_USER_ID, &specificUserIdParam) == HKS_SUCCESS) {
-        operation->isUserIdPassedDuringInit = true;
-        operation->userIdPassedDuringInit = specificUserIdParam->int32Param;
-    }
+        ret = AddOperation(operation);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add operation failed")
+        return HKS_SUCCESS;
+    } while (0);
 
-    ret = AddOperation(operation);
-    if (ret != HKS_SUCCESS) {
-        HKS_FREE_BLOB(operation->processInfo.processName);
-        HKS_FREE_BLOB(operation->processInfo.userId);
-        HKS_FREE(operation);
-    }
-
+    HKS_FREE_BLOB(operation->processInfo.processName);
+    HKS_FREE_BLOB(operation->processInfo.userId);
+    HKS_FREE(operation);
     return ret;
 }
 

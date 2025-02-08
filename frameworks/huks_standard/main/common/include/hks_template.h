@@ -35,6 +35,12 @@ if ((RESULT) != HKS_SUCCESS) { \
     return (ERROR_CODE); \
 }
 
+#define HKS_IF_NOT_SUCC_LOGI_RETURN(RESULT, ERROR_CODE, LOG_MESSAGE, ...) \
+if ((RESULT) != HKS_SUCCESS) { \
+    HKS_LOG_I(LOG_MESSAGE, ##__VA_ARGS__); \
+    return (ERROR_CODE); \
+}
+
 #define HKS_IF_NOT_SUCC_LOGE_BREAK(RESULT, LOG_MESSAGE, ...) \
 if ((RESULT) != HKS_SUCCESS) { \
     HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
@@ -63,14 +69,31 @@ if ((RESULT) != HKS_SUCCESS) { \
     HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
 }
 
+#define HKS_IF_NOT_SUCC_LOGI(RESULT, LOG_MESSAGE, ...) \
+if ((RESULT) != HKS_SUCCESS) { \
+    HKS_LOG_I(LOG_MESSAGE, ##__VA_ARGS__); \
+}
+
 #define HKS_IF_NOT_SUCC_RETURN(RESULT, ERROR_CODE) \
 if ((RESULT) != HKS_SUCCESS) { \
     return (ERROR_CODE); \
 }
 
+#define HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(RESULT, LOG_MESSAGE, ...) \
+if ((RESULT) != HKS_SUCCESS) { \
+    HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
+    return; \
+}
+
 #define HKS_IF_NULL_LOGE_RETURN(OBJECT, ERROR_CODE, LOG_MESSAGE, ...) \
 if ((OBJECT) == HKS_NULL_POINTER) { \
     HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
+    return (ERROR_CODE); \
+}
+
+#define HKS_IF_NULL_LOGI_RETURN(OBJECT, ERROR_CODE, LOG_MESSAGE, ...) \
+if ((OBJECT) == HKS_NULL_POINTER) { \
+    HKS_LOG_I(LOG_MESSAGE, ##__VA_ARGS__); \
     return (ERROR_CODE); \
 }
 
@@ -126,5 +149,12 @@ do { \
             (ret), currentErrno, strerror(currentErrno)); \
         return HKS_FAILURE; \
     }})
+
+#define HKS_IF_NOT_TRUE_LOGI(RESULT, LOG_MESSAGE, ...) \
+do { \
+    if (!(RESULT)) { \
+        HKS_LOG_I(LOG_MESSAGE, ##__VA_ARGS__); \
+    } \
+} while (0)
 
 #endif /* HKS_TEMPLATE_H */

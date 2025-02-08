@@ -185,6 +185,7 @@ if (ohos_kernel_type == "liteos_m") {
       "../../../services/huks_standard/huks_engine/main/core/src/hks_sm_import_wrap_key.c",
       "../../../services/huks_standard/huks_service/main/core/src/hks_client_check.c",
       "../../../services/huks_standard/huks_service/main/core/src/hks_client_service.c",
+      "../../../services/huks_standard/huks_service/main/core/src/hks_client_service_common.c",
       "../../../services/huks_standard/huks_service/main/core/src/hks_client_service_util.c",
       "../../../services/huks_standard/huks_service/main/core/src/hks_hitrace.c",
       "../../../services/huks_standard/huks_service/main/core/src/hks_report.c",

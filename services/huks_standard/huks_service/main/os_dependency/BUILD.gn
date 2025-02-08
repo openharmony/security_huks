@@ -29,6 +29,7 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_util_standard_static",
       "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
+      "//base/security/huks/services/huks_standard/huks_service/main/ha:libhuks_service_ha_static",
       "//base/security/huks/services/huks_standard/huks_service/main/upgrade/core:libhuks_upgrade_core_static",
       "//base/security/huks/services/huks_standard/huks_service/main/upgrade/lock:libhuks_upgrade_lock_static",
       "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
