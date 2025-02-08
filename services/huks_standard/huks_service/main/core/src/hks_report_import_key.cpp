@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+#include <cstdint>
+#include <string>
+#include <ctime>
+#include <unistd.h>
 #include "hks_base_check.h"
 #include "hks_event_info.h"
 #include "hks_mem.h"
@@ -22,10 +26,6 @@
 #include "hks_template.h"
 #include "hks_type.h"
 #include "hks_type_enum.h"
-#include <cstdint>
-#include <string>
-#include <ctime>
-#include <unistd.h>
 #include "hks_storage_utils.h"
 #include "hks_type_inner.h"
 #include "securec.h"
