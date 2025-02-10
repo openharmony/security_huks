@@ -61,24 +61,29 @@ void HksAppendThreadErrMsg(const uint8_t *buff, uint32_t buffLen)
 static uint32_t removeSubstring(const char *format, char result[MAX_ERROR_MESSAGE_LEN])
 {
     char *pos;
-    int substringLen = strlen(LOG_PUBLIC);
+    uint32_t substringLen = strlen(LOG_PUBLIC);
     if (substringLen == 0) {
         HILOG_INFO(LOG_ENGINE, "nothing needs to be replaced");
         return HKS_FAILURE;
     }
-    int i = 0;
-    while ((pos = strstr(format, LOG_PUBLIC)) != NULL) {
-        if (i >= MAX_ERROR_MESSAGE_LEN - 1) {
-            HILOG_INFO(LOG_ENGINE, "error message is too long to fill in");
-            break;
-        }
-        while (format < pos) {
-            result[i++] = *format++;
-        }
-        format = pos + substringLen;
+    uint32_t formatLen = strlen(format);
+    if (g_msgLen + (uint32_t)formatLen >= MAX_ERROR_MESSAGE_LEN - 1) {
+        HILOG_INFO(LOG_ENGINE, "drop this errMsg");
+        return HKS_FAILURE;
     }
-    while (*format && i <= MAX_ERROR_MESSAGE_LEN - 1) {
-        result[i++] = *format++;
+    uint32_t i = 0;
+    uint32_t j = 0;
+    while (j < formatLen && (pos = strstr(format + j, LOG_PUBLIC)) != NULL) {
+        if (memcpy_s(result + i, MAX_ERROR_MESSAGE_LEN - (i + 1), format + j, pos - format - j) != EOK) {
+            HILOG_ERROR(LOG_ENGINE, "errMsg memcpy_s failed");
+            return HKS_FAILURE;
+        }
+        i += pos - format - j;
+        j = pos - format + substringLen;
+    }
+    while (j < formatLen && i <= MAX_ERROR_MESSAGE_LEN - 1) {
+        result[i++] = *(format + j);
+        j++;
     }
     result[i] = '\0';
     return HKS_SUCCESS;
