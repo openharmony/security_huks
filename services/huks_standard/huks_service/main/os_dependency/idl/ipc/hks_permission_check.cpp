@@ -94,7 +94,7 @@ int32_t SystemApiPermissionCheck(int callerUserId)
 }
 
 static const uint32_t g_trustedUid[] = {
-    1024, 3333, 7008, 7023
+    1024, 3333, 3553, 7008, 7023, 7998
 };
 
 int32_t HksCheckAcrossAccountsPermission(const struct HksParamSet *paramSet, int32_t callerUserId)
@@ -125,7 +125,8 @@ int32_t HksCheckAcrossAccountsPermission(const struct HksParamSet *paramSet, int
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get front user id failed");
 
     if (specificUserId->int32Param != frontUserId) {
-        HKS_LOG_E("specific user id not equal front user id");
+        HKS_LOG_E("specific user id %" LOG_PUBLIC "d not equal front user id %" LOG_PUBLIC "d",
+            specificUserId->int32Param, frontUserId);
         return HKS_ERROR_ACCESS_OTHER_USER_KEY;
     }
     return HKS_SUCCESS;
