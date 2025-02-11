@@ -39,9 +39,9 @@
 
 #ifdef L2_STANDARD
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
-#include "hks_upgrade_lock.h"
 #ifndef HKS_USE_RKC_IN_STANDARD
 #include "hks_osaccount_check.h"
+#include "hks_upgrade_lock.h"
 #endif
 
 static bool IsDe(const struct HksParamSet *paramSet)
@@ -87,7 +87,9 @@ static void UnlockIfDe(__attribute__((unused)) const struct HksParamSet *paramSe
     if (!IsDe(paramSet)) {
         return;
     }
+#ifndef HKS_USE_RKC_IN_STANDARD
     HksUpgradeOrRequestUnlockRead();
+#endif
 #endif
 #endif
 }
