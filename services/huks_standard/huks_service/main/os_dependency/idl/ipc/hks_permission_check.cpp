@@ -93,7 +93,7 @@ int32_t SystemApiPermissionCheck(int callerUserId)
     return HKS_SUCCESS;
 }
 
-static const uint32_t g_trustedUid[] = {
+static const int g_trustedUid[] = {
     1024, 3333, 3553, 7008, 7023, 7998
 };
 
