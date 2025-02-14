@@ -19,9 +19,8 @@
 bool HksEventQueue::Enqueue(uint32_t eventId, struct HksParamSet *paramSet)
 {
     std::unique_lock<std::mutex> lock(queueMutex_);
-    HKS_LOG_I("Enqueue is start");
     if (paramSet == nullptr) {
-        HKS_LOG_I("HksParamSet is nullptr, cannot enqueue eventId: %" LOG_PUBLIC "u", eventId);
+        HKS_LOG_E("HksParamSet is nullptr, cannot enqueue eventId: %" LOG_PUBLIC "u", eventId);
         return false;
     }
 
@@ -39,7 +38,6 @@ bool HksEventQueue::Enqueue(uint32_t eventId, struct HksParamSet *paramSet)
     
     // 3. Enqueue
     queueItem_.emplace(HksEventQueueItem{eventId, paramSet});
-    HKS_LOG_I("Enqueued eventId %" LOG_PUBLIC "u", eventId);
     notEmpty.notify_one();
     return true;
 }
@@ -47,7 +45,6 @@ bool HksEventQueue::Enqueue(uint32_t eventId, struct HksParamSet *paramSet)
 bool HksEventQueue::Dequeue(HksEventQueueItem& item)
 {
     std::unique_lock<std::mutex> lock(queueMutex_);
-    HKS_LOG_I("Dequeue is start");
 
     // Wait until the queue is not empty or stopped
     notEmpty.wait(lock, [this]() {
@@ -61,7 +58,6 @@ bool HksEventQueue::Dequeue(HksEventQueueItem& item)
 
     item = std::move(queueItem_.front());
     queueItem_.pop();
-    HKS_LOG_I("Dequeued eventId %" LOG_PUBLIC "u", item.eventId);
 
     return true;
 }

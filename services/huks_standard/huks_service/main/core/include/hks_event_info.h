@@ -176,20 +176,6 @@ typedef struct HksEventInfo {
     };
 } HksEventInfo;
 
-typedef struct HksThreeStageReportInfo {
-    int32_t errCode;
-    uint32_t inDataSize;
-    enum HksReportStage stage;
-    uint64_t startTime;
-    const struct HksBlob *handle;
-} HksThreeStageReportInfo;
-
-typedef struct HksAttestReportInfo {
-    int32_t errCode;
-    uint64_t startTime;
-    const char *funcName;
-} HksAttestReportInfo;
-
 #ifdef __cplusplus
 }
 #endif

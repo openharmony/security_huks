@@ -13,33 +13,28 @@
  * limitations under the License.
  */
 
+#include "hks_report_common.h"
+
 #include <cerrno>
 #include <shared_mutex>
 #include <cstdint>
 #include <string>
 #include <sys/stat.h>
-#include <ctime>
-#include "hks_report_common.h"
 #include "hilog/log_c.h"
 #include "hks_event_info.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
-#include "hks_report.h"
-#include "hks_report_generate_key.h"
 #include "hks_template.h"
 #include "hks_type.h"
 #include "hks_type_enum.h"
-#include "hks_storage_utils.h"
 #include "hks_type_inner.h"
 #include "ipc_skeleton.h"
 #include "securec.h"
-#include "hks_api.h"
 #include "hks_util.h"
 #include "accesstoken_kit.h"
 #include "hap_token_info.h"
 #include "ipc_skeleton.h"
-#include "hks_api.h"
 /*
 HKS_TAG_PARAM0_UINT32 -> eventId
 HKS_TAG_PARAM0_BUFFER -> function
@@ -55,114 +50,48 @@ HKS_TAG_PARAM4_UINT32 -> keyAliasHash
 HKS_TAG_PARAM5_UINT32 -> keyHash
 HKS_TAG_PARAM6_UINT32 -> renameDstKeyAliasHash
 */
-#define KEY_HASH_OFFSET 8
-#define KEY_HASH_HIGHT 2
-#define KEY_HASH_LOW 1
 
 void DeConstructReportParamSet(struct HksParamSet **paramSet)
 {
-    if (paramSet == nullptr) {
-        HKS_LOG_E("invalid free paramset!");
-        return;
-    }
-    HKS_FREE(*paramSet);
-}
-
-static int32_t GetHash(const struct HksBlob *data, struct HksBlob *hash)
-{
-    struct HksParam hashParams[] = {
-        {
-            .tag = HKS_TAG_DIGEST,
-            .uint32Param = HKS_DIGEST_SHA256
-        }
-    };
-    struct HksParamSet *hashParamSet = nullptr;
-    int32_t ret = HksInitParamSet(&hashParamSet);
-    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "init paramset failed!")
-
-    do {
-        ret = HksAddParams(hashParamSet, hashParams, HKS_ARRAY_SIZE(hashParams));
-        HKS_IF_NOT_SUCC_BREAK(ret, "add params failed!")
-
-        ret = HksBuildParamSet(&hashParamSet);
-        HKS_IF_NOT_SUCC_BREAK(ret, "GetHash HksBuildParamSet failed");
-
-        ret = HksHash(hashParamSet, data, hash);
-        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "hash fail")
-    } while (0);
-
-    HksFreeParamSet(&hashParamSet);
-    return ret;
-}
-
-
-int32_t GetKeyAliasHash(const struct HksBlob *keyAlias, uint8_t *keyAliasHash)
-{
-    uint8_t hashData[HASH_SHA256_SIZE] = {0};
-    struct HksBlob hash = { HASH_SHA256_SIZE, hashData };
-    
-    int32_t ret = GetHash(keyAlias,  &hash);
-    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "get keyAlias hash failed")
-
-    *keyAliasHash = hash.data[hash.size - 1];
-    return ret;
-}
-
-int32_t GetKeyHash([[maybe_unused]]const struct HksBlob *key, uint16_t *keyHash)
-{
-    uint8_t hashData[HASH_SHA256_SIZE] = {0};
-    struct HksBlob hash = { HASH_SHA256_SIZE, hashData };
-    *(keyHash) = 0x00;
-    *(keyHash) |= hash.data[hash.size - KEY_HASH_HIGHT] << KEY_HASH_OFFSET;
-    *(keyHash) |= hash.data[hash.size - KEY_HASH_LOW];
-    return HKS_SUCCESS;
+    HksFreeParamSet(paramSet);
 }
 
 int32_t AddKeyHash(struct HksParamSet *paramSetOut, const struct HksBlob *keyIn)
 {
-    uint16_t keyHash = 0xFFFF;
-    int32_t ret = GetKeyHash(keyIn, &keyHash);
-    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "GetKeyHash Failed!!")
+    uint16_t keyHash = static_cast<uint16_t>(HksGetHash(keyIn));
     struct HksParam keyParams[] = {
         {
             .tag = HKS_TAG_PARAM5_UINT32,
             .uint32Param = (uint32_t)keyHash
         }
     };
-    ret = HksAddParams(paramSetOut, keyParams, HKS_ARRAY_SIZE(keyParams));
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("AddKeyHash failed");
-    }
+    int32_t ret = HksAddParams(paramSetOut, keyParams, HKS_ARRAY_SIZE(keyParams));
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "AddKeyHash failed")
     return ret;
 }
 
 int32_t AddKeyAliasHash(struct HksParamSet *paramSetOut, const struct HksBlob *keyAlias, enum HksInnerTag paramTag)
 {
-    uint8_t keyAliasHash = 0xFF;
-    int32_t ret = GetKeyAliasHash(keyAlias, &keyAliasHash);
-    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "GetKeyAliasHash Failed!!")
+    uint8_t keyAliasHash = static_cast<uint8_t>(HksGetHash(keyAlias));
     struct HksParam hashKeyAliasParam = {
         .tag = paramTag,
         .uint32Param = (uint32_t)keyAliasHash
     };
-    ret = HksAddParams(paramSetOut, &hashKeyAliasParam, 1);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("AddKeyAliasHash failed");
-    }
+    int32_t ret = HksAddParams(paramSetOut, &hashKeyAliasParam, 1);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "AddKeyAliasHash failed")
     return ret;
 }
 
 static int32_t AddErrorMessage(struct HksParamSet *paramSetOut)
 {
     const char *errMsg = HksGetThreadErrorMsg();
+    HKS_IF_NULL_LOGI_RETURN(errMsg, HKS_ERROR_NULL_POINTER, "error msg is null")
     struct HksParam param = {
         .tag = HKS_TAG_PARAM0_NULL,
         .blob.size = strlen(errMsg), .blob.data = (uint8_t*)errMsg,
     };
     int32_t ret = HksAddParams(paramSetOut, &param, 1);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("add error msg to paramSetOut failed");
-    }
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Add error msg failed")
     return ret;
 }
 
@@ -172,21 +101,21 @@ int32_t AddTimeCost(struct HksParamSet *paramSetOut, uint64_t startTime)
     (void)HksElapsedRealTime(&endTime);
     uint32_t totalCost = static_cast<uint32_t>(endTime - startTime);
     struct HksParam params[] = {
-    {
-        .tag = HKS_TAG_PARAM3_UINT32,
-        .uint32Param = totalCost
+        {
+            .tag = HKS_TAG_PARAM3_UINT32,
+            .uint32Param = totalCost
         }
     };
     int32_t ret = HksAddParams(paramSetOut, params, HKS_ARRAY_SIZE(params));
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("add time cost to paramSetOut failed");
-    }
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Add error msg failed")
     return ret;
 }
 
 int32_t PreAddCommonInfo(struct HksParamSet *paramSetOut, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, uint64_t startTime)
 {
+    HKS_IF_NULL_LOGI_RETURN(paramSetIn, HKS_ERROR_NULL_POINTER, "paramSetIn is null ptr")
+
     int32_t ret = AddTimeCost(paramSetOut, startTime);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "PreAddCommonInfo add time cost to paramSetOut failed!")
 
@@ -384,7 +313,7 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM3_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
         if (paramToEventInfo->blob.size == sizeof(struct HksEventResultInfo)) {
-            eventInfo->common.result = *(struct HksEventResultInfo*)paramToEventInfo->blob.data;
+            eventInfo->common.result = *(struct HksEventResultInfo *)paramToEventInfo->blob.data;
         }
     }
 
@@ -400,6 +329,13 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
         eventInfo->common.statInfo.totalCost = paramToEventInfo->uint32Param;
     }
     return HKS_SUCCESS;
+}
+
+void FreeEventInfoSpecificPtr(struct HksEventInfo *eventInfo)
+{
+    HksFreeImpl(eventInfo->common.function);
+    HksFreeImpl(eventInfo->common.callerInfo.name);
+    HksFreeImpl(eventInfo->common.result.errMsg);
 }
 
 int32_t GetEventKeyInfo(const struct HksParamSet *paramSetIn, struct HksEventKeyInfo *keyInfo)

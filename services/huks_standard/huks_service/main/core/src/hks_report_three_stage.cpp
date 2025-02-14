@@ -67,12 +67,12 @@ int32_t HksEventInfoToMapCrypto(const HksEventInfo *info, std::unordered_map<std
 // agree derive
 int32_t HksParamSetToEventInfoAgreeDerive(const struct HksParamSet *paramSet, HksEventInfo *eventInfo)
 {
-    return NeedReportCommon(eventInfo);
+    return BuildCommonInfo(paramSet, eventInfo);
 }
 
 bool HksEventInfoNeedReportAgreeDerive(const HksEventInfo *eventInfo)
 {
-    return eventInfo->common.result.code != HKS_SUCCESS;
+    return NeedReportCommon(eventInfo);
 }
 
 bool HksEventInfoIsEqualAgreeDerive(const HksEventInfo *info1, const HksEventInfo *info2)

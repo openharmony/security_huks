@@ -186,10 +186,7 @@ bool HksService::Init()
         return false;
     }
 
-    HKS_LOG_I("HksHaPlugin_Init: Start initialize plugin");
     ret = HksHaPluginInit();
-    HKS_LOG_I("HksHaPlugin_Init: End initialize HksHaPlugin");
-    
     HKS_IF_NOT_SUCC_LOGE(ret, "Init ha plugin failed!");
     
     HKS_LOG_I("HksService::Init Publish service success");
