@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,9 +20,11 @@
 #include "hks_log.h"
 #include "hks_param.h"
 #include "hks_template.h"
+#include "hks_type_enum.h"
 
 int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
 {
+    HKS_IF_NULL_LOGI_RETURN(outParamSet, HKS_ERROR_NULL_POINTER, "outParamSet is null")
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
 
@@ -49,6 +51,7 @@ int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct HksParamS
 
 int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet, int frontUserId)
 {
+    HKS_IF_NULL_LOGE_RETURN(outParamSet, HKS_ERROR_NULL_POINTER, "outParamSet is null ptr")
     struct HksParamSet *newParamSet = NULL;
     int32_t ret;
     do {
@@ -63,7 +66,7 @@ int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet, struct HksP
         frontUserIdParam.tag = HKS_TAG_FRONT_USER_ID;
         frontUserIdParam.int32Param = frontUserId;
         ret = HksAddParams(newParamSet, &frontUserIdParam, 1);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add frontUserIdParam fail!");
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add frontUserIdParam fail!");
 
         ret = HksBuildParamSet(&newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build append info failed")

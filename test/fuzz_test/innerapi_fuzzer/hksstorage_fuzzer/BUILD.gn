@@ -48,6 +48,7 @@ ohos_fuzztest("HksStorageFuzzTest") {
     "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
   ]
   external_deps = [ "c_utils:utils" ]
+  external_deps += [ "hilog:libhilog" ]
 }
 
 ###############################################################################

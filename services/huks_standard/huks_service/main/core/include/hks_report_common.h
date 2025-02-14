@@ -39,10 +39,6 @@ extern "C" {
 #define KEYALIAS_HASH_SHA256_SIZE 1
 #define KEY_HASH_SHA256_SIZE 2
 
-int32_t GetKeyAliasHash(const struct HksBlob *keyAlias, uint8_t *keyAliasHash);
-
-int32_t GetKeyHash(const struct HksBlob *key, uint16_t *keyHash);
-
 int32_t AddKeyHash(struct HksParamSet *paramSetOut, const struct HksBlob *keyIn);
 
 int32_t AddKeyAliasHash(struct HksParamSet *paramSetOut, const struct HksBlob *keyAlias, enum HksInnerTag paramTag);
@@ -57,11 +53,22 @@ int32_t ConstructReportParamSet(const char *funcName, const struct HksProcessInf
 
 void DeConstructReportParamSet(struct HksParamSet **paramSet);
 
+void FreeEventInfoSpecificPtr(struct HksEventInfo *eventInfo);
 #ifdef __cplusplus
 }
 #endif
 
 #ifdef __cplusplus
+
+static inline uint32_t HksGetHash(const struct HksBlob *blob)
+{
+    if (CheckBlob(blob) != HKS_SUCCESS) {
+        return 0;
+    }
+    std::hash<std::string> hasher;
+    std::string data(reinterpret_cast<char *>(blob->data), blob->size);
+    return static_cast<uint32_t>(hasher(data));
+}
 
 int32_t ReportGetCallerName(std::string &callerName);
 

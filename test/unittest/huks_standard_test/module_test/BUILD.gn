@@ -23,6 +23,7 @@ ohos_unittest("huks_module_test") {
   defines = []
 
   include_dirs = [
+    "//base/security/huks/services/huks_standard/huks_service/main/core/include",
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/include",
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/include/asymmetric_alg_test",
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/include/symmetric_alg_test",
@@ -187,6 +188,10 @@ ohos_unittest("huks_module_test") {
     "//base/security/huks/test/unittest/huks_standard_test/module_test/utils_test/src/hks_double_list_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/utils_test/src/hks_file_operator_test.cpp",
   ]
+
+  if (huks_security_level != "software") {
+    sources += [ "//base/security/huks/test/unittest/huks_standard_test/module_test/utils_test/src/hks_get_hash_test.cpp" ]
+  }
 
   # service test
   sources += [

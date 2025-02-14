@@ -20,6 +20,7 @@
 #include "hks_event_info.h"
 #include "hks_type.h"
 #include "hks_log.h"
+#include "hks_mem.h"
 #include <memory>
 #include <vector>
 #include <mutex>
@@ -68,7 +69,7 @@ typedef struct {
 class HksEventCacheList {
 public:
     HksEventCacheList() {}
-    
+
     void Add(const HksEventCacheNode& node)
     {
         std::lock_guard<std::mutex> lock(queueMutex_);
@@ -91,15 +92,20 @@ public:
     {
         return cacheList.size();
     }
-    
+
     void RemoveFront(uint32_t count)
     {
         std::lock_guard<std::mutex> lock(queueMutex_);
-        if (count <= cacheList.size()) {
-            auto it = cacheList.begin();
-            std::advance(it, count);
-            cacheList.erase(cacheList.begin(), it);
+        auto it = cacheList.begin();
+        for (uint32_t i = 0; i < count && it != cacheList.end(); ++i, ++it) {
+            if (it->data != nullptr) {
+                HKS_FREE(it->data->common.function);
+                HKS_FREE(it->data->common.callerInfo.name);
+                HKS_FREE(it->data->common.result.errMsg);
+                HKS_FREE(it->data);
+            }
         }
+        cacheList.erase(cacheList.begin(), it);
     }
 
     std::list<HksEventCacheNode> cacheList;
@@ -144,7 +150,7 @@ private:
 
     void HandleFaultEvent(struct HksEventCommonInfo *eventInfo, std::unordered_map<std::string, std::string> &eventMap);
 
-    void HandleStatisticEvent(struct HksEventInfo *eventInfo, uint32_t eventId,  HksEventProcMap *procMap);
+    void HandleStatisticEvent(struct HksEventInfo *eventInfo, uint32_t eventId, HksEventProcMap *procMap);
 
     HksEventProcMap* HksEventProcFind(uint32_t eventId);
 
