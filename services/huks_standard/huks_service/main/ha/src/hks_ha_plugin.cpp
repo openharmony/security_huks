@@ -204,7 +204,6 @@ void HksHaPlugin::WorkerThread()
         if (!success) {
             continue;
         }
-        HKS_LOG_I("WorkerThread: Successfully dequeued eventId %" LOG_PUBLIC "u", item.eventId);
 
         HandlerReport(item);
         HksFreeParamSet(&item.paramSet);
@@ -212,9 +211,9 @@ void HksHaPlugin::WorkerThread()
 }
 
 void HksHaPlugin::HandleFaultEvent(
-    HksEventCommonInfo *eventInfo, std::unordered_map<std::string, std::string> &eventMap)
+    HksEventCommonInfo *commonInfo, std::unordered_map<std::string, std::string> &eventMap)
 {
-    int32_t ret = HksPluginOnLocalRequest(CODE_FAULT_METRICS, eventInfo, &eventMap);
+    int32_t ret = HksPluginOnLocalRequest(CODE_FAULT_METRICS, commonInfo, &eventMap);
     HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(ret, "Failed to call OnSingleEventRequest: error code %" LOG_PUBLIC "d", ret);
 }
 
@@ -253,8 +252,6 @@ void HksHaPlugin::HandleStatisticEvent(struct HksEventInfo *eventInfo, uint32_t 
             if (judge) {
                 HKS_LOG_I("HksHaPlugin::HandleStatisticEvent:reportCount is %" LOG_PUBLIC "u", reportCount);
                 BatchReportEvents(reportCount);
-            } else {
-                HKS_LOG_I("HksHaPlugin::HandleStatisticEvent: No events to report");
             }
         }
     }
@@ -323,7 +320,8 @@ int32_t HksHaPlugin::BatchReportEvents(uint32_t reportCount)
         HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "HksHaPlugin::BatchReportEvents:CallBatchReport fail");
     } while (0);
 
-RemoveReportedEvents(reportCount);
+    RemoveReportedEvents(reportCount);
+    
     delete[] eventsWithMap;
 
     return HKS_SUCCESS;
