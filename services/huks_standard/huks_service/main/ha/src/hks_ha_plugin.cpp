@@ -321,7 +321,6 @@ int32_t HksHaPlugin::BatchReportEvents(uint32_t reportCount)
     } while (0);
 
     RemoveReportedEvents(reportCount);
-    
     delete[] eventsWithMap;
 
     return HKS_SUCCESS;
