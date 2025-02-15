@@ -322,7 +322,7 @@ static int32_t HksFreshAndReport(const char *funcName, const struct HksProcessIn
     } while (0);
 
     HksFreeParamSet(&reportParamSet);
-    return ret;
+    return ret;  
 }
 
 int32_t HksAttestEventReport(const struct HksBlob *keyAlias, const struct HksBlob *key,

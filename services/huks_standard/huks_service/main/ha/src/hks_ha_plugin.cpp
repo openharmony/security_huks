@@ -321,9 +321,9 @@ int32_t HksHaPlugin::BatchReportEvents(uint32_t reportCount)
         HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "HksHaPlugin::BatchReportEvents:FillEventInfos fail");
         ret = CallBatchReport(reportCount, eventsWithMap);
         HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "HksHaPlugin::BatchReportEvents:CallBatchReport fail");
-        RemoveReportedEvents(reportCount);
     } while (0);
-    
+
+RemoveReportedEvents(reportCount);
     delete[] eventsWithMap;
 
     return HKS_SUCCESS;

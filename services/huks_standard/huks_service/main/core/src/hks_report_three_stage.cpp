@@ -20,6 +20,7 @@
 #include <unordered_map>
 
 #include "hks_event_info.h"
+#include "hks_report_common.h"
 #include "hks_report_three_stage_build.h"
 #include "hks_template.h"
 #include "hks_type.h"
