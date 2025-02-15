@@ -338,6 +338,48 @@ void FreeEventInfoSpecificPtr(struct HksEventInfo *eventInfo)
     HksFreeImpl(eventInfo->common.result.errMsg);
 }
 
+static bool CheckKeyInfo(const HksEventKeyInfo *keyInfo1, const HksEventKeyInfo *keyInfo2)
+{
+    return (keyInfo1->specificUserId == keyInfo2->specificUserId) && (keyInfo1->aliasHash == keyInfo2->aliasHash);
+}
+
+// check uid, operation, userId, aliasHash
+bool CheckEventCommon(const struct HksEventInfo *info1, const struct HksEventInfo *info2)
+{
+    if ((info1 == nullptr) || (info2 == nullptr) ||
+        (info1->common.callerInfo.uid != info2->common.callerInfo.uid)) {
+        return false;
+    }
+    if ((info1->common.eventId != info2->common.eventId) ||
+        (info1->common.operation != info2->common.operation)) {
+        return false;
+    }
+    switch (info1->common.eventId) {
+        case HKS_EVENT_CRYPTO:
+            return CheckKeyInfo(&info1->cryptoInfo.keyInfo, &info2->cryptoInfo.keyInfo);
+        case HKS_EVENT_AGREE_DERIVE:
+            return CheckKeyInfo(&info1->agreeDeriveInfo.keyInfo, &info2->agreeDeriveInfo.keyInfo);
+        case HKS_EVENT_MAC:
+            return CheckKeyInfo(&info1->macInfo.keyInfo, &info2->macInfo.keyInfo);
+        case HKS_EVENT_ATTEST:
+            return CheckKeyInfo(&info1->attestInfo.keyInfo, &info2->attestInfo.keyInfo);
+        case HKS_EVENT_GENERATE_KEY:
+            return CheckKeyInfo(&info1->generateInfo.keyInfo, &info2->generateInfo.keyInfo);
+        case HKS_EVENT_CHECK_KEY_EXISTED:
+            return CheckKeyInfo(&info1->keyInfo, &info2->keyInfo);
+        case HKS_EVENT_DELETE_KEY:
+            return CheckKeyInfo(&info1->keyInfo, &info2->keyInfo);
+        case HKS_EVENT_IMPORT_KEY:
+            return CheckKeyInfo(&info1->importInfo.keyInfo, &info2->importInfo.keyInfo);
+        case HKS_EVENT_LIST_ALIASES:
+            return CheckKeyInfo(&info1->keyInfo, &info2->keyInfo);
+        case HKS_EVENT_RENAME_KEY:
+            return CheckKeyInfo(&info1->renameInfo.keyInfo, &info2->renameInfo.keyInfo);
+        default:
+            return false;
+    }
+}
+
 int32_t GetEventKeyInfo(const struct HksParamSet *paramSetIn, struct HksEventKeyInfo *keyInfo)
 {
     HKS_IF_NULL_LOGI_RETURN(paramSetIn, HKS_ERROR_NULL_POINTER, "GetEventKeyInfo paramSetIn is null")

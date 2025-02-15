@@ -100,13 +100,7 @@ bool HksEventInfoIsNeedReportForImport(const struct HksEventInfo *eventInfo)
 
 bool HksEventInfoIsEqualForImport(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
 {
-    return ((eventInfo1 != nullptr) && (eventInfo2 != nullptr) &&
-        (eventInfo1->common.callerInfo.uid == eventInfo2->common.callerInfo.uid) &&
-        (eventInfo1->common.eventId == eventInfo2->common.eventId) &&
-        (eventInfo1->common.operation == eventInfo2->common.operation) &&
-        (eventInfo1->keyInfo.specificUserId == eventInfo2->keyInfo.specificUserId) &&
-        (eventInfo1->keyInfo.keyHash == eventInfo2->keyInfo.keyHash)
-    );
+    return CheckEventCommon(eventInfo1, eventInfo2);
 }
 
 void HksEventInfoAddForImport(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)

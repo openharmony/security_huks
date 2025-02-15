@@ -54,6 +54,9 @@ int32_t ConstructReportParamSet(const char *funcName, const struct HksProcessInf
 void DeConstructReportParamSet(struct HksParamSet **paramSet);
 
 void FreeEventInfoSpecificPtr(struct HksEventInfo *eventInfo);
+
+bool CheckEventCommon(const struct HksEventInfo *info1, const struct HksEventInfo *info2);
+
 #ifdef __cplusplus
 }
 #endif

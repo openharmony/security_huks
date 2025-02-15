@@ -1738,15 +1738,14 @@ static int32_t DcmGenerateCertChainInAttestKey(const struct HksParamSet *paramSe
     return ret;
 }
 
-static int32_t AttestFree(struct HksBlob *keyFromFile, struct HksParamSet **newParamSet,
+static void AttestFree(struct HksBlob *keyFromFile, struct HksParamSet **newParamSet,
     struct HksParamSet **processInfoParamSet, struct HksHitraceId *traceId)
 {
     HksFreeParamSet(newParamSet);
     HksFreeParamSet(processInfoParamSet);
     HksHitraceEnd(traceId);
-    HKS_IF_NULL_LOGE_RETURN(keyFromFile, HKS_ERROR_NULL_POINTER, "keyFromFile is null")
+    HKS_IF_NULL_LOGE_RETURN_VOID(keyFromFile, "keyFromFile is null")
     HKS_FREE_BLOB(*keyFromFile);
-    return HKS_SUCCESS;
 }
 
 static int32_t AccessAttestKey(struct HksBlob *keyFromFile, struct HksParamSet *newParamSet, struct HksBlob *certChain)
@@ -1804,7 +1803,7 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
     HksAttestEventReport(keyAlias, &keyFromFile, paramSet, processInfo, &info);
 #endif
 
-    ret = AttestFree(&keyFromFile, &newParamSet, &processInfoParamSet, &traceId);
+    AttestFree(&keyFromFile, &newParamSet, &processInfoParamSet, &traceId);
     return ret;
 }
 #else // HKS_SUPPORT_API_ATTEST_KEY

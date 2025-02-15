@@ -72,10 +72,10 @@ int32_t HksParamSetToEventInfoForRename(const struct HksParamSet *paramSetIn, st
     int32_t ret = HKS_SUCCESS;
     do {
         ret = GetCommonEventInfo(paramSetIn, eventInfo);
-        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
         ret = GetEventKeyInfo(paramSetIn, &(eventInfo->renameInfo.keyInfo));
-        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetEventKeyInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "report GetEventKeyInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
         struct HksParam *paramToEventInfo = nullptr;
         if (HksGetParam(paramSetIn, HKS_TAG_PARAM6_UINT32, &paramToEventInfo) == HKS_SUCCESS) {
@@ -100,13 +100,7 @@ bool HksEventInfoIsNeedReportForRename(const struct HksEventInfo *eventInfo)
 
 bool HksEventInfoIsEqualForRename(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
 {
-    return ((eventInfo1 != nullptr) && (eventInfo2 != nullptr) &&
-        (eventInfo1->common.callerInfo.uid == eventInfo2->common.callerInfo.uid) &&
-        (eventInfo1->common.eventId == eventInfo2->common.eventId) &&
-        (eventInfo1->common.operation == eventInfo2->common.operation) &&
-        (eventInfo1->keyInfo.specificUserId == eventInfo2->keyInfo.specificUserId) &&
-        (eventInfo1->keyInfo.keyHash == eventInfo2->keyInfo.keyHash)
-    );
+    return CheckEventCommon(eventInfo1, eventInfo2);
 }
 
 void HksEventInfoAddForRename(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
