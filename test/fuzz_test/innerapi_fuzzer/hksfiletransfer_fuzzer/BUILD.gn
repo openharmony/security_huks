@@ -42,6 +42,7 @@ ohos_fuzztest("HksFileTransferFuzzTest") {
     "//base/security/huks/services/huks_standard/huks_service/main/upgrade/file_transfer:libhuks_upgrade_file_transfer_static",
   ]
   external_deps = [ "c_utils:utils" ]
+  external_deps += [ "hilog:libhilog" ]
 }
 
 ###############################################################################

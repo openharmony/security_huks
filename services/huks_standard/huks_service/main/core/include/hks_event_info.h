@@ -31,12 +31,12 @@ enum HksEventId {
     HKS_EVENT_AGREE_DERIVE = 2,
     HKS_EVENT_MAC = 3,
     HKS_EVENT_ATTEST = 4,
-    HKS_EVENT_GENERATE_KEY,
-    HKS_EVENT_CHECK_KEY_EXISTED,
-    HKS_EVENT_DELETE_KEY,
-    HKS_EVENT_IMPORT_KEY,
-    HKS_EVENT_LIST_ALIASES,
-    HKS_EVENT_RENAME_KEY
+    HKS_EVENT_GENERATE_KEY = 5,
+    HKS_EVENT_CHECK_KEY_EXISTED = 6,
+    HKS_EVENT_DELETE_KEY = 7,
+    HKS_EVENT_IMPORT_KEY = 8,
+    HKS_EVENT_LIST_ALIASES = 9,
+    HKS_EVENT_RENAME_KEY = 10,
 };
 
 enum HksReportStage {
@@ -175,20 +175,6 @@ typedef struct HksEventInfo {
         RenameInfo renameInfo;
     };
 } HksEventInfo;
-
-typedef struct HksThreeStageReportInfo {
-    int32_t errCode;
-    uint32_t inDataSize;
-    enum HksReportStage stage;
-    uint64_t startTime;
-    const struct HksBlob *handle;
-} HksThreeStageReportInfo;
-
-typedef struct HksAttestReportInfo {
-    int32_t errCode;
-    uint64_t startTime;
-    const char *funcName;
-} HksAttestReportInfo;
 
 #ifdef __cplusplus
 }

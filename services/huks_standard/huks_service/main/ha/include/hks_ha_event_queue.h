@@ -24,7 +24,6 @@
 #include <memory>
 #include <cstdint>
 
-
 constexpr uint32_t MAX_CAPACITY = 2048;
 
 typedef struct {

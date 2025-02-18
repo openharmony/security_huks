@@ -14,12 +14,15 @@
  */
 
 #include "hks_ha_plugin.h"
+
+#include <cstring>
+
+#include "securec.h"
 #include "hks_ha_event_queue.h"
 #include "hks_mem.h"
 #include "hks_log.h"
 #include "hks_plugin_adapter.h"
 #include "hks_plugin_def.h"
-#include "securec.h"
 #include "hks_template.h"
 #include "hks_report_generate_key.h"
 #include "hks_report_import_key.h"
@@ -29,7 +32,6 @@
 #include "hks_report_three_stage.h"
 #include "hks_report_list_aliases.h"
 #include "hks_param.h"
-#include <cstring>
 
 static HksEventProcMap g_eventProcMap[] = {
     {
@@ -124,7 +126,6 @@ HksHaPlugin::~HksHaPlugin()
 
 void HksHaPlugin::Destroy()
 {
-    stopFlag = true;
     queue.Stop();
 
     StopWorkerThread();
@@ -159,30 +160,40 @@ HksEventProcMap *HksHaPlugin::HksEventProcFind(uint32_t eventId)
 
 void HksHaPlugin::HandlerReport(HksEventQueueItem &item)
 {
-    HKS_IF_NULL_LOGE_RETURN_VOID(item.paramSet, "HandlerReport: paramSet is null for eventId %u", item.eventId);
+    HKS_IF_NULL_LOGE_RETURN_VOID(item.paramSet, "HandlerReport: paramSet is"
+        "null for eventId %" LOG_PUBLIC "u", item.eventId);
 
     uint32_t eventId = item.eventId;
     auto procMap = HksEventProcFind(eventId);
-    HKS_IF_NULL_LOGE_RETURN_VOID(procMap, "HandlerReport: Event ID %u not found in the eventProcMap", eventId);
+    HKS_IF_NULL_LOGE_RETURN_VOID(procMap, "HandlerReport: Event ID %" LOG_PUBLIC "u not found in"
+        "the eventProcMap", eventId);
 
-    struct HksEventInfo eventInfo {};
-    int32_t ret = procMap->eventInfoCreate(item.paramSet, &eventInfo);
-    HKS_IF_NOT_SUCC_LOGE(ret, "Failed to create HksEventInfo for eventId %" LOG_PUBLIC "u", eventId);
+    struct HksEventInfo *eventInfo = (struct HksEventInfo *)HksMalloc(sizeof(struct HksEventInfo));
+    HKS_IF_NULL_LOGE_RETURN_VOID(eventInfo, "Failed to allocate HksEventInfo");
 
-    bool needReport = procMap->needReport(&eventInfo);
+    int32_t ret = procMap->eventInfoCreate(item.paramSet, eventInfo);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Failed to create HksEventInfo for eventId %" LOG_PUBLIC "u", eventId);
+        HKS_FREE(eventInfo);
+        return;
+    }
+
+    bool needReport = procMap->needReport(eventInfo);
     if (needReport) {
         std::unordered_map<std::string, std::string> eventMap;
-        ret = procMap->eventInfoToMap(&eventInfo, eventMap);
+        ret = procMap->eventInfoToMap(eventInfo, eventMap);
         HKS_IF_NOT_SUCC_LOGE(ret, "Failed to convert HksEventInfo to map"
             "for eventId %" LOG_PUBLIC "u", eventId);
-        HandleFaultEvent(&eventInfo.common, eventMap);
+        HandleFaultEvent(&eventInfo->common, eventMap);
+
+        HKS_FREE(eventInfo->common.function);
+        HKS_FREE(eventInfo->common.callerInfo.name);
+        HKS_FREE(eventInfo->common.result.errMsg);
+        HKS_FREE(eventInfo);
     } else {
         HKS_LOG_I("HandlerReport: Statistics event detected for eventId %" LOG_PUBLIC "u", eventId);
-        HandleStatisticEvent(&eventInfo, eventId, procMap);
+        HandleStatisticEvent(eventInfo, eventId, procMap);
     }
-    HKS_FREE(eventInfo.common.function);
-    HKS_FREE(eventInfo.common.callerInfo.name);
-    HKS_FREE(eventInfo.common.result.errMsg);
 }
 
 void HksHaPlugin::WorkerThread()
@@ -191,24 +202,22 @@ void HksHaPlugin::WorkerThread()
         HksEventQueueItem item;
         bool success = queue.Dequeue(item);
         if (!success) {
-            HKS_LOG_I("WorkerThread: Queue is empty, retrying...");
             continue;
         }
-        HKS_LOG_I("WorkerThread: Successfully dequeued eventId %" LOG_PUBLIC "u", item.eventId);
-        
+
         HandlerReport(item);
         HksFreeParamSet(&item.paramSet);
     }
 }
 
 void HksHaPlugin::HandleFaultEvent(
-    HksEventCommonInfo *eventInfo, std::unordered_map<std::string, std::string> &eventMap)
+    HksEventCommonInfo *commonInfo, std::unordered_map<std::string, std::string> &eventMap)
 {
-    int32_t ret = HksPluginOnLocalRequest(CODE_FAULT_METRICS, eventInfo, &eventMap);
+    int32_t ret = HksPluginOnLocalRequest(CODE_FAULT_METRICS, commonInfo, &eventMap);
     HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(ret, "Failed to call OnSingleEventRequest: error code %" LOG_PUBLIC "d", ret);
 }
 
-uint32_t GetCurrentTimestamp()
+static uint32_t GetCurrentTimestamp()
 {
     return static_cast<uint32_t>(time(nullptr));
 }
@@ -221,7 +230,13 @@ void HksHaPlugin::HandleStatisticEvent(struct HksEventInfo *eventInfo, uint32_t 
     bool found = eventCacheList.FindAndUpdate(eventInfo, procMap);
     if (!found) {
         AddEventCache(eventId, eventInfo);
+    } else {
+        HKS_FREE(eventInfo->common.function);
+        HKS_FREE(eventInfo->common.callerInfo.name);
+        HKS_FREE(eventInfo->common.result.errMsg);
+        HKS_FREE(eventInfo);
     }
+
     uint32_t currentSize = eventCacheList.GetSize();
     if (currentSize > 0) {
         time_t currentTime = GetCurrentTimestamp();
@@ -237,8 +252,6 @@ void HksHaPlugin::HandleStatisticEvent(struct HksEventInfo *eventInfo, uint32_t 
             if (judge) {
                 HKS_LOG_I("HksHaPlugin::HandleStatisticEvent:reportCount is %" LOG_PUBLIC "u", reportCount);
                 BatchReportEvents(reportCount);
-            } else {
-                HKS_LOG_I("HksHaPlugin::HandleStatisticEvent: No events to report");
             }
         }
     }
@@ -257,7 +270,7 @@ int32_t HksHaPlugin::FillEventInfos(uint32_t reportCount, HksEventWithMap *event
     for (auto it = eventCacheList.cacheList.begin(); it != eventCacheList.cacheList.end() && count < reportCount;
          ++it) {
         if (it->data) {
-            struct HksEventInfo *eventInfo = &(*it->data);
+            struct HksEventInfo *eventInfo = it->data;
             eventsWithMap[count].common = eventInfo->common;
 
             HksEventProcMap *procMap = HksEventProcFind(eventsWithMap[count].common.eventId);
@@ -280,7 +293,7 @@ int32_t HksHaPlugin::CallBatchReport(uint32_t reportCount, HksEventWithMap *even
 {
     int32_t ret = HksPluginOnLocalRequest(CODE_STATISTICS_METRICS, (const void *)eventsWithMap, (void *)&reportCount);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "CallBatchReport: HksHaPlugin_OnBatchEventRequest failed,"
-            "error code: %" LOG_PUBLIC "d", ret)
+        "error code: %" LOG_PUBLIC "d", ret);
 
     return HKS_SUCCESS;
 }
@@ -305,9 +318,9 @@ int32_t HksHaPlugin::BatchReportEvents(uint32_t reportCount)
         HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "HksHaPlugin::BatchReportEvents:FillEventInfos fail");
         ret = CallBatchReport(reportCount, eventsWithMap);
         HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "HksHaPlugin::BatchReportEvents:CallBatchReport fail");
-        RemoveReportedEvents(reportCount);
     } while (0);
-    
+
+    RemoveReportedEvents(reportCount);
     delete[] eventsWithMap;
 
     return HKS_SUCCESS;
