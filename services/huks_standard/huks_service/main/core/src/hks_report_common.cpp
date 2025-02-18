@@ -88,7 +88,7 @@ static int32_t AddErrorMessage(struct HksParamSet *paramSetOut)
     HKS_IF_NULL_LOGI_RETURN(errMsg, HKS_ERROR_NULL_POINTER, "error msg is null")
     struct HksParam param = {
         .tag = HKS_TAG_PARAM0_NULL,
-        .blob.size = strlen(errMsg), .blob.data = (uint8_t*)errMsg,
+        .blob = { .size = strlen(errMsg), .data = (uint8_t*)errMsg },
     };
     int32_t ret = HksAddParams(paramSetOut, &param, 1);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Add error msg failed")
@@ -148,8 +148,7 @@ static int32_t AddFuncName(struct HksParamSet *paramSetOut, const char *funcName
     struct HksParam params[]  = {
         {
             .tag = HKS_TAG_PARAM0_BUFFER,
-            .blob.size = strlen(funcName),
-            .blob.data = (uint8_t*)funcName
+            .blob = { .size = strlen(funcName), .data = (uint8_t*)funcName },
         }
     };
     int32_t ret = HksAddParams(paramSetOut, params, HKS_ARRAY_SIZE(params));
@@ -246,15 +245,15 @@ int32_t ConstructReportParamSet(const char *funcName, const struct HksProcessInf
         struct HksParam params[] = {
             {
                 .tag = HKS_TAG_PARAM1_BUFFER,
-                .blob.size = sizeof(time), .blob.data = (uint8_t *)&time,
+                .blob = { .size = sizeof(time), .data = (uint8_t *)&time },
             },
             {
                 .tag = HKS_TAG_PARAM3_BUFFER,
-                .blob.size = sizeof(resultInfo), .blob.data = (uint8_t *)&resultInfo,
+                .blob = { .size = sizeof(resultInfo), .data = (uint8_t *)&resultInfo },
             },
             {
                 .tag = HKS_TAG_PARAM2_BUFFER,
-                .blob.size = callerName.size(), .blob.data = (uint8_t *)callerName.data()
+                .blob = { .size = callerName.size(), .data = (uint8_t *)callerName.data() },
             }
         };
         ret = HksAddParams(*reportParamSet, params, HKS_ARRAY_SIZE(params));
@@ -394,7 +393,7 @@ int32_t GetEventKeyInfo(const struct HksParamSet *paramSetIn, struct HksEventKey
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_SPECIFIC_USER_ID, &paramToEventInfo) == HKS_SUCCESS) {
-        keyInfo->specificUserId = paramToEventInfo->uint32Param;
+        keyInfo->specificUserId = paramToEventInfo->int32Param;
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_ALGORITHM, &paramToEventInfo) == HKS_SUCCESS) {
