@@ -13,23 +13,18 @@
  * limitations under the License.
  */
 
+#include "hks_report_check_key_exited.h"
+
 #include <cstdint>
 #include <string>
 #include <ctime>
-#include "hks_base_check.h"
 #include "hks_event_info.h"
 #include "hks_log.h"
-#include "hks_mem.h"
 #include "hks_param.h"
-#include "hks_report.h"
-#include "hks_report_check_key_exited.h"
 #include "hks_template.h"
 #include "hks_type.h"
 #include "hks_type_enum.h"
-#include "hks_storage_utils.h"
 #include "hks_type_inner.h"
-#include "securec.h"
-#include "hks_api.h"
 #include "hks_report_common.h"
 
 
@@ -73,12 +68,18 @@ int32_t HksParamSetToEventInfoForCheckKeyExited(const struct HksParamSet *paramS
         HKS_LOG_I("HksParamSetToEventInfoForCheckKeyExited params is null");
         return HKS_ERROR_NULL_POINTER;
     }
-    int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
-    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+    int32_t ret = HKS_SUCCESS;
+    do {
+        ret = GetCommonEventInfo(paramSetIn, eventInfo);
+        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
-    ret = GetEventKeyInfo(paramSetIn, &(eventInfo->keyInfo));
-    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetEventKeyInfo failed!  ret = %" LOG_PUBLIC "d", ret);
-
+        ret = GetEventKeyInfo(paramSetIn, &(eventInfo->keyInfo));
+        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "report GetEventKeyInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+    } while (0);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_I("report ParamSetToEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+        FreeEventInfoSpecificPtr(eventInfo);
+    }
     return ret;
 }
 
@@ -90,11 +91,7 @@ bool HksEventInfoIsNeedReportForCheckKeyExited(const struct HksEventInfo *eventI
 
 bool HksEventInfoIsEqualForCheckKeyExited(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
 {
-    return ((eventInfo1 != nullptr) && (eventInfo2 != nullptr) &&
-        (eventInfo1->common.callerInfo.uid == eventInfo2->common.callerInfo.uid) &&
-        (eventInfo1->common.eventId == eventInfo2->common.eventId) &&
-        (eventInfo1->common.operation == eventInfo2->common.operation)
-    );
+    return CheckEventCommon(eventInfo1, eventInfo2);
 }
 
 void HksEventInfoAddForCheckKeyExited(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
@@ -103,7 +100,6 @@ void HksEventInfoAddForCheckKeyExited(struct HksEventInfo *dstEventInfo, const s
         dstEventInfo->common.count++;
     }
 }
-
 
 int32_t HksEventInfoToMapForCheckKeyExited(const struct HksEventInfo *eventInfo,
     std::unordered_map<std::string, std::string> &reportData)

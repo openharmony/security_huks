@@ -48,6 +48,8 @@ ohos_fuzztest("HksIpcFuzzTest") {
     "c_utils:utils",
     "ipc:ipc_single",
   ]
+
+  external_deps += [ "hilog:libhilog" ]
 }
 
 ###############################################################################

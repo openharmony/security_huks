@@ -23,11 +23,25 @@
 #include "hks_session_manager.h"
 #include "hks_type.h"
 
+typedef struct HksThreeStageReportInfo {
+    int32_t errCode;
+    uint32_t inDataSize;
+    enum HksReportStage stage;
+    uint64_t startTime;
+    const struct HksBlob *handle;
+} HksThreeStageReportInfo;
+
+typedef struct HksAttestReportInfo {
+    int32_t errCode;
+    uint64_t startTime;
+    const char *funcName;
+} HksAttestReportInfo;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t HksGetAttestEventInfo(const struct HksBlob *keyAlias, const struct HksBlob *key,
+int32_t HksAttestEventReport(const struct HksBlob *keyAlias, const struct HksBlob *key,
     const struct HksParamSet *paramSet, const struct HksProcessInfo *processInfo, HksAttestReportInfo *info);
 
 int32_t HksGetInitEventInfo(const struct HksBlob *keyAlias, const struct HksBlob *key,
