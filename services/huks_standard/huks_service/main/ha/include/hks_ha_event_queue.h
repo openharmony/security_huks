@@ -34,7 +34,7 @@ typedef struct {
 class HksEventQueue {
 public:
     explicit HksEventQueue(uint32_t capacity = MAX_CAPACITY)
-        : queueCapacity_(capacity > MAX_CAPACITY ? MAX_CAPACITY : capacity) {}
+        : queueCapacity_(capacity > MAX_CAPACITY ? MAX_CAPACITY : capacity), stopped_(false) {}
 
     bool Enqueue(uint32_t eventId, struct HksParamSet *paramSet);
 
