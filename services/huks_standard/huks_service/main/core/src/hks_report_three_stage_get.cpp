@@ -113,7 +113,7 @@ static void GetKeyInfo(const struct HksParamSet *paramSet, const struct HksBlob 
     }
 
     if (HksGetParam(paramSet, HKS_TAG_SPECIFIC_USER_ID, &param) == HKS_SUCCESS) {
-        keyInfo->specificUserId = param->uint32Param;
+        keyInfo->specificUserId = param->int32Param;
     }
 
     if (HksGetParam(paramSet, HKS_TAG_ALGORITHM, &param) == HKS_SUCCESS) {
