@@ -14,6 +14,8 @@
  */
 
 #include <gtest/gtest.h>
+#include <iostream>
+#include <string>
 
 #include "hks_api.h"
 #include "hks_param.h"
@@ -62,6 +64,117 @@ HWTEST_F(HksGetErrorMsgTest, HksGetErrorMsgTest001, TestSize.Level0)
 {
     const char *errorMsg = HksGetErrorMsg();
     EXPECT_NE(errorMsg, nullptr) << "HksGetErrorMsg ret is nullptr";
+}
+
+/**
+ * @tc.name: HksGetErrorMsgTest.HksGetErrorMsgTest002
+ * @tc.desc: call HksGetErrorMsg;
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksGetErrorMsgTest, HksGetErrorMsgTest002, TestSize.Level0)
+{
+    HksClearThreadErrorMsg();
+    static std::string info = std::string(__func__) + "[" + std::to_string(__LINE__ + 3) + "]: ";
+    std::string generateStr = std::string(10, 'a');
+    const char* testStr = generateStr.c_str();
+    HKS_LOG_E_IMPORTANT("%" LOG_PUBLIC "s", testStr);
+    EXPECT_EQ(HksGetThreadErrorMsgLen(), info.length() + 10) << "errMsg len is not expected";
+}
+
+/**
+ * @tc.name: HksGetErrorMsgTest.HksGetErrorMsgTest003
+ * @tc.desc: call HksGetErrorMsg;
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksGetErrorMsgTest, HksGetErrorMsgTest003, TestSize.Level0)
+{
+    HksClearThreadErrorMsg();
+    static std::string info = std::string(__func__) + "[" + std::to_string(__LINE__ + 3) + "]: ";
+    std::string generateStr = std::string(MAX_ERROR_MESSAGE_LEN - info.length() - 1, 'a');
+    const char* testStr = generateStr.c_str();
+    HKS_LOG_E_IMPORTANT("%" LOG_PUBLIC "s", testStr);
+    EXPECT_EQ(HksGetThreadErrorMsgLen(), MAX_ERROR_MESSAGE_LEN - 1) << "errMsg len is not MAX_ERROR_MESSAGE_LEN - 1";
+}
+
+/**
+ * @tc.name: HksGetErrorMsgTest.HksGetErrorMsgTest004
+ * @tc.desc: call HksGetErrorMsg;
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksGetErrorMsgTest, HksGetErrorMsgTest004, TestSize.Level0)
+{
+    HksClearThreadErrorMsg();
+    static std::string info = std::string(__func__) + "[" + std::to_string(__LINE__ + 3) + "]: ";
+    std::string generateStr = std::string(MAX_ERROR_MESSAGE_LEN - info.length(), 'a');
+    const char* testStr = generateStr.c_str();
+    HKS_LOG_E_IMPORTANT("%" LOG_PUBLIC "s", testStr);
+    EXPECT_EQ(HksGetThreadErrorMsgLen(), 0) << "errMsg len is not 0";
+}
+
+/**
+ * @tc.name: HksGetErrorMsgTest.HksGetErrorMsgTest005
+ * @tc.desc: call HksGetErrorMsg;
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksGetErrorMsgTest, HksGetErrorMsgTest005, TestSize.Level0)
+{
+    HksClearThreadErrorMsg();
+    static std::string info = std::string(__func__) + "[" + std::to_string(__LINE__ + 3) + "]: ";
+    std::string generateStr = std::string(MAX_ERROR_MESSAGE_LEN - info.length() - 1 - 476, 'a');
+    const char* testStr = generateStr.c_str();
+    HKS_LOG_E_IMPORTANT( \
+        "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" \
+        "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" \
+        "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" \
+        "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" \
+        "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" \
+        "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "123456" \
+        "%" LOG_PUBLIC "s", testStr);
+    EXPECT_EQ(HksGetThreadErrorMsgLen(), MAX_ERROR_MESSAGE_LEN - 1) << "errMsg len is not MAX_ERROR_MESSAGE_LEN - 1";
+}
+
+/**
+ * @tc.name: HksGetErrorMsgTest.HksGetErrorMsgTest006
+ * @tc.desc: call HksGetErrorMsg;
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksGetErrorMsgTest, HksGetErrorMsgTest006, TestSize.Level0)
+{
+    HksClearThreadErrorMsg();
+    static std::string info = std::string(__func__) + "[" + std::to_string(__LINE__ + 3) + "]: ";
+    std::string generateStr = std::string(MAX_ERROR_MESSAGE_LEN - info.length() - 476, 'a');
+    const char* testStr = generateStr.c_str();
+    HKS_LOG_E_IMPORTANT( \
+        "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" \
+        "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" \
+        "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" \
+        "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" \
+        "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" \
+        "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "123456" \
+        "%" LOG_PUBLIC "s", testStr);
+    EXPECT_EQ(HksGetThreadErrorMsgLen(), 0) << "errMsg len is not 0";
+}
+
+/**
+ * @tc.name: HksGetErrorMsgTest.HksGetErrorMsgTest007
+ * @tc.desc: call HksGetErrorMsg;
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksGetErrorMsgTest, HksGetErrorMsgTest007, TestSize.Level0)
+{
+    HksClearThreadErrorMsg();
+    static std::string info = std::string(__func__) + "[" + std::to_string(__LINE__ + 3) + "]: ";
+    std::string generateStr = std::string(MAX_ERROR_MESSAGE_LEN - info.length() - 1 - 477, 'a');
+    const char* testStr = generateStr.c_str();
+    HKS_LOG_E_IMPORTANT( \
+        "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" \
+        "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" \
+        "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" \
+        "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" \
+        "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" \
+        "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567" \
+        "%" LOG_PUBLIC "s", testStr);
+    EXPECT_EQ(HksGetThreadErrorMsgLen(), 0) << "errMsg len is not 0";
 }
 
 }
