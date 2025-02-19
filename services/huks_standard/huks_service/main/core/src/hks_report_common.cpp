@@ -88,7 +88,7 @@ static int32_t AddErrorMessage(struct HksParamSet *paramSetOut)
     HKS_IF_NULL_LOGI_RETURN(errMsg, HKS_ERROR_NULL_POINTER, "error msg is null")
     struct HksParam param = {
         .tag = HKS_TAG_PARAM0_NULL,
-        .blob = { .size = strlen(errMsg), .data = (uint8_t*)errMsg },
+        .blob = { .size = strlen(errMsg) + 1, .data = (uint8_t*)errMsg },
     };
     int32_t ret = HksAddParams(paramSetOut, &param, 1);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Add error msg failed")
@@ -317,7 +317,7 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM0_NULL, &paramToEventInfo) == HKS_SUCCESS) {
-        eventInfo->common.result.errMsg = (char *)HksMalloc(paramToEventInfo->blob.size + 1);
+        eventInfo->common.result.errMsg = (char *)HksMalloc(paramToEventInfo->blob.size);
         if (eventInfo->common.result.errMsg != nullptr) {
             (void)memcpy_s(eventInfo->common.result.errMsg, paramToEventInfo->blob.size,
                 paramToEventInfo->blob.data, paramToEventInfo->blob.size);
