@@ -90,7 +90,7 @@ bool HksEventInfoIsNeedReportForDelete(const struct HksEventInfo *eventInfo)
 
 bool HksEventInfoIsEqualForDelete(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
 {
-    return CheckEventCommon(eventInfo1, eventInfo2);
+    return CheckEventCommonAndKey(eventInfo1, eventInfo2);
 }
 
 void HksEventInfoAddForDelete(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
@@ -99,7 +99,6 @@ void HksEventInfoAddForDelete(struct HksEventInfo *dstEventInfo, const struct Hk
         dstEventInfo->common.count++;
     }
 }
-
 
 int32_t HksEventInfoToMapForDelete(const struct HksEventInfo *eventInfo,
     std::unordered_map<std::string, std::string> &reportData)

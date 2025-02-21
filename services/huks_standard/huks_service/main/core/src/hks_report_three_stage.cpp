@@ -35,6 +35,15 @@ static bool NeedReportCommon(const HksEventInfo *eventInfo)
     return eventInfo->common.result.code != HKS_SUCCESS;
 }
 
+static bool CryptoInfoIsEqual(const HksEventInfo *info1, const HksEventInfo *info2)
+{
+    if (CheckEventCommon(info1, info2) == false) {
+        return false;
+    }
+    return (info1->cryptoInfo.keyInfo.alg == info2->cryptoInfo.keyInfo.alg) &&
+        (info1->common.operation == info2->common.operation);
+}
+
 // crypto
 int32_t HksParamSetToEventInfoCrypto(const struct HksParamSet *paramSet, HksEventInfo *eventInfo)
 {
@@ -48,7 +57,7 @@ bool HksEventInfoNeedReportCrypto(const HksEventInfo *eventInfo)
 
 bool HksEventInfoIsEqualCrypto(const HksEventInfo *info1, const HksEventInfo *info2)
 {
-    return CheckEventCommon(info1, info2);
+    return CryptoInfoIsEqual(info1, info2);
 }
 
 void HksEventInfoAddCrypto(HksEventInfo *info1, const HksEventInfo *info2)
@@ -78,7 +87,7 @@ bool HksEventInfoNeedReportAgreeDerive(const HksEventInfo *eventInfo)
 
 bool HksEventInfoIsEqualAgreeDerive(const HksEventInfo *info1, const HksEventInfo *info2)
 {
-    return CheckEventCommon(info1, info2);
+    return CheckEventCommonAndKey(info1, info2);
 }
 
 void HksEventInfoAddAgreeDerive(HksEventInfo *info1, const HksEventInfo *info2)
@@ -108,7 +117,7 @@ bool HksEventInfoNeedReportMac(const HksEventInfo *eventInfo)
 
 bool HksEventInfoIsEqualMac(const HksEventInfo *info1, const HksEventInfo *info2)
 {
-    return CheckEventCommon(info1, info2);
+    return CryptoInfoIsEqual(info1, info2);
 }
 
 void HksEventInfoAddMac(HksEventInfo *info1, const HksEventInfo *info2)
@@ -137,7 +146,11 @@ bool HksEventInfoNeedReportAttest(const HksEventInfo *eventInfo)
 
 bool HksEventInfoIsEqualAttest(const HksEventInfo *info1, const HksEventInfo *info2)
 {
-    return CheckEventCommon(info1, info2);
+    if (CheckEventCommon(info1, info2) == false) {
+        return false;
+    }
+    return (info1->attestInfo.keyInfo.alg == info2->attestInfo.keyInfo.alg) &&
+        (info1->attestInfo.isAnonymous == info2->attestInfo.isAnonymous);
 }
 
 void HksEventInfoAddAttest(HksEventInfo *info1, const HksEventInfo *info2)
