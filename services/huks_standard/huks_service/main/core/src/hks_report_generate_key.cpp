@@ -103,7 +103,7 @@ bool HksEventInfoIsNeedReportForKeyGen(const struct HksEventInfo *eventInfo)
 
 bool HksEventInfoIsEqualForKeyGen(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
 {
-    return CheckEventCommon(eventInfo1, eventInfo2);
+    return CheckEventCommonAndKey(eventInfo1, eventInfo2);
 }
 
 void HksEventInfoAddForKeyGen(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)

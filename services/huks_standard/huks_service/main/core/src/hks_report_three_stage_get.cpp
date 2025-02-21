@@ -45,14 +45,20 @@ static int32_t GetEventId(const struct HksParamSet *paramSet, HksEventInfo *even
     switch (purposeParam->uint32Param) {
         case HKS_KEY_PURPOSE_ENCRYPT:
         case HKS_KEY_PURPOSE_DECRYPT:
-        case HKS_KEY_PURPOSE_SIGN:
-        case HKS_KEY_PURPOSE_VERIFY:
             eventInfo->common.eventId = HKS_EVENT_CRYPTO;
             eventInfo->cryptoInfo.keyInfo.purpose = purposeParam->uint32Param;
             break;
-        case HKS_KEY_PURPOSE_AGREE:
+        case HKS_KEY_PURPOSE_SIGN:
+        case HKS_KEY_PURPOSE_VERIFY:
+            eventInfo->common.eventId = HKS_EVENT_SIGN_VERIFY;
+            eventInfo->cryptoInfo.keyInfo.purpose = purposeParam->uint32Param;
+            break;
         case HKS_KEY_PURPOSE_DERIVE:
-            eventInfo->common.eventId = HKS_EVENT_AGREE_DERIVE;
+            eventInfo->common.eventId = HKS_EVENT_DERIVE;
+            eventInfo->agreeDeriveInfo.keyInfo.purpose = purposeParam->uint32Param;
+            break;
+        case HKS_KEY_PURPOSE_AGREE:
+            eventInfo->common.eventId = HKS_EVENT_AGREE;
             eventInfo->agreeDeriveInfo.keyInfo.purpose = purposeParam->uint32Param;
             break;
         case HKS_KEY_PURPOSE_MAC:
@@ -223,9 +229,11 @@ static void FreshEventInfo(const struct HksParamSet *paramSet, HksEventInfo *eve
 {
     switch (eventInfo->common.eventId) {
         case HKS_EVENT_CRYPTO:
+        case HKS_EVENT_SIGN_VERIFY:
             GetCryptoInfo(paramSet, nullptr, nullptr, &eventInfo->cryptoInfo);
             break;
-        case HKS_EVENT_AGREE_DERIVE:
+        case HKS_EVENT_DERIVE:
+        case HKS_EVENT_AGREE:
             GetAgreeDeriveInfo(paramSet, nullptr, nullptr, &eventInfo->agreeDeriveInfo);
             break;
         case HKS_EVENT_MAC:
@@ -375,10 +383,12 @@ int32_t HksGetInitEventInfo(const struct HksBlob *keyAlias, const struct HksBlob
 
     switch (eventInfo->common.eventId) {
         case HKS_EVENT_CRYPTO:
+        case HKS_EVENT_SIGN_VERIFY:
             GetCryptoInfo(paramSet, keyAlias, key, &eventInfo->cryptoInfo);
             GetCryptoInfo(keyBlobParamSet, nullptr, nullptr, &eventInfo->cryptoInfo);
             break;
-        case HKS_EVENT_AGREE_DERIVE:
+        case HKS_EVENT_DERIVE:
+        case HKS_EVENT_AGREE:
             GetAgreeDeriveInfo(paramSet, keyAlias, key, &eventInfo->agreeDeriveInfo);
             GetAgreeDeriveInfo(keyBlobParamSet, nullptr, nullptr, &eventInfo->agreeDeriveInfo);
             break;
@@ -424,7 +434,7 @@ int32_t HksThreeStageReport(const char *funcName, const struct HksProcessInfo *p
 
     if (operation != nullptr) {
         uint32_t eventId = operation->eventInfo.common.eventId;
-        if (!(eventId == HKS_EVENT_CRYPTO || eventId == HKS_EVENT_AGREE_DERIVE || eventId == HKS_EVENT_MAC)) {
+        if (eventId < HKS_EVENT_CRYPTO || eventId > HKS_EVENT_MAC) {
             HKS_LOG_I("eventid is not support");
             return HKS_FAILURE;
         }
@@ -439,9 +449,11 @@ int32_t HksThreeStageReport(const char *funcName, const struct HksProcessInfo *p
 
     switch (eventInfo.common.eventId) {
         case HKS_EVENT_CRYPTO:
+        case HKS_EVENT_SIGN_VERIFY:
             GetCryptoInfo(paramSet, nullptr, nullptr, &eventInfo.cryptoInfo);
             break;
-        case HKS_EVENT_AGREE_DERIVE:
+        case HKS_EVENT_DERIVE:
+        case HKS_EVENT_AGREE:
             GetAgreeDeriveInfo(paramSet, nullptr, nullptr, &eventInfo.agreeDeriveInfo);
             break;
         case HKS_EVENT_MAC:

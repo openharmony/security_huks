@@ -148,7 +148,7 @@ static int32_t AddFuncName(struct HksParamSet *paramSetOut, const char *funcName
     struct HksParam params[]  = {
         {
             .tag = HKS_TAG_PARAM0_BUFFER,
-            .blob = { .size = strlen(funcName), .data = (uint8_t*)funcName },
+            .blob = { .size = strlen(funcName) + 1, .data = (uint8_t*)funcName },
         }
     };
     int32_t ret = HksAddParams(paramSetOut, params, HKS_ARRAY_SIZE(params));
@@ -253,7 +253,7 @@ int32_t ConstructReportParamSet(const char *funcName, const struct HksProcessInf
             },
             {
                 .tag = HKS_TAG_PARAM2_BUFFER,
-                .blob = { .size = callerName.size(), .data = (uint8_t *)callerName.data() },
+                .blob = { .size = callerName.size() + 1, .data = (uint8_t *)callerName.c_str() },
             }
         };
         ret = HksAddParams(*reportParamSet, params, HKS_ARRAY_SIZE(params));
@@ -280,7 +280,7 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM0_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
-        eventInfo->common.function = (char *)HksMalloc(paramToEventInfo->blob.size + 1);
+        eventInfo->common.function = (char *)HksMalloc(paramToEventInfo->blob.size);
         if (eventInfo->common.function != nullptr) {
             (void)memcpy_s(eventInfo->common.function, paramToEventInfo->blob.size,
                 paramToEventInfo->blob.data, paramToEventInfo->blob.size);
@@ -299,7 +299,7 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM2_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
-        eventInfo->common.callerInfo.name = (char *)HksMalloc(paramToEventInfo->blob.size + 1);
+        eventInfo->common.callerInfo.name = (char *)HksMalloc(paramToEventInfo->blob.size);
         if (eventInfo->common.callerInfo.name != nullptr) {
             (void)memcpy_s(eventInfo->common.callerInfo.name, paramToEventInfo->blob.size,
                 paramToEventInfo->blob.data, paramToEventInfo->blob.size);
@@ -339,39 +339,36 @@ void FreeEventInfoSpecificPtr(struct HksEventInfo *eventInfo)
 
 static bool CheckKeyInfo(const HksEventKeyInfo *keyInfo1, const HksEventKeyInfo *keyInfo2)
 {
-    return (keyInfo1->specificUserId == keyInfo2->specificUserId) && (keyInfo1->aliasHash == keyInfo2->aliasHash);
+    return (keyInfo1->alg == keyInfo2->alg) && (keyInfo1->aliasHash == keyInfo2->aliasHash);
 }
 
-// check uid, operation, userId, aliasHash
+// check eventId and caller name are equal
 bool CheckEventCommon(const struct HksEventInfo *info1, const struct HksEventInfo *info2)
 {
     if ((info1 == nullptr) || (info2 == nullptr) ||
-        (info1->common.callerInfo.uid != info2->common.callerInfo.uid)) {
+        (info1->common.eventId != info2->common.eventId)) {
         return false;
     }
-    if ((info1->common.eventId != info2->common.eventId) ||
-        (info1->common.operation != info2->common.operation)) {
+
+    return strcmp(info1->common.callerInfo.name, info2->common.callerInfo.name) == 0;
+}
+
+bool CheckEventCommonAndKey(const struct HksEventInfo *info1, const struct HksEventInfo *info2)
+{
+    if (CheckEventCommon(info1, info2) == false) {
         return false;
     }
+
     switch (info1->common.eventId) {
-        case HKS_EVENT_CRYPTO:
-            return CheckKeyInfo(&info1->cryptoInfo.keyInfo, &info2->cryptoInfo.keyInfo);
-        case HKS_EVENT_AGREE_DERIVE:
+        case HKS_EVENT_DERIVE:
+        case HKS_EVENT_AGREE:
             return CheckKeyInfo(&info1->agreeDeriveInfo.keyInfo, &info2->agreeDeriveInfo.keyInfo);
-        case HKS_EVENT_MAC:
-            return CheckKeyInfo(&info1->macInfo.keyInfo, &info2->macInfo.keyInfo);
-        case HKS_EVENT_ATTEST:
-            return CheckKeyInfo(&info1->attestInfo.keyInfo, &info2->attestInfo.keyInfo);
         case HKS_EVENT_GENERATE_KEY:
             return CheckKeyInfo(&info1->generateInfo.keyInfo, &info2->generateInfo.keyInfo);
-        case HKS_EVENT_CHECK_KEY_EXISTED:
-            return CheckKeyInfo(&info1->keyInfo, &info2->keyInfo);
         case HKS_EVENT_DELETE_KEY:
             return CheckKeyInfo(&info1->keyInfo, &info2->keyInfo);
         case HKS_EVENT_IMPORT_KEY:
             return CheckKeyInfo(&info1->importInfo.keyInfo, &info2->importInfo.keyInfo);
-        case HKS_EVENT_LIST_ALIASES:
-            return CheckKeyInfo(&info1->keyInfo, &info2->keyInfo);
         case HKS_EVENT_RENAME_KEY:
             return CheckKeyInfo(&info1->renameInfo.keyInfo, &info2->renameInfo.keyInfo);
         default:

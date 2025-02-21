@@ -57,6 +57,8 @@ void FreeEventInfoSpecificPtr(struct HksEventInfo *eventInfo);
 
 bool CheckEventCommon(const struct HksEventInfo *info1, const struct HksEventInfo *info2);
 
+bool CheckEventCommonAndKey(const struct HksEventInfo *info1, const struct HksEventInfo *info2);
+
 #ifdef __cplusplus
 }
 #endif
