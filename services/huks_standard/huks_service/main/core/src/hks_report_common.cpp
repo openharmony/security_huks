@@ -345,11 +345,14 @@ static bool CheckKeyInfo(const HksEventKeyInfo *keyInfo1, const HksEventKeyInfo 
 // check eventId and caller name are equal
 bool CheckEventCommon(const struct HksEventInfo *info1, const struct HksEventInfo *info2)
 {
-    if ((info1 == nullptr) || (info2 == nullptr) ||
-        (info1->common.eventId != info2->common.eventId)) {
+    if ((info1 == nullptr) || (info2 == nullptr)) {
         return false;
     }
 
+    if ((info1->common.eventId != info2->common.eventId) ||
+        (info1->common.callerInfo.name == nullptr) || (info2->common.callerInfo.name == nullptr)) {
+        return false;
+    }
     return strcmp(info1->common.callerInfo.name, info2->common.callerInfo.name) == 0;
 }
 
