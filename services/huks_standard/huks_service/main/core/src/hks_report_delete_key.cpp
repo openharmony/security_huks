@@ -90,7 +90,10 @@ bool HksEventInfoIsNeedReportForDelete(const struct HksEventInfo *eventInfo)
 
 bool HksEventInfoIsEqualForDelete(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
 {
-    return CheckEventCommonAndKey(eventInfo1, eventInfo2);
+    if (CheckEventCommon(eventInfo1, eventInfo2) == false) {
+        return false;
+    }
+    return eventInfo1->keyInfo.aliasHash == eventInfo2->keyInfo.aliasHash;
 }
 
 void HksEventInfoAddForDelete(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
