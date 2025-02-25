@@ -368,12 +368,8 @@ bool CheckEventCommonAndKey(const struct HksEventInfo *info1, const struct HksEv
             return CheckKeyInfo(&info1->agreeDeriveInfo.keyInfo, &info2->agreeDeriveInfo.keyInfo);
         case HKS_EVENT_GENERATE_KEY:
             return CheckKeyInfo(&info1->generateInfo.keyInfo, &info2->generateInfo.keyInfo);
-        case HKS_EVENT_DELETE_KEY:
-            return CheckKeyInfo(&info1->keyInfo, &info2->keyInfo);
         case HKS_EVENT_IMPORT_KEY:
             return CheckKeyInfo(&info1->importInfo.keyInfo, &info2->importInfo.keyInfo);
-        case HKS_EVENT_RENAME_KEY:
-            return CheckKeyInfo(&info1->renameInfo.keyInfo, &info2->renameInfo.keyInfo);
         default:
             return false;
     }

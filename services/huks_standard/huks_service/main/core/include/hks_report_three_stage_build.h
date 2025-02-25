@@ -25,9 +25,6 @@
 
 int32_t BuildCommonInfo(const struct HksParamSet *paramSet, struct HksEventInfo *eventInfo);
 
-// check uid, operation, userId
-bool CheckEventCommon(const struct HksEventInfo *info1, const struct HksEventInfo *info2);
-
 // add count, dataLen, totalCost
 void AddEventInfoCommon(HksEventInfo *info1, const HksEventInfo *info2);
 
