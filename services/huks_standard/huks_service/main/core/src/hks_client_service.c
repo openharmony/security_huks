@@ -1219,7 +1219,6 @@ int32_t HksServiceDeleteKey(const struct HksProcessInfo *processInfo, const stru
         ret = AppendStorageLevelIfNotExistInner(processInfo, paramSet, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append storage level failed")
 #endif
-    } while (0);
     /*
      * Detele key first, record log if failed; then delete cert chain, return error if failed;
      * Return error code of deleteKey in the end.
@@ -1228,6 +1227,14 @@ int32_t HksServiceDeleteKey(const struct HksProcessInfo *processInfo, const stru
     if ((ret != HKS_SUCCESS) && (ret != HKS_ERROR_NOT_EXIST)) {
         HKS_LOG_E("service delete main key failed, ret = %" LOG_PUBLIC "d", ret);
     }
+#ifdef HKS_ENABLE_SMALL_TO_SERVICE
+    int32_t oldRet = HKS_FAILURE;
+    if (HksCheckNeedUpgradeForSmallToService(processInfo) == HKS_SUCCESS) {
+        oldRet = HksDeleteOldKeyForSmallToService(keyAlias);
+        ret = (oldRet == HKS_SUCCESS) ? HKS_SUCCESS : ret;
+    }
+#endif
+    } while (0);
 #ifdef L2_STANDARD
     struct HksParamSet *reportParamSet = NULL;
     (void)PreConstructDeleteKeyReportParamSet(keyAlias, paramSet, enterTime, &reportParamSet);
@@ -1237,15 +1244,6 @@ int32_t HksServiceDeleteKey(const struct HksProcessInfo *processInfo, const stru
 
     HksFreeParamSet(&newParamSet);
 #endif
-
-#ifdef HKS_ENABLE_SMALL_TO_SERVICE
-    int32_t oldRet = HKS_FAILURE;
-    if (HksCheckNeedUpgradeForSmallToService(processInfo) == HKS_SUCCESS) {
-        oldRet = HksDeleteOldKeyForSmallToService(keyAlias);
-        ret = (oldRet == HKS_SUCCESS) ? HKS_SUCCESS : ret;
-    }
-#endif
-
     return ret;
 }
 
