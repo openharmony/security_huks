@@ -1363,11 +1363,8 @@ int32_t HksServiceImportKey(const struct HksProcessInfo *processInfo, const stru
 
         ret = HuksAccessImportKey(keyAlias, key, newParamSet, &keyOut);
         IfNotSuccAppendHdiErrorInfo(ret);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("access level import public key failed, ret = %" LOG_PUBLIC "d", ret);
-            HKS_FREE(keyOutBuffer);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "access level import public key failed, ret = %" LOG_PUBLIC "d", ret)
+
         ret = HksManageStoreKeyBlob(processInfo, newParamSet, keyAlias, &keyOut, HKS_STORAGE_TYPE_KEY);
         HKS_IF_NOT_SUCC_LOGE(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
