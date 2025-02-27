@@ -29,6 +29,7 @@
 
 #include "hks_dcm_callback_handler.h"
 #include "hks_log.h"
+#include "hks_template.h"
 #include "huks_service_ipc_interface_code.h"
 
 namespace OHOS {
@@ -57,26 +58,17 @@ int HksStub::ProcessAttestKeyAsyncReply(MessageParcel& data)
     int err = ERR_INVALID_DATA;
     do {
         uint32_t sz = 0;
-        if (!data.ReadUint32(sz) || sz == 0 || sz > MAX_OUT_BLOB_SIZE) {
-            HKS_LOG_E("invalid sz %" LOG_PUBLIC "u", sz);
-            break;
-        }
+        HKS_IF_TRUE_LOGE_BREAK(!data.ReadUint32(sz) || sz == 0 || sz > MAX_OUT_BLOB_SIZE,
+            "invalid sz %" LOG_PUBLIC "u", sz)
         const uint8_t *ptr = data.ReadBuffer(sz);
-        if (ptr == nullptr) {
-            HKS_LOG_E("ReadBuffer %" LOG_PUBLIC "u size ptr is nullptr", sz);
-            break;
-        }
+        HKS_IF_NULL_LOGE_BREAK(ptr, "ReadBuffer %" LOG_PUBLIC "u size ptr is nullptr", sz)
         std::unique_ptr<uint8_t[]> receivedPtr(new (std::nothrow) uint8_t[sz]());
         if (receivedPtr == nullptr) {
             HKS_LOG_E("new receivedPtr failed");
             err = ERR_NO_MEMORY;
             break;
         }
-        errno_t err = memcpy_s(receivedPtr.get(), sz, ptr, sz);
-        if (err != EOK) {
-            HKS_LOG_E("memcpy_s receivedPtr failed");
-            break;
-        }
+        HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(receivedPtr.get(), sz, ptr, sz), "memcpy_s receivedPtr failed");
         err = ERR_OK;
         certChain = std::move(receivedPtr);
         certChainLen = sz;
@@ -88,10 +80,8 @@ int HksStub::ProcessAttestKeyAsyncReply(MessageParcel& data)
 int HksStub::OnRemoteRequest(uint32_t code,
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    if (data.ReadInterfaceToken() != GetDescriptor()) {
-        HKS_LOG_E("failed to check interface token! code %" LOG_PUBLIC "d", code);
-        return ERR_INVALID_DATA;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(data.ReadInterfaceToken() != GetDescriptor(), ERR_INVALID_DATA,
+        "failed to check interface token! code %" LOG_PUBLIC "d", code)
     int result = ERR_NONE;
 
     switch (code) {
@@ -126,54 +116,40 @@ HksProxy::HksProxy(const sptr<IRemoteObject> &impl)
 
 void HksProxy::SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &certChain, uint32_t sz)
 {
-    if (Remote() == nullptr) {
-        HKS_LOG_E("Remote() is nullptr! Would not SendRequest!");
-        return;
-    }
+    HKS_IF_NULL_LOGE_RETURN_VOID(Remote(), "Remote() is nullptr! Would not SendRequest!")
     MessageParcel data, reply;
     MessageOption option = MessageOption::TF_ASYNC;
     bool writeResult = data.WriteInterfaceToken(GetDescriptor());
-    if (!writeResult) {
-        HKS_LOG_E("WriteInterfaceToken errCode %" LOG_PUBLIC "u failed %" LOG_PUBLIC "d", errCode, writeResult);
-        return;
-    }
+    HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(writeResult,
+        "WriteInterfaceToken errCode %" LOG_PUBLIC "u failed %" LOG_PUBLIC "d", errCode, writeResult)
     writeResult = data.WriteUint32(errCode);
-    if (!writeResult) {
-        HKS_LOG_E("WriteUint32 errCode %" LOG_PUBLIC "u failed %" LOG_PUBLIC "d", errCode, writeResult);
-        return;
-    }
+    HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(writeResult, "WriteUint32 errCode %" LOG_PUBLIC "u failed %" LOG_PUBLIC "d",
+        errCode, writeResult)
     if (errCode != DCM_SUCCESS) {
         HKS_LOG_E("dcm callback fail errCode %" LOG_PUBLIC "u", errCode);
         int res = Remote()->SendRequest(HKS_MSG_ATTEST_KEY_ASYNC_REPLY, data, reply, option);
-        if (res != ERR_OK) {
-            HKS_LOG_E("send fail reply errCode failed %" LOG_PUBLIC "d", res);
-        }
+        HKS_IF_TRUE_LOGE(res != ERR_OK, "send fail reply errCode failed %" LOG_PUBLIC "d", res)
         return;
     }
     writeResult = data.WriteUint32(sz);
-    if (!writeResult) {
-        HKS_LOG_E("WriteUint32 sz %" LOG_PUBLIC "u failed %" LOG_PUBLIC "d", sz, writeResult);
-        return;
-    }
+    HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(writeResult, "WriteUint32 sz %" LOG_PUBLIC "u failed %" LOG_PUBLIC "d",
+        sz, writeResult)
     if (sz == 0 || certChain == nullptr) {
         HKS_LOG_E("dcm reply success but empty certChain %" LOG_PUBLIC "u", sz);
         int res = Remote()->SendRequest(HKS_MSG_ATTEST_KEY_ASYNC_REPLY, data, reply, option);
-        if (res != ERR_OK) {
-            HKS_LOG_E("Remote()->SendRequest HKS_MSG_ATTEST_KEY_ASYNC_REPLY failed %" LOG_PUBLIC "d", res);
-        }
+        HKS_IF_TRUE_LOGE(res != ERR_OK,
+            "Remote()->SendRequest HKS_MSG_ATTEST_KEY_ASYNC_REPLY failed %" LOG_PUBLIC "d", res)
         return;
     }
     writeResult = data.WriteBuffer(certChain.get(), sz);
-    if (!writeResult) {
-        HKS_LOG_E("WriteBuffer size %" LOG_PUBLIC "u failed %" LOG_PUBLIC "d", sz, writeResult);
-        return;
-    }
+    HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(writeResult, "WriteBuffer size %" LOG_PUBLIC "u failed %" LOG_PUBLIC "d",
+        sz, writeResult)
     int res = Remote()->SendRequest(HKS_MSG_ATTEST_KEY_ASYNC_REPLY, data, reply, option);
-    if (res != ERR_OK) {
-        HKS_LOG_E("Remote()->SendRequest HKS_MSG_ATTEST_KEY_ASYNC_REPLY failed %" LOG_PUBLIC "d", res);
-    }
+    HKS_IF_TRUE_LOGE(res != ERR_OK,
+        "Remote()->SendRequest HKS_MSG_ATTEST_KEY_ASYNC_REPLY failed %" LOG_PUBLIC "d", res)
 }
 
 } // namespace Hks
 } // namespace Security
 } // namespace OHOS
+ 

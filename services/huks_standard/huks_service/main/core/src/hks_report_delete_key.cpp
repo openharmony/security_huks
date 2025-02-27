@@ -29,10 +29,8 @@
 int32_t PreConstructDeleteKeyReportParamSet(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
     uint64_t startTime, struct HksParamSet **paramSetOut)
 {
-    if (keyAlias == nullptr || paramSetIn == nullptr) {
-        HKS_LOG_I("PreConstructDeleteKeyReportParamSet params is null");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_TRUE_LOGI_RETURN(keyAlias == nullptr || paramSetIn == nullptr, HKS_ERROR_NULL_POINTER,
+        "PreConstructDeleteKeyReportParamSet params is null")
     int32_t ret = HksInitParamSet(paramSetOut);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "ConstructGenKeyReportParamSet InitParamSet failed")
 
@@ -62,10 +60,8 @@ int32_t PreConstructDeleteKeyReportParamSet(const struct HksBlob *keyAlias, cons
 
 int32_t HksParamSetToEventInfoForDelete(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
 {
-    if (paramSetIn == nullptr || eventInfo == nullptr) {
-        HKS_LOG_I("HksParamSetToEventInfoForDelete params is null");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
+        "HksParamSetToEventInfoForDelete params is null")
     int32_t ret = HKS_SUCCESS;
     do {
         ret = GetCommonEventInfo(paramSetIn, eventInfo);
@@ -90,9 +86,7 @@ bool HksEventInfoIsNeedReportForDelete(const struct HksEventInfo *eventInfo)
 
 bool HksEventInfoIsEqualForDelete(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
 {
-    if (CheckEventCommon(eventInfo1, eventInfo2) == false) {
-        return false;
-    }
+    HKS_IF_NOT_TRUE_RETURN(CheckEventCommon(eventInfo1, eventInfo2), false)
     return eventInfo1->keyInfo.aliasHash == eventInfo2->keyInfo.aliasHash;
 }
 
@@ -106,14 +100,9 @@ void HksEventInfoAddForDelete(struct HksEventInfo *dstEventInfo, const struct Hk
 int32_t HksEventInfoToMapForDelete(const struct HksEventInfo *eventInfo,
     std::unordered_map<std::string, std::string> &reportData)
 {
-    if (eventInfo == nullptr) {
-        HKS_LOG_I("HksEventInfoToMapForDelete evenInfo is null");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGI_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "HksEventInfoToMapForDelete evenInfo is null")
     auto ret = EventInfoToMapKeyInfo(&eventInfo->keyInfo, reportData);
-    if (!ret.second) {
-        HKS_LOG_I("HksEventInfoToMapForDelete failed! reportData insert failed!");
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    HKS_IF_NOT_TRUE_LOGI_RETURN(ret.second, HKS_ERROR_BUFFER_TOO_SMALL,
+        "HksEventInfoToMapForDelete failed! reportData insert failed!")
     return HKS_SUCCESS;
 }

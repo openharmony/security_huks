@@ -67,9 +67,7 @@ int32_t HksRwlockUnlockWrite(HksRwlock *lock)
 
 void HksRwlockClose(HksRwlock *lock)
 {
-    if (lock == NULL) {
-        return;
-    }
+    HKS_IF_NULL_RETURN_VOID(lock)
 
     pthread_rwlock_destroy(&lock->lock);
     HKS_FREE(lock);

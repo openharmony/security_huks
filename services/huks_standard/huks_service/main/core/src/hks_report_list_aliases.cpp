@@ -29,10 +29,7 @@
 int32_t PreConstructListAliasesReportParamSet(const struct HksParamSet *paramSetIn, uint64_t startTime,
     struct HksParamSet **paramSetOut)
 {
-    if (paramSetIn == nullptr) {
-        HKS_LOG_I("PreConstructListAliasesReportParamSet params is null");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGI_RETURN(paramSetIn, HKS_ERROR_NULL_POINTER, "PreConstructListAliasesReportParamSet params is null")
     int32_t ret = HksInitParamSet(paramSetOut);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "PreConstructListAliasesReportParamSet InitParamSet failed")
 
@@ -65,10 +62,8 @@ int32_t PreConstructListAliasesReportParamSet(const struct HksParamSet *paramSet
 
 int32_t HksParamSetToEventInfoForListAliases(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
 {
-    if (paramSetIn == nullptr || eventInfo == nullptr) {
-        HKS_LOG_I("HksParamSetToEventInfoForListAliases params is null");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
+        "HksParamSetToEventInfoForListAliases params is null")
     int32_t ret = HKS_SUCCESS;
     do {
         ret = GetCommonEventInfo(paramSetIn, eventInfo);
@@ -104,14 +99,9 @@ void HksEventInfoAddForListAliases(struct HksEventInfo *dstEventInfo, const stru
 int32_t HksEventInfoToMapForListAliases(const struct HksEventInfo *eventInfo,
     std::unordered_map<std::string, std::string> &reportData)
 {
-    if (eventInfo == nullptr) {
-        HKS_LOG_I("HksEventInfoToMapForImport evenInfo is null");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGI_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "HksEventInfoToMapForImport evenInfo is null")
     auto ret = EventInfoToMapKeyInfo(&eventInfo->keyInfo, reportData);
-    if (!ret.second) {
-        HKS_LOG_I("HksEventInfoToMapForImport failed! reportData insert failed!");
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    HKS_IF_NOT_TRUE_LOGI_RETURN(ret.second, HKS_ERROR_BUFFER_TOO_SMALL,
+        "HksEventInfoToMapForImport failed! reportData insert failed!")
     return HKS_SUCCESS;
 }

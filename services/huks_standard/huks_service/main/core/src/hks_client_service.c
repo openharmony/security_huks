@@ -92,9 +92,7 @@ static void IfNotSuccAppendHdiErrorInfo(int32_t hdiRet)
     }
     uint32_t errInfoSize = sizeof(struct ErrorInfo);
     uint8_t *errInfo = (uint8_t *)HksMalloc(errInfoSize);
-    if (errInfo == NULL) {
-        return;
-    }
+    HKS_IF_NULL_RETURN_VOID(errInfo)
     struct HksBlob errMsg = {.size =  errInfoSize, .data = errInfo};
     int32_t ret = HuksAccessGetErrorInfo(&errMsg);
     if (ret == HKS_ERROR_API_NOT_SUPPORTED) {
@@ -118,20 +116,15 @@ static void IfNotSuccAppendHdiErrorInfo(int32_t hdiRet)
 static int32_t AddSpecificUserIdToParamSet(const struct HksOperation *operation, struct HksParamSet *paramSet)
 {
     //when use HksUpdate, HksFinish, HksAbort, operation is not null
-    if (operation == NULL) {
-        return HKS_SUCCESS;
-    }
+    HKS_IF_NULL_RETURN(operation, HKS_SUCCESS)
     struct HksParam *specificUserId = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_SPECIFIC_USER_ID, &specificUserId);
     if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
-        if (operation->isUserIdPassedDuringInit) {
-            struct HksParam specificUserIdParam;
-            specificUserIdParam.tag = HKS_TAG_SPECIFIC_USER_ID;
-            specificUserIdParam.int32Param = operation->userIdPassedDuringInit;
-            ret = HksAddParams(paramSet, &specificUserIdParam, 1);
-        } else {
-            return HKS_SUCCESS;
-        }
+        HKS_IF_NOT_TRUE_RETURN(operation->isUserIdPassedDuringInit, HKS_SUCCESS)
+        struct HksParam specificUserIdParam;
+        specificUserIdParam.tag = HKS_TAG_SPECIFIC_USER_ID;
+        specificUserIdParam.int32Param = operation->userIdPassedDuringInit;
+        ret = HksAddParams(paramSet, &specificUserIdParam, 1);
     }
     return ret;
 }
@@ -139,9 +132,7 @@ static int32_t AddSpecificUserIdToParamSet(const struct HksOperation *operation,
 #ifdef HUKS_ENABLE_SKIP_UPGRADE_KEY_STORAGE_SECURE_LEVEL
 static int32_t GetStorageLevelForSkipUpgradeApp(const struct HksProcessInfo *processInfo, struct HksParam *storageLevel)
 {
-    if (processInfo == NULL) {
-        return HKS_SUCCESS;
-    }
+    HKS_IF_NULL_RETURN(processInfo, HKS_SUCCESS)
     struct HksUpgradeFileTransferInfo info = { 0 };
     int32_t ret = HksMatchConfig("", processInfo->uidInt, processInfo->userIdInt, processInfo->accessTokenId, &info);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "match skip upgarde config failed.")
@@ -242,9 +233,7 @@ bool HksCheckIsAcrossDevices(const struct HksParamSet *paramSet)
 static int32_t AppendOwnerInfoForAcrossDevicesIfNeed(const struct HksProcessInfo *processInfo,
     struct HksParamSet *newParamSet, struct HksBlob *appInfo)
 {
-    if (!HksCheckIsAcrossDevices(newParamSet)) {
-        return HKS_SUCCESS;
-    }
+    HKS_IF_NOT_TRUE_RETURN(HksCheckIsAcrossDevices(newParamSet), HKS_SUCCESS)
 
     int32_t ret;
     do {
@@ -312,6 +301,7 @@ static int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *par
         HKS_FREE_BLOB(appInfo);
         return ret;
     } while (0);
+
     HKS_FREE_BLOB(appInfo);
     HksFreeParamSet(&newParamSet);
     return ret;
@@ -419,10 +409,8 @@ static int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct
     if (ret != HKS_SUCCESS) {
         if (HksCheckNeedUpgradeForSmallToService(processInfo) == HKS_SUCCESS) {
             ret = HksChangeKeyOwnerForSmallToService(processInfo, paramSet, keyAlias, mode);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("do upgrade operation for small to service failed, ret = %" LOG_PUBLIC "d", ret);
-                return HKS_ERROR_NOT_EXIST;
-            }
+            HKS_IF_NOT_SUCCESS_LOGE_RETURN(ret, HKS_ERROR_NOT_EXIST,
+                "do upgrade operation for small to service failed, ret = %" LOG_PUBLIC "d", ret)
         }
     }
 #endif
@@ -524,25 +512,17 @@ static int32_t ConstructEnrolledInfoBlob(struct SecInfoWrap *secInfo, struct Hks
     (void)memset_s(enrolledInfo->data, enrolledInfo->size, 0, enrolledInfo->size);
 
     uint32_t index = 0;
-    if (memcpy_s(enrolledInfo->data, enrolledInfo->size, &secInfo->enrolledInfoLen,
-        sizeof(uint32_t)) != EOK) {
-        HKS_LOG_E("copy enrolledInfoLen failed!");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(enrolledInfo->data, enrolledInfo->size, &secInfo->enrolledInfoLen,
+        sizeof(uint32_t)), HKS_ERROR_INSUFFICIENT_MEMORY, "copy enrolledInfoLen failed!")
     index += sizeof(secInfo->enrolledInfoLen);
     for (uint32_t i = 0; i < secInfo->enrolledInfoLen; ++i) {
         uint32_t authTypeInt = (uint32_t)secInfo->enrolledInfo[i].authType;
-        if (memcpy_s(enrolledInfo->data + index, enrolledInfo->size - index, &authTypeInt,
-            sizeof(uint32_t)) != EOK) {
-            HKS_LOG_E("copy authType failed!");
-            return HKS_ERROR_INSUFFICIENT_MEMORY;
-        }
+        HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(enrolledInfo->data + index, enrolledInfo->size - index, &authTypeInt,
+            sizeof(uint32_t)), HKS_ERROR_INSUFFICIENT_MEMORY, "copy authType failed!")
         index += sizeof(authTypeInt);
-        if (memcpy_s(enrolledInfo->data + index, enrolledInfo->size - index,
-            &((secInfo->enrolledInfo[i]).enrolledId), sizeof(uint64_t)) != EOK) {
-            HKS_LOG_E("copy enrolledId failed!");
-            return HKS_ERROR_INSUFFICIENT_MEMORY;
-        }
+        HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(enrolledInfo->data + index, enrolledInfo->size - index,
+            &((secInfo->enrolledInfo[i]).enrolledId), sizeof(uint64_t)) != EOK, HKS_ERROR_INSUFFICIENT_MEMORY,
+            "copy enrolledId failed!")
         index += sizeof(secInfo->enrolledInfo[i].enrolledId);
     }
 
@@ -881,10 +861,8 @@ static int32_t GetAgreeBaseKey(const struct HksProcessInfo *processInfo, const s
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &keyAlgParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL, "get alg tag fail")
 
-    if (keyAlgParam->uint32Param != HKS_ALG_AES) {
-        HKS_LOG_I("not an aes key, no need check main key and derive factor");
-        return HKS_SUCCESS;
-    }
+    HKS_IF_TRUE_LOGI_RETURN(keyAlgParam->uint32Param != HKS_ALG_AES, HKS_SUCCESS,
+        "not an aes key, no need check main key and derive factor")
 
 #ifdef HKS_SUPPORT_ED25519_TO_X25519
     struct HksParam *agreeAlgParam = NULL;
@@ -939,10 +917,9 @@ static int32_t StoreOrCopyKeyBlob(const struct HksParamSet *paramSet, const stru
     struct HksBlob *output, struct HksBlob *outData, bool isNeedStorage)
 {
     if (!isNeedStorage) {
-        if ((outData->size != 0) && (memcpy_s(outData->data, outData->size, output->data, output->size) != EOK)) {
-            HKS_LOG_E("copy keyblob data fail");
-            return HKS_ERROR_INSUFFICIENT_MEMORY;
-        }
+        HKS_IF_TRUE_LOGE_RETURN(outData->size != 0 &&
+            memcpy_s(outData->data, outData->size, output->data, output->size) != EOK, HKS_ERROR_INSUFFICIENT_MEMORY,
+            "copy keyblob data fail")
         outData->size = output->size;
         return HKS_SUCCESS;
     }
@@ -951,10 +928,8 @@ static int32_t StoreOrCopyKeyBlob(const struct HksParamSet *paramSet, const stru
     int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_ALIAS, &keyAliasParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key alias fail, ret = %" LOG_PUBLIC "d", ret)
 
-    if (keyAliasParam->blob.size > HKS_MAX_KEY_ALIAS_LEN) {
-        HKS_LOG_E("key alias size is too long, size is %" LOG_PUBLIC "u", keyAliasParam->blob.size);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(keyAliasParam->blob.size > HKS_MAX_KEY_ALIAS_LEN, HKS_ERROR_INVALID_ARGUMENT,
+        "key alias size is too long, size is %" LOG_PUBLIC "u", keyAliasParam->blob.size)
 
     ret = CheckKeyCondition(processInfo, &keyAliasParam->blob, paramSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CheckKeyCondition fail, ret = %" LOG_PUBLIC "d", ret)
@@ -1341,10 +1316,7 @@ int32_t HksServiceImportKey(const struct HksProcessInfo *processInfo, const stru
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
     uint8_t *keyOutBuffer = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
-    if (keyOutBuffer == NULL) {
-        HKS_LOG_E("malloc keyOutBuffer failed.");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(keyOutBuffer, HKS_ERROR_MALLOC_FAIL, "malloc keyOutBuffer failed.")
     struct HksBlob keyOut = { MAX_KEY_SIZE, keyOutBuffer };
 #ifdef L2_STANDARD
     struct HksParamSet *reportParamSet = NULL;
@@ -1722,10 +1694,7 @@ static int32_t DcmGenerateCertChainInAttestKey(const struct HksParamSet *paramSe
     (void)certChainCapacity;
     int32_t ret = HKS_SUCCESS;
 #ifndef HKS_UNTRUSTED_RUNNING_ENV
-    if (!HksAttestIsAnonymous(paramSet)) {
-        HKS_LOG_I("non anonymous attest key.");
-        return HKS_SUCCESS;
-    }
+    HKS_IF_NOT_TRUE_LOGI_RETURN(HksAttestIsAnonymous(paramSet), HKS_SUCCESS, "non anonymous attest key.")
     ret = DcmGenerateCertChain(certChain, remoteObject);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "DcmGenerateCertChain fail, ret = %" LOG_PUBLIC "d.", ret)
 
@@ -1881,10 +1850,7 @@ static int32_t HksServiceCheckBatchUpdateTime(struct HksOperation *operation)
 
 static void MarkAndDeleteOperation(struct HksOperation **operation, const struct HksBlob *handle)
 {
-    if (operation == NULL) {
-        HKS_LOG_E("operation is null");
-        return;
-    }
+    HKS_IF_NULL_LOGE_RETURN_VOID(operation, "operation is null")
     MarkOperationUnUse(*operation);
     DeleteOperation(handle);
     *operation = NULL;
@@ -1952,15 +1918,10 @@ static int32_t AppendAndQueryInFinish(const struct HksBlob *handle, const struct
     struct HksOperation **outOperation)
 {
     struct HksOperation *operation = QueryOperationAndMarkInUse(processInfo, handle);
-    if (operation == NULL) {
-        HKS_LOG_E("operationHandle is not exist or being busy");
-        return HKS_ERROR_NOT_EXIST;
-    }
+    HKS_IF_NULL_LOGE_RETURN(operation, HKS_ERROR_NOT_EXIST, "operationHandle is not exist or being busy")
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
-    if (operation->accessTokenId != processInfo->accessTokenId) {
-        HKS_LOG_E("compare access token id failed, unauthorized calling");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(operation->accessTokenId != processInfo->accessTokenId, HKS_ERROR_BAD_STATE,
+        "compare access token id failed, unauthorized calling")
 #endif
     *outOperation = operation;
     return HKS_SUCCESS;

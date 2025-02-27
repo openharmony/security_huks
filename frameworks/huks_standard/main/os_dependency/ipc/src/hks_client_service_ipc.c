@@ -72,10 +72,7 @@ static int32_t BuildParamSetNotNull(const struct HksParamSet *paramSetIn, struct
     do {
         if (paramSetIn != NULL) {
             ret = HksCheckParamSet(paramSetIn, paramSetIn->paramSetSize);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("check paramSet failed");
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check paramSet failed")
         }
 
         ret = HksInitParamSet(&tmpParamSet);
@@ -352,10 +349,7 @@ static int32_t AddAeTag(struct HksParamSet *paramSet, const struct HksBlob *inTe
 {
     int32_t ret;
     if (!isEncrypt) {
-        if (inText->size <= HKS_AE_TAG_LEN) {
-            HKS_LOG_E("too small inText size");
-            return HKS_ERROR_INVALID_ARGUMENT;
-        }
+        HKS_IF_TRUE_LOGE_RETURN(inText->size <= HKS_AE_TAG_LEN, HKS_ERROR_INVALID_ARGUMENT, "too small inText size")
 
         struct HksParam aeParam;
         aeParam.tag = HKS_TAG_AE_TAG;
@@ -655,10 +649,8 @@ static int32_t CopyData(const uint8_t *data, const uint32_t size, struct HksBlob
         return HKS_SUCCESS;
     }
 
-    if (out->size < size) {
-        HKS_LOG_E("out size[%" LOG_PUBLIC "u] smaller than [%" LOG_PUBLIC "u]", out->size, size);
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(out->size < size, HKS_ERROR_BUFFER_TOO_SMALL,
+        "out size[%" LOG_PUBLIC "u] smaller than [%" LOG_PUBLIC "u]", out->size, size)
     (void)memcpy_s(out->data, out->size, data, size);
     out->size = size;
     return HKS_SUCCESS;
@@ -863,9 +855,7 @@ int32_t HksClientListAliases(const struct HksParamSet *paramSet, struct HksKeyAl
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksListAliasesUnpackFromService fail")
     } while (0);
 
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksClientListAliases fail, ret = %" LOG_PUBLIC "d", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "HksClientListAliases fail, ret = %" LOG_PUBLIC "d", ret)
 
     HKS_FREE_BLOB(inBlob);
     HKS_FREE_BLOB(outBlob);
@@ -878,6 +868,7 @@ int32_t HksClientRenameKeyAlias(const struct HksBlob *oldKeyAlias, const struct 
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob inBlob = { 0, NULL };
+
     do {
         ret = BuildParamSetNotNull(paramSet, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null failed, ret = %" LOG_PUBLIC "d", ret)
@@ -897,10 +888,12 @@ int32_t HksClientRenameKeyAlias(const struct HksBlob *oldKeyAlias, const struct 
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRenameKeyAliasPack failed!")
         ret = HksSendRequest(HKS_MSG_RENAME_KEY_ALIAS, &inBlob, NULL, newParamSet);
     } while (0);
+
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
     return ret;
 }
+
 int32_t HksClientChangeStorageLevel(const struct HksBlob *keyAlias, const struct HksParamSet *srcParamSet,
     const struct HksParamSet *destParamSet)
 {

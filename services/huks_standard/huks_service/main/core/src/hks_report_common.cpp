@@ -137,9 +137,7 @@ static int32_t AddProcessInfo(struct HksParamSet *paramSetOut, const struct HksP
         }
     };
     int32_t ret = HksAddParams(paramSetOut, params, HKS_ARRAY_SIZE(params));
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("AddProcessInfo failed");
-    }
+    HKS_IF_NOT_SUCC_LOGI(ret, "AddProcessInfo failed")
     return ret;
 }
 
@@ -152,9 +150,7 @@ static int32_t AddFuncName(struct HksParamSet *paramSetOut, const char *funcName
         }
     };
     int32_t ret = HksAddParams(paramSetOut, params, HKS_ARRAY_SIZE(params));
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("AddFuncName failed");
-    }
+    HKS_IF_NOT_SUCC_LOGI(ret, "AddFuncName failed")
     return ret;
 }
 
@@ -223,10 +219,8 @@ int32_t ReportGetCallerName(std::string &callerName)
 int32_t ConstructReportParamSet(const char *funcName, const struct HksProcessInfo *processInfo,
     int32_t errorCode, struct HksParamSet **reportParamSet)
 {
-    if (funcName == nullptr || processInfo == nullptr || reportParamSet == nullptr || *reportParamSet == nullptr) {
-        HKS_LOG_I("ConstructReportParamSet params is null");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_TRUE_LOGI_RETURN(funcName == nullptr || processInfo == nullptr || reportParamSet == nullptr ||
+        *reportParamSet == nullptr, HKS_ERROR_NULL_POINTER, "ConstructReportParamSet params is null")
     int32_t ret = AddCommonInfo(funcName, processInfo, *reportParamSet);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "ConstructReportParamSet add common info failed!")
 
@@ -345,22 +339,15 @@ static bool CheckKeyInfo(const HksEventKeyInfo *keyInfo1, const HksEventKeyInfo 
 // check eventId and caller name are equal
 bool CheckEventCommon(const struct HksEventInfo *info1, const struct HksEventInfo *info2)
 {
-    if ((info1 == nullptr) || (info2 == nullptr)) {
-        return false;
-    }
-
-    if ((info1->common.eventId != info2->common.eventId) ||
-        (info1->common.callerInfo.name == nullptr) || (info2->common.callerInfo.name == nullptr)) {
-        return false;
-    }
+    HKS_IF_TRUE_RETURN(info1 == nullptr || info2 == nullptr, false)
+    HKS_IF_TRUE_RETURN(info1->common.eventId != info2->common.eventId || info1->common.callerInfo.name == nullptr ||
+        info2->common.callerInfo.name == nullptr, false)
     return strcmp(info1->common.callerInfo.name, info2->common.callerInfo.name) == 0;
 }
 
 bool CheckEventCommonAndKey(const struct HksEventInfo *info1, const struct HksEventInfo *info2)
 {
-    if (CheckEventCommon(info1, info2) == false) {
-        return false;
-    }
+    HKS_IF_NOT_TRUE_RETURN(CheckEventCommon(info1, info2), false)
 
     switch (info1->common.eventId) {
         case HKS_EVENT_DERIVE:

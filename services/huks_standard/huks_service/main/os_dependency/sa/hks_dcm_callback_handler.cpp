@@ -55,29 +55,23 @@ public:
     int32_t SetNewInstanceWithoutLock(sptr<IHksService> index, uint64_t value)
     {
         typename std::map<sptr<IHksService>, uint64_t>::iterator position = mValues.find(index);
-        if (position != mValues.end()) {
-            HKS_LOG_E("SetNewInstance: current value exist requestId = %" LOG_PUBLIC PRIu64, position->second);
-            return HKS_ERROR_ALREADY_EXISTS;
-        }
+        HKS_IF_TRUE_LOGE_RETURN(position != mValues.end(), HKS_ERROR_ALREADY_EXISTS,
+            "SetNewInstance: current value exist requestId = %" LOG_PUBLIC PRIu64, position->second)
         mValues[index] = value;
         return HKS_SUCCESS;
     }
     sptr<IHksService> GetProxyWithoutLock(uint64_t value)
     {
         auto position = findInMapByValue(value);
-        if (position == mValues.end()) {
-            HKS_LOG_E("GetProxyWithoutLock: current value not exist, requestId %" LOG_PUBLIC PRIu64, value);
-            return nullptr;
-        }
+        HKS_IF_TRUE_LOGE_RETURN(position == mValues.end(), nullptr,
+            "GetProxyWithoutLock: current value not exist, requestId %" LOG_PUBLIC PRIu64, value)
         return position->first;
     }
     void RemoveWithoutLock(uint64_t value)
     {
         auto position = findInMapByValue(value);
-        if (position == mValues.end()) {
-            HKS_LOG_E("RemoveWithoutLock: current value not exist, requestId %" LOG_PUBLIC PRIu64, value);
-            return;
-        }
+        HKS_IF_TRUE_LOGE_RETURN_VOID(position == mValues.end(),
+            "RemoveWithoutLock: current value not exist, requestId %" LOG_PUBLIC PRIu64, value)
         mValues.erase(position);
     }
 private:
@@ -98,16 +92,12 @@ int32_t CopyBlobToBuffer(const struct DcmBlob *blob, struct HksBlob *buf)
         HKS_LOG_E("buf size smaller than blob size");
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
-    if (memcpy_s(buf->data, buf->size, &blob->size, sizeof(blob->size)) != EOK) {
-        HKS_LOG_E("copy buf fail");
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(buf->data, buf->size, &blob->size, sizeof(blob->size)),
+        HKS_ERROR_BUFFER_TOO_SMALL, "copy buf fail")
     buf->data += sizeof(blob->size);
     buf->size -= sizeof(blob->size);
-    if (memcpy_s(buf->data, buf->size, blob->data, blob->size) != EOK) {
-        HKS_LOG_E("copy buf fail");
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(buf->data, buf->size, blob->data, blob->size),
+        HKS_ERROR_BUFFER_TOO_SMALL, "copy buf fail")
     buf->data += ALIGN_SIZE(blob->size);
     buf->size -= ALIGN_SIZE(blob->size);
     return HKS_SUCCESS;
@@ -133,10 +123,8 @@ int32_t PackAttestChain(struct DcmCertChain *certChain, struct HksBlob *certChai
     }
 
     struct HksBlob tmp = *certChainPacked;
-    if (tmp.size <= sizeof(uint32_t)) {
-        HKS_LOG_E("certChainPacked size too small");
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(tmp.size <= sizeof(uint32_t), HKS_ERROR_BUFFER_TOO_SMALL,
+        "certChainPacked size too small")
     *((uint32_t *)tmp.data) = certChain->certsCount;
     tmp.data += sizeof(uint32_t);
     tmp.size -= sizeof(uint32_t);
@@ -151,9 +139,7 @@ int32_t PackAttestChain(struct DcmCertChain *certChain, struct HksBlob *certChai
         ret = CopyBlobToBuffer(&certChain->certs[i], &tmp);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy cert fail")
     }
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
     certChainPacked->size = tmp.data - certChainPacked->data;
     return HKS_SUCCESS;
 }
@@ -184,10 +170,8 @@ void HksDcmCallback(DcmAnonymousResponse *response)
     HKS_LOG_I("dcm callback requestId %" LOG_PUBLIC PRIu64, response->requestId);
     std::lock_guard<std::mutex> lockGuard(g_instancesList.GetMutex());
     sptr<IHksService> hksProxy = g_instancesList.GetProxyWithoutLock(response->requestId);
-    if (hksProxy == nullptr) {
-        HKS_LOG_E("GetProxyWithoutLock failed *requestId %" LOG_PUBLIC PRIu64, response->requestId);
-        return;
-    }
+    HKS_IF_NULL_LOGE_RETURN_VOID(hksProxy, "GetProxyWithoutLock failed *requestId %" LOG_PUBLIC PRIu64,
+        response->requestId)
     std::unique_ptr<uint8_t[]> replyData = nullptr;
     uint32_t replySize = 0;
     do {
@@ -209,14 +193,9 @@ int32_t HksDcmCallbackHandlerSetRequestIdWithoutLock(const uint8_t *remoteObject
 {
     auto hksProxy = OHOS::iface_cast<IHksService>(
         reinterpret_cast<OHOS::IRemoteObject *>(const_cast<uint8_t *>(remoteObject)));
-    if (hksProxy == nullptr) {
-        HKS_LOG_E("iface_cast IHksService failed");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(hksProxy, HKS_ERROR_NULL_POINTER, "iface_cast IHksService failed")
     int ret = g_instancesList.SetNewInstanceWithoutLock(hksProxy, requestId);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("g_instancesList.SetNewInstance failed %" LOG_PUBLIC "d", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "g_instancesList.SetNewInstance failed %" LOG_PUBLIC "d", ret)
     return ret;
 }
 
@@ -232,10 +211,7 @@ AttestFunction HksOpenDcmFunction(void)
     }
 
     g_certMgrSdkHandle = dlopen(DCM_SDK_SO, RTLD_NOW);
-    if (g_certMgrSdkHandle == nullptr) {
-        HKS_LOG_E("dlopen " DCM_SDK_SO " failed! %" LOG_PUBLIC "s", dlerror());
-        return nullptr;
-    }
+    HKS_IF_NULL_LOGE_RETURN(g_certMgrSdkHandle, nullptr, "dlopen " DCM_SDK_SO " failed! %" LOG_PUBLIC "s", dlerror())
     g_attestFunction = reinterpret_cast<AttestFunction>(dlsym(g_certMgrSdkHandle, "DcmAnonymousAttestKey"));
     if (g_attestFunction == nullptr) {
         HKS_LOG_E("dlsym failed %" LOG_PUBLIC "s", dlerror());
@@ -252,9 +228,7 @@ void HksCloseDcmFunction(void)
         return;
     }
     int ret = dlclose(g_certMgrSdkHandle);
-    if (ret != 0) {
-        HKS_LOG_E("dlclose g_certMgrSdkHandle failed %" LOG_PUBLIC "d %" LOG_PUBLIC "s", ret, dlerror());
-    }
+    HKS_IF_TRUE_LOGE(ret != 0, "dlclose g_certMgrSdkHandle failed %" LOG_PUBLIC "d %" LOG_PUBLIC "s", ret, dlerror())
     g_certMgrSdkHandle = nullptr;
     g_attestFunction = nullptr;
 }

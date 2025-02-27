@@ -99,26 +99,18 @@ int32_t HksGetHapInfo(const struct HksProcessInfo *processInfo, struct HksBlob *
     HKS_IF_NULL_LOGE_RETURN(hapInfo, HKS_ERROR_NULL_POINTER, "hapInfo is nullptr.")
 
     auto callingTokenId = IPCSkeleton::GetCallingTokenID();
-    if (AccessTokenKit::GetTokenType(callingTokenId) != ATokenTypeEnum::TOKEN_HAP) {
-        HKS_LOG_E("caller is not from hap, not support to get hap info.");
-        return HKS_ERROR_NOT_SUPPORTED;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(AccessTokenKit::GetTokenType(callingTokenId) != ATokenTypeEnum::TOKEN_HAP,
+        HKS_ERROR_NOT_SUPPORTED, "caller is not from hap, not support to get hap info.")
 
     HapTokenInfo hapTokenInfo;
     int32_t callingResult = AccessTokenKit::GetHapTokenInfo(callingTokenId, hapTokenInfo);
-    if (callingResult != HKS_SUCCESS) {
-        HKS_LOG_E("Get hap info failed from access token kit.");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(callingResult, HKS_ERROR_BAD_STATE, "Get hap info failed from access token kit.")
 
     AppExecFwk::BundleInfo bundleInfo;
     AppExecFwk::BundleMgrClient client;
     bool isGetInfoSuccess = client.GetBundleInfo(hapTokenInfo.bundleName,
         AppExecFwk::BundleFlag::GET_BUNDLE_WITH_HASH_VALUE, bundleInfo, processInfo->userIdInt);
-    if (!isGetInfoSuccess) {
-        HKS_LOG_E("GetBundleInfo failed.");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_TRUE_LOGE_RETURN(isGetInfoSuccess, HKS_ERROR_BAD_STATE, "GetBundleInfo failed.")
 
     // The appid is concatenated from the bundle name and the developer's public key certificate.
     int32_t ret = ConvertCallerInfoToJson(bundleInfo.appId, hapTokenInfo.bundleName, hapInfo, true);
@@ -133,17 +125,12 @@ static int32_t HksGetHapPkgName(const struct HksProcessInfo *processInfo, struct
     HKS_IF_NULL_LOGE_RETURN(hapPkgName, HKS_ERROR_NULL_POINTER, "hapPkgName is nullptr.")
 
     auto callingTokenId = IPCSkeleton::GetCallingTokenID();
-    if (AccessTokenKit::GetTokenType(callingTokenId) != ATokenTypeEnum::TOKEN_HAP) {
-        HKS_LOG_E("caller is not from hap, not support to get hap info.");
-        return HKS_ERROR_NOT_SUPPORTED;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(AccessTokenKit::GetTokenType(callingTokenId) != ATokenTypeEnum::TOKEN_HAP,
+        HKS_ERROR_NOT_SUPPORTED, "caller is not from hap, not support to get hap info.")
 
     HapTokenInfo hapTokenInfo;
     int32_t callingResult = AccessTokenKit::GetHapTokenInfo(callingTokenId, hapTokenInfo);
-    if (callingResult != HKS_SUCCESS) {
-        HKS_LOG_E("Get hap info failed from access token kit.");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(callingResult, HKS_ERROR_BAD_STATE, "Get hap info failed from access token kit.")
 
     uint32_t size = strlen(hapTokenInfo.bundleName.c_str());
     uint8_t *pkgName = (uint8_t *)HksMalloc(size);
@@ -162,16 +149,12 @@ int32_t HksGetSaInfo(const struct HksProcessInfo *processInfo, struct HksBlob *s
     HKS_IF_NULL_LOGE_RETURN(saInfo, HKS_ERROR_NULL_POINTER, "saInfo is nullptr.")
 
     auto callingTokenId = IPCSkeleton::GetCallingTokenID();
-    if (AccessTokenKit::GetTokenType(callingTokenId) == ATokenTypeEnum::TOKEN_HAP) {
-        HKS_LOG_E("Error caller Type, cannot get SaInfo");
-        return HKS_ERROR_NOT_SUPPORTED;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(AccessTokenKit::GetTokenType(callingTokenId) == ATokenTypeEnum::TOKEN_HAP,
+        HKS_ERROR_NOT_SUPPORTED, "Error caller Type, cannot get SaInfo")
     NativeTokenInfo saTokenInfo;
     int32_t ret = AccessTokenKit::GetNativeTokenInfo(callingTokenId, saTokenInfo);
-    if (ret != AccessTokenKitRet::RET_SUCCESS) {
-        HKS_LOG_E("Get sa info failed from access token kit.");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(ret != AccessTokenKitRet::RET_SUCCESS, HKS_ERROR_BAD_STATE,
+        "Get sa info failed from access token kit.")
 
     if (saTokenInfo.apl == ATokenAplEnum::APL_SYSTEM_BASIC) {
         ret = ConvertCallerInfoToJson(saTokenInfo.processName, SYSTEM_BASIC, saInfo, false);
@@ -191,16 +174,12 @@ static int32_t HksGetSaProcessName(const struct HksProcessInfo *processInfo, str
     HKS_IF_NULL_LOGE_RETURN(saProcessName, HKS_ERROR_NULL_POINTER, "saProcessName is nullptr.")
 
     auto callingTokenId = IPCSkeleton::GetCallingTokenID();
-    if (AccessTokenKit::GetTokenType(callingTokenId) == ATokenTypeEnum::TOKEN_HAP) {
-        HKS_LOG_E("Error caller Type, cannot get SaInfo");
-        return HKS_ERROR_NOT_SUPPORTED;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(AccessTokenKit::GetTokenType(callingTokenId) == ATokenTypeEnum::TOKEN_HAP,
+        HKS_ERROR_NOT_SUPPORTED, "Error caller Type, cannot get SaInfo")
     NativeTokenInfo saTokenInfo;
     int32_t ret = AccessTokenKit::GetNativeTokenInfo(callingTokenId, saTokenInfo);
-    if (ret != AccessTokenKitRet::RET_SUCCESS) {
-        HKS_LOG_E("Get sa info failed from access token kit.");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(ret != AccessTokenKitRet::RET_SUCCESS, HKS_ERROR_BAD_STATE,
+        "Get sa info failed from access token kit.")
 
     uint32_t size = strlen(saTokenInfo.processName.c_str());
     uint8_t *processName = (uint8_t *)HksMalloc(size);

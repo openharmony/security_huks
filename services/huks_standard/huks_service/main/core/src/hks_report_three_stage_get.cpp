@@ -76,9 +76,7 @@ static void GetKeyAccessInfo(const struct HksParamSet *paramSet, HksEventKeyAcce
 {
     struct HksParam *param = nullptr;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_USER_AUTH_TYPE, &param);
-    if (ret != HKS_SUCCESS) {
-        return;
-    }
+    HKS_IF_NOT_SUCC_RETURN_VOID(ret)
     info->authType = param->uint32Param;
 
     if (HksGetParam(paramSet, HKS_TAG_KEY_AUTH_ACCESS_TYPE, &param) == HKS_SUCCESS) {
@@ -146,9 +144,7 @@ static void GetKeyInfo(const struct HksParamSet *paramSet, const struct HksBlob 
 static void GetCryptoInfo(const struct HksParamSet *paramSet, const struct HksBlob *keyAlias,
     const struct HksBlob *key, HksEventCryptoInfo *cryptoInfo)
 {
-    if (paramSet == nullptr) {
-        return;
-    }
+    HKS_IF_NULL_RETURN_VOID(paramSet)
     GetKeyInfo(paramSet, keyAlias, key, &cryptoInfo->keyInfo);
     GetKeyAccessInfo(paramSet, &cryptoInfo->accessCtlInfo);
 
@@ -173,9 +169,7 @@ static void GetCryptoInfo(const struct HksParamSet *paramSet, const struct HksBl
 static void GetAgreeDeriveInfo(const struct HksParamSet *paramSet, const struct HksBlob *keyAlias,
     const struct HksBlob *key, HksEventAgreeDeriveInfo *info)
 {
-    if (paramSet == nullptr) {
-        return;
-    }
+    HKS_IF_NULL_RETURN_VOID(paramSet)
     GetKeyInfo(paramSet, keyAlias, key, &info->keyInfo);
     GetKeyAccessInfo(paramSet, &info->accessCtlInfo);
 
@@ -200,9 +194,7 @@ static void GetAgreeDeriveInfo(const struct HksParamSet *paramSet, const struct 
 static void GetMacInfo(const struct HksParamSet *paramSet, const struct HksBlob *keyAlias,
     const struct HksBlob *key, HksEventMacInfo *macInfo)
 {
-    if (paramSet == nullptr) {
-        return;
-    }
+    HKS_IF_NULL_RETURN_VOID(paramSet)
     GetKeyInfo(paramSet, keyAlias, key, &macInfo->keyInfo);
     GetKeyAccessInfo(paramSet, &macInfo->accessCtlInfo);
 }
@@ -210,9 +202,7 @@ static void GetMacInfo(const struct HksParamSet *paramSet, const struct HksBlob 
 static void GetAttestInfo(const struct HksParamSet *paramSet, const struct HksBlob *keyAlias,
     const struct HksBlob *key, HksEventAttestInfo *attestInfo)
 {
-    if (paramSet == nullptr) {
-        return;
-    }
+    HKS_IF_NULL_RETURN_VOID(paramSet)
     GetKeyInfo(paramSet, keyAlias, key, &attestInfo->keyInfo);
 
     struct HksParam *param = nullptr;
@@ -336,10 +326,8 @@ static int32_t HksFreshAndReport(const char *funcName, const struct HksProcessIn
 int32_t HksAttestEventReport(const struct HksBlob *keyAlias, const struct HksBlob *key,
     const struct HksParamSet *paramSet, const struct HksProcessInfo *processInfo, HksAttestReportInfo *info)
 {
-    if (keyAlias == nullptr || paramSet == nullptr || processInfo == nullptr || info == nullptr) {
-        HKS_LOG_I("keyAlias or paramset or processInfo or info is null");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_TRUE_LOGI_RETURN(keyAlias == nullptr || paramSet == nullptr || processInfo == nullptr || info == nullptr,
+        HKS_ERROR_NULL_POINTER, "keyAlias or paramset or processInfo or info is null")
 
     HksEventInfo eventInfo = {};
     eventInfo.common.eventId = HKS_EVENT_ATTEST;
@@ -367,10 +355,8 @@ int32_t HksAttestEventReport(const struct HksBlob *keyAlias, const struct HksBlo
 int32_t HksGetInitEventInfo(const struct HksBlob *keyAlias, const struct HksBlob *key,
     const struct HksParamSet *paramSet, const struct HksProcessInfo *processInfo, HksEventInfo *eventInfo)
 {
-    if (keyAlias == nullptr || paramSet == nullptr || processInfo == nullptr || eventInfo == nullptr) {
-        HKS_LOG_I("keyAlias or paramset or processInfo or eventInfo is null");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_TRUE_LOGI_RETURN(keyAlias == nullptr || paramSet == nullptr || processInfo == nullptr ||
+        eventInfo == nullptr, HKS_ERROR_NULL_POINTER, "keyAlias or paramset or processInfo or eventInfo is null")
 
     int32_t ret = GetEventId(paramSet, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "get event id fail")
@@ -406,10 +392,8 @@ int32_t HksGetInitEventInfo(const struct HksBlob *keyAlias, const struct HksBlob
 int32_t HksServiceInitReport(const char *funcName, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const HksThreeStageReportInfo *info, HksEventInfo *eventInfo)
 {
-    if (paramSet == nullptr || info == nullptr || processInfo == nullptr || eventInfo == nullptr) {
-        HKS_LOG_I("paramset or info or processInfo or eventInfo is null");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_TRUE_LOGI_RETURN(paramSet == nullptr || info == nullptr || processInfo == nullptr || eventInfo == nullptr,
+        HKS_ERROR_NULL_POINTER, "paramset or info or processInfo or eventInfo is null")
 
     if (info->errCode == HKS_SUCCESS) {
         struct HksOperation *operation = QueryOperationAndMarkInUse(processInfo, info->handle);
@@ -427,17 +411,13 @@ int32_t HksServiceInitReport(const char *funcName, const struct HksProcessInfo *
 int32_t HksThreeStageReport(const char *funcName, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const HksThreeStageReportInfo *info, struct HksOperation *operation)
 {
-    if (paramSet == nullptr || info == nullptr || processInfo == nullptr) {
-        HKS_LOG_I("paramset or info or processInfo is null");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_TRUE_LOGI_RETURN(paramSet == nullptr || info == nullptr || processInfo == nullptr, HKS_ERROR_NULL_POINTER,
+        "paramset or info or processInfo is null")
 
     if (operation != nullptr) {
         uint32_t eventId = operation->eventInfo.common.eventId;
-        if (eventId < HKS_EVENT_CRYPTO || eventId > HKS_EVENT_MAC) {
-            HKS_LOG_I("eventid is not support");
-            return HKS_FAILURE;
-        }
+        HKS_IF_TRUE_LOGI_RETURN(eventId < HKS_EVENT_CRYPTO || eventId > HKS_EVENT_MAC, HKS_FAILURE,
+            "eventid is not support")
         (void)HksFreshAndReport(funcName, processInfo, paramSet, info, &operation->eventInfo);
         return HKS_SUCCESS;
     }
