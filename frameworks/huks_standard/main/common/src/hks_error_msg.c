@@ -134,7 +134,7 @@ void HksLog(uint32_t logLevel, const char *format, ...)
         int32_t offset = sprintf_s(g_errMsg + g_msgLen, MAX_ERROR_MESSAGE_LEN - g_msgLen, " <%s[%u]",
             funName, lineNo);
         if (offset <= 0) {
-            HILOG_ERROR(LOG_ENGINE, "[HksLog] append call chain fail! offset: %d", offset);
+            HILOG_ERROR(LOG_ENGINE, "[HksLog] append call chain fail! offset: [%{public}d]", offset);
             return;
         }
         g_msgLen += (uint32_t)offset;
