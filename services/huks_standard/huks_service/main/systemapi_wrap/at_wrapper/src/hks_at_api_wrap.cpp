@@ -40,25 +40,18 @@ using namespace OHOS::Security::AccessToken;
 static int32_t CheckAccessTokenAvailable()
 {
     sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (sm == nullptr) {
-        HKS_LOG_E("get SystemAbilityManager failed.");
-        return HKS_ERROR_COMMUNICATION_FAILURE;
-    }
+    HKS_IF_NULL_LOGE_RETURN(sm, HKS_ERROR_COMMUNICATION_FAILURE, "get SystemAbilityManager failed.")
 
     // retry if check system ability failed.
     do {
         sptr<IRemoteObject> sa;
         for (uint32_t i = 0; i < HKS_MAX_RETRY_TIME; ++i) {
             sa = sm->CheckSystemAbility(ACCESS_TOKEN_SA_ID);
-            if (sa != nullptr) {
-                break;
-            }
+            HKS_IF_TRUE_BREAK(sa != nullptr)
             HKS_LOG_E("access token proxy is nullptr, retry %" LOG_PUBLIC "u", i);
             usleep(HKS_SLEEP_TIME_FOR_RETRY);
         }
-        if (sa != nullptr) {
-            break;
-        }
+        HKS_IF_TRUE_BREAK(sa != nullptr)
         return HKS_ERROR_BAD_STATE;
     } while (false);
     return HKS_SUCCESS;
@@ -66,10 +59,8 @@ static int32_t CheckAccessTokenAvailable()
 
 int32_t HksGetAtType(uint64_t accessTokenId, enum HksAtType *atType)
 {
-    if (CheckAccessTokenAvailable() != HKS_SUCCESS) {
-        HKS_LOG_E("access token sa is unavailable.");
-        return HKS_ERROR_BAD_STATE;
-    }
+    int32_t ret = CheckAccessTokenAvailable();
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "access token sa is unavailable.")
 
     ATokenTypeEnum type = AccessTokenKit::GetTokenTypeFlag((uint32_t)accessTokenId);
     switch (type) {
@@ -91,22 +82,16 @@ int32_t HksGetAtType(uint64_t accessTokenId, enum HksAtType *atType)
 
 int32_t HksGetHapNameFromAccessToken(int32_t tokenId, char *hapName, int32_t hapNameSize)
 {
-    if (CheckAccessTokenAvailable() != HKS_SUCCESS) {
-        HKS_LOG_E("access token sa is unavailable.");
-        return HKS_ERROR_BAD_STATE;
-    }
+    int32_t ret = CheckAccessTokenAvailable();
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "access token sa is unavailable.")
     HapTokenInfo tokenInfo;
     int result = AccessTokenKit::GetHapTokenInfo(tokenId, tokenInfo);
-    if (result != HKS_SUCCESS) {
-        HKS_LOG_I("GetHapTokenInfo failed, tokenId :%" LOG_PUBLIC "d", tokenId);
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(result, HKS_ERROR_BAD_STATE,
+        "GetHapTokenInfo failed, tokenId :%" LOG_PUBLIC "d", tokenId)
 
     uint32_t hapNameLen = strlen(tokenInfo.bundleName.c_str());
-    if (memcpy_s(hapName, hapNameSize, tokenInfo.bundleName.c_str(), hapNameLen) != EOK) {
-        HKS_LOG_E("memcpy for hapName failed!");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(hapName, hapNameSize, tokenInfo.bundleName.c_str(), hapNameLen),
+        HKS_ERROR_INSUFFICIENT_MEMORY, "memcpy for hapName failed!")
 
     return HKS_SUCCESS;
 }

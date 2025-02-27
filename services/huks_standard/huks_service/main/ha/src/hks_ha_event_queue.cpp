@@ -15,14 +15,13 @@
 
 #include "hks_ha_event_queue.h"
 #include "hks_log.h"
+#include "hks_template.h"
 
 bool HksEventQueue::Enqueue(uint32_t eventId, struct HksParamSet *paramSet)
 {
     std::unique_lock<std::mutex> lock(queueMutex_);
-    if (paramSet == nullptr) {
-        HKS_LOG_E("HksParamSet is nullptr, cannot enqueue eventId: %" LOG_PUBLIC "u", eventId);
-        return false;
-    }
+    HKS_IF_NULL_LOGE_RETURN(paramSet, false,
+        "HksParamSet is nullptr, cannot enqueue eventId: %" LOG_PUBLIC "u", eventId)
 
     // 1. Check if already stopped
     if (stopped_) {

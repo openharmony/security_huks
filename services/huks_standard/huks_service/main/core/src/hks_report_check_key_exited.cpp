@@ -31,10 +31,8 @@
 int32_t PreConstructCheckKeyExitedReportParamSet(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
     uint64_t startTime, struct HksParamSet **paramSetOut)
 {
-    if (keyAlias == nullptr || paramSetIn == nullptr) {
-        HKS_LOG_I("PreConstructCheckKeyExitedReportParamSet params is null");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_TRUE_LOGI_RETURN(keyAlias == nullptr || paramSetIn == nullptr, HKS_ERROR_NULL_POINTER,
+        "PreConstructCheckKeyExitedReportParamSet params is null")
     int32_t ret = HksInitParamSet(paramSetOut);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "ConstructGenKeyReportParamSet InitParamSet failed")
 
@@ -64,10 +62,8 @@ int32_t PreConstructCheckKeyExitedReportParamSet(const struct HksBlob *keyAlias,
 
 int32_t HksParamSetToEventInfoForCheckKeyExited(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
 {
-    if (paramSetIn == nullptr || eventInfo == nullptr) {
-        HKS_LOG_I("HksParamSetToEventInfoForCheckKeyExited params is null");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_TRUE_LOGI_RETURN(paramSetIn != nullptr && eventInfo != nullptr, HKS_ERROR_NULL_POINTER,
+        "HksParamSetToEventInfoForCheckKeyExited params is null")
     int32_t ret = HKS_SUCCESS;
     do {
         ret = GetCommonEventInfo(paramSetIn, eventInfo);
@@ -104,14 +100,9 @@ void HksEventInfoAddForCheckKeyExited(struct HksEventInfo *dstEventInfo, const s
 int32_t HksEventInfoToMapForCheckKeyExited(const struct HksEventInfo *eventInfo,
     std::unordered_map<std::string, std::string> &reportData)
 {
-    if (eventInfo == nullptr) {
-        HKS_LOG_I("HksEventInfoToMapForCheckKeyExited evenInfo is null");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGI_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "HksEventInfoToMapForCheckKeyExited evenInfo is null")
     auto ret = EventInfoToMapKeyInfo(&eventInfo->keyInfo, reportData);
-    if (!ret.second) {
-        HKS_LOG_I("HksEventInfoToMapForCheckKeyExited failed! reportData insert failed!");
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    HKS_IF_NOT_TRUE_LOGI_RETURN(ret.second, HKS_ERROR_BUFFER_TOO_SMALL,
+        "HksEventInfoToMapForCheckKeyExited failed! reportData insert failed!")
     return HKS_SUCCESS;
 }

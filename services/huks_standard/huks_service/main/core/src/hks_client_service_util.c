@@ -62,10 +62,8 @@ static const uint32_t SENSITIVE_DELETE_TAG[] = {
 
 int32_t GetKeyParamSet(const struct HksBlob *key, struct HksParamSet *paramSet)
 {
-    if (key->size < sizeof(struct HksParamSet)) {
-        HKS_LOG_E("get key paramset: invalid key size: %" LOG_PUBLIC "u", key->size);
-        return HKS_ERROR_INVALID_KEY_INFO;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(key->size < sizeof(struct HksParamSet), HKS_ERROR_INVALID_KEY_INFO,
+        "get key paramset: invalid key size: %" LOG_PUBLIC "u", key->size)
 
     const struct HksParamSet *tmpParamSet = (const struct HksParamSet *)key->data;
     struct HksParamSet *outParamSet = NULL;
@@ -96,10 +94,8 @@ int32_t GetKeyFileData(const struct HksProcessInfo *processInfo, const struct Hk
     int32_t ret = HksManageStoreGetKeyBlobSize(processInfo, paramSet, keyAlias, &size, mode);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyblob size from storage failed, ret = %" LOG_PUBLIC "d.", ret)
 
-    if (size > MAX_KEY_SIZE) {
-        HKS_LOG_E("invalid key size, size = %" LOG_PUBLIC "u", size);
-        return HKS_ERROR_INVALID_KEY_FILE;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(size > MAX_KEY_SIZE, HKS_ERROR_INVALID_KEY_FILE,
+        "invalid key size, size = %" LOG_PUBLIC "u", size)
 
     key->data = (uint8_t *)HksMalloc(size);
     HKS_IF_NULL_LOGE_RETURN(key->data, HKS_ERROR_MALLOC_FAIL, "get key data: malloc failed")
