@@ -33,10 +33,8 @@ static int32_t ThreeStageBuildCommonInfo(const struct HksParamSet *paramSet, str
 {
     struct HksParam *param = nullptr;
     if (HksGetParam(paramSet, HKS_TAG_PARAM3_BUFFER, &param) == HKS_SUCCESS) {
-        if (param->blob.size < sizeof(HksEventInfo)) {
-            HKS_LOG_I("blob size is less than eventInfo");
-            return HKS_ERROR_BUFFER_TOO_SMALL;
-        }
+        HKS_IF_TRUE_LOGI_RETURN(param->blob.size < sizeof(HksEventInfo), HKS_ERROR_BUFFER_TOO_SMALL,
+            "blob size is less than eventInfo")
         *eventInfo = *reinterpret_cast<HksEventInfo *>(param->blob.data);
     } else {
         return HKS_FAILURE;
@@ -49,10 +47,8 @@ static int32_t ThreeStageBuildCommonInfo(const struct HksParamSet *paramSet, str
     }
 
     if (HksGetParam(paramSet, HKS_TAG_PARAM1_BUFFER, &param) == HKS_SUCCESS) {
-        if (param->blob.size < sizeof(struct timespec)) {
-            HKS_LOG_I("blob size is less than timespec");
-            return HKS_ERROR_BUFFER_TOO_SMALL;
-        }
+        HKS_IF_TRUE_LOGI_RETURN(param->blob.size < sizeof(struct timespec), HKS_ERROR_BUFFER_TOO_SMALL,
+            "blob size is less than timespec")
         (void)memcpy_s(&eventInfo->common.time, param->blob.size, param->blob.data, param->blob.size);
     }
 
@@ -74,10 +70,8 @@ static int32_t ThreeStageBuildCommonInfo(const struct HksParamSet *paramSet, str
 
 int32_t BuildCommonInfo(const struct HksParamSet *paramSet, struct HksEventInfo *eventInfo)
 {
-    if (paramSet == nullptr || eventInfo == nullptr) {
-        HKS_LOG_I("paramset or eventInfo is null");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_TRUE_LOGI_RETURN(paramSet == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
+        "paramset or eventInfo is null")
     int32_t ret = ThreeStageBuildCommonInfo(paramSet, eventInfo);
     if (ret != HKS_SUCCESS) {
         HKS_FREE(eventInfo->common.function);
@@ -90,10 +84,7 @@ int32_t BuildCommonInfo(const struct HksParamSet *paramSet, struct HksEventInfo 
 // add count, dataLen, totalCost
 void AddEventInfoCommon(HksEventInfo *info1, const HksEventInfo *info2)
 {
-    if (info1 == nullptr || info2 == nullptr) {
-        HKS_LOG_I("eventInfo is null");
-        return;
-    }
+    HKS_IF_TRUE_LOGI_RETURN_VOID(info1 == nullptr || info2 == nullptr, "eventInfo is null")
     info1->common.count++;
     if (!IsAdditionOverflow(info1->common.statInfo.dataLen, info2->common.statInfo.dataLen)) {
         info1->common.statInfo.dataLen += info2->common.statInfo.dataLen;

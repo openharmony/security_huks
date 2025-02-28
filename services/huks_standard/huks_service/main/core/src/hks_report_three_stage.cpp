@@ -28,18 +28,13 @@
 
 static bool NeedReportCommon(const HksEventInfo *eventInfo)
 {
-    if (eventInfo == nullptr) {
-        HKS_LOG_I("paramset or eventInfo is null");
-        return false;
-    }
+    HKS_IF_NULL_LOGI_RETURN(eventInfo, false, "paramset or eventInfo is null")
     return eventInfo->common.result.code != HKS_SUCCESS;
 }
 
 static bool CryptoInfoIsEqual(const HksEventInfo *info1, const HksEventInfo *info2)
 {
-    if (CheckEventCommon(info1, info2) == false) {
-        return false;
-    }
+    HKS_IF_NOT_TRUE_RETURN(CheckEventCommon(info1, info2), false);
     return (info1->cryptoInfo.keyInfo.alg == info2->cryptoInfo.keyInfo.alg) &&
         (info1->common.operation == info2->common.operation);
 }
@@ -146,9 +141,7 @@ bool HksEventInfoNeedReportAttest(const HksEventInfo *eventInfo)
 
 bool HksEventInfoIsEqualAttest(const HksEventInfo *info1, const HksEventInfo *info2)
 {
-    if (CheckEventCommon(info1, info2) == false) {
-        return false;
-    }
+    HKS_IF_NOT_TRUE_RETURN(CheckEventCommon(info1, info2), false);
     return (info1->attestInfo.keyInfo.alg == info2->attestInfo.keyInfo.alg) &&
         (info1->attestInfo.isAnonymous == info2->attestInfo.isAnonymous);
 }

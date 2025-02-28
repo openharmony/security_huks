@@ -41,9 +41,7 @@ static int32_t GetStoreMaterial(const struct HksBlob *alias, const struct HksUpg
 {
     outMaterial->pathType = info->needDe ? DE_PATH : CE_PATH;
     outMaterial->keyAliasPath = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
-    if (outMaterial->keyAliasPath == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(outMaterial->keyAliasPath, HKS_ERROR_MALLOC_FAIL)
     int32_t ret = ConstructName(alias, outMaterial->keyAliasPath, HKS_MAX_FILE_NAME_LEN);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "construct key alias name failed.")
 
@@ -95,10 +93,7 @@ static int32_t ConstructNewFilePath(const char *alias, const struct HksUpgradeFi
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get store material failed.")
 
         ret = HksGetFileInfo(&storeMaterial, &fileInfo);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get file info failed.");
-            break;
-        };
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get file info failed.")
         *newPath = (char *)HksMalloc(strlen(fileInfo.mainPath.path) + 1);
         if (*newPath == NULL) {
             HKS_LOG_E("malloc newPath->data failed.");
@@ -123,19 +118,13 @@ static int32_t TransferFile(const char *alias, const char *anonymousKeyAlias, co
     char *newPath = NULL;
     do {
         ret = ConstructNewFilePath(alias, info, &newPath);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("construct new file path failed.");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "construct new file path failed.")
 
         // Check if the alias is of rdb key file. If it is, skip the checking of duplicate to overwrite key file.
         if (HksIsRdbDeKey(alias) && info->needDe) {
             HKS_LOG_I("Remove rbd key file in de path, to accept the old file.");
             ret = HksFileRemove(newPath, alias);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("remove DE rdb file in %" LOG_PUBLIC "s write failed.", newPath);
-                break;
-            }
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "remove DE rdb file in %" LOG_PUBLIC "s write failed.", newPath)
         } else {
             ret = HksIsFileExist(newPath, alias);
             if (ret == HKS_SUCCESS) {
@@ -147,20 +136,14 @@ static int32_t TransferFile(const char *alias, const char *anonymousKeyAlias, co
         }
 
         ret = HksMakeFullDir(newPath);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("make dir %" LOG_PUBLIC "s writefailed.", newPath);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "make dir %" LOG_PUBLIC "s writefailed.", newPath)
 
         // The result of the info record dose not need to take into consideration.
         HKS_LOG_I("transfer key, storage userid: %" LOG_PUBLIC "d, uid: %" LOG_PUBLIC "d, alias: %" LOG_PUBLIC "s",
             info->userId, info->uid, anonymousKeyAlias);
 
         ret = HksFileWrite(newPath, alias, 0, fileContent->data, fileContent->size);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("file %" LOG_PUBLIC "s write failed.", newPath);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "file %" LOG_PUBLIC "s write failed.", newPath)
 
         ret = HksFileRemove(oldPath, alias);
         if (ret != HKS_SUCCESS) {
@@ -181,15 +164,11 @@ static int32_t TransferFile(const char *alias, const char *anonymousKeyAlias, co
 static int32_t SplitPath(const char *filePath, const struct FTW *ftw, char **path, char **alias)
 {
     *alias = (char *)HksMalloc(strlen(filePath) + 1 - ftw->base);
-    if (*alias == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(*alias, HKS_ERROR_MALLOC_FAIL)
     (void)memcpy_s(*alias, strlen(filePath) - ftw->base, filePath + ftw->base, strlen(filePath) - ftw->base);
 
     *path = (char *)HksMalloc(ftw->base + 1);
-    if (*path == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(*path, HKS_ERROR_MALLOC_FAIL)
     (void)memcpy_s(*path, ftw->base, filePath, ftw->base);
 
     HKS_LOG_I("path is %" LOG_PUBLIC "s.", *path);
@@ -234,11 +213,8 @@ static int ProcessFileUpgrade(const char *filePath, const struct stat *st, int t
 
         struct HksUpgradeFileTransferInfo info = { 0 };
         ret = HksParseConfig(alias, &fileContent, &info);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksParseConfig failed, userid: %" LOG_PUBLIC "d, uid: %" LOG_PUBLIC "d, "
-                "alias: %" LOG_PUBLIC "s", info.userId, info.uid, anonymousKeyAlias);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksParseConfig failed, userid: %" LOG_PUBLIC "d, uid: %" LOG_PUBLIC "d, "
+            "alias: %" LOG_PUBLIC "s", info.userId, info.uid, anonymousKeyAlias)
         if (info.skipTransfer) {
             HKS_LOG_I("file should skip transfer, userid: %" LOG_PUBLIC "d, uid: %" LOG_PUBLIC "d, "
                 "alias: %" LOG_PUBLIC "s", info.userId, info.uid, anonymousKeyAlias);
@@ -275,10 +251,8 @@ static int32_t CopyDeToTmpPathIfNeed(void)
         return HKS_ERROR_MAKE_DIR_FAIL;
     }
     ret = HksMakeDir(HKS_KEY_STORE_PATH);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("create de path failed, error code is %" LOG_PUBLIC "d.", ret);
-        return HKS_ERROR_MAKE_DIR_FAIL;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_MAKE_DIR_FAIL,
+        "create de path failed, error code is %" LOG_PUBLIC "d.", ret)
     HKS_LOG_I("move de file path to old file path");
     return HKS_SUCCESS;
 }
@@ -295,3 +269,4 @@ int32_t HksUpgradeFileTransferOnUserUnlock(uint32_t userId)
     g_frontUserId = userId;
     return HksUpgradeFileTransferOnPowerOn();
 }
+ 

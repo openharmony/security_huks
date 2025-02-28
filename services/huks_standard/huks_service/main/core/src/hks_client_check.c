@@ -34,15 +34,11 @@ static const uint32_t CHANGE_STORAGE_LEVEL_CFG_LIST[] = HUKS_CHANGE_STORAGE_LEVE
 #ifndef _CUT_AUTHENTICATE_
 static int32_t CheckProcessNameAndKeyAliasSize(uint32_t processNameSize, uint32_t keyAliasSize)
 {
-    if (processNameSize > HKS_MAX_PROCESS_NAME_LEN) {
-        HKS_LOG_E("processName size too long, size %" LOG_PUBLIC "u", processNameSize);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(processNameSize > HKS_MAX_PROCESS_NAME_LEN, HKS_ERROR_INVALID_ARGUMENT,
+        "processName size too long, size %" LOG_PUBLIC "u", processNameSize)
 
-    if (keyAliasSize > HKS_MAX_KEY_ALIAS_LEN) {
-        HKS_LOG_E("keyAlias size too long, size %" LOG_PUBLIC "u", keyAliasSize);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(keyAliasSize > HKS_MAX_KEY_ALIAS_LEN, HKS_ERROR_INVALID_ARGUMENT,
+        "keyAlias size too long, size %" LOG_PUBLIC "u", keyAliasSize)
 
     return HKS_SUCCESS;
 }
@@ -98,10 +94,8 @@ int32_t HksCheckGetKeyParamSetParams(const struct HksBlob *processName, const st
 {
     HKS_IF_NOT_SUCC_RETURN(HksCheckProcessNameAndKeyAlias(processName, keyAlias), HKS_ERROR_INVALID_ARGUMENT)
 
-    if ((paramSet == NULL) || (paramSet->paramSetSize == 0)) {
-        HKS_LOG_E("invalid paramSet");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(paramSet == NULL || paramSet->paramSetSize == 0, HKS_ERROR_INVALID_ARGUMENT,
+        "invalid paramSet")
 
     return HKS_SUCCESS;
 }
@@ -125,15 +119,11 @@ int32_t HksCheckGetKeyInfoListParams(const struct HksBlob *processName, const st
 {
     HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(processName), HKS_ERROR_INVALID_ARGUMENT, "invalid processName")
 
-    if (processName->size > HKS_MAX_PROCESS_NAME_LEN) {
-        HKS_LOG_E("processName size too long, size %" LOG_PUBLIC "u", processName->size);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(processName->size > HKS_MAX_PROCESS_NAME_LEN, HKS_ERROR_INVALID_ARGUMENT,
+        "processName size too long, size %" LOG_PUBLIC "u", processName->size)
 
-    if ((keyInfoList == NULL) || (listCount == NULL)) {
-        HKS_LOG_E("keyInfoList or listCount null.");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(keyInfoList == NULL || listCount == NULL, HKS_ERROR_INVALID_ARGUMENT,
+        "keyInfoList or listCount null.")
 
     for (uint32_t i = 0; i < *listCount; ++i) {
         if ((CheckBlob(&(keyInfoList[i].alias)) != HKS_SUCCESS) ||
@@ -267,10 +257,8 @@ bool HksCheckIsAllowedWrap(const struct HksParamSet *paramSet)
 {
     struct HksParam *isAllowedWrap = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_ALLOWED_WRAP, &isAllowedWrap);
-    if (ret == HKS_SUCCESS) {
-        return isAllowedWrap->boolParam;
-    }
-    return false;
+    HKS_IF_NOT_SUCC_RETURN(ret, false)
+    return isAllowedWrap->boolParam;
 }
 
 int32_t HksCheckUserAuthKeyPurposeValidity(const struct HksParamSet *paramSet)
@@ -316,25 +304,19 @@ int32_t HksCheckListAliasesParam(const struct HksBlob *processName)
 {
     HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(processName), HKS_ERROR_INVALID_ARGUMENT, "invalid processName");
 
-    if (processName->size > HKS_MAX_PROCESS_NAME_LEN) {
-        HKS_LOG_E("processName size too long, size %" LOG_PUBLIC "u", processName->size);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(processName->size > HKS_MAX_PROCESS_NAME_LEN, HKS_ERROR_INVALID_ARGUMENT,
+        "processName size too long, size %" LOG_PUBLIC "u", processName->size)
     return HKS_SUCCESS;
 }
 
 int32_t HKsCheckOldKeyAliasDiffNewKeyAlias(const struct HksBlob *oldKeyAlias,
     const struct HksBlob *newKeyAlias)
 {
-    if (oldKeyAlias == NULL || newKeyAlias == NULL) {
-        HKS_LOG_E("oldKeyAlias or newKeyAlias is null !");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    if ((oldKeyAlias->size == newKeyAlias->size) &&
-        (HksMemCmp(oldKeyAlias->data, newKeyAlias->data, oldKeyAlias->size) == 0)) {
-        HKS_LOG_E("oldKeyAlias same as newKeyAlias !");
-        return HKS_ERROR_ALREADY_EXISTS;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(oldKeyAlias == NULL || newKeyAlias == NULL, HKS_ERROR_INVALID_ARGUMENT,
+        "oldKeyAlias or newKeyAlias is null!")
+    HKS_IF_TRUE_LOGE_RETURN(oldKeyAlias->size == newKeyAlias->size &&
+        HksMemCmp(oldKeyAlias->data, newKeyAlias->data, oldKeyAlias->size) == 0, HKS_ERROR_ALREADY_EXISTS,
+        "oldKeyAlias same as newKeyAlias!")
     return HKS_SUCCESS;
 }
 
@@ -373,10 +355,8 @@ int32_t HksCheckNewKeyNotExist(const struct HksProcessInfo *processInfo, const s
 int32_t HksCheckProcessInConfigList(const struct HksBlob *processName)
 {
     uint32_t uid = 0;
-    if (memcpy_s(&uid, sizeof(uid), processName->data, processName->size) != EOK) {
-        HKS_LOG_E("illegal uid, please check your process name");
-        return HKS_ERROR_NO_PERMISSION;
-    }
+    HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(&uid, sizeof(uid), processName->data, processName->size),
+        HKS_ERROR_NO_PERMISSION, "illegal uid, please check your process name")
 
     for (uint32_t i = 0; i < HKS_ARRAY_SIZE(CHANGE_STORAGE_LEVEL_CFG_LIST); ++i) {
         if (uid == CHANGE_STORAGE_LEVEL_CFG_LIST[i]) {

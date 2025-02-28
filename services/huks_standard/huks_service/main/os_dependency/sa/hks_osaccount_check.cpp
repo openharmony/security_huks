@@ -17,6 +17,7 @@
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
 #include "hks_upgrade.h"
 #include "hks_log.h"
+#include "hks_template.h"
 #include "hks_type.h"
 #include "hks_osaccount_check.h"
 
@@ -35,9 +36,7 @@ static bool HksIsOsAccountVerified(const int32_t userId)
 #ifdef HAS_OS_ACCOUNT_PART
     HKS_LOG_D("enter HksIsOsAccountVerified");
     OHOS::AccountSA::OsAccountManager::IsOsAccountVerified(userId, isVerified);
-    if (!isVerified) {
-        HKS_LOG_E("os account verify failed, userid is : %" LOG_PUBLIC "d", userId);
-    }
+    HKS_IF_NOT_TRUE_LOGE(isVerified, "os account verify failed, userid is : %" LOG_PUBLIC "d", userId)
 #else
     HKS_LOG_E("os account not support");
 #endif
@@ -48,10 +47,7 @@ static bool HksIsOsAccountVerified(const int32_t userId)
 extern "C" void HksTransferFileIfNeed(const uint32_t storageLevel, const int32_t storeUserId)
 {
     bool flag = false;
-    bool equal = std::atomic_compare_exchange_strong(&g_isCeUpgradeSucc, &flag, true);
-    if (!equal) {
-        return;
-    }
+    HKS_IF_NOT_TRUE_RETURN_VOID(std::atomic_compare_exchange_strong(&g_isCeUpgradeSucc, &flag, true));
     HKS_LOG_I("never HksTransferFileIfNeed before, first time upgrade ce!");
     if (storageLevel == HKS_AUTH_STORAGE_LEVEL_CE && HksIsOsAccountVerified(storeUserId)) {
         OHOS::Security::Hks::HksUpgradeOnUserUnlock(storeUserId);
