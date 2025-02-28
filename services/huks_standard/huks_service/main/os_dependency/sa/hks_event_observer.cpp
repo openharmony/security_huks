@@ -135,6 +135,10 @@ void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData
         int userId = data.GetCode();
         HKS_LOG_I("user %" LOG_PUBLIC "d unlocked.", userId);
         HksUpgradeOnUserUnlock(userId);
+    } else if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
+        HksSetScreenState(false);
+    } else if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
+        HksSetScreenState(true);
     }
 
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
@@ -158,6 +162,8 @@ bool SystemEventObserver::SubscribeSystemEvent()
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SANDBOX_PACKAGE_REMOVED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
     OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     systemEventSubscriber_ = std::make_shared<SystemEventSubscriber>(subscriberInfo);
 
