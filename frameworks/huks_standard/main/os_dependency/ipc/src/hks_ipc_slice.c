@@ -32,21 +32,16 @@ static bool IsSliceCmd(uint32_t cmdId)
 
 static uint32_t GetBlobBufSize(const struct HksBlob *blob, uint32_t *bufSize)
 {
-    if (IsAdditionOverflow(blob->size, DEFAULT_ALIGN_MASK_SIZE)) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    if (IsAdditionOverflow(ALIGN_SIZE(blob->size), sizeof(blob->size))) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_RETURN(IsAdditionOverflow(blob->size, DEFAULT_ALIGN_MASK_SIZE), HKS_ERROR_INVALID_ARGUMENT)
+    HKS_IF_TRUE_RETURN(IsAdditionOverflow(ALIGN_SIZE(blob->size), sizeof(blob->size)), HKS_ERROR_INVALID_ARGUMENT)
     *bufSize = ALIGN_SIZE(blob->size) + sizeof(blob->size);
     return HKS_SUCCESS;
 }
 
 static uint32_t GetParamSize(const struct HksBlob *key, const struct HksParamSet *paramSet, uint32_t *bufSize)
 {
-    if ((key->size > MAX_PROCESS_SIZE) || (paramSet->paramSetSize > MAX_PROCESS_SIZE)) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_RETURN(key->size > MAX_PROCESS_SIZE || paramSet->paramSetSize > MAX_PROCESS_SIZE,
+        HKS_ERROR_INVALID_ARGUMENT)
 
     *bufSize = ALIGN_SIZE(key->size) + sizeof(key->size) + ALIGN_SIZE(paramSet->paramSetSize);
     return HKS_SUCCESS;
@@ -65,9 +60,7 @@ static uint32_t GetDataSize(uint32_t cmdId, const struct HksBlob *inData, const 
         bufOutDataSize = sizeof(outData->size);
     }
 
-    if (IsAdditionOverflow(inBuffData, bufOutDataSize)) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_RETURN(IsAdditionOverflow(inBuffData, bufOutDataSize), HKS_ERROR_INVALID_ARGUMENT)
     *bufSize = inBuffData + bufOutDataSize;
     return HKS_SUCCESS;
 }
@@ -78,10 +71,8 @@ static int32_t ProcessDataOnce(uint32_t cmdId, const struct HksBlob *key, const 
     HKS_LOG_D("invoke ProcessOnce cmdId %" LOG_PUBLIC "u", cmdId);
 
     uint32_t paramBufSize, dataBufSize;
-    if ((GetParamSize(key, paramSet, &paramBufSize) != HKS_SUCCESS) ||
-        (GetDataSize(cmdId, inData, outData, &dataBufSize) != HKS_SUCCESS)) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_RETURN(GetParamSize(key, paramSet, &paramBufSize) != HKS_SUCCESS ||
+        GetDataSize(cmdId, inData, outData, &dataBufSize) != HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT)
     uint32_t totalBufSize = paramBufSize + dataBufSize;
     uint8_t *buffer = (uint8_t *)HksMalloc(totalBufSize);
     HKS_IF_NULL_RETURN(buffer, HKS_ERROR_MALLOC_FAIL)
@@ -118,24 +109,17 @@ static int32_t ProcessDataOnce(uint32_t cmdId, const struct HksBlob *key, const 
 int32_t HksSliceDataEntry(uint32_t cmdId, const struct HksBlob *key, const struct HksParamSet *paramSet,
     struct HksBlob *inData, struct HksBlob *outData)
 {
-    if (!IsSliceCmd(cmdId)) {
-        HKS_LOG_E("cmd %" LOG_PUBLIC "u not support slice!", cmdId);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_TRUE_LOGE_RETURN(IsSliceCmd(cmdId), HKS_ERROR_INVALID_ARGUMENT,
+        "cmd %" LOG_PUBLIC "u not support slice!", cmdId)
 
     uint32_t paramBufSize;
     uint32_t dataBufSize;
-    if ((GetParamSize(key, paramSet, &paramBufSize) != HKS_SUCCESS) ||
-        (GetDataSize(cmdId, inData, outData, &dataBufSize) != HKS_SUCCESS)) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    if (IsAdditionOverflow(paramBufSize, dataBufSize)) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_RETURN(GetParamSize(key, paramSet, &paramBufSize) != HKS_SUCCESS ||
+        GetDataSize(cmdId, inData, outData, &dataBufSize) != HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT)
+    HKS_IF_TRUE_RETURN(IsAdditionOverflow(paramBufSize, dataBufSize), HKS_ERROR_INVALID_ARGUMENT)
 
     uint32_t totalBufSize = paramBufSize + dataBufSize;
-    if (totalBufSize <= MAX_PROCESS_SIZE) {
-        return ProcessDataOnce(cmdId, key, paramSet, inData, outData);
-    }
-    return HKS_ERROR_INVALID_ARGUMENT;
+    HKS_IF_TRUE_RETURN(totalBufSize > MAX_PROCESS_SIZE, HKS_ERROR_INVALID_ARGUMENT)
+    return ProcessDataOnce(cmdId, key, paramSet, inData, outData);
 }
+ 

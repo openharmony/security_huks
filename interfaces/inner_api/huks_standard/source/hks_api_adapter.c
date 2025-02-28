@@ -71,10 +71,7 @@ int32_t HksAgreeKeyAdapter(const struct HksParamSet *paramSet, const struct HksB
 {
     struct HksBlob publicKey = { 0, NULL };
     int32_t ret = GetHksPubKeyInnerFormat(paramSet, peerPublicKey, &publicKey);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get public key from x509 format failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get public key from x509 format failed, ret = %" LOG_PUBLIC "d", ret)
 
     ret = HksClientAgreeKey(paramSet, privateKey, &publicKey, agreedKey);
     (void)memset_s(publicKey.data, publicKey.size, 0, publicKey.size);

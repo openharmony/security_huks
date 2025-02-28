@@ -47,10 +47,7 @@ static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
 static void DeleteKeyNode(uint64_t operationHandle)
 {
     uint8_t *handle = (uint8_t *)HksMalloc(sizeof(uint64_t));
-    if (handle == NULL) {
-        HKS_LOG_E("malloc failed");
-        return;
-    }
+    HKS_IF_NULL_LOGE_RETURN_VOID(handle, "malloc failed")
     (void)memcpy_s(handle, sizeof(uint64_t), &operationHandle, sizeof(uint64_t));
     struct HksBlob handleBlob = { sizeof(uint64_t), handle };
 
@@ -250,10 +247,8 @@ static int32_t ConstructOperationHandle(const struct HksBlob *operationHandle, u
         HKS_LOG_E("invalid handle size");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    if (memcpy_s(handle, sizeof(*handle), operationHandle->data, operationHandle->size) != EOK) {
-        HKS_LOG_E("copy handle failed");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(handle, sizeof(*handle), operationHandle->data, operationHandle->size),
+        HKS_ERROR_INSUFFICIENT_MEMORY, "copy handle failed")
 
     return HKS_SUCCESS;
 }
@@ -377,9 +372,7 @@ struct HksOperation *QueryOperationAndMarkInUse(const struct HksProcessInfo *pro
 
 void MarkOperationUnUse(struct HksOperation *operation)
 {
-    if (operation == NULL) {
-        return;
-    }
+    HKS_IF_NULL_RETURN_VOID(operation)
     operation->isInUse = false;
 }
 
@@ -387,10 +380,7 @@ void DeleteOperation(const struct HksBlob *operationHandle)
 {
     uint64_t handle;
     int32_t ret = ConstructOperationHandle(operationHandle, &handle);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("construct handle failed when delete operation");
-        return;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(ret, "construct handle failed when delete operation")
 
     struct HksOperation *operation = NULL;
     pthread_mutex_lock(&g_lock);

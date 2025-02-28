@@ -29,10 +29,8 @@
 int32_t PreConstructRenameReportParamSet(const struct HksBlob *keyAlias, const struct HksBlob *dstKeyAlias,
     const struct HksParamSet *paramSetIn, uint64_t startTime, struct HksParamSet **paramSetOut)
 {
-    if (keyAlias == nullptr || paramSetIn == nullptr) {
-        HKS_LOG_I("PreConstructRenameReportParamSet params is null");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_TRUE_LOGI_RETURN(keyAlias == nullptr || paramSetIn == nullptr, HKS_ERROR_NULL_POINTER,
+        "PreConstructRenameReportParamSet params is null")
     int32_t ret = HksInitParamSet(paramSetOut);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "PreConstructRenameReportParamSet InitParamSet failed")
 
@@ -65,10 +63,8 @@ int32_t PreConstructRenameReportParamSet(const struct HksBlob *keyAlias, const s
 
 int32_t HksParamSetToEventInfoForRename(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
 {
-    if (paramSetIn == nullptr || eventInfo == nullptr) {
-        HKS_LOG_I("HksParamSetToEventInfoForRename params is null");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
+        "HksParamSetToEventInfoForRename params is null")
     int32_t ret = HKS_SUCCESS;
     do {
         ret = GetCommonEventInfo(paramSetIn, eventInfo);
@@ -113,10 +109,7 @@ void HksEventInfoAddForRename(struct HksEventInfo *dstEventInfo, const struct Hk
 int32_t HksEventInfoToMapForRename(const struct HksEventInfo *eventInfo,
     std::unordered_map<std::string, std::string> &reportData)
 {
-    if (eventInfo == nullptr) {
-        HKS_LOG_I("HksEventInfoToMapForRename evenInfo is null");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGI_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "HksEventInfoToMapForRename evenInfo is null")
     auto ret = EventInfoToMapKeyInfo(&eventInfo->renameInfo.keyInfo, reportData);
     HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData EventInfoToMapKeyInfo failed!");
 
@@ -126,9 +119,7 @@ int32_t HksEventInfoToMapForRename(const struct HksEventInfo *eventInfo,
     ret = reportData.insert_or_assign("copy_key", std::to_string(eventInfo->renameInfo.isCopy));
     HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert agree_pubkey_is_alias failed!");
 
-    if (!ret.second) {
-        HKS_LOG_I("HksEventInfoToMapForImport failed! reportData insert failed!");
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    HKS_IF_NOT_TRUE_LOGI_RETURN(ret.second, HKS_ERROR_BUFFER_TOO_SMALL,
+        "HksEventInfoToMapForImport failed! reportData insert failed!")
     return HKS_SUCCESS;
 }

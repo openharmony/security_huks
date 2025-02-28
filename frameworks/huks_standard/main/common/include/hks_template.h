@@ -79,6 +79,11 @@ if ((RESULT) != HKS_SUCCESS) { \
     return (ERROR_CODE); \
 }
 
+#define HKS_IF_NOT_SUCC_RETURN_VOID(RESULT) \
+if ((RESULT) != HKS_SUCCESS) { \
+    return; \
+}
+
 #define HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(RESULT, LOG_MESSAGE, ...) \
 if ((RESULT) != HKS_SUCCESS) { \
     HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
@@ -114,26 +119,102 @@ if ((OBJECT) == HKS_NULL_POINTER) { \
     return (ERROR_CODE); \
 }
 
+#define HKS_IF_NULL_RETURN_VOID(OBJECT) \
+if ((OBJECT) == HKS_NULL_POINTER) { \
+    return; \
+}
+
 #define HKS_IF_NULL_BREAK(OBJECT) \
 if ((OBJECT) == HKS_NULL_POINTER) { \
     break; \
 }
 
-#define HKS_IF_NOT_TRUE_LOGE_RETURN(BOOL_FUNC, ERROR_CODE) \
-do { \
-    if (!(BOOL_FUNC)) { \
-        HKS_LOG_E("%" LOG_PUBLIC "s failed!", #BOOL_FUNC); \
-        return ERROR_CODE; \
-    } \
-} while (0)
+#define HKS_IF_TRUE_RETURN(BOOL_FUNC, ERROR_CODE) \
+if ((BOOL_FUNC)) { \
+    return (ERROR_CODE); \
+}
 
-#define HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(BOOL_FUNC) \
+#define HKS_IF_TRUE_LOGE_RETURN(BOOL_FUNC, ERROR_CODE, LOG_MESSAGE, ...) \
+if ((BOOL_FUNC)) { \
+    HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
+    return (ERROR_CODE); \
+}
+
+#define HKS_IF_TRUE_LOGE_RETURN_VOID(BOOL_FUNC, LOG_MESSAGE, ...) \
+if ((BOOL_FUNC)) { \
+    HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
+    return; \
+}
+
+#define HKS_IF_TRUE_LOGI_RETURN_VOID(BOOL_FUNC, LOG_MESSAGE, ...) \
+if ((BOOL_FUNC)) { \
+    HKS_LOG_I(LOG_MESSAGE, ##__VA_ARGS__); \
+    return; \
+}
+
+#define HKS_IF_TRUE_LOGI_RETURN(BOOL_FUNC, ERROR_CODE, LOG_MESSAGE, ...) \
+if ((BOOL_FUNC)) { \
+    HKS_LOG_I(LOG_MESSAGE, ##__VA_ARGS__); \
+    return (ERROR_CODE); \
+}
+
+#define HKS_IF_TRUE_LOGE(BOOL_FUNC, LOG_MESSAGE, ...) \
+if ((BOOL_FUNC)) { \
+    HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
+}
+
+#define HKS_IF_NOT_TRUE_LOGE(BOOL_FUNC, LOG_MESSAGE, ...) \
+if (!(BOOL_FUNC)) { \
+    HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
+}
+
+#define HKS_IF_NOT_TRUE_RETURN(BOOL_FUNC, ERROR_CODE) \
+if (!(BOOL_FUNC)) { \
+    return (ERROR_CODE); \
+}
+
+#define HKS_IF_NOT_TRUE_LOGE_RETURN(BOOL_FUNC, ERROR_CODE, LOG_MESSAGE, ...) \
+if (!(BOOL_FUNC)) { \
+    HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
+    return (ERROR_CODE); \
+}
+
+#define HKS_IF_NOT_EOK_LOGE_RETURN(BOOL_FUNC, ERROR_CODE, LOG_MESSAGE, ...) \
+if ((BOOL_FUNC) != EOK) { \
+    HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
+    return (ERROR_CODE); \
+}
+
+#define HKS_IF_NOT_EOK_LOGE_BREAK(BOOL_FUNC, LOG_MESSAGE, ...) \
+if ((BOOL_FUNC) != EOK) { \
+    HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
+    break; \
+}
+
+#define HKS_IF_TRUE_LOGE_BREAK(BOOL_FUNC, LOG_MESSAGE, ...) \
+if ((BOOL_FUNC)) { \
+    HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
+    break; \
+}
+
+#define HKS_IF_TRUE_BREAK(BOOL_FUNC) \
+if ((BOOL_FUNC)) { \
+    break; \
+}
+
+#define HKS_IF_NOT_TRUE_RETURN_VOID(BOOL_FUNC) \
 do { \
     if (!(BOOL_FUNC)) { \
         HKS_LOG_E("%" LOG_PUBLIC "s failed!", #BOOL_FUNC); \
         return; \
     } \
 } while (0)
+
+#define HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(BOOL_FUNC, LOG_MESSAGE, ...) \
+if (!(BOOL_FUNC)) { \
+    HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
+    return; \
+}
 
 #define HKS_LOG_ERRNO(msg, ret) ({ int currentErrno = errno; \
     HKS_LOG_E_IMPORTANT(msg " ret: %" LOG_PUBLIC "d, errno: %" LOG_PUBLIC "d, strerror: %" LOG_PUBLIC "s", \
@@ -156,5 +237,11 @@ do { \
         HKS_LOG_I(LOG_MESSAGE, ##__VA_ARGS__); \
     } \
 } while (0)
+
+#define HKS_IF_NOT_TRUE_LOGI_RETURN(RESULT, ERROR_CODE, LOG_MESSAGE, ...) \
+if (!(RESULT)) { \
+    HKS_LOG_I(LOG_MESSAGE, ##__VA_ARGS__); \
+    return (ERROR_CODE); \
+}
 
 #endif /* HKS_TEMPLATE_H */

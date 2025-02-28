@@ -35,9 +35,7 @@ void HksEventReport(const char *funcName, const struct HksProcessInfo *processIn
 #ifdef HA_REPORT
     struct HksParamSet *newParamSet = nullptr;
     ret = AppendToNewParamSet(reportParamSet, &newParamSet);
-    if (ret != HKS_SUCCESS) {
-        return;
-    }
+    HKS_IF_NOT_SUCC_RETURN_VOID(ret)
 
     ret = HksBuildParamSet(&newParamSet);
     if (ret != HKS_SUCCESS) {
