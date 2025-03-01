@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "outDir": "./cache",
+        "paths": {
+            "std": [
+                "/mnt/data/l00889714/linzs/ohos_1108/arkcompiler/runtime_core/static_core/plugins/ets/stdlib/std"
+            ],
+            "escompat": [
+                "/mnt/data/l00889714/linzs/ohos_1108/arkcompiler/runtime_core/static_core/plugins/ets/stdlib/escompat"
+            ],
+            "@ohos.base.d.etsbase": [
+                "/mnt/data/l00889714/linzs/ohos_1108/base/security/huks/interfaces/kits/ani/@ohos.base.d.ets"
+            ],
+            "@ohos.security.huks": [
+                "/mnt/data/l00889714/linzs/ohos_1108/base/security/huks/interfaces/kits/ani/@ohos.security.huks.d.ets"
+            ]
+        }
+    },
+    "include": [
+        "/mnt/data/l00889714/linzs/ohos_1108/base/security/huks/interfaces/kits/ani/aniTest.ets",
+        "/mnt/data/l00889714/linzs/ohos_1108/base/security/huks/interfaces/kits/ani/@ohos.security.huks.d.ets",
+        "/mnt/data/l00889714/linzs/ohos_1108/base/security/huks/interfaces/kits/ani/@ohos.base.d.ets"
+    ]
+}

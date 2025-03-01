@@ -35,7 +35,10 @@ group("huks_capi") {
 group("huks_napi") {
   if (os_level == "standard") {
     if (support_jsapi) {
-      deps = [ "//base/security/huks/interfaces/kits/napi:huks" ]
+      deps = [ "//base/security/huks/interfaces/kits/napi:huks",
+              "//base/security/huks/interfaces/kits/ani:huks_interfaceImpl",
+              "//base/security/huks/interfaces/kits/ani:huks_abc" 
+            ]
     }
   }
 }

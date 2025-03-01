@@ -1,0 +1,72 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
+
+ohos_shared_library("huks_interfaceImpl") {
+  branch_protector_ret = "pac_ret"
+
+  sanitize = {
+    integer_overflow = true
+    cfi = true
+    debug = false
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    ubsan = true
+  }
+  defines = [
+  ]
+
+  include_dirs = [
+    "//arkcompiler/runtime_core/static_core/plugins/ets/runtime/ani",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
+    "//base/security/huks/frameworks/huks_standard/main/common/include",
+    "include",
+  ]
+
+  sources = [
+    "//base/security/huks/interfaces/kits/ani/src/huks_ani_common.cpp",
+    "//base/security/huks/interfaces/kits/ani/src/ani_test.cpp",
+  ]
+
+  deps = [
+    "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+    "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
+    "//base/security/huks/frameworks/huks_standard/main/crypto_engine/openssl:libhuks_openssl_standard_static",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+  cflags_cc = [
+    "-Wall",
+    "-Werror",
+  ]
+  # relative_install_dir = "module/security"
+  subsystem_name = "security"
+  part_name = "huks"
+}
+
+generate_static_abc("huks_abc") {
+  arktsconfig = "//base/security/huks/interfaces/kits/ani/arktsconfig.json"
+  dst_file = "$target_out_dir/security/huks/huks_sdk.abc"
+  out_puts = [ "$target_out_dir/security/huks/huks_sdk.abc" ]
+  in_puts = [
+    "/mnt/data/l00889714/linzs/ohos_1108/base/security/huks/interfaces/kits/ani/aniTest.ets",
+    "/mnt/data/l00889714/linzs/ohos_1108/base/security/huks/interfaces/kits/ani/@ohos.security.huks.d.ets",
+    "/mnt/data/l00889714/linzs/ohos_1108/base/security/huks/interfaces/kits/ani/@ohos.base.d.ets"
+  ]
+}
