@@ -24,6 +24,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdatomic.h>
 #include "hks_type.h"
 #include "hks_base_check.h"
 #include "hks_client_check.h"
@@ -82,6 +83,18 @@
 #ifdef HUKS_ENABLE_SKIP_UPGRADE_KEY_STORAGE_SECURE_LEVEL
 #include "hks_config_parser.h"
 #endif
+
+static volatile atomic_bool g_isScreenOn = false;
+
+void HksSetScreenState(bool state)
+{
+    atomic_store(&g_isScreenOn, state);
+}
+
+static bool GetScreenState(void)
+{
+    return atomic_load(&g_isScreenOn);
+}
 
 static void IfNotSuccAppendHdiErrorInfo(int32_t hdiRet)
 {
@@ -277,6 +290,7 @@ static int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *par
         struct HksParam paramArr[] = {
             { .tag = HKS_TAG_PROCESS_NAME, .blob = processInfo->processName },
             { .tag = HKS_TAG_USER_ID, .uint32Param = processInfo->userIdInt },
+            { .tag = HKS_TAG_SCREEN_STATE, .boolParam = GetScreenState()},
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
             { .tag = HKS_TAG_ACCESS_TOKEN_ID, .uint64Param = processInfo->accessTokenId },
 #endif
@@ -2183,6 +2197,7 @@ static int32_t AppendChangeStorageLevelInfoInService(const struct HksProcessInfo
             { .tag = HKS_TAG_PROCESS_NAME, .blob = processInfo->processName },
             { .tag = HKS_TAG_USER_ID, .uint32Param = processInfo->userIdInt },
             { .tag = HKS_TAG_IS_CHANGE_STORAGE_LEVEL, .boolParam = true },
+            { .tag = HKS_TAG_SCREEN_STATE, .boolParam = GetScreenState()},
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
             { .tag = HKS_TAG_ACCESS_TOKEN_ID, .uint64Param = processInfo->accessTokenId },
 #endif
