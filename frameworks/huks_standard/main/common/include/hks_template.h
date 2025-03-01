@@ -35,6 +35,12 @@ if ((RESULT) != HKS_SUCCESS) { \
     return (ERROR_CODE); \
 }
 
+#define HKS_ANI_IF_NOT_SUCC_LOGE_RETURN(RESULT, ERROR_CODE, LOG_MESSAGE, ...) \
+({if ((RESULT) != ANI_OK) { \
+    HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
+    return (ERROR_CODE); \
+}})
+
 #define HKS_IF_NOT_SUCC_LOGI_RETURN(RESULT, ERROR_CODE, LOG_MESSAGE, ...) \
 if ((RESULT) != HKS_SUCCESS) { \
     HKS_LOG_I(LOG_MESSAGE, ##__VA_ARGS__); \
