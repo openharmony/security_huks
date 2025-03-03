@@ -73,17 +73,19 @@ void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlo
     }
 
     MessageParcel *reply = const_cast<MessageParcel *>(reinterpret_cast<const MessageParcel *>(context));
-    HKS_IF_NOT_TRUE_RETURN_VOID(reply->WriteInt32(result));
+    HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(reply->WriteInt32(result), "reply->WriteInt32(result) failed");
 
     if (response == nullptr) {
-        HKS_IF_NOT_TRUE_RETURN_VOID(reply->WriteUint32(0));
+        HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(reply->WriteUint32(0), "reply->WriteUint32(0) failed");
     } else {
-        HKS_IF_NOT_TRUE_RETURN_VOID(reply->WriteUint32(response->size));
-        HKS_IF_NOT_TRUE_RETURN_VOID(reply->WriteBuffer(response->data, static_cast<size_t>(response->size)));
+        HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(reply->WriteUint32(response->size),
+            "reply->WriteUint32(response->size) failed");
+        HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(reply->WriteBuffer(response->data, static_cast<size_t>(response->size)),
+            "reply->WriteBuffer failed");
     }
 #ifdef L2_STANDARD
     uint32_t msgLen = HksGetThreadErrorMsgLen();
-    HKS_IF_NOT_TRUE_RETURN_VOID(reply->WriteUint32(msgLen));
+    HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(reply->WriteUint32(msgLen), "reply->WriteUint32(msgLen) failed");
 
     if (msgLen != 0) {
         const char *msg = HksGetThreadErrorMsg();

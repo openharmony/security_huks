@@ -205,7 +205,6 @@ if ((BOOL_FUNC)) { \
 #define HKS_IF_NOT_TRUE_RETURN_VOID(BOOL_FUNC) \
 do { \
     if (!(BOOL_FUNC)) { \
-        HKS_LOG_E("%" LOG_PUBLIC "s failed!", #BOOL_FUNC); \
         return; \
     } \
 } while (0)
