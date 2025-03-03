@@ -150,6 +150,16 @@ DECLARE_OID(hksApplicationId);
 DECLARE_TAG(hksApplicationIdRaw, ID_KEY_PROPERTY_APP_ID_RAW);
 DECLARE_OID(hksApplicationIdRaw);
 
+#define ID_KEY_PROPERTY_APP_ID_SA ID_KEY_PROPERTY_APP_ID, 0x02
+#define ID_KEY_PROPERTY_APP_ID_SA_SIZE (ID_KEY_PROPERTY_APP_ID_SIZE + 1)
+DECLARE_TAG(hksSaId, ID_KEY_PROPERTY_APP_ID_SA);
+DECLARE_OID(hksSaId);
+
+#define ID_KEY_PROPERTY_APP_ID_UNIFIED ID_KEY_PROPERTY_APP_ID, 0x03
+#define ID_KEY_PROPERTY_APP_ID_UNIFIED_SIZE (ID_KEY_PROPERTY_APP_ID_SIZE + 1)
+DECLARE_TAG(hksUnifiedAppId, ID_KEY_PROPERTY_APP_ID_UNIFIED);
+DECLARE_OID(hksUnifiedAppId);
+
 #define ID_KEY_PROPERTY_CHALLENGE       ID_KEY_PROPERTIES, 0x04
 #define ID_KEY_PROPERTY_CHALLENGE_SIZE      (ID_KEY_PROPERTIES_SIZE + 1)
 DECLARE_TAG(hksAttestationChallenge, ID_KEY_PROPERTY_CHALLENGE);
@@ -1129,21 +1139,50 @@ static int32_t VerifyIdsInfo(enum HksTag tag, struct HksParam *param)
     return HKS_SUCCESS;
 }
 
+static const struct AppIdTypeToOid APP_ID_TO_OID_MAP[] = {
+    { HKS_HAP_TYPE, &hksApplicationIdRawOid },
+    { HKS_SA_TYPE, &hksSaIdOid },
+    { HKS_UNIFIED_TYPE, &hksUnifiedAppIdOid },
+};
+
+static const struct HksBlob* GetAppIdOid(enum HksCallerType type)
+{
+    for (uint32_t i = 0; i < HKS_ARRAY_SIZE(APP_ID_TO_OID_MAP); ++i) {
+        if (type == APP_ID_TO_OID_MAP[i].type) {
+            return APP_ID_TO_OID_MAP[i].oid;
+        }
+    }
+    return NULL;
+}
+
 static int32_t InsertAppIdClaim(struct HksBlob *out, const struct HksParamSet *paramSet, uint32_t secLevel)
 {
     struct HksParam *appId = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ATTESTATION_APPLICATION_ID, &appId);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_SUCCESS, "not contain appId param!") // appId is optional
 
+    const struct HksBlob *appIdOid = NULL;
+    struct HksParam *appIdType = NULL;
+    ret = HksGetParam(paramSet, HKS_TAG_ATTESTATION_APPLICATION_ID_TYPE, &appIdType);
+    if (ret != HKS_SUCCESS) {
+        appIdOid = &hksApplicationIdRawOid;
+    } else {
+        appIdOid = GetAppIdOid(appIdType->uint32Param);
+    }
+    if (appIdOid == NULL) {
+        HKS_LOG_E("invalid appid type");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
     uint8_t buf[ASN_1_MAX_HEADER_LEN + MAX_OID_LEN + HKS_APP_ID_SIZE] = {0};
     uint8_t *tmp = buf;
-    if (memcpy_s(tmp, MAX_OID_LEN, hksApplicationIdRawOid.data, hksApplicationIdRawOid.size) != EOK) {
+    if (memcpy_s(tmp, MAX_OID_LEN, appIdOid->data, appIdOid->size) != EOK) {
         HKS_LOG_I("invalid oid of app id!");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    tmp += hksApplicationIdRawOid.size;
+    tmp += appIdOid->size;
 
-    struct HksBlob tmpBlob = { sizeof(buf) - hksApplicationIdRawOid.size, tmp };
+    struct HksBlob tmpBlob = { sizeof(buf) - appIdOid->size, tmp };
     struct HksAsn1Blob value = { ASN_1_TAG_TYPE_OCT_STR, appId->blob.size, appId->blob.data };
     ret = DcmAsn1WriteFinal(&tmpBlob, &value);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "write final value fail\n")
