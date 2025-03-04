@@ -284,14 +284,13 @@ static int32_t HksFreshAndReport(const char *funcName, const struct HksProcessIn
     }
 
     struct timespec curTime;
-    int32_t ret = clock_gettime(CLOCK_MONOTONIC, &curTime);
-    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, HKS_FAILURE, "clock get time fail")
+    (void)timespec_get(&curTime, TIME_UTC);
 
     const char *errorMsg = HksGetThreadErrorMsg();
     HKS_IF_NULL_LOGI_RETURN(errorMsg, HKS_ERROR_NULL_POINTER, "get error msg fail")
 
     struct HksParamSet *reportParamSet = nullptr;
-    ret = HksInitParamSet(&reportParamSet);
+    int32_t ret = HksInitParamSet(&reportParamSet);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "init report paramset fail")
 
     do {
