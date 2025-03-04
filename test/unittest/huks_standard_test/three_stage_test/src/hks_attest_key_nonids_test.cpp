@@ -18,6 +18,7 @@
 #ifdef L2_STANDARD
 #include "file_ex.h"
 #endif
+#include "hks_apply_permission_test_common.h"
 #include "hks_attest_key_test_common.h"
 #include "hks_test_adapt_for_de.h"
 #include "native_huks_api.h"
@@ -677,25 +678,28 @@ static void ValidateCertChain(struct HksParamSet *paramSet, struct HksParamSet *
 
 /**
  * @tc.name: HksAttestKeyNonIdsTest.HksAttestKeyNonIdsTest001
- * @tc.desc: attest with right params and validate success.
+ * @tc.desc: attest with right params and permission.
  * @tc.type: FUNC
  * @tc.require: issueI5NY0L
  */
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest001, TestSize.Level0)
 {
+    HKS_LOG_I("enter HksAttestKeyNonIdsTest001");
+    int32_t ret = SetIdsTokenForAttestKeyPermission();
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
     struct HksParamSet *paramSet = nullptr;
     HksCertChain *certChain = nullptr;
-    HKS_LOG_I("enter HksAttestKeyNonIdsTest001");
-    int32_t ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
+    ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
     ASSERT_EQ(ret, HKS_SUCCESS);
     GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
     const struct HksTestCertChain certParam = { true, true, true, g_size };
     (void)ConstructDataToCertChain(&certChain, &certParam);
     ret = HksAttestKeyForDe(&g_keyAlias, paramSet, certChain);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("HksAttestKey fail, ret is %" LOG_PUBLIC "d!", ret);
-    }
-    ASSERT_EQ(ret, HKS_ERROR_NO_PERMISSION);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = SetIdsTokenWithoutPermission();
+    EXPECT_EQ(ret, HKS_SUCCESS);
 }
 
 /**

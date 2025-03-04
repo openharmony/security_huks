@@ -46,6 +46,7 @@ ohos_unittest("huks_UT_test") {
     "src/asymmetric_alg_test/hks_rsa_sign_verify_test_common.cpp",
     "src/asymmetric_alg_test/hks_sm2_cipher_test.cpp",
     "src/hks_agree_test_common.cpp",
+    "src/hks_apply_permission_test_common.cpp",
     "src/hks_attest_key_nonids_test.cpp",
     "src/hks_attest_key_test_common.cpp",
     "src/hks_backup_test.cpp",
@@ -55,6 +56,7 @@ ohos_unittest("huks_UT_test") {
     "src/hks_check_pur_part_test.cpp",
     "src/hks_cross_test.cpp",
     "src/hks_cross_test_common.cpp",
+    "src/hks_get_error_msg_test.cpp",
     "src/hks_hkdf_derive_part1_test.cpp",
     "src/hks_hkdf_derive_part2_test.cpp",
     "src/hks_hkdf_derive_test_common.cpp",
@@ -66,16 +68,13 @@ ohos_unittest("huks_UT_test") {
     "src/hks_import_wrapped_sm2_suite_test.cpp",
     "src/hks_import_wrapped_test_common.cpp",
     "src/hks_import_wrapped_x25519_suite_test.cpp",
-
-    # "src/hks_multiple_users_test.cpp",
+    "src/hks_multiple_users_test.cpp",
     "src/hks_pbkdf2_derive_part1_test.cpp",
     "src/hks_pbkdf2_derive_part2_test.cpp",
     "src/hks_pbkdf2_derive_test_common.cpp",
     "src/hks_rename_part1_test.cpp",
-
-    # "src/hks_rename_part2_test.cpp",
-    # "src/hks_rename_part3_test.cpp",
-    "src/hks_get_error_msg_test.cpp",
+    "src/hks_rename_part2_test.cpp",
+    "src/hks_rename_part3_test.cpp",
     "src/hks_three_stage_test_common.c",
     "src/hks_x25519_agree_test.cpp",
     "src/symmetric_alg_test/hks_3des_cipher_part1_test.cpp",
@@ -119,8 +118,9 @@ ohos_unittest("huks_UT_test") {
     ]
   } else {
     sources += [
-      # "src/hks_change_storage_level_part1_test.cpp",
-      "src/hks_change_storage_level_part2_test.cpp",
+      "src/hks_change_storage_level_part1_test.cpp",
+
+      # "src/hks_change_storage_level_part2_test.cpp",
       "src/hks_cmac_test.cpp",
 
       # "src/hks_derive_main_key_part1_test.cpp",
@@ -204,6 +204,7 @@ ohos_unittest("huks_UT_test") {
 
   if (os_level == "standard") {
     external_deps += [
+      "access_token:libaccesstoken_sdk",
       "access_token:libnativetoken_shared",
       "access_token:libtokensetproc_shared",
       "device_manager:devicemanagersdk",

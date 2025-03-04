@@ -23,8 +23,6 @@
 #include "hks_type.h"
 #include "hks_log.h"
 #include "hks_mem.h"
-#include "nativetoken_kit.h"
-#include "token_setproc.h"
 #include "hks_file_operator.h"
 using namespace testing::ext;
 namespace {

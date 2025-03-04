@@ -14,6 +14,7 @@
  */
 
 #include "hks_api.h"
+#include "hks_apply_permission_test_common.h"
 #include "hks_derive_main_key_test_common.h"
 #include "hks_three_stage_test_common.h"
 
@@ -102,11 +103,8 @@ HWTEST_F(HksDeriveMainKeyPart1Test, HksDeriveMainKeyPart1Test001, TestSize.Level
  */
 HWTEST_F(HksDeriveMainKeyPart1Test, HksDeriveMainKeyPart1Test002, TestSize.Level0)
 {
-    int32_t ret;
-#ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
+    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
     EXPECT_EQ(ret, HKS_SUCCESS);
-#endif
 
     char tmpKeyAlias[] = "HksDeriveMainKeyPart1Test002";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
@@ -155,11 +153,8 @@ HWTEST_F(HksDeriveMainKeyPart1Test, HksDeriveMainKeyPart1Test002, TestSize.Level
  */
 HWTEST_F(HksDeriveMainKeyPart1Test, HksDeriveMainKeyPart1Test003, TestSize.Level0)
 {
-    int32_t ret;
-#ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
+    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
     EXPECT_EQ(ret, HKS_SUCCESS);
-#endif
 
     char tmpKeyAlias[] = "HksDeriveMainKeyPart1Test003";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
@@ -307,11 +302,9 @@ void HksDhAgreeFreeBlob(struct HksBlob *blob1, struct HksBlob *blob2, struct Hks
  */
 HWTEST_F(HksDeriveMainKeyPart1Test, HksDeriveMainKeyPart1Test004, TestSize.Level0)
 {
-    int32_t ret;
-#ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
+    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
     EXPECT_EQ(ret, HKS_SUCCESS);
-#endif
+
     struct HksParamSet *genParamSet = nullptr;
     struct HksParamSet *initParamSet01 = nullptr;
     struct HksParamSet *finishParamSet01 = nullptr;
@@ -437,11 +430,8 @@ int32_t HksHmacDeriveTestNormalCase(const struct HksBlob keyAlias, const struct 
  */
 HWTEST_F(HksDeriveMainKeyPart1Test, HksDeriveMainKeyPart1Test005, TestSize.Level0)
 {
-    int32_t ret;
-#ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
+    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
     EXPECT_EQ(ret, HKS_SUCCESS);
-#endif
 
     struct HksBlob keyAlias = { strlen("HksDeriveMainKeyPart1Test005"), (uint8_t *)"HksDeriveMainKeyPart1Test005" };
     ret = HKS_FAILURE;
