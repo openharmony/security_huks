@@ -14,9 +14,8 @@
  */
 
 #include "hks_api.h"
+#include "hks_apply_permission_test_common.h"
 #include "hks_three_stage_test_common.h"
-#include "nativetoken_kit.h"
-#include "token_setproc.h"
 
 #include <gtest/gtest.h>
 
@@ -91,36 +90,6 @@ static const struct HksParam g_genParams002[] = {
     { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_CE },
     { .tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = 101 },
 };
-
-#ifdef HKS_INTERACT_ABILITY
-static int32_t SetIdsToken()
-{
-    uint64_t tokenId;
-    const char *acls[] = {
-        "ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS",
-    };
-    const char *perms[] = {
-        "ohos.permission.PLACE_CALL", // system_basic
-        "ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS",
-    };
-    NativeTokenInfoParams infoInstance = {
-        .dcapsNum = 0,
-        .permsNum = 2,
-        .dcaps = nullptr,
-        .perms = perms,
-        .aplStr = "system_basic",
-    };
-    infoInstance.acls = acls;
-    infoInstance.aclsNum = 1;
-    infoInstance.processName = "test_upgrade";
-    tokenId = GetAccessTokenId(&infoInstance);
-    int32_t ret = SetSelfTokenID(tokenId);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("SetSelfTokenID fail, ret is %" LOG_PUBLIC "x!", ret);
-    }
-    return ret;
-}
-#endif
 
 static int32_t HksTestUpdateLoopFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData)
@@ -231,11 +200,8 @@ int32_t HksAesCipherTestDecrypt(const struct HksBlob *keyAlias, const struct Hks
  */
 HWTEST_F(HksMultipleUsersTest, HksMultipleUsersTest001, TestSize.Level0)
 {
-    int32_t ret;
-#ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
+    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
     EXPECT_EQ(ret, HKS_SUCCESS);
-#endif
 
     char tmpKeyAlias[] = "HksMultipleUsersTest001";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
@@ -284,11 +250,8 @@ HWTEST_F(HksMultipleUsersTest, HksMultipleUsersTest001, TestSize.Level0)
  */
 HWTEST_F(HksMultipleUsersTest, HksMultipleUsersTest002, TestSize.Level0)
 {
-    int32_t ret;
-#ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
+    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
     EXPECT_EQ(ret, HKS_SUCCESS);
-#endif
 
     char tmpKeyAlias[] = "HksMultipleUsersTest002";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };

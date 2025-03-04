@@ -14,6 +14,7 @@
  */
 
 #include "hks_api.h"
+#include "hks_apply_permission_test_common.h"
 #include "hks_derive_main_key_test_common.h"
 #include "hks_three_stage_test_common.h"
 
@@ -100,11 +101,8 @@ HWTEST_F(HksDeriveMainKeyPart3Test, HksDeriveMainKeyPart3Test001, TestSize.Level
  */
 HWTEST_F(HksDeriveMainKeyPart3Test, HksDeriveMainKeyPart3Test002, TestSize.Level0)
 {
-    int32_t ret;
-#ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
+    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
     EXPECT_EQ(ret, HKS_SUCCESS);
-#endif
 
     struct HksParamSet *genParamSet = nullptr;
     ret = InitParamSet(&genParamSet, g_genParams002, sizeof(g_genParams002) / sizeof(HksParam));
@@ -151,11 +149,8 @@ HWTEST_F(HksDeriveMainKeyPart3Test, HksDeriveMainKeyPart3Test002, TestSize.Level
  */
 HWTEST_F(HksDeriveMainKeyPart3Test, HksDeriveMainKeyPart3Test003, TestSize.Level0)
 {
-    int32_t ret;
-#ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
+    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
     EXPECT_EQ(ret, HKS_SUCCESS);
-#endif
 
     struct HksParamSet *genParamSet = nullptr;
     ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003) / sizeof(HksParam));
@@ -238,11 +233,8 @@ HWTEST_F(HksDeriveMainKeyPart3Test, HksDeriveMainKeyPart3Test004, TestSize.Level
  */
 HWTEST_F(HksDeriveMainKeyPart3Test, HksDeriveMainKeyPart3Test005, TestSize.Level0)
 {
-    int32_t ret;
-#ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
+    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
     EXPECT_EQ(ret, HKS_SUCCESS);
-#endif
 
     struct HksParamSet *genParamSet = nullptr;
     ret = InitParamSet(&genParamSet, g_genParams002, sizeof(g_genParams002) / sizeof(HksParam));
@@ -280,11 +272,8 @@ HWTEST_F(HksDeriveMainKeyPart3Test, HksDeriveMainKeyPart3Test005, TestSize.Level
  */
 HWTEST_F(HksDeriveMainKeyPart3Test, HksDeriveMainKeyPart3Test006, TestSize.Level0)
 {
-    int32_t ret;
-#ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
+    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
     EXPECT_EQ(ret, HKS_SUCCESS);
-#endif
 
     struct HksParamSet *genParamSet = nullptr;
     ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003) / sizeof(HksParam));

@@ -14,43 +14,11 @@
  */
 
 #include <gtest/gtest.h>
-#include "nativetoken_kit.h"
-#include "token_setproc.h"
 
 #include "hks_derive_main_key_test_common.h"
 #include "hks_three_stage_test_common.h"
 
 namespace Unittest::HksDeriveMainKeyTest {
-#ifdef HKS_INTERACT_ABILITY
-int32_t SetIdsToken()
-{
-    uint64_t tokenId;
-    const char *acls[] = {
-        "ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS",
-    };
-    const char *perms[] = {
-        "ohos.permission.PLACE_CALL", // system_basic
-        "ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS",
-    };
-    NativeTokenInfoParams infoInstance = {
-        .dcapsNum = 0,
-        .permsNum = 2,
-        .dcaps = nullptr,
-        .perms = perms,
-        .aplStr = "system_basic",
-    };
-    infoInstance.acls = acls;
-    infoInstance.aclsNum = 1;
-    infoInstance.processName = "test_upgrade";
-    tokenId = GetAccessTokenId(&infoInstance);
-    int32_t ret = SetSelfTokenID(tokenId);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("SetSelfTokenID fail, ret is %" LOG_PUBLIC "x!", ret);
-    }
-    return ret;
-}
-#endif
-
 static int32_t HksTestUpdateLoopFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData)
 {

@@ -14,12 +14,14 @@
  */
 
 #include "hks_api.h"
+#include "hks_apply_permission_test_common.h"
+#include "hks_change_storage_level_test_common.h"
 #include "hks_three_stage_test_common.h"
 
 #include <gtest/gtest.h>
 
 using namespace testing::ext;
-namespace Unittest::HksChangeStorageLevelPart2Test {
+namespace Unittest::HksChangeStorageLevelTest {
 class HksChangeStorageLevelPart2Test : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -47,21 +49,6 @@ void HksChangeStorageLevelPart2Test::TearDown()
 {
 }
 
-static const struct HksParam g_params001[] = {
-    { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
-    { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
-    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
-    { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
-};
-
-static const struct HksParam g_params002[] = {
-    { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
-    { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
-    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
-    { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_CE },
-    { .tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = 100 },
-};
-
 /**
  * @tc.name: HksChangeStorageLevelPart2Test.HksChangeStorageLevelPart2Test001
  * @tc.desc: upgrade DE to CE
@@ -71,10 +58,13 @@ HWTEST_F(HksChangeStorageLevelPart2Test, HksChangeStorageLevelPart2Test001, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart2Test001");
 
+    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
     char tmpKeyAlias[] = "HksChangeStorageLevelPart2Test001";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *srcParamSet = nullptr;
-    int32_t ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
+    ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);
@@ -85,10 +75,7 @@ HWTEST_F(HksChangeStorageLevelPart2Test, HksChangeStorageLevelPart2Test001, Test
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksChangeStorageLevel(&keyAlias, srcParamSet, desParamSet);
-    EXPECT_EQ(ret, HKS_ERROR_NO_PERMISSION) << "HksChangeStorageLevel failed.";
-
-    ret = HksDeleteKey(&keyAlias, srcParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksDeleteKey failed.";
+    EXPECT_EQ(ret, HKS_ERROR_KEY_CLEAR_FAILED) << "HksChangeStorageLevel failed.";
 
     HksFreeParamSet(&srcParamSet);
     HksFreeParamSet(&desParamSet);

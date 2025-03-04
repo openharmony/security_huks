@@ -21,14 +21,13 @@
 
 #include "hks_rename_test.h"
 #include "hks_api.h"
+#include "hks_apply_permission_test_common.h"
 #include "hks_param.h"
 #include "hks_test_common.h"
 #include "hks_test_log.h"
 #include "hks_type.h"
 #include "hks_log.h"
 #include "hks_mem.h"
-#include "nativetoken_kit.h"
-#include "token_setproc.h"
 #include "hks_file_operator.h"
 using namespace testing::ext;
 using namespace testing::mt;
@@ -122,36 +121,6 @@ static int32_t BuildParamSetWithParam(struct HksParamSet **paramSet, struct HksP
     return HksBuildParamSet(paramSet);
 }
 
-#ifdef HKS_INTERACT_ABILITY
-static int32_t SetIdsToken()
-{
-    uint64_t tokenId;
-    const char *acls[] = {
-        "ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS",
-    };
-    const char *perms[] = {
-        "ohos.permission.PLACE_CALL", // system_basic
-        "ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS",
-    };
-    NativeTokenInfoParams infoInstance = {
-        .dcapsNum = 0,
-        .permsNum = 2,
-        .dcaps = nullptr,
-        .perms = perms,
-        .aplStr = "system_basic",
-    };
-    infoInstance.acls = acls;
-    infoInstance.aclsNum = 1;
-    infoInstance.processName = "test_movece";
-    tokenId = GetAccessTokenId(&infoInstance);
-    int32_t ret = SetSelfTokenID(tokenId);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("SetSelfTokenID fail, ret is %" LOG_PUBLIC "x!", ret);
-    }
-    return ret;
-}
-#endif
-
 /**
  * @tc.name: HksRenameKeyAliasPart3Test.HksRenameKeyAliasPart3Test013
  * @tc.desc: the storageLevel is CE
@@ -159,13 +128,13 @@ static int32_t SetIdsToken()
  */
 HWTEST_F(HksRenameKeyAliasPart3Test, HksRenameKeyAliasPart3Test0013, TestSize.Level0)
 {
-#ifdef HKS_INTERACT_ABILITY
-    SetIdsToken();
-#endif
+    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
     const char *alias = "oldAlias013";
     struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
-    
-    int32_t ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_CE);
+
+    ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_CE);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestGenerateKey keyAlias ret is " << ret;
     
     struct HksParamSet *paramSet = nullptr;
@@ -206,13 +175,13 @@ HWTEST_F(HksRenameKeyAliasPart3Test, HksRenameKeyAliasPart3Test0013, TestSize.Le
  */
 HWTEST_F(HksRenameKeyAliasPart3Test, HksRenameKeyAliasPart3Test0014, TestSize.Level0)
 {
-#ifdef HKS_INTERACT_ABILITY
-    SetIdsToken();
-#endif
+    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
     const char *alias = "oldAlias014";
     struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
-    
-    int32_t ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_ECE);
+
+    ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_ECE);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestGenerateKey keyAlias ret is " << ret;
     
     struct HksParamSet *paramSet = nullptr;
@@ -253,13 +222,13 @@ HWTEST_F(HksRenameKeyAliasPart3Test, HksRenameKeyAliasPart3Test0014, TestSize.Le
  */
 HWTEST_F(HksRenameKeyAliasPart3Test, HksRenameKeyAliasPart3Test0015, TestSize.Level0)
 {
-#ifdef HKS_INTERACT_ABILITY
-    SetIdsToken();
-#endif
+    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
     const char *alias = "oldAlias015";
     struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
-    
-    int32_t ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_CE);
+
+    ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_CE);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestGenerateKey keyAlias ret is " << ret;
     
     struct HksParamSet *paramSet = nullptr;
@@ -298,15 +267,15 @@ HWTEST_F(HksRenameKeyAliasPart3Test, HksRenameKeyAliasPart3Test0015, TestSize.Le
  */
 HWTEST_F(HksRenameKeyAliasPart3Test, HksRenameKeyAliasPart3Test0016, TestSize.Level0)
 {
-#ifdef HKS_INTERACT_ABILITY
-    SetIdsToken();
-#endif
+    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
     const char *alias = "oldAlias016";
     struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
-    
-    int32_t ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_ECE);
+
+    ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_ECE);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestGenerateKey keyAlias ret is " << ret;
-    
+
     struct HksParamSet *paramSet = nullptr;
     struct HksParam storageLevel[] = {
         { .tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = USER_ID_INT },
@@ -343,13 +312,13 @@ HWTEST_F(HksRenameKeyAliasPart3Test, HksRenameKeyAliasPart3Test0016, TestSize.Le
  */
 HWTEST_F(HksRenameKeyAliasPart3Test, HksRenameKeyAliasPart3Test020, TestSize.Level0)
 {
-#ifdef HKS_INTERACT_ABILITY
-    SetIdsToken();
-#endif
+    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
     const char *alias = "oldKeyAlias020";
     struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
-    
-    int32_t ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_DE);
+
+    ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_DE);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestGenerateKey ret is " << ret;
 
     struct HksParamSet *paramSet = nullptr;
@@ -416,13 +385,13 @@ void MultiThreadRename()
  */
 HWTEST_F(HksRenameKeyAliasPart3Test, HksRenameKeyAliasPart3Test028, TestSize.Level0)
 {
-#ifdef HKS_INTERACT_ABILITY
-    SetIdsToken();
-#endif
+    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
     const char *alias = "oldKeyAlias028";
     struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
-    
-    int32_t ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_ECE);
+
+    ret = TestGenerateKey(&keyAlias, HKS_AUTH_STORAGE_LEVEL_ECE);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestGenerateKey ret is " << ret;
 
     struct HksParamSet *paramSet = nullptr;
