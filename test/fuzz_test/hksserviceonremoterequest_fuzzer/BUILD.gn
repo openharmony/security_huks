@@ -40,6 +40,10 @@ ohos_fuzztest("HksServiceOnRemoteRequestFuzzTest") {
     "c_utils:utils",
     "hilog:libhilog",
   ]
+
+  if (os_level == "standard") {
+    external_deps += [ "safwk:system_ability_fwk" ]
+  }
 }
 
 ###############################################################################
