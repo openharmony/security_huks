@@ -47,15 +47,8 @@ static void GetProcessInfo(int userId, int uid, struct HksProcessInfo *processIn
         userSize = strlen(USER_ID_ROOT);
     }
     uint8_t *userData = static_cast<uint8_t *>(HksMalloc(userSize));
-    if (userData == nullptr) {
-        HKS_LOG_E("user id malloc failed.");
-        return;
-    }
-    if (userId == 0) {
-        (void)memcpy_s(userData, userSize, USER_ID_ROOT, userSize);
-    } else {
-        (void)memcpy_s(userData, userSize, &userId, userSize);
-    }
+    HKS_IF_NULL_LOGE_RETURN_VOID(userData, "user id malloc failed.")
+    (void)memcpy_s(userData, userSize, userId == 0 ? USER_ID_ROOT : reinterpret_cast<const char *>(&userId), userSize);
     processInfo->userId.size = userSize;
     processInfo->userId.data = userData;
     processInfo->userIdInt = userId;
@@ -77,10 +70,7 @@ static void GetUserId(int userId, struct HksBlob *userIdBlob)
 {
     uint32_t userIdSize = sizeof(userId);
     uint8_t *userIdData = static_cast<uint8_t *>(HksMalloc(userIdSize));
-    if (userIdData == nullptr) {
-        HKS_LOG_E("uid malloc failed.");
-        return;
-    }
+    HKS_IF_NULL_LOGE_RETURN_VOID(userIdData, "uid malloc failed.")
     (void)memcpy_s(userIdData, userIdSize, &userId, userIdSize);
     userIdBlob->size = userIdSize;
     userIdBlob->data = userIdData;

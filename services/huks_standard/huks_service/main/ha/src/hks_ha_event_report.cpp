@@ -38,15 +38,10 @@ void HksEventReport(const char *funcName, const struct HksProcessInfo *processIn
     HKS_IF_NOT_SUCC_RETURN_VOID(ret)
 
     ret = HksBuildParamSet(&newParamSet);
-    if (ret != HKS_SUCCESS) {
-        HksFreeParamSet(&newParamSet);
-        return;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, HksFreeParamSet(&newParamSet))
+
     bool enqueueSuccess = HksHaPlugin::GetInstance().Enqueue(eventId, newParamSet);
-    if (!enqueueSuccess) {
-        HKS_LOG_E("Report fault event failed");
-        HksFreeParamSet(&newParamSet);
-    }
+    HKS_IF_NOT_TRUE_LOGE_RETURN(enqueueSuccess, HksFreeParamSet(&newParamSet), "Report fault event failed")
 #else
     if (eventId == HKS_EVENT_DELETE_KEY) {
         if (ret != HKS_ERROR_NOT_EXIST) {

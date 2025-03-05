@@ -126,10 +126,8 @@ int32_t HksCheckGetKeyInfoListParams(const struct HksBlob *processName, const st
         "keyInfoList or listCount null.")
 
     for (uint32_t i = 0; i < *listCount; ++i) {
-        if ((CheckBlob(&(keyInfoList[i].alias)) != HKS_SUCCESS) ||
-            (keyInfoList[i].paramSet == NULL) || (keyInfoList[i].paramSet->paramSetSize == 0)) {
-            return HKS_ERROR_INVALID_ARGUMENT;
-        }
+        HKS_IF_TRUE_RETURN(CheckBlob(&(keyInfoList[i].alias)) != HKS_SUCCESS || keyInfoList[i].paramSet == NULL ||
+            keyInfoList[i].paramSet->paramSetSize == 0, HKS_ERROR_INVALID_ARGUMENT)
     }
 
     return HKS_SUCCESS;
@@ -168,10 +166,8 @@ static int32_t CheckAuthAccessLevel(const struct HksParamSet *paramSet)
     int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_AUTH_ACCESS_TYPE, &authAccess);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ACCESS_TYPE_FAILED, "get auth access type fail")
 
-    if (authAccess->uint32Param < HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD) {
-        HKS_LOG_E("auth access level is too low");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(authAccess->uint32Param < HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD,
+        HKS_ERROR_INVALID_ARGUMENT, "auth access level is too low")
     return HKS_SUCCESS;
 }
 
@@ -185,10 +181,8 @@ static int32_t CheckUserAuthParamsValidity(const struct HksParamSet *paramSet, u
         struct HksParam *authTimeout = NULL;
         ret = HksGetParam(paramSet, HKS_TAG_AUTH_TIMEOUT, &authTimeout);
         if (ret == HKS_SUCCESS) {
-            if (authTimeout->uint32Param > MAX_AUTH_TIMEOUT_SECOND || authTimeout->uint32Param == 0) {
-                HKS_LOG_E("invalid auth timeout param");
-                return HKS_ERROR_INVALID_TIME_OUT;
-            }
+            HKS_IF_TRUE_LOGE_RETURN(authTimeout->uint32Param > MAX_AUTH_TIMEOUT_SECOND ||
+                authTimeout->uint32Param == 0, HKS_ERROR_INVALID_TIME_OUT, "invalid auth timeout param")
         }
     }
 
@@ -201,10 +195,8 @@ static int32_t CheckUserAuthParamsValidity(const struct HksParamSet *paramSet, u
         /* secure sign ability only support sign-purpose algorithm */
         struct HksParam *purposeParam = NULL;
         ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &purposeParam);
-        if (ret != HKS_SUCCESS || (purposeParam->uint32Param & HKS_KEY_PURPOSE_SIGN) == 0) {
-            HKS_LOG_E("secure sign tag only support sign-purpose alg");
-            return HKS_ERROR_INVALID_ARGUMENT;
-        }
+        HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS || (purposeParam->uint32Param & HKS_KEY_PURPOSE_SIGN) == 0,
+            HKS_ERROR_INVALID_ARGUMENT, "secure sign tag only support sign-purpose alg")
         ret = CheckAuthAccessLevel(paramSet);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "check auth access level fail")
     }
@@ -267,10 +259,8 @@ int32_t HksCheckUserAuthKeyPurposeValidity(const struct HksParamSet *paramSet)
     HKS_IF_NULL_LOGE_RETURN(paramSet, HKS_ERROR_NULL_POINTER, "paramSet is null!")
 
     // step 1. Judge whether the allowed wrap param is true.
-    if (HksCheckIsAllowedWrap(paramSet)) {
-        HKS_LOG_E("key with access control isn't allowed wrap!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(HksCheckIsAllowedWrap(paramSet), HKS_ERROR_INVALID_ARGUMENT,
+        "key with access control isn't allowed wrap!")
 
     // step 2. Judge whether the user auth key purpose is set.
     struct HksParam *userAuthKeyPurposeParam = NULL;
@@ -327,9 +317,7 @@ int32_t HksCheckOldKeyExist(const struct HksProcessInfo *processInfo, const stru
     HKS_IF_NOT_SUCC_RETURN(ret, ret);
 
     ret = HksManageStoreIsKeyBlobExist(processInfo, paramSet, oldKeyAlias, HKS_STORAGE_TYPE_KEY);
-    if (ret == HKS_ERROR_NOT_EXIST) {
-        HKS_LOG_E("the oldKey not exist!");
-    }
+    HKS_IF_TRUE_LOGE(ret == HKS_ERROR_NOT_EXIST, "the oldKey not exist!")
     return ret;
 }
 
@@ -340,14 +328,8 @@ int32_t HksCheckNewKeyNotExist(const struct HksProcessInfo *processInfo, const s
     HKS_IF_NOT_SUCC_RETURN(ret, ret);
 
     ret = HksManageStoreIsKeyBlobExist(processInfo, paramSet, newKeyAlias, HKS_STORAGE_TYPE_KEY);
-    if (ret == HKS_SUCCESS) {
-        HKS_LOG_E("the newKey is already exist!");
-        return HKS_ERROR_ALREADY_EXISTS;
-    }
-    if (ret == HKS_ERROR_NOT_EXIST) {
-        HKS_LOG_I("the newKey is  not exist!");
-        return HKS_SUCCESS;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(ret == HKS_SUCCESS, HKS_ERROR_ALREADY_EXISTS, "the newKey is already exist!")
+    HKS_IF_TRUE_LOGI_RETURN(ret == HKS_ERROR_NOT_EXIST, HKS_SUCCESS, "the newKey is  not exist!")
     return ret;
 }
 
@@ -359,10 +341,8 @@ int32_t HksCheckProcessInConfigList(const struct HksBlob *processName)
         HKS_ERROR_NO_PERMISSION, "illegal uid, please check your process name")
 
     for (uint32_t i = 0; i < HKS_ARRAY_SIZE(CHANGE_STORAGE_LEVEL_CFG_LIST); ++i) {
-        if (uid == CHANGE_STORAGE_LEVEL_CFG_LIST[i]) {
-            HKS_LOG_I("%" LOG_PUBLIC "u could change storage level", uid);
-            return HKS_SUCCESS;
-        }
+        HKS_IF_TRUE_LOGI_RETURN(uid == CHANGE_STORAGE_LEVEL_CFG_LIST[i], HKS_SUCCESS,
+            "%" LOG_PUBLIC "u could change storage level", uid)
     }
     HKS_LOG_E("%" LOG_PUBLIC "u don't have permission to change storage level", uid);
     return HKS_ERROR_NO_PERMISSION;
@@ -383,19 +363,15 @@ int32_t HksCheckChangeStorageLevelParams(const struct HksBlob *processName, cons
     ret = HksGetParam(srcParamSet, HKS_TAG_AUTH_STORAGE_LEVEL, &srcStorageLevelParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "srcParamSet not set storage level!")
 
-    if (srcStorageLevelParam->uint32Param != HKS_AUTH_STORAGE_LEVEL_DE) {
-        HKS_LOG_E("storage level in srcParamSet must be DE");
-        return HKS_ERROR_NOT_SUPPORTED;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(srcStorageLevelParam->uint32Param != HKS_AUTH_STORAGE_LEVEL_DE, HKS_ERROR_NOT_SUPPORTED,
+        "storage level in srcParamSet must be DE")
 
     struct HksParam *destStorageLevelParam = NULL;
     ret = HksGetParam(destParamSet, HKS_TAG_AUTH_STORAGE_LEVEL, &destStorageLevelParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "destParamSet not set storage level!")
 
-    if (destStorageLevelParam->uint32Param != HKS_AUTH_STORAGE_LEVEL_CE) {
-        HKS_LOG_E("storage level in destParamSet must be CE");
-        return HKS_ERROR_NOT_SUPPORTED;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(destStorageLevelParam->uint32Param != HKS_AUTH_STORAGE_LEVEL_CE, HKS_ERROR_NOT_SUPPORTED,
+        "storage level in destParamSet must be CE")
     return HKS_SUCCESS;
 }
 #endif

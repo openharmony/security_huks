@@ -49,9 +49,8 @@ extern "C" void HksTransferFileIfNeed(const uint32_t storageLevel, const int32_t
     bool flag = false;
     HKS_IF_NOT_TRUE_RETURN_VOID(std::atomic_compare_exchange_strong(&g_isCeUpgradeSucc, &flag, true));
     HKS_LOG_I("never HksTransferFileIfNeed before, first time upgrade ce!");
-    if (storageLevel == HKS_AUTH_STORAGE_LEVEL_CE && HksIsOsAccountVerified(storeUserId)) {
-        OHOS::Security::Hks::HksUpgradeOnUserUnlock(storeUserId);
-    }
+    HKS_IF_NOT_TRUE_RETURN_VOID(storageLevel == HKS_AUTH_STORAGE_LEVEL_CE && HksIsOsAccountVerified(storeUserId))
+    OHOS::Security::Hks::HksUpgradeOnUserUnlock(storeUserId);
 }
 
 #endif // HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
