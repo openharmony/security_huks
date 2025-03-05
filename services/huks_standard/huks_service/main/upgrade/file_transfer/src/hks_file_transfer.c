@@ -57,13 +57,8 @@ static int32_t GetStoreMaterial(const struct HksBlob *alias, const struct HksUpg
 
     struct HksBlob userIdBlob = { 0 };
 
-    if (info->needFrontUser) {
-        userIdBlob.data = (uint8_t *)&g_frontUserId;
-        userIdBlob.size = sizeof(g_frontUserId);
-    } else {
-        userIdBlob.data = (uint8_t *)&info->userId;
-        userIdBlob.size = sizeof(info->userId);
-    }
+    userIdBlob.data = info->needFrontUser ? (uint8_t *)&g_frontUserId : (uint8_t *)&info->userId;
+    userIdBlob.size = info->needFrontUser ? sizeof(g_frontUserId) : sizeof(info->userId);
 
     ret = ConstructPlainName(&userIdBlob, outMaterial->userIdPath, HKS_MAX_DIRENT_FILE_LEN);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "construct user id path failed.")
@@ -179,9 +174,7 @@ static int32_t SplitPath(const char *filePath, const struct FTW *ftw, char **pat
 static int32_t GetFileContent(const char *path, const char *alias, struct HksBlob *fileContent)
 {
     uint32_t size = HksFileSize(path, alias);
-    if (size == 0) {
-        return HKS_ERROR_FILE_SIZE_FAIL;
-    }
+    HKS_IF_TRUE_RETURN(size == 0, HKS_ERROR_FILE_SIZE_FAIL)
     fileContent->data = (uint8_t *)HksMalloc(size);
     HKS_IF_NULL_RETURN(fileContent->data, HKS_ERROR_MALLOC_FAIL)
 
@@ -215,11 +208,8 @@ static int ProcessFileUpgrade(const char *filePath, const struct stat *st, int t
         ret = HksParseConfig(alias, &fileContent, &info);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksParseConfig failed, userid: %" LOG_PUBLIC "d, uid: %" LOG_PUBLIC "d, "
             "alias: %" LOG_PUBLIC "s", info.userId, info.uid, anonymousKeyAlias)
-        if (info.skipTransfer) {
-            HKS_LOG_I("file should skip transfer, userid: %" LOG_PUBLIC "d, uid: %" LOG_PUBLIC "d, "
-                "alias: %" LOG_PUBLIC "s", info.userId, info.uid, anonymousKeyAlias);
-            break;
-        }
+        HKS_IF_TRUE_LOGI_BREAK(info.skipTransfer, "file should skip transfer, userid: %" LOG_PUBLIC "d, "
+            "uid: %" LOG_PUBLIC "d, alias: %" LOG_PUBLIC "s", info.userId, info.uid, anonymousKeyAlias)
         HKS_IF_NOT_SUCC_LOGE(TransferFile(alias, anonymousKeyAlias, path, &fileContent, &info), "TransferFile failed!")
     } while (false);
     HKS_FREE(path);
@@ -242,9 +232,7 @@ ENABLE_CFI(int32_t UpgradeFileTransfer(void))
 
 static int32_t CopyDeToTmpPathIfNeed(void)
 {
-    if (HksIsDirExist(HKS_KEY_STORE_TMP_PATH) == HKS_SUCCESS) {
-        return HKS_SUCCESS;
-    }
+    HKS_IF_TRUE_RETURN(HksIsDirExist(HKS_KEY_STORE_TMP_PATH) == HKS_SUCCESS, HKS_SUCCESS)
     int32_t ret = rename(HKS_KEY_STORE_PATH, HKS_KEY_STORE_TMP_PATH);
     if (ret != 0) {
         HKS_LOG_ERRNO("move de file path to old file path failed, ret =",  HKS_ERROR_MAKE_DIR_FAIL);

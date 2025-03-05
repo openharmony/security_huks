@@ -100,10 +100,8 @@ static void SubscribEvent()
 static void HksSubscribeEvent()
 {
     pthread_t subscribeThread;
-    if ((pthread_create(&subscribeThread, nullptr, (void *(*)(void *))SubscribEvent, nullptr)) == -1) {
-        HKS_LOG_E("create thread failed");
-        return;
-    }
+    HKS_IF_TRUE_LOGE_RETURN_VOID(pthread_create(&subscribeThread, nullptr, (void *(*)(void *))SubscribEvent,
+        nullptr) == -1, "create thread failed")
     pthread_setname_np(subscribeThread, "HUKS_SUBSCRIBE_THREAD");
     HKS_LOG_I("create thread success");
 }
@@ -125,10 +123,8 @@ static int32_t ProcessMessage(uint32_t code, uint32_t outSize, const struct HksB
         }
     }
 
-    if (outSize > MAX_MALLOC_LEN) {
-        HKS_LOG_E("outSize is invalid, size:%" LOG_PUBLIC "u", outSize);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(outSize > MAX_MALLOC_LEN, HKS_ERROR_INVALID_ARGUMENT,
+        "outSize is invalid, size:%" LOG_PUBLIC "u", outSize)
 
     size = sizeof(HKS_IPC_THREE_STAGE_HANDLER) / sizeof(HKS_IPC_THREE_STAGE_HANDLER[0]);
     for (uint32_t i = 0; i < size; ++i) {
@@ -172,19 +168,13 @@ sptr<HksService> HksService::GetInstance()
 bool HksService::Init()
 {
     HKS_LOG_I("HksService::Init Ready to init");
-    if (registerToService_) {
-        HKS_LOG_I("HksService::Init already finished.");
-        return true;
-    }
+    HKS_IF_TRUE_LOGI_RETURN(registerToService_, true, "HksService::Init already finished.")
 
     int32_t ret = HksServiceInitialize();
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "Init hks service failed!")
     sptr<HksService> ptrInstance = HksService::GetInstance();
     HKS_IF_NULL_LOGE_RETURN(ptrInstance, false, "HksService::Init GetInstance Failed")
-    if (!Publish(ptrInstance)) {
-        HKS_LOG_E("HksService::Init Publish Failed");
-        return false;
-    }
+    HKS_IF_NOT_TRUE_LOGE_RETURN(Publish(ptrInstance), false, "HksService::Init Publish Failed")
 
     ret = HksHaPluginInit();
     HKS_IF_NOT_SUCC_LOGE(ret, "Init ha plugin failed!");
@@ -220,11 +210,8 @@ static int32_t ProcessAttestOrNormalMessage(
         return HKS_SUCCESS;
     } else if (code == HKS_MSG_ATTEST_KEY_ASYNC_REPLY) {
         auto ptr = data.ReadRemoteObject();
-        if (ptr == nullptr) {
-            // ReadRemoteObject will fail if huks_service has no selinux permission to call the client side.
-            HKS_LOG_E("ReadRemoteObject ptr failed");
-            return HKS_ERROR_IPC_INIT_FAIL;
-        }
+        // ReadRemoteObject will fail if huks_service has no selinux permission to call the client side.
+        HKS_IF_NULL_LOGE_RETURN(ptr, HKS_ERROR_IPC_INIT_FAIL, "ReadRemoteObject ptr failed")
 
         HksIpcServiceAttestKey(reinterpret_cast<const HksBlob *>(&srcData),
             reinterpret_cast<const uint8_t *>(&reply), reinterpret_cast<const uint8_t *>(ptr.GetRefPtr()));
@@ -240,42 +227,29 @@ static void ProcessRemoteRequest(uint32_t code, MessageParcel &data, MessageParc
     struct HksBlob srcData = { 0, nullptr };
     int32_t ret = HKS_ERROR_INVALID_ARGUMENT;
     do {
-        if (!data.ReadUint32(outSize)) {
-            HKS_LOG_E("Read outSize failed!");
-            break;
-        }
+        HKS_IF_NOT_TRUE_LOGE_BREAK(data.ReadUint32(outSize), "Read outSize failed!")
 
         ret = HksPluginOnLocalRequest(CODE_UPGRADE, NULL, NULL);
         HKS_IF_NOT_SUCC_BREAK(ret, "Failed to handle local request. ret = %" LOG_PUBLIC "d", ret);
 
-        if (!data.ReadUint32(srcData.size) || IsInvalidLength(srcData.size)) {
-            HKS_LOG_E("srcData size is invalid, size:%" LOG_PUBLIC "u", srcData.size);
-            ret = HKS_ERROR_INVALID_ARGUMENT;
-            break;
-        }
+        ret = HKS_ERROR_INVALID_ARGUMENT;
+        HKS_IF_TRUE_LOGE_BREAK(!data.ReadUint32(srcData.size) || IsInvalidLength(srcData.size),
+            "srcData size is invalid, size:%" LOG_PUBLIC "u", srcData.size)
 
+        ret = HKS_ERROR_MALLOC_FAIL;
         srcData.data = static_cast<uint8_t *>(HksMalloc(srcData.size));
-        if (srcData.data == nullptr) {
-            HKS_LOG_E("Malloc srcData failed.");
-            ret = HKS_ERROR_MALLOC_FAIL;
-            break;
-        }
+        HKS_IF_NULL_LOGE_BREAK(srcData.data, "Malloc srcData failed.")
 
+        ret = HKS_ERROR_IPC_MSG_FAIL;
         const uint8_t *pdata = data.ReadBuffer(static_cast<size_t>(srcData.size));
-        if (pdata == nullptr) {
-            ret = HKS_ERROR_IPC_MSG_FAIL;
-            break;
-        }
+        HKS_IF_NULL_BREAK(pdata)
         (void)memcpy_s(srcData.data, srcData.size, pdata, srcData.size);
         ret = ProcessAttestOrNormalMessage(code, data, outSize, srcData, reply);
     } while (0);
 
     HKS_FREE_BLOB(srcData);
-
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("handle ipc msg failed!");
-        HksSendResponse(reinterpret_cast<const uint8_t *>(&reply), ret, nullptr);
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HksSendResponse(reinterpret_cast<const uint8_t *>(&reply), ret, nullptr),
+        "handle ipc msg failed!")
 }
 
 int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -360,40 +334,23 @@ void MoveMineOldFile(const char *oldDir, const char *newDir)
             continue;
         }
         char curPath[DEFAULT_PATH_LEN] = { 0 };
-        if (strcpy_s(curPath, DEFAULT_PATH_LEN, oldDir) != EOK) {
-            break;
-        }
-        if (strcat_s(curPath, DEFAULT_PATH_LEN, "/") != EOK) {
-            break;
-        }
-        if (strcat_s(curPath, DEFAULT_PATH_LEN, ptr->d_name) != EOK) {
-            break;
-        }
+        HKS_IF_NOT_EOK_BREAK(strcpy_s(curPath, DEFAULT_PATH_LEN, oldDir))
+        HKS_IF_NOT_EOK_BREAK(strcat_s(curPath, DEFAULT_PATH_LEN, "/"))
+        HKS_IF_NOT_EOK_BREAK(strcat_s(curPath, DEFAULT_PATH_LEN, ptr->d_name))
         char newPath[DEFAULT_PATH_LEN] = { 0 };
-        if (strcpy_s(newPath, DEFAULT_PATH_LEN, newDir) != EOK) {
-            break;
-        }
-        if (strcat_s(newPath, DEFAULT_PATH_LEN, "/") != EOK) {
-            break;
-        }
-        if (strcat_s(newPath, DEFAULT_PATH_LEN, ptr->d_name) != EOK) {
-            break;
-        }
+        HKS_IF_NOT_EOK_BREAK(strcpy_s(newPath, DEFAULT_PATH_LEN, newDir))
+        HKS_IF_NOT_EOK_BREAK(strcat_s(newPath, DEFAULT_PATH_LEN, "/"))
+        HKS_IF_NOT_EOK_BREAK(strcat_s(newPath, DEFAULT_PATH_LEN, ptr->d_name))
         std::error_code errCode{};
         std::filesystem::create_directory(newDir, errCode);
-        if (errCode.value() != 0) {
-            HKS_LOG_E("create_directory newDir failed %" LOG_PUBLIC "s", errCode.message().c_str());
-        }
+        HKS_IF_TRUE_LOGE(errCode.value() != 0, "create_directory newDir failed %" LOG_PUBLIC "s",
+            errCode.message().c_str())
         std::filesystem::copy(curPath, newPath,
             std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing, errCode);
-        if (errCode.value() != 0) {
-            HKS_LOG_E("copy curPath to newPath failed %" LOG_PUBLIC "s", errCode.message().c_str());
-            break;
-        }
+        HKS_IF_TRUE_LOGE_BREAK(errCode.value() != 0, "copy curPath to newPath failed %" LOG_PUBLIC "s",
+            errCode.message().c_str())
         std::filesystem::remove_all(curPath, errCode);
-        if (errCode.value() != 0) {
-            HKS_LOG_E("remove_all curPath failed %" LOG_PUBLIC "s", errCode.message().c_str());
-        }
+        HKS_IF_TRUE_LOGE(errCode.value() != 0, "remove_all curPath failed %" LOG_PUBLIC "s", errCode.message().c_str())
     }
     closedir(dir);
 }
@@ -410,16 +367,12 @@ void MoveDirectoryTree(const char *oldDir, const char *newDir)
     }
     std::filesystem::copy(oldDir, newDir,
         std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing, errCode);
-    if (errCode.value() != 0) {
-        HKS_LOG_E("copy oldDir to newDir failed %" LOG_PUBLIC "s", errCode.message().c_str());
-        return;
-    }
+    HKS_IF_TRUE_LOGE_RETURN_VOID(errCode.value() != 0, "copy oldDir to newDir failed %" LOG_PUBLIC "s",
+        errCode.message().c_str())
     HKS_LOG_I("copy oldDir to newDir ok!");
     std::filesystem::remove_all(oldDir, errCode);
-    if (errCode.value() != 0) {
-        HKS_LOG_E("remove_all oldDir failed %" LOG_PUBLIC "s", errCode.message().c_str());
-        return;
-    }
+    HKS_IF_TRUE_LOGE_RETURN_VOID(errCode.value() != 0, "remove_all oldDir failed %" LOG_PUBLIC "s",
+        errCode.message().c_str())
     HKS_LOG_I("remove_all oldDir ok!");
 }
 
@@ -427,10 +380,7 @@ void HksService::OnStart()
 {
     HKS_LOG_I("HksService OnStart");
     std::lock_guard<std::mutex> lock(runningStateLock);
-    if (std::atomic_load(&runningState_) == STATE_RUNNING) {
-        HKS_LOG_I("HksService has already started");
-        return;
-    }
+    HKS_IF_TRUE_LOGI_RETURN_VOID(std::atomic_load(&runningState_) == STATE_RUNNING, "HksService has already started")
     MoveDirectoryTree(OLD_PATH, NEW_PATH);
 #ifdef HKS_USE_RKC_IN_STANDARD
     // the intermediate mine's rkc is located in INTERMEDIATE_MINE_RKC_PATH, normal keys is located in NEW_PATH
@@ -439,10 +389,7 @@ void HksService::OnStart()
     MoveMineOldFile(OLD_MINE_PATH, NEW_PATH);
 #endif
 
-    if (HksProcessConditionCreate() != HKS_SUCCESS) {
-        HKS_LOG_E("create process condition on init failed.");
-        return;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(HksProcessConditionCreate(), "create process condition on init failed.")
 
     // lock before huks init, for the upgrading will be thread safe.
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
@@ -450,10 +397,7 @@ void HksService::OnStart()
         OHOS::Utils::UniqueWriteGuard<OHOS::Utils::RWLock> writeGuard(g_upgradeOrRequestLock);
 #endif
 
-        if (!Init()) {
-            HKS_LOG_E("Failed to init HksService");
-            return;
-        }
+        HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(Init(), "Failed to init HksService")
 
         #ifdef SUPPORT_COMMON_EVENT
             (void)AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);

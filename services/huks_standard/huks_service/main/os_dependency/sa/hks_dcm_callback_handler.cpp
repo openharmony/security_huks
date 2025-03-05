@@ -88,10 +88,8 @@ private:
 
 int32_t CopyBlobToBuffer(const struct DcmBlob *blob, struct HksBlob *buf)
 {
-    if (buf->size < sizeof(blob->size) + ALIGN_SIZE(blob->size)) {
-        HKS_LOG_E("buf size smaller than blob size");
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(buf->size < sizeof(blob->size) + ALIGN_SIZE(blob->size), HKS_ERROR_BUFFER_TOO_SMALL,
+        "buf size smaller than blob size")
     HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(buf->data, buf->size, &blob->size, sizeof(blob->size)),
         HKS_ERROR_BUFFER_TOO_SMALL, "copy buf fail")
     buf->data += sizeof(blob->size);
@@ -105,21 +103,14 @@ int32_t CopyBlobToBuffer(const struct DcmBlob *blob, struct HksBlob *buf)
 
 int32_t PackAttestChain(struct DcmCertChain *certChain, struct HksBlob *certChainPacked)
 {
-    if (certChain == nullptr || certChain->certs == nullptr) {
-        HKS_LOG_E("certChain buffer from caller is null.");
-        return HKS_ERROR_NULL_POINTER;
-    }
-    if (certChain->certsCount == 0 || certChain->certsCount > HKS_CERT_COUNT) {
-        HKS_LOG_E("certs count %" LOG_PUBLIC "u is not correct", certChain->certsCount);
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(certChain == nullptr || certChain->certs == nullptr, HKS_ERROR_NULL_POINTER,
+        "certChain buffer from caller is null.")
+    HKS_IF_TRUE_LOGE_RETURN(certChain->certsCount == 0 || certChain->certsCount > HKS_CERT_COUNT,
+        HKS_ERROR_BUFFER_TOO_SMALL, "certs count %" LOG_PUBLIC "u is not correct", certChain->certsCount)
     for (uint32_t i = 0; i < certChain->certsCount; ++i) {
-        if (certChain->certs[i].data == nullptr || certChain->certs[i].size == 0 ||
-            certChain->certs[i].size > HKS_CERT_APP_SIZE) {
-            HKS_LOG_E("cert %" LOG_PUBLIC "u is null or cert size %" LOG_PUBLIC "u invalid ",
-                i, certChain->certs[i].size);
-            return HKS_ERROR_INVALID_ARGUMENT;
-        }
+        HKS_IF_TRUE_LOGE_RETURN(certChain->certs[i].data == nullptr || certChain->certs[i].size == 0 ||
+            certChain->certs[i].size > HKS_CERT_APP_SIZE, HKS_ERROR_INVALID_ARGUMENT,
+            "cert %" LOG_PUBLIC "u is null or cert size %" LOG_PUBLIC "u invalid ", i, certChain->certs[i].size)
     }
 
     struct HksBlob tmp = *certChainPacked;
@@ -206,9 +197,7 @@ std::mutex &HksDcmCallbackHandlerGetMapMutex(void)
 
 AttestFunction HksOpenDcmFunction(void)
 {
-    if (g_attestFunction != nullptr) {
-        return g_attestFunction;
-    }
+    HKS_IF_TRUE_RETURN(g_attestFunction != nullptr, g_attestFunction)
 
     g_certMgrSdkHandle = dlopen(DCM_SDK_SO, RTLD_NOW);
     HKS_IF_NULL_LOGE_RETURN(g_certMgrSdkHandle, nullptr, "dlopen " DCM_SDK_SO " failed! %" LOG_PUBLIC "s", dlerror())

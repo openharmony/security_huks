@@ -58,9 +58,7 @@ int32_t HksMutexUnlock(HksMutex *mutex)
     HKS_IF_NULL_LOGE_RETURN(mutex, HKS_ERROR_NULL_POINTER, "NULL mutex in HksMutexUnlock")
 
     int result = pthread_mutex_unlock(&mutex->mutex);
-    if (result != 0) {
-        HKS_LOG_E("pthread_mutex_unlock fail %" LOG_PUBLIC "d", result);
-    }
+    HKS_IF_TRUE_LOGE(result != 0, "pthread_mutex_unlock fail %" LOG_PUBLIC "d", result)
     return result;
 }
 
@@ -72,8 +70,6 @@ void HksMutexClose(HksMutex *mutex)
     }
 
     int result = pthread_mutex_destroy(&mutex->mutex);
-    if (result != 0) {
-        HKS_LOG_E("pthread_mutex_destroy fail %" LOG_PUBLIC "d", result);
-    }
+    HKS_IF_TRUE_LOGE(result != 0, "pthread_mutex_destroy fail %" LOG_PUBLIC "d", result)
     HKS_FREE(mutex);
 }
