@@ -167,9 +167,7 @@ bool HksHaPlugin::Enqueue(uint32_t eventId, struct HksParamSet *paramSet)
 HksEventProcMap *HksHaPlugin::HksEventProcFind(uint32_t eventId)
 {
     for (uint32_t i = 0; i < HKS_ARRAY_SIZE(g_eventProcMap); ++i) {
-        if (g_eventProcMap[i].eventId == eventId) {
-            return &g_eventProcMap[i];
-        }
+        HKS_IF_TRUE_RETURN(g_eventProcMap[i].eventId == eventId, &g_eventProcMap[i])
     }
     return nullptr;
 }
@@ -195,21 +193,19 @@ void HksHaPlugin::HandlerReport(HksEventQueueItem &item)
     }
 
     bool needReport = procMap->needReport(eventInfo);
-    if (needReport) {
-        std::unordered_map<std::string, std::string> eventMap;
-        ret = procMap->eventInfoToMap(eventInfo, eventMap);
-        HKS_IF_NOT_SUCC_LOGE(ret, "Failed to convert HksEventInfo to map"
-            "for eventId %" LOG_PUBLIC "u", eventId);
-        HandleFaultEvent(&eventInfo->common, eventMap);
+    HKS_IF_NOT_TRUE_LOGI_RETURN(needReport, HandleStatisticEvent(eventInfo, eventId, procMap),
+        "HandlerReport: Statistics event detected for eventId %" LOG_PUBLIC "u", eventId)
+    
+    std::unordered_map<std::string, std::string> eventMap;
+    ret = procMap->eventInfoToMap(eventInfo, eventMap);
+    HKS_IF_NOT_SUCC_LOGE(ret, "Failed to convert HksEventInfo to map"
+        "for eventId %" LOG_PUBLIC "u", eventId);
+    HandleFaultEvent(&eventInfo->common, eventMap);
 
-        HKS_FREE(eventInfo->common.function);
-        HKS_FREE(eventInfo->common.callerInfo.name);
-        HKS_FREE(eventInfo->common.result.errMsg);
-        HKS_FREE(eventInfo);
-    } else {
-        HKS_LOG_I("HandlerReport: Statistics event detected for eventId %" LOG_PUBLIC "u", eventId);
-        HandleStatisticEvent(eventInfo, eventId, procMap);
-    }
+    HKS_FREE(eventInfo->common.function);
+    HKS_FREE(eventInfo->common.callerInfo.name);
+    HKS_FREE(eventInfo->common.result.errMsg);
+    HKS_FREE(eventInfo);
 }
 
 void HksHaPlugin::WorkerThread()
@@ -254,23 +250,20 @@ void HksHaPlugin::HandleStatisticEvent(struct HksEventInfo *eventInfo, uint32_t 
     }
 
     uint32_t currentSize = eventCacheList.GetSize();
-    if (currentSize > 0) {
-        time_t currentTime = GetCurrentTimestamp();
-        if (!eventCacheList.cacheList.empty()) {
-            const HksEventCacheNode &firstNode = eventCacheList.cacheList.front();
-            uint32_t reportCount = 0;
-            bool judge = false;
-            if ((currentTime - firstNode.timestamp) > MAX_CACHE_DURATION || currentSize >= MAX_CACHE_SIZE) {
-                judge = true;
-                reportCount = currentSize;
-            }
+    HKS_IF_TRUE_RETURN_VOID(currentSize <= 0)
 
-            if (judge) {
-                HKS_LOG_I("HksHaPlugin::HandleStatisticEvent:reportCount is %" LOG_PUBLIC "u", reportCount);
-                BatchReportEvents(reportCount);
-            }
-        }
+    HKS_IF_TRUE_RETURN_VOID(eventCacheList.cacheList.empty())
+    const HksEventCacheNode &firstNode = eventCacheList.cacheList.front();
+    uint32_t reportCount = 0;
+    time_t currentTime = GetCurrentTimestamp();
+    bool judge = false;
+    if ((currentTime - firstNode.timestamp) > MAX_CACHE_DURATION || currentSize >= MAX_CACHE_SIZE) {
+        judge = true;
+        reportCount = currentSize;
     }
+
+    HKS_IF_TRUE_LOGI_RETURN(judge, (void)BatchReportEvents(reportCount),
+        "HksHaPlugin::HandleStatisticEvent:reportCount is %" LOG_PUBLIC "u", reportCount)
 }
 
 void HksHaPlugin::AddEventCache(uint32_t eventId, struct HksEventInfo *eventInfo)
@@ -321,10 +314,8 @@ void HksHaPlugin::RemoveReportedEvents(uint32_t reportCount)
 
 int32_t HksHaPlugin::BatchReportEvents(uint32_t reportCount)
 {
-    if (reportCount > eventCacheList.GetSize()) {
-        HKS_LOG_I("HksHaPlugin::BatchReportEvents:reportCount > queueSize");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGI_RETURN(reportCount > eventCacheList.GetSize(), HKS_ERROR_INVALID_ARGUMENT,
+        "HksHaPlugin::BatchReportEvents:reportCount > queueSize")
     HksEventWithMap *eventsWithMap = new (std::nothrow) HksEventWithMap[reportCount];
     HKS_IF_NULL_LOGI_RETURN(eventsWithMap, HKS_ERROR_NULL_POINTER, "eventsWithMap is null");
 

@@ -50,15 +50,8 @@ static int32_t ConvertCallerInfoToJson(const std::string &idStr, const std::stri
     cJSON *jsonObj = cJSON_CreateObject();
     HKS_IF_NULL_LOGE_RETURN(jsonObj, HKS_ERROR_NULL_POINTER, "create cjson object failed.")
 
-    const char *jsonKeyId;
-    const char *jsonKeyExtend;
-    if (isHap) {
-        jsonKeyId = "appId";
-        jsonKeyExtend = "bundleName";
-    } else {
-        jsonKeyId = "processName";
-        jsonKeyExtend = "APL";
-    }
+    const char *jsonKeyId = isHap ? "appId" : "processName";
+    const char *jsonKeyExtend = isHap ? "bundleName" : "APL";
     if ((cJSON_AddStringToObject(jsonObj, jsonKeyId, idStr.c_str()) == nullptr) ||
         (cJSON_AddStringToObject(jsonObj, jsonKeyExtend, extendStr.c_str()) == nullptr)) {
         HKS_LOG_E("add string to json object is failed.");

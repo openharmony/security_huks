@@ -191,10 +191,8 @@ int32_t ReportGetCallerName(std::string &callerName)
             OHOS::Security::AccessToken::HapTokenInfo hapTokenInfo;
             int32_t accessTokenRet = OHOS::Security::AccessToken::AccessTokenKit::GetHapTokenInfo(callingTokenId,
                 hapTokenInfo);
-            if (accessTokenRet != OHOS::Security::AccessToken::AccessTokenKitRet::RET_SUCCESS) {
-                HKS_LOG_I("GetHapTokenInfo failed, ret: %" LOG_PUBLIC "d", accessTokenRet);
-                return HKS_ERROR_BAD_STATE;
-            }
+            HKS_IF_TRUE_LOGI_RETURN(accessTokenRet != OHOS::Security::AccessToken::AccessTokenKitRet::RET_SUCCESS,
+                HKS_ERROR_BAD_STATE, "GetHapTokenInfo failed, ret: %" LOG_PUBLIC "d", accessTokenRet)
             callerName = hapTokenInfo.bundleName;
             return HKS_SUCCESS;
         }
@@ -202,10 +200,8 @@ int32_t ReportGetCallerName(std::string &callerName)
             OHOS::Security::AccessToken::NativeTokenInfo saTokenInfo;
             int32_t accessTokenRet = OHOS::Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(callingTokenId,
                 saTokenInfo);
-            if (accessTokenRet != OHOS::Security::AccessToken::AccessTokenKitRet::RET_SUCCESS) {
-                HKS_LOG_I("GetNativeTokenInfo failed, ret: %" LOG_PUBLIC "d", accessTokenRet);
-                return HKS_ERROR_BAD_STATE;
-            }
+            HKS_IF_TRUE_LOGI_RETURN(accessTokenRet != OHOS::Security::AccessToken::AccessTokenKitRet::RET_SUCCESS,
+                HKS_ERROR_BAD_STATE, "GetNativeTokenInfo failed, ret: %" LOG_PUBLIC "d", accessTokenRet)
             callerName = saTokenInfo.processName;
             return HKS_SUCCESS;
         }
