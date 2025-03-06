@@ -2016,6 +2016,8 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
 int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet)
 {
+    uint64_t startTime = 0;
+    (void)HksElapsedRealTime(&startTime);
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
@@ -2042,7 +2044,7 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
         IfNotSuccAppendHdiErrorInfo(ret);
         HKS_IF_NOT_SUCC_LOGE(ret, "HuksAccessAbort fail, ret = %" LOG_PUBLIC "d", ret)
 #ifdef L2_STANDARD
-        HksThreeStageReportInfo info = { ret, 0, HKS_ABORT, 0, handle };
+        HksThreeStageReportInfo info = { ret, 0, HKS_ABORT, startTime, handle };
         (void)HksThreeStageReport(__func__, processInfo, paramSet, &info, operation);
 #endif
         MarkAndDeleteOperation(&operation, handle);
