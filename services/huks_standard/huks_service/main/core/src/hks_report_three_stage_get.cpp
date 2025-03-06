@@ -345,6 +345,7 @@ int32_t HksAttestEventReport(const struct HksBlob *keyAlias, const struct HksBlo
 
     GetAttestInfo(paramSet, keyAlias, key, &(eventInfo.attestInfo));
     GetAttestInfo(keyBlobParamSet, nullptr, nullptr, &(eventInfo.attestInfo));
+    FreshStatInfo(&(eventInfo.common.statInfo), 0, HKS_ONE_STAGE, info->startTime);
 
     HksThreeStageReportInfo reportInfo = { info->errCode, 0, HKS_ONE_STAGE, info->startTime, nullptr };
     (void)HksFreshAndReport(info->funcName, processInfo, paramSet, &reportInfo, &eventInfo);
