@@ -82,19 +82,9 @@ int HksStub::OnRemoteRequest(uint32_t code,
 {
     HKS_IF_TRUE_LOGE_RETURN(data.ReadInterfaceToken() != GetDescriptor(), ERR_INVALID_DATA,
         "failed to check interface token! code %" LOG_PUBLIC "d", code)
-    int result = ERR_NONE;
-
-    switch (code) {
-        case HKS_MSG_ATTEST_KEY_ASYNC_REPLY:
-            result = ProcessAttestKeyAsyncReply(data);
-            break;
-        default:
-            HKS_LOG_E("unknown remote request code %" LOG_PUBLIC "u", code);
-            result = ERR_TRANSACTION_FAILED;
-            break;
-    }
-
-    return result;
+    HKS_IF_TRUE_LOGE_RETURN(code != HKS_MSG_ATTEST_KEY_ASYNC_REPLY, ERR_TRANSACTION_FAILED,
+        "unknown remote request code %" LOG_PUBLIC "u", code)
+    return ProcessAttestKeyAsyncReply(data);
 }
 
 std::tuple<uint32_t, std::unique_ptr<uint8_t[]>, uint32_t> HksStub::WaitForAsyncReply(int timeout)

@@ -63,10 +63,7 @@ static void HksDestoryPluginProxy(void)
 /* It is invoked when service initialize */
 ENABLE_CFI(static int32_t HksCreatePluginProxy(void))
 {
-    if (HksMutexLock(g_pluginMutex) != HKS_SUCCESS) {
-        HKS_LOG_E("lock mutex for plugin proxy failed");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksMutexLock(g_pluginMutex), HKS_ERROR_BAD_STATE, "lock mutex for plugin proxy failed")
 
     int32_t ret = HKS_ERROR_NULL_POINTER;
     do {
@@ -129,15 +126,12 @@ int32_t HksPluginOnRemoteRequest(uint32_t code, void *data, void *reply, void *o
 
 int32_t HksPluginOnLocalRequest(uint32_t code, const void *data, void *reply)
 {
-    if (g_pluginProxy == nullptr) {
-        return HKS_SUCCESS;
-    }
+    HKS_IF_NULL_RETURN(g_pluginProxy, HKS_SUCCESS)
     return g_pluginProxy->hksPluginOnLocalRequest(code, data, reply);
 }
 
 void HksPluginOnReceiveEvent(const void *data)
 {
-    if (RetryLoadPlugin() == HKS_SUCCESS) {
-        g_pluginProxy->hksPluginOnReceiveEvent(data);
-    }
+    HKS_IF_NOT_SUCC_RETURN_VOID(RetryLoadPlugin())
+    g_pluginProxy->hksPluginOnReceiveEvent(data);
 }

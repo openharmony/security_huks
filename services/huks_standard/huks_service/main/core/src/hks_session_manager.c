@@ -243,10 +243,7 @@ static int32_t ConstructOperationProcessInfo(const struct HksProcessInfo *proces
 
 static int32_t ConstructOperationHandle(const struct HksBlob *operationHandle, uint64_t *handle)
 {
-    if (operationHandle->size < sizeof(*handle)) {
-        HKS_LOG_E("invalid handle size");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(operationHandle->size < sizeof(*handle), HKS_ERROR_INVALID_ARGUMENT, "invalid handle size")
     HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(handle, sizeof(*handle), operationHandle->data, operationHandle->size),
         HKS_ERROR_INSUFFICIENT_MEMORY, "copy handle failed")
 
@@ -272,17 +269,13 @@ static int32_t HksAddBatchTimeToOperation(const struct HksParamSet *paramSet, st
             continue;
         }
         if (paramSet->params[i].tag == HKS_TAG_BATCH_OPERATION_TIMEOUT) {
-            if ((uint64_t)paramSet->params[i].uint32Param > MAX_BATCH_TIME_OUT) {
-                HKS_LOG_E("Batch time is too big.");
-                return HKS_ERROR_NOT_SUPPORTED;
-            }
+            HKS_IF_TRUE_LOGE_RETURN((uint64_t)paramSet->params[i].uint32Param > MAX_BATCH_TIME_OUT,
+                HKS_ERROR_NOT_SUPPORTED, "Batch time is too big.")
             operation->batchOperationTimestamp = curTime + (uint64_t)paramSet->params[i].uint32Param * S_TO_MS;
             findTimeout = true;
             continue;
         }
-        if (findOperation && findTimeout) {
-            break;
-        }
+        HKS_IF_TRUE_BREAK(findOperation && findTimeout)
     }
     if (!findOperation) {
         operation->batchOperationTimestamp = 0;
@@ -386,10 +379,7 @@ void DeleteOperation(const struct HksBlob *operationHandle)
     pthread_mutex_lock(&g_lock);
     HKS_DLIST_ITER(operation, &g_operationList) {
         if (operation != NULL && operation->handle == handle) {
-            if (operation->isInUse) {
-                HKS_LOG_I("operation is in use, do not delete");
-                break;
-            }
+            HKS_IF_TRUE_LOGI_BREAK(operation->isInUse, "operation is in use, do not delete")
             FreeOperation(&operation);
             --g_operationCount;
             HKS_LOG_D("delete operation count:%" LOG_PUBLIC "u", g_operationCount);

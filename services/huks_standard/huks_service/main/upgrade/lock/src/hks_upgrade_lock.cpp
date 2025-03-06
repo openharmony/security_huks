@@ -50,11 +50,9 @@ void HksUpgradeOnPowerOnDoneNotifyAll(void)
 {
     HKS_LOG_I("HksUpgradeOnPowerOnDoneNotifyAll HksConditionNotifyAll");
     int32_t ret = HksConditionNotifyAll(g_powerOnUpgradeCondition);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksUpgradeOnPowerOnDoneNotifyAll HksConditionNotifyAll fail %" LOG_PUBLIC "d", ret);
-    } else {
-        HKS_LOG_I("HksUpgradeOnPowerOnDoneNotifyAll HksConditionNotifyAll ok!");
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(ret,
+        "HksUpgradeOnPowerOnDoneNotifyAll HksConditionNotifyAll fail %" LOG_PUBLIC "d", ret)
+    HKS_LOG_I("HksUpgradeOnPowerOnDoneNotifyAll HksConditionNotifyAll ok!");
 }
 }
 }
@@ -62,16 +60,14 @@ void HksUpgradeOnPowerOnDoneNotifyAll(void)
 
 void HksUpgradeOrRequestLockRead(void)
 {
-    if (!g_readLocked) {
-        OHOS::Security::Hks::g_upgradeOrRequestLock.LockRead();
-        g_readLocked = true;
-    }
+    HKS_IF_TRUE_RETURN_VOID(g_readLocked)
+    OHOS::Security::Hks::g_upgradeOrRequestLock.LockRead();
+    g_readLocked = true;
 }
 
 void HksUpgradeOrRequestUnlockRead(void)
 {
-    if (g_readLocked) {
-        OHOS::Security::Hks::g_upgradeOrRequestLock.UnLockRead();
-        g_readLocked = false;
-    }
+    HKS_IF_NOT_TRUE_RETURN_VOID(g_readLocked)
+    OHOS::Security::Hks::g_upgradeOrRequestLock.UnLockRead();
+    g_readLocked = false;
 }

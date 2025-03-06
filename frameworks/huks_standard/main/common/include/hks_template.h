@@ -134,6 +134,11 @@ if ((BOOL_FUNC)) { \
     return (ERROR_CODE); \
 }
 
+#define HKS_IF_TRUE_RETURN_VOID(BOOL_FUNC) \
+if ((BOOL_FUNC)) { \
+    return; \
+}
+
 #define HKS_IF_TRUE_LOGE_RETURN(BOOL_FUNC, ERROR_CODE, LOG_MESSAGE, ...) \
 if ((BOOL_FUNC)) { \
     HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
@@ -158,6 +163,12 @@ if ((BOOL_FUNC)) { \
     return (ERROR_CODE); \
 }
 
+#define HKS_IF_TRUE_LOGI_BREAK(BOOL_FUNC, LOG_MESSAGE, ...) \
+if ((BOOL_FUNC)) { \
+    HKS_LOG_I(LOG_MESSAGE, ##__VA_ARGS__); \
+    break; \
+}
+
 #define HKS_IF_TRUE_LOGE(BOOL_FUNC, LOG_MESSAGE, ...) \
 if ((BOOL_FUNC)) { \
     HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
@@ -171,6 +182,12 @@ if (!(BOOL_FUNC)) { \
 #define HKS_IF_NOT_TRUE_RETURN(BOOL_FUNC, ERROR_CODE) \
 if (!(BOOL_FUNC)) { \
     return (ERROR_CODE); \
+}
+
+#define HKS_IF_NOT_TRUE_LOGE_BREAK(BOOL_FUNC, LOG_MESSAGE, ...) \
+if (!(BOOL_FUNC)) { \
+    HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
+    break; \
 }
 
 #define HKS_IF_NOT_TRUE_LOGE_RETURN(BOOL_FUNC, ERROR_CODE, LOG_MESSAGE, ...) \
@@ -191,6 +208,11 @@ if ((BOOL_FUNC) != EOK) { \
     break; \
 }
 
+#define HKS_IF_NOT_EOK_BREAK(BOOL_FUNC) \
+if ((BOOL_FUNC) != EOK) { \
+    break; \
+}
+
 #define HKS_IF_TRUE_LOGE_BREAK(BOOL_FUNC, LOG_MESSAGE, ...) \
 if ((BOOL_FUNC)) { \
     HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
@@ -203,11 +225,9 @@ if ((BOOL_FUNC)) { \
 }
 
 #define HKS_IF_NOT_TRUE_RETURN_VOID(BOOL_FUNC) \
-do { \
-    if (!(BOOL_FUNC)) { \
-        return; \
-    } \
-} while (0)
+if (!(BOOL_FUNC)) { \
+    return; \
+} \
 
 #define HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(BOOL_FUNC, LOG_MESSAGE, ...) \
 if (!(BOOL_FUNC)) { \

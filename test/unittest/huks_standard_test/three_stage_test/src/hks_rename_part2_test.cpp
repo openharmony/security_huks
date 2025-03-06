@@ -17,6 +17,7 @@
 
 #include "hks_rename_test.h"
 #include "hks_api.h"
+#include "hks_apply_permission_test_common.h"
 #include "hks_param.h"
 #include "hks_test_common.h"
 #include "hks_test_log.h"
@@ -78,15 +79,18 @@ static int32_t BuildParamSetWithParam(struct HksParamSet **paramSet, struct HksP
  */
 HWTEST_F(HksRenameKeyAliasPart2Test, HksRenameKeyAliasPart2Test020, TestSize.Level0)
 {
+    int32_t ret = SetIdsTokenWithoutPermission();
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
     const char *alias = "oldKeyAlias020";
     struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
-    
+
     struct HksParamSet *paramSet = nullptr;
     struct HksParam storageLevel[] = {
         { .tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = USER_ID_INT },
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
     };
-    int32_t ret = BuildParamSetWithParam(&paramSet, storageLevel, sizeof(storageLevel) / sizeof(storageLevel[0]));
+    ret = BuildParamSetWithParam(&paramSet, storageLevel, sizeof(storageLevel) / sizeof(storageLevel[0]));
     EXPECT_EQ(ret, HKS_SUCCESS);
     ret = HksKeyExist(&keyAlias, paramSet);
     EXPECT_EQ(ret, HKS_ERROR_NO_PERMISSION) << "Hks get generate key failed, ret is " << ret;;

@@ -446,10 +446,8 @@ static int32_t CheckKeyCondition(const struct HksProcessInfo *processInfo, const
     const struct HksParamSet *paramSet)
 {
     int32_t ret = HksServiceDeleteKey(processInfo, keyAlias, paramSet);
-    if ((ret != HKS_SUCCESS) && (ret != HKS_ERROR_NOT_EXIST)) {
-        HKS_LOG_E("delete keyblob from storage failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS && ret != HKS_ERROR_NOT_EXIST, ret,
+        "delete keyblob from storage failed, ret = %" LOG_PUBLIC "d", ret)
 
     uint32_t fileCount;
     ret = HksManageGetKeyCountByProcessName(processInfo, paramSet, &fileCount);
@@ -649,10 +647,8 @@ static int32_t CheckIfEnrollAuthInfo(int32_t userId, enum HksUserAuthType authTy
 {
     uint32_t numOfAuthInfo = 0;
     int32_t ret = HksUserIdmGetAuthInfoNum(userId, authType, &numOfAuthInfo); // callback
-    if (ret == HKS_ERROR_CREDENTIAL_NOT_EXIST || numOfAuthInfo == 0) {
-        HKS_LOG_E("have not enroll the auth info.");
-        return HKS_ERROR_CREDENTIAL_NOT_EXIST;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(ret == HKS_ERROR_CREDENTIAL_NOT_EXIST || numOfAuthInfo == 0,
+        HKS_ERROR_CREDENTIAL_NOT_EXIST, "have not enroll the auth info.")
 
     return ret;
 }
@@ -764,10 +760,8 @@ static int32_t GetAgreeStoreKey(uint32_t keyAliasTag, const struct HksProcessInf
     int32_t ret = HksGetParam(paramSet, keyAliasTag, &keyAliasParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get agree key alias tag failed")
 
-    if (keyAliasParam->blob.size > HKS_MAX_KEY_ALIAS_LEN) {
-        HKS_LOG_E("invalid main key size: %" LOG_PUBLIC "u", keyAliasParam->blob.size);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(keyAliasParam->blob.size > HKS_MAX_KEY_ALIAS_LEN, HKS_ERROR_INVALID_ARGUMENT,
+        "invalid main key size: %" LOG_PUBLIC "u", keyAliasParam->blob.size)
 
     return GetKeyData(processInfo, &(keyAliasParam->blob), paramSet, key, HKS_STORAGE_TYPE_KEY);
 }
@@ -775,10 +769,8 @@ static int32_t GetAgreeStoreKey(uint32_t keyAliasTag, const struct HksProcessInf
 static int32_t TranslateToInnerCurve25519Format(const uint32_t alg, const struct HksBlob *key,
     struct HksBlob *publicKey)
 {
-    if (key->size != HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)) {
-        HKS_LOG_E("Invalid curve25519 public key size! key size = 0x%" LOG_PUBLIC "X", key->size);
-        return HKS_ERROR_INVALID_KEY_INFO;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(key->size != HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256), HKS_ERROR_INVALID_KEY_INFO,
+        "Invalid curve25519 public key size! key size = 0x%" LOG_PUBLIC "X", key->size)
 
     uint32_t totalSize = sizeof(struct HksPubKeyInfo) + key->size;
     uint8_t *buffer = (uint8_t *)HksMalloc(totalSize);
@@ -883,9 +875,8 @@ static int32_t GetAgreeBaseKey(const struct HksProcessInfo *processInfo, const s
     ret = HksGetParam(paramSet, HKS_TAG_AGREE_ALG, &agreeAlgParam);
     HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL)
 
-    if ((agreeAlgParam->uint32Param != HKS_ALG_X25519) && (agreeAlgParam->uint32Param != HKS_ALG_ED25519)) {
-        return HKS_ERROR_INVALID_ALGORITHM;
-    }
+    HKS_IF_TRUE_RETURN(agreeAlgParam->uint32Param != HKS_ALG_X25519 && agreeAlgParam->uint32Param != HKS_ALG_ED25519,
+        HKS_ERROR_INVALID_ALGORITHM)
 
     return GetAgreeKeyPair(agreeAlgParam->uint32Param, processInfo, paramSet, key);
 #else

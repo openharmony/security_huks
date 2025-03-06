@@ -24,16 +24,11 @@ bool HksEventQueue::Enqueue(uint32_t eventId, struct HksParamSet *paramSet)
         "HksParamSet is nullptr, cannot enqueue eventId: %" LOG_PUBLIC "u", eventId)
 
     // 1. Check if already stopped
-    if (stopped_) {
-        HKS_LOG_I("Enqueue stopped");
-        return false;
-    }
+    HKS_IF_TRUE_LOGI_RETURN(stopped_, false, "Enqueue stopped")
 
     // 2. Check if the queue is full
-    if (queueItem_.size() >= queueCapacity_) {
-        HKS_LOG_I("Queue is full, cannot enqueue eventId: %" LOG_PUBLIC "u", eventId);
-        return false;
-    }
+    HKS_IF_TRUE_LOGI_RETURN(queueItem_.size() >= queueCapacity_, false,
+        "Queue is full, cannot enqueue eventId: %" LOG_PUBLIC "u", eventId)
     
     // 3. Enqueue
     queueItem_.emplace(HksEventQueueItem{eventId, paramSet});
@@ -50,10 +45,7 @@ bool HksEventQueue::Dequeue(HksEventQueueItem& item)
         return (!queueItem_.empty()) || stopped_;
     });
 
-    if (stopped_ && queueItem_.empty()) {
-        HKS_LOG_I("Dequeue stopped");
-        return false;
-    }
+    HKS_IF_TRUE_LOGI_RETURN(stopped_ && queueItem_.empty(), false, "Dequeue stopped")
 
     item = std::move(queueItem_.front());
     queueItem_.pop();
