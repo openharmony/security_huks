@@ -405,8 +405,8 @@ JSIValue HksConstructJSIReturnResult(const struct HksLiteApiResult *result)
             (void)memcpy_s(arrayBuffer, result->outData->size, result->outData->data, result->outData->size);
             JSIValue typedArray = JSI::CreateTypedArray(TypedArrayType::JSI_UINT8_ARRAY, result->outData->size,
                 buffer, 0);
-            JSI::ReleaseValue(buffer);
             JSI::SetNamedProperty(res, HKS_RESULT_PROPERTY_OUTDATA, typedArray);
+            JSI::ReleaseValueList(buffer, typedArray, ARGS_END);
         }
         if (result->handle != nullptr) {
             JSI::SetNumberProperty(res, HKS_HANDLE_PROPERTY_HANDLE, *((uint64_t *)result->handle->data));
