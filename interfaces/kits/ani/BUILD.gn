@@ -29,7 +29,7 @@ ohos_shared_library("huks_interfaceImpl") {
   ]
 
   include_dirs = [
-    "//arkcompiler/runtime_core/static_core/plugins/ets/runtime/ani",
+    # "//arkcompiler/runtime_core/static_core/plugins/ets/runtime/ani",
     "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     "//base/security/huks/frameworks/huks_standard/main/common/include",
     "include",
@@ -50,6 +50,7 @@ ohos_shared_library("huks_interfaceImpl") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "runtime_core:ani",
   ]
   cflags_cc = [
     "-Wall",
@@ -60,13 +61,23 @@ ohos_shared_library("huks_interfaceImpl") {
   part_name = "huks"
 }
 
-generate_static_abc("huks_abc") {
+generate_static_abc("huks_ani_abc") {
   arktsconfig = "//base/security/huks/interfaces/kits/ani/arktsconfig.json"
-  dst_file = "$target_out_dir/security/huks/huks_sdk.abc"
-  out_puts = [ "$target_out_dir/security/huks/huks_sdk.abc" ]
+  dst_file = "$target_out_dir/@ohos.securty.huks.d.abc"
+  out_puts = [ "$target_out_dir/@ohos.securty.huks.d.abc" ]
+  is_boot_abc = "True"
+  device_dst_file = "system/framework/@ohos.securty.huks.d.abc"
   in_puts = [
     "/mnt/data/l00889714/linzs/ohos_1108/base/security/huks/interfaces/kits/ani/aniTest.ets",
-    "/mnt/data/l00889714/linzs/ohos_1108/base/security/huks/interfaces/kits/ani/@ohos.security.huks.d.ets",
-    "/mnt/data/l00889714/linzs/ohos_1108/base/security/huks/interfaces/kits/ani/@ohos.base.d.ets"
+    "/mnt/data/l00889714/linzs/ohos_1108/base/security/huks/interfaces/kits/ani/huksInterface.ets",
   ]
+
+}
+
+ohos_prebuilt_etc("huks_ani_abc_etc") {
+  source = "$target_out_dir/@ohos.securty.huks.d.abc"
+  module_install_dir = "framework"
+  part_name = "security"
+  subsystem_name = "huks"
+  deps = [ ":huks_ani_abc" ]
 }

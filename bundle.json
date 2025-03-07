@@ -86,7 +86,8 @@
           "openssl",
           "bounds_checking_function",
           "mbedtls",
-          "cJSON"
+          "cJSON",
+          "runtime_core"
         ]
       },
       "build": {

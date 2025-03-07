@@ -37,7 +37,7 @@ group("huks_napi") {
     if (support_jsapi) {
       deps = [ "//base/security/huks/interfaces/kits/napi:huks",
               "//base/security/huks/interfaces/kits/ani:huks_interfaceImpl",
-              "//base/security/huks/interfaces/kits/ani:huks_abc" 
+              "//base/security/huks/interfaces/kits/ani:huks_ani_abc_etc" 
             ]
     }
   }
