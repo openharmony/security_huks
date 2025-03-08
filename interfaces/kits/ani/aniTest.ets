@@ -28,18 +28,24 @@ export class Huks {
     native importWrappedKeyItemSync(keyAlias: string, wrappingKeyAlias: string, options: huks.HuksOptions): HuksResult;
 
     native exportKeyItemSync(keyAlias: string, options: huks.HuksOptions): HuksResult;
+
+    native isKeyItemExistSync(keyAlias: string, options: huks.HuksOptions): HuksResult;
 }
 
 interface Result {
     result: int;
     error?: string | undefined;
-    outData?: Uint8Array;
+    outData?: Uint8Array | undefined;
+    handle?: number | undefined;
+    challenge?: Uint8Array |undefined;
 }
 
 class HuksResult implements Result {
     result: int = 1
     error?: string | undefined = ""
     outData?: Uint8Array | undefined
+    handle?: number | undefined;
+    challenge?: Uint8Array |undefined;
     // constructor(result: int, error?: string | undefined) {
     //     console.log("HuksResult constructor******")
     //     this.result = result;
@@ -104,8 +110,16 @@ function main(){
     console.log(`huks generateKeyItemSync endl. ${ret.result}`)
     console.log(ret.error)
 
+    ret = hukstest.isKeyItemExistSync(keyAlias, huksGenKeyOptions);
+    console.log(`huks isKeyItemExistSync endl. deletkey before, result shuold be 0: real = ${ret.result}`)
+    console.log(ret.error)
+
     ret = hukstest.deleteKeyItemSync(keyAlias, huksGenKeyOptions);
     console.log(`huks deleteKeyItemSync endl. ${ret.result}`)
+    console.log(ret.error)
+
+    ret = hukstest.isKeyItemExistSync(keyAlias, huksGenKeyOptions);
+    console.log(`huks isKeyItemExistSync endl. deletkey after, result shuold be -13: real = ${ret.result}`)
     console.log(ret.error)
 
     ret = hukstest.importKeyItemSync(keyAlias + "import", huksImportKeyOptions);
@@ -114,7 +128,6 @@ function main(){
 
     ret = hukstest.exportKeyItemSync(keyAlias + "export", huksImportKeyOptions);
     console.log(`huks exportKeyItemSync endl. ${ret.result}`)
-    console.log(`huks exportKeyItemSync endl. ${ret.outData}`)
     console.log(ret.error)
 
     console.println("result from native")

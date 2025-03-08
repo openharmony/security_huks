@@ -57,9 +57,11 @@ namespace AniUtils {
     bool CreateUint8Array(ani_env *env, std::vector<uint8_t> &arrayIn, ani_object &arrayOut);
 };
 
-int32_t HksGetKeyAliasFromAni([[maybe_unused]] ani_env *&env, const ani_string &strObject, HksBlob &keyAliasOut);
+int32_t HksGetKeyAliasFromAni(ani_env *&env, const ani_string &strObject, HksBlob &keyAliasOut);
 
-int32_t HksCreateAniResult(const int32_t result, [[maybe_unused]] ani_env *&env, ani_object &resultObjOut, ani_object oubBuffer = nullptr);
+int32_t HksCreateAniResult(const int32_t result, ani_env *&env, ani_object &resultObjOut, ani_object oubBuffer = nullptr);
+
+int32_t HksIsKeyItemExistCreateAniResult(const int32_t result, ani_env *&env, ani_object &resultObjOut);
 
 int32_t HksGetParamSetFromAni(ani_env *&env, const ani_object &optionsObj, struct HksParamSet *&paramSetOut);
 
@@ -73,14 +75,20 @@ public:
     struct HksParamSet *paramSetOut = nullptr;
 };
 
-class ImportKeyContext : public CommonContext {
+class KeyContext : public CommonContext {
 public:
-    struct HksBlob keyIn{};
+    struct HksBlob key{};
 };
 
-class ImportWrappedKeyContext : public ImportKeyContext {
+class ImportWrappedKeyContext : public KeyContext {
 public:
     struct HksBlob wrappingKeyAlias{};
+};
+
+class SessionContext : public CommonContext {
+public:
+    struct HksBlob handle{};
+    struct HksBlob token{};
 };
 
 template<typename T>
@@ -111,10 +119,10 @@ int32_t HksAniParseParams(ani_env *env, ani_string keyAlias, ani_object options,
 }
 
 template<>
-int32_t HksAniParseParams(ani_env *env, ani_string keyAlias, ani_object options, ImportKeyContext *&&context);
+int32_t HksAniParseParams(ani_env *env, ani_string keyAlias, ani_object options, KeyContext *&&context);
 
 template<>
-void HksDeleteContext(ImportKeyContext &context);
+void HksDeleteContext(KeyContext &context);
 
 
 int32_t HksAniImportWrappedKeyParseParams(ani_env *env, ani_string &keyAlias, ani_string &wrappingKeyAlias,
@@ -122,6 +130,9 @@ int32_t HksAniImportWrappedKeyParseParams(ani_env *env, ani_string &keyAlias, an
 
 template<>
 void HksDeleteContext(ImportWrappedKeyContext &context);
+
+template<>
+void HksDeleteContext(SessionContext &context);
 
 }
 #endif
