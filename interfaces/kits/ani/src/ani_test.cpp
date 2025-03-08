@@ -116,11 +116,14 @@ static ani_object importWrappedKeyItemSync([[maybe_unused]] ani_env *env, [[mayb
 static ani_object exportKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object, ani_string keyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
+    int32_t ret{ HKS_SUCCESS };
     std::vector<uint8_t> outBuffer{0x44, 0x22, 0x88};
-    bool aniRet = AniUtils::CreateUint8Array(env, outBuffer, aniReturnObject);
+    ani_object bufferOut;
+    bool aniRet = AniUtils::CreateUint8Array(env, outBuffer, bufferOut);
     if (aniRet != true) {
         std::cerr << "CreateUint8Array failed!" <<std::endl;
     }
+    (void)HksCreateAniResult(ret, env, aniReturnObject, bufferOut);
     return aniReturnObject;
 }
 
@@ -143,6 +146,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"deleteKeyItemSync", nullptr, reinterpret_cast<void *>(deleteKeyItemSync)},
         ani_native_function {"importKeyItemSync", nullptr, reinterpret_cast<void *>(importKeyItemSync)},
         ani_native_function {"importWrappedKeyItemSync", nullptr, reinterpret_cast<void *>(importWrappedKeyItemSync)},
+        ani_native_function {"exportKeyItemSync", nullptr, reinterpret_cast<void *>(exportKeyItemSync)},
     };
 
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {

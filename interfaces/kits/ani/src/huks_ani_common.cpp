@@ -279,7 +279,7 @@ bool AniUtils::CreateUint8Array(ani_env *env, std::vector<uint8_t> &arrayIn, ani
         // todo: exception
         return false;
     }
-    std::memcpy(bufData, arrayIn.data(), bufLength);
+    (void)memcpy_s(bufData, bufLength, arrayIn.data(), bufLength);
     return true;
 }
 
