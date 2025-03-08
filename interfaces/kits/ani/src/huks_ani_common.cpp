@@ -270,20 +270,23 @@ bool AniUtils::CreateUint8Array(ani_env *env, std::vector<uint8_t> &arrayIn, ani
         return false;
     }
     ani_ref buffer;
-    env->Object_GetFieldByName_Ref(arrayOut, "buffer", &buffer);
-    void *bufData;
-    size_t bufLength;
+    retCode = env->Object_GetFieldByName_Ref(arrayOut, "buffer", &buffer);
+    void *bufData = nullptr;
+    uint32_t bufLength = 0;
     retCode = env->ArrayBuffer_GetInfo(static_cast<ani_arraybuffer>(buffer), &bufData, &bufLength);
     if (retCode != ANI_OK) {
         std::cerr << "Failed: env->ArrayBuffer_GetInfo()" << std::endl;
         // todo: exception
         return false;
     }
-    (void)memcpy_s(bufData, bufLength, arrayIn.data(), bufLength);
+    if (memcpy_s(bufData, bufLength, arrayIn.data(), bufLength) != EOK) {
+        std::cerr << "Failed: memcpy_s" << std::endl;
+        return false;
+    }
     return true;
 }
 
-int32_t HksCreateAniResult(const int32_t result, [[maybe_unused]] ani_env *&env, ani_object &resultObjOut, ani_object oubBuffer)
+int32_t HksCreateAniResult(const int32_t result, ani_env *&env, ani_object &resultObjOut, ani_object oubBuffer)
 {
     struct HksResult errInfo {};
     errInfo.errorCode = 0;
@@ -343,7 +346,55 @@ int32_t HksCreateAniResult(const int32_t result, [[maybe_unused]] ani_env *&env,
     return HKS_SUCCESS;
 }
 
-int32_t HksGetKeyAliasFromAni([[maybe_unused]] ani_env *&env, const ani_string &strObject, HksBlob &keyAliasOut)
+int32_t HksIsKeyItemExistCreateAniResult(const int32_t result, ani_env *&env, ani_object &resultObjOut)
+{
+    struct HksResult errInfo {};
+    errInfo.errorCode = result;
+    if (result != HKS_SUCCESS && result != HKS_ERROR_NOT_EXIST) {
+        errInfo = HksConvertErrCode(result);
+    }
+
+    ani_class cls;
+    if (ANI_OK != env->FindClass(HUKS_RESULT_CLASS_NAME, &cls)) {
+        std::cerr << "Not found '" << HUKS_RESULT_CLASS_NAME << "'" << std::endl;
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)){
+        std::cerr << "get ctor Failed'" << HUKS_RESULT_CLASS_NAME << "'" << std::endl;
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    if (ANI_OK != env->Object_New(cls, ctor, &resultObjOut)){
+        std::cerr << "Create Object Failed'" << HUKS_RESULT_CLASS_NAME << "'" << std::endl;
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    
+    ani_method resultCodeSetter;
+    if(ANI_OK != env->Class_FindMethod(cls, "<set>result", nullptr, &resultCodeSetter)){
+        std::cerr << "Class_FindMethod Fail'" << "<set>result" << "'" << std::endl;
+    }
+    if(ANI_OK != env->Object_CallMethod_Void(resultObjOut, resultCodeSetter, ani_int(errInfo.errorCode)))
+    {
+        std::cerr << "Object_CallMethod_Void Fail'" << resultCodeSetter << "'" << std::endl;
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    if (errInfo.errorCode != HKS_SUCCESS) {
+        ani_method errMsgSetter;
+        if(ANI_OK != env->Class_FindMethod(cls, "<set>error", nullptr, &errMsgSetter)){
+            std::cerr << "Class_FindMethod Fail'" << "<set>error" << "'" << std::endl;
+        }
+        ani_string result_string{};
+        env->String_NewUTF8(errInfo.errorMsg, strlen(errInfo.errorMsg), &result_string);
+        if(ANI_OK != env->Object_CallMethod_Void(resultObjOut, errMsgSetter, result_string)) {
+            std::cerr << "Object_CallMethod_Void Fail'" << "<set>error" << "'" << std::endl;
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+    }
+    return HKS_SUCCESS;
+}
+
+int32_t HksGetKeyAliasFromAni(ani_env *&env, const ani_string &strObject, HksBlob &keyAliasOut)
 {
     std::string keyAliasIn = "";
     bool aniGetStringRet = AniUtils::GetStirng(env, strObject, keyAliasIn);
@@ -406,7 +457,7 @@ int32_t HksAniGetParamTag(ani_env *&env, const ani_object &object, uint32_t &val
 }
 
 
-int32_t HksAniHuksParamConvert([[maybe_unused]] ani_env *&env, const ani_object &huksParamObj, HksParam &param)
+int32_t HksAniHuksParamConvert(ani_env *&env, const ani_object &huksParamObj, HksParam &param)
 {
     ani_class cls;
     if (ANI_OK != env->FindClass(HUKS_PARAM_CLASS_NAME.data(), &cls)) {
@@ -546,7 +597,7 @@ int32_t HksGetBufferFromAni(ani_env *&env, const ani_object &arrayObj, HksBlob &
 }
 
 template<>
-int32_t HksAniParseParams(ani_env *env, ani_string keyAlias, ani_object options, ImportKeyContext *&&contextPtr)
+int32_t HksAniParseParams(ani_env *env, ani_string keyAlias, ani_object options, KeyContext *&&contextPtr)
 {
     HKS_IF_NULL_LOGE_RETURN(contextPtr, HKS_ERROR_NULL_POINTER, "ParseParams, but context is null")
     int32_t ret = HksAniParseParams<CommonContext>(env, keyAlias, options, static_cast<CommonContext *>(contextPtr));
@@ -571,14 +622,14 @@ int32_t HksAniParseParams(ani_env *env, ani_string keyAlias, ani_object options,
     HKS_IF_NOT_TRUE_LOGE_RETURN(aniRet, HKS_ERROR_INVALID_ARGUMENT);
     
     ani_object inDataBuffer = reinterpret_cast<ani_object>(inDataRef);
-    aniRet = HksGetBufferFromAni(env, inDataBuffer, contextPtr->keyIn);
+    aniRet = HksGetBufferFromAni(env, inDataBuffer, contextPtr->key);
     HKS_IF_NOT_TRUE_LOGE_RETURN(aniRet, HKS_ERROR_INVALID_ARGUMENT);
 
     return HKS_SUCCESS;
 }
 
 template<>
-void HksDeleteContext(ImportKeyContext &context)
+void HksDeleteContext(KeyContext &context)
 {
     HksDeleteContext<CommonContext>(context);
     FreeHksBlobAndFresh(context.keyAlias, true);
@@ -588,7 +639,7 @@ int32_t HksAniImportWrappedKeyParseParams(ani_env *env, ani_string &keyAlias, an
         ani_object options, ImportWrappedKeyContext *&&contextPtr)
 {
     HKS_IF_NULL_LOGE_RETURN(contextPtr, HKS_ERROR_NULL_POINTER, "ParseParams, but context is null")
-    int32_t ret = HksAniParseParams<ImportKeyContext>(env, keyAlias, options, static_cast<ImportKeyContext *>(contextPtr));
+    int32_t ret = HksAniParseParams<KeyContext>(env, keyAlias, options, static_cast<KeyContext *>(contextPtr));
     if (ret != HKS_SUCCESS) {
         std::cout << "import key parase common param failed" << std::endl;
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -605,8 +656,16 @@ int32_t HksAniImportWrappedKeyParseParams(ani_env *env, ani_string &keyAlias, an
 template<>
 void HksDeleteContext(ImportWrappedKeyContext &context)
 {
-    HksDeleteContext<ImportKeyContext>(context);
+    HksDeleteContext<KeyContext>(context);
     FreeHksBlobAndFresh(context.wrappingKeyAlias);
+}
+
+template<>
+void HksDeleteContext(SessionContext &context)
+{
+    HksDeleteContext<CommonContext>(context);
+    FreeHksBlobAndFresh(context.token);
+    FreeHksBlobAndFresh(context.handle);
 }
 
 }  // namespace

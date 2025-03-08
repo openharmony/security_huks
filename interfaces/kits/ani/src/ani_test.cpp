@@ -70,21 +70,21 @@ static ani_object importKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unuse
 {
     ani_object aniReturnObject{};
     int32_t ret{ HKS_SUCCESS };
-    ImportKeyContext context;
+    KeyContext context;
     do {
-        ret = HksAniParseParams<ImportKeyContext>(env, keyAlias, options, &context);
-        std::cout << "HksAniParseParams  success. keyIn size = " << context.keyIn.size << std::endl;
+        ret = HksAniParseParams<KeyContext>(env, keyAlias, options, &context);
+        std::cout << "HksAniParseParams  success. keyIn size = " << context.key.size << std::endl;
         
-        ret = HksImportKey(&context.keyAlias, context.paramSetIn, &context.keyIn);
+        ret = HksImportKey(&context.keyAlias, context.paramSetIn, &context.key);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksImportKey failed! ret = %" LOG_PUBLIC "d", ret)
         std::cout << "HksImportKey  success" << std::endl;
     } while(0);
     if (ret != HKS_SUCCESS) {
         std::cout << "HksImportKey  ret = " << ret << std::endl;
-        HksDeleteContext<ImportKeyContext>(context);
-        HKS_LOG_E("HksGetKeyAlias failed. ret = %" LOG_PUBLIC "d", ret);
+        HksDeleteContext<KeyContext>(context);
+        HKS_LOG_E("importKeyItemSync failed. ret = %" LOG_PUBLIC "d", ret);
     }
-    HksDeleteContext<ImportKeyContext>(context);
+    HksDeleteContext<KeyContext>(context);
     (void)HksCreateAniResult(ret, env, aniReturnObject);
     return aniReturnObject;
 }
@@ -97,16 +97,17 @@ static ani_object importWrappedKeyItemSync([[maybe_unused]] ani_env *env, [[mayb
     ImportWrappedKeyContext context;
     do {
         ret = HksAniImportWrappedKeyParseParams(env, keyAlias, wrappingKeyAlias, options, &context);
-        std::cout << "HksAniImportWrappedKeyParseParams  success. keyIn size = " << context.keyIn.size << std::endl;
+        std::cout << "HksAniImportWrappedKeyParseParams  success. keyIn size = " << context.key.size << std::endl;
         
-        ret = HksImportWrappedKey(&context.keyAlias, &context.wrappingKeyAlias, context.paramSetIn, &context.keyIn);
+        ret = HksImportWrappedKey(&context.keyAlias, &context.wrappingKeyAlias,
+            context.paramSetIn, &context.key);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksImportWrappedKey failed! ret = %" LOG_PUBLIC "d", ret)
         std::cout << "HksImportWrappedKey  success" << std::endl;
     } while(0);
     if (ret != HKS_SUCCESS) {
-        std::cout << "HksImportKey  ret = " << ret << std::endl;
+        std::cout << "importWrappedKeyItemSync  ret = " << ret << std::endl;
         HksDeleteContext<ImportWrappedKeyContext>(context);
-        HKS_LOG_E("HksGetKeyAlias failed. ret = %" LOG_PUBLIC "d", ret);
+        HKS_LOG_E("HksDeleteContext failed. ret = %" LOG_PUBLIC "d", ret);
     }
     HksDeleteContext<ImportWrappedKeyContext>(context);
     (void)HksCreateAniResult(ret, env, aniReturnObject);
@@ -117,13 +118,81 @@ static ani_object exportKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unuse
 {
     ani_object aniReturnObject{};
     int32_t ret{ HKS_SUCCESS };
-    std::vector<uint8_t> outBuffer{0x44, 0x22, 0x88};
-    ani_object bufferOut;
-    bool aniRet = AniUtils::CreateUint8Array(env, outBuffer, bufferOut);
-    if (aniRet != true) {
-        std::cerr << "CreateUint8Array failed!" <<std::endl;
+    KeyContext context;
+    std::vector<uint8_t> outBuffer;
+    ani_object bufferOut = nullptr;
+    do {
+        ret = HksAniParseParams<CommonContext>(env, keyAlias, options, &context);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAniParseParams failed! ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksExportPublicKey(&context.keyAlias, context.paramSetIn, &context.key);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksExportPublicKey failed! ret = %" LOG_PUBLIC "d", ret)
+        
+        outBuffer.reserve(context.key.size);
+        if (memcpy_s(outBuffer.data(), context.key.size, context.key.data, context.key.size) != EOK) {
+            HKS_LOG_E("export key, but copy mem to vector for creating ani object failed!");
+            ret = HKS_ERROR_BUFFER_TOO_SMALL;
+            break;
+        }
+        bool aniRet = AniUtils::CreateUint8Array(env, outBuffer, bufferOut);
+        if (aniRet != true) {
+            std::cerr << "CreateUint8Array failed!" <<std::endl;
+            HKS_LOG_E("export key get the keyOut ok, but creat ani object failed!");
+            ret = HKS_ERROR_BUFFER_TOO_SMALL;
+            break;
+        }
+        std::cout << "HksExportPublicKey  success" << std::endl;
+    } while(0);
+    if (ret != HKS_SUCCESS) {
+        std::cout << "HksExportPublicKey  ret = " << ret << std::endl;
+        HksDeleteContext<KeyContext>(context);
+        HKS_LOG_E("HksDeleteContext failed. ret = %" LOG_PUBLIC "d", ret);
     }
     (void)HksCreateAniResult(ret, env, aniReturnObject, bufferOut);
+    HksDeleteContext<KeyContext>(context);
+    return aniReturnObject;
+}
+
+static ani_object isKeyItemExistSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object, ani_string keyAlias, ani_object options)
+{
+    ani_object aniReturnObject{};
+    int32_t ret{ HKS_SUCCESS };
+    CommonContext context;
+    do {
+        ret = HksAniParseParams<CommonContext>(env, keyAlias, options, &context);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAniParseParams failed! ret = %" LOG_PUBLIC "d", ret)
+        std::cout << "HksAniParseParams  success" << std::endl;
+
+        ret = HksKeyExist(&context.keyAlias, context.paramSetIn);
+        std::cout << "HksDeleteKey  success" << std::endl;
+    } while(0);
+    if (ret != HKS_SUCCESS  && ret != HKS_ERROR_NOT_EXIST) {
+        HksDeleteContext<CommonContext>(context);
+        HKS_LOG_E("HksGetKeyAlias failed. ret = %" LOG_PUBLIC "d", ret);
+    }
+    HksDeleteContext<CommonContext>(context);
+    (void)HksIsKeyItemExistCreateAniResult(ret, env, aniReturnObject);
+    return aniReturnObject;
+}
+
+static ani_object initSessionSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object, ani_string keyAlias, ani_object options)
+{
+    ani_object aniReturnObject{};
+    int32_t ret{ HKS_SUCCESS };
+    SessionContext context;
+    do {
+        ret = HksAniParseParams<CommonContext>(env, keyAlias, options, &context);
+        std::cout << "HksAniParseParams  success" << std::endl;
+
+        ret = HksInit(&context.keyAlias, context.paramSetIn, &context.handle, &context.token);
+        std::cout << "HksInit Session success" << std::endl;
+    } while(0);
+    if (ret != HKS_SUCCESS) {
+        HksDeleteContext<SessionContext>(context);
+        HKS_LOG_E("HksGetKeyAlias failed. ret = %" LOG_PUBLIC "d", ret);
+    }
+    HksDeleteContext<SessionContext>(context);
+    (void)HksIsKeyItemExistCreateAniResult(ret, env, aniReturnObject);
     return aniReturnObject;
 }
 
@@ -147,6 +216,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"importKeyItemSync", nullptr, reinterpret_cast<void *>(importKeyItemSync)},
         ani_native_function {"importWrappedKeyItemSync", nullptr, reinterpret_cast<void *>(importWrappedKeyItemSync)},
         ani_native_function {"exportKeyItemSync", nullptr, reinterpret_cast<void *>(exportKeyItemSync)},
+        ani_native_function {"isKeyItemExistSync", nullptr, reinterpret_cast<void *>(isKeyItemExistSync)},
     };
 
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
