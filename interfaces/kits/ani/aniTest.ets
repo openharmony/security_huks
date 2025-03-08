@@ -26,6 +26,8 @@ export class Huks {
     native importKeyItemSync(keyAlias: string, options: huks.HuksOptions): HuksResult;
 
     native importWrappedKeyItemSync(keyAlias: string, wrappingKeyAlias: string, options: huks.HuksOptions): HuksResult;
+
+    native exportKeyItemSync(keyAlias: string, options: huks.HuksOptions): HuksResult;
 }
 
 interface Result {
@@ -76,7 +78,7 @@ let huksGenKeyOptions = new HuksOptionsImpl(
         new HuksParamImpl(huks.HuksTag.HUKS_TAG_KEY_SIZE, 2048 as number),
         // new HuksParamImpl(huks.HuksTag.HUKS_TAG_KEY_SIZE, huks.HuksKeySize.HUKS_DH_KEY_SIZE_2048 as number),
     ),
-    // new NativeBuffer(new Array())
+    // new Array()
 )
 
 let huksImportKeyOptions = new HuksOptionsImpl(
@@ -108,6 +110,11 @@ function main(){
 
     ret = hukstest.importKeyItemSync(keyAlias + "import", huksImportKeyOptions);
     console.log(`huks importKeyItemSync endl. ${ret.result}`)
+    console.log(ret.error)
+
+    ret = hukstest.exportKeyItemSync(keyAlias + "export", huksImportKeyOptions);
+    console.log(`huks exportKeyItemSync endl. ${ret.result}`)
+    console.log(`huks exportKeyItemSync endl. ${ret.outData}`)
     console.log(ret.error)
 
     console.println("result from native")
