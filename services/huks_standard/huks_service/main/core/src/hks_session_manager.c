@@ -392,16 +392,12 @@ void DeleteOperation(const struct HksBlob *operationHandle)
 
 static void DeleteSession(const struct HksProcessInfo *processInfo, struct HksOperation *operation)
 {
-    if (operation->isInUse) {
-        HKS_LOG_E("operation is in use, do not delete");
-        return;
-    }
-    bool isNeedDelete = false;
-    if (processInfo->processName.size == 0) { /* delete by user id */
-        isNeedDelete = IsSameUserId(processInfo, operation);
-    } else { /* delete by process name */
-        isNeedDelete = IsSameUserId(processInfo, operation) && IsSameProcessName(processInfo, operation);
-    }
+    HKS_IF_TRUE_LOGE_RETURN_VOID(operation->isInUse, "operation is in use, do not delete")
+
+    /* delete by user id or delete by process name */
+    bool isNeedDelete = (processInfo->processName.size == 0)
+        ? IsSameUserId(processInfo, operation)
+        : (IsSameUserId(processInfo, operation) && IsSameProcessName(processInfo, operation));
 
     if (isNeedDelete) {
         DeleteKeyNodeAndDecreaseGlobalCount(operation);

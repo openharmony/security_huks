@@ -108,11 +108,7 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
         HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceGenerateKey fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
-    if (isNoneResponse) {
-        HksSendResponse(context, ret, NULL);
-    } else {
-        HksSendResponse(context, ret, &keyOut);
-    }
+    HksSendResponse(context, ret, isNoneResponse ? NULL : &keyOut);
 
     HKS_FREE_BLOB(keyOut);
     HKS_FREE_BLOB(processInfo.processName);
@@ -196,13 +192,9 @@ void HksIpcServiceExportPublicKey(const struct HksBlob *srcData, const uint8_t *
 
         ret = HksServiceExportPublicKey(&processInfo, &keyAlias, paramSet, &key);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceExportPublicKey fail, ret = %" LOG_PUBLIC "d", ret)
-
-        HksSendResponse(context, ret, &key);
     } while (0);
 
-    if (ret != HKS_SUCCESS) {
-        HksSendResponse(context, ret, NULL);
-    }
+    HksSendResponse(context, ret, ret == HKS_SUCCESS ? &key : NULL);
 
     HKS_FREE_BLOB(key);
     HKS_FREE_BLOB(processInfo.processName);
@@ -238,6 +230,7 @@ void HksIpcServiceDeleteKey(const struct HksBlob *srcData, const uint8_t *contex
 void HksIpcServiceGetKeyParamSet(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob keyAlias = { 0, NULL };
+    struct HksBlob paramSet = { 0, NULL };
     struct HksParamSet *paramSetIn = NULL;
     struct HksParamSet *paramSetOut = NULL;
     struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
@@ -256,13 +249,11 @@ void HksIpcServiceGetKeyParamSet(const struct HksBlob *srcData, const uint8_t *c
         ret = HksServiceGetKeyParamSet(&processInfo, &keyAlias, paramSetIn, paramSetOut);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceGetKeyParamSet fail, ret = %" LOG_PUBLIC "d", ret)
 
-        struct HksBlob paramSet = { paramSetOut->paramSetSize, (uint8_t *)paramSetOut };
-        HksSendResponse(context, ret, &paramSet);
+        paramSet.size = paramSetOut->paramSetSize;
+        paramSet.data = (uint8_t *)paramSetOut;
     } while (0);
 
-    if (ret != HKS_SUCCESS) {
-        HksSendResponse(context, ret, NULL);
-    }
+    HksSendResponse(context, ret, ret == HKS_SUCCESS ? &paramSet : NULL);
 
     HKS_FREE(paramSetOut);
     HKS_FREE_BLOB(processInfo.processName);
@@ -300,21 +291,14 @@ void HksIpcServiceGenerateRandom(const struct HksBlob *srcData, const uint8_t *c
 {
     struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
     struct HksBlob random = { 0, NULL };
-    int32_t ret;
+    int32_t ret = HKS_ERROR_INVALID_ARGUMENT;
 
     do {
-        if ((srcData == NULL) || (srcData->data == NULL) || (srcData->size < sizeof(uint32_t))) {
-            HKS_LOG_E("invalid srcData");
-            ret = HKS_ERROR_INVALID_ARGUMENT;
-            break;
-        }
+        HKS_IF_TRUE_LOGE_BREAK(srcData == NULL || srcData->data == NULL || srcData->size < sizeof(uint32_t),
+            "invalid srcData")
 
         random.size = *((uint32_t *)(srcData->data));
-        if (IsInvalidLength(random.size)) {
-            HKS_LOG_E("invalid size %" LOG_PUBLIC "u", random.size);
-            ret = HKS_ERROR_INVALID_ARGUMENT;
-            break;
-        }
+        HKS_IF_TRUE_LOGE_BREAK(IsInvalidLength(random.size), "invalid size %" LOG_PUBLIC "u", random.size)
 
         random.data = (uint8_t *)HksMalloc(random.size);
         if (random.data == NULL) {
@@ -327,13 +311,9 @@ void HksIpcServiceGenerateRandom(const struct HksBlob *srcData, const uint8_t *c
 
         ret = HksServiceGenerateRandom(&processInfo, &random);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceGenerateRandom fail, ret = %" LOG_PUBLIC "d", ret)
-
-        HksSendResponse(context, ret, &random);
     } while (0);
 
-    if (ret != HKS_SUCCESS) {
-        HksSendResponse(context, ret, NULL);
-    }
+    HksSendResponse(context, ret, ret == HKS_SUCCESS ? &random : NULL);
 
     HKS_FREE_BLOB(random);
     HKS_FREE_BLOB(processInfo.processName);
@@ -361,13 +341,9 @@ void HksIpcServiceSign(const struct HksBlob *srcData, const uint8_t *context)
 
         ret = HksServiceSign(&processInfo, &keyAlias, inParamSet, &unsignedData, &signature);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceSign fail, ret = %" LOG_PUBLIC "d", ret)
-
-        HksSendResponse(context, ret, &signature);
     } while (0);
 
-    if (ret != HKS_SUCCESS) {
-        HksSendResponse(context, ret, NULL);
-    }
+    HksSendResponse(context, ret, ret == HKS_SUCCESS ? &signature : NULL);
 
     HKS_FREE_BLOB(signature);
     HKS_FREE_BLOB(processInfo.processName);
@@ -424,13 +400,9 @@ void HksIpcServiceEncrypt(const struct HksBlob *srcData, const uint8_t *context)
 
         ret = HksServiceEncrypt(&processInfo, &keyAlias, inParamSet, &plainText, &cipherText);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceEncrypt fail, ret = %" LOG_PUBLIC "d", ret)
-
-        HksSendResponse(context, ret, &cipherText);
     } while (0);
 
-    if (ret != HKS_SUCCESS) {
-        HksSendResponse(context, ret, NULL);
-    }
+    HksSendResponse(context, ret, ret == HKS_SUCCESS ? &cipherText : NULL);
 
     HKS_FREE_BLOB(cipherText);
     HKS_FREE_BLOB(processInfo.processName);
@@ -458,13 +430,9 @@ void HksIpcServiceDecrypt(const struct HksBlob *srcData, const uint8_t *context)
 
         ret = HksServiceDecrypt(&processInfo, &keyAlias, inParamSet, &cipherText, &plainText);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceDecrypt fail, ret = %" LOG_PUBLIC "d", ret)
-
-        HksSendResponse(context, ret, &plainText);
     } while (0);
 
-    if (ret != HKS_SUCCESS) {
-        HksSendResponse(context, ret, NULL);
-    }
+    HksSendResponse(context, ret, ret == HKS_SUCCESS ? &plainText : NULL);
 
     HKS_FREE_BLOB(plainText);
     HKS_FREE_BLOB(processInfo.processName);
@@ -492,13 +460,9 @@ void HksIpcServiceAgreeKey(const struct HksBlob *srcData, const uint8_t *context
 
         ret = HksServiceAgreeKey(&processInfo, inParamSet, &privateKey, &peerPublicKey, &agreedKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceAgreeKey fail, ret = %" LOG_PUBLIC "d", ret)
-
-        HksSendResponse(context, ret, &agreedKey);
     } while (0);
 
-    if (ret != HKS_SUCCESS) {
-        HksSendResponse(context, ret, NULL);
-    }
+    HksSendResponse(context, ret, ret == HKS_SUCCESS ? &agreedKey : NULL);
 
     HKS_FREE_BLOB(agreedKey);
     HKS_FREE_BLOB(processInfo.processName);
@@ -525,13 +489,9 @@ void HksIpcServiceDeriveKey(const struct HksBlob *srcData, const uint8_t *contex
 
         ret = HksServiceDeriveKey(&processInfo, inParamSet, &masterKey, &derivedKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceDeriveKey fail, ret = %" LOG_PUBLIC "d", ret)
-
-        HksSendResponse(context, ret, &derivedKey);
     } while (0);
 
-    if (ret != HKS_SUCCESS) {
-        HksSendResponse(context, ret, NULL);
-    }
+    HksSendResponse(context, ret, ret == HKS_SUCCESS ? &derivedKey : NULL);
 
     HKS_FREE_BLOB(derivedKey);
     HKS_FREE_BLOB(processInfo.processName);
@@ -559,13 +519,9 @@ void HksIpcServiceMac(const struct HksBlob *srcData, const uint8_t *context)
 
         ret = HksServiceMac(&processInfo, &key, inParamSet, &inputData, &mac);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceMac fail, ret = %" LOG_PUBLIC "d", ret)
-
-        HksSendResponse(context, ret, &mac);
     } while (0);
 
-    if (ret != HKS_SUCCESS) {
-        HksSendResponse(context, ret, NULL);
-    }
+    HksSendResponse(context, ret, ret == HKS_SUCCESS ? &mac : NULL);
 
     HKS_FREE_BLOB(mac);
     HKS_FREE_BLOB(processInfo.processName);
@@ -628,13 +584,9 @@ void HksIpcServiceGetKeyInfoList(const struct HksBlob *srcData, const uint8_t *c
 
         ret = HksGetKeyInfoListPackFromService(&keyInfoListBlob, listCount, keyInfoList);
         HKS_IF_NOT_SUCC_BREAK(ret)
-
-        HksSendResponse(context, ret, &keyInfoListBlob);
     } while (0);
 
-    if (ret != HKS_SUCCESS) {
-        HksSendResponse(context, ret, NULL);
-    }
+    HksSendResponse(context, ret, ret == HKS_SUCCESS ? &keyInfoListBlob : NULL);
 
     FreeKeyInfo(inputCount, &keyInfoList);
     HKS_FREE_BLOB(keyInfoListBlob);
@@ -648,15 +600,12 @@ int32_t HksAttestAccessControl(struct HksParamSet *paramSet)
     // check permisson for attest ids
     for (uint32_t i = 0; i < sizeof(g_idList) / sizeof(g_idList[0]); i++) {
         for (uint32_t j = 0; j < paramSet->paramsCnt; j++) {
-            if (paramSet->params[j].tag == g_idList[i]) {
-                return SensitivePermissionCheck("ohos.permission.ACCESS_IDS");
-            }
+            HKS_IF_TRUE_RETURN(paramSet->params[j].tag == g_idList[i],
+                SensitivePermissionCheck("ohos.permission.ACCESS_IDS"))
         }
     }
     // HKS_ATTESTATION_MODE_ANONYMOUS no need check permission
-    if (HksAttestIsAnonymous(paramSet)) {
-        return HKS_SUCCESS;
-    }
+    HKS_IF_TRUE_RETURN(HksAttestIsAnonymous(paramSet), HKS_SUCCESS)
 
     return SensitivePermissionCheck("ohos.permission.ATTEST_KEY");
 #endif
@@ -690,12 +639,9 @@ void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *contex
 
         // certChainBlob.size would be 0 if attestation mode is anonymous
         HKS_LOG_I("got certChainBlob size %" LOG_PUBLIC "u", certChainBlob.size);
-        HksSendResponse(context, ret, &certChainBlob);
     } while (0);
 
-    if (ret != HKS_SUCCESS) {
-        HksSendResponse(context, ret, NULL);
-    }
+    HksSendResponse(context, ret, ret == HKS_SUCCESS ? &certChainBlob : NULL);
 
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
@@ -713,20 +659,14 @@ static int32_t IpcServiceInit(const struct HksProcessInfo *processInfo, const st
     int32_t ret = HksServiceInit(processInfo, keyAlias, paramSet, &handle, &token);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "service init failed, ret = %" LOG_PUBLIC "d", ret)
 
-    if ((handle.size != HANDLE_SIZE) || (token.size > TOKEN_SIZE)) {
-        HKS_LOG_E("invalid handle size[%" LOG_PUBLIC "u], or token size[%" LOG_PUBLIC "u]", handle.size, token.size);
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(handle.size != HANDLE_SIZE || token.size > TOKEN_SIZE, HKS_ERROR_BAD_STATE,
+        "invalid handle size[%" LOG_PUBLIC "u], or token size[%" LOG_PUBLIC "u]", handle.size, token.size)
 
-    if (outData->size < (handle.size + token.size)) {
-        HKS_LOG_E("ipc out size[%" LOG_PUBLIC "u] too small", outData->size);
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(outData->size < handle.size + token.size, HKS_ERROR_BUFFER_TOO_SMALL,
+        "ipc out size[%" LOG_PUBLIC "u] too small", outData->size)
 
-    if (memcpy_s(outData->data, outData->size, handle.data, handle.size) != EOK) {
-        HKS_LOG_E("copy outData data failed!");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(outData->data, outData->size, handle.data, handle.size),
+        HKS_ERROR_INSUFFICIENT_MEMORY, "copy outData data failed!")
 
     if (token.size != 0 &&
         memcpy_s(outData->data + handle.size, outData->size - handle.size, token.data, token.size) != EOK) {
@@ -775,13 +715,9 @@ void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outDa
 
         ret = IpcServiceInit(&processInfo, &keyAlias, inParamSet, outData);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ipc service init fail, ret = %" LOG_PUBLIC "d", ret)
-
-        HksSendResponse(context, ret, outData);
     } while (0);
 
-    if (ret != HKS_SUCCESS) {
-        HksSendResponse(context, ret, NULL);
-    }
+    HksSendResponse(context, ret, ret == HKS_SUCCESS ? outData : NULL);
 
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&inParamSet);
@@ -826,23 +762,13 @@ void HksIpcServiceUpdOrFin(const struct HksBlob *paramSetBlob, struct HksBlob *o
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
-        if (isUpdate) {
-            ret = HksServiceUpdate(&handle, &processInfo, inParamSet, &inData, outData);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceUpdate fail, ret = %" LOG_PUBLIC "d", ret)
-        } else {
-            ret = HksServiceFinish(&handle, &processInfo, inParamSet, &inData, outData);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceFinish fail, ret = %" LOG_PUBLIC "d", ret)
-        }
-        if (outData->size == 0) {
-            HksSendResponse(context, ret, NULL);
-        } else {
-            HksSendResponse(context, ret, outData);
-        }
+        ret = isUpdate ? HksServiceUpdate(&handle, &processInfo, inParamSet, &inData, outData) :
+            HksServiceFinish(&handle, &processInfo, inParamSet, &inData, outData);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "%" LOG_PUBLIC "s fail, ret = %" LOG_PUBLIC "d",
+            isUpdate ? "HksServiceUpdate" : "HksServiceFinish", ret)
     } while (0);
 
-    if (ret != HKS_SUCCESS) {
-        HksSendResponse(context, ret, NULL);
-    }
+    HksSendResponse(context, ret, (ret == HKS_SUCCESS && outData->size > 0) ? outData : NULL);
 
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&inParamSet);
@@ -934,11 +860,7 @@ void HksIpcServiceListAliases(const struct HksBlob *srcData, const uint8_t *cont
     } while (0);
 
     // query success and key size is not 0
-    if (ret == HKS_SUCCESS && outBlob.size != 0) {
-        HksSendResponse(context, ret, &outBlob);
-    } else {
-        HksSendResponse(context, ret, NULL);
-    }
+    HksSendResponse(context, ret, ret == HKS_SUCCESS && outBlob.size != 0 ? &outBlob : NULL);
 
     HksFreeKeyAliasSet(keyAliasSet);
     HKS_FREE_BLOB(processInfo.processName);

@@ -110,12 +110,11 @@ static void Curve25519Destroy(struct Curve25519Structure *curve25519)
 
 static void SwapEndianThirtyTwoByte(uint8_t *pubkey, int len, bool isBigEndian)
 {
-    if (isBigEndian) {
-        for (int i = 0; i < len / 2; ++i) { // 2: get the middle position of the string
-            uint8_t tmp = pubkey[i];
-            pubkey[i] = pubkey[len - i - 1];
-            pubkey[len - i - 1] = tmp;
-        }
+    HKS_IF_NOT_TRUE_RETURN_VOID(isBigEndian)
+    for (int i = 0; i < len / 2; ++i) { // 2: get the middle position of the string
+        uint8_t tmp = pubkey[i];
+        pubkey[i] = pubkey[len - i - 1];
+        pubkey[len - i - 1] = tmp;
     }
 }
 
@@ -147,10 +146,7 @@ static int32_t CovertData(struct Curve25519Structure *curve25519, uint8_t *pubke
 static int32_t Curve25519Initialize(struct Curve25519Structure *curve25519,
     const uint8_t *source, uint32_t sourceLen, bool isBigEndian)
 {
-    if (sourceLen != P_BYTES) {
-        HKS_LOG_E("invalid param input");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(sourceLen != P_BYTES, HKS_ERROR_INVALID_ARGUMENT, "invalid param input")
 
     int32_t ret;
     uint8_t pubKey[P_BYTES] = {0};
@@ -261,14 +257,9 @@ static int32_t CheckEd25519Pubkey(const struct Curve25519Structure *curve25519, 
         if (BN_mod_sub(var->a, var->a, curve25519->p, curve25519->p, ctx) <= 0) {
             break;
         }
-        if (BN_cmp(var->a, tmpOne) < 0) {
-            result ^= (0x1 & ((uint32_t)flag >> 7)); // 7: Get the sign bit of the last byte of the ed25519 pubkey
-        } else {
-            result ^= 0x0;
-        }
-        if (result == 0) {
-            break;
-        }
+        // 7: Get the sign bit of the last byte of the ed25519 pubkey
+        result = result ^ (BN_cmp(var->a, tmpOne) < 0 ? (0x1 & ((uint32_t)flag >> 7)) : 0x0);
+        HKS_IF_TRUE_BREAK(result == 0)
         res = HKS_SUCCESS;
     } while (0);
     if (tmpOne != NULL) {
@@ -279,13 +270,13 @@ static int32_t CheckEd25519Pubkey(const struct Curve25519Structure *curve25519, 
 
 static int32_t FillPubKeyByZero(uint8_t *pubKey, uint32_t *pubKeySize)
 {
-    if (*pubKeySize < P_BYTES) {
-        uint8_t tmpKey[P_BYTES] = {0};
-        int baseAddr = P_BYTES - *pubKeySize;
-        (void)memcpy_s(tmpKey + baseAddr, P_BYTES - baseAddr, pubKey, *pubKeySize);
-        (void)memcpy_s(pubKey, P_BYTES, tmpKey, P_BYTES);
-        *pubKeySize = P_BYTES;
-    }
+    HKS_IF_TRUE_RETURN(*pubKeySize >= P_BYTES, HKS_SUCCESS)
+
+    uint8_t tmpKey[P_BYTES] = {0};
+    int baseAddr = P_BYTES - *pubKeySize;
+    (void)memcpy_s(tmpKey + baseAddr, P_BYTES - baseAddr, pubKey, *pubKeySize);
+    (void)memcpy_s(pubKey, P_BYTES, tmpKey, P_BYTES);
+    *pubKeySize = P_BYTES;
     return HKS_SUCCESS;
 }
 
@@ -360,9 +351,7 @@ int32_t ConvertPubkeyX25519FromED25519(const struct HksBlob *keyIn, struct HksBl
             break;
         }
         ret = Curve25519LocalVar(&var);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
         ret = BnOperationOfPubKeyConversion(keyIn, &outPubKey, &var, numberOne, ctx);
     } while (0);
 

@@ -68,9 +68,7 @@ int32_t HksLockUnlockWrite(HksLock *lock)
 
 void HksLockClose(HksLock *lock)
 {
-    if (lock == NULL) {
-        return;
-    }
+    HKS_IF_NULL_RETURN_VOID(lock)
     HksRwlockClose(lock->lock);
     HKS_FREE(lock);
 }

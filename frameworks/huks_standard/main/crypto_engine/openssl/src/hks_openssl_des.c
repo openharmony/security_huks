@@ -34,18 +34,14 @@
 
 static int32_t CheckDesKeySize(const struct HksBlob *key)
 {
-    if (key->size != HKS_KEY_BYTES(HKS_DES_KEY_SIZE_64)) {
-        return HKS_ERROR_INVALID_KEY_SIZE;
-    }
+    HKS_IF_TRUE_RETURN(key->size != HKS_KEY_BYTES(HKS_DES_KEY_SIZE_64), HKS_ERROR_INVALID_KEY_SIZE)
     return HKS_SUCCESS;
 }
 
 #ifdef HKS_SUPPORT_DES_GENERATE_KEY
 int32_t HksOpensslDesGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
 {
-    if (spec->keyLen != HKS_DES_KEY_SIZE_64) {
-        return HKS_ERROR_INVALID_KEY_SIZE;
-    }
+    HKS_IF_TRUE_RETURN(spec->keyLen != HKS_DES_KEY_SIZE_64, HKS_ERROR_INVALID_KEY_SIZE)
 
     const uint32_t keyByteLen = spec->keyLen / HKS_BITS_PER_BYTE;
     uint8_t *outKey = (uint8_t *)HksMalloc(keyByteLen);
@@ -102,12 +98,9 @@ ENABLE_CFI(const EVP_CIPHER *OpensslGetDesCipherType(uint32_t keySize, uint32_t 
 static int32_t OpensslDesCipherInitParams(const struct HksBlob *key, EVP_CIPHER_CTX *ctx, bool isEncrypt,
     struct HksCipherParam *cipherParam)
 {
-    int32_t ret;
-    if (isEncrypt) {
-        ret = EVP_EncryptInit_ex(ctx, NULL, NULL, key->data, (cipherParam == NULL) ? NULL : cipherParam->iv.data);
-    } else {
-        ret = EVP_DecryptInit_ex(ctx, NULL, NULL, key->data, (cipherParam == NULL) ? NULL : cipherParam->iv.data);
-    }
+    int32_t ret = isEncrypt
+        ? EVP_EncryptInit_ex(ctx, NULL, NULL, key->data, (cipherParam == NULL) ? NULL : cipherParam->iv.data)
+        : EVP_DecryptInit_ex(ctx, NULL, NULL, key->data, (cipherParam == NULL) ? NULL : cipherParam->iv.data);
     if (ret != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
@@ -139,11 +132,9 @@ static int32_t OpensslDesCipherInit(const struct HksBlob *key, const struct HksU
         return HKS_ERROR_INVALID_MODE;
     }
 
-    if (isEncrypt) {
-        ret = EVP_EncryptInit_ex(ctx, cipher, NULL, NULL, NULL);
-    } else {
-        ret = EVP_DecryptInit_ex(ctx, cipher, NULL, NULL, NULL);
-    }
+    ret = isEncrypt
+        ? EVP_EncryptInit_ex(ctx, cipher, NULL, NULL, NULL)
+        : EVP_DecryptInit_ex(ctx, cipher, NULL, NULL, NULL);
     if (ret != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
         EVP_CIPHER_CTX_free(ctx);
@@ -165,16 +156,11 @@ int32_t DesNoPaddingCryptInit(void **cryptoCtx, const struct HksBlob *key, const
     const bool encrypt)
 {
     struct HksCipherParam *iv = (struct HksCipherParam *)(usageSpec->algParam);
-    if (usageSpec ->mode == HKS_MODE_CBC && iv->iv.size != HKS_DES_IV_SIZE) {
-        HKS_LOG_E("initialize iv fail");
-        return HKS_ERROR_INVALID_IV;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(usageSpec->mode == HKS_MODE_CBC && iv->iv.size != HKS_DES_IV_SIZE, HKS_ERROR_INVALID_IV,
+        "initialize iv fail")
 
     struct HksOpensslDesCtx *outCtx = (struct HksOpensslDesCtx *)HksMalloc(sizeof(struct HksOpensslDesCtx));
-    if (outCtx == NULL) {
-        HKS_LOG_E("initialize outCtx fail");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(outCtx, HKS_ERROR_MALLOC_FAIL, "initialize outCtx fail")
 
     int32_t ret = OpensslDesCipherInit(key, usageSpec, encrypt, outCtx);
     if (ret != HKS_SUCCESS) {
@@ -197,10 +183,8 @@ int32_t DesNoPaddingCryptUpdate(void *cryptoCtx, const struct HksBlob *message, 
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)desCtx->append;
     HKS_IF_NULL_RETURN(ctx, HKS_ERROR_NULL_POINTER)
 
-    if (message->size % HKS_DES_BLOCK_SIZE != 0) {
-        HKS_LOG_E("DesCbcNoPaddingCryptUpdate data size invalid!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(message->size % HKS_DES_BLOCK_SIZE != 0, HKS_ERROR_INVALID_ARGUMENT,
+        "DesCbcNoPaddingCryptUpdate data size invalid!")
 
     int32_t outLen = 0;
     int evpRet = encrypt
@@ -222,10 +206,8 @@ int32_t DesNoPaddingCryptFinal(void **cryptoCtx, const struct HksBlob *message, 
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)desCtx->append;
     HKS_IF_NULL_RETURN(ctx, HKS_ERROR_NULL_POINTER)
 
-    if (message->size % HKS_DES_BLOCK_SIZE != 0) {
-        HKS_LOG_E("DesCbcNoPaddingCryptFinal data size invalid!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(message->size % HKS_DES_BLOCK_SIZE != 0, HKS_ERROR_INVALID_ARGUMENT,
+        "DesCbcNoPaddingCryptFinal data size invalid!")
 
     int32_t ret = HKS_SUCCESS;
     do {
@@ -305,10 +287,8 @@ static int32_t DesCryptFinal(void **cryptoCtx, const uint8_t padding, const stru
 int32_t HksOpensslDesCryptoInit(void **cryptoCtx, const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const bool encrypt)
 {
-    if (CheckDesKeySize(key) != HKS_SUCCESS || cryptoCtx == NULL || usageSpec == NULL) {
-        HKS_LOG_E("Invalid des keySize = 0x%" LOG_PUBLIC "X", key->size);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(CheckDesKeySize(key) != HKS_SUCCESS || cryptoCtx == NULL || usageSpec == NULL,
+        HKS_ERROR_INVALID_ARGUMENT, "Invalid des keySize = 0x%" LOG_PUBLIC "X", key->size)
 
     switch (usageSpec->mode) {
 #if defined(HKS_SUPPORT_DES_CBC_NOPADDING)
@@ -368,10 +348,7 @@ int32_t HksOpensslDesCryptoFinal(void **cryptoCtx, const struct HksBlob *message
 
 void HksOpensslDesHalFreeCtx(void **cryptCtx)
 {
-    if (cryptCtx == NULL || *cryptCtx == NULL) {
-        HKS_LOG_E("FreeCtx param context null");
-        return;
-    }
+    HKS_IF_TRUE_LOGE_RETURN_VOID(cryptCtx == NULL || *cryptCtx == NULL, "FreeCtx param context null")
     HKS_FREE(*cryptCtx);
 }
 #endif /* HKS_SUPPORT_DES_C */

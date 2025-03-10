@@ -580,11 +580,7 @@ static int32_t BuildUserAuthParamSet(const struct HksParamSet *paramSet, struct 
     struct HksParamSet *newParamSet = NULL;
     int32_t ret;
     do {
-        if (paramSet != NULL) {
-            ret = AppendToNewParamSet(paramSet, &newParamSet);
-        } else {
-            ret = HksInitParamSet(&newParamSet);
-        }
+        ret = (paramSet != NULL) ? AppendToNewParamSet(paramSet, &newParamSet) : HksInitParamSet(&newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init param set failed")
         ret = HksBuildParamSet(&newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build append info failed")
@@ -615,11 +611,7 @@ static int32_t AppendUserAuthInfo(const struct HksParamSet *paramSet, int32_t us
             break;
         }
 
-        if (paramSet != NULL) {
-            ret = AppendToNewParamSet(paramSet, &newParamSet);
-        } else {
-            ret = HksInitParamSet(&newParamSet);
-        }
+        ret = (paramSet != NULL) ? AppendToNewParamSet(paramSet, &newParamSet) : HksInitParamSet(&newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init param set failed")
 
         ret = AppendSecUid(newParamSet, secInfo);
@@ -2173,18 +2165,12 @@ static int32_t AppendChangeStorageLevelInfoInService(const struct HksProcessInfo
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
     do {
-        if (paramSet != NULL) {
-            ret = AppendToNewParamSet(paramSet, &newParamSet);
-        } else {
-            ret = HksInitParamSet(&newParamSet);
-        }
+        ret = (paramSet != NULL) ? AppendToNewParamSet(paramSet, &newParamSet) : HksInitParamSet(&newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append client service tag failed")
 
         // process name only can be inserted by service
-        if (CheckProcessNameTagExist(newParamSet)) {
-            ret = HKS_ERROR_INVALID_ARGUMENT;
-            break;
-        }
+        ret = HKS_ERROR_INVALID_ARGUMENT;
+        HKS_IF_TRUE_BREAK(CheckProcessNameTagExist(newParamSet))
 
         struct HksParam paramArr[] = {
             { .tag = HKS_TAG_PROCESS_NAME, .blob = processInfo->processName },
@@ -2302,10 +2288,8 @@ int32_t HksServiceChangeStorageLevel(const struct HksProcessInfo *processInfo, c
     HKS_FREE_BLOB(oldKey);
     HKS_FREE_BLOB(newKey);
     HksReport(__func__, processInfo, newParamSet, ret);
-    if (isSkipUpdate) {
-        ret = HKS_SUCCESS;
-    }
-    return ret;
+    HKS_IF_NOT_TRUE_RETURN(isSkipUpdate, ret)
+    return HKS_SUCCESS;
 #else
     (void)processInfo;
     (void)keyAlias;
