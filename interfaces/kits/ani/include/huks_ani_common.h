@@ -16,7 +16,6 @@
  #ifndef HKS_ANI_H
  #define HKS_ANI_H
 
-#include "base/security/huks/frameworks/huks_standard/main/crypto_engine/rkc/include/hks_rkc_rw.h"
 #include "hks_mem.h"
 #include "hks_type.h"
 #include "hks_type_enum.h"
@@ -32,6 +31,32 @@
 #include <stdio.h>
 namespace HuksAni {
 
+class CommonContext {
+public:
+    int32_t result = 0;
+    struct HksBlob keyAlias{0, nullptr};
+    struct HksParamSet *paramSetIn = nullptr;
+    struct HksParamSet *paramSetOut = nullptr;
+};
+
+class KeyContext : public CommonContext {
+public:
+    struct HksBlob key{0, nullptr};
+};
+
+class ImportWrappedKeyContext : public KeyContext {
+public:
+    struct HksBlob wrappingKeyAlias{0, nullptr};
+};
+
+class SessionContext : public CommonContext {
+public:
+    struct HksBlob inData{0, nullptr};
+    struct HksBlob outData{0, nullptr};
+    struct HksBlob handle{0, nullptr};
+    struct HksBlob token{0, nullptr};
+};
+
 namespace AniUtils {
     bool GetStirng([[maybe_unused]] ani_env *&env, const ani_string &strObject, std::string &nativeStr);
 
@@ -46,7 +71,7 @@ namespace AniUtils {
     bool GetBooleanFromUnionObj(ani_env *&env, const ani_object &unionObj, bool &value);
 
     bool GetClassPropertyGetMethod(ani_env *&env, const std::string &className, const std::string &propertyName,
-        ani_method &method);
+        const std::string getOrSet, ani_method &methodOut);
 
     bool GetEnumRealValue(ani_env *&env, ani_enum &enumObj, ani_int &enumIndex, uint32_t &realValue);
 
@@ -63,33 +88,13 @@ int32_t HksCreateAniResult(const int32_t result, ani_env *&env, ani_object &resu
 
 int32_t HksIsKeyItemExistCreateAniResult(const int32_t result, ani_env *&env, ani_object &resultObjOut);
 
+int32_t HksInitSessionCreateAniResult(const int32_t result, ani_env *&env, const SessionContext &context, ani_object &resultObjOut);
+
 int32_t HksGetParamSetFromAni(ani_env *&env, const ani_object &optionsObj, struct HksParamSet *&paramSetOut);
 
 void FreeHksBlobAndFresh(HksBlob &blob, const bool isNeedFresh = false);
 
-class CommonContext {
-public:
-    int32_t result = 0;
-    struct HksBlob keyAlias{};
-    struct HksParamSet *paramSetIn = nullptr;
-    struct HksParamSet *paramSetOut = nullptr;
-};
-
-class KeyContext : public CommonContext {
-public:
-    struct HksBlob key{};
-};
-
-class ImportWrappedKeyContext : public KeyContext {
-public:
-    struct HksBlob wrappingKeyAlias{};
-};
-
-class SessionContext : public CommonContext {
-public:
-    struct HksBlob handle{};
-    struct HksBlob token{};
-};
+int32_t HksOptionGetInData(ani_env *&env, ani_object options, HksBlob &blobOut);
 
 template<typename T>
 void HksDeleteContext(T &context)
@@ -105,10 +110,13 @@ template<typename T>
 int32_t HksAniParseParams(ani_env *env, ani_string keyAlias, ani_object options, T *&&contextPtr)
 {
     HKS_IF_NULL_LOGE_RETURN(contextPtr, HKS_ERROR_NULL_POINTER, "ParseParams, but context is null")
-    int32_t ret = HksGetKeyAliasFromAni(env, keyAlias, contextPtr->keyAlias);
-    if (ret != HKS_SUCCESS) {
-        std::cout << "HksGetKeyAliasFromAni failed" << std::endl;
-        return HKS_ERROR_INVALID_ARGUMENT;
+    int32_t ret{ HKS_SUCCESS };
+    if (keyAlias != nullptr) {
+        ret = HksGetKeyAliasFromAni(env, keyAlias, contextPtr->keyAlias);
+        if (ret != HKS_SUCCESS) {
+            std::cout << "HksGetKeyAliasFromAni failed" << std::endl;
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
     }
     ret = HksGetParamSetFromAni(env, options, contextPtr->paramSetIn);
     if (ret != HKS_SUCCESS) {
@@ -130,6 +138,8 @@ int32_t HksAniImportWrappedKeyParseParams(ani_env *env, ani_string &keyAlias, an
 
 template<>
 void HksDeleteContext(ImportWrappedKeyContext &context);
+
+int32_t HksAniParseParams(ani_env *env, ani_int handle, ani_object options, SessionContext *&&contextPtr);
 
 template<>
 void HksDeleteContext(SessionContext &context);

@@ -119,7 +119,7 @@ static ani_object exportKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unuse
     ani_object aniReturnObject{};
     int32_t ret{ HKS_SUCCESS };
     KeyContext context;
-    std::vector<uint8_t> outBuffer;
+    std::vector<uint8_t> outVec;
     ani_object bufferOut = nullptr;
     do {
         ret = HksAniParseParams<CommonContext>(env, keyAlias, options, &context);
@@ -128,13 +128,13 @@ static ani_object exportKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unuse
         ret = HksExportPublicKey(&context.keyAlias, context.paramSetIn, &context.key);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksExportPublicKey failed! ret = %" LOG_PUBLIC "d", ret)
         
-        outBuffer.reserve(context.key.size);
-        if (memcpy_s(outBuffer.data(), context.key.size, context.key.data, context.key.size) != EOK) {
+        outVec.reserve(context.key.size);
+        if (memcpy_s(outVec.data(), context.key.size, context.key.data, context.key.size) != EOK) {
             HKS_LOG_E("export key, but copy mem to vector for creating ani object failed!");
             ret = HKS_ERROR_BUFFER_TOO_SMALL;
             break;
         }
-        bool aniRet = AniUtils::CreateUint8Array(env, outBuffer, bufferOut);
+        bool aniRet = AniUtils::CreateUint8Array(env, outVec, bufferOut);
         if (aniRet != true) {
             std::cerr << "CreateUint8Array failed!" <<std::endl;
             HKS_LOG_E("export key get the keyOut ok, but creat ani object failed!");
@@ -175,7 +175,8 @@ static ani_object isKeyItemExistSync([[maybe_unused]] ani_env *env, [[maybe_unus
     return aniReturnObject;
 }
 
-static ani_object initSessionSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object, ani_string keyAlias, ani_object options)
+static ani_object initSessionSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
+    ani_string keyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
     int32_t ret{ HKS_SUCCESS };
@@ -192,7 +193,74 @@ static ani_object initSessionSync([[maybe_unused]] ani_env *env, [[maybe_unused]
         HKS_LOG_E("HksGetKeyAlias failed. ret = %" LOG_PUBLIC "d", ret);
     }
     HksDeleteContext<SessionContext>(context);
-    (void)HksIsKeyItemExistCreateAniResult(ret, env, aniReturnObject);
+    (void)HksInitSessionCreateAniResult(ret, env, context, aniReturnObject);
+    return aniReturnObject;
+}
+
+static ani_object updateFinishSessionSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
+    ani_int handle, ani_object options, ani_boolean isUpdate)
+{
+    ani_object aniReturnObject{};
+    int32_t ret{ HKS_SUCCESS };
+    std::vector<uint8_t> outVec;
+    ani_object bufferOut = nullptr;
+    SessionContext context;
+    do {
+        ret = HksAniParseParams(env, handle, options, &context);
+        std::cout << "HksAniParseParams  success" << std::endl;
+        if (static_cast<bool>(isUpdate) == true) {
+            ret = HksUpdate(&context.handle, context.paramSetIn, &context.inData, &context.outData);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "update session failed. ret = %" LOG_PUBLIC "d", ret)
+        } else {
+            ret = HksFinish(&context.handle, context.paramSetIn, &context.inData, &context.outData);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "finish session failed. ret = %" LOG_PUBLIC "d", ret)
+        }
+
+        outVec.reserve(context.outData.size);
+        if (memcpy_s(outVec.data(), context.outData.size, context.outData.data, context.outData.size) != EOK) {
+            HKS_LOG_E("updat key, but copy mem to vector for creating ani object failed!");
+            ret = HKS_ERROR_BUFFER_TOO_SMALL;
+            break;
+        }
+        bool aniRet = AniUtils::CreateUint8Array(env, outVec, bufferOut);
+        if (aniRet != true) {
+            std::cerr << "CreateUint8Array failed!" <<std::endl;
+            HKS_LOG_E("export key get the keyOut ok, but creat ani object failed!");
+            ret = HKS_ERROR_BUFFER_TOO_SMALL;
+            break;
+        }
+
+        std::cout << "updateFinishSessionync Session success" << std::endl;
+    } while(0);
+    if (ret != HKS_SUCCESS) {
+        HksDeleteContext<SessionContext>(context);
+        HKS_LOG_E("HksGetKeyAlias failed. ret = %" LOG_PUBLIC "d", ret);
+    }
+    HksDeleteContext<SessionContext>(context);
+    (void)HksCreateAniResult(ret, env, aniReturnObject, bufferOut);
+    return aniReturnObject;
+}
+
+static ani_object abortSessionSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
+    ani_int handle, ani_object options)
+{
+    ani_object aniReturnObject{};
+    int32_t ret{ HKS_SUCCESS };
+    SessionContext context;
+    do {
+        ret = HksAniParseParams(env, handle, options, &context);
+        std::cout << "HksAniParseParams  success" << std::endl;
+        ret = HksAbort(&context.handle, context.paramSetIn);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "abort session failed. ret = %" LOG_PUBLIC "d", ret)
+
+        std::cout << "HksAbort Session success" << std::endl;
+    } while(0);
+    if (ret != HKS_SUCCESS) {
+        HksDeleteContext<SessionContext>(context);
+        HKS_LOG_E("HksGetKeyAlias failed. ret = %" LOG_PUBLIC "d", ret);
+    }
+    HksDeleteContext<SessionContext>(context);
+    (void)HksCreateAniResult(ret, env, aniReturnObject);
     return aniReturnObject;
 }
 
@@ -217,6 +285,9 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"importWrappedKeyItemSync", nullptr, reinterpret_cast<void *>(importWrappedKeyItemSync)},
         ani_native_function {"exportKeyItemSync", nullptr, reinterpret_cast<void *>(exportKeyItemSync)},
         ani_native_function {"isKeyItemExistSync", nullptr, reinterpret_cast<void *>(isKeyItemExistSync)},
+        ani_native_function {"initSessionSync", nullptr, reinterpret_cast<void *>(initSessionSync)},
+        ani_native_function {"updateFinishSessionSync", nullptr, reinterpret_cast<void *>(updateFinishSessionSync)},
+        ani_native_function {"abortSessionSync", nullptr, reinterpret_cast<void *>(abortSessionSync)},
     };
 
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {

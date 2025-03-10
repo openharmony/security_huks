@@ -18,25 +18,22 @@ loadLibrary("huks_interfaceImpl.z")
 
 export class Huks {    
     native sum(a: int, b: int): int;
-
     native generateKeyItemSync(keyAlias: string, options: huks.HuksOptions): HuksResult;
-
     native deleteKeyItemSync(keyAlias: string, options: huks.HuksOptions): HuksResult;
-
     native importKeyItemSync(keyAlias: string, options: huks.HuksOptions): HuksResult;
-
     native importWrappedKeyItemSync(keyAlias: string, wrappingKeyAlias: string, options: huks.HuksOptions): HuksResult;
-
     native exportKeyItemSync(keyAlias: string, options: huks.HuksOptions): HuksResult;
-
     native isKeyItemExistSync(keyAlias: string, options: huks.HuksOptions): HuksResult;
+    native initSessionSync(keyAlias: string, options: huks.HuksOptions): HuksResult;
+    native updateFinishSessionSync(handle: int, options: huks.HuksOptions, isUpdate: boolean): HuksResult;
+    native abortSessionSync(keyAlias: string, options: huks.HuksOptions): HuksResult;
 }
 
 interface Result {
     result: int;
     error?: string | undefined;
     outData?: Uint8Array | undefined;
-    handle?: number | undefined;
+    handle?: int | undefined;
     challenge?: Uint8Array |undefined;
 }
 
@@ -44,7 +41,7 @@ class HuksResult implements Result {
     result: int = 1
     error?: string | undefined = ""
     outData?: Uint8Array | undefined
-    handle?: number | undefined;
+    handle?: int | undefined;
     challenge?: Uint8Array |undefined;
     // constructor(result: int, error?: string | undefined) {
     //     console.log("HuksResult constructor******")
