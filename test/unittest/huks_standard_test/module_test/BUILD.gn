@@ -314,7 +314,10 @@ ohos_unittest("huks_module_test") {
   ]
 
   if (os_level == "standard") {
-    external_deps += [ "openssl:libcrypto_shared" ]
+    external_deps += [
+      "openssl:libcrypto_shared",
+      "safwk:system_ability_fwk",
+    ]
   }
 
   if (support_jsapi) {

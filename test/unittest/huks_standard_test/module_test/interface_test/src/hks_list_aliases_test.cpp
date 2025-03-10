@@ -192,7 +192,10 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest003, TestSize.Level0)
 
     HksFreeParamSet(&queryParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksListAliases failed, ret = " << ret;
-    EXPECT_EQ(outData->aliasesCnt >= EXPECT_MIN_NUM, true) << "HksListAliases failed, cnt = " << outData->aliasesCnt;
+    if (outData != nullptr) {
+        EXPECT_EQ(outData->aliasesCnt >= EXPECT_MIN_NUM, true) <<
+            "HksListAliases failed, cnt = "<< outData->aliasesCnt;
+    }
     HksFreeKeyAliasSet(outData);
 }
 
