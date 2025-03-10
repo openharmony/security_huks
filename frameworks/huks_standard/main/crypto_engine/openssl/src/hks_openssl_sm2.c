@@ -63,10 +63,8 @@ static int32_t EvpPkeyToKeyMaterialEc(const struct HksKeySpec *spec, const EVP_P
     int priRet = GetBnBinpadFromPkey(pkey, OSSL_PKEY_PARAM_PRIV_KEY, &privBlob);
     int ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     do {
-        if (pubXRet != HKS_SUCCESS || pubYRet != HKS_SUCCESS || priRet != HKS_SUCCESS) {
-            HKS_LOG_E("GetBnBinpadFromPkey failed");
-            break;
-        }
+        HKS_IF_TRUE_LOGE_BREAK(pubXRet != HKS_SUCCESS || pubYRet != HKS_SUCCESS || priRet != HKS_SUCCESS,
+            "GetBnBinpadFromPkey failed")
         uint32_t rawMaterialLen = sizeof(struct KeyMaterialEcc) + pubXBlob.size + pubYBlob.size + privBlob.size;
         uint8_t *rawMaterial = (uint8_t *)HksMalloc(rawMaterialLen);
         if (!rawMaterial) {
@@ -108,15 +106,11 @@ static int32_t EvpPkeyToKeyMaterialEc(const struct HksKeySpec *spec, const EVP_P
 
 int32_t HksOpensslSm2GenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
 {
-    if (spec->algType != HKS_ALG_SM2) {
-        HKS_LOG_E("not HKS_ALG_SM2 but %" LOG_PUBLIC "u", spec->algType);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(spec->algType != HKS_ALG_SM2, HKS_ERROR_INVALID_ARGUMENT,
+        "not HKS_ALG_SM2 but %" LOG_PUBLIC "u", spec->algType)
 
-    if (spec->keyLen != HKS_SM2_KEY_SIZE_256) {
-        HKS_LOG_E("Sm2 Invalid keyLen %" LOG_PUBLIC "u", spec->keyLen);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(spec->keyLen != HKS_SM2_KEY_SIZE_256, HKS_ERROR_INVALID_ARGUMENT,
+        "Sm2 Invalid keyLen %" LOG_PUBLIC "u", spec->keyLen)
 
     EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_SM2, NULL);
     if (!ctx) {
@@ -139,10 +133,7 @@ int32_t HksOpensslSm2GenerateKey(const struct HksKeySpec *spec, struct HksBlob *
             break;
         }
         ret = EvpPkeyToKeyMaterialEc(spec, pkey, key);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("EvpPkeyToKeyMaterialEc ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "EvpPkeyToKeyMaterialEc ret = %" LOG_PUBLIC "d", ret)
     } while (false);
     SELF_FREE_PTR(pkey, EVP_PKEY_free)
     SELF_FREE_PTR(ctx, EVP_PKEY_CTX_free)
@@ -248,18 +239,12 @@ static OSSL_PARAM *ConstructSm2ParamsFromRawKey(const struct KeyMaterialEcc *mat
 
         // push private key if required
         if ((keyPurpose == HKS_KEY_PURPOSE_DECRYPT) || (keyPurpose == HKS_KEY_PURPOSE_SIGN)) {
-            if (material->zSize == 0) {
-                HKS_LOG_E("decrypt or sign but private key empty");
-                break;
-            }
+            HKS_IF_TRUE_LOGE_BREAK(material->zSize == 0, "decrypt or sign but private key empty")
             priBn = BN_bin2bn((const uint8_t *)(material) + sizeof(struct KeyMaterialEcc) +
                 material->xSize + material->ySize, material->zSize, NULL);
             HKS_IF_NULL_LOGE_BREAK(priBn, "BN_bin2bn fail%" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()))
             ret = OSSL_PARAM_BLD_push_BN(paramBld, OSSL_PKEY_PARAM_PRIV_KEY, priBn);
-            if (ret != HKS_OPENSSL_SUCCESS) {
-                HKS_LOG_E("OSSL_PARAM_BLD_push_BN failed %" LOG_PUBLIC "d", ret);
-                break;
-            }
+            HKS_IF_TRUE_LOGE_BREAK(ret != HKS_OPENSSL_SUCCESS, "OSSL_PARAM_BLD_push_BN failed %" LOG_PUBLIC "d", ret)
         }
 
         params = OSSL_PARAM_BLD_to_param(paramBld);
@@ -283,10 +268,7 @@ static EVP_PKEY *Sm2InitKey(const struct HksBlob *keyBlob, enum HksKeyPurpose ke
     EVP_PKEY *sm2EvpPkey = NULL;
     HKS_LOG_I("begin ConstructSm2ParamsFromRawKey");
     OSSL_PARAM *params = ConstructSm2ParamsFromRawKey(keyMaterial, keyPurpose);
-    if (params == NULL) {
-        HKS_LOG_E("ConstructSm2ParamsFromRawKey failed");
-        return NULL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(params, NULL, "ConstructSm2ParamsFromRawKey failed")
     do {
         EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(NID_sm2, NULL);
         if (ctx == NULL) {
@@ -405,10 +387,8 @@ static EVP_PKEY_CTX *InitSm2Ctx(const struct HksBlob *mainKey, uint32_t digest, 
 int32_t HksOpensslSm2Verify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const struct HksBlob *signature)
 {
-    if (CheckBlob(message) != HKS_SUCCESS || CheckBlob(signature) != HKS_SUCCESS) {
-        HKS_LOG_E("sm sign invalid arg");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(CheckBlob(message) != HKS_SUCCESS || CheckBlob(signature) != HKS_SUCCESS,
+        HKS_ERROR_INVALID_ARGUMENT, "sm sign invalid arg")
     HKS_LOG_I("sm2 verify");
     EVP_PKEY_CTX *ctx = InitSm2Ctx(key, usageSpec->digest, usageSpec->purpose, message);
     HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_KEY_INFO, "initialize sm2 context failed")
@@ -427,10 +407,8 @@ int32_t HksOpensslSm2Verify(const struct HksBlob *key, const struct HksUsageSpec
 int32_t HksOpensslSm2Sign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *signature)
 {
-    if (CheckBlob(message) != HKS_SUCCESS || CheckBlob(signature) != HKS_SUCCESS) {
-        HKS_LOG_E("sm sign invalid arg");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(CheckBlob(message) != HKS_SUCCESS || CheckBlob(signature) != HKS_SUCCESS,
+        HKS_ERROR_INVALID_ARGUMENT, "sm sign invalid arg")
     HKS_LOG_I("sm2 sign");
     EVP_PKEY_CTX *ctx = InitSm2Ctx(key, usageSpec->digest, usageSpec->purpose, message);
     HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_KEY_INFO, "initialize sm2 context failed")

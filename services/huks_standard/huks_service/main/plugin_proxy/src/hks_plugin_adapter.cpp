@@ -94,10 +94,8 @@ ENABLE_CFI(static int32_t HksCreatePluginProxy(void))
 
 int32_t RetryLoadPlugin(void)
 {
-    if (HksCreatePluginProxy() != HKS_SUCCESS) {
-        HKS_LOG_E("Failed to create the plugin again.");
-        return HKS_ERROR_LOAD_PLUGIN_FAIL;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksCreatePluginProxy(), HKS_ERROR_LOAD_PLUGIN_FAIL,
+        "Failed to create the plugin again.")
     return HKS_SUCCESS;
 }
 

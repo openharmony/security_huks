@@ -256,14 +256,11 @@ void HksHaPlugin::HandleStatisticEvent(struct HksEventInfo *eventInfo, uint32_t 
     const HksEventCacheNode &firstNode = eventCacheList.cacheList.front();
     uint32_t reportCount = 0;
     time_t currentTime = GetCurrentTimestamp();
-    bool judge = false;
-    if ((currentTime - firstNode.timestamp) > MAX_CACHE_DURATION || currentSize >= MAX_CACHE_SIZE) {
-        judge = true;
-        reportCount = currentSize;
-    }
 
-    HKS_IF_TRUE_LOGI_RETURN(judge, (void)BatchReportEvents(reportCount),
-        "HksHaPlugin::HandleStatisticEvent:reportCount is %" LOG_PUBLIC "u", reportCount)
+    HKS_IF_TRUE_RETURN_VOID((currentTime - firstNode.timestamp) <= MAX_CACHE_DURATION && currentSize < MAX_CACHE_SIZE)
+    reportCount = currentSize;
+    HKS_LOG_I("HksHaPlugin::HandleStatisticEvent:reportCount is %" LOG_PUBLIC "u", reportCount);
+    BatchReportEvents(reportCount);
 }
 
 void HksHaPlugin::AddEventCache(uint32_t eventId, struct HksEventInfo *eventInfo)

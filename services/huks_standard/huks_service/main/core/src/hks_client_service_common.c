@@ -55,11 +55,7 @@ int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet, struct HksP
     struct HksParamSet *newParamSet = NULL;
     int32_t ret;
     do {
-        if (paramSet != NULL) {
-            ret = AppendToNewParamSet(paramSet, &newParamSet);
-        } else {
-            ret = HksInitParamSet(&newParamSet);
-        }
+        ret = (paramSet != NULL) ? AppendToNewParamSet(paramSet, &newParamSet) : HksInitParamSet(&newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init param set failed")
 
         struct HksParam frontUserIdParam;

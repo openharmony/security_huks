@@ -500,10 +500,7 @@ int32_t HksCryptoHalDecryptFinal(const struct HksBlob *message, void **ctx, stru
 void HksCryptoHalDecryptFreeCtx(void **ctx, const uint32_t algtype)
 {
     FreeCtx func = (FreeCtx)GetAbility(HKS_CRYPTO_ABILITY_DECRYPT_FREE_CTX(algtype));
-    if (func == NULL) {
-        HKS_LOG_E("CryptoHalDecryptFreeCtx func is null");
-        return;
-    }
+    HKS_IF_NULL_LOGE_RETURN_VOID(func, "CryptoHalDecryptFreeCtx func is null")
 
     return func(ctx);
 }

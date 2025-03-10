@@ -42,10 +42,7 @@ static void GetOsAccountIdFromUid(int uid, int &osAccountId)
 
 static void GetProcessInfo(int userId, int uid, struct HksProcessInfo *processInfo)
 {
-    uint32_t userSize = sizeof(userId);
-    if (userId == 0) {
-        userSize = strlen(USER_ID_ROOT);
-    }
+    uint32_t userSize = userId != 0 ? sizeof(userId) : strlen(USER_ID_ROOT);
     uint8_t *userData = static_cast<uint8_t *>(HksMalloc(userSize));
     HKS_IF_NULL_LOGE_RETURN_VOID(userData, "user id malloc failed.")
     (void)memcpy_s(userData, userSize, userId == 0 ? USER_ID_ROOT : reinterpret_cast<const char *>(&userId), userSize);
@@ -94,10 +91,7 @@ void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData
 
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
     // judge whether is upgrading, wait for upgrade finished
-    if (HksWaitIfPowerOnUpgrading() != HKS_SUCCESS) {
-        HKS_LOG_E("wait on upgrading failed.");
-        return;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(HksWaitIfPowerOnUpgrading(), "wait on upgrading failed.")
     HksUpgradeOrRequestLockRead();
 #endif
 

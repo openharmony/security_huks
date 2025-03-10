@@ -50,20 +50,15 @@ void *HksLockUserIdm(void)
     auto *cntr = new (std::nothrow) OHOS::Security::Hks::HksIpcCounter();
     HKS_IF_NULL_LOGE_RETURN(cntr, nullptr, "useridm wrap new HksIpcCounter failed")
     int32_t ret = cntr->Wait();
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("useridm wrap HksIpcCounter wait failed %" LOG_PUBLIC "d", ret);
-        delete cntr;
-        return nullptr;
-    }
-    return cntr;
+    HKS_IF_TRUE_RETURN(ret == HKS_SUCCESS, cntr)
+    HKS_LOG_E("useridm wrap HksIpcCounter wait failed %" LOG_PUBLIC "d", ret);
+    delete cntr;
+    return nullptr;
 }
 
 void HksUnlockUserIdm(void *ptr)
 {
-    if (ptr == nullptr) {
-        HKS_LOG_E("useridm wrap HksUnlockUserIdm nullptr");
-        return;
-    }
+    HKS_IF_NULL_LOGE_RETURN_VOID(ptr, "useridm wrap HksUnlockUserIdm nullptr")
     delete static_cast<OHOS::Security::Hks::HksIpcCounter *>(ptr);
 }
 
@@ -280,15 +275,9 @@ int32_t HksUserIdmGetAuthInfoNum(int32_t userId, enum HksUserAuthType hksAuthTyp
 int32_t HksConvertUserIamTypeToHksType(enum HksUserIamType type, uint32_t userIamValue, uint32_t *hksValue)
 {
     HKS_IF_NULL_RETURN(hksValue, HKS_ERROR_NULL_POINTER)
-
-    switch (type) {
-        case HKS_AUTH_TYPE:
-            return ConvertToHksAuthType(static_cast<enum USER_IAM::AuthType>(userIamValue),
-                reinterpret_cast<enum HksUserAuthType *>(hksValue));
-        default:
-            break;
-    }
-    return HKS_ERROR_NOT_SUPPORTED;
+    HKS_IF_TRUE_RETURN(type != HKS_AUTH_TYPE, HKS_ERROR_NOT_SUPPORTED)
+    return ConvertToHksAuthType(static_cast<enum USER_IAM::AuthType>(userIamValue),
+        reinterpret_cast<enum HksUserAuthType *>(hksValue));
 }
 #else
 int32_t HksUserIdmGetSecInfo(int32_t userId, struct SecInfoWrap **outSecInfo)

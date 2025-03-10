@@ -167,17 +167,13 @@ static int32_t GetStorageTypePath(uint32_t storageType, struct HksStoreMaterial 
         case HKS_STORAGE_TYPE_KEY:
         case HKS_STORAGE_TYPE_BAK_KEY:
             outMaterial->storageTypePath = (char *)HksMalloc(sizeof(HKS_KEY_STORE_KEY_PATH) + 1);
-            if (outMaterial->storageTypePath == NULL) {
-                return HKS_ERROR_MALLOC_FAIL;
-            }
+            HKS_IF_NULL_RETURN(outMaterial->storageTypePath, HKS_ERROR_MALLOC_FAIL)
             (void)memcpy_s(outMaterial->storageTypePath, sizeof(HKS_KEY_STORE_KEY_PATH),
                 HKS_KEY_STORE_KEY_PATH, sizeof(HKS_KEY_STORE_KEY_PATH));
             return HKS_SUCCESS;
         case HKS_STORAGE_TYPE_ROOT_KEY:
             outMaterial->storageTypePath = (char *)HksMalloc(sizeof(HKS_KEY_STORE_ROOT_KEY_PATH) + 1);
-            if (outMaterial->storageTypePath == NULL) {
-                return HKS_ERROR_MALLOC_FAIL;
-            }
+            HKS_IF_NULL_RETURN(outMaterial->storageTypePath, HKS_ERROR_MALLOC_FAIL)
             (void)memcpy_s(outMaterial->storageTypePath, sizeof(HKS_KEY_STORE_ROOT_KEY_PATH),
                 HKS_KEY_STORE_ROOT_KEY_PATH, sizeof(HKS_KEY_STORE_ROOT_KEY_PATH));
             return HKS_SUCCESS;
@@ -264,10 +260,7 @@ static int32_t InitStorageMaterial(const struct HksProcessInfo *processInfo,
     int32_t ret;
 #ifdef L2_STANDARD
     ret = GetStorageLevelAndStoreUserIdParam(processInfo, paramSet, &storageLevel, &storeUserId);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get storage level and user id from param set failed.");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get storage level and user id from param set failed.")
 #endif
     bool isPlainPath = GetIsPlainPath(storageLevel);
 
@@ -435,10 +428,8 @@ int32_t HksManageStoreGetKeyBlob(const struct HksProcessInfo *processInfo, const
             ret = HksStoreGetKeyBlob(&fileInfo.bakPath, &material, keyBlob);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks get key blob failed, ret = %" LOG_PUBLIC "d.", ret)
 
-            if (HksStorageWriteFile(fileInfo.mainPath.path, fileInfo.mainPath.fileName, 0,
-                keyBlob->data, keyBlob->size) != HKS_SUCCESS) {
-                    HKS_LOG_E("hks copy bak key to main key failed");
-                }
+            HKS_IF_NOT_SUCC_LOGE(HksStorageWriteFile(fileInfo.mainPath.path, fileInfo.mainPath.fileName, 0,
+                keyBlob->data, keyBlob->size), "hks copy bak key to main key failed")
         }
 #endif
 #endif
@@ -609,13 +600,9 @@ int32_t HksManageStoreRenameKeyAlias(const struct HksProcessInfo *processInfo,
 
         struct HksParam *isNeedCopy = NULL;
         ret = HksGetParam(paramSet, HKS_TAG_IS_COPY_NEW_KEY, &isNeedCopy);
-        if (ret == HKS_SUCCESS && isNeedCopy->boolParam == true) {
-            ret = HksStoreRenameKeyAlias(&oldKeyFileInfo, &newKeyFileInfo, &oldKeyMaterial, &newKeyMaterial, true);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks rename key blod failed, ret = %" LOG_PUBLIC "d.", ret);
-        } else {
-            ret = HksStoreRenameKeyAlias(&oldKeyFileInfo, &newKeyFileInfo, &oldKeyMaterial, &newKeyMaterial, false);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks rename key blod failed, ret = %" LOG_PUBLIC "d.", ret);
-        }
+        ret = HksStoreRenameKeyAlias(&oldKeyFileInfo, &newKeyFileInfo, &oldKeyMaterial, &newKeyMaterial,
+            (ret == HKS_SUCCESS && isNeedCopy->boolParam == true) ? true : false);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks rename key blod failed, ret = %" LOG_PUBLIC "d.", ret);
     } while (0);
     FileInfoFree(&oldKeyFileInfo);
     FileInfoFree(&newKeyFileInfo);

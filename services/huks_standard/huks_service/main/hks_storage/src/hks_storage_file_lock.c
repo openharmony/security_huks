@@ -38,9 +38,7 @@ static HksMutex *g_lockListLock = NULL;
 
 static void FreeFileLock(HksStorageFileLock *lock)
 {
-    if (lock == NULL) {
-        return;
-    }
+    HKS_IF_NULL_RETURN_VOID(lock)
 
     if (lock->path) {
         HKS_FREE(lock->path);
@@ -57,9 +55,7 @@ static void FreeFileLock(HksStorageFileLock *lock)
 
 static void ClearLockList(void)
 {
-    if (g_lockListFirst == NULL) {
-        return;
-    }
+    HKS_IF_NULL_RETURN_VOID(g_lockListFirst)
 
     HksStorageFileLock *iter = g_lockListFirst;
     HksStorageFileLock *temp = NULL;
@@ -113,10 +109,7 @@ static HksStorageFileLock *AllocFileLock(const char *path)
 
 static void AddRef(HksStorageFileLock *lock)
 {
-    if (lock == NULL) {
-        return;
-    }
-
+    HKS_IF_NULL_RETURN_VOID(lock)
     lock->ref++;
 }
 
@@ -138,13 +131,8 @@ static void AppendFileLock(HksStorageFileLock *lock)
 
 HksStorageFileLock *HksStorageFileLockCreate(const char *path)
 {
-    HKS_IF_NULL_RETURN(path, NULL)
-
-    HKS_IF_NULL_RETURN(g_lockListLock, NULL)
-
-    if (HksMutexLock(g_lockListLock) != 0) {
-        return NULL;
-    }
+    HKS_IF_TRUE_RETURN(path == NULL || g_lockListLock == NULL ||
+        HksMutexLock(g_lockListLock) != 0, NULL)
     HksStorageFileLock *lock = FindFileLock(path);
     if (lock == NULL) {
         lock = AllocFileLock(path);
@@ -237,17 +225,7 @@ static uint32_t Release(HksStorageFileLock *lock)
 
 void HksStorageFileLockRelease(HksStorageFileLock *lock)
 {
-    if (lock == NULL) {
-        return;
-    }
-
-    if (g_lockListLock == NULL) {
-        return;
-    }
-
-    if (HksMutexLock(g_lockListLock) != 0) {
-        return;
-    }
+    HKS_IF_TRUE_RETURN_VOID(lock == NULL || g_lockListLock == NULL || HksMutexLock(g_lockListLock) != 0)
 
     if (IsLockInList(lock)) {
         Release(lock);

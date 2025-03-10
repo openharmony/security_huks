@@ -158,10 +158,8 @@ HksService::~HksService()
 sptr<HksService> HksService::GetInstance()
 {
     std::lock_guard<std::mutex> autoLock(instanceLock);
-    if (instance == nullptr) {
-        instance = new (std::nothrow) HksService(SA_ID_KEYSTORE_SERVICE, true);
-    }
-
+    HKS_IF_TRUE_RETURN(instance != nullptr, instance)
+    instance = new (std::nothrow) HksService(SA_ID_KEYSTORE_SERVICE, true);
     return instance;
 }
 
@@ -270,10 +268,7 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
 
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
     // judge whether is upgrading, wait for upgrade finished
-    if (HksWaitIfPowerOnUpgrading() != HKS_SUCCESS) {
-        HKS_LOG_E("wait on upgrading failed.");
-        return HW_SYSTEM_ERROR;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksWaitIfPowerOnUpgrading(), HW_SYSTEM_ERROR, "wait on upgrading failed.")
     HksUpgradeOrRequestLockRead();
 #endif
 

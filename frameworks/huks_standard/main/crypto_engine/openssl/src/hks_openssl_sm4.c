@@ -37,10 +37,8 @@
 #ifdef HKS_SUPPORT_SM4_GENERATE_KEY
 static int32_t Sm4GenKeyCheckParam(const struct HksKeySpec *spec)
 {
-    if (spec->keyLen != HKS_SM4_KEY_SIZE_128) {
-        HKS_LOG_E("Invlid sm4 key len %" LOG_PUBLIC "x!", spec->keyLen);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(spec->keyLen != HKS_SM4_KEY_SIZE_128, HKS_ERROR_INVALID_ARGUMENT,
+        "Invlid sm4 key len %" LOG_PUBLIC "x!", spec->keyLen)
     return HKS_SUCCESS;
 }
 
@@ -55,9 +53,8 @@ int32_t HksOpensslSm4GenerateKey(const struct HksKeySpec *spec, struct HksBlob *
 
 static const EVP_CIPHER *GetSm4CipherType(uint32_t keySize, uint32_t mode)
 {
-    if (keySize != HKS_KEY_BYTES(HKS_SM4_KEY_SIZE_128)) {
-        return NULL;
-    }
+    HKS_IF_TRUE_RETURN(keySize != HKS_KEY_BYTES(HKS_SM4_KEY_SIZE_128), NULL)
+
     switch (mode) {
         case HKS_MODE_CBC:
             return EVP_sm4_cbc();
@@ -251,10 +248,7 @@ int32_t HksOpensslSm4DecryptFinal(void **cryptoCtx, const struct HksBlob *messag
 
 void HksOpensslSm4HalFreeCtx(void **cryptoCtx)
 {
-    if (cryptoCtx == NULL || *cryptoCtx == NULL) {
-        HKS_LOG_E("Openssl sm4 free ctx is null");
-        return;
-    }
+    HKS_IF_TRUE_LOGE_RETURN_VOID(cryptoCtx == NULL || *cryptoCtx == NULL, "Openssl sm4 free ctx is null")
 
     HksOpensslBlockCipherCtx *opensslSm4Ctx = (HksOpensslBlockCipherCtx *)*cryptoCtx;
     switch (opensslSm4Ctx->mode) {
