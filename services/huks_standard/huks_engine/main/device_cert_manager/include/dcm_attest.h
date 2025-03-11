@@ -67,6 +67,11 @@
 
 #define HKS_IMPORT_CERT_PER_BUF_MAX_SIZE 2048
 
+struct AppIdTypeToOid {
+    enum HksCallerType type;
+    const struct HksBlob *oid;
+};
+
 struct DataTime {
     uint32_t seconds;
     uint32_t millis;
