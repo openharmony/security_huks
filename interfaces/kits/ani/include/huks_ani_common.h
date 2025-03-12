@@ -73,11 +73,13 @@ namespace AniUtils {
     bool GetClassPropertyGetMethod(ani_env *&env, const std::string &className, const std::string &propertyName,
         const std::string getOrSet, ani_method &methodOut);
 
-    bool GetEnumRealValue(ani_env *&env, ani_enum &enumObj, ani_int &enumIndex, uint32_t &realValue);
+    bool GetEnumRealValue(ani_env *&env, ani_enum_item &enumObj, uint32_t &realValue);
 
     bool GetUint8Array(ani_env *env, ani_object array, std::vector<uint8_t> &arrayOut);
 
     bool CheckRefisDefined(ani_env *&env, const ani_ref &ref);
+
+    void PrintUint8Array(std::vector<uint8_t> &arrayIn);
 
     bool CreateUint8Array(ani_env *env, std::vector<uint8_t> &arrayIn, ani_object &arrayOut);
 };
@@ -107,7 +109,7 @@ void HksDeleteContext(T &context)
 }
 
 template<typename T>
-int32_t HksAniParseParams(ani_env *env, ani_string keyAlias, ani_object options, T *&&contextPtr)
+int32_t HksAniParseParams(ani_env *env, ani_string keyAlias, ani_object &options, T *&&contextPtr)
 {
     HKS_IF_NULL_LOGE_RETURN(contextPtr, HKS_ERROR_NULL_POINTER, "ParseParams, but context is null")
     int32_t ret{ HKS_SUCCESS };
@@ -127,7 +129,7 @@ int32_t HksAniParseParams(ani_env *env, ani_string keyAlias, ani_object options,
 }
 
 template<>
-int32_t HksAniParseParams(ani_env *env, ani_string keyAlias, ani_object options, KeyContext *&&context);
+int32_t HksAniParseParams(ani_env *env, ani_string keyAlias, ani_object &options, KeyContext *&&context);
 
 template<>
 void HksDeleteContext(KeyContext &context);
@@ -139,7 +141,7 @@ int32_t HksAniImportWrappedKeyParseParams(ani_env *env, ani_string &keyAlias, an
 template<>
 void HksDeleteContext(ImportWrappedKeyContext &context);
 
-int32_t HksAniParseParams(ani_env *env, ani_int handle, ani_object options, SessionContext *&&contextPtr);
+int32_t HksAniParseParams(ani_env *env, ani_long &handle, ani_object &options, SessionContext *&&contextPtr);
 
 template<>
 void HksDeleteContext(SessionContext &context);

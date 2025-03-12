@@ -28,17 +28,18 @@
 #include <cerrno>
 #include <iostream>
 #include <memory>
+#include <ostream>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string>
 #include <vector>
 namespace HuksAni {
-static std::string HUKS_RESULT_CLASS_NAME = "LaniTest/HuksResult;";
-static std::string HUKS_OPTION_CLASS_NAME = "LaniTest/HuksOptionsImpl;";
-static std::string HUKS_PARAM_CLASS_NAME = "LaniTest/HuksParamImpl;";
-static std::string HUKS_TAG_NAME = "L#HuksTag;";
-static std::string HUKS_NAME_SPACE_NAME = "LhuksInterface/huks;";
+static std::string HUKS_RESULT_CLASS_NAME = "L@ohos/security/huks/HuksResult;";
+static std::string HUKS_OPTION_CLASS_NAME = "L@ohos/security/huks/HuksOptionsImpl;";
+static std::string HUKS_PARAM_CLASS_NAME = "L@ohos/security/huks/HuksParamImpl;";
+static std::string HUKS_TAG_ENUM_NAME = "LHuksTag;";
+static std::string HUKS_NAME_SPACE_NAME = "L@ohos/security/huks/huks;";
 
 void FreeHksBlobAndFresh(HksBlob &blob, const bool isNeedFresh)
 {
@@ -70,7 +71,6 @@ bool AniUtils::GetStirng([[maybe_unused]] ani_env *&env, const ani_string &strOb
     
     utf8_buffer[bytesWritten] = '\0';
     nativeStr = std::string(utf8_buffer);
-    std::cout << "Call Me With String. Get: "<< nativeStr << std::endl;
     return true;
 }
 
@@ -174,27 +174,21 @@ bool AniUtils::GetClassPropertyGetMethod(ani_env *&env, const std::string &class
         return false;
     }
     std::string getMethodName = getOrSet + propertyName;
-    if(ANI_OK != env->Class_FindMethod(cls, getMethodName.data(), nullptr, &methodOut)){
+    if(ANI_OK != env->Class_FindMethod(cls, getMethodName.data(), nullptr, &methodOut)) {
         std::cerr << "Class_FindMethod Fail'" << getMethodName << "'" << std::endl;
         return false;
     }
     return true;
 }
 
-bool AniUtils::GetEnumRealValue(ani_env *&env, ani_enum &enumObj, ani_int &enumIndex, uint32_t &realValue)
+bool AniUtils::GetEnumRealValue(ani_env *&env, ani_enum_item &enumObj, uint32_t &realValue)
 {
-    ani_enum_item enumItem;
-    if(ANI_OK != env->Enum_GetEnumItemByIndex(enumObj, enumIndex, &enumItem)){
-        std::cerr << "Enum_GetEnumItemByIndex FAILD" << std::endl;
-        return false;
-    }
-    ani_int tagValue;
-    if(ANI_OK != env->EnumItem_GetValue_Int(enumItem, &tagValue)) {
+    ani_int enumValue;
+    if(ANI_OK != env->EnumItem_GetValue_Int(enumObj, &enumValue)) {
         std::cerr << "EnumItem_GetValue_Int FAILD" << std::endl;
         return false;
     }
-    std::cout << "Enum Value: " << tagValue << std::endl;
-    realValue = static_cast<uint32_t>(tagValue);
+    realValue = static_cast<uint32_t>(enumValue);
     return true;
 }
 
@@ -226,16 +220,16 @@ bool AniUtils::GetUint8Array(ani_env *env, ani_object array, std::vector<uint8_t
         std::cerr << "Failed: env->ArrayBuffer_GetInfo()" << std::endl;
         return false;
     }
-    std::cout << "Length of buffer = " << length << std::endl;
-    std::cout << "Elements of buffer = [";
+    // std::cout << "Length of buffer = " << length << std::endl;
+    // std::cout << "Elements of buffer = [";
     for (size_t i = 0; i < length; i++) {
-        if (i != 0) {
-            std::cout << ", ";
-        }
-        std::cout << static_cast<unsigned>(static_cast<uint8_t*>(data)[i]);
+        // if (i != 0) {
+        //     std::cout << ", ";
+        // }
+        // std::cout << static_cast<unsigned>(static_cast<uint8_t*>(data)[i]);
         arrayOut.emplace_back(static_cast<unsigned>(static_cast<uint8_t*>(data)[i]));
     }
-    std::cout << "]" << std::endl;
+    // std::cout << "]" << std::endl;
 
     for (const char* propName: {"length", "byteLength", "byteOffset"}) {
         ani_int value;
@@ -247,6 +241,16 @@ bool AniUtils::GetUint8Array(ani_env *env, ani_object array, std::vector<uint8_t
         std::cout << "array." << propName << " = " << value << std::endl;
     }
     return true;
+}
+
+void AniUtils::PrintUint8Array(std::vector<uint8_t> &arrayIn)
+{
+    std::cout << "Elements of buffer size = " << arrayIn.size() << std::endl;
+    std::cout << "Elements of buffer = [";
+    for (uint32_t i = 0; i < arrayIn.size(); i++) {
+        std::cout << std::to_string(arrayIn[i]) + ", ";
+    }
+    std::cout << "]" << std::endl;
 }
 
 bool AniUtils::CreateUint8Array(ani_env *env, std::vector<uint8_t> &arrayIn, ani_object &arrayOut)
@@ -281,7 +285,7 @@ bool AniUtils::CreateUint8Array(ani_env *env, std::vector<uint8_t> &arrayIn, ani
         // todo: exception
         return false;
     }
-    if (memcpy_s(bufData, bufLength, arrayIn.data(), bufLength) != EOK) {
+    if (memcpy_s(bufData, bufLength, arrayIn.data(), arrayIn.size()) != EOK) {
         std::cerr << "Failed: memcpy_s" << std::endl;
         return false;
     }
@@ -307,40 +311,24 @@ static int32_t HksCreateAniResultCommon(const int32_t result, ani_env *&env, ani
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    ani_method setter;
-    bool getMethodRet = AniUtils::GetClassPropertyGetMethod(env, HUKS_RESULT_CLASS_NAME, "result", "<set>",
-        setter);
-    HKS_IF_NOT_TRUE_LOGE_RETURN(getMethodRet, HKS_ERROR_INVALID_ARGUMENT);
-    if(ANI_OK != env->Object_CallMethod_Void(resultObjOut, setter, ani_int(result))) {
-        std::cerr << "Object_CallMethod_Void Fail'" << "<set>result" << "'" << std::endl;
+    if(ANI_OK != env->Object_CallMethodByName_Void(resultObjOut, "<set>result", nullptr, ani_int(result))) {
+        std::cerr << "Object_CallMethodByName_Void Fail'" << "<set>result" << "'" << std::endl;
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-
+    
     if (errMsg != nullptr) {
-        getMethodRet = AniUtils::GetClassPropertyGetMethod(env, HUKS_RESULT_CLASS_NAME, "error", "<set>",
-            setter);
-        if(ANI_OK != getMethodRet) {
-            std::cerr << "Class_FindMethod Fail'" << "<set>error" << "'" << std::endl;
-        }
-        HKS_IF_NOT_TRUE_LOGE_RETURN(getMethodRet, HKS_ERROR_INVALID_ARGUMENT);
-        ani_string result_string{};
+        ani_string result_string;
         env->String_NewUTF8(errMsg, strlen(errMsg), &result_string);
-        if(ANI_OK != env->Object_CallMethod_Void(resultObjOut, setter, result_string)) {
-            std::cerr << "Object_CallMethod_Void Fail'" << "<set>error" << "'" << std::endl;
-            return HKS_ERROR_INVALID_ARGUMENT;
+        auto status = env->Object_CallMethodByName_Void(resultObjOut, "<set>error", "Lstd/core/String;:V", result_string);
+        if(ANI_OK != status) {
+            std::cerr << "Class_FindMethod Fail'" << "<set>error" << "'" << std::endl;
         }
     }
 
     if (oubBuffer != nullptr) {
-        getMethodRet = AniUtils::GetClassPropertyGetMethod(env, HUKS_RESULT_CLASS_NAME, "outData", "<set>",
-            setter);
-        if(ANI_OK != getMethodRet) {
-            std::cerr << "Class_FindMethod Fail'" << "<set>outData" << "'" << std::endl;
-        }
-        HKS_IF_NOT_TRUE_LOGE_RETURN(getMethodRet, HKS_ERROR_INVALID_ARGUMENT);
-        if(ANI_OK != env->Object_CallMethod_Void(resultObjOut, setter, oubBuffer)) {
-            std::cerr << "Object_CallMethod_Void Fail'" << "<set>outData" << "'" << std::endl;
-            return HKS_ERROR_INVALID_ARGUMENT;
+        auto status = env->Object_CallMethodByName_Void(resultObjOut, "<set>outData", nullptr, oubBuffer);
+        if(ANI_OK != status) {
+            std::cerr << "Object_CallMethodByName_Void Fail'" << "<set>outData" << "'" << std::endl;
         }
     }
     return HKS_SUCCESS;
@@ -383,16 +371,26 @@ int32_t HksInitSessionCreateAniResult(const int32_t result, ani_env *&env, const
         return ret;
     } else {
         ret = HksCreateAniResultCommon(HKS_SUCCESS, env, resultObjOut, nullptr, nullptr);
+        std::cerr << "HksCreateAniResultCommon success" << std::endl;
         ani_method setter;
+        std::cerr << "handle size = " << context.handle.size << std::endl;
+        int64_t handle = static_cast<int64_t>(*(uint64_t *)(context.handle.data));
+        std::cerr << "handle data = " << handle << std::endl;
         if (context.handle.size != 0 && context.handle.data != nullptr) {
-            bool getMethodRet = AniUtils::GetClassPropertyGetMethod(env, HUKS_RESULT_CLASS_NAME, "handle",
-                "<set>", setter);
-            HKS_IF_NOT_TRUE_LOGE_RETURN(getMethodRet, HKS_ERROR_INVALID_ARGUMENT);
-            int32_t handle = static_cast<int32_t>(*context.handle.data);
-            if(ANI_OK != env->Object_CallMethod_Void(resultObjOut, setter, ani_int(handle))) {
+            // bool getMethodRet = AniUtils::GetClassPropertyGetMethod(env, HUKS_RESULT_CLASS_NAME, "handle",
+            //     "<set>", setter);
+            // std::cerr << "GetClassPropertyGetMethod success" << std::endl;
+            // HKS_IF_NOT_TRUE_LOGE_RETURN(getMethodRet, HKS_ERROR_INVALID_ARGUMENT);
+
+            // if(ANI_OK != env->Object_CallMethod_Void(resultObjOut, setter, ani_int(handle))) {
+            //     std::cerr << "Object_CallMethod_Void Fail' " << "<set>handle" << std::endl;
+            //     return HKS_ERROR_INVALID_ARGUMENT;
+            // }
+            if(ANI_OK != env->Object_CallMethodByName_Void(resultObjOut, "<set>handle", nullptr, ani_long(handle))) {
                 std::cerr << "Object_CallMethod_Void Fail' " << "<set>handle" << std::endl;
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
+            std::cerr << "set handle success" << std::endl;
         }
         if (context.token.size != 0 && context.token.data != nullptr)
         {
@@ -461,31 +459,17 @@ int32_t HksAniGetParamTag(ani_env *&env, const ani_object &object, uint32_t &val
         tagGettter);
     HKS_IF_NOT_TRUE_LOGE_RETURN(getMethodRet, HKS_ERROR_INVALID_ARGUMENT);
 
-    ani_int enumIndex;
-    if(ANI_OK != env->Object_CallMethod_Int(object, tagGettter, &enumIndex))
+    ani_ref enumRef;
+    if(ANI_OK != env->Object_CallMethod_Ref(object, tagGettter, &enumRef))
     {
         std::cerr << "Object_CallMethod_Void Fail'" << tagGettter << "'" << std::endl;
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    // std::cerr << "get the tag object success, this is index, not the real value" << std::endl;
-
-    ani_namespace ns;
-    if (ANI_OK != env->FindNamespace(HUKS_NAME_SPACE_NAME.data(), &ns)) {
-        std::cerr << "Not FindNamespace '" << HUKS_NAME_SPACE_NAME << "'" << std::endl;
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    ani_enum huksTag {};
-    if (ANI_OK != env->Namespace_FindEnum(ns, HUKS_TAG_NAME.data(), &huksTag)) {
-        std::cerr << "Not Namespace_FindEnum '" << HUKS_TAG_NAME << "'" << std::endl;
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    // std::cerr << "get the tagdef from namespace success" << std::endl;
-
-    bool getRealValueRet = AniUtils::GetEnumRealValue(env, huksTag, enumIndex, value);
+    ani_enum_item enumItem = static_cast<ani_enum_item>(enumRef);
+    bool getRealValueRet = AniUtils::GetEnumRealValue(env, enumItem, value);
     HKS_IF_NOT_TRUE_LOGE_RETURN(getRealValueRet, HKS_ERROR_INVALID_ARGUMENT);
     return HKS_ERROR_INVALID_ARGUMENT;
 }
-
 
 int32_t HksAniHuksParamConvert(ani_env *&env, const ani_object &huksParamObj, HksParam &param)
 {
@@ -521,7 +505,7 @@ int32_t HksAniHuksParamConvert(ani_env *&env, const ani_object &huksParamObj, Hk
         break;
     case HKS_TAG_TYPE_UINT:
         getFieldRet = AniUtils::GetUint32FromUnionObj(env, unionObj, param.uint32Param);
-        std::cout << "uint value : " << param.uint32Param << std::endl;
+        // std::cout << "uint value : " << param.uint32Param << std::endl;
         break;
     case HKS_TAG_TYPE_INT:
         getFieldRet = AniUtils::GetInt32FromUnionObj(env, unionObj, param.int32Param);
@@ -568,17 +552,23 @@ static void FreeParsedParams(std::vector<HksParam> &params)
 
 int32_t HksGetParamSetFromAni(ani_env *&env, const ani_object &optionsObj, struct HksParamSet *&paramSetOut)
 {
-    ani_method propertiesGettter;
-    bool aniRet =  AniUtils::GetClassPropertyGetMethod(env, HUKS_OPTION_CLASS_NAME, "properties",
-        "<get>", propertiesGettter);
-    HKS_IF_NOT_TRUE_LOGE_RETURN(aniRet, HKS_ERROR_INVALID_ARGUMENT);
+    // ani_method propertiesGettter;
+    // bool aniRet =  AniUtils::GetClassPropertyGetMethod(env, HUKS_OPTION_CLASS_NAME, "properties",
+    //     "<get>", propertiesGettter);
+    // HKS_IF_NOT_TRUE_LOGE_RETURN(aniRet, HKS_ERROR_INVALID_ARGUMENT);
     ani_ref propertiesRef;
-    if(ANI_OK != env->Object_CallMethod_Ref(optionsObj, propertiesGettter, &propertiesRef))
+    // if(ANI_OK != env->Object_CallMethod_Ref(optionsObj, propertiesGettter, &propertiesRef))
+    // {
+    //     std::cerr << "Object_CallMethod_Void Fail'" << propertiesGettter << "'" << std::endl;
+    //     return HKS_ERROR_INVALID_ARGUMENT;
+    // }
+    if(ANI_OK != env->Object_CallMethodByName_Ref(optionsObj, "<get>properties", nullptr, &propertiesRef))
     {
-        std::cerr << "Object_CallMethod_Void Fail'" << propertiesGettter << "'" << std::endl;
+        std::cerr << "Object_CallMethodByName_Ref Fail' " << "<get>properties" << "'" << std::endl;
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    aniRet = AniUtils::CheckRefisDefined(env, propertiesRef);
+
+    bool aniRet = AniUtils::CheckRefisDefined(env, propertiesRef);
     HKS_IF_NOT_TRUE_LOGE_RETURN(aniRet, HKS_ERROR_INVALID_ARGUMENT);
 
     ani_object propertiesArray = reinterpret_cast<ani_object>(propertiesRef);
@@ -587,7 +577,6 @@ int32_t HksGetParamSetFromAni(ani_env *&env, const ani_object &optionsObj, struc
         std::cerr << "Object_GetPropertyByName_Double length Failed" << std::endl;    
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    std::cerr << "array length = "<< length << std::endl;
     std::vector<HksParam> paramArray {};
     HksParamSet *paramSetNew = nullptr;
     int32_t ret = HKS_SUCCESS;
@@ -645,29 +634,23 @@ int32_t HksGetBufferFromAni(ani_env *&env, const ani_object &arrayObj, HksBlob &
 
 int32_t HksOptionGetInData(ani_env *&env, ani_object options, HksBlob &blobOut)
 {
-    ani_method inDataGettter;
-    bool getMethodRet =  AniUtils::GetClassPropertyGetMethod(env, HUKS_OPTION_CLASS_NAME, "inData",
-        "<get>",inDataGettter);
-    HKS_IF_NOT_TRUE_LOGE_RETURN(getMethodRet, HKS_ERROR_INVALID_ARGUMENT);
-
-    std::cerr << "HksAniParseParams success'" << std::endl;
     ani_ref inDataRef;
-    if(ANI_OK != env->Object_CallMethod_Ref(options, inDataGettter, &inDataRef))
+    if(ANI_OK != env->Object_CallMethodByName_Ref(options, "<get>inData", nullptr, &inDataRef))
     {
-        std::cerr << "Object_CallMethod_Ref Fail'" << inDataGettter << std::endl;
+        std::cerr << "Object_CallMethodByName_Ref Fail' " << "<get>inData" << std::endl;
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     bool aniRet = AniUtils::CheckRefisDefined(env, inDataRef);
     HKS_IF_NOT_TRUE_LOGE_RETURN(aniRet, HKS_ERROR_INVALID_ARGUMENT);
     
     ani_object inDataBuffer = reinterpret_cast<ani_object>(inDataRef);
-    aniRet = HksGetBufferFromAni(env, inDataBuffer, blobOut);
-    HKS_IF_NOT_TRUE_LOGE_RETURN(aniRet, HKS_ERROR_INVALID_ARGUMENT);
-    return HKS_SUCCESS;
+    int32_t ret = HksGetBufferFromAni(env, inDataBuffer, blobOut);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "ANIGetBuffer failed! ret = %" LOG_PUBLIC "d", ret);
+    return ret;
 }
 
 template<>
-int32_t HksAniParseParams(ani_env *env, ani_string keyAlias, ani_object options, KeyContext *&&contextPtr)
+int32_t HksAniParseParams(ani_env *env, ani_string keyAlias, ani_object &options, KeyContext *&&contextPtr)
 {
     HKS_IF_NULL_LOGE_RETURN(contextPtr, HKS_ERROR_NULL_POINTER, "ParseParams, but context is null")
     int32_t ret = HksAniParseParams<CommonContext>(env, keyAlias, options, static_cast<CommonContext *>(contextPtr));
@@ -718,15 +701,14 @@ void HksDeleteContext(ImportWrappedKeyContext &context)
 }
 
 
-int32_t HksAniParseParams(ani_env *env, ani_int handle, ani_object options, SessionContext *&&contextPtr)
+int32_t HksAniParseParams(ani_env *env, ani_long &handle, ani_object &options, SessionContext *&&contextPtr)
 {
     HKS_IF_NULL_LOGE_RETURN(contextPtr, HKS_ERROR_NULL_POINTER, "ParseParams, but context is null")
     int32_t ret = HksAniParseParams<CommonContext>(env, nullptr, options, static_cast<CommonContext *>(contextPtr));
     if (ret != HKS_SUCCESS) {
-        std::cout << "import key parase common param failed" << std::endl;
+        std::cout << "SessionContext parase common param failed" << std::endl;
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    std::cerr << "HksAniParseParams success'" << std::endl;
 
     ret = HksOptionGetInData(env, options, contextPtr->inData);
     if (ret != HKS_SUCCESS) {
@@ -749,5 +731,4 @@ void HksDeleteContext(SessionContext &context)
     FreeHksBlobAndFresh(context.inData);
     FreeHksBlobAndFresh(context.outData);
 }
-
 }  // namespace

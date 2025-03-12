@@ -37,7 +37,7 @@ ohos_shared_library("huks_interfaceImpl") {
 
   sources = [
     "//base/security/huks/interfaces/kits/ani/src/huks_ani_common.cpp",
-    "//base/security/huks/interfaces/kits/ani/src/ani_test.cpp",
+    "//base/security/huks/interfaces/kits/ani/src/huks_ani_impl.cpp",
   ]
 
   deps = [
@@ -63,19 +63,17 @@ ohos_shared_library("huks_interfaceImpl") {
 
 generate_static_abc("huks_ani_abc") {
   arktsconfig = "//base/security/huks/interfaces/kits/ani/arktsconfig.json"
-  dst_file = "$target_out_dir/@ohos.securty.huks.d.abc"
-  out_puts = [ "$target_out_dir/@ohos.securty.huks.d.abc" ]
+  dst_file = "$target_out_dir/@ohos.security.huks.d.abc"
+  out_puts = [ "$target_out_dir/@ohos.security.huks.d.abc" ]
   is_boot_abc = "True"
-  device_dst_file = "system/framework/@ohos.securty.huks.d.abc"
+  device_dst_file = "system/framework/@ohos.security.huks.d.abc"
   in_puts = [
-    "/mnt/data/l00889714/linzs/ohos_1108/base/security/huks/interfaces/kits/ani/aniTest.ets",
-    "/mnt/data/l00889714/linzs/ohos_1108/base/security/huks/interfaces/kits/ani/huksInterface.ets",
+    "/mnt/data/l00889714/linzs/ohos_1108/base/security/huks/interfaces/kits/ani/@ohos.security.huks.ets",
   ]
-
 }
 
 ohos_prebuilt_etc("huks_ani_abc_etc") {
-  source = "$target_out_dir/@ohos.securty.huks.d.abc"
+  source = "$target_out_dir/@ohos.security.huks.d.abc"
   module_install_dir = "framework"
   part_name = "security"
   subsystem_name = "huks"
