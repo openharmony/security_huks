@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,13 +12,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+class BusinessError extends Error {
+  constructor(code: int, message: string) {
+    super(message)
+    this.code = code;
+  }
+  code: int;
+}
 
-/**
- * @file
- * @kit UniversalKeystoreKit
- */
+type AsyncCallback<T> = (err: BusinessError, data?: T) => void;
 
-import type { AsyncCallback } from './@ohos.base';
+interface ResultInner {
+  result: int;
+  error?: string | undefined;
+  outData?: Uint8Array | undefined;
+  handle: long;
+  challenge?: Uint8Array |undefined;
+}
+
+class HuksResult implements ResultInner {
+  result: int = 0;
+  error?: string | undefined = "";
+  outData?: Uint8Array | undefined;
+  handle: long = 0;
+  challenge?: Uint8Array | undefined;
+}
+
+native function generateKeyItemSync(keyAlias: string, options: huks.HuksOptions): ResultInner;
+
+native function deleteKeyItemSync(keyAlias: string, options: huks.HuksOptions): ResultInner;
+
+native function importKeyItemSync(keyAlias: string, options: huks.HuksOptions): ResultInner;
+
+native function importWrappedKeyItemSync(keyAlias: string, wrappingKeyAlias: string,
+  options: huks.HuksOptions): ResultInner;
+
+native function exportKeyItemSync(keyAlias: string, options: huks.HuksOptions): ResultInner;
+
+native function isKeyItemExistSync(keyAlias: string, options: huks.HuksOptions): ResultInner;
+
+native function initSessionSync(keyAlias: string, options: huks.HuksOptions): ResultInner;
+
+native function updateFinishSessionSync(handle: long, options: huks.HuksOptions, isUpdate: boolean): ResultInner;
+
+native function abortSessionSync(handle: long, options: huks.HuksOptions): ResultInner;
 
 /**
  * OpenHarmony Universal KeyStore
@@ -35,1073 +72,475 @@ import type { AsyncCallback } from './@ohos.base';
  * @atomicservice
  * @since 11
  */
-declare namespace huks {
-  /**
-   * Generate Key.
-   *
-   * @param { string } keyAlias - keyAlias indicates the key's name.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @param { AsyncCallback<void> } callback - the callback of generateKeyItem.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000013 - queried credential does not exist
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @throws { BusinessError } 12000015 - call service failed
-   * @syscap SystemCapability.Security.Huks.Core
-   * @atomicservice
-   * @since 11
-   */
-  export function generateKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<void>): void;
+export namespace huks {
+  loadLibrary("huks_interfaceImpl_ani.z")
 
-  /**
-   * Generate Key.
-   *
-   * @param { string } keyAlias - keyAlias indicates the key's name.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @returns { Promise<void> } the promise returned by the function.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000013 - queried credential does not exist
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @throws { BusinessError } 12000015 - call service failed
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @since 9
-   */
-  /**
-   * Generate Key.
-   *
-   * @param { string } keyAlias - keyAlias indicates the key's name.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @returns { Promise<void> } the promise returned by the function.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000013 - queried credential does not exist
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @throws { BusinessError } 12000015 - call service failed
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @atomicservice
-   * @since 11
-   */
-  export function generateKeyItem(keyAlias: string, options: HuksOptions): Promise<void>;
+  export function generateKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<void>): void
+  {
+    let p1 = taskpool.execute(generateKeyItemSync, keyAlias, options);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        let eNull = new BusinessError(retInner.result, errMsg);
+        if (retInner.result === 0) {
+          callback(eNull);
+        } else {
+          errMsg = retInner.error as string;
+          callback(eNull);
+        }
+    });
+  }
 
-  /**
-   * Delete Key.
-   *
-   * @param { string } keyAlias - keyAlias indicates the key's name.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @param { AsyncCallback<void> } callback - the callback of deleteKeyItem.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Core
-   * @atomicservice
-   * @since 11
-   */
-  export function deleteKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<void>): void;
+  export function generateKeyItem(keyAlias: string, options: HuksOptions): Promise<void>
+  {
+    let p = new Promise<void> ((resolve: (v: undefined) => void, reject: (error: BusinessError) => void): void => {
+      let p1 = taskpool.execute(generateKeyItemSync, keyAlias, options);
+      p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        if (retInner.result === 0) {
+          resolve(undefined);
+        } else {
+          errMsg = retInner.error as string;
+          let eNull = new BusinessError(retInner.result, errMsg);
+          reject(eNull);
+        }
+      });
+    });
+    return p;
+  }
 
-  /**
-   * Delete Key.
-   *
-   * @param { string } keyAlias - keyAlias indicates the key's name.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @returns { Promise<void> } the promise returned by the function.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @since 9
-   */
-  /**
-   * Delete Key.
-   *
-   * @param { string } keyAlias - keyAlias indicates the key's name.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @returns { Promise<void> } the promise returned by the function.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @atomicservice
-   * @since 11
-   */
-  export function deleteKeyItem(keyAlias: string, options: HuksOptions): Promise<void>;
+  export function deleteKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<void>): void
+  {
+    let p1 = taskpool.execute(deleteKeyItemSync, keyAlias, options);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        if (errMsg != undefined) {
+          errMsg = retInner.error as string;
+        }
+        let eNull = new BusinessError(retInner.result, errMsg);
+        callback(eNull);
+    });
+  }
 
-  /**
-   * Import Key.
-   *
-   * @param { string } keyAlias - keyAlias indicates the key's name.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @param { AsyncCallback<void> } callback - the callback of importKeyItem.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000013 - queried credential does not exist
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @throws { BusinessError } 12000015 - call service failed
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @since 9
-   */
-  /**
-   * Import Key.
-   *
-   * @param { string } keyAlias - keyAlias indicates the key's name.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @param { AsyncCallback<void> } callback - the callback of importKeyItem.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000013 - queried credential does not exist
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @throws { BusinessError } 12000015 - call service failed
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @atomicservice
-   * @since 11
-   */
-  /**
-   * Import Key.
-   *
-   * @param { string } keyAlias - keyAlias indicates the key's name.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @param { AsyncCallback<void> } callback - the callback of importKeyItem.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000013 - queried credential does not exist
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @throws { BusinessError } 12000015 - call service failed
-   * @syscap SystemCapability.Security.Huks.Core
-   * @atomicservice
-   * @since 12
-   */
-  export function importKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<void>): void;
+  export function deleteKeyItem(keyAlias: string, options: HuksOptions): Promise<void>
+  {
+    let p = new Promise<void> ((resolve: (v: undefined) => void, reject: (error: BusinessError) => void): void => {
+      let p1 = taskpool.execute(deleteKeyItemSync, keyAlias, options);
+      p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        if (errMsg != undefined) {
+          errMsg = retInner.error as string;
+        }
+        if (retInner.result === 0) {
+          resolve(undefined);
+        } else {
+          let eNull = new BusinessError(retInner.result, errMsg);
+          reject(eNull);
+        }
+      });
+    });
+    return p;
+  }
 
-  /**
-   * Import Key.
-   *
-   * @param { string } keyAlias - keyAlias indicates the key's name.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @returns { Promise<void> } the promise returned by the function.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000013 - queried credential does not exist
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @throws { BusinessError } 12000015 - call service failed
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @since 9
-   */
-  /**
-   * Import Key.
-   *
-   * @param { string } keyAlias - keyAlias indicates the key's name.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @returns { Promise<void> } the promise returned by the function.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000013 - queried credential does not exist
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @throws { BusinessError } 12000015 - call service failed
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @atomicservice
-   * @since 11
-   */
-  export function importKeyItem(keyAlias: string, options: HuksOptions): Promise<void>;
+  export function importKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<void>): void
+  {
+    let p1 = taskpool.execute(importKeyItemSync, keyAlias, options);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        if (errMsg != undefined) {
+          errMsg = retInner.error as string;
+        }
+        let eNull = new BusinessError(retInner.result, errMsg);
+        callback(eNull);
+    });
+  }
 
-  /**
-   * Import Wrapped Key.
-   *
-   * @param { string } keyAlias - keyAlias indicates the name of key to be imported.
-   * @param { string } wrappingKeyAlias - wrappingKeyAlias indicates the name of key for wrapping the key to be imported.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @param { AsyncCallback<void> } callback - the callback of importWrappedKeyItem.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000013 - queried credential does not exist
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @throws { BusinessError } 12000015 - call service failed
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @since 9
-   */
-  /**
-   * Import Wrapped Key.
-   *
-   * @param { string } keyAlias - keyAlias indicates the name of key to be imported.
-   * @param { string } wrappingKeyAlias - wrappingKeyAlias indicates the name of key for wrapping the key to be imported.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @param { AsyncCallback<void> } callback - the callback of importWrappedKeyItem.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000013 - queried credential does not exist
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @throws { BusinessError } 12000015 - call service failed
-   * @syscap SystemCapability.Security.Huks.Core
-   * @atomicservice
-   * @since 12
-   */
+  export function importKeyItem(keyAlias: string, options: HuksOptions): Promise<void>
+  {
+    let p = new Promise<void> ((resolve: (v: undefined) => void, reject: (error: BusinessError) => void): void => {
+      let p1 = taskpool.execute(importKeyItemSync, keyAlias, options);
+      p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        if (errMsg != undefined) {
+          errMsg = retInner.error as string;
+        }
+        if (retInner.result === 0) {
+          resolve(undefined);
+        } else {
+          let eNull = new BusinessError(retInner.result, errMsg);
+          reject(eNull);
+        }
+      });
+    });
+    return p;
+  }
+
   export function importWrappedKeyItem(
-    keyAlias: string,
-    wrappingKeyAlias: string,
-    options: HuksOptions,
-    callback: AsyncCallback<void>
-  ): void;
+    keyAlias: string, wrappingKeyAlias: string, options: HuksOptions, callback: AsyncCallback<void>
+  ): void
+  {
+    let p1 = taskpool.execute(importWrappedKeyItemSync, keyAlias, wrappingKeyAlias, options);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        if (errMsg != undefined) {
+          errMsg = retInner.error as string;
+        }
+        let eNull = new BusinessError(retInner.result, errMsg);
+        callback(eNull);
+    });
+  }
 
-  /**
-   * Import Wrapped Key.
-   *
-   * @param { string } keyAlias - keyAlias indicates the name of key to be imported.
-   * @param { string } wrappingKeyAlias - wrappingKeyAlias indicates the name of key for wrapping the key to be imported.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @returns { Promise<void> } the promise returned by the function.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000013 - queried credential does not exist
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @throws { BusinessError } 12000015 - call service failed
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @since 9
-   */
-  /**
-   * Import Wrapped Key.
-   *
-   * @param { string } keyAlias - keyAlias indicates the name of key to be imported.
-   * @param { string } wrappingKeyAlias - wrappingKeyAlias indicates the name of key for wrapping the key to be imported.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @returns { Promise<void> } the promise returned by the function.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000013 - queried credential does not exist
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @throws { BusinessError } 12000015 - call service failed
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @atomicservice
-   * @since 12
-   */
-  export function importWrappedKeyItem(keyAlias: string, wrappingKeyAlias: string, options: HuksOptions): Promise<void>;
+  export function importWrappedKeyItem(keyAlias: string, wrappingKeyAlias: string, options: HuksOptions): Promise<void>
+  {
+    let p = new Promise<void> ((resolve: (v: undefined) => void, reject: (error: BusinessError) => void): void => {
+      let p1 = taskpool.execute(importWrappedKeyItemSync, keyAlias, wrappingKeyAlias, options);
+      p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        if (retInner.result === 0) {
+          resolve(undefined);
+        } else {
+          let errMsg = retInner.error as string;
+          let eNull = new BusinessError(retInner.result, errMsg);
+          reject(eNull);
+        }
+      });
+    });
+    return p;
+  }
 
-  /**
-   * Export Key.
-   *
-   * @param { string } keyAlias - keyAlias indicates the key's name.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @param { AsyncCallback<HuksReturnResult> } callback - the callback of exportKeyItem.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @since 9
-   */
-  /**
-   * Export Key.
-   *
-   * @param { string } keyAlias - keyAlias indicates the key's name.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @param { AsyncCallback<HuksReturnResult> } callback - the callback of exportKeyItem.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Core
-   * @atomicservice
-   * @since 12
-   */
-  export function exportKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>): void;
+  class HuksReturnResultImpl implements HuksReturnResult {
+    outData?: Uint8Array | undefined;
+    properties?: Array<HuksParam> | undefined;
+    certChains?: Array<string> | undefined;
+    constructor(outData?: Uint8Array | undefined, properties?: Array<HuksParam> | undefined,
+      certChains?: Array<string> | undefined) {
+      this.outData = outData;
+      this.properties = properties;
+      this.certChains = certChains;
+    }
+  }
 
-  /**
-   * Export Key.
-   *
-   * @param { string } keyAlias - keyAlias indicates the key's name.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @returns { Promise<HuksReturnResult> } the promise returned by the function.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @since 9
-   */
-  /**
-   * Export Key.
-   *
-   * @param { string } keyAlias - keyAlias indicates the key's name.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @returns { Promise<HuksReturnResult> } the promise returned by the function.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @atomicservice
-   * @since 12
-   */
-  export function exportKeyItem(keyAlias: string, options: HuksOptions): Promise<HuksReturnResult>;
+  export function exportKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>): void
+  {
+    let p1 = taskpool.execute(exportKeyItemSync, keyAlias, options);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        let eNull = new BusinessError(retInner.result, errMsg);
+        if (retInner.result === 0) {
+          let returnResult = new HuksReturnResultImpl(retInner.outData)
+          callback(eNull, returnResult);
+        } else {
+          errMsg = retInner.error as string;
+          eNull.message = errMsg;
+          callback(eNull);
+        }
+    });
+  }
 
-  /**
-   * Check whether the key exists.
-   *
-   * @param { string } keyAlias - keyAlias indicates the key's name.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @param { AsyncCallback<boolean> } callback - the callback of isKeyItemExist.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Core
-   * @since 9
-   */
-  export function isKeyItemExist(keyAlias: string, options: HuksOptions, callback: AsyncCallback<boolean>): void;
+  export function exportKeyItem(keyAlias: string, options: HuksOptions): Promise<HuksReturnResult>
+  {
+    let p = new Promise<HuksReturnResult> ((resolve: (v: HuksReturnResult) => void,
+      reject: (error: BusinessError)=> void): void => {
+      let p1 = taskpool.execute(exportKeyItemSync, keyAlias, options);
+      p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        if (retInner.result === 0) {
+          let returnResult = new HuksReturnResultImpl(retInner.outData)
+          resolve(returnResult);
+        } else {
+           let errMsg = retInner.error as string;
+          let eNull = new BusinessError(retInner.result, errMsg);
+          reject(eNull);
+        }
+      });
+    });
+    return p;
+  }
 
-  /**
-   * Check whether the key exists.
-   *
-   * @param { string } keyAlias - keyAlias indicates the key's name.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @returns { Promise<boolean> } the promise returned by the function.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @since 9
-   */
-  export function isKeyItemExist(keyAlias: string, options: HuksOptions): Promise<boolean>;
+  export function isKeyItemExist(keyAlias: string, options: HuksOptions, callback: AsyncCallback<boolean>): void
+  {
+    let p1 = taskpool.execute(isKeyItemExistSync, keyAlias, options);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        let eNull = new BusinessError(retInner.result, errMsg);
+        let isExist : boolean = true;
+        if (retInner.result === -13) {
+          isExist = false;
+          callback(eNull, isExist);
+        } else if (retInner.result === 0){
+          isExist = true;
+          callback(eNull, isExist);
+        }
+        else {
+          errMsg = retInner.error as string;
+          eNull.message = errMsg;
+          callback(eNull);
+        }
+    });
+  }
 
-  /**
-   * Init Operation.
-   *
-   * @param { string } keyAlias - keyAlias indicates the key's name.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @param { AsyncCallback<HuksSessionHandle> } callback - the callback of initSession.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000010 - the number of sessions has reached limit
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Core
-   * @since 9
-   */
-  /**
-   * Init Operation.
-   *
-   * @param { string } keyAlias - keyAlias indicates the key's name.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @param { AsyncCallback<HuksSessionHandle> } callback - the callback of initSession.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000010 - the number of sessions has reached limit
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Core
-   * @atomicservice
-   * @since 11
-   */
-  export function initSession(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksSessionHandle>): void;
+  export function isKeyItemExist(keyAlias: string, options: HuksOptions): Promise<boolean>
+  {
+    let p = new Promise<boolean> ((resolve: (v: boolean) => void,
+      reject: (error: BusinessError)=> void): void => {
+      let p1 = taskpool.execute(isKeyItemExistSync, keyAlias, options);
+      p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let isExist : boolean = true;
+        if (retInner.result === 0) {
+          isExist = true;
+          resolve(isExist);
+        } else if (retInner.result === -13) {
+          isExist = false;
+          resolve(isExist);
+        } else {
+          let errMsg = retInner.error as string;
+          let eNull = new BusinessError(retInner.result, errMsg);
+          reject(eNull);
+        }
+      });
+    });
+    return p;
+  }
 
-  /**
-   * Init Operation.
-   *
-   * @param { string } keyAlias - keyAlias indicates the key's name.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @returns { Promise<HuksSessionHandle> } the promise returned by the function.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000010 - the number of sessions has reached limit
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @since 9
-   */
-  /**
-   * Init Operation.
-   *
-   * @param { string } keyAlias - keyAlias indicates the key's name.
-   * @param { HuksOptions } options - options indicates the properties of the key.
-   * @returns { Promise<HuksSessionHandle> } the promise returned by the function.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000010 - the number of sessions has reached limit
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @atomicservice
-   * @since 11
-   */
-  export function initSession(keyAlias: string, options: HuksOptions): Promise<HuksSessionHandle>;
+  class HuksSessionHandleImpl implements HuksSessionHandle {
+    handle: number = 0;
+    challenge?: Uint8Array | undefined;
+  }
 
-  /**
-   * Update Operation.
-   *
-   * @param { number } handle - indicates the handle of the init operation.
-   * @param { HuksOptions } options - options indicates the properties of the update operation.
-   * @param { AsyncCallback<HuksReturnResult> } callback - the callback of updateSession.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000007 - this credential is already invalidated permanently
-   * @throws { BusinessError } 12000008 - verify auth token failed
-   * @throws { BusinessError } 12000009 - auth token is already timeout
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Core
-   * @since 9
-   */
-  /**
-   * Update Operation.
-   *
-   * @param { number } handle - indicates the handle of the init operation.
-   * @param { HuksOptions } options - options indicates the properties of the update operation.
-   * @param { AsyncCallback<HuksReturnResult> } callback - the callback of updateSession.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000007 - this credential is already invalidated permanently
-   * @throws { BusinessError } 12000008 - verify auth token failed
-   * @throws { BusinessError } 12000009 - auth token is already timeout
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Core
-   * @atomicservice
-   * @since 11
-   */
-  export function updateSession(handle: number, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>): void;
+  export function initSession(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksSessionHandle>): void
+  {
+    let p1 = taskpool.execute(initSessionSync, keyAlias, options);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        let eNull = new BusinessError(retInner.result, errMsg);
+        if (retInner.result === 0) {
+          let retOut = new HuksSessionHandleImpl();
+          retOut.handle = retInner.handle as number;
+          retOut.challenge = retInner.challenge;
+          callback(eNull, retOut);
+        } else {
+          errMsg = retInner.error as string;
+          eNull.message = errMsg;
+          callback(eNull);
+        }
+    });
+  }
 
-  /**
-   * Update Operation.
-   *
-   * @param { number } handle - indicates the handle of the init operation.
-   * @param { HuksOptions } options - options indicates the properties of the update operation.
-   * @param { Uint8Array } token - token indicates the value of auth token from USER IAM service.
-   * @param { AsyncCallback<HuksReturnResult> } callback - the callback of updateSession.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000007 - this credential is already invalidated permanently
-   * @throws { BusinessError } 12000008 - verify auth token failed
-   * @throws { BusinessError } 12000009 - auth token is already timeout
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @since 9
-   */
-  /**
-   * Update Operation.
-   *
-   * @param { number } handle - indicates the handle of the init operation.
-   * @param { HuksOptions } options - options indicates the properties of the update operation.
-   * @param { Uint8Array } token - token indicates the value of auth token from USER IAM service.
-   * @param { AsyncCallback<HuksReturnResult> } callback - the callback of updateSession.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000007 - this credential is already invalidated permanently
-   * @throws { BusinessError } 12000008 - verify auth token failed
-   * @throws { BusinessError } 12000009 - auth token is already timeout
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @atomicservice
-   * @since 12
-   */
+  export function initSession(keyAlias: string, options: HuksOptions): Promise<HuksSessionHandle>
+  {
+    let p = new Promise<HuksSessionHandle> ((resolve: (v: HuksSessionHandle) => void,
+      reject: (error: BusinessError)=> void): void => {
+      let p1 = taskpool.execute(initSessionSync, keyAlias, options);
+      p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        if (retInner.result === 0) {
+          let retOut = new HuksSessionHandleImpl();
+          retOut.handle = retInner.handle as number;
+          retOut.challenge = retInner.challenge;
+          resolve(retOut);
+        } else {
+          let errMsg = retInner.error as string;
+          let eNull = new BusinessError(retInner.result, errMsg);
+          reject(eNull);
+        }
+      });
+    });
+    return p;
+  }
+
+  export function updateSession(handle: number, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>): void
+  {
+    let isUpdate : boolean = true;
+    let p1 = taskpool.execute(updateFinishSessionSync, handle as long, options, isUpdate);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        let eNull = new BusinessError(retInner.result, errMsg);
+        if (retInner.result === 0) {
+          let retOut = new HuksReturnResultImpl(retInner.outData);
+          callback(eNull, retOut);
+        } else {
+          errMsg = retInner.error as string;
+          eNull.message = errMsg;
+          callback(eNull);
+        }
+    });
+  }
+
+  class HuksParamImpl implements huks.HuksParam {
+    tag: huks.HuksTag = huks.HuksTag.HUKS_TAG_ALL_USERS
+    value: boolean | number | bigint | Uint8Array = 0
+    constructor(tag : huks.HuksTag, value : boolean | number | bigint | Uint8Array) {
+        this.tag = tag;
+        this.value = value;
+    }
+  }
+
   export function updateSession(
     handle: number,
     options: HuksOptions,
     token: Uint8Array,
     callback: AsyncCallback<HuksReturnResult>
-  ): void;
+  ): void
+  {
+    let isUpdate : boolean = true;
+    let tokenTemp = new HuksParamImpl(huks.HuksTag.HUKS_TAG_AUTH_TOKEN, token);
+    options.properties?.push(tokenTemp)
+    let p1 = taskpool.execute(updateFinishSessionSync, handle as long, options, isUpdate);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        let eNull = new BusinessError(retInner.result, errMsg);
+        if (retInner.result === 0) {
+          let retOut = new HuksReturnResultImpl(retInner.outData);
+          callback(eNull, retOut);
+        } else {
+          errMsg = retInner.error as string;
+          eNull.message = errMsg;
+          callback(eNull);
+        }
+    });
+  }
 
-  /**
-   * Update Operation.
-   *
-   * @param { number } handle - indicates the handle of the init operation.
-   * @param { HuksOptions } options - options indicates the properties of the update operation.
-   * @param { Uint8Array } token - token indicates the value of auth token from USER IAM service.
-   * @returns { Promise<HuksReturnResult> } the promise returned by the function.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000007 - this credential is already invalidated permanently
-   * @throws { BusinessError } 12000008 - verify auth token failed
-   * @throws { BusinessError } 12000009 - auth token is already timeout
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @since 9
-   */
-  /**
-   * Update Operation.
-   *
-   * @param { number } handle - indicates the handle of the init operation.
-   * @param { HuksOptions } options - options indicates the properties of the update operation.
-   * @param { Uint8Array } token - token indicates the value of auth token from USER IAM service.
-   * @returns { Promise<HuksReturnResult> } the promise returned by the function.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000007 - this credential is already invalidated permanently
-   * @throws { BusinessError } 12000008 - verify auth token failed
-   * @throws { BusinessError } 12000009 - auth token is already timeout
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @atomicservice
-   * @since 11
-   */
-  export function updateSession(handle: number, options: HuksOptions, token?: Uint8Array): Promise<HuksReturnResult>;
+  export function updateSession(handle: number, options: HuksOptions, token?: Uint8Array): Promise<HuksReturnResult>
+  {
+    let isUpdate : boolean = true;
+    if(token != undefined) {
+      let tokenTemp = new HuksParamImpl(huks.HuksTag.HUKS_TAG_AUTH_TOKEN, token);
+      options.properties?.push(tokenTemp)
+    }
+    let p = new Promise<HuksReturnResult> ((resolve: (v: HuksReturnResult) => void,
+    reject: (error: BusinessError)=> void): void => {
+    let p1 = taskpool.execute(updateFinishSessionSync, handle as long, options, isUpdate);
+    p1.then<void>((ret : NullishType) => {
+      let retInner = ret as HuksResult;
+      if (retInner.result === 0) {
+        let retOut = new HuksReturnResultImpl(retInner.outData);
+        resolve(retOut);
+      } else {
+        let errMsg = retInner.error as string;
+        let eNull = new BusinessError(retInner.result, errMsg);
+        reject(eNull);
+      }
+      });
+    });
+    return p;
+  }
 
-  /**
-   * Finish Operation.
-   *
-   * @param { number } handle - indicates the handle of the init operation.
-   * @param { HuksOptions } options - options indicates the properties of the finish operation.
-   * @param { AsyncCallback<HuksReturnResult> } callback - the callback of finishSession.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000007 - this credential is already invalidated permanently
-   * @throws { BusinessError } 12000008 - verify auth token failed
-   * @throws { BusinessError } 12000009 - auth token is already timeout
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Core
-   * @since 9
-   */
-  /**
-   * Finish Operation.
-   *
-   * @param { number } handle - indicates the handle of the init operation.
-   * @param { HuksOptions } options - options indicates the properties of the finish operation.
-   * @param { AsyncCallback<HuksReturnResult> } callback - the callback of finishSession.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000007 - this credential is already invalidated permanently
-   * @throws { BusinessError } 12000008 - verify auth token failed
-   * @throws { BusinessError } 12000009 - auth token is already timeout
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Core
-   * @atomicservice
-   * @since 11
-   */
-  export function finishSession(handle: number, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>): void;
+  export function finishSession(handle: number, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>): void
+  {
+    let isUpdate : boolean = false;
+    let p1 = taskpool.execute(updateFinishSessionSync, handle as long, options, isUpdate);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        let eNull = new BusinessError(retInner.result, errMsg);
+        if (retInner.result === 0) {
+          let retOut = new HuksReturnResultImpl(retInner.outData);
+          callback(eNull, retOut);
+        } else {
+          errMsg = retInner.error as string;
+          eNull.message = errMsg;
+          callback(eNull);
+        }
+    });
+  }
 
-  /**
-   * Finish Operation.
-   *
-   * @param { number } handle - indicates the handle of the init operation.
-   * @param { HuksOptions } options - options indicates the properties of the finish operation.
-   * @param { Uint8Array } token - token indicates the value of auth token from USER IAM service.
-   * @param { AsyncCallback<HuksReturnResult> } callback - the callback of finishSession.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000007 - this credential is already invalidated permanently
-   * @throws { BusinessError } 12000008 - verify auth token failed
-   * @throws { BusinessError } 12000009 - auth token is already timeout
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @since 9
-   */
-  /**
-   * Finish Operation.
-   *
-   * @param { number } handle - indicates the handle of the init operation.
-   * @param { HuksOptions } options - options indicates the properties of the finish operation.
-   * @param { Uint8Array } token - token indicates the value of auth token from USER IAM service.
-   * @param { AsyncCallback<HuksReturnResult> } callback - the callback of finishSession.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000007 - this credential is already invalidated permanently
-   * @throws { BusinessError } 12000008 - verify auth token failed
-   * @throws { BusinessError } 12000009 - auth token is already timeout
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @atomicservice
-   * @since 12
-   */
   export function finishSession(
     handle: number,
     options: HuksOptions,
     token: Uint8Array,
     callback: AsyncCallback<HuksReturnResult>
-  ): void;
+  ): void
+  {
+    let isUpdate : boolean = false;
+    let tokenTemp = new HuksParamImpl(huks.HuksTag.HUKS_TAG_AUTH_TOKEN, token);
+    options.properties?.push(tokenTemp)
+    let p1 = taskpool.execute(updateFinishSessionSync, handle as long, options, isUpdate);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        let eNull = new BusinessError(retInner.result, errMsg);
+        if (retInner.result === 0) {
+          let retOut = new HuksReturnResultImpl(retInner.outData);
+          callback(eNull, retOut);
+        } else {
+          errMsg = retInner.error as string;
+          eNull.message = errMsg;
+          callback(eNull);
+        }
+    });
+  }
 
-  /**
-   * Finish Operation.
-   *
-   * @param { number } handle - indicates the handle of the init operation.
-   * @param { HuksOptions } options - options indicates the properties of the finish operation.
-   * @param { Uint8Array } token - token indicates the value of auth token from USER IAM service.
-   * @returns { Promise<HuksReturnResult> } the promise returned by the function.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000007 - this credential is already invalidated permanently
-   * @throws { BusinessError } 12000008 - verify auth token failed
-   * @throws { BusinessError } 12000009 - auth token is already timeout
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @since 9
-   */
-  /**
-   * Finish Operation.
-   *
-   * @param { number } handle - indicates the handle of the init operation.
-   * @param { HuksOptions } options - options indicates the properties of the finish operation.
-   * @param { Uint8Array } token - token indicates the value of auth token from USER IAM service.
-   * @returns { Promise<HuksReturnResult> } the promise returned by the function.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000001 - algorithm mode is not supported
-   * @throws { BusinessError } 12000002 - algorithm param is missing
-   * @throws { BusinessError } 12000003 - algorithm param is invalid
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000007 - this credential is already invalidated permanently
-   * @throws { BusinessError } 12000008 - verify auth token failed
-   * @throws { BusinessError } 12000009 - auth token is already timeout
-   * @throws { BusinessError } 12000011 - queried entity does not exist
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @atomicservice
-   * @since 11
-   */
-  export function finishSession(handle: number, options: HuksOptions, token?: Uint8Array): Promise<HuksReturnResult>;
+  export function finishSession(handle: number, options: HuksOptions, token?: Uint8Array): Promise<HuksReturnResult>
+  {
+    let isUpdate : boolean = false;
+    if(token != undefined) {
+      let tokenTemp = new HuksParamImpl(huks.HuksTag.HUKS_TAG_AUTH_TOKEN, token);
+      options.properties?.push(tokenTemp)
+    }
+    let p = new Promise<HuksReturnResult> ((resolve: (v: HuksReturnResult) => void,
+    reject: (error: BusinessError)=> void): void => {
+    let p1 = taskpool.execute(updateFinishSessionSync, handle as long, options, isUpdate);
+    p1.then<void>((ret : NullishType) => {
+      let retInner = ret as HuksResult;
+      if (retInner.result === 0) {
+        let retOut = new HuksReturnResultImpl(retInner.outData);
+        resolve(retOut);
+      } else {
+        let errMsg = retInner.error as string;
+        let eNull = new BusinessError(retInner.result, errMsg);
+        reject(eNull);
+      }
+      });
+    });
+    return p;
+  }
 
-  /**
-   * Abort Operation.
-   *
-   * @param { number } handle - indicates the handle of the init operation.
-   * @param { HuksOptions } options - options indicates the properties of the abort operation.
-   * @param { AsyncCallback<void> } callback - the callback of abortSession.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Core
-   * @since 9
-   */
-  /**
-   * Abort Operation.
-   *
-   * @param { number } handle - indicates the handle of the init operation.
-   * @param { HuksOptions } options - options indicates the properties of the abort operation.
-   * @param { AsyncCallback<void> } callback - the callback of abortSession.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Core
-   * @atomicservice
-   * @since 11
-   */
-  export function abortSession(handle: number, options: HuksOptions, callback: AsyncCallback<void>): void;
+  export function abortSession(handle: number, options: HuksOptions, callback: AsyncCallback<void>): void
+  {
+    let p1 = taskpool.execute(abortSessionSync, handle as long, options);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        let eNull = new BusinessError(retInner.result, errMsg);
+        if (retInner.result === 0) {
+          callback(eNull);
+        } else {
+          errMsg = retInner.error as string;
+          eNull.message = errMsg;
+          callback(eNull);
+        }
+    });
+  }
 
-  /**
-   * Abort Operation.
-   *
-   * @param { number } handle - indicates the handle of the init operation.
-   * @param { HuksOptions } options - options indicates the properties of the abort operation.
-   * @returns { Promise<void> } the promise returned by the function.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @since 9
-   */
-  /**
-   * Abort Operation.
-   *
-   * @param { number } handle - indicates the handle of the init operation.
-   * @param { HuksOptions } options - options indicates the properties of the abort operation.
-   * @returns { Promise<void> } the promise returned by the function.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes:
-   *                                 1. Mandatory parameters are left unspecified.
-   *                                 2. Incorrect parameter types.
-   *                                 3. Parameter verification failed.
-   * @throws { BusinessError } 801 - api is not supported
-   * @throws { BusinessError } 12000004 - operating file failed
-   * @throws { BusinessError } 12000005 - IPC communication failed
-   * @throws { BusinessError } 12000006 - error occurred in crypto engine
-   * @throws { BusinessError } 12000012 - external error
-   * @throws { BusinessError } 12000014 - memory is insufficient
-   * @syscap SystemCapability.Security.Huks.Extension
-   * @atomicservice
-   * @since 11
-   */
-  export function abortSession(handle: number, options: HuksOptions): Promise<void>;
-
+  export function abortSession(handle: number, options: HuksOptions): Promise<void>
+  {
+    let p = new Promise<void> ((resolve: (v: undefined) => void, reject: (error: BusinessError) => void): void => {
+      let p1 = taskpool.execute(abortSessionSync, handle as long, options);
+      p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        if (retInner.result === 0) {
+          resolve(undefined);
+        } else {
+          let errMsg = retInner.error as string;
+          let eNull = new BusinessError(retInner.result, errMsg);
+          reject(eNull);
+        }
+      });
+    });
+    return p;
+  }
   /**
    * Interface of huks param.
    *
@@ -4240,13 +3679,15 @@ declare namespace huks {
     HUKS_TAG_KEY_DOMAIN = 2 << 28 | 1011,
 
     /**
-     * Key access control based on device password setting status. True means the key can only be generated and used when the password is set.
+     * Key access control based on device password setting status. True means the key can only be generated
+     * and used when the password is set.
      *
      * @syscap SystemCapability.Security.Huks.Extension
      * @since 11
      */
     /**
-     * Key access control based on device password setting status. True means the key can only be generated and used when the password is set.
+     * Key access control based on device password setting status. True means the key can only be generated
+     * and used when the password is set.
      *
      * @syscap SystemCapability.Security.Huks.Extension
      * @atomicservice
@@ -4381,5 +3822,3 @@ declare namespace huks {
     HUKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA = 5 << 28 | 20003
   }
 }
-
-export default huks;

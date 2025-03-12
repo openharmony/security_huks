@@ -35,10 +35,7 @@ group("huks_capi") {
 group("huks_napi") {
   if (os_level == "standard") {
     if (support_jsapi) {
-      deps = [ "//base/security/huks/interfaces/kits/napi:huks",
-              "//base/security/huks/interfaces/kits/ani:huks_interfaceImpl",
-              "//base/security/huks/interfaces/kits/ani:huks_ani_abc_etc" 
-            ]
+      deps = [ "//base/security/huks/interfaces/kits/napi:huks" ]
     }
   }
 }
@@ -66,6 +63,7 @@ group("fwk_group") {
       "//base/security/huks:huks_capi",
       "//base/security/huks:huks_napi",
       "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
+      "//base/security/huks/interfaces/kits/ani:huks_ani_package",
     ]
   } else if (os_level == "small") {
     deps = [
