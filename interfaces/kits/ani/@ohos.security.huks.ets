@@ -12,6 +12,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+export class BusinessError extends Error {
+  constructor(code: int, message: string) {
+    super(message)
+    this.code = code;
+  }
+  code: int;
+}
+
+export type AsyncCallback<T> = (err: BusinessError, data?: T) => void;
+
+interface ResultInner {
+  result: int;
+  error?: string | undefined;
+  outData?: Uint8Array | undefined;
+  handle: long;
+  challenge?: Uint8Array |undefined;
+}
+
+class HuksResult implements ResultInner {
+  result: int = 0;
+  error?: string | undefined = "";
+  outData?: Uint8Array | undefined;
+  handle: long = 0;
+  challenge?: Uint8Array | undefined;
+}
+
+native function generateKeyItemSync(keyAlias: string, options: huks.HuksOptions): ResultInner;
+native function deleteKeyItemSync(keyAlias: string, options: huks.HuksOptions): ResultInner;
+native function importKeyItemSync(keyAlias: string, options: huks.HuksOptions): ResultInner;
+native function importWrappedKeyItemSync(keyAlias: string, wrappingKeyAlias: string, options: huks.HuksOptions): ResultInner;
+native function exportKeyItemSync(keyAlias: string, options: huks.HuksOptions): ResultInner;
+native function isKeyItemExistSync(keyAlias: string, options: huks.HuksOptions): ResultInner;
+native function initSessionSync(keyAlias: string, options: huks.HuksOptions): ResultInner;
+native function updateFinishSessionSync(handle: long, options: huks.HuksOptions, isUpdate: boolean): ResultInner;
+native function abortSessionSync(handle: long, options: huks.HuksOptions): ResultInner;
 
 /**
  * OpenHarmony Universal KeyStore
@@ -29,6 +64,475 @@
  * @since 11
  */
 export namespace huks {
+  export function generateKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<void>): void
+  {
+    let p1 = taskpool.execute(generateKeyItemSync, keyAlias, options);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        let eNull = new BusinessError(retInner.result, errMsg);
+        if (retInner.result === 0) {
+          callback(eNull);
+        } else {
+          errMsg = retInner.error as string;
+          callback(eNull);
+        }
+    });
+  }
+
+  export function generateKeyItem(keyAlias: string, options: HuksOptions): Promise<void>
+  {
+    let p = new Promise<void> ((resolve: (v: undefined) => void, reject: (error: BusinessError) => void): void => {
+      let p1 = taskpool.execute(generateKeyItemSync, keyAlias, options);
+      p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        if (retInner.result === 0) {
+          resolve(undefined);
+        } else {
+          errMsg = retInner.error as string;
+          let eNull = new BusinessError(retInner.result, errMsg);
+          reject(eNull);
+        }
+      });
+    });
+    return p;
+  }
+
+  export function deleteKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<void>): void
+  {
+    let p1 = taskpool.execute(deleteKeyItemSync, keyAlias, options);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        if (errMsg != undefined) {
+          errMsg = retInner.error as string;
+        }
+        let eNull = new BusinessError(retInner.result, errMsg);
+        callback(eNull);
+    });
+  }
+
+  export function deleteKeyItem(keyAlias: string, options: HuksOptions): Promise<void>
+  {
+    let p = new Promise<void> ((resolve: (v: undefined) => void, reject: (error: BusinessError) => void): void => {
+      let p1 = taskpool.execute(deleteKeyItemSync, keyAlias, options);
+      p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        if (errMsg != undefined) {
+          errMsg = retInner.error as string;
+        }
+        if (retInner.result === 0) {
+          resolve(undefined);
+        } else {
+          let eNull = new BusinessError(retInner.result, errMsg);
+          reject(eNull);
+        }
+      });
+    });
+    return p;
+  }
+
+  export function importKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<void>): void
+  {
+    let p1 = taskpool.execute(importKeyItemSync, keyAlias, options);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        if (errMsg != undefined) {
+          errMsg = retInner.error as string;
+        }
+        let eNull = new BusinessError(retInner.result, errMsg);
+        callback(eNull);
+    });
+  }
+
+  export function importKeyItem(keyAlias: string, options: HuksOptions): Promise<void>
+  {
+    let p = new Promise<void> ((resolve: (v: undefined) => void, reject: (error: BusinessError) => void): void => {
+      let p1 = taskpool.execute(importKeyItemSync, keyAlias, options);
+      p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        if (errMsg != undefined) {
+          errMsg = retInner.error as string;
+        }
+        if (retInner.result === 0) {
+          resolve(undefined);
+        } else {
+          let eNull = new BusinessError(retInner.result, errMsg);
+          reject(eNull);
+        }
+      });
+    });
+    return p;
+  }
+
+  export function importWrappedKeyItem(
+    keyAlias: string, wrappingKeyAlias: string, options: HuksOptions, callback: AsyncCallback<void>
+  ): void
+  {
+    let p1 = taskpool.execute(importWrappedKeyItemSync, keyAlias, wrappingKeyAlias, options);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        if (errMsg != undefined) {
+          errMsg = retInner.error as string;
+        }
+        let eNull = new BusinessError(retInner.result, errMsg);
+        callback(eNull);
+    });
+  }
+
+  export function importWrappedKeyItem(keyAlias: string, wrappingKeyAlias: string, options: HuksOptions): Promise<void>
+  {
+    let p = new Promise<void> ((resolve: (v: undefined) => void, reject: (error: BusinessError) => void): void => {
+      let p1 = taskpool.execute(importWrappedKeyItemSync, keyAlias, wrappingKeyAlias, options);
+      p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        if (retInner.result === 0) {
+          resolve(undefined);
+        } else {
+          let errMsg = retInner.error as string;
+          let eNull = new BusinessError(retInner.result, errMsg);
+          reject(eNull);
+        }
+      });
+    });
+    return p;
+  }
+
+  class HuksReturnResultImpl implements HuksReturnResult {
+    outData?: Uint8Array | undefined;
+    properties?: Array<HuksParam> | undefined;
+    certChains?: Array<string> | undefined;
+    constructor(outData?: Uint8Array | undefined, properties?: Array<HuksParam> | undefined,
+      certChains?: Array<string> | undefined) {
+      this.outData = outData;
+      this.properties = properties;
+      this.certChains = certChains;
+    }
+  }
+
+  export function exportKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>): void
+  {
+    let p1 = taskpool.execute(exportKeyItemSync, keyAlias, options);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        let eNull = new BusinessError(retInner.result, errMsg);
+        if (retInner.result === 0) {
+          let returnResult = new HuksReturnResultImpl(retInner.outData)
+          callback(eNull, returnResult);
+        } else {
+          errMsg = retInner.error as string;
+          eNull.message = errMsg;
+          callback(eNull);
+        }
+        
+    });
+  }
+
+  export function exportKeyItem(keyAlias: string, options: HuksOptions): Promise<HuksReturnResult>
+  {
+    let p = new Promise<HuksReturnResult> ((resolve: (v: HuksReturnResult) => void,
+      reject: (error: BusinessError)=> void): void => {
+      let p1 = taskpool.execute(exportKeyItemSync, keyAlias, options);
+      p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        if (retInner.result === 0) {
+          let returnResult = new HuksReturnResultImpl(retInner.outData)
+          resolve(returnResult);
+        } else {
+           let errMsg = retInner.error as string;
+          let eNull = new BusinessError(retInner.result, errMsg);
+          reject(eNull);
+        }
+      });
+    });
+    return p;
+  }
+
+  export function isKeyItemExist(keyAlias: string, options: HuksOptions, callback: AsyncCallback<boolean>): void
+  {
+    let p1 = taskpool.execute(isKeyItemExistSync, keyAlias, options);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        let eNull = new BusinessError(retInner.result, errMsg);
+        let isExist : boolean = true;
+        if (retInner.result === -13) {
+          isExist = false;
+          callback(eNull, isExist);
+        } else if (retInner.result === 0){
+          isExist = true;
+          callback(eNull, isExist);
+        }
+        else {
+          errMsg = retInner.error as string;
+          eNull.message = errMsg;
+          callback(eNull);
+        }
+    });
+  }
+
+  export function isKeyItemExist(keyAlias: string, options: HuksOptions): Promise<boolean>
+  {
+    let p = new Promise<boolean> ((resolve: (v: boolean) => void,
+      reject: (error: BusinessError)=> void): void => {
+      let p1 = taskpool.execute(isKeyItemExistSync, keyAlias, options);
+      p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let isExist : boolean = true;
+        if (retInner.result === 0) {
+          isExist = true;
+          resolve(isExist);
+        } else if (retInner.result === -13) {
+          isExist = false;
+          resolve(isExist);
+        } else {
+          let errMsg = retInner.error as string;
+          let eNull = new BusinessError(retInner.result, errMsg);
+          reject(eNull);
+        }
+      });
+    });
+    return p;
+  }
+
+  class HuksSessionHandleImpl implements HuksSessionHandle {
+    handle: number = 0;
+    challenge?: Uint8Array | undefined;
+  }
+
+  export function initSession(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksSessionHandle>): void
+  {
+    let p1 = taskpool.execute(initSessionSync, keyAlias, options);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        let eNull = new BusinessError(retInner.result, errMsg);
+        if (retInner.result === 0) {
+          let retOut = new HuksSessionHandleImpl();
+          retOut.handle = retInner.handle as number;
+          retOut.challenge = retInner.challenge;
+          callback(eNull, retOut);
+        } else {
+          errMsg = retInner.error as string;
+          eNull.message = errMsg;
+          callback(eNull);
+        }
+    });
+  }
+
+  export function initSession(keyAlias: string, options: HuksOptions): Promise<HuksSessionHandle>
+  {
+    let p = new Promise<HuksSessionHandle> ((resolve: (v: HuksSessionHandle) => void,
+      reject: (error: BusinessError)=> void): void => {
+      let p1 = taskpool.execute(initSessionSync, keyAlias, options);
+      p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        if (retInner.result === 0) {
+          let retOut = new HuksSessionHandleImpl();
+          retOut.handle = retInner.handle as number;
+          retOut.challenge = retInner.challenge;
+          resolve(retOut);
+        } else {
+          let errMsg = retInner.error as string;
+          let eNull = new BusinessError(retInner.result, errMsg);
+          reject(eNull);
+        }
+      });
+    });
+    return p;
+  }
+
+  export function updateSession(handle: number, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>): void
+  {
+    let isUpdate : boolean = true;
+    let p1 = taskpool.execute(updateFinishSessionSync, handle as long, options, isUpdate);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        let eNull = new BusinessError(retInner.result, errMsg);
+        if (retInner.result === 0) {
+          let retOut = new HuksReturnResultImpl(retInner.outData);
+          callback(eNull, retOut);
+        } else {
+          errMsg = retInner.error as string;
+          eNull.message = errMsg;
+          callback(eNull);
+        }
+    });
+  }
+
+  class HuksParamImpl implements huks.HuksParam {
+    tag: huks.HuksTag = huks.HuksTag.HUKS_TAG_ALL_USERS
+    value: boolean | number | bigint | Uint8Array = 0
+    constructor(tag : huks.HuksTag, value : boolean | number | bigint | Uint8Array) {
+        this.tag = tag;
+        this.value = value;
+    }
+  }
+
+  export function updateSession(
+    handle: number,
+    options: HuksOptions,
+    token: Uint8Array,
+    callback: AsyncCallback<HuksReturnResult>
+  ): void
+  {
+    let isUpdate : boolean = true;
+    let tokenTemp = new HuksParamImpl(huks.HuksTag.HUKS_TAG_AUTH_TOKEN, token);
+    options.properties?.push(tokenTemp)
+    let p1 = taskpool.execute(updateFinishSessionSync, handle as long, options, isUpdate);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        let eNull = new BusinessError(retInner.result, errMsg);
+        if (retInner.result === 0) {
+          let retOut = new HuksReturnResultImpl(retInner.outData);
+          callback(eNull, retOut);
+        } else {
+          errMsg = retInner.error as string;
+          eNull.message = errMsg;
+          callback(eNull);
+        }
+    });
+  }
+
+  export function updateSession(handle: number, options: HuksOptions, token?: Uint8Array): Promise<HuksReturnResult>
+  {
+    let isUpdate : boolean = true;
+    if(token != undefined) {
+      let tokenTemp = new HuksParamImpl(huks.HuksTag.HUKS_TAG_AUTH_TOKEN, token);
+      options.properties?.push(tokenTemp)
+    }
+    let p = new Promise<HuksReturnResult> ((resolve: (v: HuksReturnResult) => void,
+    reject: (error: BusinessError)=> void): void => {
+    let p1 = taskpool.execute(updateFinishSessionSync, handle as long, options, isUpdate);
+    p1.then<void>((ret : NullishType) => {
+      let retInner = ret as HuksResult;
+      let errMsg = '';
+      let eNull = new BusinessError(retInner.result, errMsg);
+      if (retInner.result === 0) {
+        let retOut = new HuksReturnResultImpl(retInner.outData);
+        resolve(retOut);
+      } else {
+        let errMsg = retInner.error as string;
+        let eNull = new BusinessError(retInner.result, errMsg);
+        reject(eNull);
+      }
+      });
+    });
+    return p;
+  }
+
+  export function finishSession(handle: number, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>): void
+  {
+    let isUpdate : boolean = false;
+    let p1 = taskpool.execute(updateFinishSessionSync, handle as long, options, isUpdate);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        let eNull = new BusinessError(retInner.result, errMsg);
+        if (retInner.result === 0) {
+          let retOut = new HuksReturnResultImpl(retInner.outData);
+          callback(eNull, retOut);
+        } else {
+          errMsg = retInner.error as string;
+          eNull.message = errMsg;
+          callback(eNull);
+        }
+    });
+  }
+
+  export function finishSession(
+    handle: number,
+    options: HuksOptions,
+    token: Uint8Array,
+    callback: AsyncCallback<HuksReturnResult>
+  ): void
+  {
+    let isUpdate : boolean = false;
+    let tokenTemp = new HuksParamImpl(huks.HuksTag.HUKS_TAG_AUTH_TOKEN, token);
+    options.properties?.push(tokenTemp)
+    let p1 = taskpool.execute(updateFinishSessionSync, handle as long, options, isUpdate);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        let eNull = new BusinessError(retInner.result, errMsg);
+        if (retInner.result === 0) {
+          let retOut = new HuksReturnResultImpl(retInner.outData);
+          callback(eNull, retOut);
+        } else {
+          errMsg = retInner.error as string;
+          eNull.message = errMsg;
+          callback(eNull);
+        }
+    });
+  }
+
+  export function finishSession(handle: number, options: HuksOptions, token?: Uint8Array): Promise<HuksReturnResult>
+  {
+    let isUpdate : boolean = false;
+    if(token != undefined) {
+      let tokenTemp = new HuksParamImpl(huks.HuksTag.HUKS_TAG_AUTH_TOKEN, token);
+      options.properties?.push(tokenTemp)
+    }
+    let p = new Promise<HuksReturnResult> ((resolve: (v: HuksReturnResult) => void,
+    reject: (error: BusinessError)=> void): void => {
+    let p1 = taskpool.execute(updateFinishSessionSync, handle as long, options, isUpdate);
+    p1.then<void>((ret : NullishType) => {
+      let retInner = ret as HuksResult;
+      if (retInner.result === 0) {
+        let retOut = new HuksReturnResultImpl(retInner.outData);
+        resolve(retOut);
+      } else {
+        let errMsg = retInner.error as string;
+        let eNull = new BusinessError(retInner.result, errMsg);
+        reject(eNull);
+      }
+      });
+    });
+    return p;
+  }
+
+  export function abortSession(handle: number, options: HuksOptions, callback: AsyncCallback<void>): void
+  {
+    let p1 = taskpool.execute(abortSessionSync, handle as long, options);
+    p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        let errMsg = '';
+        let eNull = new BusinessError(retInner.result, errMsg);
+        if (retInner.result === 0) {
+          callback(eNull);
+        } else {
+          errMsg = retInner.error as string;
+          eNull.message = errMsg;
+          callback(eNull);
+        }
+    });
+  }
+
+  export function abortSession(handle: number, options: HuksOptions): Promise<void>
+  {
+    let p = new Promise<void> ((resolve: (v: undefined) => void, reject: (error: BusinessError) => void): void => {
+      let p1 = taskpool.execute(abortSessionSync, handle as long, options);
+      p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResult;
+        if (retInner.result === 0) {
+          resolve(undefined);
+        } else {
+          let errMsg = retInner.error as string;
+          let eNull = new BusinessError(retInner.result, errMsg);
+          reject(eNull);
+        }
+      });
+    });
+    return p;
+  }
   /**
    * Interface of huks param.
    *
@@ -3307,4 +3811,631 @@ export namespace huks {
      */
     HUKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA = 5 << 28 | 20003
   }
+}
+
+export class HuksParamImpl implements huks.HuksParam {
+  tag: huks.HuksTag = huks.HuksTag.HUKS_TAG_AE_TAG
+  value: boolean | number | bigint | Uint8Array = 0
+  constructor(tag : huks.HuksTag, value : boolean | number | bigint | Uint8Array) {
+      this.tag = tag;
+      this.value = value;
+  }
+}
+
+export class HuksOptionsImpl implements huks.HuksOptions {
+  properties?: Array<huks.HuksParam> | undefined;
+  inData?: Uint8Array | undefined;
+  constructor(propertiesIn?: Array<huks.HuksParam> | undefined, inDataIn?: Uint8Array | undefined) {
+      this.properties = propertiesIn;
+      this.inData = inDataIn;
+  }
+}
+
+function StringToUint8Array(str: String) : Uint8Array {
+  let arr: Uint8Array = new Uint8Array(str.length);
+  for (let i = 0, j = str.length; i < j; ++i) {
+    arr[i] = str.charCodeAt(i);
+  }
+  return arr;
+}
+
+function Uint8ArrayToString(fileData: Uint8Array) : string {
+  let dataString = '';
+  for (let i = 0; i < fileData.length; i++) {
+    dataString += String.fromCharCode(fileData[i]);
+  }
+  return dataString;
+}
+
+async function abortSessionTest()
+{
+  let aesKeyAlias = 'test_aesKeyAlias';
+  let g_handle: number = 0;
+  let plainText = '123456';
+  let IV = '001122334455';
+
+  let aesGenerateProperties = new HuksOptionsImpl(
+    new Array<huks.HuksParam>(
+        new HuksParamImpl(huks.HuksTag.HUKS_TAG_ALGORITHM, huks.HuksKeyAlg.HUKS_ALG_AES as number),
+        new HuksParamImpl(huks.HuksTag.HUKS_TAG_KEY_SIZE, huks.HuksKeySize.HUKS_AES_KEY_SIZE_128 as number),
+        new HuksParamImpl(huks.HuksTag.HUKS_TAG_PURPOSE, (huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_ENCRYPT |
+          huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_DECRYPT) as number),
+    ),
+  );
+
+  let indata222 : Uint8Array = StringToUint8Array(plainText);
+  let encryptProperties = new HuksOptionsImpl(
+    new Array<huks.HuksParam>(
+      new HuksParamImpl(huks.HuksTag.HUKS_TAG_ALGORITHM, huks.HuksKeyAlg.HUKS_ALG_AES as number),
+      new HuksParamImpl(huks.HuksTag.HUKS_TAG_KEY_SIZE, huks.HuksKeySize.HUKS_AES_KEY_SIZE_128 as number),
+      new HuksParamImpl(huks.HuksTag.HUKS_TAG_PURPOSE, huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_ENCRYPT as number),
+      new HuksParamImpl(huks.HuksTag.HUKS_TAG_PADDING, huks.HuksKeyPadding.HUKS_PADDING_PKCS7 as number),
+      new HuksParamImpl(huks.HuksTag.HUKS_TAG_BLOCK_MODE, huks.HuksCipherMode.HUKS_MODE_CBC as number),
+      new HuksParamImpl(huks.HuksTag.HUKS_TAG_IV, StringToUint8Array(IV)),
+    ),
+    indata222
+  );
+
+  let genKeyPromise = huks.generateKeyItem(aesKeyAlias, aesGenerateProperties)
+  await genKeyPromise.then<void, void>(():void => {
+      console.info(`promise: generate AES Key success`);
+    },
+    (error: BusinessError):void =>  {
+      console.error(`promise: generate AES Key failed, ${error.message}`)
+    }
+  );
+
+  let encryInitPromise = huks.initSession(aesKeyAlias, encryptProperties)
+  await encryInitPromise.then<void, void>((handle: huks.HuksSessionHandle): void => {
+      console.info(`promise: encry init session success. handle = ${handle.handle}`);
+      g_handle = handle.handle as number
+    },
+    (error: BusinessError):void => {
+      console.error(`promise: encry init session failed, ${error.message}`)
+    }
+  )
+
+  let abortPromise = huks.abortSession(g_handle, encryptProperties)
+  await abortPromise.then<void, void>((): void => {
+      console.error(`promise: abort session success!`)
+    },
+    (error: BusinessError):void => {
+      console.error(`promise: abort session failed, ${error.message}`)
+    }
+  )
+}
+
+async function EncryDencryTest()
+{
+  let aesKeyAlias = 'test_aesKeyAlias';
+  let g_handle: number = 0;
+  let plainText = '123456';
+  let IV = '001122334455';
+  let g_cipherData: Uint8Array = new Uint8Array(0);
+
+  let aesGenerateProperties = new HuksOptionsImpl(
+    new Array<huks.HuksParam>(
+        new HuksParamImpl(huks.HuksTag.HUKS_TAG_ALGORITHM, huks.HuksKeyAlg.HUKS_ALG_AES as number),
+        new HuksParamImpl(huks.HuksTag.HUKS_TAG_KEY_SIZE, huks.HuksKeySize.HUKS_AES_KEY_SIZE_128 as number),
+        new HuksParamImpl(huks.HuksTag.HUKS_TAG_PURPOSE, (huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_ENCRYPT |
+          huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_DECRYPT) as number),
+    ),
+  );
+
+  let indata222 : Uint8Array = StringToUint8Array(plainText);
+  let encryptProperties = new HuksOptionsImpl(
+    new Array<huks.HuksParam>(
+      new HuksParamImpl(huks.HuksTag.HUKS_TAG_ALGORITHM, huks.HuksKeyAlg.HUKS_ALG_AES as number),
+      new HuksParamImpl(huks.HuksTag.HUKS_TAG_KEY_SIZE, huks.HuksKeySize.HUKS_AES_KEY_SIZE_128 as number),
+      new HuksParamImpl(huks.HuksTag.HUKS_TAG_PURPOSE, huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_ENCRYPT as number),
+      new HuksParamImpl(huks.HuksTag.HUKS_TAG_PADDING, huks.HuksKeyPadding.HUKS_PADDING_PKCS7 as number),
+      new HuksParamImpl(huks.HuksTag.HUKS_TAG_BLOCK_MODE, huks.HuksCipherMode.HUKS_MODE_CBC as number),
+      new HuksParamImpl(huks.HuksTag.HUKS_TAG_IV, StringToUint8Array(IV)),
+    ),
+    indata222
+  );
+
+  let genKeyPromise = huks.generateKeyItem(aesKeyAlias, aesGenerateProperties)
+  await genKeyPromise.then<void, void>(():void => {
+      console.info(`promise: generate AES Key success`);
+    },
+    (error: BusinessError):void =>  {
+      console.error(`promise: generate AES Key failed, ${error.message}`)
+    }
+  );
+
+  let encryInitPromise = huks.initSession(aesKeyAlias, encryptProperties)
+  await encryInitPromise.then<void, void>((handle: huks.HuksSessionHandle): void => {
+      console.info(`promise: encry init session success. handle = ${handle.handle}`);
+      g_handle = handle.handle as number
+    },
+    (error: BusinessError):void => {
+      console.error(`promise: encry init session failed, ${error.message}`)
+    }
+  )
+  
+  let encryFinishPromise = huks.finishSession(g_handle, encryptProperties)
+  await encryFinishPromise.then<void, void>((outData: huks.HuksReturnResult): void => {
+      console.info(`promise: encry finish session success. cipherData = ${outData?.outData}`);
+      g_cipherData = outData?.outData as Uint8Array;
+    },
+    (error: BusinessError):void => {
+      console.error(`promise: encry finish session failed, ${error.message}`)
+    }
+  )
+
+  let dencryptProperties = new HuksOptionsImpl(
+    new Array<huks.HuksParam>(
+      new HuksParamImpl(huks.HuksTag.HUKS_TAG_ALGORITHM, huks.HuksKeyAlg.HUKS_ALG_AES as number),
+      new HuksParamImpl(huks.HuksTag.HUKS_TAG_KEY_SIZE, huks.HuksKeySize.HUKS_AES_KEY_SIZE_128 as number),
+      new HuksParamImpl(huks.HuksTag.HUKS_TAG_PURPOSE, huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_DECRYPT as number),
+      new HuksParamImpl(huks.HuksTag.HUKS_TAG_PADDING, huks.HuksKeyPadding.HUKS_PADDING_PKCS7 as number),
+      new HuksParamImpl(huks.HuksTag.HUKS_TAG_BLOCK_MODE, huks.HuksCipherMode.HUKS_MODE_CBC as number),
+      new HuksParamImpl(huks.HuksTag.HUKS_TAG_IV, StringToUint8Array(IV)),
+    ),
+    g_cipherData
+  );
+
+  let dencryInitPromise = huks.initSession(aesKeyAlias, dencryptProperties)
+  await dencryInitPromise.then<void, void>((handle: huks.HuksSessionHandle): void => {
+      console.info(`promise: dencry init session success. handle = ${handle.handle}`);
+      g_handle = handle.handle as number
+    },
+    (error: BusinessError):void => {
+      console.error(`promise: dencry init session failed, ${error.message}`)
+    }
+  )
+  
+  let dencryFinishPromise = huks.finishSession(g_handle, dencryptProperties)
+  await dencryFinishPromise.then<void, void>((outData: huks.HuksReturnResult): void => {
+      let dencryData: string = Uint8ArrayToString(outData.outData as Uint8Array)
+      console.info(`promise: dencry finish session success. plainText = ${plainText}`);
+      console.info(`promise: dencry finish session success. dencryData = ${dencryData}`);
+    },
+    (error: BusinessError):void => {
+      console.error(`promise: dencry finish session failed, ${error.message}`)
+    }
+  )
+  console.info(`encry dencry finish!!!`);
+}
+
+async function ImportKeyTest() {
+  let keyAlias = 'AES256Alias_sample';
+  let huksImportKeyOptions = new HuksOptionsImpl(
+    new Array<huks.HuksParam>(
+        new HuksParamImpl(huks.HuksTag.HUKS_TAG_ALGORITHM, huks.HuksKeyAlg.HUKS_ALG_AES as number),
+        new HuksParamImpl(huks.HuksTag.HUKS_TAG_PURPOSE, (huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_ENCRYPT |
+          huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_DECRYPT) as number),
+        new HuksParamImpl(huks.HuksTag.HUKS_TAG_KEY_SIZE, huks.HuksKeySize.HUKS_AES_KEY_SIZE_256 as number),
+    ),
+    new Uint8Array([
+        0xfb, 0x8b, 0x9f, 0x12, 0xa0, 0x83, 0x19, 0xbe, 0x6a, 0x6f, 0x63, 0x2a, 0x7c, 0x86, 0xba, 0xca,
+        0x64, 0x0b, 0x88, 0x96, 0xe2, 0xfa, 0x77, 0xbc, 0x71, 0xe3, 0x0f, 0x0f, 0x9e, 0x3c, 0xe5, 0xf9
+    ])
+  )
+  let importKeyPromise = huks.importKeyItem(keyAlias, huksImportKeyOptions)
+  await importKeyPromise.then<void, void>((): void => {
+      console.info(`promise: importKey success.`);
+    },
+    (error: BusinessError):void => {
+      console.error(`promise: importKey success. failed, ${error.message}`)
+    }
+  )
+}
+
+async function GenKeyTest() {
+  let aesKeyAlias = 'test_aesKeyAlias';
+  let aesGenerateProperties = new HuksOptionsImpl(
+    new Array<huks.HuksParam>(
+        new HuksParamImpl(huks.HuksTag.HUKS_TAG_ALGORITHM, huks.HuksKeyAlg.HUKS_ALG_AES as number),
+        new HuksParamImpl(huks.HuksTag.HUKS_TAG_KEY_SIZE, huks.HuksKeySize.HUKS_AES_KEY_SIZE_128 as number),
+        new HuksParamImpl(huks.HuksTag.HUKS_TAG_PURPOSE, (huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_ENCRYPT |
+          huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_DECRYPT) as number),
+    ),
+  );
+
+  let genKeyPromise = huks.generateKeyItem(aesKeyAlias, aesGenerateProperties)
+  await genKeyPromise.then<void, void>(():void => {
+      console.info(`promise: generate AES Key success`);
+    },
+    (error: BusinessError):void =>  {
+      console.error(`promise: generate AES Key failed, ${error.message}`)
+    }
+  );
+}
+
+
+async function KeyExistTest() {
+  let aesKeyAlias = 'test_aesKeyAlias';
+  let aesGenerateProperties = new HuksOptionsImpl(
+    new Array<huks.HuksParam>(
+        new HuksParamImpl(huks.HuksTag.HUKS_TAG_ALGORITHM, huks.HuksKeyAlg.HUKS_ALG_AES as number),
+        new HuksParamImpl(huks.HuksTag.HUKS_TAG_KEY_SIZE, huks.HuksKeySize.HUKS_AES_KEY_SIZE_128 as number),
+        new HuksParamImpl(huks.HuksTag.HUKS_TAG_PURPOSE, (huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_ENCRYPT |
+          huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_DECRYPT) as number),
+    ),
+  );
+
+  let genKeyPromise = huks.generateKeyItem(aesKeyAlias, aesGenerateProperties)
+  await genKeyPromise.then<void, void>(():void => {
+      console.info(`promise: generate AES Key success`);
+    },
+    (error: BusinessError):void =>  {
+      console.error(`promise: generate AES Key failed, ${error.message}`)
+    }
+  );
+
+  let keyExistPromise = huks.isKeyItemExist(aesKeyAlias, aesGenerateProperties)
+  await keyExistPromise.then<void, void>((isExist: boolean):void => {
+      console.info(`promise: check the generated AES Key is exist ret = ${isExist}`);
+    },
+    (error: BusinessError):void =>  {
+      console.error(`promise: generate AES Key failed, ${error.message}`)
+    }
+  );
+
+  console.info(`change the keyAlias, test the not exist key can be find?`);
+  let keyExistPromise2 = huks.isKeyItemExist(aesKeyAlias + "0006598", aesGenerateProperties)
+  await keyExistPromise2.then<void, void>((isExist: boolean):void => {
+      console.info(`promise: check the not exist Key is exist ret = ${isExist}`);
+    },
+    (error: BusinessError):void =>  {
+      console.error(`promise: generate AES Key failed, ${error.message}`)
+    }
+  );
+}
+
+
+async function ExportKeyTest()
+{
+  let rsaKeyAlias = 'test_rsaKeyAlias';
+  let huksGenKeyOptions = new HuksOptionsImpl(
+    new Array<huks.HuksParam>(
+        new HuksParamImpl(huks.HuksTag.HUKS_TAG_ALGORITHM, huks.HuksKeyAlg.HUKS_ALG_RSA as number),
+        new HuksParamImpl(huks.HuksTag.HUKS_TAG_PURPOSE, huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_ENCRYPT as number),
+        new HuksParamImpl(huks.HuksTag.HUKS_TAG_KEY_SIZE, huks.HuksKeySize.HUKS_RSA_KEY_SIZE_2048 as number),
+    ),
+  )
+
+  let genKeyPromise = huks.generateKeyItem(rsaKeyAlias, huksGenKeyOptions)
+  await genKeyPromise.then<void, void>(():void => {
+      console.info(`promise: generate RSA Key success`);
+    },
+    (error: BusinessError):void =>  {
+      console.error(`promise: generate RSA Key failed, ${error.message}`)
+    }
+  );
+
+  let exportKeyPromise = huks.exportKeyItem(rsaKeyAlias, huksGenKeyOptions)
+  await exportKeyPromise.then<void, void>((result: huks.HuksReturnResult):void => {
+      console.info(`promise: export RSA publick Key success. outKey = ${result.outData}`);
+    },
+    (error: BusinessError):void =>  {
+      console.error(`promise: generate RSA Key failed, ${error.message}`)
+    }
+  );
+
+}
+
+async function KeyDeleteTest() {
+  let aesKeyAlias = 'test_aesKeyAliaseeee';
+  let aesGenerateProperties = new HuksOptionsImpl(
+    new Array<huks.HuksParam>(
+        new HuksParamImpl(huks.HuksTag.HUKS_TAG_ALGORITHM, huks.HuksKeyAlg.HUKS_ALG_AES as number),
+        new HuksParamImpl(huks.HuksTag.HUKS_TAG_KEY_SIZE, huks.HuksKeySize.HUKS_AES_KEY_SIZE_128 as number),
+        new HuksParamImpl(huks.HuksTag.HUKS_TAG_PURPOSE, (huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_ENCRYPT |
+          huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_DECRYPT) as number),
+    ),
+  );
+  let genKeyPromise = huks.generateKeyItem(aesKeyAlias, aesGenerateProperties)
+  await genKeyPromise.then<void, void>(():void => {
+      console.info(`promise: generate AES Key success`);
+    },
+    (error: BusinessError):void =>  {
+      console.error(`promise: generate AES Key failed, ${error.message}`)
+    }
+  );
+
+  let keyExistPromise = huks.isKeyItemExist(aesKeyAlias, aesGenerateProperties)
+  await keyExistPromise.then<void, void>((isExist: boolean):void => {
+      console.info(`promise: check the generated AES Key is exist ret = ${isExist}`);
+    },
+    (error: BusinessError):void =>  {
+      console.error(`promise: generate AES Key failed, ${error.message}`)
+    }
+  );
+
+  let keyDeletePromise = huks.deleteKeyItem(aesKeyAlias, aesGenerateProperties)
+  await keyDeletePromise.then<void, void>(():void => {
+      console.info(`promise: delete generated AES Key success.`);
+    },
+    (error: BusinessError):void =>  {
+      console.error(`promise: delete generated AES Key failed, ${error.message}`)
+    }
+  );
+}
+
+// function subUint8ArrayOf(arrayBuf: Uint8Array, start: number, end: number): Uint8Array {
+//   if (start < 0 || end > arrayBuf.length || start > end) {
+//     throw new RangeError("Invalid start or end index");
+//   }
+//   let arr: Uint8Array = new Uint8Array(end - start);
+//   for (let i = start, j = 0; i < end; ++i, j++) {
+//     arr[j] = arrayBuf[i];
+//   }
+//   return arr;
+// }
+
+// function assignLength(length: number, arrayBuf: Uint8Array, startIndex: number) {
+//   let index = startIndex;
+//   let mask = [0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000];
+//   for (let i = 0; i < 4; i++) {
+//     arrayBuf[index++] = (length & mask[i]) >> (i * 8);
+//   }
+//   return 4;
+// }
+
+// function assignData(data: Uint8Array, arrayBuf: Uint8Array, startIndex: number) {
+//   let index = startIndex;
+//   for (let i = 0; i < data.length; i++) {
+//     arrayBuf[index++] = data[i];
+//   }
+//   return data.length;
+// }
+
+
+// async function publicGenerateItemFunc(keyAlias: string, huksOptions: huks.HuksOptions) {
+//     console.info(`enter promise generateKeyItem`);
+//     let genKeyPromise = huks.generateKeyItem(keyAlias, huksOptions)
+//     await genKeyPromise.then<void, void>(():void => {
+//         console.info(`promise: generate Key success`);
+//       },
+//       (error: BusinessError):void =>  {
+//         console.error(`promise: generate Key failed, ${error.message}`)
+//       }
+//     );
+//   }
+
+//   async function publicImportKeyItemFunc(keyAlias: string, HuksOptions: huks.HuksOptions) {
+//     console.info(`enter promise importKeyItem`);
+//     let importKeyPromise = huks.importKeyItem(keyAlias, HuksOptions)
+//     await importKeyPromise.then<void, void>((): void => {
+//         console.info(`promise: importKey success.`);
+//       },
+//       (error: BusinessError):void => {
+//         console.error(`promise: importKey success. failed, ${error.message}`)
+//       }
+//     )
+//   }
+
+//   async function publicDeleteKeyItemFunc(KeyAlias: string, HuksOptions: huks.HuksOptions) {
+//     console.info(`enter promise deleteKeyItem`);
+//     let keyDeletePromise = huks.deleteKeyItem(KeyAlias, HuksOptions)
+//     await keyDeletePromise.then<void, void>(():void => {
+//         console.info(`promise: delete generated AES Key success.`);
+//       },
+//       (error: BusinessError):void =>  {
+//         console.error(`promise: delete generated AES Key failed, ${error.message}`)
+//       }
+//     );
+//   }
+
+//   async function publicImportWrappedKeyFunc(keyAlias: string, wrappingKeyAlias: string, huksOptions: huks.HuksOptions) {
+//     console.info(`enter promise importWrappedKeyItem`);
+//     for (let i = 0; i < huksOptions.inData!.length; i++) {
+//       console.error(`${i}: ${huksOptions.inData![i]}`);
+//     }
+//     try {
+//       await huks.importWrappedKeyItem(keyAlias, wrappingKeyAlias, huksOptions)
+//         .then<void, void>(():void => {
+//           console.info(`promise: importWrappedKeyItem success.`);
+//         },
+//         (error: BusinessError):void =>  {
+//           console.error(`promise: importWrappedKeyItem failed, ${error.message}`)
+//         });
+//     } catch (error) {
+//       console.error(`promise: importWrappedKeyItem input arg invalid, ${JSON.stringify(error)}`);
+//     }
+//   }
+
+//   async function publicInitFunc(srcKeyAlias: string, HuksOptions: huks.HuksOptions) {
+//     let m_handle: number = 0;
+//     console.info(`enter promise doInit`);
+//     try {
+//       await huks.initSession(srcKeyAlias, HuksOptions)
+//         .then<void, void>((handle: huks.HuksSessionHandle): void => {
+//           console.info(`promise: dencry init session success. handle = ${handle.handle}`);
+//           m_handle = handle.handle as number
+//         },
+//         (error: BusinessError):void => {
+//           console.error(`promise: dencry init session failed, ${error.message}`)
+//         });
+//     } catch (error) {
+//       console.error(`promise: doInit input arg invalid, ${JSON.stringify(error)}`);
+//     }
+//     return m_handle;
+//   }
+
+//   async function publicUpdateSessionFunction(handle: number, HuksOptions: huks.HuksOptions) {
+//     const maxUpdateSize = 64;
+//     const inData = HuksOptions.inData!;
+//     const lastInDataPosition = inData.length - 1;
+//     let inDataSegSize = maxUpdateSize;
+//     let inDataSegPosition = 0;
+//     let isFinished = false;
+//     let outData: number[] = [];
+  
+//     while (inDataSegPosition <= lastInDataPosition) {
+//       if (inDataSegPosition + maxUpdateSize > lastInDataPosition) {
+//         isFinished = true;
+//         inDataSegSize = lastInDataPosition - inDataSegPosition + 1;
+//         console.info(`enter promise doUpdate`);
+//         break;
+//       }
+//       HuksOptions.inData = new Uint8Array(
+//         Array.from(inData).slice(inDataSegPosition, inDataSegPosition + inDataSegSize)
+//       );
+//       console.info(`enter promise doUpdate`);
+//       try {
+//         await huks.updateSession(handle, HuksOptions)
+//           .then<void, void>((outData: huks.HuksReturnResult): void => {
+//             let dencryData: string = Uint8ArrayToString(outData.outData as Uint8Array)
+//             console.info(`promise: dencry finish session success. dencryData = ${dencryData}`);
+//           },
+//           (error: BusinessError):void => {
+//             console.error(`promise: dencry finish session failed, ${error.message}`)
+//           }
+//         );
+//       } catch (error) {
+//         console.error(`promise: doUpdate input arg invalid, ${JSON.stringify(error)}`);
+//       }
+//       if ((!isFinished) && (inDataSegPosition + maxUpdateSize > lastInDataPosition)) {
+//         console.error(`update size invalid isFinished = ${isFinished}`);
+//         console.error(`inDataSegPosition = ${inDataSegPosition}`);
+//         console.error(`lastInDataPosition = ${lastInDataPosition}`);
+//         return;
+//       }
+//       inDataSegPosition += maxUpdateSize;
+//     }
+//     return outData;
+//   }
+
+//   async function publicFinishSession(handle: number, HuksOptions: huks.HuksOptions, inData: number[]) {
+//     let outData2: Uint8Array;
+//     console.info(`enter promise doFinish`);
+//     try {
+//       await huks.finishSession(handle, HuksOptions)
+//         .then<void, void>((outData: huks.HuksReturnResult): void => {
+//           console.info(`promise: doFinish success, data = ${JSON.stringify(outData.outData)}`);
+//           // 计算总长度
+//           const totalLength = (outData.outData?.length as int) + inData.length;
+//           outData2 = new Uint8Array(totalLength);
+
+//           // 将 result.outData 和 inData 拼接到 outData2 中
+//           outData2.set(outData.outData?, 0); // 将 result.outData 放在前面
+//           outData2.set(new Uint8Array(inData), outData.outData.length); // 将 inData 放在后面
+//         },
+//         (error: BusinessError):void => {
+//           console.error(`promise: dencry finish session failed, ${error.message}`)
+//         }
+//       );
+//     } catch (error) {
+//       console.error(`promise: doFinish input arg invalid, ${JSON.stringify(error)}`);
+//     }
+//     return outData2;
+//   }
+
+// async function importWrappedKeyTest()
+// {
+//   let IV = '0000000000000000';
+//   let AAD = "abababababababab";
+//   let NONCE = "hahahahahaha";
+//   let TAG_SIZE = 16;
+//   let FILED_LENGTH = 4;
+//   let importedAes192PlainKey = "The aes192 key to import";
+//   let callerAes256Kek = "The is kek to encrypt aes192 key";
+//   let callerKeyAlias = "test_caller_key_ecdh_aes192";
+//   let callerKekAliasAes256 = "test_caller_kek_ecdh_aes256";
+//   let callerAgreeKeyAliasAes256 = "test_caller_agree_key_ecdh_aes256";
+//   let importedKeyAliasAes192 = "test_import_key_ecdh_aes192";
+//   let huksPubKey: Uint8Array;
+//   let callerSelfPublicKey: Uint8Array;
+//   let outSharedKey: Uint8Array;
+//   let outPlainKeyEncData: Uint8Array;
+//   let outKekEncData: Uint8Array;
+//   let outKekEncTag: Uint8Array;
+//   let outAgreeKeyEncTag: Uint8Array;
+  
+//   let genWrappingKeyParams = new HuksOptionsImpl(
+//     new Array<huks.HuksParam>(
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_ALGORITHM, huks.HuksKeyAlg.HUKS_ALG_ECC as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_PURPOSE, huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_UNWRAP as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_KEY_SIZE, (huks.HuksKeySize.HUKS_CURVE25519_KEY_SIZE_256) as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_PADDING, huks.HuksKeyPadding.HUKS_PADDING_NONE as number),
+//     ),
+//   );
+
+//   let genCallerEcdhParams = new HuksOptionsImpl(
+//     new Array<huks.HuksParam>(
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_ALGORITHM, huks.HuksKeyAlg.HUKS_ALG_ECC as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_PURPOSE, huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_AGREE as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_KEY_SIZE, (huks.HuksKeySize.HUKS_CURVE25519_KEY_SIZE_256) as number),
+//     ),
+//   );
+
+//   let inData111 = StringToUint8Array(callerAes256Kek);
+//   let importParamsCallerKek = new HuksOptionsImpl(
+//     new Array<huks.HuksParam>(
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_ALGORITHM, huks.HuksKeyAlg.HUKS_ALG_AES as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_PURPOSE, huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_ENCRYPT as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_KEY_SIZE, (huks.HuksKeySize.HUKS_AES_KEY_SIZE_256) as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_PADDING, huks.HuksKeyPadding.HUKS_PADDING_NONE as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_BLOCK_MODE, huks.HuksCipherMode.HUKS_MODE_GCM as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_DIGEST, huks.HuksKeyDigest.HUKS_DIGEST_NONE as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_IV, StringToUint8Array(IV)),
+//     ),
+//     inData111
+//   );
+
+//   let importParamsAgreeKey = new HuksOptionsImpl(
+//     new Array<huks.HuksParam>(
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_ALGORITHM, huks.HuksKeyAlg.HUKS_ALG_AES as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_PURPOSE, huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_ENCRYPT as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_KEY_SIZE, (huks.HuksKeySize.HUKS_AES_KEY_SIZE_256) as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_PADDING, huks.HuksKeyPadding.HUKS_PADDING_NONE as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_BLOCK_MODE, huks.HuksCipherMode.HUKS_MODE_GCM as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_DIGEST, huks.HuksKeyDigest.HUKS_DIGEST_NONE as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_IV, StringToUint8Array(IV)),
+//     ),
+//   );
+
+//   let callerAgreeParams = new HuksOptionsImpl(
+//     new Array<huks.HuksParam>(
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_ALGORITHM, huks.HuksKeyAlg.HUKS_ALG_ECDH as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_PURPOSE, huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_AGREE as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_KEY_SIZE, (huks.HuksKeySize.HUKS_CURVE25519_KEY_SIZE_256) as number),
+//     ),
+//   );
+
+//   let encryptKeyCommonParams = new HuksOptionsImpl(
+//     new Array<huks.HuksParam>(
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_ALGORITHM, huks.HuksKeyAlg.HUKS_ALG_AES as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_PURPOSE, huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_ENCRYPT as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_KEY_SIZE, (huks.HuksKeySize.HUKS_AES_KEY_SIZE_256) as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_PADDING, huks.HuksKeyPadding.HUKS_PADDING_NONE as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_BLOCK_MODE, huks.HuksCipherMode.HUKS_MODE_GCM as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_NONCE, StringToUint8Array(NONCE)),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_ASSOCIATED_DATA, StringToUint8Array(AAD)),
+//     ),
+//   );
+
+//   let importWrappedAes192Params = new HuksOptionsImpl(
+//     new Array<huks.HuksParam>(
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_ALGORITHM, huks.HuksKeyAlg.HUKS_ALG_AES as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_PURPOSE, (huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_ENCRYPT |
+//           huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_DECRYPT) as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_KEY_SIZE, (huks.HuksKeySize.HUKS_AES_KEY_SIZE_192) as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_PADDING, huks.HuksKeyPadding.HUKS_PADDING_NONE as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_BLOCK_MODE, huks.HuksCipherMode.HUKS_MODE_CBC as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_DIGEST, huks.HuksKeyDigest.HUKS_DIGEST_NONE as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_UNWRAP_ALGORITHM_SUITE,
+//           huks.HuksUnwrapSuite.HUKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING as number),
+//         new HuksParamImpl(huks.HuksTag.HUKS_TAG_IV, StringToUint8Array(IV)),
+//     ),
+//   );
+
+  
+// }
+
+function main(){
+  loadLibrary("huks_interfaceImpl.z")
+  console.println("hello ani")
+  EncryDencryTest()
+  ImportKeyTest()
+  GenKeyTest()
+  KeyExistTest()
+  ExportKeyTest()
+  KeyDeleteTest()
+  abortSessionTest()
+  // console.log(`test enum is support? huks.HuksKeyAlg.HUKS_ALG_DH as number shuld be 103. ret = ${huks.HuksKeyAlg.HUKS_ALG_DH as number}`)
 }
