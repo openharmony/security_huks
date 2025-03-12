@@ -12,70 +12,10 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//build/config/components/ets_frontend/ets2abc_config.gni")
 
-ohos_shared_library("huks_interfaceImpl") {
-  branch_protector_ret = "pac_ret"
-
-  sanitize = {
-    integer_overflow = true
-    cfi = true
-    debug = false
-    cfi_cross_dso = true
-    boundary_sanitize = true
-    ubsan = true
-  }
-  defines = [
-  ]
-
-  include_dirs = [
-    # "//arkcompiler/runtime_core/static_core/plugins/ets/runtime/ani",
-    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
-    "//base/security/huks/frameworks/huks_standard/main/common/include",
-    "include",
-  ]
-
-  sources = [
-    "//base/security/huks/interfaces/kits/ani/src/huks_ani_common.cpp",
-    "//base/security/huks/interfaces/kits/ani/src/huks_ani_impl.cpp",
-  ]
-
+group("huks_ani_package") {
   deps = [
-    "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
-    "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
-    "//base/security/huks/frameworks/huks_standard/main/crypto_engine/openssl:libhuks_openssl_standard_static",
-    "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
+    "./ani_implement:huks_ani_abc_etc",
+    "./ani_implement:huks_interfaceImpl_ani",
   ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "runtime_core:ani",
-  ]
-  cflags_cc = [
-    "-Wall",
-    "-Werror",
-  ]
-  # relative_install_dir = "module/security"
-  subsystem_name = "security"
-  part_name = "huks"
-}
-
-generate_static_abc("huks_ani_abc") {
-  arktsconfig = "//base/security/huks/interfaces/kits/ani/arktsconfig.json"
-  dst_file = "$target_out_dir/@ohos.security.huks.d.abc"
-  out_puts = [ "$target_out_dir/@ohos.security.huks.d.abc" ]
-  is_boot_abc = "True"
-  device_dst_file = "system/framework/@ohos.security.huks.d.abc"
-  in_puts = [
-    "/mnt/data/l00889714/linzs/ohos_1108/base/security/huks/interfaces/kits/ani/@ohos.security.huks.ets",
-  ]
-}
-
-ohos_prebuilt_etc("huks_ani_abc_etc") {
-  source = "$target_out_dir/@ohos.security.huks.d.abc"
-  module_install_dir = "framework"
-  part_name = "security"
-  subsystem_name = "huks"
-  deps = [ ":huks_ani_abc" ]
 }

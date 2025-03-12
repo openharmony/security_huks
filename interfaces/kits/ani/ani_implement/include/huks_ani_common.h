@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
- #ifndef HKS_ANI_H
- #define HKS_ANI_H
+#ifndef HKS_ANI_H
+#define HKS_ANI_H
 
 #include "hks_mem.h"
 #include "hks_type.h"
@@ -25,10 +25,10 @@
 #include "hks_log.h"
 
 #include <ani.h>
-#include <stdbool.h>
+#include <cstdbool>
 #include <string>
 #include <iostream>
-#include <stdio.h>
+#include <cstdio>
 namespace HuksAni {
 
 class CommonContext {
@@ -86,11 +86,13 @@ namespace AniUtils {
 
 int32_t HksGetKeyAliasFromAni(ani_env *&env, const ani_string &strObject, HksBlob &keyAliasOut);
 
-int32_t HksCreateAniResult(const int32_t result, ani_env *&env, ani_object &resultObjOut, ani_object oubBuffer = nullptr);
+int32_t HksCreateAniResult(const int32_t result, ani_env *&env, ani_object &resultObjOut,
+    ani_object oubBuffer = nullptr);
 
 int32_t HksIsKeyItemExistCreateAniResult(const int32_t result, ani_env *&env, ani_object &resultObjOut);
 
-int32_t HksInitSessionCreateAniResult(const int32_t result, ani_env *&env, const SessionContext &context, ani_object &resultObjOut);
+int32_t HksInitSessionCreateAniResult(const int32_t result, ani_env *&env, const SessionContext &context,
+    ani_object &resultObjOut);
 
 int32_t HksGetParamSetFromAni(ani_env *&env, const ani_object &optionsObj, struct HksParamSet *&paramSetOut);
 
@@ -116,13 +118,13 @@ int32_t HksAniParseParams(ani_env *env, ani_string keyAlias, ani_object &options
     if (keyAlias != nullptr) {
         ret = HksGetKeyAliasFromAni(env, keyAlias, contextPtr->keyAlias);
         if (ret != HKS_SUCCESS) {
-            std::cout << "HksGetKeyAliasFromAni failed" << std::endl;
+            HKS_LOG_E("HksGetKeyAliasFromAni failed");
             return HKS_ERROR_INVALID_ARGUMENT;
         }
     }
     ret = HksGetParamSetFromAni(env, options, contextPtr->paramSetIn);
     if (ret != HKS_SUCCESS) {
-        std::cout << "HksGetParamSetFromAni failed" << std::endl;
+        HKS_LOG_E("HksGetParamSetFromAni failed");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return ret;
