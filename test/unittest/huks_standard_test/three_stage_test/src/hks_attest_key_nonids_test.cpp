@@ -1050,8 +1050,6 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest013, TestSize.Level0)
     ret = HksDeleteKeyForDe(&g_keyAlias, NULL);
     ASSERT_EQ(ret, HKS_SUCCESS);
 }
-<<<<<<< HEAD
-=======
 
 /**
  * @tc.name: HksAttestKeyNonIdsTest.HksAttestKeyNonIdsTest014
@@ -1559,5 +1557,4 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest027, TestSize.Level0)
     HKS_LOG_I("leave HksAttestKeyNonIdsTest027");
 }
 
->>>>>>> a50c1e6c... fix bug in verifycertchain
 }
