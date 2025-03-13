@@ -203,13 +203,16 @@ static int32_t VerifyCertChain(const struct HksCertInfo *certs, uint32_t certNum
         goto EXIT;
     }
 
-    if (X509_STORE_add_cert(store, certs[certNum - 1].x509) != OPENSSL_SUCCESS) { /* add root ca cert */
+    // We only verify the validity of the certificate chain, not its legality,
+    // so we will add the last cert in the cert chain, instead of the real root cert, into trust store here.
+    if (X509_STORE_add_cert(store, certs[certNum - 1].x509) != OPENSSL_SUCCESS) {
         HKS_LOG_E("add root cert failed");
         goto EXIT;
     }
 
     for (uint32_t i = certNum - 2; i > 0; i--) {
-        if (sk_X509_push(skCerts, X509_dup(certs[i].x509)) != certNum - 1 - i) {
+        int opensslRet = sk_X509_push(skCerts, X509_dup(certs[i].x509));
+        if (opensslRet <= 0 || (uint32_t)(opensslRet) != certNum - 1 - i) {
             HKS_LOG_E("add cert to chain failed");
             goto EXIT;
         }
@@ -586,7 +589,7 @@ static int32_t InitCertChainInfo(const struct HksCertChain *certChain, struct Hk
 {
     int32_t ret = HKS_SUCCESS;
 
-    uint32_t certsInfoLen = sizeof(struct HksCertInfo) * certChain->certsCount; /* only 4 cert */
+    uint32_t certsInfoLen = sizeof(struct HksCertInfo) * certChain->certsCount;
     struct HksCertInfo *certsInfo = (struct HksCertInfo *)HksMalloc(certsInfoLen);
     HKS_IF_NULL_RETURN(certsInfo, HKS_ERROR_MALLOC_FAIL)
 
