@@ -20,6 +20,7 @@ enable_huks_lite_hap = false
 enable_bundle_framework = true
 enable_interact_across_local_accounts = false
 fuzz_module_out_path = "huks/huks"
+huks_base_path = "//base/security/huks/"
 
 # always set as false for upload code
 hks_enable_test = false
