@@ -2285,8 +2285,8 @@ int32_t HksServiceChangeStorageLevel(const struct HksProcessInfo *processInfo, c
     HKS_FREE_BLOB(oldKey);
     HKS_FREE_BLOB(newKey);
     HksReport(__func__, processInfo, newParamSet, ret);
-    HKS_IF_NOT_TRUE_RETURN(isSkipUpdate, ret)
-    return HKS_SUCCESS;
+    HKS_IF_TRUE_RETURN(isSkipUpdate, HKS_SUCCESS)
+    return ret;
 #else
     (void)processInfo;
     (void)keyAlias;
