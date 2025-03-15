@@ -398,7 +398,6 @@ static void DeleteSession(const struct HksProcessInfo *processInfo, struct HksOp
     bool isNeedDelete = (processInfo->processName.size == 0)
         ? IsSameUserId(processInfo, operation)
         : (IsSameUserId(processInfo, operation) && IsSameProcessName(processInfo, operation));
-
     if (isNeedDelete) {
         DeleteKeyNodeAndDecreaseGlobalCount(operation);
     }
