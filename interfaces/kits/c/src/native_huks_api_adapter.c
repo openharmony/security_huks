@@ -54,13 +54,9 @@ int32_t HuksAttestAdapter(const struct OH_Huks_Blob *keyAlias, const struct OH_H
         if (ret != HKS_SUCCESS) {
             break;
         }
-        if (needAnonCertChain) {
-            ret = HksAnonAttestKey((const struct HksBlob *)keyAlias, (struct HksParamSet *)newParamSet,
-                (struct HksCertChain *)certChain);
-        } else {
-            ret = HksAttestKey((const struct HksBlob *)keyAlias, (struct HksParamSet *)newParamSet,
-                (struct HksCertChain *)certChain);
-        }
+        ret = needAnonCertChain ? HksAnonAttestKey((const struct HksBlob *)keyAlias, (struct HksParamSet *)newParamSet,
+            (struct HksCertChain *)certChain) : HksAttestKey((const struct HksBlob *)keyAlias,
+            (struct HksParamSet *)newParamSet, (struct HksCertChain *)certChain);
     } while (0);
     HksFreeParamSet(&newParamSet);
     return ret;

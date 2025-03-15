@@ -142,9 +142,7 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
 
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
     processInfo->accessTokenId = static_cast<uint64_t>(IPCSkeleton::GetCallingTokenID());
-    if (processInfo->accessTokenId == 0) {
-        HKS_LOG_E("accessTokenId is zero");
-    }
+    HKS_IF_TRUE_LOGE(processInfo->accessTokenId == 0, "accessTokenId is zero")
 #endif
 
     return HKS_SUCCESS;
@@ -155,10 +153,8 @@ int32_t HksGetFrontUserId(int32_t *outId)
 #ifdef HAS_OS_ACCOUNT_PART
     std::vector<int> ids;
     int ret = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
-    if (ret != ERR_OK || ids.empty()) {
-        HKS_LOG_E("QueryActiveOsAccountIds Failed!! ret = %" LOG_PUBLIC "d", ret);
-        return HKS_FAILURE;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(ret != ERR_OK || ids.empty(), HKS_FAILURE,
+        "QueryActiveOsAccountIds Failed!! ret = %" LOG_PUBLIC "d", ret)
     HKS_LOG_I("QueryActiveOsAccountIds success: FrontUserId= %" LOG_PUBLIC "d", ids[0]);
     *outId = ids[0];
 #else // HAS_OS_ACCOUNT_PART

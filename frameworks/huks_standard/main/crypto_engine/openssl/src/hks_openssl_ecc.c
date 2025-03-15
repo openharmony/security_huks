@@ -162,10 +162,8 @@ static int32_t EccSaveKeyMaterial(const EC_KEY *eccKey, const struct HksKeySpec 
 
 int32_t HksOpensslEccGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
 {
-    if (spec->algType != HKS_ALG_ECC) {
-        HKS_LOG_E("invalid alg type %" LOG_PUBLIC "u", spec->algType);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(spec->algType != HKS_ALG_ECC, HKS_ERROR_INVALID_ARGUMENT,
+        "invalid alg type %" LOG_PUBLIC "u", spec->algType)
     HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslEccCheckKeyLen(spec->keyLen),
         HKS_ERROR_INVALID_ARGUMENT, "Ecc Invalid Param!")
 
@@ -206,11 +204,8 @@ int32_t HksOpensslEccGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
 int32_t HksOpensslGetEccPubKey(const struct HksBlob *input, struct HksBlob *output)
 {
     struct KeyMaterialEcc *keyMaterial = (struct KeyMaterialEcc *)input->data;
-
-    if ((keyMaterial->xSize == 0) || (keyMaterial->ySize == 0)) {
-        HKS_LOG_E("not support get pubkey");
-        return HKS_ERROR_NOT_SUPPORTED;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(keyMaterial->xSize == 0 || keyMaterial->ySize == 0, HKS_ERROR_NOT_SUPPORTED,
+        "not support get pubkey")
 
     output->size = sizeof(struct KeyMaterialEcc) + keyMaterial->xSize + keyMaterial->ySize;
 
@@ -301,10 +296,8 @@ static EC_KEY *EccInitKey(const struct HksBlob *keyBlob, bool private)
     uint32_t privateSize;
     uint32_t keySize;
 
-    if (GetEccModules(keyPair, &keySize, &publicXSize, &publicYSize, &privateSize) != 0) {
-        HKS_LOG_E("get ecc key modules is failed");
-        return NULL;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(GetEccModules(keyPair, &keySize, &publicXSize, &publicYSize, &privateSize) != 0, NULL,
+        "get ecc key modules is failed")
 
     int nid;
     HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslGetCurveId(keySize, &nid), NULL, "get curve id failed")
@@ -380,9 +373,7 @@ static int32_t EcdhDerive(EVP_PKEY_CTX *ctx, EVP_PKEY *peerKey, struct HksBlob *
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
-    if (tmpSharedKeySize > sharedKey->size) {
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    HKS_IF_TRUE_RETURN(tmpSharedKeySize > sharedKey->size, HKS_ERROR_BUFFER_TOO_SMALL)
 
     if (EVP_PKEY_derive(ctx, sharedKey->data, &tmpSharedKeySize) != 1) {
         HksLogOpensslError();

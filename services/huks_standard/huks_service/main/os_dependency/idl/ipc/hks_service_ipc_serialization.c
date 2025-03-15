@@ -23,9 +23,7 @@
 
 static int32_t CopyUint32ToBuffer(uint32_t value, const struct HksBlob *destBlob, uint32_t *destOffset)
 {
-    if (*destOffset > destBlob->size) {
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    HKS_IF_TRUE_RETURN(*destOffset > destBlob->size, HKS_ERROR_BUFFER_TOO_SMALL)
 
     if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, &(value), sizeof(value)) != EOK) {
         return HKS_ERROR_INSUFFICIENT_MEMORY;
@@ -39,23 +37,16 @@ static int32_t CopyBlobToBuffer(const struct HksBlob *blob, const struct HksBlob
 {
     HKS_IF_NOT_SUCC_RETURN(CheckBlob(blob), HKS_ERROR_INVALID_ARGUMENT)
 
-    if ((*destOffset > destBlob->size) ||
-        ((destBlob->size - *destOffset) < (sizeof(blob->size) + ALIGN_SIZE(blob->size)))) {
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    HKS_IF_TRUE_RETURN((*destOffset > destBlob->size) ||
+        (destBlob->size - *destOffset < sizeof(blob->size) + ALIGN_SIZE(blob->size)), HKS_ERROR_BUFFER_TOO_SMALL)
 
-    if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, &(blob->size),
-        sizeof(blob->size)) != EOK) {
-        HKS_LOG_E("copy destBlob data failed!");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, &(blob->size),
+        sizeof(blob->size)), HKS_ERROR_INSUFFICIENT_MEMORY, "copy destBlob data failed!")
 
     *destOffset += sizeof(blob->size);
 
-    if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, blob->data, blob->size) != EOK) {
-        HKS_LOG_E("copy destBlob data failed!");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, blob->data,
+        blob->size), HKS_ERROR_INSUFFICIENT_MEMORY, "copy destBlob data failed!")
 
     *destOffset += ALIGN_SIZE(blob->size);
     return HKS_SUCCESS;
@@ -66,9 +57,8 @@ static int32_t CopyParamSetToBuffer(const struct HksParamSet *paramSet,
 {
     HKS_IF_NULL_RETURN(paramSet, HKS_ERROR_INVALID_ARGUMENT)
 
-    if ((*destOffset > destBlob->size) || (destBlob->size - *destOffset < ALIGN_SIZE(paramSet->paramSetSize))) {
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    HKS_IF_TRUE_RETURN((*destOffset > destBlob->size) ||
+        (destBlob->size - *destOffset < ALIGN_SIZE(paramSet->paramSetSize)), HKS_ERROR_BUFFER_TOO_SMALL)
 
     if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, paramSet, paramSet->paramSetSize) != EOK) {
         return HKS_ERROR_INSUFFICIENT_MEMORY;
@@ -80,9 +70,8 @@ static int32_t CopyParamSetToBuffer(const struct HksParamSet *paramSet,
 
 static int32_t GetUint32FromBuffer(uint32_t *value, const struct HksBlob *srcBlob, uint32_t *srcOffset)
 {
-    if ((*srcOffset > srcBlob->size) || (srcBlob->size - *srcOffset < sizeof(uint32_t))) {
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    HKS_IF_TRUE_RETURN((*srcOffset > srcBlob->size) || (srcBlob->size - *srcOffset < sizeof(uint32_t)),
+        HKS_ERROR_BUFFER_TOO_SMALL)
 
     if (memcpy_s(value, sizeof(*value), srcBlob->data + *srcOffset, sizeof(uint32_t)) != EOK) {
         HKS_LOG_E("copy value failed!");
@@ -100,12 +89,8 @@ int32_t GetBlobFromBuffer(struct HksBlob *blob, const struct HksBlob *srcBlob, u
     }
 
     uint32_t size = *((uint32_t *)(srcBlob->data + *srcOffset));
-    if (IsAdditionOverflow(size, DEFAULT_ALIGN_MASK_SIZE)) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    if (ALIGN_SIZE(size) > srcBlob->size - *srcOffset - sizeof(uint32_t)) {
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    HKS_IF_TRUE_RETURN(IsAdditionOverflow(size, DEFAULT_ALIGN_MASK_SIZE), HKS_ERROR_INVALID_ARGUMENT)
+    HKS_IF_TRUE_RETURN(ALIGN_SIZE(size) > srcBlob->size - *srcOffset - sizeof(uint32_t), HKS_ERROR_BUFFER_TOO_SMALL)
 
     blob->size = size;
     *srcOffset += sizeof(blob->size);
@@ -117,18 +102,14 @@ int32_t GetBlobFromBuffer(struct HksBlob *blob, const struct HksBlob *srcBlob, u
 static int32_t GetParamSetFromBuffer(struct HksParamSet **paramSet,
     const struct HksBlob *srcBlob, uint32_t *srcOffset)
 {
-    if (*srcOffset > srcBlob->size || ((srcBlob->size - *srcOffset) < sizeof(struct HksParamSet))) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_RETURN(*srcOffset > srcBlob->size || ((srcBlob->size - *srcOffset) < sizeof(struct HksParamSet)),
+        HKS_ERROR_INVALID_ARGUMENT)
 
     *paramSet = (struct HksParamSet*)(srcBlob->data + *srcOffset);
-    if (IsAdditionOverflow((*paramSet)->paramSetSize, DEFAULT_ALIGN_MASK_SIZE)) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    if (ALIGN_SIZE((*paramSet)->paramSetSize) > (srcBlob->size - *srcOffset) ||
-        HksFreshParamSet(*paramSet, false) != HKS_SUCCESS) {
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    HKS_IF_TRUE_RETURN(IsAdditionOverflow((*paramSet)->paramSetSize, DEFAULT_ALIGN_MASK_SIZE),
+        HKS_ERROR_INVALID_ARGUMENT)
+    HKS_IF_TRUE_RETURN(ALIGN_SIZE((*paramSet)->paramSetSize) > (srcBlob->size - *srcOffset) ||
+    HksFreshParamSet(*paramSet, false) != HKS_SUCCESS, HKS_ERROR_BUFFER_TOO_SMALL)
 
     *srcOffset += ALIGN_SIZE((*paramSet)->paramSetSize);
     return HKS_SUCCESS;
@@ -152,10 +133,7 @@ static int32_t MallocBlobFromBuffer(const struct HksBlob *srcData, struct HksBlo
     int32_t ret = GetUint32FromBuffer(&blobSize, srcData, offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get blobSize failed")
 
-    if (IsInvalidLength(blobSize)) {
-        HKS_LOG_E("get blobSize failed");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(IsInvalidLength(blobSize), HKS_ERROR_INVALID_ARGUMENT, "get blobSize failed")
 
     uint8_t *blobData = (uint8_t *)HksMalloc(blobSize);
     HKS_IF_NULL_RETURN(blobData, HKS_ERROR_MALLOC_FAIL)
@@ -171,10 +149,8 @@ static int32_t MallocParamSetFromBuffer(const struct HksBlob *srcData, struct Hk
     int32_t ret = GetUint32FromBuffer(&paramSetOutSize, srcData, offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get paramSetOutSize failed")
 
-    if (IsInvalidLength(paramSetOutSize) || paramSetOutSize < sizeof(struct HksParamSet)) {
-        HKS_LOG_E("get paramSetOutSize failed");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(IsInvalidLength(paramSetOutSize) || paramSetOutSize < sizeof(struct HksParamSet),
+        HKS_ERROR_INVALID_ARGUMENT, "get paramSetOutSize failed")
 
     *paramSet = (struct HksParamSet *)HksMalloc(paramSetOutSize);
     HKS_IF_NULL_RETURN(*paramSet, HKS_ERROR_MALLOC_FAIL)
@@ -193,20 +169,16 @@ int32_t HksGenerateKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyA
     uint32_t keyOutSize = 0;
     ret = GetUint32FromBuffer(&keyOutSize, srcData, &offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyOutSize failed")
-
-    if (keyOutSize > MAX_OUT_BLOB_SIZE) {
-        HKS_LOG_E("keyOutSize out of range %" LOG_PUBLIC "u", keyOutSize);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(keyOutSize > MAX_OUT_BLOB_SIZE, HKS_ERROR_INVALID_ARGUMENT,
+        "keyOutSize out of range %" LOG_PUBLIC "u", keyOutSize)
+    HKS_IF_TRUE_RETURN(keyOutSize <= 0, HKS_SUCCESS)
 
     /* no allocate memory when keyOutSize is 0 */
-    if (keyOutSize > 0) {
-        uint8_t *keyData = (uint8_t *)HksMalloc(keyOutSize);
-        HKS_IF_NULL_RETURN(keyData, HKS_ERROR_MALLOC_FAIL)
+    uint8_t *keyData = (uint8_t *)HksMalloc(keyOutSize);
+    HKS_IF_NULL_RETURN(keyData, HKS_ERROR_MALLOC_FAIL)
 
-        keyOut->data = keyData;
-        keyOut->size = keyOutSize;
-    }
+    keyOut->data = keyData;
+    keyOut->size = keyOutSize;
 
     return HKS_SUCCESS;
 }
@@ -242,10 +214,7 @@ int32_t HksDeleteKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAli
     uint32_t offset = 0;
     int32_t ret = GetBlobFromBuffer(keyAlias, srcData, &offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyAlias failed")
-
-    if (offset == srcData->size) {
-        return HKS_SUCCESS;
-    }
+    HKS_IF_TRUE_RETURN(offset == srcData->size, HKS_SUCCESS)
 
     ret = GetParamSetFromBuffer(paramSet, srcData, &offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get paramSet failed")
@@ -262,10 +231,7 @@ int32_t HksExportPublicKeyUnpack(const struct HksBlob *srcData, struct HksBlob *
 
     ret = MallocBlobFromBuffer(srcData, key, &offset);
     HKS_IF_NOT_SUCC_LOGE(ret, "malloc key data failed")
-
-    if (offset == srcData->size) {
-        return HKS_SUCCESS;
-    }
+    HKS_IF_TRUE_RETURN(offset == srcData->size, HKS_SUCCESS)
 
     ret = GetParamSetFromBuffer(paramSet, srcData, &offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get paramSet failed")
@@ -281,10 +247,7 @@ int32_t HksGetKeyParamSetUnpack(const struct HksBlob *srcData, struct HksBlob *k
 
     ret = MallocParamSetFromBuffer(srcData, paramSetOut, &offset);
     HKS_IF_NOT_SUCC_LOGE(ret, "malloc paramSet failed")
-
-    if (offset == srcData->size) {
-        return HKS_SUCCESS;
-    }
+    HKS_IF_TRUE_RETURN(offset == srcData->size, HKS_SUCCESS)
 
     ret = GetParamSetFromBuffer(paramSetIn, srcData, &offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get paramSet failed")
@@ -296,10 +259,7 @@ int32_t HksKeyExistUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlia
     uint32_t offset = 0;
     int32_t ret = GetBlobFromBuffer(keyAlias, srcData, &offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyAlias failed")
-
-    if (offset == srcData->size) {
-        return HKS_SUCCESS;
-    }
+    HKS_IF_TRUE_RETURN(offset == srcData->size, HKS_SUCCESS)
 
     ret = GetParamSetFromBuffer(paramSet, srcData, &offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get paramSet failed")
@@ -419,11 +379,10 @@ static int32_t KeyInfoListInit(struct HksKeyInfo *keyInfoList, uint32_t listCoun
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "malloc keyInfoList paramSetSize failed")
     }
 
-    if (ret != HKS_SUCCESS) {
-        for (uint32_t j = 0; j <= i; ++j) {
-            HKS_FREE_BLOB(keyInfoList[j].alias);
-            HKS_FREE(keyInfoList[j].paramSet);
-        }
+    HKS_IF_TRUE_RETURN(ret == HKS_SUCCESS, ret)
+    for (uint32_t j = 0; j <= i; ++j) {
+        HKS_FREE_BLOB(keyInfoList[j].alias);
+        HKS_FREE(keyInfoList[j].paramSet);
     }
     return ret;
 }
@@ -438,16 +397,12 @@ int32_t HksGetKeyInfoListUnpack(const struct HksBlob *srcData, struct HksParamSe
     enum {
         HKS_GET_KEY_LIST_MAX_COUNT = 2048U,
     };
-    if (*listCount == 0 || *listCount > HKS_GET_KEY_LIST_MAX_COUNT) {
-        HKS_LOG_E("invalid listCount %" LOG_PUBLIC "u", *listCount);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(*listCount == 0 || *listCount > HKS_GET_KEY_LIST_MAX_COUNT, HKS_ERROR_INSUFFICIENT_MEMORY,
+        "invalid listCount %" LOG_PUBLIC "u", *listCount)
 
     uint32_t keyInfoListSize = (*listCount) * sizeof(struct HksKeyInfo);
-    if (IsInvalidLength(keyInfoListSize)) {
-        HKS_LOG_E("keyInfoListSize too big %" LOG_PUBLIC "u", keyInfoListSize);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(IsInvalidLength(keyInfoListSize), HKS_ERROR_INSUFFICIENT_MEMORY,
+        "keyInfoListSize too big %" LOG_PUBLIC "u", keyInfoListSize)
 
     *keyInfoList = (struct HksKeyInfo *)HksMalloc(keyInfoListSize);
     HKS_IF_NULL_LOGE_RETURN(*keyInfoList, HKS_ERROR_MALLOC_FAIL, "*keyInfoList is NULL")
@@ -459,10 +414,7 @@ int32_t HksGetKeyInfoListUnpack(const struct HksBlob *srcData, struct HksParamSe
         HKS_LOG_E("KeyInfoListInit failed");
         HKS_FREE(*keyInfoList);
     }
-
-    if (offset == srcData->size) {
-        return HKS_SUCCESS;
-    }
+    HKS_IF_TRUE_RETURN(offset == srcData->size, HKS_SUCCESS)
 
     ret = GetParamSetFromBuffer(paramSet, srcData, &offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get paramSet failed")
@@ -502,15 +454,13 @@ int32_t HksCertificateChainUnpack(const struct HksBlob *srcData, struct HksBlob 
 
 static int32_t GetNullBlobParam(const struct HksParamSet *paramSet, struct HksParamOut *outParams)
 {
-    if (GetTagType(outParams->tag) != HKS_TAG_TYPE_BYTES) {
-        HKS_LOG_E("get param tag[0x%" LOG_PUBLIC "x] from ipc buffer failed", outParams->tag);
-        return HKS_ERROR_PARAM_NOT_EXIST;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(GetTagType(outParams->tag) != HKS_TAG_TYPE_BYTES, HKS_ERROR_PARAM_NOT_EXIST,
+        "get param tag[0x%" LOG_PUBLIC "x] from ipc buffer failed", outParams->tag)
 
     struct HksParam *param = NULL;
     int32_t ret = HksGetParam(paramSet, outParams->tag + HKS_PARAM_BUFFER_NULL_INTERVAL, &param);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get param tag[0x%" LOG_PUBLIC "x] from ipc buffer failed",
-            outParams->tag + HKS_PARAM_BUFFER_NULL_INTERVAL)
+        outParams->tag + HKS_PARAM_BUFFER_NULL_INTERVAL)
 
     outParams->blob->data = NULL;
     outParams->blob->size = 0;
@@ -580,13 +530,9 @@ static int32_t HksCopyBlobsAndCntToBlob(const struct HksBlob *srcBlob, uint32_t 
 
 int32_t HksListAliasesPackFromService(const struct HksKeyAliasSet *aliasSet, struct HksBlob *destData)
 {
-    if (destData == NULL || destData->size != 0) {
-        HKS_LOG_E("HksListAliasesPackFromService invalid param");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    if (aliasSet == NULL || aliasSet->aliasesCnt == 0) {
-        return HKS_SUCCESS;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(destData == NULL || destData->size != 0, HKS_ERROR_INVALID_ARGUMENT,
+        "HksListAliasesPackFromService invalid param")
+    HKS_IF_TRUE_RETURN(aliasSet == NULL || aliasSet->aliasesCnt == 0, HKS_SUCCESS)
 
     destData->size = sizeof(aliasSet->aliasesCnt);
     for (uint32_t i = 0; i < aliasSet->aliasesCnt; ++i) {

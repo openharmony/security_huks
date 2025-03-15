@@ -332,15 +332,14 @@ static const EVP_CIPHER *GetAesCipherType(uint32_t keySize, uint32_t mode)
 
 static const EVP_CIPHER *GetAeadCipherType(uint32_t keySize, uint32_t mode)
 {
-    if (mode == HKS_MODE_GCM) {
-        return GetGcmCipherType(keySize);
+    switch (mode) {
+        case HKS_MODE_GCM:
+            return GetGcmCipherType(keySize);
+        case HKS_MODE_CCM:
+            return GetCcmCipherType(keySize);
+        default:
+            return NULL;
     }
-
-    if (mode == HKS_MODE_CCM) {
-        return GetCcmCipherType(keySize);
-    }
-
-    return NULL;
 }
 
 #if defined(HKS_SUPPORT_AES_GCM) || defined(HKS_SUPPORT_AES_CCM)
@@ -773,16 +772,10 @@ static int32_t OpensslAesAeadCipherUpdate(void *cryptoCtx, const struct HksUsage
     int32_t outLen = output->size;
 
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)aesCtx->append;
-    if (ctx == NULL) {
-        HKS_LOG_E("EVP_CIPHER_CTX is null!");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "EVP_CIPHER_CTX is null!")
 
     struct HksAeadParam *aeadParam = (struct HksAeadParam *)usageSpec->algParam;
-    if (aeadParam == NULL) {
-        HKS_LOG_E("aeadParam is null!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(aeadParam, HKS_ERROR_INVALID_ARGUMENT, "aeadParam is null!")
 
     if (aesCtx->mode == HKS_MODE_CCM) {
         if (EVP_CipherUpdate(ctx, NULL, &outLen, NULL, input->size) != HKS_OPENSSL_SUCCESS) {
@@ -825,10 +818,7 @@ static int32_t OpensslAesAeadCipherFinal(void **cryptoCtx, const struct HksUsage
         int32_t outLen = 0;
         if (input->size != 0) {
             ret = OpensslAesAeadCipherUpdate(*cryptoCtx, usageSpec, input, output);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("cipher final update input data failed");
-                break;
-            }
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "cipher final update input data failed")
         }
 
         // for gcm mode in decrypt process need set aead tag before EVP_CipherFinal_ex

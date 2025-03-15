@@ -86,10 +86,8 @@ int32_t SystemApiPermissionCheck(int callerUserId)
 {
     int32_t ret = CheckTokenType();
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CheckTokenType fail %" LOG_PUBLIC "d", ret)
-    if (callerUserId < 0 || callerUserId >= HKS_ROOT_USER_UPPERBOUND) {
-        HKS_LOG_E("invalid callerUserId %" LOG_PUBLIC "d", callerUserId);
-        return HKS_ERROR_NO_PERMISSION;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(callerUserId < 0 || callerUserId >= HKS_ROOT_USER_UPPERBOUND, HKS_ERROR_NO_PERMISSION,
+        "invalid callerUserId %" LOG_PUBLIC "d", callerUserId)
     return HKS_SUCCESS;
 }
 

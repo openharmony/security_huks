@@ -133,10 +133,8 @@ int32_t HksOpensslHashUpdate(void *cryptoCtx, const struct HksBlob *msg)
 
 int32_t HksOpensslHashFinal(void **cryptoCtx, const struct HksBlob *msg, struct HksBlob *hash)
 {
-    if (cryptoCtx == NULL || *cryptoCtx == NULL) {
-        HKS_LOG_E("Invalid param cryptoCtx!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(cryptoCtx == NULL || *cryptoCtx == NULL, HKS_ERROR_INVALID_ARGUMENT,
+        "Invalid param cryptoCtx!")
 
     if (msg == NULL) {
         HKS_LOG_E("Invalid param msg!");
@@ -177,10 +175,7 @@ int32_t HksOpensslHashFinal(void **cryptoCtx, const struct HksBlob *msg, struct 
 
 void HksOpensslHashFreeCtx(void **cryptoCtx)
 {
-    if (cryptoCtx == NULL || *cryptoCtx == NULL) {
-        HKS_LOG_E("Openssl Hash freeCtx param error");
-        return;
-    }
+    HKS_IF_TRUE_LOGE_RETURN_VOID(cryptoCtx == NULL || *cryptoCtx == NULL, "Openssl Hash freeCtx param error")
 
     if (*cryptoCtx != NULL) {
         EVP_MD_CTX_free((EVP_MD_CTX *)*cryptoCtx);

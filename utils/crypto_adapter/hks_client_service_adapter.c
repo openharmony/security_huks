@@ -207,18 +207,14 @@ static int32_t Sm2ToX509PublicKey(
 static int32_t GetDsaPubKeyParam(
     const struct HksBlob *publicKey, struct HksBlob *y, struct HksBlob *p, struct HksBlob *q, struct HksBlob *g)
 {
-    if (publicKey->size < sizeof(struct KeyMaterialDsa)) {
-        HKS_LOG_E("Invaild dsa key material size!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(publicKey->size < sizeof(struct KeyMaterialDsa), HKS_ERROR_INVALID_ARGUMENT,
+        "Invaild dsa key material size!")
 
     struct KeyMaterialDsa *keyMaterial = (struct KeyMaterialDsa *)publicKey->data;
     uint32_t keyMaterialSize = sizeof(struct KeyMaterialDsa) + keyMaterial->xSize + keyMaterial->ySize +
         keyMaterial->pSize + keyMaterial->qSize + keyMaterial->gSize;
-    if (publicKey->size < keyMaterialSize) {
-        HKS_LOG_E("translate to x509 public key invalid size");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(publicKey->size < keyMaterialSize, HKS_ERROR_INVALID_ARGUMENT,
+        "translate to x509 public key invalid size")
     uint32_t offset = sizeof(struct KeyMaterialDsa) + keyMaterial->xSize;
     y->size = keyMaterial->ySize;
     y->data = publicKey->data + offset;
@@ -363,10 +359,8 @@ static int32_t DhToX509PublicKey(
 #if defined(HKS_SUPPORT_X25519_C) || defined(HKS_SUPPORT_ED25519_C)
 static int32_t Curve25519ToX509PublicKey(const struct HksBlob *publicKey, struct HksBlob *x509Key)
 {
-    if (publicKey->size != HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)) {
-        HKS_LOG_E("Invalid public key size! key size = 0x%" LOG_PUBLIC "X", publicKey->size);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(publicKey->size != HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256), HKS_ERROR_INVALID_ARGUMENT,
+        "Invalid public key size! key size = 0x%" LOG_PUBLIC "X", publicKey->size)
 
     x509Key->data = (uint8_t *)HksMalloc(publicKey->size);
     HKS_IF_NULL_LOGE_RETURN(x509Key->data, HKS_ERROR_MALLOC_FAIL,
@@ -429,17 +423,13 @@ int32_t TranslateToX509PublicKey(const struct HksBlob *publicKey, struct HksBlob
 
     struct HksPubKeyInfo *publicKeyInfo = (struct HksPubKeyInfo *)publicKey->data;
     uint32_t offset = sizeof(struct HksPubKeyInfo);
-    if ((publicKey->size - offset) < publicKeyInfo->nOrXSize) {
-        HKS_LOG_E("translate to x509 public key invalid nOrXSize size");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(publicKey->size - offset < publicKeyInfo->nOrXSize, HKS_ERROR_INVALID_ARGUMENT,
+        "translate to x509 public key invalid nOrXSize size")
 
     struct HksBlob material1 = { publicKeyInfo->nOrXSize, publicKey->data + offset };
     offset += publicKeyInfo->nOrXSize;
-    if ((publicKey->size - offset) < publicKeyInfo->eOrYSize) {
-        HKS_LOG_E("translate to x509 public key invalid eOrYSize size");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(publicKey->size - offset < publicKeyInfo->eOrYSize, HKS_ERROR_INVALID_ARGUMENT,
+        "translate to x509 public key invalid eOrYSize size")
 
     struct HksBlob material2 = { publicKeyInfo->eOrYSize, publicKey->data + offset };
     return TranslateToX509PublicKeySwitchAlg(publicKeyInfo, &material1, &material2, publicKey, x509Key);
@@ -561,9 +551,7 @@ static int32_t EvpPkeyToHksPubKeyInfo(
     int pubYRet = GetBnBinpadFromPkey(pkey, OSSL_PKEY_PARAM_EC_PUB_Y, &pubYBlob);
     int ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     do {
-        if (pubXRet != HKS_SUCCESS || pubYRet != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_TRUE_BREAK(pubXRet != HKS_SUCCESS || pubYRet != HKS_SUCCESS)
         // NOTICE! x size and y size are smaller than or equal to HKS_KEY_BYTES(keyLen)
         // e.g. assuming that HKS_KEY_BYTES(keyLen) is 32, x size might be 32, 31, 30, etc.
         uint32_t rawInfoLen = sizeof(struct HksPubKeyInfo) + pubXBlob.size + pubYBlob.size;
@@ -606,14 +594,10 @@ static int32_t X509PublicKeyToSm2(const uint32_t alg, EVP_PKEY *pkey, struct Hks
         HKS_LOG_E("EVP_PKEY_get_bits failed keyLen = %" LOG_PUBLIC "d", keyLen);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
-    if (keyLen != HKS_SM2_KEY_SIZE_256) {
-        HKS_LOG_E("not supported sm2 keyLen %" LOG_PUBLIC "d", keyLen);
-        return HKS_ERROR_NOT_SUPPORTED;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(keyLen != HKS_SM2_KEY_SIZE_256, HKS_ERROR_NOT_SUPPORTED,
+        "not supported sm2 keyLen %" LOG_PUBLIC "d", keyLen)
     int ret = EvpPkeyToHksPubKeyInfo(alg, (uint32_t)keyLen, pkey, sm2PublicKey);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("EvpPkeyToHksPubKeyInfo failed ret = %" LOG_PUBLIC "d", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "EvpPkeyToHksPubKeyInfo failed ret = %" LOG_PUBLIC "d", ret)
     return ret;
 }
 #endif
@@ -702,10 +686,8 @@ static int32_t X509PublicKeyToDh(EVP_PKEY *pkey, struct HksBlob *dhPublicKey)
         "DH_get0_pub_key error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()))
 
     uint32_t pubKeySize = (uint32_t)BN_num_bytes(pubKey);
-    if (pubKeySize > UINT32_MAX - sizeof(struct KeyMaterialDh)) {
-        HKS_LOG_E("the size is too long, failed");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(pubKeySize > UINT32_MAX - sizeof(struct KeyMaterialDh), HKS_ERROR_BAD_STATE,
+        "the size is too long, failed")
 
     uint32_t totalSize = sizeof(struct KeyMaterialDh) + pubKeySize;
     uint8_t *keyBuffer = (uint8_t *)HksMalloc(totalSize);
