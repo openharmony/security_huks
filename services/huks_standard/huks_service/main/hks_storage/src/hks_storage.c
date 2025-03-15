@@ -856,9 +856,9 @@ int32_t HksStoreRenameKeyAlias(const struct HksStoreFileInfo *oldFileInfo,
             }
         }
 #endif
-        HKS_IF_TRUE_RETURN(isCopy, ret)
+        HKS_IF_TRUE_BREAK(isCopy)
         ret = HksStoreDeleteKeyBlob(oldFileInfo, oldMaterial);
-        HKS_IF_TRUE_RETURN(ret == HKS_SUCCESS, ret)
+        HKS_IF_TRUE_BREAK(ret == HKS_SUCCESS)
 
         HKS_LOG_I("Delete the old key failed, need to delete the new key");
         ret = HksStoreDeleteKeyBlob(newFileInfo, newMaterial);

@@ -1513,6 +1513,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest025, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
 }
 
+#ifndef HKS_UNTRUSTED_RUNNING_ENV
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest026, TestSize.Level0)
 {
     HKS_LOG_E("enter HksAttestKeyNonIdsTest026");
@@ -1535,10 +1536,11 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest026, TestSize.Level0)
     };
 
     ret = HksValidateCertChain(&certChain, paramSetOut);
-    EXPECT_EQ(ret, 0) << "HksValidateCertChain, ret = " << ret;
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksValidateCertChain, ret = " << ret;
     HksFreeParamSet(&paramSetOut);
     HKS_LOG_E("leave HksAttestKeyNonIdsTest026");
 }
+#endif
 
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest027, TestSize.Level0)
 {
@@ -1560,7 +1562,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest027, TestSize.Level0)
     };
 
     int32_t ret = HksValidateCertChain(&certChain, paramSetOut);
-    EXPECT_EQ(ret, -38) << "HksValidateCertChain failed, ret = " << ret;
+    EXPECT_EQ(ret, HKS_ERROR_VERIFICATION_FAILED) << "HksValidateCertChain failed, ret = " << ret;
     HksFreeParamSet(&paramSetOut);
     HKS_LOG_I("leave HksAttestKeyNonIdsTest027");
 }
