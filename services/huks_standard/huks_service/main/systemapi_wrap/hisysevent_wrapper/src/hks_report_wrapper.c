@@ -45,39 +45,27 @@ static const struct HksBlob g_tagAttestationMode = {
 
 static int32_t AppendParamToExtra(const struct HksParam *paramIn, char *extraOut, uint32_t *index)
 {
-    switch (GetTagType(paramIn->tag)) {
-        case HKS_TAG_TYPE_UINT: {
-            int32_t num = snprintf_s(extraOut + *index, EXTRA_DATA_SIZE - *index, EXTRA_DATA_SIZE - *index - 1, "%u",
-                paramIn->uint32Param);
-            if (num < 0) {
-                HKS_LOG_E("snprintf_s failed!");
-                return HKS_ERROR_BAD_STATE;
-            }
-            *index = *index + num;
-            break;
-        }
-        default:
-            break;
+    HKS_IF_TRUE_RETURN(GetTagType(paramIn->tag) != HKS_TAG_TYPE_UINT, HKS_SUCCESS)
+    int32_t num = snprintf_s(extraOut + *index, EXTRA_DATA_SIZE - *index, EXTRA_DATA_SIZE - *index - 1, "%u",
+        paramIn->uint32Param);
+    if (num < 0) {
+        HKS_LOG_E("snprintf_s failed!");
+        return HKS_ERROR_BAD_STATE;
     }
+    *index = *index + num;
     return HKS_SUCCESS;
 }
 
 static bool ISExceedTheLimitSize(const uint32_t val)
 {
-    if (val > EXTRA_DATA_SIZE) {
-        HKS_LOG_E("no enough space!");
-        return true;
-    }
-
+    HKS_IF_TRUE_LOGE_RETURN(val > EXTRA_DATA_SIZE, true, "no enough space!")
     return false;
 }
 
 static int32_t AppendToExtra(const struct HksBlob *tag, const struct HksParam *paramIn, char *extraOut,
     uint32_t *index)
 {
-    if (ISExceedTheLimitSize(*index)) {
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_TRUE_RETURN(ISExceedTheLimitSize(*index), HKS_ERROR_BAD_STATE)
     if (memcpy_s(extraOut + *index, EXTRA_DATA_SIZE - *index, tag->data, tag->size) != EOK) {
         HKS_LOG_E("copy extra tag failed!");
         return HKS_ERROR_INSUFFICIENT_MEMORY;
@@ -85,25 +73,19 @@ static int32_t AppendToExtra(const struct HksBlob *tag, const struct HksParam *p
     *index += tag->size;
 
     char split = ':';
-    if (ISExceedTheLimitSize(*index)) {
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_TRUE_RETURN(ISExceedTheLimitSize(*index), HKS_ERROR_BAD_STATE)
     if (memcpy_s(extraOut + *index, EXTRA_DATA_SIZE - *index, &split, sizeof(char)) != EOK) {
         HKS_LOG_E("copy split failed!");
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *index += sizeof(char);
 
-    if (ISExceedTheLimitSize(*index)) {
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_TRUE_RETURN(ISExceedTheLimitSize(*index), HKS_ERROR_BAD_STATE)
     int32_t ret = AppendParamToExtra(paramIn, extraOut, index);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append param to extra failed!")
 
     split = ';';
-    if (ISExceedTheLimitSize(*index)) {
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_TRUE_RETURN(ISExceedTheLimitSize(*index), HKS_ERROR_BAD_STATE)
     if (memcpy_s(extraOut + *index, EXTRA_DATA_SIZE - *index, &split, sizeof(char)) != EOK) {
         HKS_LOG_E("copy split failed!");
         return HKS_ERROR_INSUFFICIENT_MEMORY;

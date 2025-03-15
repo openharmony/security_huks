@@ -110,13 +110,10 @@ int32_t ConstructPlainName(const struct HksBlob *blob, char *targetName, uint32_
     }
 
     uint32_t count = 0;
-    if (nameLen <= 1) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_RETURN(nameLen <= 1, HKS_ERROR_INVALID_ARGUMENT)
     for (uint32_t i = 0; i < blob->size; ++i) {
-        if (count >= (nameLen - 1)) { /* nameLen can be guaranteed to be greater than 1 */
-            return HKS_ERROR_INSUFFICIENT_DATA;
-        }
+        /* nameLen can be guaranteed to be greater than 1 */
+        HKS_IF_TRUE_RETURN(count >= nameLen - 1, HKS_ERROR_INSUFFICIENT_DATA)
         targetName[count++] = blob->data[i];
 
 #ifdef HKS_SUPPORT_POSIX
@@ -131,9 +128,7 @@ int32_t ConstructPlainName(const struct HksBlob *blob, char *targetName, uint32_
 int32_t ConstructName(const struct HksBlob *blob, char *targetName, uint32_t nameLen)
 {
     uint32_t count = 0;
-    if (nameLen <= 1) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_RETURN(nameLen <= 1, HKS_ERROR_INVALID_ARGUMENT)
 
     for (uint32_t i = 0; i < blob->size; ++i) {
         if (count >= (nameLen - 1)) { /* nameLen can be guaranteed to be greater than 1 */
@@ -206,14 +201,10 @@ int32_t ConstructBlob(const char *src, struct HksBlob *blob)
 
 int32_t GetPath(const char *path, const char *name, char *targetPath, uint32_t pathLen, uint32_t bakFlag)
 {
-    if (strncpy_s(targetPath, pathLen, path, strlen(path)) != EOK) {
-        HKS_LOG_E("strncpy path failed");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_EOK_LOGE_RETURN(strncpy_s(targetPath, pathLen, path, strlen(path)), HKS_ERROR_BAD_STATE,
+        "strncpy path failed")
 
-    if (strlen(targetPath) <= 0) {
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
+    HKS_IF_TRUE_RETURN(strlen(targetPath) <= 0, HKS_ERROR_INTERNAL_ERROR)
 
     if (targetPath[strlen(targetPath) - 1] != '/') {
         if (strncat_s(targetPath, pathLen, "/", strlen("/")) != EOK) {
@@ -354,10 +345,8 @@ void FileNameListFree(struct HksFileEntry **fileNameList, uint32_t keyCount)
 
 int32_t FileNameListInit(struct HksFileEntry **fileNameList, uint32_t keyCount)
 {
-    if (((keyCount > UINT32_MAX / (sizeof(struct HksFileEntry)))) || (keyCount == 0)) {
-        HKS_LOG_E("keyCount too big or is zero.");
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(keyCount > UINT32_MAX / sizeof(struct HksFileEntry) || keyCount == 0,
+        HKS_ERROR_BUFFER_TOO_SMALL, "keyCount too big or is zero.")
 
     uint32_t totalSize = keyCount * sizeof(struct HksFileEntry);
     *fileNameList = (struct HksFileEntry *)HksMalloc(totalSize);
@@ -381,16 +370,12 @@ static int32_t CheckIfBothTagExist(const struct HksParam *storageLevel,
     const struct HksParam *specificUserId)
 {
     if (storageLevel->uint32Param == HKS_AUTH_STORAGE_LEVEL_DE) {
-        if (specificUserId->int32Param < 0) {
-            HKS_LOG_E("invalid specificUserId, specificUserId is %" LOG_PUBLIC "d.", specificUserId->int32Param);
-            return HKS_ERROR_INVALID_ARGUMENT;
-        }
+        HKS_IF_TRUE_LOGE_RETURN(specificUserId->int32Param < 0, HKS_ERROR_INVALID_ARGUMENT,
+            "invalid specificUserId, specificUserId is %" LOG_PUBLIC "d.", specificUserId->int32Param)
     } else {
-        if (specificUserId->int32Param < HKS_ROOT_USER_UPPERBOUND) {
-            HKS_LOG_E("invalid specificUserId when tag storage level is CE or ECE, specificUserId is %" LOG_PUBLIC "d",
-                specificUserId->int32Param);
-            return HKS_ERROR_INVALID_ARGUMENT;
-        }
+        HKS_IF_TRUE_LOGE_RETURN(specificUserId->int32Param < HKS_ROOT_USER_UPPERBOUND, HKS_ERROR_INVALID_ARGUMENT,
+            "invalid specificUserId when tag storage level is CE or ECE, specificUserId is %" LOG_PUBLIC "d",
+            specificUserId->int32Param)
     }
     return HKS_SUCCESS;
 }
@@ -416,9 +401,7 @@ int32_t CheckSpecificUserIdAndStorageLevel(const struct HksProcessInfo *processI
     const struct HksParamSet *paramSet)
 {
 #ifdef L2_STANDARD
-    if (paramSet == NULL) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_RETURN(paramSet, HKS_ERROR_INVALID_ARGUMENT)
     int32_t ret = HKS_SUCCESS;
     struct HksParam *storageLevel = NULL;
     struct HksParam *specificUserId = NULL;
@@ -455,16 +438,12 @@ int32_t HksMakeFullDir(const char *path)
                     continue;
                 }
                 ret = HksMakeDir(curPath);
-                if (ret != HKS_SUCCESS && ret != HKS_ERROR_ALREADY_EXISTS) {
-                    HKS_LOG_E("mkdir %" LOG_PUBLIC "s failed. ret = %" LOG_PUBLIC "d", curPath, ret);
-                    break;
-                }
+                HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS && ret != HKS_ERROR_ALREADY_EXISTS,
+                    "mkdir %" LOG_PUBLIC "s failed. ret = %" LOG_PUBLIC "d", curPath, ret)
                 ret = HKS_SUCCESS;
             }
         }
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
         ret = HksMakeDir(path);
         if (ret == HKS_ERROR_ALREADY_EXISTS) {
             ret = HKS_SUCCESS;
@@ -581,10 +560,8 @@ static int32_t GetPathInfo(const struct HksStoreMaterial *material, const char *
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "make full dir failed. ret = %" LOG_PUBLIC"d.", ret)
     }
     if (material->keyAliasPath != NULL) {
-        if (strstr(material->keyAliasPath, "../") != NULL) {
-            HKS_LOG_E("invalid filePath, ../ is included in file path");
-            return HKS_ERROR_INVALID_ARGUMENT;
-        }
+        HKS_IF_TRUE_LOGE_RETURN(strstr(material->keyAliasPath, "../") != NULL, HKS_ERROR_INVALID_ARGUMENT,
+            "invalid filePath, ../ is included in file path")
         if (memcpy_s(fileInfoPath->fileName, HKS_MAX_FILE_NAME_LEN,
             material->keyAliasPath, strlen(material->keyAliasPath)) != EOK) {
             ret = HKS_ERROR_INSUFFICIENT_MEMORY;

@@ -85,12 +85,7 @@ static int32_t RsaCheckKeyMaterial(const struct HksBlob *key)
 
 int32_t InitRsaKeyBuf(const struct KeyMaterialRsa *keyMaterial, struct HksBlob *bufBlob)
 {
-    uint32_t maxSize;
-    if (keyMaterial->nSize >= keyMaterial->eSize) {
-        maxSize = keyMaterial->nSize;
-    } else {
-        maxSize = keyMaterial->eSize;
-    }
+    uint32_t maxSize = keyMaterial->nSize >= keyMaterial->eSize ? keyMaterial->nSize : keyMaterial->eSize;
 
     if (maxSize < keyMaterial->dSize) {
         maxSize = keyMaterial->dSize;
@@ -537,15 +532,11 @@ static EVP_PKEY_CTX *InitRsaCtx(const struct HksBlob *key, const struct HksUsage
         } else {
             ret = EVP_PKEY_verify_init(ctx);
         }
-        if (ret != HKS_OPENSSL_SUCCESS) {
-            break;
-        }
+        HKS_IF_TRUE_BREAK(ret != HKS_OPENSSL_SUCCESS)
 
         ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
         HKS_IF_NOT_SUCC_BREAK(SetRsaPadding(ctx, usageSpec))
-        if (EVP_PKEY_CTX_set_signature_md(ctx, opensslAlg) != HKS_OPENSSL_SUCCESS) {
-            break;
-        }
+        HKS_IF_TRUE_BREAK(EVP_PKEY_CTX_set_signature_md(ctx, opensslAlg) != HKS_OPENSSL_SUCCESS)
         ret = HKS_SUCCESS;
     } while (0);
 

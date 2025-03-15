@@ -35,19 +35,16 @@
 
 static int32_t Check3DesKeySize(const struct HksBlob *key)
 {
-    if (key->size != HKS_KEY_BYTES(HKS_3DES_KEY_SIZE_128) && key->size != HKS_KEY_BYTES(HKS_3DES_KEY_SIZE_192)) {
-        return HKS_ERROR_INVALID_KEY_SIZE;
-    }
-
+    HKS_IF_TRUE_RETURN(key->size != HKS_KEY_BYTES(HKS_3DES_KEY_SIZE_128) &&
+        key->size != HKS_KEY_BYTES(HKS_3DES_KEY_SIZE_192), HKS_ERROR_INVALID_KEY_SIZE)
     return HKS_SUCCESS;
 }
 
 #ifdef HKS_SUPPORT_3DES_GENERATE_KEY
 int32_t HksOpenssl3DesGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
 {
-    if (spec->keyLen != HKS_3DES_KEY_SIZE_128 && spec->keyLen != HKS_3DES_KEY_SIZE_192) {
-        return HKS_ERROR_INVALID_KEY_SIZE;
-    }
+    HKS_IF_TRUE_RETURN(spec->keyLen != HKS_3DES_KEY_SIZE_128 && spec->keyLen != HKS_3DES_KEY_SIZE_192,
+        HKS_ERROR_INVALID_KEY_SIZE)
 
     const uint32_t keyByteLen = spec->keyLen / HKS_BITS_PER_BYTE;
     uint8_t *outKey = (uint8_t *)HksMalloc(keyByteLen);
@@ -120,10 +117,8 @@ static int32_t Des3CryptFinal(void **cryptoCtx, const uint8_t padding, const str
 int32_t HksOpenssl3DesCryptoInit(void **cryptoCtx, const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const bool encrypt)
 {
-    if (Check3DesKeySize(key) != HKS_SUCCESS || cryptoCtx == NULL || usageSpec == NULL) {
-        HKS_LOG_E("Invalid 3des keySize = 0x%" LOG_PUBLIC "X", key->size);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(Check3DesKeySize(key) != HKS_SUCCESS || cryptoCtx == NULL || usageSpec == NULL,
+        HKS_ERROR_INVALID_ARGUMENT, "Invalid 3des keySize = 0x%" LOG_PUBLIC "X", key->size)
 
     switch (usageSpec->mode) {
 #if defined(HKS_SUPPORT_3DES_CBC_NOPADDING)
@@ -183,10 +178,7 @@ int32_t HksOpenssl3DesCryptoFinal(void **cryptoCtx, const struct HksBlob *messag
 
 void HksOpenssl3DesHalFreeCtx(void **cryptCtx)
 {
-    if (cryptCtx == NULL || *cryptCtx == NULL) {
-        HKS_LOG_E("FreeCtx param context null");
-        return;
-    }
+    HKS_IF_TRUE_LOGE_RETURN_VOID(cryptCtx == NULL || *cryptCtx == NULL, "FreeCtx param context null")
     HKS_FREE(*cryptCtx);
 }
 #endif /* HKS_SUPPORT_3DES_C */

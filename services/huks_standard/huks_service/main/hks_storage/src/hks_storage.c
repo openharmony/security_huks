@@ -91,10 +91,8 @@ static int32_t HksStorageReadFile(
 static int32_t CleanFile(const char *path, const char *fileName)
 {
     uint32_t size = HksFileSize(path, fileName);
-    if (size == 0 || size > HKS_MAX_FILE_SIZE) {
-        HKS_LOG_E("get file size failed, ret = %" LOG_PUBLIC "u.", size);
-        return HKS_ERROR_FILE_SIZE_FAIL;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(size == 0 || size > HKS_MAX_FILE_SIZE, HKS_ERROR_FILE_SIZE_FAIL,
+        "get file size failed, ret = %" LOG_PUBLIC "u.", size)
 
     int32_t ret = HKS_SUCCESS;
     uint8_t *buf;
@@ -133,9 +131,7 @@ static int32_t HksStorageRemoveFile(const char *path, const char *fileName)
     int32_t ret;
 #ifdef HKS_ENABLE_CLEAN_FILE
     ret = CleanFile(path, fileName);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("clean file failed!");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "clean file failed!")
 #endif
 #ifdef HKS_SUPPORT_THREAD
     HksStorageFileLock *lock = CreateStorageFileLock(path, fileName);
@@ -153,10 +149,7 @@ static int32_t CopyKeyBlobFromSrc(const char *srcPath, const char *srcFileName,
     const char *destPath, const char *destFileName)
 {
     uint32_t size = HksFileSize(srcPath, srcFileName);
-    if (size == 0) {
-        HKS_LOG_E("get file size failed, ret = %" LOG_PUBLIC "u.", size);
-        return HKS_ERROR_FILE_SIZE_FAIL;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(size == 0, HKS_ERROR_FILE_SIZE_FAIL, "get file size failed, ret = %" LOG_PUBLIC "u.", size)
 
     uint8_t *buffer = (uint8_t *)HksMalloc(size);
     HKS_IF_NULL_RETURN(buffer, HKS_ERROR_MALLOC_FAIL)
@@ -169,10 +162,8 @@ static int32_t CopyKeyBlobFromSrc(const char *srcPath, const char *srcFileName,
     do {
         ret = HksStorageReadFile(srcPath, srcFileName, 0, &blob, &size);
         if (ret != HKS_SUCCESS) {
-            if (ret == HKS_ERROR_NO_PERMISSION) {
-                HKS_LOG_E("Check Permission failed, ret = %" LOG_PUBLIC "d.", ret);
-                break;
-            }
+            HKS_IF_TRUE_LOGE_BREAK(ret == HKS_ERROR_NO_PERMISSION,
+                "Check Permission failed, ret = %" LOG_PUBLIC "d.", ret)
             HKS_LOG_E("read file failed, ret = %" LOG_PUBLIC "d.", ret);
             ret = HKS_ERROR_READ_FILE_FAIL;
             break;
@@ -189,23 +180,14 @@ static int32_t CopyKeyBlobFromSrc(const char *srcPath, const char *srcFileName,
 static int32_t GetKeyBlobFromFile(const char *path, const char *fileName, struct HksBlob *keyBlob)
 {
     uint32_t size = HksFileSize(path, fileName);
-    if (size == 0) {
-        return HKS_ERROR_FILE_SIZE_FAIL;
-    }
-
-    if (keyBlob->size < size) {
-        return HKS_ERROR_INSUFFICIENT_DATA;
-    }
+    HKS_IF_TRUE_RETURN(size == 0, HKS_ERROR_FILE_SIZE_FAIL)
+    HKS_IF_TRUE_RETURN(keyBlob->size < size, HKS_ERROR_INSUFFICIENT_DATA)
 
     int32_t ret = HksStorageReadFile(path, fileName, 0, keyBlob, &size);
-    if (ret != HKS_SUCCESS) {
-        if (ret == HKS_ERROR_NO_PERMISSION) {
-            HKS_LOG_E("Check Permission failed, ret = %" LOG_PUBLIC "d.", ret);
-            return ret;
-        }
-        HKS_LOG_E("read file failed, ret = %" LOG_PUBLIC "d.", ret);
-        return HKS_ERROR_READ_FILE_FAIL;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(ret == HKS_ERROR_NO_PERMISSION, ret,
+        "Check Permission failed, ret = %" LOG_PUBLIC "d.", ret)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_READ_FILE_FAIL, "read file failed, ret = %" LOG_PUBLIC "d.", ret)
+
     keyBlob->size = size;
     return HKS_SUCCESS;
 }
@@ -250,9 +232,8 @@ static int32_t GetKeyBlobSize(const struct HksStoreInfo *fileInfoPath, uint32_t 
     HKS_IF_NOT_SUCC_RETURN(isFileExist, HKS_ERROR_NOT_EXIST)
 
     uint32_t size = HksFileSize(fileInfoPath->path, fileInfoPath->fileName);
-    if (size == 0) {
-        return HKS_ERROR_FILE_SIZE_FAIL;
-    }
+    HKS_IF_TRUE_RETURN(size == 0, HKS_ERROR_FILE_SIZE_FAIL)
+
     *keyBlobSize = size;
     return HKS_SUCCESS;
 }
@@ -267,10 +248,8 @@ static int32_t IsKeyBlobExist(const struct HksStoreFileInfo *fileInfo)
         int32_t isBakFileExist = HksIsFileExist(fileInfo->bakPath.path, fileInfo->bakPath.fileName);
         HKS_IF_NOT_SUCC_LOGE_RETURN(isBakFileExist, HKS_ERROR_NOT_EXIST, "hks mainkey and backupkey not exist")
 
-        if (CopyKeyBlobFromSrc(fileInfo->bakPath.path, fileInfo->bakPath.fileName,
-            fileInfo->mainPath.path, fileInfo->mainPath.fileName) != HKS_SUCCESS) {
-                HKS_LOG_E("hks copy bak key to main key failed");
-            }
+        HKS_IF_NOT_SUCC_LOGE(CopyKeyBlobFromSrc(fileInfo->bakPath.path, fileInfo->bakPath.fileName,
+            fileInfo->mainPath.path, fileInfo->mainPath.fileName), "hks copy bak key to main key failed")
     }
 #endif
     return HKS_SUCCESS;
@@ -289,10 +268,8 @@ int32_t HksStoreKeyBlob(const struct HksStoreFileInfo *fileInfo, const struct Hk
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks save main key blob failed, ret = %" LOG_PUBLIC "d.", ret)
 
 #ifdef SUPPORT_STORAGE_BACKUP
-        if (HksStorageWriteFile(fileInfo->bakPath.path, fileInfo->bakPath.fileName, 0,
-            keyBlob->data, keyBlob->size) != HKS_SUCCESS) {
-                HKS_LOG_E("hks save backup key blob failed");
-            }
+        HKS_IF_NOT_SUCC_LOGE(HksStorageWriteFile(fileInfo->bakPath.path, fileInfo->bakPath.fileName, 0, keyBlob->data,
+            keyBlob->size), "hks save backup key blob failed")
 #endif
     } while (0);
 
@@ -355,9 +332,7 @@ int32_t HksStoreGetKeyBlobSize(const struct HksStoreInfo *fileInfoPath, const st
 
 static int32_t GetFileCount(const char *path, uint32_t *fileCount)
 {
-    if ((path == NULL) || (fileCount == NULL)) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_TRUE_RETURN(path == NULL || fileCount == NULL, HKS_ERROR_NULL_POINTER)
 
     void *dir = HksOpenDir(path);
     if (dir == NULL) {
@@ -381,9 +356,7 @@ static int32_t GetFileCount(const char *path, uint32_t *fileCount)
 
 static int32_t GetFileNameList(const char *path, struct HksFileEntry *fileNameList, uint32_t *fileCount)
 {
-    if ((path == NULL) || (fileCount == NULL) || (fileNameList == NULL)) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_TRUE_RETURN(path == NULL || fileCount == NULL || fileNameList == NULL, HKS_ERROR_NULL_POINTER)
 
     void *dir = HksOpenDir(path);
     if (dir == NULL) {
@@ -398,16 +371,11 @@ static int32_t GetFileNameList(const char *path, struct HksFileEntry *fileNameLi
     while (ret == HKS_SUCCESS) {
         count++;
         uint32_t nameLen = strlen(dire.fileName);
-        if ((*fileCount < count) || (fileNameList[count - 1].fileNameLen < (nameLen + 1))) {
-            HKS_LOG_E("the input params are wrong and too small");
-            break;
-        }
+        HKS_IF_TRUE_LOGE_BREAK(*fileCount < count || fileNameList[count - 1].fileNameLen < nameLen + 1,
+            "the input params are wrong and too small")
 
-        if (strncpy_s(fileNameList[count - 1].fileName, fileNameList[count - 1].fileNameLen,
-            dire.fileName, nameLen) != EOK) {
-            HKS_LOG_E("failed to copy the string");
-            break;
-        }
+        HKS_IF_NOT_EOK_LOGE_BREAK(strncpy_s(fileNameList[count - 1].fileName, fileNameList[count - 1].fileNameLen,
+            dire.fileName, nameLen), "failed to copy the string")
         fileNameList[count - 1].fileName[nameLen] = '\0';
         ret = HksGetDirFile(dir, &dire);
     }
@@ -422,12 +390,8 @@ static int32_t GetAndCheckFileCount(const char *path, uint32_t *fileCount, const
     int32_t ret = GetFileCount(path, fileCount);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get storage file count, ret = %" LOG_PUBLIC "d.", ret)
 
-    if (*inputCount < *fileCount) {
-        HKS_LOG_E("listCount space not enough");
-        ret = HKS_ERROR_BUFFER_TOO_SMALL;
-    }
-
-    return ret;
+    HKS_IF_TRUE_LOGE_RETURN(*inputCount < *fileCount, HKS_ERROR_BUFFER_TOO_SMALL, "listCount space not enough")
+    return HKS_SUCCESS;
 }
 
 static int32_t GetKeyAliasByProcessName(const struct HksStoreFileInfo *fileInfo, struct HksKeyInfo *keyInfoList,
@@ -534,14 +498,10 @@ static int32_t StoreDestroy(const char *processNameEncoded, uint32_t bakFlag)
     }
 
     ret = DestroyType(storePath, HKS_KEY_STORE_ROOT_KEY_PATH, bakFlag);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("Destroy info dir failed! ret = 0x%" LOG_PUBLIC "X", ret); /* continue delete */
-    }
+    HKS_IF_NOT_SUCC_LOGI(ret, "Destroy info dir failed! ret = 0x%" LOG_PUBLIC "X", ret) /* continue delete */
 
     ret = DestroyType(storePath, HKS_KEY_STORE_KEY_PATH, bakFlag);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("Destroy key dir failed! ret = 0x%" LOG_PUBLIC "X", ret); /* continue delete */
-    }
+    HKS_IF_NOT_SUCC_LOGI(ret, "Destroy key dir failed! ret = 0x%" LOG_PUBLIC "X", ret) /* continue delete */
 
     HKS_FREE(storePath);
     return HKS_SUCCESS;
@@ -777,9 +737,7 @@ void HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo *processInfo)
 static int32_t GetHksKeyAliasSet(const struct HksFileEntry *fileNameList, const uint32_t fileCount,
     struct HksKeyAliasSet **outData)
 {
-    if (fileCount == 0) {
-        return HKS_SUCCESS;
-    }
+    HKS_IF_TRUE_RETURN(fileCount == 0, HKS_SUCCESS)
 
     int32_t ret;
     struct HksKeyAliasSet *tempAliasSet = (struct HksKeyAliasSet *)(HksMalloc(sizeof(struct HksKeyAliasSet)));
@@ -824,13 +782,9 @@ static int32_t GetHksFileEntry(const struct HksStoreFileInfo *fileInfo, struct H
     uint32_t fileCount;
     int32_t ret = GetFileCount(fileInfo->mainPath.path, &fileCount);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get storage file count, ret = %" LOG_PUBLIC "d.", ret)
-    if (fileCount == 0) {
-        return HKS_SUCCESS;
-    }
-    if (fileCount > HKS_MAX_KEY_ALIAS_COUNT) {
-        HKS_LOG_E("file count too long, count = %" LOG_PUBLIC "u.", fileCount);
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    HKS_IF_TRUE_RETURN(fileCount == 0, HKS_SUCCESS)
+    HKS_IF_TRUE_LOGE_RETURN(fileCount > HKS_MAX_KEY_ALIAS_COUNT, HKS_ERROR_BUFFER_TOO_SMALL,
+        "file count too long, count = %" LOG_PUBLIC "u.", fileCount)
 
     struct HksFileEntry *tempFileNameList = NULL;
     uint32_t realfileCount = fileCount;
@@ -902,15 +856,14 @@ int32_t HksStoreRenameKeyAlias(const struct HksStoreFileInfo *oldFileInfo,
             }
         }
 #endif
-        if (!isCopy) {
-            ret = HksStoreDeleteKeyBlob(oldFileInfo, oldMaterial);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_I("Delete the old key failed, need to delete the new key");
-                ret = HksStoreDeleteKeyBlob(newFileInfo, newMaterial);
-                HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks delete new key blob failed, ret = %" LOG_PUBLIC "d.", ret)
-                ret = HKS_ERROR_REMOVE_FILE_FAIL;
-            }
-        }
+        HKS_IF_TRUE_RETURN(isCopy, ret)
+        ret = HksStoreDeleteKeyBlob(oldFileInfo, oldMaterial);
+        HKS_IF_TRUE_RETURN(ret == HKS_SUCCESS, ret)
+
+        HKS_LOG_I("Delete the old key failed, need to delete the new key");
+        ret = HksStoreDeleteKeyBlob(newFileInfo, newMaterial);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks delete new key blob failed, ret = %" LOG_PUBLIC "d.", ret)
+        ret = HKS_ERROR_REMOVE_FILE_FAIL;
     } while (0);
     return ret;
 }

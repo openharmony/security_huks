@@ -49,10 +49,7 @@ void *HksLockUserIdm(void)
 
 void HksUnlockUserIdm(void *ptr)
 {
-    if (ptr == nullptr) {
-        HKS_LOG_E("useridm mock HksUnlockUserIdm nullptr");
-        return;
-    }
+    HKS_IF_NULL_LOGE_RETURN_VOID(ptr, "useridm mock HksUnlockUserIdm nullptr")
     delete static_cast<OHOS::Security::Hks::HksIpcCounter *>(ptr);
 }
 
@@ -127,12 +124,6 @@ int32_t HksUserIdmGetAuthInfoNum(int32_t userId, enum HksUserAuthType hksAuthTyp
 int32_t HksConvertUserIamTypeToHksType(enum HksUserIamType userIamType, uint32_t userIamValue, uint32_t *hksValue)
 {
     HKS_IF_NULL_RETURN(hksValue, HKS_ERROR_NULL_POINTER)
-
-    switch (userIamType) {
-        case HKS_AUTH_TYPE:
-            return ConvertToHksAuthType((enum USER_IAM::AuthType)userIamValue, (enum HksUserAuthType *)hksValue);
-        default:
-            break;
-    }
-    return HKS_ERROR_NOT_SUPPORTED;
+    HKS_IF_TRUE_RETURN(userIamType != HKS_AUTH_TYPE, HKS_ERROR_NOT_SUPPORTED)
+    return ConvertToHksAuthType((enum USER_IAM::AuthType)userIamValue, (enum HksUserAuthType *)hksValue);
 }
