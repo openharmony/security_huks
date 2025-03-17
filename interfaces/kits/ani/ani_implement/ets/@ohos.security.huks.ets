@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class BusinessError extends Error {
+
+export class BusinessError extends Error {
   constructor(code: int, message: string) {
     super(message)
     this.code = code;
