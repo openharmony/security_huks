@@ -28,6 +28,7 @@
 
 #include <array>
 #include <cerrno>
+#include <cstddef>
 #include <iostream>
 #include <memory>
 #include <ostream>
@@ -222,7 +223,8 @@ bool AniUtils::GetUint8Array(ani_env *env, ani_object array, std::vector<uint8_t
     }
     void* data = nullptr;
     uint32_t length = 0;
-    if (env->ArrayBuffer_GetInfo(static_cast<ani_arraybuffer>(buffer), &data, &length) != ANI_OK) {
+    if (env->ArrayBuffer_GetInfo(static_cast<ani_arraybuffer>(buffer), &data,
+        static_cast<size_t *>(&length)) != ANI_OK) {
         HKS_LOG_E("Failed: env->ArrayBuffer_GetInfo");
         return false;
     }
@@ -265,7 +267,8 @@ bool AniUtils::CreateUint8Array(ani_env *env, std::vector<uint8_t> &arrayIn, ani
     retCode = env->Object_GetFieldByName_Ref(arrayOut, "buffer", &buffer);
     void *bufData = nullptr;
     uint32_t bufLength = 0;
-    retCode = env->ArrayBuffer_GetInfo(static_cast<ani_arraybuffer>(buffer), &bufData, &bufLength);
+    retCode = env->ArrayBuffer_GetInfo(static_cast<ani_arraybuffer>(buffer), &bufData,
+        static_cast<size_t *>(&bufLength));
     if (retCode != ANI_OK) {
         HKS_LOG_E("Failed: env->ArrayBuffer_GetInfo()");
         return false;
