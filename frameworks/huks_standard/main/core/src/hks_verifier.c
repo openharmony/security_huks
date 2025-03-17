@@ -197,19 +197,28 @@ static int32_t VerifyCertChain(const struct HksCertInfo *certs, uint32_t certNum
     int32_t ret = HKS_ERROR_VERIFICATION_FAILED;
     X509_STORE *store = X509_STORE_new();
     X509_STORE_CTX *verifyCtx = X509_STORE_CTX_new();
-    if ((store == NULL) || (verifyCtx == NULL)) {
+    STACK_OF(X509) *skCerts = sk_X509_new_null();
+    if ((store == NULL) || (verifyCtx == NULL) || (skCerts == NULL)) {
         HKS_LOG_E("verify cert chain init failed");
         goto EXIT;
     }
 
-    for (uint32_t i = certNum - 1; i > 1; i--) { /* add root ca cert and device ca cert */
-        if (X509_STORE_add_cert(store, certs[i].x509) != OPENSSL_SUCCESS) {
-            HKS_LOG_E("add cert to store failed");
+    // We only verify the validity of the certificate chain, not its legality,
+    // so we will add the last cert in the cert chain, instead of the real root cert, into trust store here.
+    if (X509_STORE_add_cert(store, certs[certNum - 1].x509) != OPENSSL_SUCCESS) {
+        HKS_LOG_E("add root cert failed");
+        goto EXIT;
+    }
+
+    for (uint32_t i = certNum - 2; i > 0; i--) {
+        int opensslRet = sk_X509_push(skCerts, X509_dup(certs[i].x509));
+        if (opensslRet <= 0 || (uint32_t)(opensslRet) != certNum - 1 - i) {
+            HKS_LOG_E("add cert to chain failed");
             goto EXIT;
         }
     }
 
-    int32_t resOpenssl = X509_STORE_CTX_init(verifyCtx, store, certs[1].x509, NULL); /* cert 1: add device cert */
+    int32_t resOpenssl = X509_STORE_CTX_init(verifyCtx, store, certs[0].x509, skCerts); /* cert 0: add leaf cert */
     if (resOpenssl != OPENSSL_SUCCESS) {
         HKS_LOG_E("init verify ctx failed");
         goto EXIT;
@@ -225,6 +234,9 @@ static int32_t VerifyCertChain(const struct HksCertInfo *certs, uint32_t certNum
     HKS_IF_NOT_SUCC_LOGE(ret, "verify root cert failed")
 
 EXIT:
+    if (skCerts != NULL) {
+        sk_X509_pop_free(skCerts, X509_free);
+    }
     if (verifyCtx != NULL) {
         X509_STORE_CTX_free(verifyCtx);
     }
@@ -577,7 +589,7 @@ static int32_t InitCertChainInfo(const struct HksCertChain *certChain, struct Hk
 {
     int32_t ret = HKS_SUCCESS;
 
-    uint32_t certsInfoLen = sizeof(struct HksCertInfo) * certChain->certsCount; /* only 4 cert */
+    uint32_t certsInfoLen = sizeof(struct HksCertInfo) * certChain->certsCount;
     struct HksCertInfo *certsInfo = (struct HksCertInfo *)HksMalloc(certsInfoLen);
     HKS_IF_NULL_RETURN(certsInfo, HKS_ERROR_MALLOC_FAIL)
 
