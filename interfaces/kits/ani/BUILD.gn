@@ -16,7 +16,7 @@ import("//build/ohos.gni")
 group("huks_ani_package") {
   deps = []
   if (support_jsapi) {
-    deps = [
+    deps += [
       "./ani_implement:huks_ani_abc_etc",
       "./ani_implement:huks_interfaceImpl_ani",
     ]
