@@ -65,6 +65,14 @@ struct ExpectParamsValuesChecker {
     const struct ExpectParamsValues paramValues;
 };
 
+struct HksAlgParamSetHandler {
+    enum HksKeyAlg alg;
+    const struct ParamsValuesChecker *algParamSet;
+    uint32_t algParamSetCnt;
+    const struct ExpectParamsValuesChecker *expectParams;
+    uint32_t expectParamsCnt;
+};
+
 struct AuthAccessTypeChecker {
     enum HksUserAuthType userAuthType;
     const struct ExpectParams allowAuthAccessTypes;
@@ -95,10 +103,11 @@ int32_t HksGetKeySize(uint32_t alg, const struct HksBlob *key, uint32_t *keySize
 
 int32_t HksCheckGenKeyPurpose(uint32_t alg, uint32_t inputPurpose, uint32_t keyFlag);
 
-int32_t HksGetInputParmasByAlg(uint32_t alg, enum CheckKeyType checkType, const struct HksParamSet *paramSet,
-    struct ParamsValues *inputParams);
-
-int32_t HksCheckFixedParams(uint32_t alg, enum CheckKeyType checkType, const struct ParamsValues *inputParams);
+#ifdef HKS_SUPPORT_RSA_C
+#ifdef HKS_SUPPORT_RSA_C_FLEX_KEYSIZE
+int32_t CheckRsaKeySize(uint32_t keyLen);
+#endif
+#endif
 
 int32_t HksCheckGenKeyMutableParams(uint32_t alg, const struct ParamsValues *inputParams);
 
@@ -122,11 +131,13 @@ int32_t HksCheckSecureSignParams(uint32_t secureSignType);
 
 int32_t GetInputParams(const struct HksParamSet *paramSet, struct ParamsValues *inputParams);
 
-int32_t HksCheckOptionalParam(uint32_t tag, uint32_t alg, uint32_t purpose, bool isAbsent, struct HksParam *param);
-
 int32_t HksCheckNeedCache(uint32_t alg, uint32_t digest);
 
 int32_t HksCheckUserAuthKeyInfoValidity(const struct HksParamSet *paramSet);
+
+int32_t InitInputParamsByAlg(uint32_t alg, enum CheckKeyType checkType, struct ParamsValues *inputParams);
+
+int32_t GetExpectParams(uint32_t alg, enum CheckKeyType checkType, struct ExpectParamsValues *expectValues);
 
 inline bool HksAttestIsAnonymous(const struct HksParamSet *paramSet)
 {
