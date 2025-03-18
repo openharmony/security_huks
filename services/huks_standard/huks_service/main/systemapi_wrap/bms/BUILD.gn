@@ -42,6 +42,7 @@ ohos_static_library("libhuks_bms_systemapi_wrap_static") {
 
   external_deps = [
     "access_token:libaccesstoken_sdk",
+    "bounds_checking_function:libsec_shared",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "cJSON:cjson",
@@ -55,8 +56,6 @@ ohos_static_library("libhuks_bms_systemapi_wrap_static") {
   if (!huks_qemu_enabled) {
     external_deps += [ "ability_base:want" ]
   }
-
-  public_external_deps = [ "bounds_checking_function:libsec_shared" ]
 
   complete_static_lib = true
 }
