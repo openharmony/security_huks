@@ -701,11 +701,9 @@ static int32_t CheckCipherAeNonceMaterial(uint32_t mode, const struct HksParamSe
             return HKS_ERROR_INVALID_NONCE;
         }
     } else if (mode == HKS_MODE_CCM) {
-        if ((nonceParam->blob.size < HKS_AES_CCM_NONCE_LEN_MIN) ||
-            (nonceParam->blob.size > HKS_AES_CCM_NONCE_LEN_MAX)) {
-            HKS_LOG_E("ccm invalid nonce size, nonce size = %" LOG_PUBLIC "u", nonceParam->blob.size);
-            return HKS_ERROR_INVALID_NONCE;
-        }
+        HKS_IF_TRUE_LOGE_RETURN((nonceParam->blob.size < HKS_AES_CCM_NONCE_LEN_MIN) ||
+            (nonceParam->blob.size > HKS_AES_CCM_NONCE_LEN_MAX), HKS_ERROR_INVALID_NONCE,
+            "ccm invalid nonce size, nonce size = %" LOG_PUBLIC "u", nonceParam->blob.size);
     }
 
     return HKS_SUCCESS;
@@ -817,10 +815,8 @@ int32_t HksCheckGenKeyPurpose(uint32_t alg, uint32_t inputPurpose, uint32_t keyF
 #ifdef HKS_SUPPORT_DSA_C
 static int32_t HksGetDsaKeySize(const struct HksBlob *key, uint32_t *keySize)
 {
-    if (key->size < sizeof(struct HksParamSet)) {
-        HKS_LOG_E("check dsa key size: invalid keyfile size: %" LOG_PUBLIC "u", key->size);
-        return HKS_ERROR_INVALID_KEY_FILE;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(key->size < sizeof(struct HksParamSet), HKS_ERROR_INVALID_KEY_FILE,
+        "check dsa key size: invalid keyfile size: %" LOG_PUBLIC "u", key->size);
 
     struct HksParamSet *keyParamSet = (struct HksParamSet *)key->data;
     int32_t ret = HksCheckParamSetValidity(keyParamSet);
@@ -1205,9 +1201,9 @@ int32_t HksCheckCipherMaterialParams(uint32_t alg, const struct ParamsValues *in
 #ifdef HKS_SUPPORT_SM4_C
     if (alg == HKS_ALG_SM4) {
         uint32_t mode = inputParams->mode.value;
-        if (mode == HKS_MODE_CBC || mode == HKS_MODE_CTR || mode == HKS_MODE_CFB || mode == HKS_MODE_OFB) {
-            return CheckBlockCipherIvMaterial(paramSet);
-        }
+        HKS_IF_TRUE_RETURN(mode == HKS_MODE_CBC || mode == HKS_MODE_CTR ||
+            mode == HKS_MODE_CFB || mode == HKS_MODE_OFB,
+            CheckBlockCipherIvMaterial(paramSet));
     }
 #endif
     return HKS_SUCCESS;
@@ -1239,11 +1235,9 @@ static int32_t HksCheckAuthAccessTypeByUserAuthType(uint32_t userAuthType, uint3
         }
     }
     if ((authAccessType != 0) && (authAccessType == validAuthAccessType)) {
-        if ((authAccessType & HKS_AUTH_ACCESS_ALWAYS_VALID) != 0
-            && (authAccessType &(~HKS_AUTH_ACCESS_ALWAYS_VALID)) != 0) {
-            HKS_LOG_E("auth access type is invalid: ALWAYS_VALID cannot coexist with other type");
-            return HKS_ERROR_INVALID_ACCESS_TYPE;
-        }
+        HKS_IF_TRUE_LOGE_RETURN((authAccessType & HKS_AUTH_ACCESS_ALWAYS_VALID) != 0 &&
+            (authAccessType &(~HKS_AUTH_ACCESS_ALWAYS_VALID)) != 0, HKS_ERROR_INVALID_ACCESS_TYPE,
+            "auth access type is invalid: ALWAYS_VALID cannot coexist with other type");
         return HKS_SUCCESS;
     }
     HKS_LOG_E("authAccessType %" LOG_PUBLIC "u is not equal to validAuthAccessType %" LOG_PUBLIC "u or is 0",

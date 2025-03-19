@@ -134,6 +134,13 @@ if ((BOOL_FUNC)) { \
     return (ERROR_CODE); \
 }
 
+#define HKS_IF_TRUE_CONTINUE(BOOL_FUNC) \
+if ((BOOL_FUNC)) { \
+    continue; \
+}
+
+#define HKS_IF_NULL_CONTINUE(OBJECT) HKS_IF_TRUE_CONTINUE((OBJECT) == HKS_NULL_POINTER)
+
 #define HKS_IF_TRUE_RETURN_VOID(BOOL_FUNC) \
 if ((BOOL_FUNC)) { \
     return; \
@@ -143,6 +150,24 @@ if ((BOOL_FUNC)) { \
 if ((BOOL_FUNC)) { \
     HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
     return (ERROR_CODE); \
+}
+
+#define HKS_IF_TRUE_LOGERR_RETURN(BOOL_FUNC, ERROR_CODE, LOG_MESSAGE, ...) \
+if ((BOOL_FUNC)) { \
+    HKS_LOG_ERRNO(LOG_MESSAGE, ##__VA_ARGS__); \
+    return (ERROR_CODE); \
+}
+
+#define HKS_IF_TRUE_LOGW_CONTINUE(BOOL_FUNC, LOG_MESSAGE, ...) \
+if ((BOOL_FUNC)) { \
+    HKS_LOG_W(LOG_MESSAGE, ##__VA_ARGS__); \
+    continue; \
+}
+
+#define HKS_IF_TRUE_LOGE_CONTINUE(BOOL_FUNC, LOG_MESSAGE, ...) \
+if ((BOOL_FUNC)) { \
+    HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
+    continue; \
 }
 
 #define HKS_IF_TRUE_LOGE_RETURN_VOID(BOOL_FUNC, LOG_MESSAGE, ...) \

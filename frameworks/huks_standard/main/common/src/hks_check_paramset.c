@@ -966,9 +966,7 @@ int32_t HksCoreCheckImportKeyParams(const struct HksBlob *keyAlias, const struct
         }
     }
 #endif
-    if (!needCheckLater) {
-        return ret;
-    }
+    HKS_IF_NOT_TRUE_RETURN(needCheckLater, ret);
 
     /* check public key params: 1. check keySize */
     ret = CheckImportKeySize(alg, &params, key);
@@ -1090,10 +1088,9 @@ int32_t HksCoreCheckAgreeKeyParams(const struct HksParamSet *paramSet, const str
     uint32_t keySize = 0;
     if (isLocalCheck) {
         if (alg == HKS_ALG_ED25519) {
-            if ((privateKey->size != HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)) ||
-                (peerPublicKey->size != HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256))) {
-                return HKS_ERROR_INVALID_KEY_SIZE;
-            }
+            HKS_IF_TRUE_RETURN((privateKey->size != HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)) ||
+                (peerPublicKey->size != HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)),
+                HKS_ERROR_INVALID_KEY_SIZE);
         }
 
         if (alg == HKS_ALG_DH || alg == HKS_ALG_ECC || alg == HKS_ALG_ECDH) {
@@ -1288,9 +1285,7 @@ int32_t HksCoreCheckMacParams(const struct HksBlob *key, const struct HksParamSe
 static bool CheckIsSymmetricAlgorithm(uint32_t alg)
 {
     for (uint32_t i = 0; i < HKS_ARRAY_SIZE(g_symmetricAlgorithm); ++i) {
-        if (alg == g_symmetricAlgorithm[i]) {
-            return true;
-        }
+        HKS_IF_TRUE_RETURN(alg == g_symmetricAlgorithm[i], true);
     }
     return false;
 }
@@ -1301,11 +1296,10 @@ int32_t HksCoreCheckAgreeDeriveFinishParams(const struct HksBlob *key, const str
     struct HksParam *keySize = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_SIZE, &keySize);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key size from agree paramset failed!")
-    if (HKS_KEY_BYTES(keySize->uint32Param) != key->size) {
-        HKS_LOG_E("key size param from paramSet is not consistent with real key size, param size %" LOG_PUBLIC
-            "u not equals to real key size %" LOG_PUBLIC "u", HKS_KEY_BYTES(keySize->uint32Param), key->size);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(HKS_KEY_BYTES(keySize->uint32Param) != key->size, HKS_ERROR_INVALID_ARGUMENT,
+        "key size param from paramSet is not consistent with real key size, param size %" LOG_PUBLIC
+        "u not equals to real key size %" LOG_PUBLIC "u", HKS_KEY_BYTES(keySize->uint32Param), key->size);
+
     struct HksParam *algorithm = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algorithm);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key algorithm from agree paramset failed!")

@@ -655,9 +655,7 @@ static int32_t CheckIfUserIamSupportCurType(int32_t userId, uint32_t userAuthTyp
     };
     int32_t ret;
     for (uint32_t i = 0; i < HKS_ARRAY_SIZE(userAuthTypes); ++i) {
-        if ((userAuthType & userAuthTypes[i]) == 0) {
-            continue;
-        }
+        HKS_IF_TRUE_CONTINUE((userAuthType & userAuthTypes[i]) == 0);
         ret = CheckIfEnrollAuthInfo(userId, userAuthTypes[i]); // callback
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
             "no enrolled info of the user auth type: %" LOG_PUBLIC "d.", userAuthTypes[i])
@@ -2217,9 +2215,7 @@ static int32_t HksCheckSrcKeyAndDestKeyCondition(const struct HksProcessInfo *pr
         }
     } else if (ret == HKS_ERROR_NOT_EXIST) {
         ret = HksManageStoreIsKeyBlobExist(processInfo, srcParamSet, keyAlias, HKS_STORAGE_TYPE_KEY);
-        if (ret == HKS_ERROR_NOT_EXIST) {
-            HKS_LOG_E("source and destination both don't have key");
-        }
+        HKS_IF_TRUE_LOGE(ret == HKS_ERROR_NOT_EXIST, "source and destination both don't have key");
     } else {
         HKS_LOG_E("hks get key blob is exist failed");
     }
