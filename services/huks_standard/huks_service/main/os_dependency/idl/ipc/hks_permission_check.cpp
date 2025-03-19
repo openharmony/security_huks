@@ -48,13 +48,11 @@ int32_t SensitivePermissionCheck(const char *permission)
 {
     OHOS::Security::AccessToken::AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
     int result = OHOS::Security::AccessToken::AccessTokenKit::VerifyAccessToken(tokenId, permission);
-    if (result == OHOS::Security::AccessToken::PERMISSION_GRANTED) {
-        HKS_LOG_I("Check Permission success!");
-        return HKS_SUCCESS;
-    } else {
-        HKS_LOG_E("Check Permission failed!%" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", permission, result);
-        return HKS_ERROR_NO_PERMISSION;
-    }
+    HKS_IF_TRUE_LOGI_RETURN(result == OHOS::Security::AccessToken::PERMISSION_GRANTED,
+        HKS_SUCCESS, "Check Permission success!");
+
+    HKS_LOG_E("Check Permission failed!%" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", permission, result);
+    return HKS_ERROR_NO_PERMISSION;
 }
 
 namespace {
@@ -68,13 +66,11 @@ static int32_t CheckTokenType(void)
         case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL:
             return HKS_SUCCESS;
         case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_HAP:
-            if (!OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx)) {
-                HKS_LOG_E("not system hap, check permission failed, accessTokenIDEx %" LOG_PUBLIC PRIu64,
-                    accessTokenIDEx);
-                return HKS_ERROR_NOT_SYSTEM_APP;
-            } else {
-                return HKS_SUCCESS;
-            }
+            HKS_IF_NOT_TRUE_LOGE_RETURN(
+                OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx),
+                HKS_ERROR_NOT_SYSTEM_APP,
+                "not system hap, check permission failed, accessTokenIDEx %" LOG_PUBLIC PRIu64, accessTokenIDEx);
+            return HKS_SUCCESS;
         default:
             HKS_LOG_E("unknown tokenid, accessTokenIDEx %" LOG_PUBLIC PRIu64, accessTokenIDEx);
             return HKS_ERROR_INVALID_ACCESS_TYPE;

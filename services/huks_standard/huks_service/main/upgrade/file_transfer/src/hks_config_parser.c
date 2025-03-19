@@ -151,9 +151,7 @@ static int32_t MatchHapConfig(const char *alias, uint32_t uid, uint32_t userId, 
 
     InitDefaultStrategy(alias, info);
     for (uint32_t i = 0; i < HKS_ARRAY_SIZE(HAP_SKIP_UPGRADE_CFG_LIST); ++i) {
-        if (strlen(HAP_SKIP_UPGRADE_CFG_LIST[i]) != strlen(hapName)) {
-            continue;
-        }
+        HKS_IF_TRUE_CONTINUE(strlen(HAP_SKIP_UPGRADE_CFG_LIST[i]) != strlen(hapName));
         if (HksMemCmp(HAP_SKIP_UPGRADE_CFG_LIST[i], hapName, strlen(hapName)) == EOK) {
             info->skipTransfer = true;
             HKS_LOG_I("%" LOG_PUBLIC "u, %" LOG_PUBLIC "s needs skip transfer upgrade.", uid, hapName);
@@ -161,9 +159,7 @@ static int32_t MatchHapConfig(const char *alias, uint32_t uid, uint32_t userId, 
         }
     }
     for (uint32_t i = 0; i < HKS_ARRAY_SIZE(HAP_UPGRADE_CFG_LIST); ++i) {
-        if (strlen(HAP_UPGRADE_CFG_LIST[i].hapName) != strlen(hapName)) {
-            continue;
-        }
+        HKS_IF_TRUE_CONTINUE(strlen(HAP_UPGRADE_CFG_LIST[i].hapName) != strlen(hapName));
         if (HksMemCmp(HAP_UPGRADE_CFG_LIST[i].hapName, hapName, strlen(hapName)) == EOK) {
             info->needDe = HAP_UPGRADE_CFG_LIST[i].needDe;
             info->needFrontUser = HAP_UPGRADE_CFG_LIST[i].needFrontUser;
