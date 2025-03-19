@@ -39,6 +39,15 @@ class HuksResult implements ResultInner {
   challenge?: Uint8Array | undefined;
 }
 
+class HuksParamImpl implements huks.HuksParam {
+  tag: huks.HuksTag = huks.HuksTag.HUKS_TAG_ALL_USERS
+  value: boolean | number | bigint | Uint8Array = 0
+  constructor(tag : huks.HuksTag, value : boolean | number | bigint | Uint8Array) {
+      this.tag = tag;
+      this.value = value;
+  }
+}
+
 native function generateKeyItemSync(keyAlias: string, options: huks.HuksOptions): ResultInner;
 
 native function deleteKeyItemSync(keyAlias: string, options: huks.HuksOptions): ResultInner;
@@ -376,15 +385,6 @@ export namespace huks {
           callback(eNull);
         }
     });
-  }
-
-  class HuksParamImpl implements huks.HuksParam {
-    tag: huks.HuksTag = huks.HuksTag.HUKS_TAG_ALL_USERS
-    value: boolean | number | bigint | Uint8Array = 0
-    constructor(tag : huks.HuksTag, value : boolean | number | bigint | Uint8Array) {
-        this.tag = tag;
-        this.value = value;
-    }
   }
 
   export function updateSession(
