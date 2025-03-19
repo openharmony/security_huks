@@ -57,6 +57,8 @@ int32_t HksCoreCheckMacParams(const struct HksBlob *key, const struct HksParamSe
 
 int32_t HksCoreCheckAgreeDeriveFinishParams(const struct HksBlob *key, const struct HksParamSet *paramSet);
 
+int32_t HksCheckOptionalParam(uint32_t tag, uint32_t alg, uint32_t purpose, bool isAbsent, struct HksParam *param);
+
 #ifdef __cplusplus
 }
 #endif

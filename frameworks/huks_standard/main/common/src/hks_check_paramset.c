@@ -355,6 +355,125 @@ static int32_t CheckAndGetDigest(
     return ret;
 }
 
+int32_t HksGetInputParmasByAlg(uint32_t alg, enum CheckKeyType checkType, const struct HksParamSet *paramSet,
+    struct ParamsValues *inputParams)
+{
+    int32_t ret = InitInputParamsByAlg(alg, checkType, inputParams);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "init input params failed!")
+
+    ret = GetInputParams(paramSet, inputParams);
+    HKS_IF_NOT_SUCC_LOGE(ret, "get input params failed!")
+
+    return ret;
+}
+static int32_t CheckOptionalParams(bool needCheck, bool isAbsent, uint32_t inputValue, const uint32_t* expectValue,
+    uint32_t expectCnt)
+{
+    if (needCheck) {
+        if (!isAbsent) {
+            if (HksCheckValue(inputValue, expectValue, expectCnt) != HKS_SUCCESS) {
+                HKS_LOG_E("CheckOptionalParams invalid argument, %" LOG_PUBLIC "u", inputValue);
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+        }
+    }
+    return HKS_SUCCESS;
+}
+
+static int32_t InitCheckOptionalParams(bool needCheck, bool isAbsent, struct HksParam *param,
+    const uint32_t* expectValue, uint32_t expectCnt)
+{
+    if (needCheck) {
+        if (!isAbsent) {
+            if (HksCheckValue(param->uint32Param, expectValue, expectCnt) != HKS_SUCCESS) {
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+        } else {
+            HKS_LOG_E("This param is absent, but it is necessary.");
+            return HKS_ERROR_NOT_EXIST;
+        }
+    }
+    return HKS_SUCCESS;
+}
+
+int32_t HksCheckOptionalParam(uint32_t tag, uint32_t alg, uint32_t purpose, bool isAbsent, struct HksParam *param)
+{
+    enum CheckKeyType checkType = HKS_CHECK_TYPE_GEN_KEY;
+    if (((purpose & HKS_KEY_PURPOSE_DERIVE) != 0) || ((purpose & HKS_KEY_PURPOSE_MAC) != 0)) {
+        if ((alg != HKS_ALG_AES) && (alg != HKS_ALG_DES) && (alg != HKS_ALG_3DES) &&
+            (alg != HKS_ALG_HMAC) && (alg != HKS_ALG_CMAC) && (alg != HKS_ALG_SM3)) {
+            HKS_LOG_E("check mac or derive, not aes alg, alg: %" LOG_PUBLIC "u", alg);
+            return HKS_ERROR_INVALID_PURPOSE;
+        }
+        if (purpose == HKS_KEY_PURPOSE_DERIVE) {
+            checkType = HKS_CHECK_TYPE_GEN_DERIVE_KEY;
+        } else {
+            checkType = HKS_CHECK_TYPE_GEN_MAC_KEY;
+        }
+    }
+    struct ExpectParamsValues expectValues = EXPECT_PARAMS_VALUES_INIT;
+    int32_t ret = GetExpectParams(alg, checkType, &expectValues);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    switch (tag) {
+        case HKS_TAG_BLOCK_MODE:
+            ret = InitCheckOptionalParams(expectValues.mode.needCheck, isAbsent, param,
+                expectValues.mode.values, expectValues.mode.valueCnt);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_MODE_FAIL,
+                "check param fail:0x%" LOG_PUBLIC "x failed", HKS_TAG_BLOCK_MODE);
+            break;
+        case HKS_TAG_DIGEST:
+            ret = InitCheckOptionalParams(expectValues.digest.needCheck, isAbsent, param,
+                expectValues.digest.values, expectValues.digest.valueCnt);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_DIGEST_FAIL,
+                "check param fail:0x%" LOG_PUBLIC "x failed", HKS_TAG_DIGEST);
+            break;
+        case HKS_TAG_PADDING:
+            ret = InitCheckOptionalParams(expectValues.padding.needCheck, isAbsent, param,
+                expectValues.padding.values, expectValues.padding.valueCnt);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_PADDING_FAIL,
+                "check param fail:0x%" LOG_PUBLIC "x failed", HKS_TAG_PADDING);
+            break;
+        default:
+            HKS_LOG_E("invalid tag: %" LOG_PUBLIC "u", tag);
+            ret = HKS_FAILURE;
+    }
+    return ret;
+}
+
+int32_t HksCheckFixedParams(uint32_t alg, enum CheckKeyType checkType, const struct ParamsValues *inputParams)
+{
+    struct ExpectParamsValues expectValues = EXPECT_PARAMS_VALUES_INIT;
+    int32_t ret = GetExpectParams(alg, checkType, &expectValues);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    ret = CheckOptionalParams(expectValues.keyLen.needCheck, inputParams->keyLen.isAbsent, inputParams->keyLen.value,
+        expectValues.keyLen.values, expectValues.keyLen.valueCnt);
+#ifdef HKS_SUPPORT_RSA_C_FLEX_KEYSIZE
+    if ((ret != HKS_SUCCESS) && (alg == HKS_ALG_RSA)) {
+        ret = CheckRsaKeySize(inputParams->keyLen.value);
+    }
+#endif
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_KEY_SIZE,
+        "check keyLen not expected, len = %" LOG_PUBLIC "u", inputParams->keyLen.value);
+    ret = CheckOptionalParams(expectValues.padding.needCheck, inputParams->padding.isAbsent, inputParams->padding.value,
+        expectValues.padding.values, expectValues.padding.valueCnt);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_PADDING,
+        "check padding not expected, padding = %" LOG_PUBLIC "u", inputParams->padding.value);
+    ret = CheckOptionalParams(expectValues.purpose.needCheck, inputParams->purpose.isAbsent, inputParams->purpose.value,
+        expectValues.purpose.values, expectValues.purpose.valueCnt);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_PURPOSE,
+        "check purpose not expected, purpose = %" LOG_PUBLIC "u", inputParams->purpose.value);
+    ret = CheckOptionalParams(expectValues.digest.needCheck, inputParams->digest.isAbsent, inputParams->digest.value,
+        expectValues.digest.values, expectValues.digest.valueCnt);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_DIGEST,
+        "check digest not expected, digest = %" LOG_PUBLIC "u", inputParams->digest.value);
+    ret = CheckOptionalParams(expectValues.mode.needCheck, inputParams->mode.isAbsent, inputParams->mode.value,
+        expectValues.mode.values, expectValues.mode.valueCnt);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_MODE,
+        "check mode not expected, mode = %" LOG_PUBLIC "u", inputParams->mode.value);
+    return ret;
+}
+
 #ifndef _CUT_AUTHENTICATE_
 static int32_t CheckGenKeyParamsByAlg(uint32_t alg, const struct HksParamSet *paramSet,
     struct ParamsValues *params, uint32_t keyFlag)
