@@ -48,8 +48,10 @@ int32_t SensitivePermissionCheck(const char *permission)
 {
     OHOS::Security::AccessToken::AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
     int result = OHOS::Security::AccessToken::AccessTokenKit::VerifyAccessToken(tokenId, permission);
-    HKS_IF_TRUE_LOGI_RETURN(result == OHOS::Security::AccessToken::PERMISSION_GRANTED,
-        HKS_SUCCESS, "Check Permission success!");
+    if (result == OHOS::Security::AccessToken::PERMISSION_GRANTED) {
+        HKS_LOG_I("Check Permission success!");
+        return HKS_SUCCESS;
+    }
 
     HKS_LOG_E("Check Permission failed!%" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", permission, result);
     return HKS_ERROR_NO_PERMISSION;
