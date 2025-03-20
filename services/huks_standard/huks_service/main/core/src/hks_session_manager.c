@@ -90,8 +90,8 @@ static bool DeleteFirstAbortableOperation(void)
     struct HksOperation *operation = NULL;
 
     HKS_DLIST_ITER(operation, &g_operationList) {
-        HKS_IF_NULL_CONTINUE(operation);
-        HKS_IF_TRUE_LOGW_CONTINUE(operation->isInUse,
+        HKS_IF_TRUE_CONTINUE(operation == NULL);
+        HKS_IF_TRUE_LOGE_CONTINUE(operation->isInUse,
             "DeleteFirstAbortableOperation can not delete using session! userIdInt %" LOG_PUBLIC "d",
             operation->processInfo.userIdInt);
         HKS_LOG_E("DeleteFirstAbortableOperation delete old not using session! userIdInt %"
@@ -118,7 +118,7 @@ static void DeleteFirstTimeOutBatchOperation(void)
         HKS_IF_TRUE_LOGE_CONTINUE(ret != HKS_SUCCESS,
             "HksElapsedRealTime failed %" LOG_PUBLIC "d, err %" LOG_PUBLIC "s", ret, strerror(errno));
         HKS_IF_TRUE_CONTINUE(operation->batchOperationTimestamp >= curTime);
-        HKS_IF_TRUE_LOGW_CONTINUE(operation->isInUse,
+        HKS_IF_TRUE_LOGE_CONTINUE(operation->isInUse,
             "Batch operation timeout but is in use, not delete, userIdInt %" LOG_PUBLIC "d",
             operation->processInfo.userIdInt);
         HKS_LOG_E("Batch operation timeout! delete operation! userIdInt %" LOG_PUBLIC "d",
