@@ -16,7 +16,7 @@ import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 
-module_output_path = "huks_standard/huks_systemapi_wrap"
+module_output_path = "huks/huks/huks_systemapi_wrap"
 
 ohos_unittest("huks_useridm_wrap_test") {
   module_out_path = module_output_path

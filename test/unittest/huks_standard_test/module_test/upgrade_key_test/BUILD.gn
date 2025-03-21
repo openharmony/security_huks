@@ -16,7 +16,7 @@ import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 
-module_output_path = "huks_standard/huks_upgrade_key"
+module_output_path = "huks/huks/huks_upgrade_key"
 
 ohos_unittest("huks_upgrade_key_test") {
   module_out_path = module_output_path
