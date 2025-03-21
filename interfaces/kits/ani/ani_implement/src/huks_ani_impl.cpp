@@ -12,25 +12,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "hks_api.h"
-#include "hks_mem.h"
-#include "hks_template.h"
-#include "hks_type.h"
-#include "hks_type_enum.h"
-#include "hks_log.h"
-#include "securec.h"
-#include "huks_ani_common.h"
 
-#include <ani.h>
 #include <array>
 #include <iostream>
 #include <cstdint>
 #include <string>
 #include <vector>
 
+#include "securec.h"
+#include <ani.h>
+
+#include "huks_ani_common.h"
+#include "hks_api.h"
+#include "hks_mem.h"
+#include "hks_template.h"
+#include "hks_type.h"
+#include "hks_type_enum.h"
+#include "hks_log.h"
+
 using namespace HuksAni;
 static const char *HUKS_GLOBAL_NAME_SPACE = "L@ohos/security/huks/ETSGLOBAL;";
-constexpr int HKS_MAX_TOKEN_SIZE = 2048;
+constexpr uint32_t HKS_MAX_TOKEN_SIZE = 2048;
+constexpr uint32_t OUTPURT_DATA_SIZE = 1024 * 64;
 
 static ani_object generateKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
     ani_string keyAlias, ani_object options)
@@ -157,7 +160,7 @@ static ani_object exportKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unuse
             break;
         }
         bool aniRet = AniUtils::CreateUint8Array(env, outVec, bufferOut);
-        if (aniRet != true) {
+        if (!aniRet) {
             HKS_LOG_E("export key get the keyOut ok, but creat ani object failed!");
             ret = HKS_ERROR_BUFFER_TOO_SMALL;
             break;
@@ -237,7 +240,6 @@ static ani_object initSessionSync([[maybe_unused]] ani_env *env, [[maybe_unused]
     return aniReturnObject;
 }
 
-#define DATA_SIZE_64KB  (1024 * 64)
 static ani_object updateFinishSessionSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
     ani_long handle, ani_object options, ani_boolean isUpdate)
 {
@@ -250,7 +252,7 @@ static ani_object updateFinishSessionSync([[maybe_unused]] ani_env *env, [[maybe
         ret = HksAniParseParams(env, handle, options, &context);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAniParseParams failed! ret = %" LOG_PUBLIC "d", ret)
 
-        context.outData.size = context.inData.size + DATA_SIZE_64KB;
+        context.outData.size = context.inData.size + OUTPURT_DATA_SIZE;
         context.outData.data = static_cast<uint8_t *>(HksMalloc(context.outData.size));
         if (context.outData.data == nullptr) {
             HKS_LOG_E("malloc memory failed");
@@ -272,7 +274,7 @@ static ani_object updateFinishSessionSync([[maybe_unused]] ani_env *env, [[maybe
             break;
         }
         bool aniRet = AniUtils::CreateUint8Array(env, outVec, bufferOut);
-        if (aniRet != true) {
+        if (!aniRet) {
             HKS_LOG_E("export key get the keyOut ok, but creat ani object failed!");
             ret = HKS_ERROR_BUFFER_TOO_SMALL;
             break;
