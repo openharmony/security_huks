@@ -16,7 +16,7 @@ import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 
-module_output_path = "huks_standard/hal_unittest"
+module_output_path = "huks/huks/hal_unittest"
 
 config("json_config") {
   cflags_cc = [ "-fexceptions" ]
