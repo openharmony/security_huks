@@ -12,19 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "drivers/interface/huks/v1_0/ihuks_types.h"
-#include "hks_common_check.h"
-#include "hks_mem.h"
-#include "hks_template.h"
-#include "hks_type.h"
-#include "hks_type_enum.h"
-#include "hks_log.h"
-#include "securec.h"
-#include "hks_param.h"
 #include "huks_ani_common.h"
-#include "hks_errcode_adapter.h"
-
-#include <ani.h>
 
 #include <array>
 #include <cerrno>
@@ -37,6 +25,19 @@
 #include <cstdio>
 #include <string>
 #include <vector>
+
+#include <ani.h>
+
+#include "securec.h"
+#include "hks_common_check.h"
+#include "hks_mem.h"
+#include "hks_template.h"
+#include "hks_type.h"
+#include "hks_type_enum.h"
+#include "hks_log.h"
+#include "hks_param.h"
+#include "hks_errcode_adapter.h"
+
 namespace HuksAni {
 static std::string g_huksResultClassName = "L@ohos/security/huks/HuksResult;";
 static std::string g_huksOptionClassName = "L@ohos/security/huks/HuksOptionsImpl;";
@@ -67,12 +68,12 @@ bool AniUtils::GetStirng([[maybe_unused]] ani_env *&env, const ani_string &strOb
     ani_size strSize = 0;
     env->String_GetUTF8Size(strObject, &strSize);
     std::vector<char> buffer(strSize + 1);
-    char* utf8_buffer = buffer.data();
+    char* utfBuffer = buffer.data();
     ani_size bytesWritten = 0;
-    env->String_GetUTF8(strObject, utf8_buffer, strSize + 1, &bytesWritten);
+    env->String_GetUTF8(strObject, utfBuffer, strSize + 1, &bytesWritten);
 
-    utf8_buffer[bytesWritten] = '\0';
-    nativeStr = std::string(utf8_buffer);
+    utfBuffer[bytesWritten] = '\0';
+    nativeStr = std::string(utfBuffer);
     return true;
 }
 
@@ -361,7 +362,11 @@ int32_t HksInitSessionCreateAniResult(const int32_t result, ani_env *&env, const
         return ret;
     } else {
         ret = HksCreateAniResultCommon(HKS_SUCCESS, env, resultObjOut, nullptr, nullptr);
-        int64_t handle = static_cast<int64_t>(*(uint64_t *)(context.handle.data));
+        if (context.handle.size != sizeof(uint64_t)) {
+            HKS_LOG_E("handle blob is invalid. size no equal to 4 Bytes!")
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+        int64_t handle = static_cast<int64_t>(*reinterpret_cast<uint64_t *>(context.handle.data));
         if (context.handle.size != 0 && context.handle.data != nullptr) {
             if (env->Object_CallMethodByName_Void(resultObjOut, "<set>handle", nullptr, ani_long(handle)) != ANI_OK) {
                 HKS_LOG_E("Object_CallMethod_Void Fail'<set>handle")
@@ -377,7 +382,7 @@ int32_t HksInitSessionCreateAniResult(const int32_t result, ani_env *&env, const
                 return HKS_ERROR_BUFFER_TOO_SMALL;
             }
             bool aniRet = AniUtils::CreateUint8Array(env, outVec, oubBuffer);
-            if (aniRet != true) {
+            if (!aniRet) {
                 HKS_LOG_E("export key get the keyOut ok, but creat ani object failed!");
                 return HKS_ERROR_BUFFER_TOO_SMALL;
             }
@@ -401,7 +406,7 @@ int32_t HksGetKeyAliasFromAni(ani_env *&env, const ani_string &strObject, HksBlo
     }
     int32_t ret = HKS_SUCCESS;
     keyAliasOut.size = keyAliasIn.size();
-    keyAliasOut.data = (uint8_t *)HksMalloc(keyAliasOut.size);
+    keyAliasOut.data = static_cast<uint8_t *>(HksMalloc(keyAliasOut.size));
     if (keyAliasOut.data == nullptr) {
         HKS_LOG_E("HksMalloc for keyAlias failed!");
         return HKS_ERROR_MALLOC_FAIL;
@@ -437,7 +442,8 @@ static int32_t GetHuksBlobFromUnionObj(ani_env *&env, const ani_object &unionObj
     int32_t ret{ HKS_SUCCESS };
     std::vector<uint8_t> buffer {};
     bool aniRet = AniUtils::GetUint8Array(env, unionObj, buffer);
-    if (aniRet != true) {
+    if (!aniRet) {
+        HKS_LOG_E("GetUint8Array fromUnionObj failed!")
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     blobOut.size = buffer.size();
@@ -581,9 +587,10 @@ int32_t HksGetBufferFromAni(ani_env *&env, const ani_object &arrayObj, HksBlob &
     bool getKeyRet = AniUtils::GetUint8Array(env, arrayObj, keyBuffer);
     HKS_IF_NOT_TRUE_LOGE_RETURN(getKeyRet, HKS_ERROR_INVALID_ARGUMENT);
     blobBuffer.size = keyBuffer.size();
-    blobBuffer.data = (uint8_t *)HksMalloc(blobBuffer.size);
+    blobBuffer.data = static_cast<uint8_t *>(HksMalloc(blobBuffer.size));
     HKS_IF_NULL_LOGE_RETURN(blobBuffer.data, HKS_ERROR_MALLOC_FAIL, "malloc mem for key buffer failed!")
     if (memcpy_s(blobBuffer.data, blobBuffer.size, keyBuffer.data(), blobBuffer.size) != EOK) {
+        HKS_FREE_BLOB(blobBuffer);
         HKS_LOG_E("memcpy vector key buffer to blob data failed!")
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
