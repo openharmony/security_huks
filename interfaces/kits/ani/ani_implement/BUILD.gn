@@ -26,7 +26,10 @@ ohos_shared_library("huks_interfaceImpl_ani") {
     boundary_sanitize = true
     ubsan = true
   }
-  defines = []
+  defines = [
+    "_HUKS_LOG_ENABLE_",
+    "L2_STANDARD",
+  ]
 
   include_dirs = [
     "${huks_base_path}interfaces/inner_api/huks_standard/main/include",

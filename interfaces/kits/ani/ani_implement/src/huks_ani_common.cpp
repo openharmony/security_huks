@@ -38,25 +38,6 @@
 #include "hks_param.h"
 #include "hks_errcode_adapter.h"
 
-namespace HuksAni {
-static std::string g_huksResultClassName = "L@ohos/security/huks/HuksResult;";
-static std::string g_huksOptionClassName = "L@ohos/security/huks/HuksOptionsImpl;";
-static std::string g_huksParamClassName = "L@ohos/security/huks/HuksParamImpl;";
-static std::string g_huksTagEnumName = "LHuksTag;";
-static std::string g_huksNameSpace = "L@ohos/security/huks/huks;";
-
-void FreeHksBlobAndFresh(HksBlob &blob, const bool isNeedFresh)
-{
-    if (blob.data != nullptr) {
-        if (isNeedFresh && blob.size != 0) {
-            (void)memset_s(blob.data, blob.size, 0, blob.size);
-        }
-        HKS_FREE(blob.data);
-        blob.data = nullptr;
-    }
-    blob.size = 0;
-}
-
 bool AniUtils::GetStirng([[maybe_unused]] ani_env *&env, const ani_string &strObject, std::string &nativeStr)
 {
     ani_boolean isUndefined;
@@ -67,13 +48,17 @@ bool AniUtils::GetStirng([[maybe_unused]] ani_env *&env, const ani_string &strOb
     }
     ani_size strSize = 0;
     env->String_GetUTF8Size(strObject, &strSize);
-    std::vector<char> buffer(strSize + 1);
-    char* utfBuffer = buffer.data();
+    std::string buffer(strSize + 1, '\0');
     ani_size bytesWritten = 0;
-    env->String_GetUTF8(strObject, utfBuffer, strSize + 1, &bytesWritten);
+    env->String_GetUTF8(strObject, buffer.data(), strSize + 1, &bytesWritten);
 
-    utfBuffer[bytesWritten] = '\0';
-    nativeStr = std::string(utfBuffer);
+    if (bytesWritten <= strSize) {
+        buffer[bytesWritten] = '\0';
+    } else {
+        HKS_LOG_E("String_GetUTF8 wrote beyond buffer size");
+        buffer[bytesWritten] = '\0';
+    }
+    nativeStr = buffer;
     return true;
 }
 
@@ -279,6 +264,25 @@ bool AniUtils::CreateUint8Array(ani_env *env, std::vector<uint8_t> &arrayIn, ani
     return true;
 }
 
+namespace HuksAni {
+static std::string g_huksResultClassName = "L@ohos/security/huks/HuksResult;";
+static std::string g_huksOptionClassName = "L@ohos/security/huks/HuksOptionsImpl;";
+static std::string g_huksParamClassName = "L@ohos/security/huks/HuksParamImpl;";
+static std::string g_huksTagEnumName = "LHuksTag;";
+static std::string g_huksNameSpace = "L@ohos/security/huks/huks;";
+
+void FreeHksBlobAndFresh(HksBlob &blob, const bool isNeedFresh)
+{
+    if (blob.data != nullptr) {
+        if (isNeedFresh && blob.size != 0) {
+            (void)memset_s(blob.data, blob.size, 0, blob.size);
+        }
+        HKS_FREE(blob.data);
+        blob.data = nullptr;
+    }
+    blob.size = 0;
+}
+
 static int32_t HksCreateAniResultCommon(const int32_t result, ani_env *&env, ani_object &resultObjOut,
     const char *errMsg = nullptr, ani_object oubBuffer = nullptr)
 {
@@ -363,13 +367,13 @@ int32_t HksInitSessionCreateAniResult(const int32_t result, ani_env *&env, const
     } else {
         ret = HksCreateAniResultCommon(HKS_SUCCESS, env, resultObjOut, nullptr, nullptr);
         if (context.handle.size != sizeof(uint64_t)) {
-            HKS_LOG_E("handle blob is invalid. size no equal to 4 Bytes!")
+            HKS_LOG_E("handle blob is invalid. size no equal to 4 Bytes!");
             return HKS_ERROR_INVALID_ARGUMENT;
         }
         int64_t handle = static_cast<int64_t>(*reinterpret_cast<uint64_t *>(context.handle.data));
         if (context.handle.size != 0 && context.handle.data != nullptr) {
             if (env->Object_CallMethodByName_Void(resultObjOut, "<set>handle", nullptr, ani_long(handle)) != ANI_OK) {
-                HKS_LOG_E("Object_CallMethod_Void Fail'<set>handle")
+                HKS_LOG_E("Object_CallMethod_Void Fail'<set>handle");
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
         }
@@ -443,17 +447,17 @@ static int32_t GetHuksBlobFromUnionObj(ani_env *&env, const ani_object &unionObj
     std::vector<uint8_t> buffer {};
     bool aniRet = AniUtils::GetUint8Array(env, unionObj, buffer);
     if (!aniRet) {
-        HKS_LOG_E("GetUint8Array fromUnionObj failed!")
+        HKS_LOG_E("GetUint8Array fromUnionObj failed!");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     blobOut.size = buffer.size();
     blobOut.data = static_cast<uint8_t *>(HksMalloc(blobOut.size));
     if (blobOut.data == nullptr) {
-        HKS_LOG_E("malloc mem for huks param buffer failed!")
+        HKS_LOG_E("malloc mem for huks param buffer failed!");
         return HKS_ERROR_MALLOC_FAIL;
     }
     if (memcpy_s(blobOut.data, blobOut.size, buffer.data(), blobOut.size) != EOK) {
-        HKS_LOG_E("GetHuksBlobFromUnionObj memcy to blobOut failed!")
+        HKS_LOG_E("GetHuksBlobFromUnionObj memcy to blobOut failed!");
         HKS_FREE_BLOB(blobOut);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
@@ -510,7 +514,7 @@ int32_t HksAniHuksParamConvert(ani_env *&env, const ani_object &huksParamObj, Hk
             break;
         default:
             ret = HKS_ERROR_INVALID_ARGUMENT;
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Undefin param enum type. tag value 0x%" LOG_PUBLIC "x", paramOut->tag)
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Undefin param enum type. tag value 0x%" LOG_PUBLIC "x", param.tag)
     }
     return ret;
 }
@@ -591,7 +595,7 @@ int32_t HksGetBufferFromAni(ani_env *&env, const ani_object &arrayObj, HksBlob &
     HKS_IF_NULL_LOGE_RETURN(blobBuffer.data, HKS_ERROR_MALLOC_FAIL, "malloc mem for key buffer failed!")
     if (memcpy_s(blobBuffer.data, blobBuffer.size, keyBuffer.data(), blobBuffer.size) != EOK) {
         HKS_FREE_BLOB(blobBuffer);
-        HKS_LOG_E("memcpy vector key buffer to blob data failed!")
+        HKS_LOG_E("memcpy vector key buffer to blob data failed!");
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
     return HKS_SUCCESS;
