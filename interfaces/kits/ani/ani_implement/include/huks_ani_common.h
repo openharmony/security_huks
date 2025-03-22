@@ -31,34 +31,6 @@
 #include "hks_param.h"
 #include "hks_log.h"
 
-namespace HuksAni {
-
-class CommonContext {
-public:
-    int32_t result = 0;
-    struct HksBlob keyAlias{0, nullptr};
-    struct HksParamSet *paramSetIn = nullptr;
-    struct HksParamSet *paramSetOut = nullptr;
-};
-
-class KeyContext : public CommonContext {
-public:
-    struct HksBlob key{0, nullptr};
-};
-
-class ImportWrappedKeyContext : public KeyContext {
-public:
-    struct HksBlob wrappingKeyAlias{0, nullptr};
-};
-
-class SessionContext : public CommonContext {
-public:
-    struct HksBlob inData{0, nullptr};
-    struct HksBlob outData{0, nullptr};
-    struct HksBlob handle{0, nullptr};
-    struct HksBlob token{0, nullptr};
-};
-
 namespace AniUtils {
     bool GetStirng([[maybe_unused]] ani_env *&env, const ani_string &strObject, std::string &nativeStr);
 
@@ -84,6 +56,33 @@ namespace AniUtils {
     void PrintUint8Array(std::vector<uint8_t> &arrayIn);
 
     bool CreateUint8Array(ani_env *env, std::vector<uint8_t> &arrayIn, ani_object &arrayOut);
+}
+
+namespace HuksAni {
+class CommonContext {
+public:
+    int32_t result = 0;
+    struct HksBlob keyAlias{0, nullptr};
+    struct HksParamSet *paramSetIn = nullptr;
+    struct HksParamSet *paramSetOut = nullptr;
+};
+
+class KeyContext : public CommonContext {
+public:
+    struct HksBlob key{0, nullptr};
+};
+
+class ImportWrappedKeyContext : public KeyContext {
+public:
+    struct HksBlob wrappingKeyAlias{0, nullptr};
+};
+
+class SessionContext : public CommonContext {
+public:
+    struct HksBlob inData{0, nullptr};
+    struct HksBlob outData{0, nullptr};
+    struct HksBlob handle{0, nullptr};
+    struct HksBlob token{0, nullptr};
 };
 
 int32_t HksGetKeyAliasFromAni(ani_env *&env, const ani_string &strObject, HksBlob &keyAliasOut);
