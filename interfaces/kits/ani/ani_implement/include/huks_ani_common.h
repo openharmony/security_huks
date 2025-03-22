@@ -16,19 +16,21 @@
 #ifndef HKS_ANI_H
 #define HKS_ANI_H
 
-#include "hks_mem.h"
-#include "hks_type.h"
-#include "hks_type_enum.h"
-#include "securec.h"
-#include "hks_template.h"
-#include "hks_param.h"
-#include "hks_log.h"
-
-#include <ani.h>
 #include <cstdbool>
 #include <string>
 #include <iostream>
 #include <cstdio>
+
+#include <ani.h>
+#include "securec.h"
+
+#include "hks_mem.h"
+#include "hks_type.h"
+#include "hks_type_enum.h"
+#include "hks_template.h"
+#include "hks_param.h"
+#include "hks_log.h"
+
 namespace HuksAni {
 
 class CommonContext {
