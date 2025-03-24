@@ -235,7 +235,7 @@ static int32_t CopyDeToTmpPathIfNeed(void)
     HKS_IF_TRUE_RETURN(HksIsDirExist(HKS_KEY_STORE_TMP_PATH) == HKS_SUCCESS, HKS_SUCCESS)
     int32_t ret = rename(HKS_KEY_STORE_PATH, HKS_KEY_STORE_TMP_PATH);
     HKS_IF_TRUE_LOGE_RETURN(ret != 0, HKS_ERROR_MAKE_DIR_FAIL,
-        "move de file path to old file path failed, ret = %" LOG_PUBLIC "d.", HKS_ERROR_MAKE_DIR_FAIL);
+        "move de file path to old file path failed, ret = %" LOG_PUBLIC "d.", ret);
 
     ret = HksMakeDir(HKS_KEY_STORE_PATH);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_MAKE_DIR_FAIL,
