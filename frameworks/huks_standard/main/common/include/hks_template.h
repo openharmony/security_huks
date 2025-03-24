@@ -150,12 +150,6 @@ if ((BOOL_FUNC)) { \
     return (ERROR_CODE); \
 }
 
-#define HKS_IF_TRUE_LOGERR_RETURN(BOOL_FUNC, ERROR_CODE, LOG_MESSAGE, ...) \
-if ((BOOL_FUNC)) { \
-    HKS_LOG_ERRNO(LOG_MESSAGE, ##__VA_ARGS__); \
-    return (ERROR_CODE); \
-}
-
 #define HKS_IF_TRUE_LOGE_CONTINUE(BOOL_FUNC, LOG_MESSAGE, ...) \
 if ((BOOL_FUNC)) { \
     HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
