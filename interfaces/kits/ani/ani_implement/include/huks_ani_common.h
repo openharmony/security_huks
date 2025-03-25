@@ -30,6 +30,7 @@
 #include "hks_template.h"
 #include "hks_param.h"
 #include "hks_log.h"
+#include "hks_errcode_adapter.h"
 
 namespace AniUtils {
     bool GetStirng([[maybe_unused]] ani_env *&env, const ani_string &strObject, std::string &nativeStr);
@@ -61,6 +62,9 @@ namespace AniUtils {
 namespace HuksAni {
 class CommonContext {
 public:
+    CommonContext() = default;
+    ~CommonContext();
+
     int32_t result = 0;
     struct HksBlob keyAlias{0, nullptr};
     struct HksParamSet *paramSetIn = nullptr;
@@ -69,16 +73,25 @@ public:
 
 class KeyContext : public CommonContext {
 public:
+    KeyContext() = default;
+    ~KeyContext();
+
     struct HksBlob key{0, nullptr};
 };
 
 class ImportWrappedKeyContext : public KeyContext {
 public:
+    ImportWrappedKeyContext() = default;
+    ~ImportWrappedKeyContext();
+
     struct HksBlob wrappingKeyAlias{0, nullptr};
 };
 
 class SessionContext : public CommonContext {
 public:
+    SessionContext() = default;
+    ~SessionContext();
+
     struct HksBlob inData{0, nullptr};
     struct HksBlob outData{0, nullptr};
     struct HksBlob handle{0, nullptr};
@@ -87,12 +100,12 @@ public:
 
 int32_t HksGetKeyAliasFromAni(ani_env *&env, const ani_string &strObject, HksBlob &keyAliasOut);
 
-int32_t HksCreateAniResult(const int32_t result, ani_env *&env, ani_object &resultObjOut,
-    ani_object oubBuffer = nullptr);
+int32_t HksCreateAniResult(const HksResult &resultInfo, ani_env *&env, ani_object &resultObjOut,
+    ani_object outBuffer = nullptr);
 
-int32_t HksIsKeyItemExistCreateAniResult(const int32_t result, ani_env *&env, ani_object &resultObjOut);
+int32_t HksIsKeyItemExistCreateAniResult(const HksResult &resultInfo, ani_env *&env, ani_object &resultObjOut);
 
-int32_t HksInitSessionCreateAniResult(const int32_t result, ani_env *&env, const SessionContext &context,
+int32_t HksInitSessionCreateAniResult(const HksResult &resultInfo, ani_env *&env, const SessionContext &context,
     ani_object &resultObjOut);
 
 int32_t HksGetParamSetFromAni(ani_env *&env, const ani_object &optionsObj, struct HksParamSet *&paramSetOut);
@@ -100,16 +113,6 @@ int32_t HksGetParamSetFromAni(ani_env *&env, const ani_object &optionsObj, struc
 void FreeHksBlobAndFresh(HksBlob &blob, const bool isNeedFresh = false);
 
 int32_t HksOptionGetInData(ani_env *&env, ani_object options, HksBlob &blobOut);
-
-template<typename T>
-void HksDeleteContext(T &context)
-{
-    FreeHksBlobAndFresh(context.keyAlias);
-    HksFreeParamSet(&(context.paramSetIn));
-    if (context.paramSetOut != nullptr) {
-        HksFreeParamSet(&(context.paramSetOut));
-    }
-}
 
 template<typename T>
 int32_t HksAniParseParams(ani_env *env, ani_string keyAlias, ani_object &options, T *&&contextPtr)
@@ -134,20 +137,10 @@ int32_t HksAniParseParams(ani_env *env, ani_string keyAlias, ani_object &options
 template<>
 int32_t HksAniParseParams(ani_env *env, ani_string keyAlias, ani_object &options, KeyContext *&&context);
 
-template<>
-void HksDeleteContext(KeyContext &context);
-
-
 int32_t HksAniImportWrappedKeyParseParams(ani_env *env, ani_string &keyAlias, ani_string &wrappingKeyAlias,
     ani_object options, ImportWrappedKeyContext *&&contextPtr);
 
-template<>
-void HksDeleteContext(ImportWrappedKeyContext &context);
-
 int32_t HksAniParseParams(ani_env *env, ani_long &handle, ani_object &options, SessionContext *&&contextPtr);
-
-template<>
-void HksDeleteContext(SessionContext &context);
 
 }
 #endif
