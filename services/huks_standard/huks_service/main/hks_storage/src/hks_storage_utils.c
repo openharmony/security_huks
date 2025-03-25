@@ -131,9 +131,8 @@ int32_t ConstructName(const struct HksBlob *blob, char *targetName, uint32_t nam
     HKS_IF_TRUE_RETURN(nameLen <= 1, HKS_ERROR_INVALID_ARGUMENT)
 
     for (uint32_t i = 0; i < blob->size; ++i) {
-        if (count >= (nameLen - 1)) { /* nameLen can be guaranteed to be greater than 1 */
-            return HKS_ERROR_INSUFFICIENT_DATA;
-        }
+        /* nameLen can be guaranteed to be greater than 1 */
+        HKS_IF_TRUE_RETURN(count >= (nameLen - 1), HKS_ERROR_INSUFFICIENT_DATA);
 
         if ((blob->data[i] < '0') || (blob->data[i] > '~')) {
             targetName[count++] = '+' + (blob->data[i] >> HKS_ENCODE_OFFSET_LEN);
@@ -207,10 +206,8 @@ int32_t GetPath(const char *path, const char *name, char *targetPath, uint32_t p
     HKS_IF_TRUE_RETURN(strlen(targetPath) <= 0, HKS_ERROR_INTERNAL_ERROR)
 
     if (targetPath[strlen(targetPath) - 1] != '/') {
-        if (strncat_s(targetPath, pathLen, "/", strlen("/")) != EOK) {
-            HKS_LOG_E("strncat slash failed");
-            return HKS_ERROR_INTERNAL_ERROR;
-        }
+        HKS_IF_NOT_EOK_LOGE_RETURN(strncat_s(targetPath, pathLen, "/", strlen("/")),
+            HKS_ERROR_INTERNAL_ERROR, "strncat slash failed");
     }
 
     if (strncat_s(targetPath, pathLen, name, strlen(name)) != EOK) {
