@@ -328,41 +328,37 @@ static int32_t HksCreateAniResultCommon(const int32_t result, ani_env *&env, ani
     return HKS_SUCCESS;
 }
 
-int32_t HksCreateAniResult(const int32_t result, ani_env *&env, ani_object &resultObjOut, ani_object oubBuffer)
+int32_t HksCreateAniResult(const HksResult &resultInfo, ani_env *&env, ani_object &resultObjOut, ani_object outBuffer)
 {
-    struct HksResult errInfo {};
     int32_t ret{ HKS_SUCCESS };
-    errInfo.errorCode = 0;
-    if (result != HKS_SUCCESS) {
-        errInfo = HksConvertErrCode(result);
-        ret = HksCreateAniResultCommon(errInfo.errorCode, env, resultObjOut, errInfo.errorMsg, oubBuffer);
+    HKS_IF_NULL_LOGE_RETURN(env, HKS_ERROR_NULL_POINTER, "HksCreateAniResult, but ani env is null!")
+    if (resultInfo.errorCode != HKS_SUCCESS) {
+        ret = HksCreateAniResultCommon(resultInfo.errorCode, env, resultObjOut, resultInfo.errorMsg, outBuffer);
     } else {
-        ret = HksCreateAniResultCommon(HKS_SUCCESS, env, resultObjOut, nullptr, oubBuffer);
+        ret = HksCreateAniResultCommon(resultInfo.errorCode, env, resultObjOut, nullptr, outBuffer);
     }
     return ret;
 }
 
-int32_t HksIsKeyItemExistCreateAniResult(const int32_t result, ani_env *&env, ani_object &resultObjOut)
+int32_t HksIsKeyItemExistCreateAniResult(const HksResult &resultInfo, ani_env *&env, ani_object &resultObjOut)
 {
-    struct HksResult errInfo {};
     int32_t ret{ HKS_SUCCESS };
-    if (result != HKS_SUCCESS && result != HKS_ERROR_NOT_EXIST) {
-        errInfo = HksConvertErrCode(result);
-        ret = HksCreateAniResultCommon(errInfo.errorCode, env, resultObjOut, errInfo.errorMsg, nullptr);
+    HKS_IF_NULL_LOGE_RETURN(env, HKS_ERROR_NULL_POINTER, "HksIsKeyItemExistCreateAniResult, but ani env is null!")
+    if (resultInfo.errorCode != HKS_SUCCESS && resultInfo.errorCode != HKS_ERROR_NOT_EXIST) {
+        ret = HksCreateAniResultCommon(resultInfo.errorCode, env, resultObjOut, resultInfo.errorMsg, nullptr);
     } else {
-        ret = HksCreateAniResultCommon(result, env, resultObjOut, nullptr, nullptr);
+        ret = HksCreateAniResultCommon(resultInfo.errorCode, env, resultObjOut, nullptr, nullptr);
     }
     return ret;
 }
 
-int32_t HksInitSessionCreateAniResult(const int32_t result, ani_env *&env, const SessionContext &context,
+int32_t HksInitSessionCreateAniResult(const HksResult &resultInfo, ani_env *&env, const SessionContext &context,
     ani_object &resultObjOut)
 {
-    struct HksResult errInfo {};
     int32_t ret{ HKS_SUCCESS };
-    if (result != HKS_SUCCESS) {
-        errInfo = HksConvertErrCode(result);
-        ret = HksCreateAniResultCommon(errInfo.errorCode, env, resultObjOut, errInfo.errorMsg, nullptr);
+    HKS_IF_NULL_LOGE_RETURN(env, HKS_ERROR_NULL_POINTER, "HksInitSessionCreateAniResult, but ani env is null!")
+    if (resultInfo.errorCode != HKS_SUCCESS) {
+        ret = HksCreateAniResultCommon(resultInfo.errorCode, env, resultObjOut, resultInfo.errorMsg, nullptr);
         return ret;
     } else {
         ret = HksCreateAniResultCommon(HKS_SUCCESS, env, resultObjOut, nullptr, nullptr);
@@ -553,9 +549,9 @@ int32_t HksGetParamSetFromAni(ani_env *&env, const ani_object &optionsObj, struc
             ani_ref paramEntryRef;
             if (env->Object_CallMethodByName_Ref(propertiesArray, "$_get",
                 "I:Lstd/core/Object;", &paramEntryRef, (ani_int)i) != ANI_OK) {
-                HKS_LOG_E("Object_CallMethodByName_Ref _get Failed");
-                FreeParsedParams(paramArray);
-                return HKS_ERROR_INVALID_ARGUMENT;
+                HKS_LOG_E("Object_CallMethodByName_Ref get ani object Failed");
+                ret = HKS_ERROR_INVALID_ARGUMENT;
+                break;
             }
             ani_object huksParamObj = reinterpret_cast<ani_object>(paramEntryRef);
             HksParam tempParam;
@@ -573,15 +569,13 @@ int32_t HksGetParamSetFromAni(ani_env *&env, const ani_object &optionsObj, struc
 
         ret = HksBuildParamSet(&paramSetNew);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksBuildParamSet fail. ret = %" LOG_PUBLIC "d", ret)
-
-        FreeParsedParams(paramArray);
     } while (0);
-    paramSetOut = paramSetNew;
+    FreeParsedParams(paramArray);
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&paramSetNew);
-        FreeParsedParams(paramArray);
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return ret;
     }
+    paramSetOut = paramSetNew;
     return ret;
 }
 
@@ -634,13 +628,6 @@ int32_t HksAniParseParams(ani_env *env, ani_string keyAlias, ani_object &options
     return ret;
 }
 
-template<>
-void HksDeleteContext(KeyContext &context)
-{
-    HksDeleteContext<CommonContext>(context);
-    FreeHksBlobAndFresh(context.keyAlias, true);
-}
-
 int32_t HksAniImportWrappedKeyParseParams(ani_env *env, ani_string &keyAlias, ani_string &wrappingKeyAlias,
     ani_object options, ImportWrappedKeyContext *&&contextPtr)
 {
@@ -657,14 +644,6 @@ int32_t HksAniImportWrappedKeyParseParams(ani_env *env, ani_string &keyAlias, an
     }
     return ret;
 }
-
-template<>
-void HksDeleteContext(ImportWrappedKeyContext &context)
-{
-    HksDeleteContext<KeyContext>(context);
-    FreeHksBlobAndFresh(context.wrappingKeyAlias);
-}
-
 
 int32_t HksAniParseParams(ani_env *env, ani_long &handle, ani_object &options, SessionContext *&&contextPtr)
 {
@@ -692,13 +671,31 @@ int32_t HksAniParseParams(ani_env *env, ani_long &handle, ani_object &options, S
     return ret;
 }
 
-template<>
-void HksDeleteContext(SessionContext &context)
+CommonContext::~CommonContext()
 {
-    HksDeleteContext<CommonContext>(context);
-    FreeHksBlobAndFresh(context.token, true);
-    FreeHksBlobAndFresh(context.handle);
-    FreeHksBlobAndFresh(context.inData);
-    FreeHksBlobAndFresh(context.outData, true);
+    FreeHksBlobAndFresh(this->keyAlias);
+    HksFreeParamSet(&(this->paramSetIn));
+    if (this->paramSetOut != nullptr) {
+        HksFreeParamSet(&(this->paramSetOut));
+    }
 }
+
+KeyContext::~KeyContext()
+{
+    FreeHksBlobAndFresh(this->key, true);
+}
+
+ImportWrappedKeyContext::~ImportWrappedKeyContext()
+{
+    FreeHksBlobAndFresh(this->wrappingKeyAlias);
+}
+
+SessionContext::~SessionContext()
+{
+    FreeHksBlobAndFresh(this->token, true);
+    FreeHksBlobAndFresh(this->handle);
+    FreeHksBlobAndFresh(this->inData);
+    FreeHksBlobAndFresh(this->outData, true);
+}
+
 }  // namespace
