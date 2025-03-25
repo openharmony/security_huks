@@ -209,11 +209,10 @@ int32_t HksCheckWrappedDataFormatValidity(const struct HksBlob *wrappedData, uin
         }
         offset += partDataLength;
 
-        if ((validBlobLengths != NULL) && (*(validBlobLengths + blobIndex) != partDataLength)) {
-            HKS_LOG_E("the blob part:%" LOG_PUBLIC "u length is invalid, should be %" LOG_PUBLIC "u!",
-                blobIndex, *(validBlobLengths + blobIndex));
-            return HKS_ERROR_INVALID_WRAPPED_FORMAT;
-        }
+        HKS_IF_TRUE_LOGE_RETURN((validBlobLengths != NULL) && (*(validBlobLengths + blobIndex) != partDataLength),
+            HKS_ERROR_INVALID_WRAPPED_FORMAT,
+            "the blob part:%" LOG_PUBLIC "u length is invalid, should be %" LOG_PUBLIC "u!",
+            blobIndex, *(validBlobLengths + blobIndex));
     }
 
     if (offset != dataSize) {
@@ -290,15 +289,13 @@ int32_t HksCheckKeyBlobParamSetEqualRuntimeParamSet(const struct HksParamSet *ke
     if (ret != HKS_SUCCESS) {
         isExistInParamsetTwo = false;
     }
-    if (isExistInParamsetOne && (!isExistInParamsetTwo)) {
-        HKS_LOG_E("please set param in paramsetTwo");
-        return HKS_ERROR_BAD_STATE;
-    }
-    if (isExistInParamsetOne && isExistInParamsetTwo &&
-        (paramInParamsetOne->uint32Param != paramInParamsetTwo->uint32Param)) {
-        HKS_LOG_E("values does not match");
-        return HKS_ERROR_BAD_STATE;
-    }
+
+    HKS_IF_TRUE_LOGE_RETURN(isExistInParamsetOne && (!isExistInParamsetTwo),
+        HKS_ERROR_BAD_STATE, "please set param in paramsetTwo");
+    HKS_IF_TRUE_LOGE_RETURN(isExistInParamsetOne && isExistInParamsetTwo &&
+        (paramInParamsetOne->uint32Param != paramInParamsetTwo->uint32Param),
+        HKS_ERROR_BAD_STATE, "values does not match");
+
     return HKS_SUCCESS;
 }
 
