@@ -326,6 +326,11 @@ static int32_t AesExcute(AesAsyncContext *asyncContext)
     if (ret != ERROR_SUCCESS) {
         CIPHER_LOG_E("AesCrypt fail, ret is %d", ret);
     }
+    if (aes.data.text == nullptr) {
+        CIPHER_LOG_E("aes.data.text is null");
+        DeinitAesCryptData(&aes);
+        return ERROR_CODE_GENERAL;
+    }
     asyncContext->textOut = static_cast<char *>(malloc(strlen(aes.data.text) + 1));
     if (asyncContext->textOut == nullptr) {
         DeinitAesCryptData(&aes);
