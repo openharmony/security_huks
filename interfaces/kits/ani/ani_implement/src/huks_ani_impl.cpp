@@ -29,6 +29,7 @@
 #include "hks_type.h"
 #include "hks_type_enum.h"
 #include "hks_log.h"
+#include "hks_errcode_adapter.h"
 
 using namespace HuksAni;
 static const char *HUKS_GLOBAL_NAME_SPACE = "L@ohos/security/huks/ETSGLOBAL;";
@@ -39,6 +40,7 @@ static ani_object generateKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unu
     ani_string keyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
+    struct HksResult resultInfo{0, nullptr, nullptr};
     int32_t ret{ HKS_SUCCESS };
     CommonContext context;
     do {
@@ -49,11 +51,14 @@ static ani_object generateKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unu
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGenerateKey failed! ret = %" LOG_PUBLIC "d", ret)
     } while (0);
     if (ret != HKS_SUCCESS) {
-        HksDeleteContext<CommonContext>(context);
+        resultInfo = HksConvertErrCode(ret);
         HKS_LOG_E("HksGetKeyAlias failed. ret = %" LOG_PUBLIC "d", ret);
     }
-    HksDeleteContext<CommonContext>(context);
-    (void)HksCreateAniResult(ret, env, aniReturnObject);
+    ret = HksCreateAniResult(resultInfo, env, aniReturnObject);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret);
+        return {};
+    }
     return aniReturnObject;
 }
 
@@ -61,6 +66,7 @@ static ani_object deleteKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unuse
     ani_string keyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
+    struct HksResult resultInfo{0, nullptr, nullptr};
     int32_t ret{ HKS_SUCCESS };
     CommonContext context;
     do {
@@ -71,11 +77,14 @@ static ani_object deleteKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unuse
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDeleteKey failed! ret = %" LOG_PUBLIC "d", ret)
     } while (0);
     if (ret != HKS_SUCCESS) {
-        HksDeleteContext<CommonContext>(context);
-        HKS_LOG_E("HksGetKeyAlias failed. ret = %" LOG_PUBLIC "d", ret);
+        resultInfo = HksConvertErrCode(ret);
+        HKS_LOG_E("HksDeleteKey failed. ret = %" LOG_PUBLIC "d", ret);
     }
-    HksDeleteContext<CommonContext>(context);
-    (void)HksCreateAniResult(ret, env, aniReturnObject);
+    ret = HksCreateAniResult(resultInfo, env, aniReturnObject);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret);
+        return {};
+    }
     return aniReturnObject;
 }
 
@@ -83,6 +92,7 @@ static ani_object importKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unuse
     ani_string keyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
+    struct HksResult resultInfo{0, nullptr, nullptr};
     int32_t ret{ HKS_SUCCESS };
     KeyContext context;
     do {
@@ -93,11 +103,14 @@ static ani_object importKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unuse
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksImportKey failed! ret = %" LOG_PUBLIC "d", ret)
     } while (0);
     if (ret != HKS_SUCCESS) {
-        HksDeleteContext<KeyContext>(context);
-        HKS_LOG_E("importKeyItemSync failed. ret = %" LOG_PUBLIC "d", ret);
+        resultInfo = HksConvertErrCode(ret);
+        HKS_LOG_E("HksImportKey failed. ret = %" LOG_PUBLIC "d", ret);
     }
-    HksDeleteContext<KeyContext>(context);
-    (void)HksCreateAniResult(ret, env, aniReturnObject);
+    ret = HksCreateAniResult(resultInfo, env, aniReturnObject);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret);
+        return {};
+    }
     return aniReturnObject;
 }
 
@@ -105,6 +118,7 @@ static ani_object importWrappedKeyItemSync([[maybe_unused]] ani_env *env, [[mayb
     ani_string keyAlias, ani_string wrappingKeyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
+    struct HksResult resultInfo{0, nullptr, nullptr};
     int32_t ret{ HKS_SUCCESS };
     ImportWrappedKeyContext context;
     do {
@@ -116,11 +130,14 @@ static ani_object importWrappedKeyItemSync([[maybe_unused]] ani_env *env, [[mayb
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksImportWrappedKey failed! ret = %" LOG_PUBLIC "d", ret)
     } while (0);
     if (ret != HKS_SUCCESS) {
-        HksDeleteContext<ImportWrappedKeyContext>(context);
-        HKS_LOG_E("HksDeleteContext failed. ret = %" LOG_PUBLIC "d", ret);
+        resultInfo = HksConvertErrCode(ret);
+        HKS_LOG_E("HksImportWrappedKey failed. ret = %" LOG_PUBLIC "d", ret);
     }
-    HksDeleteContext<ImportWrappedKeyContext>(context);
-    (void)HksCreateAniResult(ret, env, aniReturnObject);
+    ret = HksCreateAniResult(resultInfo, env, aniReturnObject);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret);
+        return {};
+    }
     return aniReturnObject;
 }
 
@@ -138,6 +155,7 @@ static ani_object exportKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unuse
     ani_string keyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
+    struct HksResult resultInfo{0, nullptr, nullptr};
     int32_t ret{ HKS_SUCCESS };
     KeyContext context;
     std::vector<uint8_t> outVec;
@@ -167,11 +185,14 @@ static ani_object exportKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unuse
         }
     } while (0);
     if (ret != HKS_SUCCESS) {
-        HksDeleteContext<KeyContext>(context);
-        HKS_LOG_E("HksDeleteContext failed. ret = %" LOG_PUBLIC "d", ret);
+        resultInfo = HksConvertErrCode(ret);
+        HKS_LOG_E("HksExportPublicKey failed. ret = %" LOG_PUBLIC "d", ret);
     }
-    (void)HksCreateAniResult(ret, env, aniReturnObject, bufferOut);
-    HksDeleteContext<KeyContext>(context);
+    ret = HksCreateAniResult(resultInfo, env, aniReturnObject, bufferOut);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret);
+        return {};
+    }
     return aniReturnObject;
 }
 
@@ -179,6 +200,7 @@ static ani_object isKeyItemExistSync([[maybe_unused]] ani_env *env, [[maybe_unus
     ani_string keyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
+    struct HksResult resultInfo{0, nullptr, nullptr};
     int32_t ret{ HKS_SUCCESS };
     CommonContext context;
     do {
@@ -188,12 +210,16 @@ static ani_object isKeyItemExistSync([[maybe_unused]] ani_env *env, [[maybe_unus
         ret = HksKeyExist(&context.keyAlias, context.paramSetIn);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksKeyExist failed! ret = %" LOG_PUBLIC "d", ret)
     } while (0);
+    resultInfo.errorCode = ret;
     if (ret != HKS_SUCCESS  && ret != HKS_ERROR_NOT_EXIST) {
-        HksDeleteContext<CommonContext>(context);
-        HKS_LOG_E("HksGetKeyAlias failed. ret = %" LOG_PUBLIC "d", ret);
+        resultInfo = HksConvertErrCode(ret);
+        HKS_LOG_E("HksKeyExist failed. ret = %" LOG_PUBLIC "d", ret);
     }
-    HksDeleteContext<CommonContext>(context);
-    (void)HksIsKeyItemExistCreateAniResult(ret, env, aniReturnObject);
+    ret = HksIsKeyItemExistCreateAniResult(resultInfo, env, aniReturnObject);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksIsKeyItemExistCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret);
+        return {};
+    }
     return aniReturnObject;
 }
 
@@ -219,6 +245,7 @@ static ani_object initSessionSync([[maybe_unused]] ani_env *env, [[maybe_unused]
     ani_string keyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
+    struct HksResult resultInfo{0, nullptr, nullptr};
     int32_t ret{ HKS_SUCCESS };
     SessionContext context;
     do {
@@ -232,11 +259,14 @@ static ani_object initSessionSync([[maybe_unused]] ani_env *env, [[maybe_unused]
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksInit failed! ret = %" LOG_PUBLIC "d", ret)
     } while (0);
     if (ret != HKS_SUCCESS) {
-        HksDeleteContext<SessionContext>(context);
-        HKS_LOG_E("HksGetKeyAlias failed. ret = %" LOG_PUBLIC "d", ret);
+        resultInfo = HksConvertErrCode(ret);
+        HKS_LOG_E("HksInit failed. ret = %" LOG_PUBLIC "d", ret);
     }
-    (void)HksInitSessionCreateAniResult(ret, env, context, aniReturnObject);
-    HksDeleteContext<SessionContext>(context);
+    ret = HksInitSessionCreateAniResult(resultInfo, env, context, aniReturnObject);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksInitSessionCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret);
+        return {};
+    }
     return aniReturnObject;
 }
 
@@ -244,6 +274,7 @@ static ani_object updateFinishSessionSync([[maybe_unused]] ani_env *env, [[maybe
     ani_long handle, ani_object options, ani_boolean isUpdate)
 {
     ani_object aniReturnObject{};
+    struct HksResult resultInfo{0, nullptr, nullptr};
     int32_t ret{ HKS_SUCCESS };
     std::vector<uint8_t> outVec;
     ani_object bufferOut = nullptr;
@@ -273,19 +304,21 @@ static ani_object updateFinishSessionSync([[maybe_unused]] ani_env *env, [[maybe
             ret = HKS_ERROR_BUFFER_TOO_SMALL;
             break;
         }
-        bool aniRet = AniUtils::CreateUint8Array(env, outVec, bufferOut);
-        if (!aniRet) {
+        if (!AniUtils::CreateUint8Array(env, outVec, bufferOut)) {
             HKS_LOG_E("export key get the keyOut ok, but creat ani object failed!");
             ret = HKS_ERROR_BUFFER_TOO_SMALL;
             break;
         }
     } while (0);
     if (ret != HKS_SUCCESS) {
-        HksDeleteContext<SessionContext>(context);
-        HKS_LOG_E("HksGetKeyAlias failed. ret = %" LOG_PUBLIC "d", ret);
+        resultInfo = HksConvertErrCode(ret);
+        HKS_LOG_E("updateFinishSessionSync failed. ret = %" LOG_PUBLIC "d", ret);
     }
-    HksDeleteContext<SessionContext>(context);
-    (void)HksCreateAniResult(ret, env, aniReturnObject, bufferOut);
+    ret = HksCreateAniResult(resultInfo, env, aniReturnObject, bufferOut);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret);
+        return {};
+    }
     return aniReturnObject;
 }
 
@@ -293,6 +326,7 @@ static ani_object abortSessionSync([[maybe_unused]] ani_env *env, [[maybe_unused
     ani_long handle, ani_object options)
 {
     ani_object aniReturnObject{};
+    struct HksResult resultInfo{0, nullptr, nullptr};
     int32_t ret{ HKS_SUCCESS };
     SessionContext context;
     do {
@@ -303,11 +337,14 @@ static ani_object abortSessionSync([[maybe_unused]] ani_env *env, [[maybe_unused
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "abort session failed. ret = %" LOG_PUBLIC "d", ret)
     } while (0);
     if (ret != HKS_SUCCESS) {
-        HksDeleteContext<SessionContext>(context);
+        resultInfo = HksConvertErrCode(ret);
         HKS_LOG_E("HksGetKeyAlias failed. ret = %" LOG_PUBLIC "d", ret);
     }
-    HksDeleteContext<SessionContext>(context);
-    (void)HksCreateAniResult(ret, env, aniReturnObject);
+    ret = HksCreateAniResult(resultInfo, env, aniReturnObject);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret);
+        return {};
+    }
     return aniReturnObject;
 }
 
