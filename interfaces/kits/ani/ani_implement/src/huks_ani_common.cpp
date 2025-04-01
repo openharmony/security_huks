@@ -87,18 +87,18 @@ bool AniUtils::GetInt32Field(ani_env *&env, const ani_object &object, std::strin
 
 bool AniUtils::GetInt32FromUnionObj(ani_env *&env, const ani_object &unionObj, int32_t &value)
 {
-    ani_class DoubleClass;
-    if (env->FindClass("Lstd/core/Double;", &DoubleClass) != ANI_OK) {
+    ani_class intClass;
+    if (env->FindClass("Lstd/core/Int;", &intClass) != ANI_OK) {
         HKS_LOG_E("Not found Boolean");
         return false;
     }
-    ani_boolean isNumber;
-    if (env->Object_InstanceOf(unionObj, DoubleClass, &isNumber) != ANI_OK) {
+    ani_boolean isInt;
+    if (env->Object_InstanceOf(unionObj, intClass, &isInt) != ANI_OK) {
         HKS_LOG_E("Reference_IsUndefined isNumber Failed");
         return false;
     }
-    if (!isNumber) {
-        HKS_LOG_E("Not isNumber");
+    if (!isInt) {
+        HKS_LOG_E("the class is not int type! can not use CallMethodByName_Int");
         return false;
     }
     if (env->Object_CallMethodByName_Int(unionObj, "intValue", nullptr, &value) != ANI_OK) {
