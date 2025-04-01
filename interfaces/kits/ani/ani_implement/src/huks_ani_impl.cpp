@@ -32,11 +32,11 @@
 #include "hks_errcode_adapter.h"
 
 using namespace HuksAni;
-static const char *HUKS_GLOBAL_NAME_SPACE = "L@ohos/security/huks/ETSGLOBAL;";
+static const char *HUKS_GLOBAL_NAME_SPACE = "L@ohos/security/huks;";
 constexpr uint32_t HKS_MAX_TOKEN_SIZE = 2048;
 constexpr uint32_t OUTPURT_DATA_SIZE = 1024 * 64;
 
-static ani_object generateKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
+static ani_object generateKeyItemSync([[maybe_unused]] ani_env *env,
     ani_string keyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
@@ -62,7 +62,7 @@ static ani_object generateKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unu
     return aniReturnObject;
 }
 
-static ani_object deleteKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
+static ani_object deleteKeyItemSync([[maybe_unused]] ani_env *env,
     ani_string keyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
@@ -88,7 +88,7 @@ static ani_object deleteKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unuse
     return aniReturnObject;
 }
 
-static ani_object importKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
+static ani_object importKeyItemSync([[maybe_unused]] ani_env *env,
     ani_string keyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
@@ -114,7 +114,7 @@ static ani_object importKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unuse
     return aniReturnObject;
 }
 
-static ani_object importWrappedKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
+static ani_object importWrappedKeyItemSync([[maybe_unused]] ani_env *env,
     ani_string keyAlias, ani_string wrappingKeyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
@@ -151,7 +151,7 @@ static int32_t PrepareExportKeyContextBuffer(KeyContext &context)
     return HKS_SUCCESS;
 }
 
-static ani_object exportKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
+static ani_object exportKeyItemSync([[maybe_unused]] ani_env *env,
     ani_string keyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
@@ -196,7 +196,7 @@ static ani_object exportKeyItemSync([[maybe_unused]] ani_env *env, [[maybe_unuse
     return aniReturnObject;
 }
 
-static ani_object isKeyItemExistSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
+static ani_object isKeyItemExistSync([[maybe_unused]] ani_env *env,
     ani_string keyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
@@ -241,7 +241,7 @@ static int32_t InitOutParams(SessionContext &context)
     return HKS_SUCCESS;
 }
 
-static ani_object initSessionSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
+static ani_object initSessionSync([[maybe_unused]] ani_env *env,
     ani_string keyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
@@ -270,7 +270,7 @@ static ani_object initSessionSync([[maybe_unused]] ani_env *env, [[maybe_unused]
     return aniReturnObject;
 }
 
-static ani_object updateFinishSessionSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
+static ani_object updateFinishSessionSync([[maybe_unused]] ani_env *env,
     ani_long handle, ani_object options, ani_boolean isUpdate)
 {
     ani_object aniReturnObject{};
@@ -322,7 +322,7 @@ static ani_object updateFinishSessionSync([[maybe_unused]] ani_env *env, [[maybe
     return aniReturnObject;
 }
 
-static ani_object abortSessionSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
+static ani_object abortSessionSync([[maybe_unused]] ani_env *env,
     ani_long handle, ani_object options)
 {
     ani_object aniReturnObject{};
@@ -358,13 +358,13 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         HKS_LOG_E("vm or result is null ptr!!");
         return (ani_status)INVALID_ANI_VERSION;
     }
-    ani_env *env;
+    ani_env *env{};
     if (vm->GetEnv(ANI_VERSION_1, &env) != ANI_OK) {
         HKS_LOG_E("Unsupported ANI_VERSION_1");
         return (ani_status)INVALID_ANI_VERSION;
     }
-    ani_class globalCls;
-    if (env->FindClass(HUKS_GLOBAL_NAME_SPACE, &globalCls) != ANI_OK) {
+    ani_module globalModule{};
+    if (env->FindModule(HUKS_GLOBAL_NAME_SPACE, &globalModule) != ANI_OK) {
         HKS_LOG_E("Not found '%" LOG_PUBLIC "s", HUKS_GLOBAL_NAME_SPACE);
         return (ani_status)ANI_CLASS_NOT_FOUND;
     }
@@ -381,7 +381,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"abortSessionSync", nullptr, reinterpret_cast<void *>(abortSessionSync)},
     };
 
-    if (env->Class_BindNativeMethods(globalCls, methods.data(), methods.size()) != ANI_OK) {
+    if (env->Module_BindNativeFunctions(globalModule, methods.data(), methods.size()) != ANI_OK) {
         HKS_LOG_E("Cannot bind native methods to '%" LOG_PUBLIC "s", HUKS_GLOBAL_NAME_SPACE);
         return (ani_status)ANI_BIND_METHOD_FAILED;
     };
