@@ -112,7 +112,10 @@ bool AniUtils::GetUint32FromUnionObj(ani_env *&env, const ani_object &unionObj, 
 {
     int32_t rawValue = 0;
     bool ret = GetInt32FromUnionObj(env, unionObj, rawValue);
-    HKS_IF_NOT_TRUE_LOGE_RETURN(ret, ret);
+    if (!ret) {
+        HKS_LOG_E("GetInt32FromUnionObj failed");
+        return false;
+    }
     value = static_cast<uint32_t>(rawValue);
     return true;
 }
