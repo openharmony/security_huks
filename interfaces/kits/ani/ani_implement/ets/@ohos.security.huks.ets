@@ -22,6 +22,7 @@ class HuksResultInner {
   handle: long = 0;
   challenge?: Uint8Array | undefined;
   properties?: Array<HuksParamInner> | undefined;
+  certChains?: Array<string>;
 }
 
 class HuksParamInner {
@@ -50,6 +51,8 @@ native function initSessionSync(keyAlias: string, options: huks.HuksOptions): Hu
 native function updateFinishSessionSync(handle: long, options: huks.HuksOptions, isUpdate: boolean): HuksResultInner;
 
 native function abortSessionSync(handle: long, options: huks.HuksOptions): HuksResultInner;
+
+native function attestKeyItemSync(keyAlias: string, options: huks.HuksOptions, isAnonymous: boolean): HuksResultInner;
 
 native function getKeyItemPropertiesSync(keyAlias: string, options: huks.HuksOptions): HuksResultInner;
 /**
@@ -394,6 +397,11 @@ export namespace huks {
     return p;
   }
 
+  export function initSessionAsUser(userId: int, keyAlias: string, huksOptions: HuksOptions): Promise<HuksSessionHandle>
+  {
+    return initSession(keyAlias, AddUserIdToHuksOptions(huksOptions, userId))
+  }
+
   export function updateSession(handle: long, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>): void
   {
     let isUpdate : boolean = true;
@@ -613,6 +621,62 @@ export namespace huks {
   {
     return getKeyItemProperties(keyAlias, AddUserIdToHuksOptions(huksOptions, userId));
   }
+
+  function AddBase64ToHuksOptions(huksOptions: HuksOptions): HuksOptions {
+    let copyOne = CopyHuksOptions(huksOptions)
+    copyOne?.properties?.push(new HuksParam(HuksTag.HUKS_TAG_ATTESTATION_BASE64, true))
+    return copyOne
+  }
+
+  function AddBase64AndUserIdToHuksOptions(huksOptions: HuksOptions, userId: int): HuksOptions {
+    let copyOne = CopyHuksOptions(huksOptions)
+    copyOne?.properties?.push(new HuksParam(HuksTag.HUKS_TAG_ATTESTATION_BASE64, true));
+    copyOne?.properties?.push(new HuksParam(HuksTag.HUKS_TAG_SPECIFIC_USER_ID, userId));
+    return copyOne
+  }
+
+  function InnerAttest(keyAlias: string, options: HuksOptions, isAnonymous: boolean): Promise<HuksReturnResult>
+  {
+    let p = new Promise<HuksReturnResult> ((resolve: (v: HuksReturnResult) => void,
+      reject: (error: BusinessError)=> void): void => {
+        let p1 = taskpool.execute(attestKeyItemSync, keyAlias, options, isAnonymous);
+        p1.then<void>((ret : NullishType) => {
+          let retInner = ret as HuksResultInner;
+          if (retInner.result === 0) {
+            let retOut = new HuksReturnResult(undefined, undefined, retInner.certChains);
+            resolve(retOut);
+          } else {
+            let eNull = new BusinessError();
+            eNull.code = retInner.result
+            eNull.message = retInner.error as string;
+            reject(eNull);
+          }
+        });
+      }
+    );
+    return p;
+  }
+
+  export function attestKeyItemAsUser(userId: int, keyAlias: string, huksOptions: HuksOptions): Promise<HuksReturnResult>
+  {
+    return InnerAttest(keyAlias, AddBase64AndUserIdToHuksOptions(huksOptions, userId), false);
+  }
+
+  export function attestKeyItem(keyAlias: string, options: HuksOptions): Promise<HuksReturnResult>
+  {
+    return InnerAttest(keyAlias, AddBase64ToHuksOptions(options), false);
+  }
+
+  export function anonAttestKeyItemAsUser(userId: int, keyAlias: string, huksOptions: HuksOptions): Promise<HuksReturnResult>
+  {
+    return InnerAttest(keyAlias, AddBase64AndUserIdToHuksOptions(huksOptions, userId), true);
+  }
+
+  export function anonAttestKeyItem(keyAlias: string, options: HuksOptions): Promise<HuksReturnResult>
+  {
+    return InnerAttest(keyAlias, AddBase64ToHuksOptions(options), true);
+  }
+
   /**
    * Interface of huks param.
    *
@@ -2397,6 +2461,9 @@ export namespace huks {
   export enum HuksTag {
     /* Specific TAG: for as user funtion. @ohos.security.huks.d.ets file should not export */
     HUKS_TAG_SPECIFIC_USER_ID = 1 << 28 | 317,
+
+    /* Specific TAG: for attestation certificates format. @ohos.security.huks.d.ets file should not export */
+    HUKS_TAG_ATTESTATION_BASE64 =  4 << 28 | 516,
 
     /* Base algorithm TAG: 1 - 200 */
     /**
