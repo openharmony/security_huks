@@ -16,6 +16,7 @@
 #include <array>
 #include <iostream>
 #include <cstdint>
+#include <new>
 #include <string>
 #include <vector>
 
@@ -355,6 +356,120 @@ static ani_object abortSessionSync([[maybe_unused]] ani_env *env,
     return aniReturnObject;
 }
 
+
+struct CertArray {
+    std::unique_ptr<std::array<uint8_t, HKS_CERT_APP_SIZE>> appCert{};
+    std::unique_ptr<std::array<uint8_t, HKS_CERT_DEVICE_SIZE>> devCert{};
+    std::unique_ptr<std::array<uint8_t, HKS_CERT_CA_SIZE>> caCert{};
+    std::unique_ptr<std::array<uint8_t, HKS_CERT_ROOT_SIZE>> rootCert{};
+    std::unique_ptr<std::array<struct HksBlob, HKS_CERT_COUNT>> blob{};
+    struct HksCertChain c{};
+};
+
+static CertArray ConstructChainInput() {
+    decltype(CertArray::appCert) appCert(new (std::nothrow) std::array<uint8_t, HKS_CERT_APP_SIZE>);
+    decltype(CertArray::devCert) devCert(new (std::nothrow) std::array<uint8_t, HKS_CERT_DEVICE_SIZE>);
+    decltype(CertArray::caCert) caCert(new (std::nothrow) std::array<uint8_t, HKS_CERT_CA_SIZE>);
+    decltype(CertArray::rootCert) rootCert(new (std::nothrow) std::array<uint8_t, HKS_CERT_ROOT_SIZE>);
+    decltype(CertArray::blob) blob(new (std::nothrow) std::array<struct HksBlob, HKS_CERT_COUNT> {{
+        {.size = HKS_CERT_APP_SIZE, .data = appCert->data()},
+        {.size = HKS_CERT_DEVICE_SIZE, .data = devCert->data()},
+        {.size = HKS_CERT_CA_SIZE, .data = caCert->data()},
+        {.size = HKS_CERT_ROOT_SIZE, .data = rootCert->data()},
+    }});
+    if (appCert == nullptr || devCert == nullptr || caCert == nullptr || rootCert == nullptr || blob == nullptr) {
+        return {};
+    }
+    CertArray arr{
+        .appCert = std::move(appCert),
+        .devCert = std::move(devCert),
+        .caCert = std::move(caCert),
+        .rootCert = std::move(rootCert),
+        .blob = std::move(blob),
+        .c = { .certs = arr.blob->data(), .certsCount = HKS_CERT_COUNT }};
+    return arr;
+}
+
+static ani_object ConstructArrayString(ani_env *env, uint32_t sz, struct HksBlob *blobs)
+{
+    ani_class arrayCls{};
+    auto status = env->FindClass("Lescompat/Array;", &arrayCls);
+    HKS_ANI_IF_NOT_SUCC_LOGE_RETURN(status, ani_object{}, "FindClass Lescompat/Array fail %" LOG_PUBLIC "u", status);
+
+    ani_method arrayCtor{};
+    status = env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor);
+    HKS_ANI_IF_NOT_SUCC_LOGE_RETURN(status, ani_object{}, "Class_FindMethod <ctor> fail %" LOG_PUBLIC "u", status);
+
+    ani_object arrayObj{};
+    status = env->Object_New(arrayCls, arrayCtor, &arrayObj, sz);
+    HKS_ANI_IF_NOT_SUCC_LOGE_RETURN(status, ani_object{}, "Object_New Array fail %" LOG_PUBLIC "u", status);
+
+    for (uint32_t i = 0; i < sz; ++i) {
+        ani_string aniCert{};
+        status = env->String_NewUTF8(reinterpret_cast<char *>(blobs[i].data), blobs[i].size, &aniCert);
+        HKS_ANI_IF_NOT_SUCC_LOGE_RETURN(status, ani_object{}, "String_NewUTF8 fail %" LOG_PUBLIC "u", status);
+
+        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", i, aniCert);
+        HKS_ANI_IF_NOT_SUCC_LOGE_RETURN(status, ani_object{}, "Object_CallMethodByName_Void $_set fail %" LOG_PUBLIC "u", status);
+    }
+
+    return arrayObj;
+}
+
+static ani_object InnerAttest(ani_env *env, ani_string keyAlias, ani_object options,
+    int32_t (*attestMethod)(const struct HksBlob *, const struct HksParamSet *, struct HksCertChain *))
+{
+    ani_object aniReturnObject{};
+    struct HksResult resultInfo{0, nullptr, nullptr};
+    int32_t ret{ HKS_SUCCESS };
+    CommonContext context{};
+    CertArray certs = ConstructChainInput();
+    do {
+        if (certs.c.certs == nullptr) {
+            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
+            break;
+        }
+
+        ret = HksAniParseParams<CommonContext>(env, keyAlias, options, &context);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAniParseParams failed! ret = %" LOG_PUBLIC "d", ret)
+
+        ret = attestMethod(&context.keyAlias, context.paramSetIn, &certs.c);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAttestKey or HksAnonAttestKey failed! ret = %" LOG_PUBLIC "d", ret)
+    } while (false);
+    if (ret != HKS_SUCCESS) {
+        resultInfo = HksConvertErrCode(ret);
+        HKS_LOG_E("HksInit failed. ret = %" LOG_PUBLIC "d", ret);
+    }
+    ret = HksCreateAniResult(resultInfo, env, aniReturnObject);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret);
+        return {};
+    }
+
+    ani_object arrayObj = ConstructArrayString(env, certs.c.certsCount, certs.c.certs);
+    if (arrayObj == nullptr) {
+        HKS_LOG_E("ConstructArrayString fail");
+        return {};
+    }
+
+    auto status = env->Object_CallMethodByName_Void(aniReturnObject, "<set>certChains", nullptr, arrayObj);
+    if (status != ANI_OK) {
+        HKS_LOG_E("Object_CallMethodByName_Void Failed <set>outData %" LOG_PUBLIC "u", status);
+        return {};
+    }
+
+    return aniReturnObject;
+}
+
+static ani_object attestKeyItemSync(ani_env *env,
+    ani_string keyAlias, ani_object options, ani_boolean isAnonymous)
+{
+    if (static_cast<bool>(isAnonymous)) {
+        return InnerAttest(env, keyAlias, options, HksAnonAttestKey);
+    }
+    return InnerAttest(env, keyAlias, options, HksAttestKey);
+}
+
 static int32_t GetKeyItemPropertiesCreateAniResult(const HksResult &resultInfo, const ani_array_ref &retArray,
     ani_env *&env, ani_object &resultObjOut)
 {
@@ -419,7 +534,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
     ani_module globalModule{};
     if (env->FindModule(HUKS_GLOBAL_NAME_SPACE, &globalModule) != ANI_OK) {
-        HKS_LOG_E("Not found '%" LOG_PUBLIC "s", HUKS_GLOBAL_NAME_SPACE);
+        HKS_LOG_E("Not found %" LOG_PUBLIC "s", HUKS_GLOBAL_NAME_SPACE);
         return (ani_status)ANI_CLASS_NOT_FOUND;
     }
 
@@ -433,6 +548,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"initSessionSync", nullptr, reinterpret_cast<void *>(initSessionSync)},
         ani_native_function {"updateFinishSessionSync", nullptr, reinterpret_cast<void *>(updateFinishSessionSync)},
         ani_native_function {"abortSessionSync", nullptr, reinterpret_cast<void *>(abortSessionSync)},
+        ani_native_function {"attestKeyItemSync", nullptr, reinterpret_cast<void *>(attestKeyItemSync)},
         ani_native_function {"getKeyItemPropertiesSync", nullptr, reinterpret_cast<void *>(getKeyItemPropertiesSync)},
     };
 
