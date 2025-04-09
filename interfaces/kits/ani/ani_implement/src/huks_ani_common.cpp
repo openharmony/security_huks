@@ -379,6 +379,8 @@ int32_t HksInitSessionCreateAniResult(const HksResult &resultInfo, ani_env *&env
         if (context.token.size != 0 && context.token.data != nullptr) {
             ani_object oubBuffer;
             std::vector<uint8_t> outVec;
+            ret = CheckBlob(&context.token);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "context token blob invalid!")
             outVec.resize(context.token.size);
             if (memcpy_s(outVec.data(), context.token.size, context.token.data, context.token.size) != EOK) {
                 HKS_LOG_E("init session, copy challenge to vector for creating ani object failed!");
