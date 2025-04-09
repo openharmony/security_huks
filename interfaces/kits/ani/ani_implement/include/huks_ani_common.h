@@ -45,8 +45,8 @@ namespace AniUtils {
 
     bool GetBooleanFromUnionObj(ani_env *&env, const ani_object &unionObj, bool &value);
 
-    bool GetClassPropertyGetMethod(ani_env *&env, const std::string &className, const std::string &propertyName,
-        const std::string getOrSet, ani_method &methodOut);
+    bool GetClassPropertyGetMethod(ani_env *&env, const std::string &className,
+        const std::string &MethodName, ani_method &methodOut, const std::string &ns = "");
 
     bool GetEnumRealValue(ani_env *&env, ani_enum_item &enumObj, uint32_t &realValue);
 
@@ -57,6 +57,8 @@ namespace AniUtils {
     void PrintUint8Array(std::vector<uint8_t> &arrayIn);
 
     bool CreateUint8Array(ani_env *env, std::vector<uint8_t> &arrayIn, ani_object &arrayOut);
+
+    bool CreatIntObj(ani_env *env, int32_t paramValue, ani_object &objOut);
 }
 
 namespace HuksAni {
@@ -141,6 +143,8 @@ int32_t HksAniImportWrappedKeyParseParams(ani_env *env, ani_string &keyAlias, an
     ani_object options, ImportWrappedKeyContext *&&contextPtr);
 
 int32_t HksAniParseParams(ani_env *env, ani_long &handle, ani_object &options, SessionContext *&&contextPtr);
+
+int32_t CreateHuksParamInnerArray(ani_env *env, const std::vector<HksParam> &params, ani_array_ref &arrayOut);
 
 }
 #endif

@@ -355,6 +355,53 @@ static ani_object abortSessionSync([[maybe_unused]] ani_env *env,
     return aniReturnObject;
 }
 
+static int32_t GetKeyItemPropertiesCreateAniResult(const HksResult &resultInfo, const ani_array_ref &retArray,
+    ani_env *&env, ani_object &resultObjOut)
+{
+    int32_t ret = HksCreateAniResult(resultInfo, env, resultObjOut);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret)
+
+    if (retArray != nullptr) {
+        if (env->Object_CallMethodByName_Void(resultObjOut, "<set>properties", nullptr, retArray) != ANI_OK) {
+            HKS_LOG_E("Object_CallMethodByName_Void failed. <set>properties ret = %" LOG_PUBLIC "d", ret);
+            ret = HKS_ERROR_INVALID_ARGUMENT;
+        }
+    }
+    return ret;
+}
+
+static ani_object getKeyItemPropertiesSync([[maybe_unused]] ani_env *env, ani_string keyAlias, ani_object options)
+{
+    ani_object aniReturnObject{};
+    struct HksResult resultInfo{0, nullptr, nullptr};
+    int32_t ret{ HKS_SUCCESS };
+    CommonContext context;
+    ani_array_ref retArray = nullptr;
+    do {
+        ret = HksAniParseParams<CommonContext>(env, keyAlias, options, &context);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "getKeyItemProperties HksAniParseParams failed! ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksGetKeyParamSet(&context.keyAlias, context.paramSetIn, context.paramSetOut);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "getKeyItemProperties failed! ret = %" LOG_PUBLIC "d", ret)
+
+        
+        if (context.paramSetOut != nullptr) {
+            std::vector<HksParam> paramVec(context.paramSetOut->paramsCnt);
+            ret = CreateHuksParamInnerArray(env, paramVec, retArray);
+        }
+    } while (0);
+    if (ret != HKS_SUCCESS) {
+        resultInfo = HksConvertErrCode(ret);
+        HKS_LOG_E("HksGetKeyAlias failed. ret = %" LOG_PUBLIC "d", ret);
+    }
+    ret = GetKeyItemPropertiesCreateAniResult(resultInfo, retArray, env, aniReturnObject);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret);
+        return {};
+    }
+    return aniReturnObject;
+}
+
 constexpr int32_t INVALID_ANI_VERSION = 9;
 constexpr int32_t ANI_CLASS_NOT_FOUND = 2;
 constexpr int32_t ANI_BIND_METHOD_FAILED = 3;
@@ -386,6 +433,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"initSessionSync", nullptr, reinterpret_cast<void *>(initSessionSync)},
         ani_native_function {"updateFinishSessionSync", nullptr, reinterpret_cast<void *>(updateFinishSessionSync)},
         ani_native_function {"abortSessionSync", nullptr, reinterpret_cast<void *>(abortSessionSync)},
+        ani_native_function {"getKeyItemPropertiesSync", nullptr, reinterpret_cast<void *>(getKeyItemPropertiesSync)},
     };
 
     if (env->Module_BindNativeFunctions(globalModule, methods.data(), methods.size()) != ANI_OK) {
