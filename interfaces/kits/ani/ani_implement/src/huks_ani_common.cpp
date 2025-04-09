@@ -162,17 +162,29 @@ bool AniUtils::GetBooleanFromUnionObj(ani_env *&env, const ani_object &unionObj,
     return false;
 }
 
-bool AniUtils::GetClassPropertyGetMethod(ani_env *&env, const std::string &className, const std::string &propertyName,
-    const std::string getOrSet, ani_method &methodOut)
+bool AniUtils::GetClassPropertyGetMethod(ani_env *&env, const std::string &className,
+    const std::string &methodName, ani_method &methodOut, const std::string &ns)
 {
-    ani_class cls;
-    if (env->FindClass(className.data(), &cls) != ANI_OK) {
-        HKS_LOG_E("FindClass. Not found. className = %" LOG_PUBLIC "s", className.data());
-        return false;
+    ani_class clsObj {};
+    if (ns.size() != 0) {
+        if (env->FindClass(className.data(), &clsObj) != ANI_OK) {
+            HKS_LOG_E("FindClass. Not found. className = %" LOG_PUBLIC "s", className.data());
+            return false;
+        }
+    } else {
+        HKS_LOG_I("this class in namespace %" LOG_PUBLIC "s", ns.data());
+        ani_namespace aniNameSpace {};
+        if (env->FindNamespace(ns.data(), &aniNameSpace) != ANI_OK) {
+            HKS_LOG_E("FindNamespace. Fail. Namespace = %" LOG_PUBLIC "s", ns.data());
+            return false;
+        }
+        if(env->Namespace_FindClass(aniNameSpace, className.data(), &clsObj) != ANI_OK) {
+            HKS_LOG_E("Namespace_FindClass. Fail. className = %" LOG_PUBLIC "s", className.data());
+            return false;
+        }
     }
-    std::string getMethodName = getOrSet + propertyName;
-    if (env->Class_FindMethod(cls, getMethodName.data(), nullptr, &methodOut) != ANI_OK) {
-        HKS_LOG_E("Class_FindMethod. Fail. getMethodName = %" LOG_PUBLIC "s", getMethodName.data());
+    if (env->Class_FindMethod(clsObj, methodName.data(), nullptr, &methodOut) != ANI_OK) {
+        HKS_LOG_E("Class_FindMethod. Fail. getMethodName = %" LOG_PUBLIC "s", methodName.data());
         return false;
     }
     return true;
@@ -267,11 +279,30 @@ bool AniUtils::CreateUint8Array(ani_env *env, std::vector<uint8_t> &arrayIn, ani
     return true;
 }
 
+bool AniUtils::CreatIntObj(ani_env *env, int32_t paramValue, ani_object &objOut)
+{
+    ani_class itemCls {};
+    ani_method ctor {};
+    if (env->FindClass("Lstd/core/Int;", &itemCls) != ANI_OK) {
+        HKS_LOG_E("FindClass Failed: Not found Lstd/core/Int;");
+        return false;
+    }
+    if (env->Class_FindMethod(itemCls, "<ctor>", nullptr, &ctor) != ANI_OK)
+    {
+        HKS_LOG_E("Class_FindMethod <ctor> Failed: Not found Lstd/core/Int;");
+        return false;
+    }
+    if (env->Object_New(itemCls, ctor, &objOut, paramValue) != ANI_OK) {
+        HKS_LOG_E("Create Object Failed' Int obj");
+        return false;
+    }
+    return true;
+}
+
 namespace HuksAni {
-static std::string g_huksResultClassName = "L@ohos/security/huks/HuksResult;";
-static std::string g_huksOptionClassName = "L@ohos/security/huks/HuksOptionsImpl;";
-static std::string g_huksParamClassName = "L@ohos/security/huks/HuksParamImpl;";
-static std::string g_huksTagEnumName = "LHuksTag;";
+static std::string g_huksResultClassName = "L@ohos/security/huks/HuksResultInner;";
+static std::string g_ParamInnerClassName = "L@ohos/security/huks/HuksParamInner;";
+static std::string g_huksParamClassName = "LHuksParam;";
 static std::string g_huksNameSpace = "L@ohos/security/huks/huks;";
 
 void FreeHksBlobAndFresh(HksBlob &blob, const bool isNeedFresh)
@@ -427,8 +458,8 @@ int32_t HksGetKeyAliasFromAni(ani_env *&env, const ani_string &strObject, HksBlo
 int32_t HksAniGetParamTag(ani_env *&env, const ani_object &object, uint32_t &value)
 {
     ani_method tagGettter;
-    bool getMethodRet = AniUtils::GetClassPropertyGetMethod(env, g_huksParamClassName, "tag", "<get>",
-        tagGettter);
+    bool getMethodRet = AniUtils::GetClassPropertyGetMethod(env, g_huksParamClassName, "<get>tag",
+        tagGettter, g_huksNameSpace);
     HKS_IF_NOT_TRUE_LOGE_RETURN(getMethodRet, HKS_ERROR_INVALID_ARGUMENT, "AniUtils GetClassPropertyGetMethod failed!");
 
     ani_ref enumRef;
@@ -467,18 +498,12 @@ static int32_t GetHuksBlobFromUnionObj(ani_env *&env, const ani_object &unionObj
 
 int32_t HksAniHuksParamConvert(ani_env *&env, const ani_object &huksParamObj, HksParam &param)
 {
-    ani_class cls;
-    int32_t ret{ HKS_SUCCESS };
-    if (env->FindClass(g_huksParamClassName.data(), &cls) != ANI_OK) {
-        HKS_LOG_E("FindClass failed. Not found %" LOG_PUBLIC "s", g_huksParamClassName.data());
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
     bool getFieldRet = HksAniGetParamTag(env, huksParamObj, param.tag);
     HKS_IF_NOT_TRUE_LOGE_RETURN(getFieldRet, HKS_ERROR_INVALID_ARGUMENT, "HksAniGetParamTag failed!");
 
     ani_method getter;
-    bool aniRet = AniUtils::GetClassPropertyGetMethod(env, g_huksParamClassName, "value", "<get>", getter);
+    bool aniRet = AniUtils::GetClassPropertyGetMethod(env, g_huksParamClassName, "<get>value",
+        getter, g_huksNameSpace);
     HKS_IF_NOT_TRUE_LOGE_RETURN(aniRet, HKS_ERROR_INVALID_ARGUMENT, "AniUtils GetClassPropertyGetMethod failed!");
 
     ani_ref valueUnionRef;
@@ -488,6 +513,7 @@ int32_t HksAniHuksParamConvert(ani_env *&env, const ani_object &huksParamObj, Hk
     }
 
     ani_object unionObj = reinterpret_cast<ani_object>(valueUnionRef);
+    int32_t ret = HKS_SUCCESS;
     switch (GetTagType(static_cast<enum HksTag>(param.tag))) {
         case HKS_TAG_TYPE_BOOL:
             if (!AniUtils::GetBooleanFromUnionObj(env, unionObj, param.boolParam)) {
@@ -705,6 +731,96 @@ SessionContext::~SessionContext()
     FreeHksBlobAndFresh(this->handle);
     FreeHksBlobAndFresh(this->inData);
     FreeHksBlobAndFresh(this->outData, true);
+}
+
+static bool SetParamInnerValueObj(ani_env *env, const HksParam &paramIn, ani_object &outObj)
+{
+    ani_int etsIntValue = 0;
+    switch (paramIn.tag & HKS_TAG_TYPE_MASK) {
+        case HKS_TAG_TYPE_INT:
+            etsIntValue = static_cast<ani_int>(paramIn.int32Param);
+        case HKS_TAG_TYPE_UINT:
+            etsIntValue = static_cast<ani_int>(paramIn.uint32Param);
+            if (env->Object_CallMethodByName_Void(outObj, "<set>valueInt", nullptr, etsIntValue) != ANI_OK) {
+                HKS_LOG_E("Object_CallMethodByName_Void Failed <set>valueInt");
+                return false;
+            }
+            break;
+        case HKS_TAG_TYPE_ULONG:
+            if (env->Object_CallMethodByName_Void(outObj, "<set>valueLong", nullptr,
+                ani_long(paramIn.uint64Param)) != ANI_OK) {
+                HKS_LOG_E("Object_CallMethodByName_Void Failed uint64Param <set>valueLong");
+                return false;
+            }
+            break;
+        case HKS_TAG_TYPE_BOOL:
+            if (env->Object_CallMethodByName_Void(outObj, "<set>valueBool", nullptr,
+                ani_boolean(paramIn.boolParam)) != ANI_OK) {
+                HKS_LOG_E("Object_CallMethodByName_Void Failed uint64Param <set>valueBool");
+                return false;
+            }
+            break;
+        case HKS_TAG_TYPE_BYTES:
+        {
+            std::vector<uint8_t> u8Vector(paramIn.blob.size);
+            ani_object u8Array {};
+            (void)memcpy_s(u8Vector.data(), paramIn.blob.size, paramIn.blob.data, paramIn.blob.size);
+            if (!AniUtils::CreateUint8Array(env, u8Vector, u8Array)) {
+                return false;
+            }
+            if (env->Object_CallMethodByName_Void(outObj, "<set>valueBuffer", nullptr, u8Array) != ANI_OK) {
+                HKS_LOG_E("Object_CallMethodByName_Void Failed uint64Param <set>valueBuffer");
+                return false;
+            }
+            break;
+        }
+        default:
+            HKS_LOG_E("SetParamInnerValueObj Failed' paramIn.tag invalid");
+            return false;
+    }
+    return true;
+}
+
+int32_t CreateHuksParamInnerArray(ani_env *env, const std::vector<HksParam> &params, ani_array_ref &arrayOut)
+{
+    if (env == nullptr) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    ani_class itemCls = nullptr;
+    if (env->FindClass(g_ParamInnerClassName.data(), &itemCls) != ANI_OK) {
+        HKS_LOG_E("FindClass Failed: Not found '%" LOG_PUBLIC "s", g_ParamInnerClassName.data());
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    if (env->Array_New_Ref(itemCls, params.size(), nullptr, &arrayOut) != ANI_OK) {
+        HKS_LOG_E("Array_New_Ref. Fail. className = %" LOG_PUBLIC "s. size = %" LOG_PUBLIC "d",
+            g_huksParamClassName.data(), params.size());
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    for (uint32_t i = 0; i < params.size(); i++) {
+        ani_method ctor {};
+        if (env->Class_FindMethod(itemCls, "<ctor>", nullptr, &ctor) != ANI_OK) {
+            HKS_LOG_E("Class_FindMethod Failed: <ctor> '%" LOG_PUBLIC "s", g_huksParamClassName.data());
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+        ani_object item {};
+        if (env->Object_New(itemCls, ctor, &item) != ANI_OK) {
+            HKS_LOG_E("Create Object Failed' '%" LOG_PUBLIC "s", g_huksParamClassName.data());
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+
+        if (env->Object_CallMethodByName_Void(item, "<set>tag", nullptr, ani_int(params[i].tag)) != ANI_OK) {
+            HKS_LOG_E("Object_CallMethodByName_Void Failed. HuksParamInner <set>tag");
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+        if (!SetParamInnerValueObj(env, params[i], item)) {
+            HKS_LOG_E("SetParamInnerValueObj Failed. HuksParamInner <set>value...");
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+        if (env->Array_Set_Ref(arrayOut, i, ani_ref(item)) != ANI_OK) {
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+    }
+    return HKS_SUCCESS;
 }
 
 }  // namespace
