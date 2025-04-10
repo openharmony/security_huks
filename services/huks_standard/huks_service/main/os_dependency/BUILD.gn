@@ -54,6 +54,7 @@ if (os_level == "standard") {
       "posix/hks_rwlock.c",
       "sa/hks_dcm_callback_handler.cpp",
       "sa/hks_sa.cpp",
+      "sa/hks_xcollie.cpp",
 
       # both client side and server side will include hks_sa_interface.cpp
       "sa/hks_sa_interface.cpp",
@@ -90,6 +91,7 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]
     external_deps += [
+      "hicollie:libhicollie",
       "hilog:libhilog",
       "init:libbegetutil",
       "ipc:ipc_single",

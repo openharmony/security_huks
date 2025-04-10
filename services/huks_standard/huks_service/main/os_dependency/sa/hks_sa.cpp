@@ -20,6 +20,7 @@
 #include <mutex>
 #include <securec.h>
 #include <set>
+#include <sstream>
 #include <string_ex.h>
 #include <system_ability_definition.h>
 #include "parameters.h"
@@ -36,6 +37,7 @@
 #include "hks_upgrade.h"
 #include "hks_upgrade_lock.h"
 #include "hks_util.h"
+#include "hks_xcollie.h"
 #include "huks_service_ipc_interface_code.h"
 #include "hks_ha_plugin.h"
 #include "rwlock.h"
@@ -250,11 +252,15 @@ static void ProcessRemoteRequest(uint32_t code, MessageParcel &data, MessageParc
         "handle ipc msg failed!")
 }
 
+static std::string GetTimeoutMonitorMarkTag(uint32_t code, uint32_t callingUid)
+{
+    std::string markTag = (std::ostringstream{} << "huks:OnRemoteRequest, code = " << code << ", callingUid = " <<
+        callingUid << ", sessionId = " << g_sessionId).str();
+    return markTag;
+}
+
 int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-#ifdef L2_STANDARD
-    HksClearThreadErrorMsg();
-#endif
     HksInitMemPolicy();
 
     uint64_t enterTime = 0;
@@ -262,6 +268,13 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
     g_sessionId++;
     auto callingUid = IPCSkeleton::GetCallingUid();
     int userId = HksGetOsAccountIdFromUid(callingUid);
+
+#ifdef L2_STANDARD
+    HksClearThreadErrorMsg();
+    constexpr unsigned int DEFAULT_TIMEOUT = 5U; // seconds
+    HksXCollie hksXCollie(GetTimeoutMonitorMarkTag(code, callingUid), DEFAULT_TIMEOUT, [](void *)->void {}, nullptr,
+        HiviewDFX::XCOLLIE_FLAG_LOG);
+#endif
 
     HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "u,  callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC
         "d, sessionId = %" LOG_PUBLIC "u", code, callingUid, userId, g_sessionId);
