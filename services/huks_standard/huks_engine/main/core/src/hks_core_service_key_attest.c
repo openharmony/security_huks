@@ -101,6 +101,7 @@ int32_t HksCoreAttestKey(const struct HksBlob *key, const  struct HksParamSet *p
     ret = HksGetParam(paramSet, HKS_TAG_ATTESTATION_MODE, &attestParam);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get attestation mode failed");
+        HksFreeKeyNode(&keyNode);
         return ret;
     }
  
