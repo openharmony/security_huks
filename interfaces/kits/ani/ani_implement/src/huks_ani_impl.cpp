@@ -452,9 +452,9 @@ static ani_object InnerAttest(ani_env *env, ani_string keyAlias, ani_object opti
         return {};
     }
 
-    auto status = env->Object_CallMethodByName_Void(aniReturnObject, "<set>certChains", nullptr, arrayObj);
-    if (status != ANI_OK) {
-        HKS_LOG_E("Object_CallMethodByName_Void Failed <set>outData %" LOG_PUBLIC "u", status);
+    ani_status st = env->Object_SetFieldByName_Ref(aniReturnObject, "certChains", arrayObj);
+    if (st != ANI_OK) {
+        HKS_LOG_E("Object_CallMethodByName_Void Failed <set>outData %" LOG_PUBLIC "u", st);
         return {};
     }
 
