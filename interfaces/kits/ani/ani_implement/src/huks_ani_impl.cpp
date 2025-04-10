@@ -362,8 +362,8 @@ static int32_t GetKeyItemPropertiesCreateAniResult(const HksResult &resultInfo, 
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret)
 
     if (retArray != nullptr) {
-        if (env->Object_CallMethodByName_Void(resultObjOut, "<set>properties", nullptr, retArray) != ANI_OK) {
-            HKS_LOG_E("Object_CallMethodByName_Void failed. <set>properties ret = %" LOG_PUBLIC "d", ret);
+        if (env->Object_SetFieldByName_Ref(resultObjOut, "properties", retArray) != ANI_OK) {
+            HKS_LOG_E("Object_SetFieldByName_Ref failed. properties ret = %" LOG_PUBLIC "d", ret);
             ret = HKS_ERROR_INVALID_ARGUMENT;
         }
     }
