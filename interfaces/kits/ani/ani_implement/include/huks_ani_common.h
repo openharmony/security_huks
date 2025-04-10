@@ -45,9 +45,6 @@ namespace AniUtils {
 
     bool GetBooleanFromUnionObj(ani_env *&env, const ani_object &unionObj, bool &value);
 
-    bool GetClassPropertyGetMethod(ani_env *&env, const std::string &className,
-        const std::string &MethodName, ani_method &methodOut, const std::string &ns = "");
-
     bool GetEnumRealValue(ani_env *&env, ani_enum_item &enumObj, uint32_t &realValue);
 
     bool GetUint8Array(ani_env *env, ani_object array, std::vector<uint8_t> &arrayOut);
