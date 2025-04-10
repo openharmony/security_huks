@@ -170,8 +170,9 @@ static ani_object exportKeyItemSync([[maybe_unused]] ani_env *env,
         ret = HksExportPublicKey(&context.keyAlias, context.paramSetIn, &context.key);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksExportPublicKey failed! ret = %" LOG_PUBLIC "d", ret)
 
+        ret = CheckBlob(&context.key);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "context key blob invalid!")
         outVec.resize(context.key.size);
-        outVec.reserve(context.key.size);
         if (memcpy_s(outVec.data(), context.key.size, context.key.data, context.key.size) != EOK) {
             HKS_LOG_E("export key, but copy mem to vector for creating ani object failed!");
             ret = HKS_ERROR_BUFFER_TOO_SMALL;
@@ -297,7 +298,8 @@ static ani_object updateFinishSessionSync([[maybe_unused]] ani_env *env,
             ret = HksFinish(&context.handle, context.paramSetIn, &context.inData, &context.outData);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "finish session failed. ret = %" LOG_PUBLIC "d", ret)
         }
-
+        ret = CheckBlob(&context.outData);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "context outData blob invalid!")
         outVec.resize(context.outData.size);
         if (memcpy_s(outVec.data(), context.outData.size, context.outData.data, context.outData.size) != EOK) {
             HKS_LOG_E("updat key, but copy mem to vector for creating ani object failed!");
