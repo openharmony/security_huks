@@ -470,50 +470,66 @@ static ani_object attestKeyItemSync(ani_env *env,
     return InnerAttest(env, keyAlias, options, HksAttestKey);
 }
 
-static int32_t GetKeyItemPropertiesCreateAniResult(const HksResult &resultInfo, const ani_array_ref &retArray,
-    ani_env *&env, ani_object &resultObjOut)
+static int32_t GetKeyItemPropertiesCreateAniResult(const HksResult &resultInfo, std::vector<HksParam> &paramVec,
+    ani_env *env, ani_object &resultObjOut)
 {
     int32_t ret = HksCreateAniResult(resultInfo, env, resultObjOut);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret)
 
-    if (retArray != nullptr) {
-        if (env->Object_SetFieldByName_Ref(resultObjOut, "properties", retArray) != ANI_OK) {
+    if (!paramVec.empty()) {
+        ani_array_ref paramInnerArray = nullptr;
+        ret = CreateHuksParamInnerArray(env, paramVec, paramInnerArray);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CreateHuksParamInnerArray failed. ret = %" LOG_PUBLIC "d", ret)
+        HKS_LOG_I("ani_array_ref is not null, use Object_SetFieldByName_Ref");
+        if (env->Object_SetFieldByName_Ref(resultObjOut, "properties", paramInnerArray) != ANI_OK) {
+        // if (env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, retArray) != ANI_OK) {
             HKS_LOG_E("Object_SetFieldByName_Ref failed. properties ret = %" LOG_PUBLIC "d", ret);
             ret = HKS_ERROR_INVALID_ARGUMENT;
         }
     }
+    HKS_LOG_I("GetKeyItemPropertiesCreateAniResult success.1111");
     return ret;
 }
 
+constexpr int HKS_DEFAULT_OUTPARAMSET_SIZE = 2048;
 static ani_object getKeyItemPropertiesSync([[maybe_unused]] ani_env *env, ani_string keyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
     struct HksResult resultInfo{0, nullptr, nullptr};
     int32_t ret{ HKS_SUCCESS };
     CommonContext context;
-    ani_array_ref retArray = nullptr;
+    std::vector<HksParam> paramVecOut;
     do {
         ret = HksAniParseParams<CommonContext>(env, keyAlias, options, &context);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "getKeyItemProperties HksAniParseParams failed! ret = %" LOG_PUBLIC "d", ret)
+
+        context.paramSetOut = static_cast<struct HksParamSet *>(HksMalloc(HKS_DEFAULT_OUTPARAMSET_SIZE));
+        if (context.paramSetOut != nullptr) {
+            context.paramSetOut->paramSetSize = HKS_DEFAULT_OUTPARAMSET_SIZE;
+            context.paramSetOut->paramsCnt = 0;
+        }
 
         ret = HksGetKeyParamSet(&context.keyAlias, context.paramSetIn, context.paramSetOut);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "getKeyItemProperties failed! ret = %" LOG_PUBLIC "d", ret)
 
         
         if (context.paramSetOut != nullptr) {
-            std::vector<HksParam> paramVec(context.paramSetOut->paramsCnt);
-            ret = CreateHuksParamInnerArray(env, paramVec, retArray);
+            HKS_LOG_I("context.paramSetOut->paramsCnt = %" LOG_PUBLIC "d", context.paramSetOut->paramsCnt);
+            ret = HuksParamSet2ParamVec(context.paramSetOut, paramVecOut);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksParamSet2ParamVec failed! ret = %" LOG_PUBLIC "d", ret)
+
         }
     } while (0);
     if (ret != HKS_SUCCESS) {
         resultInfo = HksConvertErrCode(ret);
         HKS_LOG_E("HksGetKeyAlias failed. ret = %" LOG_PUBLIC "d", ret);
     }
-    ret = GetKeyItemPropertiesCreateAniResult(resultInfo, retArray, env, aniReturnObject);
+    ret = GetKeyItemPropertiesCreateAniResult(resultInfo, paramVecOut, env, aniReturnObject);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret);
         return {};
     }
+    HKS_LOG_I("HksCreateAniResult success.22222.");
     return aniReturnObject;
 }
 
