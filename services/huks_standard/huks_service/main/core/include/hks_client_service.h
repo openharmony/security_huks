@@ -29,6 +29,8 @@
 extern "C" {
 #endif
 
+void HksSetScreenState(bool state);
+
 int32_t HksServiceInitialize(void);
 
 int32_t HksServiceRefreshKeyInfo(const struct HksBlob *processName);
