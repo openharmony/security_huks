@@ -52,6 +52,8 @@ namespace AniUtils {
     void PrintUint8Array(std::vector<uint8_t> &arrayIn);
 
     bool CreateUint8Array(ani_env *env, std::vector<uint8_t> &arrayIn, ani_object &arrayOut);
+
+    int32_t CreateStringArrayObject(ani_env *env, std::vector<std::string> &arrayIn, ani_object &arrayOut);
 }
 
 namespace HuksAni {
@@ -102,6 +104,9 @@ int32_t HksIsKeyItemExistCreateAniResult(const HksResult &resultInfo, ani_env *&
 
 int32_t HksInitSessionCreateAniResult(const HksResult &resultInfo, ani_env *&env, const SessionContext &context,
     ani_object &resultObjOut);
+
+int32_t HksInitListAliasAniResult(const HksResult &resultInfo, ani_env *&env,
+    ani_object &resultObjOut, ani_object &arrayObj);
 
 int32_t HksGetParamSetFromAni(ani_env *&env, const ani_object &optionsObj, struct HksParamSet *&paramSetOut);
 
