@@ -211,13 +211,13 @@ static ani_object isKeyItemExistSync([[maybe_unused]] ani_env *env,
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksKeyExist failed! ret = %" LOG_PUBLIC "d", ret)
     } while (0);
     resultInfo.errorCode = ret;
-    if (ret != HKS_SUCCESS  && ret != HKS_ERROR_NOT_EXIST) {
-        resultInfo = HksConvertErrCode(ret);
-        HKS_LOG_E("HksKeyExist failed. ret = %" LOG_PUBLIC "d", ret);
-    }
-    ret = HksIsKeyItemExistCreateAniResult(resultInfo, env, aniReturnObject);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksIsKeyItemExistCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret);
+        resultInfo = HksConvertErrCode(ret);
+        HKS_LOG_I("HksKeyExist failed. ret = %" LOG_PUBLIC "d", ret);
+    }
+    ret = HksCreateAniResult(resultInfo, env, aniReturnObject);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret);
         return {};
     }
     return aniReturnObject;
