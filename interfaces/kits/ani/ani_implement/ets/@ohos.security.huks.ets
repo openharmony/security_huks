@@ -21,6 +21,7 @@ class HuksResultInner {
   handle: long = 0;
   challenge?: Uint8Array | undefined;
   certChains?: Array<string>;
+  listString?: Array<string> | undefined;
 }
 
 native function generateKeyItemSync(keyAlias: string, options: huks.HuksOptions): HuksResultInner;
@@ -43,6 +44,10 @@ native function updateFinishSessionSync(handle: long, options: huks.HuksOptions,
 native function abortSessionSync(handle: long, options: huks.HuksOptions): HuksResultInner;
 
 native function attestKeyItemSync(keyAlias: string, options: huks.HuksOptions, isAnonymous: boolean): HuksResultInner;
+
+native function listAliasesSync(options: huks.HuksOptions): HuksResultInner;
+
+native function hasKeyItemSync(keyAlias: string, options: huks.HuksOptions): HuksResultInner;
 
 /**
  * OpenHarmony Universal KeyStore
@@ -704,6 +709,98 @@ export namespace huks {
     return InnerAttestPromise(keyAlias, AddBase64ToHuksOptions(options), true);
   }
 
+  export function listAliases(options: HuksOptions): Promise<HuksListAliasesReturnResult>
+  {
+    let p = new Promise<HuksListAliasesReturnResult> ((resolve: (v: HuksListAliasesReturnResult) => void,
+      reject: (error: BusinessError) => void): void => {
+      let p1 = taskpool.execute(listAliasesSync, options);
+      p1.then<void>((ret: NullishType) => {
+        let retInner = ret as HuksResultInner;
+        if (retInner.result === 0) {
+          let retOut: HuksListAliasesReturnResult = {
+            keyAliases: retInner.listString!
+          }
+          resolve(retOut);
+        } else {
+          let eNull = new BusinessError();
+          eNull.code = retInner.result;
+          eNull.message = retInner.error as string;
+          reject(eNull);
+        }
+      });
+    });
+
+    return p;
+  }
+
+  export function hasKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<boolean>): void
+  {
+    let p1 = taskpool.execute(hasKeyItemSync, keyAlias, options);
+    p1.then<void>((ret: NullishType) => {
+        let retInner = ret as HuksResultInner;
+        let isExist: boolean = true;
+        let eNull = new BusinessError();
+        if (retInner.result === 0) {
+          callback(eNull, isExist);
+        } else {
+          eNull.code = retInner.result;
+          eNull.message = retInner.error as string;
+          isExist = false;
+          callback(eNull, isExist);
+        }
+    });
+  }
+
+  export function hasKeyItem(keyAlias: string, options: HuksOptions): Promise<boolean>
+  {
+    let p = new Promise<boolean> ((resolve: (v: boolean) => void,
+      reject: (error: BusinessError)=> void): void => {
+      let p1 = taskpool.execute(hasKeyItemSync, keyAlias, options);
+      p1.then<void>((ret: NullishType) => {
+        let retInner = ret as HuksResultInner;
+        let isExist: boolean = true;
+        if (retInner.result === 0) {
+          isExist = true;
+          resolve(isExist);
+        } else if (retInner.result === -13) {
+          isExist = false;
+          resolve(isExist);
+        } else {
+          let eNull = new BusinessError();
+          eNull.code = retInner.result;
+          eNull.message = retInner.error as string;
+          reject(eNull);
+        }
+      });
+    });
+    return p;
+  }
+
+  export function hasKeyItemAsUser(userId: int, keyAlias: string, options: HuksOptions): Promise<boolean>
+  {
+    let optionAsUser = AdduserIdtoHuksOptions(options, userId);
+    let p = new Promise<boolean> ((resolve: (v: boolean) => void,
+      reject: (error: BusinessError)=> void): void => {
+      let p1 = taskpool.execute(hasKeyItemSync, keyAlias, optionAsUser);
+      p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResultInner;
+        let isExist: boolean = true;
+        if (retInner.result === 0) {
+          isExist = true;
+          resolve(isExist);
+        } else if (retInner.result === -13) {
+          isExist = false;
+          resolve(isExist);
+        } else {
+          let eNull = new BusinessError();
+          eNull.code = retInner.result;
+          eNull.message = retInner.error as string;
+          reject(eNull);
+        }
+      });
+    });
+    return p;
+  }
   /**
    * Interface of huks param.
    *
