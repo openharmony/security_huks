@@ -306,10 +306,7 @@ export namespace huks {
         let retInner = ret as HuksResult;
         let eNull = new BusinessError();
         let isExist : boolean = true;
-        if (retInner.result === -13) {
-          isExist = false;
-          callback(eNull, isExist);
-        } else if (retInner.result === 0){
+        if (retInner.result === 0){
           isExist = true;
           callback(eNull, isExist);
         }
@@ -331,9 +328,6 @@ export namespace huks {
         let isExist : boolean = true;
         if (retInner.result === 0) {
           isExist = true;
-          resolve(isExist);
-        } else if (retInner.result === -13) {
-          isExist = false;
           resolve(isExist);
         } else {
           let eNull = new BusinessError();
