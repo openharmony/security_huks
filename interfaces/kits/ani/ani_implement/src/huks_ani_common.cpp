@@ -812,7 +812,6 @@ static bool SetParamInnerValueObj(ani_env *env, const HksParam &paramIn, ani_obj
     switch (paramIn.tag & HKS_TAG_TYPE_MASK) {
         HKS_LOG_I("SetParamInnerValueObj paramIn.tag. tagType = %" LOG_PUBLIC "d", (paramIn.tag & HKS_TAG_TYPE_MASK));
         case HKS_TAG_TYPE_INT:
-            etsIntValue = static_cast<ani_int>(paramIn.int32Param);
         case HKS_TAG_TYPE_UINT:
         {
             etsIntValue = static_cast<ani_int>(paramIn.uint32Param);
@@ -874,7 +873,7 @@ int32_t CreateHuksParamInnerArray(ani_env *env, const std::vector<HksParam> &par
             g_huksParamClassName.data(), params.size());
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    HKS_LOG_I("CreateHuksParamInnerArray: params size = %" LOG_PUBLIC "d", params.size());
+    HKS_LOG_I("CreateHuksParamInnerArray: params size = %" LOG_PUBLIC "zu", params.size());
     for (uint32_t i = 0; i < params.size(); i++) {
         ani_method ctor {};
         if (env->Class_FindMethod(itemCls, "<ctor>", nullptr, &ctor) != ANI_OK) {
