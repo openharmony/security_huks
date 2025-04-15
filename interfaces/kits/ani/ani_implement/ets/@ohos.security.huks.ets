@@ -484,7 +484,7 @@ export namespace huks {
     return copyOne
   }
 
-  function InnerAttest(keyAlias: string, options: HuksOptions, isAnonymous: boolean): Promise<HuksReturnResult>
+  function InnerAttestPromise(keyAlias: string, options: HuksOptions, isAnonymous: boolean): Promise<HuksReturnResult>
   {
     let p = new Promise<HuksReturnResult> ((resolve: (v: HuksReturnResult) => void,
       reject: (error: BusinessError)=> void): void => {
@@ -508,24 +508,52 @@ export namespace huks {
     return p;
   }
 
+  function InnerAttestCallback(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>, isAnonymous: boolean): void
+  {
+    let p = taskpool.execute(attestKeyItemSync, keyAlias, options, isAnonymous);
+    p.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResultInner;
+        let eNull = new BusinessError();
+        if (retInner.result === 0) {
+          let returnResult = new HuksReturnResult(undefined, undefined, retInner.certChains)
+          callback(eNull, returnResult);
+        } else {
+          eNull.code = retInner.result
+          eNull.message = retInner.error as string;
+          let empty = new HuksReturnResult()
+          callback(eNull, empty);
+        }
+    });
+  }
+
+  export function attestKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>): void
+  {
+    return InnerAttestCallback(keyAlias, options, callback, false);
+  }
+
   export function attestKeyItemAsUser(userId: int, keyAlias: string, huksOptions: HuksOptions): Promise<HuksReturnResult>
   {
-    return InnerAttest(keyAlias, AddBase64AndUserIdToHuksOptions(huksOptions, userId), false);
+    return InnerAttestPromise(keyAlias, AddBase64AndUserIdToHuksOptions(huksOptions, userId), false);
   }
 
   export function attestKeyItem(keyAlias: string, options: HuksOptions): Promise<HuksReturnResult>
   {
-    return InnerAttest(keyAlias, AddBase64ToHuksOptions(options), false);
+    return InnerAttestPromise(keyAlias, AddBase64ToHuksOptions(options), false);
+  }
+
+  export function anonAttestKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>): void
+  {
+    return InnerAttestCallback(keyAlias, options, callback, true);
   }
 
   export function anonAttestKeyItemAsUser(userId: int, keyAlias: string, huksOptions: HuksOptions): Promise<HuksReturnResult>
   {
-    return InnerAttest(keyAlias, AddBase64AndUserIdToHuksOptions(huksOptions, userId), true);
+    return InnerAttestPromise(keyAlias, AddBase64AndUserIdToHuksOptions(huksOptions, userId), true);
   }
 
   export function anonAttestKeyItem(keyAlias: string, options: HuksOptions): Promise<HuksReturnResult>
   {
-    return InnerAttest(keyAlias, AddBase64ToHuksOptions(options), true);
+    return InnerAttestPromise(keyAlias, AddBase64ToHuksOptions(options), true);
   }
 
   /**
