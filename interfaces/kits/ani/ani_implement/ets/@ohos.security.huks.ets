@@ -515,12 +515,14 @@ export namespace huks {
         let retInner = ret as HuksResultInner;
         let eNull = new BusinessError();
         if (retInner.result === 0) {
-          let returnResult = new HuksReturnResult(undefined, undefined, retInner.certChains)
+          let returnResult: HuksReturnResult = {
+            certChains: retInner.certChains
+          }
           callback(eNull, returnResult);
         } else {
           eNull.code = retInner.result
           eNull.message = retInner.error as string;
-          let empty = new HuksReturnResult()
+          let empty: HuksReturnResult = {}
           callback(eNull, empty);
         }
     });
