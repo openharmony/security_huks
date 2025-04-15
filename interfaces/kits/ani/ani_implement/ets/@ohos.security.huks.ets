@@ -530,7 +530,7 @@ export namespace huks {
 
   export function attestKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>): void
   {
-    return InnerAttestCallback(keyAlias, options, callback, false);
+    return InnerAttestCallback(keyAlias, AddBase64ToHuksOptions(options), callback, false);
   }
 
   export function attestKeyItemAsUser(userId: int, keyAlias: string, huksOptions: HuksOptions): Promise<HuksReturnResult>
@@ -545,7 +545,7 @@ export namespace huks {
 
   export function anonAttestKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>): void
   {
-    return InnerAttestCallback(keyAlias, options, callback, true);
+    return InnerAttestCallback(keyAlias, AddBase64ToHuksOptions(options), callback, true);
   }
 
   export function anonAttestKeyItemAsUser(userId: int, keyAlias: string, huksOptions: HuksOptions): Promise<HuksReturnResult>
