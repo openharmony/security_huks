@@ -607,13 +607,16 @@ int32_t HksOptionGetInData(ani_env *&env, ani_object options, HksBlob &blobOut)
         HKS_LOG_E("Object_CallMethodByName_Ref Fail. <get>inData");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    bool aniRet = AniUtils::CheckRefisDefined(env, inDataRef);
-    HKS_IF_NOT_TRUE_LOGE_RETURN(aniRet, HKS_ERROR_INVALID_ARGUMENT, "AniUtils CheckRefisDefined failed!");
-
-    ani_object inDataBuffer = reinterpret_cast<ani_object>(inDataRef);
-    int32_t ret = HksGetBufferFromAni(env, inDataBuffer, blobOut);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "ANIGetBuffer failed! ret = %" LOG_PUBLIC "d", ret);
-    return ret;
+    if (AniUtils::CheckRefisDefined(env, inDataRef)) {
+        ani_object inDataBuffer = reinterpret_cast<ani_object>(inDataRef);
+        int32_t ret = HksGetBufferFromAni(env, inDataBuffer, blobOut);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "ANIGetBuffer failed! ret = %" LOG_PUBLIC "d", ret);
+    } else {
+        HKS_LOG_I("AniUtils CheckRefisDefined. option.inData is undefined!");
+        blobOut.size = 0;
+        blobOut.data = nullptr;
+    }
+    return HKS_SUCCESS;
 }
 
 template<>
@@ -665,6 +668,7 @@ int32_t HksAniParseParams(ani_env *env, ani_long &handle, ani_object &options, S
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     uint64_t huksHandle = static_cast<uint64_t>(handle);
+    HKS_LOG_I("huksHandle = %" LOG_PUBLIC "llu", huksHandle);
     contextPtr->handle.size = sizeof(uint64_t);
     contextPtr->handle.data = static_cast<uint8_t *>(HksMalloc(contextPtr->handle.size));
     if (contextPtr->handle.data == nullptr) {

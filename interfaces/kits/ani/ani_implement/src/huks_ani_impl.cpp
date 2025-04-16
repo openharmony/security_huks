@@ -271,13 +271,26 @@ static ani_object initSessionSync([[maybe_unused]] ani_env *env,
     return aniReturnObject;
 }
 
+static int32_t AddOutData(const HksBlob &huksData, ani_env *env, ani_object &bufferOut)
+{
+    std::vector<uint8_t> outVec(huksData.size);
+    if (memcpy_s(outVec.data(), outVec.size(), huksData.data, huksData.size) != EOK) {
+        HKS_LOG_E("updateFinishSessionSync, but copy mem to vector for creating ani object failed!");
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
+    if (!AniUtils::CreateUint8Array(env, outVec, bufferOut)) {
+        HKS_LOG_E("updateFinishSessionSync ok, but creat ani object failed!");
+        return HKS_ERROR_BAD_STATE;
+    }
+    return HKS_SUCCESS;
+}
+
 static ani_object updateFinishSessionSync([[maybe_unused]] ani_env *env,
     ani_long handle, ani_object options, ani_boolean isUpdate)
 {
     ani_object aniReturnObject{};
     struct HksResult resultInfo{0, nullptr, nullptr};
     int32_t ret{ HKS_SUCCESS };
-    std::vector<uint8_t> outVec;
     ani_object bufferOut = nullptr;
     SessionContext context;
     do {
@@ -291,6 +304,7 @@ static ani_object updateFinishSessionSync([[maybe_unused]] ani_env *env,
             ret = HKS_ERROR_MALLOC_FAIL;
             break;
         }
+        HKS_LOG_I("context.inData.size = %" LOG_PUBLIC "u", context.inData.size);
         if (static_cast<bool>(isUpdate) == true) {
             ret = HksUpdate(&context.handle, context.paramSetIn, &context.inData, &context.outData);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "update session failed. ret = %" LOG_PUBLIC "d", ret)
@@ -298,18 +312,9 @@ static ani_object updateFinishSessionSync([[maybe_unused]] ani_env *env,
             ret = HksFinish(&context.handle, context.paramSetIn, &context.inData, &context.outData);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "finish session failed. ret = %" LOG_PUBLIC "d", ret)
         }
-        ret = CheckBlob(&context.outData);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "context outData blob invalid!")
-        outVec.resize(context.outData.size);
-        if (memcpy_s(outVec.data(), context.outData.size, context.outData.data, context.outData.size) != EOK) {
-            HKS_LOG_E("updat key, but copy mem to vector for creating ani object failed!");
-            ret = HKS_ERROR_BUFFER_TOO_SMALL;
-            break;
-        }
-        if (!AniUtils::CreateUint8Array(env, outVec, bufferOut)) {
-            HKS_LOG_E("export key get the keyOut ok, but creat ani object failed!");
-            ret = HKS_ERROR_BUFFER_TOO_SMALL;
-            break;
+        HKS_LOG_I("context.outData.size = %" LOG_PUBLIC "u", context.outData.size);
+        if (context.outData.size != 0 && context.outData.data != nullptr) {
+            ret = AddOutData(context.outData, env, bufferOut);
         }
     } while (0);
     if (ret != HKS_SUCCESS) {
