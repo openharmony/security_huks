@@ -23,6 +23,7 @@
 #endif
 
 #include "hks_type.h"
+#include "hks_session_manager.h"
 #include "hks_storage_utils.h"
 
 #ifdef __cplusplus
@@ -38,9 +39,26 @@ int32_t GetKeyFileData(const struct HksProcessInfo *processInfo, const struct Hk
 #ifdef HKS_ENABLE_UPGRADE_KEY
 int32_t ConstructUpgradeKeyParamSet(const struct HksProcessInfo *processInfo, const struct HksParamSet *srcParamSet,
     struct HksParamSet **outParamSet);
-#endif
+#endif /* HKS_ENABLE_UPGRADE_KEY */
 
-#endif
+#endif /* _STORAGE_LITE_ */
+
+int32_t AppendStorageLevelIfNotExistInner(const struct HksProcessInfo *processInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
+
+bool CheckProcessNameTagExist(const struct HksParamSet *paramSet);
+
+int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *paramSet,
+    const struct HksProcessInfo *processInfo, const struct HksOperation *operation, struct HksParamSet **outParamSet);
+
+// callback
+int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
+
+int32_t AppendNewInfoForUseKeyInService(const struct HksParamSet *paramSet,
+    const struct HksProcessInfo *processInfo, struct HksParamSet **outParamSet);
+
+int32_t AppendStorageLevelIfNotExist(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
 
 #ifdef __cplusplus
 }

@@ -31,18 +31,19 @@ typedef struct HksThreeStageReportInfo {
     const struct HksBlob *handle;
 } HksThreeStageReportInfo;
 
-typedef struct HksAttestReportInfo {
+typedef struct HksOneStageReportInfo {
     int32_t errCode;
     uint64_t startTime;
     const char *funcName;
-} HksAttestReportInfo;
+    enum HksReportStage stage;
+} HksOneStageReportInfo;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t HksAttestEventReport(const struct HksBlob *keyAlias, const struct HksBlob *key,
-    const struct HksParamSet *paramSet, const struct HksProcessInfo *processInfo, HksAttestReportInfo *info);
+int32_t HksOneStageEventReport(const struct HksBlob *keyAlias, const struct HksBlob *key,
+    const struct HksParamSet *paramSet, const struct HksProcessInfo *processInfo, HksOneStageReportInfo *info);
 
 int32_t HksGetInitEventInfo(const struct HksBlob *keyAlias, const struct HksBlob *key,
     const struct HksParamSet *paramSet, const struct HksProcessInfo *processInfo, HksEventInfo *eventInfo);
