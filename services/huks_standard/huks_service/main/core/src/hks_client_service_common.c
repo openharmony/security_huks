@@ -15,12 +15,15 @@
 
 #include "hks_client_service_common.h"
 
+#include <stdatomic.h>
 #include <stddef.h>
 
 #include "hks_log.h"
 #include "hks_param.h"
 #include "hks_template.h"
 #include "hks_type_enum.h"
+
+static volatile atomic_bool g_isScreenOn = false;
 
 int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
 {
@@ -73,4 +76,14 @@ int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet, struct HksP
         *outParamSet = NULL;
     }
     return ret;
+}
+
+void HksSetScreenState(bool state)
+{
+    atomic_store(&g_isScreenOn, state);
+}
+
+bool HksGetScreenState(void)
+{
+    return atomic_load(&g_isScreenOn);
 }

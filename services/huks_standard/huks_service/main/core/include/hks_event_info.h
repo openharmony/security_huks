@@ -26,6 +26,7 @@
 extern "C" {
 #endif
 
+// modify this please sync modify g_threeStageEvent
 enum HksEventId {
     HKS_EVENT_CRYPTO = 1,
     HKS_EVENT_SIGN_VERIFY = 2,
@@ -41,12 +42,18 @@ enum HksEventId {
     HKS_EVENT_RENAME_KEY = 12,
 };
 
+// modify this please sync modify g_threeStage
 enum HksReportStage {
     HKS_INIT = 1,
     HKS_UPDATE = 2,
     HKS_FINISH = 3,
     HKS_ABORT = 4,
-    HKS_ONE_STAGE = 5,
+    HKS_ONE_STAGE_CRYPTO = 5,
+    HKS_ONE_STAGE_SIGN_VERIFY = 6,
+    HKS_ONE_STAGE_DERIVE = 7,
+    HKS_ONE_STAGE_AGREE = 8,
+    HKS_ONE_STAGE_MAC = 9,
+    HKS_ONE_STAGE_ATTEST = 10,
 };
 
 typedef struct HksEventKeyAccessInfo {

@@ -18,7 +18,7 @@
 #include <dlfcn.h>
 
 #include "hks_cfi.h"
-#include "hks_client_service.h"
+#include "hks_client_service_util.h"
 #include "hks_log.h"
 #include "hks_mutex.h"
 #include "hks_response.h"
