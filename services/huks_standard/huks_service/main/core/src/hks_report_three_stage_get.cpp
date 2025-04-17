@@ -43,12 +43,10 @@ static uint32_t g_threeStageEvent[] = {
 };
 
 static uint32_t g_threeStage[] = {
-    HKS_ONE_STAGE_CRYPTO,
-    HKS_ONE_STAGE_SIGN_VERIFY,
-    HKS_ONE_STAGE_DERIVE,
-    HKS_ONE_STAGE_AGREE,
-    HKS_ONE_STAGE_MAC,
-    HKS_ONE_STAGE_ATTEST,
+    HKS_INIT,
+    HKS_UPDATE,
+    HKS_FINISH,
+    HKS_ABORT,
 };
 
 static std::unordered_map<enum HksReportStage, enum HksEventId> g_eventIdMap = {
@@ -322,8 +320,8 @@ static int32_t HksFreshAndReport(const char *funcName, const struct HksProcessIn
 {
     if (IsThreeStage(info->stage)) {
         FreshEventInfo(paramSet, eventInfo);
-        FreshStatInfo(&(eventInfo->common.statInfo), info->inDataSize, info->stage, info->startTime);
     }
+    FreshStatInfo(&(eventInfo->common.statInfo), info->inDataSize, info->stage, info->startTime);
 
     if (info->errCode == HKS_SUCCESS && (info->stage == HKS_INIT || info->stage == HKS_UPDATE)) {
         return HKS_SUCCESS;
@@ -408,14 +406,13 @@ int32_t HksOneStageEventReport(const struct HksBlob *keyAlias, const struct HksB
         case HKS_EVENT_ATTEST:
             GetAttestInfo(paramSet, keyAlias, key, &(eventInfo.attestInfo));
             GetAttestInfo(keyBlobParamSet, nullptr, nullptr, &(eventInfo.attestInfo));
-            FreshStatInfo(&(eventInfo.common.statInfo), 0, HKS_ONE_STAGE_ATTEST, info->startTime);
             break;
         default:
             HKS_LOG_I("event id no need report");
             return HKS_ERROR_NOT_SUPPORTED;
     }
 
-    HksThreeStageReportInfo reportInfo = { info->errCode, 0, HKS_ONE_STAGE_CRYPTO, info->startTime, nullptr };
+    HksThreeStageReportInfo reportInfo = { info->errCode, 0, HKS_ONE_STAGE, info->startTime, nullptr };
     (void)HksFreshAndReport(info->funcName, processInfo, paramSet, &reportInfo, &eventInfo);
     return HKS_SUCCESS;
 }
