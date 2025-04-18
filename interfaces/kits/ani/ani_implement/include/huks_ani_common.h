@@ -141,7 +141,7 @@ int32_t HksAniImportWrappedKeyParseParams(ani_env *env, ani_string &keyAlias, an
 
 int32_t HksAniParseParams(ani_env *env, ani_long &handle, ani_object &options, SessionContext *&&contextPtr);
 
-int32_t CreateHuksParamInnerArray(ani_env *env, const std::vector<HksParam> &params, ani_array_ref &arrayOut);
+int32_t CreateHuksParamInnerArray(ani_env *env, const std::vector<HksParam> &params, ani_object &arrayOut);
 
 int32_t HuksParamSet2ParamVec(const HksParamSet *paramSetIn, std::vector<HksParam> &paramsVecOut,
     bool isDeepCopy = false);

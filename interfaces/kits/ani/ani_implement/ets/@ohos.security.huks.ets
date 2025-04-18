@@ -14,25 +14,25 @@
  */
 
 import { BusinessError, AsyncCallback } from '@ohos.base';
-
+import hilog from '@ohos.hilog'
 class HuksResultInner {
   result: int = 0;
   error?: string | undefined = "";
   outData?: Uint8Array | undefined;
   handle: long = 0;
   challenge?: Uint8Array | undefined;
-  properties?: Array<HuksParamInner>;
+  properties?: Array<HuksAniParamInner>;
   certChains?: Array<string>;
 }
 
-class HuksParamInner {
-  constructor(tag: int, valueBool: boolean, valueInt: int, valueLong: long, valueBuffer?: Uint8Array | undefined) {
-    this.tag = tag;
-    this.valueBool = valueBool;
-    this.valueInt = valueInt;
-    this.valueLong = valueLong;
-    this.valueBuffer = valueBuffer;
-  }
+class HuksAniParamInner {
+  // constructor(tag: int, valueBool: boolean, valueInt: int, valueLong: long, valueBuffer?: Uint8Array | undefined) {
+  //   this.tag = tag;
+  //   this.valueBool = valueBool;
+  //   this.valueInt = valueInt;
+  //   this.valueLong = valueLong;
+  //   this.valueBuffer = valueBuffer;
+  // }
   tag: int = -1;
   valueBool: boolean  = false;
   valueInt: int = -1;
@@ -257,44 +257,45 @@ export namespace huks {
         let retOut: HuksReturnResult = {
           properties: new Array<HuksParam>()
         }
-        if (retInner.result === 0 && retInner.properties != undefined) {
-          for (let i : int = 0; i < retInner.properties!.length; i++) {
+        if (retInner.result === 0 && retInner.properties !== undefined) {
+          hilog.info(0x0000, 'testTag', `huks.ets getKeyItemPropertiesSync 5.5 lenth ${retInner.properties!.length}`)
+          for (let i: int = 0; i < retInner.properties!.length; i++) {
+            hilog.info(0x0000, 'testTag', `huks.ets getKeyItemPropertiesSync 66666 paramIndex: ${i}`)
             let paramTagType : HuksTagType = (retInner.properties![i].tag & (0xF << 28)) as HuksTagType
-            if (paramTagType == HuksTagType.HUKS_TAG_TYPE_BOOL) {
+            if (paramTagType === HuksTagType.HUKS_TAG_TYPE_BOOL) {
               let paramValue : boolean = retInner.properties![i].valueBool!
-              let tempParam: HuksParam = {
-                tag: retInner.properties![i].tag as HuksTag,
-                value: paramValue
-              }
-              retOut.properties!.push(tempParam)
+              hilog.info(0x0000, 'testTag', `huks.ets getKeyItemPropertiesSync HUKS_TAG_TYPE_BOOL = ${paramValue}`)
+              // let tempParam: HuksParam = {
+              //   tag: retInner.properties![i].tag as HuksTag,
+              //   value: paramValue
+              // }
+              retOut.properties!.push({tag: retInner.properties![i].tag as HuksTag, value: paramValue} as HuksParam)
             }
-            if ((paramTagType == HuksTagType.HUKS_TAG_TYPE_INT) || (paramTagType == HuksTagType.HUKS_TAG_TYPE_UINT)) {
-              let paramValue : int = retInner.properties![i].valueInt!
-              let tempParam: HuksParam = {
-                tag: retInner.properties![i].tag as HuksTag,
-                value: paramValue
-              }
-              retOut.properties!.push(tempParam)
-            }
-            if ((paramTagType == HuksTagType.HUKS_TAG_TYPE_ULONG)) {
-              let paramValue : BigInt = BigInt(retInner.properties![i].valueLong!)
-              let tempParam: HuksParam = {
-                tag: retInner.properties![i].tag as HuksTag,
-                value: paramValue
-              }
-              retOut.properties!.push(tempParam)
-            }
-            if ((paramTagType == HuksTagType.HUKS_TAG_TYPE_BYTES)) {
-              let paramValue : Uint8Array = retInner.properties![i].valueBuffer!
-              let tempParam: HuksParam = {
-                tag: retInner.properties![i].tag as HuksTag,
-                value: paramValue
-              }
-              retOut.properties!.push(tempParam)
+            // else if ((paramTagType === HuksTagType.HUKS_TAG_TYPE_INT) || (paramTagType == HuksTagType.HUKS_TAG_TYPE_UINT)) {
+            //   let paramValue : int = retInner.properties![i].valueInt!
+            //   hilog.info(0x0000, 'testTag', `huks.ets getKeyItemPropertiesSync HUKS_TAG_TYPE_INT = ${paramValue}`)
+            //   retOut.properties!.push({tag: retInner.properties![i].tag as HuksTag, value: paramValue} as HuksParam)
+            // }
+            // else if ((paramTagType === HuksTagType.HUKS_TAG_TYPE_ULONG)) {
+            //   let paramValue : BigInt = BigInt(retInner.properties![i].valueLong!)
+            //   hilog.info(0x0000, 'testTag', `huks.ets getKeyItemPropertiesSync HUKS_TAG_TYPE_ULONG = ${paramValue}`)
+            //   retOut.properties!.push({tag: retInner.properties![i].tag as HuksTag, value: paramValue} as HuksParam)
+            // }
+            else if ((paramTagType === HuksTagType.HUKS_TAG_TYPE_BYTES)) {
+              hilog.info(0x0000, 'testTag', `huks.ets getKeyItemPropertiesSync 888666`)
+              let paramValue: Uint8Array = new Uint8Array(retInner.properties![i].valueBuffer!)
+              // for (let i:int = 0; i < retInner.properties![i].valueBuffer!.length; i++) {
+              //   paramValue[i] = retInner.properties![i].valueBuffer![i]
+              // }
+              hilog.info(0x0000, 'testTag', `huks.ets getKeyItemPropertiesSync HUKS_TAG_TYPE_BYTES = ${JSON.stringify(paramValue)}`)
+              hilog.info(0x0000, 'testTag', `huks.ets getKeyItemPropertiesSync 8887.5`)
+              retOut.properties!.push({tag: retInner.properties![i].tag as HuksTag, value: false} as HuksParam)
+              hilog.info(0x0000, 'testTag', `huks.ets getKeyItemPropertiesSync 8887.6`)
             }
           }
           resolve(retOut);
         } else {
+          hilog.info(0x0000, 'testTag', `huks.ets getKeyItemPropertiesSync 999999`)
           let eNull = new BusinessError();
           eNull.code = retInner.result
           eNull.message = retInner.error as string;
