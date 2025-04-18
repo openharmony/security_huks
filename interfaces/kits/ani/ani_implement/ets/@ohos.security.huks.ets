@@ -14,7 +14,6 @@
  */
 
 import { BusinessError, AsyncCallback } from '@ohos.base';
-import hilog from '@ohos.hilog'
 class HuksResultInner {
   result: int = 0;
   error?: string | undefined = "";

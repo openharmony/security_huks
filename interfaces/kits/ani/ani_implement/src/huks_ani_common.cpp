@@ -480,7 +480,23 @@ static void FreeParsedParams(std::vector<HksParam> &params)
     }
 }
 
-int32_t HksGetParamSetFromAni(ani_env *&env, const ani_object &optionsObj, struct HksParamSet *&paramSetOut)
+static int32_t InitAndBuildParamSet(const std::vector<HksParam> &paramArray, HksParamSet *&paramSetNew)
+{
+    int32_t ret = HksInitParamSet(&paramSetNew);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksInitParamSet failed. ret = %" LOG_PUBLIC "d", ret)
+
+    if (!paramArray.empty()) {
+        ret = HksAddParams(paramSetNew, paramArray.data(), paramArray.size());
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksAddParams addParams fail. ret = %" LOG_PUBLIC "d", ret)
+    }
+
+    ret = HksBuildParamSet(&paramSetNew);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksBuildParamSet fail. ret = %" LOG_PUBLIC "d", ret)
+
+    return HKS_SUCCESS;
+}
+
+static int32_t ParsePropertiesArray(ani_env *&env, const ani_object &optionsObj, std::vector<HksParam> &paramArray)
 {
     ani_ref propertiesRef;
     ani_double length = 0;
@@ -489,6 +505,7 @@ int32_t HksGetParamSetFromAni(ani_env *&env, const ani_object &optionsObj, struc
         HKS_LOG_E("Object_GetPropertyByName_Ref properties failed %" LOG_PUBLIC "u", st);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
+
     ani_object propertiesArray = nullptr;
     if (AniUtils::CheckRefisDefined(env, propertiesRef)) {
         propertiesArray = reinterpret_cast<ani_object>(propertiesRef);
@@ -497,38 +514,38 @@ int32_t HksGetParamSetFromAni(ani_env *&env, const ani_object &optionsObj, struc
             return HKS_ERROR_INVALID_ARGUMENT;
         }
     }
+    int32_t ret = HKS_SUCCESS;
+    for (int32_t i = 0; i < int32_t(length); i++) {
+        ani_ref paramEntryRef;
+        std::string methodSig = arkts::ani_signature::SignatureBuilder().AddInt().
+            SetReturnClass({"std", "core", "Object"}).BuildSignatureDescriptor();
+        if (env->Object_CallMethodByName_Ref(propertiesArray, "$_get",
+            methodSig.c_str(), &paramEntryRef, (ani_int)i) != ANI_OK) {
+            HKS_LOG_E("Object_CallMethodByName_Ref get ani object Failed");
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+
+        ani_object huksParamObj = reinterpret_cast<ani_object>(paramEntryRef);
+        HksParam tempParam;
+        ret = HksAniHuksParamConvert(env, huksParamObj, tempParam);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAniHuksParamConvert failed. ret = %" LOG_PUBLIC "d", ret)
+        paramArray.emplace_back(tempParam);
+    }
+
+    return ret;
+}
+
+int32_t HksGetParamSetFromAni(ani_env *&env, const ani_object &optionsObj, struct HksParamSet *&paramSetOut)
+{
     std::vector<HksParam> paramArray {};
     HksParamSet *paramSetNew = nullptr;
     int32_t ret = HKS_SUCCESS;
     do {
-        for (int32_t i = 0; i < int32_t(length); i++) {
-            ani_ref paramEntryRef;
-            std::string methodSig = arkts::ani_signature::SignatureBuilder().AddInt().
-                SetReturnClass({"std", "core", "Object"}).BuildSignatureDescriptor();
-            if (env->Object_CallMethodByName_Ref(propertiesArray, "$_get",
-                methodSig.c_str(), &paramEntryRef, (ani_int)i) != ANI_OK) {
-                HKS_LOG_E("Object_CallMethodByName_Ref get ani object Failed");
-                ret = HKS_ERROR_INVALID_ARGUMENT;
-                break;
-            }
-            ani_object huksParamObj = reinterpret_cast<ani_object>(paramEntryRef);
-            HksParam tempParam;
-            ret = HksAniHuksParamConvert(env, huksParamObj, tempParam);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAniHuksParamConvert failed. ret = %" LOG_PUBLIC "d", ret)
-            paramArray.emplace_back(tempParam);
-        }
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get param from union failed. ret = %" LOG_PUBLIC "d", ret)
+        ret = ParsePropertiesArray(env, optionsObj, paramArray);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ParsePropertiesArray failed. ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksInitParamSet(&paramSetNew);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksInitParamSet failed. ret = %" LOG_PUBLIC "d", ret)
-
-        if (!paramArray.empty()) {
-            ret = HksAddParams(paramSetNew, paramArray.data(), paramArray.size());
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAddParams addParams fail. ret = %" LOG_PUBLIC "d", ret)
-        }
-
-        ret = HksBuildParamSet(&paramSetNew);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksBuildParamSet fail. ret = %" LOG_PUBLIC "d", ret)
+        ret = InitAndBuildParamSet(paramArray, paramSetNew);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "InitAndBuildParamSet failed. ret = %" LOG_PUBLIC "d", ret)
     } while (0);
     FreeParsedParams(paramArray);
     if (ret != HKS_SUCCESS) {
