@@ -517,21 +517,21 @@ static struct HksError g_errCodeTable[] = {
         .innerErrCode = HKS_FAILURE,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
-            .errorMsg = "System external error.",
+            .errorMsg = "Device environment or input parameter abnormal.",
             .data = NULL
         }
     }, {
         .innerErrCode = HKS_ERROR_BAD_STATE,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
-            .errorMsg = "System external error.",
+            .errorMsg = "Device environment or input parameter abnormal.",
             .data = NULL
         }
     }, {
         .innerErrCode = HKS_ERROR_INTERNAL_ERROR,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
-            .errorMsg = "System external error.",
+            .errorMsg = "Device environment or input parameter abnormal.",
             .data = NULL
         }
     }, {
