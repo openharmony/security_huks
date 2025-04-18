@@ -27,6 +27,7 @@
 #include <vector>
 
 #include <ani.h>
+#include <ani_signature_builder.h>
 
 #include "securec.h"
 #include "hks_common_check.h"
@@ -62,33 +63,11 @@ bool AniUtils::GetStirng([[maybe_unused]] ani_env *&env, const ani_string &strOb
     return true;
 }
 
-bool AniUtils::GetInt32Field(ani_env *&env, const ani_object &object, std::string fieldName, int32_t &value)
-{
-    ani_ref ref;
-    if (env->Object_GetFieldByName_Ref(object, fieldName.data(), &ref) != ANI_OK) {
-        HKS_LOG_E("Object_GetFieldByName_Ref int");
-        return false;
-    }
-    ani_boolean isUndefined;
-    if (env->Reference_IsUndefined(ref, &isUndefined) != ANI_OK) {
-        HKS_LOG_E("Reference_IsUndefined isUndefined Failed");
-        return false;
-    }
-    if (isUndefined) {
-        return false;
-    }
-    if (env->Object_CallMethodByName_Int(static_cast<ani_object>(ref), "intValue", nullptr, &value) != ANI_OK) {
-        HKS_LOG_E("Object_CallMethodByName_Int int Failed");
-        return false;
-    }
-    return true;
-}
-
-
 bool AniUtils::GetInt32FromUnionObj(ani_env *&env, const ani_object &unionObj, int32_t &value)
 {
     ani_class intClass;
-    if (env->FindClass("Lstd/core/Int;", &intClass) != ANI_OK) {
+    std::string intDesc = arkts::ani_signature::Builder::BuildClass({"std", "core", "Int"}).Descriptor();
+    if (env->FindClass(intDesc.c_str(), &intClass) != ANI_OK) {
         HKS_LOG_E("Not found Boolean");
         return false;
     }
@@ -123,14 +102,20 @@ bool AniUtils::GetUint32FromUnionObj(ani_env *&env, const ani_object &unionObj, 
 bool AniUtils::GetUint64FromUnionObj(ani_env *&env, const ani_object &unionObj, uint64_t &value)
 {
     ani_class bigIntCls;
-    const char *className = "Lescompat/BigInt;";
-    if (env->FindClass(className, &bigIntCls) != ANI_OK) {
-        HKS_LOG_E("Not found %" LOG_PUBLIC "s", className);
+    std::string className = arkts::ani_signature::Builder::BuildClass({"escompat", "BigInt"}).Descriptor();
+    HKS_LOG_E("className %" LOG_PUBLIC "s", className.c_str());
+    if (className != "Lescompat/BigInt;") {
+        HKS_LOG_E("####TODO remove#### fzt ani_signature fail");
+        return false;
+    }
+    if (env->FindClass(className.c_str(), &bigIntCls) != ANI_OK) {
+        HKS_LOG_E("Not found %" LOG_PUBLIC "s", className.c_str());
         return false;
     }
     ani_method getLongMethod;
-    if (env->Class_FindMethod(bigIntCls, "getLong", ":J", &getLongMethod) != ANI_OK) {
-        HKS_LOG_E("Class_GetMethod Failed %" LOG_PUBLIC "s", className);
+    auto getLongSignature = arkts::ani_signature::SignatureBuilder().SetReturnLong().BuildSignatureDescriptor();
+    if (env->Class_FindMethod(bigIntCls, "getLong", getLongSignature.c_str(), &getLongMethod) != ANI_OK) {
+        HKS_LOG_E("Class_FindMethod getLong Failed");
         return false;
     }
 
@@ -146,7 +131,8 @@ bool AniUtils::GetUint64FromUnionObj(ani_env *&env, const ani_object &unionObj, 
 bool AniUtils::GetBooleanFromUnionObj(ani_env *&env, const ani_object &unionObj, bool &value)
 {
     ani_class booleanClass;
-    if (env->FindClass("Lstd/core/Boolean;", &booleanClass) != ANI_OK) {
+    auto boolDesc = arkts::ani_signature::Builder::BuildClass({"std", "core", "Boolean"}).Descriptor();
+    if (env->FindClass(boolDesc.c_str(), &booleanClass) != ANI_OK) {
         HKS_LOG_E("Not found Boolean");
         return false;
     }
@@ -219,13 +205,16 @@ void AniUtils::PrintUint8Array(std::vector<uint8_t> &arrayIn)
 bool AniUtils::CreateUint8Array(ani_env *env, std::vector<uint8_t> &arrayIn, ani_object &arrayOut)
 {
     ani_class arrayClass;
-    ani_status retCode = env->FindClass("Lescompat/Uint8Array;", &arrayClass);
+    auto u8arrDesc = arkts::ani_signature::Builder::BuildClass({"escompat", "Uint8Array"}).Descriptor();
+    ani_status retCode = env->FindClass(u8arrDesc.c_str(), &arrayClass);
     if (retCode != ANI_OK) {
         HKS_LOG_E("Failed: env->FindClass()");
         return false;
     }
     ani_method arrayCtor;
-    retCode = env->Class_FindMethod(arrayClass, "<ctor>", "I:V", &arrayCtor);
+    auto methodCtor = arkts::ani_signature::Builder::BuildConstructorName();
+    auto methodCtorSignature = arkts::ani_signature::SignatureBuilder().AddInt().BuildSignatureDescriptor();
+    retCode = env->Class_FindMethod(arrayClass, methodCtor.c_str(), methodCtorSignature.c_str(), &arrayCtor);
     if (retCode != ANI_OK) {
         HKS_LOG_E("Failed: env->Class_FindMethod()");
         return false;
@@ -251,32 +240,7 @@ bool AniUtils::CreateUint8Array(ani_env *env, std::vector<uint8_t> &arrayIn, ani
     return true;
 }
 
-bool AniUtils::CreatIntObj(ani_env *env, int32_t paramValue, ani_object &objOut)
-{
-    ani_class itemCls {};
-    ani_method ctor {};
-    if (env->FindClass("Lstd/core/Int;", &itemCls) != ANI_OK) {
-        HKS_LOG_E("FindClass Failed: Not found Lstd/core/Int;");
-        return false;
-    }
-    if (env->Class_FindMethod(itemCls, "<ctor>", nullptr, &ctor) != ANI_OK)
-    {
-        HKS_LOG_E("Class_FindMethod <ctor> Failed: Not found Lstd/core/Int;");
-        return false;
-    }
-    if (env->Object_New(itemCls, ctor, &objOut, paramValue) != ANI_OK) {
-        HKS_LOG_E("Create Object Failed' Int obj");
-        return false;
-    }
-    return true;
-}
-
 namespace HuksAni {
-static std::string g_huksResultClassName = "L@ohos/security/huks/HuksResultInner;";
-static std::string g_ParamInnerClassName = "L@ohos/security/huks/HuksAniParamInner;";
-static std::string g_huksParamClassName = "LHuksParam;";
-static std::string g_huksNameSpace = "L@ohos/security/huks/huks;";
-
 void FreeHksBlobAndFresh(HksBlob &blob, const bool isNeedFresh)
 {
     if (blob.data != nullptr) {
@@ -293,18 +257,24 @@ static int32_t HksCreateAniResultCommon(const int32_t result, ani_env *&env, ani
     const char *errMsg = nullptr, ani_object oubBuffer = nullptr)
 {
     ani_class cls;
-    if (env->FindClass(g_huksResultClassName.data(), &cls) != ANI_OK) {
-        HKS_LOG_E("FindClass Failed: Not found '%" LOG_PUBLIC "s", g_huksResultClassName.data());
+    std::string resultInnerClassName = arkts::ani_signature::Builder::BuildClass({
+        "@ohos", "security", "huks", "HuksResultInner"}).Descriptor();
+    if (resultInnerClassName != "L@ohos/security/huks/HuksResultInner;") {
+        HKS_LOG_E("####TODO remove#### fzt ani_signature build fail %" LOG_PUBLIC "s", resultInnerClassName.c_str());
+    }
+    if (env->FindClass(resultInnerClassName.c_str(), &cls) != ANI_OK) {
+        HKS_LOG_E("FindClass Failed: Not found '%" LOG_PUBLIC "s", resultInnerClassName.data());
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     ani_method ctor;
-    if (env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor) != ANI_OK) {
-        HKS_LOG_E("Class_FindMethod Failed: <ctor> '%" LOG_PUBLIC "s", g_huksResultClassName.data());
+    auto methodCtor = arkts::ani_signature::Builder::BuildConstructorName();
+    if (env->Class_FindMethod(cls, methodCtor.c_str(), nullptr, &ctor) != ANI_OK) {
+        HKS_LOG_E("Class_FindMethod Failed: %" LOG_PUBLIC "s in %" LOG_PUBLIC "s", methodCtor.c_str(), resultInnerClassName.data());
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     if (env->Object_New(cls, ctor, &resultObjOut) != ANI_OK) {
-        HKS_LOG_E("Create Object Failed' '%" LOG_PUBLIC "s", g_huksResultClassName.data());
+        HKS_LOG_E("Create Object Failed %" LOG_PUBLIC "s", resultInnerClassName.data());
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -313,26 +283,38 @@ static int32_t HksCreateAniResultCommon(const int32_t result, ani_env *&env, ani
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
+    // 下边两行注释
     // ani_array_ref arrayOut;
     // ani_class itemCls;
-    // if (env->FindClass(g_ParamInnerClassName.data(), &itemCls) != ANI_OK) {
-    //     HKS_LOG_E("FindClass Failed: Not found '%" LOG_PUBLIC "s", g_ParamInnerClassName.data());
+    std::string paramInnerClassName = arkts::ani_signature::Builder::BuildClass({"@ohos", "security", "huks", "HuksAniParamInner"}).Descriptor();
+    if (paramInnerClassName != "L@ohos/security/huks/HuksAniParamInner;") {
+        HKS_LOG_E("####TODO remove#### fzt ani_signature::Builder fail %" LOG_PUBLIC "s", paramInnerClassName.c_str());
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    std::string huksParamClassName = arkts::ani_signature::Builder::BuildClass({"HuksParam"}).Descriptor();
+    if (huksParamClassName != "LHuksParam;") {
+        HKS_LOG_E("####TODO remove#### fzt ani_signature::Builder fail %" LOG_PUBLIC "s", huksParamClassName.c_str());
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    // 注释开始
+    // if (env->FindClass(paramInnerClassName.data(), &itemCls) != ANI_OK) {
+    //     HKS_LOG_E("FindClass Failed: Not found '%" LOG_PUBLIC "s", paramInnerClassName.data());
     //     return HKS_ERROR_INVALID_ARGUMENT;
     // }
     // if (env->Array_New_Ref(itemCls, 2, nullptr, &arrayOut) != ANI_OK) {
     //     HKS_LOG_E("Array_New_Ref. Fail. className = %" LOG_PUBLIC "s. size = %" LOG_PUBLIC "d",
-    //         g_huksParamClassName.data(), 2);
+    //         huksParamClassName.data(), 2);
     //     return HKS_ERROR_INVALID_ARGUMENT;
     // }
     // for (uint32_t i = 0; i < 2; i++) {
     //     ani_method ctor {};
-    //     if (env->Class_FindMethod(itemCls, "<ctor>", nullptr, &ctor) != ANI_OK) {
-    //         HKS_LOG_E("Class_FindMethod Failed: <ctor> '%" LOG_PUBLIC "s", g_huksParamClassName.data());
+    //     if (env->Class_FindMethod(itemCls, methodCtor.c_str(), nullptr, &ctor) != ANI_OK) {
+    //         HKS_LOG_E("Class_FindMethod Failed: %" LOG_PUBLIC "s in %" LOG_PUBLIC "s", methodCtor.c_str(), huksParamClassName.data());
     //         return HKS_ERROR_INVALID_ARGUMENT;
     //     }
     //     ani_object item {};
     //     if (env->Object_New(itemCls, ctor, &item) != ANI_OK) {
-    //         HKS_LOG_E("Create Object Failed' '%" LOG_PUBLIC "s", g_huksParamClassName.data());
+    //         HKS_LOG_E("Create Object Failed' '%" LOG_PUBLIC "s", huksParamClassName.data());
     //         return HKS_ERROR_INVALID_ARGUMENT;
     //     }
 
@@ -342,13 +324,22 @@ static int32_t HksCreateAniResultCommon(const int32_t result, ani_env *&env, ani
     //     }
 
     //     ani_class arrayClass;
-    //     ani_status retCode = env->FindClass("Lescompat/Uint8Array;", &arrayClass);
+    //     std::string u8arrClassName = arkts::ani_signature::Builder::BuildClass({"escompat", "Uint8Array"}).Descriptor();
+    //     if (u8arrClassName != "Lescompat/Uint8Array;") {
+    //         HKS_LOG_E("####TODO remove#### fzt ani_signature::Builder fail %" LOG_PUBLIC "s", u8arrClassName.c_str());
+    //         return HKS_ERROR_INVALID_ARGUMENT;
+    //     }
+    //     ani_status retCode = env->FindClass(u8arrClassName.c_str(), &arrayClass);
     //     if (retCode != ANI_OK) {
     //         HKS_LOG_E("Failed: env->FindClass()");
     //         return HKS_ERROR_INVALID_ARGUMENT;
     //     }
     //     ani_method arrayCtor;
-    //     retCode = env->Class_FindMethod(arrayClass, "<ctor>", "I:V", &arrayCtor);
+    //     std::string argIntReturnVoid = arkts::ani_signature::SignatureBuilder().AddInt().BuildSignatureDescriptor();
+    //     if (argIntReturnVoid != "I:V") {
+    //         HKS_LOG_E("####TODO remove#### fzt SignatureBuilder fail %" LOG_PUBLIC "s", argIntReturnVoid.c_str());
+    //     }
+    //     retCode = env->Class_FindMethod(arrayClass, methodCtor.c_str(), argIntReturnVoid.c_str(), &arrayCtor);
     //     if (retCode != ANI_OK) {
     //         HKS_LOG_E("Failed: env->Class_FindMethod()");
     //         return HKS_ERROR_INVALID_ARGUMENT;
@@ -392,6 +383,7 @@ static int32_t HksCreateAniResultCommon(const int32_t result, ani_env *&env, ani
     //         HKS_LOG_E("Object_SetFieldByName_Ref properties failed. sttt ret = %" LOG_PUBLIC "d", sttt);
     // }
     // HKS_LOG_E("Object_SetFieldByName_Ref properties successssssssssssssssssss. ");
+    // 注释结束
 
     if (errMsg != nullptr) {
         ani_string result_string;
@@ -648,8 +640,13 @@ int32_t HksGetParamSetFromAni(ani_env *&env, const ani_object &optionsObj, struc
     do {
         for (int32_t i = 0; i < int32_t(length); i++) {
             ani_ref paramEntryRef;
-            if (env->Object_CallMethodByName_Ref(propertiesArray, "$_get",
-                "I:Lstd/core/Object;", &paramEntryRef, (ani_int)i) != ANI_OK) {
+            std::string methodSig = arkts::ani_signature::SignatureBuilder().AddInt().SetReturnClass({"std", "core", "Object"}).BuildSignatureDescriptor();
+            if (methodSig != "I:Lstd/core/Object;") {
+                HKS_LOG_E("####TODO remove#### fzt ani_signature fail %" LOG_PUBLIC "s", methodSig.c_str());
+                ret = HKS_ERROR_INVALID_ARGUMENT;
+                break;
+            }
+            if (env->Object_CallMethodByName_Ref(propertiesArray, "$_get", methodSig.c_str(), &paramEntryRef, (ani_int)i) != ANI_OK) {
                 HKS_LOG_E("Object_CallMethodByName_Ref get ani object Failed");
                 ret = HKS_ERROR_INVALID_ARGUMENT;
                 break;
@@ -701,9 +698,12 @@ int32_t HksGetBufferFromAni(ani_env *&env, const ani_object &arrayObj, HksBlob &
 int32_t HksOptionGetInData(ani_env *&env, ani_object options, HksBlob &blobOut)
 {
     ani_ref inDataRef;
-    ani_status st = env->Object_GetPropertyByName_Ref(options, "inData", &inDataRef);
-    if (st != ANI_OK) {
-        HKS_LOG_E("Object_GetPropertyByName_Ref inData Fail %" LOG_PUBLIC "u", st);
+    std::string getInDataMethodName = arkts::ani_signature::Builder::BuildGetterName("inData");
+    if (getInDataMethodName != "<get>inData") {
+        HKS_LOG_E("####TODO remove#### fzt BuildGetterName fail %" LOG_PUBLIC "s", getInDataMethodName.c_str());
+    }
+    if (env->Object_CallMethodByName_Ref(options, getInDataMethodName.c_str(), nullptr, &inDataRef) != ANI_OK) {
+        HKS_LOG_E("Object_CallMethodByName_Ref Fail. %" LOG_PUBLIC "s", getInDataMethodName.c_str());
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     if (AniUtils::CheckRefisDefined(env, inDataRef)) {
@@ -868,17 +868,11 @@ int32_t CreateHuksParamInnerArray(ani_env *env, const std::vector<HksParam> &par
     if (env == nullptr) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    // if (env->Array_New_Ref(itemCls, params.size(), nullptr, &arrayOut) != ANI_OK) {
-    //     HKS_LOG_E("Array_New_Ref. Fail. className = %" LOG_PUBLIC "s. size = %" LOG_PUBLIC "zu",
-    //         g_huksParamClassName.data(), params.size());
-    //     return HKS_ERROR_INVALID_ARGUMENT;
-    // }
     ani_class arrayCls = nullptr;
     if (ANI_OK != env->FindClass("Lescompat/Array;", &arrayCls)){
         HKS_LOG_E("FindClass Lescompat/Array; Failed");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-
     ani_method arrayCtor;
     if(ANI_OK != env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor)){
         HKS_LOG_E("Class_FindMethod <ctor> Failed. Lescompat/Array");
@@ -897,18 +891,29 @@ int32_t CreateHuksParamInnerArray(ani_env *env, const std::vector<HksParam> &par
     HKS_LOG_I("CreateHuksParamInnerArray: params size = %" LOG_PUBLIC "zu", params.size());
     for (uint32_t i = 0; i < params.size(); i++) {
         ani_class itemCls = nullptr;
-        if (env->FindClass(g_ParamInnerClassName.data(), &itemCls) != ANI_OK) {
-            HKS_LOG_E("FindClass Failed: Not found '%" LOG_PUBLIC "s", g_ParamInnerClassName.data());
+        std::string paramInnerClassName = arkts::ani_signature::Builder::BuildClass({"@ohos", "security", "huks", "HuksAniParamInner"}).Descriptor();
+        if (paramInnerClassName != "L@ohos/security/huks/HuksAniParamInner;") {
+            HKS_LOG_E("####TODO remove#### fzt ani_signature::Builder fail %" LOG_PUBLIC "s", paramInnerClassName.c_str());
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+        std::string huksParamClassName = arkts::ani_signature::Builder::BuildClass({"HuksParam"}).Descriptor();
+        if (huksParamClassName != "LHuksParam;") {
+            HKS_LOG_E("####TODO remove#### fzt ani_signature::Builder fail %" LOG_PUBLIC "s", huksParamClassName.c_str());
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+        if (env->FindClass(paramInnerClassName.c_str(), &itemCls) != ANI_OK) {
+            HKS_LOG_E("FindClass Failed: Not found '%" LOG_PUBLIC "s", paramInnerClassName.c_str());
             return HKS_ERROR_INVALID_ARGUMENT;
         }
         ani_method ctor {};
-        if (env->Class_FindMethod(itemCls, "<ctor>", nullptr, &ctor) != ANI_OK) {
-            HKS_LOG_E("Class_FindMethod Failed: <ctor> '%" LOG_PUBLIC "s", g_huksParamClassName.data());
+        auto methodCtor = arkts::ani_signature::Builder::BuildConstructorName();
+        if (env->Class_FindMethod(itemCls, methodCtor.c_str(), nullptr, &ctor) != ANI_OK) {
+            HKS_LOG_E("Class_FindMethod Failed: %" LOG_PUBLIC "s in %" LOG_PUBLIC "s", methodCtor.c_str(), huksParamClassName.c_str());
             return HKS_ERROR_INVALID_ARGUMENT;
         }
         ani_object item {};
         if (env->Object_New(itemCls, ctor, &item) != ANI_OK) {
-            HKS_LOG_E("Create Object Failed' '%" LOG_PUBLIC "s", g_huksParamClassName.data());
+            HKS_LOG_E("Create Object Failed' '%" LOG_PUBLIC "s", huksParamClassName.c_str());
             return HKS_ERROR_INVALID_ARGUMENT;
         }
         ani_ref itemGlobal {};

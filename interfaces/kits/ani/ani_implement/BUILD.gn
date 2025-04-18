@@ -53,6 +53,7 @@ ohos_shared_library("huks_interfaceImpl_ani") {
     "c_utils:utils",
     "hilog:libhilog",
     "runtime_core:ani",
+    "runtime_core:ani_helpers",
     "runtime_core:libarkruntime",
   ]
   cflags_cc = [

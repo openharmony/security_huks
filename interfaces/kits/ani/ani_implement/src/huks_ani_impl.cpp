@@ -22,6 +22,7 @@
 
 #include "securec.h"
 #include <ani.h>
+#include <ani_signature_builder.h>
 
 #include "huks_ani_common.h"
 #include "hks_api.h"
@@ -33,7 +34,6 @@
 #include "hks_errcode_adapter.h"
 
 using namespace HuksAni;
-static const char *HUKS_GLOBAL_NAME_SPACE = "L@ohos/security/huks;";
 constexpr uint32_t HKS_MAX_TOKEN_SIZE = 2048;
 constexpr uint32_t OUTPURT_DATA_SIZE = 1024 * 64;
 
@@ -393,12 +393,24 @@ static CertArray ConstructChainInput() {
 static ani_object ConstructArrayString(ani_env *env, uint32_t sz, struct HksBlob *blobs)
 {
     ani_class arrayCls{};
-    auto status = env->FindClass("Lescompat/Array;", &arrayCls);
-    HKS_ANI_IF_NOT_SUCC_LOGE_RETURN(status, ani_object{}, "FindClass Lescompat/Array fail %" LOG_PUBLIC "u", status);
+    std::string arrClassName = arkts::ani_signature::Builder::BuildClass({"escompat", "Array"}).Descriptor();
+    if (arrClassName != "Lescompat/Array;") {
+        HKS_LOG_E("####TODO remove#### fzt ani_signature::Builder fail %" LOG_PUBLIC "s", arrClassName.c_str());
+        return {};
+    }
+    auto status = env->FindClass(arrClassName.c_str(), &arrayCls);
+    HKS_ANI_IF_NOT_SUCC_LOGE_RETURN(status, ani_object{}, "FindClass %" LOG_PUBLIC "s fail %" LOG_PUBLIC "u", arrClassName.c_str(), status);
 
     ani_method arrayCtor{};
-    status = env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor);
-    HKS_ANI_IF_NOT_SUCC_LOGE_RETURN(status, ani_object{}, "Class_FindMethod <ctor> fail %" LOG_PUBLIC "u", status);
+    std::string argIntReturnVoid = arkts::ani_signature::SignatureBuilder().AddInt().BuildSignatureDescriptor();
+    if (argIntReturnVoid != "I:V") {
+        HKS_LOG_E("####TODO remove#### fzt SignatureBuilder fail %" LOG_PUBLIC "s", argIntReturnVoid.c_str());
+        return {};
+    }
+    auto methodCtor = arkts::ani_signature::Builder::BuildConstructorName();
+    status = env->Class_FindMethod(arrayCls, methodCtor.c_str(), argIntReturnVoid.c_str(), &arrayCtor);
+    HKS_ANI_IF_NOT_SUCC_LOGE_RETURN(status, ani_object{}, "Class_FindMethod %" LOG_PUBLIC "s %" LOG_PUBLIC "s fail %" LOG_PUBLIC "u",
+        methodCtor.c_str(), argIntReturnVoid.c_str(), status);
 
     ani_object arrayObj{};
     status = env->Object_New(arrayCls, arrayCtor, &arrayObj, sz);
@@ -409,7 +421,12 @@ static ani_object ConstructArrayString(ani_env *env, uint32_t sz, struct HksBlob
         status = env->String_NewUTF8(reinterpret_cast<char *>(blobs[i].data), blobs[i].size, &aniCert);
         HKS_ANI_IF_NOT_SUCC_LOGE_RETURN(status, ani_object{}, "String_NewUTF8 fail %" LOG_PUBLIC "u", status);
 
-        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", i, aniCert);
+        std::string methodSig = arkts::ani_signature::SignatureBuilder().AddInt().AddClass({"std", "core", "Object"}).BuildSignatureDescriptor();
+        if (methodSig != "ILstd/core/Object;:V") {
+            HKS_LOG_E("####TODO remove#### fzt ani_signature fail %" LOG_PUBLIC "s", methodSig.c_str());
+            return {};
+        }
+        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", methodSig.c_str(), i, aniCert);
         HKS_ANI_IF_NOT_SUCC_LOGE_RETURN(status, ani_object{}, "Object_CallMethodByName_Void $_set fail %" LOG_PUBLIC "u", status);
     }
 
@@ -454,7 +471,7 @@ static ani_object InnerAttest(ani_env *env, ani_string keyAlias, ani_object opti
 
     ani_status st = env->Object_SetFieldByName_Ref(aniReturnObject, "certChains", arrayObj);
     if (st != ANI_OK) {
-        HKS_LOG_E("Object_CallMethodByName_Void Failed <set>outData %" LOG_PUBLIC "u", st);
+        HKS_LOG_E("Object_SetFieldByName_Ref certChains %" LOG_PUBLIC "u", st);
         return {};
     }
 
@@ -486,8 +503,13 @@ static int32_t GetKeyItemPropertiesCreateAniResult(const HksResult &resultInfo, 
         ret = CreateHuksParamInnerArray(env, paramVec, paramInnerArray);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CreateHuksParamInnerArray failed. ret = %" LOG_PUBLIC "d", ret)
         HKS_LOG_I("ani_array_ref is not null, use Object_SetFieldByName_Ref");
+        // std::string methodSig = arkts::ani_signature::SignatureBuilder().AddInt().AddClass({"std", "core", "Object"}).BuildSignatureDescriptor();
+        // if (methodSig != "ILstd/core/Object;:V") {
+        //     HKS_LOG_E("####TODO remove#### fzt ani_signature fail %" LOG_PUBLIC "s", methodSig.c_str());
+        //     return {};
+        // }
         if (env->Object_SetFieldByName_Ref(resultObjOut, "properties", paramInnerArray) != ANI_OK) {
-        // if (env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, retArray) != ANI_OK) {
+        // if (env->Object_CallMethodByName_Void(arrayObj, "$_set", methodSig.c_str(), index, retArray) != ANI_OK) {
             HKS_LOG_E("Object_SetFieldByName_Ref failed. properties ret = %" LOG_PUBLIC "d", ret);
             ret = HKS_ERROR_INVALID_ARGUMENT;
         }
@@ -554,8 +576,14 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return (ani_status)INVALID_ANI_VERSION;
     }
     ani_module globalModule{};
-    if (env->FindModule(HUKS_GLOBAL_NAME_SPACE, &globalModule) != ANI_OK) {
-        HKS_LOG_E("Not found %" LOG_PUBLIC "s", HUKS_GLOBAL_NAME_SPACE);
+    std::string globalNameSpace = arkts::ani_signature::Builder::BuildClass({
+        "@ohos", "security", "huks"}).Descriptor();
+    if (globalNameSpace != "L@ohos/security/huks;") {
+        HKS_LOG_E("####TODO remove#### fzt ani_signature::Builder fail %" LOG_PUBLIC "s", globalNameSpace.c_str());
+        return (ani_status)ANI_CLASS_NOT_FOUND;;
+    }
+    if (env->FindModule(globalNameSpace.c_str(), &globalModule) != ANI_OK) {
+        HKS_LOG_E("Not found %" LOG_PUBLIC "s", globalNameSpace.c_str());
         return (ani_status)ANI_CLASS_NOT_FOUND;
     }
 
@@ -574,7 +602,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     };
 
     if (env->Module_BindNativeFunctions(globalModule, methods.data(), methods.size()) != ANI_OK) {
-        HKS_LOG_E("Cannot bind native methods to '%" LOG_PUBLIC "s", HUKS_GLOBAL_NAME_SPACE);
+        HKS_LOG_E("Cannot bind native methods to '%" LOG_PUBLIC "s", globalNameSpace.c_str());
         return (ani_status)ANI_BIND_METHOD_FAILED;
     };
 
