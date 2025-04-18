@@ -61,7 +61,6 @@ native function abortSessionSync(handle: long, options: huks.HuksOptions): HuksR
 
 native function attestKeyItemSync(keyAlias: string, options: huks.HuksOptions, isAnonymous: boolean): HuksResultInner;
 
-native function getKeyItemPropertiesSync(keyAlias: string, options: huks.HuksOptions): HuksResultInner;
 /**
  * OpenHarmony Universal KeyStore
  *
@@ -248,64 +247,6 @@ export namespace huks {
     return p;
   }
 
-  export function getKeyItemProperties(keyAlias: string, options: HuksOptions): Promise<HuksReturnResult> {
-    let p = new Promise<HuksReturnResult>((resolve: (v: HuksReturnResult) => void,
-      reject: (error: BusinessError) => void): void => {
-      let p1 = taskpool.execute(getKeyItemPropertiesSync, keyAlias, options);
-      p1.then((ret: NullishType) => {
-        let retInner = ret as HuksResultInner;
-        let retOut: HuksReturnResult = {
-          properties: new Array<HuksParam>()
-        }
-        if (retInner.result === 0 && retInner.properties !== undefined) {
-          hilog.info(0x0000, 'testTag', `huks.ets getKeyItemPropertiesSync 5.5 lenth ${retInner.properties!.length}`)
-          for (let i: int = 0; i < retInner.properties!.length; i++) {
-            hilog.info(0x0000, 'testTag', `huks.ets getKeyItemPropertiesSync 66666 paramIndex: ${i}`)
-            let paramTagType : HuksTagType = (retInner.properties![i].tag & (0xF << 28)) as HuksTagType
-            if (paramTagType === HuksTagType.HUKS_TAG_TYPE_BOOL) {
-              let paramValue : boolean = retInner.properties![i].valueBool!
-              hilog.info(0x0000, 'testTag', `huks.ets getKeyItemPropertiesSync HUKS_TAG_TYPE_BOOL = ${paramValue}`)
-              // let tempParam: HuksParam = {
-              //   tag: retInner.properties![i].tag as HuksTag,
-              //   value: paramValue
-              // }
-              retOut.properties!.push({tag: retInner.properties![i].tag as HuksTag, value: paramValue} as HuksParam)
-            }
-            // else if ((paramTagType === HuksTagType.HUKS_TAG_TYPE_INT) || (paramTagType == HuksTagType.HUKS_TAG_TYPE_UINT)) {
-            //   let paramValue : int = retInner.properties![i].valueInt!
-            //   hilog.info(0x0000, 'testTag', `huks.ets getKeyItemPropertiesSync HUKS_TAG_TYPE_INT = ${paramValue}`)
-            //   retOut.properties!.push({tag: retInner.properties![i].tag as HuksTag, value: paramValue} as HuksParam)
-            // }
-            // else if ((paramTagType === HuksTagType.HUKS_TAG_TYPE_ULONG)) {
-            //   let paramValue : BigInt = BigInt(retInner.properties![i].valueLong!)
-            //   hilog.info(0x0000, 'testTag', `huks.ets getKeyItemPropertiesSync HUKS_TAG_TYPE_ULONG = ${paramValue}`)
-            //   retOut.properties!.push({tag: retInner.properties![i].tag as HuksTag, value: paramValue} as HuksParam)
-            // }
-            else if ((paramTagType === HuksTagType.HUKS_TAG_TYPE_BYTES)) {
-              hilog.info(0x0000, 'testTag', `huks.ets getKeyItemPropertiesSync 888666`)
-              let paramValue: Uint8Array = new Uint8Array(retInner.properties![i].valueBuffer!)
-              // for (let i:int = 0; i < retInner.properties![i].valueBuffer!.length; i++) {
-              //   paramValue[i] = retInner.properties![i].valueBuffer![i]
-              // }
-              hilog.info(0x0000, 'testTag', `huks.ets getKeyItemPropertiesSync HUKS_TAG_TYPE_BYTES = ${JSON.stringify(paramValue)}`)
-              hilog.info(0x0000, 'testTag', `huks.ets getKeyItemPropertiesSync 8887.5`)
-              retOut.properties!.push({tag: retInner.properties![i].tag as HuksTag, value: false} as HuksParam)
-              hilog.info(0x0000, 'testTag', `huks.ets getKeyItemPropertiesSync 8887.6`)
-            }
-          }
-          resolve(retOut);
-        } else {
-          hilog.info(0x0000, 'testTag', `huks.ets getKeyItemPropertiesSync 999999`)
-          let eNull = new BusinessError();
-          eNull.code = retInner.result
-          eNull.message = retInner.error as string;
-          reject(eNull);
-        }
-      });
-    });
-    return p;
-  }
-
   export function initSession(keyAlias: string, options: HuksOptions): Promise<HuksSessionHandle>
   {
     let p = new Promise<HuksSessionHandle> ((resolve: (v: HuksSessionHandle) => void,
@@ -455,12 +396,6 @@ export namespace huks {
     return exportKeyItem(keyAlias, AddUserIdToHuksOptions(huksOptions, userId));
   }
 
-  export function getKeyItemPropertiesAsUser(userId: int, keyAlias: string, 
-    huksOptions: HuksOptions): Promise<HuksReturnResult>
-  {
-    return getKeyItemProperties(keyAlias, AddUserIdToHuksOptions(huksOptions, userId));
-  }
-
   function AddBase64ToHuksOptions(huksOptions: HuksOptions): HuksOptions {
     let copyOne = CopyHuksOptions(huksOptions)
     let tempParam: HuksParam = {
@@ -509,7 +444,8 @@ export namespace huks {
     return p;
   }
 
-  function InnerAttestCallback(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>, isAnonymous: boolean): void
+  function InnerAttestCallback(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>,
+    isAnonymous: boolean): void
   {
     let p = taskpool.execute(attestKeyItemSync, keyAlias, options, isAnonymous);
     p.then<void>((ret : NullishType) => {
@@ -534,7 +470,8 @@ export namespace huks {
     return InnerAttestCallback(keyAlias, AddBase64ToHuksOptions(options), callback, false);
   }
 
-  export function attestKeyItemAsUser(userId: int, keyAlias: string, huksOptions: HuksOptions): Promise<HuksReturnResult>
+  export function attestKeyItemAsUser(userId: int, keyAlias: string,
+    huksOptions: HuksOptions): Promise<HuksReturnResult>
   {
     return InnerAttestPromise(keyAlias, AddBase64AndUserIdToHuksOptions(huksOptions, userId), false);
   }
@@ -544,12 +481,14 @@ export namespace huks {
     return InnerAttestPromise(keyAlias, AddBase64ToHuksOptions(options), false);
   }
 
-  export function anonAttestKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>): void
+  export function anonAttestKeyItem(keyAlias: string, options: HuksOptions,
+    callback: AsyncCallback<HuksReturnResult>): void
   {
     return InnerAttestCallback(keyAlias, AddBase64ToHuksOptions(options), callback, true);
   }
 
-  export function anonAttestKeyItemAsUser(userId: int, keyAlias: string, huksOptions: HuksOptions): Promise<HuksReturnResult>
+  export function anonAttestKeyItemAsUser(userId: int, keyAlias: string,
+    huksOptions: HuksOptions): Promise<HuksReturnResult>
   {
     return InnerAttestPromise(keyAlias, AddBase64AndUserIdToHuksOptions(huksOptions, userId), true);
   }
