@@ -214,7 +214,7 @@ export namespace huks {
         let retInner = ret as HuksResultInner;
         let eNull = new BusinessError();
         let isExist : boolean = true;
-        if (retInner.result === 0){
+        if (retInner.result === 0) {
           isExist = true;
           callback(eNull, isExist);
         }

@@ -35,8 +35,6 @@
 namespace AniUtils {
     bool GetStirng([[maybe_unused]] ani_env *&env, const ani_string &strObject, std::string &nativeStr);
 
-    bool GetInt32Field(ani_env *&env, const ani_object &object, std::string fieldName, int32_t &value);
-
     bool GetInt32FromUnionObj(ani_env *&env, const ani_object &unionObj, int32_t &value);
 
     bool GetUint32FromUnionObj(ani_env *&env, const ani_object &unionObj, uint32_t &value);
@@ -54,8 +52,6 @@ namespace AniUtils {
     void PrintUint8Array(std::vector<uint8_t> &arrayIn);
 
     bool CreateUint8Array(ani_env *env, std::vector<uint8_t> &arrayIn, ani_object &arrayOut);
-
-    bool CreatIntObj(ani_env *env, int32_t paramValue, ani_object &objOut);
 }
 
 namespace HuksAni {
