@@ -366,7 +366,8 @@ struct CertArray {
     struct HksCertChain c{};
 };
 
-static CertArray ConstructChainInput() {
+static CertArray ConstructChainInput()
+{
     decltype(CertArray::appCert) appCert(new (std::nothrow) std::array<uint8_t, HKS_CERT_APP_SIZE>);
     decltype(CertArray::devCert) devCert(new (std::nothrow) std::array<uint8_t, HKS_CERT_DEVICE_SIZE>);
     decltype(CertArray::caCert) caCert(new (std::nothrow) std::array<uint8_t, HKS_CERT_CA_SIZE>);
@@ -478,27 +479,27 @@ static ani_object attestKeyItemSync(ani_env *env,
     return InnerAttest(env, keyAlias, options, HksAttestKey);
 }
 
-constexpr int32_t INVALID_ANI_VERSION = 9;
-constexpr int32_t ANI_CLASS_NOT_FOUND = 2;
-constexpr int32_t ANI_BIND_METHOD_FAILED = 3;
+static constexpr int32_t aniInvalidVersion = 9;
+static constexpr int32_t aniClassNotFound = 2;
+static constexpr int32_t aniBindMethodFailed = 3;
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     if (vm == nullptr || result == nullptr) {
         HKS_LOG_E("vm or result is null ptr!!");
-        return (ani_status)INVALID_ANI_VERSION;
+        return (ani_status)aniInvalidVersion;
     }
     ani_env *env{};
     if (vm->GetEnv(ANI_VERSION_1, &env) != ANI_OK) {
         HKS_LOG_E("Unsupported ANI_VERSION_1");
-        return (ani_status)INVALID_ANI_VERSION;
+        return (ani_status)aniInvalidVersion;
     }
     ani_module globalModule{};
     std::string globalNameSpace = arkts::ani_signature::Builder::BuildClass({
         "@ohos", "security", "huks"}).Descriptor();
     if (env->FindModule(globalNameSpace.c_str(), &globalModule) != ANI_OK) {
         HKS_LOG_E("Not found %" LOG_PUBLIC "s", globalNameSpace.c_str());
-        return (ani_status)ANI_CLASS_NOT_FOUND;
+        return (ani_status)aniClassNotFound;
     }
 
     std::array methods = {
@@ -516,7 +517,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 
     if (env->Module_BindNativeFunctions(globalModule, methods.data(), methods.size()) != ANI_OK) {
         HKS_LOG_E("Cannot bind native methods to '%" LOG_PUBLIC "s", globalNameSpace.c_str());
-        return (ani_status)ANI_BIND_METHOD_FAILED;
+        return (ani_status)aniBindMethodFailed;
     };
 
     *result = ANI_VERSION_1;
