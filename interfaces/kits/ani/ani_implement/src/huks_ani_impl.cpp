@@ -394,23 +394,16 @@ static ani_object ConstructArrayString(ani_env *env, uint32_t sz, struct HksBlob
 {
     ani_class arrayCls{};
     std::string arrClassName = arkts::ani_signature::Builder::BuildClass({"escompat", "Array"}).Descriptor();
-    if (arrClassName != "Lescompat/Array;") {
-        HKS_LOG_E("####TODO remove#### fzt ani_signature::Builder fail %" LOG_PUBLIC "s", arrClassName.c_str());
-        return {};
-    }
     auto status = env->FindClass(arrClassName.c_str(), &arrayCls);
-    HKS_ANI_IF_NOT_SUCC_LOGE_RETURN(status, ani_object{}, "FindClass %" LOG_PUBLIC "s fail %" LOG_PUBLIC "u", arrClassName.c_str(), status);
+    HKS_ANI_IF_NOT_SUCC_LOGE_RETURN(status, ani_object{}, "FindClass %" LOG_PUBLIC "s fail %" LOG_PUBLIC "u",
+        arrClassName.c_str(), status);
 
     ani_method arrayCtor{};
     std::string argIntReturnVoid = arkts::ani_signature::SignatureBuilder().AddInt().BuildSignatureDescriptor();
-    if (argIntReturnVoid != "I:V") {
-        HKS_LOG_E("####TODO remove#### fzt SignatureBuilder fail %" LOG_PUBLIC "s", argIntReturnVoid.c_str());
-        return {};
-    }
     auto methodCtor = arkts::ani_signature::Builder::BuildConstructorName();
     status = env->Class_FindMethod(arrayCls, methodCtor.c_str(), argIntReturnVoid.c_str(), &arrayCtor);
-    HKS_ANI_IF_NOT_SUCC_LOGE_RETURN(status, ani_object{}, "Class_FindMethod %" LOG_PUBLIC "s %" LOG_PUBLIC "s fail %" LOG_PUBLIC "u",
-        methodCtor.c_str(), argIntReturnVoid.c_str(), status);
+    HKS_ANI_IF_NOT_SUCC_LOGE_RETURN(status, ani_object{}, "Class_FindMethod %" LOG_PUBLIC "s %" LOG_PUBLIC "s fail %"
+        LOG_PUBLIC "u", methodCtor.c_str(), argIntReturnVoid.c_str(), status);
 
     ani_object arrayObj{};
     status = env->Object_New(arrayCls, arrayCtor, &arrayObj, sz);
@@ -421,13 +414,11 @@ static ani_object ConstructArrayString(ani_env *env, uint32_t sz, struct HksBlob
         status = env->String_NewUTF8(reinterpret_cast<char *>(blobs[i].data), blobs[i].size, &aniCert);
         HKS_ANI_IF_NOT_SUCC_LOGE_RETURN(status, ani_object{}, "String_NewUTF8 fail %" LOG_PUBLIC "u", status);
 
-        std::string methodSig = arkts::ani_signature::SignatureBuilder().AddInt().AddClass({"std", "core", "Object"}).BuildSignatureDescriptor();
-        if (methodSig != "ILstd/core/Object;:V") {
-            HKS_LOG_E("####TODO remove#### fzt ani_signature fail %" LOG_PUBLIC "s", methodSig.c_str());
-            return {};
-        }
+        std::string methodSig = arkts::ani_signature::SignatureBuilder().AddInt().AddClass({"std", "core", "Object"}).
+            BuildSignatureDescriptor();
         status = env->Object_CallMethodByName_Void(arrayObj, "$_set", methodSig.c_str(), i, aniCert);
-        HKS_ANI_IF_NOT_SUCC_LOGE_RETURN(status, ani_object{}, "Object_CallMethodByName_Void $_set fail %" LOG_PUBLIC "u", status);
+        HKS_ANI_IF_NOT_SUCC_LOGE_RETURN(status, ani_object{}, "Object_CallMethodByName_Void $_set fail %"
+            LOG_PUBLIC "u", status);
     }
 
     return arrayObj;
@@ -487,79 +478,6 @@ static ani_object attestKeyItemSync(ani_env *env,
     return InnerAttest(env, keyAlias, options, HksAttestKey);
 }
 
-static int32_t GetKeyItemPropertiesCreateAniResult(const HksResult &resultInfo, std::vector<HksParam> &paramVec,
-    ani_env *env, ani_object &resultObjOut)
-{
-    int32_t ret = HksCreateAniResult(resultInfo, env, resultObjOut);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret)
-
-    if (!paramVec.empty()) {
-        ani_ref resultReturnGlobal;
-        if (env->GlobalReference_Create(resultObjOut, &resultReturnGlobal) != ANI_OK) {
-            HKS_LOG_E("GlobalReference_Create Failed. resultReturnGlobal");
-            return HKS_ERROR_INVALID_ARGUMENT;
-        }
-        ani_object paramInnerArray = nullptr;
-        ret = CreateHuksParamInnerArray(env, paramVec, paramInnerArray);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CreateHuksParamInnerArray failed. ret = %" LOG_PUBLIC "d", ret)
-        HKS_LOG_I("ani_array_ref is not null, use Object_SetFieldByName_Ref");
-        // std::string methodSig = arkts::ani_signature::SignatureBuilder().AddInt().AddClass({"std", "core", "Object"}).BuildSignatureDescriptor();
-        // if (methodSig != "ILstd/core/Object;:V") {
-        //     HKS_LOG_E("####TODO remove#### fzt ani_signature fail %" LOG_PUBLIC "s", methodSig.c_str());
-        //     return {};
-        // }
-        if (env->Object_SetFieldByName_Ref(resultObjOut, "properties", paramInnerArray) != ANI_OK) {
-        // if (env->Object_CallMethodByName_Void(arrayObj, "$_set", methodSig.c_str(), index, retArray) != ANI_OK) {
-            HKS_LOG_E("Object_SetFieldByName_Ref failed. properties ret = %" LOG_PUBLIC "d", ret);
-            ret = HKS_ERROR_INVALID_ARGUMENT;
-        }
-    }
-    HKS_LOG_I("GetKeyItemPropertiesCreateAniResult success.1111");
-    return ret;
-}
-
-constexpr int HKS_DEFAULT_OUTPARAMSET_SIZE = 2048;
-static ani_object getKeyItemPropertiesSync([[maybe_unused]] ani_env *env, ani_string keyAlias, ani_object options)
-{
-    ani_object aniReturnObject{};
-    struct HksResult resultInfo{0, nullptr, nullptr};
-    int32_t ret{ HKS_SUCCESS };
-    CommonContext context;
-    std::vector<HksParam> paramVecOut;
-    do {
-        ret = HksAniParseParams<CommonContext>(env, keyAlias, options, &context);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "getKeyItemProperties HksAniParseParams failed! ret = %" LOG_PUBLIC "d", ret)
-
-        context.paramSetOut = static_cast<struct HksParamSet *>(HksMalloc(HKS_DEFAULT_OUTPARAMSET_SIZE));
-        if (context.paramSetOut != nullptr) {
-            context.paramSetOut->paramSetSize = HKS_DEFAULT_OUTPARAMSET_SIZE;
-            context.paramSetOut->paramsCnt = 0;
-        }
-
-        ret = HksGetKeyParamSet(&context.keyAlias, context.paramSetIn, context.paramSetOut);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "getKeyItemProperties failed! ret = %" LOG_PUBLIC "d", ret)
-
-        
-        if (context.paramSetOut != nullptr) {
-            HKS_LOG_I("context.paramSetOut->paramsCnt = %" LOG_PUBLIC "d", context.paramSetOut->paramsCnt);
-            ret = HuksParamSet2ParamVec(context.paramSetOut, paramVecOut);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksParamSet2ParamVec failed! ret = %" LOG_PUBLIC "d", ret)
-
-        }
-    } while (0);
-    if (ret != HKS_SUCCESS) {
-        resultInfo = HksConvertErrCode(ret);
-        HKS_LOG_E("HksGetKeyAlias failed. ret = %" LOG_PUBLIC "d", ret);
-    }
-    ret = GetKeyItemPropertiesCreateAniResult(resultInfo, paramVecOut, env, aniReturnObject);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret);
-        return {};
-    }
-    HKS_LOG_I("HksCreateAniResult success.22222.");
-    return aniReturnObject;
-}
-
 constexpr int32_t INVALID_ANI_VERSION = 9;
 constexpr int32_t ANI_CLASS_NOT_FOUND = 2;
 constexpr int32_t ANI_BIND_METHOD_FAILED = 3;
@@ -578,10 +496,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     ani_module globalModule{};
     std::string globalNameSpace = arkts::ani_signature::Builder::BuildClass({
         "@ohos", "security", "huks"}).Descriptor();
-    if (globalNameSpace != "L@ohos/security/huks;") {
-        HKS_LOG_E("####TODO remove#### fzt ani_signature::Builder fail %" LOG_PUBLIC "s", globalNameSpace.c_str());
-        return (ani_status)ANI_CLASS_NOT_FOUND;;
-    }
     if (env->FindModule(globalNameSpace.c_str(), &globalModule) != ANI_OK) {
         HKS_LOG_E("Not found %" LOG_PUBLIC "s", globalNameSpace.c_str());
         return (ani_status)ANI_CLASS_NOT_FOUND;
@@ -598,7 +512,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"updateFinishSessionSync", nullptr, reinterpret_cast<void *>(updateFinishSessionSync)},
         ani_native_function {"abortSessionSync", nullptr, reinterpret_cast<void *>(abortSessionSync)},
         ani_native_function {"attestKeyItemSync", nullptr, reinterpret_cast<void *>(attestKeyItemSync)},
-        ani_native_function {"getKeyItemPropertiesSync", nullptr, reinterpret_cast<void *>(getKeyItemPropertiesSync)},
     };
 
     if (env->Module_BindNativeFunctions(globalModule, methods.data(), methods.size()) != ANI_OK) {
