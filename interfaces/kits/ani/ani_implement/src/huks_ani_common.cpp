@@ -806,7 +806,7 @@ SessionContext::~SessionContext()
     FreeHksBlobAndFresh(this->outData, true);
 }
 
-static bool SetParamInnerValueObj(ani_env *env, const HksParam &paramIn, ani_object &outObj)
+static bool SetParamInnerValueObj(ani_env *env, const HksParam &paramIn, ani_object outObj)
 {
     ani_int etsIntValue = 0;
     switch (paramIn.tag & HKS_TAG_TYPE_MASK) {
@@ -845,6 +845,11 @@ static bool SetParamInnerValueObj(ani_env *env, const HksParam &paramIn, ani_obj
             if (!AniUtils::CreateUint8Array(env, u8Vector, u8Array)) {
                 return false;
             }
+            ani_ref u8ArrayGlobal;
+            if (env->GlobalReference_Create(u8Array, &u8ArrayGlobal) != ANI_OK) {
+                HKS_LOG_E("GlobalReference_Create Failed. arrayGlobal");
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
             if (env->Object_SetFieldByName_Ref(outObj, "valueBuffer", u8Array) != ANI_OK) {
                 HKS_LOG_E("Object_SetFieldByName_Ref Failed blob->valueBuffer");
                 return false;
@@ -858,23 +863,44 @@ static bool SetParamInnerValueObj(ani_env *env, const HksParam &paramIn, ani_obj
     return true;
 }
 
-int32_t CreateHuksParamInnerArray(ani_env *env, const std::vector<HksParam> &params, ani_array_ref &arrayOut)
+int32_t CreateHuksParamInnerArray(ani_env *env, const std::vector<HksParam> &params, ani_object &arrayOut)
 {
     if (env == nullptr) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    ani_class itemCls = nullptr;
-    if (env->FindClass(g_ParamInnerClassName.data(), &itemCls) != ANI_OK) {
-        HKS_LOG_E("FindClass Failed: Not found '%" LOG_PUBLIC "s", g_ParamInnerClassName.data());
+    // if (env->Array_New_Ref(itemCls, params.size(), nullptr, &arrayOut) != ANI_OK) {
+    //     HKS_LOG_E("Array_New_Ref. Fail. className = %" LOG_PUBLIC "s. size = %" LOG_PUBLIC "zu",
+    //         g_huksParamClassName.data(), params.size());
+    //     return HKS_ERROR_INVALID_ARGUMENT;
+    // }
+    ani_class arrayCls = nullptr;
+    if (ANI_OK != env->FindClass("Lescompat/Array;", &arrayCls)){
+        HKS_LOG_E("FindClass Lescompat/Array; Failed");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    if (env->Array_New_Ref(itemCls, params.size(), nullptr, &arrayOut) != ANI_OK) {
-        HKS_LOG_E("Array_New_Ref. Fail. className = %" LOG_PUBLIC "s. size = %" LOG_PUBLIC "zu",
-            g_huksParamClassName.data(), params.size());
+
+    ani_method arrayCtor;
+    if(ANI_OK != env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor)){
+        HKS_LOG_E("Class_FindMethod <ctor> Failed. Lescompat/Array");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
+    if(ANI_OK != env->Object_New(arrayCls, arrayCtor, &arrayOut, params.size())){
+        HKS_LOG_E("Object_New Array Faild");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    ani_ref arrayGlobal;
+    if (env->GlobalReference_Create(arrayOut, &arrayGlobal) != ANI_OK) {
+        HKS_LOG_E("GlobalReference_Create Failed. arrayGlobal");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
     HKS_LOG_I("CreateHuksParamInnerArray: params size = %" LOG_PUBLIC "zu", params.size());
     for (uint32_t i = 0; i < params.size(); i++) {
+        ani_class itemCls = nullptr;
+        if (env->FindClass(g_ParamInnerClassName.data(), &itemCls) != ANI_OK) {
+            HKS_LOG_E("FindClass Failed: Not found '%" LOG_PUBLIC "s", g_ParamInnerClassName.data());
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
         ani_method ctor {};
         if (env->Class_FindMethod(itemCls, "<ctor>", nullptr, &ctor) != ANI_OK) {
             HKS_LOG_E("Class_FindMethod Failed: <ctor> '%" LOG_PUBLIC "s", g_huksParamClassName.data());
@@ -885,16 +911,22 @@ int32_t CreateHuksParamInnerArray(ani_env *env, const std::vector<HksParam> &par
             HKS_LOG_E("Create Object Failed' '%" LOG_PUBLIC "s", g_huksParamClassName.data());
             return HKS_ERROR_INVALID_ARGUMENT;
         }
+        ani_ref itemGlobal {};
+        if (env->GlobalReference_Create(item, &itemGlobal) != ANI_OK) {
+            HKS_LOG_E("GlobalReference_Create Failed. arrayItemGlobal");
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
 
-        if (env->Object_SetFieldByName_Int(item, "tag", ani_int(params[i].tag)) != ANI_OK) {
+        if (env->Object_SetFieldByName_Int(static_cast<ani_object>(itemGlobal), "tag", ani_int(params[i].tag)) != ANI_OK) {
             HKS_LOG_E("Object_SetFieldByName_Int Failed. HuksParamInner tag");
             return HKS_ERROR_INVALID_ARGUMENT;
         }
-        if (!SetParamInnerValueObj(env, params[i], item)) {
+        if (!SetParamInnerValueObj(env, params[i], static_cast<ani_object>(itemGlobal))) {
             HKS_LOG_E("SetParamInnerValueObj Failed. HuksParamInner value...");
             return HKS_ERROR_INVALID_ARGUMENT;
         }
-        if (env->Array_Set_Ref(arrayOut, i, ani_ref(item)) != ANI_OK) {
+        // if (env->Array_Set_Ref(static_cast<ani_array_ref>(arrayGlobal), i, itemGlobal) != ANI_OK) {
+        if (env->Object_CallMethodByName_Void(static_cast<ani_object>(arrayGlobal), "$_set", "ILstd/core/Object;:V", i, itemGlobal) != ANI_OK) {
             HKS_LOG_E("Array_Set_Ref Failed.");
             return HKS_ERROR_INVALID_ARGUMENT;
         }

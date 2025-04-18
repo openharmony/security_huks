@@ -477,7 +477,12 @@ static int32_t GetKeyItemPropertiesCreateAniResult(const HksResult &resultInfo, 
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret)
 
     if (!paramVec.empty()) {
-        ani_array_ref paramInnerArray = nullptr;
+        ani_ref resultReturnGlobal;
+        if (env->GlobalReference_Create(resultObjOut, &resultReturnGlobal) != ANI_OK) {
+            HKS_LOG_E("GlobalReference_Create Failed. resultReturnGlobal");
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+        ani_object paramInnerArray = nullptr;
         ret = CreateHuksParamInnerArray(env, paramVec, paramInnerArray);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CreateHuksParamInnerArray failed. ret = %" LOG_PUBLIC "d", ret)
         HKS_LOG_I("ani_array_ref is not null, use Object_SetFieldByName_Ref");
