@@ -21,6 +21,7 @@
 #include "os_account_manager.h"
 #endif
 #include "hks_client_service.h"
+#include "hks_client_service_common.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_plugin_adapter.h"
