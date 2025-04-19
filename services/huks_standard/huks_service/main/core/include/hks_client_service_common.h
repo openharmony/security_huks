@@ -27,6 +27,10 @@ int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct HksParamS
 int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet,
     struct HksParamSet **outParamSet, int frontUserId);
 
+void HksSetScreenState(bool state);
+    
+bool HksGetScreenState(void);
+
 #ifdef __cplusplus
 }
 #endif

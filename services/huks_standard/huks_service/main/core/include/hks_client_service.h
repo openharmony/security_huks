@@ -29,8 +29,6 @@
 extern "C" {
 #endif
 
-void HksSetScreenState(bool state);
-
 int32_t HksServiceInitialize(void);
 
 int32_t HksServiceRefreshKeyInfo(const struct HksBlob *processName);
@@ -98,15 +96,6 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
     const struct HksParamSet *paramSet);
 
 void HksServiceDeleteProcessInfo(const struct HksProcessInfo *processInfo);
-
-// callback
-int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo,
-    const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
-
-int32_t AppendNewInfoForUseKeyInService(const struct HksParamSet *paramSet,
-    const struct HksProcessInfo *processInfo, struct HksParamSet **outParamSet);
-
-int32_t AppendStorageLevelIfNotExist(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
 
 int32_t HksServiceListAliases(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     struct HksKeyAliasSet **outData);

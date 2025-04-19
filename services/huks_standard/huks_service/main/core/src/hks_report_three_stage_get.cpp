@@ -19,6 +19,7 @@
 #include <ctime>
 #include <string>
 #include <sys/stat.h>
+#include <unordered_map>
 
 #include "hks_error_msg.h"
 #include "hks_event_info.h"
@@ -32,6 +33,39 @@
 #include "hks_type_inner.h"
 #include "hks_util.h"
 #include "hks_ha_event_report.h"
+
+static uint32_t g_threeStageEvent[] = {
+    HKS_EVENT_CRYPTO,
+    HKS_EVENT_SIGN_VERIFY,
+    HKS_EVENT_DERIVE,
+    HKS_EVENT_AGREE,
+    HKS_EVENT_MAC,
+};
+
+static uint32_t g_threeStage[] = {
+    HKS_INIT,
+    HKS_UPDATE,
+    HKS_FINISH,
+    HKS_ABORT,
+};
+
+static std::unordered_map<enum HksReportStage, enum HksEventId> g_eventIdMap = {
+    { HKS_ONE_STAGE_CRYPTO, HKS_EVENT_CRYPTO },
+    { HKS_ONE_STAGE_SIGN_VERIFY, HKS_EVENT_SIGN_VERIFY },
+    { HKS_ONE_STAGE_DERIVE, HKS_EVENT_DERIVE },
+    { HKS_ONE_STAGE_AGREE, HKS_EVENT_AGREE },
+    { HKS_ONE_STAGE_MAC, HKS_EVENT_MAC },
+    { HKS_ONE_STAGE_ATTEST, HKS_EVENT_ATTEST }
+};
+
+static int32_t GetOneStageEventId(enum HksReportStage stage, HksEventInfo *eventInfo)
+{
+    if (g_eventIdMap.count(stage) == 0) {
+        return HKS_FAILURE;
+    }
+    eventInfo->common.eventId = static_cast<uint32_t>(g_eventIdMap[stage]);
+    return HKS_SUCCESS;
+}
 
 static int32_t GetEventId(const struct HksParamSet *paramSet, HksEventInfo *eventInfo)
 {
@@ -271,13 +305,23 @@ static void FreshStatInfo(HksEventStatInfo *statInfo, uint32_t dataSize, enum Hk
     }
 }
 
+static bool IsThreeStage(uint32_t stage)
+{
+    for (uint32_t id : g_threeStage) {
+        if (id == stage) {
+            return true;
+        }
+    }
+    return false;
+}
+
 static int32_t HksFreshAndReport(const char *funcName, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const HksThreeStageReportInfo *info, HksEventInfo *eventInfo)
 {
-    if (info->stage != HKS_ONE_STAGE) {
+    if (IsThreeStage(info->stage)) {
         FreshEventInfo(paramSet, eventInfo);
-        FreshStatInfo(&(eventInfo->common.statInfo), info->inDataSize, info->stage, info->startTime);
     }
+    FreshStatInfo(&(eventInfo->common.statInfo), info->inDataSize, info->stage, info->startTime);
 
     if (info->errCode == HKS_SUCCESS && (info->stage == HKS_INIT || info->stage == HKS_UPDATE)) {
         return HKS_SUCCESS;
@@ -322,20 +366,21 @@ static int32_t HksFreshAndReport(const char *funcName, const struct HksProcessIn
     return ret;
 }
 
-int32_t HksAttestEventReport(const struct HksBlob *keyAlias, const struct HksBlob *key,
-    const struct HksParamSet *paramSet, const struct HksProcessInfo *processInfo, HksAttestReportInfo *info)
+int32_t HksOneStageEventReport(const struct HksBlob *keyAlias, const struct HksBlob *key,
+    const struct HksParamSet *paramSet, const struct HksProcessInfo *processInfo, HksOneStageReportInfo *info)
 {
     HKS_IF_TRUE_LOGI_RETURN(keyAlias == nullptr || paramSet == nullptr || processInfo == nullptr || info == nullptr,
         HKS_ERROR_NULL_POINTER, "keyAlias or paramset or processInfo or info is null")
 
     HksEventInfo eventInfo = {};
-    eventInfo.common.eventId = HKS_EVENT_ATTEST;
+    int32_t ret = GetOneStageEventId(info->stage, &eventInfo);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "get one stage event id fail")
+
     eventInfo.common.callerInfo.uid = processInfo->uidInt;
 
-    struct HksParam *param = nullptr;
-    if (HksGetParam(paramSet, HKS_TAG_PURPOSE, &param) == HKS_SUCCESS) {
-        eventInfo.common.operation = param->uint32Param;
-        eventInfo.attestInfo.keyInfo.purpose = param->uint32Param;
+    struct HksParam *purposeParam = nullptr;
+    if (HksGetParam(paramSet, HKS_TAG_PURPOSE, &purposeParam) == HKS_SUCCESS) {
+        eventInfo.common.operation = purposeParam->uint32Param;
     }
 
     struct HksParamSet *keyBlobParamSet = nullptr;
@@ -343,9 +388,29 @@ int32_t HksAttestEventReport(const struct HksBlob *keyAlias, const struct HksBlo
         keyBlobParamSet = reinterpret_cast<struct HksParamSet *>(key->data);
     }
 
-    GetAttestInfo(paramSet, keyAlias, key, &(eventInfo.attestInfo));
-    GetAttestInfo(keyBlobParamSet, nullptr, nullptr, &(eventInfo.attestInfo));
-    FreshStatInfo(&(eventInfo.common.statInfo), 0, HKS_ONE_STAGE, info->startTime);
+    switch (eventInfo.common.eventId) {
+        case HKS_EVENT_CRYPTO:
+        case HKS_EVENT_SIGN_VERIFY:
+            GetCryptoInfo(paramSet, keyAlias, key, &eventInfo.cryptoInfo);
+            GetCryptoInfo(keyBlobParamSet, nullptr, nullptr, &eventInfo.cryptoInfo);
+            break;
+        case HKS_EVENT_DERIVE:
+        case HKS_EVENT_AGREE:
+            GetAgreeDeriveInfo(paramSet, keyAlias, key, &eventInfo.agreeDeriveInfo);
+            GetAgreeDeriveInfo(keyBlobParamSet, nullptr, nullptr, &eventInfo.agreeDeriveInfo);
+            break;
+        case HKS_EVENT_MAC:
+            GetMacInfo(paramSet, keyAlias, key, &eventInfo.macInfo);
+            GetMacInfo(keyBlobParamSet, nullptr, nullptr, &eventInfo.macInfo);
+            break;
+        case HKS_EVENT_ATTEST:
+            GetAttestInfo(paramSet, keyAlias, key, &(eventInfo.attestInfo));
+            GetAttestInfo(keyBlobParamSet, nullptr, nullptr, &(eventInfo.attestInfo));
+            break;
+        default:
+            HKS_LOG_I("event id no need report");
+            return HKS_ERROR_NOT_SUPPORTED;
+    }
 
     HksThreeStageReportInfo reportInfo = { info->errCode, 0, HKS_ONE_STAGE, info->startTime, nullptr };
     (void)HksFreshAndReport(info->funcName, processInfo, paramSet, &reportInfo, &eventInfo);
@@ -408,6 +473,16 @@ int32_t HksServiceInitReport(const char *funcName, const struct HksProcessInfo *
     return HKS_SUCCESS;
 }
 
+static bool IsThreeStageEvent(uint32_t eventId)
+{
+    for (uint32_t id : g_threeStageEvent) {
+        if (id == eventId) {
+            return true;
+        }
+    }
+    return false;
+}
+
 int32_t HksThreeStageReport(const char *funcName, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const HksThreeStageReportInfo *info, struct HksOperation *operation)
 {
@@ -416,8 +491,7 @@ int32_t HksThreeStageReport(const char *funcName, const struct HksProcessInfo *p
 
     if (operation != nullptr) {
         uint32_t eventId = operation->eventInfo.common.eventId;
-        HKS_IF_TRUE_LOGI_RETURN(eventId < HKS_EVENT_CRYPTO || eventId > HKS_EVENT_MAC, HKS_FAILURE,
-            "eventid is not support")
+        HKS_IF_TRUE_LOGI_RETURN(!IsThreeStageEvent(eventId), HKS_FAILURE, "eventid is not support")
         (void)HksFreshAndReport(funcName, processInfo, paramSet, info, &operation->eventInfo);
         return HKS_SUCCESS;
     }
