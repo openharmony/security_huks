@@ -141,6 +141,7 @@ if (os_level == "standard") {
       "bounds_checking_function:libsec_shared",
       "hilog:libhilog",
       "hitrace:libhitracechain",
+      "init:libbegetutil",
       "ipc:ipc_single",
     ]
   }
