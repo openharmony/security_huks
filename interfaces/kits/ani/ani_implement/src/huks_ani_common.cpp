@@ -400,6 +400,7 @@ int32_t HksInitSessionCreateAniResult(const HksResult &resultInfo, ani_env *&env
     return ret;
 }
 
+constexpr int HKS_MAX_DATA_LEN = 0x6400000; // The maximum length is 100M
 int32_t HksGetKeyAliasFromAni(ani_env *&env, const ani_string &strObject, HksBlob &keyAliasOut)
 {
     std::string keyAliasIn = "";
@@ -409,8 +410,12 @@ int32_t HksGetKeyAliasFromAni(ani_env *&env, const ani_string &strObject, HksBlo
         HKS_LOG_E("input key alias maybe null");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    int32_t ret = HKS_SUCCESS;
-    keyAliasOut.size = keyAliasIn.size();
+    size_t length = keyAliasIn.size() - 1;
+    if (length > HKS_MAX_DATA_LEN) {
+        HKS_LOG_E("the length of alias is too long");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    keyAliasOut.size = static_cast<uint32_t>(length & UINT32_MAX);
     keyAliasOut.data = static_cast<uint8_t *>(HksMalloc(keyAliasOut.size));
     if (keyAliasOut.data == nullptr) {
         HKS_LOG_E("HksMalloc for keyAlias failed!");
@@ -421,7 +426,7 @@ int32_t HksGetKeyAliasFromAni(ani_env *&env, const ani_string &strObject, HksBlo
         HKS_FREE_BLOB(keyAliasOut);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
-    return ret;
+    return HKS_SUCCESS;
 }
 
 int32_t HksAniGetParamTag(ani_env *&env, const ani_object &object, uint32_t &value)
