@@ -154,7 +154,7 @@ bool AniUtils::GetEnumRealValue(ani_env *&env, ani_enum_item &enumObj, uint32_t 
     return true;
 }
 
-bool AniUtils::CheckRefisDefined(ani_env *&env, const ani_ref &ref)
+bool AniUtils::CheckRefIsDefined(ani_env *&env, const ani_ref &ref)
 {
     ani_boolean isUndefined{ true };
     if (env->Reference_IsUndefined(ref, &isUndefined) != ANI_OK) {
@@ -300,7 +300,6 @@ int32_t HksCreateAniResult(const HksResult &resultInfo, ani_env *&env, ani_objec
 {
     int32_t ret{ HKS_SUCCESS };
     HKS_IF_NULL_LOGE_RETURN(env, HKS_ERROR_NULL_POINTER, "HksCreateAniResult, but ani env is null!")
-    HKS_LOG_I("HksCreateAniResult resultInfo.errorCode = %" LOG_PUBLIC "d", resultInfo.errorCode);
     if (resultInfo.errorCode != HKS_SUCCESS) {
         ret = HksCreateAniResultCommon(resultInfo.errorCode, env, resultObjOut, resultInfo.errorMsg, outBuffer);
     } else {
@@ -358,7 +357,7 @@ int32_t HksInitSessionCreateAniResult(const HksResult &resultInfo, ani_env *&env
                 return HKS_ERROR_BUFFER_TOO_SMALL;
             }
             if (env->Object_SetFieldByName_Ref(resultObjOut, "challenge", ani_ref(oubBuffer)) != ANI_OK) {
-                HKS_LOG_E("Object_SetFieldByName_Ref Fail' challenge");
+                HKS_LOG_E("Object_SetFieldByName_Ref Fail. set challenge");
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
         }
@@ -387,7 +386,6 @@ int32_t HksGetKeyAliasFromAni(ani_env *&env, const ani_string &strObject, HksBlo
         HKS_FREE_BLOB(keyAliasOut);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
-    HKS_LOG_I("keyAlias %" LOG_PUBLIC "s", keyAliasIn.c_str());
     return ret;
 }
 
@@ -485,15 +483,20 @@ static int32_t InitAndBuildParamSet(const std::vector<HksParam> &paramArray, Hks
     int32_t ret = HksInitParamSet(&paramSetNew);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksInitParamSet failed. ret = %" LOG_PUBLIC "d", ret)
 
-    if (!paramArray.empty()) {
-        ret = HksAddParams(paramSetNew, paramArray.data(), paramArray.size());
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksAddParams addParams fail. ret = %" LOG_PUBLIC "d", ret)
+    do {
+        if (!paramArray.empty()) {
+            ret = HksAddParams(paramSetNew, paramArray.data(), paramArray.size());
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAddParams addParams fail. ret = %" LOG_PUBLIC "d", ret)
+        }
+    
+        ret = HksBuildParamSet(&paramSetNew);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksBuildParamSet fail. ret = %" LOG_PUBLIC "d", ret)
+    } while (false);
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(&paramSetNew);
+        return ret;
     }
-
-    ret = HksBuildParamSet(&paramSetNew);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksBuildParamSet fail. ret = %" LOG_PUBLIC "d", ret)
-
-    return HKS_SUCCESS;
+    return ret;
 }
 
 static int32_t ParsePropertiesArray(ani_env *&env, const ani_object &optionsObj, std::vector<HksParam> &paramArray)
@@ -507,7 +510,7 @@ static int32_t ParsePropertiesArray(ani_env *&env, const ani_object &optionsObj,
     }
 
     ani_object propertiesArray = nullptr;
-    if (AniUtils::CheckRefisDefined(env, propertiesRef)) {
+    if (AniUtils::CheckRefIsDefined(env, propertiesRef)) {
         propertiesArray = reinterpret_cast<ani_object>(propertiesRef);
         if (env->Object_GetPropertyByName_Double(propertiesArray, "length", &length) != ANI_OK) {
             HKS_LOG_E("Object_GetPropertyByName_Double length Failed");
@@ -515,12 +518,12 @@ static int32_t ParsePropertiesArray(ani_env *&env, const ani_object &optionsObj,
         }
     }
     int32_t ret = HKS_SUCCESS;
-    for (int32_t i = 0; i < int32_t(length); i++) {
+    for (int32_t i = 0; i < static_cast<int32_t>(length); i++) {
         ani_ref paramEntryRef;
         std::string methodSig = arkts::ani_signature::SignatureBuilder().AddInt().
             SetReturnClass({"std", "core", "Object"}).BuildSignatureDescriptor();
         if (env->Object_CallMethodByName_Ref(propertiesArray, "$_get",
-            methodSig.c_str(), &paramEntryRef, (ani_int)i) != ANI_OK) {
+            methodSig.c_str(), &paramEntryRef, i) != ANI_OK) {
             HKS_LOG_E("Object_CallMethodByName_Ref get ani object Failed");
             return HKS_ERROR_INVALID_ARGUMENT;
         }
@@ -580,12 +583,12 @@ int32_t HksOptionGetInData(ani_env *&env, ani_object options, HksBlob &blobOut)
         HKS_LOG_E("Object_CallMethodByName_Ref Fail. %" LOG_PUBLIC "s", getInDataMethodName.c_str());
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    if (AniUtils::CheckRefisDefined(env, inDataRef)) {
+    if (AniUtils::CheckRefIsDefined(env, inDataRef)) {
         ani_object inDataBuffer = reinterpret_cast<ani_object>(inDataRef);
         int32_t ret = HksGetBufferFromAni(env, inDataBuffer, blobOut);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "ANIGetBuffer failed! ret = %" LOG_PUBLIC "d", ret);
     } else {
-        HKS_LOG_I("AniUtils CheckRefisDefined. option.inData is undefined!");
+        HKS_LOG_I("AniUtils CheckRefIsDefined. option.inData is undefined!");
         blobOut.size = 0;
         blobOut.data = nullptr;
     }
