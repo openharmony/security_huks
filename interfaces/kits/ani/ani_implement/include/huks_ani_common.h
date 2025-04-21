@@ -47,7 +47,7 @@ namespace AniUtils {
 
     bool GetUint8Array(ani_env *env, ani_object array, std::vector<uint8_t> &arrayOut);
 
-    bool CheckRefisDefined(ani_env *&env, const ani_ref &ref);
+    bool CheckRefIsDefined(ani_env *&env, const ani_ref &ref);
 
     void PrintUint8Array(std::vector<uint8_t> &arrayIn);
 

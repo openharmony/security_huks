@@ -37,7 +37,7 @@ using namespace HuksAni;
 constexpr uint32_t HKS_MAX_TOKEN_SIZE = 2048;
 constexpr uint32_t OUTPURT_DATA_SIZE = 1024 * 64;
 
-static ani_object generateKeyItemSync([[maybe_unused]] ani_env *env,
+static ani_object GenerateKeyItemSync([[maybe_unused]] ani_env *env,
     ani_string keyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
@@ -63,7 +63,7 @@ static ani_object generateKeyItemSync([[maybe_unused]] ani_env *env,
     return aniReturnObject;
 }
 
-static ani_object deleteKeyItemSync([[maybe_unused]] ani_env *env,
+static ani_object DeleteKeyItemSync([[maybe_unused]] ani_env *env,
     ani_string keyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
@@ -89,7 +89,7 @@ static ani_object deleteKeyItemSync([[maybe_unused]] ani_env *env,
     return aniReturnObject;
 }
 
-static ani_object importKeyItemSync([[maybe_unused]] ani_env *env,
+static ani_object ImportKeyItemSync([[maybe_unused]] ani_env *env,
     ani_string keyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
@@ -115,7 +115,7 @@ static ani_object importKeyItemSync([[maybe_unused]] ani_env *env,
     return aniReturnObject;
 }
 
-static ani_object importWrappedKeyItemSync([[maybe_unused]] ani_env *env,
+static ani_object ImportWrappedKeyItemSync([[maybe_unused]] ani_env *env,
     ani_string keyAlias, ani_string wrappingKeyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
@@ -152,7 +152,7 @@ static int32_t PrepareExportKeyContextBuffer(KeyContext &context)
     return HKS_SUCCESS;
 }
 
-static ani_object exportKeyItemSync([[maybe_unused]] ani_env *env,
+static ani_object ExportKeyItemSync([[maybe_unused]] ani_env *env,
     ani_string keyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
@@ -198,7 +198,7 @@ static ani_object exportKeyItemSync([[maybe_unused]] ani_env *env,
     return aniReturnObject;
 }
 
-static ani_object isKeyItemExistSync([[maybe_unused]] ani_env *env,
+static ani_object IsKeyItemExistSync([[maybe_unused]] ani_env *env,
     ani_string keyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
@@ -243,7 +243,7 @@ static int32_t InitOutParams(SessionContext &context)
     return HKS_SUCCESS;
 }
 
-static ani_object initSessionSync([[maybe_unused]] ani_env *env,
+static ani_object InitSessionSync([[maybe_unused]] ani_env *env,
     ani_string keyAlias, ani_object options)
 {
     ani_object aniReturnObject{};
@@ -286,7 +286,7 @@ static int32_t AddOutData(const HksBlob &huksData, ani_env *env, ani_object &buf
     return HKS_SUCCESS;
 }
 
-static ani_object updateFinishSessionSync([[maybe_unused]] ani_env *env,
+static ani_object UpdateFinishSessionSync([[maybe_unused]] ani_env *env,
     ani_long handle, ani_object options, ani_boolean isUpdate)
 {
     ani_object aniReturnObject{};
@@ -330,7 +330,7 @@ static ani_object updateFinishSessionSync([[maybe_unused]] ani_env *env,
     return aniReturnObject;
 }
 
-static ani_object abortSessionSync([[maybe_unused]] ani_env *env,
+static ani_object AbortSessionSync([[maybe_unused]] ani_env *env,
     ani_long handle, ani_object options)
 {
     ani_object aniReturnObject{};
@@ -470,7 +470,7 @@ static ani_object InnerAttest(ani_env *env, ani_string keyAlias, ani_object opti
     return aniReturnObject;
 }
 
-static ani_object attestKeyItemSync(ani_env *env,
+static ani_object AttestKeyItemSync(ani_env *env,
     ani_string keyAlias, ani_object options, ani_boolean isAnonymous)
 {
     if (static_cast<bool>(isAnonymous)) {
@@ -479,45 +479,44 @@ static ani_object attestKeyItemSync(ani_env *env,
     return InnerAttest(env, keyAlias, options, HksAttestKey);
 }
 
-static constexpr int32_t aniInvalidVersion = 9;
-static constexpr int32_t aniClassNotFound = 2;
-static constexpr int32_t aniBindMethodFailed = 3;
-
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     if (vm == nullptr || result == nullptr) {
         HKS_LOG_E("vm or result is null ptr!!");
-        return (ani_status)aniInvalidVersion;
+        return ANI_ERROR;
     }
     ani_env *env{};
-    if (vm->GetEnv(ANI_VERSION_1, &env) != ANI_OK) {
+    ani_status aniResult = vm->GetEnv(ANI_VERSION_1, &env);
+    if (aniResult != ANI_OK) {
         HKS_LOG_E("Unsupported ANI_VERSION_1");
-        return (ani_status)aniInvalidVersion;
+        return aniResult;
     }
     ani_module globalModule{};
     std::string globalNameSpace = arkts::ani_signature::Builder::BuildClass({
         "@ohos", "security", "huks"}).Descriptor();
-    if (env->FindModule(globalNameSpace.c_str(), &globalModule) != ANI_OK) {
+    aniResult = env->FindModule(globalNameSpace.c_str(), &globalModule);
+    if (aniResult != ANI_OK) {
         HKS_LOG_E("Not found %" LOG_PUBLIC "s", globalNameSpace.c_str());
-        return (ani_status)aniClassNotFound;
+        return aniResult;
     }
 
     std::array methods = {
-        ani_native_function {"generateKeyItemSync", nullptr, reinterpret_cast<void *>(generateKeyItemSync)},
-        ani_native_function {"deleteKeyItemSync", nullptr, reinterpret_cast<void *>(deleteKeyItemSync)},
-        ani_native_function {"importKeyItemSync", nullptr, reinterpret_cast<void *>(importKeyItemSync)},
-        ani_native_function {"importWrappedKeyItemSync", nullptr, reinterpret_cast<void *>(importWrappedKeyItemSync)},
-        ani_native_function {"exportKeyItemSync", nullptr, reinterpret_cast<void *>(exportKeyItemSync)},
-        ani_native_function {"isKeyItemExistSync", nullptr, reinterpret_cast<void *>(isKeyItemExistSync)},
-        ani_native_function {"initSessionSync", nullptr, reinterpret_cast<void *>(initSessionSync)},
-        ani_native_function {"updateFinishSessionSync", nullptr, reinterpret_cast<void *>(updateFinishSessionSync)},
-        ani_native_function {"abortSessionSync", nullptr, reinterpret_cast<void *>(abortSessionSync)},
-        ani_native_function {"attestKeyItemSync", nullptr, reinterpret_cast<void *>(attestKeyItemSync)},
+        ani_native_function {"generateKeyItemSync", nullptr, reinterpret_cast<void *>(GenerateKeyItemSync)},
+        ani_native_function {"deleteKeyItemSync", nullptr, reinterpret_cast<void *>(DeleteKeyItemSync)},
+        ani_native_function {"importKeyItemSync", nullptr, reinterpret_cast<void *>(ImportKeyItemSync)},
+        ani_native_function {"importWrappedKeyItemSync", nullptr, reinterpret_cast<void *>(ImportWrappedKeyItemSync)},
+        ani_native_function {"exportKeyItemSync", nullptr, reinterpret_cast<void *>(ExportKeyItemSync)},
+        ani_native_function {"isKeyItemExistSync", nullptr, reinterpret_cast<void *>(IsKeyItemExistSync)},
+        ani_native_function {"initSessionSync", nullptr, reinterpret_cast<void *>(InitSessionSync)},
+        ani_native_function {"updateFinishSessionSync", nullptr, reinterpret_cast<void *>(UpdateFinishSessionSync)},
+        ani_native_function {"abortSessionSync", nullptr, reinterpret_cast<void *>(AbortSessionSync)},
+        ani_native_function {"attestKeyItemSync", nullptr, reinterpret_cast<void *>(AttestKeyItemSync)},
     };
 
-    if (env->Module_BindNativeFunctions(globalModule, methods.data(), methods.size()) != ANI_OK) {
-        HKS_LOG_E("Cannot bind native methods to '%" LOG_PUBLIC "s", globalNameSpace.c_str());
-        return (ani_status)aniBindMethodFailed;
+    aniResult = env->Module_BindNativeFunctions(globalModule, methods.data(), methods.size());
+    if (aniResult != ANI_OK) {
+        HKS_LOG_E("Cannot bind native methods to %" LOG_PUBLIC "s", globalNameSpace.c_str());
+        return aniResult;
     };
 
     *result = ANI_VERSION_1;
