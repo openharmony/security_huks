@@ -130,12 +130,12 @@ if ((OBJECT) == HKS_NULL_POINTER) { \
 }
 
 #define HKS_IF_TRUE_RETURN(BOOL_FUNC, ERROR_CODE) \
-if ((BOOL_FUNC)) { \
+if (BOOL_FUNC) { \
     return (ERROR_CODE); \
 }
 
 #define HKS_IF_TRUE_CONTINUE(BOOL_FUNC) \
-if ((BOOL_FUNC)) { \
+if (BOOL_FUNC) { \
     continue; \
 }
 
@@ -145,7 +145,7 @@ if ((BOOL_FUNC)) { \
 }
 
 #define HKS_IF_TRUE_LOGE_RETURN(BOOL_FUNC, ERROR_CODE, LOG_MESSAGE, ...) \
-if ((BOOL_FUNC)) { \
+if (BOOL_FUNC) { \
     HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
     return (ERROR_CODE); \
 }
@@ -169,7 +169,7 @@ if ((BOOL_FUNC)) { \
 }
 
 #define HKS_IF_TRUE_LOGI_RETURN(BOOL_FUNC, ERROR_CODE, LOG_MESSAGE, ...) \
-if ((BOOL_FUNC)) { \
+if (BOOL_FUNC) { \
     HKS_LOG_I(LOG_MESSAGE, ##__VA_ARGS__); \
     return (ERROR_CODE); \
 }
@@ -181,7 +181,7 @@ if ((BOOL_FUNC)) { \
 }
 
 #define HKS_IF_TRUE_LOGE(BOOL_FUNC, LOG_MESSAGE, ...) \
-if ((BOOL_FUNC)) { \
+if (BOOL_FUNC) { \
     HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
 }
 
@@ -225,13 +225,13 @@ if ((BOOL_FUNC) != EOK) { \
 }
 
 #define HKS_IF_TRUE_LOGE_BREAK(BOOL_FUNC, LOG_MESSAGE, ...) \
-if ((BOOL_FUNC)) { \
+if (BOOL_FUNC) { \
     HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
     break; \
 }
 
 #define HKS_IF_TRUE_BREAK(BOOL_FUNC) \
-if ((BOOL_FUNC)) { \
+if (BOOL_FUNC) { \
     break; \
 }
 
