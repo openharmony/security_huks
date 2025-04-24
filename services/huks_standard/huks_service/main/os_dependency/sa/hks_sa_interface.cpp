@@ -39,6 +39,7 @@ namespace Hks {
 void HksStub::SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &certChain, uint32_t sz)
 {
     std::unique_lock<std::mutex> lck(mMutex);
+    received = true;
     mErrCode = errCode;
     mAsyncReply = std::move(certChain);
     mSize = sz;
@@ -90,11 +91,17 @@ int HksStub::OnRemoteRequest(uint32_t code,
 std::tuple<uint32_t, std::unique_ptr<uint8_t[]>, uint32_t> HksStub::WaitForAsyncReply(int timeout)
 {
     std::unique_lock<std::mutex> lck(mMutex);
+    if (received) {
+        return {mErrCode, std::move(mAsyncReply), mSize};
+    }
     mAsyncReply = nullptr;
     mSize = 0;
     mErrCode = DCM_SUCCESS;
     HKS_LOG_I("begin wait for async reply");
-    mCv.wait_for(lck, std::chrono::seconds(timeout));
+    if (mCv.wait_for(lck, std::chrono::seconds(timeout)) == std::cv_status::timeout) {
+        HKS_LOG_E("WaitForAsyncReply timeout! %d seconds", timeout);
+        return {HKS_ERROR_BAD_STATE, nullptr, 0};
+    }
     return {mErrCode, std::move(mAsyncReply), mSize};
 }
 
