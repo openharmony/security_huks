@@ -472,10 +472,10 @@ static int32_t AppendUserAuthInfo(const struct HksParamSet *paramSet, int32_t us
 
         *outParamSet = newParamSet;
     } while (0);
-    HKS_MEMSET_FREE_BLOB(enrolledInfo);
+    HKS_FREE(enrolledInfo.data);
     if (secInfo != NULL) {
-        HKS_MEMSET_FREE_PTR(secInfo->enrolledInfo, sizeof(struct EnrolledInfoWrap) * secInfo->enrolledInfoLen);
-        HKS_MEMSET_FREE_PTR(secInfo, sizeof(struct SecInfoWrap));
+        HKS_FREE(secInfo->enrolledInfo);
+        HKS_FREE(secInfo);
     }
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&newParamSet);
