@@ -35,8 +35,6 @@
 namespace AniUtils {
     bool GetStirng([[maybe_unused]] ani_env *&env, const ani_string &strObject, std::string &nativeStr);
 
-    bool GetInt32Field(ani_env *&env, const ani_object &object, std::string fieldName, int32_t &value);
-
     bool GetInt32FromUnionObj(ani_env *&env, const ani_object &unionObj, int32_t &value);
 
     bool GetUint32FromUnionObj(ani_env *&env, const ani_object &unionObj, uint32_t &value);
@@ -45,14 +43,11 @@ namespace AniUtils {
 
     bool GetBooleanFromUnionObj(ani_env *&env, const ani_object &unionObj, bool &value);
 
-    bool GetClassPropertyGetMethod(ani_env *&env, const std::string &className, const std::string &propertyName,
-        const std::string getOrSet, ani_method &methodOut);
-
     bool GetEnumRealValue(ani_env *&env, ani_enum_item &enumObj, uint32_t &realValue);
 
     bool GetUint8Array(ani_env *env, ani_object array, std::vector<uint8_t> &arrayOut);
 
-    bool CheckRefisDefined(ani_env *&env, const ani_ref &ref);
+    bool CheckRefIsDefined(ani_env *&env, const ani_ref &ref);
 
     void PrintUint8Array(std::vector<uint8_t> &arrayIn);
 

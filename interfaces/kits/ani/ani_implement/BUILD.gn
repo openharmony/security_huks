@@ -15,67 +15,70 @@ import("//base/security/huks/huks.gni")
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 
-ohos_shared_library("huks_interfaceImpl_ani") {
-  branch_protector_ret = "pac_ret"
+if (os_level == "standard") {
+  ohos_shared_library("huks_interfaceImpl_ani") {
+    branch_protector_ret = "pac_ret"
 
-  sanitize = {
-    integer_overflow = true
-    cfi = true
-    debug = false
-    cfi_cross_dso = true
-    boundary_sanitize = true
-    ubsan = true
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+      cfi_cross_dso = true
+      boundary_sanitize = true
+      ubsan = true
+    }
+    defines = [
+      "_HUKS_LOG_ENABLE_",
+      "L2_STANDARD",
+    ]
+
+    include_dirs = [
+      "${huks_base_path}interfaces/inner_api/huks_standard/main/include",
+      "${huks_base_path}frameworks/huks_standard/main/common/include",
+      "include",
+    ]
+
+    sources = [
+      "${huks_base_path}interfaces/kits/ani/ani_implement/src/huks_ani_common.cpp",
+      "${huks_base_path}interfaces/kits/ani/ani_implement/src/huks_ani_impl.cpp",
+    ]
+
+    deps = [
+      "${huks_base_path}frameworks/huks_standard/main/common:libhuks_common_standard_static",
+      "${huks_base_path}frameworks/huks_standard/main/crypto_engine/openssl:libhuks_openssl_standard_static",
+      "${huks_base_path}frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
+      "${huks_base_path}interfaces/inner_api/huks_standard/main:libhukssdk",
+    ]
+
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+      "runtime_core:ani",
+      "runtime_core:ani_helpers",
+      "runtime_core:libarkruntime",
+    ]
+    cflags_cc = [
+      "-Wall",
+      "-Werror",
+    ]
+
+    # relative_install_dir = "module/security"
+    subsystem_name = "security"
+    part_name = "huks"
   }
-  defines = [
-    "_HUKS_LOG_ENABLE_",
-    "L2_STANDARD",
-  ]
 
-  include_dirs = [
-    "${huks_base_path}interfaces/inner_api/huks_standard/main/include",
-    "${huks_base_path}frameworks/huks_standard/main/common/include",
-    "include",
-  ]
+  generate_static_abc("security_huks_ani") {
+    base_url = "./ets"
+    files = [ "./ets/@ohos.security.huks.ets" ]
+    is_boot_abc = "True"
+    device_dst_file = "/system/framework/security_huks_ani.abc"
+  }
 
-  sources = [
-    "${huks_base_path}interfaces/kits/ani/ani_implement/src/huks_ani_common.cpp",
-    "${huks_base_path}interfaces/kits/ani/ani_implement/src/huks_ani_impl.cpp",
-  ]
-
-  deps = [
-    "${huks_base_path}frameworks/huks_standard/main/common:libhuks_common_standard_static",
-    "${huks_base_path}frameworks/huks_standard/main/crypto_engine/openssl:libhuks_openssl_standard_static",
-    "${huks_base_path}frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
-    "${huks_base_path}interfaces/inner_api/huks_standard/main:libhukssdk",
-  ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "runtime_core:ani",
-    "runtime_core:libarkruntime",
-  ]
-  cflags_cc = [
-    "-Wall",
-    "-Werror",
-  ]
-
-  # relative_install_dir = "module/security"
-  subsystem_name = "security"
-  part_name = "huks"
-}
-
-generate_static_abc("security_huks_ani") {
-  base_url = "./ets"
-  files = [ "./ets/@ohos.security.huks.ets" ]
-  is_boot_abc = "True"
-  device_dst_file = "/system/framework/security_huks_ani.abc"
-}
-
-ohos_prebuilt_etc("huks_ani_abc_etc") {
-  source = "$target_out_dir/security_huks_ani.abc"
-  module_install_dir = "framework"
-  part_name = "huks"
-  subsystem_name = "security"
-  deps = [ ":security_huks_ani" ]
+  ohos_prebuilt_etc("huks_ani_abc_etc") {
+    source = "$target_out_dir/security_huks_ani.abc"
+    module_install_dir = "framework"
+    part_name = "huks"
+    subsystem_name = "security"
+    deps = [ ":security_huks_ani" ]
+  }
 }
