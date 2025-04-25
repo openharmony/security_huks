@@ -31,6 +31,7 @@
 #include "hks_test_modify_old_key.h"
 
 #include "base/security/huks/services/huks_standard/huks_service/main/plugin_proxy/src/hks_plugin_adapter.cpp"
+#include "base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_service_util.c"
 #include "base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_service.c"
 
 using namespace testing::ext;
