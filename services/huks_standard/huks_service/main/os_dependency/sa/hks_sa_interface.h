@@ -41,6 +41,7 @@ private:
     uint32_t mErrCode = 0;
     uint32_t mSize = 0;
     std::unique_ptr<uint8_t[]> mAsyncReply {};
+    std::atomic_bool received = false;
 
     std::mutex mMutex;
     std::condition_variable mCv;
