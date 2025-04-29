@@ -30,6 +30,7 @@
 #include "hks_client_check.h"
 #ifdef HKS_SUPPORT_API_ATTEST_KEY
 #include "hks_client_service_dcm.h"
+#include "parameter.h"
 #endif
 #include "hks_client_service_common.h"
 #include "hks_client_service_util.h"
@@ -1627,44 +1628,80 @@ int32_t HksServiceRefreshKeyInfo(const struct HksBlob *processName)
     return ret;
 }
 
+#ifdef HKS_SUPPORT_API_ATTEST_KEY
 #ifdef HKS_SUPPORT_GET_BUNDLE_INFO
-static int32_t AddAppInfoToParamSet(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
-    struct HksParamSet **outParamSet)
+static int32_t AddAppInfoToParamSet(const struct HksProcessInfo *processInfo, struct HksBlob *appInfo,
+    struct HksParamSet *paramSet)
 {
     int32_t ret;
-    struct HksBlob appInfo = {0, NULL};
-    struct HksParamSet *newParamSet = NULL;
-
     do {
-        ret = AppendToNewParamSet(paramSet, &newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "int paramset failed")
-
         enum HksCallerType appidType = HksGetCallerType();
         if (appidType == HKS_HAP_TYPE) {
-            ret = HksGetHapInfo(processInfo, &appInfo);
+            ret = HksGetHapInfo(processInfo, appInfo);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetHapInfo failed")
         } else if (appidType == HKS_SA_TYPE) {
-            ret = HksGetSaInfo(processInfo, &appInfo);
+            ret = HksGetSaInfo(processInfo, appInfo);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetSaInfo failed")
-        } else {
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "invalid appidType!")
         }
 
-        ret = CheckBlob(&appInfo);
+        ret = CheckBlob(appInfo);
         if (ret == HKS_SUCCESS) {
             struct HksParam params[] = {
-                {.tag = HKS_TAG_ATTESTATION_APPLICATION_ID, .blob = appInfo},
-                {.tag = HKS_TAG_ATTESTATION_APPLICATION_ID_TYPE, .uint32Param = appidType}
+                { .tag = HKS_TAG_ATTESTATION_APPLICATION_ID, .blob = *appInfo },
+                { .tag = HKS_TAG_ATTESTATION_APPLICATION_ID_TYPE, .uint32Param = appidType }
             };
-            ret = HksAddParams(newParamSet, params, sizeof(params) / sizeof(params[0]));
+            ret = HksAddParams(paramSet, params, sizeof(params) / sizeof(params[0]));
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add appInfo failed")
         } else {
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Check appInfo Blob failed!")
         }
+    } while (0);
+    return ret;
+}
+#endif
+
+static int32_t AddModelToParamSet(struct HksParamSet *paramSet)
+{
+    const char *modelPtr = GetProductModel();
+    HKS_IF_NULL_LOGE_RETURN(modelPtr, HKS_ERROR_NULL_POINTER, "GetProductModel failed")
+
+    struct HksParam modelParam = {
+        .tag = HKS_TAG_ATTESTATION_ID_MODEL,
+        .blob = { .size = strlen(modelPtr), .data = (uint8_t *)modelPtr }
+    };
+    int32_t ret = HksAddParams(paramSet, &modelParam, 1);
+    HKS_IF_NOT_SUCC_LOGE(ret, "add model failed")
+    return HKS_SUCCESS;
+}
+
+static int32_t AddAppInfoAndModelToParamSet(const struct HksProcessInfo *processInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
+{
+    int32_t ret;
+    struct HksBlob appInfo = { 0, NULL };
+    struct HksParamSet *newParamSet = NULL;
+
+    do {
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+        ret = AppendToNewParamSet(paramSet, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy paramSet failed")
+
+        ret = AddAppInfoToParamSet(processInfo, &appInfo, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add appInfo to paramset failed")
+#else
+        ret = AppendToNewParamSet(*outParamSet, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy outParamSet failed")
+#endif
+
+        ret = AddModelToParamSet(newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add model to paramset failed")
 
         ret = HksBuildParamSet(&newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build paramset failed")
 
+#ifndef HKS_SUPPORT_GET_BUNDLE_INFO
+        HksFreeParamSet(outParamSet);
+#endif
         *outParamSet = newParamSet;
         HKS_FREE_BLOB(appInfo);
         return ret;
@@ -1674,9 +1711,7 @@ static int32_t AddAppInfoToParamSet(const struct HksProcessInfo *processInfo, co
     HksFreeParamSet(&newParamSet);
     return ret;
 }
-#endif
 
-#ifdef HKS_SUPPORT_API_ATTEST_KEY
 static int32_t DcmGenerateCertChainInAttestKey(const struct HksParamSet *paramSet, const uint8_t *remoteObject,
     struct HksBlob *certChain, uint32_t certChainCapacity)
 {
@@ -1734,10 +1769,8 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
 #endif
         uint32_t certChainCapacity = certChain->size;
         if (ret == HKS_SUCCESS) {
-#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
-            ret = AddAppInfoToParamSet(processInfo, processInfoParamSet, &newParamSet);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddAppInfoToParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
-#endif
+            ret = AddAppInfoAndModelToParamSet(processInfo, processInfoParamSet, &newParamSet);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddAppInfoAndModelToParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
             ret = AccessAttestKey(&keyFromFile, newParamSet, certChain);
         }
 #ifdef SUPPORT_STORAGE_BACKUP
@@ -1745,9 +1778,9 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
             HKS_FREE_BLOB(keyFromFile);
 #ifdef HKS_SUPPORT_GET_BUNDLE_INFO
             HksFreeParamSet(&newParamSet);
-            ret = AddAppInfoToParamSet(processInfo, processInfoParamSet, &newParamSet);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddAppInfoToParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
 #endif
+            ret = AddAppInfoAndModelToParamSet(processInfo, processInfoParamSet, &newParamSet);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddAppInfoAndModelToParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
             ret = GetKeyData(processInfo, keyAlias, newParamSet, &keyFromFile, HKS_STORAGE_TYPE_BAK_KEY);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get bak key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
             ret = AccessAttestKey(&keyFromFile, newParamSet, certChain);
