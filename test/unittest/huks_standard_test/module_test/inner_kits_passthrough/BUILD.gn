@@ -203,6 +203,7 @@ ohos_static_library("libhukssdk_static") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "hitrace:libhitracechain",
+    "init:libbegetutil",
     "openssl:libcrypto_shared",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
