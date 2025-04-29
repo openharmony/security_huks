@@ -453,7 +453,7 @@ int32_t HksAniGetParamTag(ani_env *&env, const ani_object &object, uint32_t &val
     ani_enum_item enumItem = static_cast<ani_enum_item>(enumRef);
     bool getRealValueRet = AniUtils::GetEnumRealValue(env, enumItem, value);
     HKS_IF_NOT_TRUE_LOGE_RETURN(getRealValueRet, HKS_ERROR_INVALID_ARGUMENT, "AniUtils GetEnumRealValue failed!");
-    return HKS_ERROR_INVALID_ARGUMENT;
+    return HKS_SUCCESS;
 }
 
 static int32_t GetHuksBlobFromUnionObj(ani_env *&env, const ani_object &unionObj, HksBlob &blobOut)
@@ -481,8 +481,8 @@ static int32_t GetHuksBlobFromUnionObj(ani_env *&env, const ani_object &unionObj
 
 int32_t HksAniHuksParamConvert(ani_env *&env, const ani_object &huksParamObj, HksParam &param)
 {
-    bool getFieldRet = HksAniGetParamTag(env, huksParamObj, param.tag);
-    HKS_IF_NOT_TRUE_LOGE_RETURN(getFieldRet, HKS_ERROR_INVALID_ARGUMENT, "HksAniGetParamTag failed!");
+    int32_t ret = HksAniGetParamTag(env, huksParamObj, param.tag);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "HksAniGetParamTag failed!");
 
     ani_ref valueUnionRef;
     ani_status st = env->Object_GetPropertyByName_Ref(huksParamObj, "value", &valueUnionRef);
@@ -490,7 +490,6 @@ int32_t HksAniHuksParamConvert(ani_env *&env, const ani_object &huksParamObj, Hk
         "Object_GetPropertyByName_Ref value failed %" LOG_PUBLIC "u", st);
 
     ani_object unionObj = reinterpret_cast<ani_object>(valueUnionRef);
-    int32_t ret = HKS_SUCCESS;
     switch (GetTagType(static_cast<enum HksTag>(param.tag))) {
         case HKS_TAG_TYPE_BOOL:
             if (!AniUtils::GetBooleanFromUnionObj(env, unionObj, param.boolParam)) {
