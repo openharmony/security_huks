@@ -226,6 +226,7 @@ static int32_t ConstructOperationProcessInfo(const struct HksProcessInfo *proces
     operation->processInfo.processName.size = processNameLen;
     operation->processInfo.processName.data = processName;
     operation->accessTokenId = processInfo->accessTokenId;
+    operation->pid = processInfo->pid;
     return HKS_SUCCESS;
 }
 
@@ -351,6 +352,26 @@ struct HksOperation *QueryOperationAndMarkInUse(const struct HksProcessInfo *pro
     return NULL;
 }
 
+struct HksOperation *QueryOperationByPidAndMarkInUse(int32_t pid)
+{
+    struct HksOperation *operation = NULL;
+    pthread_mutex_lock(&g_lock);
+    HKS_DLIST_ITER(operation, &g_operationList) {
+        if ((operation != NULL) && (operation->pid == pid)) {
+            if (operation->isInUse) {
+                pthread_mutex_unlock(&g_lock);
+                HKS_LOG_E("this operation is in use, cannot delete!");
+                return NULL;
+            }
+            operation->isInUse = true;
+            pthread_mutex_unlock(&g_lock);
+            return operation;
+        }
+    }
+    pthread_mutex_unlock(&g_lock);
+    return NULL;
+}
+
 void MarkOperationUnUse(struct HksOperation *operation)
 {
     HKS_IF_NULL_RETURN_VOID(operation)
@@ -370,7 +391,7 @@ void DeleteOperation(const struct HksBlob *operationHandle)
             HKS_IF_TRUE_LOGI_BREAK(operation->isInUse, "operation is in use, do not delete")
             FreeOperation(&operation);
             --g_operationCount;
-            HKS_LOG_D("delete operation count:%" LOG_PUBLIC "u", g_operationCount);
+            HKS_LOG_I("delete operation count:%" LOG_PUBLIC "u", g_operationCount);
             pthread_mutex_unlock(&g_lock);
             return;
         }

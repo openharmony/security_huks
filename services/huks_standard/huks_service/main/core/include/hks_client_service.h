@@ -95,6 +95,8 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
 int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet);
 
+int32_t HksServiceAbortByPid(int32_t pid);
+
 void HksServiceDeleteProcessInfo(const struct HksProcessInfo *processInfo);
 
 int32_t HksServiceListAliases(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,

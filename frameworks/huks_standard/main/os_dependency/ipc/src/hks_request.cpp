@@ -32,6 +32,8 @@ using namespace OHOS;
 namespace {
 constexpr int SA_ID_KEYSTORE_SERVICE = 3510;
 const std::u16string SA_KEYSTORE_SERVICE_DESCRIPTOR = u"ohos.security.hks.service";
+static volatile std::atomic_bool g_isInitBundleDead = false;
+sptr<Security::Hks::HksStub> g_hks_callback;
 }
 
 static sptr<IRemoteObject> GetHksProxy()
@@ -160,6 +162,15 @@ int32_t HksSendRequest(enum HksIpcInterfaceCode type, const struct HksBlob *inBl
     sptr<IRemoteObject> hksProxy = GetHksProxy();
     HKS_IF_NULL_LOGE_RETURN(hksProxy, HKS_ERROR_BAD_STATE, "GetHksProxy registry is null")
 
+    bool flag = false;
+    if (type == HKS_MSG_INIT && std::atomic_compare_exchange_strong(&g_isInitBundleDead, &flag, true)) {
+        g_hks_callback = new (std::nothrow) Security::Hks::HksStub();
+        HKS_IF_NULL_LOGE_RETURN(g_hks_callback, HKS_ERROR_INSUFFICIENT_MEMORY, "new HksStub failed")
+
+        bool result = data.WriteRemoteObject(g_hks_callback);
+        HKS_IF_NOT_TRUE_LOGE_RETURN(result, HKS_ERROR_IPC_MSG_FAIL,
+            "WriteRemoteObject hksCallback failed %" LOG_PUBLIC "d", result)
+    }
     if (type == HKS_MSG_ATTEST_KEY_ASYNC_REPLY) {
         sptr<Security::Hks::HksStub> hksCallback = new (std::nothrow) Security::Hks::HksStub();
         HKS_IF_NULL_LOGE_RETURN(hksCallback, HKS_ERROR_INSUFFICIENT_MEMORY, "new HksStub failed")

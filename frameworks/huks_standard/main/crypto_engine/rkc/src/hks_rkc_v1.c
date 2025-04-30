@@ -225,7 +225,7 @@ static int32_t RkcLoadKsfV1(struct HksBlob *mkBlob)
 
 static int32_t RkcDeleteAllKsfV1(void)
 {
-    struct HksProcessInfo processInfo = { {0, NULL}, {0, NULL}, 0, 0, 0 };
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     int32_t ret = GetProcessInfo(&processInfo);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
 

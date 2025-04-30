@@ -70,6 +70,7 @@ namespace Security {
 namespace Hks {
 
 const std::string BOOTEVENT_HUKSSERVICE_READY = "bootevent.huksService.ready";
+const int32_t MAX_OPERATIONS_EACH_PID = 32;
 
 REGISTER_SYSTEM_ABILITY_BY_ID(HksService, SA_ID_KEYSTORE_SERVICE, true);
 
@@ -200,6 +201,21 @@ static void HksInitMemPolicy(void)
 #endif
 }
 
+void HksDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remoteObject)
+{
+    int32_t index = 0;
+    while (HksServiceAbortByPid(callingPid_) == HKS_SUCCESS && index < MAX_OPERATIONS_EACH_PID) {
+        index++;
+    }
+    HKS_LOG_I("The death process[%" LOG_PUBLIC "d] cache has been cleared [%" LOG_PUBLIC "d] operations!",
+        callingPid_, index);
+}
+
+HksDeathRecipient::HksDeathRecipient(int32_t callingPid)
+{
+    callingPid_ = callingPid;
+}
+
 static int32_t ProcessAttestOrNormalMessage(
     uint32_t code, MessageParcel &data, uint32_t outSize, const struct HksBlob &srcData, MessageParcel &reply)
 {
@@ -216,9 +232,15 @@ static int32_t ProcessAttestOrNormalMessage(
         HksIpcServiceAttestKey(reinterpret_cast<const HksBlob *>(&srcData),
             reinterpret_cast<const uint8_t *>(&reply), reinterpret_cast<const uint8_t *>(ptr.GetRefPtr()));
         return HKS_SUCCESS;
-    } else {
-        return ProcessMessage(code, outSize, srcData, reply);
+    } else if (code == HKS_MSG_INIT) {
+        sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
+        if (remoteObject != HKS_NULL_POINTER) {
+            int32_t callingPid = IPCSkeleton::GetCallingPid();
+            remoteObject->AddDeathRecipient(new OHOS::Security::Hks::HksDeathRecipient(callingPid));
+            HKS_LOG_I("Add bundleDead for pid: %" LOG_PUBLIC "d", callingPid);
+        }
     }
+    return ProcessMessage(code, outSize, srcData, reply);
 }
 
 static void ProcessRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply)
