@@ -570,7 +570,6 @@ enum OH_Huks_SecureSignType {
  * @brief Enumerates for key wrap type.
  *
  * @since 20
- * @version 1.0
  */
 enum OH_Huks_KeyWrapType {
     /**
