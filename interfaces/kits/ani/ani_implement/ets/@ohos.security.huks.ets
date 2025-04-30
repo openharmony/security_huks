@@ -778,7 +778,7 @@ export namespace huks {
 
   export function hasKeyItemAsUser(userId: int, keyAlias: string, options: HuksOptions): Promise<boolean>
   {
-    let optionAsUser = AdduserIdtoHuksOptions(options, userId);
+    let optionAsUser = AddUserIdToHuksOptions(options, userId);
     let p = new Promise<boolean> ((resolve: (v: boolean) => void,
       reject: (error: BusinessError)=> void): void => {
       let p1 = taskpool.execute(hasKeyItemSync, keyAlias, optionAsUser);
