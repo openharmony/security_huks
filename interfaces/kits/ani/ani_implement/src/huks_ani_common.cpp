@@ -243,22 +243,22 @@ int32_t AniUtils::CreateStringArrayObject(ani_env *env, std::vector<std::string>
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     ani_method arrayCtor;
-    if(ANI_OK != env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor)) {
+    if (ANI_OK != env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor)) {
         HKS_LOG_E("Class_FindMethod <ctor> Failed");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    if(ANI_OK != env->Object_New(arrayCls, arrayCtor, &arrayOut, arrayIn.size())) {
+    if (ANI_OK != env->Object_New(arrayCls, arrayCtor, &arrayOut, arrayIn.size())) {
         HKS_LOG_E("Object_New Array Faild");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     ani_size index = 0;
     for (auto &str : arrayIn) {
         ani_string ani_str;
-        if(ANI_OK != env->String_NewUTF8(str.c_str(), str.size(), &ani_str)) {
+        if (ANI_OK != env->String_NewUTF8(str.c_str(), str.size(), &ani_str)) {
             HKS_LOG_E("String_NewUTF8 Faild ");
             return HKS_ERROR_INVALID_ARGUMENT;
         }
-        if(ANI_OK != env->Object_CallMethodByName_Void(arrayOut, "$_set", "ILstd/core/Object;:V", index, ani_str)) {
+        if (ANI_OK != env->Object_CallMethodByName_Void(arrayOut, "$_set", "ILstd/core/Object;:V", index, ani_str)) {
             HKS_LOG_E("Object_CallMethodByName_Void  $_set Faild");
             return HKS_ERROR_INVALID_ARGUMENT;
         }

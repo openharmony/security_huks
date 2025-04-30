@@ -478,8 +478,9 @@ static ani_object AttestKeyItemSync(ani_env *env,
     }
     return InnerAttest(env, keyAlias, options, HksAttestKey);
 }
+
 static ani_object ListAliasesSync([[maybe_unused]] ani_env *env, ani_object options)
-{   
+{
     ani_object aniReturnObject{};
     struct HksResult resultInfo{ 0, nullptr, nullptr };
     struct HksKeyAliasSet *KeyAliasesSet{ nullptr };
@@ -498,7 +499,7 @@ static ani_object ListAliasesSync([[maybe_unused]] ani_env *env, ani_object opti
         resultInfo = HksConvertErrCode(ret);
         HKS_LOG_E("AliasList Parase Failed. ret = %" LOG_PUBLIC "d", ret);
     }
-    if (( KeyAliasesSet != nullptr) && ( KeyAliasesSet->aliases != nullptr)) {
+    if ((KeyAliasesSet != nullptr) && (KeyAliasesSet->aliases != nullptr)) {
         for (uint32_t i = 0; i < KeyAliasesSet->aliasesCnt; ++i) {
             char *data = reinterpret_cast<char *>(KeyAliasesSet->aliases[i].data);
             outVecAlias.emplace_back(data);
