@@ -218,9 +218,6 @@ static struct OH_Huks_Param g_genTuiParams[] = {
     }, {
         .tag = OH_HUKS_TAG_CHALLENGE_TYPE,
         .uint32Param = OH_HUKS_CHALLENGE_TYPE_NORMAL
-    }, {
-        .tag = OH_HUKS_TAG_IS_ALLOWED_WRAP,
-        .boolParam = true
     }
 };
 
@@ -279,7 +276,7 @@ HWTEST_F(HksWrapKeyTest, HksWrapKeyTest002, TestSize.Level0)
         EXPECT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
 
         ohResult = OH_Huks_GenerateKeyItem(&keyAlias, genParamSet, nullptr);
-        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_NOT_SUPPORTED_API) << "OH_Huks_GenerateKeyItem fail";
+        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED) << "OH_Huks_GenerateKeyItem fail";
     } while (0);
         
     OH_Huks_FreeParamSet(&genParamSet);
@@ -307,7 +304,7 @@ HWTEST_F(HksWrapKeyTest, HksWrapKeyTest003, TestSize.Level0)
         char newKey[] = "test_import_tui";
         struct OH_Huks_Blob newKeyAlias = {.size = (uint32_t)strlen(newKey), .data = (uint8_t *)newKey};
         ohResult = OH_Huks_ImportKeyItem(&newKeyAlias, testImportKeyParamSet, &publicKey);
-        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_NOT_SUPPORTED_API) << "OH_Huks_ImportKeyItem fail";
+        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED) << "OH_Huks_ImportKeyItem fail";
     } while (0);
 
     OH_Huks_FreeParamSet(&testImportKeyParamSet);
