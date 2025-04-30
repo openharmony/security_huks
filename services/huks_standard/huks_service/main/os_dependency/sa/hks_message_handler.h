@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,6 +48,8 @@ const struct HksIpcEntryPoint HKS_IPC_MESSAGE_HANDLER[] = {
     { HKS_MSG_LIST_ALIASES, HksIpcServiceListAliases },
     { HKS_MSG_RENAME_KEY_ALIAS, HksIpcServiceRenameKeyAlias },
     { HKS_MSG_CHANGE_STORAGE_LEVEL, HksIpcChangeStorageLevel },
+    { HKS_MSG_WRAP_KEY, HksIpcWrapKey },
+    { HKS_MSG_UNWRAP_KEY, HksIpcUnwrapKey },
 };
 
 typedef void (*HksIpcThreeStageHandlerFuncProc)(const struct HksBlob *msg, struct HksBlob *outData,

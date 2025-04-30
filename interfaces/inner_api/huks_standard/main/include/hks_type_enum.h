@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -378,6 +378,7 @@ enum HksErrorCode {
     HKS_ERROR_EMPTY_BASE64_STRING = -151,
     HKS_ERROR_ACCESS_OTHER_USER_KEY = -152,
 
+    HKS_ERROR_NEW_INVALID_ARGUMENT = -997,
     HKS_ERROR_LOAD_PLUGIN_FAIL = -998,
     HKS_ERROR_INTERNAL_ERROR = -999,
     HKS_ERROR_UNKNOWN_ERROR = -1000,
@@ -408,6 +409,7 @@ enum HksErrCode {
     HUKS_ERR_CODE_INSUFFICIENT_MEMORY = 12000014,
     HUKS_ERR_CODE_CALL_SERVICE_FAILED = 12000015,
     HUKS_ERR_CODE_DEVICE_PASSWORD_UNSET = 12000016,
+    HUKS_ERR_CODE_INVALID_ARGUMENT = 12000018,
 };
 
 /**
@@ -438,6 +440,21 @@ enum HksUserAuthType {
     HKS_USER_AUTH_TYPE_FINGERPRINT = 1 << 0,
     HKS_USER_AUTH_TYPE_FACE = 1 << 1,
     HKS_USER_AUTH_TYPE_PIN = 1 << 2,
+    HKS_USER_AUTH_TYPE_TUI_PIN = 1 << 5,
+};
+
+/**
+ * @brief hks user auth type
+ * @see `enum AuthType` in `base/useriam/user_auth_framework/interfaces/inner_api/iam_common_defines.h`
+ */
+enum HksIamUserAuthType {
+    HKS_IAM_USER_AUTH_TYPE_ALL = 0,
+    HKS_IAM_USER_AUTH_TYPE_PIN = 1,
+    HKS_IAM_USER_AUTH_TYPE_FACE = 2,
+    HKS_IAM_USER_AUTH_TYPE_FINGERPRINT = 4,
+    HKS_IAM_USER_AUTH_TYPE_RECOVERY_KEY = 8,
+    HKS_IAM_USER_AUTH_TYPE_PRIVATE_PIN = 16,
+    HKS_IAM_USER_AUTH_TYPE_TUI_PIN = 32,
 };
 
 /**
@@ -688,6 +705,10 @@ enum HksAuthStorageLevel {
 
 enum HksAgreePubKeyType {
     HKS_PUBKEY_DEFAULT = 0
+};
+
+enum HksKeyWrapType {
+    HKS_KEY_WRAP_TYPE_HUK = 2,
 };
 
 #ifdef __cplusplus

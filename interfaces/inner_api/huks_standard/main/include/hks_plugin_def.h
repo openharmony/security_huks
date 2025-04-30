@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,9 @@ struct HksProcessInfo {
 enum LocalRequestCode {
     CODE_UPGRADE = 1,
     CODE_FAULT_METRICS = 2,
-    CODE_STATISTICS_METRICS = 3
+    CODE_STATISTICS_METRICS = 3,
+    CODE_SA_WRAP_KEY = 4,
+    CODE_SA_UNWRAP_KEY = 5,
 };
 
 /**

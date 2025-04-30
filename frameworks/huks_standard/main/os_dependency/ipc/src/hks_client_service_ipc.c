@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,7 @@
 #include "hks_template.h"
 #include "hks_type.h"
 #include "hks_type_inner.h"
+#include "huks_service_ipc_interface_code.h"
 #include "securec.h"
 
 #ifdef HKS_L1_SMALL
@@ -911,6 +912,56 @@ int32_t HksClientChangeStorageLevel(const struct HksBlob *keyAlias, const struct
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksChangeStorageLevelPack fail")
 
         ret = HksSendRequest(HKS_MSG_CHANGE_STORAGE_LEVEL, &inBlob, NULL, srcParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HKS_FREE_BLOB(inBlob);
+    return ret;
+}
+
+int32_t HksClientWrapKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    struct HksBlob *wrappedKey)
+{
+    int32_t ret = HksCheckIpcWrapKey(keyAlias, paramSet, wrappedKey);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckIpcWrapKey fail.")
+
+    struct HksBlob inBlob = { 0, NULL };
+    inBlob.size = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) +
+                  ALIGN_SIZE(paramSet->paramSetSize) + sizeof(wrappedKey->size);
+    
+    inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
+    HKS_IF_NULL_LOGE_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL, "malloc inblob data fail")
+
+    do {
+        ret = HksWrapKeyPack(&inBlob, keyAlias, paramSet, wrappedKey);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksWrapKeyPack fail.")
+
+        ret = HksSendRequest(HKS_MSG_WRAP_KEY, &inBlob, wrappedKey, paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HKS_FREE_BLOB(inBlob);
+    return ret;
+}
+
+int32_t HksClientUnwrapKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *wrappedKey)
+{
+    int32_t ret = HksCheckIpcUnwrapKey(keyAlias, paramSet, wrappedKey);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckIpcUnwrapKey fail.")
+
+    struct HksBlob inBlob = { 0, NULL };
+    inBlob.size = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) +
+                  ALIGN_SIZE(paramSet->paramSetSize) + sizeof(wrappedKey->size) + ALIGN_SIZE(wrappedKey->size);
+    
+    inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
+    HKS_IF_NULL_LOGE_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL, "malloc inblob data fail")
+
+    do {
+        ret = HksUnwrapKeyPack(&inBlob, keyAlias, paramSet, wrappedKey);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksUnwrapKeyPack fail.")
+
+        ret = HksSendRequest(HKS_MSG_UNWRAP_KEY, &inBlob, NULL, paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
