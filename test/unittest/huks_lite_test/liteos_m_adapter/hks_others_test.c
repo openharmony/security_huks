@@ -100,28 +100,6 @@ LITE_TEST_CASE(HksOthersTest, HksOthersTest004, Level1)
 }
 
 /**
- * @tc.name: HksOthersTest.HksOthersTest005
- * @tc.desc: The static function will return true;
- * @tc.type: FUNC
- */
-LITE_TEST_CASE(HksOthersTest, HksOthersTest005, Level1)
-{
-    int32_t ret = HksWrapKey(NULL, NULL, NULL, NULL);
-    TEST_ASSERT_TRUE(ret == HKS_ERROR_API_NOT_SUPPORTED);
-}
-
-/**
- * @tc.name: HksOthersTest.HksOthersTest006
- * @tc.desc: The static function will return true;
- * @tc.type: FUNC
- */
-LITE_TEST_CASE(HksOthersTest, HksOthersTest006, Level1)
-{
-    int32_t ret = HksUnwrapKey(NULL, NULL, NULL, NULL);
-    TEST_ASSERT_TRUE(ret == HKS_ERROR_API_NOT_SUPPORTED);
-}
-
-/**
  * @tc.name: HksOthersTest.HksOthersTest006
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC

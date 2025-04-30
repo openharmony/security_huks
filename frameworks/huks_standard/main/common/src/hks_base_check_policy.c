@@ -963,15 +963,22 @@ static const uint32_t g_validPinAuthAccessType[] = {
     HKS_AUTH_ACCESS_ALWAYS_VALID
 };
 
+static const uint32_t g_validTuiPinAuthAccessType[] = {
+    HKS_AUTH_ACCESS_ALWAYS_VALID
+};
+
 static const struct AuthAccessTypeChecker g_expectAuthAccessParams[] = {
     { HKS_USER_AUTH_TYPE_FACE,
-        { true, g_validBiometricAuthAccessType, HKS_ARRAY_SIZE(g_validBiometricAuthAccessType)}
+        { true, g_validBiometricAuthAccessType, HKS_ARRAY_SIZE(g_validBiometricAuthAccessType) }
     },
     { HKS_USER_AUTH_TYPE_FINGERPRINT,
-        { true, g_validBiometricAuthAccessType, HKS_ARRAY_SIZE(g_validBiometricAuthAccessType)}
+        { true, g_validBiometricAuthAccessType, HKS_ARRAY_SIZE(g_validBiometricAuthAccessType) }
     },
     { HKS_USER_AUTH_TYPE_PIN,
-        { true, g_validPinAuthAccessType, HKS_ARRAY_SIZE(g_validPinAuthAccessType)}
+        { true, g_validPinAuthAccessType, HKS_ARRAY_SIZE(g_validPinAuthAccessType) }
+    },
+    { HKS_USER_AUTH_TYPE_TUI_PIN,
+        { true, g_validTuiPinAuthAccessType, HKS_ARRAY_SIZE(g_validTuiPinAuthAccessType) }
     }
 };
 
@@ -982,7 +989,11 @@ static const uint32_t g_supportUserAuthTypes[] = {
     HKS_USER_AUTH_TYPE_PIN | HKS_USER_AUTH_TYPE_FINGERPRINT,
     HKS_USER_AUTH_TYPE_PIN | HKS_USER_AUTH_TYPE_FACE,
     HKS_USER_AUTH_TYPE_FACE | HKS_USER_AUTH_TYPE_FINGERPRINT,
-    HKS_USER_AUTH_TYPE_PIN | HKS_USER_AUTH_TYPE_FACE | HKS_USER_AUTH_TYPE_FINGERPRINT
+    HKS_USER_AUTH_TYPE_PIN | HKS_USER_AUTH_TYPE_FACE | HKS_USER_AUTH_TYPE_FINGERPRINT,
+    HKS_USER_AUTH_TYPE_TUI_PIN,
+    HKS_USER_AUTH_TYPE_TUI_PIN | HKS_USER_AUTH_TYPE_FINGERPRINT,
+    HKS_USER_AUTH_TYPE_TUI_PIN | HKS_USER_AUTH_TYPE_FACE,
+    HKS_USER_AUTH_TYPE_TUI_PIN | HKS_USER_AUTH_TYPE_FACE | HKS_USER_AUTH_TYPE_FINGERPRINT
 };
 
 static const uint32_t g_supportSecureSignType[] = {

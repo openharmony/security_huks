@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -422,6 +422,62 @@ struct OH_Huks_Result OH_Huks_AbortSession(const struct OH_Huks_Blob *handle,
  */
 struct OH_Huks_Result OH_Huks_ListAliases(const struct OH_Huks_ParamSet *paramSet,
     struct OH_Huks_KeyAliasSet **outData);
+
+/**
+ * @brief Export the wrapped key encrypted by a specific key.
+ * @param keyAlias Indicates the pointer to the alias of the key to export.
+ * @param paramSet Indicates the pointer to the export parameters.
+ * @param wrappedKey Indicates the - indicates the wrapped key to export.
+ * @return {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} 0 - If the operation is successful.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_NOT_SUPPORTED_API} 801 - api is not supported
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_MISSING_CRYPTO_ALG_ARGUMENT} 12000002 - If failed to
+ *         get key argument.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_INVALID_CRYPTO_ALG_ARGUMENT} 12000003 - If the key argument
+ *         is invalid.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_FILE_OPERATION_FAIL} 12000004 - If failed to remove file,
+ *         or if failed to write file.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_COMMUNICATION_FAIL} 12000005 - If Ipc commuication failed.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_CRYPTO_FAIL} 12000006 - If crypto engine failed.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_INTERNAL_ERROR} 12000012 - If system error ocurred.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_INSUFFICIENT_MEMORY} 12000014 - If the memory is insufficient.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 12000018 - If keyAlias or paramSet or wrappedKey is
+ *         invalid.
+ * @since 20
+ * @version 1.0
+ */
+struct OH_Huks_Result OH_Huks_WrapKey(const struct OH_Huks_Blob *keyAlias, const struct OH_Huks_ParamSet *paramSet,
+    struct OH_Huks_Blob *wrappedKey);
+
+/**
+ * @brief Import the wrapped key encrypted by a specific key.
+ * @param keyAlias Indicates the pointer to the alias of the key to import.
+ * The alias must be unique in the process of the service. Otherwise, the key will be overwritten.
+ * @param paramSet Indicates the pointer to the import parameters.
+ * @param wrappedKey Indicates the - indicates the wrapped key to import.
+ * @return {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} 0 - If the operation is successful.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_NOT_SUPPORTED_API} 801 - api is not supported
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_MISSING_CRYPTO_ALG_ARGUMENT} 12000002 - If failed to
+ *         get key argument.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_INVALID_CRYPTO_ALG_ARGUMENT} 12000003 - If the key argument
+ *         is invalid.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_FILE_OPERATION_FAIL} 12000004 - If failed to remove file,
+ *         or if failed to write file.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_COMMUNICATION_FAIL} 12000005 - If Ipc commuication failed.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_CRYPTO_FAIL} 12000006 - If crypto engine failed.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_KEY_AUTH_PERMANENTLY_INVALIDATED} 12000007 - If auth token info
+ *         verify failed.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_KEY_AUTH_VERIFY_FAILED} 12000008 - If auth token verify failed.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_KEY_AUTH_TIME_OUT} 12000009 - If authentication token timed out.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_INTERNAL_ERROR} 12000012 - If system error ocurred.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_INSUFFICIENT_MEMORY} 12000014 - If the memory is insufficient.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_CALL_SERVICE_FAILED} 12000015 - If connect userIam failed.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 12000018 - If keyAlias or paramSet or wrappedKey is
+ *         invalid.
+ * @since 20
+ * @version 1.0
+ */
+struct OH_Huks_Result OH_Huks_UnwrapKey(const struct OH_Huks_Blob *keyAlias, const struct OH_Huks_ParamSet *paramSet,
+    const struct OH_Huks_Blob *wrappedKey);
 
 #ifdef __cplusplus
 }

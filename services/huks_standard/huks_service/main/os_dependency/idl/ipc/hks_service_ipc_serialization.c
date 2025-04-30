@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -576,4 +576,36 @@ int32_t HksChangeStorageLevelUnpack(const struct HksBlob *srcData, struct HksBlo
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get destParamSet failed")
 
     return HKS_SUCCESS;
+}
+
+int32_t HksWrapKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias, struct HksParamSet **paramSet,
+    struct HksBlob *wrappedKey)
+{
+    uint32_t offset = 0;
+    int32_t ret = GetBlobFromBuffer(keyAlias, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyAlias fail")
+
+    ret = GetParamSetFromBuffer(paramSet, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get paramSet fail")
+
+    ret = MallocBlobFromBuffer(srcData, wrappedKey, &offset);
+    HKS_IF_NOT_SUCC_LOGE(ret, "malloc wrappedKey fail")
+
+    return ret;
+}
+
+int32_t HksUnwrapKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias, struct HksParamSet **paramSet,
+    struct HksBlob *wrappedKey)
+{
+    uint32_t offset = 0;
+    int32_t ret = GetBlobFromBuffer(keyAlias, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyAlias fail")
+
+    ret = GetParamSetFromBuffer(paramSet, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get paramSet fail")
+
+    ret = GetBlobFromBuffer(wrappedKey, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE(ret, "get wrappedKey fail")
+
+    return ret;
 }
