@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -408,7 +408,13 @@ enum  OH_Huks_ErrCode {
      *
      * @since 11
      */
-    OH_HUKS_ERR_CODE_DEVICE_PASSWORD_UNSET = 12000016
+    OH_HUKS_ERR_CODE_DEVICE_PASSWORD_UNSET = 12000016,
+    /**
+     * The input parameter is invalid.
+     *
+     * @since 20
+     */
+    OH_HUKS_ERR_CODE_INVALID_ARGUMENT = 12000018
 };
 
 /**
@@ -446,6 +452,8 @@ enum OH_Huks_UserAuthType {
     OH_HUKS_USER_AUTH_TYPE_FACE = 1 << 1,
     /** PIN authentication. */
     OH_HUKS_USER_AUTH_TYPE_PIN = 1 << 2,
+    /** TUI PIN authentication. */
+    OH_HUKS_USER_AUTH_TYPE_TUI_PIN = 1 << 5,
 };
 
 /**
@@ -556,6 +564,20 @@ enum OH_Huks_SecureSignType {
      *  the authentication information and then be signed.
      */
     OH_HUKS_SECURE_SIGN_WITH_AUTHINFO = 1,
+};
+
+/**
+ * @brief Enumerates for key wrap type.
+ *
+ * @since 20
+ */
+enum OH_Huks_KeyWrapType {
+    /**
+     * The hardware unique key wrap type.
+     *
+     * @since 20
+     */
+    OH_HUKS_KEY_WRAP_TYPE_HUK_BASED = 2,
 };
 
 /**
