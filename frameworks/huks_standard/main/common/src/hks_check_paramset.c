@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "hks_type_enum.h"
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
 #else
@@ -541,6 +542,13 @@ static int32_t CoreCheckGenKeyParams(const struct HksParamSet *paramSet, struct 
             HKS_LOG_E("batchPurposeParam should fall within the scope of purposeParam.");
             return HKS_ERROR_INVALID_PURPOSE;
         }
+    }
+
+    struct HksParam *authTypeParam = NULL;
+    int32_t result = HksGetParam(paramSet, HKS_TAG_USER_AUTH_TYPE, &authTypeParam);
+    if (result == HKS_SUCCESS && authTypeParam->uint32Param == HKS_USER_AUTH_TYPE_TUI_PIN) {
+        HKS_LOG_E("TUI PIN user auth type not supported");
+        return HKS_ERROR_USER_AUTH_TYPE_NOT_SUPPORT;
     }
 
     if (((purposeParam->uint32Param & HKS_KEY_PURPOSE_DERIVE) != 0) ||
