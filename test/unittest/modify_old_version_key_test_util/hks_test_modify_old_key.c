@@ -81,6 +81,7 @@ int32_t HksTestOldKeyExist(const struct HksBlob *keyAlias)
         { strlen(processName), (uint8_t *)processName },
         0,
         0,
+        0,
         0
     };
     return HksServiceKeyExist(&processInfo, keyAlias, NULL);

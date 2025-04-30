@@ -69,6 +69,17 @@ private:
     static sptr<HksService> instance;
     int OnRemotePluginRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
 };
+
+class HksDeathRecipient : public IRemoteObject::DeathRecipient {
+public:
+    HksDeathRecipient() {}
+    explicit HksDeathRecipient(int32_t callingPid);
+    ~HksDeathRecipient() override = default;
+    void OnRemoteDied(const wptr<IRemoteObject>& remoteObject) override;
+private:
+    int32_t callingPid_;
+};
+
 } // namespace Hks
 } // namespace Security
 } // namespace OHOS
