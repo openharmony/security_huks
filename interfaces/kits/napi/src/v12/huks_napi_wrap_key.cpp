@@ -59,7 +59,6 @@ static void DeleteWrapKeyAsyncContext(napi_env env, WrapKeyAsyncContext &context
     }
 
     DeleteCommonAsyncContext(env, context->asyncWork, context->callback, context->keyAlias, context->paramSet);
-
     if (context->wrappedKey != nullptr) {
         FreeHksBlob(context->wrappedKey);
     }
