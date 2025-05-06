@@ -35,6 +35,7 @@ struct HksOperation {
     bool isBatchOperation;
     bool isUserIdPassedDuringInit;
     int userIdPassedDuringInit;
+    int32_t pid;
 };
 
 #ifdef __cplusplus
@@ -46,6 +47,8 @@ int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct H
 
 struct HksOperation *QueryOperationAndMarkInUse(const struct HksProcessInfo *processInfo,
     const struct HksBlob *operationHandle);
+
+struct HksOperation *QueryOperationByPidAndMarkInUse(int32_t pid);
 
 void MarkOperationUnUse(struct HksOperation *operation);
 

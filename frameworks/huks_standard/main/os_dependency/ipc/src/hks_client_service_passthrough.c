@@ -69,6 +69,7 @@ int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksPar
         { strlen(processName), (uint8_t *)processName },
         0,
         0,
+        0,
         0
     };
     return HksServiceGenerateKey(&processInfo, keyAlias, paramSetIn, NULL);
@@ -87,6 +88,7 @@ int32_t HksClientImportKey(const struct HksBlob *keyAlias, const struct HksParam
         { strlen(processName), (uint8_t *)processName },
         0,
         0,
+        0,
         0
     };
     return HksServiceImportKey(&processInfo, keyAlias, paramSet, key);
@@ -103,6 +105,7 @@ int32_t HksClientImportWrappedKey(const struct HksBlob *keyAlias, const struct H
     struct HksProcessInfo processInfo = {
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
+        0,
         0,
         0,
         0
@@ -124,6 +127,7 @@ int32_t HksClientExportPublicKey(const struct HksBlob *keyAlias, const struct Hk
         { strlen(processName), (uint8_t *)processName },
         0,
         0,
+        0,
         0
     };
     return HksServiceExportPublicKey(&processInfo, keyAlias, paramSet, key);
@@ -139,6 +143,7 @@ int32_t HksClientDeleteKey(const struct HksBlob *keyAlias, const struct HksParam
     struct HksProcessInfo processInfo = {
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
+        0,
         0,
         0,
         0
@@ -159,6 +164,7 @@ int32_t HksClientGetKeyParamSet(const struct HksBlob *keyAlias, const struct Hks
         { strlen(processName), (uint8_t *)processName },
         0,
         0,
+        0,
         0
     };
     return HksServiceGetKeyParamSet(&processInfo, keyAlias, paramSetIn, paramSetOut);
@@ -174,6 +180,7 @@ int32_t HksClientKeyExist(const struct HksBlob *keyAlias, const struct HksParamS
     struct HksProcessInfo processInfo = {
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
+        0,
         0,
         0,
         0
@@ -194,6 +201,7 @@ int32_t HksClientSign(const struct HksBlob *key, const struct HksParamSet *param
         { strlen(processName), (uint8_t *)processName },
         0,
         0,
+        0,
         0
     };
     return HksServiceSign(&processInfo, key, paramSet, srcData, signature);
@@ -210,6 +218,7 @@ int32_t HksClientVerify(const struct HksBlob *key, const struct HksParamSet *par
     struct HksProcessInfo processInfo = {
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
+        0,
         0,
         0,
         0
@@ -230,6 +239,7 @@ int32_t HksClientEncrypt(const struct HksBlob *key, const struct HksParamSet *pa
         { strlen(processName), (uint8_t *)processName },
         0,
         0,
+        0,
         0
     };
     return HksServiceEncrypt(&processInfo, key, paramSet, plainText, cipherText);
@@ -246,6 +256,7 @@ int32_t HksClientDecrypt(const struct HksBlob *key, const struct HksParamSet *pa
     struct HksProcessInfo processInfo = {
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
+        0,
         0,
         0,
         0
@@ -266,6 +277,7 @@ int32_t HksClientAgreeKey(const struct HksParamSet *paramSet, const struct HksBl
         { strlen(processName), (uint8_t *)processName },
         0,
         0,
+        0,
         0
     };
     return HksServiceAgreeKey(&processInfo, paramSet, privateKey, peerPublicKey, agreedKey);
@@ -282,6 +294,7 @@ int32_t HksClientDeriveKey(const struct HksParamSet *paramSet, const struct HksB
     struct HksProcessInfo processInfo = {
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
+        0,
         0,
         0,
         0
@@ -302,6 +315,7 @@ int32_t HksClientMac(const struct HksBlob *key, const struct HksParamSet *paramS
         { strlen(processName), (uint8_t *)processName },
         0,
         0,
+        0,
         0
     };
     return HksServiceMac(&processInfo, key, paramSet, srcData, mac);
@@ -318,6 +332,7 @@ int32_t HksClientGetKeyInfoList(const struct HksParamSet *paramSet, struct HksKe
     struct HksProcessInfo processInfo = {
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
+        0,
         0,
         0,
         0
@@ -346,6 +361,7 @@ int32_t HksClientInit(const struct HksBlob *keyAlias, const struct HksParamSet *
     struct HksProcessInfo processInfo = {
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
+        0,
         0,
         0,
         0
@@ -378,6 +394,7 @@ int32_t HksClientUpdate(const struct HksBlob *handle, const struct HksParamSet *
         { strlen(processName), (uint8_t *)processName },
         0,
         0,
+        0,
         0
     };
     return HksServiceUpdate(handle, &processInfo, paramSet, inData, outData);
@@ -396,6 +413,7 @@ int32_t HksClientFinish(const struct HksBlob *handle, const struct HksParamSet *
         { strlen(processName), (uint8_t *)processName },
         0,
         0,
+        0,
         0
     };
     return HksServiceFinish(handle, &processInfo, paramSet, inData, outData);
@@ -411,6 +429,7 @@ int32_t HksClientAbort(const struct HksBlob *handle, const struct HksParamSet *p
     struct HksProcessInfo processInfo = {
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
+        0,
         0,
         0,
         0
@@ -432,6 +451,7 @@ int32_t HksClientGenerateRandom(struct HksBlob *random, const struct HksParamSet
         { strlen(processName), (uint8_t *)processName },
         0,
         0,
+        0,
         0
     };
     return HksServiceGenerateRandom(&processInfo, random);
@@ -447,6 +467,7 @@ int32_t HksClientListAliases(const struct HksParamSet *paramSet, struct HksKeyAl
     struct HksProcessInfo processInfo = {
         { strlen(tempUserId), (uint8_t *)tempUserId },
         { strlen(tempProcessName), (uint8_t *)tempProcessName },
+        0,
         0,
         0,
         0

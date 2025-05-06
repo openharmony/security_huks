@@ -24,6 +24,8 @@
 #ifndef HKS_PLUGIN_DEF_H
 #define HKS_PLUGIN_DEF_H
 
+#define HKS_PROCESS_INFO_INIT_VALUE { {0, NULL}, {0, NULL}, 0, 0, 0, 0 }
+
 #include "hks_type.h"
 
 #ifdef __cplusplus
@@ -39,6 +41,7 @@ struct HksProcessInfo {
     int32_t userIdInt;
     uint32_t uidInt;
     uint64_t accessTokenId;
+    int32_t pid;
 };
 
 enum LocalRequestCode {
