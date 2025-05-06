@@ -143,6 +143,8 @@ static const struct HksProcessInfo PROCESS_INFO = {
     { strlen(USER_ID), (uint8_t *)USER_ID },
     { sizeof(TEST_PROCESS_UID), (uint8_t *)&TEST_PROCESS_UID },
     0,
+    0,
+    0,
     0
 };
 

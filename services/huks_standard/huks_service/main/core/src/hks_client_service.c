@@ -1637,6 +1637,52 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
     return ret;
 }
 
+static int32_t BuildAbortParamSet(struct HksParamSet **newParamSet)
+{
+    int32_t ret = HksInitParamSet(newParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksInitParamSet fail!");
+    do {
+        struct HksParam Param = { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP};
+        ret = HksAddParams(*newParamSet, &Param, 1);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAddParams  fail!");
+
+        ret = HksBuildParamSet(newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksBuildParamSet  fail!");
+    } while (0);
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(newParamSet);
+    }
+    return ret;
+}
+
+int32_t HksServiceAbortByPid(int32_t pid)
+{
+    struct HksParamSet *newParamSet = NULL;
+    struct HksOperation *operation;
+    int32_t ret;
+    do {
+        operation = QueryOperationByPidAndMarkInUse(pid);
+        if (operation == NULL) {
+            HKS_LOG_E("operationHandle by pid failed! not exist or being busy");
+            ret = HKS_ERROR_NOT_EXIST; /* return success if the handle is not found */
+            break;
+        }
+
+        ret = BuildAbortParamSet(&newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "BuildAbortParamSet failed, ret = %" LOG_PUBLIC "d", ret)
+
+        struct HksBlob handleBlob = { .data = (uint8_t *)(&(operation->handle)), .size = sizeof(operation->handle) };
+        ret = HuksAccessAbort(&handleBlob, newParamSet);
+        IfNotSuccAppendHdiErrorInfo(ret);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HuksAccessAbort for dead process fail, ret = %" LOG_PUBLIC "d", ret)
+
+        MarkAndDeleteOperation(&operation, &handleBlob);
+    } while (0);
+    MarkOperationUnUse(operation);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
 void HksServiceDeleteProcessInfo(const struct HksProcessInfo *processInfo)
 {
 #ifndef __LITEOS_M__
