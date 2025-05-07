@@ -371,7 +371,7 @@ int32_t HksInitListAliasAniResult(const HksResult &resultInfo, ani_env *&env,
     int32_t ret{ HKS_SUCCESS };
     ret = HksCreateAniResult(resultInfo, env, resultObjOut);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
-    "HksCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret);
+        "HksCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret);
     HKS_IF_NULL_RETURN(arrayObj, HKS_SUCCESS);
     
     std::string listString = arkts::ani_signature::Builder::BuildSetterName("listString");

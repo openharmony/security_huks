@@ -729,7 +729,6 @@ export namespace huks {
         }
       });
     });
-
     return p;
   }
 
@@ -751,6 +750,7 @@ export namespace huks {
     });
   }
 
+  let keyNotExist: int = -13
   export function hasKeyItem(keyAlias: string, options: HuksOptions): Promise<boolean>
   {
     let p = new Promise<boolean> ((resolve: (v: boolean) => void,
@@ -762,7 +762,7 @@ export namespace huks {
         if (retInner.result === 0) {
           isExist = true;
           resolve(isExist);
-        } else if (retInner.result === -13) {
+        } else if (retInner.result === keyNotExist) {
           isExist = false;
           resolve(isExist);
         } else {
@@ -788,7 +788,7 @@ export namespace huks {
         if (retInner.result === 0) {
           isExist = true;
           resolve(isExist);
-        } else if (retInner.result === -13) {
+        } else if (retInner.result === keyNotExist) {
           isExist = false;
           resolve(isExist);
         } else {
