@@ -374,10 +374,9 @@ int32_t HksInitListAliasAniResult(const HksResult &resultInfo, ani_env *&env,
         "HksCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret);
     HKS_IF_NULL_RETURN(arrayObj, HKS_SUCCESS);
     
-    std::string listString = arkts::ani_signature::Builder::BuildSetterName("listString");
-    auto status = env->Object_CallMethodByName_Void(resultObjOut, listString.c_str(), nullptr, arrayObj);
+    ani_status status = env->Object_SetFieldByName_Ref(resultObjOut, "listString", arrayObj);
     if (status != ANI_OK) {
-        HKS_LOG_E("Object_CallMethodByName_Void Failed %" LOG_PUBLIC "s", listString.c_str());
+        HKS_LOG_E("Object_SetFieldByName_Ref listString %" LOG_PUBLIC "u", status);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
