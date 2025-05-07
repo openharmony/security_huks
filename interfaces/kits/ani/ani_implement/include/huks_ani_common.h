@@ -103,6 +103,9 @@ int32_t HksIsKeyItemExistCreateAniResult(const HksResult &resultInfo, ani_env *&
 int32_t HksInitSessionCreateAniResult(const HksResult &resultInfo, ani_env *&env, const SessionContext &context,
     ani_object &resultObjOut);
 
+int32_t HksInitListAliasAniResult(const HksResult &resultInfo, ani_env *&env,
+    ani_object &resultObjOut, ani_object &arrayObj);
+
 int32_t HksGetParamSetFromAni(ani_env *&env, const ani_object &optionsObj, struct HksParamSet *&paramSetOut);
 
 void FreeHksBlobAndFresh(HksBlob &blob, const bool isNeedFresh = false);
