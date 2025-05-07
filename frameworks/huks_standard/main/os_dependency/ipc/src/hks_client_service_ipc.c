@@ -666,6 +666,9 @@ static int32_t ClientInit(const struct HksBlob *inData, const struct HksParamSet
     int32_t ret;
     do {
         ret = HksSendRequest(HKS_MSG_INIT, inData, &outBlob, paramSet);
+        if (ret == HKS_ERROR_IPC_MSG_FAIL) {
+            ret = HksSendRequest(HKS_MSG_INIT, inData, &outBlob, paramSet);
+        }
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "client init send fail")
 
         if (outBlob.size < HANDLE_SIZE) {
