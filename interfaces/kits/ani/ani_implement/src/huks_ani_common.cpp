@@ -235,38 +235,6 @@ bool AniUtils::CreateUint8Array(ani_env *env, std::vector<uint8_t> &arrayIn, ani
     return true;
 }
 
-int32_t AniUtils::CreateStringArrayObject(ani_env *env, std::vector<std::string> &arrayIn, ani_object &arrayOut)
-{
-    ani_class arrayCls = nullptr;
-    if (ANI_OK != env->FindClass("Lescompat/Array;", &arrayCls)) {
-        HKS_LOG_E("FindClass Lescompat/Array Failed");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    ani_method arrayCtor;
-    if (ANI_OK != env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor)) {
-        HKS_LOG_E("Class_FindMethod <ctor> Failed");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    if (ANI_OK != env->Object_New(arrayCls, arrayCtor, &arrayOut, arrayIn.size())) {
-        HKS_LOG_E("Object_New Array Faild");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    ani_size index = 0;
-    for (auto &str : arrayIn) {
-        ani_string ani_str;
-        if (ANI_OK != env->String_NewUTF8(str.c_str(), str.size(), &ani_str)) {
-            HKS_LOG_E("String_NewUTF8 Faild ");
-            return HKS_ERROR_INVALID_ARGUMENT;
-        }
-        if (ANI_OK != env->Object_CallMethodByName_Void(arrayOut, "$_set", "ILstd/core/Object;:V", index, ani_str)) {
-            HKS_LOG_E("Object_CallMethodByName_Void  $_set Faild");
-            return HKS_ERROR_INVALID_ARGUMENT;
-        }
-        index++;
-    }
-    return HKS_SUCCESS;
-}
-
 namespace HuksAni {
 void FreeHksBlobAndFresh(HksBlob &blob, const bool isNeedFresh)
 {
@@ -406,9 +374,10 @@ int32_t HksInitListAliasAniResult(const HksResult &resultInfo, ani_env *&env,
     "HksCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret);
     HKS_IF_NULL_RETURN(arrayObj, HKS_SUCCESS);
     
-    auto status = env->Object_CallMethodByName_Void(resultObjOut, "<set>listString", nullptr, arrayObj);
+    std::string listString = arkts::ani_signature::Builder::BuildSetterName("listString");
+    auto status = env->Object_CallMethodByName_Void(resultObjOut, listString.c_str(), nullptr, arrayObj);
     if (status != ANI_OK) {
-        HKS_LOG_E("Object_CallMethodByName_Void Failed <set>listString");
+        HKS_LOG_E("Object_CallMethodByName_Void Failed %" LOG_PUBLIC "s", listString.c_str());
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;

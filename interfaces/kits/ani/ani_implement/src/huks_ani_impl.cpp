@@ -483,15 +483,15 @@ static ani_object ListAliasesSync([[maybe_unused]] ani_env *env, ani_object opti
 {
     ani_object aniReturnObject{};
     struct HksResult resultInfo{ 0, nullptr, nullptr };
-    struct HksKeyAliasSet *KeyAliasesSet{ nullptr };
+    struct HksKeyAliasSet *keyAliasesSet{ nullptr };
     int32_t ret{ HKS_SUCCESS };
-    std::vector<std::string> outVecAlias;
     CommonContext context;
+    ani_object arrayObj;
     do {
         ret = HksAniParseParams<CommonContext>(env, nullptr, options, &context);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAniParseParams failed! ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksListAliases(context.paramSetIn, &KeyAliasesSet);
+        ret = HksListAliases(context.paramSetIn, &keyAliasesSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Get AliasList Failed. ret = %" LOG_PUBLIC "d", ret);
     } while (0);
     resultInfo.errorCode = ret;
@@ -499,19 +499,14 @@ static ani_object ListAliasesSync([[maybe_unused]] ani_env *env, ani_object opti
         resultInfo = HksConvertErrCode(ret);
         HKS_LOG_E("AliasList Parase Failed. ret = %" LOG_PUBLIC "d", ret);
     }
-    if ((KeyAliasesSet != nullptr) && (KeyAliasesSet->aliases != nullptr)) {
-        for (uint32_t i = 0; i < KeyAliasesSet->aliasesCnt; ++i) {
-            char *data = reinterpret_cast<char *>(KeyAliasesSet->aliases[i].data);
-            outVecAlias.emplace_back(data);
+    if ((keyAliasesSet != nullptr) && (keyAliasesSet->aliases != nullptr)) {
+        arrayObj = ConstructArrayString(env, keyAliasesSet->aliasesCnt, keyAliasesSet->aliases);
+        if (arrayObj == nullptr) {
+            HKS_LOG_E("ConstructArrayString fail");
+            return {};
         }
     }
 
-    ani_object arrayObj;
-    ret = AniUtils::CreateStringArrayObject(env, outVecAlias, arrayObj);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("CreateStringArrayObject failed. ret = %" LOG_PUBLIC "d", ret);
-        return {};
-    }
     ret = HksInitListAliasAniResult(resultInfo, env, aniReturnObject, arrayObj);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksInitListAliasAniResult failed. ret = %" LOG_PUBLIC "d", ret);
