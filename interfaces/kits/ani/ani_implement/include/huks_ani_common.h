@@ -52,8 +52,6 @@ namespace AniUtils {
     void PrintUint8Array(std::vector<uint8_t> &arrayIn);
 
     bool CreateUint8Array(ani_env *env, std::vector<uint8_t> &arrayIn, ani_object &arrayOut);
-
-    int32_t CreateStringArrayObject(ani_env *env, std::vector<std::string> &arrayIn, ani_object &arrayOut);
 }
 
 namespace HuksAni {
