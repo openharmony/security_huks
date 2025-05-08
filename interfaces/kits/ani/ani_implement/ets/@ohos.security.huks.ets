@@ -47,8 +47,6 @@ native function attestKeyItemSync(keyAlias: string, options: huks.HuksOptions, i
 
 native function listAliasesSync(options: huks.HuksOptions): HuksResultInner;
 
-native function hasKeyItemSync(keyAlias: string, options: huks.HuksOptions): HuksResultInner;
-
 /**
  * OpenHarmony Universal KeyStore
  *
@@ -734,7 +732,7 @@ export namespace huks {
 
   export function hasKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<boolean>): void
   {
-    let p1 = taskpool.execute(hasKeyItemSync, keyAlias, options);
+    let p1 = taskpool.execute(isKeyItemExistSync, keyAlias, options);
     p1.then<void>((ret: NullishType) => {
         let retInner = ret as HuksResultInner;
         let isExist: boolean = true;
@@ -750,12 +748,12 @@ export namespace huks {
     });
   }
 
-  let keyNotExist: int = -13
+  let keyNotExist: int = 12000011
   export function hasKeyItem(keyAlias: string, options: HuksOptions): Promise<boolean>
   {
     let p = new Promise<boolean> ((resolve: (v: boolean) => void,
       reject: (error: BusinessError)=> void): void => {
-      let p1 = taskpool.execute(hasKeyItemSync, keyAlias, options);
+      let p1 = taskpool.execute(isKeyItemExistSync, keyAlias, options);
       p1.then<void>((ret: NullishType) => {
         let retInner = ret as HuksResultInner;
         let isExist: boolean = true;
@@ -781,7 +779,7 @@ export namespace huks {
     let optionAsUser = AddUserIdToHuksOptions(options, userId);
     let p = new Promise<boolean> ((resolve: (v: boolean) => void,
       reject: (error: BusinessError)=> void): void => {
-      let p1 = taskpool.execute(hasKeyItemSync, keyAlias, optionAsUser);
+      let p1 = taskpool.execute(isKeyItemExistSync, keyAlias, optionAsUser);
       p1.then<void>((ret : NullishType) => {
         let retInner = ret as HuksResultInner;
         let isExist: boolean = true;
