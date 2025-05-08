@@ -308,18 +308,6 @@ int32_t HksCreateAniResult(const HksResult &resultInfo, ani_env *&env, ani_objec
     return ret;
 }
 
-int32_t HksIsKeyItemExistCreateAniResult(const HksResult &resultInfo, ani_env *&env, ani_object &resultObjOut)
-{
-    int32_t ret{ HKS_SUCCESS };
-    HKS_IF_NULL_LOGE_RETURN(env, HKS_ERROR_NULL_POINTER, "HksIsKeyItemExistCreateAniResult, but ani env is null!")
-    if (resultInfo.errorCode != HKS_SUCCESS && resultInfo.errorCode != HKS_ERROR_NOT_EXIST) {
-        ret = HksCreateAniResultCommon(resultInfo.errorCode, env, resultObjOut, resultInfo.errorMsg, nullptr);
-    } else {
-        ret = HksCreateAniResultCommon(resultInfo.errorCode, env, resultObjOut, nullptr, nullptr);
-    }
-    return ret;
-}
-
 int32_t HksInitSessionCreateAniResult(const HksResult &resultInfo, ani_env *&env, const SessionContext &context,
     ani_object &resultObjOut)
 {
