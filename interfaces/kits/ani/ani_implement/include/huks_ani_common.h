@@ -98,8 +98,6 @@ int32_t HksGetKeyAliasFromAni(ani_env *&env, const ani_string &strObject, HksBlo
 int32_t HksCreateAniResult(const HksResult &resultInfo, ani_env *&env, ani_object &resultObjOut,
     ani_object outBuffer = nullptr);
 
-int32_t HksIsKeyItemExistCreateAniResult(const HksResult &resultInfo, ani_env *&env, ani_object &resultObjOut);
-
 int32_t HksInitSessionCreateAniResult(const HksResult &resultInfo, ani_env *&env, const SessionContext &context,
     ani_object &resultObjOut);
 
