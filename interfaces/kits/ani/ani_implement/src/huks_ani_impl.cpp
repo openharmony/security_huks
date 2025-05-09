@@ -516,32 +516,6 @@ static ani_object ListAliasesSync([[maybe_unused]] ani_env *env, ani_object opti
     return aniReturnObject;
 }
 
-static ani_object HasKeyItemSync([[maybe_unused]] ani_env *env, ani_string keyAlias, ani_object options)
-{
-    ani_object aniReturnObject{};
-    struct HksResult resultInfo{ 0, nullptr, nullptr };
-    int32_t ret{ HKS_SUCCESS };
-    CommonContext context;
-    do {
-        ret = HksAniParseParams<CommonContext>(env, keyAlias, options, &context);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAniParseParams failed! ret = %" LOG_PUBLIC "d", ret)
-
-        ret = HksKeyExist(&context.keyAlias, context.paramSetIn);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksKeyExist failed! ret = %" LOG_PUBLIC "d", ret)
-    } while (0);
-    resultInfo.errorCode = ret;
-    if (ret != HKS_SUCCESS  && ret != HKS_ERROR_NOT_EXIST) {
-        resultInfo = HksConvertErrCode(ret);
-        HKS_LOG_E("HksKeyExist failed. ret = %" LOG_PUBLIC "d", ret);
-    }
-    ret = HksIsKeyItemExistCreateAniResult(resultInfo, env, aniReturnObject);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksIsKeyItemExistCreateAniResult failed. ret = %" LOG_PUBLIC "d", ret);
-        return {};
-    }
-    return aniReturnObject;
-}
-
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     if (vm == nullptr || result == nullptr) {
@@ -575,7 +549,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"abortSessionSync", nullptr, reinterpret_cast<void *>(AbortSessionSync)},
         ani_native_function {"attestKeyItemSync", nullptr, reinterpret_cast<void *>(AttestKeyItemSync)},
         ani_native_function {"listAliasesSync", nullptr, reinterpret_cast<void *>(ListAliasesSync)},
-        ani_native_function {"hasKeyItemSync", nullptr, reinterpret_cast<void *>(HasKeyItemSync)},
     };
 
     aniResult = env->Module_BindNativeFunctions(globalModule, methods.data(), methods.size());
