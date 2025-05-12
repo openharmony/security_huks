@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2020-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -490,5 +490,23 @@ int32_t HksClientChangeStorageLevel(const struct HksBlob *keyAlias, const struct
     (void)keyAlias;
     (void)srcParamSet;
     (void)destParamSet;
+    return HKS_ERROR_NOT_SUPPORTED;
+}
+
+int32_t HksClientWrapKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    struct HksBlob *wrappedKey)
+{
+    (void)keyAlias;
+    (void)paramSet;
+    (void)wrappedKey;
+    return HKS_ERROR_NOT_SUPPORTED;
+}
+
+int32_t HksClientUnwrapKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *wrappedKey)
+{
+    (void)keyAlias;
+    (void)paramSet;
+    (void)wrappedKey;
     return HKS_ERROR_NOT_SUPPORTED;
 }

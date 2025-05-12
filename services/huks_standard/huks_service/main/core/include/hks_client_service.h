@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,11 @@
 #endif
 
 #include "hks_type_inner.h"
+
+struct HksIpcData {
+    const struct HksBlob *srcData;
+    const uint8_t *context;
+};
 
 #ifdef __cplusplus
 extern "C" {
@@ -107,6 +112,10 @@ int32_t HksServiceRenameKeyAlias(const struct HksProcessInfo *processInfo, const
 
 int32_t HksServiceChangeStorageLevel(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *srcParamSet, const struct HksParamSet *destParamSet);
+
+int32_t HksServiceWrapKey(const struct HksBlob *srcData, const uint8_t *context);
+
+int32_t HksServiceUnwrapKey(const struct HksBlob *srcData, const uint8_t *context);
 
 #ifdef __cplusplus
 }

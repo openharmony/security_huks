@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_template.h"
+#include "hks_type_enum.h"
 #include "securec.h"
 
 #define NUM_TWO        2
@@ -594,5 +595,34 @@ int32_t HksChangeStorageLevelPack(struct HksBlob *destData, const struct HksBlob
 
     ret = CopyParamSetToBuffer(destParamSet, destData, &offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy destParamSet failed")
+    return HKS_SUCCESS;
+}
+
+int32_t HksWrapKeyPack(struct HksBlob *inBlob, const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    struct HksBlob *wrappedKey)
+{
+    uint32_t offset = 0;
+    int32_t ret = CopyBlobToBuffer(keyAlias, inBlob, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy keyAlias fail")
+
+    ret = CopyParamSetToBuffer(paramSet, inBlob, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy paramSet fail")
+
+    return CopyUint32ToBuffer(wrappedKey->size, inBlob, &offset);
+}
+
+int32_t HksUnwrapKeyPack(struct HksBlob *inBlob, const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *wrappedKey)
+{
+    uint32_t offset = 0;
+    int32_t ret = CopyBlobToBuffer(keyAlias, inBlob, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy keyAlias fail")
+
+    ret = CopyParamSetToBuffer(paramSet, inBlob, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy paramSet fail")
+
+    ret = CopyBlobToBuffer(wrappedKey, inBlob, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy wrappedKey fail")
+
     return HKS_SUCCESS;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -92,6 +92,12 @@ int32_t HksClientRenameKeyAlias(const struct HksBlob *oldKeyAlias, const struct 
 
 int32_t HksClientChangeStorageLevel(const struct HksBlob *keyAlias, const struct HksParamSet *srcParamSet,
     const struct HksParamSet *destParamSet);
+
+int32_t HksClientWrapKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    struct HksBlob *wrappedKey);
+
+int32_t HksClientUnwrapKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *wrappedKey);
 
 #ifdef __cplusplus
 }

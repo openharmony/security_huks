@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,8 @@
 #include "hks_log.h"
 #include "hks_param.h"
 #include "hks_template.h"
+#include "hks_type.h"
+#include "hks_type_enum.h"
 
 #define MIN_CERT_COUNT 3
 #define MAX_CERT_COUNT 4
@@ -299,5 +301,39 @@ int32_t HksCheckIpcChangeStorageLevel(const struct HksBlob *keyAlias, const stru
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
+    return HKS_SUCCESS;
+}
+
+int32_t HksCheckIpcWrapKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *wrappedKey)
+{
+    int32_t ret = HksCheckBlob2AndParamSet(keyAlias, wrappedKey, paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check keyAlias or wrappedkey or paramSet fail")
+
+    if (keyAlias->size > MAX_PROCESS_SIZE) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    if ((sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) +
+        ALIGN_SIZE(paramSet->paramSetSize) + sizeof(wrappedKey->size)) > MAX_PROCESS_SIZE) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    return HKS_SUCCESS;
+}
+
+int32_t HksCheckIpcUnwrapKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *wrappedKey)
+{
+    int32_t ret = HksCheckBlob2AndParamSet(keyAlias, wrappedKey, paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check keyAlias or wrappedkey or paramSet fail")
+
+    if (keyAlias->size > MAX_PROCESS_SIZE || wrappedKey->size > MAX_PROCESS_SIZE) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    if ((sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + ALIGN_SIZE(paramSet->paramSetSize) +
+        sizeof(wrappedKey->size) + ALIGN_SIZE(keyAlias->size)) > MAX_PROCESS_SIZE) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
     return HKS_SUCCESS;
 }
