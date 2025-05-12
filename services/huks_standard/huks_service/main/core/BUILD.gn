@@ -142,6 +142,7 @@ if (os_level == "standard") {
       "c_utils:utils",
       "hilog:libhilog",
       "hitrace:libhitracechain",
+      "init:libbegetutil",
       "ipc:ipc_single",
     ]
   }

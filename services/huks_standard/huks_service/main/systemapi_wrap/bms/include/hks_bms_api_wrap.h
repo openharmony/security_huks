@@ -16,10 +16,23 @@
 #ifndef HKS_BMS_API_WRAP_H
 #define HKS_BMS_API_WRAP_H
 
+#ifdef __cplusplus
+#include <string>
+#endif
 #include "hks_type_inner.h"
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#ifdef __cplusplus
+typedef struct HksCallerInfo {
+    bool isHap;
+    std::string id;
+    std::string extend;
+    std::string appIdentifier;
+    std::string appMode;
+} HksCallerInfo;
 #endif
 
 int32_t HksGetHapInfo(const struct HksProcessInfo *processInfo, struct HksBlob *hapInfo);

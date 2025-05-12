@@ -40,21 +40,32 @@
 
 #define SYSTEM_BASIC "system_basic"
 #define SYSTEM_CORE "system_core"
+#define APP_MODE_DEBUG "debug"
+#define APP_MODE_RELEASE "release"
 
 using namespace OHOS;
 using namespace Security::AccessToken;
 
-static int32_t ConvertCallerInfoToJson(const std::string &idStr, const std::string &extendStr, HksBlob *outInfo,
-    bool isHap)
+static int32_t ConvertCallerInfoToJson(struct HksCallerInfo *callerInfo, struct HksBlob *outInfo)
 {
     cJSON *jsonObj = cJSON_CreateObject();
     HKS_IF_NULL_LOGE_RETURN(jsonObj, HKS_ERROR_NULL_POINTER, "create cjson object failed.")
 
-    const char *jsonKeyId = isHap ? "appId" : "processName";
-    const char *jsonKeyExtend = isHap ? "bundleName" : "APL";
-    if ((cJSON_AddStringToObject(jsonObj, jsonKeyId, idStr.c_str()) == nullptr) ||
-        (cJSON_AddStringToObject(jsonObj, jsonKeyExtend, extendStr.c_str()) == nullptr)) {
-        HKS_LOG_E("add string to json object is failed.");
+    const char *jsonKeyId = callerInfo->isHap ? "appId" : "processName";
+    const char *jsonKeyExtend = callerInfo->isHap ? "bundleName" : "APL";
+    if ((cJSON_AddStringToObject(jsonObj, jsonKeyId, callerInfo->id.c_str()) == nullptr) ||
+        (cJSON_AddStringToObject(jsonObj, jsonKeyExtend, callerInfo->extend.c_str()) == nullptr)) {
+        HKS_LOG_E("add id and extend info to json object is failed.");
+        cJSON_Delete(jsonObj);
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    const char *jsonKeyIdentifier = "appIdentifier";
+    const char *jsonKeyMode = "appMode";
+    if (callerInfo->isHap &&
+        (cJSON_AddStringToObject(jsonObj, jsonKeyIdentifier, callerInfo->appIdentifier.c_str()) == nullptr ||
+        cJSON_AddStringToObject(jsonObj, jsonKeyMode, callerInfo->appMode.c_str()) == nullptr)) {
+        HKS_LOG_E("add appIdentifier and appMode to json object is failed.");
         cJSON_Delete(jsonObj);
         return HKS_ERROR_NULL_POINTER;
     }
@@ -105,8 +116,15 @@ int32_t HksGetHapInfo(const struct HksProcessInfo *processInfo, struct HksBlob *
         AppExecFwk::BundleFlag::GET_BUNDLE_WITH_HASH_VALUE, bundleInfo, processInfo->userIdInt);
     HKS_IF_NOT_TRUE_LOGE_RETURN(isGetInfoSuccess, HKS_ERROR_BAD_STATE, "GetBundleInfo failed.")
 
+    struct HksCallerInfo callerInfo = {
+        .isHap = true,
+        .id = bundleInfo.appId,
+        .extend = hapTokenInfo.bundleName,
+        .appIdentifier = bundleInfo.signatureInfo.appIdentifier,
+        .appMode = bundleInfo.applicationInfo.debug ? APP_MODE_DEBUG : APP_MODE_RELEASE
+    };
     // The appid is concatenated from the bundle name and the developer's public key certificate.
-    int32_t ret = ConvertCallerInfoToJson(bundleInfo.appId, hapTokenInfo.bundleName, hapInfo, true);
+    int32_t ret = ConvertCallerInfoToJson(&callerInfo, hapInfo);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ConvertHapInfoToJson failed.")
 
     return HKS_SUCCESS;
@@ -149,14 +167,23 @@ int32_t HksGetSaInfo(const struct HksProcessInfo *processInfo, struct HksBlob *s
     HKS_IF_TRUE_LOGE_RETURN(ret != AccessTokenKitRet::RET_SUCCESS, HKS_ERROR_BAD_STATE,
         "Get sa info failed from access token kit.")
 
+    struct HksCallerInfo callerInfo = {
+        .isHap = false,
+        .id = "",
+        .extend = "",
+        .appIdentifier = "",
+        .appMode = ""
+    };
     if (saTokenInfo.apl == ATokenAplEnum::APL_SYSTEM_BASIC) {
-        ret = ConvertCallerInfoToJson(saTokenInfo.processName, SYSTEM_BASIC, saInfo, false);
+        callerInfo.id = saTokenInfo.processName;
+        callerInfo.extend = SYSTEM_BASIC;
     } else if (saTokenInfo.apl == ATokenAplEnum::APL_SYSTEM_CORE) {
-        ret = ConvertCallerInfoToJson(saTokenInfo.processName, SYSTEM_CORE, saInfo, false);
+        callerInfo.id = saTokenInfo.processName;
+        callerInfo.extend = SYSTEM_CORE;
     } else {
         HKS_LOG_E("The normal process, hide the caller information.");
-        ret = ConvertCallerInfoToJson("", "", saInfo, false);
     }
+    ret = ConvertCallerInfoToJson(&callerInfo, saInfo);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ConvertSaInfoToJson failed.")
     return HKS_SUCCESS;
 }
