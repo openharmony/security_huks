@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 
 #include "hks_cfi.h"
 #include "hks_client_service_util.h"
+#include "hks_error_code.h"
 #include "hks_log.h"
 #include "hks_mutex.h"
 #include "hks_response.h"
@@ -132,4 +133,19 @@ void HksPluginOnReceiveEvent(const void *data)
 {
     HKS_IF_NOT_SUCC_RETURN_VOID(RetryLoadPlugin())
     g_pluginProxy->hksPluginOnReceiveEvent(data);
+}
+
+int32_t HksPluginOnLocalRequestWrapKey(uint32_t code, const void *data, void *reply)
+{
+    HKS_IF_NULL_LOGE_RETURN(g_pluginProxy, HKS_ERROR_API_NOT_SUPPORTED, "wrap key not supported")
+    return g_pluginProxy->hksPluginOnLocalRequest(code, data, reply);
+}
+
+int32_t HksPluginWrapKey(const struct HksBlob *srcData, const uint8_t *context)
+{
+    if (g_pluginProxy != nullptr) {
+        return HKS_SUCCESS;
+    }
+    HksSendResponse(context, HKS_ERROR_API_NOT_SUPPORTED, nullptr);
+    return HKS_ERROR_API_NOT_SUPPORTED;
 }

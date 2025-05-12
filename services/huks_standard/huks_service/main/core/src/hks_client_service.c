@@ -1974,3 +1974,17 @@ int32_t HksServiceChangeStorageLevel(const struct HksProcessInfo *processInfo, c
     return HKS_SUCCESS;
 #endif
 }
+
+int32_t HksServiceWrapKey(const struct HksBlob *srcData, const uint8_t *context)
+{
+    struct HksIpcData ipcData = { srcData, context };
+    uint32_t size = sizeof(ipcData);
+    return HksPluginOnLocalRequestWrapKey(CODE_SA_WRAP_KEY, &ipcData, &size);
+}
+
+int32_t HksServiceUnwrapKey(const struct HksBlob *srcData, const uint8_t *context)
+{
+    struct HksIpcData ipcData = { srcData, context };
+    uint32_t size = sizeof(ipcData);
+    return HksPluginOnLocalRequestWrapKey(CODE_SA_UNWRAP_KEY, &ipcData, &size);
+}

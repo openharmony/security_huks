@@ -543,6 +543,13 @@ static int32_t CoreCheckGenKeyParams(const struct HksParamSet *paramSet, struct 
         }
     }
 
+    struct HksParam *authTypeParam = NULL;
+    int32_t result = HksGetParam(paramSet, HKS_TAG_USER_AUTH_TYPE, &authTypeParam);
+    if (result == HKS_SUCCESS && authTypeParam->uint32Param == HKS_USER_AUTH_TYPE_TUI_PIN) {
+        HKS_LOG_E("TUI PIN user auth type not supported");
+        return HKS_ERROR_API_NOT_SUPPORTED;
+    }
+
     if (((purposeParam->uint32Param & HKS_KEY_PURPOSE_DERIVE) != 0) ||
         ((purposeParam->uint32Param & HKS_KEY_PURPOSE_MAC) != 0)) {
         return CheckGenKeyMacDeriveParams(alg, purposeParam->uint32Param, paramSet, params, keyFlag);
