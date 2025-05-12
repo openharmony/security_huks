@@ -17,6 +17,7 @@
 
 #include <stddef.h>
 
+#include "hks_error_code.h"
 #include "hks_log.h"
 #include "hks_type.h"
 
@@ -576,7 +577,14 @@ static struct HksError g_errCodeTable[] = {
             .errorMsg = "A device password is required but not set.",
             .data = NULL
         }
-    },
+    }, {
+        .innerErrCode = HKS_ERROR_NEW_INVALID_ARGUMENT,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "The input parameter is invalid.",
+            .data = NULL
+        }
+    }
 };
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,38 +24,46 @@
 
 #include "hks_fuzz_util.h"
 
+constexpr int WRAPPED_KEY_SIZE = 2048;
+constexpr int BLOB_NUM = 3;
+
 namespace OHOS {
 namespace Security {
 namespace Hks {
 
-static void HksWrapKeyTest()
+int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
 {
-    HKS_LOG_I("enter HksWrapKeyTest");
-    (void)HksWrapKey(nullptr, nullptr, nullptr, nullptr);
+    if (data == nullptr || size < (BLOB_NUM * sizeof(uint32_t))) {
+        return -1;
+    }
+
+    struct HksBlob key = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
+    struct HksBlob srcData = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
+    struct HksBlob mac = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
+
+    WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
+
+    uint8_t WrappedData[WRAPPED_KEY_SIZE] = {0};
+    struct HksBlob wrappedKey = {WRAPPED_KEY_SIZE, WrappedData};
+    (void)HksWrapKey(&key, nullptr, ps.s, &wrappedKey);
+
+    (void)HksUnwrapKey(&key, nullptr, &srcData, ps.s);
+
+    (void)HcmIsDeviceKeyExist(ps.s);
+
+    [[maybe_unused]] int ret = HksMac(&key, ps.s, &srcData, &mac);
+
+    return 0;
 }
 
-static void HksUnwrapKeyTest()
-{
-    HKS_LOG_I("enter HksUnwrapKeyTest");
-    (void)HksUnwrapKey(nullptr, nullptr, nullptr, nullptr);
-}
-
-static void HcmIsDeviceKeyExistTest()
-{
-    HKS_LOG_I("enter HcmIsDeviceKeyExistTest");
-    (void)HcmIsDeviceKeyExist(nullptr);
-}
 }
 }
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    (void)data;
-    (void)size;
-    OHOS::Security::Hks::HksWrapKeyTest();
-    OHOS::Security::Hks::HksUnwrapKeyTest();
-    OHOS::Security::Hks::HcmIsDeviceKeyExistTest();
+    std::vector<uint8_t> v(data, data + size);
+    OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
 
     return 0;
 }

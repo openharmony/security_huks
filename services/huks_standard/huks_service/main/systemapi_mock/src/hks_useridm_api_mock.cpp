@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,17 +53,20 @@ void HksUnlockUserIdm(void *ptr)
     delete static_cast<OHOS::Security::Hks::HksIpcCounter *>(ptr);
 }
 
-static int32_t ConvertToHksAuthType(enum USER_IAM::AuthType authType, enum HksUserAuthType *hksAuthType)
+static int32_t ConvertToHksAuthType(uint32_t authType, enum HksUserAuthType *hksAuthType)
 {
     switch (authType) {
-        case USER_IAM::AuthType::FACE:
+        case HKS_IAM_USER_AUTH_TYPE_FACE:
             *hksAuthType = HKS_USER_AUTH_TYPE_FACE;
             break;
-        case USER_IAM::AuthType::FINGERPRINT:
+        case HKS_IAM_USER_AUTH_TYPE_FINGERPRINT:
             *hksAuthType =  HKS_USER_AUTH_TYPE_FINGERPRINT;
             break;
-        case USER_IAM::AuthType::PIN:
+        case HKS_IAM_USER_AUTH_TYPE_PIN:
             *hksAuthType =  HKS_USER_AUTH_TYPE_PIN;
+            break;
+        case HKS_IAM_USER_AUTH_TYPE_TUI_PIN:
+            *hksAuthType =  HKS_USER_AUTH_TYPE_TUI_PIN;
             break;
         default:
             HKS_LOG_E("Invalid authType!");
@@ -125,5 +128,5 @@ int32_t HksConvertUserIamTypeToHksType(enum HksUserIamType userIamType, uint32_t
 {
     HKS_IF_NULL_RETURN(hksValue, HKS_ERROR_NULL_POINTER)
     HKS_IF_TRUE_RETURN(userIamType != HKS_AUTH_TYPE, HKS_ERROR_NOT_SUPPORTED)
-    return ConvertToHksAuthType((enum USER_IAM::AuthType)userIamValue, (enum HksUserAuthType *)hksValue);
+    return ConvertToHksAuthType(userIamValue, (enum HksUserAuthType *)hksValue);
 }

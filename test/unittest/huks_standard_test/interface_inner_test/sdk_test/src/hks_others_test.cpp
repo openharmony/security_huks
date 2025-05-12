@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,7 +59,7 @@ void HksOthersTest::TearDown()
  */
 HWTEST_F(HksOthersTest, HksOthersTest001, TestSize.Level0)
 {
-    int32_t ret = HksGetKeyParamSetForDe(NULL, NULL, NULL);
+    int32_t ret = HksGetKeyParamSetForDe(nullptr, nullptr, nullptr);
     ASSERT_TRUE(ret == HKS_ERROR_NULL_POINTER);
 }
 
@@ -70,7 +70,7 @@ HWTEST_F(HksOthersTest, HksOthersTest001, TestSize.Level0)
  */
 HWTEST_F(HksOthersTest, HksOthersTest002, TestSize.Level0)
 {
-    int32_t ret = HksGetKeyInfoListForDe(NULL, NULL, NULL);
+    int32_t ret = HksGetKeyInfoListForDe(nullptr, nullptr, nullptr);
     ASSERT_TRUE(ret == HKS_ERROR_NULL_POINTER);
 }
 
@@ -81,29 +81,7 @@ HWTEST_F(HksOthersTest, HksOthersTest002, TestSize.Level0)
  */
 HWTEST_F(HksOthersTest, HksOthersTest003, TestSize.Level0)
 {
-    int32_t ret = HksGetCertificateChain(NULL, NULL, NULL);
-    ASSERT_TRUE(ret == HKS_ERROR_API_NOT_SUPPORTED);
-}
-
-/**
- * @tc.name: HksOthersTest.HksOthersTest005
- * @tc.desc: The static function will return true;
- * @tc.type: FUNC
- */
-HWTEST_F(HksOthersTest, HksOthersTest004, TestSize.Level0)
-{
-    int32_t ret = HksWrapKey(NULL, NULL, NULL, NULL);
-    ASSERT_TRUE(ret == HKS_ERROR_API_NOT_SUPPORTED);
-}
-
-/**
- * @tc.name: HksOthersTest.HksOthersTest006
- * @tc.desc: The static function will return true;
- * @tc.type: FUNC
- */
-HWTEST_F(HksOthersTest, HksOthersTest005, TestSize.Level0)
-{
-    int32_t ret = HksUnwrapKey(NULL, NULL, NULL, NULL);
+    int32_t ret = HksGetCertificateChain(nullptr, nullptr, nullptr);
     ASSERT_TRUE(ret == HKS_ERROR_API_NOT_SUPPORTED);
 }
 
@@ -114,7 +92,7 @@ HWTEST_F(HksOthersTest, HksOthersTest005, TestSize.Level0)
  */
 HWTEST_F(HksOthersTest, HksOthersTest006, TestSize.Level0)
 {
-    int32_t ret = HksGetSdkVersion(NULL);
+    int32_t ret = HksGetSdkVersion(nullptr);
     ASSERT_TRUE(ret == HKS_ERROR_NULL_POINTER);
 }
 

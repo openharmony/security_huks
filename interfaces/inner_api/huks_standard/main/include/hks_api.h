@@ -254,7 +254,7 @@ HKS_API_EXPORT int32_t HksGetCertificateChain(const struct HksBlob *keyAlias,
 /**
  * @brief Wrap key operation
  * @param keyAlias key alias
- * @param targetKeyAlias target key alias
+ * @param targetKeyAlias target key alias (disuse)
  * @param paramSet required parameter set
  * @param wrappedData wrapped data
  * @return error code, see hks_type.h
@@ -265,7 +265,7 @@ HKS_API_EXPORT int32_t HksWrapKey(const struct HksBlob *keyAlias, const struct H
 /**
  * @brief Unwrap key operation
  * @param keyAlias key alias
- * @param targetKeyAlias target key alias
+ * @param targetKeyAlias target key alias (disuse)
  * @param wrappedData wrapped data
  * @param paramSet required parameter set
  * @return error code, see hks_type.h

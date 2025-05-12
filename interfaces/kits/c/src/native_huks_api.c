@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +17,22 @@
 
 #include "hks_api.h"
 #include "hks_errcode_adapter.h"
+#include "hks_error_code.h"
 #include "native_huks_api_adapter.h"
+#include "stdlib.h"
 
 static struct OH_Huks_Result ConvertApiResult(int32_t ret)
 {
     struct HksResult result = HksConvertErrCode(ret);
+    return *((struct OH_Huks_Result *)(&result));
+}
+
+static struct OH_Huks_Result NewConvertApiResult(int32_t ret)
+{
+    struct HksResult result = HksConvertErrCode(ret);
+    if (result.errorCode == HUKS_ERR_CODE_ILLEGAL_ARGUMENT) {
+        result.errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT;
+    }
     return *((struct OH_Huks_Result *)(&result));
 }
 
@@ -137,4 +148,20 @@ struct OH_Huks_Result OH_Huks_ListAliases(const struct OH_Huks_ParamSet *paramSe
 {
     int32_t result = HksListAliases((const struct HksParamSet *) paramSet, (struct HksKeyAliasSet **) outData);
     return ConvertApiResult(result);
+}
+
+struct OH_Huks_Result OH_Huks_WrapKey(const struct OH_Huks_Blob *keyAlias, const struct OH_Huks_ParamSet *paramSet,
+    struct OH_Huks_Blob *wrappedKey)
+{
+    int32_t result = HksWrapKey((const struct HksBlob *) keyAlias, NULL, (const struct HksParamSet *) paramSet,
+        (struct HksBlob *) wrappedKey);
+    return NewConvertApiResult(result);
+}
+
+struct OH_Huks_Result OH_Huks_UnwrapKey(const struct OH_Huks_Blob *keyAlias, const struct OH_Huks_ParamSet *paramSet,
+    const struct OH_Huks_Blob *wrappedKey)
+{
+    int32_t result = HksUnwrapKey((const struct HksBlob *) keyAlias, NULL, (struct HksBlob *) wrappedKey,
+        (const struct HksParamSet *) paramSet);
+    return NewConvertApiResult(result);
 }

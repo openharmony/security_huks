@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,8 @@ enum HksIpcInterfaceCode {
     HKS_MSG_LIST_ALIASES,
     HKS_MSG_RENAME_KEY_ALIAS,
     HKS_MSG_CHANGE_STORAGE_LEVEL,
+    HKS_MSG_WRAP_KEY,
+    HKS_MSG_UNWRAP_KEY,
 
     /* new cmd type must be added before HKS_MSG_MAX */
     HKS_MSG_MAX,

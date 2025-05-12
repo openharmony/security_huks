@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@
 #include "system_ability_definition.h"
 #include "hap_token_info.h"
 #include "bundle_mgr_client.h"
+#include "bundle_mgr_interface.h"
 #include "bundle_info.h"
 
 #include "hks_log.h"
@@ -112,10 +113,29 @@ int32_t HksGetHapInfo(const struct HksProcessInfo *processInfo, struct HksBlob *
     return HKS_SUCCESS;
 }
 
-static int32_t HksGetHapPkgName(const struct HksProcessInfo *processInfo, struct HksBlob *hapPkgName)
+static int32_t HksGetBundleInfoV9(const std::string &bundleName, int32_t userId, AppExecFwk::BundleInfo &bundleInfo)
+{
+    sptr<ISystemAbilityManager> systemAbilityManager =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    HKS_IF_NULL_LOGE_RETURN(systemAbilityManager, HKS_ERROR_BAD_STATE, "failed to get system ability mgr")
+
+    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    HKS_IF_NULL_LOGE_RETURN(remoteObject, HKS_ERROR_BAD_STATE, "failed to get remoteObject")
+
+    sptr<AppExecFwk::IBundleMgr> bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    HKS_IF_NULL_LOGE_RETURN(bundleMgrProxy, HKS_ERROR_BAD_STATE, "failed to get bundleMgrProxy")
+
+    uint32_t flag = static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO);
+    int32_t ret = bundleMgrProxy->GetBundleInfoV9(bundleName, flag, bundleInfo, userId);
+    HKS_IF_NOT_SUCC_LOGE(ret, "GetBundleInfoV9 fail, ret = %" LOG_PUBLIC "d", ret)
+
+    return ret;
+}
+
+static int32_t HksGetHapPkgName(const struct HksProcessInfo *processInfo, struct HksBlob *hapOwnerId)
 {
     HKS_IF_NULL_LOGE_RETURN(processInfo, HKS_ERROR_NULL_POINTER, "processInfo is nullptr.")
-    HKS_IF_NULL_LOGE_RETURN(hapPkgName, HKS_ERROR_NULL_POINTER, "hapPkgName is nullptr.")
+    HKS_IF_NULL_LOGE_RETURN(hapOwnerId, HKS_ERROR_NULL_POINTER, "hapOwnerId is nullptr.")
 
     auto callingTokenId = IPCSkeleton::GetCallingTokenID();
     HKS_IF_TRUE_LOGE_RETURN(AccessTokenKit::GetTokenType(callingTokenId) != ATokenTypeEnum::TOKEN_HAP,
@@ -125,14 +145,16 @@ static int32_t HksGetHapPkgName(const struct HksProcessInfo *processInfo, struct
     int32_t callingResult = AccessTokenKit::GetHapTokenInfo(callingTokenId, hapTokenInfo);
     HKS_IF_NOT_SUCC_LOGE_RETURN(callingResult, HKS_ERROR_BAD_STATE, "Get hap info failed from access token kit.")
 
-    uint32_t size = strlen(hapTokenInfo.bundleName.c_str());
-    uint8_t *pkgName = (uint8_t *)HksMalloc(size);
-    HKS_IF_NULL_LOGE_RETURN(pkgName, HKS_ERROR_MALLOC_FAIL, "malloc for pkgName failed.")
+    AppExecFwk::BundleInfo bundleInfo;
+    int32_t ret =  HksGetBundleInfoV9(hapTokenInfo.bundleName, processInfo->userIdInt, bundleInfo);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksGetBundleInfoV9 fail")
 
-    (void)memcpy_s(pkgName, size, hapTokenInfo.bundleName.c_str(), size);
+    const char *appIdentifier = bundleInfo.signatureInfo.appIdentifier.c_str();
+    hapOwnerId->size = bundleInfo.signatureInfo.appIdentifier.size();
+    hapOwnerId->data = (uint8_t *)HksMalloc(hapOwnerId->size);
+    HKS_IF_NULL_LOGE_RETURN(hapOwnerId->data, HKS_ERROR_MALLOC_FAIL, "malloc hapOwnerId data fail")
 
-    hapPkgName->size = size;
-    hapPkgName->data = pkgName;
+    (void)memcpy_s(hapOwnerId->data, hapOwnerId->size, appIdentifier, hapOwnerId->size);
     return HKS_SUCCESS;
 }
 
