@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,8 +49,10 @@
 #include "huks_napi_is_key_exist.h"
 #include "huks_napi_is_key_item_exist.h"
 #include "huks_napi_list_aliases.h"
+#include "huks_napi_unwrap_key.h"
 #include "huks_napi_update_finish.h"
 #include "huks_napi_update_finish_session.h"
+#include "huks_napi_wrap_key.h"
 
 namespace HuksNapi {
 inline void AddInt32Property(napi_env env, napi_value object, const char *name, int32_t value)
@@ -597,6 +599,7 @@ static napi_value CreateHuksUserAuthType(napi_env env)
     AddInt32Property(env, value, "HUKS_USER_AUTH_TYPE_FINGERPRINT", HKS_USER_AUTH_TYPE_FINGERPRINT);
     AddInt32Property(env, value, "HUKS_USER_AUTH_TYPE_FACE", HKS_USER_AUTH_TYPE_FACE);
     AddInt32Property(env, value, "HUKS_USER_AUTH_TYPE_PIN", HKS_USER_AUTH_TYPE_PIN);
+    AddInt32Property(env, value, "HUKS_USER_AUTH_TYPE_TUI_PIN", HKS_USER_AUTH_TYPE_TUI_PIN);
 
     return value;
 }
@@ -680,6 +683,16 @@ static napi_value CreateHuksAuthStorageLevel(napi_env env)
     AddInt32Property(env, value, "HUKS_AUTH_STORAGE_LEVEL_ECE", HKS_AUTH_STORAGE_LEVEL_ECE);
     return value;
 }
+
+static napi_value CreateHuksKeyWrapType(napi_env env)
+{
+    napi_value keyWrapType = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &keyWrapType));
+
+    AddInt32Property(env, keyWrapType, "HUKS_KEY_WRAP_TYPE_HUK_BASED", HKS_KEY_WRAP_TYPE_HUK);
+
+    return keyWrapType;
+}
 }  // namespace HuksNapi
 
 using namespace HuksNapi;
@@ -724,6 +737,8 @@ napi_property_descriptor NAPI_FUNC_DESC[] = {
     DECLARE_NAPI_FUNCTION("finishSession", HuksNapiFinishSession),
     DECLARE_NAPI_FUNCTION("abortSession", HuksNapiAbortSession),
     DECLARE_NAPI_FUNCTION("listAliases", HuksNapiListAliases),
+    DECLARE_NAPI_FUNCTION("wrapKeyItem", HuksNapiWrapKey),
+    DECLARE_NAPI_FUNCTION("unwrapKeyItem", HuksNapiUnwrapKey),
 };
 
 static napi_value HuksNapiRegister(napi_env env, napi_value exports)
@@ -753,6 +768,7 @@ static napi_value HuksNapiRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("HuksSecureSignType", CreateHuksSecureSignType(env)),
         DECLARE_NAPI_PROPERTY("HuksRsaPssSaltLenType", CreateHuksRsaPssSaltLenType(env)),
         DECLARE_NAPI_PROPERTY("HuksAuthStorageLevel", CreateHuksAuthStorageLevel(env)),
+        DECLARE_NAPI_PROPERTY("HuksKeyWrapType", CreateHuksKeyWrapType(env)),
     };
     napi_property_descriptor desc[HKS_ARRAY_SIZE(NAPI_FUNC_DESC) + HKS_ARRAY_SIZE(propDesc)];
 

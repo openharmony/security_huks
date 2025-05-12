@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_permission_check.h"
+#include "hks_plugin_adapter.h"
 #include "hks_response.h"
 #include "hks_service_ipc_serialization.h"
 #include "hks_template.h"
@@ -926,4 +927,18 @@ void HksIpcChangeStorageLevel(const struct HksBlob *srcData, const uint8_t *cont
 
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
+}
+
+void HksIpcWrapKey(const struct HksBlob *srcData, const uint8_t *context)
+{
+    int32_t ret = HksPluginWrapKey(srcData, context);
+    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(ret, "wrap key not support")
+    (void)HksServiceWrapKey(srcData, context);
+}
+
+void HksIpcUnwrapKey(const struct HksBlob *srcData, const uint8_t *context)
+{
+    int32_t ret = HksPluginWrapKey(srcData, context);
+    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(ret, "unwrap key not support")
+    (void)HksServiceUnwrapKey(srcData, context);
 }
