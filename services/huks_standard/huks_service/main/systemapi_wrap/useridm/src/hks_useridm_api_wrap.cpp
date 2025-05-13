@@ -33,6 +33,9 @@
 
 #define USER_IAM OHOS::UserIam::UserAuth
 
+#define BIT_NUM  48
+#define FACTOR  0x000000000000FFFF
+
 static constexpr const uint32_t g_maxEnrolledLen = 256;
 
 static constexpr std::array g_supportIamAuthType = {
@@ -149,6 +152,9 @@ void GetSecUserInfoCallbackImplHuks::OnSecUserInfo(int32_t result, const USER_IA
         uint32_t hksEnrollIndex = 0;
         for (uint32_t i = 0; i < (**outSecInfo).enrolledInfoLen; ++i) {
             enum HksUserAuthType authType;
+            HKS_LOG_I("i: %" LOG_PUBLIC "d, enrolledId begin: %" LOG_PUBLIC "u, enrolledId end: %" LOG_PUBLIC "u",
+                i, (uint32_t)(info.enrolledInfo[i].enrolledId & FACTOR),
+                (uint32_t)((info.enrolledInfo[i].enrolledId >> BIT_NUM) & FACTOR));
             if (ConvertToHksAuthType(info.enrolledInfo[i].authType, &authType) != HKS_SUCCESS) {
                 continue;
             }
