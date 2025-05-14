@@ -143,7 +143,6 @@ void GetSecUserInfoCallbackImplHuks::OnSecUserInfo(int32_t result, const USER_IA
             HksMalloc(sizeof(struct EnrolledInfoWrap) * supportAuthNum));
         if ((*outSecInfo)->enrolledInfo == NULL) {
             HKS_LOG_E("Malloc enrolledInfo failed!");
-            HKS_FREE(*outSecInfo);
             ret = HKS_ERROR_MALLOC_FAIL;
             break;
         }
@@ -151,10 +150,10 @@ void GetSecUserInfoCallbackImplHuks::OnSecUserInfo(int32_t result, const USER_IA
         (**outSecInfo).enrolledInfoLen = supportAuthNum;
         uint32_t hksEnrollIndex = 0;
         for (uint32_t i = 0; i < (**outSecInfo).enrolledInfoLen; ++i) {
-            enum HksUserAuthType authType;
             HKS_LOG_I("i: %" LOG_PUBLIC "d, enrolledId begin: %" LOG_PUBLIC "u, enrolledId end: %" LOG_PUBLIC "u",
                 i, (uint32_t)(info.enrolledInfo[i].enrolledId & FACTOR),
                 (uint32_t)((info.enrolledInfo[i].enrolledId >> BIT_NUM) & FACTOR));
+            enum HksUserAuthType authType;
             if (ConvertToHksAuthType(info.enrolledInfo[i].authType, &authType) != HKS_SUCCESS) {
                 continue;
             }
@@ -164,11 +163,9 @@ void GetSecUserInfoCallbackImplHuks::OnSecUserInfo(int32_t result, const USER_IA
             hksEnrollIndex++;
         }
     } while (0);
-    if (ret != HKS_SUCCESS) {
-        if (*outSecInfo != NULL) {
-            HKS_FREE((*outSecInfo)->enrolledInfo);
-            HKS_FREE(*outSecInfo);
-        }
+    if (ret != HKS_SUCCESS && *outSecInfo != NULL) {
+        HKS_FREE((*outSecInfo)->enrolledInfo);
+        HKS_FREE(*outSecInfo);
     }
     isCallbacked = true;
     HksConditionNotify(condition);
