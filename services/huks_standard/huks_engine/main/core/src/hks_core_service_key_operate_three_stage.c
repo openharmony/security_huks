@@ -130,6 +130,10 @@ static int32_t GetPurposeAndAlgorithm(const struct HksParamSet *paramSet, uint32
         }
 
         if (i == paramSet->paramsCnt) {
+            if (*alg == HKS_ALG_ED25519) {
+                HKS_LOG_I("Algorithm is ed25519, not need to check digest");
+                return HKS_SUCCESS;
+            }
             HKS_LOG_E("don't found digest");
             return HKS_ERROR_INVALID_ARGUMENT;
         }

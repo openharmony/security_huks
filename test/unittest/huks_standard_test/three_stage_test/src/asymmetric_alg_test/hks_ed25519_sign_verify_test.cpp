@@ -145,6 +145,79 @@ static int32_t HksEd25519SignVerifyTestNormalCase(struct HksBlob keyAlias, struc
     return ret;
 }
 
+static int32_t HksTestThreeStageSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet,
+    const struct HksBlob *inData, struct HksBlob *outData)
+{
+    struct HksParam *tmpParam = NULL;
+    uint8_t tmpHandle[sizeof(uint64_t)] = {0};
+    struct HksBlob handleTest = { sizeof(uint64_t), tmpHandle };
+    int32_t ret = HksInitForDe(keyAlias, paramSet, &handleTest, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
+    if (ret != HKS_SUCCESS) {
+        return HKS_FAILURE;
+    }
+
+    ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &tmpParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get tag purpose failed.");
+        return HKS_FAILURE;
+    }
+
+    ret = TestUpdateFinish(&handleTest, paramSet, tmpParam->uint32Param, inData, outData);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateFinish failed.";
+    if (ret != HKS_SUCCESS) {
+        return HKS_FAILURE;
+    }
+    return ret;
+}
+
+static int32_t HksEd25519SignVerifyTestNoDigestCase(struct HksBlob keyAlias, struct HksParamSet *genParamSet,
+    struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet, uint32_t loopIndex)
+{
+    struct HksBlob inData = {
+        (uint32_t)tmpInData.length(),
+        (uint8_t *)tmpInData.c_str()
+    };
+    int32_t ret = HKS_FAILURE;
+
+    struct HksParam *digestAlg = nullptr;
+    ret = HksGetParam(signParamSet, HKS_TAG_DIGEST, &digestAlg);
+    EXPECT_EQ(ret, HKS_ERROR_PARAM_NOT_EXIST) << "GetParam digest param, but we not need this param.";
+    inData.size = DATA_ARRAY_AFTER_HASH_LEN[loopIndex];
+    inData.data = const_cast<uint8_t *>(g_inDataArrayAfterHash[loopIndex]);
+
+    /* 1. Generate Key */
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
+
+    /* 2. Sign Three Stage */
+    uint8_t outDataS[ED25519_COMMON_SIZE] = {0};
+    struct HksBlob outDataSign = { ED25519_COMMON_SIZE, outDataS };
+    ret = HksTestThreeStageSignVerify(&keyAlias, signParamSet, &inData, &outDataSign);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Sign failed.";
+
+    /* 3. Export Public Key */
+    uint8_t pubKey[HKS_CURVE25519_KEY_SIZE_256] = {0};
+    struct HksBlob publicKey = { HKS_CURVE25519_KEY_SIZE_256, pubKey };
+    ret = HksExportPublicKeyForDe(&keyAlias, genParamSet, &publicKey);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "ExportPublicKey failed.";
+
+    /* 4. Import Key */
+    char newKey[] = "ECC_Sign_Verify_Import_KeyAlias";
+    struct HksBlob newKeyAlias = { .size = (uint32_t)strlen(newKey), .data = (uint8_t *)newKey };
+    ret = HksImportKeyForDe(&newKeyAlias, verifyParamSet, &publicKey);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "ImportKey failed";
+
+    /* 5. Verify Three Stage */
+    ret = HksTestThreeStageSignVerify(&newKeyAlias, verifyParamSet, &inData, &outDataSign);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Verify failed.";
+
+    /* 6. Delete Key */
+    EXPECT_EQ(HksDeleteKeyForDe(&newKeyAlias, verifyParamSet), HKS_SUCCESS) << "Delete ImportKey failed.";
+
+    return ret;
+}
+
 /**
  * @tc.name: HksEd25519SignVerifyTest.HksEd25519SignVerifyTest001
  * @tc.desc: alg-ED25519 pur-Sign.
@@ -463,6 +536,39 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest007, TestSize.Level0)
         for (uint32_t i = 0; i < (sizeof(g_inDataArrayAfterHash) / sizeof(g_inDataArrayAfterHash[0])); i++) {
             HKS_LOG_E("HksEd25519SignVerifyTest007 loop: %d", i);
             ret = HksEd25519SignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet, i);
+        }
+    }
+    EXPECT_EQ(HksDeleteKeyForDe(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
+    HksTestFreeParamSet(genParamSet, signParamSet, verifyParamSet);
+}
+
+/**
+ * @tc.name: HksEd25519SignVerifyTest.HksEd25519SignVerifyTest008
+ * @tc.desc: alg-ED25519 pur-Sign. and When generating the key, only the necessary parameters are passed in, no digest.
+ * @tc.type: FUNC
+ * @tc.require:issueI611S5
+ */
+HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest008, TestSize.Level0)
+{
+    HKS_LOG_E("Enter HksEd25519SignVerifyTest008");
+    const char *keyAliasString = "HksED25519SignVerifyKeyAliasTest008";
+    struct HksParamSet *genParamSet = nullptr;
+    struct HksParamSet *signParamSet = nullptr;
+    struct HksParamSet *verifyParamSet = nullptr;
+    int32_t ret = HKS_FAILURE;
+
+    ret = InitParamSet(&genParamSet, g_genParamsTest008, sizeof(g_genParamsTest008) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+    ret = InitParamSet(&signParamSet, g_signParamsTest008, sizeof(g_signParamsTest008) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+    ret = InitParamSet(&verifyParamSet, g_verifyParamsTest008, sizeof(g_verifyParamsTest008) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+
+    struct HksBlob keyAlias = { (uint32_t)strlen(keyAliasString), (uint8_t *)keyAliasString };
+    if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
+        for (uint32_t i = 0; i < (sizeof(g_inDataArrayAfterHash) / sizeof(g_inDataArrayAfterHash[0])); i++) {
+            HKS_LOG_E("HksEd25519SignVerifyTest007 loop: %d", i);
+            ret = HksEd25519SignVerifyTestNoDigestCase(keyAlias, genParamSet, signParamSet, verifyParamSet, i);
         }
     }
     EXPECT_EQ(HksDeleteKeyForDe(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
