@@ -66,6 +66,24 @@ static int32_t CheckPurpose(const struct HksParam *authParam, const struct HksPa
     return HKS_SUCCESS;
 }
 
+static bool IsNeedToCheckDigestParam(uint32_t authTag, uint32_t alg, uint32_t purpose,
+    const struct HksParamSet *paramSet)
+{
+    struct HksParam *padding;
+    if (authTag != HKS_TAG_DIGEST) {
+        return true;
+    }
+    if ((alg == HKS_ALG_RSA) && (purpose & (HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT))) {
+        if (HksGetParam(paramSet, HKS_TAG_PADDING, &padding) != HKS_SUCCESS) {
+            return true;
+        }
+        if ((padding->uint32Param == HKS_PADDING_NONE) || (padding->uint32Param == HKS_PADDING_PKCS1_V1_5)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 static int32_t OptionalParamCheck(uint32_t authTag, uint32_t alg, uint32_t purpose, const struct HksParamSet *paramSet,
     const struct ParamsValues* paramValues)
 {
@@ -81,11 +99,18 @@ static int32_t OptionalParamCheck(uint32_t authTag, uint32_t alg, uint32_t purpo
         HKS_LOG_D("when generates key, the tag is absent. tag is 0x%" LOG_PUBLIC "x", authTag);
         isAbsent = true;
     }
-
-    ret = HksCheckOptionalParam(authTag, alg, purpose, isAbsent, param);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check optional param fail");
-        return ret;
+    /* 
+    The following scenes do not require checking the digest param:
+     1. when the algorithm is ED25519
+     2. when the algorithm is RSA, purpose is HKS_KEY_PURPOSE_ENCRYPT or HKS_KEY_PURPOSE_ENCRYPT,
+        padding is HKS_PADDING_NONE or HKS_PADDING_PKCS1_V1_5 
+    */
+    if (IsNeedToCheckDigestParam(authTag, alg, purpose, paramSet)) {
+        ret = HksCheckOptionalParam(authTag, alg, purpose, isAbsent, param);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("check optional param fail");
+            return ret;
+        }
     }
     if (((purpose & HKS_KEY_PURPOSE_DERIVE) != 0) || ((purpose & HKS_KEY_PURPOSE_MAC) != 0)) {
         HKS_LOG_E("derive or mac no need to check");

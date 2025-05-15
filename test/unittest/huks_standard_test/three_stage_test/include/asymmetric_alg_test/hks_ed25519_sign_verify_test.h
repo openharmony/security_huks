@@ -308,5 +308,42 @@ static struct HksParam g_verifyParamsTest007[] = {
         .uint32Param = HKS_DIGEST_NONE
     }
 };
+
+static struct HksParam g_genParamsTest008[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_ED25519
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_CURVE25519_KEY_SIZE_256
+    }
+};
+static struct HksParam g_signParamsTest008[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_ED25519
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_SIGN
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_CURVE25519_KEY_SIZE_256
+    }
+};
+static struct HksParam g_verifyParamsTest008[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_ED25519
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_VERIFY
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_CURVE25519_KEY_SIZE_256
+    }
+};
 } // namespace Unittest::Ed25519
 #endif // HKS_ED25519_SIGN_VERIFY_TEST_H
