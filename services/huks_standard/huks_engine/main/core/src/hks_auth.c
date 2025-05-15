@@ -100,11 +100,10 @@ static int32_t OptionalParamCheck(uint32_t authTag, uint32_t alg, uint32_t purpo
         isAbsent = true;
     }
     /* 
-    The following scenes do not require checking the digest param:
-     1. when the algorithm is ED25519
-     2. when the algorithm is RSA, purpose is HKS_KEY_PURPOSE_ENCRYPT or HKS_KEY_PURPOSE_ENCRYPT,
-        padding is HKS_PADDING_NONE or HKS_PADDING_PKCS1_V1_5 
-    */
+     * The following scenes do not require checking the digest param:
+     * 1. when the algorithm is RSA, purpose is HKS_KEY_PURPOSE_ENCRYPT or HKS_KEY_PURPOSE_ENCRYPT,
+     * padding is HKS_PADDING_NONE or HKS_PADDING_PKCS1_V1_5 
+     */
     if (IsNeedToCheckDigestParam(authTag, alg, purpose, paramSet)) {
         ret = HksCheckOptionalParam(authTag, alg, purpose, isAbsent, param);
         if (ret != HKS_SUCCESS) {
