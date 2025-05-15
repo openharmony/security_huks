@@ -38,6 +38,7 @@
     OH_Huks_IsParamSetValid;
     OH_Huks_CheckParamMatch;
     OH_Huks_ListAliases;
+    OH_Huks_FreeKeyAliasSet;
     OH_Huks_WrapKey;
     OH_Huks_UnwrapKey;
   local: *;
