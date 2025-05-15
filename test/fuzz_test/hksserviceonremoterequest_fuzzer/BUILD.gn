@@ -39,6 +39,7 @@ ohos_fuzztest("HksServiceOnRemoteRequestFuzzTest") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_single",
   ]
 
   if (os_level == "standard") {
