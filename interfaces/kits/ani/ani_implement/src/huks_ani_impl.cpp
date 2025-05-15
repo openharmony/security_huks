@@ -499,9 +499,24 @@ static ani_object ListAliasesSync([[maybe_unused]] ani_env *env, ani_object opti
         resultInfo = HksConvertErrCode(ret);
         HKS_LOG_E("AliasList Parase Failed. ret = %" LOG_PUBLIC "d", ret);
     }
+
+    auto FreeHksKeyAliasesSet = [&] () {
+        if (keyAliasesSet == nullptr) {
+            return;
+        }
+        if (keyAliasesSet->aliasesCnt > 0 && keyAliasesSet->aliases != nullptr) {
+            for (uint32_t i = 0; i < keyAliasesSet->aliasesCnt; ++i) {
+                HKS_FREE_BLOB(keyAliasesSet->aliases[i]);
+            }
+        }
+        HKS_FREE(keyAliasesSet->aliases);
+        HKS_FREE(keyAliasesSet);
+        keyAliasesSet = nullptr;
+    };
     if ((keyAliasesSet != nullptr) && (keyAliasesSet->aliases != nullptr)) {
         arrayObj = ConstructArrayString(env, keyAliasesSet->aliasesCnt, keyAliasesSet->aliases);
         if (arrayObj == nullptr) {
+            FreeHksKeyAliasesSet();
             HKS_LOG_E("ConstructArrayString fail");
             return {};
         }
@@ -509,10 +524,11 @@ static ani_object ListAliasesSync([[maybe_unused]] ani_env *env, ani_object opti
 
     ret = HksInitListAliasAniResult(resultInfo, env, aniReturnObject, arrayObj);
     if (ret != HKS_SUCCESS) {
+        FreeHksKeyAliasesSet();
         HKS_LOG_E("HksInitListAliasAniResult failed. ret = %" LOG_PUBLIC "d", ret);
         return {};
     }
-
+    FreeHksKeyAliasesSet();
     return aniReturnObject;
 }
 
