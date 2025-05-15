@@ -73,9 +73,6 @@ static bool IsNeedToCheckDigestParam(uint32_t authTag, uint32_t alg, uint32_t pu
     if (authTag != HKS_TAG_DIGEST) {
         return true;
     }
-    if ((alg == HKS_ALG_ED25519) && (HksGetParam(paramSet, HKS_TAG_DIGEST, &padding) == HKS_ERROR_PARAM_NOT_EXIST)) {
-        return false;
-    }
     if ((alg == HKS_ALG_RSA) && (purpose & (HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT))) {
         if (HksGetParam(paramSet, HKS_TAG_PADDING, &padding) != HKS_SUCCESS) {
             return true;
