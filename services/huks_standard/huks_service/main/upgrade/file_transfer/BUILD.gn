@@ -32,6 +32,7 @@ ohos_static_library("libhuks_upgrade_file_transfer_static") {
   include_dirs = [
     "../../core/include",
     "../../hks_storage/include",
+    "../../plugin_proxy/include"
   ]
 
   deps = [

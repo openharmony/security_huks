@@ -40,6 +40,7 @@ ohos_fuzztest("HksFileTransferFuzzTest") {
     "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/at_wrapper:libhuks_at_systemapi_wrap_static",
     "//base/security/huks/services/huks_standard/huks_service/main/upgrade/file_transfer:libhuks_upgrade_file_transfer_static",
+    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency:libhuks_service_os_dependency_standard_static",
   ]
   external_deps = [ "c_utils:utils" ]
   external_deps += [ "hilog:libhilog" ]

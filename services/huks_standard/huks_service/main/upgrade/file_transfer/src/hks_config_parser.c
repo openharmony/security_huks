@@ -121,7 +121,7 @@ static int32_t MatchSaConfig(const char *alias, uint32_t uid, uint32_t userId, s
     InitDefaultStrategy(alias, info);
     for (uint32_t i = 0; i < HKS_ARRAY_SIZE(SA_SKIP_UPGRADE_CFG_LIST); ++i) {
         if (uid == SA_SKIP_UPGRADE_CFG_LIST[i]) {
-            HKS_LOG_I("%" LOG_PUBLIC "u needs skip transfer upgrade.", uid);
+            HKS_LOG_E_IMPORTANT("%" LOG_PUBLIC "u needs skip transfer upgrade.", uid);
             info->skipTransfer = true;
             return HKS_SUCCESS;
         }
@@ -131,8 +131,8 @@ static int32_t MatchSaConfig(const char *alias, uint32_t uid, uint32_t userId, s
         if (SA_UPGRADE_CFG_LIST[i].uid == uid) {
             info->needDe = SA_UPGRADE_CFG_LIST[i].needDe;
             info->needFrontUser = SA_UPGRADE_CFG_LIST[i].needFrontUser;
-            HKS_LOG_I("match sa config, need de %" LOG_PUBLIC "d, need with withUser %" LOG_PUBLIC "d.",
-                info->needDe, info->needFrontUser);
+            HKS_LOG_E_IMPORTANT("match sa config, need de %" LOG_PUBLIC "d, need with withUser %" LOG_PUBLIC "d,"
+                "need uid %" LOG_PUBLIC "u.", info->needDe, info->needFrontUser, uid);
             break;
         }
     }
@@ -154,7 +154,7 @@ static int32_t MatchHapConfig(const char *alias, uint32_t uid, uint32_t userId, 
         HKS_IF_TRUE_CONTINUE(strlen(HAP_SKIP_UPGRADE_CFG_LIST[i]) != strlen(hapName));
         if (HksMemCmp(HAP_SKIP_UPGRADE_CFG_LIST[i], hapName, strlen(hapName)) == EOK) {
             info->skipTransfer = true;
-            HKS_LOG_I("%" LOG_PUBLIC "u, %" LOG_PUBLIC "s needs skip transfer upgrade.", uid, hapName);
+            HKS_LOG_E_IMPORTANT("%" LOG_PUBLIC "u, %" LOG_PUBLIC "s needs skip transfer upgrade.", uid, hapName);
             return HKS_SUCCESS;
         }
     }
@@ -163,8 +163,8 @@ static int32_t MatchHapConfig(const char *alias, uint32_t uid, uint32_t userId, 
         if (HksMemCmp(HAP_UPGRADE_CFG_LIST[i].hapName, hapName, strlen(hapName)) == EOK) {
             info->needDe = HAP_UPGRADE_CFG_LIST[i].needDe;
             info->needFrontUser = HAP_UPGRADE_CFG_LIST[i].needFrontUser;
-            HKS_LOG_I("match hap config, need de %" LOG_PUBLIC "d, need with withUser %" LOG_PUBLIC "d.",
-                info->needDe, info->needFrontUser);
+            HKS_LOG_E_IMPORTANT("match hap config, need de %" LOG_PUBLIC "d, need with withUser %" LOG_PUBLIC "d,"
+                "need uid %" LOG_PUBLIC "u.", info->needDe, info->needFrontUser, uid);
             break;
         }
     }
