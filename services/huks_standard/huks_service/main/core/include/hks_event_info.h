@@ -40,6 +40,8 @@ enum HksEventId {
     HKS_EVENT_IMPORT_KEY = 10,
     HKS_EVENT_LIST_ALIASES = 11,
     HKS_EVENT_RENAME_KEY = 12,
+    HKS_EVENT_GET_PROPERTIES = 13,
+    HKS_EVENT_KEY_LEVEL_CHANGE = 14,
 };
 
 // modify this please sync modify g_threeStage

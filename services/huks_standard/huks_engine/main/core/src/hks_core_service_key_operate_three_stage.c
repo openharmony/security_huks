@@ -122,6 +122,10 @@ static int32_t GetPurposeAndAlgorithm(const struct HksParamSet *paramSet, uint32
     }
 
     if (*alg == HKS_ALG_HMAC || *alg == HKS_ALG_SM3 || *pur == HKS_KEY_PURPOSE_SIGN || *pur == HKS_KEY_PURPOSE_VERIFY) {
+        if (*alg == HKS_ALG_ED25519) {
+            HKS_LOG_I("Algorithm is ed25519, not need to check digest");
+            return HKS_SUCCESS;
+        }
         for (i = 0; i < paramSet->paramsCnt; i++) {
             if (paramSet->params[i].tag ==  HKS_TAG_DIGEST) {
                 *alg = paramSet->params[i].uint32Param;

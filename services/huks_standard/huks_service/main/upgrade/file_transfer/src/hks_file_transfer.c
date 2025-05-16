@@ -22,8 +22,12 @@
 #include "hks_mem.h"
 #include "hks_template.h"
 #include "hks_type_inner.h"
+#include "hks_util.h"
 
 #include "hks_storage_utils.h"
+#include "hks_plugin_adapter.h"
+#include "hks_plugin_def.h"
+#include "hks_event_info.h"
 #include "hisysevent_wrapper.h"
 
 #include <errno.h>
@@ -244,11 +248,39 @@ static int32_t CopyDeToTmpPathIfNeed(void)
     return HKS_SUCCESS;
 }
 
+static int32_t ConstructHksEventCommonInfo(HksEventCommonInfo *commonInfo, uint64_t totalCostTime)
+{
+    HKS_IF_NULL_LOGE_RETURN(commonInfo, HKS_ERROR_NULL_POINTER, "commonInfo in ConstructHksEventCommonInfo is NULL");
+    commonInfo->callerInfo.name = "KEY_LEVEL_CHANGE";
+    commonInfo->result.code = HKS_FAILURE;
+    commonInfo->result.errMsg = (char *)HksGetThreadErrorMsg();
+    commonInfo->statInfo.totalCost = (uint32_t)totalCostTime;
+    commonInfo->eventId = HKS_EVENT_KEY_LEVEL_CHANGE;
+    commonInfo->count = 1;
+    commonInfo->function = "HksUpgradeFileTransferOnPowerOn";
+    return HKS_SUCCESS;
+}
+
 int32_t HksUpgradeFileTransferOnPowerOn(void)
 {
+    uint64_t startTime = 0;
+    uint64_t endTime = 0;
+    int32_t ret;
+    
+    (void)HksElapsedRealTime(&startTime);
     WritePerformanceEvent(HUKS_TRANSFER_KEY);
     CopyDeToTmpPathIfNeed();
-    return UpgradeFileTransfer();
+    
+    ret = UpgradeFileTransfer();
+    
+    (void)HksElapsedRealTime(&endTime);
+    if (HksGetThreadErrorMsgLen() != 0) {
+        uint64_t totalCostTime = endTime - startTime;
+        HksEventCommonInfo commonInfo = {0};
+        (void)ConstructHksEventCommonInfo(&commonInfo, totalCostTime);
+        (void)HksPluginOnLocalRequest(CODE_FAULT_METRICS, &commonInfo, NULL);
+    }
+    return ret;
 }
 
 int32_t HksUpgradeFileTransferOnUserUnlock(uint32_t userId)
