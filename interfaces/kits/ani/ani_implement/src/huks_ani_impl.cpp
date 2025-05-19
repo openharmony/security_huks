@@ -495,6 +495,22 @@ static ani_object ListAliasesSync([[maybe_unused]] ani_env *env, ani_object opti
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Get AliasList Failed. ret = %" LOG_PUBLIC "d", ret);
     } while (0);
     resultInfo.errorCode = ret;
+    std::unique_ptr<struct HksKeyAliasSet, void(*)(struct HksKeyAliasSet *)> keyAliasesUnique(
+        keyAliasesSet,
+        [] (struct HksKeyAliasSet *keyAliasSet) {
+            if (keyAliasSet == nullptr) {
+                return;
+            }
+            if (keyAliasSet->aliasesCnt > 0 && keyAliasSet->aliases != nullptr) {
+                for (uint32_t i = 0; i < keyAliasSet->aliasesCnt; ++i) {
+                    HKS_FREE_BLOB(keyAliasSet->aliases[i]);
+                }
+            }
+            HKS_FREE(keyAliasSet->aliases);
+            HKS_FREE(keyAliasSet);
+            keyAliasSet = nullptr;
+        }
+    );
     if (ret != HKS_SUCCESS) {
         resultInfo = HksConvertErrCode(ret);
         HKS_LOG_E("AliasList Parase Failed. ret = %" LOG_PUBLIC "d", ret);
@@ -512,7 +528,6 @@ static ani_object ListAliasesSync([[maybe_unused]] ani_env *env, ani_object opti
         HKS_LOG_E("HksInitListAliasAniResult failed. ret = %" LOG_PUBLIC "d", ret);
         return {};
     }
-
     return aniReturnObject;
 }
 
