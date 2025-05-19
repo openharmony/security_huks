@@ -118,6 +118,7 @@ ohos_unittest("huks_UT_test") {
     ]
   } else {
     sources += [
+      "src/hks_access_control_gen_test.cpp",
       "src/hks_change_storage_level_part1_test.cpp",
 
       # "src/hks_change_storage_level_part2_test.cpp",
