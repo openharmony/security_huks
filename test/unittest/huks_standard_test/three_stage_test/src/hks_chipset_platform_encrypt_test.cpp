@@ -19,8 +19,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-
-#include <nlohmann/json.hpp>
+#include <cJSON.h>
 
 #ifdef L2_STANDARD
 #include "file_ex.h"
@@ -171,6 +170,27 @@ std::vector<HksCipsetPlatformEncryptInput> g_encryptInputs = {
             0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
         },
     },
+};
+
+struct HksChipsetPlatformEncryptJson {
+    cJSON *scene;
+    cJSON *salt;
+    cJSON *uuid;
+    cJSON *customInfo;
+    cJSON *plainText;
+    cJSON *inputPlatformPubKeyManually;
+    cJSON *platformPubKey;
+
+    HksChipsetPlatformEncryptJson()
+    {
+        scene = nullptr;
+        salt  = nullptr;
+        uuid  = nullptr;
+        customInfo = nullptr;
+        plainText  = nullptr;
+        inputPlatformPubKeyManually = nullptr;
+        platformPubKey = nullptr;
+    }
 };
 
 void PrintOne(const std::vector<uint8_t> one)
@@ -492,6 +512,81 @@ std::vector<uint8_t> VectorStrToVectorUint8(const std::vector<std::string> &str)
     return res;
 }
 
+int32_t FileRead(const char *filePath, struct HksBlob *blob)
+{
+    FILE *fp = fopen(filePath, "rb");
+    HKS_IF_NULL_LOGE_RETURN(fp, HKS_ERROR_OPEN_FILE_FAIL, "open file fail");
+    uint32_t len = fread(blob->data, 1, blob->size, fp);
+    HKS_IF_TRUE_LOGE_RETURN(fclose(fp) < 0, HKS_ERROR_CLOSE_FILE_FAIL, "close file fail");
+    return len;
+}
+
+int32_t CJsonArrayToVectorUint8(cJSON *jsonArrayObj, std::vector<uint8_t>& res)
+{
+    std::vector<std::string> str;
+    for (int i = 0; i < cJSON_GetArraySize(jsonArrayObj); ++i) {
+        cJSON *arrayItem = cJSON_GetArrayItem(jsonArrayObj, i);
+        HKS_IF_NULL_LOGE_RETURN(arrayItem, HKS_FAILURE, "get array item failed");
+        HKS_IF_NOT_TRUE_LOGE_RETURN(cJSON_IsString(arrayItem), HKS_FAILURE, "arrayItem not a string type");
+        str.push_back(arrayItem->valuestring);
+    }
+    res = VectorStrToVectorUint8(str);
+    return HKS_SUCCESS;
+}
+
+bool GetCJsonBoolValue(cJSON *jsonObj)
+{
+    HKS_IF_NULL_LOGE_RETURN(jsonObj, false, "bool obj is nullptr");
+    HKS_IF_NOT_TRUE_LOGE_RETURN(cJSON_IsBool(jsonObj), false, "obj is not a bool type");
+    return cJSON_IsTrue(jsonObj) ? true : false;
+}
+
+int32_t GetInfoIntoJson(cJSON **json, char *data, HksChipsetPlatformEncryptJson &jsonInfo)
+{
+    bool allCorrect = false;
+    do {
+        *json = cJSON_Parse(data);
+        HKS_IF_NULL_LOGE_BREAK(*json, "can not parse json string");
+
+        jsonInfo.scene = cJSON_GetObjectItem(*json, "scene");
+        HKS_IF_NULL_LOGE_BREAK(jsonInfo.scene, "get object scene failed");
+        HKS_IF_NOT_TRUE_LOGE_BREAK(cJSON_IsString(jsonInfo.scene), "scene not a string type");
+
+        jsonInfo.salt = cJSON_GetObjectItem(*json, "salt");
+        HKS_IF_NULL_LOGE_BREAK(jsonInfo.salt, "get object salt failed");
+        HKS_IF_NOT_TRUE_LOGE_BREAK(cJSON_IsArray(jsonInfo.salt), "salt not a array type");
+
+        jsonInfo.uuid = cJSON_GetObjectItem(*json, "uuid");
+        HKS_IF_NULL_LOGE_BREAK(jsonInfo.uuid, "get object uuid failed");
+        HKS_IF_NOT_TRUE_LOGE_BREAK(cJSON_IsArray(jsonInfo.uuid), "uuid not a array type");
+
+        jsonInfo.customInfo = cJSON_GetObjectItem(*json, "customInfo");
+        HKS_IF_NULL_LOGE_BREAK(jsonInfo.customInfo, "get object customInfo failed");
+        HKS_IF_NOT_TRUE_LOGE_BREAK(cJSON_IsArray(jsonInfo.customInfo), "customInfo not a array type");
+
+        jsonInfo.plainText = cJSON_GetObjectItem(*json, "plainText");
+        HKS_IF_NULL_LOGE_BREAK(jsonInfo.plainText, "get object plainText failed");
+        HKS_IF_NOT_TRUE_LOGE_BREAK(cJSON_IsArray(jsonInfo.plainText), "plainText not a array type");
+
+        jsonInfo.inputPlatformPubKeyManually = cJSON_GetObjectItem(*json, "inputPlatformPubKeyManually");
+        HKS_IF_NULL_LOGE_BREAK(jsonInfo.inputPlatformPubKeyManually, "get object inputPlatformPubKeyManually failed");
+        HKS_IF_NOT_TRUE_LOGE_BREAK(cJSON_IsBool(jsonInfo.inputPlatformPubKeyManually),
+            "inputPlatformPubKeyManually not a bool type");
+        
+        if (cJSON_IsTrue(jsonInfo.inputPlatformPubKeyManually)) {
+            jsonInfo.platformPubKey = cJSON_GetObjectItem(*json, "platformPubKey");
+            HKS_IF_NULL_LOGE_BREAK(jsonInfo.platformPubKey, "get object platformPubKey failed");
+            HKS_IF_NOT_TRUE_LOGE_BREAK(cJSON_IsArray(jsonInfo.platformPubKey), "platformPubKey not a array type");
+        }
+        allCorrect = true;
+    } while (0);
+    if (allCorrect == false) {
+        HKS_LOG_E("get object failed");
+        return HKS_FAILURE;
+    }
+    return HKS_SUCCESS;
+}
+#define HKS_FILE_CACHE 1024 * 10
 int32_t ReadInputFile(const char *path, HksCipsetPlatformEncryptInput &input)
 {
     #define MAP_SCENE_ENUM_KEY_VALUE(a) { (#a), (a) }
@@ -499,28 +594,36 @@ int32_t ReadInputFile(const char *path, HksCipsetPlatformEncryptInput &input)
         MAP_SCENE_ENUM_KEY_VALUE(HKS_CHIPSET_PLATFORM_DECRYPT_SCENE_TA_TO_TA),
     };
     #undef MAP_SCENE_ENUM_KEY_VALUE
-    std::ifstream f(path, std::ios::binary | std::ios::in);
-    if (!f) {
-        HKS_TEST_LOG_I("open file \"%s\" failed", path);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    nlohmann::json data = nlohmann::json::parse(f);
-    std::string scene = data["scene"];
-    auto sceneValue = scenes.find(scene);
-    if (sceneValue == scenes.end()) {
-        HKS_TEST_LOG_I("invalid scene \"%s\"", scene.c_str());
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    input.scene = sceneValue->second;
-    input.salt = VectorStrToVectorUint8(data["salt"]);
-    input.uuid = VectorStrToVectorUint8(data["uuid"]);
-    input.customInfo = VectorStrToVectorUint8(data["customInfo"]);
-    input.plainText = VectorStrToVectorUint8(data["plainText"]);
-    input.inputPlatformPubKeyManually = data["inputPlatformPubKeyManually"];
+    
+    cJSON *json = nullptr;
+    std::unique_ptr<cJSON, void(*)(cJSON *)> uniqueJson(json, cJSON_Delete);
+    std::unique_ptr<uint8_t> uniqueData(new uint8_t[HKS_FILE_CACHE]);
+    struct HksChipsetPlatformEncryptJson jsonInfo;
+    struct HksBlob jsonBlob = { .size = HKS_FILE_CACHE, .data = uniqueData.get() };
+    int32_t readLen = FileRead(path, &jsonBlob);
+    HKS_IF_TRUE_LOGE_RETURN(readLen < 0, readLen, "can not read info from file");
+    int32_t ret = GetInfoIntoJson(&json, (char *)jsonBlob.data, jsonInfo);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_FAILURE, "GetInfoIntoJson failed");
+
+    auto sceneValue = scenes.find(jsonInfo.scene->valuestring);
+    HKS_IF_TRUE_LOGE_RETURN(sceneValue == scenes.end(), HKS_ERROR_INVALID_ARGUMENT,
+        "invalid scene %" LOG_PUBLIC "s", jsonInfo.scene->valuestring);
+    ret = CJsonArrayToVectorUint8(jsonInfo.salt, input.salt);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get array info from salt failed");
+    ret = CJsonArrayToVectorUint8(jsonInfo.uuid, input.uuid);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get array info from uuid failed");
+    ret = CJsonArrayToVectorUint8(jsonInfo.customInfo, input.customInfo);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get array info from customInfo failed");
+    ret = CJsonArrayToVectorUint8(jsonInfo.plainText, input.plainText);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get array info from plainText failed");
+    input.inputPlatformPubKeyManually = GetCJsonBoolValue(jsonInfo.inputPlatformPubKeyManually);
     if (input.inputPlatformPubKeyManually) {
-        input.platformPubKey = VectorStrToVectorUint8(data["platformPubKey"]);
+        ret = CJsonArrayToVectorUint8(jsonInfo.platformPubKey, input.platformPubKey);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get array info from platformPubKey failed");
     }
-    HKS_TEST_LOG_I("read scene = %s", scene.c_str());
+    HKS_LOG_E("get object SUCCESS");
+
+    HKS_TEST_LOG_I("read scene = %s", jsonInfo.scene->valuestring);
     HKS_TEST_LOG_I("read salt size = %zu, data = ", input.salt.size());
     PrintOne(input.salt);
     HKS_TEST_LOG_I("read uuid size = %zu, data = ", input.uuid.size());

@@ -77,7 +77,6 @@
           "hilog",
           "hilog_lite",
           "ipc",
-          "json",
           "napi",
           "os_account",
           "safwk",
