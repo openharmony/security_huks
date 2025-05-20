@@ -49,7 +49,6 @@ ohos_static_library("libhuks_bms_systemapi_wrap_static") {
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_single",
-    "json:nlohmann_json_static",
     "samgr:samgr_proxy",
   ]
 
