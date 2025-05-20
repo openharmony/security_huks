@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -150,6 +150,9 @@ static uint32_t g_validTags[] = {
     HKS_TAG_AGREE_PUBKEY_TYPE,
     HKS_TAG_IS_CHANGE_STORAGE_LEVEL,
     HKS_TAG_SCREEN_STATE,
+    HKS_TAG_DEVICE_ID,
+    HKS_TAG_WRAP_DATA_ASSET_SECRET,
+    HKS_TAG_WRAP_DATA_ASSET_EXTRA_AAD,
 };
 
 HKS_API_EXPORT enum HksTagType GetTagType(enum HksTag tag)
