@@ -14,59 +14,38 @@
  */
 
 import { BusinessError, AsyncCallback } from '@ohos.base';
-
-interface ResultInner {
-  result: int;
-  error?: string | undefined;
-  outData?: Uint8Array | undefined;
-  handle: long;
-  challenge?: Uint8Array |undefined;
-}
-
-class HuksResult implements ResultInner {
+class HuksResultInner {
   result: int = 0;
   error?: string | undefined = "";
   outData?: Uint8Array | undefined;
   handle: long = 0;
   challenge?: Uint8Array | undefined;
+  certChains?: Array<string>;
+  listString?: Array<string> | undefined;
 }
 
-class HuksParamImpl implements huks.HuksParam {
-  tag: huks.HuksTag = huks.HuksTag.HUKS_TAG_ALL_USERS
-  value: boolean | int | bigint | Uint8Array = 0
-  constructor(tag : huks.HuksTag, value : boolean | int | bigint | Uint8Array) {
-      this.tag = tag;
-      this.value = value;
-  }
-}
+native function generateKeyItemSync(keyAlias: string, options: huks.HuksOptions): HuksResultInner;
 
-class HuksOptionsImpl implements huks.HuksOptions {
-  properties?: Array<huks.HuksParam> | undefined;
-  inData?: Uint8Array | undefined;
-  constructor(propertiesIn?: Array<huks.HuksParam> | undefined, inDataIn?: Uint8Array | undefined) {
-      this.properties = propertiesIn;
-      this.inData = inDataIn;
-  }
-}
+native function deleteKeyItemSync(keyAlias: string, options: huks.HuksOptions): HuksResultInner;
 
-native function generateKeyItemSync(keyAlias: string, options: huks.HuksOptions): ResultInner;
-
-native function deleteKeyItemSync(keyAlias: string, options: huks.HuksOptions): ResultInner;
-
-native function importKeyItemSync(keyAlias: string, options: huks.HuksOptions): ResultInner;
+native function importKeyItemSync(keyAlias: string, options: huks.HuksOptions): HuksResultInner;
 
 native function importWrappedKeyItemSync(keyAlias: string, wrappingKeyAlias: string,
-  options: huks.HuksOptions): ResultInner;
+  options: huks.HuksOptions): HuksResultInner;
 
-native function exportKeyItemSync(keyAlias: string, options: huks.HuksOptions): ResultInner;
+native function exportKeyItemSync(keyAlias: string, options: huks.HuksOptions): HuksResultInner;
 
-native function isKeyItemExistSync(keyAlias: string, options: huks.HuksOptions): ResultInner;
+native function isKeyItemExistSync(keyAlias: string, options: huks.HuksOptions): HuksResultInner;
 
-native function initSessionSync(keyAlias: string, options: huks.HuksOptions): ResultInner;
+native function initSessionSync(keyAlias: string, options: huks.HuksOptions): HuksResultInner;
 
-native function updateFinishSessionSync(handle: long, options: huks.HuksOptions, isUpdate: boolean): ResultInner;
+native function updateFinishSessionSync(handle: long, options: huks.HuksOptions, isUpdate: boolean): HuksResultInner;
 
-native function abortSessionSync(handle: long, options: huks.HuksOptions): ResultInner;
+native function abortSessionSync(handle: long, options: huks.HuksOptions): HuksResultInner;
+
+native function attestKeyItemSync(keyAlias: string, options: huks.HuksOptions, isAnonymous: boolean): HuksResultInner;
+
+native function listAliasesSync(options: huks.HuksOptions): HuksResultInner;
 
 /**
  * OpenHarmony Universal KeyStore
@@ -94,9 +73,17 @@ export namespace huks {
     if (huksOptions?.properties) {
       for (let param of huksOptions.properties!) {
         if (param.value instanceof Uint8Array) {
-          copyOne?.properties?.push(new HuksParamImpl(param.tag!, new Uint8Array(param.value as Uint8Array)))
+          let tempBufferParam: HuksParam = {
+            tag: param.tag!,
+            value: new Uint8Array(param.value as Uint8Array)
+          }
+          copyOne?.properties?.push(tempBufferParam)
         } else {
-          copyOne?.properties?.push(new HuksParamImpl(param.tag!, param.value))
+          let tempCommonParam: HuksParam = {
+            tag: param.tag!,
+            value: param.value
+          }
+          copyOne?.properties?.push(tempCommonParam)
         }
       }
     }
@@ -110,12 +97,12 @@ export namespace huks {
   {
     let p1 = taskpool.execute(generateKeyItemSync, keyAlias, options);
     p1.then<void>((ret : NullishType) => {
-        let retInner = ret as HuksResult;
+        let retInner = ret as HuksResultInner;
         let eNull = new BusinessError();
-        eNull.code = retInner.result
         if (retInner.result === 0) {
           callback(eNull, undefined);
         } else {
+          eNull.code = retInner.result
           eNull.message = retInner.error as string
           callback(eNull, undefined);
         }
@@ -127,7 +114,7 @@ export namespace huks {
     let p = new Promise<void> ((resolve: (v: undefined) => void, reject: (error: BusinessError) => void): void => {
       let p1 = taskpool.execute(generateKeyItemSync, keyAlias, options);
       p1.then<void>((ret : NullishType) => {
-        let retInner = ret as HuksResult;
+        let retInner = ret as HuksResultInner;
         if (retInner.result === 0) {
           resolve(undefined);
         } else {
@@ -145,7 +132,7 @@ export namespace huks {
   {
     let p1 = taskpool.execute(deleteKeyItemSync, keyAlias, options);
     p1.then<void>((ret : NullishType) => {
-        let retInner = ret as HuksResult;
+        let retInner = ret as HuksResultInner;
         let eNull = new BusinessError();
         eNull.code = retInner.result
         if (retInner.result === 0) {
@@ -162,7 +149,7 @@ export namespace huks {
     let p = new Promise<void> ((resolve: (v: undefined) => void, reject: (error: BusinessError) => void): void => {
       let p1 = taskpool.execute(deleteKeyItemSync, keyAlias, options);
       p1.then<void>((ret : NullishType) => {
-        let retInner = ret as HuksResult;
+        let retInner = ret as HuksResultInner;
         if (retInner.result === 0) {
           resolve(undefined);
         } else {
@@ -180,7 +167,7 @@ export namespace huks {
   {
     let p1 = taskpool.execute(importKeyItemSync, keyAlias, options);
     p1.then<void>((ret : NullishType) => {
-        let retInner = ret as HuksResult;
+        let retInner = ret as HuksResultInner;
         let eNull = new BusinessError();
         eNull.code = retInner.result
         if (retInner.result === 0) {
@@ -197,7 +184,7 @@ export namespace huks {
     let p = new Promise<void> ((resolve: (v: undefined) => void, reject: (error: BusinessError) => void): void => {
       let p1 = taskpool.execute(importKeyItemSync, keyAlias, options);
       p1.then<void>((ret : NullishType) => {
-        let retInner = ret as HuksResult;
+        let retInner = ret as HuksResultInner;
         if (retInner.result === 0) {
           resolve(undefined);
         } else {
@@ -217,7 +204,7 @@ export namespace huks {
   {
     let p1 = taskpool.execute(importWrappedKeyItemSync, keyAlias, wrappingKeyAlias, options);
     p1.then<void>((ret : NullishType) => {
-        let retInner = ret as HuksResult;
+        let retInner = ret as HuksResultInner;
         let eNull = new BusinessError();
         eNull.code = retInner.result
         if (retInner.result === 0) {
@@ -234,7 +221,7 @@ export namespace huks {
     let p = new Promise<void> ((resolve: (v: undefined) => void, reject: (error: BusinessError) => void): void => {
       let p1 = taskpool.execute(importWrappedKeyItemSync, keyAlias, wrappingKeyAlias, options);
       p1.then<void>((ret : NullishType) => {
-        let retInner = ret as HuksResult;
+        let retInner = ret as HuksResultInner;
         if (retInner.result === 0) {
           resolve(undefined);
         } else {
@@ -248,31 +235,21 @@ export namespace huks {
     return p;
   }
 
-  class HuksReturnResultImpl implements HuksReturnResult {
-    outData?: Uint8Array | undefined;
-    properties?: Array<HuksParam> | undefined;
-    certChains?: Array<string> | undefined;
-    constructor(outData?: Uint8Array | undefined, properties?: Array<HuksParam> | undefined,
-      certChains?: Array<string> | undefined) {
-      this.outData = outData;
-      this.properties = properties;
-      this.certChains = certChains;
-    }
-  }
-
   export function exportKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>): void
   {
     let p1 = taskpool.execute(exportKeyItemSync, keyAlias, options);
     p1.then<void>((ret : NullishType) => {
-        let retInner = ret as HuksResult;
+        let retInner = ret as HuksResultInner;
         let eNull = new BusinessError();
         if (retInner.result === 0) {
-          let returnResult = new HuksReturnResultImpl(retInner.outData)
+          let returnResult: HuksReturnResult = {
+            outData: retInner.outData
+          }
           callback(eNull, returnResult);
         } else {
           eNull.code = retInner.result
           eNull.message = retInner.error as string;
-          let empty = new HuksReturnResultImpl()
+          let empty: HuksReturnResult = {}
           callback(eNull, empty);
         }
     });
@@ -284,9 +261,11 @@ export namespace huks {
       reject: (error: BusinessError)=> void): void => {
       let p1 = taskpool.execute(exportKeyItemSync, keyAlias, options);
       p1.then<void>((ret : NullishType) => {
-        let retInner = ret as HuksResult;
+        let retInner = ret as HuksResultInner;
         if (retInner.result === 0) {
-          let returnResult = new HuksReturnResultImpl(retInner.outData)
+          let returnResult: HuksReturnResult = {
+            outData: retInner.outData
+          }
           resolve(returnResult);
         } else {
           let eNull = new BusinessError();
@@ -303,13 +282,10 @@ export namespace huks {
   {
     let p1 = taskpool.execute(isKeyItemExistSync, keyAlias, options);
     p1.then<void>((ret : NullishType) => {
-        let retInner = ret as HuksResult;
+        let retInner = ret as HuksResultInner;
         let eNull = new BusinessError();
         let isExist : boolean = true;
-        if (retInner.result === -13) {
-          isExist = false;
-          callback(eNull, isExist);
-        } else if (retInner.result === 0){
+        if (retInner.result === 0) {
           isExist = true;
           callback(eNull, isExist);
         }
@@ -327,13 +303,10 @@ export namespace huks {
       reject: (error: BusinessError)=> void): void => {
       let p1 = taskpool.execute(isKeyItemExistSync, keyAlias, options);
       p1.then<void>((ret : NullishType) => {
-        let retInner = ret as HuksResult;
+        let retInner = ret as HuksResultInner;
         let isExist : boolean = true;
         if (retInner.result === 0) {
           isExist = true;
-          resolve(isExist);
-        } else if (retInner.result === -13) {
-          isExist = false;
           resolve(isExist);
         } else {
           let eNull = new BusinessError();
@@ -346,26 +319,22 @@ export namespace huks {
     return p;
   }
 
-  class HuksSessionHandleImpl implements HuksSessionHandle {
-    handle: long = 0;
-    challenge?: Uint8Array | undefined;
-  }
-
   export function initSession(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksSessionHandle>): void
   {
     let p1 = taskpool.execute(initSessionSync, keyAlias, options);
     p1.then<void>((ret : NullishType) => {
-        let retInner = ret as HuksResult;
+        let retInner = ret as HuksResultInner;
         let eNull = new BusinessError();
         if (retInner.result === 0) {
-          let retOut = new HuksSessionHandleImpl();
-          retOut.handle = retInner.handle;
-          retOut.challenge = retInner.challenge;
+          let retOut: HuksSessionHandle = {
+            handle: retInner.handle,
+            challenge: retInner.challenge
+          }
           callback(eNull, retOut);
         } else {
           eNull.code = retInner.result
           eNull.message = retInner.error as string;
-          let empty = new HuksSessionHandleImpl();
+          let empty: HuksSessionHandle = {}
           callback(eNull, empty);
         }
     });
@@ -377,11 +346,12 @@ export namespace huks {
       reject: (error: BusinessError)=> void): void => {
       let p1 = taskpool.execute(initSessionSync, keyAlias, options);
       p1.then<void>((ret : NullishType) => {
-        let retInner = ret as HuksResult;
+        let retInner = ret as HuksResultInner;
         if (retInner.result === 0) {
-          let retOut = new HuksSessionHandleImpl();
-          retOut.handle = retInner.handle;
-          retOut.challenge = retInner.challenge;
+          let retOut: HuksSessionHandle = {
+            handle: retInner.handle,
+            challenge: retInner.challenge
+          }
           resolve(retOut);
         } else {
           let eNull = new BusinessError();
@@ -394,20 +364,27 @@ export namespace huks {
     return p;
   }
 
+  export function initSessionAsUser(userId: int, keyAlias: string, huksOptions: HuksOptions): Promise<HuksSessionHandle>
+  {
+    return initSession(keyAlias, AddUserIdToHuksOptions(huksOptions, userId))
+  }
+
   export function updateSession(handle: long, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>): void
   {
     let isUpdate : boolean = true;
     let p1 = taskpool.execute(updateFinishSessionSync, handle, options, isUpdate);
     p1.then<void>((ret : NullishType) => {
-        let retInner = ret as HuksResult;
+        let retInner = ret as HuksResultInner;
         let eNull = new BusinessError();
         if (retInner.result === 0) {
-          let retOut = new HuksReturnResultImpl(retInner.outData);
+          let retOut: HuksReturnResult = {
+            outData: retInner.outData
+          }
           callback(eNull, retOut);
         } else {
           eNull.code = retInner.result
           eNull.message = retInner.error as string;
-          let empty = new HuksReturnResultImpl();
+          let empty: HuksReturnResult = {};
           callback(eNull, empty);
         }
     });
@@ -421,27 +398,35 @@ export namespace huks {
   ): void
   {
     let isUpdate : boolean = true;
-    let tokenTemp = new HuksParamImpl(huks.HuksTag.HUKS_TAG_AUTH_TOKEN, token);
+    let tokenTemp: HuksParam = {
+      tag: HuksTag.HUKS_TAG_AUTH_TOKEN,
+      value: token
+    }
     options.properties?.push(tokenTemp)
     let p1 = taskpool.execute(updateFinishSessionSync, handle, options, isUpdate);
     p1.then<void>((ret : NullishType) => {
-        let retInner = ret as HuksResult;
+        let retInner = ret as HuksResultInner;
         let eNull = new BusinessError();
         if (retInner.result === 0) {
-          let retOut = new HuksReturnResultImpl(retInner.outData);
+          let retOut: HuksReturnResult = {
+            outData: retInner.outData
+          }
           callback(eNull, retOut);
         } else {
           eNull.code = retInner.result
           eNull.message = retInner.error as string;
-          let empty = new HuksReturnResultImpl();
+          let empty: HuksReturnResult = {};
           callback(eNull, empty);
         }
     });
   }
 
-  function AddtokenToHuksOptions(huksOptions: HuksOptions, token: Uint8Array): HuksOptions {
+  function AddTokenToHuksOptions(huksOptions: HuksOptions, token: Uint8Array): HuksOptions {
     let copyOne = CopyHuksOptions(huksOptions)
-    let tokenTemp = new HuksParamImpl(huks.HuksTag.HUKS_TAG_AUTH_TOKEN, token);
+    let tokenTemp: HuksParam = {
+      tag: HuksTag.HUKS_TAG_AUTH_TOKEN,
+      value: token
+    }
     copyOne?.properties?.push(tokenTemp)
     return copyOne
   }
@@ -450,15 +435,17 @@ export namespace huks {
   {
     let isUpdate : boolean = true;
     if(token != undefined) {
-      options = AddtokenToHuksOptions(options, token)
+      options = AddTokenToHuksOptions(options, token)
     }
     let p = new Promise<HuksReturnResult> ((resolve: (v: HuksReturnResult) => void,
     reject: (error: BusinessError)=> void): void => {
     let p1 = taskpool.execute(updateFinishSessionSync, handle, options, isUpdate);
     p1.then<void>((ret : NullishType) => {
-      let retInner = ret as HuksResult;
+      let retInner = ret as HuksResultInner;
       if (retInner.result === 0) {
-        let retOut = new HuksReturnResultImpl(retInner.outData);
+        let retOut: HuksReturnResult = {
+          outData: retInner.outData
+        }
         resolve(retOut);
       } else {
         let eNull = new BusinessError();
@@ -476,15 +463,17 @@ export namespace huks {
     let isUpdate : boolean = false;
     let p1 = taskpool.execute(updateFinishSessionSync, handle, options, isUpdate);
     p1.then<void>((ret : NullishType) => {
-        let retInner = ret as HuksResult;
+        let retInner = ret as HuksResultInner;
         let eNull = new BusinessError();
         if (retInner.result === 0) {
-          let retOut = new HuksReturnResultImpl(retInner.outData);
+          let retOut: HuksReturnResult = {
+            outData: retInner.outData
+          }
           callback(eNull, retOut);
         } else {
           eNull.code = retInner.result
           eNull.message = retInner.error as string;
-          let empty = new HuksReturnResultImpl();
+          let empty: HuksReturnResult = {};
           callback(eNull, empty);
         }
     });
@@ -498,19 +487,20 @@ export namespace huks {
   ): void
   {
     let isUpdate : boolean = false;
-    let tokenTemp = new HuksParamImpl(huks.HuksTag.HUKS_TAG_AUTH_TOKEN, token);
-    options.properties?.push(tokenTemp)
+    options = AddTokenToHuksOptions(options, token)
     let p1 = taskpool.execute(updateFinishSessionSync, handle, options, isUpdate);
     p1.then<void>((ret : NullishType) => {
-        let retInner = ret as HuksResult;
+        let retInner = ret as HuksResultInner;
         let eNull = new BusinessError();
         if (retInner.result === 0) {
-          let retOut = new HuksReturnResultImpl(retInner.outData);
+          let retOut: HuksReturnResult = {
+            outData: retInner.outData
+          }
           callback(eNull, retOut);
         } else {
           eNull.code = retInner.result
           eNull.message = retInner.error as string;
-          let empty = new HuksReturnResultImpl();
+          let empty: HuksReturnResult = {};
           callback(eNull, empty);
         }
     });
@@ -520,15 +510,17 @@ export namespace huks {
   {
     let isUpdate : boolean = false;
     if(token != undefined) {
-      options = AddtokenToHuksOptions(options, token)
+      options = AddTokenToHuksOptions(options, token)
     }
     let p = new Promise<HuksReturnResult> ((resolve: (v: HuksReturnResult) => void,
     reject: (error: BusinessError)=> void): void => {
     let p1 = taskpool.execute(updateFinishSessionSync, handle, options, isUpdate);
     p1.then<void>((ret : NullishType) => {
-      let retInner = ret as HuksResult;
+      let retInner = ret as HuksResultInner;
       if (retInner.result === 0) {
-        let retOut = new HuksReturnResultImpl(retInner.outData);
+        let retOut: HuksReturnResult = {
+          outData: retInner.outData
+        }
         resolve(retOut);
       } else {
         let eNull = new BusinessError();
@@ -545,7 +537,7 @@ export namespace huks {
   {
     let p1 = taskpool.execute(abortSessionSync, handle, options);
     p1.then<void>((ret : NullishType) => {
-        let retInner = ret as HuksResult;
+        let retInner = ret as HuksResultInner;
         let eNull = new BusinessError();
         if (retInner.result === 0) {
           callback(eNull, undefined);
@@ -562,7 +554,7 @@ export namespace huks {
     let p = new Promise<void> ((resolve: (v: undefined) => void, reject: (error: BusinessError) => void): void => {
       let p1 = taskpool.execute(abortSessionSync, handle, options);
       p1.then<void>((ret : NullishType) => {
-        let retInner = ret as HuksResult;
+        let retInner = ret as HuksResultInner;
         if (retInner.result === 0) {
           resolve(undefined);
         } else {
@@ -576,24 +568,160 @@ export namespace huks {
     return p;
   }
 
-  function AdduserIdtoHuksOptions(huksOptions: HuksOptions, userId: int): HuksOptions {
+  function AddUserIdToHuksOptions(huksOptions: HuksOptions, userId: int): HuksOptions {
     let copyOne = CopyHuksOptions(huksOptions)
-    copyOne?.properties?.push(new HuksParamImpl(HuksTag.HUKS_TAG_SPECIFIC_USER_ID, userId))
+    let tempParam: HuksParam = {
+      tag: HuksTag.HUKS_TAG_SPECIFIC_USER_ID,
+      value: userId
+    }
+    copyOne?.properties?.push(tempParam)
     return copyOne
   }
 
   export function generateKeyItemAsUser(userId: int, keyAlias: string, huksOptions: HuksOptions): Promise<void>
   {
-    let optionAsUser = AdduserIdtoHuksOptions(huksOptions, userId)
-    let p = new Promise<void> ((resolve: (v: undefined) => void, reject: (error: BusinessError) => void): void => {
-      let p1 = taskpool.execute(generateKeyItemSync, keyAlias, optionAsUser);
-      p1.then<void>((ret : NullishType) => {
-        let retInner = ret as HuksResult;
+    return generateKeyItem(keyAlias, AddUserIdToHuksOptions(huksOptions, userId));
+  }
+
+  export function deleteKeyItemAsUser(userId: int, keyAlias: string, huksOptions: HuksOptions): Promise<void>
+  {
+    return deleteKeyItem(keyAlias, AddUserIdToHuksOptions(huksOptions, userId));
+  }
+
+  export function importKeyItemAsUser(userId: int, keyAlias: string, huksOptions: HuksOptions): Promise<void>
+  {
+    return importKeyItem(keyAlias, AddUserIdToHuksOptions(huksOptions, userId));
+  }
+
+  export function importWrappedKeyItemAsUser(userId: int, keyAlias: string, wrappingKeyAlias: string,
+    huksOptions: HuksOptions): Promise<void>
+  {
+    return importWrappedKeyItem(keyAlias, wrappingKeyAlias, AddUserIdToHuksOptions(huksOptions, userId));
+  }
+
+  export function exportKeyItemAsUser(userId: int, keyAlias: string,
+    huksOptions: HuksOptions): Promise<HuksReturnResult>
+  {
+    return exportKeyItem(keyAlias, AddUserIdToHuksOptions(huksOptions, userId));
+  }
+
+  function AddBase64ToHuksOptions(huksOptions: HuksOptions): HuksOptions {
+    let copyOne = CopyHuksOptions(huksOptions)
+    let tempParam: HuksParam = {
+      tag: HuksTag.HUKS_TAG_ATTESTATION_BASE64,
+      value: true
+    }
+    copyOne?.properties?.push(tempParam)
+    return copyOne
+  }
+
+  function AddBase64AndUserIdToHuksOptions(huksOptions: HuksOptions, userId: int): HuksOptions {
+    let copyOne = CopyHuksOptions(huksOptions)
+    let tempParam1: HuksParam = {
+      tag: HuksTag.HUKS_TAG_ATTESTATION_BASE64,
+      value: true
+    }
+    let tempParam2: HuksParam = {
+      tag: HuksTag.HUKS_TAG_SPECIFIC_USER_ID,
+      value: userId
+    }
+    copyOne?.properties?.push(tempParam1, tempParam2);
+    return copyOne
+  }
+
+  function InnerAttestPromise(keyAlias: string, options: HuksOptions, isAnonymous: boolean): Promise<HuksReturnResult>
+  {
+    let p = new Promise<HuksReturnResult> ((resolve: (v: HuksReturnResult) => void,
+      reject: (error: BusinessError)=> void): void => {
+        let p1 = taskpool.execute(attestKeyItemSync, keyAlias, options, isAnonymous);
+        p1.then<void>((ret : NullishType) => {
+          let retInner = ret as HuksResultInner;
+          if (retInner.result === 0) {
+            let retOut: HuksReturnResult = {
+              certChains: retInner.certChains
+            }
+            resolve(retOut);
+          } else {
+            let eNull = new BusinessError();
+            eNull.code = retInner.result
+            eNull.message = retInner.error as string;
+            reject(eNull);
+          }
+        });
+      }
+    );
+    return p;
+  }
+
+  function InnerAttestCallback(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>,
+    isAnonymous: boolean): void
+  {
+    let p = taskpool.execute(attestKeyItemSync, keyAlias, options, isAnonymous);
+    p.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResultInner;
+        let eNull = new BusinessError();
         if (retInner.result === 0) {
-          resolve(undefined);
+          let returnResult: HuksReturnResult = {
+            certChains: retInner.certChains
+          }
+          callback(eNull, returnResult);
+        } else {
+          eNull.code = retInner.result
+          eNull.message = retInner.error as string;
+          let empty: HuksReturnResult = {}
+          callback(eNull, empty);
+        }
+    });
+  }
+
+  export function attestKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>): void
+  {
+    return InnerAttestCallback(keyAlias, AddBase64ToHuksOptions(options), callback, false);
+  }
+
+  export function attestKeyItemAsUser(userId: int, keyAlias: string,
+    huksOptions: HuksOptions): Promise<HuksReturnResult>
+  {
+    return InnerAttestPromise(keyAlias, AddBase64AndUserIdToHuksOptions(huksOptions, userId), false);
+  }
+
+  export function attestKeyItem(keyAlias: string, options: HuksOptions): Promise<HuksReturnResult>
+  {
+    return InnerAttestPromise(keyAlias, AddBase64ToHuksOptions(options), false);
+  }
+
+  export function anonAttestKeyItem(keyAlias: string, options: HuksOptions,
+    callback: AsyncCallback<HuksReturnResult>): void
+  {
+    return InnerAttestCallback(keyAlias, AddBase64ToHuksOptions(options), callback, true);
+  }
+
+  export function anonAttestKeyItemAsUser(userId: int, keyAlias: string,
+    huksOptions: HuksOptions): Promise<HuksReturnResult>
+  {
+    return InnerAttestPromise(keyAlias, AddBase64AndUserIdToHuksOptions(huksOptions, userId), true);
+  }
+
+  export function anonAttestKeyItem(keyAlias: string, options: HuksOptions): Promise<HuksReturnResult>
+  {
+    return InnerAttestPromise(keyAlias, AddBase64ToHuksOptions(options), true);
+  }
+
+  export function listAliases(options: HuksOptions): Promise<HuksListAliasesReturnResult>
+  {
+    let p = new Promise<HuksListAliasesReturnResult> ((resolve: (v: HuksListAliasesReturnResult) => void,
+      reject: (error: BusinessError) => void): void => {
+      let p1 = taskpool.execute(listAliasesSync, options);
+      p1.then<void>((ret: NullishType) => {
+        let retInner = ret as HuksResultInner;
+        if (retInner.result === 0) {
+          let retOut: HuksListAliasesReturnResult = {
+            keyAliases: retInner.listString!
+          }
+          resolve(retOut);
         } else {
           let eNull = new BusinessError();
-          eNull.code = retInner.result
+          eNull.code = retInner.result;
           eNull.message = retInner.error as string;
           reject(eNull);
         }
@@ -601,42 +729,98 @@ export namespace huks {
     });
     return p;
   }
-  /**
-   * Interface of huks param.
-   *
-   * @typedef HuksParam
-   * @syscap SystemCapability.Security.Huks.Core
-   * @since 8
-   */
+
+  export function hasKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<boolean>): void
+  {
+    let p1 = taskpool.execute(isKeyItemExistSync, keyAlias, options);
+    p1.then<void>((ret: NullishType) => {
+        let retInner = ret as HuksResultInner;
+        let isExist: boolean = true;
+        let eNull = new BusinessError();
+        if (retInner.result === 0) {
+          callback(eNull, isExist);
+        } else {
+          eNull.code = retInner.result;
+          eNull.message = retInner.error as string;
+          isExist = false;
+          callback(eNull, isExist);
+        }
+    });
+  }
+
+  let keyNotExist: int = 12000011
+  export function hasKeyItem(keyAlias: string, options: HuksOptions): Promise<boolean>
+  {
+    let p = new Promise<boolean> ((resolve: (v: boolean) => void,
+      reject: (error: BusinessError)=> void): void => {
+      let p1 = taskpool.execute(isKeyItemExistSync, keyAlias, options);
+      p1.then<void>((ret: NullishType) => {
+        let retInner = ret as HuksResultInner;
+        let isExist: boolean = true;
+        if (retInner.result === 0) {
+          isExist = true;
+          resolve(isExist);
+        } else if (retInner.result === keyNotExist) {
+          isExist = false;
+          resolve(isExist);
+        } else {
+          let eNull = new BusinessError();
+          eNull.code = retInner.result;
+          eNull.message = retInner.error as string;
+          reject(eNull);
+        }
+      });
+    });
+    return p;
+  }
+
+  export function hasKeyItemAsUser(userId: int, keyAlias: string, options: HuksOptions): Promise<boolean>
+  {
+    let optionAsUser = AddUserIdToHuksOptions(options, userId);
+    let p = new Promise<boolean> ((resolve: (v: boolean) => void,
+      reject: (error: BusinessError)=> void): void => {
+      let p1 = taskpool.execute(isKeyItemExistSync, keyAlias, optionAsUser);
+      p1.then<void>((ret : NullishType) => {
+        let retInner = ret as HuksResultInner;
+        let isExist: boolean = true;
+        if (retInner.result === 0) {
+          isExist = true;
+          resolve(isExist);
+        } else if (retInner.result === keyNotExist) {
+          isExist = false;
+          resolve(isExist);
+        } else {
+          let eNull = new BusinessError();
+          eNull.code = retInner.result;
+          eNull.message = retInner.error as string;
+          reject(eNull);
+        }
+      });
+    });
+    return p;
+  }
   /**
    * Interface of huks param.
    *
    * @typedef HuksParam
    * @syscap SystemCapability.Security.Huks.Core
    * @atomicservice
-   * @since 11
+   * @since 20
    */
   export interface HuksParam {
-    /**
-     * @syscap SystemCapability.Security.Huks.Core
-     * @since 8
-     */
     /**
      * @type { HuksTag }
      * @syscap SystemCapability.Security.Huks.Core
      * @atomicservice
-     * @since 11
+     * @since 20
      */
     tag: HuksTag;
-    /**
-     * @syscap SystemCapability.Security.Huks.Core
-     * @since 8
-     */
+
     /**
      * @type { boolean | int | bigint | Uint8Array }
      * @syscap SystemCapability.Security.Huks.Core
      * @atomicservice
-     * @since 11
+     * @since 20
      */
     value: boolean | int | bigint | Uint8Array;
   }
@@ -646,21 +830,10 @@ export namespace huks {
    *
    * @typedef HuksSessionHandle
    * @syscap SystemCapability.Security.Huks.Core
-   * @since 9
-   */
-  /**
-   * Interface of huks handle.
-   *
-   * @typedef HuksSessionHandle
-   * @syscap SystemCapability.Security.Huks.Core
    * @atomicservice
-   * @since 11
+   * @since 20
    */
   export interface HuksSessionHandle {
-    /**
-     * @syscap SystemCapability.Security.Huks.Core
-     * @since 9
-     */
     /**
      * @type { long }
      * @syscap SystemCapability.Security.Huks.Core
@@ -669,14 +842,10 @@ export namespace huks {
      */
     handle: long;
     /**
-     * @syscap SystemCapability.Security.Huks.Core
-     * @since 9
-     */
-    /**
      * @type { ?Uint8Array }
      * @syscap SystemCapability.Security.Huks.Core
      * @atomicservice
-     * @since 11
+     * @since 20
      */
     challenge?: Uint8Array;
   }
@@ -686,37 +855,22 @@ export namespace huks {
    *
    * @typedef HuksOptions
    * @syscap SystemCapability.Security.Huks.Core
-   * @since 8
-   */
-  /**
-   * Interface of huks option.
-   *
-   * @typedef HuksOptions
-   * @syscap SystemCapability.Security.Huks.Core
    * @atomicservice
-   * @since 11
+   * @since 20
    */
   export interface HuksOptions {
-    /**
-     * @syscap SystemCapability.Security.Huks.Core
-     * @since 8
-     */
     /**
      * @type { ?Array<HuksParam> }
      * @syscap SystemCapability.Security.Huks.Core
      * @atomicservice
-     * @since 11
+     * @since 20
      */
     properties?: Array<HuksParam>;
-    /**
-     * @syscap SystemCapability.Security.Huks.Core
-     * @since 8
-     */
     /**
      * @type { ?Uint8Array }
      * @syscap SystemCapability.Security.Huks.Core
      * @atomicservice
-     * @since 11
+     * @since 20
      */
     inData?: Uint8Array;
   }
@@ -726,48 +880,31 @@ export namespace huks {
    *
    * @typedef HuksReturnResult
    * @syscap SystemCapability.Security.Huks.Core
-   * @since 9
-   */
-  /**
-   * Interface of huks result.
-   *
-   * @typedef HuksReturnResult
-   * @syscap SystemCapability.Security.Huks.Core
    * @atomicservice
-   * @since 11
+   * @since 20
    */
   export interface HuksReturnResult {
-    /**
-     * @syscap SystemCapability.Security.Huks.Core
-     * @since 9
-     */
     /**
      * @type { ?Uint8Array }
      * @syscap SystemCapability.Security.Huks.Core
      * @atomicservice
-     * @since 11
+     * @since 20
      */
     outData?: Uint8Array;
-    /**
-     * @syscap SystemCapability.Security.Huks.Core
-     * @since 9
-     */
+
     /**
      * @type { ?Array<HuksParam> }
      * @syscap SystemCapability.Security.Huks.Core
      * @atomicservice
-     * @since 11
+     * @since 20
      */
     properties?: Array<HuksParam>;
-    /**
-     * @syscap SystemCapability.Security.Huks.Core
-     * @since 9
-     */
+
     /**
      * @type { ?Array<string> }
      * @syscap SystemCapability.Security.Huks.Core
      * @atomicservice
-     * @since 12
+     * @since 20
      */
     certChains?: Array<string>;
   }
@@ -2407,6 +2544,9 @@ export namespace huks {
   export enum HuksTag {
     /* Specific TAG: for as user funtion. @ohos.security.huks.d.ets file should not export */
     HUKS_TAG_SPECIFIC_USER_ID = 1 << 28 | 317,
+
+    /* Specific TAG: for attestation certificates format. @ohos.security.huks.d.ets file should not export */
+    HUKS_TAG_ATTESTATION_BASE64 =  4 << 28 | 516,
 
     /* Base algorithm TAG: 1 - 200 */
     /**
