@@ -71,7 +71,6 @@ if (os_level == "standard") {
       "access_token:libtokenid_sdk",
       "c_utils:utils",
       "ipc:ipc_single",
-      "json:nlohmann_json_static",
     ]
 
     if (!huks_qemu_enabled) {
