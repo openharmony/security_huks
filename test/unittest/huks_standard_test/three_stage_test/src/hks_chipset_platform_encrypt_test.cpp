@@ -512,15 +512,6 @@ std::vector<uint8_t> VectorStrToVectorUint8(const std::vector<std::string> &str)
     return res;
 }
 
-int32_t FileRead(const char *filePath, uint8_t *blob, size_t size)
-{
-    FILE *fp = fopen(filePath, "rb");
-    HKS_IF_NULL_LOGE_RETURN(fp, HKS_ERROR_OPEN_FILE_FAIL, "open file fail");
-    size_t len = fread(blob, 1, size, fp);
-    HKS_IF_TRUE_LOGE_RETURN(fclose(fp) < 0, HKS_ERROR_CLOSE_FILE_FAIL, "close file fail");
-    return len;
-}
-
 int32_t CJsonArrayToVectorUint8(cJSON *jsonArrayObj, std::vector<uint8_t> &res)
 {
     std::vector<std::string> str;
@@ -541,7 +532,7 @@ bool GetCJsonBoolValue(cJSON *jsonObj)
     return cJSON_IsTrue(jsonObj) ? true : false;
 }
 
-int32_t ParseEncryptJson(cJSON **json, char *data, HksChipsetPlatformEncryptJson &jsonInfo)
+int32_t ParseEncryptJson(cJSON **json, const char *data, HksChipsetPlatformEncryptJson &jsonInfo)
 {
     bool allCorrect = false;
     do {
@@ -586,7 +577,7 @@ int32_t ParseEncryptJson(cJSON **json, char *data, HksChipsetPlatformEncryptJson
     }
     return HKS_SUCCESS;
 }
-#define HKS_FILE_CACHE 1024 * 10
+
 int32_t ReadInputFile(const char *path, HksCipsetPlatformEncryptInput &input)
 {
     #define MAP_SCENE_ENUM_KEY_VALUE(a) { (#a), (a) }
@@ -597,16 +588,17 @@ int32_t ReadInputFile(const char *path, HksCipsetPlatformEncryptInput &input)
     
     cJSON *json = nullptr;
     std::unique_ptr<cJSON, void(*)(cJSON *)> jsonData(json, cJSON_Delete);
-    std::unique_ptr<uint8_t> fileData(new uint8_t[HKS_FILE_CACHE]);
+    std::string content;
     struct HksChipsetPlatformEncryptJson encryptJson;
-    int32_t ret = FileRead(path, fileData.get(), HKS_FILE_CACHE);
-    HKS_IF_TRUE_LOGE_RETURN(ret < 0, ret, "can not read info from file");
+    int32_t ret = OHOS::LoadStringFromFile(path, content);
+    HKS_IF_NOT_TRUE_LOGE_RETURN(ret, ret, "can not read info from file");
     
-    ret = ParseEncryptJson(&json, reinterpret_cast<char *>(fileData.get()), encryptJson);
+    ret = ParseEncryptJson(&json, content.c_str(), encryptJson);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_FAILURE, "ParseEncryptJson failed");
     auto sceneValue = scenes.find(encryptJson.scene->valuestring);
     HKS_IF_TRUE_LOGE_RETURN(sceneValue == scenes.end(), HKS_ERROR_INVALID_ARGUMENT,
         "invalid scene %" LOG_PUBLIC "s", encryptJson.scene->valuestring);
+    input.scene = sceneValue->second;
     ret = CJsonArrayToVectorUint8(encryptJson.salt, input.salt);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get array info from salt failed");
     ret = CJsonArrayToVectorUint8(encryptJson.uuid, input.uuid);
