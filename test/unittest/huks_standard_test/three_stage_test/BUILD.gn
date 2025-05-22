@@ -209,7 +209,7 @@ ohos_unittest("huks_UT_test") {
       "access_token:libnativetoken_shared",
       "access_token:libtokensetproc_shared",
       "device_manager:devicemanagersdk",
-      "json:nlohmann_json_static",
+      "cJSON:cjson",
       "openssl:libcrypto_shared",
     ]
   }
