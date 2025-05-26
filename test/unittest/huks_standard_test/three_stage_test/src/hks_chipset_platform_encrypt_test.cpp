@@ -591,7 +591,7 @@ int32_t ReadInputFile(const char *path, HksCipsetPlatformEncryptInput &input)
     std::string content;
     struct HksChipsetPlatformEncryptJson encryptJson;
     int32_t ret = OHOS::LoadStringFromFile(path, content);
-    HKS_IF_NOT_TRUE_LOGE_RETURN(ret, ret, "can not read info from file");
+    HKS_IF_NOT_TRUE_LOGE_RETURN(ret, HKS_FAILURE, "can not read info from file");
     
     ret = ParseEncryptJson(&json, content.c_str(), encryptJson);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_FAILURE, "ParseEncryptJson failed");
