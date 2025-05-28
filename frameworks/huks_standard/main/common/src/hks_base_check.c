@@ -1222,8 +1222,21 @@ static int32_t HasValidAuthAccessType(const struct ExpectParams allowAuthAccessT
     return HKS_ERROR_INVALID_ARGUMENT;
 }
 
+static int32_t CheckTuiPinAccessType(uint32_t authAccessType)
+{
+    if (authAccessType != HKS_AUTH_ACCESS_ALWAYS_VALID) {
+        HKS_LOG_E("invalid authAccessType for TUI PIN, authAccessType = %" LOG_PUBLIC "d", authAccessType);
+        return HKS_ERROR_INVALID_ACCESS_TYPE;
+    }
+
+    return HKS_SUCCESS;
+}
+
 static int32_t HksCheckAuthAccessTypeByUserAuthType(uint32_t userAuthType, uint32_t authAccessType)
 {
+    if ((userAuthType & HKS_USER_AUTH_TYPE_TUI_PIN) != 0) {
+        return CheckTuiPinAccessType(authAccessType);
+    }
     uint32_t valuesCnt = HKS_ARRAY_SIZE(g_expectAuthAccessParams);
     uint32_t validAuthAccessType = 0;
     uint32_t tempType = 0;
