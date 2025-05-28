@@ -279,7 +279,7 @@ HWTEST_F(HksWrapKeyTest, HksWrapKeyTest002, TestSize.Level0)
         EXPECT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
 
         ohResult = OH_Huks_GenerateKeyItem(&keyAlias, genParamSet, nullptr);
-        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_NOT_SUPPORTED_API) << "OH_Huks_GenerateKeyItem fail";
+        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED) << "OH_Huks_GenerateKeyItem fail";
     } while (0);
         
     OH_Huks_FreeParamSet(&genParamSet);
@@ -307,7 +307,7 @@ HWTEST_F(HksWrapKeyTest, HksWrapKeyTest003, TestSize.Level0)
         char newKey[] = "test_import_tui";
         struct OH_Huks_Blob newKeyAlias = {.size = (uint32_t)strlen(newKey), .data = (uint8_t *)newKey};
         ohResult = OH_Huks_ImportKeyItem(&newKeyAlias, testImportKeyParamSet, &publicKey);
-        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_NOT_SUPPORTED_API) << "OH_Huks_ImportKeyItem fail";
+        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED) << "OH_Huks_ImportKeyItem fail";
     } while (0);
 
     OH_Huks_FreeParamSet(&testImportKeyParamSet);
@@ -499,23 +499,23 @@ HWTEST_F(HksWrapKeyTest, HksWrapKeyTest005, TestSize.Level0)
 
         authTypeParam->uint32Param = OH_HUKS_USER_AUTH_TYPE_TUI_PIN | OH_HUKS_USER_AUTH_TYPE_PIN;
         ohResult = OH_Huks_GenerateKeyItem(&keyAlias, genParamSet, nullptr);
-        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_INVALID_ARGUMENT) << "OH_Huks_GenerateKeyItem fail";
+        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT) << "OH_Huks_GenerateKeyItem fail";
 
         authTypeParam->uint32Param =
             OH_HUKS_USER_AUTH_TYPE_TUI_PIN | OH_HUKS_USER_AUTH_TYPE_FACE | OH_HUKS_USER_AUTH_TYPE_PIN;
         ohResult = OH_Huks_GenerateKeyItem(&keyAlias, genParamSet, nullptr);
-        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_INVALID_ARGUMENT) << "OH_Huks_GenerateKeyItem fail";
+        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT) << "OH_Huks_GenerateKeyItem fail";
 
         authTypeParam->uint32Param =
             OH_HUKS_USER_AUTH_TYPE_TUI_PIN | OH_HUKS_USER_AUTH_TYPE_FINGERPRINT | OH_HUKS_USER_AUTH_TYPE_PIN;
         ohResult = OH_Huks_GenerateKeyItem(&keyAlias, genParamSet, nullptr);
-        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_INVALID_ARGUMENT) << "OH_Huks_GenerateKeyItem fail";
+        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT) << "OH_Huks_GenerateKeyItem fail";
 
         authTypeParam->uint32Param =
             OH_HUKS_USER_AUTH_TYPE_TUI_PIN | OH_HUKS_USER_AUTH_TYPE_FACE | OH_HUKS_USER_AUTH_TYPE_FINGERPRINT |
             OH_HUKS_USER_AUTH_TYPE_PIN;
         ohResult = OH_Huks_GenerateKeyItem(&keyAlias, genParamSet, nullptr);
-        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_INVALID_ARGUMENT) << "OH_Huks_GenerateKeyItem fail";
+        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT) << "OH_Huks_GenerateKeyItem fail";
     } while (0);
         
     OH_Huks_FreeParamSet(&genParamSet);
@@ -552,11 +552,11 @@ HWTEST_F(HksWrapKeyTest, HksWrapKeyTest006, TestSize.Level0)
 
         accessTypeParam->uint32Param = OH_HUKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD;
         ohResult = OH_Huks_GenerateKeyItem(&keyAlias, genParamSet, nullptr);
-        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_INVALID_ARGUMENT) << "OH_Huks_WrapKey fail";
+        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT) << "OH_Huks_WrapKey fail";
 
         accessTypeParam->uint32Param = OH_HUKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL;
         ohResult = OH_Huks_GenerateKeyItem(&keyAlias, genParamSet, nullptr);
-        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_INVALID_ARGUMENT) << "OH_Huks_WrapKey fail";
+        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT) << "OH_Huks_WrapKey fail";
 
         authTypeParam->uint32Param = OH_HUKS_USER_AUTH_TYPE_TUI_PIN | OH_HUKS_USER_AUTH_TYPE_FINGERPRINT;
 
@@ -566,11 +566,11 @@ HWTEST_F(HksWrapKeyTest, HksWrapKeyTest006, TestSize.Level0)
 
         accessTypeParam->uint32Param = OH_HUKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD;
         ohResult = OH_Huks_GenerateKeyItem(&keyAlias, genParamSet, nullptr);
-        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_INVALID_ARGUMENT) << "OH_Huks_WrapKey fail";
+        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT) << "OH_Huks_WrapKey fail";
 
         accessTypeParam->uint32Param = OH_HUKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL;
         ohResult = OH_Huks_GenerateKeyItem(&keyAlias, genParamSet, nullptr);
-        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_INVALID_ARGUMENT) << "OH_Huks_WrapKey fail";
+        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT) << "OH_Huks_WrapKey fail";
 
         authTypeParam->uint32Param =
             OH_HUKS_USER_AUTH_TYPE_TUI_PIN | OH_HUKS_USER_AUTH_TYPE_FACE | OH_HUKS_USER_AUTH_TYPE_FINGERPRINT;
@@ -581,11 +581,11 @@ HWTEST_F(HksWrapKeyTest, HksWrapKeyTest006, TestSize.Level0)
 
         accessTypeParam->uint32Param = OH_HUKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD;
         ohResult = OH_Huks_GenerateKeyItem(&keyAlias, genParamSet, nullptr);
-        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_INVALID_ARGUMENT) << "OH_Huks_WrapKey fail";
+        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT) << "OH_Huks_WrapKey fail";
 
         accessTypeParam->uint32Param = OH_HUKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL;
         ohResult = OH_Huks_GenerateKeyItem(&keyAlias, genParamSet, nullptr);
-        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_INVALID_ARGUMENT) << "OH_Huks_WrapKey fail";
+        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT) << "OH_Huks_WrapKey fail";
     } while (0);
         
     OH_Huks_FreeParamSet(&genParamSet);
