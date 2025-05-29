@@ -614,6 +614,7 @@ HKS_API_EXPORT int32_t HksWrapKey(const struct HksBlob *keyAlias, const struct H
     const struct HksParamSet *paramSet, struct HksBlob *wrappedData)
 {
     (void)targetKeyAlias;
+#ifdef L2_STANDARD
     HKS_LOG_D("enter %" LOG_PUBLIC "s", __func__);
     if (keyAlias == NULL || paramSet == NULL || wrappedData == NULL) {
         return HKS_ERROR_NULL_POINTER;
@@ -621,12 +622,19 @@ HKS_API_EXPORT int32_t HksWrapKey(const struct HksBlob *keyAlias, const struct H
     int32_t ret = HksClientWrapKey(keyAlias, paramSet, wrappedData);
     HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
+#else
+    (void)keyAlias;
+    (void)paramSet;
+    (void)wrappedData;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
 }
 
 HKS_API_EXPORT int32_t HksUnwrapKey(const struct HksBlob *keyAlias, const struct HksBlob *targetKeyAlias,
     const struct HksBlob *wrappedData, const struct HksParamSet *paramSet)
 {
     (void)targetKeyAlias;
+#ifdef L2_STANDARD
     HKS_LOG_D("enter %" LOG_PUBLIC "s", __func__);
     if (keyAlias == NULL || paramSet == NULL || wrappedData == NULL) {
         return HKS_ERROR_NULL_POINTER;
@@ -634,6 +642,12 @@ HKS_API_EXPORT int32_t HksUnwrapKey(const struct HksBlob *keyAlias, const struct
     int32_t ret = HksClientUnwrapKey(keyAlias, paramSet, wrappedData);
     HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
+#else
+    (void)keyAlias;
+    (void)paramSet;
+    (void)wrappedData;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
 }
 
 HKS_API_EXPORT int32_t HksBnExpMod(struct HksBlob *x, const struct HksBlob *a,
