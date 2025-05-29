@@ -499,7 +499,7 @@ int32_t HksClientWrapKey(const struct HksBlob *keyAlias, const struct HksParamSe
     (void)keyAlias;
     (void)paramSet;
     (void)wrappedKey;
-    return HKS_ERROR_NOT_SUPPORTED;
+    return HKS_ERROR_API_NOT_SUPPORTED;
 }
 
 int32_t HksClientUnwrapKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
@@ -508,5 +508,5 @@ int32_t HksClientUnwrapKey(const struct HksBlob *keyAlias, const struct HksParam
     (void)keyAlias;
     (void)paramSet;
     (void)wrappedKey;
-    return HKS_ERROR_NOT_SUPPORTED;
+    return HKS_ERROR_API_NOT_SUPPORTED;
 }
