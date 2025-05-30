@@ -62,6 +62,7 @@ static const uint32_t g_rsaDigest[] = {
     HKS_DIGEST_SHA512
 };
 static const uint32_t g_rsaSignPadding[] = {
+    HKS_PADDING_NONE,
     HKS_PADDING_PSS,
     HKS_PADDING_PKCS1_V1_5,
     HKS_PADDING_ISO_IEC_9796_2
@@ -70,7 +71,6 @@ static const uint32_t g_rsaCipherPadding[] = {
     HKS_PADDING_NONE,
     HKS_PADDING_OAEP,
     HKS_PADDING_PKCS1_V1_5,
-    HKS_PADDING_ISO_IEC_9796_2
 };
 #endif
 

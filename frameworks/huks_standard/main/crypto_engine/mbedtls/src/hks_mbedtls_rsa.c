@@ -508,13 +508,124 @@ static int32_t HksMbedtlsRsaSignVerify(const struct HksBlob *key, const struct H
     return ret;
 }
 
+static int32_t RsaCheckNoPadding(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message)
+{
+    if (usageSpec->digest != HKS_DIGEST_NONE) {
+        HKS_LOG_E("check rsa digest fail");
+        return HKS_ERROR_INVALID_DIGEST;
+    }
+
+    const struct KeyMaterialRsa *keyMaterial = (struct KeyMaterialRsa *)(key->data);
+#ifdef HKS_SUPPORT_RSA_C_FLEX_KEYSIZE
+    if (keyMaterial->keySize < HKS_RSA_KEY_SIZE_1024 || keyMaterial->keySize > HKS_RSA_KEY_SIZE_2048 ||
+        keyMaterial->keySize % HKS_RSA_KEYSIZE_CNT != 0) {
+        HKS_LOG_E("check rsa key size fail");
+        return HKS_ERROR_INVALID_KEY_SIZE;
+    }
+#endif
+
+    if (message->size * HKS_BITS_PER_BYTE != keyMaterial->keySize) {
+        HKS_LOG_E("check rsa message size fail");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    return HKS_SUCCESS;
+}
+
+static int32_t HksMbedtlsRsaSignForNoPadding(mbedtls_rsa_context *ctx, mbedtls_ctr_drbg_context *ctrDrbg,
+    const struct HksBlob *message, struct HksBlob *signature)
+{
+    int32_t ret = mbedtls_rsa_private(ctx, mbedtls_ctr_drbg_random, ctrDrbg, message->data, signature->data);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("mbedtls rsa no padding sign failed, mbedtls ret = %" LOG_PUBLIC "d", ret);
+        (void)memset_s(signature->data, signature->size, 0, signature->size);
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+
+    signature->size = (uint32_t)mbedtls_rsa_get_len(ctx);
+    return HKS_SUCCESS;
+}
+
+static int32_t HksMbedtlsRsaVerifyForNoPadding(mbedtls_rsa_context *ctx, const struct HksBlob *message,
+    struct HksBlob *signature)
+{
+    uint8_t *decryptedHash = (uint8_t *)HksMalloc(message->size);
+    if (decryptedHash == NULL) {
+        HKS_LOG_E("HksMalloc failed");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+
+    int32_t ret = mbedtls_rsa_public(ctx, signature->data, decryptedHash);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get message hash from signature fail, mbedtls ret = %" LOG_PUBLIC "d", ret);
+        HKS_FREE(decryptedHash);
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+
+    if (memcmp(decryptedHash, message->data, message->size) != 0) {
+        HKS_LOG_E("mbedtls rsa no padding verify failed");
+        HKS_FREE(decryptedHash);
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+
+    HKS_FREE(decryptedHash);
+    return HKS_SUCCESS;
+}
+
+static int32_t HksMbedtlsRsaSignVerifyForNoPadding(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, const bool sign, struct HksBlob *signature)
+{
+    int32_t ret = RsaCheckNoPadding(key, usageSpec, message);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check rsa no padding fail")
+
+    mbedtls_ctr_drbg_context ctrDrbg;
+    mbedtls_entropy_context entropy;
+    (void)memset_s(&ctrDrbg, sizeof(mbedtls_ctr_drbg_context), 0, sizeof(mbedtls_ctr_drbg_context));
+    (void)memset_s(&entropy, sizeof(mbedtls_entropy_context), 0, sizeof(mbedtls_entropy_context));
+    ret = HksCtrDrbgSeed(&ctrDrbg, &entropy);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    mbedtls_rsa_context ctx;
+    (void)memset_s(&ctx, sizeof(mbedtls_rsa_context), 0, sizeof(mbedtls_rsa_context));
+    mbedtls_rsa_init(&ctx);
+
+    do {
+        ret = RsaKeyMaterialToCtx(key, sign, &ctx); /* sign need private exponent (d) */
+        HKS_IF_NOT_SUCC_BREAK(ret)
+
+        if (sign) {
+            ret = HksMbedtlsRsaSignForNoPadding(&ctx, &ctrDrbg, message, signature);
+        } else {
+            ret = HksMbedtlsRsaVerifyForNoPadding(&ctx, message, signature);
+        }
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("mbedtls rsa sign/verify failed");
+        }
+    } while (0);
+
+    mbedtls_rsa_free(&ctx);
+    mbedtls_ctr_drbg_free(&ctrDrbg);
+    mbedtls_entropy_free(&entropy);
+
+    return ret;
+}
+
 int32_t HksMbedtlsRsaSign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *signature)
 {
     int32_t ret = RsaKeyCheck(key);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    if (usageSpec->padding != HKS_PADDING_NONE) {
+        ret = HksMbedtlsRsaSignVerify(key, usageSpec, message, true, signature);
+    } else {
+        ret = HksMbedtlsRsaSignVerifyForNoPadding(key, usageSpec, message, true, signature);
+    }
 
-    return HksMbedtlsRsaSignVerify(key, usageSpec, message, true, signature); /* true: is sign */
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksMbedtlsRsaSign, ret = %" LOG_PUBLIC "d", ret);
+    }
+    return ret;
 }
 
 int32_t HksMbedtlsRsaVerify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
@@ -522,8 +633,16 @@ int32_t HksMbedtlsRsaVerify(const struct HksBlob *key, const struct HksUsageSpec
 {
     int32_t ret = RsaKeyCheck(key);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    if (usageSpec->padding != HKS_PADDING_NONE) {
+        ret = HksMbedtlsRsaSignVerify(key, usageSpec, message, false, (struct HksBlob *)signature);
+    } else {
+        ret = HksMbedtlsRsaSignVerifyForNoPadding(key, usageSpec, message, false, (struct HksBlob *)signature);
+    }
 
-    return HksMbedtlsRsaSignVerify(key, usageSpec, message, false, (struct HksBlob *)signature); /* false: is verify */
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksMbedtlsRsaVerify, ret = %" LOG_PUBLIC "d", ret);
+    }
+    return ret;
 }
 #endif /* HKS_SUPPORT_RSA_SIGN_VERIFY */
 
