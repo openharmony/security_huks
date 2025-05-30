@@ -309,7 +309,7 @@ HWTEST_F(HksRsaSignVerifyPart10Test, HksRsaSignVerifyPart10Test101, TestSize.Lev
 
     uint8_t out[RSA_COMMON_SIZE] = { 0 };
     struct HksBlob outData = { RSA_COMMON_SIZE, out };
-    ret = HksRsaVerifyTest(&keyAlias, signParamSet, &inData, &signature, &outData);
+    ret = HksRsaVerifyTest(&keyAlias, verifyParamSet, &inData, &signature, &outData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksRsaVerifyTest failed.";
 
     ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
@@ -352,7 +352,7 @@ HWTEST_F(HksRsaSignVerifyPart10Test, HksRsaSignVerifyPart10Test102, TestSize.Lev
 
     uint8_t out[RSA_COMMON_SIZE] = { 0 };
     struct HksBlob outData = { RSA_COMMON_SIZE, out };
-    ret = HksRsaVerifyTest(&keyAlias, signParamSet, &inData, &signature, &outData);
+    ret = HksRsaVerifyTest(&keyAlias, verifyParamSet, &inData, &signature, &outData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksRsaVerifyTest failed.";
 
     ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
@@ -458,7 +458,7 @@ HWTEST_F(HksRsaSignVerifyPart10Test, HksRsaSignVerifyPart10Test105, TestSize.Lev
     uint8_t out[RSA_COMMON_SIZE] = { 0 };
     struct HksBlob outData = { RSA_COMMON_SIZE, out };
     if (deviceType == DEVICE_TYPE_WATCH) {
-        ret = HksRsaVerifyTest(&keyAlias, signParamSet, &inData, &signature, &outData);
+        ret = HksRsaVerifyTest(&keyAlias, verifyParamSet, &inData, &signature, &outData);
         EXPECT_EQ(ret, HKS_SUCCESS) << "HksRsaVerifyTest failed.";
     }
 
