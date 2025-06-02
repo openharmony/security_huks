@@ -193,8 +193,7 @@ void HksHaPlugin::HandlerReport(HksEventQueueItem &item)
     }
 
     bool needReport = procMap->needReport(eventInfo);
-    HKS_IF_NOT_TRUE_LOGI_RETURN(needReport, HandleStatisticEvent(eventInfo, eventId, procMap),
-        "HandlerReport: Statistics event detected for eventId %" LOG_PUBLIC "u", eventId)
+    HKS_IF_NOT_TRUE_RETURN(needReport, HandleStatisticEvent(eventInfo, eventId, procMap))
     
     std::unordered_map<std::string, std::string> eventMap;
     ret = procMap->eventInfoToMap(eventInfo, eventMap);

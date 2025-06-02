@@ -151,7 +151,7 @@ static int32_t TransferFile(const char *alias, const char *anonymousKeyAlias, co
             if (HksFileRemove(newPath, alias) != HKS_SUCCESS) {
                 HKS_LOG_E("try remove new file in %" LOG_PUBLIC "s failed.", newPath);
             } else {
-                HKS_LOG_I("remove new file success.");
+                HKS_LOG_D("remove new file success.");
             }
         }
     } while (false);
@@ -244,7 +244,7 @@ static int32_t CopyDeToTmpPathIfNeed(void)
     ret = HksMakeDir(HKS_KEY_STORE_PATH);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_MAKE_DIR_FAIL,
         "create de path failed, error code is %" LOG_PUBLIC "d.", ret)
-    HKS_LOG_I("move de file path to old file path");
+    HKS_LOG_D("move de file path to old file path");
     return HKS_SUCCESS;
 }
 
