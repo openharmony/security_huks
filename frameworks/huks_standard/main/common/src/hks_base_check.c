@@ -185,7 +185,7 @@ static int32_t GetOptionalParams(const struct HksParamSet *paramSet, uint32_t ta
             return ret;
         }
         if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
-            HKS_LOG_I("tag is empty, but it is supported!");
+            HKS_LOG_D("tag [%" LOG_PUBLIC "u] is empty, but it is supported!", tag);
             *isAbsent = true;
             return HKS_SUCCESS;
         }
