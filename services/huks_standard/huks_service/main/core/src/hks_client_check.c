@@ -214,13 +214,13 @@ int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t 
     struct HksParam *noRequireAuth = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_NO_AUTH_REQUIRED, &noRequireAuth);
     if (ret == HKS_SUCCESS && noRequireAuth->boolParam == true) {
-        HKS_LOG_I("no require auth=true");
+        HKS_LOG_D("no require auth=true");
         return HKS_ERROR_NOT_SUPPORTED;
     }
 
     struct HksParam *userAuthTypeParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_USER_AUTH_TYPE, &userAuthTypeParam);
-    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, HKS_ERROR_NOT_SUPPORTED, "no user auth type param: not support user auth!")
+    HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_NOT_SUPPORTED)
 
     struct HksParam *accessTypeParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_KEY_AUTH_ACCESS_TYPE, &accessTypeParam);

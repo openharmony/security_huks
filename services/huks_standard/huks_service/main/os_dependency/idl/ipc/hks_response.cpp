@@ -146,7 +146,6 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
 #endif
     processInfo->pid = static_cast<uint64_t>(IPCSkeleton::GetCallingPid());
     HKS_IF_TRUE_LOGE(processInfo->pid == 0, "GetCallingPID is zero")
-
     return HKS_SUCCESS;
 }
 
@@ -157,7 +156,7 @@ int32_t HksGetFrontUserId(int32_t *outId)
     int ret = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
     HKS_IF_TRUE_LOGE_RETURN(ret != ERR_OK || ids.empty(), HKS_FAILURE,
         "QueryActiveOsAccountIds Failed!! ret = %" LOG_PUBLIC "d", ret)
-    HKS_LOG_I("QueryActiveOsAccountIds success: FrontUserId= %" LOG_PUBLIC "d", ids[0]);
+    HKS_LOG_D("QueryActiveOsAccountIds success: FrontUserId= %" LOG_PUBLIC "d", ids[0]);
     *outId = ids[0];
 #else // HAS_OS_ACCOUNT_PART
     *outId = -1;
