@@ -144,7 +144,7 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
     processInfo->accessTokenId = static_cast<uint64_t>(IPCSkeleton::GetCallingTokenID());
     HKS_IF_TRUE_LOGE(processInfo->accessTokenId == 0, "accessTokenId is zero")
 #endif
-    processInfo->pid = static_cast<uint64_t>(IPCSkeleton::GetCallingPid());
+    processInfo->pid = static_cast<int32_t>(IPCSkeleton::GetCallingPid());
     HKS_IF_TRUE_LOGE(processInfo->pid == 0, "GetCallingPID is zero")
     return HKS_SUCCESS;
 }
