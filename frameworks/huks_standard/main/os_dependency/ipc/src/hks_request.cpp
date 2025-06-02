@@ -77,7 +77,7 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
 #ifdef L2_STANDARD
     uint32_t errMsgLen = 0;
     if (reply.ReadUint32(errMsgLen) && errMsgLen != 0 && errMsgLen < MAX_ERROR_MESSAGE_LEN) {
-        HKS_LOG_I("reply get errMsgLen = %{public}u", errMsgLen);
+        HKS_LOG_D("reply get errMsgLen = %{public}u", errMsgLen);
         const uint8_t *errMsg = reply.ReadUnpadBuffer(errMsgLen);
         HKS_IF_NULL_LOGE_RETURN(errMsg, ret, "[ipc error] read errorMsg")
         HksAppendThreadErrMsg(errMsg, errMsgLen);
