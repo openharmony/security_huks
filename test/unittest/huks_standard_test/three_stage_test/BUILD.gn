@@ -114,6 +114,7 @@ ohos_unittest("huks_UT_test") {
       "src/asymmetric_alg_test/hks_rsa_sign_verify_part2_test.cpp",
       "src/asymmetric_alg_test/hks_rsa_sign_verify_part3_test.cpp",
       "src/asymmetric_alg_test/hks_rsa_sign_verify_part4_test.cpp",
+      "src/asymmetric_alg_test/hks_rsa_sign_verify_part11_test.cpp",
       "src/hks_import_sign_verify_test.cpp",
     ]
   } else {
