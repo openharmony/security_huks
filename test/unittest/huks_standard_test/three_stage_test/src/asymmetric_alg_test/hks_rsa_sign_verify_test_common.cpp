@@ -348,7 +348,9 @@ int32_t HksRsaSignTest(struct HksBlob *keyAlias, struct HksParamSet *signParamSe
         return ret;
     }
 
-    return HksFinishForDe(&handleBlob, signParamSet, plaintext, signature);
+    uint8_t tmpIn[] = "tempIn";
+    struct HksBlob finishInData = { 0, tmpIn };
+    return HksFinishForDe(&handleBlob, signParamSet, &finishInData, signature);
 }
 
 int32_t HksRsaVerifyTest(struct HksBlob *keyAlias, struct HksParamSet *verifyParamSet, struct HksBlob *plaintext,
