@@ -106,6 +106,7 @@ static uint32_t g_validTags[] = {
     HKS_TAG_KEY_ROLE,
     HKS_TAG_KEY_FLAG,
     HKS_TAG_KEY_DOMAIN,
+    HKS_TAG_KEY_OVERRIDE,
 
     HKS_TAG_KEY_AUTH_ACCESS_TYPE,
     HKS_TAG_KEY_SECURE_SIGN_TYPE,
@@ -266,6 +267,39 @@ HKS_API_EXPORT int32_t HksAddParams(struct HksParamSet *paramSet,
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     for (uint32_t i = 0; i < paramCnt; i++) {
+        paramSet->paramSetSize += sizeof(struct HksParam);
+        if (GetTagType((enum HksTag)(params[i].tag)) == HKS_TAG_TYPE_BYTES) {
+            if (IsAdditionOverflow(paramSet->paramSetSize, params[i].blob.size)) {
+                HKS_LOG_E("params size overflow!");
+                paramSet->paramSetSize -= sizeof(struct HksParam);
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+            paramSet->paramSetSize += params[i].blob.size;
+        }
+        if (memcpy_s(&paramSet->params[paramSet->paramsCnt++], sizeof(struct HksParam), &params[i],
+            sizeof(struct HksParam)) != EOK) {
+            HKS_LOG_E("copy paramSet failed!");
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
+        }
+    }
+    return HKS_SUCCESS;
+}
+static const uint32_t g_dropTags[] = {
+    HKS_TAG_KEY_OVERRIDE,
+};
+
+HKS_API_EXPORT int32_t HksAddParamsWithFilter(struct HksParamSet *paramSet,
+    const struct HksParam *params, uint32_t paramCnt)
+{
+    int32_t ret = CheckBeforeAddParams(paramSet, params, paramCnt);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    for (uint32_t i = 0; i < paramCnt; i++) {
+        for (uint32_t j = 0; j < sizeof(g_dropTags) / sizeof(g_dropTags[0]); j++) {
+            if (params[i].tag == g_dropTags[j]) {
+                continue;
+            }
+        }
         paramSet->paramSetSize += sizeof(struct HksParam);
         if (GetTagType((enum HksTag)(params[i].tag)) == HKS_TAG_TYPE_BYTES) {
             if (IsAdditionOverflow(paramSet->paramSetSize, params[i].blob.size)) {

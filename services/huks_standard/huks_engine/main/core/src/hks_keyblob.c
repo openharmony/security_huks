@@ -347,7 +347,7 @@ static int32_t BuildKeyBlobWithKeyParam(const struct HksBlob *key, enum HksKeyFl
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "init param set failed")
 
     do {
-        ret = HksAddParams(newParamSet, inParamSet->params, inParamSet->paramsCnt);
+        ret = HksAddParamsWithFilter(newParamSet, inParamSet->params, inParamSet->paramsCnt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add in params failed")
 
         ret = InitKeyBlobInfo(key, &tmpKey);
