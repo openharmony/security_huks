@@ -43,7 +43,7 @@ int32_t HksGetKeyCountByProcessName(const struct HksBlob *processName, uint32_t 
 #else // _STORAGE_LITE_
 
 int32_t HksStoreKeyBlob(const struct HksStoreFileInfo *fileInfo, const struct HksStoreMaterial *material,
-    const struct HksBlob *keyBlob);
+    const struct HksBlob *keyBlob, bool isOverride);
 
 int32_t HksStoreDeleteKeyBlob(const struct HksStoreFileInfo *fileInfo, const struct HksStoreMaterial *material);
 
@@ -58,7 +58,7 @@ int32_t HksStoreGetKeyBlobSize(const struct HksStoreInfo *fileInfoPath, const st
 int32_t HksGetKeyCountByProcessName(const struct HksStoreFileInfo *fileInfo, uint32_t *fileCount);
 
 int32_t HksStorageWriteFile(
-    const char *path, const char *fileName, uint32_t offset, const uint8_t *buf, uint32_t len);
+    const char *path, const char *fileName, const uint8_t *buf, uint32_t len, bool isOverride);
 
 #endif // _STORAGE_LITE_
 #endif // _CUT_AUTHENTICATE_

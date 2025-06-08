@@ -159,6 +159,7 @@ static void AddHuksTagPart2(napi_env env, napi_value tag)
     AddInt32Property(env, tag, "HUKS_TAG_SECURE_KEY_UUID", HKS_TAG_SECURE_KEY_UUID);
     AddInt32Property(env, tag, "HUKS_TAG_KEY_DOMAIN", HKS_TAG_KEY_DOMAIN);
     AddInt32Property(env, tag, "HUKS_TAG_IS_DEVICE_PASSWORD_SET", HKS_TAG_IS_DEVICE_PASSWORD_SET);
+    AddInt32Property(env, tag, "HUKS_TAG_KEY_OVERRIDE", HKS_TAG_KEY_OVERRIDE);
 
     /* Inner-use TAG: 10001 - 10999 */
     AddInt32Property(env, tag, "HUKS_TAG_PROCESS_NAME", HKS_TAG_PROCESS_NAME);

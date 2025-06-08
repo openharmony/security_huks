@@ -58,17 +58,31 @@ static HksStorageFileLock *CreateStorageFileLock(const char *path, const char *f
 #endif
 
 int32_t HksStorageWriteFile(
-    const char *path, const char *fileName, uint32_t offset, const uint8_t *buf, uint32_t len)
+    const char *path, const char *fileName, const uint8_t *buf, uint32_t len, bool isOverride)
 {
 #ifdef HKS_SUPPORT_THREAD
     HksStorageFileLock *lock = CreateStorageFileLock(path, fileName);
     HksStorageFileLockWrite(lock);
-    int32_t ret = HksFileWrite(path, fileName, offset, buf, len);
+    
+    if (!isOverride) {
+        int32_t ret = HksIsFileExist(path, fileName);
+        if (ret == HKS_SUCCESS) {
+            HKS_LOG_I("key is already exist.");
+            HksStorageFileUnlockWrite(lock);
+            HksStorageFileLockRelease(lock);
+            return HKS_ERROR_CODE_KEY_ALREADY_EXIST;
+        } else if (ret != HKS_ERROR_NOT_EXIST) {
+            HksStorageFileUnlockWrite(lock);
+            HksStorageFileLockRelease(lock);
+            return ret;
+        }
+    }
+    int32_t ret = HksFileWrite(path, fileName, 0, buf, len);
     HksStorageFileUnlockWrite(lock);
     HksStorageFileLockRelease(lock);
     return ret;
 #else
-    return HksFileWrite(path, fileName, offset, buf, len);
+    return HksFileWrite(path, fileName, 0, buf, len);
 #endif
 }
 
@@ -105,18 +119,18 @@ static int32_t CleanFile(const char *path, const char *fileName)
         }
 
         (void)memset_s(buf, size, 0, size);
-        ret = HksStorageWriteFile(path, fileName, 0, buf, size);
+        ret = HksStorageWriteFile(path, fileName, buf, size, true);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "write file 0 failed!")
 
         (void)memset_s(buf, size, 1, size);
-        ret = HksStorageWriteFile(path, fileName, 0, buf, size);
+        ret = HksStorageWriteFile(path, fileName, buf, size, true);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "write file 1 failed!")
 
         struct HksBlob bufBlob = { .size = size, .data = buf };
         ret = HuksAccessGenerateRandom(NULL, &bufBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "fill buf random failed!")
 
-        ret = HksStorageWriteFile(path, fileName, 0, buf, size);
+        ret = HksStorageWriteFile(path, fileName, buf, size, true);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "write file random failed!")
     } while (0);
 
@@ -169,7 +183,7 @@ static int32_t CopyKeyBlobFromSrc(const char *srcPath, const char *srcFileName,
             break;
         }
 
-        ret = HksStorageWriteFile(destPath, destFileName, 0, buffer, size);
+        ret = HksStorageWriteFile(destPath, destFileName, buffer, size, true);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "file write destPath failed, ret = %" LOG_PUBLIC "d.", ret)
     } while (0);
 
@@ -256,20 +270,20 @@ static int32_t IsKeyBlobExist(const struct HksStoreFileInfo *fileInfo)
 }
 
 int32_t HksStoreKeyBlob(const struct HksStoreFileInfo *fileInfo, const struct HksStoreMaterial *material,
-    const struct HksBlob *keyBlob)
+    const struct HksBlob *keyBlob, bool isOverride)
 {
     int32_t ret;
     do {
         ret = RecordKeyOperation(KEY_OPERATION_SAVE, material, fileInfo->mainPath.fileName);
         HKS_IF_NOT_SUCC_BREAK(ret)
 
-        ret = HksStorageWriteFile(fileInfo->mainPath.path, fileInfo->mainPath.fileName, 0,
-            keyBlob->data, keyBlob->size);
+        ret = HksStorageWriteFile(fileInfo->mainPath.path, fileInfo->mainPath.fileName,
+            keyBlob->data, keyBlob->size, isOverride);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks save main key blob failed, ret = %" LOG_PUBLIC "d.", ret)
 
 #ifdef SUPPORT_STORAGE_BACKUP
-        HKS_IF_NOT_SUCC_LOGE(HksStorageWriteFile(fileInfo->bakPath.path, fileInfo->bakPath.fileName, 0, keyBlob->data,
-            keyBlob->size), "hks save backup key blob failed")
+        HKS_IF_NOT_SUCC_LOGE(HksStorageWriteFile(fileInfo->bakPath.path, fileInfo->bakPath.fileName, keyBlob->data,
+            keyBlob->size, isOverride), "hks save backup key blob failed")
 #endif
     } while (0);
 

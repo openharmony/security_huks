@@ -55,6 +55,16 @@ HKS_API_EXPORT int32_t HksAddParams(struct HksParamSet *paramSet,
     const struct HksParam *params, uint32_t paramCnt);
 
 /**
+ * @brief Add parameter set and filter in black list way
+ * @param paramSet required parameter set
+ * @param params params need to add
+ *
+ * @param paramCnt numbers of params
+ * @return error code, see hks_type.h
+ */
+HKS_API_EXPORT int32_t HksAddParamsWithFilter(struct HksParamSet *paramSet,
+    const struct HksParam *params, uint32_t paramCnt);
+/**
  * @brief Build parameter set
  * @param paramSet required parameter set
  * @return error code, see hks_type.h
