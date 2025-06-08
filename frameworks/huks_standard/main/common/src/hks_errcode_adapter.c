@@ -584,6 +584,13 @@ static struct HksError g_errCodeTable[] = {
             .errorMsg = "The input parameter is invalid.",
             .data = NULL
         }
+    }, {
+        .innerErrCode = HKS_ERROR_CODE_KEY_ALREADY_EXIST,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_KEY_ALREADY_EXIST,
+            .errorMsg = "The key with same name is already exist.",
+            .data = NULL
+        }
     }
 };
 
