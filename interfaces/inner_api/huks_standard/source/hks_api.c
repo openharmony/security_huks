@@ -114,12 +114,13 @@ static int32_t CheckifNeedOverrideKey(const struct HksBlob *keyAlias,
     int32_t ret = HksGetParam(paramSetIn, HKS_TAG_KEY_OVERRIDE, &isKeyOverride);
     if (ret == HKS_SUCCESS && !isKeyOverride->boolParam) {
         ret =HksClientKeyExist(keyAlias, paramSetIn);
+        if (ret == HKS_SUCCESS) {
+            return HKS_ERROR_CODE_KEY_ALREADY_EXIST;
+        } else if (ret != HKS_ERROR_NOT_EXIST) {
+            return ret;
+        }
     }
-    if (ret == HKS_SUCCESS) {
-        return HKS_ERROR_CODE_KEY_ALREADY_EXIST;
-    } else if (ret != HKS_ERROR_NOT_EXIST) {
-        return ret;
-    }
+    
     return HKS_SUCCESS;
 }
 
