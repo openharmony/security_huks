@@ -324,7 +324,14 @@ int32_t HksManageStoreKeyBlob(const struct HksProcessInfo *processInfo, const st
         ret = HksConstructStoreFileInfo(processInfo, paramSet, &material, &fileInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks construct store file info failed, ret = %" LOG_PUBLIC "d.", ret)
 
-        ret = HksStoreKeyBlob(&fileInfo, &material, keyBlob);
+        struct HksParam *isKeyOverride = NULL;
+        ret = HksGetParam(paramSet, HKS_TAG_KEY_OVERRIDE, &isKeyOverride);
+        if (ret == HKS_SUCCESS) {
+            ret = HksStoreKeyBlob(&fileInfo, &material, keyBlob, isKeyOverride->boolParam);
+        } else {
+            ret = HksStoreKeyBlob(&fileInfo, &material, keyBlob, true);
+        }
+        
 #endif
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks store key blob failed, ret = %" LOG_PUBLIC "d.", ret)
     } while (0);
@@ -428,8 +435,8 @@ int32_t HksManageStoreGetKeyBlob(const struct HksProcessInfo *processInfo, const
             ret = HksStoreGetKeyBlob(&fileInfo.bakPath, &material, keyBlob);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks get key blob failed, ret = %" LOG_PUBLIC "d.", ret)
 
-            HKS_IF_NOT_SUCC_LOGE(HksStorageWriteFile(fileInfo.mainPath.path, fileInfo.mainPath.fileName, 0,
-                keyBlob->data, keyBlob->size), "hks copy bak key to main key failed")
+            HKS_IF_NOT_SUCC_LOGE(HksStorageWriteFile(fileInfo.mainPath.path, fileInfo.mainPath.fileName,
+                keyBlob->data, keyBlob->size, true), "hks copy bak key to main key failed")
         }
 #endif
 #endif

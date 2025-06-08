@@ -409,6 +409,8 @@ enum  OH_Huks_ErrCode {
      * @since 11
      */
     OH_HUKS_ERR_CODE_DEVICE_PASSWORD_UNSET = 12000016,
+    /** The key with same name is already exist. */
+    OH_HUKS_ERR_CODE_KEY_ALREADY_EXIST = 12000017,
     /**
      * The input parameter is invalid.
      *
@@ -696,6 +698,8 @@ enum OH_Huks_Tag {
     OH_HUKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO = OH_HUKS_TAG_TYPE_BYTES | 514,
     /** Version information used in the attestation. */
     OH_HUKS_TAG_ATTESTATION_ID_VERSION_INFO = OH_HUKS_TAG_TYPE_BYTES | 515,
+    /** The tag indicates wheather to overwrite the kay with same alias. */
+    OH_HUKS_TAG_KEY_OVERRIDE = OH_HUKS_TAG_TYPE_BOOL | 520,
 
     /**
      * 601 to 1000 are reserved for other tags.

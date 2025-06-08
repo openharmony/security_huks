@@ -104,13 +104,36 @@ HKS_API_EXPORT int32_t HksRefreshKeyInfo(void)
 #endif
 }
 
+static int32_t CheckifNeedOverrideKey(const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSetIn)
+{
+    if (paramSetIn == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    struct HksParam *isKeyOverride = NULL;
+    int32_t ret = HksGetParam(paramSetIn, HKS_TAG_KEY_OVERRIDE, &isKeyOverride);
+    if (ret == HKS_SUCCESS && !isKeyOverride->boolParam) {
+        ret =HksClientKeyExist(keyAlias, paramSetIn);
+    }
+    if (ret == HKS_SUCCESS) {
+        return HKS_ERROR_CODE_KEY_ALREADY_EXIST;
+    } else if (ret != HKS_ERROR_NOT_EXIST) {
+        return ret;
+    }
+    return HKS_SUCCESS;
+}
+
 HKS_API_EXPORT int32_t HksGenerateKey(const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut)
 {
 #ifdef HKS_SUPPORT_API_GENERATE_KEY
     HKS_LOG_D("enter %" LOG_PUBLIC "s", __func__);
+    int32_t ret = CheckifNeedOverrideKey(keyAlias, paramSetIn);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
     struct HksParam *storageFlag = NULL;
-    int32_t ret = HksGetParam(paramSetIn, HKS_TAG_KEY_STORAGE_FLAG, &storageFlag);
+    ret = HksGetParam(paramSetIn, HKS_TAG_KEY_STORAGE_FLAG, &storageFlag);
     if ((ret == HKS_SUCCESS) && (storageFlag->uint32Param == HKS_STORAGE_TEMP)) {
         if ((paramSetIn == NULL) || (paramSetOut == NULL)) {
             return HKS_ERROR_NULL_POINTER;
@@ -143,7 +166,11 @@ HKS_API_EXPORT int32_t HksImportKey(const struct HksBlob *keyAlias,
     if ((keyAlias == NULL) || (paramSet == NULL) || (key == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
-    int32_t ret = HksImportKeyAdapter(keyAlias, paramSet, key);
+    int32_t ret = CheckifNeedOverrideKey(keyAlias, paramSet);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    ret = HksImportKeyAdapter(keyAlias, paramSet, key);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 #else
@@ -162,7 +189,11 @@ HKS_API_EXPORT int32_t HksImportWrappedKey(const struct HksBlob *keyAlias, const
     if ((keyAlias == NULL) || (wrappingKeyAlias == NULL)|| (paramSet == NULL) || (wrappedKeyData == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
-    int32_t ret = HksClientImportWrappedKey(keyAlias, wrappingKeyAlias, paramSet, wrappedKeyData);
+    int32_t ret = CheckifNeedOverrideKey(keyAlias, paramSet);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    ret = HksClientImportWrappedKey(keyAlias, wrappingKeyAlias, paramSet, wrappedKeyData);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 #else

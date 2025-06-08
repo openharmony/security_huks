@@ -67,6 +67,26 @@ static const struct HksParam g_genParams[] = {
     { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
 };
 
+static const struct HksParam g_genParams001[] = {
+    { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+    { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
+    { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
+    { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
+    { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+    { .tag = HKS_TAG_KEY_OVERRIDE, .boolParam = true },
+};
+
+static const struct HksParam g_genParams002[] = {
+    { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+    { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
+    { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
+    { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
+    { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+    { .tag = HKS_TAG_KEY_OVERRIDE, .boolParam = false },
+};
+
 class HksStorageTest : public testing::Test {
 public:
     void TearDown() override
@@ -223,4 +243,87 @@ HWTEST_F(HksStorageTest, HksStorageTest_00300, Function | SmallTest | Level1)
     EXPECT_EQ(result, (int32_t)0);
     HksFreeParamSet(&paramSet);
 }
+
+HWTEST_F(HksStorageTest, HksStorageTest_00400, Function | SmallTest | Level1)
+{
+    PrepareBlob();
+
+    HksBlob processName = {
+        .size = TEST_PROCESS_NAME.size() + 1,
+        .data = (uint8_t *)&TEST_PROCESS_NAME[0],
+    };
+    HksBlob userId = {
+        .size = TEST_USER_ID.size() + 1,
+        .data = (uint8_t *)&TEST_USER_ID[0]
+    };
+    uint8_t buff[TEST_BLOB_SIZE] = {0};
+    HksBlob keyBlob = {
+        .size = TEST_BLOB_SIZE,
+        .data = buff,
+    };
+    HksBlob keyAlias = {
+        .size = TEST_KEY_ALIAS.size() + 1,
+        .data = (uint8_t *)&TEST_KEY_ALIAS[0],
+    };
+    HksProcessInfo hksProcessInfo = {
+        .userId = userId,
+        .processName = processName
+    };
+    struct HksParamSet *paramSet = nullptr;
+    struct HksParamSet *paramSet001 = nullptr;
+    int32_t ret = BuildParamSet(g_genParams, HKS_ARRAY_SIZE(g_genParams), &paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = BuildParamSet(g_genParams001, HKS_ARRAY_SIZE(g_genParams001), &paramSet001);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    int32_t result = HksManageStoreKeyBlob(&hksProcessInfo, paramSet,
+        &keyAlias, &keyBlob, HksStorageType::HKS_STORAGE_TYPE_KEY);
+    EXPECT_EQ(result, (int32_t)0);
+    result = HksManageStoreKeyBlob(&hksProcessInfo, paramSet001,
+        &keyAlias, &keyBlob, HksStorageType::HKS_STORAGE_TYPE_KEY);
+    EXPECT_EQ(result, (int32_t)0);
+    HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&paramSet001);
+}
+
+HWTEST_F(HksStorageTest, HksStorageTest_00500, Function | SmallTest | Level1)
+{
+    PrepareBlob();
+
+    HksBlob processName = {
+        .size = TEST_PROCESS_NAME.size() + 1,
+        .data = (uint8_t *)&TEST_PROCESS_NAME[0],
+    };
+    HksBlob userId = {
+        .size = TEST_USER_ID.size() + 1,
+        .data = (uint8_t *)&TEST_USER_ID[0]
+    };
+    uint8_t buff[TEST_BLOB_SIZE] = {0};
+    HksBlob keyBlob = {
+        .size = TEST_BLOB_SIZE,
+        .data = buff,
+    };
+    HksBlob keyAlias = {
+        .size = TEST_KEY_ALIAS.size() + 1,
+        .data = (uint8_t *)&TEST_KEY_ALIAS[0],
+    };
+    HksProcessInfo hksProcessInfo = {
+        .userId = userId,
+        .processName = processName
+    };
+    struct HksParamSet *paramSet = nullptr;
+    struct HksParamSet *paramSet002 = nullptr;
+    int32_t ret = BuildParamSet(g_genParams, HKS_ARRAY_SIZE(g_genParams), &paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = BuildParamSet(g_genParams002, HKS_ARRAY_SIZE(g_genParams002), &paramSet002);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    int32_t result = HksManageStoreKeyBlob(&hksProcessInfo, paramSet,
+        &keyAlias, &keyBlob, HksStorageType::HKS_STORAGE_TYPE_KEY);
+    EXPECT_EQ(result, (int32_t)0);
+    result = HksManageStoreKeyBlob(&hksProcessInfo, paramSet002,
+        &keyAlias, &keyBlob, HksStorageType::HKS_STORAGE_TYPE_KEY);
+    EXPECT_EQ(result, HKS_ERROR_CODE_KEY_ALREADY_EXIST);
+    HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&paramSet002);
+}
+
 }  // namespace

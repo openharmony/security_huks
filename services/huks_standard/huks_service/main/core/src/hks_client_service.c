@@ -231,10 +231,14 @@ int32_t HksServiceDeleteKey(const struct HksProcessInfo *processInfo, const stru
 static int32_t CheckKeyCondition(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet)
 {
-    int32_t ret = HksServiceDeleteKey(processInfo, keyAlias, paramSet);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS && ret != HKS_ERROR_NOT_EXIST, ret,
-        "delete keyblob from storage failed, ret = %" LOG_PUBLIC "d", ret)
-
+    struct HksParam *isKeyOverride = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_OVERRIDE, &isKeyOverride);
+    if (ret != HKS_SUCCESS || isKeyOverride->boolParam) {
+        ret = HksServiceDeleteKey(processInfo, keyAlias, paramSet);
+        HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS && ret != HKS_ERROR_NOT_EXIST, ret,
+            "delete keyblob from storage failed, ret = %" LOG_PUBLIC "d", ret)
+    }
+    
     uint32_t fileCount;
     ret = HksManageGetKeyCountByProcessName(processInfo, paramSet, &fileCount);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
