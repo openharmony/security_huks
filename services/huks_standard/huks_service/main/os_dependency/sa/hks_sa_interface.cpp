@@ -114,7 +114,8 @@ HksProxy::HksProxy(const sptr<IRemoteObject> &impl)
 void HksProxy::SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &certChain, uint32_t sz)
 {
     HKS_IF_NULL_LOGE_RETURN_VOID(Remote(), "Remote() is nullptr! Would not SendRequest!")
-    MessageParcel data, reply;
+    MessageParcel data;
+    MessageParcel reply;
     MessageOption option = MessageOption::TF_ASYNC;
     bool writeResult = data.WriteInterfaceToken(GetDescriptor());
     HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(writeResult,
