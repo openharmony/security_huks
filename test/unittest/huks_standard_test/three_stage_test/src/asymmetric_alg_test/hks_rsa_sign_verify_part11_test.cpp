@@ -78,6 +78,7 @@ static const std::string g_inData4096 = "Hks_RSA_Sign_Verify_Test_00000000000000
                                         "0000000000000000000000000000000000000000000000000000000000000000"
                                         "000000000000000000000000000000000000000000000000000000000_string";
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParamsTest111[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -175,6 +176,7 @@ static struct HksParam g_verifyParamsTest112[] = {
         .uint32Param = HKS_DIGEST_NONE
     }
 };
+#endif
 
 static struct HksParam g_genParamsTest113[] = {
     {
@@ -483,6 +485,7 @@ static struct HksParam g_signParamsTest119[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksRsaSignVerifyPart11Test.HksRsaSignVerifyPart11Test111
  * @tc.desc: rsa sign and verify; keySize-512, alg-RSA, pad-NONE and digest-NONE.
@@ -576,6 +579,7 @@ HWTEST_F(HksRsaSignVerifyPart11Test, HksRsaSignVerifyPart11Test112, TestSize.Lev
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
 }
+#endif
 
 /**
  * @tc.name: HksRsaSignVerifyPart11Test.HksRsaSignVerifyPart11Test113
