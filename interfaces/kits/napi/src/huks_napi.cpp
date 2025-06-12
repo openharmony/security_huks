@@ -500,6 +500,7 @@ static void AddHuksErrCodePart(napi_env env, napi_value errorCode)
     AddInt32Property(env, errorCode, "HUKS_ERR_CODE_INSUFFICIENT_MEMORY", HUKS_ERR_CODE_INSUFFICIENT_MEMORY);
     AddInt32Property(env, errorCode, "HUKS_ERR_CODE_CALL_SERVICE_FAILED", HUKS_ERR_CODE_CALL_SERVICE_FAILED);
     AddInt32Property(env, errorCode, "HUKS_ERR_CODE_DEVICE_PASSWORD_UNSET", HUKS_ERR_CODE_DEVICE_PASSWORD_UNSET);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_INVALID_ARGUMENT", HUKS_ERR_CODE_INVALID_ARGUMENT);
 }
 
 static napi_value CreateHuksErrCode(napi_env env)
