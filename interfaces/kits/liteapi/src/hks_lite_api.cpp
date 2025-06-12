@@ -240,6 +240,7 @@ static JSIValue CreateHuksKeyDigest()
 {
     JSIValue keyDigest = JSI::CreateObject();
 
+    AddInt32PropertyInLite(keyDigest, "HUKS_DIGEST_NONE", HKS_DIGEST_NONE);
     AddInt32PropertyInLite(keyDigest, "HUKS_DIGEST_SHA1", HKS_DIGEST_SHA1);
     AddInt32PropertyInLite(keyDigest, "HUKS_DIGEST_SHA256", HKS_DIGEST_SHA256);
 
