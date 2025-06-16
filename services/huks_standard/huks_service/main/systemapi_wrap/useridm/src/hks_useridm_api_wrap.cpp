@@ -149,7 +149,7 @@ void GetSecUserInfoCallbackImplHuks::OnSecUserInfo(int32_t result, const USER_IA
         (**outSecInfo).secureUid = info.secureUid;
         (**outSecInfo).enrolledInfoLen = supportAuthNum;
         uint32_t hksEnrollIndex = 0;
-        for (uint32_t i = 0; i < (**outSecInfo).enrolledInfoLen; ++i) {
+        for (uint32_t i = 0; i < info.enrolledInfo.size(); ++i) {
             HKS_LOG_I("i: %" LOG_PUBLIC "d, enrolledId begin: %" LOG_PUBLIC "u, enrolledId end: %" LOG_PUBLIC "u",
                 i, (uint32_t)(info.enrolledInfo[i].enrolledId & FACTOR),
                 (uint32_t)((info.enrolledInfo[i].enrolledId >> BIT_NUM) & FACTOR));
