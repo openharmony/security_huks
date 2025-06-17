@@ -29,6 +29,7 @@ typedef struct HksThreeStageReportInfo {
     enum HksReportStage stage;
     uint64_t startTime;
     const struct HksBlob *handle;
+    struct HksOperation *operation;
 } HksThreeStageReportInfo;
 
 typedef struct HksOneStageReportInfo {
@@ -52,7 +53,7 @@ int32_t HksServiceInitReport(const char *funcName, const struct HksProcessInfo *
     const struct HksParamSet *paramSet, const HksThreeStageReportInfo *info, HksEventInfo *eventInfo);
 
 int32_t HksThreeStageReport(const char *funcName, const struct HksProcessInfo *processInfo,
-    const struct HksParamSet *paramSet, const HksThreeStageReportInfo *info, struct HksOperation *operation);
+    const struct HksParamSet *paramSet, const HksThreeStageReportInfo *info);
 
 #ifdef __cplusplus
 }

@@ -59,7 +59,8 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
         }
     }
     if (outLen != 0) {
-        HKS_IF_NOT_SUCC_RETURN(CheckBlob(outBlob), ret == HKS_SUCCESS ? HKS_ERROR_INVALID_ARGUMENT : ret)
+        HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(outBlob), (ret == HKS_SUCCESS ? HKS_ERROR_INVALID_ARGUMENT : ret),
+            "Check blob failed in HksReadRequestReply")
         const uint8_t *outData = reply.ReadBuffer(outLen);
         HKS_IF_NULL_RETURN(outData, ret == HKS_SUCCESS ? HKS_ERROR_IPC_MSG_FAIL : ret)
 
@@ -154,7 +155,7 @@ int32_t HksSendRequest(enum HksIpcInterfaceCode type, const struct HksBlob *inBl
     if (outBlob == nullptr) {
         HKS_IF_NOT_TRUE_RETURN(data.WriteUint32(0), HKS_ERROR_BAD_STATE);
     } else {
-        HKS_IF_NOT_TRUE_RETURN(data.WriteUint32(outBlob->size), HKS_ERROR_BAD_STATE);
+        HKS_IF_NOT_TRUE_LOGE_RETURN(data.WriteUint32(outBlob->size), HKS_ERROR_BAD_STATE, "WriteUint32 fail")
     }
     HKS_IF_NOT_TRUE_RETURN(data.WriteUint32(inBlob->size), HKS_ERROR_BAD_STATE);
     HKS_IF_NOT_TRUE_RETURN(data.WriteBuffer(inBlob->data, static_cast<size_t>(inBlob->size)), HKS_ERROR_BAD_STATE);

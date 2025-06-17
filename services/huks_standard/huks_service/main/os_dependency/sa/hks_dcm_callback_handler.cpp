@@ -130,7 +130,7 @@ int32_t PackAttestChain(struct DcmCertChain *certChain, struct HksBlob *certChai
         ret = CopyBlobToBuffer(&certChain->certs[i], &tmp);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy cert fail")
     }
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "PackAttestChain fail")
     certChainPacked->size = tmp.data - certChainPacked->data;
     return HKS_SUCCESS;
 }
