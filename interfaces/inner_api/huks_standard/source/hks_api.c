@@ -107,7 +107,7 @@ HKS_API_EXPORT int32_t HksRefreshKeyInfo(void)
 static int32_t CheckifNeedOverrideKey(const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn)
 {
-    if (paramSetIn == NULL) {
+    if (paramSetIn == NULL || keyAlias == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
     struct HksParam *isKeyOverride = NULL;
@@ -129,12 +129,8 @@ HKS_API_EXPORT int32_t HksGenerateKey(const struct HksBlob *keyAlias,
 {
 #ifdef HKS_SUPPORT_API_GENERATE_KEY
     HKS_LOG_D("enter %" LOG_PUBLIC "s", __func__);
-    int32_t ret = CheckifNeedOverrideKey(keyAlias, paramSetIn);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
     struct HksParam *storageFlag = NULL;
-    ret = HksGetParam(paramSetIn, HKS_TAG_KEY_STORAGE_FLAG, &storageFlag);
+    int32_t  ret = HksGetParam(paramSetIn, HKS_TAG_KEY_STORAGE_FLAG, &storageFlag);
     if ((ret == HKS_SUCCESS) && (storageFlag->uint32Param == HKS_STORAGE_TEMP)) {
         if ((paramSetIn == NULL) || (paramSetOut == NULL)) {
             return HKS_ERROR_NULL_POINTER;
@@ -147,6 +143,10 @@ HKS_API_EXPORT int32_t HksGenerateKey(const struct HksBlob *keyAlias,
     /* generate persistent keys */
     if ((paramSetIn == NULL) || (keyAlias == NULL)) {
         return HKS_ERROR_NULL_POINTER;
+    }
+    ret = CheckifNeedOverrideKey(keyAlias, paramSetIn);
+    if (ret != HKS_SUCCESS) {
+        return ret;
     }
     ret = HksClientGenerateKey(keyAlias, paramSetIn, paramSetOut);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
