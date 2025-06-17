@@ -611,6 +611,7 @@ int32_t HksThreeStageReport(const char *funcName, const struct HksProcessInfo *p
     HKS_IF_TRUE_LOGI_RETURN(paramSet == nullptr || info == nullptr || processInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "paramset or info or processInfo is null")
 
+    struct HksOperation *operation = info->operation;
     if (operation != nullptr) {
         uint32_t eventId = operation->eventInfo.common.eventId;
         HKS_IF_TRUE_LOGI_RETURN(!IsThreeStageEvent(eventId), HKS_FAILURE, "eventid is not support")
