@@ -36,6 +36,8 @@ struct HksOperation {
     bool isUserIdPassedDuringInit;
     int userIdPassedDuringInit;
     int32_t pid;
+    struct HksBlob errMsgBlob;
+    uint64_t startTime;
 };
 
 #ifdef __cplusplus
