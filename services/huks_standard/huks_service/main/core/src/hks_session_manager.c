@@ -72,6 +72,7 @@ static void FreeOperation(struct HksOperation **operation)
     RemoveDoubleListNode(&(*operation)->listHead);
     HKS_FREE_BLOB((*operation)->processInfo.userId);
     HKS_FREE_BLOB((*operation)->processInfo.processName);
+    HKS_FREE_BLOB((*operation)->errMsgBlob);
     HKS_FREE(*operation);
 }
 
@@ -143,8 +144,8 @@ static bool DeleteFirstAbortableOperationForTokenId(uint32_t tokenId)
                 LOG_PUBLIC "d", operation->processInfo.userIdInt);
             continue;
         }
-        HKS_LOG_E("DeleteFirstAbortableOperationForTokenId delete old not using session! userIdInt %"
-            LOG_PUBLIC "d", operation->processInfo.userIdInt);
+        HKS_LOG_E_IMPORTANT("DeleteFirstAbortableOperationForTokenId delete old not using session! userIdInt %"
+            LOG_PUBLIC "d uid %" LOG_PUBLIC "u. ", operation->processInfo.userIdInt, operation->processInfo.uidInt);
         DeleteKeyNodeAndDecreaseGlobalCount(operation);
         return true;
     }
@@ -165,7 +166,8 @@ static int32_t DeleteForTokenIdIfExceedLimit(uint32_t tokenId)
         }
     }
     if (ownedSessionCount >= MAX_OPERATIONS_EACH_TOKEN_ID) {
-        HKS_LOG_E("current tokenId have owned too many %" LOG_PUBLIC "u sessions", ownedSessionCount);
+        HKS_LOG_E_IMPORTANT("current tokenId have owned too many [%" LOG_PUBLIC "u] sessions"
+            "uid = %" LOG_PUBLIC "u. ", ownedSessionCount, operation->processInfo.uidInt);
         if (DeleteFirstAbortableOperationForTokenId(tokenId)) {
             return HKS_SUCCESS;
         }

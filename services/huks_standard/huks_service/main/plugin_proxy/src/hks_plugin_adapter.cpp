@@ -87,6 +87,7 @@ ENABLE_CFI(static int32_t HksCreatePluginProxy(void))
     } while (0);
 
     if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksCreatePluginProxy failed");
         HksDestoryPluginProxy();
     }
     (void)HksMutexUnlock(g_pluginMutex);

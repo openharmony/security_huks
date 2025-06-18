@@ -43,7 +43,7 @@ void HksEventReport(const char *funcName, const struct HksProcessInfo *processIn
     bool enqueueSuccess = HksHaPlugin::GetInstance().Enqueue(eventId, newParamSet);
     HKS_IF_NOT_TRUE_LOGE_RETURN(enqueueSuccess, HksFreeParamSet(&newParamSet), "Report fault event failed")
 #else
-    if (eventId == HKS_EVENT_DELETE_KEY) {
+    if (eventId == HKS_EVENT_DELETE_KEY || eventId == HKS_EVENT_CHECK_KEY_EXISTED) {
         if (ret != HKS_ERROR_NOT_EXIST) {
             HksReport(__func__, processInfo, nullptr, ret);
         }

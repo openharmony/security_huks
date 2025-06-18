@@ -1538,8 +1538,8 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
         }
     } while (0);
 #ifdef L2_STANDARD
-    HksThreeStageReportInfo info = { ret, inData->size, HKS_UPDATE, startTime, handle };
-    (void)HksThreeStageReport(__func__, processInfo, paramSet, &info, operation);
+    HksThreeStageReportInfo info = { ret, inData->size, HKS_UPDATE, startTime, handle, operation};
+    (void)HksThreeStageReport(__func__, processInfo, paramSet, &info);
 #endif
     MarkOperationUnUse(operation);
     HksFreeParamSet(&newParamSet);
@@ -1622,8 +1622,8 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
     HKS_FREE_BLOB(output);
     if (operation != NULL) {
 #ifdef L2_STANDARD
-        HksThreeStageReportInfo info = { ret, inData->size, HKS_FINISH, startTime, handle };
-        (void)HksThreeStageReport(__func__, processInfo, paramSet, &info, operation);
+        HksThreeStageReportInfo info = { ret, inData->size, HKS_FINISH, startTime, handle, operation};
+        (void)HksThreeStageReport(__func__, processInfo, paramSet, &info);
 #endif
         MarkAndDeleteOperation(&operation, handle);
     }
@@ -1663,8 +1663,8 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
         IfNotSuccAppendHdiErrorInfo(ret);
         HKS_IF_NOT_SUCC_LOGE(ret, "HuksAccessAbort fail, ret = %" LOG_PUBLIC "d", ret)
 #ifdef L2_STANDARD
-        HksThreeStageReportInfo info = { ret, 0, HKS_ABORT, startTime, handle };
-        (void)HksThreeStageReport(__func__, processInfo, paramSet, &info, operation);
+        HksThreeStageReportInfo info = { ret, 0, HKS_ABORT, startTime, handle};
+        (void)HksThreeStageReport(__func__, processInfo, paramSet, &info);
 #endif
         MarkAndDeleteOperation(&operation, handle);
     } while (0);
@@ -1679,6 +1679,7 @@ static int32_t BuildAbortParamSet(struct HksParamSet **newParamSet)
     int32_t ret = HksInitParamSet(newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksInitParamSet fail!");
     do {
+        // This param exists solely to pass the paramSet validation check
         struct HksParam Param = { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP};
         ret = HksAddParams(*newParamSet, &Param, 1);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAddParams  fail!");

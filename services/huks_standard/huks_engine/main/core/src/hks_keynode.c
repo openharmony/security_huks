@@ -381,7 +381,8 @@ static int32_t DeleteKeyNodeForTokenIdIfExceedLimit(uint32_t tokenId)
         }
     }
     if (ownedNodeCount >= MAX_KEY_NODES_EACH_TOKEN_ID) {
-        HKS_LOG_E("current token id have owned too many %" LOG_PUBLIC "u nodes", ownedNodeCount);
+        HKS_LOG_E_IMPORTANT("current token id %" LOG_PUBLIC "u have owned too"
+            "many %" LOG_PUBLIC "u nodes", tokenId, ownedNodeCount);
         if (DeleteFirstKeyNodeForTokenId(tokenId)) {
             return HKS_SUCCESS;
         }
