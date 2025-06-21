@@ -99,6 +99,8 @@ int32_t HksDeleteDir(const char *path);
 
 int32_t HksGetFileName(const char *path, const char *fileName, char *fullFileName, uint32_t fullFileNameLen);
 
+double GetDeviceValidSize(const char *partitionName);
+
 #ifdef __cplusplus
 }
 #endif

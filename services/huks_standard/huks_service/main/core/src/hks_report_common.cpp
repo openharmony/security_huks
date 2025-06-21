@@ -270,11 +270,7 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM0_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
-        eventInfo->common.function = (char *)HksMalloc(paramToEventInfo->blob.size);
-        if (eventInfo->common.function != nullptr) {
-            (void)memcpy_s(eventInfo->common.function, paramToEventInfo->blob.size,
-                paramToEventInfo->blob.data, paramToEventInfo->blob.size);
-        }
+        CopyParamBlobData(&eventInfo->common.function, paramToEventInfo);
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM1_UINT32, &paramToEventInfo) == HKS_SUCCESS) {
@@ -289,11 +285,7 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM2_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
-        eventInfo->common.callerInfo.name = (char *)HksMalloc(paramToEventInfo->blob.size);
-        if (eventInfo->common.callerInfo.name != nullptr) {
-            (void)memcpy_s(eventInfo->common.callerInfo.name, paramToEventInfo->blob.size,
-                paramToEventInfo->blob.data, paramToEventInfo->blob.size);
-        }
+        CopyParamBlobData(&eventInfo->common.callerInfo.name, paramToEventInfo);
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM2_UINT32, &paramToEventInfo) == HKS_SUCCESS) {
@@ -307,15 +299,15 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM0_NULL, &paramToEventInfo) == HKS_SUCCESS) {
-        eventInfo->common.result.errMsg = (char *)HksMalloc(paramToEventInfo->blob.size);
-        if (eventInfo->common.result.errMsg != nullptr) {
-            (void)memcpy_s(eventInfo->common.result.errMsg, paramToEventInfo->blob.size,
-                paramToEventInfo->blob.data, paramToEventInfo->blob.size);
-        }
+        CopyParamBlobData(&eventInfo->common.result.errMsg, paramToEventInfo);
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM3_UINT32, &paramToEventInfo) == HKS_SUCCESS) {
         eventInfo->common.statInfo.totalCost = paramToEventInfo->uint32Param;
+    }
+
+    if (HksGetParam(paramSetIn, HKS_TAG_TRACE_ID, &paramToEventInfo) == HKS_SUCCESS) {
+        eventInfo->common.traceId = paramToEventInfo->uint64Param;
     }
     return HKS_SUCCESS;
 }
@@ -520,4 +512,13 @@ std::pair<std::unordered_map<std::string, std::string>::iterator, bool> EventInf
     ret = reportData.insert_or_assign("need_pwd_set", std::to_string(eventKeyAccessInfo->needPwdSet));
     HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert need_pwd_set failed!");
     return ret;
+}
+
+void CopyParamBlobData(char **dst, const struct HksParam *param)
+{
+    HKS_IF_TRUE_RETURN_VOID(dst == nullptr || param == nullptr);
+    *dst = static_cast<char *>(HksMalloc(param->blob.size));
+    if (*dst != nullptr) {
+        (void)memcpy_s(*dst, param->blob.size, param->blob.data, param->blob.size);
+    }
 }
