@@ -27,7 +27,7 @@
 
 
 int32_t PreConstructGenKeyReportParamSet(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
-    uint64_t startTime, const struct HksBlob *keyIn, struct HksParamSet **paramSetOut)
+    struct InfoPair infoPair, const struct HksBlob *keyIn, struct HksParamSet **paramSetOut)
 {
     HKS_IF_TRUE_LOGI_RETURN(keyAlias == nullptr || paramSetIn == nullptr, HKS_ERROR_NULL_POINTER,
         "PreConstructDeleteKeyReportParamSet params is null")
@@ -35,7 +35,7 @@ int32_t PreConstructGenKeyReportParamSet(const struct HksBlob *keyAlias, const s
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "ConstructGenKeyReportParamSet InitParamSet failed")
 
     do {
-        ret = PreAddCommonInfo(*paramSetOut, keyAlias, paramSetIn, startTime);
+        ret = PreAddCommonInfo(*paramSetOut, keyAlias, paramSetIn, infoPair.startTime);
         HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "pre add common info to params failed!")
 
         ret = AddKeyHash(*paramSetOut, keyIn);
@@ -50,6 +50,10 @@ int32_t PreConstructGenKeyReportParamSet(const struct HksBlob *keyAlias, const s
                 .tag = HKS_TAG_PARAM0_UINT32,
                 .uint32Param = HKS_EVENT_GENERATE_KEY
             },
+            {
+                .tag = HKS_TAG_TRACE_ID,
+                .uint64Param = infoPair.traceId
+            }
         };
         ret = HksAddParams(*paramSetOut, params, HKS_ARRAY_SIZE(params));
         HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "add in params failed!")
