@@ -42,6 +42,8 @@ enum HksEventId {
     HKS_EVENT_RENAME_KEY = 12,
     HKS_EVENT_GET_PROPERTIES = 13,
     HKS_EVENT_KEY_LEVEL_CHANGE = 14,
+    /* closed source event start with 15, end with 19 */
+    HKS_EVENT_DATA_SIZE_STATISTICS = 30,
 };
 
 // modify this please sync modify g_threeStage
@@ -111,10 +113,11 @@ typedef struct HksEventCallerInfo {
 } HksEventCallerInfo;
 
 typedef struct HksEventCommonInfo {
+    uint64_t traceId;
+    struct timespec time;
     HksEventCallerInfo callerInfo;
     HksEventResultInfo result;
     HksEventStatInfo statInfo;
-    struct timespec time;
     uint32_t eventId;
     uint32_t operation;
     uint32_t count;
@@ -173,6 +176,14 @@ typedef struct RenameInfo {
     bool isCopy;
 } RenameInfo;
 
+typedef struct DataSizeInfo {
+    char *component;
+    char *partition;
+    char *foldPath;
+    char *foldSize;
+    uint64_t partitionRemain;
+} DataSizeInfo;
+
 typedef struct HksEventInfo {
     struct HksEventCommonInfo common;
     union {
@@ -185,6 +196,7 @@ typedef struct HksEventInfo {
         GenerateInfo generateInfo;
         ImportInfo importInfo;
         RenameInfo renameInfo;
+        DataSizeInfo dataSizeInfo;
     };
 } HksEventInfo;
 
