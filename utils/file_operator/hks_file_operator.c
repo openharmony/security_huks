@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <sys/stat.h>
+#include <sys/statfs.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -567,4 +568,15 @@ uint32_t HksFileSize(const char *path, const char *fileName)
 int32_t HksGetFileName(const char *path, const char *fileName, char *fullFileName, uint32_t fullFileNameLen)
 {
     return GetFileName(path, fileName, fullFileName, fullFileNameLen);
+}
+
+double GetDeviceValidSize(const char *partitionName)
+{
+    struct statfs stat;
+    int err = statfs(partitionName, &stat);
+    if (err != 0) {
+        HKS_LOG_I("GetDeviceValidSize failed");
+        return 0;
+    }
+    return (double)(stat.f_bfree) * (double)(stat.f_bsize);
 }

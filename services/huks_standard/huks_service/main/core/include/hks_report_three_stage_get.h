@@ -28,6 +28,7 @@ typedef struct HksThreeStageReportInfo {
     uint32_t inDataSize;
     enum HksReportStage stage;
     uint64_t startTime;
+    uint64_t traceId;
     const struct HksBlob *handle;
     struct HksOperation *operation;
 } HksThreeStageReportInfo;
@@ -35,6 +36,7 @@ typedef struct HksThreeStageReportInfo {
 typedef struct HksOneStageReportInfo {
     int32_t errCode;
     uint64_t startTime;
+    uint64_t traceId;
     const char *funcName;
     enum HksReportStage stage;
 } HksOneStageReportInfo;

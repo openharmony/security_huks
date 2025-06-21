@@ -31,6 +31,8 @@
 #include "hks_report_rename_key.h"
 #include "hks_report_three_stage.h"
 #include "hks_report_list_aliases.h"
+#include "hks_report_data_size.h"
+#include "hks_report_three_stage_build.h"
 #include "hks_param.h"
 
 static HksEventProcMap g_eventProcMap[] = {
@@ -129,6 +131,14 @@ static HksEventProcMap g_eventProcMap[] = {
         HksEventInfoIsEqualForListAliases,
         HksEventInfoAddForListAliases,
         HksEventInfoToMapForListAliases
+    },
+    {
+        HKS_EVENT_DATA_SIZE_STATISTICS,
+        HksParamSetToEventInfoForDataSize,
+        HksEventInfoIsNeedReportForDataSize,
+        HksEventInfoIsEqualForDataSize,
+        HksEventInfoAddForDataSize,
+        HksEventInfoToMapForDataSize
     }
 };
 
@@ -201,9 +211,7 @@ void HksHaPlugin::HandlerReport(HksEventQueueItem &item)
         "for eventId %" LOG_PUBLIC "u", eventId);
     HandleFaultEvent(&eventInfo->common, eventMap);
 
-    HKS_FREE(eventInfo->common.function);
-    HKS_FREE(eventInfo->common.callerInfo.name);
-    HKS_FREE(eventInfo->common.result.errMsg);
+    HksFreeEventInfo(&eventInfo);
     HKS_FREE(eventInfo);
 }
 
@@ -242,9 +250,7 @@ void HksHaPlugin::HandleStatisticEvent(struct HksEventInfo *eventInfo, uint32_t 
     if (!found) {
         AddEventCache(eventId, eventInfo);
     } else {
-        HKS_FREE(eventInfo->common.function);
-        HKS_FREE(eventInfo->common.callerInfo.name);
-        HKS_FREE(eventInfo->common.result.errMsg);
+        HksFreeEventInfo(&eventInfo);
         HKS_FREE(eventInfo);
     }
 
