@@ -466,6 +466,7 @@ static int32_t HksFreshAndReport(const char *funcName, const struct HksProcessIn
             { .tag = HKS_TAG_PARAM2_BUFFER, .blob = { callerName.size() + 1, (uint8_t *)callerName.c_str() } },
             { .tag = HKS_TAG_PARAM3_BUFFER, .blob = { sizeof(HksEventInfo), (uint8_t *)eventInfo } },
             { .tag = HKS_TAG_PARAM0_NULL, .blob = { errMsg.size, (uint8_t *)errMsg.data } },
+            { .tag = HKS_TAG_TRACE_ID, .uint64Param = info->traceId },
         };
 
         ret = HksAddParams(reportParamSet, params, HKS_ARRAY_SIZE(params));
@@ -532,7 +533,7 @@ int32_t HksOneStageEventReport(const struct HksBlob *keyAlias, const struct HksB
             return HKS_ERROR_NOT_SUPPORTED;
     }
 
-    HksThreeStageReportInfo reportInfo = { info->errCode, 0, HKS_ONE_STAGE, info->startTime, nullptr };
+    HksThreeStageReportInfo reportInfo = { info->errCode, 0, HKS_ONE_STAGE, info->startTime, 0, nullptr };
     (void)HksFreshAndReport(info->funcName, processInfo, paramSet, &reportInfo, &eventInfo);
     return HKS_SUCCESS;
 }
