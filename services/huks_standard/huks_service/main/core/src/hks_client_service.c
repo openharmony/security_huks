@@ -58,6 +58,7 @@
 #include "hks_report_list_aliases.h"
 #include "hks_report_check_key_exited.h"
 #include "hks_report_rename_key.h"
+#include "hks_report_data_size.h"
 #include "hks_report_common.h"
 #include "hks_report_three_stage_get.h"
 #include "hks_type_enum.h"
@@ -565,7 +566,8 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
     } while (0);
 #ifdef L2_STANDARD
     struct HksParamSet *reportParamSet = NULL;
-    (void)PreConstructGenKeyReportParamSet(keyAlias, paramSetIn, enterTime, &output, &reportParamSet);
+    struct InfoPair infoPair = { .startTime = enterTime, .traceId = traceId.traceId.chainId };
+    (void)PreConstructGenKeyReportParamSet(keyAlias, paramSetIn, infoPair, &output, &reportParamSet);
     (void)ConstructReportParamSet(__func__, processInfo, ret, &reportParamSet);
     HksEventReport(__func__, processInfo, paramSetIn, reportParamSet, ret);
     DeConstructReportParamSet(&reportParamSet);
@@ -618,7 +620,7 @@ int32_t HksServiceSign(const struct HksProcessInfo *processInfo, const struct Hk
     } while (0);
 
 #ifdef L2_STANDARD
-    HksOneStageReportInfo info = {ret, startTime, __func__, HKS_ONE_STAGE_SIGN_VERIFY};
+    HksOneStageReportInfo info = {ret, startTime, traceId.traceId.chainId, __func__, HKS_ONE_STAGE_SIGN_VERIFY};
     (void)HksOneStageEventReport(keyAlias, &keyFromFile, paramSet, processInfo, &info);
 #endif
     HksHitraceEnd(&traceId);
@@ -665,7 +667,7 @@ int32_t HksServiceVerify(const struct HksProcessInfo *processInfo, const struct 
     } while (0);
 
 #ifdef L2_STANDARD
-    HksOneStageReportInfo info = {ret, startTime, __func__, HKS_ONE_STAGE_SIGN_VERIFY};
+    HksOneStageReportInfo info = {ret, startTime, traceId.traceId.chainId, __func__, HKS_ONE_STAGE_SIGN_VERIFY};
     (void)HksOneStageEventReport(keyAlias, &keyFromFile, paramSet, processInfo, &info);
 #endif
     HksHitraceEnd(&traceId);
@@ -707,7 +709,7 @@ int32_t HksServiceEncrypt(const struct HksProcessInfo *processInfo, const struct
     } while (0);
 
 #ifdef L2_STANDARD
-    HksOneStageReportInfo info = {ret, startTime, __func__, HKS_ONE_STAGE_CRYPTO};
+    HksOneStageReportInfo info = {ret, startTime, 0, __func__, HKS_ONE_STAGE_CRYPTO};
     (void)HksOneStageEventReport(keyAlias, &keyFromFile, paramSet, processInfo, &info);
 #endif
     HKS_FREE_BLOB(keyFromFile);
@@ -752,7 +754,7 @@ int32_t HksServiceDecrypt(const struct HksProcessInfo *processInfo, const struct
 #endif
     } while (0);
 #ifdef L2_STANDARD
-    HksOneStageReportInfo info = {ret, startTime, __func__, HKS_ONE_STAGE_CRYPTO};
+    HksOneStageReportInfo info = {ret, startTime, traceId.traceId.chainId, __func__, HKS_ONE_STAGE_CRYPTO};
     HksOneStageEventReport(keyAlias, &keyFromFile, paramSet, processInfo, &info);
 #endif
     HksHitraceEnd(&traceId);
@@ -1078,7 +1080,7 @@ int32_t HksServiceAgreeKey(const struct HksProcessInfo *processInfo, const struc
     } while (0);
 
 #ifdef L2_STANDARD
-    HksOneStageReportInfo info = {ret, startTime, __func__, HKS_ONE_STAGE_AGREE};
+    HksOneStageReportInfo info = {ret, startTime, traceId.traceId.chainId, __func__, HKS_ONE_STAGE_AGREE};
     (void)HksOneStageEventReport(agreedKey, &keyFromFile, paramSet, processInfo, &info);
 #endif
     HksHitraceEnd(&traceId);
@@ -1124,7 +1126,7 @@ int32_t HksServiceDeriveKey(const struct HksProcessInfo *processInfo, const stru
     } while (0);
 
 #ifdef L2_STANDARD
-    HksOneStageReportInfo info = {ret, startTime, __func__, HKS_ONE_STAGE_DERIVE};
+    HksOneStageReportInfo info = {ret, startTime, traceId.traceId.chainId, __func__, HKS_ONE_STAGE_DERIVE};
     (void)HksOneStageEventReport(derivedKey, &keyFromFile, paramSet, processInfo, &info);
 #endif
     HksHitraceEnd(&traceId);
@@ -1170,7 +1172,7 @@ int32_t HksServiceMac(const struct HksProcessInfo *processInfo, const struct Hks
     } while (0);
 
 #ifdef L2_STANDARD
-    HksOneStageReportInfo info = {ret, startTime, __func__, HKS_ONE_STAGE_MAC};
+    HksOneStageReportInfo info = {ret, startTime, traceId.traceId.chainId, __func__, HKS_ONE_STAGE_MAC};
     (void)HksOneStageEventReport(key, &keyFromFile, paramSet, processInfo, &info);
 #endif
     HksHitraceEnd(&traceId);
@@ -1398,7 +1400,7 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
         ret = DcmGenerateCertChainInAttestKey(paramSet, remoteObject, certChain, certChainCapacity);
     } while (0);
 #ifdef L2_STANDARD
-    HksOneStageReportInfo info = {ret, startTime, __func__, HKS_ONE_STAGE_ATTEST};
+    HksOneStageReportInfo info = {ret, startTime, traceId.traceId.chainId, __func__, HKS_ONE_STAGE_ATTEST};
     (void)HksOneStageEventReport(keyAlias, &keyFromFile, paramSet, processInfo, &info);
 #endif
 
@@ -1460,7 +1462,7 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
 #ifdef L2_STANDARD
     HksEventInfo eventInfo = { };
     (void)HksGetInitEventInfo(keyAlias, &keyFromFile, paramSet, processInfo, &eventInfo);
-    HksThreeStageReportInfo info = { ret, 0, HKS_INIT, startTime, handle };
+    HksThreeStageReportInfo info = { ret, 0, HKS_INIT, startTime, traceId.traceId.chainId, handle };
     (void)HksServiceInitReport(__func__, processInfo, paramSet, &info, &eventInfo);
 #endif
     HKS_FREE_BLOB(keyFromFile);
@@ -1487,6 +1489,13 @@ static void MarkAndDeleteOperation(struct HksOperation **operation, const struct
     MarkOperationUnUse(*operation);
     DeleteOperation(handle);
     *operation = NULL;
+}
+
+static void HksUpdateEnd(struct HksOperation **operation, struct HksHitraceId *traceId)
+{
+    HKS_IF_TRUE_LOGE_RETURN_VOID(operation == NULL || traceId == NULL, "operation is null")
+    MarkOperationUnUse(*operation);
+    HksHitraceEnd(traceId);
 }
 
 int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
@@ -1538,12 +1547,12 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
         }
     } while (0);
 #ifdef L2_STANDARD
-    HksThreeStageReportInfo info = { ret, inData->size, HKS_UPDATE, startTime, handle, operation};
+    HksThreeStageReportInfo info = { ret, inData->size, HKS_UPDATE, startTime, traceId.traceId.chainId,
+        handle, operation };
     (void)HksThreeStageReport(__func__, processInfo, paramSet, &info);
 #endif
-    MarkOperationUnUse(operation);
+    HksUpdateEnd(&operation, &traceId);
     HksFreeParamSet(&newParamSet);
-    HksHitraceEnd(&traceId);
     return ret;
 }
 
@@ -1622,7 +1631,8 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
     HKS_FREE_BLOB(output);
     if (operation != NULL) {
 #ifdef L2_STANDARD
-        HksThreeStageReportInfo info = { ret, inData->size, HKS_FINISH, startTime, handle, operation};
+        HksThreeStageReportInfo info = { ret, inData->size, HKS_FINISH, startTime, traceId.traceId.chainId,
+            handle, operation };
         (void)HksThreeStageReport(__func__, processInfo, paramSet, &info);
 #endif
         MarkAndDeleteOperation(&operation, handle);
@@ -1663,7 +1673,7 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
         IfNotSuccAppendHdiErrorInfo(ret);
         HKS_IF_NOT_SUCC_LOGE(ret, "HuksAccessAbort fail, ret = %" LOG_PUBLIC "d", ret)
 #ifdef L2_STANDARD
-        HksThreeStageReportInfo info = { ret, 0, HKS_ABORT, startTime, handle};
+        HksThreeStageReportInfo info = { ret, 0, HKS_ABORT, startTime, traceId.traceId.chainId, handle, operation };
         (void)HksThreeStageReport(__func__, processInfo, paramSet, &info);
 #endif
         MarkAndDeleteOperation(&operation, handle);

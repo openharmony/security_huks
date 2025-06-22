@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HKS_REPORT_GENERATE_KEY_H
-#define HKS_REPORT_GENERATE_KEY_H
+#ifndef HKS_REPORT_DATA_SIZE_H
+#define HKS_REPORT_DATA_SIZE_H
 
 #include "hks_type.h"
 #include "hks_type_inner.h"
@@ -28,17 +28,16 @@
 #include <string>
 #endif
 
+#define HKS_EL1_DATA_PATH     "/data/service/el1/public/huks_service"
+#define HKS_EL2_DATA_PATH     "/data/service/el2"
+#define HKS_EL4_DATA_PATH     "/data/service/el4"
+#define HKS_DIRECTOREY_NAME   "/huks_service"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct InfoPair {
-    uint64_t startTime;
-    uint64_t traceId;
-};
-
-int32_t PreConstructGenKeyReportParamSet(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
-    struct InfoPair infoPair, const struct HksBlob *keyIn, struct HksParamSet **paramSetOut);
+int32_t PreConstructDataSizeReportParamSet(int userId, struct HksParamSet **reportParamSet);
 
 #ifdef __cplusplus
 }
@@ -46,17 +45,19 @@ int32_t PreConstructGenKeyReportParamSet(const struct HksBlob *keyAlias, const s
 
 #ifdef __cplusplus
 
-int32_t HksParamSetToEventInfoForKeyGen(const struct HksParamSet *paramSetIn, struct HksEventInfo* eventInfo);
+int32_t HksParamSetToEventInfoForDataSize(const struct HksParamSet *paramSetIn, struct HksEventInfo* eventInfo);
 
-bool HksEventInfoIsNeedReportForKeyGen(const struct HksEventInfo *eventInfo);
+bool HksEventInfoIsNeedReportForDataSize(const struct HksEventInfo *eventInfo);
 
-bool HksEventInfoIsEqualForKeyGen(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2);
+bool HksEventInfoIsEqualForDataSize(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2);
 
-void HksEventInfoAddForKeyGen(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo);
+void HksEventInfoAddForDataSize(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo);
 
-int32_t HksEventInfoToMapForKeyGen(const struct HksEventInfo *eventInfo,
+int32_t HksEventInfoToMapForDataSize(const struct HksEventInfo *eventInfo,
     std::unordered_map<std::string, std::string> &reportData);
+
+void ReportDataSizeEvent(int userId);
 
 #endif
 
-#endif  // HKS_REPORT_GENERATE_KEY_H
+#endif  // HKS_REPORT_DATA_SIZE_H

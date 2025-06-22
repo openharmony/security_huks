@@ -27,6 +27,7 @@
 #include "hks_type.h"
 #include "hks_type_enum.h"
 #include "hks_type_inner.h"
+#include "hks_ha_plugin.h"
 #include "securec.h"
 
 static int32_t ThreeStageBuildCommonInfo(const struct HksParamSet *paramSet, struct HksEventInfo *eventInfo)
@@ -64,8 +65,26 @@ static int32_t ThreeStageBuildCommonInfo(const struct HksParamSet *paramSet, str
         (void)memcpy_s((char *)eventInfo->common.result.errMsg, param->blob.size, param->blob.data, param->blob.size);
     }
 
+    if (HksGetParam(paramSet, HKS_TAG_TRACE_ID, &param) == HKS_SUCCESS) {
+        eventInfo->common.traceId = param->uint64Param;
+    }
+
     eventInfo->common.count = 1;
     return HKS_SUCCESS;
+}
+
+void HksFreeEventInfo(HksEventInfo **eventInfo)
+{
+    HKS_IF_TRUE_LOGI_RETURN_VOID(eventInfo == nullptr || (*eventInfo) == nullptr, "eventInfo is nullptr");
+    HKS_FREE((*eventInfo)->common.function);
+    HKS_FREE((*eventInfo)->common.callerInfo.name);
+    HKS_FREE((*eventInfo)->common.result.errMsg);
+    if ((*eventInfo)->common.eventId == HKS_EVENT_DATA_SIZE_STATISTICS) {
+        HKS_FREE((*eventInfo)->dataSizeInfo.component);
+        HKS_FREE((*eventInfo)->dataSizeInfo.partition);
+        HKS_FREE((*eventInfo)->dataSizeInfo.foldPath);
+        HKS_FREE((*eventInfo)->dataSizeInfo.foldSize);
+    }
 }
 
 int32_t BuildCommonInfo(const struct HksParamSet *paramSet, struct HksEventInfo *eventInfo)
@@ -74,9 +93,7 @@ int32_t BuildCommonInfo(const struct HksParamSet *paramSet, struct HksEventInfo 
         "paramset or eventInfo is null")
     int32_t ret = ThreeStageBuildCommonInfo(paramSet, eventInfo);
     if (ret != HKS_SUCCESS) {
-        HKS_FREE(eventInfo->common.function);
-        HKS_FREE(eventInfo->common.callerInfo.name);
-        HKS_FREE(eventInfo->common.result.errMsg);
+        HksFreeEventInfo(&eventInfo);
     }
     return ret;
 }

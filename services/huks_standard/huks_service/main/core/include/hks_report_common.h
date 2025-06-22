@@ -89,6 +89,8 @@ std::pair<std::unordered_map<std::string, std::string>::iterator, bool> EventInf
 std::pair<std::unordered_map<std::string, std::string>::iterator, bool> EventInfoToMapKeyAccessInfo(
     const struct HksEventKeyAccessInfo *eventKeyAccessInfo, std::unordered_map<std::string, std::string> &reportData);
 
+void CopyParamBlobData(char **dst, const struct HksParam *param);
+
 #endif
 
 #endif  // HKS_REPORT_COMMON_H
