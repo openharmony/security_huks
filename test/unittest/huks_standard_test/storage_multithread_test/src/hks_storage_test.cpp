@@ -91,28 +91,7 @@ class HksStorageTest : public testing::Test {
 public:
     void TearDown() override
     {
-        HksBlob processName = {
-            .size = TEST_PROCESS_NAME.size() + 1,
-            .data = (uint8_t *)&TEST_PROCESS_NAME[0],
-        };
-        HksBlob userId = {
-            .size = TEST_USER_ID.size() + 1,
-            .data = (uint8_t *)&TEST_USER_ID[0]
-        };
-        HksBlob keyAlias = {
-            .size = TEST_KEY_ALIAS.size() + 1,
-            .data = (uint8_t *)&TEST_KEY_ALIAS[0],
-        };
-        HksProcessInfo hksProcessInfo = {
-            .userId = userId,
-            .processName = processName
-        };
-
-        struct HksParamSet *paramSet = nullptr;
-        int32_t ret = BuildParamSet(g_genParams, HKS_ARRAY_SIZE(g_genParams), &paramSet);
-        ASSERT_EQ(ret, HKS_SUCCESS);
-        HksManageStoreDeleteKeyBlob(&hksProcessInfo, paramSet, &keyAlias, HksStorageType::HKS_STORAGE_TYPE_KEY);
-        HksFreeParamSet(&paramSet);
+        std::system("find /data/service/el1/public/huks_service -user root -delete");
     };
 };
 

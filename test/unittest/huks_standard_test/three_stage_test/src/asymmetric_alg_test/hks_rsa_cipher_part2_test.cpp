@@ -49,6 +49,7 @@ void HksRsaCipherPart2Test::SetUp()
 
 void HksRsaCipherPart2Test::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 #ifdef L2_STANDARD

@@ -131,6 +131,7 @@ void HksPbkdf2DerivePart2Test::SetUp()
 
 void HksPbkdf2DerivePart2Test::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 uint8_t g_saltdata2[16] = {0};

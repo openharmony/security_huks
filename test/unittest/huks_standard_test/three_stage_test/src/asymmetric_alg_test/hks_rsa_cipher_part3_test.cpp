@@ -49,6 +49,7 @@ void HksRsaCipherPart3Test::SetUp()
 
 void HksRsaCipherPart3Test::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 #ifdef HKS_UNTRUSTED_RUNNING_ENV
