@@ -52,6 +52,7 @@ void HksMacTest::SetUp()
 
 void HksMacTest::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 const int HKS_TEST_MAC_REE_KEY_SIZE_32 = 32;

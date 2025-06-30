@@ -52,6 +52,7 @@ void HksEccSignVerifyPart3Test::SetUp()
 
 void HksEccSignVerifyPart3Test::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 static struct HksParam g_genParamsTest017[] = {

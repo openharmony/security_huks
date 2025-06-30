@@ -50,6 +50,7 @@ void HksCheckPurPartTest::SetUp()
 
 void HksCheckPurPartTest::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 /* 001: gen rsa for cipher; init for sign */

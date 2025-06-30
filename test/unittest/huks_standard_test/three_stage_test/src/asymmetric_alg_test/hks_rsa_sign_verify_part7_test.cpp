@@ -50,6 +50,7 @@ void HksRsaSignVerifyPart7Test::SetUp()
 
 void HksRsaSignVerifyPart7Test::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 #ifdef HKS_UNTRUSTED_RUNNING_ENV
