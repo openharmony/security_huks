@@ -49,6 +49,7 @@ void HksRsaSignVerifyPart2Test::SetUp()
 
 void HksRsaSignVerifyPart2Test::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 #ifdef _USE_OPENSSL_

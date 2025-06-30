@@ -53,6 +53,7 @@ void HksAccessControlCipherTest::SetUp()
 
 void HksAccessControlCipherTest::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 /* 001: gen aes for cipher; init for cipher */

@@ -52,6 +52,7 @@ void HksDeleteTest::SetUp()
 
 void HksDeleteTest::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 static const struct HksTestKeyExistParams g_testKeyExistParams[] = {

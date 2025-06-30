@@ -54,6 +54,7 @@ void HksAccessControlAgreeTest::SetUp()
 
 void HksAccessControlAgreeTest::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 /* 001: gen ecdh for agree; init for agree */

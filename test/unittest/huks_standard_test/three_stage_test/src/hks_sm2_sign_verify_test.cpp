@@ -60,6 +60,7 @@ void HksSm2SignVerifyTest::SetUp()
 
 void HksSm2SignVerifyTest::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 #ifdef _USE_OPENSSL_

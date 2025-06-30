@@ -49,6 +49,7 @@ void HksImportSignVerifyTest::SetUp()
 
 void HksImportSignVerifyTest::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 static const uint8_t g_xData224[] = {

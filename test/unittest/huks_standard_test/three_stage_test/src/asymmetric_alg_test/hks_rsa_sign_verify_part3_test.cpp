@@ -50,6 +50,7 @@ void HksRsaSignVerifyPart3Test::SetUp()
 
 void HksRsaSignVerifyPart3Test::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 #ifdef L2_STANDARD
 static struct HksParam g_genParamsTest021[] = {

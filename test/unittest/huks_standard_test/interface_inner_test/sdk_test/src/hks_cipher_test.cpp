@@ -49,6 +49,7 @@ void HksCipherTest::SetUp()
 
 void HksCipherTest::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 /**

@@ -50,6 +50,7 @@ void HksEd25519SignVerifyTest::SetUp()
 
 void HksEd25519SignVerifyTest::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 void HksTestFreeParamSet(struct HksParamSet *paramSet1, struct HksParamSet *paramSet2, struct HksParamSet *paramSet3)
