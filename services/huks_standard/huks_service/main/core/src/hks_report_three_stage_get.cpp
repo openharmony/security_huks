@@ -446,7 +446,7 @@ static int32_t HksFreshAndReport(const char *funcName, const struct HksProcessIn
     struct timespec curTime;
     (void)timespec_get(&curTime, TIME_UTC);
 
-    struct HksBlob errMsg;
+    struct HksBlob errMsg = {0};
     struct HksParamSet *reportParamSet = nullptr;
     int32_t ret = HKS_SUCCESS;
     do {
