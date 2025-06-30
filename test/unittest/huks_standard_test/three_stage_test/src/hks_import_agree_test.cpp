@@ -1290,7 +1290,7 @@ static void ImportAgreeTestForOverwriteCase(uint32_t alg, uint32_t keySize)
 
     uint8_t alias3[] = "agree_key3";
     struct HksBlob keyAlias3 = { sizeof(alias3), alias3 };
-    ret = TestGenerate(&keyAlias2, DEFAULT_WITHOUT_TAG);
+    ret = TestGenerate(&keyAlias3, DEFAULT_WITHOUT_TAG);
     EXPECT_EQ(ret, HKS_SUCCESS) << "generate agree_key3 failed";
 
     struct HksBlob keyAlias4 = { (uint32_t)strlen("hks_import_agree_test_finish1"),
@@ -1388,12 +1388,12 @@ HWTEST_F(HksImportAgreeTest, HksImportAgreeTest005, TestSize.Level0)
 
 /**
  * @tc.name: HksImportAgreeTest.HksImportAgreeTest006
- * @tc.desc: import aes 256
+ * @tc.desc: import x25519 256
  * @tc.type: FUNC normal
  */
 HWTEST_F(HksImportAgreeTest, HksImportAgreeTest006, TestSize.Level0)
 {
-    ImportAgreeTestForOverwriteCase(HKS_ALG_AES, HKS_AES_KEY_SIZE_256);
+    ImportAgreeTestForOverwriteCase(HKS_ALG_X25519, HKS_CURVE25519_KEY_SIZE_256);
 }
 } // namespace Unittest::ImportAgreeTest
 

@@ -649,7 +649,7 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive004, TestSize.Level0)
     struct HksBlob testKeyAlias = { (uint32_t)strlen("HksPBKDF2DeriveKeyAliasTest004_2"),
         (uint8_t *)"HksPBKDF2DeriveKeyAliasTest004_2" };
     ret = HksKeyExistForDe(&testKeyAlias, pbkdf2FinishParamSet0);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksKeyExistForDe failed.";
+    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "HksKeyExistForDe failed.";
     // init-update-final
     ret = HksPbkdf2DeriveTestForOverwriteCase(keyAlias, genParamSet, pbkdf2ParamSet, pbkdf2FinishParamSet0);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksPbkdf2DeriveTestForOverwriteCase failed.";
