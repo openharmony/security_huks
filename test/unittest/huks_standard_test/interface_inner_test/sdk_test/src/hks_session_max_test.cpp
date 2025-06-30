@@ -52,6 +52,7 @@ void HksSessionMaxTest::SetUp()
 
 void HksSessionMaxTest::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 static void GenerateBaseKey(const struct HksBlob *alias)

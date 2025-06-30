@@ -53,6 +53,7 @@ void HksAccessControlMacTest::SetUp()
 
 void HksAccessControlMacTest::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 /* 001: gen hmac for mac; init for mac */

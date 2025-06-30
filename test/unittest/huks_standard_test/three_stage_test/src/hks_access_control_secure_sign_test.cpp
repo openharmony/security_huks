@@ -57,6 +57,7 @@ void HksAccessControlSecureSignTest::SetUp()
 
 void HksAccessControlSecureSignTest::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 static const std::string g_inData = "Hks_SM4_Cipher_Test_000000000000000000000000000000000000000000000000000000000000"

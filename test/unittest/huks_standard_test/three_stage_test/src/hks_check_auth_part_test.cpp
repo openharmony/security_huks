@@ -50,6 +50,7 @@ void HksCheckAuthPartTest::SetUp()
 
 void HksCheckAuthPartTest::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 const uint32_t KEY_PARAMSET_SIZE = 1024;
