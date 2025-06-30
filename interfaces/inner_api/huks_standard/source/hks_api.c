@@ -107,9 +107,6 @@ HKS_API_EXPORT int32_t HksRefreshKeyInfo(void)
 static int32_t CheckifNeedOverrideKey(const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn)
 {
-    if (paramSetIn == NULL || keyAlias == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
     struct HksParam *isKeyOverride = NULL;
     int32_t ret = HksGetParam(paramSetIn, HKS_TAG_KEY_OVERRIDE, &isKeyOverride);
     if (ret == HKS_SUCCESS && !isKeyOverride->boolParam) {
