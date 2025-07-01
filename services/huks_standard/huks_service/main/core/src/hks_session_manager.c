@@ -160,14 +160,17 @@ static int32_t DeleteForTokenIdIfExceedLimit(uint32_t tokenId)
     }
     uint32_t ownedSessionCount = 0;
     struct HksOperation *operation = NULL;
+    uint32_t uidInt = 0;
     HKS_DLIST_ITER(operation, &g_operationList) {
         if (operation != NULL && operation->accessTokenId == tokenId) {
             ++ownedSessionCount;
+            uidInt = operation->processInfo.uidInt;
         }
     }
     if (ownedSessionCount >= MAX_OPERATIONS_EACH_TOKEN_ID) {
         HKS_LOG_E_IMPORTANT("current tokenId have owned too many [%" LOG_PUBLIC "u] sessions"
-            "uid = %" LOG_PUBLIC "u. ", ownedSessionCount, operation->processInfo.uidInt);
+            "uid = %" LOG_PUBLIC "u. ", ownedSessionCount, uidInt);
+        (void)(uidInt); // uidInt might not be used, because HKS_LOG_E_IMPORTANT might expand to an empty macro
         if (DeleteFirstAbortableOperationForTokenId(tokenId)) {
             return HKS_SUCCESS;
         }
