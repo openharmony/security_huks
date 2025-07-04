@@ -60,6 +60,10 @@ if (os_level == "standard") {
       "c_utils:utils",
       "hilog:libhilog",
     ]
+    install_images = [
+      system_base_dir,
+      updater_base_dir,
+    ]
   }
 }
 
