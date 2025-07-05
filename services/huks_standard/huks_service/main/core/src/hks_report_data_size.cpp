@@ -127,7 +127,8 @@ bool HksEventInfoIsNeedReportForDataSize(const struct HksEventInfo *eventInfo)
 
 bool HksEventInfoIsEqualForDataSize(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
 {
-    return CheckEventCommon(eventInfo1, eventInfo2);
+    /* data size event is not a statistic event */
+    return false;
 }
 
 void HksEventInfoAddForDataSize(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)

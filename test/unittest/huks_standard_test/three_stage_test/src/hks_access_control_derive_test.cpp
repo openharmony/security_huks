@@ -53,6 +53,7 @@ void HksAccessControlDeriveTest::SetUp()
 
 void HksAccessControlDeriveTest::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 /* 001: gen hkdf for derive; init for derive */

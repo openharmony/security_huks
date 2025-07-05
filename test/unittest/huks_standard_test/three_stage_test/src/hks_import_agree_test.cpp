@@ -129,6 +129,7 @@ void HksImportAgreeTest::SetUp()
 
 void HksImportAgreeTest::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 static const uint8_t g_dhPubData2048One[] = {
@@ -591,6 +592,24 @@ static struct HksParam g_importKeyParams[] = {
     { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
 };
 
+static struct HksParam g_importKeyParams000[] = {
+    { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ECC },
+    { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ECC_KEY_SIZE_256 },
+    { .tag = HKS_TAG_IMPORT_KEY_TYPE, .uint32Param = HKS_KEY_TYPE_PUBLIC_KEY },
+    { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
+    { .tag =  HKS_TAG_KEY_OVERRIDE, .boolParam = false},
+};
+
+static struct HksParam g_importKeyParams001[] = {
+    { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ECC },
+    { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ECC_KEY_SIZE_256 },
+    { .tag = HKS_TAG_IMPORT_KEY_TYPE, .uint32Param = HKS_KEY_TYPE_PUBLIC_KEY },
+    { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
+    { .tag =  HKS_TAG_KEY_OVERRIDE, .boolParam = true},
+};
+
 static struct HksParam g_initOpParams[] = {
     { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ECDH },
     { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
@@ -603,6 +622,78 @@ static struct HksParam g_updateParams[] = {
 
 static struct HksParam g_finishParams[] = {
     { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
+};
+
+static struct HksBlob g_agreeKeyAliasFinal1 = {
+    strlen("hks_import_agree_test_finish1"),
+    (uint8_t *)"hks_import_agree_test_finish1"
+};
+
+static struct HksBlob g_agreeKeyAliasFinal2 = {
+    strlen("hks_import_agree_test_finish2"),
+    (uint8_t *)"hks_import_agree_test_finish2"
+};
+
+static struct HksParam g_finishParams000[] = {
+    { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
+    { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+    { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+    { .tag = HKS_TAG_KEY_ALIAS, .blob = g_agreeKeyAliasFinal1 },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_256 },
+    { .tag =  HKS_TAG_KEY_OVERRIDE, .boolParam = false },
+};
+
+static struct HksParam g_finishParams001[] = {
+    { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
+    { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+    { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+    { .tag = HKS_TAG_KEY_ALIAS, .blob = g_agreeKeyAliasFinal1 },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_256 },
+    { .tag =  HKS_TAG_KEY_OVERRIDE, .boolParam = true },
+};
+
+static struct HksParam g_finishParams002[] = {
+    { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
+    { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+    { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+    { .tag = HKS_TAG_KEY_ALIAS, .blob = g_agreeKeyAliasFinal2 },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_256 },
+};
+
+static struct HksParam g_genKeyParams[] {
+    { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_X25519 },
+    { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_CURVE25519_KEY_SIZE_256 },
+    { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_NONE },
+    { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
+    { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
+};
+
+static struct HksParam g_genKeyParams000[] {
+    { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_X25519 },
+    { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_CURVE25519_KEY_SIZE_256 },
+    { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_NONE },
+    { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
+    { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
+    { .tag =  HKS_TAG_KEY_OVERRIDE, .boolParam = false },
+};
+
+static struct HksParam g_genKeyParams001[] {
+    { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_X25519 },
+    { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_CURVE25519_KEY_SIZE_256 },
+    { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_NONE },
+    { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
+    { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
+    { .tag =  HKS_TAG_KEY_OVERRIDE, .boolParam = true },
+};
+
+enum OverrideFinalType {
+    DEFAULT_WITHOUT_TAG = 0,
+    OVERRIDE_TAG_TRUE,
+    OVERRIDE_TAG_FALSE,
+    DEFAULT_WITH_DIFF_NAME,
 };
 
 struct TestImportKeyData {
@@ -1025,7 +1116,7 @@ static int32_t ConstructAgreePubKey(uint32_t alg, uint32_t keySize, uint32_t id,
 }
 
 static int32_t ConstructParamSets(    struct HksParamSet **initParamSet,
-    struct HksParamSet **updateParamSet, struct HksParamSet **finishParamSet)
+    struct HksParamSet **updateParamSet, struct HksParamSet **finishParamSet, enum OverrideFinalType overrideType)
 {
     int32_t ret = InitParamSet(initParamSet, g_initOpParams, sizeof(g_initOpParams) / sizeof(struct HksParam));
     if (ret != HKS_SUCCESS) {
@@ -1037,8 +1128,20 @@ static int32_t ConstructParamSets(    struct HksParamSet **initParamSet,
         HksFreeParamSet(initParamSet);
         return ret;
     }
-
-    ret = InitParamSet(finishParamSet, g_finishParams, sizeof(g_finishParams) / sizeof(struct HksParam));
+    switch (overrideType) {
+        case OverrideFinalType::OVERRIDE_TAG_FALSE:
+            ret = InitParamSet(finishParamSet, g_finishParams000, sizeof(g_finishParams000) / sizeof(struct HksParam));
+            break;
+        case OverrideFinalType::OVERRIDE_TAG_TRUE:
+            ret = InitParamSet(finishParamSet, g_finishParams001, sizeof(g_finishParams001) / sizeof(struct HksParam));
+            break;
+        case OverrideFinalType::DEFAULT_WITH_DIFF_NAME:
+            ret = InitParamSet(finishParamSet, g_finishParams002, sizeof(g_finishParams002) / sizeof(struct HksParam));
+            break;
+        default:
+            ret = InitParamSet(finishParamSet, g_finishParams, sizeof(g_finishParams) / sizeof(struct HksParam));
+    }
+    
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(initParamSet);
         HksFreeParamSet(updateParamSet);
@@ -1046,12 +1149,36 @@ static int32_t ConstructParamSets(    struct HksParamSet **initParamSet,
     return ret;
 }
 
-static int32_t TestAgree(const struct HksBlob *keyAlias, const struct HksBlob *peerPubKey, struct HksBlob *agreeKey)
+static int32_t TestGenerate(const struct HksBlob *keyAlias, enum OverrideFinalType overrideType)
+{
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = 0;
+    switch (overrideType) {
+        case OverrideFinalType::OVERRIDE_TAG_FALSE:
+            ret = InitParamSet(&genParamSet, g_genKeyParams000, sizeof(g_genKeyParams000) / sizeof(HksParam));
+            break;
+        case OverrideFinalType::OVERRIDE_TAG_TRUE:
+            ret = InitParamSet(&genParamSet, g_genKeyParams001, sizeof(g_genKeyParams001) / sizeof(HksParam));
+            break;
+        default:
+            ret = InitParamSet(&genParamSet, g_genKeyParams, sizeof(g_genKeyParams) / sizeof(HksParam));
+    }
+
+    ret = HksGenerateKeyForDe(keyAlias, genParamSet, NULL);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksGenerateKeyForDe failed");
+    }
+    HksFreeParamSet(&genParamSet);
+    return ret;
+}
+
+static int32_t TestAgree(const struct HksBlob *keyAlias, const struct HksBlob *peerPubKey, struct HksBlob *agreeKey,
+    enum OverrideFinalType overrideType)
 {
     struct HksParamSet *initParamSet = nullptr;
     struct HksParamSet *updateParamSet = nullptr;
     struct HksParamSet *finishParamSet = nullptr;
-    int32_t ret = ConstructParamSets(&initParamSet, &updateParamSet, &finishParamSet);
+    int32_t ret = ConstructParamSets(&initParamSet, &updateParamSet, &finishParamSet, overrideType);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
@@ -1082,7 +1209,7 @@ static int32_t TestAgree(const struct HksBlob *keyAlias, const struct HksBlob *p
 }
 
 static int32_t TestAgreeOp(const struct HksBlob *keyAlias1, const struct HksBlob *keyAlias2,
-    uint32_t alg, uint32_t keySize)
+    uint32_t alg, uint32_t keySize, enum OverrideFinalType overrideType)
 {
     struct HksBlob pubKey1 = { 0, nullptr };
     struct HksBlob pubKey2 = { 0, nullptr };
@@ -1104,12 +1231,17 @@ static int32_t TestAgreeOp(const struct HksBlob *keyAlias1, const struct HksBlob
     struct HksBlob agreeKey2 = { LENGTH_MAX, agreeBuf2 };
 
     do {
-        ret = TestAgree(keyAlias1, &pubKey2, &agreeKey1);
+        ret = TestAgree(keyAlias1, &pubKey2, &agreeKey1, overrideType);
         if (ret != HKS_SUCCESS) {
             break;
         }
 
-        ret = TestAgree(keyAlias2, &pubKey1, &agreeKey2);
+        if (overrideType == DEFAULT_WITHOUT_TAG) {
+            ret = TestAgree(keyAlias2, &pubKey1, &agreeKey2, DEFAULT_WITHOUT_TAG);
+        } else {
+            ret = TestAgree(keyAlias2, &pubKey1, &agreeKey2, DEFAULT_WITH_DIFF_NAME);
+        }
+
         if (ret != HKS_SUCCESS) {
             break;
         }
@@ -1136,12 +1268,59 @@ static void TestImportKey(uint32_t alg, uint32_t keySize, uint32_t importType)
     EXPECT_EQ(ret, HKS_SUCCESS) << "import key 2 failed:" << importType;
 
     if (importType != HKS_KEY_TYPE_PUBLIC_KEY) {
-        ret = TestAgreeOp(&keyAlias1, &keyAlias2, alg, keySize);
+        ret = TestAgreeOp(&keyAlias1, &keyAlias2, alg, keySize, DEFAULT_WITHOUT_TAG);
         EXPECT_EQ(ret, HKS_SUCCESS) << "agree test failed:" << importType;
     }
 
     (void)HksDeleteKeyForDe(&keyAlias1, nullptr);
     (void)HksDeleteKeyForDe(&keyAlias2, nullptr);
+}
+
+static void ImportAgreeTestForOverwriteCase(uint32_t alg, uint32_t keySize)
+{
+    uint8_t alias2[] = "gen_key2";
+    struct HksBlob keyAlias2 = { sizeof(alias2), alias2 };
+    (void)HksDeleteKeyForDe(&keyAlias2, nullptr);
+    int32_t ret = TestGenerate(&keyAlias2, OVERRIDE_TAG_FALSE);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "generate key 2 failed";
+    ret = TestGenerate(&keyAlias2, OVERRIDE_TAG_TRUE);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "generate key 2 failed";
+    ret = TestGenerate(&keyAlias2, OVERRIDE_TAG_FALSE);
+    EXPECT_EQ(ret, HKS_ERROR_CODE_KEY_ALREADY_EXIST) << "generate key 2 success";
+
+    uint8_t alias3[] = "agree_key3";
+    struct HksBlob keyAlias3 = { sizeof(alias3), alias3 };
+    ret = TestGenerate(&keyAlias3, DEFAULT_WITHOUT_TAG);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "generate agree_key3 failed";
+
+    struct HksBlob keyAlias4 = { (uint32_t)strlen("hks_import_agree_test_finish1"),
+        (uint8_t *)"hks_import_agree_test_finish1" };
+    (void)HksDeleteKeyForDe(&keyAlias4, nullptr);
+    struct HksBlob keyAlias5 = { (uint32_t)strlen("hks_import_agree_test_finish2"),
+        (uint8_t *)"hks_import_agree_test_finish2" };
+    (void)HksDeleteKeyForDe(&keyAlias5, nullptr);
+    ret = TestAgreeOp(&keyAlias2, &keyAlias3, alg, keySize, OVERRIDE_TAG_FALSE);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "agree key test failed";
+    ret = TestAgreeOp(&keyAlias2, &keyAlias3, alg, keySize, OVERRIDE_TAG_TRUE);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "agree key test failed";
+    ret = TestAgreeOp(&keyAlias2, &keyAlias3, alg, keySize, OVERRIDE_TAG_FALSE);
+    EXPECT_EQ(ret, HKS_ERROR_CODE_KEY_ALREADY_EXIST) << "agree key test success";
+
+    uint8_t alias1[] = "import_key1";
+    struct HksBlob keyAlias1 = { sizeof(alias1), alias1 };
+    (void)HksDeleteKeyForDe(&keyAlias1, nullptr);
+    ret = ImportKey(&keyAlias1, 0, g_importKeyParams000, sizeof(g_importKeyParams000) / sizeof(struct HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "import key 1 failed";
+    ret = ImportKey(&keyAlias1, 0, g_importKeyParams001, sizeof(g_importKeyParams001) / sizeof(struct HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "import key 1 failed";
+    ret = ImportKey(&keyAlias1, 0, g_importKeyParams000, sizeof(g_importKeyParams000) / sizeof(struct HksParam));
+    EXPECT_EQ(ret, HKS_ERROR_CODE_KEY_ALREADY_EXIST) << "import key 1 success";
+
+    (void)HksDeleteKeyForDe(&keyAlias1, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias2, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias3, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias4, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias5, nullptr);
 }
 
 static void ImportAgreeTest(uint32_t alg, uint32_t keySize)
@@ -1206,5 +1385,15 @@ HWTEST_F(HksImportAgreeTest, HksImportAgreeTest005, TestSize.Level0)
     ImportAgreeTest(HKS_ALG_DH, HKS_DH_KEY_SIZE_4096);
 }
 #endif
+
+/**
+ * @tc.name: HksImportAgreeTest.HksImportAgreeTest006
+ * @tc.desc: import x25519 256
+ * @tc.type: FUNC normal
+ */
+HWTEST_F(HksImportAgreeTest, HksImportAgreeTest006, TestSize.Level0)
+{
+    ImportAgreeTestForOverwriteCase(HKS_ALG_X25519, HKS_CURVE25519_KEY_SIZE_256);
+}
 } // namespace Unittest::ImportAgreeTest
 

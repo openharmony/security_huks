@@ -79,6 +79,7 @@ void HksDeriveTest::SetUp()
 
 void HksDeriveTest::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 static int32_t BaseTestDerive(uint32_t index)

@@ -67,6 +67,9 @@ void HksStorageUtilTest::SetUp()
 
 void HksStorageUtilTest::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
+    std::system("find /data/service/el2/100/huks_service -user root -delete");
+    std::system("find /data/service/el4/100/huks_service -user root -delete");
 }
 
 /**

@@ -71,6 +71,7 @@ void HksEcdhAgreePart2Test::SetUp()
 
 void HksEcdhAgreePart2Test::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 static struct HksBlob g_keyAlias01006 = {

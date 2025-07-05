@@ -447,14 +447,15 @@ static int32_t HksFreshAndReport(const char *funcName, const struct HksProcessIn
     (void)timespec_get(&curTime, TIME_UTC);
 
     struct HksBlob errMsg;
-    int32_t ret = GetErrorMessageData(processInfo, info, eventInfo, &errMsg);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret);
-
     struct HksParamSet *reportParamSet = nullptr;
-    ret = HksInitParamSet(&reportParamSet);
-    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "init report paramset fail")
-
+    int32_t ret = HKS_SUCCESS;
     do {
+        ret = GetErrorMessageData(processInfo, info, eventInfo, &errMsg);
+        HKS_IF_NOT_SUCC_BREAK(ret);
+
+        ret = HksInitParamSet(&reportParamSet);
+        HKS_IF_NOT_SUCC_BREAK(ret);
+
         HksEventResultInfo result = { .code = info->errCode, .module = 0, .stage = 0, .errMsg = nullptr };
         eventInfo->common.result = result;
         std::string callerName;

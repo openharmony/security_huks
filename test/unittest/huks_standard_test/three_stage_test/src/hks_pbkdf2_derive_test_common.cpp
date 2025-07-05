@@ -54,6 +54,39 @@ int32_t HksPbkdf2DeriveTestNormalCase(const struct HksBlob keyAlias,
     return ret;
 }
 
+int32_t HksPbkdf2DeriveTestForOverwriteCase(const struct HksBlob keyAlias,
+    const struct HksParamSet *genParamSet, struct HksParamSet *deriveParamSet, struct HksParamSet *deriveFinalParamsSet)
+{
+    struct HksBlob inData = {
+        (uint32_t)g_inData.length(),
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
+    };
+    int32_t ret = HKS_FAILURE;
+
+    /* 1. Generate Key */
+    // Generate Key
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
+
+    /* 2. Derive Three Stage */
+    // Init
+    uint8_t handleD[sizeof(uint64_t)] = {0};
+    struct HksBlob handleDerive = { sizeof(uint64_t), handleD };
+    ret = HksInitForDe(&keyAlias, deriveParamSet, &handleDerive, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
+    // Update
+    uint8_t tmpOut[COMMON_SIZE] = {0};
+    struct HksBlob outData = { COMMON_SIZE, tmpOut };
+    ret = HksUpdateForDe(&handleDerive, deriveParamSet, &inData, &outData);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
+    // Finish
+    uint8_t outDataD[COMMON_SIZE] = {0};
+    struct HksBlob outDataDerive = { COMMON_SIZE, outDataD };
+    ret = HksFinishForDe(&handleDerive, deriveFinalParamsSet, &inData, &outDataDerive);
+
+    return ret;
+}
+
 #ifdef L2_STANDARD
 int32_t HksPbkdf2DeriveTestCmpCase(const struct HksBlob keyAlias,
     const struct HksParamSet *genParamSet, struct HksParamSet *deriveParamSet, struct HksParamSet *deriveFinalParamsSet)

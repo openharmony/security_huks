@@ -51,6 +51,7 @@ void HksAesCipherPart2Test::SetUp()
 
 void HksAesCipherPart2Test::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 static struct HksParam g_genParams008[] = {
