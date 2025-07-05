@@ -165,8 +165,6 @@ int32_t HksHaPluginInit(void);
 
 void HksHaPluginDestroy(HksHaPlugin *plugin);
 
-void HksFreeEventInfo(HksEventInfo **eventInfo);
-
 #ifdef __cplusplus
 }
 #endif
