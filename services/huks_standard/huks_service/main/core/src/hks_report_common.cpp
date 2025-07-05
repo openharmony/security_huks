@@ -100,10 +100,11 @@ int32_t AddTimeCost(struct HksParamSet *paramSetOut, uint64_t startTime)
     uint64_t endTime = 0;
     (void)HksElapsedRealTime(&endTime);
     uint32_t totalCost = 0;
-    if (endTime > startTime) {
+    if (endTime >= startTime) {
         totalCost = static_cast<uint32_t>(endTime - startTime);
     } else {
-        HKS_LOG_E("startTime is bigger than endTime");
+        HKS_LOG_I("startTime is bigger than endTime. diff time: %" LOG_PUBLIC "d",
+            static_cast<uint32_t>(startTime - endTime));
     }
     struct HksParam params[] = {
         {
