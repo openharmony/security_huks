@@ -62,6 +62,7 @@
 #include "hks_report_common.h"
 #include "hks_report_three_stage_get.h"
 #include "hks_type_enum.h"
+#include "hks_type_inner.h"
 
 #ifdef L2_STANDARD
 #include "hks_ha_event_report.h"
@@ -300,6 +301,35 @@ int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, const
 
 #ifndef _CUT_AUTHENTICATE_
 
+static int32_t DksAppendKeyAliasAndNewParamSet(struct HksParamSet *paramSet, const struct HksBlob *keyAlias,
+    struct HksParamSet **outParamSet)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    do {
+        if (paramSet != NULL) {
+            ret = AppendToNewParamSet(paramSet, &newParamSet);
+        } else {
+            ret = HksInitParamSet(&newParamSet);
+        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init new param set failed, ret = %" LOG_PUBLIC "d", ret)
+        struct HksParam paramArray[] = {
+            { .tag = HKS_TAG_KEY_ALIAS, .blob = {.size = keyAlias->size, .data = keyAlias->data} },
+        };
+        ret = HksAddParams(newParamSet, paramArray, HKS_ARRAY_SIZE(paramArray));
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add key alias, ret = %" LOG_PUBLIC "d", ret)
+        
+        ret = HksBuildParamSet(&newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build new param set failed, ret = %" LOG_PUBLIC "d", ret)
+        
+        HksFreeParamSet(&paramSet);
+        *outParamSet = newParamSet;
+        return ret;
+    } while (false);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
 static int32_t GetKeyAndNewParamSet(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *key, struct HksParamSet **outParamSet)
 {
@@ -307,10 +337,18 @@ static int32_t GetKeyAndNewParamSet(const struct HksProcessInfo *processInfo, co
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
         "append process info and default strategy failed, ret = %" LOG_PUBLIC "d", ret)
 
-    ret = GetKeyData(processInfo, keyAlias, *outParamSet, key, HKS_STORAGE_TYPE_KEY);
+    struct HksParam* dksParam = NULL;
+    if (HksGetParam(paramSet, DKS_TAG_IS_USE_DISTRIBUTED_KEY, &dksParam) == HKS_SUCCESS) {
+        if (dksParam->boolParam) {
+            HKS_LOG_I("dks recover after use, has the DKS_TAG_IS_USE_DISTRIBUTED_KEY tag, read keyfile from Ta cache!");
+            ret = DksAppendKeyAliasAndNewParamSet(*outParamSet, keyAlias, outParamSet);
+            HKS_IF_NOT_SUCC_LOGE(ret, "dks append key alias and new param set failed, ret = %" LOG_PUBLIC "d.", ret)
+        }
+    } else {
+        ret = GetKeyData(processInfo, keyAlias, *outParamSet, key, HKS_STORAGE_TYPE_KEY);
+        HKS_IF_NOT_SUCC_LOGE(ret, "get key data failed, ret = %" LOG_PUBLIC "d.", ret)
+    }
     // free outParamSet together after do-while
-    HKS_IF_NOT_SUCC_LOGE(ret, "get key data failed, ret = %" LOG_PUBLIC "d.", ret)
-
     return ret;
 }
 
