@@ -73,6 +73,20 @@ static int32_t ThreeStageBuildCommonInfo(const struct HksParamSet *paramSet, str
     return HKS_SUCCESS;
 }
 
+void HksFreeEventInfo(HksEventInfo **eventInfo)
+{
+    HKS_IF_TRUE_LOGI_RETURN_VOID(eventInfo == nullptr || (*eventInfo) == nullptr, "eventInfo is nullptr");
+    HKS_FREE((*eventInfo)->common.function);
+    HKS_FREE((*eventInfo)->common.callerInfo.name);
+    HKS_FREE((*eventInfo)->common.result.errMsg);
+    if ((*eventInfo)->common.eventId == HKS_EVENT_DATA_SIZE_STATISTICS) {
+        HKS_FREE((*eventInfo)->dataSizeInfo.component);
+        HKS_FREE((*eventInfo)->dataSizeInfo.partition);
+        HKS_FREE((*eventInfo)->dataSizeInfo.foldPath);
+        HKS_FREE((*eventInfo)->dataSizeInfo.foldSize);
+    }
+}
+
 int32_t BuildCommonInfo(const struct HksParamSet *paramSet, struct HksEventInfo *eventInfo)
 {
     HKS_IF_TRUE_LOGI_RETURN(paramSet == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,

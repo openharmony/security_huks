@@ -49,6 +49,7 @@ void HksCurve25519Test::SetUp()
 
 void HksCurve25519Test::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 /**

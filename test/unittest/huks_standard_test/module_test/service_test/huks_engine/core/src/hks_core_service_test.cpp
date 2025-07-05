@@ -63,6 +63,7 @@ void HksCoreServiceTest::SetUp()
 
 void HksCoreServiceTest::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 static int32_t GenerateParamSet(struct HksParamSet **paramSet, const struct HksParam tmpParams[], uint32_t paramCount)

@@ -156,6 +156,7 @@ void HksSm4CipherPartTest::SetUp()
 
 void HksSm4CipherPartTest::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 #ifdef _USE_OPENSSL_

@@ -99,7 +99,12 @@ int32_t AddTimeCost(struct HksParamSet *paramSetOut, uint64_t startTime)
 {
     uint64_t endTime = 0;
     (void)HksElapsedRealTime(&endTime);
-    uint32_t totalCost = static_cast<uint32_t>(endTime - startTime);
+    uint32_t totalCost = 0;
+    if (endTime > startTime) {
+        totalCost = static_cast<uint32_t>(endTime - startTime);
+    } else {
+        HKS_LOG_E("startTime is bigger than endTime");
+    }
     struct HksParam params[] = {
         {
             .tag = HKS_TAG_PARAM3_UINT32,
@@ -519,6 +524,7 @@ void CopyParamBlobData(char **dst, const struct HksParam *param)
     HKS_IF_TRUE_RETURN_VOID(dst == nullptr || param == nullptr);
     *dst = static_cast<char *>(HksMalloc(param->blob.size));
     if (*dst != nullptr) {
+        (void)memset_s(*dst, param->blob.size, 0, param->blob.size);
         (void)memcpy_s(*dst, param->blob.size, param->blob.data, param->blob.size);
     }
 }

@@ -23,6 +23,8 @@
 #include "hks_event_info.h"
 #include "hks_type.h"
 
+void HksFreeEventInfo(HksEventInfo **eventInfo);
+
 int32_t BuildCommonInfo(const struct HksParamSet *paramSet, struct HksEventInfo *eventInfo);
 
 // add count, dataLen, totalCost

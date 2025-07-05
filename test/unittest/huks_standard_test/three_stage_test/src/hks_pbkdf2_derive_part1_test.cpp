@@ -53,6 +53,7 @@ void HksPbkdf2DerivePart1Test::SetUp()
 
 void HksPbkdf2DerivePart1Test::TearDown()
 {
+    std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
 uint8_t g_saltdata1[16] = {0};
@@ -240,6 +241,57 @@ static struct HksParam g_pbkdf2FinishParams003[] = {
         .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
     }
 };
+
+static struct HksParam g_pbkdf2FinishParams0040[] = {
+    {
+        .tag = HKS_TAG_KEY_STORAGE_FLAG,
+        .uint32Param = HKS_STORAGE_PERSISTENT
+    }, {
+        .tag = HKS_TAG_KEY_ALIAS,
+        .blob = {
+            (uint32_t)strlen("HksPBKDF2DeriveKeyAliasTest004_2"),
+            (uint8_t *)"HksPBKDF2DeriveKeyAliasTest004_2"
+        }
+    }, {
+        .tag =  HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_AES
+    }, {
+        .tag =  HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_AES_KEY_SIZE_256
+    }, {
+        .tag =  HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
+    }, {
+        .tag =  HKS_TAG_KEY_OVERRIDE,
+        .boolParam = false
+    }
+};
+
+static struct HksParam g_pbkdf2FinishParams0041[] = {
+    {
+        .tag = HKS_TAG_KEY_STORAGE_FLAG,
+        .uint32Param = HKS_STORAGE_PERSISTENT
+    }, {
+        .tag = HKS_TAG_KEY_ALIAS,
+        .blob = {
+            (uint32_t)strlen("HksPBKDF2DeriveKeyAliasTest004_2"),
+            (uint8_t *)"HksPBKDF2DeriveKeyAliasTest004_2"
+        }
+    }, {
+        .tag =  HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_AES
+    }, {
+        .tag =  HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_AES_KEY_SIZE_256
+    }, {
+        .tag =  HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
+    }, {
+        .tag =  HKS_TAG_KEY_OVERRIDE,
+        .boolParam = true
+    }
+};
+
 #ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParams007[] = {
     {
@@ -559,6 +611,62 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive003, TestSize.Level0)
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&pbkdf2ParamSet);
     HksFreeParamSet(&pbkdf2FinishParamSet);
+}
+
+/**
+ * @tc.name: HksPbkdf2DerivePart1Test.HksPbkdf2Derive004
+ * @tc.desc: alg-PBKDF2 pur-Derive dig-SHA256.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive004, TestSize.Level0)
+{
+    struct HksBlob keyAlias = { (uint32_t)strlen("HksPBKDF2DeriveKeyAliasTest003_1"),
+        (uint8_t *)"HksPBKDF2DeriveKeyAliasTest003_1" };
+    int32_t ret = HKS_FAILURE;
+    /* 1. Generate Key */
+    struct HksParamSet *genParamSet = nullptr;
+    ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+
+    /* 2. PBKDF2 Three Stage */
+    struct HksParamSet *pbkdf2ParamSet = nullptr;
+    struct HksParamSet *pbkdf2FinishParamSet0 = nullptr;
+    struct HksParamSet *pbkdf2FinishParamSet1 = nullptr;
+    ret = InitParamSet(&pbkdf2ParamSet, g_pbkdf2Params003, sizeof(g_pbkdf2Params003) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+    struct HksParam *saltParam = nullptr;
+    HksGetParam(pbkdf2ParamSet, HKS_TAG_SALT, &saltParam);
+    ret = HksGenerateRandom(NULL, &(saltParam->blob));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateRandom failed.";
+    // Finish paramset
+    ret = InitParamSet(&pbkdf2FinishParamSet0, g_pbkdf2FinishParams0040,
+        sizeof(g_pbkdf2FinishParams0040) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+    ret = InitParamSet(&pbkdf2FinishParamSet1, g_pbkdf2FinishParams0041,
+        sizeof(g_pbkdf2FinishParams0041) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+
+    struct HksBlob testKeyAlias = { (uint32_t)strlen("HksPBKDF2DeriveKeyAliasTest004_2"),
+        (uint8_t *)"HksPBKDF2DeriveKeyAliasTest004_2" };
+    ret = HksKeyExistForDe(&testKeyAlias, pbkdf2FinishParamSet0);
+    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "HksKeyExistForDe failed.";
+    // init-update-final
+    ret = HksPbkdf2DeriveTestForOverwriteCase(keyAlias, genParamSet, pbkdf2ParamSet, pbkdf2FinishParamSet0);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksPbkdf2DeriveTestForOverwriteCase failed.";
+    ret = HksPbkdf2DeriveTestForOverwriteCase(keyAlias, genParamSet, pbkdf2ParamSet, pbkdf2FinishParamSet1);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksPbkdf2DeriveTestForOverwriteCase failed.";
+    ret = HksPbkdf2DeriveTestForOverwriteCase(keyAlias, genParamSet, pbkdf2ParamSet, pbkdf2FinishParamSet0);
+    EXPECT_EQ(ret, HKS_ERROR_CODE_KEY_ALREADY_EXIST) << "HksPbkdf2DeriveTestForOverwriteCase failed.";
+    /* 3. Delete Key */
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
+    ret = HksDeleteKeyForDe(&testKeyAlias, NULL);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&pbkdf2ParamSet);
+    HksFreeParamSet(&pbkdf2FinishParamSet0);
+    HksFreeParamSet(&pbkdf2FinishParamSet1);
 }
 
 #ifdef HKS_UNTRUSTED_RUNNING_ENV

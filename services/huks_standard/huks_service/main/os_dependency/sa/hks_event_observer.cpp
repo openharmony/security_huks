@@ -121,6 +121,7 @@ void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData
         int userId = data.GetCode();
         HKS_LOG_I("user %" LOG_PUBLIC "d unlocked.", userId);
         HksUpgradeOnUserUnlock(userId);
+        ReportDataSizeEvent(userId);
     } else if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
         HksSetScreenState(false);
     } else if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
