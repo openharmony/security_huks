@@ -151,8 +151,17 @@ static int32_t FileRead(const char *fileName, uint32_t offset, struct HksBlob *b
             "failed to close file, errno = 0x%" LOG_PUBLIC "x", errno)
         return HKS_ERROR_OPEN_FILE_FAIL;
     }
-    HKS_LOG_I("File ctime: %" LOG_PUBLIC "s, mtime: %" LOG_PUBLIC "s",
-        ctime(&fileStat.st_ctime), ctime(&fileStat.st_mtime));
+    char *cTime = ctime(&fileStat.st_ctime);
+    char *mTime = ctime(&fileStat.st_mtime);
+    size_t cTimeLen = strlen(cTime);
+    size_t mTimeLen = strlen(mTime);
+    if (cTimeLen > 0 && cTime[cTimeLen - 1] == '\n') {
+        cTime[cTimeLen - 1] = '\0';
+    }
+    if (mTimeLen > 0 && mTime[mTimeLen - 1] == '\n') {
+        mTime[mTimeLen - 1] = '\0';
+    }
+    HKS_LOG_I("File ctime: %" LOG_PUBLIC "s, mtime: %" LOG_PUBLIC "s", cTime, mTime);
 
     uint32_t len = fread(blob->data, 1, blob->size, fp);
     if (fclose(fp) < 0) {

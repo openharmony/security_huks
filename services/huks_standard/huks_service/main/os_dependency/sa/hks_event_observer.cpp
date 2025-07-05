@@ -126,7 +126,6 @@ void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData
         HksSetScreenState(false);
     } else if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
         HksSetScreenState(true);
-        ReportDataSizeEvent(data.GetCode());
     }
 
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
