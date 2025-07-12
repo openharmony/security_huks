@@ -88,7 +88,8 @@
           "bounds_checking_function",
           "mbedtls",
           "cJSON",
-          "init"
+          "init",
+          "runtime_core"
         ]
       },
       "build": {
