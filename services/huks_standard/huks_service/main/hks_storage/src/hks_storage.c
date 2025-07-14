@@ -82,6 +82,7 @@ int32_t HksStorageWriteFile(
     HksStorageFileLockRelease(lock);
     return ret;
 #else
+    (void)isOverride;
     return HksFileWrite(path, fileName, 0, buf, len);
 #endif
 }

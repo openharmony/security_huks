@@ -437,8 +437,8 @@ static int32_t HksMbedtlsRsaSignHandle(mbedtls_rsa_context *ctx, mbedtls_ctr_drb
     return ret;
 }
 
-static int32_t HksMbedtlsRsaVerifyHandle(mbedtls_rsa_context *ctx, mbedtls_ctr_drbg_context *ctrDrbg,
-    HksMbedtlsSignVerifyParam *verifyParam, const struct HksBlob *message, struct HksBlob *signature)
+static int32_t HksMbedtlsRsaVerifyHandle(mbedtls_rsa_context *ctx, HksMbedtlsSignVerifyParam *verifyParam,
+    const struct HksBlob *message, struct HksBlob *signature)
 {
     int32_t ret = HKS_SUCCESS;
     if (verifyParam->padding == MBEDTLS_RSA_PKCS_V21) {
@@ -489,7 +489,7 @@ static int32_t HksMbedtlsRsaSignVerify(const struct HksBlob *key, const struct H
         if (sign) {
             ret = HksMbedtlsRsaSignHandle(&ctx, &ctrDrbg, &mbedtlsSignVerifyParam, message, signature);
         } else {
-            ret = HksMbedtlsRsaVerifyHandle(&ctx, &ctrDrbg, &mbedtlsSignVerifyParam, message, signature);
+            ret = HksMbedtlsRsaVerifyHandle(&ctx, &mbedtlsSignVerifyParam, message, signature);
         }
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls rsa sign/verify failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
