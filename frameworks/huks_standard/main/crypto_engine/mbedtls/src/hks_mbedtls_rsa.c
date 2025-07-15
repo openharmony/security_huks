@@ -440,6 +440,7 @@ static int32_t HksMbedtlsRsaSignHandle(mbedtls_rsa_context *ctx, mbedtls_ctr_drb
 static int32_t HksMbedtlsRsaVerifyHandle(mbedtls_rsa_context *ctx, mbedtls_ctr_drbg_context *ctrDrbg,
     HksMbedtlsSignVerifyParam *verifyParam, const struct HksBlob *message, struct HksBlob *signature)
 {
+    (void)ctrDrbg;
     int32_t ret = HKS_SUCCESS;
     if (verifyParam->padding == MBEDTLS_RSA_PKCS_V21) {
         // 支持传入saltlen
