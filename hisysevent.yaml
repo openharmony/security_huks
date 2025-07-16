@@ -22,3 +22,18 @@ FAULT:
     KEY_TYPE: {type: INT32, desc: algorithm of the key}
     ERROR_CODE: {type: INT32, desc: error code}
     EXTRA: {type: STRING, desc: extra data}
+
+HKS_DKS_BEHAVIOR:
+    __BASE:{type:BEHAVIOR,level:CRITICAL,desc:Huks destribute key service behavior,preserve:false}
+    ORG_PKG:{type:STRING,desc:package name}
+    FUNC:{type:STRING:function name}
+    BIZ_SCENE:{type:INT32,desc:business scene}
+    BIZ_STATE:{type:INT32,desc:business state}
+    BIZ_STAGE:{type:INT32,desc:business stage}
+    STAGE_RES:{type:STRING,desc:business stage result}
+    ERROR_CODE:{type:INT32,desc:error code}
+    TO_CALL_PKG:{type:STRING,desc:call package}
+    HOST_PKG:{type:STRING,desc:host package}
+    LOCAL_UDID:{type:STRING,desc:local udid}
+    PEER_UDID:{type:STRING,desc:peer udid}
+    CONCURRENT_ID:{type:STRING,desc:concurrent id}
