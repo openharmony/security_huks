@@ -26,7 +26,7 @@ FAULT:
 HKS_DKS_BEHAVIOR:
     __BASE:{type:BEHAVIOR,level:CRITICAL,desc:Huks destribute key service behavior,preserve:false}
     ORG_PKG:{type:STRING,desc:package name}
-    FUNC:{type:STRING:function name}
+    FUNC:{type:STRING,desc:function name}
     BIZ_SCENE:{type:INT32,desc:business scene}
     BIZ_STATE:{type:INT32,desc:business state}
     BIZ_STAGE:{type:INT32,desc:business stage}
