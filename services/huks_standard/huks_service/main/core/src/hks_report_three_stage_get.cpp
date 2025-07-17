@@ -426,8 +426,17 @@ static int32_t GetErrorMessageData(const struct HksProcessInfo *processInfo, con
 
     const char *errorMsg = HksGetThreadErrorMsg();
     HKS_IF_NULL_LOGI_RETURN(errorMsg, HKS_ERROR_NULL_POINTER, "get error msg fail")
-    errMsg->data = reinterpret_cast<uint8_t *>(const_cast<char*>(errorMsg));
     errMsg->size = strlen(errorMsg) + 1;
+    errMsg->data = static_cast<uint8_t *>(HksMalloc(errMsg->size));
+    if (errMsg->data == nullptr) {
+        errMsg->size = 0;
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    if (memcpy_s(errMsg->data, errMsg->size, errorMsg, errMsg->size) != EOK) {
+        HKS_LOG_E("memcpy_s fail");
+        HKS_FREE(errMsg->data);
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
     return HKS_SUCCESS;
 }
 
@@ -482,9 +491,7 @@ static int32_t HksFreshAndReport(const char *funcName, const struct HksProcessIn
     } while (0);
 
     HksFreeParamSet(&reportParamSet);
-    if (IsThreeStage(info->stage)) {
-        HKS_FREE(errMsg.data);
-    }
+    HKS_FREE(errMsg.data);
     return ret;
 }
 

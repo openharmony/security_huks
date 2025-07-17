@@ -27,8 +27,54 @@
 #include "hks_file_operator.h"
 #include "hks_ha_event_report.h"
 #include "hks_mem.h"
+#include "hks_util.h"
 #include "securec.h"
 #include "directory_ex.h"
+
+static int32_t AddDataSizeParam(
+    const std::string &foldSize, const std::string &foldPath, const std::string &partitionName,
+    struct HksParamSet **reportParamSet)
+{
+    std::string callerName = "HUKS";
+    std::string function = "ReportDataSizeEvent";
+    const struct HksParam params[] = {
+        {
+            .tag = HKS_TAG_PARAM0_UINT32,
+            .uint32Param = HKS_EVENT_DATA_SIZE_STATISTICS
+        },
+        {
+            .tag = HKS_TAG_COMPONENT_NAME,
+            .blob = { strlen("huks") + 1, (uint8_t *)"huks" }
+        },
+        {
+            .tag = HKS_TAG_PARTITION_NAME,
+            .blob = { strlen("/data") + 1, (uint8_t *)"/data" }
+        },
+        {
+            .tag = HKS_TAG_REMAIN_PARTITION_SIZE,
+            .uint64Param = static_cast<uint64_t>(GetDeviceValidSize(partitionName.c_str()))
+        },
+        {
+            .tag = HKS_TAG_FILE_OF_FOLDER_PATH,
+            .blob = { foldPath.size() + 1, (uint8_t *)(foldPath.c_str()) }
+        },
+        {
+            .tag = HKS_TAG_FILE_OF_FOLDER_SIZE,
+            .blob = { foldSize.size() + 1, (uint8_t *)(foldSize.c_str()) }
+        },
+        {
+            .tag = HKS_TAG_PARAM2_BUFFER,
+            .blob = { .size = callerName.size() + 1, .data = (uint8_t *)callerName.c_str() }
+        },
+        {
+            .tag = HKS_TAG_PARAM0_BUFFER,
+            .blob = { .size = function.size() + 1, .data = (uint8_t*)function.c_str() }
+        }
+    };
+    int32_t ret = HksAddParams(*reportParamSet, params, HKS_ARRAY_SIZE(params));
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add params failed");
+    return HKS_SUCCESS;
+}
 
 int32_t PreConstructDataSizeReportParamSet(int userId, struct HksParamSet **reportParamSet)
 {
@@ -38,6 +84,8 @@ int32_t PreConstructDataSizeReportParamSet(int userId, struct HksParamSet **repo
     std::string el1Path = HKS_EL1_DATA_PATH;
     std::string el2Path = HKS_EL2_DATA_PATH + userStr + HKS_DIRECTOREY_NAME;
     std::string el4Path = HKS_EL4_DATA_PATH + userStr + HKS_DIRECTOREY_NAME;
+    uint64_t startTime = 0;
+    (void)HksElapsedRealTime(&startTime);
     std::string foldSize = "[" +
         std::to_string(OHOS::GetFolderSize(el1Path)) + ", " +
         std::to_string(OHOS::GetFolderSize(el2Path)) + ", " +
@@ -45,34 +93,11 @@ int32_t PreConstructDataSizeReportParamSet(int userId, struct HksParamSet **repo
     std::string foldPath = "[\"" + el1Path + "\", \"" + el2Path + "\", \"" + el4Path + "\"]";
     std::string partitionName = "/data";
     do {
-        const struct HksParam params[] = {
-            {
-                .tag = HKS_TAG_PARAM0_UINT32,
-                .uint32Param = HKS_EVENT_DATA_SIZE_STATISTICS
-            },
-            {
-                .tag = HKS_TAG_COMPONENT_NAME,
-                .blob = { strlen("huks") + 1, (uint8_t *)"huks" }
-            },
-            {
-                .tag = HKS_TAG_PARTITION_NAME,
-                .blob = { strlen("/data") + 1, (uint8_t *)"/data" }
-            },
-            {
-                .tag = HKS_TAG_REMAIN_PARTITION_SIZE,
-                .uint64Param = static_cast<uint64_t>(GetDeviceValidSize(partitionName.c_str()))
-            },
-            {
-                .tag = HKS_TAG_FILE_OF_FOLDER_PATH,
-                .blob = { foldPath.size() + 1, (uint8_t *)(foldPath.c_str()) }
-            },
-            {
-                .tag = HKS_TAG_FILE_OF_FOLDER_SIZE,
-                .blob = { foldSize.size() + 1, (uint8_t *)(foldSize.c_str()) }
-            }
-        };
-        ret = HksAddParams(*reportParamSet, params, HKS_ARRAY_SIZE(params));
-        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "add params failed");
+        ret = AddTimeCost(*reportParamSet, startTime);
+        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "add time cost to reportParamSet failed!")
+
+        ret = AddDataSizeParam(foldSize, foldPath, partitionName, reportParamSet);
+        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "AddDataSizeParam failed");
 
         ret = HksBuildParamSet(reportParamSet);
         HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "build paramset failed");
