@@ -40,6 +40,27 @@
 #define CE_TYPE 1
 #define ECE_TYPE 2
 
+static char *GetTimeString(const time_t *timer)
+{
+    char *saveTime = NULL;
+    char *time = ctime(timer);
+    if (time == NULL) {
+        return saveTime;
+    }
+
+    size_t timeLen = strlen(time);
+    if (timeLen <= 0) {
+        return saveTime;
+    }
+    
+    saveTime = (char *)HksMalloc(timeLen);
+    if (saveTime != NULL) {
+        (void)memcpy_s(saveTime, timeLen, time, timeLen);
+        saveTime[timeLen - 1] = '\0';
+    }
+    return saveTime;
+}
+
 static int32_t GetFileName(const char *path, const char *fileName, char *fullFileName, uint32_t fullFileNameLen)
 {
     if (path != NULL) {
@@ -151,17 +172,14 @@ static int32_t FileRead(const char *fileName, uint32_t offset, struct HksBlob *b
             "failed to close file, errno = 0x%" LOG_PUBLIC "x", errno)
         return HKS_ERROR_OPEN_FILE_FAIL;
     }
-    char *cTime = ctime(&fileStat.st_ctime);
-    char *mTime = ctime(&fileStat.st_mtime);
-    size_t cTimeLen = strlen(cTime);
-    size_t mTimeLen = strlen(mTime);
-    if (cTimeLen > 0 && cTime[cTimeLen - 1] == '\n') {
-        cTime[cTimeLen - 1] = '\0';
+
+    char *cTime = GetTimeString(&fileStat.st_ctime);
+    char *mTime = GetTimeString(&fileStat.st_mtime);
+    if (cTime != NULL && mTime != NULL) {
+        HKS_LOG_I("File ctime: %" LOG_PUBLIC "s, mtime: %" LOG_PUBLIC "s", cTime, mTime);
     }
-    if (mTimeLen > 0 && mTime[mTimeLen - 1] == '\n') {
-        mTime[mTimeLen - 1] = '\0';
-    }
-    HKS_LOG_I("File ctime: %" LOG_PUBLIC "s, mtime: %" LOG_PUBLIC "s", cTime, mTime);
+    HKS_FREE(cTime);
+    HKS_FREE(mTime);
 
     uint32_t len = fread(blob->data, 1, blob->size, fp);
     if (fclose(fp) < 0) {
