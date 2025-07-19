@@ -31,12 +31,13 @@
 #include "securec.h"
 #include "directory_ex.h"
 
+const static std::string g_callerName = "HUKS";
+const static std::string g_function = "ReportDataSizeEvent";
+
 static int32_t AddDataSizeParam(
     const std::string &foldSize, const std::string &foldPath, const std::string &partitionName,
     struct HksParamSet **reportParamSet)
 {
-    std::string callerName = "HUKS";
-    std::string function = "ReportDataSizeEvent";
     const struct HksParam params[] = {
         {
             .tag = HKS_TAG_PARAM0_UINT32,
@@ -64,11 +65,11 @@ static int32_t AddDataSizeParam(
         },
         {
             .tag = HKS_TAG_PARAM2_BUFFER,
-            .blob = { .size = callerName.size() + 1, .data = (uint8_t *)callerName.c_str() }
+            .blob = { g_callerName.size() + 1, (uint8_t *)g_callerName.c_str() }
         },
         {
             .tag = HKS_TAG_PARAM0_BUFFER,
-            .blob = { .size = function.size() + 1, .data = (uint8_t*)function.c_str() }
+            .blob = { g_function.size() + 1, (uint8_t*)g_function.c_str() }
         }
     };
     int32_t ret = HksAddParams(*reportParamSet, params, HKS_ARRAY_SIZE(params));
