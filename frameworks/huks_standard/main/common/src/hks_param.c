@@ -155,6 +155,7 @@ static uint32_t g_validTags[] = {
     HKS_TAG_WRAP_DATA_ASSET_SECRET,
     HKS_TAG_WRAP_DATA_ASSET_EXTRA_AAD,
     DKS_TAG_IS_USE_DISTRIBUTED_KEY,
+    DKS_TAG_IS_ALLOW_REMOTE_OPERATE,
 };
 
 HKS_API_EXPORT enum HksTagType GetTagType(enum HksTag tag)
