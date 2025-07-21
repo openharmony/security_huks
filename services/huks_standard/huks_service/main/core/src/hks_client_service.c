@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "hks_error_code.h"
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
 #else
@@ -338,15 +339,16 @@ static int32_t GetKeyAndNewParamSet(const struct HksProcessInfo *processInfo, co
         "append process info and default strategy failed, ret = %" LOG_PUBLIC "d", ret)
 
     struct HksParam* dksParam = NULL;
-    if (HksGetParam(paramSet, DKS_TAG_IS_USE_DISTRIBUTED_KEY, &dksParam) == HKS_SUCCESS) {
-        if (dksParam->boolParam) {
-            HKS_LOG_I("dks recover after use, has the DKS_TAG_IS_USE_DISTRIBUTED_KEY tag, read keyfile from Ta cache!");
-            ret = DksAppendKeyAliasAndNewParamSet(*outParamSet, keyAlias, outParamSet);
-            HKS_IF_NOT_SUCC_LOGE(ret, "dks append key alias and new param set failed, ret = %" LOG_PUBLIC "d.", ret)
-        }
-    } else {
+    ret = HksGetParam(paramSet, DKS_TAG_IS_USE_DISTRIBUTED_KEY, &dksParam);
+    if (ret == HKS_SUCCESS && dksParam->boolParam) {
+        HKS_LOG_D("dks recover after use, has the DKS_TAG_IS_USE_DISTRIBUTED_KEY tag, read keyfile from Ta cache!");
+        ret = DksAppendKeyAliasAndNewParamSet(*outParamSet, keyAlias, outParamSet);
+        HKS_IF_NOT_SUCC_LOGE(ret, "dks append key alias and new param set failed, ret = %" LOG_PUBLIC "d.", ret)
+    } else if (ret == HKS_ERROR_PARAM_NOT_EXIST || (ret == HKS_SUCCESS && !dksParam->boolParam)) {
         ret = GetKeyData(processInfo, keyAlias, *outParamSet, key, HKS_STORAGE_TYPE_KEY);
         HKS_IF_NOT_SUCC_LOGE(ret, "get key data failed, ret = %" LOG_PUBLIC "d.", ret)
+    } else {
+        HKS_IF_NOT_SUCC_LOGE(ret, "get DKS_TAG_IS_USE_DISTRIBUTED_KEY failed, ret = %" LOG_PUBLIC "d.", ret)
     }
     // free outParamSet together after do-while
     return ret;
