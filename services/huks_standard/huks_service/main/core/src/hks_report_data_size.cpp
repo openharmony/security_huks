@@ -31,12 +31,12 @@
 #include "securec.h"
 #include "directory_ex.h"
 
-const static std::string g_callerName = "HUKS";
-const static std::string g_function = "ReportDataSizeEvent";
+constexpr static char COMPONENT_NAME[] = "HUKS";
+constexpr static char PARTITION_NAME[] = "/data";
+constexpr static char FUNCTION_NAME[] = "ReportDataSizeEvent";
 
 static int32_t AddDataSizeParam(
-    const std::string &foldSize, const std::string &foldPath, const std::string &partitionName,
-    struct HksParamSet **reportParamSet)
+    const std::string &foldSize, const std::string &foldPath, struct HksParamSet **reportParamSet)
 {
     const struct HksParam params[] = {
         {
@@ -45,15 +45,15 @@ static int32_t AddDataSizeParam(
         },
         {
             .tag = HKS_TAG_COMPONENT_NAME,
-            .blob = { strlen("huks") + 1, (uint8_t *)"huks" }
+            .blob = { strlen(COMPONENT_NAME) + 1, (uint8_t *)COMPONENT_NAME }
         },
         {
             .tag = HKS_TAG_PARTITION_NAME,
-            .blob = { strlen("/data") + 1, (uint8_t *)"/data" }
+            .blob = { strlen(PARTITION_NAME) + 1, (uint8_t *)PARTITION_NAME }
         },
         {
             .tag = HKS_TAG_REMAIN_PARTITION_SIZE,
-            .uint64Param = static_cast<uint64_t>(GetDeviceValidSize(partitionName.c_str()))
+            .uint64Param = static_cast<uint64_t>(GetDeviceValidSize(PARTITION_NAME))
         },
         {
             .tag = HKS_TAG_FILE_OF_FOLDER_PATH,
@@ -65,11 +65,11 @@ static int32_t AddDataSizeParam(
         },
         {
             .tag = HKS_TAG_PARAM2_BUFFER,
-            .blob = { g_callerName.size() + 1, (uint8_t *)g_callerName.c_str() }
+            .blob = { strlen(COMPONENT_NAME) + 1, (uint8_t *)COMPONENT_NAME }
         },
         {
             .tag = HKS_TAG_PARAM0_BUFFER,
-            .blob = { g_function.size() + 1, (uint8_t*)g_function.c_str() }
+            .blob = { strlen(FUNCTION_NAME) + 1, (uint8_t *)FUNCTION_NAME }
         }
     };
     int32_t ret = HksAddParams(*reportParamSet, params, HKS_ARRAY_SIZE(params));
@@ -92,12 +92,11 @@ int32_t PreConstructDataSizeReportParamSet(int userId, struct HksParamSet **repo
         std::to_string(OHOS::GetFolderSize(el2Path)) + ", " +
         std::to_string(OHOS::GetFolderSize(el4Path)) + "]";
     std::string foldPath = "[\"" + el1Path + "\", \"" + el2Path + "\", \"" + el4Path + "\"]";
-    std::string partitionName = "/data";
     do {
         ret = AddTimeCost(*reportParamSet, startTime);
         HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "add time cost to reportParamSet failed!")
 
-        ret = AddDataSizeParam(foldSize, foldPath, partitionName, reportParamSet);
+        ret = AddDataSizeParam(foldSize, foldPath, reportParamSet);
         HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "AddDataSizeParam failed");
 
         ret = HksBuildParamSet(reportParamSet);
