@@ -44,20 +44,21 @@ static char *GetTimeString(const time_t *timer)
 {
     char *saveTime = NULL;
     char *time = ctime(timer);
-    if (time == NULL) {
-        return saveTime;
-    }
+    do {
+        HKS_IF_TRUE_BREAK(time == NULL);
 
-    size_t timeLen = strlen(time);
-    if (timeLen <= 0) {
-        return saveTime;
-    }
-    
-    saveTime = (char *)HksMalloc(timeLen);
-    if (saveTime != NULL) {
-        (void)memcpy_s(saveTime, timeLen, time, timeLen);
+        size_t timeLen = strlen(time);
+        HKS_IF_TRUE_BREAK(timeLen <= 0);
+
+        saveTime = (char *)HksMalloc(timeLen);
+        HKS_IF_TRUE_BREAK(saveTime == NULL);
+
+        if (memcpy_s(saveTime, timeLen, time, timeLen) != EOK) {
+            HKS_LOG_E("memcpy_s failed");
+            break;
+        }
         saveTime[timeLen - 1] = '\0';
-    }
+    } while (0);
     return saveTime;
 }
 
