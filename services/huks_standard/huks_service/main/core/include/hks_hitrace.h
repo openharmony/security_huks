@@ -29,6 +29,7 @@
 #endif
 
 #define HKS_HITRACE_FLAG_DEFAULT 0
+#define HKS_HITRACE_FLAG_NO_BE_INFO (1 << 3)
 
 #ifdef __cplusplus
 extern "C" {
