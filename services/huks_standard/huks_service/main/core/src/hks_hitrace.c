@@ -40,7 +40,9 @@ struct HksHitraceId HksHitraceBegin(const char *name, int flag)
 void HksHitraceEnd(const struct HksHitraceId *hitraceId)
 {
 #ifdef L2_STANDARD
-    HiTraceChainEnd(&hitraceId->traceId);
+    if (HiTraceChainIsValid(&hitraceId->traceId)) {
+        HiTraceChainEnd(&hitraceId->traceId);
+    }
     HksTraceMeterFinish(huksLabel);
 #else
     (void)hitraceId;
