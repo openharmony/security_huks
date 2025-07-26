@@ -573,7 +573,7 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
 
     struct HksBlob output = { MAX_KEY_SIZE, keyOutBuffer };
@@ -633,7 +633,7 @@ int32_t HksServiceSign(const struct HksProcessInfo *processInfo, const struct Hk
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
 
     do {
@@ -680,7 +680,7 @@ int32_t HksServiceVerify(const struct HksProcessInfo *processInfo, const struct 
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
 
     do {
@@ -768,7 +768,7 @@ int32_t HksServiceDecrypt(const struct HksProcessInfo *processInfo, const struct
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
 
     do {
@@ -1001,7 +1001,7 @@ int32_t HksServiceImportWrappedKey(const struct HksProcessInfo *processInfo, con
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
 
     do {
@@ -1094,7 +1094,7 @@ int32_t HksServiceAgreeKey(const struct HksProcessInfo *processInfo, const struc
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
 
     do {
@@ -1140,7 +1140,7 @@ int32_t HksServiceDeriveKey(const struct HksProcessInfo *processInfo, const stru
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
 
     do {
@@ -1186,7 +1186,7 @@ int32_t HksServiceMac(const struct HksProcessInfo *processInfo, const struct Hks
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
 
     do {
@@ -1403,7 +1403,7 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
 {
     uint64_t startTime = 0;
     (void)HksElapsedRealTime(&startTime);
-    struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
     struct HksBlob keyFromFile = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
     struct HksParamSet *processInfoParamSet = NULL;
@@ -1471,7 +1471,7 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
 
     do {
@@ -1546,7 +1546,7 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
     struct HksParamSet *newParamSet = NULL;
     struct HksOperation *operation;
@@ -1632,7 +1632,7 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
 
     struct HksParamSet *newParamSet = NULL;
@@ -1690,7 +1690,7 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
     struct HksParamSet *newParamSet = NULL;
     struct HksOperation *operation;
