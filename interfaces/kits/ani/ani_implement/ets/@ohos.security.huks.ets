@@ -334,7 +334,7 @@ export namespace huks {
         } else {
           eNull.code = retInner.result
           eNull.message = retInner.error as string;
-          let empty: HuksSessionHandle = {}
+          let empty: HuksSessionHandle = {handle: 0}
           callback(eNull, empty);
         }
     });
