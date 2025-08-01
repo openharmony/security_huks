@@ -130,7 +130,6 @@ ohos_unittest("huks_UT_test") {
       # "src/hks_derive_main_key_part2_test.cpp",
       # "src/hks_derive_main_key_part3_test.cpp",
       # "src/hks_derive_main_key_test_common.cpp",
-      "src/hks_iso_iec_test_common.cpp",
     ]
   }
 
@@ -210,10 +209,12 @@ ohos_unittest("huks_UT_test") {
       "access_token:libaccesstoken_sdk",
       "access_token:libnativetoken_shared",
       "access_token:libtokensetproc_shared",
-      "device_manager:devicemanagersdk",
       "cJSON:cjson",
       "openssl:libcrypto_shared",
     ]
+    if (huks_security_level == "trusted_environment") {
+      external_deps += [ "init:libbegetutil" ]
+    }
   }
 
   defines += [ "L2_STANDARD" ]
