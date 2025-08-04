@@ -234,5 +234,74 @@ HWTEST_F(HksReportCommonTest, HksReportCommonTest004, TestSize.Level0)
 
     HksFreeParamSet(&paramSet);
 }
+
+/**
+ * @tc.name: HksReportCommonTest.HksReportCommonTest005
+ * @tc.desc: tdd GetCommonEventInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksReportCommonTest, HksReportCommonTest005, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksReportCommonTest005");
+
+    struct HksParam tmpParams[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES }
+    };
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = GenerateParamSet(&paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    struct HksEventInfo eventInfo = {};
+    ret = GetCommonEventInfo(paramSet, &eventInfo);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksReportCommonTest.HksReportCommonTest006
+ * @tc.desc: tdd GetEventKeyInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksReportCommonTest, HksReportCommonTest006, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksReportCommonTest006");
+
+    struct HksParam tmpParams[] = {
+        { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB }
+    };
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = GenerateParamSet(&paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    struct HksEventKeyInfo keyInfo = { 0 };
+    ret = GetEventKeyInfo(paramSet, &keyInfo);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksReportCommonTest.HksReportCommonTest007
+ * @tc.desc: tdd GetEventKeyAccessInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksReportCommonTest, HksReportCommonTest007, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksReportCommonTest007");
+
+    struct HksParam tmpParams[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES }
+    };
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = GenerateParamSet(&paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    struct HksEventKeyAccessInfo keyAccessInfo = { 0 };
+    ret = GetEventKeyAccessInfo(paramSet, &keyAccessInfo);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
 }
  
