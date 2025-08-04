@@ -141,11 +141,4 @@ void HksLog(uint32_t logLevel, const char *format, ...)
     }
 }
 
-void PrintErrorMsg(void)
-{
-    if (g_msgLen != 0) {
-        HILOG_ERROR(LOG_ENGINE, "[HksLog]: g_errMsg [%{public}s]", g_errMsg);
-    }
-}
 #endif
-

@@ -397,7 +397,7 @@ int32_t HksManageStoreIsKeyBlobExist(const struct HksProcessInfo *processInfo, c
 
         ret = HksStoreIsKeyBlobExist(&fileInfo);
 #endif
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks key blob in old de not exist, ret = %" LOG_PUBLIC "d.", ret)
+        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "hks key blob in old de not exist, ret = %" LOG_PUBLIC "d.", ret)
     } while (0);
 
     FileInfoFree(&fileInfo);
