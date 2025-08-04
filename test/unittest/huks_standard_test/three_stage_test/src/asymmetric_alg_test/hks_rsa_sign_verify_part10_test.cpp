@@ -16,15 +16,15 @@
 #ifdef L2_STANDARD
 #include "file_ex.h"
 #endif
-#include "hks_iso_iec_test_common.h"
+#ifndef HKS_UNTRUSTED_RUNNING_ENV
+#include "parameters.h"
+#endif
 #include "hks_rsa_sign_verify_test_common.h"
 #include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 
 using namespace testing::ext;
-using namespace Unittest::IsoIec;
-using namespace OHOS::DistributedHardware;
 namespace Unittest::RsaSignVerify {
 class HksRsaSignVerifyPart10Test : public testing::Test {
 public:
@@ -52,6 +52,8 @@ void HksRsaSignVerifyPart10Test::SetUp()
 void HksRsaSignVerifyPart10Test::TearDown()
 {
 }
+
+static const std::string DEVICE_WEARABLE = "wearable";
 
 static struct HksParam g_genParamsTest101[] = {
     {
@@ -438,14 +440,13 @@ HWTEST_F(HksRsaSignVerifyPart10Test, HksRsaSignVerifyPart10Test105, TestSize.Lev
     ret = InitParamSet(&signParamSet, g_signParamsTest105, sizeof(g_signParamsTest105) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
-    int32_t deviceType;
-    ret = HksGetLocalDeviceType(deviceType);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksGetLocalDeviceType failed.";
+    std::string deviceType = OHOS::system::GetDeviceType();
+    EXPECT_NE(deviceType, "") << "GetDeviceType failed.";
 
     uint8_t sign[RSA_COMMON_SIZE] = { 0 };
     struct HksBlob signature = { RSA_COMMON_SIZE, sign };
     ret = HksRsaSignTest(&keyAlias, signParamSet, &inData, &signature);
-    if (deviceType == DEVICE_TYPE_WATCH) {
+    if (deviceType == DEVICE_WEARABLE) {
         EXPECT_EQ(ret, HKS_SUCCESS) << "HksRsaSignTest failed.";
     } else {
         EXPECT_EQ(ret, HKS_FAILURE) << "HksRsaSignTest failed.";
@@ -457,7 +458,7 @@ HWTEST_F(HksRsaSignVerifyPart10Test, HksRsaSignVerifyPart10Test105, TestSize.Lev
 
     uint8_t out[RSA_COMMON_SIZE] = { 0 };
     struct HksBlob outData = { RSA_COMMON_SIZE, out };
-    if (deviceType == DEVICE_TYPE_WATCH) {
+    if (deviceType == DEVICE_WEARABLE) {
         ret = HksRsaVerifyTest(&keyAlias, verifyParamSet, &inData, &signature, &outData);
         EXPECT_EQ(ret, HKS_SUCCESS) << "HksRsaVerifyTest failed.";
     }

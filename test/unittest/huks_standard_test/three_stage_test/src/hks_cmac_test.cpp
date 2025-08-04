@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
+#include "parameters.h"
 #include "hks_cmac_test.h"
-#include "hks_iso_iec_test_common.h"
 #include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
@@ -24,8 +24,6 @@
 #endif
 
 using namespace testing::ext;
-using namespace Unittest::IsoIec;
-using namespace OHOS::DistributedHardware;
 namespace Unittest::Cmac {
 class HksCmacTest : public testing::Test {
 public:
@@ -53,6 +51,8 @@ void HksCmacTest::SetUp()
 void HksCmacTest::TearDown()
 {
 }
+
+static const std::string DEVICE_WEARABLE = "wearable";
 
 static struct HksParam g_genParams001[] = {
     {
@@ -280,14 +280,13 @@ HWTEST_F(HksCmacTest, HksCmacTest001, TestSize.Level0)
     ret = InitParamSet(&cmacParamSet, g_cmacParams001, sizeof(g_cmacParams001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
-    int32_t deviceType;
-    ret = HksGetLocalDeviceType(deviceType);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksGetLocalDeviceType failed.";
+    std::string deviceType = OHOS::system::GetDeviceType();
+    EXPECT_NE(deviceType, "") << "GetDeviceType failed.";
 
     uint8_t mac[CMAC_COMMON_SIZE] = { 0 };
     struct HksBlob outData = { CMAC_COMMON_SIZE, mac };
     ret = HksCmacTestCase(&keyAlias, cmacParamSet, &inData, &outData);
-    if (deviceType == DEVICE_TYPE_WATCH) {
+    if (deviceType == DEVICE_WEARABLE) {
         EXPECT_EQ(ret, HKS_SUCCESS) << "HksCmacTestCase failed.";
     } else {
         EXPECT_EQ(ret, HKS_FAILURE) << "HksCmacTestCase failed.";
@@ -440,14 +439,13 @@ HWTEST_F(HksCmacTest, HksCmacTest006, TestSize.Level0)
     ret = InitParamSet(&cmacParamSet, g_cmacParams006, sizeof(g_cmacParams006) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
-    int32_t deviceType;
-    ret = HksGetLocalDeviceType(deviceType);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksGetLocalDeviceType failed.";
+    std::string deviceType = OHOS::system::GetDeviceType();
+    EXPECT_NE(deviceType, "") << "GetDeviceType failed.";
 
     uint8_t mac[CMAC_COMMON_SIZE] = { 0 };
     struct HksBlob outData = { CMAC_COMMON_SIZE, mac };
     ret = HksCmacTestCase(&keyAlias, cmacParamSet, &inData, &outData);
-    if (deviceType == DEVICE_TYPE_WATCH) {
+    if (deviceType == DEVICE_WEARABLE) {
         EXPECT_EQ(ret, HKS_SUCCESS) << "HksCmacTestCase failed.";
         EXPECT_EQ(HksMemCmp(outData.data, macData.data, outData.size), HKS_SUCCESS) << "outData not equals macData";
     } else {
