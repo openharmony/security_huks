@@ -21,6 +21,7 @@
 #include "hks_type_inner.h"
 #include "hks_file_operator.h"
 
+/* To modify this, you need to synchronize the changes to the same code segment in huks_ext hks_extension_interface.h */
 enum HksStorageType {
     HKS_STORAGE_TYPE_KEY = 0,
     HKS_STORAGE_TYPE_ROOT_KEY = 1,

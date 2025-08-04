@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "hks_error_code.h"
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
 #else
@@ -62,6 +63,7 @@
 #include "hks_report_common.h"
 #include "hks_report_three_stage_get.h"
 #include "hks_type_enum.h"
+#include "hks_type_inner.h"
 
 #ifdef L2_STANDARD
 #include "hks_ha_event_report.h"
@@ -299,6 +301,35 @@ int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, const
 
 #ifndef _CUT_AUTHENTICATE_
 
+static int32_t DksAppendKeyAliasAndNewParamSet(struct HksParamSet *paramSet, const struct HksBlob *keyAlias,
+    struct HksParamSet **outParamSet)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    do {
+        if (paramSet != NULL) {
+            ret = AppendToNewParamSet(paramSet, &newParamSet);
+        } else {
+            ret = HksInitParamSet(&newParamSet);
+        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init new param set failed, ret = %" LOG_PUBLIC "d", ret)
+        struct HksParam paramArray[] = {
+            { .tag = HKS_TAG_KEY_ALIAS, .blob = {.size = keyAlias->size, .data = keyAlias->data} },
+        };
+        ret = HksAddParams(newParamSet, paramArray, HKS_ARRAY_SIZE(paramArray));
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add key alias, ret = %" LOG_PUBLIC "d", ret)
+        
+        ret = HksBuildParamSet(&newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build new param set failed, ret = %" LOG_PUBLIC "d", ret)
+        
+        HksFreeParamSet(&paramSet);
+        *outParamSet = newParamSet;
+        return ret;
+    } while (false);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
 static int32_t GetKeyAndNewParamSet(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *key, struct HksParamSet **outParamSet)
 {
@@ -306,10 +337,19 @@ static int32_t GetKeyAndNewParamSet(const struct HksProcessInfo *processInfo, co
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
         "append process info and default strategy failed, ret = %" LOG_PUBLIC "d", ret)
 
-    ret = GetKeyData(processInfo, keyAlias, *outParamSet, key, HKS_STORAGE_TYPE_KEY);
+    struct HksParam* dksParam = NULL;
+    ret = HksGetParam(paramSet, DKS_TAG_IS_USE_DISTRIBUTED_KEY, &dksParam);
+    if (ret == HKS_SUCCESS && dksParam->boolParam) {
+        HKS_LOG_D("dks recover after use, has the DKS_TAG_IS_USE_DISTRIBUTED_KEY tag, read keyfile from Ta cache!");
+        ret = DksAppendKeyAliasAndNewParamSet(*outParamSet, keyAlias, outParamSet);
+        HKS_IF_NOT_SUCC_LOGE(ret, "dks append key alias and new param set failed, ret = %" LOG_PUBLIC "d.", ret)
+    } else if (ret == HKS_ERROR_PARAM_NOT_EXIST || (ret == HKS_SUCCESS && !dksParam->boolParam)) {
+        ret = GetKeyData(processInfo, keyAlias, *outParamSet, key, HKS_STORAGE_TYPE_KEY);
+        HKS_IF_NOT_SUCC_LOGE(ret, "get key data failed, ret = %" LOG_PUBLIC "d.", ret)
+    } else {
+        HKS_IF_NOT_SUCC_LOGE(ret, "get DKS_TAG_IS_USE_DISTRIBUTED_KEY failed, ret = %" LOG_PUBLIC "d.", ret)
+    }
     // free outParamSet together after do-while
-    HKS_IF_NOT_SUCC_LOGE(ret, "get key data failed, ret = %" LOG_PUBLIC "d.", ret)
-
     return ret;
 }
 
@@ -532,7 +572,7 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
 
     struct HksBlob output = { MAX_KEY_SIZE, keyOutBuffer };
@@ -592,7 +632,7 @@ int32_t HksServiceSign(const struct HksProcessInfo *processInfo, const struct Hk
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
 
     do {
@@ -639,7 +679,7 @@ int32_t HksServiceVerify(const struct HksProcessInfo *processInfo, const struct 
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
 
     do {
@@ -727,7 +767,7 @@ int32_t HksServiceDecrypt(const struct HksProcessInfo *processInfo, const struct
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
 
     do {
@@ -960,7 +1000,7 @@ int32_t HksServiceImportWrappedKey(const struct HksProcessInfo *processInfo, con
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
 
     do {
@@ -1053,7 +1093,7 @@ int32_t HksServiceAgreeKey(const struct HksProcessInfo *processInfo, const struc
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
 
     do {
@@ -1099,7 +1139,7 @@ int32_t HksServiceDeriveKey(const struct HksProcessInfo *processInfo, const stru
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
 
     do {
@@ -1145,7 +1185,7 @@ int32_t HksServiceMac(const struct HksProcessInfo *processInfo, const struct Hks
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
 
     do {
@@ -1362,7 +1402,7 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
 {
     uint64_t startTime = 0;
     (void)HksElapsedRealTime(&startTime);
-    struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
     struct HksBlob keyFromFile = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
     struct HksParamSet *processInfoParamSet = NULL;
@@ -1430,7 +1470,7 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
 
     do {
@@ -1505,7 +1545,7 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
     struct HksParamSet *newParamSet = NULL;
     struct HksOperation *operation;
@@ -1591,7 +1631,7 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
 
     struct HksParamSet *newParamSet = NULL;
@@ -1649,7 +1689,7 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
     struct HksHitraceId traceId = {0};
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
     struct HksParamSet *newParamSet = NULL;
     struct HksOperation *operation;
