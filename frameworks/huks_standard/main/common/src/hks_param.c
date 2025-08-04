@@ -403,7 +403,7 @@ HKS_API_EXPORT int32_t HksFreshParamSet(struct HksParamSet *paramSet, bool isCop
 HKS_API_EXPORT int32_t HksGetParam(const struct HksParamSet *paramSet, uint32_t tag, struct HksParam **param)
 {
     if ((paramSet == NULL) || (param == NULL)) {
-        HKS_LOG_E("invalid params!");
+        HKS_LOG_W("invalid params!");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
