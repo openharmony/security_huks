@@ -111,4 +111,18 @@ HWTEST_F(HksDoubleListTest, HksDoubleListTest004, TestSize.Level0)
     EXPECT_EQ(head.next == nullptr, true);
     EXPECT_EQ(head.prev == nullptr, true);
 }
+
+/**
+ * @tc.name: HksDoubleListTest.HksDoubleListTest005
+ * @tc.desc: tdd AddNodeAfterDoubleListHead
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksDoubleListTest, HksDoubleListTest005, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksDoubleListTest005");
+    struct DoubleList node = { 0 };
+    struct DoubleList head = { .prev = nullptr, .next = &node };
+    AddNodeAfterDoubleListHead(&head, &node);
+    ASSERT_TRUE(head.next == &node);
+}
 }

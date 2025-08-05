@@ -303,5 +303,19 @@ HWTEST_F(HksReportCommonTest, HksReportCommonTest007, TestSize.Level0)
 
     HksFreeParamSet(&paramSet);
 }
+
+/**
+ * @tc.name: HksReportCommonTest.HksReportCommonTest008
+ * @tc.desc: tdd AddTimeCost
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksReportCommonTest, HksReportCommonTest008, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksReportCommonTest008");
+
+    uint64_t startTime = 0xffffffffffffffff;
+    int32_t ret = AddTimeCost(nullptr, startTime);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
+}
 }
  

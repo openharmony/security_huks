@@ -17,6 +17,7 @@
 #include <securec.h>
 
 #include "hks_api.h"
+#include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_type.h"
@@ -30,7 +31,10 @@ namespace Hks {
 int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
 {
     (void)size;
-    (void)data;
+    if (data == nullptr) {
+        return -1;
+    }
+    HKS_LOG_I("data may be unused, the first byte of data is %" LOG_PUBLIC "u", data);
 
     [[maybe_unused]] int ret = HksInitialize();
 
