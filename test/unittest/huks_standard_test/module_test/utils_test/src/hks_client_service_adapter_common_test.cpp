@@ -109,4 +109,29 @@ HWTEST_F(HksClientServiceAdapterCommonTest, HksClientServiceAdapterCommonTest003
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksClientServiceAdapterCommonTest003 failed, ret = " << ret;
     HKS_FREE(key.data);
 }
+
+/**
+ * @tc.name: HksClientServiceAdapterCommonTest.HksClientServiceAdapterCommonTest004
+ * @tc.desc: tdd HksClientServiceAdapterCommonTest004, function is GetHksPubKeyInnerFormat
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceAdapterCommonTest, HksClientServiceAdapterCommonTest004, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceAdapterCommonTest004");
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_HKDF }
+    };
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret= InitParamSet(&paramSet, params, sizeof(params) / sizeof(params[0]));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksBlob key = {
+        .size = sizeof(HksBlob),
+        .data = reinterpret_cast<uint8_t *>(HksMalloc(sizeof(HksBlob))),
+    };
+    HksBlob outKey = { .size = 0, .data = nullptr };
+    ret = GetHksPubKeyInnerFormat(paramSet, &key, &outKey);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_ALGORITHM) << "HksClientServiceAdapterCommonTest004 failed, ret = " << ret;
+    HksFreeParamSet(&paramSet);
+    HKS_FREE(key.data);
+}
 }

@@ -862,4 +862,16 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest012, TestSize.Level0)
     HksFreeParamSet(&paramSet);
 }
 #endif /** HKS_ENABLE_UPGRADE_KEY*/
+
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest014
+ * @tc.desc: tdd HksServiceAbortByPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest014, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest014");
+    int32_t ret = HksServiceAbortByPid(0);
+    ASSERT_EQ(ret, HKS_ERROR_NOT_EXIST);
+}
 }
