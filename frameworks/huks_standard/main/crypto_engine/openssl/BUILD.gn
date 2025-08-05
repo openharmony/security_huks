@@ -55,6 +55,7 @@ if (os_level == "standard") {
     deps = []
     defines = []
     include_dirs = []
+    external_deps = []
     if (huks_use_rkc_in_standard) {
       defines += [ "HKS_USE_RKC_IN_STANDARD" ]
 
@@ -111,7 +112,7 @@ if (os_level == "standard") {
       boundary_sanitize = true
       ubsan = true
     }
-    external_deps = [
+    external_deps += [
       "c_utils:utils",
       "hilog:libhilog",
     ]
