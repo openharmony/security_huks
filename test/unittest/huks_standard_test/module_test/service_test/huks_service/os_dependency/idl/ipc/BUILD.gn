@@ -24,6 +24,7 @@ ohos_unittest("service_ipc_test") {
   sources = [
     "src/huks_ipc_serialization_test.cpp",
     "src/huks_ipc_service_test.cpp",
+    "src/huks_permission_check_test.cpp",
   ]
 
   configs = [
