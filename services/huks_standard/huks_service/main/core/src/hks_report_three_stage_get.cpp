@@ -485,7 +485,7 @@ static int32_t HksFreshAndReport(const char *funcName, const struct HksProcessIn
         ret = HksBuildParamSet(&reportParamSet);
         HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "build paramset fail")
 
-        HKS_LOG_I("three stage report %" LOG_PUBLIC "s, purpose = %" LOG_PUBLIC "d, eventId = %" LOG_PUBLIC "d",
+        HKS_LOG_D("three stage report %" LOG_PUBLIC "s, purpose = %" LOG_PUBLIC "d, eventId = %" LOG_PUBLIC "d",
             funcName, eventInfo->common.operation, eventInfo->common.eventId);
         HksEventReport(funcName, processInfo, paramSet, reportParamSet, info->errCode);
     } while (0);
