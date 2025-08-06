@@ -25,8 +25,6 @@ extern "C" {
 
 void HksClearThreadErrorMsg(void);
 
-void PrintErrorMsg(void);
-
 void HksLog(uint32_t logLevel, const char *format, ...) __attribute__((format(os_log, 2, 3)));
 
 void HksAppendThreadErrMsg(const uint8_t *buff, uint32_t buffLen);

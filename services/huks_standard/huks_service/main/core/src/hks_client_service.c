@@ -107,7 +107,6 @@ static void IfNotSuccAppendHdiErrorInfo(int32_t hdiRet)
     uint32_t offset = sizeof(struct ErrorInfoHead);
     if (ret == HKS_SUCCESS && CheckBlob(&errMsg) == HKS_SUCCESS && errMsg.size > offset) {
         HksAppendThreadErrMsg((uint8_t *)(errMsg.data + offset), errMsg.size - offset);
-        PrintErrorMsg();
     } else {
         HKS_LOG_E("HuksAccessGetErrorInfo fail, ret = %" LOG_PUBLIC "d, errMsg size = %" LOG_PUBLIC "u",
             ret, errMsg.size);
