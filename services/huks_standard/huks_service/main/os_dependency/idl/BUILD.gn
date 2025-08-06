@@ -73,10 +73,6 @@ if (os_level == "standard") {
       "ipc:ipc_single",
     ]
 
-    if (!huks_qemu_enabled) {
-      external_deps += [ "ability_base:want" ]
-    }
-
     defines = []
 
     if (has_os_account_part) {
