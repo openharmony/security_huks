@@ -201,7 +201,7 @@ static int32_t AddOperation(struct HksOperation *operation)
 
         AddNodeAtDoubleListTail(&g_operationList, &operation->listHead);
         ++g_operationCount;
-        HKS_LOG_D("add operation count:%" LOG_PUBLIC "u", g_operationCount);
+        HKS_LOG_I("add operation count:%" LOG_PUBLIC "u", g_operationCount);
     } while (false);
     pthread_mutex_unlock(&g_lock);
     return ret;
