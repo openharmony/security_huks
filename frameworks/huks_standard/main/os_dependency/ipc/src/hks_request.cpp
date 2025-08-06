@@ -83,7 +83,6 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
         HKS_IF_NULL_LOGE_RETURN(errMsg, ret, "[ipc error] read errorMsg")
         HksAppendThreadErrMsg(errMsg, errMsgLen);
     }
-    PrintErrorMsg();
 #endif
 
     return ret;

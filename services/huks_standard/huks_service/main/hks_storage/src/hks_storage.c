@@ -261,7 +261,7 @@ static int32_t IsKeyBlobExist(const struct HksStoreFileInfo *fileInfo)
 #else
     if (isMainFileExist != HKS_SUCCESS) {
         int32_t isBakFileExist = HksIsFileExist(fileInfo->bakPath.path, fileInfo->bakPath.fileName);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(isBakFileExist, HKS_ERROR_NOT_EXIST, "hks mainkey and backupkey not exist")
+        HKS_IF_NOT_SUCC_LOGI_RETURN(isBakFileExist, HKS_ERROR_NOT_EXIST, "hks mainkey and backupkey not exist")
 
         HKS_IF_NOT_SUCC_LOGE(CopyKeyBlobFromSrc(fileInfo->bakPath.path, fileInfo->bakPath.fileName,
             fileInfo->mainPath.path, fileInfo->mainPath.fileName), "hks copy bak key to main key failed")
@@ -306,10 +306,10 @@ int32_t HksStoreDeleteKeyBlob(const struct HksStoreFileInfo *fileInfo, const str
 
 int32_t HksStoreIsKeyBlobExist(const struct HksStoreFileInfo *fileInfo)
 {
-    int32_t ret;
+    int32_t ret = HKS_SUCCESS;
     do {
         ret = IsKeyBlobExist(fileInfo);
-        HKS_IF_NOT_SUCC_LOGE(ret, "check is key exist, ret = %" LOG_PUBLIC "d.", ret)
+        HKS_IF_NOT_SUCC_LOGI(ret, "check is key exist, ret = %" LOG_PUBLIC "d.", ret)
     } while (0);
 
     return ret;

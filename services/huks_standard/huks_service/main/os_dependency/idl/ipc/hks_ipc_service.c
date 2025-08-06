@@ -279,6 +279,7 @@ void HksIpcServiceKeyExist(const struct HksBlob *srcData, const uint8_t *context
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksServiceKeyExist(&processInfo, &keyAlias, paramSet);
+        HKS_IF_TRUE_LOGI_BREAK(ret == HKS_ERROR_NOT_EXIST, "key is not exist");
         HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceKeyExist fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
