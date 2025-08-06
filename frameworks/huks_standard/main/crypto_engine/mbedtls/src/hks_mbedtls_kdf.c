@@ -38,6 +38,7 @@
 #endif
 
 #ifdef HKS_SUPPORT_KDF_PBKDF2
+#ifdef USE_HISI_MBED
 static int32_t DeriveKeyPbkdf2(const struct HksBlob *mainKey, const struct HksKeyDerivationParam *derParam,
     const mbedtls_md_info_t *info, struct HksBlob *derivedKey)
 {
@@ -64,6 +65,15 @@ static int32_t DeriveKeyPbkdf2(const struct HksBlob *mainKey, const struct HksKe
     mbedtls_md_free(&ctx);
     return ret;
 }
+#else
+static int32_t DeriveKeyPbkdf2(const struct HksBlob *mainKey, const struct HksKeyDerivationParam *derParam,
+    mbedtls_md_type_t type, struct HksBlob *derivedKey)
+{
+    int32_t ret = mbedtls_pkcs5_pbkdf2_hmac_ext(type, mainKey->data, mainKey->size, derParam->salt.data,
+        derParam->salt.size, derParam->iterations, derivedKey->size, derivedKey->data);
+    return ret;
+}
+#endif
 #endif /* HKS_SUPPORT_KDF_PBKDF2 */
 
 #ifdef HKS_SUPPORT_KDF_HKDF
@@ -97,7 +107,11 @@ int32_t HksMbedtlsDeriveKey(const struct HksBlob *mainKey,
     switch (derivationSpec->algType) {
 #ifdef HKS_SUPPORT_KDF_PBKDF2
         case HKS_ALG_PBKDF2:
+#ifdef USE_HISI_MBED
             return DeriveKeyPbkdf2(mainKey, derParam, info, derivedKey);
+#else
+            return DeriveKeyPbkdf2(mainKey, derParam, (mbedtls_md_type_t)mbedtlsAlg, derivedKey);
+#endif
 #endif
 #ifdef HKS_SUPPORT_KDF_HKDF
         case HKS_ALG_HKDF:
