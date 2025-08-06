@@ -25,9 +25,8 @@ ohos_shared_library("huks_ndk") {
     "_HUKS_LOG_ENABLE_",
   ]
 
-  branch_protector_ret = "pac_ret"
-
   version_script = "libhuksndk.map"
+  branch_protector_ret = "pac_ret"
 
   sanitize = {
     integer_overflow = true

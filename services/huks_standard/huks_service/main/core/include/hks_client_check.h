@@ -68,9 +68,9 @@ int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t 
 
 int32_t HksCheckUserAuthKeyPurposeValidity(const struct HksParamSet *paramSet);
 
-int32_t HksCheckListAliasesParam(const struct HksBlob *processName);
-
 bool HksCheckIsAllowedWrap(const struct HksParamSet *paramSet);
+
+int32_t HksCheckListAliasesParam(const struct HksBlob *processName);
 
 int32_t HKsCheckOldKeyAliasDiffNewKeyAlias(const struct HksBlob *oldKeyAlias,
     const struct HksBlob *newKeyAlias);
