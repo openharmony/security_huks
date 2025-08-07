@@ -19,85 +19,81 @@
 #include "hks_type.h"
 
 #ifdef L2_STANDARD
-#include "hks_error_msg.h"
+    #include "hks_error_msg.h"
 #endif
 
 #ifdef HKS_CONFIG_FILE
-#include HKS_CONFIG_FILE
+    #include HKS_CONFIG_FILE
 #else
-#include "hks_config.h"
+    #include "hks_config.h"
 #endif
 
 #ifdef _HUKS_LOG_ENABLE_
-#ifdef HKS_ENABLE_LOG_PUBLIC
-#define LOG_PUBLIC "{public}"
-#else
-#define LOG_PUBLIC
-#endif
+    #ifdef HKS_ENABLE_LOG_PUBLIC
+        #define LOG_PUBLIC "{public}"
+    #else
+        #define LOG_PUBLIC
+    #endif
 
-#undef LOG_TAG
-#define LOG_TAG "HUKS"
-#undef LOG_DOMAIN
-#define LOG_DOMAIN 0xD002F06 /* Security subsystem huks domain id */
+    #undef LOG_TAG
+    #define LOG_TAG "HUKS"
+    #undef LOG_DOMAIN
+    #define LOG_DOMAIN 0xD002F06 /* Security subsystem huks domain id */
 
-#ifdef HKS_LOG_ENGINE_LOG_CORE
-#include "hilog/log.h"
-#define LOG_ENGINE LOG_CORE
-#else
-#ifdef HKS_LOG_ENGINE_HILOG_MODULE_SCY
-#include "log.h"
-#define LOG_ENGINE HILOG_MODULE_SCY
-#endif
-#endif
+    #ifdef HKS_LOG_ENGINE_LOG_CORE
+        #include "hilog/log.h"
+        #define LOG_ENGINE LOG_CORE
+    #else
+        #ifdef HKS_LOG_ENGINE_HILOG_MODULE_SCY
+            #include "log.h"
+            #define LOG_ENGINE HILOG_MODULE_SCY
+        #endif
+    #endif
 
-#ifdef L2_STANDARD
-
-enum HksLogLevel {
-    HKS_LOG_LEVEL_I,
-    HKS_LOG_LEVEL_E,
-    HKS_LOG_LEVEL_E_IMPORTANT,
-    HKS_LOG_LEVEL_W,
-    HKS_LOG_LEVEL_D,
-};
-
-
-#define HKS_LOG_I(fmt, arg...) HILOG_INFO(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", \
-                                                                                            __func__, __LINE__, ##arg)
-#define HKS_LOG_W(fmt, arg...) HILOG_WARN(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", \
-                                                                                            __func__, __LINE__, ##arg)
-#define HKS_LOG_E(fmt, arg...) \
-do { \
-        HILOG_ERROR(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", __func__, __LINE__, ##arg); \
-        HksLog(HKS_LOG_LEVEL_E, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt, __func__, __LINE__, ##arg); \
-} while (0)
-#define HKS_LOG_E_IMPORTANT(fmt, arg...) \
-do { \
-        HILOG_ERROR(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", __func__, __LINE__, ##arg); \
-        HksLog(HKS_LOG_LEVEL_E_IMPORTANT, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt, __func__, __LINE__, ##arg); \
-} while (0)
-#define HKS_LOG_D(fmt, arg...) HILOG_DEBUG(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", \
-                                                                                            __func__, __LINE__, ##arg)
-
-#else // L2_STANDARD
-
-#define HKS_LOG_I(fmt, arg...) HILOG_INFO(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", \
-                                                                                            __func__, __LINE__, ##arg)
-#define HKS_LOG_W(fmt, arg...) HILOG_WARN(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", \
-                                                                                            __func__, __LINE__, ##arg)
-#define HKS_LOG_E(fmt, arg...) HILOG_ERROR(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", \
-                                                                                            __func__, __LINE__, ##arg)
-#define HKS_LOG_E_IMPORTANT(fmt, arg...) HILOG_ERROR(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", \
-                                                                                            __func__, __LINE__, ##arg)
-#define HKS_LOG_D(fmt, arg...) HILOG_DEBUG(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", \
-                                                                                            __func__, __LINE__, ##arg)
-#endif // L2_STANDARD
+    #ifdef L2_STANDARD
+        enum HksLogLevel {
+            HKS_LOG_LEVEL_I,
+            HKS_LOG_LEVEL_E,
+            HKS_LOG_LEVEL_E_IMPORTANT,
+            HKS_LOG_LEVEL_W,
+            HKS_LOG_LEVEL_D,
+        };
+        #define HKS_LOG_I(fmt, arg...) \
+            HILOG_INFO(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", __func__, __LINE__, ##arg)
+        #define HKS_LOG_W(fmt, arg...) \
+            HILOG_WARN(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", __func__, __LINE__, ##arg)
+        #define HKS_LOG_E(fmt, arg...) \
+            do { \
+                HILOG_ERROR(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", __func__, __LINE__, ##arg); \
+                HksLog(HKS_LOG_LEVEL_E, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt, __func__, __LINE__, ##arg); \
+            } while (0)
+        #define HKS_LOG_E_IMPORTANT(fmt, arg...) \
+            do { \
+                HILOG_ERROR(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", __func__, __LINE__, ##arg); \
+                HksLog(HKS_LOG_LEVEL_E_IMPORTANT, \
+                    "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt, __func__, __LINE__, ##arg); \
+            } while (0)
+        #define HKS_LOG_D(fmt, arg...) \
+            HILOG_DEBUG(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", __func__, __LINE__, ##arg)
+    #else // L2_STANDARD
+        #define HKS_LOG_I(fmt, arg...) \
+            HILOG_INFO(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", __func__, __LINE__, ##arg)
+        #define HKS_LOG_W(fmt, arg...) \
+            HILOG_WARN(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", __func__, __LINE__, ##arg)
+        #define HKS_LOG_E(fmt, arg...) \
+            HILOG_ERROR(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", __func__, __LINE__, ##arg)
+        #define HKS_LOG_E_IMPORTANT(fmt, arg...) \
+            HILOG_ERROR(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", __func__, __LINE__, ##arg)
+        #define HKS_LOG_D(fmt, arg...) \
+            HILOG_DEBUG(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", __func__, __LINE__, ##arg)
+    #endif // L2_STANDARD
 
 #else // _HUKS_LOG_ENABLE_
-#define HKS_LOG_I(...)
-#define HKS_LOG_W(...)
-#define HKS_LOG_E(...)
-#define HKS_LOG_E_IMPORTANT(...)
-#define HKS_LOG_D(...)
+    #define HKS_LOG_I(...)
+    #define HKS_LOG_W(...)
+    #define HKS_LOG_E(...)
+    #define HKS_LOG_E_IMPORTANT(...)
+    #define HKS_LOG_D(...)
 #endif //_HUKS_LOG_ENABLE_
 
 #ifdef __cplusplus

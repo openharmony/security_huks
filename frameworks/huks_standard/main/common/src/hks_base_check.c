@@ -471,9 +471,10 @@ static int32_t CheckRsaCipherData(uint32_t cmdId, const struct ParamsValues *inp
         ret = CheckRsaOaepCipherData(cmdId, keySize, inputParams->digest.value, inData, outData);
     }
 
-    HKS_IF_NOT_SUCC_LOGE(ret, "Check Rsa CipherData failed, cmdId: %" LOG_PUBLIC "u, padding: %" LOG_PUBLIC "u, "
-        "keyLen: %" LOG_PUBLIC "u, inData size: %" LOG_PUBLIC "u, outData size: %" LOG_PUBLIC "u",
-        cmdId, padding, keySize, inData->size, outData->size)
+    HKS_IF_NOT_SUCC_LOGE(ret, "Check Rsa CipherData fail, cmdId: %" LOG_PUBLIC "u, padding: %" LOG_PUBLIC
+        "u, keyLen: %" LOG_PUBLIC "u", cmdId, padding, keySize)
+    HKS_IF_NOT_SUCC_LOGE(ret, "Check Rsa CipherData fail, inData sz: %" LOG_PUBLIC "u, outData sz: %" LOG_PUBLIC "u",
+        inData->size, outData->size)
 
     return ret;
 }
