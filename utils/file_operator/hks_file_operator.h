@@ -66,7 +66,7 @@
 #define HKS_PROCESS_INFO_LEN    128
 #define HKS_MAX_DIRENT_FILE_LEN 128
 struct HksFileDirentInfo {
-    char fileName[HKS_MAX_DIRENT_FILE_LEN]; /* point to dirent->d_name */
+    char fileName[HKS_MAX_DIRENT_FILE_LEN + 1]; /* point to dirent->d_name */
 };
 
 #ifdef __cplusplus
