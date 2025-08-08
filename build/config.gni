@@ -41,7 +41,7 @@ declare_args() {
   huks_key_store_standard_path = "/data/service/el1/public/huks_service"
 
   # whether huks enable log
-  huks_enable_log = true
+  huks_enable_log = false
 
   # specify the path of MbedTls huks depends on
   huks_dependency_mbedtls_path = ""
