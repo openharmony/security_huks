@@ -28,7 +28,11 @@
     #include "hks_config.h"
 #endif
 
-#ifdef _HUKS_LOG_ENABLE_
+// On non-L0 devices, log will be enabled if _HUKS_LOG_ENABLE_ is defined.
+// On L0 devices, log will be disabled if HUKS_DISABLE_LOG_AT_FILE_TO_REDUCE_ROM_SIZE is defined,
+// even if _HUKS_LOG_ENABLE_ is defined.
+#if (!defined(__LITEOS_M__) && defined(_HUKS_LOG_ENABLE_)) || \
+    (defined(__LITEOS_M__) && defined(_HUKS_LOG_ENABLE_) && !defined(HUKS_DISABLE_LOG_AT_FILE_TO_REDUCE_ROM_SIZE))
     #ifdef HKS_ENABLE_LOG_PUBLIC
         #define LOG_PUBLIC "{public}"
     #else
