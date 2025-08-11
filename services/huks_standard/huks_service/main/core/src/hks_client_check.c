@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define HUKS_DISABLE_LOG_AT_FILE_TO_REDUCE_ROM_SIZE
 
 #include "hks_client_check.h"
 
