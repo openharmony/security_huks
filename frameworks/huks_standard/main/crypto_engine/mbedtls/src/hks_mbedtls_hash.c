@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define HUKS_DISABLE_LOG_AT_FILE_TO_REDUCE_ROM_SIZE
+
 #ifndef USE_HISI_MBED
 #include "mbedtls/compat-2.x.h"
 #endif
