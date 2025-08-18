@@ -34,6 +34,8 @@
 
 namespace OHOS {
 namespace ACELite {
+#define FACTOR 0xFFFFFFFF
+
 #define RELEASE_JSI_VALUE_IF_NOT_NULL(jsiValue) \
 do { \
     if ((jsiValue) != nullptr) { \
@@ -56,7 +58,8 @@ static int32_t CheckIsNumberAndAssignIntParam(const JSIValue paramProperty, uint
     int32_t ret = HKS_ERROR_INVALID_ARGUMENT;
     JSIValue valueJSIValue = JSI::GetNamedProperty(paramProperty, HKS_PARAM_PROPERTY_VALUE);
     if (JSI::ValueIsNumber(valueJSIValue)) {
-        int32_t paramValue = (int32_t)JSI::ValueToNumber(valueJSIValue);
+        int64_t temp = (int64_t)JSI::ValueToNumber(valueJSIValue);
+        int32_t paramValue = static_cast<int32_t>(temp & FACTOR);
         outParam->tag = paramTag;
         outParam->int32Param = paramValue;
         ret = HKS_SUCCESS;
@@ -71,7 +74,8 @@ static int32_t CheckIsNumberAndAssignUintParam(const JSIValue paramProperty, uin
     int32_t ret = HKS_ERROR_INVALID_ARGUMENT;
     JSIValue valueJSIValue = JSI::GetNamedProperty(paramProperty, HKS_PARAM_PROPERTY_VALUE);
     if (JSI::ValueIsNumber(valueJSIValue)) {
-        uint32_t paramValue = (uint32_t)JSI::ValueToNumber(valueJSIValue);
+        int64_t temp = (int64_t)JSI::ValueToNumber(valueJSIValue);
+        uint32_t paramValue = static_cast<uint32_t>(temp & FACTOR);
         outParam->tag = paramTag;
         outParam->uint32Param = paramValue;
         ret = HKS_SUCCESS;
@@ -165,7 +169,8 @@ static int32_t CheckIsBytesAndAssignBlobParam(const JSIValue paramProperty, uint
 
 static int32_t HksParseParam(const JSIValue paramProperty, struct HksParam *outParam)
 {
-    uint32_t paramTag = (uint32_t)JSI::GetNumberProperty(paramProperty, HKS_PARAM_PROPERTY_TAG);
+    int64_t temp = (int64_t)JSI::GetNumberProperty(paramProperty, HKS_PARAM_PROPERTY_TAG);
+    uint32_t paramTag = static_cast<uint32_t>(temp & FACTOR);
     int32_t ret;
     switch (paramTag & HKS_TAG_TYPE_MASK) {
         case HKS_TAG_TYPE_INT:
