@@ -118,7 +118,7 @@ static void DeleteFirstTimeOutBatchOperation(void)
         uint64_t curTime = 0;
         int32_t ret = HksElapsedRealTime(&curTime);
         HKS_IF_TRUE_LOGE_CONTINUE(ret != HKS_SUCCESS,
-            "HksElapsedRealTime failed %" LOG_PUBLIC "d, err %" LOG_PUBLIC "s", ret, strerror(errno));
+            "HksElapsedRealTime failed %" LOG_PUBLIC "d, err %" LOG_PUBLIC "d", ret, errno);
         HKS_IF_TRUE_CONTINUE(operation->batchOperationTimestamp >= curTime);
         HKS_IF_TRUE_LOGE_CONTINUE(operation->isInUse,
             "Batch operation timeout but is in use, not delete, userIdInt %" LOG_PUBLIC "d",
