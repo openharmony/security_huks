@@ -30,6 +30,12 @@
 extern "C" {
 #endif
 
+HKS_API_EXPORT int32_t RegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
+
+HKS_API_EXPORT int32_t UnRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
+
+HKS_API_EXPORT int32_t VerifyPin(const struct HksBlob *handle, const struct HksParamSet *paramSetIn);
+
 /**
  * @brief Get HUKS sdk version
  * @param sdkVersion sdk version

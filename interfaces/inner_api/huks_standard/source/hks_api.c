@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "hks_crypto_hal.h"
 #define HUKS_DISABLE_LOG_AT_FILE_TO_REDUCE_ROM_SIZE
 
 #include "hks_type_enum.h"
@@ -60,6 +61,21 @@
 #undef HKS_SUPPORT_API_ATTEST_KEY
 #undef HKS_SUPPORT_API_GET_CERTIFICATE_CHAIN
 #endif
+
+HKS_API_EXPORT int32_t RegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
+{
+    return 0;
+}
+
+HKS_API_EXPORT int32_t UnRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
+{
+    return 0;
+}
+
+HKS_API_EXPORT int32_t VerifyPin(const struct HksBlob *handle, const struct HksParamSet *paramSetIn)
+{
+    return 0;
+}
 
 HKS_API_EXPORT int32_t HksGetSdkVersion(struct HksBlob *sdkVersion)
 {
