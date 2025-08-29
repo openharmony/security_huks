@@ -65,5 +65,8 @@
     HksRenameKeyAlias;
     HksChangeStorageLevel;
     HksGetErrorMsg;
+    RegisterProvider;
+    UnRegisterProvider;
+    VerifyPin;
   local: *;
 };

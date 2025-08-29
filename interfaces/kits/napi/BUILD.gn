@@ -44,6 +44,7 @@ ohos_shared_library("huks") {
 
   sources = [
     "src/huks_napi.cpp",
+    "src/v12/huks_napi_ukey.cpp",
     "src/v12/huks_napi_attest_key_item_as_user.cpp",
     "src/v12/huks_napi_delete_key_item_as_user.cpp",
     "src/v12/huks_napi_export_key_item_as_user.cpp",
