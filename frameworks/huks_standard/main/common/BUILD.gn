@@ -44,6 +44,7 @@ if (os_level == "standard") {
       "src/hks_error_msg.c",
       "src/hks_param.c",
       "src/hks_tags_type_manager.c",
+      "src/hks_cpp_paramset.cpp"
     ]
 
     complete_static_lib = true
