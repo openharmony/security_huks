@@ -18,15 +18,21 @@ if (os_level == "standard") {
   ohos_shared_library("libhuks_external_crypto_ext_core") {
     subsystem_name = "security"
     part_name = "huks"
-    public_configs = [ ":huks_config" ]
+    version_script = "libhuks_external_crypto_ext_core.map"
+    configs = [
+      "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+    ]
 
     include_dirs = [
+      "include",
     ]
 
     sources = [
+      "src/hks_provider_life_cycle_manager.cpp",
     ]
 
     deps = [
+      "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
     ]
 
     cflags = [
@@ -43,6 +49,8 @@ if (os_level == "standard") {
       ubsan = true
     }
     external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
     ]
   }
 }

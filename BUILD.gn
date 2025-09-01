@@ -79,6 +79,7 @@ group("service_group") {
   if (os_level == "standard") {
     deps = [
       "//base/security/huks/services/huks_standard:huks_service",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey:libhuks_external_crypto_ext_core",
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/sa_profile:huks_sa_profile",
     ]
     if (huks_use_rkc_in_standard) {
