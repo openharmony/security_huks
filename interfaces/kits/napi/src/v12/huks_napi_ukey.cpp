@@ -10,60 +10,16 @@
 #include "huks_napi_common_item.h"
 
 namespace HuksNapiItem {
-
 constexpr int HUKS_NAPI_TWO_ARGS = 2;
-
-VerifyPinAsyncContext CreateVerifyPinAsyncContext()
-{
-    VerifyPinAsyncContext context = static_cast<VerifyPinAsyncContext>(HksMalloc(sizeof(VerifyPinAsyncContextT)));
-    if (context != nullptr) {
-        (void)memset_s(context, sizeof(VerifyPinAsyncContextT), 0, sizeof(VerifyPinAsyncContextT));
-    }
-    return context;
-}
-
-UKeyAsyncContext CreateUKeyAsyncContext()
-{
-    UKeyAsyncContext context = static_cast<UKeyAsyncContext>(HksMalloc(sizeof(UKeyAsyncContextT)));
-    if (context != nullptr) {
-        (void)memset_s(context, sizeof(UKeyAsyncContextT), 0, sizeof(UKeyAsyncContextT));
-    }
-    return context;
-}
-
-void DeleteUKeyAsyncContext(napi_env env, UKeyAsyncContext &context)
-{
-    if (context == nullptr) {
-        return;
-    }
-    DeleteCommonAsyncContext(env, context->asyncWork, context->callback, context->name, context->paramSetIn);
-    if (context->paramSetOut != nullptr) {
-        HksFreeParamSet(&context->paramSetOut);
-    }
-    HKS_FREE(context);
-    context = nullptr;
-}
-
-void DeleteVerifyPinAsyncContext(napi_env env, VerifyPinAsyncContext &context)
-{
-    if (context == nullptr) {
-        return;
-    }
-    DeleteCommonAsyncContext(env, context->asyncWork, context->callback, context->handle, context->paramSetIn);
-    if (context->paramSetOut != nullptr) {
-        HksFreeParamSet(&context->paramSetOut);
-    }
-    HKS_FREE(context);
-    context = nullptr;
-}
-
 napi_value ParseStringAndHksParamSet(napi_env env, napi_value *argv, size_t &index,
     HksBlob *&Name, HksParamSet *&paramSet)
 {
+    // 复用huks解析string和paramSet的方法
     return ParseKeyAliasAndHksParamSet(env, argv, index, Name, paramSet);
 }
 
-static napi_value ProviderParseParams(napi_env env, napi_callback_info info, UKeyAsyncContext context)
+static napi_value ParseTwoArgsStringParamSetAndCallback(napi_env env, napi_callback_info info,
+    HksBlob *&blobOut, HksParamSet *&paramSetOut, napi_ref &callbackRef)
 {
     size_t argc = HUKS_NAPI_TWO_ARGS;
     napi_value argv[HUKS_NAPI_TWO_ARGS] = { 0 };
@@ -76,184 +32,174 @@ static napi_value ProviderParseParams(napi_env env, napi_callback_info info, UKe
     }
 
     size_t index = 0;
-    napi_value result = ParseStringAndHksParamSet(env, argv, index, context->name, context->paramSetIn);
+    napi_value result = ParseStringAndHksParamSet(env, argv, index, blobOut, paramSetOut);
     if (result == nullptr) {
-        HKS_LOG_E("UKey parse params failed");
+        HKS_LOG_E("ParseTwoArgs failed");
         return nullptr;
     }
 
     index++;
     if (index < argc) {
-        context->callback = GetCallback(env, argv[index]);
+        callbackRef = GetCallback(env, argv[index]);
     }
 
     return GetInt32(env, 0);
 }
 
-napi_value ProviderAsyncWork(napi_env env, UKeyAsyncContext &context)
+static napi_value CreateAsyncWork(napi_env env, napi_callback_info info, std::unique_ptr<AsyncContext> context, const char *resource)
 {
+    if(context->parse != nullptr) {
+        NAPI_CALL(env, context->parse(env, info, context.get()));
+    }
+
     napi_value promise = nullptr;
     if (context->callback == nullptr) {
         NAPI_CALL(env, napi_create_promise(env, &context->deferred, &promise));
     }
 
     napi_value resourceName = nullptr;
-    napi_create_string_latin1(env, "ProviderAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
+    napi_create_string_latin1(env, resource, NAPI_AUTO_LENGTH, &resourceName);
 
     napi_create_async_work(
         env,
         nullptr,
         resourceName,
-        [](napi_env env, void *data) {
-            UKeyAsyncContext napiContext = static_cast<UKeyAsyncContext>(data);
-            napiContext->result = napiContext->action(napiContext->name, napiContext->paramSetIn);
-        },
+        context->execute,
         [](napi_env env, napi_status status, void *data) {
-            UKeyAsyncContext napiContext = static_cast<UKeyAsyncContext>(data);
-            HksSuccessReturnResult resultData;
-            SuccessReturnResultInit(resultData);
-            HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
-            DeleteUKeyAsyncContext(env, napiContext);
+            AsyncContext *napiContext = static_cast<AsyncContext *>(data);
+            napiContext->resolve(env, napiContext);
+            delete napiContext;
         },
-        static_cast<void *>(context),
+        static_cast<void *>(context.get()),
         &context->asyncWork);
 
+    context->env = env;
     napi_status status = napi_queue_async_work(env, context->asyncWork);
+
     if (status != napi_ok) {
-        DeleteUKeyAsyncContext(env, context);
         HKS_LOG_E("could not queue async work");
         return nullptr;
     }
 
     if (context->callback == nullptr) {
+        context.release();
         return promise;
     } else {
+        context.release();
         return GetNull(env);
     }
 }
 
-napi_value ProviderEntry(napi_env env, napi_callback_info info, ProviderFunc action)
+
+napi_value HuksNapiRegisterProvider(napi_env env, napi_callback_info info)
 {
-    UKeyAsyncContext context = CreateUKeyAsyncContext();
+    auto context = std::unique_ptr<RegisterAndUngisterProviderContext>(new (std::nothrow)RegisterAndUngisterProviderContext());
+
     if (context == nullptr) {
         HKS_LOG_E("could not create context");
         return nullptr;
     }
 
-    napi_value result = ProviderParseParams(env, info, context);
-    if (result == nullptr) {
-        HKS_LOG_E("could not parse params");
-        DeleteUKeyAsyncContext(env, context);
-        return nullptr;
-    }
-    context->action = action;
-    result = ProviderAsyncWork(env, context);
+    context->parse = [](napi_env env, napi_callback_info info, AsyncContext *context) -> napi_status {
+        RegisterAndUngisterProviderContext *asyncContext = reinterpret_cast<RegisterAndUngisterProviderContext *>(context);
+        napi_value result = ParseTwoArgsStringParamSetAndCallback(env, info, asyncContext->name, context->paramSetIn, context->callback);
+        if (result == nullptr) {
+            HKS_LOG_E("generateKey parse params failed");
+            return napi_generic_failure;
+        }
+        return napi_ok;
+    };
+
+    context->execute = [](napi_env env, void *data) {
+        RegisterAndUngisterProviderContext *napiContext = static_cast<RegisterAndUngisterProviderContext *>(data);
+        napiContext->result = RegisterProvider(napiContext->name, napiContext->paramSetIn);
+    };
+
+    context->resolve = [](napi_env env, AsyncContext *context) {
+        RegisterAndUngisterProviderContext *napiContext = static_cast<RegisterAndUngisterProviderContext *>(context);
+        HksSuccessReturnResult resultData;
+        SuccessReturnResultInit(resultData);
+        HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+    };
+
+    napi_value result = CreateAsyncWork(env, info, std::move(context), __func__);
     if (result == nullptr) {
         HKS_LOG_E("could not do async work");
-        DeleteUKeyAsyncContext(env, context);
-        return nullptr;
     }
     return result;
 }
 
-napi_value HuksNapiRegisterProvider(napi_env env, napi_callback_info info)
-{
-    return ProviderEntry(env, info, RegisterProvider);
-}
-
 napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
 {
-    return ProviderEntry(env, info, UnRegisterProvider);
-}
+    auto context = std::unique_ptr<RegisterAndUngisterProviderContext>(new (std::nothrow)RegisterAndUngisterProviderContext());
 
-
-static napi_value VerifyPinParseParams(napi_env env, napi_callback_info info, VerifyPinAsyncContext context)
-{
-    size_t argc = HUKS_NAPI_TWO_ARGS;
-    napi_value argv[HUKS_NAPI_TWO_ARGS] = { 0 };
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
-
-    if (argc < HUKS_NAPI_TWO_ARGS) {
-        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
-        HKS_LOG_E("no enough params");
-        return nullptr;
-    }
-
-    size_t index = 0;
-    napi_value result = ParseStringAndHksParamSet(env, argv, index, context->handle, context->paramSetIn);
-    if (result == nullptr) {
-        HKS_LOG_E("VerifyPin parse params failed");
-        return nullptr;
-    }
-
-    index++;
-    if (index < argc) {
-        context->callback = GetCallback(env, argv[index]);
-    }
-
-    return GetInt32(env, 0);
-}
-
-napi_value VerifyPinAsyncWork(napi_env env, VerifyPinAsyncContext &context)
-{
-    napi_value promise = nullptr;
-    if (context->callback == nullptr) {
-        NAPI_CALL(env, napi_create_promise(env, &context->deferred, &promise));
-    }  
-    napi_value resourceName = nullptr;
-    napi_create_string_latin1(env, "VerifyPinAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
-
-    napi_create_async_work(
-        env,
-        nullptr,
-        resourceName,
-        [](napi_env env, void *data) {
-            VerifyPinAsyncContext napiContext = static_cast<VerifyPinAsyncContext>(data);
-            napiContext->result = VerifyPin(napiContext->handle, napiContext->paramSetIn);
-        },
-        [](napi_env env, napi_status status, void *data) {
-            VerifyPinAsyncContext napiContext = static_cast<VerifyPinAsyncContext>(data);
-            HksSuccessReturnResult resultData;
-            SuccessReturnResultInit(resultData);
-            HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
-            DeleteVerifyPinAsyncContext(env, napiContext);
-        },
-        static_cast<void *>(context),
-        &context->asyncWork);
-
-    napi_status status = napi_queue_async_work(env, context->asyncWork);
-    if (status != napi_ok) {
-        DeleteVerifyPinAsyncContext(env, context);
-        HKS_LOG_E("could not queue async work");
-        return nullptr;
-    }
-    if (context->callback == nullptr) {
-        return promise;
-    } else {
-        return GetNull(env);
-    }
-}
-
-napi_value HuksNapiVerifyPin(napi_env env, napi_callback_info info)
-{
-    VerifyPinAsyncContext context = CreateVerifyPinAsyncContext();
     if (context == nullptr) {
         HKS_LOG_E("could not create context");
         return nullptr;
     }
 
-    napi_value result = VerifyPinParseParams(env, info, context);
+    context->parse = [](napi_env env, napi_callback_info info, AsyncContext *context) -> napi_status {
+        RegisterAndUngisterProviderContext *asyncContext = reinterpret_cast<RegisterAndUngisterProviderContext *>(context);
+        napi_value result = ParseTwoArgsStringParamSetAndCallback(env, info, asyncContext->name, context->paramSetIn, context->callback);
+        if (result == nullptr) {
+            HKS_LOG_E("generateKey parse params failed");
+            return napi_generic_failure;
+        }
+        return napi_ok;
+    };
+
+    context->execute = [](napi_env env, void *data) {
+        RegisterAndUngisterProviderContext *napiContext = static_cast<RegisterAndUngisterProviderContext *>(data);
+        napiContext->result = UnRegisterProvider(napiContext->name, napiContext->paramSetIn);
+    };
+
+    context->resolve = [](napi_env env, AsyncContext *context) {
+        RegisterAndUngisterProviderContext *napiContext = static_cast<RegisterAndUngisterProviderContext *>(context);
+        HksSuccessReturnResult resultData;
+        SuccessReturnResultInit(resultData);
+        HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+    };
+
+    napi_value result = CreateAsyncWork(env, info, std::move(context), __func__);
     if (result == nullptr) {
-        HKS_LOG_E("could not parse params");
-        DeleteVerifyPinAsyncContext(env, context);
+        HKS_LOG_E("could not do async work");
+    }
+    return result;
+}
+
+napi_value HuksNapiVerifyPin(napi_env env, napi_callback_info info)
+{
+    auto context = std::unique_ptr<VerifyPinAsyncContext>(new (std::nothrow) VerifyPinAsyncContext());
+    if (context == nullptr) {
+        HKS_LOG_E("could not create context");
         return nullptr;
     }
 
-    result = VerifyPinAsyncWork(env, context);
+    context->parse = [](napi_env env, napi_callback_info info, AsyncContext *context) -> napi_status {
+        VerifyPinAsyncContext *asyncContext = reinterpret_cast<VerifyPinAsyncContext *>(context);
+        napi_value result = ParseTwoArgsStringParamSetAndCallback(env, info, asyncContext->handle, context->paramSetIn, context->callback);
+        if (result == nullptr) {
+            HKS_LOG_E("generateKey parse params failed");
+            return napi_generic_failure;
+        }
+        return napi_ok;
+    };
+
+    context->execute = [](napi_env env, void *data) {
+        VerifyPinAsyncContext *napiContext = static_cast<VerifyPinAsyncContext *>(data);
+        napiContext->result = VerifyPin(napiContext->handle, napiContext->paramSetIn);
+    };
+
+    context->resolve = [](napi_env env, AsyncContext *context) {
+        VerifyPinAsyncContext *napiContext = static_cast<VerifyPinAsyncContext *>(context);
+        HksSuccessReturnResult resultData;
+        SuccessReturnResultInit(resultData);
+        HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+    };
+
+    napi_value result = CreateAsyncWork(env, info, std::move(context), __func__);
     if (result == nullptr) {
         HKS_LOG_E("could not do async work");
-        DeleteVerifyPinAsyncContext(env, context);
-        return nullptr;
     }
     return result;
 }
