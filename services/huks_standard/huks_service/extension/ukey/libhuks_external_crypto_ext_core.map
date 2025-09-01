@@ -13,5 +13,6 @@
 
 1.0 {
   global:
+    _ZN27HksProviderLifeCycleManager18OnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEERK11CppParamSet;
   local: *;
 };
