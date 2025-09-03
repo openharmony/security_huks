@@ -68,5 +68,8 @@
     RegisterProvider;
     UnRegisterProvider;
     VerifyPin;
+    RegisterProvider;
+    UnRegisterProvider;
+    VerifyPin;
   local: *;
 };

@@ -24,22 +24,29 @@
 #include <string>
 #include <unordered_map>
 #include "safe_map.h"
+#include "iremote_object.h"
+#include "iremote_proxy.h"
+#include "iremote_stub.h"
 
-class CrypoExtensionProxy {
-public:
-    int32_t AbilityId = 0;
-};
-
+namespace OHOS {
+namespace Security {
+namespace Huks {
 class HksProviderLifeCycleManager : private OHOS::DelayedSingleton<HksProviderLifeCycleManager> {
 public:
     static std::shared_ptr<HksProviderLifeCycleManager> GetInstanceWrapper();
     static void ReleaseInstance();
     int32_t OnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName,
-        const CppParamSet &paramSet);
-    std::shared_ptr<CrypoExtensionProxy> GetExtensionProxy(const std::string &providerName,
-        const HksProcessInfo &processInfo);
+        [[maybe_unused]] const CppParamSet &paramSet);
+    int32_t OnUnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName,
+        [[maybe_unused]] const CppParamSet &paramSet);
+    OHOS::sptr<IRemoteObject> GetExtensionProxy(const std::string &providerName,
+        [[maybe_unused]] const HksProcessInfo &processInfo);
 private:
     // ProviderName + userId + bundleName
-    OHOS::SafeMap<std::string, std::shared_ptr<CrypoExtensionProxy>> m_providerMap;
+    OHOS::SafeMap<std::string, OHOS::sptr<IRemoteObject>> m_providerMap;
 };
+}
+}
+}
+
 #endif

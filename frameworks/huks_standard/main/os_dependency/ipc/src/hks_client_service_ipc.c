@@ -95,6 +95,29 @@ static int32_t BuildParamSetNotNull(const struct HksParamSet *paramSetIn, struct
     return ret;
 }
 
+int32_t HksClientRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
+{
+    int32_t ret = HksCheckIpcGenerateKey(name, paramSetIn);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksClientRegisterProvider fail")
+
+    struct HksBlob inBlob = { 0, NULL };
+    struct HksBlob outBlob = { 0, NULL };
+    inBlob.size = sizeof(name->size) + ALIGN_SIZE(name->size) + ALIGN_SIZE(paramSetIn->paramSetSize) +
+        sizeof(outBlob.size);
+    inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
+    HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
+    do {
+        ret = HksGenerateKeyPack(&inBlob, name, paramSetIn, &outBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRegisterProviderPack fail")
+
+        ret = HksSendRequest(HKS_MSG_EXT_REGISTER, &inBlob, &outBlob, paramSetIn);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HKS_FREE_BLOB(inBlob);
+    return ret;
+}
+
 int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
     struct HksParamSet *paramSetOut)
 {

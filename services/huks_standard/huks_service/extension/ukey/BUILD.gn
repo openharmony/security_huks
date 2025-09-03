@@ -51,6 +51,7 @@ if (os_level == "standard") {
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
+      "ipc:ipc_core",
     ]
   }
 }
