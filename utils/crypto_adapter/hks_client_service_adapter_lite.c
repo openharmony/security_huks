@@ -293,6 +293,7 @@ int32_t TranslateToX509PublicKey(const struct HksBlob *publicKey, struct HksBlob
 #ifdef HKS_SUPPORT_RSA_C
 static int32_t CheckRsaCtx(const mbedtls_rsa_context *rsaCtx)
 {
+    HKS_IF_NULL_LOGE_RETURN(rsaCtx, HKS_ERROR_NULL_POINTER, "rsaCtx is null");
     uint32_t maxKeyByteLen = HKS_RSA_KEY_SIZE_4096 / HKS_BITS_PER_BYTE;
     if (rsaCtx->MBEDTLS_PRIVATE(len) > maxKeyByteLen) {
         HKS_LOG_E("Invalid mbedtls rsa context's len! len = 0x%" LOG_PUBLIC "zu", rsaCtx->MBEDTLS_PRIVATE(len));
@@ -358,6 +359,7 @@ static int32_t CheckEccXySize(const uint32_t xSize, const uint32_t ySize)
 
 static int32_t X509PublicKeyToEcc(mbedtls_ecp_keypair *pubKey, struct HksBlob *eccPublicKey)
 {
+    HKS_IF_NULL_LOGE_RETURN(pubKey, HKS_ERROR_NULL_POINTER, "Ecc key is null");
     /* When converting from X509 to internal format, the first byte needs to be filled with 0 */
     uint32_t xSize = mbedtls_mpi_size(&(pubKey->MBEDTLS_PRIVATE(grp).P));
     uint32_t ySize = mbedtls_mpi_size(&(pubKey->MBEDTLS_PRIVATE(grp).P));
