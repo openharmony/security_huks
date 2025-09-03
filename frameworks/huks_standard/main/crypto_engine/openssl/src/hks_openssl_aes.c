@@ -202,7 +202,8 @@ static int32_t OpensslBlockCipherHandleFinalThree(
 int32_t OpensslBlockCipherEncryptFinalThree(
     void **cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText)
 {
-    return OpensslBlockCipherHandleFinalThree(cryptoCtx, message, cipherText, true);
+    return OpensslBlockCipher
+    FinalThree(cryptoCtx, message, cipherText, true);
 }
 
 // blob data and size have been checked in hks_core_service_three_stage.c
