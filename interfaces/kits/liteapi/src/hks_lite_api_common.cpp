@@ -167,7 +167,7 @@ static int32_t CheckIsBytesAndAssignBlobParam(const JSIValue paramProperty, uint
 static int32_t HksParseParam(const JSIValue paramProperty, struct HksParam *outParam)
 {
     uint32_t paramTag
-        = static_cast<uint32_t>(static_cast<int64_t>(GetNumberProperty(paramProperty, HKS_PARAM_PROPERTY_TAG)));
+        = static_cast<uint32_t>(static_cast<int64_t>(JSI::GetNumberProperty(paramProperty, HKS_PARAM_PROPERTY_TAG)));
     int32_t ret;
     switch (paramTag & HKS_TAG_TYPE_MASK) {
         case HKS_TAG_TYPE_INT:
