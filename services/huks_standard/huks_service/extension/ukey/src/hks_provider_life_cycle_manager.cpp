@@ -18,6 +18,8 @@
 #include "hks_log.h"
 #include <memory>
 
+namespace OHOS::Security::Huks {
+
 std::shared_ptr<HksProviderLifeCycleManager> HksProviderLifeCycleManager::GetInstanceWrapper()
 {
     return HksProviderLifeCycleManager::GetInstance();
@@ -28,25 +30,33 @@ void HksProviderLifeCycleManager::ReleaseInstance()
     return HksProviderLifeCycleManager::DestroyInstance();
 }
 
-static std::shared_ptr<CrypoExtensionProxy> TO_REMOV_Connect(){
-    return std::make_shared<CrypoExtensionProxy>();
-}
-
 int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet)
+    const std::string &providerName, [[maybe_unused]] const CppParamSet &paramSet)
 {
-    // TODO: ConnetExtension
-    m_providerMap.Insert(providerName, TO_REMOV_Connect());
+    // TODO: ConnetExtension and get the sptr<IRemoteObject>
     return HKS_SUCCESS;
 }
 
-std::shared_ptr<CrypoExtensionProxy> HksProviderLifeCycleManager::GetExtensionProxy(const std::string &providerName,
-    const HksProcessInfo &processInfo)
+OHOS::sptr<IRemoteObject> HksProviderLifeCycleManager::GetExtensionProxy(const std::string &providerName,
+    [[maybe_unused]] const HksProcessInfo &processInfo)
 {
-    std::shared_ptr<CrypoExtensionProxy> retProxy = nullptr;
+    sptr<IRemoteObject> retProxy = nullptr;
     if(!m_providerMap.Find(providerName, retProxy)) {
         HKS_LOG_E("GetExtensionProxy failed, providerName: %s", providerName.c_str());
         return nullptr;
     }
     return retProxy;
+}
+
+int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &processInfo,
+    const std::string &providerName, [[maybe_unused]] const CppParamSet &paramSet)
+{
+    sptr<IRemoteObject> retProxy = nullptr;
+    if(!m_providerMap.Find(providerName, retProxy)) {
+        HKS_LOG_E("OnUnRegisterProvider failed, unfound providerName: %s", providerName.c_str());
+        return HKS_ERROR_NOT_EXIST;
+    }
+    m_providerMap.Erase(providerName);
+    return HKS_SUCCESS;
+}
 }

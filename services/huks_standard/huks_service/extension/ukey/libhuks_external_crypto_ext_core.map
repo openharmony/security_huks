@@ -13,6 +13,8 @@
 
 1.0 {
   global:
-    _ZN27HksProviderLifeCycleManager18OnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEERK11CppParamSet;
+    _ZN4OHOS8Security4Huks27HksProviderLifeCycleManager18OnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_stringIcNS6_11char_traitsIcEENS6_9allocatorIcEEEERK11CppParamSet;
+
+    _ZN4OHOS8Security4Huks27HksProviderLifeCycleManager20OnUnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_stringIcNS6_11char_traitsIcEENS6_9allocatorIcEEEERK11CppParamSet;
   local: *;
 };

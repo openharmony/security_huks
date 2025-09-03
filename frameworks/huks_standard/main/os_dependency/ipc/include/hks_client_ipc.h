@@ -26,6 +26,8 @@ int32_t HksClientInitialize(void);
 
 int32_t HksClientRefreshKeyInfo(void);
 
+int32_t HksClientRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
+
 int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
     struct HksParamSet *paramSetOut);
 

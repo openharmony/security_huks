@@ -64,7 +64,20 @@
 
 HKS_API_EXPORT int32_t RegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
 {
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter RegisterProvider");
+    /* generate persistent keys */
+    if ((paramSetIn == NULL) || (name == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientRegisterProvider(name, paramSetIn);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave GenerateKey, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)name;
+    (void)paramSetIn;
     return 0;
+#endif
 }
 
 HKS_API_EXPORT int32_t UnRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)

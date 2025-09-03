@@ -49,6 +49,7 @@ enum HksIpcInterfaceCode {
     HKS_MSG_WRAP_KEY,
     HKS_MSG_UNWRAP_KEY,
 
+    HKS_MSG_EXT_REGISTER,
     /* new cmd type must be added before HKS_MSG_MAX */
     HKS_MSG_MAX,
 };
