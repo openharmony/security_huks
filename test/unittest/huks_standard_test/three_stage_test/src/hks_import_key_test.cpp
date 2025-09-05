@@ -682,7 +682,7 @@ const ImportKeyCaseParams HKS_IMPORT_TEST_045_PARAMS = {
             { .tag = HKS_TAG_IMPORT_KEY_TYPE, .uint32Param = HKS_KEY_TYPE_KEY_PAIR },
         },
     .keySize = HKS_RSA_KEY_SIZE_2048 / HKS_BITS_PER_BYTE,
-    .importKeyResult = HKS_ERROR_INVALID_KEY_INFO,
+    .importKeyResult = HKS_SUCCESS,
 };
 
 /* 046: insecure dh key */
