@@ -122,15 +122,111 @@ int32_t HuksExtensionPluginManager::OnVerifyPin(const std::string &index, vector
     return HKS_SUCCESS;
 }
 
-int32_t HuksExtensionPluginManager::OnFindCertificate(const std::string &index, vector<uint8_t> &cetificatesOut) {
-    auto it = m_pluginProviderMap.find(PluginMethodEnum::FUNC_ON_FINDCERTIFICATE);
+int32_t OnVerifyPinStatus(const std::string &index) {
+    auto it = m_pluginProviderMap.find(PluginMethodEnum::FUNC_ON_VERIFYPIN_STATUS);
     HKS_IF_TRUE_LOGE_RETURN(it == m_pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
-        "FindCertificate method enum not found in plugin provider map.")
+        "VerifyPinStatus method enum not found in plugin provider map.")
     
-    int ret = (*reinterpret_cast<OnFindCertificate>(it->second))();
+    int ret = (*reinterpret_cast<OnVerifyPinStatusFunc>(it->second))();
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
-        "FindCertificatefunc fail, lib can not be loaded now, ret = %{public}d", ret)
-    HKS_LOG_I("find certificates success")
+        "VerifyPinStatusfunc fail, lib can not be loaded now, ret = %{public}d", ret)
+    HKS_LOG_I("verify pin status success")
+    return HKS_SUCCESS;
+}
+
+int32_t OnClearPinStatus(const std::string &index) {
+    auto it = m_pluginProviderMap.find(PluginMethodEnum::FUNC_ON_VERIFYPIN_STATUS);
+    HKS_IF_TRUE_LOGE_RETURN(it == m_pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "VerifyPinStatus method enum not found in plugin provider map.")
+    
+    int ret = (*reinterpret_cast<OnVerifyPinStatusFunc>(it->second))();
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "VerifyPinStatusfunc fail, lib can not be loaded now, ret = %{public}d", ret)
+    HKS_LOG_I("verify pin status success")
+    return HKS_SUCCESS;
+}
+
+int32_t OnFindProviderList(const std::string &index, vector<uint8_t> &providersOut) {
+    auto it = m_pluginProviderMap.find(PluginMethodEnum::FUNC_ON_FIND_PROVIDER_LIST);
+    HKS_IF_TRUE_LOGE_RETURN(it == m_pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "FindProviderList method enum not found in plugin provider map.")
+    
+    int ret = (*reinterpret_cast<OnFindProviderListFunc>(it->second))();
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "FindProviderListfunc fail, lib can not be loaded now, ret = %{public}d", ret)
+    HKS_LOG_I("find provider list success")
+    return HKS_SUCCESS;
+}
+
+int32_t OnFindProviderCertificate(const std::string &index, vector<uint8_t> &cetificatesOut) {
+    auto it = m_pluginProviderMap.find(PluginMethodEnum::FUNC_ON_FIND_PROVIDER_CERTIFICATE);
+    HKS_IF_TRUE_LOGE_RETURN(it == m_pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "FindProviderCertificate method enum not found in plugin provider map.")
+    
+    int ret = (*reinterpret_cast<OnFindProviderCertificateFunc>(it->second))();
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "FindProviderCertificatefunc fail, lib can not be loaded now, ret = %{public}d", ret)
+    HKS_LOG_I("find provider certificates success")
+    return HKS_SUCCESS;
+}
+
+int32_t OnFindProviderAllCertificate(const std::string &index, vector<uint8_t> &cetificatesOut) {
+    auto it = m_pluginProviderMap.find(PluginMethodEnum::FUNC_ON_FIND_PROVIDER_ALL_CERTIFICATE);
+    HKS_IF_TRUE_LOGE_RETURN(it == m_pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "FindProviderAllCertificate method enum not found in plugin provider map.")
+    
+    int ret = (*reinterpret_cast<OnFindProviderAllCertificateFunc>(it->second))();
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "FindProviderAllCertificatefunc fail, lib can not be loaded now, ret = %{public}d", ret)
+    HKS_LOG_I("find provider all certificates success")
+    return HKS_SUCCESS;
+}
+
+int32_t OnGetContainerIndex(vector<uint8_t> &providersOut, std::string &outIndex) {
+    auto it = m_pluginProviderMap.find(PluginMethodEnum::FUNC_ON_GET_CONTAINER_INDEX);
+    HKS_IF_TRUE_LOGE_RETURN(it == m_pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "GetContainerIndex method enum not found in plugin provider map.")
+    
+    int ret = (*reinterpret_cast<OnGetContainerIndexFunc>(it->second))();
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "GetContainerIndexfunc fail, lib can not be loaded now, ret = %{public}d", ret)
+    HKS_LOG_I("get container index success")
+    return HKS_SUCCESS;
+}
+
+int32_t OnCreateRemoteKeyHandle(const std::string &index, std::string &keyIndex) {
+    auto it = m_pluginProviderMap.find(PluginMethodEnum::FUNC_ON_CREATE_REMOTE_KEY_HANDLE);
+    HKS_IF_TRUE_LOGE_RETURN(it == m_pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "CreateRemoteKeyHandle method enum not found in plugin provider map.")
+    
+    int ret = (*reinterpret_cast<OnCreateRemoteKeyHandleFunc>(it->second))();
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "CreateRemoteKeyHandlefunc fail, lib can not be loaded now, ret = %{public}d", ret)
+    HKS_LOG_I("create remote key handle success")
+    return HKS_SUCCESS;
+}
+
+int32_t OnFindRemoteKeyHandle(const std::string &index, std::string &keyIndex) {
+    auto it = m_pluginProviderMap.find(PluginMethodEnum::FUNC_ON_FIND_REMOTE_KEY_HANDLE);
+    HKS_IF_TRUE_LOGE_RETURN(it == m_pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "FindRemoteKeyHandle method enum not found in plugin provider map.")
+    
+    int ret = (*reinterpret_cast<OnFindRemoteKeyHandleFunc>(it->second))();
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "FindRemoteKeyHandlefunc fail, lib can not be loaded now, ret = %{public}d", ret)
+    HKS_LOG_I("find remote key handle success")
+    return HKS_SUCCESS;
+}
+
+int32_t OnCloseRemoteKeyHandle(const std::string &index, std::string &keyIndex) {
+    auto it = m_pluginProviderMap.find(PluginMethodEnum::FUNC_ON_CLOSE_REMOTE_KEY_HANDLE);
+    HKS_IF_TRUE_LOGE_RETURN(it == m_pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "CloseRemoteKeyHandle method enum not found in plugin provider map.")
+    
+    int ret = (*reinterpret_cast<OnCloseRemoteKeyHandleFunc>(it->second))();
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "CloseRemoteKeyHandlefunc fail, lib can not be loaded now, ret = %{public}d", ret)
+    HKS_LOG_I("close remote key handle success")
     return HKS_SUCCESS;
 }
     
@@ -147,8 +243,7 @@ int32_t HuksExtensionPluginManager::OnEncryptData(const std::string &index,
     return HKS_SUCCESS;
 }
 
-int32_t HuksExtensionPluginManager::OnDecryptData(const std::string &index,
-    const CppParamSet& paramSet, vector<uint8_t> &outData) {
+int32_t HuksExtensionPluginManager::OnDecryptData(const std::string &index, const CppParamSet& paramSet) {
     auto it = m_pluginProviderMap.find(PluginMethodEnum::FUNC_ON_DECYPTDATA);
     HKS_IF_TRUE_LOGE_RETURN(it == m_pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
         "DecryptData method enum not found in plugin provider map.")
