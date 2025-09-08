@@ -176,18 +176,85 @@ napi_value HuksNapiVerifyPin(napi_env env, napi_callback_info info)
     }
 
     context->parse = [](napi_env env, napi_callback_info info, AsyncContext *context) -> napi_status {
-        VerifyPinAsyncContext *asyncContext = reinterpret_cast<VerifyPinAsyncContext *>(context);
-        napi_value result = ParseTwoArgsStringParamSetAndCallback(env, info, asyncContext->handle, context->paramSetIn, context->callback);
-        if (result == nullptr) {
-            HKS_LOG_E("generateKey parse params failed");
-            return napi_generic_failure;
-        }
+        UkeyPinContext *asyncContext = reinterpret_cast<UkeyPinContext *>(context);
+        size_t argc = HUKS_NAPI_TWO_ARGS;
+        napi_value argv[HUKS_NAPI_TWO_ARGS] = { nullptr };
+        NAPI_CALL_RETURN_ERR(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+        
+        NAPI_THROW_RETURN_ERR(env, argc < HUKS_NAPI_TWO_ARGS, napi_generic_failure,
+                              HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
+
+        napi_value result = ParseString(env, argv[0], asyncContext->index);
+        NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure, 
+                              HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get stringname");
+
+        result = ParseGetHksParamSet(env, argv[1], context->paramSetIn);
+        NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure, 
+                              HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get paramSet");
+
         return napi_ok;
     };
 
     context->execute = [](napi_env env, void *data) {
-        VerifyPinAsyncContext *napiContext = static_cast<VerifyPinAsyncContext *>(data);
-        napiContext->result = VerifyPin(napiContext->handle, napiContext->paramSetIn);
+        UkeyPinContext *napiContext = static_cast<UkeyPinContext *>(data);
+        napiContext->result = AuthUkeyPin(napiContext->index, napiContext->paramSetIn);
+    };
+
+    context->resolve = [](napi_env env, AsyncContext *context) {
+        UkeyPinContext *napiContext = static_cast<UkeyPinContext *>(context);
+        HksSuccessReturnResult resultData;
+        SuccessReturnResultInit(resultData);
+        HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+    };
+
+    napi_value result = CreateAsyncWork(env, info, std::move(context), __func__);
+    if (result == nullptr) {
+        HKS_LOG_E("could not do async work");
+    }
+    return result;
+}
+
+napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info)
+{
+    auto context = std::unique_ptr<UkeyPinContext>(new (std::nothrow)UkeyPinContext());
+
+    if (context == nullptr) {
+        HKS_LOG_E("could not create context");
+        return nullptr;
+    }
+
+    context->parse = [](napi_env env, napi_callback_info info, AsyncContext *context) -> napi_status {
+        UkeyPinContext *asyncContext = reinterpret_cast<UkeyPinContext *>(context);
+        size_t argc = HUKS_NAPI_TWO_ARGS;
+        napi_value argv[HUKS_NAPI_TWO_ARGS] = { nullptr };
+        NAPI_CALL_RETURN_ERR(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+        
+        NAPI_THROW_RETURN_ERR(env, argc < HUKS_NAPI_ONE_ARG, napi_generic_failure,
+                              HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
+
+        napi_value result = ParseString(env, argv[0], asyncContext->index);
+        NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure, 
+                              HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get stringname");
+
+        if (argc < HUKS_NAPI_TWO_ARGS) {
+            context->paramSetIn = static_cast<HksParamSet *>(HksMalloc(sizeof(HksParamSet)));
+            NAPI_THROW_RETURN_ERR(env, context->paramSetIn == nullptr, napi_generic_failure, 
+                                  HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not allocate memory for paramSetIn");
+
+            (void)memset_s(context->paramSetIn, sizeof(HksParamSet), 0, sizeof(HksParamSet));
+            context->paramSetIn->paramSetSize = 0;
+            return napi_ok;
+        }
+        result = ParseGetHksParamSet(env, argv[1], context->paramSetIn);
+        NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure, 
+                              HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get paramSet");
+
+        return napi_ok;
+    };
+
+    context->execute = [](napi_env env, void *data) {
+        UkeyPinContext *napiContext = static_cast<UkeyPinContext *>(data);
+        napiContext->result = GetUkeyPinAuthState(napiContext->index, napiContext->paramSetIn);
     };
 
     context->resolve = [](napi_env env, AsyncContext *context) {

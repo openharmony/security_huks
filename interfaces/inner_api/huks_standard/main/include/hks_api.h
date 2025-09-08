@@ -35,6 +35,9 @@ HKS_API_EXPORT int32_t RegisterProvider(const struct HksBlob *name, const struct
 HKS_API_EXPORT int32_t UnRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
 
 HKS_API_EXPORT int32_t VerifyPin(const struct HksBlob *handle, const struct HksParamSet *paramSetIn);
+HKS_API_EXPORT int32_t AuthUkeyPin(const struct HksBlob *name, const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut);
+
+HKS_API_EXPORT int32_t GetUkeyPinAuthState(const struct HksBlob *name, const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut);
 
 /**
  * @brief Get HUKS sdk version

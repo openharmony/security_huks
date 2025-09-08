@@ -38,6 +38,18 @@ int32_t HksServiceInitialize(void);
 
 int32_t HksServiceRefreshKeyInfo(const struct HksBlob *processName);
 
+int32_t HksServiceRegisterProvider(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSetIn);
+
+int32_t HksServiceUnRegisterProvider(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSetIn);
+
+int32_t HksServiceAuthUkeyPin(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
+    const struct HksParamSet *paramSetIn, struct HksBlob *keyOut);
+
+int32_t HksServiceGetUkeyPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
+    const struct HksParamSet *paramSetIn, struct HksBlob *keyOut);
+
 int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, struct HksBlob *keyOut);
 
