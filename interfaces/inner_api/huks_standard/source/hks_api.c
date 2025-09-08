@@ -71,7 +71,7 @@ HKS_API_EXPORT int32_t RegisterProvider(const struct HksBlob *name, const struct
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = HksClientRegisterProvider(name, paramSetIn);
-    HKS_IF_NOT_SUCC_LOGE(ret, "leave GenerateKey, result = %" LOG_PUBLIC "d", ret);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave RegisterProvider, result = %" LOG_PUBLIC "d", ret);
     return ret;
 #else
     (void)name;
@@ -82,12 +82,58 @@ HKS_API_EXPORT int32_t RegisterProvider(const struct HksBlob *name, const struct
 
 HKS_API_EXPORT int32_t UnRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
 {
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter UnRegisterProvider");
+    /* generate persistent keys */
+    if (name == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientUnRegisterProvider(name, paramSetIn);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave UnRegisterProvider, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)name;
+    (void)paramSetIn;
     return 0;
+#endif
 }
 
-HKS_API_EXPORT int32_t VerifyPin(const struct HksBlob *handle, const struct HksParamSet *paramSetIn)
+HKS_API_EXPORT int32_t AuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
+    struct HksParamSet *paramSetOut)
 {
-    return 0;
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter AuthUkeyPin");
+    if ((index == NULL) || (paramSetIn == NULL) || (paramSetOut == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientAuthUkeyPin(index, paramSetIn, paramSetOut);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave AuthUkeyPin, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)index;
+    (void)paramSetIn;
+    (void)paramSetOut;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+
+
+HKS_API_EXPORT int32_t GetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter GetUkeyPinAuthState");
+    if ((index == NULL) || (paramSetIn == NULL) || (paramSetOut == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientGetUkeyPinAuthState(index, paramSetIn, paramSetOut);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave GetUkeyPinAuthState, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)index;
+    (void)paramSetIn;
+    (void)paramSetOut;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
 }
 
 HKS_API_EXPORT int32_t HksGetSdkVersion(struct HksBlob *sdkVersion)

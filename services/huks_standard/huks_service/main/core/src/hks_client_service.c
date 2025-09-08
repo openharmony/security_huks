@@ -562,6 +562,32 @@ static void HksReportEvent(const char *funcName, const struct HksHitraceId *trac
 #endif
 }
 
+int32_t HksServiceRegisterProvider(const struct HksProcessInfo *processInfo, const struct HksBlob *name,
+    const struct HksParamSet *paramSetIn)
+{
+    return 0;
+}
+
+int32_t HksServiceUnRegisterProvider(const struct HksProcessInfo *processInfo, const struct HksBlob *name,
+    const struct HksParamSet *paramSetIn)
+{
+    return 0;
+}
+
+int32_t HksServiceAuthUkeyPin(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
+    const struct HksParamSet *paramSetIn, struct HksBlob *keyOut)
+{
+    return 0;
+}
+
+int32_t HksServiceGetUkeyPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
+    const struct HksParamSet *paramSetIn, struct HksBlob *keyOut)
+{
+    return 0;
+}
+
+
+
 int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, struct HksBlob *keyOut)
 {

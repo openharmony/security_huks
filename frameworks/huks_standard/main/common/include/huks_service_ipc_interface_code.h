@@ -50,6 +50,9 @@ enum HksIpcInterfaceCode {
     HKS_MSG_UNWRAP_KEY,
 
     HKS_MSG_EXT_REGISTER,
+    HKS_MSG_EXT_UNREGISTER,
+    HKS_MSG_EXT_AUTH_UKEY_PIN,
+    HKS_MSG_EXT_GET_UKEY_PIN_AUTH_STATE,
     /* new cmd type must be added before HKS_MSG_MAX */
     HKS_MSG_MAX,
 };

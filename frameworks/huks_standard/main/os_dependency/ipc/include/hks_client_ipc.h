@@ -28,6 +28,12 @@ int32_t HksClientRefreshKeyInfo(void);
 
 int32_t HksClientRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
 
+int32_t HksClientUnRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
+
+int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut);
+
+int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut);
+
 int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
     struct HksParamSet *paramSetOut);
 
