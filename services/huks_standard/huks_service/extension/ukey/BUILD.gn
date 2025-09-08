@@ -29,6 +29,8 @@ if (os_level == "standard") {
 
     sources = [
       "src/hks_provider_life_cycle_manager.cpp",
+      "src/hks_remote_handle_manger.cpp",
+      "src/hks_json_wrapper.cpp",
     ]
 
     deps = [
