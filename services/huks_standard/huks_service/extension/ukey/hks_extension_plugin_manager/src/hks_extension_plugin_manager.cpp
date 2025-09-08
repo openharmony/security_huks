@@ -16,14 +16,17 @@
 #include "hks_extension_plugin_manager.h"
 
 #include <vector>
-// -999 没找到函数
-//
 
 namespace OHOS::Security::Huks {
 
 std::shared_ptr<HuksExtensionPluginManager> HuksExtensionPluginManager::GetInstanceWrapper()
 {
     return HuksExtensionPluginManager::GetInstance();
+}
+
+void HuksExtensionPluginManager::ReleaseInstance()
+{
+    return HuksExtensionPluginManager::DestroyInstance();
 }
 
 int32_t HuksExtensionPluginManager::RegisterProvider(struct HksProcessInfo &info, const std::string& AbilityName,
@@ -122,7 +125,7 @@ int32_t HuksExtensionPluginManager::OnVerifyPin(const std::string &index, vector
     return HKS_SUCCESS;
 }
 
-int32_t OnVerifyPinStatus(const std::string &index) {
+int32_t OnVerifyPinStatus(const std::string &index, std::string &pinStatus) {
     auto it = m_pluginProviderMap.find(PluginMethodEnum::FUNC_ON_VERIFYPIN_STATUS);
     HKS_IF_TRUE_LOGE_RETURN(it == m_pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
         "VerifyPinStatus method enum not found in plugin provider map.")

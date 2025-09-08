@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HKS_PROVIDER_LIFE_CYCLE_MANAGER_H
-#define HKS_PROVIDER_LIFE_CYCLE_MANAGER_H
+#ifndef HKS_EXTENSION_PLUGIN_MANAGER_H
+#define HKS_EXTENSION_PLUGIN_MANAGER_H
 
 #include <string>
 #include <unordered_map>
@@ -88,13 +88,14 @@ namespace Huks {
 public:
     std::unordered_map<PluginMethodEnum, void*> m_pluginProviderMap;
     static std::shared_ptr<HksProviderLifeCycleManager> GetInstanceWrapper();
+    static void ReleaseInstance();
     int32_t RegisterProvider(struct HksProcessInfo &info, const std::string &AbilityName,
     const CppParamSet& paramSet);
     int32_t UnRegisterProvider(struct HksProcessInfo &info, const std::string &AbilityName,
     const CppParamSet& paramSet);
     int32_t OnSigned(const std::string &index, const CppParamSet& paramSet, vector<uint8_t> &outData);
     int32_t OnVerifyPin(const std::string &index, vector<uint8_t> &pinData);
-    int32_t OnVerifyPinStatus(const std::string &index);
+    int32_t OnVerifyPinStatus(const std::string &index, std::string &pinStatus);
     int32_t OnClearPinStatus(const std::string &index);
     int32_t OnFindProviderList(const std::string &index, vector<uint8_t> &providersOut);
     int32_t OnFindProviderCertificate(const std::string &index, vector<uint8_t> &cetificatesOut);
@@ -115,3 +116,4 @@ private:
 }
 }
 }
+#endif
