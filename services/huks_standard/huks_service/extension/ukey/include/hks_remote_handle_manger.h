@@ -34,18 +34,48 @@ public:
     
     int32_t FindKeyHandle(const std::string &abilityName, const std::string &index, const CppParamSet &paramSet, HksBlob &keyHandle);
 
-    int32_t CloseKeyHandle(const std::string &abilityName, const std::string &index, const HksBlob &keyHandle);
+    static std::shared_ptr<HksRemoteHandleManager> GetInstanceWrapper();
+    static void ReleaseInstance();
 
-    int32_t GetContainerIndex(const std::string &abilityName, std::string &index);
+    int32_t GetRemoteIndex(const std::string &providerInfo, [[maybe_unused]] const CppParamSet &paramSet, std::string &index);
+    // handle管理
+    int32_t CreateRemoteHandle(const std::string &index, [[maybe_unused]] const CppParamSet &paramSet);
+    int32_t CloseRemoteHandle(const std::string &index, [[maybe_unused]] const CppParamSet &paramSet);
 
-    int32_t ClearKeyHandle(const std::string &abilityName);
+    // ukey PIN码管理
+    int32_t RemoteVerifyPin(const std::string &index, const HksBlob &pinData);
+    int32_t RemoteVerifyPinStatus(const std::string &index);
+    int32_t RemoteClearPinStatus(const std::string &index);
 
-    static int32_t GetHandle(const std::string &abilityName, std::string &index, HksBlob &keyHandle);
+    //证书查询
+//      int32_t FindRemoteCertificate(const std::string &index, const std::string certificatesOut);
+//     int32_t FindRemoteAllCertificate(const std::string &index, const std::string certificatesOut);
+
+    //签名验签
+    int32_t RemoteHandleSign(const std::string &index, const CppParamSet &paramSet,
+            const HksBlob &inData, HksBlob &outData);
+    int32_t RemoteHandleVerify(const std::string &index, const CppParamSet &paramSet,
+            const HksBlob &plainText, HksBlob &signature);
+
+    //加密解密
+//     int32_t RemoteHandleEncrypt(const std::string &index, const CppParamSet &paramSet,
+//             const HksBlob &inData, HksBlob &outData);
+//     int32_t RemoteHandleDecrypt(const std::string &index, const CppParamSet &paramSet,
+//             const HksBlob &inData, HksBlob &outData);
+
+    int32_t ClearRemoteHandle();
 
     static int32_t KeyHandlePreCheck(const std::string &abilityName, std::string &index);
 
 
 private:
+
+    int32_t ValidateAndGetHandle(const std::string &newIndex, const std::string &providerInfo, std::string &handle);
+    int32_t ParseAndValidateIndex(const std::string &index, std::string &providerInfo,
+                                    std::string &newIndex,std::string &handle);
+    OHOS::sptr<IRemoteObject> GetProviderProxy(const std::string &providerInfo, int32_t &ret);
+
+    OHOS::SafeMap<std::string, std::string> indexToHandle;
 
     
     // 释放HksBlob资源

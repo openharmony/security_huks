@@ -27,9 +27,15 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_json_wrapper.h"
 
+#include "cJSON.h"
+namespace OHOS {
+namespace Security {
+namespace Huks {
 
-inline void FreeHksBlob(HksBlob *&blob)
+constexpr const char *PROVIDER_INFO_KEY = "providerInfo";
+std::shared_ptr<HksRemoteHandleManager> HksRemoteHandleManager::GetInstanceWrapper()
 {
     if (blob == nullptr) {
         return;
@@ -45,30 +51,50 @@ inline void FreeHksBlob(HksBlob *&blob)
     blob = nullptr;
 }
 
-inline HksBlob StringToBlob(const std::string &inStr)
+void HksRemoteHandleManager::ReleaseInstance()
 {
-    return {
-        .size = inStr.size(),
-        .data = reinterpret_cast<uint8_t *>(const_cast<char *>(inStr.c_str())),
-    };
+    OHOS::DelayedSingleton<HksRemoteHandleManager>::DestroyInstance();
 }
 
-namespace {
-constexpr uint32_t MAX_INDEX_NUM = 1000;
-constexpr int32_t INDEX_NOT_FOUND = -1;
-constexpr int32_t HANDLE_NOT_FOUND = -2;
-}  // namespace
-
-
-int32_t HksRemoteHandleManager::CopyHksBlob(const HksBlob &src, HksBlob &dest)
+int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &index, 
+                                                         std::string &providerInfo, 
+                                                         std::string &newIndex)
 {
-    if (src.size == 0 || src.data == nullptr) {
-        return HKS_ERROR_NULL_POINTER;
+    CommJsonObject root = CommJsonObject::Parse(index);
+
+    auto providerInfoResult = root.GetValue(PROVIDER_INFO_KEY).ToString();
+    if (providerInfoResult.first != HKS_SUCCESS) {
+        HKS_LOG_E("Get providerInfo field failed");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    providerInfo = providerInfoResult.second;
+    
+    if (providerInfo.empty()) {
+        HKS_LOG_E("ProviderInfo is empty");
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    uint8_t *data = static_cast<uint8_t *>(HksMalloc(src.size));
-    if (data == nullptr) {
-        return HKS_ERROR_MALLOC_FAIL;
+    // Create a new JSON object without the provider info field
+    CommJsonObject newRoot = CommJsonObject::CreateObject();
+
+    // Copy all fields except provider info
+    auto keys = root.GetKeys();
+    for (const auto &key : keys) {
+        if (key != PROVIDER_INFO_KEY) {
+            auto value = root.GetValue(key);
+            if (!newRoot.SetValue(key, std::move(value))) {
+                HKS_LOG_E("Copy all fields except provider info failed");
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+        }
+    }
+    
+    std::string newJson = newRoot.Serialize(false);
+    newIndex = newJson;
+    
+    if (newIndex.empty()) {
+        HKS_LOG_E("New index is empty");
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     (void)memcpy_s(data, src.size, src.data, src.size);
@@ -77,250 +103,288 @@ int32_t HksRemoteHandleManager::CopyHksBlob(const HksBlob &src, HksBlob &dest)
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::GetRemoteIndex(const std::string &abilityName, std::string &index)
+int32_t HksRemoteHandleManager::ValidateProviderInfo(const std::string &newIndex, const std::string &providerInfo)
 {
     
+    if (cachedProviderInfo != providerInfo) {
+        HKS_LOG_E("Provider info mismatch: cached=%s, current=%s", 
+                 cachedProviderInfo.c_str(), providerInfo.c_str());
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    
+    return HKS_SUCCESS;
+}
+OHOS::sptr<IRemoteObject> HksRemoteHandleManager::GetProviderProxy(const std::string &providerInfo, int32_t &ret)
+{
     auto providerManager = HksProviderLifeCycleManager::GetInstanceWrapper();
     if (providerManager == nullptr) {
         HKS_LOG_E("Get provider manager instance failed");
-        return HKS_ERROR_NULL_POINTER;
+        ret = HKS_ERROR_INVALID_ARGUMENT;
+        return nullptr;
     }
-    
-    auto proxy = providerManager->GetExtensionProxy(abilityName);
+
+    auto proxy = providerManager->GetExtensionProxy(providerInfo);
     if (proxy == nullptr) {
-        HKS_LOG_E("Get extension proxy failed for ability: %s", abilityName.c_str());
-        return HKS_ERROR_NOT_EXIST;
+        HKS_LOG_E("Get extension proxy failed for provider: %s", providerInfo.c_str());
+        ret = HKS_ERROR_INVALID_ARGUMENT;
+        return nullptr;
     }
     
-    // 缓存代理对象
-    if (!providerProxyMap.Insert(abilityName, proxy)) {
-        HKS_LOG_E("Cache provider proxy failed");
-        return HKS_FAILURE;
+    ret = HKS_SUCCESS;
+    return proxy;
+}
+
+int32_t HksRemoteHandleManager::GetRemoteIndex(const std::string &providerInfo, [[maybe_unused]] const CppParamSet &paramSet, std::string &index)
+{
+    int32_t ret;
+    auto proxy = GetProviderProxy(providerInfo, ret);
+    if (proxy == nullptr) {
+        return ret;
     }
-    
-    // int32_t ret = proxy->GetRemoteIndex(index);
-    // if (ret != HKS_SUCCESS) {
-    //     HKS_LOG_E("Get remote index failed: %d", ret);
-    //     return ret;
-    // }
-    
+
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::CreateRemoteHandle(const std::string &abilityName, const std::string &index, 
-                                                  const CppParamSet &paramSet, HksBlob &keyHandle)
-{
-    std::shared_ptr<CrypoExtensionProxy> proxy;
-    if (providerProxyMap.Find(abilityName, proxy) != HKS_SUCCESS) {
-        HKS_LOG_E("Get cached proxy failed for ability: %s", abilityName.c_str());
-        return HKS_ERROR_NOT_EXIST;
-    }
-    
-    // std::string remoteHandle;
-    // int32_t ret = proxy->CreateRemoteHandle(index, paramSet, remoteHandle);
-    // if (ret != HKS_SUCCESS) {
-    //     HKS_LOG_E("Create remote handle failed: %d", ret);
-    //     return ret;
-    // }
-    
-    std::string remoteHandle = "remote_handle_" + GenerateRandomIndex();
-    HKS_LOG_I("Create remote handle success: %s", remoteHandle.c_str());
-    
-    keyHandle.size = remoteHandle.size();
-    keyHandle.data = static_cast<uint8_t *>(HksMalloc(keyHandle.size));
-    if (keyHandle.data == nullptr) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-    
-    (void)memcpy_s(keyHandle.data, keyHandle.size, remoteHandle.data(), remoteHandle.size());
-    
-    return HKS_SUCCESS;
-}
 
-int32_t HksRemoteHandleManager::CreateKeyHandle(const std::string &abilityName, const std::string &index, 
-                                               const CppParamSet &paramSet)
+int32_t HksRemoteHandleManager::ValidateAndGetHandle(const std::string &newIndex, 
+                                                    const std::string &providerInfo, std::string &handle)
 {
-    if (abilityName.empty() || index.empty()) {
-        HKS_LOG_E("Invalid abilityName or index");
+    int32_t ret = ValidateProviderInfo(newIndex, providerInfo);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Provider info validation failed: %d", ret);
+        return ret;
+    }
+
+    if (!indexToHandle.Find(newIndex, handle)) {
+        HKS_LOG_E("Remote handle not found for newIndex: %s", newIndex.c_str());
         return HKS_ERROR_INVALID_ARGUMENT;
     }
+    
+    return HKS_SUCCESS;
+}
 
-    HksBlob keyHandle = {0, nullptr};
-    int32_t ret = CreateRemoteHandle(abilityName, index, paramSet, keyHandle);
+int32_t HksRemoteHandleManager::ParseAndValidateIndex(const std::string &index, std::string &providerInfo,
+                                    std::string &newIndex,std::string &handle)
+{
+    int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Parse index and provider info failed: %d", ret);
+        return ret;
+    }
+    
+    ret = ValidateAndGetHandle(newIndex, providerInfo, handle);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Validate provider info and get handle failed: %d", ret);
+        return ret;
+    }
+    
+    return HKS_SUCCESS;
+}
+
+int32_t HksRemoteHandleManager::CreateRemoteHandle(const std::string &index, [[maybe_unused]] const CppParamSet &paramSet)
+{
+    std::string providerInfo;
+    std::string newIndex;
+    int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Parse index and provider info failed: %d", ret);
+        return ret;
+    }
+
+    auto proxy = GetProviderProxy(providerInfo, ret);
+    if (proxy == nullptr) {
+        return ret;
+    }
+
+    // int32_t ret = proxy->CreateRemoteHandle(newIndex, paramSet, handle);
+    std::string handle = "remote_handle_" + newIndex; 
+    ret = HKS_SUCCESS;
+    
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Create remote handle failed: %d", ret);
-        return ret;
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    std::vector<HksBlob> handleList;
-    if (indexHandleMap.Find(index, handleList) != HKS_SUCCESS) {
-        handleList = {keyHandle};
-    } else {
-        handleList.push_back(keyHandle);
+    if (!indexToHandle.Insert(newIndex, handle)) {
+        HKS_LOG_E("Cache remote handle failed");
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
     
-    if (!indexHandleMap.Insert(index, handleList)) {
-        FreeHksBlob(keyHandle);
-        HKS_LOG_E("Insert key handle failed");
-        return HKS_FAILURE;
-    }
-
-    // 存储句柄到能力名和索引的映射
-    if (!handleInfoMap.Insert(keyHandle, std::make_pair(abilityName, index))) {
-        HKS_LOG_E("Insert handle info failed");
-        handleList.erase(std::remove(handleList.begin(), handleList.end(), keyHandle), handleList.end());
-        if (handleList.empty()) {
-            indexHandleMap.Erase(index);
-        } else {
-            indexHandleMap.Insert(index, handleList);
-        }
-        FreeHksBlob(keyHandle);
-        return HKS_FAILURE;
-    }
-
-    std::vector<std::string> indexList;
-    if (abilityIndexMap.Find(abilityName, indexList) != HKS_SUCCESS) {
-        indexList = {index};
-    } else {
-        if (std::find(indexList.begin(), indexList.end(), index) == indexList.end()) {
-            indexList.push_back(index);
-        }
-    }
-
-    if (!abilityIndexMap.Insert(abilityName, indexList)) {
-        HKS_LOG_E("Update ability index list failed");
-        handleList.erase(std::remove(handleList.begin(), handleList.end(), keyHandle), handleList.end());
-        if (handleList.empty()) {
-            indexHandleMap.Erase(index);
-        } else {
-            indexHandleMap.Insert(index, handleList);
-        }
-        handleInfoMap.Erase(keyHandle);
-        FreeHksBlob(keyHandle);
-        return HKS_FAILURE;
+    if (!newIndexToProviderInfo.Insert(newIndex, providerInfo)) {
+        indexToHandle.Erase(newIndex); 
+        HKS_LOG_E("Cache provider info failed");
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::FindKeyHandle(const std::string &abilityName, const std::string &index,
-                                             const CppParamSet &paramSet, HksBlob &keyHandle)
+int32_t HksRemoteHandleManager::CloseRemoteHandle(const std::string &index, [[maybe_unused]] const CppParamSet &paramSet)
 {
-    if (abilityName.empty() || index.empty()) {
-        HKS_LOG_E("Invalid abilityName or index");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
-    std::vector<HksBlob> handleList;
-    if (indexHandleMap.Find(index, handleList) != HKS_SUCCESS) {
-        HKS_LOG_E("Key handle not found for index: %s", index.c_str());
-        return HKS_ERROR_NOT_EXIST;
-    }
-
-    if (!handleList.empty()) {
-        std::pair<std::string, std::string> info;
-        if (handleInfoMap.Find(handleList[0], info) == HKS_SUCCESS && info.first == abilityName) {
-            return CopyHksBlob(handleList[0], keyHandle);
-        }
-    }
-
-    HKS_LOG_E("Key handle not found for ability: %s, index: %s", abilityName.c_str(), index.c_str());
-    return HKS_ERROR_NOT_EXIST;
-}
-
-int32_t HksRemoteHandleManager::CloseKeyHandle(const std::string &abilityName, const std::string &index,
-                                              const HksBlob &keyHandle)
-{
-    // 检查abilityName和index是否有效
-    if (abilityName.empty() || index.empty()) {
-        HKS_LOG_E("Invalid abilityName or index");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
-    // 验证句柄对应的信息是否匹配
-    std::pair<std::string, std::string> info;
-    if (handleInfoMap.Find(keyHandle, info) != HKS_SUCCESS) {
-        HKS_LOG_E("Key handle not found");
-        return HKS_ERROR_NOT_EXIST;
-    }
-
-    if (info.first != abilityName || info.second != index) {
-        HKS_LOG_E("AbilityName or index not match");
-        return HKS_ERROR_NOT_EXIST;
-    }
-
-    // 从索引到句柄的映射中移除
-    std::vector<HksBlob> handleList;
-    if (indexHandleMap.Find(index, handleList) == HKS_SUCCESS) {
-        auto it = std::remove(handleList.begin(), handleList.end(), keyHandle);
-        if (it != handleList.end()) {
-            handleList.erase(it, handleList.end());
-            
-            if (handleList.empty()) {
-                indexHandleMap.Erase(index);
-            } else {
-                indexHandleMap.Insert(index, handleList);
-            }
-        }
-    }
-
-    // 从句柄到信息的映射中移除
-    handleInfoMap.Erase(keyHandle);
-
-    // 如果该index已经没有句柄，从abilityIndexMap中移除
-    if (handleList.empty()) {
-        std::vector<std::string> indexList;
-        if (abilityIndexMap.Find(abilityName, indexList) == HKS_SUCCESS) {
-            auto indexIt = std::find(indexList.begin(), indexList.end(), index);
-            if (indexIt != indexList.end()) {
-                indexList.erase(indexIt);
-                if (indexList.empty()) {
-                    abilityIndexMap.Erase(abilityName);
-                } else {
-                    abilityIndexMap.Insert(abilityName, indexList);
-                }
-            }
-        }
-    }
-
-    return HKS_SUCCESS;
-}
-
-int32_t HksRemoteHandleManager::GetContainerIndex(const std::string &abilityName, std::string &index)
-{
-    if (abilityName.empty()) {
-        HKS_LOG_E("Invalid abilityName");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
-    // 检查是否已存在索引
-    std::vector<std::string> indexList;
-    if (abilityIndexMap.Find(abilityName, indexList) == HKS_SUCCESS) {
-        if (!indexList.empty()) {
-            index = indexList.front();
-            return HKS_SUCCESS;
-        }
-    }
-
-    // 通过代理对象获取远程索引
-    int32_t ret = GetRemoteIndex(abilityName, index);
+    std::string providerInfo;
+    std::string newIndex;
+    std::string handle;
+    int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Get remote index failed: %d", ret);
         return ret;
     }
 
-    // 缓存索引
-    if (indexList.empty()) {
-        indexList = {index};
-    } else {
-        indexList.push_back(index);
-    }
-    
-    if (!abilityIndexMap.Insert(abilityName, indexList)) {
-        HKS_LOG_E("Cache index failed");
-        return HKS_FAILURE;
+    auto proxy = GetProviderProxy(providerInfo, ret);
+    if (proxy == nullptr) {
+        return ret;
     }
 
+    // ret = proxy->CloseRemoteHandle(newIndex, handle);
+    ret = HKS_SUCCESS;
+    
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Close remote handle failed: %d", ret);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    // 移除缓存
+    indexToHandle.Erase(newIndex);
+    newIndexToProviderInfo.Erase(newIndex);
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksRemoteHandleManager::RemoteVerifyPin(const std::string &index, const HksBlob &pinData)
+{
+    std::string providerInfo;
+    std::string newIndex;
+    std::string handle;
+    int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    auto proxy = GetProviderProxy(providerInfo, ret);
+    if (proxy == nullptr) {
+        return ret;
+    }
+
+    // ret = proxy->VerifyPin(newIndex, handle, pinData);
+    ret = HKS_SUCCESS;
+    
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Remote verify pin failed: %d", ret);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const std::string &index)
+{
+    std::string providerInfo;
+    std::string newIndex;
+    std::string handle;
+    int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    auto proxy = GetProviderProxy(providerInfo, ret);
+    if (proxy == nullptr) {
+        return ret;
+    }
+
+    // ret = proxy->VerifyPinStatus(newIndex, handle);
+    ret = HKS_SUCCESS;
+    
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Remote verify pin status failed: %d", ret);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksRemoteHandleManager::RemoteClearPinStatus(const std::string &index)
+{
+    std::string providerInfo;
+    std::string newIndex;
+    std::string handle;
+    int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    auto proxy = GetProviderProxy(providerInfo, ret);
+    if (proxy == nullptr) {
+        return ret;
+    }
+
+    // ret = proxy->ClearPinStatus(newIndex, handle);
+    ret = HKS_SUCCESS;
+    
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Remote clear pin status failed: %d", ret);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    return HKS_SUCCESS;
+}
+
+
+int32_t HksRemoteHandleManager::RemoteHandleSign(const std::string &index, const CppParamSet &paramSet,
+    const HksBlob &inData, HksBlob &outData)
+{
+    std::string providerInfo;
+    std::string newIndex;
+    std::string handle;
+    int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    auto proxy = GetProviderProxy(providerInfo, ret);
+    if (proxy == nullptr) {
+        return ret;
+    }
+
+    // ret = proxy->Sign(newIndex, handle, paramSet, inData, outData);
+    ret = HKS_SUCCESS;
+    
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Remote sign failed: %d", ret);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksRemoteHandleManager::RemoteHandleVerify(const std::string &index, const CppParamSet &极速版paramSet,
+    const HksBlob &plainText, HksBlob &signature)
+{
+    std::string providerInfo;
+    std::string newIndex;
+    std::string handle;
+    int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    auto proxy = GetProviderProxy(providerInfo, ret);
+    if (proxy == nullptr) {
+        return ret;
+    }
+
+    // ret = proxy->Verify(newIndex, handle, paramSet, plainText, signature);
+    ret = HKS_SUCCESS;
+    
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Remote verify failed: %d", ret);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksRemoteHandleManager::ClearRemoteHandle()
+{
+    indexToHandle.Clear();
     return HKS_SUCCESS;
 }
 
