@@ -74,7 +74,7 @@ int32_t HksClientRegisterProvider(const struct HksBlob *name, const struct HksPa
     return HksServiceRegisterProvider(&processInfo, name, paramSetIn);
 }
 
-int32_t HksClientUnRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
+int32_t HksClientUnregisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
 {
     char *processName = NULL;
     char *userId = NULL;
@@ -89,7 +89,7 @@ int32_t HksClientUnRegisterProvider(const struct HksBlob *name, const struct Hks
         0,
         0
     };
-    return HksServiceUnRegisterProvider(&processInfo, name, paramSetIn);
+    return HksServiceUnregisterProvider(&processInfo, name, paramSetIn);
 }
 
 int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut)
@@ -110,6 +110,24 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
     return HksServiceAuthUkeyPin(&processInfo, index, paramSetIn, paramSetOut);
 }
 
+int32_t HksClientOpenRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
+{
+    char *processName = NULL;
+    char *userId = NULL;
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+        "get process info failed")
+
+    struct HksProcessInfo processInfo = {
+        { strlen(userId), (uint8_t *)userId },
+        { strlen(processName), (uint8_t *)processName },
+        0,
+        0,
+        0,
+        0
+    };
+    return HksServiceOpenRemoteHandle(&processInfo, index, paramSetIn, remoteHandleOut);
+}
+
 int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut)
 {
     char *processName = NULL;
@@ -128,6 +146,72 @@ int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct H
     return HksServiceGetUkeyPinAuthState(&processInfo, index, paramSetIn, paramSetOut);
 }
 
+int32_t HksClientGetRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
+{
+    char *processName = NULL;
+    char *userId = NULL;
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+        "get process info failed")
+
+    struct HksProcessInfo processInfo = {
+        { strlen(userId), (uint8_t *)userId },
+        { strlen(processName), (uint8_t *)processName },
+        0,
+        0,
+        0,
+        0
+    };
+    return HksServiceGetRemoteHandle(&processInfo, index, paramSetIn, remoteHandleOut);
+}
+
+int32_t HksClientCloseRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
+{
+    char *processName = NULL;
+    char *userId = NULL;
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+        "get process info failed")
+
+    struct HksProcessInfo processInfo = {
+        { strlen(userId), (uint8_t *)userId },
+        { strlen(processName), (uint8_t *)processName },
+        0,
+        0,
+        0,
+        0
+    };
+    return HksServiceCloseRemoteHandle(&processInfo, index, paramSetIn, remoteHandleOut);
+}
+
+int32_t HksClientGetPinAuthState(const struct HksBlob *index, uint32_t *stateOut)
+{
+    // TODO: 接口不清晰
+    return 0;
+}
+
+int32_t HksClientClearPinAuthState(const struct HksBlob *index)
+{
+    // TODO: 接口不清晰
+    return 0;
+}
+
+int32_t HksClientUkeySign(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
+    const struct HksBlob *srcData, struct HksBlob *signatureOut)
+{
+    char *processName = NULL;
+    char *userId = NULL;
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+        "get process info failed")
+
+    struct HksProcessInfo processInfo = {
+        { strlen(userId), (uint8_t *)userId },
+        { strlen(processName), (uint8_t *)processName },
+        0,
+        0,
+        0,
+        0
+    };
+    return HksServiceUkeySign(&processInfo, index, paramSetIn, srcData, signatureOut);
+}
 int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
     struct HksParamSet *paramSetOut)
 {

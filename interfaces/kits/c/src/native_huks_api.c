@@ -42,6 +42,65 @@ struct OH_Huks_Result OH_Huks_GetSdkVersion(struct OH_Huks_Blob *sdkVersion)
     return ConvertApiResult(result);
 }
 
+struct OH_Huks_Result OH_Huks_RegisterProvider(const struct OH_Huks_Blob *providerName, const struct OH_Huks_ParamSet *paramSet)
+{
+    int32_t result = HksRegisterProvider((const struct HksBlob *) providerName, (const struct HksParamSet *) paramSet);
+    return ConvertApiResult(result);
+}
+
+struct OH_Huks_Result OH_Huks_UnregisterProvider(const struct OH_Huks_Blob *providerName, const struct OH_Huks_ParamSet *paramSet)
+{
+    int32_t result = HksUnregisterProvider((const struct HksBlob *) providerName, (const struct HksParamSet *) paramSet);
+    return ConvertApiResult(result);
+}
+
+struct OH_Huks_Result OH_Huks_OpenRemoteHandle(const struct OH_Huks_Blob *index, const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_Blob *remoteHandleOut)
+{
+    int32_t ret = HksOpenRemoteHandle((const struct HksBlob *) index,
+        (const struct HksParamSet *) paramSet, (struct HksBlob *) remoteHandleOut);
+    return ConvertApiResult(ret);
+}
+
+struct OH_Huks_Result OH_Huks_GetRemoteHandle(const struct OH_Huks_Blob *index, const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_Blob *remoteHandleOut)
+{
+    int32_t ret = HksGetRemoteHandle((const struct HksBlob *) index,
+        (const struct HksParamSet *) paramSet, (struct HksBlob *) remoteHandleOut);
+    return ConvertApiResult(ret);
+}
+
+struct OH_Huks_Result OH_Huks_CloseRemoteHandle(const struct OH_Huks_Blob *index, const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_Blob *remoteHandleOut)
+{
+    int32_t ret = HksCloseRemoteHandle((const struct HksBlob *) index,
+        (const struct HksParamSet *) paramSet, (struct HksBlob *) remoteHandleOut);
+    return ConvertApiResult(ret);
+}
+
+struct OH_Huks_Result OH_Huks_AuthUkeyPin(const struct OH_Huks_Blob *index, const struct OH_Huks_ParamSet *paramSetIn, uint32_t *retryCount)
+{
+    int32_t ret = HksAuthUkeyPinWithRetry((const struct HksBlob *) index,
+        (const struct HksParamSet *) paramSetIn, retryCount);
+    return ConvertApiResult(ret);
+}
+
+struct OH_Huks_Result OH_Huks_GetPinAuthState(const struct OH_Huks_Blob *index, uint32_t *stateOut)
+{
+    int32_t ret = HksGetPinAuthState((const struct HksBlob *) index, stateOut);
+    return ConvertApiResult(ret);
+}
+struct OH_Huks_Result OH_Huks_ClearPinAuthState(const struct OH_Huks_Blob *index)
+{
+    int32_t ret = HksClearPinAuthState((const struct HksBlob *) index);
+    return ConvertApiResult(ret);
+}
+
+struct OH_Huks_Result OH_Huks_Sign(const struct OH_Huks_Blob *index, const struct OH_Huks_ParamSet *paramSet,
+    const struct OH_Huks_Blob *srcData, struct OH_Huks_Blob *signatureOut)
+{
+    int32_t ret = HksUkeySign((const struct HksBlob *) index,
+        (const struct HksParamSet *) paramSet, (const struct HksBlob *) srcData, (struct HksBlob *) signatureOut);
+    return ConvertApiResult(ret);
+}
+
 struct OH_Huks_Result OH_Huks_GenerateKeyItem(const struct OH_Huks_Blob *keyAlias,
     const struct OH_Huks_ParamSet *paramSetIn, struct OH_Huks_ParamSet *paramSetOut)
 {

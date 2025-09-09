@@ -112,7 +112,7 @@ napi_value HuksNapiRegisterProvider(napi_env env, napi_callback_info info)
 
     context->execute = [](napi_env env, void *data) {
         RegisterAndUngisterProviderContext *napiContext = static_cast<RegisterAndUngisterProviderContext *>(data);
-        napiContext->result = RegisterProvider(napiContext->name, napiContext->paramSetIn);
+        napiContext->result = HksRegisterProvider(napiContext->name, napiContext->paramSetIn);
     };
 
     context->resolve = [](napi_env env, AsyncContext *context) {
@@ -150,7 +150,7 @@ napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
 
     context->execute = [](napi_env env, void *data) {
         RegisterAndUngisterProviderContext *napiContext = static_cast<RegisterAndUngisterProviderContext *>(data);
-        napiContext->result = UnRegisterProvider(napiContext->name, napiContext->paramSetIn);
+        napiContext->result = HksUnregisterProvider(napiContext->name, napiContext->paramSetIn);
     };
 
     context->resolve = [](napi_env env, AsyncContext *context) {
@@ -197,7 +197,7 @@ napi_value HuksNapiVerifyPin(napi_env env, napi_callback_info info)
 
     context->execute = [](napi_env env, void *data) {
         UkeyPinContext *napiContext = static_cast<UkeyPinContext *>(data);
-        napiContext->result = AuthUkeyPin(napiContext->index, napiContext->paramSetIn);
+        napiContext->result = HksAuthUkeyPin(napiContext->index, napiContext->paramSetIn, napiContext->paramSetOut);
     };
 
     context->resolve = [](napi_env env, AsyncContext *context) {
@@ -254,7 +254,7 @@ napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info)
 
     context->execute = [](napi_env env, void *data) {
         UkeyPinContext *napiContext = static_cast<UkeyPinContext *>(data);
-        napiContext->result = GetUkeyPinAuthState(napiContext->index, napiContext->paramSetIn);
+        napiContext->result = HksGetUkeyPinAuthState(napiContext->index, napiContext->paramSetIn, napiContext->paramSetOut);
     };
 
     context->resolve = [](napi_env env, AsyncContext *context) {

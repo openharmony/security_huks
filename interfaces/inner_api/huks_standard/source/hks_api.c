@@ -62,7 +62,7 @@
 #undef HKS_SUPPORT_API_GET_CERTIFICATE_CHAIN
 #endif
 
-HKS_API_EXPORT int32_t RegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
+HKS_API_EXPORT int32_t HksRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter RegisterProvider");
@@ -80,16 +80,16 @@ HKS_API_EXPORT int32_t RegisterProvider(const struct HksBlob *name, const struct
 #endif
 }
 
-HKS_API_EXPORT int32_t UnRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
+HKS_API_EXPORT int32_t HksUnregisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
 {
 #ifdef L2_STANDARD
-    HKS_LOG_D("enter UnRegisterProvider");
+    HKS_LOG_D("enter UnregisterProvider");
     /* generate persistent keys */
     if (name == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
-    int32_t ret = HksClientUnRegisterProvider(name, paramSetIn);
-    HKS_IF_NOT_SUCC_LOGE(ret, "leave UnRegisterProvider, result = %" LOG_PUBLIC "d", ret);
+    int32_t ret = HksClientUnregisterProvider(name, paramSetIn);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave UnregisterProvider, result = %" LOG_PUBLIC "d", ret);
     return ret;
 #else
     (void)name;
@@ -98,7 +98,7 @@ HKS_API_EXPORT int32_t UnRegisterProvider(const struct HksBlob *name, const stru
 #endif
 }
 
-HKS_API_EXPORT int32_t AuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
+HKS_API_EXPORT int32_t HksAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
     struct HksParamSet *paramSetOut)
 {
 #ifdef L2_STANDARD
@@ -117,8 +117,13 @@ HKS_API_EXPORT int32_t AuthUkeyPin(const struct HksBlob *index, const struct Hks
 #endif
 }
 
+HKS_API_EXPORT int32_t HksAuthUkeyPinWithRetry(const struct HksBlob *index, const struct HksParamSet *HksParamSet, uint32_t *retryCount)
+{
+    return 0;
+}
 
-HKS_API_EXPORT int32_t GetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut)
+
+HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut)
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter GetUkeyPinAuthState");
@@ -132,6 +137,111 @@ HKS_API_EXPORT int32_t GetUkeyPinAuthState(const struct HksBlob *index, const st
     (void)index;
     (void)paramSetIn;
     (void)paramSetOut;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+
+HKS_API_EXPORT int32_t HksOpenRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter OpenRemoteHandle");
+    if ((index == NULL) || (paramSetIn == NULL) || (remoteHandleOut == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientOpenRemoteHandle(index, paramSetIn, remoteHandleOut);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave OpenRemoteHandle, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)index;
+    (void)paramSetIn;
+    (void)remoteHandleOut;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+HKS_API_EXPORT int32_t HksGetRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter GetRemoteHandle");
+    if ((index == NULL) || (paramSetIn == NULL) || (remoteHandleOut == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientGetRemoteHandle(index, paramSetIn, remoteHandleOut);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave GetRemoteHandle, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)index;
+    (void)paramSetIn;
+    (void)remoteHandleOut;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+HKS_API_EXPORT int32_t HksCloseRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter CloseRemoteHandle");
+    if ((index == NULL) || (paramSetIn == NULL) || (remoteHandleOut == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientCloseRemoteHandle(index, paramSetIn, remoteHandleOut);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave CloseRemoteHandle, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)index;
+    (void)paramSetIn;
+    (void)remoteHandleOut;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+
+HKS_API_EXPORT int32_t HksGetPinAuthState(const struct HksBlob *index, uint32_t *stateOut)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter GetPinAuthState");
+    if ((index == NULL) || (stateOut == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientGetPinAuthState(index, stateOut);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave GetPinAuthState, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)index;
+    (void)stateOut;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+HKS_API_EXPORT int32_t HksClearPinAuthState(const struct HksBlob *index)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter ClearPinAuthState");
+    if (index == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientClearPinAuthState(index);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave ClearPinAuthState, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)index;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+
+// 签名验签
+HKS_API_EXPORT int32_t HksUkeySign(const struct HksBlob *index, const struct HksParamSet *HksParamSet,
+    const struct HksBlob *srcData, struct HksBlob *signatureOut)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter UkeySign");
+    if ((index == NULL) || (HksParamSet == NULL) || (srcData == NULL) || (signatureOut == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientUkeySign(index, HksParamSet, srcData, signatureOut);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave UkeySign, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)index;
+    (void)HksParamSet;
+    (void)srcData;
+    (void)signatureOut;
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
