@@ -63,7 +63,7 @@
 #include <dirent.h>
 #endif
 
-uint32_t g_sessionId = 0;
+std::atomic_uint32_t g_sessionId = 0;
 
 namespace OHOS {
 namespace Security {
@@ -287,7 +287,7 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
 
     uint64_t enterTime = 0;
     (void)HksElapsedRealTime(&enterTime);
-    g_sessionId++;
+    uint32_t currentSessionId = g_sessionId.fetch_add(1);
     auto callingUid = IPCSkeleton::GetCallingUid();
     int userId = HksGetOsAccountIdFromUid(callingUid);
 
@@ -299,7 +299,7 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
 #endif
 
     HKS_LOG_I("code:%" LOG_PUBLIC "u,  callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC
-        "d, sessionId = %" LOG_PUBLIC "u", code, callingUid, userId, g_sessionId);
+        "d, sessionId = %" LOG_PUBLIC "u", code, callingUid, userId, currentSessionId);
 
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
     // judge whether is upgrading, wait for upgrade finished
@@ -330,9 +330,9 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         ProcessRemoteRequest(code, data, reply);
         uint64_t leaveTime = 0;
         (void)HksElapsedRealTime(&leaveTime);
-        HKS_LOG_I("finish code:%" LOG_PUBLIC "d, total cost %" LOG_PUBLIC PRIu64 " ms, sessionId = %"
-            LOG_PUBLIC "u, finish result:%" LOG_PUBLIC "d",
-            code, leaveTime - enterTime, g_sessionId, reply.ReadInt32());
+        HKS_LOG_I("code:%" LOG_PUBLIC "d, cost %" LOG_PUBLIC PRIu64 " ms, sessionId = %"
+            LOG_PUBLIC "u, ret:%" LOG_PUBLIC "d",
+            code, leaveTime - enterTime, currentSessionId, reply.ReadInt32());
         retSys = NO_ERROR;
     }
 
