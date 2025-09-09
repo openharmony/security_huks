@@ -49,7 +49,7 @@ private:
 
     std::atomic<bool> isConnected_ = {false}; // 供provider检测连接状态
     std::mutex deathRecipientMutex_;
-    sptr<IRemoteObject::DeathRecipient> callerGeathRecipient_ = nullptr;
+    sptr<IRemoteObject::DeathRecipient> callerDeathRecipient_ = nullptr;
     sptr<DesignAccessExtBase> extConnectProxy;
     
     void AddExtDeathRecipient(const wptr<IRemoteObject>& token);
