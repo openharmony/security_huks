@@ -378,7 +378,6 @@ static int32_t AddAesTag(const struct HksParamSet *paramSet, struct HksParamSet 
 
     /* Except for AES GCM and CCM mode, no need add tag, return success */
     if ((!isAes) || (!isAeMode)) {
-        HKS_LOG_I("Not AES CCM or GCM mode!");
         return HKS_SUCCESS;
     }
     return AddAeTag(newParamSet, inText, isEncrypt);
