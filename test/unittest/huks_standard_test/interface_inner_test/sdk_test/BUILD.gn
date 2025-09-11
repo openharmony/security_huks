@@ -31,6 +31,7 @@ ohos_unittest("hukssdk_test") {
     "./src/hks_generate_random_test.cpp",
     "./src/hks_hash_test.cpp",
     "./src/hks_mac_test.cpp",
+    "./src/hks_ukey_test.cpp",
 
     # "./src/hks_modify_key_test.cpp",
     "./src/hks_others_test.cpp",

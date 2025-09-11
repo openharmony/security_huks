@@ -575,7 +575,7 @@ int32_t HksServiceUnregisterProvider(const struct HksProcessInfo *processInfo, c
 }
 
 int32_t HksServiceAuthUkeyPin(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn, struct HksBlob *keyOut)
+    const struct HksParamSet *paramSetIn, struct HksParamSet *keyOut)
 {
     return 0;
 }
@@ -587,7 +587,7 @@ int32_t HksServiceOpenRemoteHandle(const struct HksProcessInfo *processInfo, con
 }
 
 int32_t HksServiceGetUkeyPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn, struct HksBlob *keyOut)
+    const struct HksParamSet *paramSetIn, struct HksParamSet *keyOut)
 {
     return 0;
 }
@@ -599,7 +599,7 @@ int32_t HksServiceGetRemoteHandle(const struct HksProcessInfo *processInfo, cons
 }
 
 int32_t HksServiceCloseRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn)
+    const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
 {
     return 0;
 }
