@@ -303,23 +303,23 @@ int32_t RecordKeyOperation(uint32_t operation, const struct HksStoreMaterial *ma
 
     switch (operation) {
         case KEY_OPERATION_SAVE:
-            HKS_LOG_I("generate key, storage userid: %" LOG_PUBLIC "s, uid: %" LOG_PUBLIC "s, "
-                "storage level: %" LOG_PUBLIC "u, key alias: %" LOG_PUBLIC "s",
+            HKS_LOG_I("gen, userid: %" LOG_PUBLIC "s, uid: %" LOG_PUBLIC "s, "
+                "level: %" LOG_PUBLIC "u, key: %" LOG_PUBLIC "s",
                 material->userIdPath, material->uidPath, material->pathType, anonymousKeyAlias);
             break;
         case KEY_OPERATION_GET:
-            HKS_LOG_I("use key, storage userid: %" LOG_PUBLIC "s, uid: %" LOG_PUBLIC "s, "
-                "storage level: %" LOG_PUBLIC "u, key alias: %" LOG_PUBLIC "s",
+            HKS_LOG_I("use, userid: %" LOG_PUBLIC "s, uid: %" LOG_PUBLIC "s, "
+                "level: %" LOG_PUBLIC "u, key: %" LOG_PUBLIC "s",
                 material->userIdPath, material->uidPath, material->pathType, anonymousKeyAlias);
             break;
         case KEY_OPERATION_DELETE:
-            HKS_LOG_I("delete key, storage userid: %" LOG_PUBLIC "s, uid: %" LOG_PUBLIC "s, "
-                "storage level: %" LOG_PUBLIC "u, key alias: %" LOG_PUBLIC "s",
+            HKS_LOG_I("del, userid: %" LOG_PUBLIC "s, uid: %" LOG_PUBLIC "s, "
+                "level: %" LOG_PUBLIC "u, key: %" LOG_PUBLIC "s",
                 material->userIdPath, material->uidPath, material->pathType, anonymousKeyAlias);
             break;
         case KEY_OPERATION_CHECK:
-            HKS_LOG_I("check key, storage userid: %" LOG_PUBLIC "s, uid: %" LOG_PUBLIC "s, "
-                "storage level: %" LOG_PUBLIC "u, key alias: %" LOG_PUBLIC "s",
+            HKS_LOG_I("chk, userid: %" LOG_PUBLIC "s, uid: %" LOG_PUBLIC "s, "
+                "level: %" LOG_PUBLIC "u, key: %" LOG_PUBLIC "s",
                 material->userIdPath, material->uidPath, material->pathType, anonymousKeyAlias);
             break;
         default:
