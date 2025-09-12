@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- #include "hks_lib_entry.h"
+ #include "hks_lib_interface.h"
 
 namespace OHOS {
 namespace Security {

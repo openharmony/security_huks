@@ -40,7 +40,7 @@ void ExtensionConnection::OnAbilityConnectDone(const AppExecFwk::ElementName& el
     std::lock_guard<std::mutex> lock(proxyMutex_);
     isConnected_.store(true);
     isReady = true;
-    proxyConv_.notifty_all();
+    proxyConv_.notify_all();
 }
 
 int32_t ExtensionConnection::OnConnection(const Want &want) {
@@ -80,7 +80,7 @@ sptr<DesignAccessExtBase> ExtensionConnection::GetExtConnectProxy() {
 }
 
 bool ExtensionConnection::IsConnected() {
-    return isConnected_.Load();
+    return isConnected_.load();
 }
 
 void ExtensionConnection::AddExtDeathRecipient(const wptr<IRemoteObject>& token) {
@@ -100,6 +100,11 @@ void ExtensionConnection::AddExtDeathRecipient(const wptr<IRemoteObject>& token)
     if (token != nullptr) {
         token->AddDeathRecipient(callerDeathRecipient_);
     }
+}
+
+// TODO:
+void ExtensionConnection::RemoveDeathRecipient(const wptr<IRemoteObject>& token) {
+    
 }
 
 void ExtensionConnection::RemoveExtDeathRecipient(const wptr<IRemoteObject>& token) {

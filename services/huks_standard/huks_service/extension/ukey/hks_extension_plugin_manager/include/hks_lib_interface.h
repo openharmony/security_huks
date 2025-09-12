@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HKS_LIB_ENTRY_H
-#define HKS_LIB_ENTRY_H
+#ifndef HKS_LIB_INTERFACE_H
+#define HKS_LIB_INTERFACE_H
 
 #include <unordered_map>
 #include <string>
@@ -36,6 +36,7 @@ public:
 
     int32_t OnRegistProvider(); // TODO
     int32_t OnUnRegistProvider();
+    int32_t RegistLibFunction(int32_t funCode, void *fun); // TODO
 
     int32_t OnCreateRemoteIndex(const std::string &providerName, const CppParamSet& paramSet, std::string &outIndex);
     int32_t OnCreateRemoteKeyHandle(const std::string &index);
@@ -52,7 +53,6 @@ public:
     int32_t OnListProviderAllCertificate(const std::string &providerName, std::string &cetificatesOut); // 这里证书会带上index
 
 private:
-    std::unordered_map<PluginMethodEnum, void*> m_pluginProviderMap;
     std::mutex mapMutex_;
 };
 }

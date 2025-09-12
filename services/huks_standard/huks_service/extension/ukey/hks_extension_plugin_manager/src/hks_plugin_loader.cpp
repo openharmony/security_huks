@@ -14,6 +14,7 @@
  */
 
 #include "hks_extension_plugin_manager.h"
+#include "hks_plugin_loader.h"
 
 #include <vector>
 

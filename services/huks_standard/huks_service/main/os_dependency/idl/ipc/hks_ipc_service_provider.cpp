@@ -34,9 +34,12 @@ void HksIpcServiceProviderRegister(const struct HksBlob *srcData, const uint8_t 
         ret = HksCheckAcrossAccountsPermission(inParamSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
-        // TODO:是否要根据等级精细化权限（暂时不用）
-        // 调用插件管理模块拉起Ukey插件，并调用对应的函数指针
-        HuksExtensionPluginManager pluginManager;
+        auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+        if (pluginManager == nullptr) {
+            HKS_LOG_E("Failed to get plugin manager instance.");
+            ret = HKS_ERROR_NULL_POINTER;
+            break;
+        }
         CppParamSet paramSet(inParamSet); 
         // TODO:转换时是否要进行安全检查，keyAlias可靠吗
         ret = pluginManager.RegisterProvider(processInfo, std::string(reinterpret_cast<const char*>(keyAlias.data), keyAlias.size), paramSet); 
@@ -82,7 +85,7 @@ void HksIpcServiceProviderUnRegister(const struct HksBlob *srcData, const uint8_
         ret = HksCheckAcrossAccountsPermission(inParamSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
-        auto pluginManager = HuksExtensionPluginManager::GetInstance();
+        auto pluginManager = HuksExtensionPluginManager::GetInstanceWrapper();
         if (pluginManager == nullptr) {
             HKS_LOG_E("Failed to get plugin manager instance.");
             ret = HKS_ERROR_NULL_POINTER;
@@ -97,4 +100,8 @@ void HksIpcServiceProviderUnRegister(const struct HksBlob *srcData, const uint8_
     HKS_FREE_BLOB(keyOut);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
+}
+
+void HksIpcServiceRegistLibFunction(int32_t funCode, void *fun) {
+
 }
