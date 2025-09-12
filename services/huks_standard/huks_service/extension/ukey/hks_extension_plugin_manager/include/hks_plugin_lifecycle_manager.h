@@ -17,6 +17,7 @@
 #define HKS_PLUGIN_LIFECYCLE_MANAGER_H
 #include <atomic>
 #include <string>
+#include <memory>
 
 #include "hks_cpp_paramset.h"
 #include "hks_error_code.h"

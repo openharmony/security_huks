@@ -13,11 +13,21 @@
  * limitations under the License.
  */
 
-#include "hks_plugin_lifecycle_manager"
+#include "hks_plugin_lifecycle_manager.h"
 
 namespace OHOS {
 namespace Security {
 namespace Huks {
+std::shared_ptr<HuksPluginLifeCycleMgr> HuksPluginLifeCycleMgr::GetInstanceWrapper()
+{
+    return HuksPluginLifeCycleMgr::GetInstance();
+}
+
+void HuksPluginLifeCycleMgr::ReleaseInstance()
+{
+    return HuksPluginLifeCycleMgr::DestroyInstance();
+}
+
 int32_t HuksExtensionPluginManager::RegisterProvider(struct HksProcessInfo &info, const std::string& providerName,
     const CppParamSet& paramSet){
     int32_t ret;
@@ -50,7 +60,7 @@ int32_t HuksExtensionPluginManager::UnRegisterProvider(struct HksProcessInfo &in
     return HKS_SUCCESS;
 }
 
-void RecordProvider(const std::string &providerName) {
+void HuksExtensionPluginManager::RecordProvider(const std::string &providerName) {
     //TODO:需要区分是否为重复注册的provider吗
     auto ret = registerProvider.Add(providerName);
     HKS_IF_TRUE_LOGI_RETURN_VOID(!ret, "repete record provider")

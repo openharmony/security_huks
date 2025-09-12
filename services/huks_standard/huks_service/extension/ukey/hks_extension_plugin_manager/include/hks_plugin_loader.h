@@ -24,7 +24,7 @@
 #include <atomic>
 #include <cstdint>
 
-#include "hks_lib_entry.h"
+#include "hks_lib_interface.h
 #include "hks_cpp_paramset.h"
 #include "hks_template.h"
 #include "singleton.h"
