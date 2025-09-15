@@ -43,7 +43,6 @@
 #include "hks_response.h"
 #include "hks_service_ipc_serialization.h"
 #include "hks_template.h"
-
 #define MAX_KEY_SIZE         2048
 
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
@@ -60,6 +59,38 @@ static enum HksTag g_idList[] = {
     HKS_TAG_ATTESTATION_ID_UDID,
 };
 #endif
+
+void HksIpcServiceRegisterProvider(const struct HksBlob *srcData, const uint8_t *context) {
+    HksIpcServiceProviderRegisterAdapter(srcData, context);
+}
+
+void HksIpcServiceUnregisterProvider(const struct HksBlob *srcData, const uint8_t *context) {
+
+}
+
+void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *context) {
+
+}
+
+void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8_t *context) {
+
+}
+
+void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t *context) {
+
+}
+
+void HksIpcServiceGetRemoteHandle(const struct HksBlob *srcData, const uint8_t *context) {
+
+}
+
+void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t *context) {
+
+}
+
+void HksIpcServiceUkeySign(const struct HksBlob *srcData, const uint8_t *context) {
+
+}
 
 void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *context)
 {
