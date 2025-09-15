@@ -32,6 +32,7 @@ if (os_level == "standard") {
       "ipc/hks_permission_check.cpp",
       "ipc/hks_response.cpp",
       "ipc/hks_service_ipc_serialization.c",
+      "ipc/hks_ipc_service_provider_adapter.cpp",     
     ]
 
     if (huks_enable_hdi_in_standard) {
