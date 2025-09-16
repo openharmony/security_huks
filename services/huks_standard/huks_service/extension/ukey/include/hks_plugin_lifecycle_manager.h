@@ -37,7 +37,7 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
-class HuksPluginLifeCycleMgr : private OHOS::DelayedSingleton<HuksPluginLifeCycleMgr>{
+class __attribute__((visibility("default"))) HuksPluginLifeCycleMgr : private OHOS::DelayedSingleton<HuksPluginLifeCycleMgr>{
 public:
     static std::shared_ptr<HuksPluginLifeCycleMgr> GetInstanceWrapper();
     static void ReleaseInstance();
@@ -50,6 +50,7 @@ private:
     std::atomic<int> m_refCount{0};
     //OHOS::SafeSet<std::string> registerProvider;
     void RecordProvider(const std::string &providerName);
+    static HuksPluginLifeCycleMgr instancePLCM;
 };
 }
 }

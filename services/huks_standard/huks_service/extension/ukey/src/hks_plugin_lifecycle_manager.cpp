@@ -19,15 +19,15 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
-std::shared_ptr<HuksPluginLifeCycleMgr> HuksPluginLifeCycleMgr::GetInstanceWrapper()
-{
+std::shared_ptr<HuksPluginLifeCycleMgr> HuksPluginLifeCycleMgr::GetInstanceWrapper() {
     return HuksPluginLifeCycleMgr::GetInstance();
 }
 
 void HuksPluginLifeCycleMgr::ReleaseInstance()
 {
-    return HuksPluginLifeCycleMgr::DestroyInstance();
+    OHOS::DelayedSingleton<HuksPluginLifeCycleMgr>::DestroyInstance();
 }
+
 
 int32_t HuksPluginLifeCycleMgr::RegisterProvider(struct HksProcessInfo &info, const std::string& providerName,
     const CppParamSet& paramSet){

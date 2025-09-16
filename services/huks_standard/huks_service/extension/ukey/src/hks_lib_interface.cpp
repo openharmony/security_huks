@@ -19,6 +19,14 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
+std::shared_ptr<HuksLibEntry> HuksLibEntry::GetInstanceWrapper() {
+    return HuksLibEntry::GetInstance();
+}
+
+void HuksLibEntry::ReleaseInstance() {
+    HuksLibEntry::DestroyInstance();
+}
+
 void HuksLibEntry::initProviderMap(std::unordered_map<PluginMethodEnum, void*>& mpluginProviderMap) {
     std::lock_guard<std::mutex> lock(mapMutex_);
     pluginProviderMap = mpluginProviderMap;
