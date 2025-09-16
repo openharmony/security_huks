@@ -401,17 +401,19 @@ static int32_t HksToMbedtlsRsaSetPssSaltLen(const struct HksBlob *key, const uin
     uint32_t digestLen = 0;
     int32_t ret = HksGetDigestLen(digest, &digestLen);
     HKS_IF_NOT_SUCC_RETURN(ret, ret);
-    int32_t saltLen = 0;
+    uint32_t saltLen = 0;
 
     switch (hksPssSaltLen) {
         case HKS_RSA_PSS_SALTLEN_DIGEST:
             saltLen = digestLen;
             break;
         case HKS_RSA_PSS_SALTLEN_MAX:
-            saltLen = (keyMaterial->keySize / HKS_BITS_PER_BYTE) - digestLen - MBEDTLS_RSA_PSS_DIGEST_NUM;
-            if (saltLen < 0) {
+            if ((keyMaterial->keySize / HKS_BITS_PER_BYTE) < (digestLen + MBEDTLS_RSA_PSS_DIGEST_NUM)) {
+                HKS_LOG_E("saltLen is invalid, keysize: %" LOG_PUBLIC "u, digestLen: %" LOG_PUBLIC "u",
+                    keyMaterial->keySize, digestLen);
                 return HKS_ERROR_INVALID_KEY_SIZE;
             }
+            saltLen = (keyMaterial->keySize / HKS_BITS_PER_BYTE) - digestLen - MBEDTLS_RSA_PSS_DIGEST_NUM;
             break;
         default:
             return HKS_ERROR_NOT_SUPPORTED;

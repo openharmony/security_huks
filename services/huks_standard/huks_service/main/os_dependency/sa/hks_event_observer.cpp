@@ -80,7 +80,6 @@ namespace Security {
 namespace Hks {
 std::shared_ptr<SystemEventSubscriber> SystemEventObserver::systemEventSubscriber_ = nullptr;
 std::shared_ptr<SystemEventSubscriber> SystemEventObserver::backUpEventSubscriber_ = nullptr;
-const static std::string RESTORE_EVENT_NAME = "usual.event.RESTORE_START";
 const int32_t BACKUP_UID = 1089;
 
 void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData &data)
@@ -165,7 +164,7 @@ bool SystemEventObserver::SubscribeSystemEvent()
 bool SystemEventObserver::SubscribeBackUpEvent()
 {
     OHOS::EventFwk::MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(RESTORE_EVENT_NAME);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_RESTORE_START);
     OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     subscriberInfo.SetPublisherUid(BACKUP_UID);
     backUpEventSubscriber_ = std::make_shared<SystemEventSubscriber>(subscriberInfo);
