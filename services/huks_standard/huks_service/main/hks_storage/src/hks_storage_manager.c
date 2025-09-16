@@ -126,13 +126,13 @@ static int32_t GetUserIdPath(int32_t userId, bool isPlain, struct HksStoreMateri
 
     int32_t ret;
     if (isPlain) {
-        ret = ConstructPlainName(&userIdBlob, outMaterial->userIdPath, HKS_MAX_FILE_NAME_LEN);
+        ret = ConstructPlainName(&userIdBlob, outMaterial->userIdPath, HKS_MAX_DIRENT_FILE_LEN);
     } else {
         if (userId == 0) {
             HKS_LOG_D("skip user id path.");
             return HKS_SUCCESS;
         }
-        ret = ConstructName(&userIdBlob, outMaterial->userIdPath, HKS_MAX_FILE_NAME_LEN);
+        ret = ConstructName(&userIdBlob, outMaterial->userIdPath, HKS_MAX_DIRENT_FILE_LEN);
     }
 
     return ret;

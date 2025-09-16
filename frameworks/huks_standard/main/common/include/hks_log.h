@@ -16,6 +16,9 @@
 #ifndef HKS_LOG_H
 #define HKS_LOG_H
 
+#include <time.h>
+#include <unistd.h>
+
 #include "hks_type.h"
 
 #ifdef L2_STANDARD
@@ -80,16 +83,36 @@
         #define HKS_LOG_D(fmt, arg...) \
             HILOG_DEBUG(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", __func__, __LINE__, ##arg)
     #else // L2_STANDARD
-        #define HKS_LOG_I(fmt, arg...) \
-            HILOG_INFO(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", __func__, __LINE__, ##arg)
-        #define HKS_LOG_W(fmt, arg...) \
-            HILOG_WARN(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", __func__, __LINE__, ##arg)
-        #define HKS_LOG_E(fmt, arg...) \
-            HILOG_ERROR(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", __func__, __LINE__, ##arg)
-        #define HKS_LOG_E_IMPORTANT(fmt, arg...) \
-            HILOG_ERROR(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", __func__, __LINE__, ##arg)
-        #define HKS_LOG_D(fmt, arg...) \
-            HILOG_DEBUG(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", __func__, __LINE__, ##arg)
+        #define HKS_LOG_I(fmt, arg...) do {                                                                         \
+            struct timespec _ts;                                                                                    \
+            clock_gettime(CLOCK_REALTIME, &_ts);                                                                    \
+            uint32_t _ms = (uint32_t)((long long)_ts.tv_sec * 1000LL + _ts.tv_nsec / 1000000LL);                    \
+            HILOG_INFO(LOG_ENGINE, "HUKS_I_%" LOG_PUBLIC "u_%" LOG_PUBLIC "u:" fmt "\n", _ms, __LINE__, ##arg);     \
+        } while (0)
+        #define HKS_LOG_W(fmt, arg...) do {                                                                         \
+            struct timespec _ts;                                                                                    \
+            clock_gettime(CLOCK_REALTIME, &_ts);                                                                    \
+            uint32_t _ms = (uint32_t)((long long)_ts.tv_sec * 1000LL + _ts.tv_nsec / 1000000LL);                    \
+            HILOG_WARN(LOG_ENGINE, "HUKS_W_%" LOG_PUBLIC "u_%" LOG_PUBLIC "u:" fmt "\n", _ms, __LINE__, ##arg);     \
+        } while (0)
+        #define HKS_LOG_E(fmt, arg...) do {                                                                         \
+            struct timespec _ts;                                                                                    \
+            clock_gettime(CLOCK_REALTIME, &_ts);                                                                    \
+            uint32_t _ms = (uint32_t)((long long)_ts.tv_sec * 1000LL + _ts.tv_nsec / 1000000LL);                    \
+            HILOG_ERROR(LOG_ENGINE, "HUKS_E_%" LOG_PUBLIC "u_%" LOG_PUBLIC "u:" fmt "\n", _ms, __LINE__, ##arg);    \
+        } while (0)
+        #define HKS_LOG_E_IMPORTANT(fmt, arg...) do {                                                               \
+            struct timespec _ts;                                                                                    \
+            clock_gettime(CLOCK_REALTIME, &_ts);                                                                    \
+            uint32_t _ms = (uint32_t)((long long)_ts.tv_sec * 1000LL + _ts.tv_nsec / 1000000LL);                    \
+            HILOG_ERROR(LOG_ENGINE, "HUKS_E_%" LOG_PUBLIC "u_%" LOG_PUBLIC "u:" fmt "\n", _ms, __LINE__, ##arg);    \
+        } while (0)
+        #define HKS_LOG_D(fmt, arg...) do {                                                                         \
+            struct timespec _ts;                                                                                    \
+            clock_gettime(CLOCK_REALTIME, &_ts);                                                                    \
+            uint32_t _ms = (uint32_t)((long long)_ts.tv_sec * 1000LL + _ts.tv_nsec / 1000000LL);                    \
+            HILOG_DEBUG(LOG_ENGINE, "HUKS_D_%" LOG_PUBLIC "u_%" LOG_PUBLIC "u:" fmt "\n", _ms, __LINE__, ##arg);    \
+        } while (0)
     #endif // L2_STANDARD
 
 #else // _HUKS_LOG_ENABLE_
