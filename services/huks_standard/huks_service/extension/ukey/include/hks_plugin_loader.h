@@ -24,32 +24,29 @@
 #include <atomic>
 #include <cstdint>
 
-#include "hks_lib_interface.h
+#include "hks_lib_interface.h"
 #include "hks_cpp_paramset.h"
 #include "hks_template.h"
 #include "singleton.h"
 #include "hks_type.h"
 #include "hks_plugin_def.h"
-#include "hks_service_ipc_serialization.h"
-#include "hks_permission_check.h"
-#include "hks_response.h"
 #include "hks_mem.h"
-#include "hks_extension_plugin_manager.h"
 #include "safe_map.h"
 #include "hks_funtion_types.h"
+#include "hks_provider_life_cycle_manager.h"
 
 #define PLUGIN_SO "libhuks_external_crypto_ext_core.z.so"
 
 namespace OHOS {
 namespace Security {
 namespace Huks {
-    class HuksPluginLoader : private OHOS::DelayedSingleton<HuksExtensionPluginManager>{
+    class HuksPluginLoader : private OHOS::DelayedSingleton<HuksPluginLoader>{
 public:
     std::unordered_map<PluginMethodEnum, void*> m_pluginProviderMap;
 
     int32_t Start(struct HksProcessInfo &info, const std::string& providerName, const CppParamSet& paramSet);
     int32_t Stop(struct HksProcessInfo &info, const std::string& providerName, const CppParamSet& paramSet);
-    static std::shared_ptr<HksProviderLifeCycleManager> GetInstanceWrapper();
+    static std::shared_ptr<HuksPluginLoader> GetInstanceWrapper();
     static void ReleaseInstance();
     
 private:
@@ -57,8 +54,8 @@ private:
     std::atomic<int> m_refCount{0};
     std::mutex libMutex;
 
-    int32_t LoadPlugins(); // TODO:参数根据生命周期模块的注册函数定义
-    int32_t UnLoadPlugins(); // TODO:定义
+    int32_t LoadPlugins(struct HksProcessInfo &info, const std::string& providerName, const CppParamSet& paramSet); // TODO:参数根据生命周期模块的注册函数定义
+    int32_t UnLoadPlugins(struct HksProcessInfo &info, const std::string& providerName, const CppParamSet& paramSet); // TODO:定义
     static std::string GetMethodByEnum(PluginMethodEnum methodEnum);
 };
 }
