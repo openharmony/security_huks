@@ -13,39 +13,39 @@
  * limitations under the License.
  */
 
-#include "hks_extension_plugin_manager.h"
+#include "hks_plugin_lifecycle_manager.h"
 #include "hks_plugin_loader.h"
 
 #include <vector>
 
 namespace OHOS::Security::Huks {
 
-std::shared_ptr<HuksExtensionPluginManager> HuksExtensionPluginManager::GetInstanceWrapper()
+std::shared_ptr<HuksPluginLoader> HuksPluginLoader::GetInstanceWrapper()
 {
-    return HuksExtensionPluginManager::GetInstance();
+    return HuksPluginLoader::GetInstance();
 }
 
-void HuksExtensionPluginManager::ReleaseInstance()
+void HuksPluginLoader::ReleaseInstance()
 {
-    return HuksExtensionPluginManager::DestroyInstance();
+    return HuksPluginLoader::DestroyInstance();
 }
 
-int32_t HuksExtensionPluginManager::Start(struct HksProcessInfo &info, const std::string& providerName,
+int32_t HuksPluginLoader::Start(struct HksProcessInfo &info, const std::string& providerName,
     const CppParamSet& paramSet) {
-    int32_t ret = LoadPlugins();
+    int32_t ret = LoadPlugins(info, providerName, paramSet);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "load plugins fail, ret = %{public}d", ret)
 
     return HKS_SUCCESS;
 }
 
-int32_t HuksExtensionPluginManager::Stop(struct HksProcessInfo &info, const std::string& providerName,
+int32_t HuksPluginLoader::Stop(struct HksProcessInfo &info, const std::string& providerName,
     const CppParamSet& paramSet) {
-    int32_t ret = UnLoadPlugins();
+    int32_t ret = UnLoadPlugins(info, providerName, paramSet);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "unload plugins fail, ret = %{public}d", ret)
     return HKS_SUCCESS;
 }
 
-int32_t HuksExtensionPluginManager::LoadPlugins(){
+int32_t HuksPluginLoader::LoadPlugins(struct HksProcessInfo &info, const std::string& providerName, const CppParamSet& paramSet){
     std::lock_guard<std::mutex> lock(libMutex);
     HKS_IF_TRUE_RETURN(m_pluginHandle != nullptr, HKS_SUCCESS) //或者换成重复打开的消息码
 
@@ -56,7 +56,7 @@ int32_t HuksExtensionPluginManager::LoadPlugins(){
     for (auto i = 0; i < static_cast<int>(PluginMethodEnum::COUNT); ++i) {
         std::string methodString = GetMethodByEnum(static_cast<PluginMethodEnum>(i));
         if (methodString.empty()) {
-            HKS_LOG_E("the entry %{public}d is not include", PLUGIN_SO)
+            HKS_LOG_E("the entry %{public}s is not include", PLUGIN_SO);
             dlclose(m_pluginHandle);
             m_pluginHandle = nullptr;
             m_pluginProviderMap.clear();
@@ -66,27 +66,28 @@ int32_t HuksExtensionPluginManager::LoadPlugins(){
         void* func = dlsym(m_pluginHandle, methodString.c_str());
         const char *dlsym_error = dlerror();
         if (dlsym_error != nullptr) {
-            HKS_LOG_E("failed to find entry %{public}d in dynamic link liberary, error is %{public}d",
-                methodString.c_str(), dlsym_error)
+            HKS_LOG_E("failed to find entry %{public}s in dynamic link liberary, error is %{public}s",
+                methodString.c_str(), dlsym_error);
             dlclose(m_pluginHandle);
-            m_pluginHandle = nullptr;
+            m_pluginHandle= nullptr;
             m_pluginProviderMap.clear();
             return HKS_ERROR_GET_FUNC_POINTER_FAIL;
         }
         m_pluginProviderMap.emplace(std::make_pair(static_cast<PluginMethodEnum>(i), func));
     }
 
-    HuksLibEntry::initProviderMap(m_pluginProviderMap);
     auto libEntry = HuksLibEntry::GetInstanceWrapper();
+    libEntry->initProviderMap(m_pluginProviderMap);
     
-    int32_t ret = libEntry.OnRegistProvider();
+    int32_t ret = libEntry->OnRegistProvider(info, providerName, paramSet);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_EXEC_FUNC_FAIL,
         "regist provider method in plugin laoder is fail")
 
     return HKS_SUCCESS;
 }
 
-int32_t HuksExtensionPluginManager::UnLoadPlugins() {
+int32_t HuksPluginLoader::UnLoadPlugins(struct HksProcessInfo &info, const std::string& providerName,
+    const CppParamSet& paramSet) {
     std::lock_guard<std::mutex> lock(libMutex);
     HKS_IF_TRUE_RETURN(m_pluginHandle == nullptr, HKS_SUCCESS) //或者换成重复释放的消息码
 
@@ -94,12 +95,12 @@ int32_t HuksExtensionPluginManager::UnLoadPlugins() {
     HKS_IF_TRUE_LOGE_RETURN(it == m_pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
         "unregist provider method enum not found in plugin provider map.")
     
-    HuksLibEntry::initProviderMap(m_pluginProviderMap);
+    // HuksLibEntry::initProviderMap(m_pluginProviderMap);
     auto libEntry = HuksLibEntry::GetInstanceWrapper();
     
-    int32_t ret = libEntry.OnUnRegistProvider();
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_EXEC_FUNC_FAIL,
-        "unregist provider method in plugin laoder is fail")
+    // int32_t ret = libEntry.OnUnRegistProvider();
+    // HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_EXEC_FUNC_FAIL,
+    //     "unregist provider method in plugin laoder is fail")
 
     m_pluginProviderMap.clear();
     dlclose(m_pluginHandle);
@@ -108,10 +109,10 @@ int32_t HuksExtensionPluginManager::UnLoadPlugins() {
     return HKS_SUCCESS;
 }
 
-std::string HuksExtensionPluginManager::GetMethodByEnum(PluginMethodEnum methodEnum) {
+std::string HuksPluginLoader::GetMethodByEnum(PluginMethodEnum methodEnum) {
     const auto& it = m_pluginMethodNameMap.find(methodEnum);
     HKS_IF_TRUE_RETURN(it != m_pluginMethodNameMap.end(), it->second)
-    HKS_LOG_E("enum = %{public}d can not find string", methodEnum)
+    HKS_LOG_E("enum = %{public}d can not find string", methodEnum);
     return "";
 }
 

@@ -15,6 +15,13 @@
 
 #ifndef HKS_PLUGIN_LIFECYCLE_MANAGER_H
 #define HKS_PLUGIN_LIFECYCLE_MANAGER_H
+
+// #if defined(BUILDING_DYNAMIC_LIB)
+//   #define DYNAMIC_LIB_API __attribute__((visibility("default")))
+// #else
+//   #define DYNAMIC_LIB_API
+// #endif
+
 #include <atomic>
 #include <string>
 #include <memory>
@@ -26,12 +33,13 @@
 #include "safe_map.h"
 #include "hks_template.h"
 
+
 namespace OHOS {
 namespace Security {
 namespace Huks {
 class HuksPluginLifeCycleMgr : private OHOS::DelayedSingleton<HuksPluginLifeCycleMgr>{
 public:
-    static std::shared_ptr<HksProviderLifeCycleManager> GetInstanceWrapper();
+    static std::shared_ptr<HuksPluginLifeCycleMgr> GetInstanceWrapper();
     static void ReleaseInstance();
     int32_t RegisterProvider(struct HksProcessInfo &info, const std::string &AbilityName,
     const CppParamSet& paramSet);
@@ -40,7 +48,7 @@ public:
 
 private:
     std::atomic<int> m_refCount{0};
-    OHOS::SafeSet<std::string> registerProvider;
+    //OHOS::SafeSet<std::string> registerProvider;
     void RecordProvider(const std::string &providerName);
 };
 }

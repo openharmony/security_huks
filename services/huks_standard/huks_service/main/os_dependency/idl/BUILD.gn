@@ -25,7 +25,10 @@ if (os_level == "standard") {
     part_name = "huks"
     public_configs = [ ":huks_config" ]
 
-    include_dirs = [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough" ]
+    include_dirs = [ 
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/include",
+    ]
 
     sources = [
       "ipc/hks_ipc_service.c",
@@ -33,6 +36,7 @@ if (os_level == "standard") {
       "ipc/hks_response.cpp",
       "ipc/hks_service_ipc_serialization.c",
       "ipc/hks_ipc_service_provider_adapter.cpp",     
+      "ipc/hks_ipc_service_provider.cpp",
     ]
 
     if (huks_enable_hdi_in_standard) {
@@ -48,6 +52,7 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
       "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/at_wrapper:libhuks_at_systemapi_wrap_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey:libhuks_external_crypto_ext_core",
     ]
 
     if (enable_bundle_framework) {
@@ -98,6 +103,7 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough",
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/sa_mgr",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/include",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/include",
     ]
     configs = [
       "//base/security/huks/frameworks/config/build:l1_small_common_config",
@@ -113,6 +119,7 @@ if (os_level == "standard") {
     deps = [
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_small_static",
       "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_small_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey:libhuks_external_crypto_ext_core",
     ]
 
     complete_static_lib = true

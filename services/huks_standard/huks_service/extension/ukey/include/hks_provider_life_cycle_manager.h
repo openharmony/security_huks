@@ -16,13 +16,14 @@
 #ifndef HKS_PROVIDER_LIFE_CYCLE_MANAGER_H
 #define HKS_PROVIDER_LIFE_CYCLE_MANAGER_H
 
-#include "hks_cpp_paramset.h"
-#include "hks_plugin_def.h"
-#include "singleton.h"
 #include <memory>
 #include <shared_mutex>
 #include <string>
 #include <unordered_map>
+
+#include "hks_cpp_paramset.h"
+#include "hks_plugin_def.h"
+#include "singleton.h"
 #include "safe_map.h"
 #include "iremote_object.h"
 #include "iremote_proxy.h"

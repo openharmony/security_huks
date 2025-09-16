@@ -1,6 +1,24 @@
+/*
+ * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "hks_ipc_service_provider.h"
+#include "hks_plugin_lifecycle_manager.h"
 
-
+namespace OHOS {
+namespace Security {
+namespace Huks {
 void HksIpcServiceProviderRegister(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob keyAlias = { 0, NULL }; //abilityName
@@ -42,7 +60,7 @@ void HksIpcServiceProviderRegister(const struct HksBlob *srcData, const uint8_t 
         }
         CppParamSet paramSet(inParamSet); 
         // TODO:转换时是否要进行安全检查，keyAlias可靠吗
-        ret = pluginManager.RegisterProvider(processInfo, std::string(reinterpret_cast<const char*>(keyAlias.data), keyAlias.size), paramSet); 
+        ret = pluginManager->RegisterProvider(processInfo, std::string(reinterpret_cast<const char*>(keyAlias.data), keyAlias.size), paramSet); 
 
     } while (0);
     HksSendResponse(context, ret, isNoneResponse ? NULL : &keyOut);
@@ -85,14 +103,14 @@ void HksIpcServiceProviderUnRegister(const struct HksBlob *srcData, const uint8_
         ret = HksCheckAcrossAccountsPermission(inParamSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
-        auto pluginManager = HuksExtensionPluginManager::GetInstanceWrapper();
+        auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
         if (pluginManager == nullptr) {
             HKS_LOG_E("Failed to get plugin manager instance.");
             ret = HKS_ERROR_NULL_POINTER;
             break;
         }
         CppParamSet paramSet(inParamSet); 
-        ret = pluginManager.UnRegisterProvider(processInfo, std::string(reinterpret_cast<const char*>(keyAlias.data), keyAlias.size), paramSet); 
+        ret = pluginManager->UnRegisterProvider(processInfo, std::string(reinterpret_cast<const char*>(keyAlias.data), keyAlias.size), paramSet); 
 
     } while (0);
     HksSendResponse(context, ret, isNoneResponse ? NULL : &keyOut);
@@ -105,3 +123,12 @@ void HksIpcServiceProviderUnRegister(const struct HksBlob *srcData, const uint8_
 void HksIpcServiceRegistLibFunction(int32_t funCode, void *fun) {
 
 }
+
+}
+}
+}
+
+
+
+
+

@@ -19,23 +19,26 @@
 #include <unordered_map>
 #include <string>
 #include <mutex>
+#include <vector>
 
 #include "singleton.h"
 #include "hks_template.h"
-#include "hks_error_code"
+#include "hks_error_code.h"
+#include "hks_funtion_types.h"
 
 namespace OHOS {
 namespace Security {
 namespace Huks {
-class HuksLibEntry : private OHOS::DelayedSingleton<HuksExtensionPluginManager> {
+class HuksLibEntry : private OHOS::DelayedSingleton<HuksLibEntry> {
 public:
     std::unordered_map<PluginMethodEnum, void*> pluginProviderMap;
-    static void initProviderMap(std::unordered_map<PluginMethodEnum, void*>& pluginProviderMap);
-    static std::shared_ptr<HksProviderLifeCycleManager> GetInstanceWrapper();
-    static void ReleaseInstance();
 
-    int32_t OnRegistProvider(); // TODO
-    int32_t OnUnRegistProvider();
+    void initProviderMap(std::unordered_map<PluginMethodEnum, void*>& pluginProviderMap);
+    static std::shared_ptr<HuksLibEntry> GetInstanceWrapper();
+    void ReleaseInstance();
+
+    int32_t OnRegistProvider(const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet); // TODO
+    int32_t OnUnRegistProvider(const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet);
     int32_t RegistLibFunction(int32_t funCode, void *fun); // TODO
 
     int32_t OnCreateRemoteIndex(const std::string &providerName, const CppParamSet& paramSet, std::string &outIndex);
@@ -43,18 +46,20 @@ public:
     int32_t OnFindRemoteKeyHandle(const std::string &index, std::string &keyIndex);
     int32_t OnCloseRemoteKeyHandle(const std::string &index, std::string &keyIndex);
 
-    int32_t OnSigned(const std::string &index, const CppParamSet& paramSet, vector<uint8_t> &outData);
-    int32_t OnAuthUkeyPin(const std::string &index, const vector<uint8_t> &pinData, bool outStatus, int32_t retryCnt);
+    int32_t OnSigned(const std::string &index, const CppParamSet& paramSet, std::vector<uint8_t> &outData);
+    int32_t OnAuthUkeyPin(const std::string &index, const std::vector<uint8_t> &pinData, bool outStatus, int32_t retryCnt);
     int32_t OnGetVerifyPinStatus(const std::string &index, int32_t &pinStatus);
     int32_t OnClearPinStatus(const std::string &index);
     
-    int32_t OnListProviders(vector<uint8_t> &providersOut);
-    int32_t OnFindProviderCertificate(const std::string &index, vector<uint8_t> &cetificatesOut); // 可能不需要
+    int32_t OnListProviders(std::vector<uint8_t> &providersOut);
+    int32_t OnFindProviderCertificate(const std::string &index, std::vector<uint8_t> &cetificatesOut); // 可能不需要
     int32_t OnListProviderAllCertificate(const std::string &providerName, std::string &cetificatesOut); // 这里证书会带上index
 
 private:
     std::mutex mapMutex_;
+
 };
+
 }
 }
 }

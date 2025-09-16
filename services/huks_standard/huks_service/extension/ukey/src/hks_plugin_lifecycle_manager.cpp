@@ -14,6 +14,7 @@
  */
 
 #include "hks_plugin_lifecycle_manager.h"
+#include "hks_plugin_loader.h"
 
 namespace OHOS {
 namespace Security {
@@ -28,13 +29,13 @@ void HuksPluginLifeCycleMgr::ReleaseInstance()
     return HuksPluginLifeCycleMgr::DestroyInstance();
 }
 
-int32_t HuksExtensionPluginManager::RegisterProvider(struct HksProcessInfo &info, const std::string& providerName,
+int32_t HuksPluginLifeCycleMgr::RegisterProvider(struct HksProcessInfo &info, const std::string& providerName,
     const CppParamSet& paramSet){
     int32_t ret;
     int preCount = m_refCount.fetch_add(1, std::memory_order_acq_rel);
     if (preCount == 0) {
-        auto pluginLoader = HuksPluginLoader::GetInstance();
-        ret = pluginLoader.Start(info, providerName, paramSet);
+        auto pluginLoader = HuksPluginLoader::GetInstanceWrapper();
+        ret = pluginLoader->Start(info, providerName, paramSet);
         if (ret != HKS_SUCCESS) {
             m_refCount.fetch_sub(1, std::memory_order_acq_rel);
             HKS_LOG_E("regist provider failed!");
@@ -45,13 +46,13 @@ int32_t HuksExtensionPluginManager::RegisterProvider(struct HksProcessInfo &info
     return HKS_SUCCESS;
 }
 
-int32_t HuksExtensionPluginManager::UnRegisterProvider(struct HksProcessInfo &info, const std::string& providerName,
+int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(struct HksProcessInfo &info, const std::string& providerName,
     const CppParamSet& paramSet) {
     int preCount = m_refCount.fetch_sub(1, std::memory_order_acq_rel);
-    HKS_IF_TRUE_RETURN_VOID(preCount != 1)
+    HKS_IF_TRUE_RETURN(preCount != 1, HKS_SUCCESS)
 
-    auto pluginLoader = HuksPluginLoader::GetInstance();
-    int32_t ret = pluginLoader.Stop(info, providerName, paramSet);
+    auto pluginLoader = HuksPluginLoader::GetInstanceWrapper();
+    int32_t ret = pluginLoader->Stop(info, providerName, paramSet);
     if (ret != HKS_SUCCESS) {
         m_refCount.fetch_add(1, std::memory_order_acq_rel);
         HKS_LOG_E("unregist provider failed!, ret = %{public}d", ret);
@@ -60,10 +61,10 @@ int32_t HuksExtensionPluginManager::UnRegisterProvider(struct HksProcessInfo &in
     return HKS_SUCCESS;
 }
 
-void HuksExtensionPluginManager::RecordProvider(const std::string &providerName) {
+void HuksPluginLifeCycleMgr::RecordProvider(const std::string &providerName) {
     //TODO:需要区分是否为重复注册的provider吗
-    auto ret = registerProvider.Add(providerName);
-    HKS_IF_TRUE_LOGI_RETURN_VOID(!ret, "repete record provider")
+    //auto ret = registerProvider.Add(providerName);
+    //HKS_IF_TRUE_LOGI_RETURN_VOID(!ret, "repete record provider")
 }
 
 }
