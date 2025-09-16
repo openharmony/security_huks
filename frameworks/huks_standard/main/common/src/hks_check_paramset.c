@@ -24,7 +24,6 @@
 
 #ifdef L2_STANDARD
 #include "hks_openssl_dh.h"
-#include "hks_openssl_rsa.h"
 #endif
 
 #include <stddef.h>
@@ -963,15 +962,9 @@ int32_t HksCoreCheckImportKeyParams(const struct HksBlob *keyAlias, const struct
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check import key invalid")
     }
 #ifdef L2_STANDARD
-    if (ret == HKS_SUCCESS) {
-        if (importKeyTypeParam->uint32Param != HKS_KEY_TYPE_PRIVATE_KEY) {
-            if (alg == HKS_ALG_DH) {
-                ret = HksOpensslCheckDhKey(key, (enum HksImportKeyType)importKeyTypeParam->uint32Param);
-            } else if (alg == HKS_ALG_RSA) {
-                ret = HksOpensslCheckRsaKey(key);
-            }
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "openssl check import key invalid")
-        }
+    if (ret == HKS_SUCCESS && importKeyTypeParam->uint32Param != HKS_KEY_TYPE_PRIVATE_KEY && alg == HKS_ALG_DH) {
+        ret = HksOpensslCheckDhKey(key, (enum HksImportKeyType)importKeyTypeParam->uint32Param);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "openssl check import dh key invalid")
     }
 #endif
     HKS_IF_NOT_TRUE_RETURN(needCheckLater, ret);
