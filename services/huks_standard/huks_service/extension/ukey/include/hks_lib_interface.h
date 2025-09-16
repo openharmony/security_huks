@@ -20,6 +20,7 @@
 #include <string>
 #include <mutex>
 #include <vector>
+#include <memory>
 
 #include "singleton.h"
 #include "hks_template.h"
@@ -35,7 +36,7 @@ public:
 
     void initProviderMap(std::unordered_map<PluginMethodEnum, void*>& pluginProviderMap);
     static std::shared_ptr<HuksLibEntry> GetInstanceWrapper();
-    void ReleaseInstance();
+    static void ReleaseInstance();
 
     int32_t OnRegistProvider(const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet); // TODO
     int32_t OnUnRegistProvider(const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet);

@@ -16,9 +16,6 @@
 #include "hks_ipc_service_provider.h"
 #include "hks_plugin_lifecycle_manager.h"
 
-namespace OHOS {
-namespace Security {
-namespace Huks {
 void HksIpcServiceProviderRegister(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob keyAlias = { 0, NULL }; //abilityName
@@ -52,7 +49,7 @@ void HksIpcServiceProviderRegister(const struct HksBlob *srcData, const uint8_t 
         ret = HksCheckAcrossAccountsPermission(inParamSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
-        auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+        auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
         if (pluginManager == nullptr) {
             HKS_LOG_E("Failed to get plugin manager instance.");
             ret = HKS_ERROR_NULL_POINTER;
@@ -103,7 +100,7 @@ void HksIpcServiceProviderUnRegister(const struct HksBlob *srcData, const uint8_
         ret = HksCheckAcrossAccountsPermission(inParamSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
-        auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+        auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
         if (pluginManager == nullptr) {
             HKS_LOG_E("Failed to get plugin manager instance.");
             ret = HKS_ERROR_NULL_POINTER;
@@ -122,10 +119,6 @@ void HksIpcServiceProviderUnRegister(const struct HksBlob *srcData, const uint8_
 
 void HksIpcServiceRegistLibFunction(int32_t funCode, void *fun) {
 
-}
-
-}
-}
 }
 
 
