@@ -1,12 +1,12 @@
 #include "hks_ipc_service_provider_adapter.h"
-// #include "hks_ipc_service_provider.h"
+#include "hks_ipc_service_provider.h"
 #include <string>
 #include <vector>
 
 // 适配器模式
 void HksIpcServiceProviderRegisterAdapter(const struct HksBlob *srcData, const uint8_t *context)
 {
-    // HksIpcServiceProviderRegister(srcData, context);
+    HksIpcServiceProviderRegister(srcData, context);
     return;
 }
 
