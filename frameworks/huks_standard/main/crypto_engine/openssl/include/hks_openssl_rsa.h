@@ -53,7 +53,6 @@ int32_t HksOpensslRsaVerify(const struct HksBlob *key, const struct HksUsageSpec
     const struct HksBlob *message, const struct HksBlob *signature);
 #endif /* HKS_SUPPORT_RSA_SIGN_VERIFY */
 
-int32_t HksOpensslCheckRsaKey(const struct HksBlob *key);
 #endif /* HKS_SUPPORT_RSA_C */
 
 #ifdef __cplusplus

@@ -598,7 +598,7 @@ static int32_t HksCheckNeedCachePadding(uint32_t alg, const struct HuksKeyNode *
     }
 
     uint32_t padding;
-    uint32_t ret = HksGetParamPadding(keyNode, &padding);
+    int32_t ret = HksGetParamPadding(keyNode, &padding);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_PADDING_FAIL,
         "get param get 0x%" LOG_PUBLIC "x failed", HKS_TAG_PADDING)
     if (padding == HKS_PADDING_ISO_IEC_9796_2) {
