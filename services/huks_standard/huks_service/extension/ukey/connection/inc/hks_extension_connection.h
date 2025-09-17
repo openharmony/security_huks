@@ -21,7 +21,6 @@
 #include <securec.h>
 
 #include "ability_connect_callback_stub.h"
-#include "singleton.h"
 #include "iremote_object.h"
  #include "hks_log.h"
  #include "hks_template.h"
@@ -34,9 +33,6 @@ namespace Huks {
 
 class ExtensionConnection : public OHOS::AAFwk::AbilityConnectionStub {
 public:
-    static std::shared_ptr<ExtensionConnection> GetInstanceWrapper();
-    static void ReleaseInstance();
-
     int32_t OnConnection(const Want &want);
     void OnAbilityConnectDone(const AppExecFwk::ElementName& element,
         const sptr<IRemoteObject>& remoteObject, int resultCode) override;

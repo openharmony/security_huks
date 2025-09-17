@@ -23,16 +23,6 @@ namespace Huks {
 constexpr int WAIT_TIME = 3;
 constexpr int32_t DEFAULT_USER_ID = -1;
 
-std::shared_ptr<ExtensionConnection> ExtensionConnection::GetInstanceWrapper()
-{
-    return ExtensionConnection::GetInstance();
-}
-
-void ExtensionConnection::ReleaseInstance()
-{
-    ExtensionConnection::DestroyInstance();
-}
-
 void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementName& element,
     const sptr<IRemoteObject>& remoteObject, int resultCode) {
     HKS_IF_TRUE_LOGE_RETURN(remoteObject == nullptr, HKS_ERROR_NULL_POINTER, "remoteObject is nullptr")

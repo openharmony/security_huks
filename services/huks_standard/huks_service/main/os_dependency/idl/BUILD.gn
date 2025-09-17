@@ -27,6 +27,7 @@ if (os_level == "standard") {
 
     include_dirs = [ 
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough",
+      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger/inc",
     ]
 
     sources = [
@@ -51,7 +52,7 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
       "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/at_wrapper:libhuks_at_systemapi_wrap_static",
-      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static"
+      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
     ]
 
     if (enable_bundle_framework) {
