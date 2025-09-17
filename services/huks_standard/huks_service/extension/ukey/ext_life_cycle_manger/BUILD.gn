@@ -14,14 +14,8 @@
 import("//base/security/huks/build/config.gni")
 import("//build/ohos.gni")
 
-config("huks_ext_plugin_manager_config") {
-  include_dirs = [
-    "inc",
-  ]
-}
-
 if (os_level == "standard") {
-  ohos_static_library("libhuks_ukey_plugin_extesnion_static") {
+  ohos_static_library("libhuks_provider_life_cycle_manager_static") {
     subsystem_name = "security"
     part_name = "huks"
     # version_script = "libhuks_external_crypto_ext_core.map"
@@ -32,11 +26,9 @@ if (os_level == "standard") {
     include_dirs = [
       "inc",
     ]
-    public_configs = [ ":huks_ext_plugin_manager_config" ]
+
     sources = [
-      "src/hks_plugin_lifecycle_manager.cpp",
-      "src/hks_plugin_loader.cpp",
-      "src/hks_lib_interface.cpp",
+      "src/hks_provider_life_cycle_manager.cpp",
     ]
 
     public_deps = [
@@ -44,7 +36,7 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
     ]
-
+    complete_static_lib = true
     cflags = []
 
     branch_protector_ret = "pac_ret"
@@ -57,6 +49,7 @@ if (os_level == "standard") {
       boundary_sanitize = true
       ubsan = true
     }
+
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",

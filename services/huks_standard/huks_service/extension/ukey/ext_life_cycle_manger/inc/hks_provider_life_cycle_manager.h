@@ -33,19 +33,28 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
+
+class ProviderInfo {
+public:
+    std::string m_providerName{};
+    std::string m_abilityName{};
+    std::string m_bundleName{};
+};
+
 class HksProviderLifeCycleManager : private OHOS::DelayedSingleton<HksProviderLifeCycleManager> {
 public:
     static std::shared_ptr<HksProviderLifeCycleManager> GetInstanceWrapper();
     static void ReleaseInstance();
-    int32_t OnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName,
-        [[maybe_unused]] const CppParamSet &paramSet);
-    int32_t OnUnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName,
-        [[maybe_unused]] const CppParamSet &paramSet);
-    OHOS::sptr<IRemoteObject> GetExtensionProxy(const std::string &providerName,
-        [[maybe_unused]] const HksProcessInfo &processInfo);
+    int32_t OnRegisterProvider(const HksProcessInfo &processInfo, const std::string &AbilityName,
+        const CppParamSet &paramSet);
+    int32_t OnUnRegisterProvider(const HksProcessInfo &processInfo, const std::string &AbilityName,
+        const CppParamSet &paramSet);
+    sptr<IRemoteObject> GetExtensionProxy(const std::string &providerInfo);
 private:
     // ProviderName + userId + bundleName
     OHOS::SafeMap<std::string, OHOS::sptr<IRemoteObject>> m_providerMap;
+    int32_t GetProviderInfo(const HksProcessInfo &processInfo, const std::string &providerName,
+        const CppParamSet &paramSet, ProviderInfo &providerInfo);
 };
 }
 }

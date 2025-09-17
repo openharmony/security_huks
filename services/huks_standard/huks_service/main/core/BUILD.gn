@@ -51,9 +51,9 @@ if (os_level == "standard") {
       "src/hks_client_service_common.c",
       "src/hks_client_service_util.c",
       "src/hks_session_manager.c",
-      "ukey_plugin_manager/src/hks_plugin_lifecycle_manager.cpp",
-      "ukey_plugin_manager/src/hks_plugin_loader.cpp",
-      "ukey_plugin_manager/src/hks_lib_interface.cpp",
+      # "ukey_plugin_manager/src/hks_plugin_lifecycle_manager.cpp",
+      # "ukey_plugin_manager/src/hks_plugin_loader.cpp",
+      # "ukey_plugin_manager/src/hks_lib_interface.cpp",
     ]
 
     defines = [ "HKS_ENABLE_CLEAN_FILE" ]
