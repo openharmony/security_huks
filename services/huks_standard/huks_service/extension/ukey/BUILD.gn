@@ -31,9 +31,7 @@ if (os_level == "standard") {
       "src/hks_provider_life_cycle_manager.cpp",
       "src/hks_remote_handle_manger.cpp",
       "src/hks_json_wrapper.cpp",
-      "src/hks_plugin_lifecycle_manager.cpp",
-      "src/hks_plugin_loader.cpp",
-      "src/hks_lib_interface.cpp",
+      "src/hks_extension_connection.cpp",
     ]
 
     deps = [

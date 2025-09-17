@@ -20,26 +20,13 @@ void HksIpcServiceProviderRegister(const struct HksBlob *srcData, const uint8_t 
 {
     struct HksBlob keyAlias = { 0, NULL }; //abilityName
     struct HksParamSet *inParamSet = NULL;
-    struct HksBlob keyOut = { 0, NULL };
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     int32_t ret;
-    bool isNoneResponse = false;
 
     do {
         // 解析参数
-        ret = HksGenerateKeyUnpack(srcData, &keyAlias, &inParamSet, &keyOut);
+        ret = HksDeleteKeyUnpack(srcData, &keyAlias, &inParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGenerateKeyUnpack Ipc fail")
-        // keyOut.data可能为空，比如生成非对称密钥，私钥不暴露
-        if (keyOut.data == NULL) {
-            isNoneResponse = true;
-            keyOut.data = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
-            if (keyOut.data == NULL) {
-                HKS_LOG_E("malloc fail.");
-                ret = HKS_ERROR_MALLOC_FAIL;
-                break;
-            }
-            keyOut.size = MAX_KEY_SIZE;
-        }
 
         // 获取调用方身份信息
         ret = HksGetProcessInfoForIPC(context, &processInfo);
@@ -56,41 +43,26 @@ void HksIpcServiceProviderRegister(const struct HksBlob *srcData, const uint8_t 
             break;
         }
         CppParamSet paramSet(inParamSet); 
-        // TODO:转换时是否要进行安全检查，keyAlias可靠吗
         ret = pluginManager->RegisterProvider(processInfo, std::string(reinterpret_cast<const char*>(keyAlias.data), keyAlias.size), paramSet); 
 
     } while (0);
-    HksSendResponse(context, ret, isNoneResponse ? NULL : &keyOut);
+    HksSendResponse(context, ret, nullptr);
 
-    HKS_FREE_BLOB(keyOut);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
 }
 
 void HksIpcServiceProviderUnRegister(const struct HksBlob *srcData, const uint8_t *context)
 {
-    struct HksBlob keyAlias = { 0, NULL }; //abilityName
+    struct HksBlob keyAlias = { 0, NULL };
     struct HksParamSet *inParamSet = NULL;
-    struct HksBlob keyOut = { 0, NULL };
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     int32_t ret;
-    bool isNoneResponse = false;
 
     do {
         // 解析参数
-        ret = HksGenerateKeyUnpack(srcData, &keyAlias, &inParamSet, &keyOut);
+        ret = HksDeleteKeyUnpack(srcData, &keyAlias, &inParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGenerateKeyUnpack Ipc fail")
-        // keyOut.data可能为空，比如生成非对称密钥，私钥不暴露
-        if (keyOut.data == NULL) {
-            isNoneResponse = true;
-            keyOut.data = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
-            if (keyOut.data == NULL) {
-                HKS_LOG_E("malloc fail.");
-                ret = HKS_ERROR_MALLOC_FAIL;
-                break;
-            }
-            keyOut.size = MAX_KEY_SIZE;
-        }
 
         // 获取调用方身份信息
         ret = HksGetProcessInfoForIPC(context, &processInfo);
@@ -106,18 +78,63 @@ void HksIpcServiceProviderUnRegister(const struct HksBlob *srcData, const uint8_
             ret = HKS_ERROR_NULL_POINTER;
             break;
         }
+
         CppParamSet paramSet(inParamSet); 
         ret = pluginManager->UnRegisterProvider(processInfo, std::string(reinterpret_cast<const char*>(keyAlias.data), keyAlias.size), paramSet); 
 
     } while (0);
-    HksSendResponse(context, ret, isNoneResponse ? NULL : &keyOut);
+    HksSendResponse(context, ret, nullptr);
 
-    HKS_FREE_BLOB(keyOut);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
 }
 
 void HksIpcServiceRegistLibFunction(int32_t funCode, void *fun) {
+
+    
+}
+
+void HksIpcServiceOnCreateRemoteIndex(const std::string &providerName, const CppParamSet& paramSet, std::string &outIndex) {
+
+}
+
+void HksIpcServiceOnCreateRemoteKeyHandle(const std::string &index) {
+
+}
+
+void HksIpcServiceOnFindRemoteKeyHandle(const std::string &index, std::string &keyIndex) {
+
+}
+
+void HksIpcServiceOnCloseRemoteKeyHandle(const std::string &index, std::string &keyIndex) {
+
+}
+
+void HksIpcServiceOnSigned(const std::string &index, const CppParamSet& paramSet, std::vector<uint8_t> &outData) {
+
+}
+
+void HksIpcServiceOnAuthUkeyPin(const std::string &index, const std::vector<uint8_t> &pinData, bool outStatus, int32_t retryCnt) {
+
+}
+
+void HksIpcServiceOnGetVerifyPinStatus(const std::string &index, int32_t &pinStatus) {
+
+}
+
+void HksIpcServiceOnClearPinStatus(const std::string &index) {
+
+}
+    
+void HksIpcServiceOnListProviders(std::vector<uint8_t> &providersOut) {
+
+}
+
+void HksIpcServiceOnFindProviderCertificate(const std::string &index, std::vector<uint8_t> &cetificatesOut) {
+
+}
+
+void HksIpcServiceOnListProviderAllCertificate(const std::string &providerName, std::string &cetificatesOut) {
 
 }
 
