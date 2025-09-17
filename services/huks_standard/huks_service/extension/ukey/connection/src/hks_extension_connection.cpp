@@ -23,12 +23,17 @@ namespace Huks {
 constexpr int WAIT_TIME = 3;
 constexpr int32_t DEFAULT_USER_ID = -1;
 
-std::shared_ptr<HksProviderLifeCycleManager> HksProviderLifeCycleManager::GetInstanceWrapper()
+std::shared_ptr<ExtensionConnection> ExtensionConnection::GetInstanceWrapper()
 {
-    return HksProviderLifeCycleManager::GetInstance();
+    return ExtensionConnection::GetInstance();
 }
 
-void ExtensionConnection::OnAbilityConnectDone(const AppExecFwk::ElementName& element,
+void ExtensionConnection::ReleaseInstance()
+{
+    ExtensionConnection::DestroyInstance();
+}
+
+void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementName& element,
     const sptr<IRemoteObject>& remoteObject, int resultCode) {
     HKS_IF_TRUE_LOGE_RETURN(remoteObject == nullptr, HKS_ERROR_NULL_POINTER, "remoteObject is nullptr")
 
@@ -43,7 +48,7 @@ void ExtensionConnection::OnAbilityConnectDone(const AppExecFwk::ElementName& el
     proxyConv_.notify_all();
 }
 
-int32_t ExtensionConnection::OnConnection(const Want &want) {
+int32_t ExtensionConnection::OnConnection(const OHOS::AppExecFwk::Want &want) {
     int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, this, DEFAULT_USER_ID);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_FUNC_FAIL, "fail to connect ability by AbilityManagerClient")
 
@@ -118,10 +123,10 @@ void ExtensionConnection::OnRemoteDied(const wptr<IRemoteObject> &remote) {
     std::unique_lock<std::mutex> lock(proxyMutex_);
     HKS_LOG_E("OnRemoteDied from ExtensionConnection")
     // TODO: 冗余代码
-    // auto object = remote.promote();
-    // if (object) {
-    //     object = nullptr;
-    // }
+    auto object = remote.promote();
+    if (object) {
+        object = nullptr;
+    }
     isConnected_.store(false);
     isReady = false;
     if (extConnectProxy) {

@@ -20,6 +20,7 @@
 #include <shared_mutex>
 #include <string>
 #include <unordered_map>
+#include <securec.h>
 
 #include "hks_cpp_paramset.h"
 #include "hks_plugin_def.h"

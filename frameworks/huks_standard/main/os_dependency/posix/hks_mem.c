@@ -48,7 +48,8 @@ int32_t HksMemCmp(const void *ptr1, const void *ptr2, uint32_t size)
     return memcmp(ptr1, ptr2, size);
 }
 
-void HksFreeImpl(void *addr)
+void 
+HksFreeImpl(void *addr)
 {
     if (addr == NULL) {
         return;
