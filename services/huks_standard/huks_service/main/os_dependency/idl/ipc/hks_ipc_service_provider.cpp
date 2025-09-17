@@ -138,49 +138,6 @@ void HksIpcServiceOnListProviderAllCertificate(const std::string &providerName, 
 
 }
 
-void HksIpcServiceOnCreateRemoteIndex(const std::string &providerName, const CppParamSet& paramSet, std::string &outIndex) {
-
-}
-
-void HksIpcServiceOnCreateRemoteKeyHandle(const std::string &index) {
-
-}
-
-void HksIpcServiceOnFindRemoteKeyHandle(const std::string &index, std::string &keyIndex) {
-
-}
-
-void HksIpcServiceOnCloseRemoteKeyHandle(const std::string &index, std::string &keyIndex) {
-
-}
-
-void HksIpcServiceOnSigned(const std::string &index, const CppParamSet& paramSet, std::vector<uint8_t> &outData) {
-
-}
-
-void HksIpcServiceOnAuthUkeyPin(const std::string &index, const std::vector<uint8_t> &pinData, bool outStatus, int32_t retryCnt) {
-
-}
-
-void HksIpcServiceOnGetVerifyPinStatus(const std::string &index, int32_t &pinStatus) {
-
-}
-
-void HksIpcServiceOnClearPinStatus(const std::string &index) {
-
-}
-    
-void HksIpcServiceOnListProviders(std::vector<uint8_t> &providersOut) {
-
-}
-
-void HksIpcServiceOnFindProviderCertificate(const std::string &index, std::vector<uint8_t> &cetificatesOut) {
-
-}
-
-void HksIpcServiceOnListProviderAllCertificate(const std::string &providerName, std::string &cetificatesOut) {
-
-}
 
 
 

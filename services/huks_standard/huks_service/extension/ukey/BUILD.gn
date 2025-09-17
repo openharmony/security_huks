@@ -23,25 +23,11 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]
 
-    include_dirs = [
-      "include",
-    ]
-
-    sources = [
-      "src/hks_provider_life_cycle_manager.cpp",
-      "src/hks_remote_handle_manger.cpp",
-      "src/hks_json_wrapper.cpp",
-      "src/hks_extension_connection.cpp",
-    ]
-
     deps = [
-      "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
-      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
-      "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger:libhuks_provider_life_cycle_manager_static"
     ]
 
-    cflags = [
-    ]
+    cflags = []
 
     branch_protector_ret = "pac_ret"
 

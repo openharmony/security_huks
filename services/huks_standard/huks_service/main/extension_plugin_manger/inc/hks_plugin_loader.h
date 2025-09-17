@@ -33,7 +33,6 @@
 #include "hks_mem.h"
 #include "safe_map.h"
 #include "hks_funtion_types.h"
-#include "hks_provider_life_cycle_manager.h"
 
 #define PLUGIN_SO "libhuks_external_crypto_ext_core.z.so"
 
