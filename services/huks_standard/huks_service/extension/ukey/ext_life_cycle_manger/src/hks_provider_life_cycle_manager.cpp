@@ -15,9 +15,20 @@
 
 #include "hks_provider_life_cycle_manager.h"
 //  #include "hks_extension_connection.h"
+#include "if_system_ability_manager.h"
+#include "bundle_mgr_client.h"
+#include "bundle_mgr_interface.h"
+#include "bundle_info.h"
+#include "system_ability_definition.h"
+#include <iservice_registry.h>
 #include "hks_error_code.h"
 #include "hks_log.h"
+#include "hks_template.h"
+#include "iremote_broker.h"
+#include "iremote_object.h"
+#include "refbase.h"
 #include <memory>
+#include <string>
 
 namespace OHOS::Security::Huks {
 
@@ -74,6 +85,20 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
 int32_t HksProviderLifeCycleManager::GetProviderInfo(const HksProcessInfo &processInfo, const std::string &providerName,
     const CppParamSet &paramSet, ProviderInfo &providerInfo)
 {
+    sptr<ISystemAbilityManager> saMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    HKS_IF_NULL_LOGE_RETURN(saMgr, HKS_ERROR_NULL_POINTER, "GetSystemAbilityManager failed")
+
+    sptr<IRemoteObject> remoteObj = saMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    HKS_IF_NULL_LOGE_RETURN(remoteObj, HKS_ERROR_NULL_POINTER, "GetSystemAbility failed")
+
+    auto bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(remoteObj);
+    HKS_IF_NULL_LOGE_RETURN(bundleMgrProxy, HKS_ERROR_NULL_POINTER, "iface_cast IBundleMgr failed")
+
+    auto bundleRet = bundleMgrProxy->GetBundleNameForUid(processInfo.uidInt, providerInfo.m_bundleName);
+    HKS_IF_TRUE_LOGE_RETURN(bundleRet != ERR_OK, HKS_ERROR_BAD_STATE, "GetBundleNameForUid failed")
+
+    providerInfo.m_providerName = providerName;
+    // TODO: 需要从paramset中获取abilityName
     return HKS_SUCCESS;
 }
 
