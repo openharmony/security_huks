@@ -74,7 +74,7 @@ HWTEST_F(HksGetErrorMsgTest, HksGetErrorMsgTest001, TestSize.Level0)
 HWTEST_F(HksGetErrorMsgTest, HksGetErrorMsgTest002, TestSize.Level0)
 {
     HksClearThreadErrorMsg();
-    static std::string info = std::string(__func__) + "[" + std::to_string(__LINE__ + 3) + "]: ";
+    static std::string info = std::string(__func__) + ": ";
     std::string generateStr = std::string(10, 'a');
     const char* testStr = generateStr.c_str();
     HKS_LOG_E_IMPORTANT("%" LOG_PUBLIC "s", testStr);
@@ -89,7 +89,7 @@ HWTEST_F(HksGetErrorMsgTest, HksGetErrorMsgTest002, TestSize.Level0)
 HWTEST_F(HksGetErrorMsgTest, HksGetErrorMsgTest003, TestSize.Level0)
 {
     HksClearThreadErrorMsg();
-    static std::string info = std::string(__func__) + "[" + std::to_string(__LINE__ + 3) + "]: ";
+    static std::string info = std::string(__func__) + ": ";
     std::string generateStr = std::string(MAX_ERROR_MESSAGE_LEN - info.length() - 1, 'a');
     const char* testStr = generateStr.c_str();
     HKS_LOG_E_IMPORTANT("%" LOG_PUBLIC "s", testStr);
@@ -104,7 +104,7 @@ HWTEST_F(HksGetErrorMsgTest, HksGetErrorMsgTest003, TestSize.Level0)
 HWTEST_F(HksGetErrorMsgTest, HksGetErrorMsgTest004, TestSize.Level0)
 {
     HksClearThreadErrorMsg();
-    static std::string info = std::string(__func__) + "[" + std::to_string(__LINE__ + 3) + "]: ";
+    static std::string info = std::string(__func__) + ": ";
     std::string generateStr = std::string(MAX_ERROR_MESSAGE_LEN - info.length(), 'a');
     const char* testStr = generateStr.c_str();
     HKS_LOG_E_IMPORTANT("%" LOG_PUBLIC "s", testStr);
@@ -119,7 +119,7 @@ HWTEST_F(HksGetErrorMsgTest, HksGetErrorMsgTest004, TestSize.Level0)
 HWTEST_F(HksGetErrorMsgTest, HksGetErrorMsgTest005, TestSize.Level0)
 {
     HksClearThreadErrorMsg();
-    static std::string info = std::string(__func__) + "[" + std::to_string(__LINE__ + 3) + "]: ";
+    static std::string info = std::string(__func__) + ": ";
     std::string generateStr = std::string(MAX_ERROR_MESSAGE_LEN - info.length() - 1 - 476, 'a');
     const char* testStr = generateStr.c_str();
     HKS_LOG_E_IMPORTANT( \
@@ -141,7 +141,7 @@ HWTEST_F(HksGetErrorMsgTest, HksGetErrorMsgTest005, TestSize.Level0)
 HWTEST_F(HksGetErrorMsgTest, HksGetErrorMsgTest006, TestSize.Level0)
 {
     HksClearThreadErrorMsg();
-    static std::string info = std::string(__func__) + "[" + std::to_string(__LINE__ + 3) + "]: ";
+    static std::string info = std::string(__func__) + ": ";
     std::string generateStr = std::string(MAX_ERROR_MESSAGE_LEN - info.length() - 476, 'a');
     const char* testStr = generateStr.c_str();
     HKS_LOG_E_IMPORTANT( \
@@ -163,8 +163,8 @@ HWTEST_F(HksGetErrorMsgTest, HksGetErrorMsgTest006, TestSize.Level0)
 HWTEST_F(HksGetErrorMsgTest, HksGetErrorMsgTest007, TestSize.Level0)
 {
     HksClearThreadErrorMsg();
-    static std::string info = std::string(__func__) + "[" + std::to_string(__LINE__ + 3) + "]: ";
-    std::string generateStr = std::string(MAX_ERROR_MESSAGE_LEN - info.length() - 1 - 477, 'a');
+    static std::string info = std::string(__func__) + ": ";
+    std::string generateStr = std::string(MAX_ERROR_MESSAGE_LEN - info.length() - 477, 'a');
     const char* testStr = generateStr.c_str();
     HKS_LOG_E_IMPORTANT( \
         "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" "1234567890" \
