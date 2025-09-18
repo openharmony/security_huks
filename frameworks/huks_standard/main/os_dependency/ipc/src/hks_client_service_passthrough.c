@@ -92,24 +92,6 @@ int32_t HksClientUnregisterProvider(const struct HksBlob *name, const struct Hks
     return HksServiceUnregisterProvider(&processInfo, name, paramSetIn);
 }
 
-int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut)
-{
-    char *processName = NULL;
-    char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
-        "get process info failed")
-
-    struct HksProcessInfo processInfo = {
-        { strlen(userId), (uint8_t *)userId },
-        { strlen(processName), (uint8_t *)processName },
-        0,
-        0,
-        0,
-        0
-    };
-    return HksServiceAuthUkeyPin(&processInfo, index, paramSetIn, paramSetOut);
-}
-
 int32_t HksClientOpenRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
 {
     char *processName = NULL;
@@ -126,6 +108,24 @@ int32_t HksClientOpenRemoteHandle(const struct HksBlob *index, const struct HksP
         0
     };
     return HksServiceOpenRemoteHandle(&processInfo, index, paramSetIn, remoteHandleOut);
+}
+
+int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut)
+{
+    char *processName = NULL;
+    char *userId = NULL;
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+        "get process info failed")
+
+    struct HksProcessInfo processInfo = {
+        { strlen(userId), (uint8_t *)userId },
+        { strlen(processName), (uint8_t *)processName },
+        0,
+        0,
+        0,
+        0
+    };
+    return HksServiceAuthUkeyPin(&processInfo, index, paramSetIn, paramSetOut);
 }
 
 int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut)
@@ -164,7 +164,7 @@ int32_t HksClientGetRemoteHandle(const struct HksBlob *index, const struct HksPa
     return HksServiceGetRemoteHandle(&processInfo, index, paramSetIn, remoteHandleOut);
 }
 
-int32_t HksClientCloseRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
+int32_t HksClientCloseRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn)
 {
     char *processName = NULL;
     char *userId = NULL;
@@ -179,7 +179,7 @@ int32_t HksClientCloseRemoteHandle(const struct HksBlob *index, const struct Hks
         0,
         0
     };
-    return HksServiceCloseRemoteHandle(&processInfo, index, paramSetIn, remoteHandleOut);
+    return HksServiceCloseRemoteHandle(&processInfo, index, paramSetIn);
 }
 
 int32_t HksClientGetPinAuthState(const struct HksBlob *index, uint32_t *stateOut)

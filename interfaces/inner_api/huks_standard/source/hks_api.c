@@ -66,6 +66,7 @@ HKS_API_EXPORT int32_t HksRegisterProvider(const struct HksBlob *name, const str
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter RegisterProvider");
+    HKS_LOG_E("hks_api.c ======== enter RegisterProvider");
     /* generate persistent keys */
     if ((paramSetIn == NULL) || (name == NULL)) {
         return HKS_ERROR_NULL_POINTER;
@@ -122,7 +123,7 @@ HKS_API_EXPORT int32_t HksAuthUkeyPinWithRetry(const struct HksBlob *index, cons
     return 0;
 }
 
-
+// NAPI接口
 HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut)
 {
 #ifdef L2_STANDARD
@@ -175,14 +176,14 @@ HKS_API_EXPORT int32_t HksGetRemoteHandle(const struct HksBlob *index, const str
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
-HKS_API_EXPORT int32_t HksCloseRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
+HKS_API_EXPORT int32_t HksCloseRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn)
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter CloseRemoteHandle");
-    if ((index == NULL) || (paramSetIn == NULL) || (remoteHandleOut == NULL)) {
+    if ((index == NULL) || (paramSetIn == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
-    int32_t ret = HksClientCloseRemoteHandle(index, paramSetIn, remoteHandleOut);
+    int32_t ret = HksClientCloseRemoteHandle(index, paramSetIn);
     HKS_IF_NOT_SUCC_LOGE(ret, "leave CloseRemoteHandle, result = %" LOG_PUBLIC "d", ret);
     return ret;
 #else

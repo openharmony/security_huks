@@ -145,4 +145,88 @@ HWTEST_F(HksUKeyTest, HksRegisterProviderWithoutNameTest, TestSize.Level0)
     HKS_TEST_LOG_I("[%u]TestRegisterProvider, Testcase_RegisterProvider_[%03u] pass!", times, testParams.testId);
     ASSERT_TRUE(ret == HKS_ERROR_NULL_POINTER);
 }
+
+
+HWTEST_F(HksUKeyTest, HksUnregisterProvider, TestSize.Level0)
+{
+    uint32_t times = 1;
+    uint32_t index = 0;
+    const HksTestGenKeyParams &testParams = g_testGenKeyParams[index];
+    struct HksBlob *name = NULL;
+    int32_t ret = ConstructTestBlob(&name, testParams);
+    EXPECT_TRUE(ret == 0);
+
+    struct HksParamSet *paramSet = NULL;
+    ret = ConstructTestParamSet(&paramSet, testParams);
+    EXPECT_TRUE(ret == 0);
+
+    ret = HksUnregisterProvider(name, paramSet);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("failed, ret[%u] = %d", testParams.testId, ret);
+    }
+    EXPECT_TRUE(ret == 0);
+
+    TestFreeBlob(&name);
+    HksFreeParamSet(&paramSet);
+    HKS_TEST_LOG_I("[%u]TestRegisterProvider, Testcase_RegisterProvider_[%03u] pass!", times, testParams.testId);
+    ASSERT_TRUE(ret == 0);
+}
+
+HWTEST_F(HksUKeyTest, HksUnregisterProviderWithoutNameTest, TestSize.Level0)
+{
+    uint32_t times = 1;
+    uint32_t index = 0;
+    const HksTestGenKeyParams &testParams = g_testGenKeyParams[index];
+    struct HksBlob *name = NULL;
+    struct HksParamSet *paramSet = NULL;
+    int ret = ConstructTestParamSet(&paramSet, testParams);
+    EXPECT_TRUE(ret == 0);
+
+    ret = HksUnregisterProvider(name, paramSet);
+    if (ret != HKS_ERROR_NULL_POINTER) {
+        HKS_TEST_LOG_I("failed, ret[%u] = %d", testParams.testId, ret);
+    }
+    EXPECT_TRUE(ret == HKS_ERROR_NULL_POINTER);
+
+    TestFreeBlob(&name);
+    HksFreeParamSet(&paramSet);
+    HKS_TEST_LOG_I("[%u]TestRegisterProvider, Testcase_RegisterProvider_[%03u] pass!", times, testParams.testId);
+    ASSERT_TRUE(ret == HKS_ERROR_NULL_POINTER);
+}
+
+HWTEST_F(HksUKeyTest, HksAuthUkeyPin, TestSize.Level0)
+{
+
+}
+
+HWTEST_F(HksUKeyTest, HksGetUkeyPinAuthState, TestSize.Level0)
+{
+
+}
+
+HWTEST_F(HksUKeyTest, HksOpenRemoteHandle, TestSize.Level0)
+{
+
+}
+
+HWTEST_F(HksUKeyTest, HksGetRemoteHandle, TestSize.Level0)
+{
+
+}
+
+HWTEST_F(HksUKeyTest, HksGetPinAuthState, TestSize.Level0)
+{
+
+}
+
+HWTEST_F(HksUKeyTest, HksClearPinAuthState, TestSize.Level0)
+{
+
+}
+
+HWTEST_F(HksUKeyTest, HksUkeySign, TestSize.Level0)
+{
+
+}
+
 }

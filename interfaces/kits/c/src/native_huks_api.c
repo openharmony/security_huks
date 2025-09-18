@@ -68,10 +68,10 @@ struct OH_Huks_Result OH_Huks_GetRemoteHandle(const struct OH_Huks_Blob *index, 
     return ConvertApiResult(ret);
 }
 
-struct OH_Huks_Result OH_Huks_CloseRemoteHandle(const struct OH_Huks_Blob *index, const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_Blob *remoteHandleOut)
+struct OH_Huks_Result OH_Huks_CloseRemoteHandle(const struct OH_Huks_Blob *index, const struct OH_Huks_ParamSet *paramSet)
 {
     int32_t ret = HksCloseRemoteHandle((const struct HksBlob *) index,
-        (const struct HksParamSet *) paramSet, (struct HksBlob *) remoteHandleOut);
+        (const struct HksParamSet *) paramSet);
     return ConvertApiResult(ret);
 }
 

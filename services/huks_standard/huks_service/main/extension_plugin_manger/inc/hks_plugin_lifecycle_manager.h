@@ -41,9 +41,9 @@ class __attribute__((visibility("default"))) HuksPluginLifeCycleMgr : private OH
 public:
     static std::shared_ptr<HuksPluginLifeCycleMgr> GetInstanceWrapper();
     static void ReleaseInstance();
-    int32_t RegisterProvider(struct HksProcessInfo &info, const std::string &AbilityName,
+    int32_t RegisterProvider(const struct HksProcessInfo &info, const std::string &AbilityName,
     const CppParamSet& paramSet);
-    int32_t UnRegisterProvider(struct HksProcessInfo &info, const std::string &AbilityName,
+    int32_t UnRegisterProvider(const struct HksProcessInfo &info, const std::string &AbilityName,
     const CppParamSet& paramSet);
 
 private:

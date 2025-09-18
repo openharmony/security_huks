@@ -45,7 +45,7 @@ HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *name, const 
 // 句柄管理
 HKS_API_EXPORT int32_t HksOpenRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut);
 HKS_API_EXPORT int32_t HksGetRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut);
-HKS_API_EXPORT int32_t HksCloseRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut);
+HKS_API_EXPORT int32_t HksCloseRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn);
 
 // PIN码认证
 // HKS_API_EXPORT int32_t AuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *HksParamSetIn, uint32_t *retryCount);
