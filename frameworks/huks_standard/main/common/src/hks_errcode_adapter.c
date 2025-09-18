@@ -592,7 +592,98 @@ static struct HksError g_errCodeTable[] = {
             .errorMsg = "The key with same name is already exist.",
             .data = NULL
         }
-    }
+    }, {
+        .innerErrCode = HKS_ERROR_VECTOR_PUSH_BACK,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "push back item to vector fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_GET_ENGINE_ATTRIBUTE_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "get attribute from engine fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_GET_ENGINE_PARAM_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "get param from engine fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_KEYSTORE_DEL_JSON,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "import keystore delete json fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_KEYSTORE_DEL_DB,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "import keystore delete db fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_KEYSTORE_USERID_MAP_ENTRY,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "import keystore userid map entry fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_KEYSTORE_USERID_NOT_FOUND,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "import keystore userid not found.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_KEYSTORE_OLD_BUNDLENAME_NOT_FOUND,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "import keystore old bundle name not found.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_KEYSTORE_OLD_APPUID_NOT_FOUND,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "import keystore old app uid not found.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_KEYSTORE_DB_QUERY_FAILED,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "import keystore db query failed.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_KEYSTORE_DB_QUERY_NOT_FOUND,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "import keystore db query not found.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_KEYSTORE_DB_QUERY_WRONG_SIZE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "import keystore db query wrong size.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_CHECK_USER_ID_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "import keystore check user id fail.",
+            .data = NULL
+        }
+    },
 };
 
 /**
