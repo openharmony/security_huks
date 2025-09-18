@@ -67,6 +67,7 @@
         "components": [
           "ability_runtime",
           "ability_base",
+          "ability_runtime",
           "access_token",
           "bundle_framework",
           "c_utils",
@@ -100,7 +101,8 @@
           ],
           "service_group": [
             "//base/security/huks/etc:param_files",
-            "//base/security/huks:service_group"
+            "//base/security/huks:service_group",
+            "//base/security/huks:huks_crypto_extension"
           ]
         },
         "inner_api": [
