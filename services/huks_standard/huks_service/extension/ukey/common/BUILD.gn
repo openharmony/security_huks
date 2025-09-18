@@ -14,21 +14,27 @@
 import("//base/security/huks/build/config.gni")
 import("//build/ohos.gni")
 
+
 if (os_level == "standard") {
-  ohos_shared_library("libhuks_external_crypto_ext_core") {
+  ohos_static_library("libhuks_ukey_common_static") {
     subsystem_name = "security"
     part_name = "huks"
-    # version_script = "libhuks_external_crypto_ext_core.map"
     configs = [
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]
 
-    deps = [
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger:libhuks_provider_life_cycle_manager_static",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection:libhuks_extension_connection_static",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager:libhuks_remote_handle_manager_static",
+    include_dirs = [
+      "inc",
     ]
 
+    sources = [
+      "src/hks_json_wrapper.cpp",
+    ]
+    
+    public_deps = [
+      "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+    ]
+    complete_static_lib = true
     cflags = []
 
     branch_protector_ret = "pac_ret"
@@ -41,10 +47,14 @@ if (os_level == "standard") {
       boundary_sanitize = true
       ubsan = true
     }
+
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
-      "ipc:ipc_core",
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_core",
+      "cJSON:cjson",
+      "samgr:samgr_proxy",
     ]
   }
 }

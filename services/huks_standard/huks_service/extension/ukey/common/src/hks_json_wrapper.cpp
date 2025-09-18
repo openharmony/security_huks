@@ -4,7 +4,7 @@
 #include <hks_log.h>
 #include <hks_template.h>
 #include "hks_json_wrapper.h"
-#include "cJSON.h"
+#include <cJSON.h>
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
