@@ -58,6 +58,7 @@ public:
     sptr<ExtensionConnection> m_connection{nullptr};
 };
 
+constexpr int32_t HKS_PROVIDER_CAN_REMOVE_REF_COUNT = 1;
 int32_t HksGetProviderInfo(const HksProcessInfo &processInfo, const std::string &providerName,
     const CppParamSet &paramSet, ProviderInfo &providerInfo);
 
