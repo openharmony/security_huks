@@ -34,6 +34,9 @@ if (os_level == "standard") {
 
     deps = []
 
+    defines = [
+        "L2_STANDARD",
+    ]
     public_deps = [
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
