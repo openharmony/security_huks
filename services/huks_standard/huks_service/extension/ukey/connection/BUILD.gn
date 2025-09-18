@@ -15,7 +15,7 @@ import("//base/security/huks/build/config.gni")
 import("//build/ohos.gni")
 
 if (os_level == "standard") {
-  ohos_shared_library("libhuks_external_crypto_ext_core") {
+  ohos_static_library("libhuks_extension_connection_static") {
     subsystem_name = "security"
     part_name = "huks"
     # version_script = "libhuks_external_crypto_ext_core.map"
@@ -23,11 +23,20 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]
 
-    deps = [
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger:libhuks_provider_life_cycle_manager_static",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection:libhuks_extension_connection_static",
+    include_dirs = [
+      "inc",
     ]
 
+    sources = [
+      "src/hks_extension_connection.cpp",
+    ]
+
+    public_deps = [
+      "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
+    ]
+    complete_static_lib = true
     cflags = []
 
     branch_protector_ret = "pac_ret"
@@ -40,10 +49,14 @@ if (os_level == "standard") {
       boundary_sanitize = true
       ubsan = true
     }
+
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
       "ipc:ipc_core",
+      "ability_runtime:ability_connect_callback_stub",
+      "ability_runtime:ability_manager",
+      "ability_base:ability_base_want",
     ]
   }
 }
