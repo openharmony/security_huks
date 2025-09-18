@@ -15,6 +15,7 @@
 
 #include "hks_provider_life_cycle_manager.h"
 //  #include "hks_extension_connection.h"
+#include "hks_cpp_paramset.h"
 #include "if_system_ability_manager.h"
 #include "bundle_mgr_client.h"
 #include "bundle_mgr_interface.h"
@@ -82,7 +83,7 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
     return HKS_SUCCESS;
 }
 
-int32_t HksProviderLifeCycleManager::GetProviderInfo(const HksProcessInfo &processInfo, const std::string &providerName,
+int32_t HksGetProviderInfo(const HksProcessInfo &processInfo, const std::string &providerName,
     const CppParamSet &paramSet, ProviderInfo &providerInfo)
 {
     sptr<ISystemAbilityManager> saMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -96,9 +97,12 @@ int32_t HksProviderLifeCycleManager::GetProviderInfo(const HksProcessInfo &proce
 
     auto bundleRet = bundleMgrProxy->GetBundleNameForUid(processInfo.uidInt, providerInfo.m_bundleName);
     HKS_IF_TRUE_LOGE_RETURN(bundleRet != ERR_OK, HKS_ERROR_BAD_STATE, "GetBundleNameForUid failed")
-
     providerInfo.m_providerName = providerName;
-    // TODO: 需要从paramset中获取abilityName
+
+    auto abilityName = paramSet.GetParam<HKS_TAG_EXTENSION_ABILITY_NAME>();
+    HKS_IF_TRUE_LOGE_RETURN(abilityName.first != HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
+        "GetParam HKS_TAG_EXTENSION_ABILITY_NAME failed")
+    providerInfo.m_abilityName = std::string(abilityName.second.begin(), abilityName.second.end());
     return HKS_SUCCESS;
 }
 

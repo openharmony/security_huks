@@ -41,6 +41,9 @@ public:
     std::string m_bundleName{};
 };
 
+int32_t HksGetProviderInfo(const HksProcessInfo &processInfo, const std::string &providerName,
+    const CppParamSet &paramSet, ProviderInfo &providerInfo);
+
 class HksProviderLifeCycleManager : private OHOS::DelayedSingleton<HksProviderLifeCycleManager> {
 public:
     static std::shared_ptr<HksProviderLifeCycleManager> GetInstanceWrapper();
@@ -53,8 +56,6 @@ public:
 private:
     // ProviderName + userId + bundleName
     OHOS::SafeMap<std::string, OHOS::sptr<IRemoteObject>> m_providerMap;
-    int32_t GetProviderInfo(const HksProcessInfo &processInfo, const std::string &providerName,
-        const CppParamSet &paramSet, ProviderInfo &providerInfo);
 };
 }
 }
