@@ -24,6 +24,8 @@
 #include "hks_type_enum.h"
 #include <parcel.h>
 
+namespace OHOS {
+namespace Huks {
 class CppParamSet : public virtual OHOS::Parcelable{
 public:
     explicit CppParamSet() = default;
@@ -82,14 +84,6 @@ public:
             }
             return std::pair<int32_t, std::vector<uint8_t>>{ret, {}}; 
         }
-    }
-
-    static HksBlob VectorToBlob(const std::vector<uint8_t> &vec)
-    {
-        return {
-            .size = vec.size(),
-            .data = const_cast<uint8_t*>(vec.data())
-        };
     }
 
     virtual bool Marshalling(OHOS::Parcel &parcel) const override
@@ -244,4 +238,6 @@ private:
     HksParamSet *ptr_ = nullptr;
 };
 
+}
+}
 #endif

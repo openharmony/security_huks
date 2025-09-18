@@ -28,8 +28,6 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_json_wrapper.h"
-
-#include "cJSON.h"
 namespace OHOS {
 namespace Security {
 namespace Huks {

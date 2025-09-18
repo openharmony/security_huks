@@ -12,8 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+sequenceable HksCppParamset..CppParamSet;
 interface OHOS.Huks.IHuksAccessExtBase {
 
-    void test([in] String testIn, [out] List<String> testOut);
+    [ipccode 1] void test([in] CppParamSet testIn, [out] List<String> testOut);
+    
+    
 }
