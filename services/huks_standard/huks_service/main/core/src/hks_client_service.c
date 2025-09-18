@@ -241,7 +241,7 @@ static int32_t CheckKeyCondition(const struct HksProcessInfo *processInfo, const
         HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS && ret != HKS_ERROR_NOT_EXIST, ret,
             "delete keyblob from storage failed, ret = %" LOG_PUBLIC "d", ret)
     }
-    
+
     uint32_t fileCount;
     ret = HksManageGetKeyCountByProcessName(processInfo, paramSet, &fileCount);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
@@ -992,6 +992,73 @@ static int32_t GetKeyAndNewParamSetInForGenKeyInService(const struct HksProcessI
     return ret;
 }
 
+struct HksImportWrappedInnerArgs {
+    const struct HksProcessInfo *processInfo;
+    const struct HksBlob *keyAlias;
+    const struct HksBlob *wrappingKeyAlias;
+    const struct HksParamSet *paramSet;
+    const struct HksBlob *wrappedKeyData;
+};
+
+static int32_t GetAndImportKeystoreKey(const struct HksImportWrappedInnerArgs *args,
+    struct HksParamSet **newParamSet, struct HksBlob *keyOut)
+{
+    struct HksParam *authTypeParam = NULL;
+    int32_t ret = HksGetParam(args->paramSet, HKS_TAG_USER_AUTH_TYPE, &authTypeParam);
+    HKS_IF_TRUE_LOGE_RETURN(ret == HKS_SUCCESS, HKS_ERROR_NOT_SUPPORTED, "access control not support import")
+
+    struct HksBlob cipherKey = { 0, NULL };
+    struct HksImportKeyStoreArgs data = { .keyAlias = *args->keyAlias, .uidInt = args->processInfo->uidInt };
+    ret = HksPluginImportWrappedKey(&data, &cipherKey);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+        "HksPluginImportWrappedKey failed, ret = %" LOG_PUBLIC "d", ret)
+    do {
+        ret = AppendProcessInfoAndDefaultStrategy(args->paramSet, args->processInfo, NULL, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append new info failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = CheckKeyCondition(args->processInfo, args->keyAlias, *newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check key condition failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HuksAccessImportWrappedKey(args->wrappingKeyAlias, &cipherKey, &cipherKey, *newParamSet, keyOut);
+        IfNotSuccAppendHdiErrorInfo(ret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "access import wrappedKey failed, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HKS_FREE_BLOB(cipherKey);
+    return ret;
+}
+
+static int32_t GetAndImportWrappedKey(const struct HksImportWrappedInnerArgs *args,
+    struct HksParamSet **newParamSet, struct HksBlob *keyOut)
+{
+    struct HksParam *suite = NULL;
+    if (HksGetParam(args->paramSet, HKS_TAG_UNWRAP_ALGORITHM_SUITE, &suite) == HKS_SUCCESS &&
+        suite->uint32Param == HKS_UNWRAP_SUITE_KEYSTORE) {
+        return GetAndImportKeystoreKey(args, newParamSet, keyOut);
+    }
+
+    struct HksBlob wrappingKeyFromFile = { 0, NULL };
+    int32_t ret = HksServiceKeyExist(args->processInfo, args->wrappingKeyAlias, args->paramSet);
+    do {
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "wrapping key is not exist, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = GetKeyAndNewParamSetInForGenKeyInService(args->processInfo, args->wrappingKeyAlias, args->paramSet,
+            &wrappingKeyFromFile, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get wrapping key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = CheckKeyCondition(args->processInfo, args->keyAlias, *newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check condition failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HuksAccessImportWrappedKey(args->wrappingKeyAlias, &wrappingKeyFromFile, args->wrappedKeyData,
+            *newParamSet, keyOut);
+        IfNotSuccAppendHdiErrorInfo(ret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "access import wrappedKey failed, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HKS_FREE_BLOB(wrappingKeyFromFile);
+    return ret;
+}
+
 int32_t HksServiceImportWrappedKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksBlob *wrappingKeyAlias, const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData)
 {
@@ -1003,40 +1070,23 @@ int32_t HksServiceImportWrappedKey(const struct HksProcessInfo *processInfo, con
 #ifdef L2_STANDARD
     traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
-
+    struct HksBlob keyOut = { MAX_KEY_SIZE, (uint8_t *)HksMalloc(MAX_KEY_SIZE) };
+    HKS_IF_NULL_LOGE_RETURN(keyOut.data, HKS_ERROR_MALLOC_FAIL, "malloc keyout fail")
     do {
         ret = HksCheckImportWrappedKeyParams(&processInfo->processName, keyAlias,
             wrappingKeyAlias, paramSet, wrappedKeyData);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check import params failed, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksServiceKeyExist(processInfo, wrappingKeyAlias, paramSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "wrapping key is not exist, ret = %" LOG_PUBLIC "d", ret)
+        struct HksImportWrappedInnerArgs constArgs = { .processInfo = processInfo, .keyAlias = keyAlias,
+            .wrappingKeyAlias = wrappingKeyAlias, .paramSet = paramSet, .wrappedKeyData = wrappedKeyData };
+        ret = GetAndImportWrappedKey(&constArgs, &newParamSet, &keyOut);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get and import wrappedKey failed, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = GetKeyAndNewParamSetInForGenKeyInService(processInfo, wrappingKeyAlias, paramSet, &wrappingKeyFromFile,
-            &newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get wrapping key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = CheckKeyCondition(processInfo, keyAlias, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check condition failed, ret = %" LOG_PUBLIC "d", ret)
-
-        uint8_t *keyOutBuffer = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
-        if (keyOutBuffer == NULL) {
-            ret = HKS_ERROR_MALLOC_FAIL;
-            break;
-        }
-        struct HksBlob keyOut = { MAX_KEY_SIZE, keyOutBuffer };
-        ret = HuksAccessImportWrappedKey(wrappingKeyAlias, &wrappingKeyFromFile, wrappedKeyData, newParamSet, &keyOut);
-        IfNotSuccAppendHdiErrorInfo(ret);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("access level import wrapped key failed, ret = %" LOG_PUBLIC "d", ret);
-            HKS_FREE(keyOutBuffer);
-            break;
-        }
         ret = HksManageStoreKeyBlob(processInfo, newParamSet, keyAlias, &keyOut, HKS_STORAGE_TYPE_KEY);
-        HKS_IF_NOT_SUCC_LOGE(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
-        HKS_FREE(keyOutBuffer);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
+    HKS_FREE_BLOB(keyOut);
     HKS_FREE_BLOB(wrappingKeyFromFile);
     HksFreeParamSet(&newParamSet);
     HksReportEvent(__func__, &traceId, processInfo, paramSet, ret);
