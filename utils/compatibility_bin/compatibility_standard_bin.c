@@ -33,8 +33,7 @@
 #undef LOG_DOMAIN
 #define LOG_DOMAIN 0xD002F00 /* Security subsystem's domain id */
 
-#define HKS_LOG_E(fmt, arg...) HILOG_ERROR(LOG_ENGINE, "%" LOG_PUBLIC "s[%" LOG_PUBLIC "u]: " fmt "\n", \
-                                                                                            __func__, __LINE__, ##arg)
+#define HKS_LOG_E(fmt, arg...) HILOG_ERROR(LOG_ENGINE, "%" LOG_PUBLIC "s: " fmt "\n", __func__, ##arg)
 
 #define HUKS_SERVICE_UID 3510
 #define DIR_TYPE 4
