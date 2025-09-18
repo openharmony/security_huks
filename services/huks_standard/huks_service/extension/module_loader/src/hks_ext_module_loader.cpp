@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,30 +13,43 @@
  * limitations under the License.
  */
 
- #ifndef FILE_ACCESS_EXT_ABILITY_MODULE_LOADER_H
- #define FILE_ACCESS_EXT_ABILITY_MODULE_LOADER_H
- 
- #include <map>
- #include <memory>
- 
- #include "extension.h"
- #include "extension_module_loader.h"
- #include "runtime.h"
- #include "singleton.h"
- 
+#include "hks_ext_module_loader.h"
+
+#include <string>
+#include <utility>
+#include "hks_crypto_ext_ability.h"
+
 namespace OHOS {
 namespace Security {
 namespace Huks {
-using namespace AbilityRuntime;
-class CryptoAccessExtAbilityModuleLoader : public ExtensionModuleLoader,
-    public Singleton<CryptoAccessExtAbilityModuleLoader> {
-    DECLARE_SINGLETON(CryptoAccessExtAbilityModuleLoader);
 
-public:
-    virtual Extension *Create(const std::unique_ptr<Runtime>& runtime) const override;
-    virtual std::map<std::string, std::string> GetParams() override;
-};
+CryptoAccessExtAbilityModuleLoader::CryptoAccessExtAbilityModuleLoader() = default;
+CryptoAccessExtAbilityModuleLoader::~CryptoAccessExtAbilityModuleLoader() = default;
+
+Extension *CryptoAccessExtAbilityModuleLoader::Create(const std::unique_ptr<Runtime>& runtime) const
+{
+    return CryptoExtAbility::Create(runtime);
 }
+
+extern "C" __attribute__((visibility("default"))) void* OHOS_EXTENSION_GetExtensionModule()
+{
+    return &CryptoAccessExtAbilityModuleLoader::GetInstance();
 }
+
+extern "C" __attribute__((visibility("default"))) void SetCreator(const CreatorFunc& creator)
+{
+    return CryptoExtAbility::SetCreator(creator);
+}
+
+std::map<std::string, std::string> CryptoAccessExtAbilityModuleLoader::GetParams()
+{
+    std::map<std::string, std::string> params;
+    // TODO 根据BMS最终代码，要更换 35的具体值
+    const std::string CRYPTO_ACCESS_TYPE = "35";
+    params.insert(std::pair<std::string, std::string>("type", CRYPTO_ACCESS_TYPE));
+    params.insert(std::pair<std::string, std::string>("name", "CryptoExtensionAbility"));
+    return params;
+}
+} // Huks
+} // namespace Security
 } // namespace OHOS
-#endif // FILE_ACCESS_EXT_ABILITY_MODULE_LOADER_H

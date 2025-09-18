@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (C) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -97,5 +97,13 @@ group("huks_components") {
   deps = [
     "//base/security/huks:fwk_group",
     "//base/security/huks:service_group",
+  ]
+}
+
+group("huks_crypto_extension") {
+  deps = [
+    "//base/security/huks/interfaces/js/crypto_extension_module:cryptoextensionability_napi",
+    "//base/security/huks/services/huks_standard/huks_service/extension/ability_native:crypto_extension_ability_native",
+    "//base/security/huks/services/huks_standard/huks_service/extension/module_loader:crypto_extension_module",
   ]
 }
