@@ -57,7 +57,7 @@ int32_t HksServiceGetRemoteHandle(const struct HksProcessInfo *processInfo, cons
     const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut);
 
 int32_t HksServiceCloseRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut);
+    const struct HksParamSet *paramSetIn);
 
 int32_t HksServiceUkeySign(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn, const struct HksBlob *srcData, struct HksBlob *signatureOut);

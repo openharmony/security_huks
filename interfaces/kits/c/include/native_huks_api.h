@@ -65,7 +65,7 @@ struct OH_Huks_Result OH_Huks_UnregisterProvider(const struct OH_Huks_Blob *prov
 // 句柄管理
 struct OH_Huks_Result OH_Huks_OpenRemoteHandle(const struct OH_Huks_Blob *index, const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_Blob *remoteHandleOut);
 struct OH_Huks_Result OH_Huks_GetRemoteHandle(const struct OH_Huks_Blob *index, const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_Blob *remoteHandleOut);
-struct OH_Huks_Result OH_Huks_CloseRemoteHandle(const struct OH_Huks_Blob *index, const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_Blob *remoteHandleOut);
+struct OH_Huks_Result OH_Huks_CloseRemoteHandle(const struct OH_Huks_Blob *index, const struct OH_Huks_ParamSet *paramSet);
 
 // PIN码认证
 struct OH_Huks_Result OH_Huks_AuthUkeyPin(const struct OH_Huks_Blob *index, const struct OH_Huks_ParamSet *paramSetIn, uint32_t *retryCount);

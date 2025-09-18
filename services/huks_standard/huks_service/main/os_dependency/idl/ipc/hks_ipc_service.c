@@ -60,36 +60,180 @@ static enum HksTag g_idList[] = {
 };
 #endif
 
-void HksIpcServiceRegisterProvider(const struct HksBlob *srcData, const uint8_t *context) {
-    HksIpcServiceProviderRegisterAdapter(srcData, context);
+void HksIpcServiceRegisterProvider(const struct HksBlob *srcData, const uint8_t *context) 
+{
+    struct HksBlob name = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    int32_t ret;
+    do {
+        ret  = HksDeleteKeyUnpack(srcData, &name, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDeleteKeyUnpack Ipc fail")
+
+        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcServiceOnProviderRegisterAdapter(&processInfo, &name, paramSet);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceOnCloseRemoteKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HksSendResponse(context, ret, NULL);
+
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
 }
 
-void HksIpcServiceUnregisterProvider(const struct HksBlob *srcData, const uint8_t *context) {
+void HksIpcServiceUnregisterProvider(const struct HksBlob *srcData, const uint8_t *context) 
+{
+    struct HksBlob name = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    int32_t ret;
+    do {
+        ret  = HksDeleteKeyUnpack(srcData, &name, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDeleteKeyUnpack Ipc fail")
+
+        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcServiceOnProviderUnRegisterAdapter(&processInfo, &name, paramSet);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceOnCloseRemoteKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HksSendResponse(context, ret, NULL);
+
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+}
+
+void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *context) 
+{
 
 }
 
-void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *context) {
+void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8_t *context) 
+{
 
 }
 
-void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8_t *context) {
+void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t *context) 
+{
+    struct HksBlob index = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksBlob remoteHandleOut = { 0, NULL };
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    int32_t ret;
 
+    do {
+        ret  = HksExportPublicKeyUnpack(srcData, &index, &paramSet, &remoteHandleOut);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksExportremoteHandleOutUnpack Ipc fail")
+
+        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcServiceOnCreateRemoteKeyHandleAdapter(&processInfo, &index, paramSet, &remoteHandleOut);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceExportPublicremoteHandleOut fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HksSendResponse(context, ret, ret == HKS_SUCCESS ? &remoteHandleOut : NULL);
+
+    HKS_FREE_BLOB(remoteHandleOut);
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
 }
 
-void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t *context) {
+void HksIpcServiceGetRemoteHandle(const struct HksBlob *srcData, const uint8_t *context) 
+{
+    struct HksBlob index = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksBlob handle = { 0, NULL };
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    int32_t ret;
 
+    do {
+        ret  = HksExportPublicKeyUnpack(srcData, &index, &paramSet, &handle);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksExportKeyUnpack Ipc fail")
+
+        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcServiceOnFindRemoteKeyHandleAdapter(&processInfo, &index, paramSet, &handle);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceExportPublicKey fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HksSendResponse(context, ret, ret == HKS_SUCCESS ? &handle : NULL);
+
+    HKS_FREE_BLOB(handle);
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
 }
 
-void HksIpcServiceGetRemoteHandle(const struct HksBlob *srcData, const uint8_t *context) {
+void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t *context) 
+{
+    struct HksBlob index = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    int32_t ret;
+    do {
+        ret  = HksDeleteKeyUnpack(srcData, &index, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDeleteKeyUnpack Ipc fail")
 
+        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcServiceOnCloseRemoteKeyHandleAdapter(&processInfo, &index, paramSet);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceOnCloseRemoteKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HksSendResponse(context, ret, NULL);
+
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
 }
 
-void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t *context) {
+void HksIpcServiceUkeySign(const struct HksBlob *srcData, const uint8_t *context) 
+{
+    struct HksBlob index = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksBlob data = { 0, NULL };
+    struct HksBlob signatureOut = { 0, NULL };
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    int32_t ret;
 
-}
+    do {
+        ret = HksAgreeKeyUnpack(srcData, &paramSet, &index, &data, &signatureOut);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAgreeKeyUnpack Ipc fail")
 
-void HksIpcServiceUkeySign(const struct HksBlob *srcData, const uint8_t *context) {
+        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcServiceOnSignedAdapter(&processInfo, paramSet, &index, &data, &signatureOut);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceAgreeKey fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HksSendResponse(context, ret, ret == HKS_SUCCESS ? &signatureOut : NULL);
+
+    HKS_FREE_BLOB(signatureOut);
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
 }
 
 void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *context)

@@ -16,114 +16,89 @@
 #include "hks_ipc_service_provider.h"
 #include "hks_plugin_lifecycle_manager.h"
 
-void HksIpcServiceProviderRegister(const struct HksBlob *srcData, const uint8_t *context)
+int HksIpcServiceProviderRegister(const struct HksProcessInfo *processInfo, std::string name, 
+    CppParamSet &paramSet)
 {
-    struct HksBlob keyAlias = { 0, NULL }; //abilityName
-    struct HksParamSet *inParamSet = NULL;
-    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    HKS_LOG_E("===========HksIpcServiceProviderRegister income");
     int32_t ret;
 
-    do {
-        // 解析参数
-        ret = HksDeleteKeyUnpack(srcData, &keyAlias, &inParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGenerateKeyUnpack Ipc fail")
+    auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    if (pluginManager == nullptr) {
+        HKS_LOG_E("Failed to get plugin manager instance.");
+        ret = HKS_ERROR_NULL_POINTER;
+    }
 
-        // 获取调用方身份信息
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+    HKS_LOG_E("Register provider name is %{public}s", name.data());
+    HKS_LOG_E("Register provider paramSet is %{public}p", &paramSet);
 
-        // 权限校验
-        ret = HksCheckAcrossAccountsPermission(inParamSet, processInfo.userIdInt);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = pluginManager->RegisterProvider(*processInfo, name, paramSet); 
 
-        auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
-        if (pluginManager == nullptr) {
-            HKS_LOG_E("Failed to get plugin manager instance.");
-            ret = HKS_ERROR_NULL_POINTER;
-            break;
-        }
-        CppParamSet paramSet(inParamSet); 
-        ret = pluginManager->RegisterProvider(processInfo, std::string(reinterpret_cast<const char*>(keyAlias.data), keyAlias.size), paramSet); 
-
-    } while (0);
-    HksSendResponse(context, ret, nullptr);
-
-    HKS_FREE_BLOB(processInfo.processName);
-    HKS_FREE_BLOB(processInfo.userId);
+    return ret;
 }
 
-void HksIpcServiceProviderUnRegister(const struct HksBlob *srcData, const uint8_t *context)
+int HksIpcServiceProviderUnRegister(const struct HksProcessInfo *processInfo, std::string name, 
+    CppParamSet &paramSet)
 {
-    struct HksBlob keyAlias = { 0, NULL };
-    struct HksParamSet *inParamSet = NULL;
-    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     int32_t ret;
 
-    do {
-        // 解析参数
-        ret = HksDeleteKeyUnpack(srcData, &keyAlias, &inParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGenerateKeyUnpack Ipc fail")
+    auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    if (pluginManager == nullptr) {
+        HKS_LOG_E("Failed to get plugin manager instance.");
+        ret = HKS_ERROR_NULL_POINTER;
+    }
 
-        // 获取调用方身份信息
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = pluginManager->UnRegisterProvider(*processInfo, name, paramSet); 
 
-        // 权限校验
-        ret = HksCheckAcrossAccountsPermission(inParamSet, processInfo.userIdInt);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
-
-        auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
-        if (pluginManager == nullptr) {
-            HKS_LOG_E("Failed to get plugin manager instance.");
-            ret = HKS_ERROR_NULL_POINTER;
-            break;
-        }
-
-        CppParamSet paramSet(inParamSet); 
-        ret = pluginManager->UnRegisterProvider(processInfo, std::string(reinterpret_cast<const char*>(keyAlias.data), keyAlias.size), paramSet); 
-
-    } while (0);
-    HksSendResponse(context, ret, nullptr);
-
-    HKS_FREE_BLOB(processInfo.processName);
-    HKS_FREE_BLOB(processInfo.userId);
+    return ret;
 }
 
-void HksIpcServiceRegistLibFunction(int32_t funCode, void *fun) {
+int HksIpcServiceRegistLibFunction(int32_t funCode, int *fun) {
 
-    
+    return 0;
 }
 
-void HksIpcServiceOnCreateRemoteIndex(const std::string &providerName, const CppParamSet& paramSet, std::string &outIndex) {
+int HksIpcServiceOnCreateRemoteIndex(const std::string &providerName, const CppParamSet& paramSet, std::string &outIndex) {
 
+    return 0;
 }
 
-void HksIpcServiceOnCreateRemoteKeyHandle(const std::string &index) {
+int HksIpcServiceOnCreateRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string index, 
+    CppParamSet &paramSet, std::string &remoteHandleOut) {
 
+    return 0;
 }
 
-void HksIpcServiceOnFindRemoteKeyHandle(const std::string &index, std::string &keyIndex) {
+int HksIpcServiceOnFindRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string index, 
+    CppParamSet &paramSet, std::string &remoteHandleOut) {
 
+    return 0;
 }
 
-void HksIpcServiceOnCloseRemoteKeyHandle(const std::string &index, std::string &keyIndex) {
+int HksIpcServiceOnSigned(const struct HksProcessInfo *processInfo, std::string index, 
+    CppParamSet &paramSet, std::string srcData, std::string &signature) {
 
+    return 0;
 }
 
-void HksIpcServiceOnSigned(const std::string &index, const CppParamSet& paramSet, std::vector<uint8_t> &outData) {
-
+int HksIpcServiceOnCloseRemoteKeyHandle(const struct HksProcessInfo *processInfo, 
+    std::string index, CppParamSet &paramSet) 
+{
+    return 0;
 }
 
-void HksIpcServiceOnAuthUkeyPin(const std::string &index, const std::vector<uint8_t> &pinData, bool outStatus, int32_t retryCnt) {
+int HksIpcServiceOnAuthUkeyPin(const std::string &index, const std::vector<uint8_t> &pinData, bool outStatus, int32_t retryCnt) {
 
+    return 0;
 }
 
-void HksIpcServiceOnGetVerifyPinStatus(const std::string &index, int32_t &pinStatus) {
+int HksIpcServiceOnGetVerifyPinStatus(const std::string &index, int32_t &pinStatus) {
 
+    return 0;
 }
 
-void HksIpcServiceOnClearPinStatus(const std::string &index) {
+int HksIpcServiceOnClearPinStatus(const std::string &index) {
 
+    return 0;
 }
     
 void HksIpcServiceOnListProviders(std::vector<uint8_t> &providersOut) {

@@ -26,25 +26,28 @@ int32_t HksClientInitialize(void);
 
 int32_t HksClientRefreshKeyInfo(void);
 
+// 注册注销
 int32_t HksClientRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
-
 int32_t HksClientUnregisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
 
-int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut);
+// NAPI侧PIN码认证
+int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, 
+    struct HksParamSet *paramSetOut);
+int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, 
+    struct HksParamSet *paramSetOut);
 
-int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut);
-
+// 句柄管理    
 int32_t HksClientOpenRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
     struct HksBlob *remoteHandleOut);
+int32_t HksClientGetRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, 
+    struct HksBlob *remoteHandleOut);
+int32_t HksClientCloseRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn);
 
-int32_t HksClientGetRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut);
-
-int32_t HksClientCloseRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut);
-
+// PIN码认证
 int32_t HksClientGetPinAuthState(const struct HksBlob *index, uint32_t *stateOut);
-
 int32_t HksClientClearPinAuthState(const struct HksBlob *index);
 
+// 签名验签
 int32_t HksClientUkeySign(const struct HksBlob *index, const struct HksParamSet *HksParamSet,
     const struct HksBlob *srcData, struct HksBlob *signatureOut);
 

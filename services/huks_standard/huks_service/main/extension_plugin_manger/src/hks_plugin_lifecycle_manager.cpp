@@ -29,7 +29,7 @@ void HuksPluginLifeCycleMgr::ReleaseInstance()
 }
 
 
-int32_t HuksPluginLifeCycleMgr::RegisterProvider(struct HksProcessInfo &info, const std::string& providerName,
+int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &info, const std::string& providerName,
     const CppParamSet& paramSet){
     int32_t ret;
     int preCount = m_refCount.fetch_add(1, std::memory_order_acq_rel);
@@ -46,7 +46,7 @@ int32_t HuksPluginLifeCycleMgr::RegisterProvider(struct HksProcessInfo &info, co
     return HKS_SUCCESS;
 }
 
-int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(struct HksProcessInfo &info, const std::string& providerName,
+int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &info, const std::string& providerName,
     const CppParamSet& paramSet) {
     int preCount = m_refCount.fetch_sub(1, std::memory_order_acq_rel);
     HKS_IF_TRUE_RETURN(preCount != 1, HKS_SUCCESS)

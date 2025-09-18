@@ -1,51 +1,102 @@
 #include "hks_ipc_service_provider_adapter.h"
 #include "hks_ipc_service_provider.h"
+#include "securec.h"
 #include <string>
 #include <vector>
 
 // 适配器模式
-void HksIpcServiceProviderRegisterAdapter(const struct HksBlob *srcData, const uint8_t *context)
+int HksIpcServiceOnProviderRegisterAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *name, 
+    const struct HksParamSet *paramSet)
 {
-    HksIpcServiceProviderRegister(srcData, context);
-    return;
+    HKS_LOG_E("==========ksIpcServiceProviderRegisterAdapter income");
+
+    std::string cppIndex(reinterpret_cast<const char*>(name->data), name->size);
+    CppParamSet cppParamSet(paramSet);
+
+    return HksIpcServiceProviderRegister(processInfo, cppIndex, cppParamSet);
 }
 
-void HksIpcServiceProviderUnRegisterAdapter(const struct HksBlob *srcData, const uint8_t *context)
+int HksIpcServiceOnProviderUnRegisterAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *name, 
+    const struct HksParamSet *paramSet)
 {
-    return;
+
+    std::string cppIndex(reinterpret_cast<const char*>(name->data), name->size);
+    CppParamSet cppParamSet(paramSet);
+
+    return HksIpcServiceProviderRegister(processInfo, cppIndex, cppParamSet);
 }
 
-void HksIpcServiceRegistLibFunctionAdapter(int32_t funCode, void *fun)
-{
-    return;
-}
 
-int HksIpcServiceOnCreateRemoteIndexAdapter(const char *providerName, const uint8_t *paramSet, uint32_t paramSetLen, char *outIndex, uint32_t outIndexLen)
-{
-    return 0;
-}
-
-int HksIpcServiceOnCreateRemoteKeyHandleAdapter(const char *index)
-{
-    return 0;
-}
-
-int HksIpcServiceOnFindRemoteKeyHandleAdapter(const char *index, char *keyIndex, uint32_t keyIndexLen)
+int HksIpcServiceOnCreateRemoteIndexAdapter(const char *providerName, const uint8_t *paramSet, uint32_t paramSetLen, 
+    char *outIndex, uint32_t outIndexLen)
 {
     return 0;
 }
 
-int HksIpcServiceOnCloseRemoteKeyHandleAdapter(const char *index, char *keyIndex, uint32_t keyIndexLen)
+int HksIpcServiceOnCreateRemoteKeyHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *index, 
+    const struct HksParamSet *paramSet, struct HksBlob *remoteHandleOut)
 {
+    std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
+    CppParamSet cppParamSet(paramSet);
+
+    std::string remoteHandle;
+    HksIpcServiceOnCreateRemoteKeyHandle(processInfo, cppIndex, cppParamSet, remoteHandle);
+
+    uint32_t copyLen = std::min(remoteHandleOut->size, static_cast<uint32_t>(remoteHandle.size()));
+    memcpy_s(remoteHandleOut->data, remoteHandleOut->size, remoteHandle.data(), copyLen);
+    remoteHandleOut->size = copyLen;
+
+    // TODO: 错误特判处理
     return 0;
 }
 
-int HksIpcServiceOnSignedAdapter(const char *index, const uint8_t *paramSet, uint32_t paramSetLen, uint8_t *outData, uint32_t *outDataLen)
+int HksIpcServiceOnFindRemoteKeyHandleAdapter(const struct HksProcessInfo *processInfo,  
+    const struct HksBlob *index, const struct HksParamSet *paramSet, struct HksBlob *remoteHandleOut)
 {
+    std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
+    CppParamSet cppParamSet(paramSet);
+
+    std::string remoteHandle;
+    HksIpcServiceOnFindRemoteKeyHandle(processInfo, cppIndex, cppParamSet, remoteHandle);
+
+    uint32_t copyLen = std::min(remoteHandleOut->size, static_cast<uint32_t>(remoteHandle.size()));
+    memcpy_s(remoteHandleOut->data, remoteHandleOut->size, remoteHandle.data(), copyLen);
+    remoteHandleOut->size = copyLen;
+
+    // TODO: 错误特判处理
     return 0;
 }
 
-int HksIpcServiceOnAuthUkeyPinAdapter(const char *index, const uint8_t *pinData, uint32_t pinDataLen, bool *outStatus, int32_t *retryCnt)
+int HksIpcServiceOnCloseRemoteKeyHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *index, 
+    const struct HksParamSet *paramSet)
+{
+    std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
+    CppParamSet cppParamSet(paramSet);
+
+    return HksIpcServiceOnCloseRemoteKeyHandle(processInfo, cppIndex, cppParamSet);
+   
+}
+
+int HksIpcServiceOnSignedAdapter(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+    const struct HksBlob *index, const struct HksBlob *srcData, struct HksBlob *signatureOut)
+{
+    std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
+    std::string cppSrcData(reinterpret_cast<const char*>(srcData->data), srcData->size);
+    CppParamSet cppParamSet(paramSet);
+
+    std::string signature;
+    HksIpcServiceOnSigned(processInfo, cppIndex, cppParamSet, cppSrcData, signature);
+
+    uint32_t copyLen = std::min(signatureOut->size, static_cast<uint32_t>(signature.size()));
+    memcpy_s(signatureOut->data, signatureOut->size, signature.data(), copyLen);
+    signatureOut->size = copyLen;
+
+    // TODO: 错误特判处理
+    return 0;
+}
+
+int HksIpcServiceOnAuthUkeyPinAdapter(const char *index, const uint8_t *pinData, uint32_t pinDataLen, 
+    bool *outStatus, int32_t *retryCnt)
 {
     return 0;
 }

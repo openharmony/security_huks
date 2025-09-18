@@ -9,17 +9,30 @@
 extern "C" {
 #endif
 
-void HksIpcServiceProviderRegisterAdapter(const struct HksBlob *srcData, const uint8_t *context);
-void HksIpcServiceProviderUnRegisterAdapter(const struct HksBlob *srcData, const uint8_t *context);
-void HksIpcServiceRegistLibFunctionAdapter(int32_t funCode, void *fun);
+// 注册注销
+int HksIpcServiceOnProviderRegisterAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *name, 
+    const struct HksParamSet *paramSet);
+int HksIpcServiceOnProviderUnRegisterAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *name, 
+    const struct HksParamSet *paramSet);
 
-int HksIpcServiceOnCreateRemoteIndexAdapter(const char *providerName, const uint8_t *paramSet, uint32_t paramSetLen, char *outIndex, uint32_t outIndexLen);
-int HksIpcServiceOnCreateRemoteKeyHandleAdapter(const char *index);
-int HksIpcServiceOnFindRemoteKeyHandleAdapter(const char *index, char *keyIndex, uint32_t keyIndexLen);
-int HksIpcServiceOnCloseRemoteKeyHandleAdapter(const char *index, char *keyIndex, uint32_t keyIndexLen);
+int HksIpcServiceOnCreateRemoteIndexAdapter(const char *providerName, const uint8_t *paramSet, uint32_t paramSetLen, 
+    char *outIndex, uint32_t outIndexLen);
 
-int HksIpcServiceOnSignedAdapter(const char *index, const uint8_t *paramSet, uint32_t paramSetLen, uint8_t *outData, uint32_t *outDataLen);
-int HksIpcServiceOnAuthUkeyPinAdapter(const char *index, const uint8_t *pinData, uint32_t pinDataLen, bool *outStatus, int32_t *retryCnt);
+int HksIpcServiceOnCreateRemoteKeyHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *index, 
+    const struct HksParamSet *paramSet, struct HksBlob *remoteHandleOut);
+
+int HksIpcServiceOnFindRemoteKeyHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *index, 
+    const struct HksParamSet *paramSet, struct HksBlob *remoteHandleOut);
+
+int HksIpcServiceOnCloseRemoteKeyHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *index, 
+    const struct HksParamSet *paramSet);
+
+int HksIpcServiceOnSignedAdapter(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+    const struct HksBlob *index, const struct HksBlob *data, struct HksBlob *signatureOut);
+
+int HksIpcServiceOnAuthUkeyPinAdapter(const char *index, const uint8_t *pinData, uint32_t pinDataLen, bool *outStatus, 
+    int32_t *retryCnt);
+
 int HksIpcServiceOnGetVerifyPinStatusAdapter(const char *index, int32_t *pinStatus);
 int HksIpcServiceOnClearPinStatusAdapter(const char *index);
 

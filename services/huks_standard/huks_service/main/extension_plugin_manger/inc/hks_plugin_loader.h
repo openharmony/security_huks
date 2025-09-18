@@ -43,8 +43,8 @@ namespace Huks {
 public:
     std::unordered_map<PluginMethodEnum, void*> m_pluginProviderMap;
 
-    int32_t Start(struct HksProcessInfo &info, const std::string& providerName, const CppParamSet& paramSet);
-    int32_t Stop(struct HksProcessInfo &info, const std::string& providerName, const CppParamSet& paramSet);
+    int32_t Start(const struct HksProcessInfo &info, const std::string& providerName, const CppParamSet& paramSet);
+    int32_t Stop(const struct HksProcessInfo &info, const std::string& providerName, const CppParamSet& paramSet);
     static std::shared_ptr<HuksPluginLoader> GetInstanceWrapper();
     static void ReleaseInstance();
     
@@ -53,8 +53,8 @@ private:
     std::atomic<int> m_refCount{0};
     std::mutex libMutex;
 
-    int32_t LoadPlugins(struct HksProcessInfo &info, const std::string& providerName, const CppParamSet& paramSet); // TODO:参数根据生命周期模块的注册函数定义
-    int32_t UnLoadPlugins(struct HksProcessInfo &info, const std::string& providerName, const CppParamSet& paramSet); // TODO:定义
+    int32_t LoadPlugins(const struct HksProcessInfo &info, const std::string& providerName, const CppParamSet& paramSet); // TODO:参数根据生命周期模块的注册函数定义
+    int32_t UnLoadPlugins(const struct HksProcessInfo &info, const std::string& providerName, const CppParamSet& paramSet); // TODO:定义
     static std::string GetMethodByEnum(PluginMethodEnum methodEnum);
 };
 }
