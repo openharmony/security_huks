@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,11 @@ extern "C" {
     #define HKS_API_EXPORT __attribute__ ((visibility("default")))
 #endif
 
-#define HKS_SDK_VERSION "2.0.0.4"
+/*
+ * a.b.c.d => a * 1000 + b * 100 + c * 10 + d
+ * a,b,c,d should in [0, 9]
+ */
+#define HKS_SDK_VERSION "2.0.0.5"
 
 /*
  * Align to 4-tuple
@@ -343,6 +347,14 @@ struct ErrorInfo {
 struct Hks25519KeyPair {
     uint32_t publicBufferSize;
     uint32_t privateBufferSize;
+};
+
+/**
+ * @brief hks import keystore args
+ */
+struct HksImportKeyStoreArgs {
+    const struct HksBlob keyAlias;
+    uint32_t uidInt;
 };
 
 static inline bool IsAdditionOverflow(uint32_t a, uint32_t b)

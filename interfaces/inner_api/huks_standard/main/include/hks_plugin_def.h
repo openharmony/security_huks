@@ -50,6 +50,7 @@ enum LocalRequestCode {
     CODE_STATISTICS_METRICS = 3,
     CODE_SA_WRAP_KEY = 4,
     CODE_SA_UNWRAP_KEY = 5,
+    CODE_IMPORT_KEY_STORE = 6,
 };
 
 /**
