@@ -34,33 +34,12 @@
 #include "hks_template.h"
 #include "securec.h"
 #define REQUIRED_KEY_NOT_AVAILABLE 126
+#define FILE_TIME_LEN 64
 
 #define UNKNOWN_TYPE (-1)
 #define DE_TYPE 0
 #define CE_TYPE 1
 #define ECE_TYPE 2
-
-static char *GetTimeString(const time_t *timer)
-{
-    char *saveTime = NULL;
-    char *time = ctime(timer);
-    do {
-        HKS_IF_TRUE_BREAK(time == NULL);
-
-        size_t timeLen = strlen(time);
-        HKS_IF_TRUE_BREAK(timeLen <= 0);
-
-        saveTime = (char *)HksMalloc(timeLen);
-        HKS_IF_TRUE_BREAK(saveTime == NULL);
-
-        if (memcpy_s(saveTime, timeLen, time, timeLen) != EOK) {
-            HKS_LOG_E("memcpy_s failed");
-            break;
-        }
-        saveTime[timeLen - 1] = '\0';
-    } while (0);
-    return saveTime;
-}
 
 static int32_t GetFileName(const char *path, const char *fileName, char *fullFileName, uint32_t fullFileNameLen)
 {
@@ -143,6 +122,17 @@ static int32_t IsFileExist(const char *fileName)
     return HKS_SUCCESS;
 }
 
+static void UnixToString(char *outTime, time_t unixTime, char *format)
+{
+    HKS_IF_TRUE_LOGE_RETURN_VOID(outTime == NULL || format == NULL, "outTime or format is NULL");
+
+    struct tm* localTime = localtime(&unixTime);
+    HKS_IF_NULL_LOGE_RETURN_VOID(localTime, "localTime is NULL");
+
+    size_t size = strftime(outTime, FILE_TIME_LEN, format, localTime);
+    HKS_IF_TRUE_LOGE_RETURN_VOID(size == 0, "create format time failed");
+}
+
 static int32_t FileRead(const char *fileName, uint32_t offset, struct HksBlob *blob, uint32_t *size)
 {
     (void)offset;
@@ -174,13 +164,11 @@ static int32_t FileRead(const char *fileName, uint32_t offset, struct HksBlob *b
         return HKS_ERROR_OPEN_FILE_FAIL;
     }
 
-    char *cTime = GetTimeString(&fileStat.st_ctime);
-    char *mTime = GetTimeString(&fileStat.st_mtime);
-    if (cTime != NULL && mTime != NULL) {
-        HKS_LOG_I("File ctime: %" LOG_PUBLIC "s, mtime: %" LOG_PUBLIC "s", cTime, mTime);
-    }
-    HKS_FREE(cTime);
-    HKS_FREE(mTime);
+    char cTime[FILE_TIME_LEN] = {0};
+    char mTime[FILE_TIME_LEN] = {0};
+    UnixToString(cTime, fileStat.st_ctime, "%Y-%m-%d %H:%M:%S");
+    UnixToString(mTime, fileStat.st_mtime, "%Y-%m-%d %H:%M:%S");
+    HKS_LOG_I("File ctime: %" LOG_PUBLIC "s, mtime: %" LOG_PUBLIC "s", cTime, mTime);
 
     uint32_t len = fread(blob->data, 1, blob->size, fp);
     if (fclose(fp) < 0) {
