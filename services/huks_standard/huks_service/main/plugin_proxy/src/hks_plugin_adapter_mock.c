@@ -65,3 +65,10 @@ int32_t HksPluginWrapKey(const struct HksBlob *srcData, const uint8_t *context)
     (void)(context);
     return HKS_SUCCESS;
 }
+
+int32_t HksPluginImportWrappedKey(const struct HksImportKeyStoreArgs *data, struct HksBlob *reply)
+{
+    (void)(data);
+    (void)(reply);
+    return HKS_SUCCESS;
+}

@@ -222,6 +222,8 @@ enum HuksAlgSuite {
      *  |          iv_data_length     (4 Byte) |            iv_data  |key_material_size_len (4 Byte) | key_material_size
      */
     HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7 = 4,
+
+    HKS_UNWRAP_SUITE_KEYSTORE = 255,
 };
 
 /**

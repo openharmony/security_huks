@@ -37,6 +37,8 @@ void HksPluginOnReceiveEvent(const void *data);
 int32_t HksPluginOnLocalRequestWrapKey(uint32_t code, const void *data, void *reply);
 int32_t HksPluginWrapKey(const struct HksBlob *srcData, const uint8_t *context);
 
+int32_t HksPluginImportWrappedKey(const struct HksImportKeyStoreArgs *data, struct HksBlob *reply);
+
 #ifdef __cplusplus
 }
 #endif
