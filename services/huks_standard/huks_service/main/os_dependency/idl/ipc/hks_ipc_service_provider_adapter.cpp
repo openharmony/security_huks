@@ -13,7 +13,7 @@ int HksIpcServiceOnProviderRegisterAdapter(const struct HksProcessInfo *processI
     std::string cppIndex(reinterpret_cast<const char*>(name->data), name->size);
     CppParamSet cppParamSet(paramSet);
 
-    return HksIpcServiceProviderRegister(processInfo, cppIndex, cppParamSet);
+    return OHOS::Security::Huks::HksIpcServiceProviderRegister(processInfo, cppIndex, cppParamSet);
 }
 
 int HksIpcServiceOnProviderUnRegisterAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *name, 
@@ -23,7 +23,7 @@ int HksIpcServiceOnProviderUnRegisterAdapter(const struct HksProcessInfo *proces
     std::string cppIndex(reinterpret_cast<const char*>(name->data), name->size);
     CppParamSet cppParamSet(paramSet);
 
-    return HksIpcServiceProviderRegister(processInfo, cppIndex, cppParamSet);
+    return OHOS::Security::Huks::HksIpcServiceProviderRegister(processInfo, cppIndex, cppParamSet);
 }
 
 
@@ -40,7 +40,7 @@ int HksIpcServiceOnCreateRemoteKeyHandleAdapter(const struct HksProcessInfo *pro
     CppParamSet cppParamSet(paramSet);
 
     std::string remoteHandle;
-    HksIpcServiceOnCreateRemoteKeyHandle(processInfo, cppIndex, cppParamSet, remoteHandle);
+    OHOS::Security::Huks::HksIpcServiceOnCreateRemoteKeyHandle(processInfo, cppIndex, cppParamSet, remoteHandle);
 
     uint32_t copyLen = std::min(remoteHandleOut->size, static_cast<uint32_t>(remoteHandle.size()));
     memcpy_s(remoteHandleOut->data, remoteHandleOut->size, remoteHandle.data(), copyLen);
@@ -57,7 +57,7 @@ int HksIpcServiceOnFindRemoteKeyHandleAdapter(const struct HksProcessInfo *proce
     CppParamSet cppParamSet(paramSet);
 
     std::string remoteHandle;
-    HksIpcServiceOnFindRemoteKeyHandle(processInfo, cppIndex, cppParamSet, remoteHandle);
+    OHOS::Security::Huks::HksIpcServiceOnFindRemoteKeyHandle(processInfo, cppIndex, cppParamSet, remoteHandle);
 
     uint32_t copyLen = std::min(remoteHandleOut->size, static_cast<uint32_t>(remoteHandle.size()));
     memcpy_s(remoteHandleOut->data, remoteHandleOut->size, remoteHandle.data(), copyLen);
@@ -73,7 +73,7 @@ int HksIpcServiceOnCloseRemoteKeyHandleAdapter(const struct HksProcessInfo *proc
     std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
     CppParamSet cppParamSet(paramSet);
 
-    return HksIpcServiceOnCloseRemoteKeyHandle(processInfo, cppIndex, cppParamSet);
+    return OHOS::Security::Huks::HksIpcServiceOnCloseRemoteKeyHandle(processInfo, cppIndex, cppParamSet);
    
 }
 
@@ -85,7 +85,7 @@ int HksIpcServiceOnSignedAdapter(const struct HksProcessInfo *processInfo, const
     CppParamSet cppParamSet(paramSet);
 
     std::string signature;
-    HksIpcServiceOnSigned(processInfo, cppIndex, cppParamSet, cppSrcData, signature);
+    OHOS::Security::Huks::HksIpcServiceOnSigned(processInfo, cppIndex, cppParamSet, cppSrcData, signature);
 
     uint32_t copyLen = std::min(signatureOut->size, static_cast<uint32_t>(signature.size()));
     memcpy_s(signatureOut->data, signatureOut->size, signature.data(), copyLen);
