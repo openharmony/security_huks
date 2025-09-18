@@ -28,7 +28,7 @@ void ExtensionConnectionTest::TearDownTestCase(void) {
 
 void ExtensionConnectionTest::SetUp() {
     extensionConn = std::make_shared<ExtensionConnection>();
-    ASSERT_NE(extensionConn, nullptr);
+    EXPECT_NE(extensionConn, nullptr) << "extensionConn invalid fail";
 }
 
 void ExtensionConnectionTest::TearDown() {
@@ -55,38 +55,10 @@ HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest001, TestSize.Level10) 
 
 /**
  * @tc.name: ExtensionConnectionTest.ExtensionConnectionTest002
- * @tc.desc: connect fail.
+ * @tc.desc: disconnect.
  * @tc.type: FUNC
  */
 HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest002, TestSize.Level10) {
-    AppExecFwk::ElementName element;
-    int resultCode = 0;
-    extensionConn->OnAbilityConnectDone(element, nullptr, resultCode);
-
-    EXPECT_EQ(extensionConn->IsConnected(), true) << "IsConnected is true";
-    EXPECT_EQ(extensionConn->GetExtConnectProxy(), nullptr) << "extConnectProxy is not nullptr";
-}
-
-/**
- * @tc.name: ExtensionConnectionTest.ExtensionConnectionTest003
- * @tc.desc: connect time out.
- * @tc.type: FUNC
- */
-HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest003, TestSize.Level10) {
-    Want want;
-    int32_t ret = extensionConn->OnConnection(want);
-
-    EXPECT_EQ(ret, HKS_ERROR_CONNECT_TIME_OUT) << "ret is not time out";
-    EXPECT_EQ(extensionConn->IsConnected(), false) << "IsConnected is true";
-    EXPECT_EQ(extensionConn->GetExtConnectProxy(), nullptr) << "extConnectProxy is not nullptr";
-}
-
-/**
- * @tc.name: ExtensionConnectionTest.ExtensionConnectionTest004
- * @tc.desc: connect and disconnect.
- * @tc.type: FUNC
- */
-HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest004, TestSize.Level10) {
     EXPECT_CALL(*mockProxy, AsObject()).WillRepeatedly(Return(mockRemoteObject)) << "mockProxy is nullptr";
     EXPECT_CALL(*mockRemoteObject, AddDeathRecipient(_, _)).Times(1) << "AddDeathRecipient fail";
 
@@ -104,11 +76,11 @@ HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest004, TestSize.Level10) 
 }
 
 /**
- * @tc.name: ExtensionConnectionTest.ExtensionConnectionTest005
+ * @tc.name: ExtensionConnectionTest.ExtensionConnectionTest003
  * @tc.desc: death recipient callback.
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest005, TestSize.Level10) {
+HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest003, TestSize.Level10) {
     EXPECT_CALL(*mockProxy, AsObject()).WillRepeatedly(Return(mockRemoteObject));
     EXPECT_CALL(*mockRemoteObject, AddDeathRecipient(_, _)).Times(1);
 
@@ -119,6 +91,34 @@ HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest005, TestSize.Level10) 
     wptr<IRemoteObject> remote(mockRemoteObject);
     extensionConn->OnRemoteDied(remote);
 
+    EXPECT_EQ(extensionConn->IsConnected(), false) << "IsConnected is true";
+    EXPECT_EQ(extensionConn->GetExtConnectProxy(), nullptr) << "extConnectProxy is not nullptr";
+}
+
+/**
+ * @tc.name: ExtensionConnectionTest.ExtensionConnectionTest004
+ * @tc.desc: connect fail.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest004, TestSize.Level10) {
+    AppExecFwk::ElementName element;
+    int resultCode = 0;
+    extensionConn->OnAbilityConnectDone(element, nullptr, resultCode);
+
+    EXPECT_EQ(extensionConn->IsConnected(), true) << "IsConnected is true";
+    EXPECT_EQ(extensionConn->GetExtConnectProxy(), nullptr) << "extConnectProxy is not nullptr";
+}
+
+/**
+ * @tc.name: ExtensionConnectionTest.ExtensionConnectionTest005
+ * @tc.desc: connect time out.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest005, TestSize.Level10) {
+    Want want;
+    int32_t ret = extensionConn->OnConnection(want);
+
+    EXPECT_EQ(ret, HKS_ERROR_CONNECT_TIME_OUT) << "ret is not time out";
     EXPECT_EQ(extensionConn->IsConnected(), false) << "IsConnected is true";
     EXPECT_EQ(extensionConn->GetExtConnectProxy(), nullptr) << "extConnectProxy is not nullptr";
 }
