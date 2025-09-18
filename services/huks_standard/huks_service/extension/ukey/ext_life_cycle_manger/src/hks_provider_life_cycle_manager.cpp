@@ -14,7 +14,8 @@
  */
 
 #include "hks_provider_life_cycle_manager.h"
-//  #include "hks_extension_connection.h"
+#include "base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc/hks_extension_connection.h"
+ #include "hks_extension_connection.h"
 #include "hks_cpp_paramset.h"
 #include "if_system_ability_manager.h"
 #include "bundle_mgr_client.h"
@@ -47,17 +48,16 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
     const std::string &providerName, const CppParamSet &paramSet)//deviceID
 {
     // TODO: ConnetExtension and get the sptr<IRemoteObject>
-//  auto extConnect = ExtensionConnection::GetInstanceWrapper();
-//  HKS_IF_TRUE_LOGE_RETURN(extConnect == nullptr, HKS_ERROR_CONNECT_FAIL, "Fail to get extension connection instance")
 
     // bundleName、abilityName
-//  OHOS::AAFwk::Want want;
-//  // want.deviceId = paramSet;
-//  // want.bundleName = providerName;
-//  int32_t ret = extConnect->OnConnection(want);
-//  HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_NULL_POINTER, "Fail to connect AMS")
-//  sptr<IRemoteObject> retProxy = extConnect->GetExtConnectProxy();
-//  m_providerMap.emplace(std::make_pair(providerName, retProxy));
+    // TODO: need to get the bundleName、abilityName from paramSet
+    AAFwk::Want want{};
+    sptr<ExtensionConnection> connect(new (std::nothrow) ExtensionConnection());
+    HKS_IF_TRUE_LOGE_RETURN(connect == nullptr, HKS_ERROR_NULL_POINTER, "new ExtensionConnection failed");
+
+    if (!connect->IsConnected()) {
+        connect->OnConnection(want);
+    }
     return HKS_SUCCESS;
 }
 

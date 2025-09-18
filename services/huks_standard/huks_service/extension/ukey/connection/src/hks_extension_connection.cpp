@@ -14,7 +14,9 @@
  */
 
 #include "hks_extension_connection.h"
-
+#include "ability_manager_client.h"
+#include "hks_log.h"
+#include "hks_template.h"
 namespace OHOS {
 namespace Security {
 namespace Huks {

@@ -25,11 +25,14 @@ if (os_level == "standard") {
 
     include_dirs = [
       "inc",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc"
     ]
 
     sources = [
       "src/hks_provider_life_cycle_manager.cpp",
     ]
+
+    deps = []
 
     public_deps = [
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
@@ -56,6 +59,7 @@ if (os_level == "standard") {
       "c_utils:utils",
       "hilog:libhilog",
       "ipc:ipc_single",
+      "ability_runtime:ability_connect_callback_stub",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "samgr:samgr_proxy",

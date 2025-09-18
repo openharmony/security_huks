@@ -21,10 +21,8 @@
 #include <securec.h>
 
 #include "ability_connect_callback_stub.h"
-#include "ability_manager_client.h"
 #include "iremote_object.h"
-#include "hks_log.h"
-#include "hks_template.h"
+
 #include "want.h"
  
 
