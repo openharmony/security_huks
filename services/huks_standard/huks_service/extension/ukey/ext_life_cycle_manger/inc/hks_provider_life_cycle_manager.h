@@ -17,10 +17,13 @@
 #define HKS_PROVIDER_LIFE_CYCLE_MANAGER_H
 
 #include <memory>
+#include <mutex>
+#include <set>
 #include <shared_mutex>
 #include <string>
 #include <unordered_map>
 #include <securec.h>
+#include <unordered_set>
 
 #include "hks_cpp_paramset.h"
 #include "hks_plugin_def.h"
@@ -29,6 +32,8 @@
 #include "iremote_object.h"
 #include "iremote_proxy.h"
 #include "iremote_stub.h"
+#include "want.h"
+#include "hks_extension_connection.h"
 
 namespace OHOS {
 namespace Security {
@@ -39,23 +44,38 @@ public:
     std::string m_providerName{};
     std::string m_abilityName{};
     std::string m_bundleName{};
+
+    bool operator==(const ProviderInfo &other) const;
+    bool operator<(const ProviderInfo &other) const;
+};
+
+class HksExtAbilityConnectInfo {
+public:
+    HksExtAbilityConnectInfo(const AAFwk::Want &want, const sptr<ExtensionConnection> &connection)
+        : m_want(want), m_connection(connection) {};
+    ~HksExtAbilityConnectInfo() = default;
+    AAFwk::Want m_want{};
+    sptr<ExtensionConnection> m_connection{nullptr};
 };
 
 int32_t HksGetProviderInfo(const HksProcessInfo &processInfo, const std::string &providerName,
     const CppParamSet &paramSet, ProviderInfo &providerInfo);
 
-class HksProviderLifeCycleManager : private OHOS::DelayedSingleton<HksProviderLifeCycleManager> {
+class HksProviderLifeCycleManager : private OHOS::DelayedSingleton<HksProviderLifeCycleManager>,
+    std::enable_shared_from_this<HksProviderLifeCycleManager> {
 public:
     static std::shared_ptr<HksProviderLifeCycleManager> GetInstanceWrapper();
     static void ReleaseInstance();
-    int32_t OnRegisterProvider(const HksProcessInfo &processInfo, const std::string &AbilityName,
+    int32_t OnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName,
         const CppParamSet &paramSet);
-    int32_t OnUnRegisterProvider(const HksProcessInfo &processInfo, const std::string &AbilityName,
+    int32_t OnUnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName,
         const CppParamSet &paramSet);
-    sptr<IRemoteObject> GetExtensionProxy(const std::string &providerInfo);
+    int32_t GetExtensionProxy(const ProviderInfo &providerInfo, sptr<IRemoteObject> &proxy);
+
+    int32_t InsertConnectedProvider(const ProviderInfo &providerInfo, sptr<IRemoteObject> proxy);
 private:
-    // ProviderName + userId + bundleName
-    OHOS::SafeMap<std::string, OHOS::sptr<IRemoteObject>> m_providerMap;
+    // ProviderInfo, proxy
+    OHOS::SafeMap<ProviderInfo, std::shared_ptr<HksExtAbilityConnectInfo>> m_providerMap{};
 };
 }
 }

@@ -14,8 +14,6 @@
  */
 
 #include "hks_provider_life_cycle_manager.h"
-#include "base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc/hks_extension_connection.h"
- #include "hks_extension_connection.h"
 #include "hks_cpp_paramset.h"
 #include "if_system_ability_manager.h"
 #include "bundle_mgr_client.h"
@@ -34,6 +32,17 @@
 
 namespace OHOS::Security::Huks {
 
+bool ProviderInfo::operator==(const ProviderInfo &other) const
+{
+    return m_bundleName == other.m_bundleName && m_providerName == other.m_providerName && 
+        m_abilityName == other.m_abilityName;
+}
+
+bool ProviderInfo::operator<(const ProviderInfo &other) const
+{
+    return m_providerName < other.m_providerName;
+}
+
 std::shared_ptr<HksProviderLifeCycleManager> HksProviderLifeCycleManager::GetInstanceWrapper()
 {
     return HksProviderLifeCycleManager::GetInstance();
@@ -45,41 +54,58 @@ void HksProviderLifeCycleManager::ReleaseInstance()
 }
 
 int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet)//deviceID
+    const std::string &providerName, const CppParamSet &paramSet)
 {
-    // TODO: ConnetExtension and get the sptr<IRemoteObject>
+    ProviderInfo providerInfo{};
+    int32_t ret = HksGetProviderInfo(processInfo, providerName, paramSet, providerInfo);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_NULL_POINTER, "Fail to get provider info")
 
-    // bundleName、abilityName
-    // TODO: need to get the bundleName、abilityName from paramSet
     AAFwk::Want want{};
+    want.SetElementName(providerInfo.m_bundleName, providerInfo.m_abilityName);
     sptr<ExtensionConnection> connect(new (std::nothrow) ExtensionConnection());
     HKS_IF_TRUE_LOGE_RETURN(connect == nullptr, HKS_ERROR_NULL_POINTER, "new ExtensionConnection failed");
 
     if (!connect->IsConnected()) {
         connect->OnConnection(want);
     }
+
+    auto proxy = connect->GetExtConnectProxy();
+    HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NULL_POINTER, "GetExtConnectProxy failed");
+
+    auto connectInfo = std::make_shared<HksExtAbilityConnectInfo>(want, connect);
+    m_providerMap.Insert(providerInfo, connectInfo);
     return HKS_SUCCESS;
 }
 
-sptr<IRemoteObject> HksProviderLifeCycleManager::GetExtensionProxy(const std::string &providerInfo)
+int32_t HksProviderLifeCycleManager::GetExtensionProxy(const ProviderInfo &providerInfo, sptr<IRemoteObject> &proxy)
 {
-    sptr<IRemoteObject> retProxy = nullptr;
-    if(!m_providerMap.Find(providerInfo, retProxy)) {
-        HKS_LOG_E("GetExtensionProxy failed, providerName: %s", providerInfo.c_str());
-        return nullptr;
+    std::shared_ptr<HksExtAbilityConnectInfo> connectionInfo = nullptr;
+    if(!m_providerMap.Find(providerInfo, connectionInfo)) {
+        HKS_LOG_E("GetExtensionProxy failed, providerName: %s", providerInfo.m_providerName.c_str());
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
-    return retProxy;
+    HKS_IF_TRUE_LOGE_RETURN(connectionInfo == nullptr, HKS_ERROR_NULL_POINTER, "connectionInfo is nullptr")
+    HKS_IF_TRUE_LOGE_RETURN(connectionInfo->m_connection == nullptr, HKS_ERROR_NULL_POINTER, "m_connection is nullptr")
+    proxy = connectionInfo->m_connection->GetExtConnectProxy();
+    return HKS_SUCCESS;
 }
 
 int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &processInfo,
     const std::string &providerName, [[maybe_unused]] const CppParamSet &paramSet)
 {
-    sptr<IRemoteObject> retProxy = nullptr;
-    if(!m_providerMap.Find(providerName, retProxy)) {
+    std::shared_ptr<HksExtAbilityConnectInfo> connectionInfo = nullptr;
+    ProviderInfo providerInfo{};
+    int32_t ret = HksGetProviderInfo(processInfo, providerName, paramSet, providerInfo);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_NULL_POINTER, "Fail to get provider info")
+    if(!m_providerMap.Find(providerInfo, connectionInfo)) {
         HKS_LOG_E("OnUnRegisterProvider failed, unfound providerName: %s", providerName.c_str());
         return HKS_ERROR_NOT_EXIST;
     }
-    m_providerMap.Erase(providerName);
+    HKS_IF_TRUE_LOGE_RETURN(connectionInfo == nullptr, HKS_ERROR_NULL_POINTER, "connectionInfo is nullptr")
+    HKS_IF_TRUE_LOGE_RETURN(connectionInfo->m_connection == nullptr, HKS_ERROR_NULL_POINTER, "m_connection is nullptr")
+
+    connectionInfo->m_connection->OnDisconnect();
+    m_providerMap.Erase(providerInfo);
     return HKS_SUCCESS;
 }
 
