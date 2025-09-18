@@ -21,11 +21,12 @@
 #include <securec.h>
 
 #include "ability_connect_callback_stub.h"
+#include "ability_manager_client.h"
 #include "iremote_object.h"
- #include "hks_log.h"
- #include "hks_template.h"
+#include "hks_log.h"
+#include "hks_template.h"
+#include "want.h"
  
-
 
 namespace OHOS {
 namespace Security {
@@ -33,14 +34,14 @@ namespace Huks {
 
 class ExtensionConnection : public OHOS::AAFwk::AbilityConnectionStub {
 public:
-    int32_t OnConnection(const Want &want);
+    int32_t OnConnection(const AAFwk::Want &want);
     void OnAbilityConnectDone(const AppExecFwk::ElementName& element,
         const sptr<IRemoteObject>& remoteObject, int resultCode) override;
     void OnDisconnect();
     void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) override;
     
-    bool IsConnected() const;
-    sptr<DesignAccessExtBase> GetExtConnectProxy();
+    bool IsConnected();
+    sptr<IRemoteObject> GetExtConnectProxy();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
 
 private: 
@@ -51,7 +52,7 @@ private:
     std::atomic<bool> isConnected_ = {false}; // 供provider检测连接状态
     std::mutex deathRecipientMutex_;
     sptr<IRemoteObject::DeathRecipient> callerDeathRecipient_ = nullptr;
-    sptr<DesignAccessExtBase> extConnectProxy;
+    sptr<IRemoteObject> extConnectProxy;
     
     void AddExtDeathRecipient(const wptr<IRemoteObject>& token);
     void RemoveExtDeathRecipient(const wptr<IRemoteObject>& token);
@@ -60,7 +61,7 @@ private:
 class ExtensionDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
     using RemoteDiedHandler = std::function<void(const wptr<IRemoteObject> &)>;
-    explicit ExtensionDeathRecipient(RemoteDiedHandler &handler);
+    explicit ExtensionDeathRecipient(RemoteDiedHandler handler);
     virtual ~ExtensionDeathRecipient();
     virtual void OnRemoteDied(const wptr<IRemoteObject> &remote);
 private:
