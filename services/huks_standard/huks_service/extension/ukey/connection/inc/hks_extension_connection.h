@@ -22,6 +22,7 @@
 
 #include "ability_connect_callback_stub.h"
 #include "iremote_object.h"
+#include "ihuks_access_ext_base.h"
 
 #include "want.h"
  
@@ -39,7 +40,7 @@ public:
     void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) override;
     
     bool IsConnected();
-    sptr<IRemoteObject> GetExtConnectProxy();
+    sptr<IHuksAccessExtBase> GetExtConnectProxy();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
 
 private: 
@@ -50,7 +51,7 @@ private:
     std::atomic<bool> isConnected_ = {false}; // 供provider检测连接状态
     std::mutex deathRecipientMutex_;
     sptr<IRemoteObject::DeathRecipient> callerDeathRecipient_ = nullptr;
-    sptr<IRemoteObject> extConnectProxy;
+    sptr<IHuksAccessExtBase> extConnectProxy;
     
     void AddExtDeathRecipient(const wptr<IRemoteObject>& token);
     void RemoveExtDeathRecipient(const wptr<IRemoteObject>& token);

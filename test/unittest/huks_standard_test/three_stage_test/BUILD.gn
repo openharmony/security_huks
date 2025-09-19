@@ -53,9 +53,6 @@ ohos_unittest("huks_UT_test") {
     "src/hks_backup_test.cpp",
     "src/hks_batch_test.cpp",
 
-    # hks_ukey
-    # "src/hks_ukey/hks_extension_connection_test.cpp",
-
     # "src/hks_ce_update_test.cpp",
     "src/hks_check_pur_part_test.cpp",
     "src/hks_cross_test.cpp",
