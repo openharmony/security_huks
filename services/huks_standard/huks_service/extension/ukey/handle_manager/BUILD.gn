@@ -12,19 +12,7 @@
 # limitations under the License.
 
 import("//base/security/huks/build/config.gni")
-import("//build/config/components/idl_tool/idl.gni")
 import("//build/ohos.gni")
-
-idl_gen_interface("huks_access_ext_base") {
-  src_idl = rebase_path("IHuksAccessExtBase.idl")
-}
-
-config("huks_access_ext_base_config") {
-  include_dirs = [
-    "${target_gen_dir}",
-    "inc",
-  ]
-}
 
 if (os_level == "standard") {
   ohos_static_library("libhuks_remote_handle_manager_static") {
@@ -45,11 +33,9 @@ if (os_level == "standard") {
       "src/hks_remote_handle_manager.cpp",
     ]
     
-    public_configs = [":huks_access_ext_base_config"]
 
     deps = [
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger:libhuks_provider_life_cycle_manager_static",
-      ":huks_access_ext_base",
     ]
     public_deps = [
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
