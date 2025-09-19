@@ -1003,13 +1003,9 @@ struct HksImportWrappedInnerArgs {
 static int32_t GetAndImportKeystoreKey(const struct HksImportWrappedInnerArgs *args,
     struct HksParamSet **newParamSet, struct HksBlob *keyOut)
 {
-    struct HksParam *authTypeParam = NULL;
-    int32_t ret = HksGetParam(args->paramSet, HKS_TAG_USER_AUTH_TYPE, &authTypeParam);
-    HKS_IF_TRUE_LOGE_RETURN(ret == HKS_SUCCESS, HKS_ERROR_NOT_SUPPORTED, "access control not support import")
-
     struct HksBlob cipherKey = { 0, NULL };
     struct HksImportKeyStoreArgs data = { .keyAlias = *args->keyAlias, .uidInt = args->processInfo->uidInt };
-    ret = HksPluginImportWrappedKey(&data, &cipherKey);
+    int32_t ret = HksPluginImportWrappedKey(&data, &cipherKey);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
         "HksPluginImportWrappedKey failed, ret = %" LOG_PUBLIC "d", ret)
     do {
