@@ -37,7 +37,8 @@ if (os_level == "standard") {
     include_dirs = [
       "inc",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger/inc",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common/inc"
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common/inc",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc"
     ]
 
     sources = [
@@ -74,6 +75,9 @@ if (os_level == "standard") {
       "c_utils:utils",
       "hilog:libhilog",
       "ipc:ipc_single",
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_core",
+      "ability_runtime:ability_connect_callback_stub",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "samgr:samgr_proxy",
