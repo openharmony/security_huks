@@ -44,7 +44,7 @@ if (os_level == "standard") {
     
     public_configs = [":huks_access_ext_base_config"]
 
-    public_deps = [
+    deps = [
       ":huks_access_ext_base",
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
