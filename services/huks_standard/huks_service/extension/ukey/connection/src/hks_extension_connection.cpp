@@ -28,11 +28,10 @@ void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementNa
     const sptr<IRemoteObject>& remoteObject, int resultCode) {
     HKS_IF_TRUE_RETURN_VOID(remoteObject == nullptr)
 
-    // extConnectProxy = iface_cast<IRemoteObject>(remoteObject);
-    extConnectProxy = remoteObject;
+    extConnectProxy = iface_cast<IHuksAccessExtBase>(remoteObject);
     HKS_IF_TRUE_RETURN_VOID(extConnectProxy == nullptr)
 
-    // AddExtDeathRecipient(extConnectProxy->AsObject()); // TODO:DesignAccessExtBase需要实现AsObject()
+    AddExtDeathRecipient(extConnectProxy->AsObject()); // TODO:DesignAccessExtBase需要实现AsObject()
     
     std::lock_guard<std::mutex> lock(proxyMutex_);
     isConnected_.store(true);
@@ -72,7 +71,7 @@ void ExtensionConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName&
     isReady = false;
 }
 
-sptr<IRemoteObject> ExtensionConnection::GetExtConnectProxy() {
+sptr<IHuksAccessExtBase> ExtensionConnection::GetExtConnectProxy() {
     return extConnectProxy;
 }
 
