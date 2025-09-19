@@ -15,7 +15,8 @@
 sequenceable HksCppParamset..CppParamSet;
 interface OHOS.Huks.IHuksAccessExtBase {
 
-    [ipccode 1] void test([in] CppParamSet testIn, [out] List<String> testOut);
+    [ipccode 1] void ICreateRemoteIndex([in] CppParamSet testIn, [out] String index);
+
     
     
 }

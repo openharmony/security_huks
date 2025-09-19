@@ -13,7 +13,18 @@
 
 import("//base/security/huks/build/config.gni")
 import("//build/ohos.gni")
+import("//build/config/components/idl_tool/idl.gni")
 
+idl_gen_interface("huks_access_ext_base") {
+  src_idl = rebase_path("IHuksAccessExtBase.idl")
+}
+
+config("huks_access_ext_base_config") {
+  include_dirs = [
+    "${target_gen_dir}",
+    "inc",
+  ]
+}
 
 if (os_level == "standard") {
   ohos_static_library("libhuks_ukey_common_static") {
@@ -31,8 +42,13 @@ if (os_level == "standard") {
       "src/hks_json_wrapper.cpp",
     ]
     
-    public_deps = [
+    public_configs = [":huks_access_ext_base_config"]
+
+    deps = [
+      ":huks_access_ext_base",
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
     ]
     complete_static_lib = true
     cflags = []
@@ -51,10 +67,14 @@ if (os_level == "standard") {
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
+      "ipc:ipc_single",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
-      "cJSON:cjson",
+      "ability_runtime:ability_connect_callback_stub",
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_core",
       "samgr:samgr_proxy",
+      "cJSON:cjson",
     ]
   }
 }
