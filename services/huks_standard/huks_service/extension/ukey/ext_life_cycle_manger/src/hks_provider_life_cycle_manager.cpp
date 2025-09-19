@@ -70,10 +70,13 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
     }
 
     auto proxy = connect->GetExtConnectProxy();
-    HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NULL_POINTER, "GetExtConnectProxy failed");
+    HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NULL_POINTER, "GetExtConnectProxy failed.");
 
-    auto connectInfo = std::make_shared<HksExtAbilityConnectInfo>(want, connect);
-    m_providerMap.Insert(providerInfo, connectInfo);
+    std::shared_ptr<HksExtAbilityConnectInfo> connectInfo{nullptr};
+    if (!m_providerMap.Find(providerInfo, connectInfo)) {
+        connectInfo = std::make_shared<HksExtAbilityConnectInfo>(want, connect);
+        m_providerMap.Insert(providerInfo, connectInfo);
+    }
     return HKS_SUCCESS;
 }
 
