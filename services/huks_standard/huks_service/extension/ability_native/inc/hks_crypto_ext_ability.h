@@ -43,6 +43,9 @@ public:
     
     virtual int test(const std::string& testIn, std::vector<std::string>& testOut);
     virtual int OnCreateRemoteIndex(const std::string& abilityName, std::string& index);
+    virtual int OnGetRemoteHandle(const std::string& index, std::string& handle);
+    virtual int OnOpenRemoteHandle(const std::string& handle);
+    virtual int OnCloseRemoteHandle(const std::string& index);
 private:
     static CreatorFunc creator_;
 };

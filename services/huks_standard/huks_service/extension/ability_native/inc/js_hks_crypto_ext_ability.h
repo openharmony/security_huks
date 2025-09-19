@@ -58,6 +58,9 @@ public:
     sptr<IRemoteObject> OnConnect(const AAFwk::Want &want) override;
     int test(const std::string &testIn, std::vector<std::string> &testOut) override;
     int OnCreateRemoteIndex(const std::string& abilityName, std::string& index) override;
+    int OnGetRemoteHandle(const std::string& index, std::string& handle) override;
+    int OnOpenRemoteHandle(const std::string& handle) override;
+    int OnCloseRemoteHandle(const std::string& index) override;
 private:
     template <typename T>
     struct Value {

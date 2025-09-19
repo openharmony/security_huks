@@ -74,6 +74,24 @@ int HksCryptoExtAbility::OnCreateRemoteIndex(const std::string& abilityName, std
     LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO OnCreateRemoteIndex(BASE)");
     return true;
 }
+
+int HksCryptoExtAbility::OnGetRemoteHandle(const std::string& index, std::string& handle)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO OnGetRemoteHandle(BASE)");
+    return true;
+}
+
+int HksCryptoExtAbility::OnOpenRemoteHandle(const std::string& handle)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO OnOpenRemoteHandle(BASE)");
+    return true;
+}
+
+int HksCryptoExtAbility::OnCloseRemoteHandle(const std::string& index)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO OnCloseRemoteHandle(BASE)");
+    return true;
+}
 } // namespace HUKS
 } // namespace Security
 } // namespace OHOS

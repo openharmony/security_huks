@@ -14,6 +14,7 @@
  */
 // #include "hks_log.h"
 #include "js_hks_crypto_ext_ability.h"
+#include "errors.h"
 #include "hks_crypto_ext_stub_impl.h"
 #include "extension_context.h"
 #include "if_system_ability_manager.h"
@@ -396,6 +397,124 @@ int32_t JsHksCryptoExtAbility::OnCreateRemoteIndex(const std::string &abilityNam
     return ERR_OK;
 }
 
-} // namespace Huks
+int JsHksCryptoExtAbility::OnGetRemoteHandle(const std::string& index, std::string& handle)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsHksCryptoExtAbility(JS) OnGetRemoteHandle");
+
+    auto value = std::make_shared<Value<std::string>>();
+        if (value == nullptr) {
+        LOGE("Query value is nullptr.");
+        return -1;
+    }
+
+    auto argParser = [index](napi_env &env, napi_value *argv, size_t &argc) -> bool {
+        napi_value nativeIndex = nullptr;
+        napi_create_string_utf8(env, index.c_str(), index.length(), &nativeIndex);
+        argv[ARGC_ZERO] = nativeIndex;
+        argc = ARGC_ONE;
+        return true;
+    };
+
+    auto retParser = [value, this](napi_env &env, napi_value result) -> bool {
+        napi_value code = nullptr;
+        napi_get_named_property(env, result, "code", &code);
+        if (napi_get_value_int32(env, code, &value->code) != napi_ok) {
+            HILOG_ERROR("Convert js value code fail.");
+            return napi_generic_failure;
+        }
+        napi_value index = nullptr;
+        napi_get_named_property(env, result, "handle", &index);
+        if (GetStringValue(env, index, value->data) != napi_ok) {
+            HILOG_ERROR("Convert js value fail.");
+            return napi_generic_failure;
+        }
+        return true;
+    };
+    auto errCode = CallJsMethod("OnGetRemoteHandle", jsRuntime_, jsObj_.get(), argParser, retParser);
+    if (errCode != ERR_OK) {
+        LOGE("CallJsMethod error, code:%d.", errCode);
+        return errCode;
+    }
+
+    if (value->code != ERR_OK) {
+        LOGE("OnGetRemoteHandle fail.");
+        return value->code;
+    }
+
+    handle = std::move(value->data);
+    return ERR_OK;
+}
+
+int JsHksCryptoExtAbility::OnOpenRemoteHandle(const std::string& handle)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsHksCryptoExtAbility(JS) OnOpenRemoteHandle");
+
+    auto argParser = [handle](napi_env &env, napi_value *argv, size_t &argc) -> bool {
+        napi_value nativeHandle = nullptr;
+        napi_create_string_utf8(env, handle.c_str(), handle.length(), &nativeHandle);
+        argv[ARGC_ZERO] = nativeHandle;
+        argc = ARGC_ONE;
+        return true;
+    };
+    auto resultCode = std::make_shared<int>();
+    auto retParser = [resultCode, this](napi_env &env, napi_value result) -> bool {
+        napi_value code = nullptr;
+        napi_get_named_property(env, result, "code", &code);
+        if (napi_get_value_int32(env, code, resultCode.get()) != napi_ok) {
+            HILOG_ERROR("Convert js value resultCode fail.");
+            return napi_generic_failure;
+        }
+        return true;
+    };
+    auto errCode = CallJsMethod("OnOpenRemoteHandle", jsRuntime_, jsObj_.get(), argParser, retParser);
+    if (errCode != ERR_OK) {
+        LOGE("CallJsMethod error, code:%d.", errCode);
+        return errCode;
+    }
+
+    if (*resultCode != ERR_OK) {
+        LOGE("OnOpenRemoteHandle fail.");
+        return *resultCode;
+    }
+
+    return ERR_OK;
+}
+
+int JsHksCryptoExtAbility::OnCloseRemoteHandle(const std::string& index)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsHksCryptoExtAbility(JS) OnCloseRemoteHandle");
+
+    auto argParser = [index](napi_env &env, napi_value *argv, size_t &argc) -> bool {
+        napi_value nativeIndex = nullptr;
+        napi_create_string_utf8(env, index.c_str(), index.length(), &nativeIndex);
+        argv[ARGC_ZERO] = nativeIndex;
+        argc = ARGC_ONE;
+        return true;
+    };
+    auto resultCode = std::make_shared<int>();
+    auto retParser = [resultCode, this](napi_env &env, napi_value result) -> bool {
+        napi_value code = nullptr;
+        napi_get_named_property(env, result, "code", &code);
+        if (napi_get_value_int32(env, code, resultCode.get()) != napi_ok) {
+            HILOG_ERROR("Convert js value resultCode fail.");
+            return napi_generic_failure;
+        }
+        return true;
+    };
+    auto errCode = CallJsMethod("OnCloseRemoteHandle", jsRuntime_, jsObj_.get(), argParser, retParser);
+    if (errCode != ERR_OK) {
+        LOGE("CallJsMethod error, code:%d.", errCode);
+        return errCode;
+    }
+
+    if (*resultCode != ERR_OK) {
+        LOGE("OnCloseRemoteHandle fail.");
+        return *resultCode;
+    }
+
+    return ERR_OK;
+}
+
+} // names
 } // namespace Security
 } // namespace OHOS
