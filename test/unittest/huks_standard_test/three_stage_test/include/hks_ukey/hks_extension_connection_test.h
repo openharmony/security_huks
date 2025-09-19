@@ -16,6 +16,7 @@
 #ifndef HKS_EXTENSION_CONNECTION_TEST_H
 #define HKS_EXTENSION_CONNECTION_TEST_H
 #include "iremote_broker.h"
+#include "hks_extension_connection.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
