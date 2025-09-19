@@ -15,8 +15,11 @@
 sequenceable HksCppParamset..CppParamSet;
 interface OHOS.Security.Huks.IHuksAccessExtBase {
 
-    [ipccode 1] void ICreateRemoteIndex([in] CppParamSet testIn, [out] String index);
-
-    
-    
+    [ipccode 1] void IRegisterProvider([in] CppParamSet params, [out] int errcode);
+    [ipccode 2] void IOpenRemoteHandle([in] String index, [in] CppParamSet params, [out] String handle, [out] int errcode);
+    [ipccode 3] void ICloseRemoteHandle([in] String index, [in] CppParamSet params, [out] int errcode);
+    [ipccode 4] void IGetUkeyPinAuthState([in] String index, [in] CppParamSet params,
+        [out] unsigned int state, [out] int errcode);
+    [ipccode 5] void IHuksSign([in] String alias, [in] CppParamSet params,
+        [in] unsigned char[] srcData, [out] unsigned char[] signature, [out] int errcode);
 }
