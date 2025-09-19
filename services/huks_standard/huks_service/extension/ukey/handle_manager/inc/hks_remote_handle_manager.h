@@ -26,7 +26,11 @@
 #include <unordered_map>
 #include <vector>
 #include "safe_map.h"
+#include "ihuks_access_ext_base.h"
 
+namespace OHOS {
+namespace Security {
+namespace Huks {
 class HksRemoteHandleManager : private OHOS::DelayedSingleton<HksRemoteHandleManager> {
 public:
     int32_t CreateKeyHandle(const std::string &abilityName, const std::string &index, const CppParamSet &paramSet);
@@ -68,7 +72,7 @@ private:
     int32_t ValidateAndGetHandle(const std::string &newIndex, const ProviderInfo &providerInfo, std::string &handle);
     int32_t ParseAndValidateIndex(const std::string &index, ProviderInfo &providerInfo,
                                     std::string &newIndex,std::string &handle);
-    OHOS::sptr<IRemoteObject> GetProviderProxy(const ProviderInfo &providerInfo, int32_t &ret);
+    OHOS::sptr<IHuksAccessExtBase> GetProviderProxy(const ProviderInfo &providerInfo, int32_t &ret);
 
     OHOS::SafeMap<std::string, std::string> indexToHandle;
 

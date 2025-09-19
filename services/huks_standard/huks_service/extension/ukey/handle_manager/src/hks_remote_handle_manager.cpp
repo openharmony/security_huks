@@ -149,7 +149,7 @@ int32_t HksRemoteHandleManager::ValidateProviderInfo(const std::string &newIndex
     return HKS_SUCCESS;
 }
 
-OHOS::sptr<IRemoteObject> HksRemoteHandleManager::GetProviderProxy(const ProviderInfo &providerInfo, int32_t &ret)
+OHOS::sptr<IHuksAccessExtBase> HksRemoteHandleManager::GetProviderProxy(const ProviderInfo &providerInfo, int32_t &ret)
 {
     auto providerManager = HksProviderLifeCycleManager::GetInstanceWrapper();
     if (providerManager == nullptr) {
@@ -158,7 +158,7 @@ OHOS::sptr<IRemoteObject> HksRemoteHandleManager::GetProviderProxy(const Provide
         return nullptr;
     }
 
-    sptr<IRemoteObject> proxy;
+    sptr<IHuksAccessExtBase> proxy;
     ret = providerManager->GetExtensionProxy(providerInfo, proxy);
     if (ret != HKS_SUCCESS || proxy == nullptr) {
         HKS_LOG_E("Get extension proxy failed for provider: %s", providerInfo.m_providerName.c_str());

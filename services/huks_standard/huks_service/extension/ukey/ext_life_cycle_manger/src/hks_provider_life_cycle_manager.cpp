@@ -77,7 +77,8 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
     return HKS_SUCCESS;
 }
 
-int32_t HksProviderLifeCycleManager::GetExtensionProxy(const ProviderInfo &providerInfo, sptr<IRemoteObject> &proxy)
+int32_t HksProviderLifeCycleManager::GetExtensionProxy(const ProviderInfo &providerInfo,
+    sptr<IHuksAccessExtBase> &proxy)
 {
     std::shared_ptr<HksExtAbilityConnectInfo> connectionInfo = nullptr;
     if(!m_providerMap.Find(providerInfo, connectionInfo)) {
@@ -86,7 +87,7 @@ int32_t HksProviderLifeCycleManager::GetExtensionProxy(const ProviderInfo &provi
     }
     HKS_IF_TRUE_LOGE_RETURN(connectionInfo == nullptr, HKS_ERROR_NULL_POINTER, "connectionInfo is nullptr")
     HKS_IF_TRUE_LOGE_RETURN(connectionInfo->m_connection == nullptr, HKS_ERROR_NULL_POINTER, "m_connection is nullptr")
-    proxy = connectionInfo->m_connection->GetExtConnectProxy();
+    // proxy = connectionInfo->m_connection->GetExtConnectProxy();
     return HKS_SUCCESS;
 }
 
@@ -103,6 +104,7 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
     }
     HKS_IF_TRUE_LOGE_RETURN(connectionInfo == nullptr, HKS_ERROR_NULL_POINTER, "connectionInfo is nullptr")
     HKS_IF_TRUE_LOGE_RETURN(connectionInfo->m_connection == nullptr, HKS_ERROR_NULL_POINTER, "m_connection is nullptr")
+
     int32_t refCount = connectionInfo->m_connection->GetExtConnectProxy()->GetObjectRefCount();
     if (refCount > HKS_PROVIDER_CAN_REMOVE_REF_COUNT) {
         HKS_LOG_E("OnUnRegisterProvider failed, refCount is not 1, maybe in use. refCount: %" LOG_PUBLIC "d", refCount);
