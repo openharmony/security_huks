@@ -24,7 +24,7 @@
 #define LOG_DOMAIN 0xD002F00
 
 #undef LOG_TAG
-#define LOG_TAG "[crypto_ext]"
+#define LOG_TAG "[Huks]"
 
 #define LOG_DEBUG(buf) HILOG_DEBUG(LOG_CORE, "%{public}s", buf)
 #define LOG_INFO(buf) HILOG_INFO(LOG_CORE, "%{public}s", buf)

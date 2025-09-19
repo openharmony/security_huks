@@ -42,6 +42,7 @@ public:
     static void SetCreator(const CreatorFunc& creator);
     
     virtual int test(const std::string& testIn, std::vector<std::string>& testOut);
+    virtual int OnCreateRemoteIndex(const std::string& abilityName, std::string& index);
 private:
     static CreatorFunc creator_;
 };

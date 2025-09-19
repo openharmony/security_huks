@@ -269,8 +269,8 @@ bool JsHksCryptoExtAbility::ParserVectorStringJsResult(napi_env &env, napi_value
 {
     napi_value code = nullptr;
     napi_get_named_property(env, nativeValue, "code", &code);
-    if (napi_get_value_int32(env, nativeValue, &results.code) != napi_ok) {
-        HILOG_ERROR("Convert js value fail.");
+    if (napi_get_value_int32(env, code, &results.code) != napi_ok) {
+        LOGE("Convert js value code fail.");
         return napi_generic_failure;
     }
     napi_value nativeArray = nullptr;
@@ -348,42 +348,53 @@ int JsHksCryptoExtAbility::test(const std::string &testIn, std::vector<std::stri
     return ERR_OK;
 }
 
-// int32_t OnCreateRemoteIndex(const std::string &abilityName, std::string &index)
-// {
-//     LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsHksCryptoExtAbility(JS) test");
+int32_t JsHksCryptoExtAbility::OnCreateRemoteIndex(const std::string &abilityName, std::string &index)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsHksCryptoExtAbility(JS) OnCreateRemoteIndex");
 
-//     auto value = std::make_shared<Value<std::string>>();
-//         if (value == nullptr) {
-//         LOGE("Query value is nullptr.");
-//         return -1;
-//     }
+    auto value = std::make_shared<Value<std::string>>();
+        if (value == nullptr) {
+        LOGE("Query value is nullptr.");
+        return -1;
+    }
 
-//     auto argParser = [abilityName](napi_env &env, napi_value *argv, size_t &argc) -> bool {
-//         napi_value nativeAbilityName = nullptr;
-//         napi_create_string_utf8(env, abilityName.c_str(), abilityName.length(), &nativeAbilityName);
-//         argv[ARGC_ZERO] = nativeAbilityName;
-//         argc = ARGC_ONE;
-//         return true;
-//     };
+    auto argParser = [abilityName](napi_env &env, napi_value *argv, size_t &argc) -> bool {
+        napi_value nativeAbilityName = nullptr;
+        napi_create_string_utf8(env, abilityName.c_str(), abilityName.length(), &nativeAbilityName);
+        argv[ARGC_ZERO] = nativeAbilityName;
+        argc = ARGC_ONE;
+        return true;
+    };
 
-//     auto retParser = [value, this](napi_env &env, napi_value result) -> bool {
-//         napi_value code = nullptr;
-//         napi_get_named_property(env, result, "code", &code);
-//         if (napi_get_value_int32(env, code, &value->code) != napi_ok) {
-//             HILOG_ERROR("Convert js value fail.");
-//             return napi_generic_failure;
-//         }
-//         napi_value index = nullptr;
-//         napi_get_named_property(env, result, "index", &uri);
-//         if (GetStringValue(env, index, &value->data) != napi_ok) {
-//             HILOG_ERROR("Convert js value fail.");
-//             return napi_generic_failure;
-//         }
-//         value->code = queryResult.code;
-//         value->data = queryResult.data;
-//         return ret;
-//     };
-// }
+    auto retParser = [value, this](napi_env &env, napi_value result) -> bool {
+        napi_value code = nullptr;
+        napi_get_named_property(env, result, "code", &code);
+        if (napi_get_value_int32(env, code, &value->code) != napi_ok) {
+            HILOG_ERROR("Convert js value code fail.");
+            return napi_generic_failure;
+        }
+        napi_value index = nullptr;
+        napi_get_named_property(env, result, "index", &index);
+        if (GetStringValue(env, index, value->data) != napi_ok) {
+            HILOG_ERROR("Convert js value fail.");
+            return napi_generic_failure;
+        }
+        return true;
+    };
+    auto errCode = CallJsMethod("OnCreateRemoteIndex", jsRuntime_, jsObj_.get(), argParser, retParser);
+    if (errCode != ERR_OK) {
+        LOGE("CallJsMethod error, code:%d.", errCode);
+        return errCode;
+    }
+
+    if (value->code != ERR_OK) {
+        LOGE("OnCreateRemoteIndex fail.");
+        return value->code;
+    }
+
+    index = std::move(value->data);
+    return ERR_OK;
+}
 
 } // namespace Huks
 } // namespace Security
