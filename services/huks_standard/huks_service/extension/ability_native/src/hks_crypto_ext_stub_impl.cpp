@@ -40,6 +40,40 @@ ErrCode HksCryptoExtStubImpl::OnCreateRemoteIndex(const std::string& abilityName
     extension_->OnCreateRemoteIndex(abilityName, index);
     return ERR_OK;
 }
+
+ErrCode HksCryptoExtStubImpl::OnGetRemoteHandle(const std::string& index, std::string& handle)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl OnGetRemoteHandle");
+    if (extension_ == nullptr) {
+        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        return ERR_OK;
+    }
+    extension_->OnGetRemoteHandle(index, handle);
+    return ERR_OK;
+}
+
+ErrCode HksCryptoExtStubImpl::OnOpenRemoteHandle(const std::string& handle)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl OnOpenRemoteHandle");
+    if (extension_ == nullptr) {
+        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        return ERR_OK;
+    }
+    extension_->OnOpenRemoteHandle(handle);
+    return ERR_OK;
+}
+
+ErrCode HksCryptoExtStubImpl::OnCloseRemoteHandle(const std::string& index)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl OnCloseRemoteHandle");
+    if (extension_ == nullptr) {
+        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        return ERR_OK;
+    }
+    extension_->OnCloseRemoteHandle(index);
+    return ERR_OK;
+}
+
 } // namespace Huks
 } // namespace Security
 } // namespace OHOS

@@ -35,6 +35,9 @@ public:
     // bool CheckCallingPermission(const std::string &permission);
     ErrCode test(const std::string& testIn, std::vector<std::string> &testOut) override;
     ErrCode OnCreateRemoteIndex(const std::string& abilityName, std::string& index) override;
+    ErrCode OnGetRemoteHandle(const std::string& index, std::string& handle) override;
+    ErrCode OnOpenRemoteHandle(const std::string& handle) override;
+    ErrCode OnCloseRemoteHandle(const std::string& index) override;
 private:
     std::shared_ptr<HksCryptoExtAbility> extension_;
 };

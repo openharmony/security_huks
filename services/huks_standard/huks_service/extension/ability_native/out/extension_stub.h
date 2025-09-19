@@ -13,10 +13,27 @@
  * limitations under the License.
  */
 
-interface OHOS.Security.Huks.IExtension {
-    void test([in] String testIn, [out] List<String> testOut);
-    void OnCreateRemoteIndex([in] String abilityName, [out] String index);
-    void OnGetRemoteHandle([in] String index, [out] String handle);
-    void OnOpenRemoteHandle([in] String handle);
-    void OnCloseRemoteHandle([in] String index);
-}
+#ifndef OHOS_SECURITY_HUKS_EXTENSIONSTUB_H
+#define OHOS_SECURITY_HUKS_EXTENSIONSTUB_H
+
+#include <iremote_stub.h>
+#include "iextension.h"
+
+namespace OHOS {
+namespace Security {
+namespace Huks {
+
+class ExtensionStub : public IRemoteStub<IExtension> {
+public:
+    ExtensionStub(bool serialInvokeFlag = false): IRemoteStub(serialInvokeFlag){};
+    int32_t OnRemoteRequest(
+        uint32_t code,
+        MessageParcel& data,
+        MessageParcel& reply,
+        MessageOption& option) override;
+};
+} // namespace Huks
+} // namespace Security
+} // namespace OHOS
+#endif // OHOS_SECURITY_HUKS_EXTENSIONSTUB_H
+
