@@ -43,17 +43,17 @@ struct CallJsParam {
     {}
 };
 
-class JsCryptoExtAbility : public CryptoExtAbility {
+class JsHksCryptoExtAbility : public HksCryptoExtAbility {
 public:
-    JsCryptoExtAbility(AbilityRuntime::JsRuntime &jsRuntime);
-    virtual ~JsCryptoExtAbility() override;
+    JsHksCryptoExtAbility(AbilityRuntime::JsRuntime &jsRuntime);
+    virtual ~JsHksCryptoExtAbility() override;
 
     void Init(const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &record,
         const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
         std::shared_ptr<AppExecFwk::AbilityHandler> &handler,
         const sptr<IRemoteObject> &token) override;
 
-    static JsCryptoExtAbility* Create(const std::unique_ptr<AbilityRuntime::Runtime> &runtime);
+    static JsHksCryptoExtAbility* Create(const std::unique_ptr<AbilityRuntime::Runtime> &runtime);
     void OnStart(const AAFwk::Want &want) override;
     sptr<IRemoteObject> OnConnect(const AAFwk::Want &want) override;
     int test(const std::string &testIn, std::vector<std::string> &testOut) override;

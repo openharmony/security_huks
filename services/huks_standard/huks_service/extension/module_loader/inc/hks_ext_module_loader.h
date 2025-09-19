@@ -28,9 +28,9 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 using namespace AbilityRuntime;
-class CryptoAccessExtAbilityModuleLoader : public ExtensionModuleLoader,
-    public Singleton<CryptoAccessExtAbilityModuleLoader> {
-    DECLARE_SINGLETON(CryptoAccessExtAbilityModuleLoader);
+class HksCryptoExtAbilityModuleLoader : public ExtensionModuleLoader,
+    public Singleton<HksCryptoExtAbilityModuleLoader> {
+    DECLARE_SINGLETON(HksCryptoExtAbilityModuleLoader);
 
 public:
     virtual Extension *Create(const std::unique_ptr<Runtime>& runtime) const override;

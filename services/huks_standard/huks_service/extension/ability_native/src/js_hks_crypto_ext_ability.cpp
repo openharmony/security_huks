@@ -90,26 +90,26 @@ static int DoCallJsMethod(CallJsParam *param)
     return ERR_OK;
 }
 
-JsCryptoExtAbility *JsCryptoExtAbility::Create(const std::unique_ptr<AbilityRuntime::Runtime> &runtime)
+JsHksCryptoExtAbility *JsHksCryptoExtAbility::Create(const std::unique_ptr<AbilityRuntime::Runtime> &runtime)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsCryptoExtAbility Create start");
-    return new JsCryptoExtAbility(static_cast<AbilityRuntime::JsRuntime &>(*runtime));
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsHksCryptoExtAbility Create start");
+    return new JsHksCryptoExtAbility(static_cast<AbilityRuntime::JsRuntime &>(*runtime));
 }
 
-JsCryptoExtAbility::JsCryptoExtAbility(AbilityRuntime::JsRuntime &jsRuntime) : jsRuntime_(jsRuntime) {}
+JsHksCryptoExtAbility::JsHksCryptoExtAbility(AbilityRuntime::JsRuntime &jsRuntime) : jsRuntime_(jsRuntime) {}
 
-JsCryptoExtAbility::~JsCryptoExtAbility()
+JsHksCryptoExtAbility::~JsHksCryptoExtAbility()
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO ~JsCryptoExtAbility start");
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO ~JsHksCryptoExtAbility start");
     jsRuntime_.FreeNativeReference(std::move(jsObj_));
 }
 
-void JsCryptoExtAbility::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalRecord> &record,
+void JsHksCryptoExtAbility::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalRecord> &record,
     const std::shared_ptr<AbilityRuntime::OHOSApplication> &application, std::shared_ptr<AbilityRuntime::AbilityHandler> &handler,
     const sptr<IRemoteObject> &token)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsCryptoExtAbility(JS) Init");
-    CryptoExtAbility::Init(record, application, handler, token);
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsHksCryptoExtAbility(JS) Init");
+    HksCryptoExtAbility::Init(record, application, handler, token);
     std::string srcPath = "";
     if (abilityInfo_ == nullptr) {
         LOGE("abilityInfo_ is nullptr");
@@ -131,14 +131,14 @@ void JsCryptoExtAbility::Init(const std::shared_ptr<AbilityRuntime::AbilityLocal
     }
 
     if (jsObj_->GetNapiValue() == nullptr) {
-        LOGE("Failed to get JsCryptoExtAbility value");
+        LOGE("Failed to get JsHksCryptoExtAbility value");
         return;
     }
 }
 
-void JsCryptoExtAbility::OnStart(const AAFwk::Want &want)
+void JsHksCryptoExtAbility::OnStart(const AAFwk::Want &want)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsCryptoExtAbility(JS) OnStart");
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsHksCryptoExtAbility(JS) OnStart");
     Extension::OnStart(want);
     AbilityRuntime::HandleScope handleScope(jsRuntime_);
     napi_env env = reinterpret_cast<napi_env>(&jsRuntime_.GetNativeEngine());
@@ -147,22 +147,22 @@ void JsCryptoExtAbility::OnStart(const AAFwk::Want &want)
     CallObjectMethod("onCreate", argv, ARGC_ONE);
 }
 
-sptr<IRemoteObject> JsCryptoExtAbility::OnConnect(const AAFwk::Want &want)
+sptr<IRemoteObject> JsHksCryptoExtAbility::OnConnect(const AAFwk::Want &want)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsCryptoExtAbility(JS) OnConnect");
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsHksCryptoExtAbility(JS) OnConnect");
     Extension::OnConnect(want);
-    sptr<CryptoExtStubImpl> remoteObject(
-        new (std::nothrow) CryptoExtStubImpl(std::static_pointer_cast<JsCryptoExtAbility>(shared_from_this()),
+    sptr<HksCryptoExtStubImpl> remoteObject(
+        new (std::nothrow) HksCryptoExtStubImpl(std::static_pointer_cast<JsHksCryptoExtAbility>(shared_from_this()),
         reinterpret_cast<napi_env>(&jsRuntime_.GetNativeEngine())));
     if (remoteObject == nullptr) {
-        LOGE("No memory allocated for CryptoExtStubImpl");
+        LOGE("No memory allocated for HksCryptoExtStubImpl");
         return nullptr;
     }
 
     return remoteObject->AsObject();
 }
 
-napi_status JsCryptoExtAbility::GetStringValue(napi_env env, napi_value value, std::string &result)
+napi_status JsHksCryptoExtAbility::GetStringValue(napi_env env, napi_value value, std::string &result)
 {
     size_t tempSize = 0;
     if (napi_get_value_string_utf8(env, value, nullptr, 0, &tempSize) != napi_ok) {
@@ -176,11 +176,11 @@ napi_status JsCryptoExtAbility::GetStringValue(napi_env env, napi_value value, s
     return napi_ok;
 }
 
-napi_value JsCryptoExtAbility::CallObjectMethod(const char *name, napi_value const *argv, size_t argc)
+napi_value JsHksCryptoExtAbility::CallObjectMethod(const char *name, napi_value const *argv, size_t argc)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsCryptoExtAbility(JS) CallObjectMethod");
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsHksCryptoExtAbility(JS) CallObjectMethod");
     if (!jsObj_) {
-        LOGE("JsCryptoExtAbility::CallObjectMethod jsObj Not found FileAccessExtAbility.js");
+        LOGE("JsHksCryptoExtAbility::CallObjectMethod jsObj Not found FileAccessExtAbility.js");
         return nullptr;
     }
 
@@ -190,14 +190,14 @@ napi_value JsCryptoExtAbility::CallObjectMethod(const char *name, napi_value con
 
     napi_value value = jsObj_->GetNapiValue();
     if (value == nullptr) {
-        LOGE("Failed to get CryptoExtAbility value");
+        LOGE("Failed to get HksCryptoExtAbility value");
         return nullptr;
     }
 
     napi_value method = nullptr;
     napi_get_named_property(env, value, name, &method);
     if (method == nullptr) {
-        LOGE("Failed to get '%s' from CryptoExtAbility object", name);
+        LOGE("Failed to get '%s' from HksCryptoExtAbility object", name);
         return nullptr;
     }
 
@@ -209,10 +209,10 @@ napi_value JsCryptoExtAbility::CallObjectMethod(const char *name, napi_value con
     return handleEscape.Escape(result);
 }
 
-int JsCryptoExtAbility::CallJsMethod(const std::string &funcName, AbilityRuntime::JsRuntime &jsRuntime, NativeReference *jsObj,
+int JsHksCryptoExtAbility::CallJsMethod(const std::string &funcName, AbilityRuntime::JsRuntime &jsRuntime, NativeReference *jsObj,
     InputArgsParser argParser, ResultValueParser retParser)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsCryptoExtAbility(JS) CallJsMethod");
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsHksCryptoExtAbility(JS) CallJsMethod");
     uv_loop_s *loop = nullptr;
     napi_status status = napi_get_uv_event_loop(reinterpret_cast<napi_env>(&jsRuntime.GetNativeEngine()), &loop);
     if (status != napi_ok) {
@@ -255,21 +255,27 @@ int JsCryptoExtAbility::CallJsMethod(const std::string &funcName, AbilityRuntime
 }
 
 
-void JsCryptoExtAbility::GetSrcPath(std::string &srcPath)
+void JsHksCryptoExtAbility::GetSrcPath(std::string &srcPath)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsCryptoExtAbility(JS) GetSrcPath");
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsHksCryptoExtAbility(JS) GetSrcPath");
     srcPath.append(Extension::abilityInfo_->moduleName + "/");
     srcPath.append(Extension::abilityInfo_->srcEntrance);
     srcPath.erase(srcPath.rfind('.'));
     srcPath.append(".abc");
 }
 
-bool JsCryptoExtAbility::ParserVectorStringJsResult(napi_env &env, napi_value nativeValue,
+bool JsHksCryptoExtAbility::ParserVectorStringJsResult(napi_env &env, napi_value nativeValue,
     Value<std::vector<std::string>> &results)
 {
+    napi_value code = nullptr;
+    napi_get_named_property(env, nativeValue, "code", &code);
+    if (napi_get_value_int32(env, nativeValue, &results.code) != napi_ok) {
+        HILOG_ERROR("Convert js value fail.");
+        return napi_generic_failure;
+    }
     napi_value nativeArray = nullptr;
     napi_create_array(env, &nativeArray);
-    napi_get_named_property(env, nativeValue, "results", &nativeArray);
+    napi_get_named_property(env, nativeValue, "testOut", &nativeArray);
     if (nativeArray == nullptr) {
         LOGE("Convert js array object fail.");
         return false;
@@ -298,9 +304,9 @@ bool JsCryptoExtAbility::ParserVectorStringJsResult(napi_env &env, napi_value na
     return true;
 }
 
-int JsCryptoExtAbility::test(const std::string &testIn, std::vector<std::string> &testOut)
+int JsHksCryptoExtAbility::test(const std::string &testIn, std::vector<std::string> &testOut)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsCryptoExtAbility(JS) test");
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsHksCryptoExtAbility(JS) test");
     auto value = std::make_shared<Value<std::vector<std::string>>>();
     if (value == nullptr) {
         LOGE("Query value is nullptr.");
@@ -341,6 +347,43 @@ int JsCryptoExtAbility::test(const std::string &testIn, std::vector<std::string>
     testOut = std::move(value->data);
     return ERR_OK;
 }
+
+// int32_t OnCreateRemoteIndex(const std::string &abilityName, std::string &index)
+// {
+//     LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsHksCryptoExtAbility(JS) test");
+
+//     auto value = std::make_shared<Value<std::string>>();
+//         if (value == nullptr) {
+//         LOGE("Query value is nullptr.");
+//         return -1;
+//     }
+
+//     auto argParser = [abilityName](napi_env &env, napi_value *argv, size_t &argc) -> bool {
+//         napi_value nativeAbilityName = nullptr;
+//         napi_create_string_utf8(env, abilityName.c_str(), abilityName.length(), &nativeAbilityName);
+//         argv[ARGC_ZERO] = nativeAbilityName;
+//         argc = ARGC_ONE;
+//         return true;
+//     };
+
+//     auto retParser = [value, this](napi_env &env, napi_value result) -> bool {
+//         napi_value code = nullptr;
+//         napi_get_named_property(env, result, "code", &code);
+//         if (napi_get_value_int32(env, code, &value->code) != napi_ok) {
+//             HILOG_ERROR("Convert js value fail.");
+//             return napi_generic_failure;
+//         }
+//         napi_value index = nullptr;
+//         napi_get_named_property(env, result, "index", &uri);
+//         if (GetStringValue(env, index, &value->data) != napi_ok) {
+//             HILOG_ERROR("Convert js value fail.");
+//             return napi_generic_failure;
+//         }
+//         value->code = queryResult.code;
+//         value->data = queryResult.data;
+//         return ret;
+//     };
+// }
 
 } // namespace Huks
 } // namespace Security

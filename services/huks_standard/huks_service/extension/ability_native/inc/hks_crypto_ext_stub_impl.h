@@ -25,17 +25,17 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
-class CryptoExtStubImpl : public ExtensionStub {
+class HksCryptoExtStubImpl : public ExtensionStub {
 public:
-    explicit CryptoExtStubImpl(const std::shared_ptr<CryptoExtAbility>& extension, napi_env env)
+    explicit HksCryptoExtStubImpl(const std::shared_ptr<HksCryptoExtAbility>& extension, napi_env env)
         : extension_(extension) {}
 
-    virtual ~CryptoExtStubImpl() {}
+    virtual ~HksCryptoExtStubImpl() {}
 
     // bool CheckCallingPermission(const std::string &permission);
     ErrCode test(const std::string& testIn, std::vector<std::string> &testOut) override;
 private:
-    std::shared_ptr<CryptoExtAbility> extension_;
+    std::shared_ptr<HksCryptoExtAbility> extension_;
 };
 } // namespace Huks
 } // namespace Security

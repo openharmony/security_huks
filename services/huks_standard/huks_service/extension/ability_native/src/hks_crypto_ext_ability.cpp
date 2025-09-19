@@ -26,18 +26,18 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 
-CreatorFunc CryptoExtAbility::creator_ = nullptr;
-void CryptoExtAbility::SetCreator(const CreatorFunc &creator)
+CreatorFunc HksCryptoExtAbility::creator_ = nullptr;
+void HksCryptoExtAbility::SetCreator(const CreatorFunc &creator)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO SetCreator CryptoExtJSAbility(BASE)");
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO SetCreator HksCryptoExtAbility(BASE)");
     creator_ = creator;
 }
 
-CryptoExtAbility* CryptoExtAbility::Create(const std::unique_ptr<AbilityRuntime::Runtime> &runtime)
+HksCryptoExtAbility* HksCryptoExtAbility::Create(const std::unique_ptr<AbilityRuntime::Runtime> &runtime)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO CryptoExtAbility Create start");
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtAbility Create start");
     if (runtime == nullptr) {
-        return new CryptoExtAbility();
+        return new HksCryptoExtAbility();
     }
 
     if (creator_) {
@@ -47,14 +47,14 @@ CryptoExtAbility* CryptoExtAbility::Create(const std::unique_ptr<AbilityRuntime:
     switch (runtime->GetLanguage()) {
         case AbilityRuntime::Runtime::Language::JS:
             LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO create CryptoExtJSAbility(JS)");
-            return JsCryptoExtAbility::Create(runtime);
+            return JsHksCryptoExtAbility::Create(runtime);
         default:
             LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO create CryptoExtJSAbility(BASE)");
-            return new CryptoExtAbility();
+            return new HksCryptoExtAbility();
     }
 }
 
-void CryptoExtAbility::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalRecord> &record,
+void HksCryptoExtAbility::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalRecord> &record,
     const std::shared_ptr<AbilityRuntime::OHOSApplication> &application,
     std::shared_ptr<AbilityRuntime::AbilityHandler> &handler,
     const sptr<IRemoteObject> &token)
@@ -63,7 +63,7 @@ void CryptoExtAbility::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalRe
     ExtensionBase<>::Init(record, application, handler, token);
 }
 
-int CryptoExtAbility::test(const std::string& testIn, std::vector<std::string>& testOut)
+int HksCryptoExtAbility::test(const std::string& testIn, std::vector<std::string>& testOut)
 {
     LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO test(BASE)");
     return true;
