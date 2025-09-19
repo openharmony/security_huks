@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 sequenceable HksCppParamset..CppParamSet;
-interface OHOS.Huks.IHuksAccessExtBase {
+interface OHOS.Security.Huks.IHuksAccessExtBase {
 
     [ipccode 1] void ICreateRemoteIndex([in] CppParamSet testIn, [out] String index);
 

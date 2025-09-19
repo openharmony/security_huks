@@ -42,7 +42,8 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
 
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection:libhuks_extension_connection_static"
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection:libhuks_extension_connection_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
     ]
     complete_static_lib = true
     cflags = []

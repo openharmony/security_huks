@@ -34,6 +34,7 @@
 #include "iremote_stub.h"
 #include "want.h"
 #include "hks_extension_connection.h"
+#include "ihuks_access_ext_base.h"
 
 namespace OHOS {
 namespace Security {
@@ -71,9 +72,8 @@ public:
         const CppParamSet &paramSet);
     int32_t OnUnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName,
         const CppParamSet &paramSet);
-    int32_t GetExtensionProxy(const ProviderInfo &providerInfo, sptr<IRemoteObject> &proxy);
+    int32_t GetExtensionProxy(const ProviderInfo &providerInfo, sptr<IHuksAccessExtBase> &proxy);
 
-    int32_t InsertConnectedProvider(const ProviderInfo &providerInfo, sptr<IRemoteObject> proxy);
 private:
     // ProviderInfo, proxy
     OHOS::SafeMap<ProviderInfo, std::shared_ptr<HksExtAbilityConnectInfo>> m_providerMap{};
