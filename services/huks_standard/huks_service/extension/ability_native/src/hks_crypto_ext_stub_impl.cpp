@@ -29,6 +29,17 @@ ErrCode HksCryptoExtStubImpl::test(const std::string& testIn, std::vector<std::s
     extension_->test(testIn, testOut);
     return ERR_OK;
 }
+
+ErrCode HksCryptoExtStubImpl::OnCreateRemoteIndex(const std::string& abilityName, std::string& index)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl OnCreateRemoteIndex");
+    if (extension_ == nullptr) {
+        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        return ERR_OK;
+    }
+    extension_->OnCreateRemoteIndex(abilityName, index);
+    return ERR_OK;
+}
 } // namespace Huks
 } // namespace Security
 } // namespace OHOS

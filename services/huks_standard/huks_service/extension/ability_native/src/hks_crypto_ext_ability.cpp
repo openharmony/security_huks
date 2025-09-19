@@ -68,6 +68,12 @@ int HksCryptoExtAbility::test(const std::string& testIn, std::vector<std::string
     LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO test(BASE)");
     return true;
 }
+
+int HksCryptoExtAbility::OnCreateRemoteIndex(const std::string& abilityName, std::string& index)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO OnCreateRemoteIndex(BASE)");
+    return true;
+}
 } // namespace HUKS
 } // namespace Security
 } // namespace OHOS

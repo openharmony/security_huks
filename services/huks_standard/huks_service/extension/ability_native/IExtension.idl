@@ -15,4 +15,6 @@
 
 interface OHOS.Security.Huks.IExtension {
     void test([in] String testIn, [out] List<String> testOut);
+    void OnCreateRemoteIndex([in] String abilityName, [out] String index);
+
 }
