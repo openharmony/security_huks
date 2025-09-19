@@ -63,14 +63,11 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
                                                          std::string &newIndex)
 {
     CommJsonObject root = CommJsonObject::Parse(index);
-    // 修改：使用 IsNull() 而不是 IsInvalid()
     if (root.IsNull()) {
         HKS_LOG_E("Parse index failed, invalid JSON format");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    // 解析ProviderInfo字段
-    // 修改：使用正确的 GetValue 和 ToString 方法调用方式
     auto providerNameObj = root.GetValue(PROVIDER_NAME_KEY);
     auto providerNameResult = providerNameObj.ToString();
     
@@ -80,7 +77,6 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
     auto bundleNameObj = root.GetValue(BUNDLE_NAME_KEY);
     auto bundleNameResult = bundleNameObj.ToString();
     
-    // 修改：检查每个字段是否有效
     if (providerNameResult.first != HKS_SUCCESS || abilityNameResult.first != HKS_SUCCESS || 
         bundleNameResult.first != HKS_SUCCESS) {
         HKS_LOG_E("Get provider info fields failed");
@@ -96,22 +92,17 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
         HKS_LOG_E("Provider info is incomplete");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-
-    // 创建不包含provider信息的新JSON对象
     CommJsonObject newRoot = CommJsonObject::CreateObject();
 
-    // 复制除provider信息外的所有字段
     auto keys = root.GetKeys();
     for (const auto &key : keys) {
         if (key != PROVIDER_NAME_KEY && key != ABILITY_NAME_KEY && key != BUNDLE_NAME_KEY) {
             auto value = root.GetValue(key);
-            // 修改：检查值是否有效
             if (value.IsNull()) {
                 HKS_LOG_W("Skip invalid field: %s", key.c_str());
                 continue;
             }
             
-            // 修改：使用正确的 SetValue 方法
             if (!newRoot.SetValue(key, value)) {
                 HKS_LOG_E("Copy field %s failed", key.c_str());
                 return HKS_ERROR_INVALID_ARGUMENT;
@@ -172,7 +163,6 @@ OHOS::sptr<IHuksAccessExtBase> HksRemoteHandleManager::GetProviderProxy(const Pr
 
 int32_t HksRemoteHandleManager::GetRemoteIndex(const ProviderInfo &providerInfo, [[maybe_unused]] const CppParamSet &paramSet, std::string &index)
 {
-    // 创建包含provider信息的JSON对象
     CommJsonObject root = CommJsonObject::CreateObject();
     
     if (!root.SetValue(PROVIDER_NAME_KEY, providerInfo.m_providerName) ||
@@ -182,8 +172,6 @@ int32_t HksRemoteHandleManager::GetRemoteIndex(const ProviderInfo &providerInfo,
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     
-    // 如果有其他需要包含的参数，可以在这里添加
-    // 例如: root.SetValue("keySize", paramSet.GetInt32(HKS_KEY_SIZE));
     
     index = root.Serialize(false);
     return HKS_SUCCESS;
