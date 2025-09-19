@@ -19,9 +19,9 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
-ErrCode CryptoExtStubImpl::test(const std::string& testIn, std::vector<std::string>& testOut)
+ErrCode HksCryptoExtStubImpl::test(const std::string& testIn, std::vector<std::string>& testOut)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO CryptoExtStubImpl test");
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl test");
     if (extension_ == nullptr) {
         LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
         return ERR_OK;

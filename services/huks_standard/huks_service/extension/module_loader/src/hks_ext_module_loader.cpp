@@ -23,25 +23,25 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 
-CryptoAccessExtAbilityModuleLoader::CryptoAccessExtAbilityModuleLoader() = default;
-CryptoAccessExtAbilityModuleLoader::~CryptoAccessExtAbilityModuleLoader() = default;
+HksCryptoExtAbilityModuleLoader::HksCryptoExtAbilityModuleLoader() = default;
+HksCryptoExtAbilityModuleLoader::~HksCryptoExtAbilityModuleLoader() = default;
 
-Extension *CryptoAccessExtAbilityModuleLoader::Create(const std::unique_ptr<Runtime>& runtime) const
+Extension *HksCryptoExtAbilityModuleLoader::Create(const std::unique_ptr<Runtime>& runtime) const
 {
-    return CryptoExtAbility::Create(runtime);
+    return HksCryptoExtAbility::Create(runtime);
 }
 
 extern "C" __attribute__((visibility("default"))) void* OHOS_EXTENSION_GetExtensionModule()
 {
-    return &CryptoAccessExtAbilityModuleLoader::GetInstance();
+    return &HksCryptoExtAbilityModuleLoader::GetInstance();
 }
 
 extern "C" __attribute__((visibility("default"))) void SetCreator(const CreatorFunc& creator)
 {
-    return CryptoExtAbility::SetCreator(creator);
+    return HksCryptoExtAbility::SetCreator(creator);
 }
 
-std::map<std::string, std::string> CryptoAccessExtAbilityModuleLoader::GetParams()
+std::map<std::string, std::string> HksCryptoExtAbilityModuleLoader::GetParams()
 {
     std::map<std::string, std::string> params;
     // TODO 根据BMS最终代码，要更换 35的具体值

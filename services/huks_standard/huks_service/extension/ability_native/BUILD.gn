@@ -43,7 +43,6 @@ ohos_shared_library("crypto_extension_ability_native") {
 
     include_dirs = [
         "inc",
-        "../ukey/connection/inc",
     ]
 
     sources = [

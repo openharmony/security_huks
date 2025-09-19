@@ -26,19 +26,19 @@ class Runtime;
 namespace Security {
 namespace Huks {
 
-class CryptoExtAbility;
-using CreatorFunc = std::function<CryptoExtAbility* (const std::unique_ptr<AbilityRuntime::Runtime>& runtime)>;
-class CryptoExtAbility : public AbilityRuntime::ExtensionBase<> {
+class HksCryptoExtAbility;
+using CreatorFunc = std::function<HksCryptoExtAbility* (const std::unique_ptr<AbilityRuntime::Runtime>& runtime)>;
+class HksCryptoExtAbility : public AbilityRuntime::ExtensionBase<> {
 public:
-    CryptoExtAbility() = default;
-    virtual ~CryptoExtAbility() = default;
+    HksCryptoExtAbility() = default;
+    virtual ~HksCryptoExtAbility() = default;
 
     virtual void Init(const std::shared_ptr<AbilityRuntime::AbilityLocalRecord> &record,
         const std::shared_ptr<AbilityRuntime::OHOSApplication> &application,
         std::shared_ptr<AbilityRuntime::AbilityHandler> &handler,
         const sptr<IRemoteObject> &token) override;
 
-    static CryptoExtAbility* Create(const std::unique_ptr<AbilityRuntime::Runtime>& runtime);
+    static HksCryptoExtAbility* Create(const std::unique_ptr<AbilityRuntime::Runtime>& runtime);
     static void SetCreator(const CreatorFunc& creator);
     
     virtual int test(const std::string& testIn, std::vector<std::string>& testOut);
