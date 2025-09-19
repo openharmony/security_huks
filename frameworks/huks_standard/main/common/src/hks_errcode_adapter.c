@@ -628,10 +628,10 @@ static struct HksError g_errCodeTable[] = {
             .data = NULL
         }
     }, {
-        .innerErrCode = HKS_ERROR_KEYSTORE_USERID_MAP_ENTRY,
+        .innerErrCode = HKS_ERROR_KEYSTORE_USERID_MAP_EMPTY,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
-            .errorMsg = "import keystore userid map entry fail.",
+            .errorMsg = "import keystore userid map is empty.",
             .data = NULL
         }
     }, {
