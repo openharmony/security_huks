@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,7 +33,10 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 
-constexpr const char *PROVIDER_INFO_KEY = "providerInfo";
+constexpr const char *PROVIDER_NAME_KEY = "providerName";
+constexpr const char *ABILITY_NAME_KEY = "abilityName";
+constexpr const char *BUNDLE_NAME_KEY = "bundleName";
+
 std::shared_ptr<HksRemoteHandleManager> HksRemoteHandleManager::GetInstanceWrapper()
 {
     if (blob == nullptr) {
@@ -55,33 +59,61 @@ void HksRemoteHandleManager::ReleaseInstance()
 }
 
 int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &index, 
-                                                         std::string &providerInfo, 
+                                                         ProviderInfo &providerInfo, 
                                                          std::string &newIndex)
 {
     CommJsonObject root = CommJsonObject::Parse(index);
-
-    auto providerInfoResult = root.GetValue(PROVIDER_INFO_KEY).ToString();
-    if (providerInfoResult.first != HKS_SUCCESS) {
-        HKS_LOG_E("Get providerInfo field failed");
+    // 修改：使用 IsNull() 而不是 IsInvalid()
+    if (root.IsNull()) {
+        HKS_LOG_E("Parse index failed, invalid JSON format");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    providerInfo = providerInfoResult.second;
+
+    // 解析ProviderInfo字段
+    // 修改：使用正确的 GetValue 和 ToString 方法调用方式
+    auto providerNameObj = root.GetValue(PROVIDER_NAME_KEY);
+    auto providerNameResult = providerNameObj.ToString();
     
-    if (providerInfo.empty()) {
-        HKS_LOG_E("ProviderInfo is empty");
+    auto abilityNameObj = root.GetValue(ABILITY_NAME_KEY);
+    auto abilityNameResult = abilityNameObj.ToString();
+    
+    auto bundleNameObj = root.GetValue(BUNDLE_NAME_KEY);
+    auto bundleNameResult = bundleNameObj.ToString();
+    
+    // 修改：检查每个字段是否有效
+    if (providerNameResult.first != HKS_SUCCESS || abilityNameResult.first != HKS_SUCCESS || 
+        bundleNameResult.first != HKS_SUCCESS) {
+        HKS_LOG_E("Get provider info fields failed");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    
+    providerInfo.m_providerName = providerNameResult.second;
+    providerInfo.m_abilityName = abilityNameResult.second;
+    providerInfo.m_bundleName = bundleNameResult.second;
+    
+    if (providerInfo.m_providerName.empty() || providerInfo.m_abilityName.empty() || 
+        providerInfo.m_bundleName.empty()) {
+        HKS_LOG_E("Provider info is incomplete");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    // Create a new JSON object without the provider info field
+    // 创建不包含provider信息的新JSON对象
     CommJsonObject newRoot = CommJsonObject::CreateObject();
 
-    // Copy all fields except provider info
+    // 复制除provider信息外的所有字段
     auto keys = root.GetKeys();
     for (const auto &key : keys) {
-        if (key != PROVIDER_INFO_KEY) {
+        if (key != PROVIDER_NAME_KEY && key != ABILITY_NAME_KEY && key != BUNDLE_NAME_KEY) {
             auto value = root.GetValue(key);
-            if (!newRoot.SetValue(key, std::move(value))) {
-                HKS_LOG_E("Copy all fields except provider info failed");
+            // 修改：检查值是否有效
+            if (value.IsNull()) {
+                HKS_LOG_W("Skip invalid field: %s", key.c_str());
+                continue;
+            }
+            
+            // 修改：使用正确的 SetValue 方法
+            if (!newRoot.SetValue(key, value)) {
+                HKS_LOG_E("Copy field %s failed", key.c_str());
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
         }
@@ -101,18 +133,23 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::ValidateProviderInfo(const std::string &newIndex, const std::string &providerInfo)
+int32_t HksRemoteHandleManager::ValidateProviderInfo(const std::string &newIndex, const ProviderInfo &providerInfo)
 {
+    ProviderInfo cachedProviderInfo;
+    if (!newIndexToProviderInfo.Find(newIndex, cachedProviderInfo)) {
+        HKS_LOG_E("Provider info not found for newIndex: %s", newIndex.c_str());
+        return HKS_ERROR_NOT_EXIST;
+    }
     
-    if (cachedProviderInfo != providerInfo) {
-        HKS_LOG_E("Provider info mismatch: cached=%s, current=%s", 
-                 cachedProviderInfo.c_str(), providerInfo.c_str());
+    if (!(cachedProviderInfo == providerInfo)) {
+        HKS_LOG_E("Provider info mismatch");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     
     return HKS_SUCCESS;
 }
-OHOS::sptr<IRemoteObject> HksRemoteHandleManager::GetProviderProxy(const std::string &providerInfo, int32_t &ret)
+
+OHOS::sptr<IRemoteObject> HksRemoteHandleManager::GetProviderProxy(const ProviderInfo &providerInfo, int32_t &ret)
 {
     auto providerManager = HksProviderLifeCycleManager::GetInstanceWrapper();
     if (providerManager == nullptr) {
@@ -121,9 +158,10 @@ OHOS::sptr<IRemoteObject> HksRemoteHandleManager::GetProviderProxy(const std::st
         return nullptr;
     }
 
-    auto proxy = providerManager->GetExtensionProxy(providerInfo);
-    if (proxy == nullptr) {
-        HKS_LOG_E("Get extension proxy failed for provider: %s", providerInfo.c_str());
+    sptr<IRemoteObject> proxy;
+    ret = providerManager->GetExtensionProxy(providerInfo, proxy);
+    if (ret != HKS_SUCCESS || proxy == nullptr) {
+        HKS_LOG_E("Get extension proxy failed for provider: %s", providerInfo.m_providerName.c_str());
         ret = HKS_ERROR_INVALID_ARGUMENT;
         return nullptr;
     }
@@ -132,20 +170,27 @@ OHOS::sptr<IRemoteObject> HksRemoteHandleManager::GetProviderProxy(const std::st
     return proxy;
 }
 
-int32_t HksRemoteHandleManager::GetRemoteIndex(const std::string &providerInfo, [[maybe_unused]] const CppParamSet &paramSet, std::string &index)
+int32_t HksRemoteHandleManager::GetRemoteIndex(const ProviderInfo &providerInfo, [[maybe_unused]] const CppParamSet &paramSet, std::string &index)
 {
-    int32_t ret;
-    auto proxy = GetProviderProxy(providerInfo, ret);
-    if (proxy == nullptr) {
-        return ret;
+    // 创建包含provider信息的JSON对象
+    CommJsonObject root = CommJsonObject::CreateObject();
+    
+    if (!root.SetValue(PROVIDER_NAME_KEY, providerInfo.m_providerName) ||
+        !root.SetValue(ABILITY_NAME_KEY, providerInfo.m_abilityName) ||
+        !root.SetValue(BUNDLE_NAME_KEY, providerInfo.m_bundleName)) {
+        HKS_LOG_E("Set provider info to index failed");
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
-
+    
+    // 如果有其他需要包含的参数，可以在这里添加
+    // 例如: root.SetValue("keySize", paramSet.GetInt32(HKS_KEY_SIZE));
+    
+    index = root.Serialize(false);
     return HKS_SUCCESS;
 }
 
-
 int32_t HksRemoteHandleManager::ValidateAndGetHandle(const std::string &newIndex, 
-                                                    const std::string &providerInfo, std::string &handle)
+                                                    const ProviderInfo &providerInfo, std::string &handle)
 {
     int32_t ret = ValidateProviderInfo(newIndex, providerInfo);
     if (ret != HKS_SUCCESS) {
@@ -161,7 +206,7 @@ int32_t HksRemoteHandleManager::ValidateAndGetHandle(const std::string &newIndex
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::ParseAndValidateIndex(const std::string &index, std::string &providerInfo,
+int32_t HksRemoteHandleManager::ParseAndValidateIndex(const std::string &index, ProviderInfo &providerInfo,
                                     std::string &newIndex,std::string &handle)
 {
     int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
@@ -181,7 +226,7 @@ int32_t HksRemoteHandleManager::ParseAndValidateIndex(const std::string &index, 
 
 int32_t HksRemoteHandleManager::CreateRemoteHandle(const std::string &index, [[maybe_unused]] const CppParamSet &paramSet)
 {
-    std::string providerInfo;
+    ProviderInfo providerInfo;
     std::string newIndex;
     int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
     if (ret != HKS_SUCCESS) {
@@ -194,6 +239,7 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const std::string &index, [[m
         return ret;
     }
 
+    // 这里调用远程provider的创建handle方法
     // int32_t ret = proxy->CreateRemoteHandle(newIndex, paramSet, handle);
     std::string handle = "remote_handle_" + newIndex; 
     ret = HKS_SUCCESS;
@@ -219,7 +265,7 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const std::string &index, [[m
 
 int32_t HksRemoteHandleManager::CloseRemoteHandle(const std::string &index, [[maybe_unused]] const CppParamSet &paramSet)
 {
-    std::string providerInfo;
+    ProviderInfo providerInfo;
     std::string newIndex;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
@@ -232,6 +278,7 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const std::string &index, [[ma
         return ret;
     }
 
+    // 调用远程provider的关闭handle方法
     // ret = proxy->CloseRemoteHandle(newIndex, handle);
     ret = HKS_SUCCESS;
     
@@ -249,7 +296,7 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const std::string &index, [[ma
 
 int32_t HksRemoteHandleManager::RemoteVerifyPin(const std::string &index, const HksBlob &pinData)
 {
-    std::string providerInfo;
+    ProviderInfo providerInfo;
     std::string newIndex;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
@@ -262,6 +309,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const std::string &index, const 
         return ret;
     }
 
+    // 调用远程provider的验证PIN方法
     // ret = proxy->VerifyPin(newIndex, handle, pinData);
     ret = HKS_SUCCESS;
     
@@ -275,7 +323,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const std::string &index, const 
 
 int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const std::string &index)
 {
-    std::string providerInfo;
+    ProviderInfo providerInfo;
     std::string newIndex;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
@@ -288,6 +336,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const std::string &index)
         return ret;
     }
 
+    // 调用远程provider的验证PIN状态方法
     // ret = proxy->VerifyPinStatus(newIndex, handle);
     ret = HKS_SUCCESS;
     
@@ -301,7 +350,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const std::string &index)
 
 int32_t HksRemoteHandleManager::RemoteClearPinStatus(const std::string &index)
 {
-    std::string providerInfo;
+    ProviderInfo providerInfo;
     std::string newIndex;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
@@ -314,6 +363,7 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const std::string &index)
         return ret;
     }
 
+    // 调用远程provider的清除PIN状态方法
     // ret = proxy->ClearPinStatus(newIndex, handle);
     ret = HKS_SUCCESS;
     
@@ -325,11 +375,10 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const std::string &index)
     return HKS_SUCCESS;
 }
 
-
 int32_t HksRemoteHandleManager::RemoteHandleSign(const std::string &index, const CppParamSet &paramSet,
     const HksBlob &inData, HksBlob &outData)
 {
-    std::string providerInfo;
+    ProviderInfo providerInfo;
     std::string newIndex;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
@@ -342,6 +391,7 @@ int32_t HksRemoteHandleManager::RemoteHandleSign(const std::string &index, const
         return ret;
     }
 
+    // 调用远程provider的签名方法
     // ret = proxy->Sign(newIndex, handle, paramSet, inData, outData);
     ret = HKS_SUCCESS;
     
@@ -353,10 +403,10 @@ int32_t HksRemoteHandleManager::RemoteHandleSign(const std::string &index, const
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::RemoteHandleVerify(const std::string &index, const CppParamSet &极速版paramSet,
+int32_t HksRemoteHandleManager::RemoteHandleVerify(const std::string &index, const CppParamSet &paramSet,
     const HksBlob &plainText, HksBlob &signature)
 {
-    std::string providerInfo;
+    ProviderInfo providerInfo;
     std::string newIndex;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
@@ -369,6 +419,7 @@ int32_t HksRemoteHandleManager::RemoteHandleVerify(const std::string &index, con
         return ret;
     }
 
+    // 调用远程provider的验签方法
     // ret = proxy->Verify(newIndex, handle, paramSet, plainText, signature);
     ret = HKS_SUCCESS;
     
@@ -383,6 +434,7 @@ int32_t HksRemoteHandleManager::RemoteHandleVerify(const std::string &index, con
 int32_t HksRemoteHandleManager::ClearRemoteHandle()
 {
     indexToHandle.Clear();
+    newIndexToProviderInfo.Clear();
     return HKS_SUCCESS;
 }
 

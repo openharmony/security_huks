@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,7 +36,7 @@ public:
     static std::shared_ptr<HksRemoteHandleManager> GetInstanceWrapper();
     static void ReleaseInstance();
 
-    int32_t GetRemoteIndex(const std::string &providerInfo, [[maybe_unused]] const CppParamSet &paramSet, std::string &index);
+    int32_t GetRemoteIndex(const ProviderInfo &providerInfo, [[maybe_unused]] const CppParamSet &paramSet, std::string &index);
     // handle管理
     int32_t CreateRemoteHandle(const std::string &index, [[maybe_unused]] const CppParamSet &paramSet);
     int32_t CloseRemoteHandle(const std::string &index, [[maybe_unused]] const CppParamSet &paramSet);
@@ -48,8 +47,8 @@ public:
     int32_t RemoteClearPinStatus(const std::string &index);
 
     //证书查询
-//      int32_t FindRemoteCertificate(const std::string &index, const std::string certificatesOut);
-//     int32_t FindRemoteAllCertificate(const std::string &index, const std::string certificatesOut);
+    //  int32_t FindRemoteCertificate(const std::string &index, const std::string certificatesOut);
+    // int32_t FindRemoteAllCertificate(const std::string &index, const std::string certificatesOut);
 
     //签名验签
     int32_t RemoteHandleSign(const std::string &index, const CppParamSet &paramSet,
@@ -57,42 +56,23 @@ public:
     int32_t RemoteHandleVerify(const std::string &index, const CppParamSet &paramSet,
             const HksBlob &plainText, HksBlob &signature);
 
-    //加密解密
-//     int32_t RemoteHandleEncrypt(const std::string &index, const CppParamSet &paramSet,
-//             const HksBlob &inData, HksBlob &outData);
-//     int32_t RemoteHandleDecrypt(const std::string &index, const CppParamSet &paramSet,
-//             const HksBlob &inData, HksBlob &outData);
 
     int32_t ClearRemoteHandle();
 
-    static int32_t KeyHandlePreCheck(const std::string &abilityName, std::string &index);
+    static int32_t ParseIndexAndProviderInfo(const std::string &index, ProviderInfo &providerInfo, std::string &newIndex);
 
+    int32_t ValidateProviderInfo(const std::string &newIndex, const ProviderInfo &providerInfo);
 
 private:
 
-    int32_t ValidateAndGetHandle(const std::string &newIndex, const std::string &providerInfo, std::string &handle);
-    int32_t ParseAndValidateIndex(const std::string &index, std::string &providerInfo,
+    int32_t ValidateAndGetHandle(const std::string &newIndex, const ProviderInfo &providerInfo, std::string &handle);
+    int32_t ParseAndValidateIndex(const std::string &index, ProviderInfo &providerInfo,
                                     std::string &newIndex,std::string &handle);
-    OHOS::sptr<IRemoteObject> GetProviderProxy(const std::string &providerInfo, int32_t &ret);
+    OHOS::sptr<IRemoteObject> GetProviderProxy(const ProviderInfo &providerInfo, int32_t &ret);
 
     OHOS::SafeMap<std::string, std::string> indexToHandle;
 
-    
-    // 释放HksBlob资源
-    void FreeHksBlob(HksBlob &blob);
-    
-    int32_t GetRemoteIndex(const std::string &abilityName, std::string &index);
-    
-    int32_t CreateRemoteHandle(const std::string &abilityName, const std::string &index, 
-                              const CppParamSet &paramSet, HksBlob &keyHandle);
-    
-    OHOS::SafeMap<std::string, std::vector<std::string>> abilityIndexMap;
-    
-    OHOS::SafeMap<std::string, std::vector<HksBlob>> indexHandleMap;
-    
-    OHOS::SafeMap<HksBlob, std::pair<std::string, std::string>, HksBlobHash, HksBlobEqual> handleInfoMap;
-    
-    OHOS::SafeMap<std::string, std::shared_ptr<CrypoExtensionProxy>> providerProxyMap;
+    OHOS::SafeMap<std::string, ProviderInfo> newIndexToProviderInfo;
 };
 
 // HksBlob哈希函数
