@@ -120,17 +120,17 @@ static int32_t CheckSm2CipherData(bool isEncrypt, const struct HksUsageSpec *usa
 }
 
 static int32_t CheckAesCipherAead(bool isEncrypt, const struct HksBlob *inData,
-    const struct HksBlob *outData)
+    const struct HksBlob *outData, uint32_t aeadTagLen)
 {
     if (isEncrypt) {
-        if (outData->size < (inData->size + HKS_AE_TAG_LEN)) {
+        if (outData->size < (inData->size + aeadTagLen)) {
             HKS_LOG_E("encrypt, out buffer too small size: %" LOG_PUBLIC "u, inSize: %" LOG_PUBLIC "u",
                 outData->size, inData->size);
             return HKS_ERROR_BUFFER_TOO_SMALL;
         }
     } else {
         if (outData->size < inData->size) {
-            HKS_LOG_E("decryptfinal, out buffer too small size: %" LOG_PUBLIC "u, inSize: %" LOG_PUBLIC "u",
+            HKS_LOG_E("decrypt, out buffer too small size: %" LOG_PUBLIC "u, inSize: %" LOG_PUBLIC "u",
                 outData->size, inData->size);
             return HKS_ERROR_BUFFER_TOO_SMALL;
         }
@@ -177,7 +177,7 @@ static int32_t CheckBlockCipherOther(uint32_t mode, bool isEncrypt, const struct
 }
 
 static int32_t CheckBlockCipherData(bool isEncrypt, const struct HksUsageSpec *usageSpec,
-    const struct HksBlob *inData, const struct HksBlob *outData)
+    const struct HksBlob *inData, const struct HksBlob *outData, uint32_t aeadTagLen)
 {
     const uint32_t mode = usageSpec->mode;
     const uint32_t alg = usageSpec->algType;
@@ -185,7 +185,7 @@ static int32_t CheckBlockCipherData(bool isEncrypt, const struct HksUsageSpec *u
 
     if (mode == HKS_MODE_GCM || mode == HKS_MODE_CCM) {
         if (alg == HKS_ALG_AES) {
-            ret = CheckAesCipherAead(isEncrypt, inData, outData);
+            ret = CheckAesCipherAead(isEncrypt, inData, outData, aeadTagLen);
         }
     } else if (mode == HKS_MODE_CFB || mode == HKS_MODE_OFB) {
         if (alg == HKS_ALG_SM4) {
@@ -206,22 +206,28 @@ static int32_t HksCheckFinishOutSize(bool isEncrypt, struct HksParamSet *paramSe
     struct HksKeySpec cipherSpec = {0};
     HksFillKeySpec(paramSet, &cipherSpec);
     uint32_t alg = usageSpec.algType;
-
+    uint32_t aeadTagLen = HKS_AE_TAG_LEN;
+    int32_t ret = HKS_SUCCESS;
     switch (alg) {
         case HKS_ALG_RSA:
             return CheckRsaCipherData(isEncrypt, cipherSpec.keyLen, &usageSpec, outData);
         case HKS_ALG_SM2:
             return CheckSm2CipherData(isEncrypt, &usageSpec, inData, outData);
         case HKS_ALG_AES:
+            if (usageSpec.mode == HKS_MODE_CCM || usageSpec.mode == HKS_MODE_GCM) {
+                ret = HksGetAeadTagLength(paramSet, usageSpec.mode, &aeadTagLen);
+                HKS_IF_NOT_SUCC_RETURN(ret, ret);
+            }
+            return CheckBlockCipherData(isEncrypt, &usageSpec, inData, outData, aeadTagLen);
 #ifdef HKS_SUPPORT_DES_C
         case HKS_ALG_DES:
 #endif
 #ifdef HKS_SUPPORT_3DES_C
         case HKS_ALG_3DES:
+            return CheckBlockCipherData(isEncrypt, &usageSpec, inData, outData, aeadTagLen);
 #endif
-            return CheckBlockCipherData(isEncrypt, &usageSpec, inData, outData);
         case HKS_ALG_SM4:
-            return CheckBlockCipherData(isEncrypt, &usageSpec, inData, outData);
+            return CheckBlockCipherData(isEncrypt, &usageSpec, inData, outData, aeadTagLen);
         default:
             return HKS_ERROR_INVALID_ALGORITHM;
     }
@@ -801,6 +807,17 @@ static int32_t CoreCipherInit(const struct HuksKeyNode *keyNode)
         if (purposeParam->uint32Param == HKS_KEY_PURPOSE_ENCRYPT) {
             ret = HksCryptoHalEncryptInit(&rawKey, usageSpec, &ctx);
         } else {
+            if (usageSpec->algType == HKS_ALG_AES &&
+                (usageSpec->mode == HKS_MODE_CCM || usageSpec->mode == HKS_MODE_GCM)) {
+                struct HksAeadParam *aeadParam = (struct HksAeadParam *)(usageSpec->algParam);
+                struct HksParam *tagParam = NULL;
+                ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_AE_TAG, &tagParam);
+                HKS_IF_NOT_SUCC_RETURN(ret, ret);
+                HKS_IF_NOT_TRUE_LOGE_RETURN(tagParam->blob.size == aeadParam->tagDec.size,
+                    HKS_ERROR_CODE_AEAD_TAG_LEN_NOT_EQUAL,
+                    "indicate len %" LOG_PUBLIC "u != input len %" LOG_PUBLIC "u",
+                    aeadParam->tagDec.size, tagParam->blob.size);
+            }
             ret = HksCryptoHalDecryptInit(&rawKey, usageSpec, &ctx);
         }
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "cipher ctx init failed, ret = %" LOG_PUBLIC "d", ret)
@@ -890,7 +907,7 @@ static int32_t CoreAesEncryptFinish(const struct HuksKeyNode *keyNode,
     struct HksParam *needAppendNonce = NULL;
     ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_AES_GCM_NEED_REGENERATE_NONCE, &needAppendNonce);
     if (ret == HKS_SUCCESS && needAppendNonce->boolParam == true) {
-        if (outData->size < (inData->size + HKS_AE_TAG_LEN + HKS_AES_GCM_NONCE_LEN)) {
+        if (outData->size < (inData->size + tag.size + HKS_AES_GCM_NONCE_LEN)) {
             HKS_LOG_E("too small out buf!");
             return HKS_ERROR_INVALID_ARGUMENT;
         }
@@ -930,6 +947,12 @@ static int32_t CoreAesDecryptFinish(const struct HuksKeyNode *keyNode,
             return ret;
         }
         tag = tagParam->blob;
+
+        uint32_t aeadTagLen = HKS_AE_TAG_LEN;
+        ret = HksGetAeadTagLengthWithoutMode(keyNode->runtimeParamSet, &aeadTagLen);
+        HKS_IF_NOT_SUCC_RETURN(ret, ret);
+        HKS_IF_TRUE_LOGE_RETURN(tag.size != aeadTagLen, HKS_ERROR_CODE_AEAD_TAG_LEN_NOT_EQUAL,
+            "indicate aead %" LOG_PUBLIC "u, input aead %" LOG_PUBLIC "u", aeadTagLen, tag.size);
     }
 
     ret = HksCheckFinishOutSize(false, keyNode->runtimeParamSet, inData, outData);
@@ -966,15 +989,16 @@ static int32_t CoreAesCcmCipherFinish(const struct HuksKeyNode *keyNode, const b
         ret = HksGetRawKey(keyNode->keyBlobParamSet, &rawKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ccm get raw key failed")
 
+        struct HksAeadParam *aeadParam = (struct HksAeadParam *)usageSpec->algParam;
         struct HksParam *needAppendNonce = NULL;
         ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_AES_GCM_NEED_REGENERATE_NONCE, &needAppendNonce);
         if (ret == HKS_SUCCESS && needAppendNonce->boolParam == true) {
-            if (outData->size < (inData->size + HKS_AE_TAG_LEN + HKS_AES_CCM_NONCE_LEN)) {
+            uint32_t aeadTagLen = isEncrypt ? aeadParam->tagLenEnc : aeadParam->tagDec.size;
+            if (outData->size < (inData->size + aeadTagLen + HKS_AES_CCM_NONCE_LEN)) {
                 HKS_IF_NOT_SUCC_LOGE_BREAK(HKS_ERROR_INVALID_ARGUMENT, "ccm too small out buf")
             }
         }
 
-        struct HksAeadParam *aeadParam = usageSpec->algParam;
         aeadParam->payloadLen = inData->size;
         if (usageSpec->purpose == HKS_KEY_PURPOSE_ENCRYPT) {
             struct HksBlob tag = { 0, NULL };
@@ -1006,7 +1030,24 @@ static int32_t CoreAesCipherInit(const struct HuksKeyNode *keyNode)
     if (modeParam->uint32Param == HKS_MODE_CCM) {
         ret = UpdateNonceForAesAeMode((struct HksParamSet **)(unsigned long)&keyNode->runtimeParamSet,
             keyNode->keyBlobParamSet, true);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "update aes gcm nonce failed")
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "update aes gcm nonce failed");
+        
+        uint32_t aeadTagLen = HKS_AE_TAG_LEN;
+        ret = HksGetAeadTagLength(keyNode->runtimeParamSet, HKS_MODE_CCM, &aeadTagLen);
+        HKS_IF_NOT_SUCC_RETURN(ret, ret);
+
+        struct HksParam *purposeParam = NULL;
+        ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_PURPOSE, &purposeParam);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_PURPOSE_FAIL, "ccm not have purpose");
+        if (purposeParam->uint32Param == HKS_KEY_PURPOSE_DECRYPT) {
+            struct HksParam *aeadTagParam = NULL;
+            ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_AE_TAG, &aeadTagParam);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_AE_TAG_FAIL, "ccm decrypt not have aead");
+            HKS_IF_TRUE_LOGE_RETURN(aeadTagParam->blob.size != aeadTagLen, HKS_ERROR_CODE_AEAD_TAG_LEN_NOT_EQUAL,
+                "ccm indiacte aead tag len %" LOG_PUBLIC "u != input aead size %" LOG_PUBLIC "u",
+                aeadTagLen, aeadTagParam->blob.size);
+        }
+
         return SetCacheModeCtx(keyNode);
     }
 

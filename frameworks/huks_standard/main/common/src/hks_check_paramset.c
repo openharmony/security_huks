@@ -34,6 +34,7 @@
 #include "hks_log.h"
 #include "hks_param.h"
 #include "hks_template.h"
+#include "hks_cmd_id.h"
 #include "securec.h"
 
 #ifdef _CUT_AUTHENTICATE_
@@ -322,6 +323,17 @@ static uint32_t g_symmetricAlgorithm[] = {
     HKS_ALG_SM4,
 #endif
 };
+
+#ifdef L2_STANDARD
+/*
+ * AES-CCM mode supported aead length
+ */
+static const uint32_t g_ccmSupportLen[] = {4, 6, 8, 10, 12, 14, 16};
+/*
+ * AES-GCM mode supported aead length
+ */
+static const uint32_t g_gcmSupportLen[] = {16};
+#endif
 
 static int32_t CheckAndGetAlgorithm(
     const struct HksParamSet *paramSet, const uint32_t *expectAlg, uint32_t expectCnt, uint32_t *alg)
@@ -1116,6 +1128,41 @@ int32_t HksCoreCheckAgreeKeyParams(const struct HksParamSet *paramSet, const str
     return HKS_SUCCESS;
 }
 
+static int32_t CheckAesAeCipherData(uint32_t cmdId, const struct HksBlob *inData, const struct HksBlob *outData,
+    uint32_t aeadTagLen)
+{
+    /*
+     * encrypt: inSize greater than 0(has been checked),
+     *          outSize no less than inSize + tagLen (in: plain; out: cipher)
+     * decrypt: inSize greater than tagLen, outSize no less than inSize - tagLen
+     * decryptFinal: inSize greater than 0(has been checked), outSize no less than inSize (in: cipher; out: plain)
+     */
+    switch (cmdId) {
+        case HKS_CMD_ID_ENCRYPT:
+            if (inData->size > (UINT32_MAX - aeadTagLen)) {
+                HKS_LOG_E("encrypt, invalid inSize: %" LOG_PUBLIC "u", inData->size);
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+            if (outData->size < (inData->size + aeadTagLen)) {
+                HKS_LOG_E("encrypt, out buffer too small size: %" LOG_PUBLIC "u, inSize: %" LOG_PUBLIC "u",
+                    outData->size, inData->size);
+                return HKS_ERROR_BUFFER_TOO_SMALL;
+            }
+            break;
+        case HKS_CMD_ID_DECRYPT:
+            if ((inData->size < aeadTagLen) || (outData->size < inData->size - aeadTagLen)) {
+                HKS_LOG_E("decryptfinal, out buffer too small size: %" LOG_PUBLIC "u, inSize: %" LOG_PUBLIC "u",
+                    outData->size, inData->size);
+                return HKS_ERROR_BUFFER_TOO_SMALL;
+            }
+            break;
+        default:
+            return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    return HKS_SUCCESS;
+}
+
 int32_t HksCoreCheckCipherParams(uint32_t cmdId, const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, const struct HksBlob *outData)
 {
@@ -1136,6 +1183,13 @@ int32_t HksCoreCheckCipherParams(uint32_t cmdId, const struct HksBlob *key, cons
 
     ret = CheckCipherParamsByAlg(cmdId, alg, paramSet, &params);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "cipher check params failed, ret = %" LOG_PUBLIC "d", ret)
+
+    if (alg == HKS_ALG_AES && (params.mode.value == HKS_MODE_GCM || params.mode.value == HKS_MODE_CCM)) {
+        uint32_t aeadTagLen = HKS_AE_TAG_LEN;
+        ret = HksGetAeadTagLength(paramSet, params.mode.value, &aeadTagLen);
+        HKS_IF_NOT_SUCC_RETURN(ret, ret);
+        return CheckAesAeCipherData(cmdId, inData, outData, aeadTagLen);
+    }
 
     ret = HksCheckCipherData(cmdId, alg, &params, inData, outData);
     HKS_IF_NOT_SUCC_LOGE(ret, "cipher check input or output data failed, ret = %" LOG_PUBLIC "d", ret)
@@ -1187,6 +1241,13 @@ int32_t HksLocalCheckCipherParams(uint32_t cmdId, uint32_t keySize, const struct
 
     ret = CheckCipherParamsByAlg(cmdId, alg, paramSet, &params);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "local cipher check params failed, ret = %" LOG_PUBLIC "d", ret)
+
+    if (alg == HKS_ALG_AES && (params.mode.value == HKS_MODE_GCM || params.mode.value == HKS_MODE_CCM)) {
+        uint32_t aeadTagLen = HKS_AE_TAG_LEN;
+        ret = HksGetAeadTagLength(paramSet, params.mode.value, &aeadTagLen);
+        HKS_IF_NOT_SUCC_RETURN(ret, ret);
+        return CheckAesAeCipherData(cmdId, inData, outData, aeadTagLen);
+    }
 
     ret = HksCheckCipherData(cmdId, alg, &params, inData, outData);
     HKS_IF_NOT_SUCC_LOGE(ret, "local cipher check input or output data failed, ret = %" LOG_PUBLIC "d", ret)
@@ -1311,4 +1372,69 @@ int32_t HksCoreCheckAgreeDeriveFinishParams(const struct HksBlob *key, const str
     }
 
     return HKS_SUCCESS;
+}
+
+#ifdef L2_STANDARD
+static int32_t IsValidCcmTagLen(uint32_t aeadTagLen)
+{
+    for (uint32_t i = 0; i < HKS_ARRAY_SIZE(g_ccmSupportLen); ++i) {
+        if (g_ccmSupportLen[i] == aeadTagLen) {
+            return HKS_SUCCESS;
+        }
+    }
+    HKS_LOG_E("ccm tag len %" LOG_PUBLIC "u invalid", aeadTagLen);
+    return HKS_ERROR_CODE_AEAD_TAG_LEN_INVALID;
+}
+
+static int32_t IsValidGcmTagLen(uint32_t aeadTagLen)
+{
+    for (uint32_t i = 0; i < HKS_ARRAY_SIZE(g_gcmSupportLen); ++i) {
+        if (g_gcmSupportLen[i] == aeadTagLen) {
+            return HKS_SUCCESS;
+        }
+    }
+    HKS_LOG_E("gcm tag len %" LOG_PUBLIC "u invalid", aeadTagLen);
+    return HKS_ERROR_CODE_AEAD_TAG_LEN_INVALID;
+}
+
+static int32_t IsValidAeadTagLen(uint32_t mode, uint32_t aeadTagLen)
+{
+    if (mode == HKS_MODE_CCM) {
+        return IsValidCcmTagLen(aeadTagLen);
+    } else if (mode == HKS_MODE_GCM) {
+        return IsValidGcmTagLen(aeadTagLen);
+    } else {
+        HKS_LOG_E("not support aead tag for mode %" LOG_PUBLIC "u", mode);
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+    return HKS_SUCCESS;
+}
+#endif
+
+int32_t HksGetAeadTagLength(const struct HksParamSet *paramSet, const uint32_t mode, uint32_t *aeadTagLen)
+{
+#ifdef L2_STANDARD
+    *aeadTagLen = HKS_AE_TAG_LEN;
+    struct HksParam *aeadParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_AE_TAG_LEN, &aeadParam);
+    HKS_IF_TRUE_RETURN(ret == HKS_ERROR_PARAM_NOT_EXIST, HKS_SUCCESS);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret);
+    ret = IsValidAeadTagLen(mode, aeadParam->uint32Param);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret);
+    *aeadTagLen = aeadParam->uint32Param;
+#else
+    (void)paramSet;
+    (void)mode;
+    *aeadTagLen = HKS_AE_TAG_LEN;
+#endif
+    return HKS_SUCCESS;
+}
+
+int32_t HksGetAeadTagLengthWithoutMode(const struct HksParamSet *paramSet, uint32_t *aeadTagLen)
+{
+    struct HksParam *modeParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_BLOCK_MODE, &modeParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_MODE_FAIL, "get mode failed!");
+
+    return HksGetAeadTagLength(paramSet, modeParam->uint32Param, aeadTagLen);
 }
