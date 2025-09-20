@@ -10,41 +10,61 @@
 #include "huks_napi_common_item.h"
 
 namespace HuksNapiItem {
-constexpr int HUKS_NAPI_TWO_ARGS = 2;
-napi_value ParseStringAndHksParamSet(napi_env env, napi_value *argv, size_t &index,
-    HksBlob *&Name, HksParamSet *&paramSet)
+namespace {
+    constexpr int HKS_MAX_DATA_LEN = 0x6400000; // The maximum length is 100M
+    constexpr int HUKS_NAPI_ONE_ARG = 1;
+    constexpr int HUKS_NAPI_TWO_ARGS = 2;
+}  // namespace
+
+napi_value NapiCreateError(napi_env env, int32_t errCode, const char *errMsg)
 {
-    // 复用huks解析string和paramSet的方法
-    return ParseKeyAliasAndHksParamSet(env, argv, index, Name, paramSet);
+    napi_value code = nullptr;
+    NAPI_CALL(env, napi_create_int32(env, errCode, &code));
+
+    napi_value msg = nullptr;
+    NAPI_CALL(env, napi_create_string_utf8(env, errMsg, strlen(errMsg), &msg));
+
+    napi_value result = nullptr;
+    NAPI_CALL(env, napi_create_error(env, code, msg, &result));
+
+    return result;
 }
 
-static napi_value ParseTwoArgsStringParamSetAndCallback(napi_env env, napi_callback_info info,
-    HksBlob *&blobOut, HksParamSet *&paramSetOut, napi_ref &callbackRef)
+napi_value ParseString(napi_env env, napi_value object, HksBlob *&str)
 {
-    size_t argc = HUKS_NAPI_TWO_ARGS;
-    napi_value argv[HUKS_NAPI_TWO_ARGS] = { 0 };
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    napi_valuetype valueType = napi_valuetype::napi_undefined;
+    NAPI_CALL(env, napi_typeof(env, object, &valueType));
+    NAPI_THROW(env, valueType != napi_valuetype::napi_string, 
+               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "invalid type, expect string");
 
-    if (argc < HUKS_NAPI_TWO_ARGS) {
-        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
-        HKS_LOG_E("no enough params");
-        return nullptr;
+    size_t length = 0;
+    napi_status status = napi_get_value_string_utf8(env, object, nullptr, 0, &length);
+
+    NAPI_THROW(env, status != napi_ok, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get string length");
+    NAPI_THROW(env, length > HKS_MAX_DATA_LEN, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "the length of str is too long");
+
+    char *data = static_cast<char *>(HksMalloc(length + 1));
+    NAPI_THROW(env, data == nullptr, HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not alloc memory");
+
+    (void)memset_s(data, length + 1, 0, length + 1);
+    size_t result = 0;
+    status = napi_get_value_string_utf8(env, object, data, length + 1, &result);
+    if (status != napi_ok) {
+        HKS_FREE(data);
+        NAPI_THROW(env, true, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get string");
     }
 
-    size_t index = 0;
-    napi_value result = ParseStringAndHksParamSet(env, argv, index, blobOut, paramSetOut);
-    if (result == nullptr) {
-        HKS_LOG_E("ParseTwoArgs failed");
-        return nullptr;
+    str = static_cast<HksBlob *>(HksMalloc(sizeof(HksBlob)));
+    if (str == nullptr) {
+        HKS_FREE(data);
+        NAPI_THROW(env, true, HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not alloc memory");
     }
-
-    index++;
-    if (index < argc) {
-        callbackRef = GetCallback(env, argv[index]);
-    }
+    str->data = reinterpret_cast<uint8_t *>(data);
+    str->size = static_cast<uint32_t>(length & UINT32_MAX);
 
     return GetInt32(env, 0);
 }
+
 
 static napi_value CreateAsyncWork(napi_env env, napi_callback_info info, std::unique_ptr<AsyncContext> context, const char *resource)
 {
@@ -95,18 +115,34 @@ napi_value HuksNapiRegisterProvider(napi_env env, napi_callback_info info)
 {
     auto context = std::unique_ptr<RegisterAndUngisterProviderContext>(new (std::nothrow)RegisterAndUngisterProviderContext());
 
-    if (context == nullptr) {
-        HKS_LOG_E("could not create context");
-        return nullptr;
-    }
+    NAPI_THROW(env, context == nullptr, HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not create context");
 
     context->parse = [](napi_env env, napi_callback_info info, AsyncContext *context) -> napi_status {
         RegisterAndUngisterProviderContext *asyncContext = reinterpret_cast<RegisterAndUngisterProviderContext *>(context);
-        napi_value result = ParseTwoArgsStringParamSetAndCallback(env, info, asyncContext->name, context->paramSetIn, context->callback);
-        if (result == nullptr) {
-            HKS_LOG_E("generateKey parse params failed");
-            return napi_generic_failure;
+        size_t argc = HUKS_NAPI_TWO_ARGS;
+        napi_value argv[HUKS_NAPI_TWO_ARGS] = { nullptr };
+        NAPI_CALL_RETURN_ERR(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+        
+        NAPI_THROW_RETURN_ERR(env, argc < HUKS_NAPI_ONE_ARG, napi_generic_failure,
+                              HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
+
+        napi_value result = ParseString(env, argv[0], asyncContext->name);
+        NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure, 
+                              HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get stringname");
+
+        if (argc < HUKS_NAPI_TWO_ARGS) {
+            context->paramSetIn = static_cast<HksParamSet *>(HksMalloc(sizeof(HksParamSet)));
+            NAPI_THROW_RETURN_ERR(env, context->paramSetIn == nullptr, napi_generic_failure, 
+                                  HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not allocate memory for paramSetIn");
+
+            (void)memset_s(context->paramSetIn, sizeof(HksParamSet), 0, sizeof(HksParamSet));
+            context->paramSetIn->paramSetSize = 0;
+            return napi_ok;
         }
+        result = ParseGetHksParamSet(env, argv[1], context->paramSetIn);
+        NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure, 
+                              HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get paramSet");
+
         return napi_ok;
     };
 
@@ -140,11 +176,30 @@ napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
 
     context->parse = [](napi_env env, napi_callback_info info, AsyncContext *context) -> napi_status {
         RegisterAndUngisterProviderContext *asyncContext = reinterpret_cast<RegisterAndUngisterProviderContext *>(context);
-        napi_value result = ParseTwoArgsStringParamSetAndCallback(env, info, asyncContext->name, context->paramSetIn, context->callback);
-        if (result == nullptr) {
-            HKS_LOG_E("generateKey parse params failed");
-            return napi_generic_failure;
+        size_t argc = HUKS_NAPI_TWO_ARGS;
+        napi_value argv[HUKS_NAPI_TWO_ARGS] = { nullptr };
+        NAPI_CALL_RETURN_ERR(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+        
+        NAPI_THROW_RETURN_ERR(env, argc < HUKS_NAPI_ONE_ARG, napi_generic_failure,
+                              HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
+
+        napi_value result = ParseString(env, argv[0], asyncContext->name);
+        NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure, 
+                              HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get stringname");
+
+        if (argc < HUKS_NAPI_TWO_ARGS) {
+            context->paramSetIn = static_cast<HksParamSet *>(HksMalloc(sizeof(HksParamSet)));
+            NAPI_THROW_RETURN_ERR(env, context->paramSetIn == nullptr, napi_generic_failure, 
+                                  HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not allocate memory for paramSetIn");
+
+            (void)memset_s(context->paramSetIn, sizeof(HksParamSet), 0, sizeof(HksParamSet));
+            context->paramSetIn->paramSetSize = 0;
+            return napi_ok;
         }
+        result = ParseGetHksParamSet(env, argv[1], context->paramSetIn);
+        NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure, 
+                              HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get paramSet");
+
         return napi_ok;
     };
 
@@ -167,9 +222,10 @@ napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
     return result;
 }
 
-napi_value HuksNapiVerifyPin(napi_env env, napi_callback_info info)
+napi_value HuksNapiAuthUkeyPin(napi_env env, napi_callback_info info)
 {
-    auto context = std::unique_ptr<VerifyPinAsyncContext>(new (std::nothrow) VerifyPinAsyncContext());
+    auto context = std::unique_ptr<UkeyPinContext>(new (std::nothrow)UkeyPinContext());
+
     if (context == nullptr) {
         HKS_LOG_E("could not create context");
         return nullptr;
@@ -258,7 +314,7 @@ napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info)
     };
 
     context->resolve = [](napi_env env, AsyncContext *context) {
-        VerifyPinAsyncContext *napiContext = static_cast<VerifyPinAsyncContext *>(context);
+        UkeyPinContext *napiContext = static_cast<UkeyPinContext *>(context);
         HksSuccessReturnResult resultData;
         SuccessReturnResultInit(resultData);
         HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
