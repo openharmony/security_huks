@@ -413,7 +413,7 @@ static int32_t OpensslAesAeadEncryptFinal(EVP_CIPHER_CTX *ctx, const struct HksU
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
-    if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, HKS_AE_TAG_LEN, tagAead->data) != HKS_OPENSSL_SUCCESS) {
+    if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, tagAead->size, tagAead->data) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
         EVP_CIPHER_CTX_free(ctx);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
@@ -611,7 +611,7 @@ static int32_t OpensslAesAeadEncryptFinalGCM(void **cryptoCtx, const struct HksB
             break;
         }
         cipherText->size += (uint32_t)outLen;
-        if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, HKS_AE_TAG_LEN, tagAead->data) != HKS_OPENSSL_SUCCESS) {
+        if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, tagAead->size, tagAead->data) != HKS_OPENSSL_SUCCESS) {
             HksLogOpensslError();
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
@@ -733,11 +733,13 @@ static int32_t OpensslAesAeadCipherInit(const struct HksBlob *key, const struct 
     }
 
     if (isEncrypt && usageSpec->mode ==  HKS_MODE_CCM) {
-        if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, HKS_AE_TAG_LEN, NULL) != HKS_OPENSSL_SUCCESS) {
+        const struct HksAeadParam *aeadParam = (struct HksAeadParam *)(usageSpec->algParam);
+        HKS_IF_NULL_LOGE_RETURN(aeadParam, HKS_ERROR_NULL_POINTER, "aeadparam is NULL");
+        if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, aeadParam->tagLenEnc, NULL) != HKS_OPENSSL_SUCCESS) {
             HKS_LOG_E("EVP_CIPHER_CTX_ctrl set tag len failed!");
             HksLogOpensslError();
             EVP_CIPHER_CTX_free(ctx);
-            return  HKS_ERROR_CRYPTO_ENGINE_ERROR;
+            return HKS_ERROR_CRYPTO_ENGINE_ERROR;
         }
     }
 
@@ -841,7 +843,7 @@ static int32_t OpensslAesAeadCipherFinal(void **cryptoCtx, const struct HksUsage
         output->size += (uint32_t)outLen;
 
         if (isEncrypt) {
-            if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, HKS_AE_TAG_LEN, tagAead->data) != HKS_OPENSSL_SUCCESS) {
+            if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, tagAead->size, tagAead->data) != HKS_OPENSSL_SUCCESS) {
                 HksLogOpensslError();
                 HKS_LOG_E("EVP_CIPHER_CTX_ctrl get aead faild");
                 ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;

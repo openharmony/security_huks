@@ -26,6 +26,7 @@
 #include <stdint.h>
 
 #include "hks_common_check.h"
+#include "hks_check_paramset.h"
 #include "hks_ipc_check.h"
 #include "hks_client_ipc_serialization.h"
 #include "hks_ipc_slice.h"
@@ -348,14 +349,17 @@ int32_t HksClientVerify(const struct HksBlob *key, const struct HksParamSet *par
 
 static int32_t AddAeTag(struct HksParamSet *paramSet, const struct HksBlob *inText, bool isEncrypt)
 {
-    int32_t ret;
+    uint32_t aeadTagLen = HKS_AE_TAG_LEN;
+    int32_t ret = HksGetAeadTagLengthWithoutMode(paramSet, &aeadTagLen);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret);
+
     if (!isEncrypt) {
-        HKS_IF_TRUE_LOGE_RETURN(inText->size <= HKS_AE_TAG_LEN, HKS_ERROR_INVALID_ARGUMENT, "too small inText size")
+        HKS_IF_TRUE_LOGE_RETURN(inText->size <= aeadTagLen, HKS_ERROR_INVALID_ARGUMENT, "too small inText size")
 
         struct HksParam aeParam;
         aeParam.tag = HKS_TAG_AE_TAG;
-        aeParam.blob.data = inText->data + inText->size - HKS_AE_TAG_LEN;
-        aeParam.blob.size = HKS_AE_TAG_LEN;
+        aeParam.blob.data = inText->data + inText->size - aeadTagLen;
+        aeParam.blob.size = aeadTagLen;
         ret = HksAddParams(paramSet, &aeParam, 1);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "decrypt add ae params failed")
     }
@@ -363,6 +367,9 @@ static int32_t AddAeTag(struct HksParamSet *paramSet, const struct HksBlob *inTe
     struct HksParam payloadParam;
     payloadParam.tag = HKS_TAG_PAYLOAD_LEN;
     payloadParam.uint32Param = inText->size;
+    if (!isEncrypt) {
+        payloadParam.uint32Param -= aeadTagLen;
+    }
     ret = HksAddParams(paramSet, &payloadParam, 1);
     HKS_IF_NOT_SUCC_LOGE(ret, "add payload param failed")
     return ret;
