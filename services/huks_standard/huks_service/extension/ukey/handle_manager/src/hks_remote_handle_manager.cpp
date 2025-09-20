@@ -39,18 +39,7 @@ constexpr const char *BUNDLE_NAME_KEY = "bundleName";
 
 std::shared_ptr<HksRemoteHandleManager> HksRemoteHandleManager::GetInstanceWrapper()
 {
-    if (blob == nullptr) {
-        return;
-    }
-
-    if (blob->data != nullptr) {
-        HKS_FREE(blob->data);
-        blob->data = nullptr;
-    }
-    blob->size = 0;
-
-    HKS_FREE(blob);
-    blob = nullptr;
+    return OHOS::DelayedSingleton<HksRemoteHandleManager>::GetInstance();
 }
 
 void HksRemoteHandleManager::ReleaseInstance()
@@ -59,8 +48,8 @@ void HksRemoteHandleManager::ReleaseInstance()
 }
 
 int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &index, 
-                                                         ProviderInfo &providerInfo, 
-                                                         std::string &newIndex)
+                                                        ProviderInfo &providerInfo, 
+                                                        std::string &newIndex)
 {
     CommJsonObject root = CommJsonObject::Parse(index);
     if (root.IsNull()) {
@@ -118,9 +107,6 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    (void)memcpy_s(data, src.size, src.data, src.size);
-    dest.data = data;
-    dest.size = src.size;
     return HKS_SUCCESS;
 }
 
@@ -248,6 +234,8 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const std::string &index, [[m
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
+    HKS_LOG_I("Create remote handle success, newIndex: %s, handle: %s", 
+            newIndex.c_str(), handle.c_str());
     return HKS_SUCCESS;
 }
 
@@ -279,6 +267,7 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const std::string &index, [[ma
     indexToHandle.Erase(newIndex);
     newIndexToProviderInfo.Erase(newIndex);
 
+    HKS_LOG_I("Close remote handle success, newIndex: %s", newIndex.c_str());
     return HKS_SUCCESS;
 }
 
@@ -426,86 +415,6 @@ int32_t HksRemoteHandleManager::ClearRemoteHandle()
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::ClearKeyHandle(const std::string &abilityName)
-{
-    if (abilityName.empty()) {
-        HKS_LOG_E("Invalid abilityName");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
-    std::vector<std::string> indexList;
-    if (abilityIndexMap.Find(abilityName, indexList) != HKS_SUCCESS) {
-        return HKS_SUCCESS;  // 不存在则直接返回成功
-    }
-
-    // 删除所有相关的keyHandle
-    for (const auto &index : indexList) {
-        std::vector<HksBlob> handleList;
-        if (indexHandleMap.Find(index, handleList) == HKS_SUCCESS) {
-            for (auto& handle : handleList) {
-                handleInfoMap.Erase(handle);
-                FreeHksBlob(handle);
-            }
-            indexHandleMap.Erase(index);
-        }
-    }
-
-    // 删除abilityName的映射
-    abilityIndexMap.Erase(abilityName);
-    
-    // 删除代理对象缓存
-    providerProxyMap.Erase(abilityName);
-    
-    return HKS_SUCCESS;
-}
-
-int32_t HksRemoteHandleManager::GetHandle(const std::string &abilityName, std::string &index, HksBlob &keyHandle)
-{
-    auto instance = OHOS::DelayedSingleton<HksRemoteHandleManager>::GetInstance();
-    if (instance == nullptr) {
-        HKS_LOG_E("Get instance failed");
-        return HKS_ERROR_NULL_POINTER;
-    }
-
-    // 获取索引
-    int32_t ret = instance->GetContainerIndex(abilityName, index);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Get container index failed");
-        return ret;
-    }
-
-    // 查找keyHandle
-    CppParamSet paramSet;  // 需要根据实际情况构造paramSet
-    return instance->FindKeyHandle(abilityName, index, paramSet, keyHandle);
-}
-
-int32_t HksRemoteHandleManager::KeyHandlePreCheck(const std::string &abilityName, std::string &index)
-{
-    auto instance = OHOS::DelayedSingleton<HksRemoteHandleManager>::GetInstance();
-    if (instance == nullptr) {
-        HKS_LOG_E("Get instance failed");
-        return HKS_ERROR_NULL_POINTER;
-    }
-
-    // 检查索引是否存在
-    std::vector<std::string> indexList;
-    if (instance->abilityIndexMap.Find(abilityName, indexList) != HKS_SUCCESS) {
-        return INDEX_NOT_FOUND;
-    }
-
-    if (index.empty()) {
-        // 如果index为空，返回第一个索引
-        if (!indexList.empty()) {
-            index = indexList.front();
-            return HKS_SUCCESS;
-        }
-        return INDEX_NOT_FOUND;
-    }
-
-    // 检查指定的index是否存在
-    if (std::find(indexList.begin(), indexList.end(), index) == indexList.end()) {
-        return INDEX_NOT_FOUND;
-    }
-
-    return HKS_SUCCESS;
-}
+}  // namespace Huks
+}  // namespace Security
+}  // namespace OHOS

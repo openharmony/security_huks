@@ -105,6 +105,7 @@ struct HksBlobEqual {
         return memcmp(a.data, b.data, a.size) == 0;
     }
 };
-
-#endif
+}
+}
+}
 #endif

@@ -7,29 +7,62 @@
 
 #include "hks_param.h"
 
-namespace HuksNapiItem {
-using ProviderFunc = int32_t (*)(const HksBlob *, const HksParamSet *);
+namespace HuksNapiItem
+{
 
-class AsyncContext {
+#define NAPI_TYPE_CHECK(env, valueType, expectType, code, msg) \
+    if ((valueType) != (expectType))                           \
+    {                                                          \
+        HksNapiThrow((env), (code), (msg));                    \
+        HKS_LOG_E("%s", (msg));                                \
+        return nullptr;                                        \
+    }
+
+#define NAPI_CALL_RETURN_ERR(env, ret)   \
+    if ((ret) != napi_ok)                \
+    {                                    \
+        GET_AND_THROW_LAST_ERROR((env)); \
+        return ret;                      \
+    }
+
+#define NAPI_THROW_BASE(env, condition, ret, code, message)           \
+    if ((condition))                                                  \
+    {                                                                 \
+        HKS_LOG_E(message);                                           \
+        napi_throw((env), NapiCreateError((env), (code), (message))); \
+        return (ret);                                                 \
+    }
+
+#define NAPI_THROW(env, condition, code, message) \
+    NAPI_THROW_BASE(env, condition, nullptr, code, message)
+
+#define NAPI_THROW_RETURN_ERR(env, condition, ret, code, message) \
+    NAPI_THROW_BASE(env, condition, ret, code, message)
+
+class AsyncContext
+{
 public:
-    virtual ~AsyncContext() 
+    virtual ~AsyncContext()
     {
-        if(asyncWork != nullptr && env != nullptr) {
+        if (asyncWork != nullptr && env != nullptr)
+        {
             napi_delete_async_work(env, asyncWork);
         }
 
-        if (callback != nullptr) {
+        if (callback != nullptr)
+        {
             napi_delete_reference(env, callback);
             callback = nullptr;
         }
-        
-        if (paramSetIn != nullptr) {
+
+        if (paramSetIn != nullptr)
+        {
             HksFreeParamSet(&paramSetIn);
         }
-        if (paramSetOut != nullptr) {
+        if (paramSetOut != nullptr)
+        {
             HksFreeParamSet(&paramSetOut);
         }
-
     }
 
     napi_env env;
@@ -46,35 +79,46 @@ public:
     struct HksParamSet *paramSetOut = nullptr;
 };
 
-class RegisterAndUngisterProviderContext : public AsyncContext {
+class RegisterAndUngisterProviderContext : public AsyncContext
+{
 public:
-    ~RegisterAndUngisterProviderContext() {
-        if (name != nullptr) {
+    ~RegisterAndUngisterProviderContext()
+    {
+        if (name != nullptr)
+        {
             FreeHksBlob(name);
         }
     }
     struct HksBlob *name = nullptr;
 };
 
-class VerifyPinAsyncContext : public AsyncContext {
+class UkeyPinContext : public AsyncContext
+{
 public:
-    ~VerifyPinAsyncContext() {
-        if (handle != nullptr) {
-            FreeHksBlob(handle);
+    ~UkeyPinContext()
+    {
+        if (index != nullptr)
+        {
+            FreeHksBlob(index);
         }
     }
-    struct HksBlob *handle = nullptr;
-    
+    struct HksBlob *index = nullptr;
 };
 
+// 对外接口
 napi_value HuksNapiRegisterProvider(napi_env env, napi_callback_info info);
 
 napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info);
 
-napi_value HuksNapiVerifyPin(napi_env env, napi_callback_info info);
+napi_value HuksNapiAuthUkeyPin(napi_env env, napi_callback_info info);
 
+napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info);
 
+// 工具函数
+napi_value NapiCreateError(napi_env env, int32_t errCode, const char *errMsg);
 
-}  // namespace HuksNapiItem
+napi_value ParseString(napi_env env, napi_value object, HksBlob *&alias);
 
-#endif  // HUKS_NAPI_UKEY_H
+} // namespace HuksNapiItem
+
+#endif // HUKS_NAPI_UKEY_H

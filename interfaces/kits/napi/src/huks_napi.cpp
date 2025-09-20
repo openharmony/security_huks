@@ -747,7 +747,8 @@ napi_property_descriptor NAPI_FUNC_DESC[] = {
 
     DECLARE_NAPI_FUNCTION("registerProvider", HuksNapiRegisterProvider),
     DECLARE_NAPI_FUNCTION("unregisterProvider", HuksNapiUnregisterProvider),
-    DECLARE_NAPI_FUNCTION("verifyPin", HuksNapiVerifyPin),
+    DECLARE_NAPI_FUNCTION("authUkeyPin", HuksNapiAuthUkeyPin),
+    DECLARE_NAPI_FUNCTION("getUkeyPinAuthState", HuksNapiGetUkeyPinAuthState),
 };
 
 static napi_value HuksNapiRegister(napi_env env, napi_value exports)
