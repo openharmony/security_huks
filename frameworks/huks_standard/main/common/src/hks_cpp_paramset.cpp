@@ -176,3 +176,150 @@ CppParamSet &CppParamSet::operator=(CppParamSet &&inCppPs) noexcept
 {
     return this->ptr_;
 }
+
+bool CppParamSet::Marshalling(OHOS::Parcel &parcel) const
+{
+    // 首先检查ptr_是否为空
+    if (ptr_ == nullptr) {
+        return false;
+    }
+    // 写入paramSetSize和paramsCnt
+    if (!parcel.WriteUint32(ptr_->paramSetSize) || !parcel.WriteUint32(ptr_->paramsCnt)) {
+        return false;
+    }
+    // 逐个序列化params数组中的元素
+    for (uint32_t i = 0; i < ptr_->paramsCnt; i++) {
+        const HksParam &param = ptr_->params[i];
+        // 写入tag
+        if (!parcel.WriteUint32(param.tag)) {
+            return false;
+        }
+        HksTagType tagType = GetTagType(static_cast<HksTag>(param.tag));
+        
+        switch (tagType) {
+            case HKS_TAG_TYPE_INT:
+                if (!parcel.WriteInt32(param.int32Param)) {
+                    return false;
+                }
+                break;
+                
+            case HKS_TAG_TYPE_UINT:
+                if (!parcel.WriteUint32(param.uint32Param)) {
+                    return false;
+                }
+                break;
+                
+            case HKS_TAG_TYPE_ULONG:
+                if (!parcel.WriteUint64(param.uint64Param)) {
+                    return false;
+                }
+                break;
+                
+            case HKS_TAG_TYPE_BOOL:
+                if (!parcel.WriteBool(param.boolParam)) {
+                    return false;
+                }
+                break;
+                
+            case HKS_TAG_TYPE_BYTES:
+                // 序列化HksBlob
+                if (!parcel.WriteUint32(param.blob.size)) {
+                    return false;
+                }
+                if (param.blob.size > 0 && param.blob.data != nullptr) {
+                    if (!parcel.WriteBuffer(param.blob.data, param.blob.size)) {
+                        return false;
+                    }
+                }
+                break;
+                
+            default:
+                return false;
+        }
+    }
+    return true;
+}
+
+CppParamSet *CppParamSet::Unmarshalling(OHOS::Parcel &parcel)
+{
+    CppParamSet *cppParamSet = new (std::nothrow) CppParamSet();
+    if (cppParamSet == nullptr) {
+        return nullptr;
+    }
+
+    // 读取paramSetSize和paramsCnt
+    uint32_t paramSetSize = parcel.ReadUint32();
+    uint32_t paramsCnt = parcel.ReadUint32();
+
+    if (paramSetSize == 0) {
+        return cppParamSet;
+    }
+
+    // 计算需要分配的内存大小
+    size_t allocSize = sizeof(HksParamSet) + paramsCnt * sizeof(HksParam);
+    HksParamSet *paramSet = static_cast<HksParamSet*>(malloc(allocSize));
+    if (paramSet == nullptr) {
+        delete cppParamSet;
+        return nullptr;
+    }
+
+    paramSet->paramSetSize = paramSetSize;
+    paramSet->paramsCnt = paramsCnt;
+
+    // 逐个反序列化params数组中的元素
+    for (uint32_t i = 0; i < paramsCnt; i++) {
+        HksParam &param = paramSet->params[i];
+        
+        // 读取tag
+        param.tag = parcel.ReadUint32();
+        if (parcel.GetReadableBytes() == 0) {
+            free(paramSet);
+            delete cppParamSet;
+            return nullptr;
+        }
+
+        // 根据GetParam函数中的逻辑来判断如何反序列化
+        HksTagType tagType = GetTagType(static_cast<HksTag>(param.tag));
+        
+        switch (tagType) {
+            case HKS_TAG_TYPE_INT:
+                param.int32Param = parcel.ReadInt32();
+                break;
+                
+            case HKS_TAG_TYPE_UINT:
+                param.uint32Param = parcel.ReadUint32();
+                break;
+                
+            case HKS_TAG_TYPE_ULONG:
+                param.uint64Param = parcel.ReadUint64();
+                break;
+                
+            case HKS_TAG_TYPE_BOOL:
+                param.boolParam = parcel.ReadBool();
+                break;
+                
+            case HKS_TAG_TYPE_BYTES:
+                param.blob.size = parcel.ReadUint32();
+                if (param.blob.size > 0) {
+                    param.blob.data = const_cast<uint8_t*>(parcel.ReadBuffer(param.blob.size));
+                    if (param.blob.data == nullptr) {
+                        free(paramSet);
+                        delete cppParamSet;
+                        return nullptr;
+                    }
+                } else {
+                    param.blob.data = nullptr;
+                }
+                break;
+                
+            default:
+                // 未知的tag类型，反序列化失败
+                free(paramSet);
+                delete cppParamSet;
+                return nullptr;
+        }
+    }
+
+    cppParamSet->ptr_ = paramSet;
+    return cppParamSet;
+}
