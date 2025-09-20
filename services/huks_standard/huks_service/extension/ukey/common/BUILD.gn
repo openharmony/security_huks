@@ -15,15 +15,41 @@ import("//base/security/huks/build/config.gni")
 import("//build/ohos.gni")
 import("//build/config/components/idl_tool/idl.gni")
 
-idl_gen_interface("huks_access_ext_base") {
+idl_gen_interface("IHuks_Access_Ext_Base") {
   src_idl = rebase_path("IHuksAccessExtBase.idl")
 }
 
-config("huks_access_ext_base_config") {
+config("IHuks_Access_Ext_Base_config") {
+  visibility = [ ":*" ]
   include_dirs = [
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
+    "//base/security/huks/frameworks/huks_standard/main/common/include",
     "${target_gen_dir}",
     "inc",
   ]
+}
+
+ohos_source_set("huks_access_ext_base_include") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":IHuks_Access_Ext_Base_config" ]
+  output_values = get_target_outputs(":IHuks_Access_Ext_Base")
+  sources = filter_include(output_values, [ "*.cpp" ])
+  deps = [ ":IHuks_Access_Ext_Base" ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:ability_connect_callback_stub",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "ipc:ipc_single",
+  ]
+  subsystem_name = "security"
+  part_name = "huks"
 }
 
 if (os_level == "standard") {
@@ -42,10 +68,10 @@ if (os_level == "standard") {
       "src/hks_json_wrapper.cpp",
     ]
     
-    public_configs = [":huks_access_ext_base_config"]
+    public_configs = [":IHuks_Access_Ext_Base_config"]
 
     deps = [
-      ":huks_access_ext_base",
+      ":IHuks_Access_Ext_Base",
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",

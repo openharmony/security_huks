@@ -18,26 +18,29 @@
 
 #include <memory>
 #include <vector>
-
-#include "extension_stub.h"
+#include "hks_cpp_paramset.h"
+#include "huks_access_ext_base_stub.h"
 #include "hks_crypto_ext_ability.h"
 
 namespace OHOS {
 namespace Security {
 namespace Huks {
-class HksCryptoExtStubImpl : public ExtensionStub {
+class HksCryptoExtStubImpl : public HuksAccessExtBaseStub {
 public:
     explicit HksCryptoExtStubImpl(const std::shared_ptr<HksCryptoExtAbility>& extension, napi_env env)
         : extension_(extension) {}
 
     virtual ~HksCryptoExtStubImpl() {}
 
-    // bool CheckCallingPermission(const std::string &permission);
-    ErrCode test(const std::string& testIn, std::vector<std::string> &testOut) override;
-    ErrCode OnCreateRemoteIndex(const std::string& abilityName, std::string& index) override;
-    ErrCode OnGetRemoteHandle(const std::string& index, std::string& handle) override;
-    ErrCode OnOpenRemoteHandle(const std::string& handle) override;
-    ErrCode OnCloseRemoteHandle(const std::string& index) override;
+    // // bool CheckCallingPermission(const std::string &permission);
+    // ErrCode test(const std::string& testIn, std::vector<std::string> &testOut) override;
+    // ErrCode OnCreateRemoteIndex(const std::string& abilityName, std::string& index) override;
+    // ErrCode OnGetRemoteHandle(const std::string& index, std::string& handle) override;
+    ErrCode OpenRemoteHandle(
+        const std::string& index,
+        const CppParamSet& params,
+        std::string& handle,
+        int32_t& errcode) override;
 private:
     std::shared_ptr<HksCryptoExtAbility> extension_;
 };
