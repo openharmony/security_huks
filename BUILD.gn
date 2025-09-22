@@ -35,7 +35,11 @@ group("huks_capi") {
 group("huks_napi") {
   if (os_level == "standard") {
     if (support_jsapi) {
-      deps = [ "//base/security/huks/interfaces/kits/napi:huks" ]
+      # Include both original NAPI library and the new external crypto library
+      deps = [
+        "//base/security/huks/interfaces/kits/napi:huks",
+        "//base/security/huks/interfaces/kits/napi:huks_external_crypto",
+      ]
     }
   }
 }
@@ -105,5 +109,6 @@ group("huks_crypto_extension") {
     "//base/security/huks/interfaces/js/crypto_extension_module:cryptoextensionability_napi",
     "//base/security/huks/services/huks_standard/huks_service/extension/ability_native:crypto_extension_ability_native",
     "//base/security/huks/services/huks_standard/huks_service/extension/module_loader:crypto_extension_module",
+    "//base/security/huks/interfaces/kits/napi:huks_external_crypto",
   ]
 }

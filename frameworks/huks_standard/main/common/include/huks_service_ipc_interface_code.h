@@ -57,6 +57,7 @@ enum HksIpcInterfaceCode {
     HKS_MSG_EXT_GET_REMOTE_HANDLE,
     HKS_MSG_EXT_CLOSE_REMOTE_HANDLE,
     HKS_MSG_EXT_UKEY_SIGN,
+    HKS_MSG_EXT_UKEY_VERIFY,
     /* new cmd type must be added before HKS_MSG_MAX */
     HKS_MSG_MAX,
 };

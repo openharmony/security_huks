@@ -95,6 +95,24 @@ int HksIpcServiceOnSignedAdapter(const struct HksProcessInfo *processInfo, const
     return 0;
 }
 
+int HksIpcServiceOnVerifyAdapter(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+    const struct HksBlob *index, const struct HksBlob *data, struct HksBlob *signatureOut)
+{
+    std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
+    std::string cppData(reinterpret_cast<const char*>(data->data), data->size);
+    CppParamSet cppParamSet(paramSet);
+
+    std::string signature;
+    OHOS::Security::Huks::HksIpcServiceOnVerify(processInfo, cppIndex, cppParamSet, cppData, signature);
+
+    uint32_t copyLen = std::min(signatureOut->size, static_cast<uint32_t>(signature.size()));
+    memcpy_s(signatureOut->data, signatureOut->size, signature.data(), copyLen);
+    signatureOut->size = copyLen;
+
+    // TODO: 错误特判处理
+    return 0;
+}
+
 int HksIpcServiceOnAuthUkeyPinAdapter(const char *index, const uint8_t *pinData, uint32_t pinDataLen, 
     bool *outStatus, int32_t *retryCnt)
 {

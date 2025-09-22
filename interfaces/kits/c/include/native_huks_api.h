@@ -75,6 +75,8 @@ struct OH_Huks_Result OH_Huks_ClearPinAuthState(const struct OH_Huks_Blob *index
 // 签名验签
 struct OH_Huks_Result OH_Huks_Sign(const struct OH_Huks_Blob *index, const struct OH_Huks_ParamSet *paramSet,
     const struct OH_Huks_Blob *srcData, struct OH_Huks_Blob *signatureOut);
+struct OH_Huks_Result OH_Huks_Verify(const struct OH_Huks_Blob *index, const struct OH_Huks_ParamSet *paramSet,
+    const struct OH_Huks_Blob *srcData, struct OH_Huks_Blob *signatureOut);
 
 /**
  * @brief Generates a key.

@@ -59,6 +59,7 @@ const struct HksIpcEntryPoint HKS_IPC_MESSAGE_HANDLER[] = {
     { HKS_MSG_EXT_GET_REMOTE_HANDLE, HksIpcServiceGetRemoteHandle },
     { HKS_MSG_EXT_CLOSE_REMOTE_HANDLE, HksIpcServiceCloseRemoteHandle },
     { HKS_MSG_EXT_UKEY_SIGN, HksIpcServiceUkeySign },
+    { HKS_MSG_EXT_UKEY_VERIFY, HksIpcServiceUkeyVerify },
 
 };
 

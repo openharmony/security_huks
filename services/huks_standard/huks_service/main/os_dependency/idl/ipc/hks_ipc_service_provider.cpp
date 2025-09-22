@@ -111,6 +111,12 @@ int32_t HksIpcServiceOnSigned(const struct HksProcessInfo *processInfo, std::str
     return ret;
 }
 
+int HksIpcServiceOnVerify(const struct HksProcessInfo *processInfo, std::string index, 
+    CppParamSet &paramSet, std::string srcData, std::string &signature) {
+
+    return 0;
+}
+
 int32_t HksIpcServiceOnAuthUkeyPin(const std::string &index, const std::vector<uint8_t> &pinData,
     bool outStatus, int32_t retryCnt) {
     HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");

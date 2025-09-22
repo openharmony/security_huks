@@ -212,6 +212,26 @@ int32_t HksClientUkeySign(const struct HksBlob *index, const struct HksParamSet 
     };
     return HksServiceUkeySign(&processInfo, index, paramSetIn, srcData, signatureOut);
 }
+
+int32_t HksClientUkeyVerify(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
+    const struct HksBlob *srcData, struct HksBlob *signatureOut)
+{
+    char *processName = NULL;
+    char *userId = NULL;
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+        "get process info failed")
+
+    struct HksProcessInfo processInfo = {
+        { strlen(userId), (uint8_t *)userId },
+        { strlen(processName), (uint8_t *)processName },
+        0,
+        0,
+        0,
+        0
+    };
+    return HksServiceUkeyVerify(&processInfo, index, paramSetIn, srcData, signatureOut);
+}
+
 int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
     struct HksParamSet *paramSetOut)
 {
