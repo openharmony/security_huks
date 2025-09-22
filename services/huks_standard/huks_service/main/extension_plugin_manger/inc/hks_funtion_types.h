@@ -48,7 +48,7 @@ enum class PluginMethodEnum{
 };
 
 static const std::map<PluginMethodEnum, std::string> m_pluginMethodNameMap = {
-    {PluginMethodEnum::FUNC_ON_REGISTER_PROVIDER, "_ZN27HksProviderLifeCycleManager18OnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEERK11CppParamSet"},
+    {PluginMethodEnum::FUNC_ON_REGISTER_PROVIDER, "_ZN4OHOS8Security4Huks30HksExtPluginOnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet"},
     {PluginMethodEnum::FUNC_ON_UN_REGISTER_PROVIDER, ""},
     {PluginMethodEnum::FUNC_ON_CREATE_REMOTE_INDEX, ""},
     {PluginMethodEnum::FUNC_ON_CREATE_REMOTE_KEY_HANDLE, ""},
