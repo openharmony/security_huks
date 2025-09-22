@@ -202,14 +202,7 @@ static void AddHuksTagPart3(napi_env env, napi_value tag)
     AddInt32Property(env, tag, "HUKS_TAG_CHALLENGE_POS", HKS_TAG_CHALLENGE_POS);
     AddInt32Property(env, tag, "HUKS_TAG_KEY_AUTH_PURPOSE", HKS_TAG_KEY_AUTH_PURPOSE);
 
-    /* ExtensionAbility TAG: 300001 - 300100 */
-    AddInt32Property(env, tag, "HUKS_TAG_REMOTE_DEVICE", HKS_TAG_REMOTE_DEVICE);
-    AddInt32Property(env, tag, "HUKS_TAG_REMOTE_APP", HKS_TAG_REMOTE_APP);
-    AddInt32Property(env, tag, "HUKS_TAG_REMOTE_CONTAINER", HKS_TAG_REMOTE_CONTAINER);
-    AddInt32Property(env, tag, "HUKS_TAG_PIN", HKS_TAG_PIN);
-    AddInt32Property(env, tag, "HUKS_TAG_ABILITY_NAME", HKS_TAG_ABILITY_NAME);
-    AddInt32Property(env, tag, "HUKS_TAG_REMOTE_ABILITY_SN", HKS_TAG_REMOTE_ABILITY_SN);
-    AddInt32Property(env, tag, "HUKS_TAG_EXTRA_DATA", HKS_TAG_EXTRA_DATA);
+    /* ExtensionAbility TAGs moved to external crypto (ukey) module */
 }
 
 static napi_value CreateHuksTag(napi_env env)
