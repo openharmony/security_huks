@@ -21,7 +21,7 @@ namespace OHOS::Security::Huks {
 __attribute__((visibility("default"))) int32_t HksExtPluginOnRegisterProvider(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet)
 {
-    return HksProviderLifeCycleManager::GetInstanceWrapper()->OnUnRegisterProvider(processInfo, providerName, paramSet);
+    return HksProviderLifeCycleManager::GetInstanceWrapper()->OnRegisterProvider(processInfo, providerName, paramSet);
 }
 
 }
