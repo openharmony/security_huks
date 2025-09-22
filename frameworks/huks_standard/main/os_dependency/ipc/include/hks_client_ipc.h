@@ -50,6 +50,8 @@ int32_t HksClientClearPinAuthState(const struct HksBlob *index);
 // 签名验签
 int32_t HksClientUkeySign(const struct HksBlob *index, const struct HksParamSet *HksParamSet,
     const struct HksBlob *srcData, struct HksBlob *signatureOut);
+int32_t HksClientUkeyVerify(const struct HksBlob *index, const struct HksParamSet *HksParamSet,
+    const struct HksBlob *srcData, struct HksBlob *signatureOut);
 
 int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
     struct HksParamSet *paramSetOut);

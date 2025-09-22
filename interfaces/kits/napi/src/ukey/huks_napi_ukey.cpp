@@ -71,7 +71,7 @@ static napi_value CreateAsyncWork(napi_env env, napi_callback_info info, std::un
     if(context->parse != nullptr) {
         NAPI_CALL(env, context->parse(env, info, context.get()));
     }
-
+    
     napi_value promise = nullptr;
     if (context->callback == nullptr) {
         NAPI_CALL(env, napi_create_promise(env, &context->deferred, &promise));

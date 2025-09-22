@@ -53,7 +53,7 @@
 #include "huks_napi_update_finish.h"
 #include "huks_napi_update_finish_session.h"
 #include "huks_napi_wrap_key.h"
-#include "huks_napi_ukey.h"
+// UKey functions moved to separate shared library huks_external_crypto
 
 namespace HuksNapi {
 inline void AddInt32Property(napi_env env, napi_value object, const char *name, int32_t value)
@@ -754,10 +754,6 @@ napi_property_descriptor NAPI_FUNC_DESC[] = {
     DECLARE_NAPI_FUNCTION("wrapKeyItem", HuksNapiWrapKey),
     DECLARE_NAPI_FUNCTION("unwrapKeyItem", HuksNapiUnwrapKey),
 
-    DECLARE_NAPI_FUNCTION("registerProvider", HuksNapiRegisterProvider),
-    DECLARE_NAPI_FUNCTION("unregisterProvider", HuksNapiUnregisterProvider),
-    DECLARE_NAPI_FUNCTION("authUkeyPin", HuksNapiAuthUkeyPin),
-    DECLARE_NAPI_FUNCTION("getUkeyPinAuthState", HuksNapiGetUkeyPinAuthState),
 };
 
 static napi_value HuksNapiRegister(napi_env env, napi_value exports)

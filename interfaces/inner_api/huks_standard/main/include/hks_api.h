@@ -55,7 +55,8 @@ HKS_API_EXPORT int32_t HksClearPinAuthState(const struct HksBlob *index);
 // 签名验签
 HKS_API_EXPORT int32_t HksUkeySign(const struct HksBlob *index, const struct HksParamSet *HksParamSet,
     const struct HksBlob *srcData, struct HksBlob *signatureOut);
-
+HKS_API_EXPORT int32_t HksUkeyVerify(const struct HksBlob *index, const struct HksParamSet *HksParamSet,
+    const struct HksBlob *srcData, struct HksBlob *signatureOut);
 
 /**
  * @brief Get HUKS sdk version

@@ -247,6 +247,26 @@ HKS_API_EXPORT int32_t HksUkeySign(const struct HksBlob *index, const struct Hks
 #endif
 }
 
+HKS_API_EXPORT int32_t HksUkeyVerify(const struct HksBlob *index, const struct HksParamSet *HksParamSet,
+    const struct HksBlob *srcData, struct HksBlob *signatureOut)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter UkeyVerify");
+    if ((index == NULL) || (HksParamSet == NULL) || (srcData == NULL) || (signatureOut == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientUkeyVerify(index, HksParamSet, srcData, signatureOut);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave UkeyVerify, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)index;
+    (void)HksParamSet;
+    (void)srcData;
+    (void)signatureOut;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+
 HKS_API_EXPORT int32_t HksGetSdkVersion(struct HksBlob *sdkVersion)
 {
     if ((sdkVersion == NULL) || (sdkVersion->data == NULL)) {

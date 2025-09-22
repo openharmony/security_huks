@@ -39,6 +39,8 @@ void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t
 
 void HksIpcServiceUkeySign(const struct HksBlob *srcData, const uint8_t *context);
 
+void HksIpcServiceUkeyVerify(const struct HksBlob *srcData, const uint8_t *context);
+
 
 void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *context);
 

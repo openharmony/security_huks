@@ -44,7 +44,6 @@ ohos_shared_library("huks") {
 
   sources = [
     "src/huks_napi.cpp",
-    "src/v12/huks_napi_ukey.cpp",
     "src/v12/huks_napi_attest_key_item_as_user.cpp",
     "src/v12/huks_napi_delete_key_item_as_user.cpp",
     "src/v12/huks_napi_export_key_item_as_user.cpp",
@@ -94,6 +93,7 @@ ohos_shared_library("huks") {
     "hilog:libhilog",
     "napi:ace_napi",
   ]
+
   cflags_cc = [
     "-Wall",
     "-Werror",
@@ -102,4 +102,50 @@ ohos_shared_library("huks") {
   relative_install_dir = "module/security"
   subsystem_name = "security"
   part_name = "huks"
+}
+
+ohos_shared_library("huks_external_crypto") {
+
+  branch_protector_ret = "pac_ret"
+
+  version_script = "libhuksnapi.map"
+
+  sanitize = {
+    integer_overflow = true
+    cfi = true
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    ubsan = true
+    debug = false
+  }
+
+  sources = [
+    "src/ukey/huks_napi_ukey.cpp",
+    "src/huks_napi_ukey_module.cpp",
+    "src/v9/huks_napi_common_item.cpp",
+  ]
+  include_dirs = [
+    "include",
+    "include/v9",
+    "include/ukey",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
+    "//base/security/huks/frameworks/huks_standard/main/common/include",
+  ]
+  defines = [
+    "HUKS_NAPI_ERRORCODE_WITH_MESSAGE",
+    "L2_STANDARD",
+    "_HARDWARE_ROOT_KEY_",
+    "_HUKS_LOG_ENABLE_",
+    "HUKS_EXTERNAL_CRYPTO",
+  ]
+  deps = [
+    "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+    "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
+  ]
+  external_deps = [ "c_utils:utils", "hilog:libhilog", "napi:ace_napi" ]
+  cflags_cc = [ "-Wall", "-Werror" ]
+  subsystem_name = "security"
+  part_name = "huks"
+  relative_install_dir = "module/security"
 }

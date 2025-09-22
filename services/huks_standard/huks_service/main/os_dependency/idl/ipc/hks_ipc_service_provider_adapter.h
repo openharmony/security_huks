@@ -30,6 +30,9 @@ int HksIpcServiceOnCloseRemoteKeyHandleAdapter(const struct HksProcessInfo *proc
 int HksIpcServiceOnSignedAdapter(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     const struct HksBlob *index, const struct HksBlob *data, struct HksBlob *signatureOut);
 
+int HksIpcServiceOnVerifyAdapter(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+    const struct HksBlob *index, const struct HksBlob *data, struct HksBlob *signatureOut);
+
 int HksIpcServiceOnAuthUkeyPinAdapter(const char *index, const uint8_t *pinData, uint32_t pinDataLen, bool *outStatus, 
     int32_t *retryCnt);
 

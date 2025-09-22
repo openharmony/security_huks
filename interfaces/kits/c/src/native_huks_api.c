@@ -101,6 +101,15 @@ struct OH_Huks_Result OH_Huks_Sign(const struct OH_Huks_Blob *index, const struc
     return ConvertApiResult(ret);
 }
 
+struct OH_Huks_Result OH_Huks_Verify(const struct OH_Huks_Blob *index, const struct OH_Huks_ParamSet *paramSet,
+    const struct OH_Huks_Blob *srcData, struct OH_Huks_Blob *signatureOut)
+{
+    int32_t ret = HksUkeyVerify((const struct HksBlob *) index,
+        (const struct HksParamSet *) paramSet, (const struct HksBlob *) srcData, (struct HksBlob *) signatureOut);
+    return ConvertApiResult(ret);
+}
+
+
 struct OH_Huks_Result OH_Huks_GenerateKeyItem(const struct OH_Huks_Blob *keyAlias,
     const struct OH_Huks_ParamSet *paramSetIn, struct OH_Huks_ParamSet *paramSetOut)
 {
