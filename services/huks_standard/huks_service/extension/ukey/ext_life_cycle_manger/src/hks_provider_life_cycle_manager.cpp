@@ -56,11 +56,14 @@ void HksProviderLifeCycleManager::ReleaseInstance()
 int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet)
 {
+    HKS_LOG_I("OnRegisterProvider providerName: %s", providerName.c_str());
     ProviderInfo providerInfo{};
     int32_t ret = HksGetProviderInfo(processInfo, providerName, paramSet, providerInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_NULL_POINTER, "Fail to get provider info")
 
     AAFwk::Want want{};
+    HKS_LOG_I("m_bundleName: %" LOG_PUBLIC "s, m_abilityName: %" LOG_PUBLIC "s", providerInfo.m_bundleName.c_str(),
+        providerInfo.m_abilityName.c_str());
     want.SetElementName(providerInfo.m_bundleName, providerInfo.m_abilityName);
     sptr<ExtensionConnection> connect(new (std::nothrow) ExtensionConnection());
     HKS_IF_TRUE_LOGE_RETURN(connect == nullptr, HKS_ERROR_NULL_POINTER, "new ExtensionConnection failed");
