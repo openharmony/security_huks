@@ -16,9 +16,11 @@ sequenceable HksCppParamset..CppParamSet;
 interface OHOS.Security.Huks.IHuksAccessExtBase {
 
     [ipccode 1] void OpenRemoteHandle([in] String index, [in] CppParamSet params, [out] String handle, [out] int errcode);
-    // [ipccode 2] void CloseRemoteHandle([in] String index, [in] CppParamSet params, [out] int errcode);
-    // [ipccode 4] void IGetUkeyPinAuthState([in] String index, [in] CppParamSet params,
-    //     [out] unsigned int state, [out] int errcode);
-    // [ipccode 5] void IHuksSign([in] String alias, [in] CppParamSet params,
-    //     [in] unsigned char[] srcData, [out] unsigned char[] signature, [out] int errcode);
+    [ipccode 2] void CloseRemoteHandle([in] String handle, [in] CppParamSet params, [out] int errcode);
+    [ipccode 3] void AuthUkeyPin([in] String handle, [in] CppParamSet params, [out] int errcode);
+    [ipccode 4] void GetUkeyPinAuthState([in] String handle, [in] CppParamSet params, [out] String state, [out] int errcode);
+    [ipccode 5] void Sign([in] String handle, [in] CppParamSet params, [in] unsigned char[] inData, [out] unsigned char[] outData, [out] int errcode);
+    [ipccode 6] void Verify([in] String handle, [in] CppParamSet params, [in] unsigned char[] plainText, [in] unsigned char[] signature, [out] int errcode);
+
+
 }

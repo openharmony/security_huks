@@ -41,6 +41,36 @@ public:
         const CppParamSet& params,
         std::string& handle,
         int32_t& errcode) override;
+
+    ErrCode CloseRemoteHandle(
+        const std::string& handle,
+        const CppParamSet& params,
+        int32_t& errcode) override;
+
+    ErrCode AuthUkeyPin(
+        const std::string& handle,
+        const CppParamSet& params,
+        int32_t& errcode) override;
+
+    ErrCode GetUkeyPinAuthState(
+        const std::string& handle,
+        const CppParamSet& params,
+        std::string& state,
+        int32_t& errcode) override;
+
+    ErrCode Sign(
+        const std::string& handle,
+        const CppParamSet& params,
+        const std::vector<uint8_t>& inData,
+        std::vector<uint8_t>& outData,
+        int32_t& errcode) override;
+
+    ErrCode Verify(
+        const std::string& handle,
+        const CppParamSet& params,
+        const std::vector<uint8_t>& plainText,
+        const std::vector<uint8_t>& signature,
+        int32_t& errcode) override;
 private:
     std::shared_ptr<HksCryptoExtAbility> extension_;
 };

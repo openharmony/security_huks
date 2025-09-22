@@ -212,11 +212,9 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const std::string &index, [[m
     if (proxy == nullptr) {
         return ret;
     }
-
-    // 这里调用远程provider的创建handle方法
-    // int32_t ret = proxy->CreateRemoteHandle(newIndex, paramSet, handle);
-    std::string handle = "remote_handle_" + newIndex; 
-    ret = HKS_SUCCESS;
+    
+    std::string handle = ""; 
+    (void)proxy->OpenRemoteHandle(newIndex, paramSet, handle, ret);
     
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Create remote handle failed: %d", ret);
@@ -254,9 +252,7 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const std::string &index, [[ma
         return ret;
     }
 
-    // 调用远程provider的关闭handle方法
-    // ret = proxy->CloseRemoteHandle(newIndex, handle);
-    ret = HKS_SUCCESS;
+    (void)proxy->CloseRemoteHandle(handle, paramSet, ret);
     
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Close remote handle failed: %d", ret);
@@ -286,9 +282,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const std::string &index, const 
         return ret;
     }
 
-    // 调用远程provider的验证PIN方法
-    // ret = proxy->VerifyPin(newIndex, handle, pinData);
-    ret = HKS_SUCCESS;
+    (void)proxy->AuthUkeyPin(handle, pinData, ret);
     
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Remote verify pin failed: %d", ret);
@@ -298,7 +292,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const std::string &index, const 
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const std::string &index)
+int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const std::string &index,  [[maybe_unused]] const CppParamSet &paramSet, std::string& state)
 {
     ProviderInfo providerInfo;
     std::string newIndex;
@@ -313,9 +307,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const std::string &index)
         return ret;
     }
 
-    // 调用远程provider的验证PIN状态方法
-    // ret = proxy->VerifyPinStatus(newIndex, handle);
-    ret = HKS_SUCCESS;
+    (void)proxy->GetUkeyPinAuthState(handle, paramSet, state, ret);
     
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Remote verify pin status failed: %d", ret);
@@ -353,7 +345,7 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const std::string &index)
 }
 
 int32_t HksRemoteHandleManager::RemoteHandleSign(const std::string &index, const CppParamSet &paramSet,
-    const HksBlob &inData, HksBlob &outData)
+    const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData)
 {
     ProviderInfo providerInfo;
     std::string newIndex;
@@ -368,8 +360,7 @@ int32_t HksRemoteHandleManager::RemoteHandleSign(const std::string &index, const
         return ret;
     }
 
-    // 调用远程provider的签名方法
-    // ret = proxy->Sign(newIndex, handle, paramSet, inData, outData);
+    (void)proxy->Sign(handle, paramSet, inData, outData, ret);
     ret = HKS_SUCCESS;
     
     if (ret != HKS_SUCCESS) {
@@ -381,7 +372,7 @@ int32_t HksRemoteHandleManager::RemoteHandleSign(const std::string &index, const
 }
 
 int32_t HksRemoteHandleManager::RemoteHandleVerify(const std::string &index, const CppParamSet &paramSet,
-    const HksBlob &plainText, HksBlob &signature)
+    const std::vector<uint8_t> &plainText, std::vector<uint8_t> &signature)
 {
     ProviderInfo providerInfo;
     std::string newIndex;
@@ -396,9 +387,7 @@ int32_t HksRemoteHandleManager::RemoteHandleVerify(const std::string &index, con
         return ret;
     }
 
-    // 调用远程provider的验签方法
-    // ret = proxy->Verify(newIndex, handle, paramSet, plainText, signature);
-    ret = HKS_SUCCESS;
+    (void)proxy->Verify(handle, paramSet, plainText, signature, ret);
     
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Remote verify failed: %d", ret);

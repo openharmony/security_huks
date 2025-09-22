@@ -35,49 +35,83 @@ ErrCode HksCryptoExtStubImpl::OpenRemoteHandle(
     return ERR_OK;
 }
 
-// ErrCode HksCryptoExtStubImpl::OnCreateRemoteIndex(const std::string& abilityName, std::string& index)
-// {
-//     LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl OnCreateRemoteIndex");
-//     if (extension_ == nullptr) {
-//         LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
-//         return ERR_OK;
-//     }
-//     extension_->OnCreateRemoteIndex(abilityName, index);
-//     return ERR_OK;
-// }
+ErrCode HksCryptoExtStubImpl::CloseRemoteHandle(
+    const std::string& handle,
+    const CppParamSet& params,
+    int32_t& errcode)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl CloseRemoteHandle");
+    if (extension_ == nullptr) {
+        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        return ERR_OK;
+    }
+    // 实现具体的关闭远程句柄逻辑
+    return ERR_OK;
+}
 
-// ErrCode HksCryptoExtStubImpl::OnGetRemoteHandle(const std::string& index, std::string& handle)
-// {
-//     LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl OnGetRemoteHandle");
-//     if (extension_ == nullptr) {
-//         LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
-//         return ERR_OK;
-//     }
-//     extension_->OnGetRemoteHandle(index, handle);
-//     return ERR_OK;
-// }
+ErrCode HksCryptoExtStubImpl::AuthUkeyPin(
+    const std::string& handle,
+    const CppParamSet& params,
+    int32_t& errcode)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl AuthUkeyPin");
+    if (extension_ == nullptr) {
+        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        return ERR_OK;
+    }
+    // 实现具体的Ukey PIN认证逻辑
+    return ERR_OK;
+}
 
-// ErrCode HksCryptoExtStubImpl::OnOpenRemoteHandle(const std::string& handle)
-// {
-//     LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl OnOpenRemoteHandle");
-//     if (extension_ == nullptr) {
-//         LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
-//         return ERR_OK;
-//     }
-//     extension_->OnOpenRemoteHandle(handle);
-//     return ERR_OK;
-// }
+ErrCode HksCryptoExtStubImpl::GetUkeyPinAuthState(
+    const std::string& handle,
+    const CppParamSet& params,
+    std::string& state,
+    int32_t& errcode)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl GetUkeyPinAuthState");
+    if (extension_ == nullptr) {
+        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        return ERR_OK;
+    }
+    // 实现获取Ukey PIN认证状态的逻辑
+    state = "unknown"; // 设置默认状态
+    return ERR_OK;
+}
 
-// ErrCode HksCryptoExtStubImpl::OnCloseRemoteHandle(const std::string& index)
-// {
-//     LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl OnCloseRemoteHandle");
-//     if (extension_ == nullptr) {
-//         LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
-//         return ERR_OK;
-//     }
-//     extension_->OnCloseRemoteHandle(index);
-//     return ERR_OK;
-// }
+ErrCode HksCryptoExtStubImpl::Sign(
+    const std::string& handle,
+    const CppParamSet& params,
+    const std::vector<uint8_t>& inData,
+    std::vector<uint8_t>& outData,
+    int32_t& errcode)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl Sign");
+    if (extension_ == nullptr) {
+        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        return ERR_OK;
+    }
+    // 实现签名逻辑
+    // outData = ...; // 设置签名结果
+    return ERR_OK;
+}
+
+ErrCode HksCryptoExtStubImpl::Verify(
+    const std::string& handle,
+    const CppParamSet& params,
+    const std::vector<uint8_t>& plainText,
+    const std::vector<uint8_t>& signature,
+    int32_t& errcode)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl Verify");
+    if (extension_ == nullptr) {
+        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        return ERR_OK;
+    }
+    // 实现验证逻辑
+    // 设置errcode为验证结果
+    return ERR_OK;
+}
 
 } // namespace Huks
 } // namespace Security
