@@ -47,18 +47,18 @@ public:
 
     // ukey PIN码管理
     int32_t RemoteVerifyPin(const std::string &index, const HksBlob &pinData);
-    int32_t RemoteVerifyPinStatus(const std::string &index);
+    int32_t RemoteVerifyPinStatus(const std::string &index, [[maybe_unused]] const CppParamSet &paramSet, std::string& state);
     int32_t RemoteClearPinStatus(const std::string &index);
 
     //证书查询
-    //  int32_t FindRemoteCertificate(const std::string &index, const std::string certificatesOut);
-    // int32_t FindRemoteAllCertificate(const std::string &index, const std::string certificatesOut);
+    int32_t FindRemoteCertificate(const std::string &index, const std::string certificatesOut);
+    int32_t FindRemoteAllCertificate(const std::string &index, const std::string certificatesOut);
 
     //签名验签
     int32_t RemoteHandleSign(const std::string &index, const CppParamSet &paramSet,
-            const HksBlob &inData, HksBlob &outData);
+            const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
     int32_t RemoteHandleVerify(const std::string &index, const CppParamSet &paramSet,
-            const HksBlob &plainText, HksBlob &signature);
+            const std::vector<uint8_t> &plainText, std::vector<uint8_t> &signature);
 
 
     int32_t ClearRemoteHandle();
@@ -77,33 +77,6 @@ private:
     OHOS::SafeMap<std::string, std::string> indexToHandle;
 
     OHOS::SafeMap<std::string, ProviderInfo> newIndexToProviderInfo;
-};
-
-// HksBlob哈希函数
-struct HksBlobHash {
-    size_t operator()(const HksBlob& blob) const {
-        if (blob.data == nullptr || blob.size == 0) {
-            return 0;
-        }
-        
-        // 简单哈希实现，实际可能需要更复杂的哈希函数
-        size_t hash = 0;
-        for (uint32_t i = 0; i < blob.size; ++i) {
-            hash = hash * 31 + blob.data[i];
-        }
-        return hash;
-    }
-};
-
-// HksBlob相等比较函数
-struct HksBlobEqual {
-    bool operator()(const HksBlob& a, const HksBlob& b) const {
-        if (a.size != b.size) return false;
-        if (a.data == b.data) return true;
-        if (a.data == nullptr || b.data == nullptr) return false;
-        
-        return memcmp(a.data, b.data, a.size) == 0;
-    }
 };
 }
 }
