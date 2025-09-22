@@ -56,7 +56,7 @@ void HksProviderLifeCycleManager::ReleaseInstance()
 int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet)
 {
-    HKS_LOG_I("OnRegisterProvider providerName: %s", providerName.c_str());
+    HKS_LOG_I("OnRegisterProvider providerName: %" LOG_PUBLIC "s", providerName.c_str());
     ProviderInfo providerInfo{};
     int32_t ret = HksGetProviderInfo(processInfo, providerName, paramSet, providerInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_NULL_POINTER, "Fail to get provider info")
@@ -80,6 +80,7 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
         connectInfo = std::make_shared<HksExtAbilityConnectInfo>(want, connect);
         m_providerMap.Insert(providerInfo, connectInfo);
     }
+    HKS_LOG_I("OnRegisterProvider Success! providerName: %s", providerName.c_str());
     return HKS_SUCCESS;
 }
 
@@ -138,7 +139,7 @@ int32_t HksGetProviderInfo(const HksProcessInfo &processInfo, const std::string 
     HKS_IF_NULL_LOGE_RETURN(bundleMgrProxy, HKS_ERROR_NULL_POINTER, "iface_cast IBundleMgr failed")
 
     auto bundleRet = bundleMgrProxy->GetBundleNameForUid(processInfo.uidInt, providerInfo.m_bundleName);
-    HKS_IF_TRUE_LOGE_RETURN(bundleRet != ERR_OK, HKS_ERROR_BAD_STATE, "GetBundleNameForUid failed")
+    HKS_IF_TRUE_LOGE_RETURN(!bundleRet, HKS_ERROR_BAD_STATE, "GetBundleNameForUid failed")
     providerInfo.m_providerName = providerName;
 
     auto abilityName = paramSet.GetParam<HKS_TAG_ABILITY_NAME>();
