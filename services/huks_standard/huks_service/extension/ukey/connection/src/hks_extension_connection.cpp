@@ -22,7 +22,7 @@ namespace Security {
 namespace Huks {
 
 constexpr int WAIT_TIME = 3;
-constexpr int32_t DEFAULT_USER_ID = -1;
+constexpr int32_t DEFAULT_USER_ID = 100;
 
 void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementName& element,
     const sptr<IRemoteObject>& remoteObject, int resultCode) {

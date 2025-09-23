@@ -78,10 +78,6 @@ int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const s
 
     auto libEntry = HuksLibEntry::GetInstanceWrapper();
     libEntry->initProviderMap(m_pluginProviderMap);
-    
-    int32_t ret = libEntry->OnRegistProvider(info, providerName, paramSet);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_EXEC_FUNC_FAIL,
-        "regist provider method in plugin laoder is fail")
 
     return HKS_SUCCESS;
 }

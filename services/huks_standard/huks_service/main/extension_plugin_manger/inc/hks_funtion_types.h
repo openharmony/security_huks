@@ -44,7 +44,7 @@ enum class PluginMethodEnum{
     FUNC_ON_GET_PROVIDER_CERTIFICATE,
     FUNC_ON_LIST_PROVIDER_ALL_CERTIFICATE,
 
-    COUNT = 13,
+    COUNT = 1,
 };
 
 static const std::map<PluginMethodEnum, std::string> m_pluginMethodNameMap = {

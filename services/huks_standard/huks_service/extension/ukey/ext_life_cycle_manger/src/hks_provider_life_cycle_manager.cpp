@@ -62,13 +62,13 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_NULL_POINTER, "Fail to get provider info")
 
     AAFwk::Want want{};
-    HKS_LOG_I("m_bundleName: %" LOG_PUBLIC "s, m_abilityName: %" LOG_PUBLIC "s", providerInfo.m_bundleName.c_str(),
-        providerInfo.m_abilityName.c_str());
     want.SetElementName(providerInfo.m_bundleName, providerInfo.m_abilityName);
     sptr<ExtensionConnection> connect(new (std::nothrow) ExtensionConnection());
     HKS_IF_TRUE_LOGE_RETURN(connect == nullptr, HKS_ERROR_NULL_POINTER, "new ExtensionConnection failed");
 
     if (!connect->IsConnected()) {
+        HKS_LOG_I("Connect Extension Ability. m_bundleName: %" LOG_PUBLIC "s, m_abilityName: %" LOG_PUBLIC "s",
+            providerInfo.m_bundleName.c_str(), providerInfo.m_abilityName.c_str());
         connect->OnConnection(want);
     }
 
@@ -120,7 +120,7 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
         HKS_LOG_E("OnUnRegisterProvider failed, refCount is not 2, maybe in use. refCount: %" LOG_PUBLIC "d", refCount);
         return HKS_ERROR_BAD_STATE;
     }
-
+    HKS_LOG_I("OnUnRegisterProvider Success! providerName: %s", providerName.c_str());
     connectionInfo->m_connection->OnDisconnect();
     m_providerMap.Erase(providerInfo);
     return HKS_SUCCESS;
