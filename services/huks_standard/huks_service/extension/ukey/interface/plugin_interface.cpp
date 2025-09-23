@@ -15,13 +15,23 @@
 
 #include "hks_provider_life_cycle_manager.h"
 #include "hks_cpp_paramset.h"
+#include "hks_template.h"
 
 namespace OHOS::Security::Huks {
 
 __attribute__((visibility("default"))) int32_t HksExtPluginOnRegisterProvider(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet)
 {
-    return HksProviderLifeCycleManager::GetInstanceWrapper()->OnRegisterProvider(processInfo, providerName, paramSet);
+    auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(providerMgr == nullptr, HKS_ERROR_NULL_POINTER, "providerMgr is null");
+    return providerMgr->OnRegisterProvider(processInfo, providerName, paramSet);
 }
 
+__attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet)
+{
+    auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(providerMgr == nullptr, HKS_ERROR_NULL_POINTER, "providerMgr is null");
+    return providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet);
+}
 }

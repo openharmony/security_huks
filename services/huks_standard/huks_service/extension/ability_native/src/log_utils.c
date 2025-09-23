@@ -21,10 +21,10 @@
 #include "hilog/log.h"
 
 #undef LOG_DOMAIN
-#define LOG_DOMAIN 0xD002F00
+#define LOG_DOMAIN 0xD002F06
 
 #undef LOG_TAG
-#define LOG_TAG "[Huks]"
+#define LOG_TAG "[HUKS]"
 
 #define LOG_DEBUG(buf) HILOG_DEBUG(LOG_CORE, "%{public}s", buf)
 #define LOG_INFO(buf) HILOG_INFO(LOG_CORE, "%{public}s", buf)
