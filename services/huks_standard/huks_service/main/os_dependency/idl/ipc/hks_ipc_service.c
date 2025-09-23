@@ -932,20 +932,14 @@ void HksIpcChangeStorageLevel(const struct HksBlob *srcData, const uint8_t *cont
 
 void HksIpcWrapKey(const struct HksBlob *srcData, const uint8_t *context)
 {
-    int32_t ret = HksPluginWrapKey(srcData, context);
-    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(ret, "wrap key not support")
-    (void)HksServiceWrapKey(srcData, context);
-    if (ret == HKS_ERROR_API_NOT_SUPPORTED) {
+    if (HksServiceUnwrapKey(srcData, context) == HKS_ERROR_API_NOT_SUPPORTED) {
         HksSendResponse(context, HKS_ERROR_API_NOT_SUPPORTED, NULL);
     }
 }
 
 void HksIpcUnwrapKey(const struct HksBlob *srcData, const uint8_t *context)
 {
-    int32_t ret = HksPluginWrapKey(srcData, context);
-    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(ret, "unwrap key not support")
-    (void)HksServiceUnwrapKey(srcData, context);
-    if (ret == HKS_ERROR_API_NOT_SUPPORTED) {
+    if (HksServiceUnwrapKey(srcData, context) == HKS_ERROR_API_NOT_SUPPORTED) {
         HksSendResponse(context, HKS_ERROR_API_NOT_SUPPORTED, NULL);
     }
 }
