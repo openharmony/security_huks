@@ -3,44 +3,33 @@
 
 using namespace HuksNapiItem;
 
-// Keep style consistent with main huks_napi.cpp
-namespace {
-inline void AddInt32Property(napi_env env, napi_value object, const char *name, int32_t value)
-{
-    napi_value property = nullptr;
-    NAPI_CALL_RETURN_VOID(env, napi_create_int32(env, value, &property));
-    NAPI_CALL_RETURN_VOID(env, napi_set_named_property(env, object, name, property));
-}
-
-static napi_value CreateExtensionAbilityTag(napi_env env)
-{
-    napi_value tag = nullptr;
-    NAPI_CALL(env, napi_create_object(env, &tag));
-    /* ExtensionAbility TAG: 300001 - 300100 */
-    AddInt32Property(env, tag, "HUKS_TAG_REMOTE_DEVICE", HKS_TAG_REMOTE_DEVICE);
-    AddInt32Property(env, tag, "HUKS_TAG_REMOTE_APP", HKS_TAG_REMOTE_APP);
-    AddInt32Property(env, tag, "HUKS_TAG_REMOTE_CONTAINER", HKS_TAG_REMOTE_CONTAINER);
-    AddInt32Property(env, tag, "HUKS_TAG_PIN", HKS_TAG_PIN);
-    AddInt32Property(env, tag, "HUKS_TAG_ABILITY_NAME", HKS_TAG_ABILITY_NAME);
-    AddInt32Property(env, tag, "HUKS_TAG_REMOTE_ABILITY_SN", HKS_TAG_REMOTE_ABILITY_SN);
-    AddInt32Property(env, tag, "HUKS_TAG_EXTRA_DATA", HKS_TAG_EXTRA_DATA);
-    return tag;
-}
-} // anonymous namespace
-
 extern "C" {
+
+static napi_value CreateByte(napi_env env, int32_t value)
+{
+    napi_value napiValue{};
+    NAPI_CALL(env, napi_create_object(env, &napiValue));
+
+    return napiValue;
+}
+
 static napi_value HuksExternalCryptoRegister(napi_env env, napi_value exports)
 {
-    napi_property_descriptor funcDesc[] = {
+    napi_property_descriptor propDesc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("HUKS_TAG_REMOTE_DEVICE", CreateByte(env, HKS_TAG_REMOTE_DEVICE)),
+        DECLARE_NAPI_STATIC_PROPERTY("HUKS_TAG_REMOTE_APP", CreateByte(env, HKS_TAG_REMOTE_APP)),
+        DECLARE_NAPI_STATIC_PROPERTY("HUKS_TAG_REMOTE_CONTAINER", CreateByte(env, HKS_TAG_REMOTE_CONTAINER)),
+        DECLARE_NAPI_STATIC_PROPERTY("HUKS_TAG_PIN", CreateByte(env, HKS_TAG_PIN)),
+        DECLARE_NAPI_STATIC_PROPERTY("HUKS_TAG_ABILITY_NAME", CreateByte(env, HKS_TAG_ABILITY_NAME)),
+        DECLARE_NAPI_STATIC_PROPERTY("HUKS_TAG_REMOTE_ABILITY_SN", CreateByte(env, HKS_TAG_REMOTE_ABILITY_SN)),
+        DECLARE_NAPI_STATIC_PROPERTY("HUKS_TAG_EXTRA_DATA", CreateByte(env, HKS_TAG_EXTRA_DATA)),
+
         DECLARE_NAPI_FUNCTION("registerProvider", HuksNapiRegisterProvider),
         DECLARE_NAPI_FUNCTION("unregisterProvider", HuksNapiUnregisterProvider),
         DECLARE_NAPI_FUNCTION("authUkeyPin", HuksNapiAuthUkeyPin),
         DECLARE_NAPI_FUNCTION("getUkeyPinAuthState", HuksNapiGetUkeyPinAuthState),
     };
-    NAPI_CALL(env, napi_define_properties(env, exports, sizeof(funcDesc) / sizeof(funcDesc[0]), funcDesc));
-
-    napi_value extTag = CreateExtensionAbilityTag(env);
-    NAPI_CALL(env, napi_set_named_property(env, exports, "ExtensionAbilityTag", extTag));
+    NAPI_CALL(env, napi_define_properties(env, exports, std::size(propDesc), propDesc));
     return exports;
 }
 
