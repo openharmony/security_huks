@@ -162,6 +162,15 @@ int32_t HksImportWrappedKeyPack(struct HksBlob *destData, const struct HksBlob *
     return CopyBlobToBuffer(wrappedKeyData, destData, &offset);
 }
 
+int32_t HksClearPinAuthStatePack(const struct HksBlob *index, struct HksBlob *destData)
+{
+    uint32_t offset = 0;
+    int32_t ret = CopyBlobToBuffer(index, destData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy keyAlias failed")
+
+    return HKS_SUCCESS;
+}
+
 int32_t HksDeleteKeyPack(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet, struct HksBlob *destData)
 {
     uint32_t offset = 0;

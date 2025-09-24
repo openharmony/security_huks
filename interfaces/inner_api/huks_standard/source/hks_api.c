@@ -172,6 +172,7 @@ HKS_API_EXPORT int32_t HksOpenRemoteHandle(const struct HksBlob *index, const st
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
+
 HKS_API_EXPORT int32_t HksGetRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
 {
 #ifdef L2_STANDARD

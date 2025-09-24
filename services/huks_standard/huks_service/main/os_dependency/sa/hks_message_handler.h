@@ -55,6 +55,7 @@ const struct HksIpcEntryPoint HKS_IPC_MESSAGE_HANDLER[] = {
     { HKS_MSG_EXT_UNREGISTER, HksIpcServiceUnregisterProvider },
     { HKS_MSG_EXT_AUTH_UKEY_PIN, HksIpcServiceAuthUkeyPin },
     { HKS_MSG_EXT_GET_UKEY_PIN_AUTH_STATE, HksIpcServiceGetUkeyPinAuthState },
+    { HKS_MSG_EXT_CLEAR_PIN_AUTH_STATE, HksIpcServiceClearPinAuthState },
     { HKS_MSG_EXT_OPEN_REMOTE_HANDLE, HksIpcServiceOpenRemoteHandle },
     { HKS_MSG_EXT_GET_REMOTE_HANDLE, HksIpcServiceGetRemoteHandle },
     { HKS_MSG_EXT_CLOSE_REMOTE_HANDLE, HksIpcServiceCloseRemoteHandle },

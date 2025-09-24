@@ -42,6 +42,8 @@ int32_t HksImportWrappedKeyPack(struct HksBlob *destData, const struct HksBlob *
 
 int32_t HksDeleteKeyPack(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet, struct HksBlob *destData);
 
+int32_t HksClearPinAuthStatePack(const struct HksBlob *index, struct HksBlob *destData);
+
 int32_t HksExportPublicKeyPack(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksBlob *key, struct HksBlob *destData);
 

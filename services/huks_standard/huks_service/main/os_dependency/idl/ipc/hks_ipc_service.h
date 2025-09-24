@@ -31,6 +31,8 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
 
 void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8_t *context); 
 
+void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t *context);
+
 void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t *context);
 
 void HksIpcServiceGetRemoteHandle(const struct HksBlob *srcData, const uint8_t *context);
