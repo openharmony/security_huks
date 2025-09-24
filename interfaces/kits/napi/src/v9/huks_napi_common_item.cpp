@@ -17,6 +17,7 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 
 #include "hks_errcode_adapter.h"
 #include "hks_log.h"
@@ -28,6 +29,7 @@ namespace HuksNapiItem {
 namespace {
 constexpr int HKS_MAX_DATA_LEN = 0x6400000; // The maximum length is 100M
 constexpr size_t ASYNCCALLBACK_ARGC = 2;
+static int32_t pinRetryCount = 0; //ukey retry count
 }  // namespace
 
 napi_value ParseKeyAlias(napi_env env, napi_value object, HksBlob *&alias)
@@ -802,6 +804,27 @@ static napi_value GenerateResult(napi_env env, const struct HksSuccessReturnResu
     return result;
 }
 
+// napi层将retryCount传递到这里
+void SetRetryCountIfExists(int32_t outStatus, int32_t retryCount)
+{
+    if (outStatus != HKS_SUCCESS && retryCount >= 0) {
+        pinRetryCount = retryCount;
+    }
+}
+
+// 错误上报时，将retryCount拼接到错误信息后面
+static napi_value AppendRetryCountToMessage(napi_env env, const std::string &errorMsg, int32_t retryCount)
+{
+    std::ostringstream oss;
+    oss << errorMsg << " " << retryCount;
+    std::string appendedMsg = oss.str();
+
+    std::vector<uint8_t> appendedBlobData(appendedMsg.begin(), appendedMsg.end());
+    struct HksBlob appendedBlob = { static_cast<uint32_t>(appendedBlobData.size()), appendedBlobData.data() };
+
+    return GenerateStringArray(env, &appendedBlob, 1);
+}
+
 static napi_value GenerateBusinessError(napi_env env, int32_t errorCode)
 {
     napi_value businessError = nullptr;
@@ -833,6 +856,10 @@ static napi_value GenerateBusinessError(napi_env env, int32_t errorCode)
         (void)memcpy_s(errorMsgBuf, errorMsgLen, errInfo.errorMsg, errorMsgLen);
         struct HksBlob msgBlob = { errorMsgLen, errorMsgBuf };
         msg = GenerateStringArray(env, &msgBlob, 1);
+        // ukey报错时需要在此处需要拼接 retryCount 上报给上层
+        if (errInfo.errorCode == HUKS_ERR_CODE_PIN_CODE_ERROR) {
+            msg = AppendRetryCountToMessage(env, errInfo.errorMsg, pinRetryCount);
+        }
         msg = ((msg == nullptr) ? GetNull(env) : msg);
 #endif
     }
@@ -1012,4 +1039,5 @@ void HksReturnListAliasesResult(napi_env env, napi_ref callback, napi_deferred d
         }
     }
 }
+
 }  // namespace HuksNapiItem

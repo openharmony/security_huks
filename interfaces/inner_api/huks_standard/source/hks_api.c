@@ -99,30 +99,43 @@ HKS_API_EXPORT int32_t HksUnregisterProvider(const struct HksBlob *name, const s
 #endif
 }
 
-HKS_API_EXPORT int32_t HksAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
-    struct HksParamSet *paramSetOut)
+HKS_API_EXPORT int32_t HksAuthUkeyPinWrapper(const struct HksBlob *index, const struct HksParamSet *paramSetIn, uint32_t *retryCount)
 {
 #ifdef L2_STANDARD
-    HKS_LOG_D("enter AuthUkeyPin");
-    if ((index == NULL) || (paramSetIn == NULL) || (paramSetOut == NULL)) {
+    HKS_LOG_D("enter HksAuthUkeyPinWrapper");
+    if ((index == NULL) || (paramSetIn == NULL) || (retryCount == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
-    int32_t ret = HksClientAuthUkeyPin(index, paramSetIn, paramSetOut);
+    uint32_t outStatus = 0;
+    int32_t ret = HksClientAuthUkeyPin(index, paramSetIn, &outStatus, retryCount);
     HKS_IF_NOT_SUCC_LOGE(ret, "leave AuthUkeyPin, result = %" LOG_PUBLIC "d", ret);
     return ret;
 #else
     (void)index;
     (void)paramSetIn;
-    (void)paramSetOut;
+    (void)retryCount;
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
 
-HKS_API_EXPORT int32_t HksAuthUkeyPinWithRetry(const struct HksBlob *index, const struct HksParamSet *HksParamSet, uint32_t *retryCount)
-{
-    return 0;
-}
 
+HKS_API_EXPORT int32_t HksAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, uint32_t *outStatus, uint32_t *retryCount)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter AuthUkeyPin");
+    if ((index == NULL) || (paramSetIn == NULL) || (outStatus == NULL) || (retryCount == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientAuthUkeyPin(index, paramSetIn, outStatus, retryCount);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave AuthUkeyPin, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)index;
+    (void)paramSetIn;
+    (void)retryCount;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
 // NAPI接口
 HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut)
 {
@@ -227,40 +240,40 @@ HKS_API_EXPORT int32_t HksClearPinAuthState(const struct HksBlob *index)
 }
 
 // 签名验签
-HKS_API_EXPORT int32_t HksUkeySign(const struct HksBlob *index, const struct HksParamSet *HksParamSet,
+HKS_API_EXPORT int32_t HksUkeySign(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
     const struct HksBlob *srcData, struct HksBlob *signatureOut)
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter UkeySign");
-    if ((index == NULL) || (HksParamSet == NULL) || (srcData == NULL) || (signatureOut == NULL)) {
+    if ((index == NULL) || (paramSetIn == NULL) || (srcData == NULL) || (signatureOut == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
-    int32_t ret = HksClientUkeySign(index, HksParamSet, srcData, signatureOut);
+    int32_t ret = HksClientUkeySign(index, paramSetIn, srcData, signatureOut);
     HKS_IF_NOT_SUCC_LOGE(ret, "leave UkeySign, result = %" LOG_PUBLIC "d", ret);
     return ret;
 #else
     (void)index;
-    (void)HksParamSet;
+    (void)paramSetIn;
     (void)srcData;
     (void)signatureOut;
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
 
-HKS_API_EXPORT int32_t HksUkeyVerify(const struct HksBlob *index, const struct HksParamSet *HksParamSet,
+HKS_API_EXPORT int32_t HksUkeyVerify(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
     const struct HksBlob *srcData, struct HksBlob *signatureOut)
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter UkeyVerify");
-    if ((index == NULL) || (HksParamSet == NULL) || (srcData == NULL) || (signatureOut == NULL)) {
+    if ((index == NULL) || (paramSetIn == NULL) || (srcData == NULL) || (signatureOut == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
-    int32_t ret = HksClientUkeyVerify(index, HksParamSet, srcData, signatureOut);
+    int32_t ret = HksClientUkeyVerify(index, paramSetIn, srcData, signatureOut);
     HKS_IF_NOT_SUCC_LOGE(ret, "leave UkeyVerify, result = %" LOG_PUBLIC "d", ret);
     return ret;
 #else
     (void)index;
-    (void)HksParamSet;
+    (void)paramSetIn;
     (void)srcData;
     (void)signatureOut;
     return HKS_ERROR_API_NOT_SUPPORTED;

@@ -30,7 +30,7 @@ napi_value NapiCreateError(napi_env env, int32_t errCode, const char *errMsg)
     return result;
 }
 
-napi_value ParseString(napi_env env, napi_value object, HksBlob *&str)
+napi_value ParseHksBlob(napi_env env, napi_value object, HksBlob *&str)
 {
     napi_valuetype valueType = napi_valuetype::napi_undefined;
     NAPI_CALL(env, napi_typeof(env, object, &valueType));
@@ -126,7 +126,7 @@ napi_value HuksNapiRegisterProvider(napi_env env, napi_callback_info info)
         NAPI_THROW_RETURN_ERR(env, argc < HUKS_NAPI_ONE_ARG, napi_generic_failure,
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
 
-        napi_value result = ParseString(env, argv[0], asyncContext->name);
+        napi_value result = ParseHksBlob(env, argv[0], asyncContext->name);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure, 
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get stringname");
 
@@ -183,7 +183,7 @@ napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
         NAPI_THROW_RETURN_ERR(env, argc < HUKS_NAPI_ONE_ARG, napi_generic_failure,
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
 
-        napi_value result = ParseString(env, argv[0], asyncContext->name);
+        napi_value result = ParseHksBlob(env, argv[0], asyncContext->name);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure, 
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get stringname");
 
@@ -240,7 +240,7 @@ napi_value HuksNapiAuthUkeyPin(napi_env env, napi_callback_info info)
         NAPI_THROW_RETURN_ERR(env, argc < HUKS_NAPI_TWO_ARGS, napi_generic_failure,
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
 
-        napi_value result = ParseString(env, argv[0], asyncContext->index);
+        napi_value result = ParseHksBlob(env, argv[0], asyncContext->index);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure, 
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get stringname");
 
@@ -253,13 +253,14 @@ napi_value HuksNapiAuthUkeyPin(napi_env env, napi_callback_info info)
 
     context->execute = [](napi_env env, void *data) {
         UkeyPinContext *napiContext = static_cast<UkeyPinContext *>(data);
-        napiContext->result = HksAuthUkeyPin(napiContext->index, napiContext->paramSetIn, napiContext->paramSetOut);
+        napiContext->result = HksAuthUkeyPin(napiContext->index, napiContext->paramSetIn, &napiContext->outStatus, &napiContext->retryCount);
     };
 
     context->resolve = [](napi_env env, AsyncContext *context) {
         UkeyPinContext *napiContext = static_cast<UkeyPinContext *>(context);
         HksSuccessReturnResult resultData;
         SuccessReturnResultInit(resultData);
+        SetRetryCountIfExists(napiContext->outStatus, napiContext->retryCount);        
         HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
     };
 
@@ -288,7 +289,7 @@ napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info)
         NAPI_THROW_RETURN_ERR(env, argc < HUKS_NAPI_ONE_ARG, napi_generic_failure,
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
 
-        napi_value result = ParseString(env, argv[0], asyncContext->index);
+        napi_value result = ParseHksBlob(env, argv[0], asyncContext->index);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure, 
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get stringname");
 

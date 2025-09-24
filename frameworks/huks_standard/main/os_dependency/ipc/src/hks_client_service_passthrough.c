@@ -110,8 +110,8 @@ int32_t HksClientOpenRemoteHandle(const struct HksBlob *index, const struct HksP
     return HksServiceOpenRemoteHandle(&processInfo, index, paramSetIn, remoteHandleOut);
 }
 
-int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut)
-{
+
+int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, uint32_t *outStatus, uint32_t *retryCount) {
     char *processName = NULL;
     char *userId = NULL;
     HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
@@ -125,7 +125,7 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
         0,
         0
     };
-    return HksServiceAuthUkeyPin(&processInfo, index, paramSetIn, paramSetOut);
+    return HksServiceAuthUkeyPin(&processInfo, index, paramSetIn, outStatus, retryCount);
 }
 
 int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut)

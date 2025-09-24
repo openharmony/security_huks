@@ -32,7 +32,7 @@ int32_t HksClientUnregisterProvider(const struct HksBlob *name, const struct Hks
 
 // NAPI侧PIN码认证
 int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, 
-    struct HksParamSet *paramSetOut);
+    uint32_t *outStatus, uint32_t *retryCount);
 int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, 
     struct HksParamSet *paramSetOut);
 
@@ -48,9 +48,9 @@ int32_t HksClientGetPinAuthState(const struct HksBlob *index, uint32_t *stateOut
 int32_t HksClientClearPinAuthState(const struct HksBlob *index);
 
 // 签名验签
-int32_t HksClientUkeySign(const struct HksBlob *index, const struct HksParamSet *HksParamSet,
+int32_t HksClientUkeySign(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
     const struct HksBlob *srcData, struct HksBlob *signatureOut);
-int32_t HksClientUkeyVerify(const struct HksBlob *index, const struct HksParamSet *HksParamSet,
+int32_t HksClientUkeyVerify(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
     const struct HksBlob *srcData, struct HksBlob *signatureOut);
 
 int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,

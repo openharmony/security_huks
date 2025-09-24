@@ -26,7 +26,6 @@ int HksIpcServiceOnProviderUnRegisterAdapter(const struct HksProcessInfo *proces
     return OHOS::Security::Huks::HksIpcServiceProviderRegister(processInfo, cppIndex, cppParamSet);
 }
 
-
 int HksIpcServiceOnCreateRemoteIndexAdapter(const char *providerName, const uint8_t *paramSet, uint32_t paramSetLen, 
     char *outIndex, uint32_t outIndexLen)
 {
@@ -113,9 +112,11 @@ int HksIpcServiceOnVerifyAdapter(const struct HksProcessInfo *processInfo, const
     return 0;
 }
 
-int HksIpcServiceOnAuthUkeyPinAdapter(const char *index, const uint8_t *pinData, uint32_t pinDataLen, 
-    bool *outStatus, int32_t *retryCnt)
+int HksIpcServiceOnAuthUkeyPinAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *index, const struct HksParamSet *paramSet, int32_t *outStatus, int32_t *retryCnt)
 {
+    std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
+    CppParamSet cppParamSet(paramSet);
+    // return OHOS::Security::Huks::HksIpcServiceOnAuthUkeyPin(cppIndex, cppParamSet, retryCount);
     return 0;
 }
 

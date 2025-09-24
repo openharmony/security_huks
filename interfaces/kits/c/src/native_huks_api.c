@@ -77,7 +77,7 @@ struct OH_Huks_Result OH_Huks_CloseRemoteHandle(const struct OH_Huks_Blob *index
 
 struct OH_Huks_Result OH_Huks_AuthUkeyPin(const struct OH_Huks_Blob *index, const struct OH_Huks_ParamSet *paramSetIn, uint32_t *retryCount)
 {
-    int32_t ret = HksAuthUkeyPinWithRetry((const struct HksBlob *) index,
+    int32_t ret = HksAuthUkeyPinWrapper((const struct HksBlob *) index,
         (const struct HksParamSet *) paramSetIn, retryCount);
     return ConvertApiResult(ret);
 }
