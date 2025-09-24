@@ -274,7 +274,8 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const std::string &index, [[ma
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::RemoteVerifyPin(const std::string &index, const CppParamSet &paramSet)
+int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, int32_t& authState, uint32_t& retryCnt)
 {
     ProviderInfo providerInfo;
     std::string newIndex;
@@ -288,8 +289,8 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const std::string &index, const 
     if (proxy == nullptr) {
         return ret;
     }
-
-    (void)proxy->AuthUkeyPin(handle, paramSet, ret);
+    
+    (void)proxy->AuthUkeyPin(handle, paramSet, ret, authState, retryCnt);
     
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Remote verify pin failed: %d", ret);
@@ -299,7 +300,8 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const std::string &index, const 
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const std::string &index,  [[maybe_unused]] const CppParamSet &paramSet, std::string& state)
+int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, uint32_t &state)
 {
     ProviderInfo providerInfo;
     std::string newIndex;

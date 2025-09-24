@@ -75,5 +75,7 @@
     HksGetPinAuthState;
     HksClearPinAuthState;
     HksUkeySign;
+    HksExportProviderCertificates;
+    HksExportCertificate;
   local: *;
 };

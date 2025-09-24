@@ -76,7 +76,7 @@ int32_t HksIpcServiceOnCreateRemoteKeyHandle(const struct HksProcessInfo *proces
     auto libInterface = GetExtLibInterfaceInstance();
     HKS_LOG_I("got libInterface instance");
 
-    int32_t ret = libInterface->OnCreateRemoteKeyHandle(index); // TODO:参数对齐OnCreateRemoteKeyHandle(const std::string &index)
+    int32_t ret = libInterface->OnCreateRemoteKeyHandle(*processInfo, index, paramSet, remoteHandleOut); // TODO:参数对齐OnCreateRemoteKeyHandle(const std::string &index)
     return ret;
 }
 
@@ -97,7 +97,7 @@ int32_t HksIpcServiceOnCloseRemoteKeyHandle(const struct HksProcessInfo *process
     auto libInterface = GetExtLibInterfaceInstance();
     HKS_LOG_I("got libInterface instance");
 
-    int32_t ret = libInterface->OnCloseRemoteKeyHandle(index, index); // TODO:参数对齐OnCloseRemoteKeyHandle(const std::string &index, std::string &keyIndex)
+    int32_t ret = libInterface->OnCloseRemoteKeyHandle(*processInfo, index, paramSet); // TODO:参数对齐OnCloseRemoteKeyHandle(const std::string &index, std::string &keyIndex)
     return ret;
 }
 
@@ -117,22 +117,23 @@ int HksIpcServiceOnVerify(const struct HksProcessInfo *processInfo, std::string 
     return 0;
 }
 
-int32_t HksIpcServiceOnAuthUkeyPin(const std::string &index, const std::vector<uint8_t> &pinData,
-    bool outStatus, int32_t retryCnt) {
+int32_t HksIpcServiceOnAuthUkeyPin(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, int32_t& authState, uint32_t& retryCnt) {
     HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
     auto libInterface = GetExtLibInterfaceInstance();
     HKS_LOG_I("got libInterface instance");
 
-    int32_t ret = libInterface->OnAuthUkeyPin(index, pinData, outStatus, retryCnt);
+    int32_t ret = libInterface->OnAuthUkeyPin(processInfo, index, paramSet, authState, retryCnt);
     return ret;
 }
 
-int32_t HksIpcServiceOnGetVerifyPinStatus(const std::string &index, int32_t &pinStatus) {
+int32_t HksIpcServiceOnGetVerifyPinStatus(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, uint32_t &state) {
     HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
     auto libInterface = GetExtLibInterfaceInstance();
     HKS_LOG_I("got libInterface instance");
 
-    int32_t ret = libInterface->OnGetVerifyPinStatus(index, pinStatus);
+    int32_t ret = libInterface->OnGetVerifyPinStatus(processInfo, index, paramSet, state);
     return ret;
 }
 

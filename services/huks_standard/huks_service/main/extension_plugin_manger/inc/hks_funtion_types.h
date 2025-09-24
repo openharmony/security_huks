@@ -32,31 +32,31 @@ enum class PluginMethodEnum{
 
     FUNC_ON_CREATE_REMOTE_INDEX,
     FUNC_ON_CREATE_REMOTE_KEY_HANDLE,
-    FUNC_ON_FIND_REMOTE_KEY_HANDLE,
     FUNC_ON_CLOSE_REMOTE_KEY_HANDLE,
-
-    FUNC_ON_SIGNED,
     FUNC_ON_AUTH_UKEY_PIN,
     FUNC_ON_GET_VERIFY_PIN_STATUS,
+    
+    FUNC_ON_FIND_REMOTE_KEY_HANDLE,
+    FUNC_ON_SIGNED,
     FUNC_ON_CLEAR_PIN_STATUS,
 
     FUNC_ON_LIST_PROVIDER,
     FUNC_ON_GET_PROVIDER_CERTIFICATE,
     FUNC_ON_LIST_PROVIDER_ALL_CERTIFICATE,
 
-    COUNT = 1,
+    COUNT = 6,
 };
 
 static const std::map<PluginMethodEnum, std::string> m_pluginMethodNameMap = {
     {PluginMethodEnum::FUNC_ON_REGISTER_PROVIDER, "_ZN4OHOS8Security4Huks30HksExtPluginOnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet"},
-    {PluginMethodEnum::FUNC_ON_UN_REGISTER_PROVIDER, ""},
-    {PluginMethodEnum::FUNC_ON_CREATE_REMOTE_INDEX, ""},
-    {PluginMethodEnum::FUNC_ON_CREATE_REMOTE_KEY_HANDLE, ""},
+    {PluginMethodEnum::FUNC_ON_UN_REGISTER_PROVIDER, "_ZN4OHOS8Security4Huks32HksExtPluginOnUnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet"},
+    {PluginMethodEnum::FUNC_ON_CREATE_REMOTE_INDEX, "_ZN4OHOS8Security4Huks31HksExtPluginOnCreateRemoteIndexERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_"},
+    {PluginMethodEnum::FUNC_ON_CREATE_REMOTE_KEY_HANDLE, "_ZN4OHOS8Security4Huks30HksExtPluginOnOpemRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_"},
+    {PluginMethodEnum::FUNC_ON_CLOSE_REMOTE_KEY_HANDLE, "_ZN4OHOS8Security4Huks31HksExtPluginOnCloseRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet"},
+    {PluginMethodEnum::FUNC_ON_AUTH_UKEY_PIN, "_ZN4OHOS8Security4Huks25HksExtPluginOnAuthUkeyPinERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet"},
+    {PluginMethodEnum::FUNC_ON_GET_VERIFY_PIN_STATUS, "_ZN4OHOS8Security4Huks33HksExtPluginOnGetUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRj"},
     {PluginMethodEnum::FUNC_ON_FIND_REMOTE_KEY_HANDLE, ""},
-    {PluginMethodEnum::FUNC_ON_CLOSE_REMOTE_KEY_HANDLE, ""},
     {PluginMethodEnum::FUNC_ON_SIGNED, ""},
-    {PluginMethodEnum::FUNC_ON_AUTH_UKEY_PIN, ""},
-    {PluginMethodEnum::FUNC_ON_GET_VERIFY_PIN_STATUS, ""},
     {PluginMethodEnum::FUNC_ON_CLEAR_PIN_STATUS, ""},
     {PluginMethodEnum::FUNC_ON_LIST_PROVIDER, ""},
     {PluginMethodEnum::FUNC_ON_GET_PROVIDER_CERTIFICATE, ""},
@@ -69,13 +69,17 @@ using OnUnRegisterProviderFunc = int32_t (*)(const HksProcessInfo &processInfo, 
     const CppParamSet &paramSet);
 
 using OnCreateRemoteIndexFunc = int32_t (*)();
-using OnCreateRemoteKeyHandleFunc = int32_t (*)();
+using OnCreateRemoteKeyHandleFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, std::string &handle);
 using OnFindRemoteKeyHandleFunc = int32_t (*)();
-using OnCloseRemoteKeyHandleFunc = int32_t (*)();
+using OnCloseRemoteKeyHandleFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet);
 
 using OnSignedFunc = int32_t (*)();
-using OnAuthUkeyPinFunc = int32_t (*)();
-using OnGetVerifyPinStatusFunc = int32_t (*)();
+using OnAuthUkeyPinFunc = int32_t (*)(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, int32_t& authState, uint32_t& retryCnt);
+using OnGetVerifyPinStatusFunc = int32_t (*)(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, uint32_t &state);
 using OnClearPinStatusFunc = int32_t (*)();
 
 using OnListProvidersFunc = int32_t (*)();

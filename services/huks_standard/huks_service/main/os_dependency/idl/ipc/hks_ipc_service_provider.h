@@ -55,15 +55,21 @@ namespace Huks {
         CppParamSet &paramSet);
     int32_t HksIpcServiceOnSigned(const struct HksProcessInfo *processInfo, std::string index, 
         CppParamSet &paramSet, std::string srcData, std::string &signature);
-
-    int32_t HksIpcServiceOnVerify(const struct HksProcessInfo *processInfo, std::string index, 
+    int32_t HksIpcServiceOnCreateRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string index, 
+        CppParamSet &paramSet, std::string &remoteHandleOut);
+    int32_t HksIpcServiceOnFindRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string index, 
+        CppParamSet &paramSet, std::string &remoteHandleOut);
+    int32_t HksIpcServiceOnCloseRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string index, 
+        CppParamSet &paramSet);
+    int32_t HksIpcServiceOnSigned(const struct HksProcessInfo *processInfo, std::string index, 
+        CppParamSet &paramSet, std::string srcData, std::string &signature);
+    int HksIpcServiceOnVerify(const struct HksProcessInfo *processInfo, std::string index, 
         CppParamSet &paramSet, std::string srcData, std::string &signature);
 
     int32_t HksIpcServiceOnCreateRemoteIndex(const std::string &providerName, const CppParamSet& paramSet, std::string &outIndex);
-    int32_t HksIpcServiceOnAuthUkeyPin(const struct HksProcessInfo *processInfo, std::string index, 
-        const std::vector<uint8_t> &pinData, bool outStatus, int32_t retryCnt);
-    int32_t HksIpcServiceOnGetVerifyPinStatus(const struct HksProcessInfo *processInfo, std::string index, 
-        int32_t &pinStatus);
+    int32_t HksIpcServiceOnAuthUkeyPin(const HksProcessInfo &processInfo,
+        const std::string &index, const CppParamSet &paramSet, int32_t& authState, uint32_t& retryCnt);
+    int32_t HksIpcServiceOnGetVerifyPinStatus(const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet, uint32_t &state);
     int32_t HksIpcServiceOnClearPinStatus(const struct HksProcessInfo *processInfo, std::string index);
         
     void HksIpcServiceOnListProviders(std::vector<uint8_t> &providersOut);

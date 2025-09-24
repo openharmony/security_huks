@@ -43,13 +43,17 @@ public:
     int32_t RegistLibFunction(int32_t funCode, void *fun); // TODO
 
     int32_t OnCreateRemoteIndex(const std::string &providerName, const CppParamSet& paramSet, std::string &outIndex);
-    int32_t OnCreateRemoteKeyHandle(const std::string &index);
+    int32_t OnCreateRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
+        const CppParamSet &paramSet, std::string &handle);
     int32_t OnFindRemoteKeyHandle(const std::string &index, std::string &keyIndex);
-    int32_t OnCloseRemoteKeyHandle(const std::string &index, std::string &keyIndex);
+    int32_t OnCloseRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
+        const CppParamSet &paramSet);
 
     int32_t OnSigned(const std::string &index, const CppParamSet& paramSet, std::vector<uint8_t> &outData);
-    int32_t OnAuthUkeyPin(const std::string &index, const std::vector<uint8_t> &pinData, bool outStatus, int32_t retryCnt);
-    int32_t OnGetVerifyPinStatus(const std::string &index, int32_t &pinStatus);
+    int32_t OnAuthUkeyPin(const HksProcessInfo &processInfo,
+        const std::string &index, const CppParamSet &paramSet, int32_t& authState, uint32_t& retryCnt);
+    int32_t OnGetVerifyPinStatus(const HksProcessInfo &processInfo,
+        const std::string &index, const CppParamSet &paramSet, uint32_t &state);
     int32_t OnClearPinStatus(const std::string &index);
     
     int32_t OnListProviders(std::vector<uint8_t> &providersOut);

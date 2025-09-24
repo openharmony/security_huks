@@ -50,12 +50,14 @@ public:
     ErrCode AuthUkeyPin(
         const std::string& handle,
         const CppParamSet& params,
-        int32_t& errcode) override;
+        int32_t& errcode,
+        int32_t& authState,
+        uint32_t& retryCnt) override;
 
     ErrCode GetUkeyPinAuthState(
         const std::string& handle,
         const CppParamSet& params,
-        std::string& state,
+        uint32_t& state,
         int32_t& errcode) override;
 
     ErrCode Sign(
@@ -70,6 +72,17 @@ public:
         const CppParamSet& params,
         const std::vector<uint8_t>& plainText,
         const std::vector<uint8_t>& signature,
+        int32_t& errcode) override;
+
+    ErrCode ExportCertificate(
+        const std::string& index,
+        const CppParamSet& params,
+        std::string& certJsonArr,
+        int32_t& errcode) override;
+
+    ErrCode ExportProviderCertificates(
+        const CppParamSet& params,
+        std::string& certJsonArr,
         int32_t& errcode) override;
 private:
     std::shared_ptr<HksCryptoExtAbility> extension_;

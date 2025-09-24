@@ -62,6 +62,18 @@
 #undef HKS_SUPPORT_API_GET_CERTIFICATE_CHAIN
 #endif
 
+HKS_API_EXPORT int32_t HksExportProviderCertificates(const struct HksBlob *providerName, const struct HksParamSet *paramSetIn, struct HksExtCertInfo *certSet)
+{
+    // TODO:
+    return 0;
+}
+
+HKS_API_EXPORT int32_t HksExportCertificate(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksExtCertInfo *certSet)
+{
+    // TODO:
+    return 0;
+}
+
 HKS_API_EXPORT int32_t HksRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
 {
 #ifdef L2_STANDARD
