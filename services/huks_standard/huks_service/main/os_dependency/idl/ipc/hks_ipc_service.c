@@ -112,9 +112,53 @@ void HksIpcServiceUnregisterProvider(const struct HksBlob *srcData, const uint8_
     HKS_FREE_BLOB(processInfo.userId);
 }
 
-void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *context) 
+void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *context)
 {
+    struct HksBlob index = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    int32_t outStatus = 0;
+    int32_t retryCount = 0;
+    struct HksBlob outBlob = { 0, NULL };
+    int32_t ret;
 
+    do {
+        ret = HksGenerateKeyUnpack(srcData, &index, &paramSet, &outBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGenerateKeyUnpack fail");
+
+        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret);
+
+        ret = HksIpcServiceOnAuthUkeyPinAdapter(&processInfo, &index, paramSet, &outStatus, &retryCount);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceAuthUkeyPin ret = %" LOG_PUBLIC "d", ret);
+
+        if(outStatus != 0) {
+            outBlob.size = sizeof(int32_t) * 2;
+            outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
+            if (outBlob.data == NULL) {
+                ret = HKS_ERROR_MALLOC_FAIL;
+                HKS_LOG_E("malloc fail");
+                break;
+            }
+            if (memcpy_s(outBlob.data, outBlob.size, &outStatus, sizeof(int32_t)) != EOK ||
+                memcpy_s(outBlob.data + sizeof(int32_t), outBlob.size - sizeof(int32_t), &retryCount, sizeof(int32_t)) != EOK) {
+                ret = HKS_ERROR_BAD_STATE;
+                HKS_LOG_E("memcpy_s failed");
+                break;
+            }
+        }
+    } while (0);
+
+    HksSendResponse(context, ret, outStatus != 0 ? &outBlob: NULL);
+
+    HKS_FREE_BLOB(index);
+    HKS_FREE_BLOB(outBlob);
+    HksFreeParamSet(&paramSet);
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
 }
 
 void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8_t *context) 

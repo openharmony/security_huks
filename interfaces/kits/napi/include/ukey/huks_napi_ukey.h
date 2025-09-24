@@ -103,6 +103,8 @@ public:
         }
     }
     struct HksBlob *index = nullptr;
+    uint32_t outStatus = 0;
+    uint32_t retryCount = 0;
 };
 
 // 对外接口

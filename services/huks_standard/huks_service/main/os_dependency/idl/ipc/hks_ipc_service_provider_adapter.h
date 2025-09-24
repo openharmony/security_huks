@@ -33,8 +33,7 @@ int HksIpcServiceOnSignedAdapter(const struct HksProcessInfo *processInfo, const
 int HksIpcServiceOnVerifyAdapter(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     const struct HksBlob *index, const struct HksBlob *data, struct HksBlob *signatureOut);
 
-int HksIpcServiceOnAuthUkeyPinAdapter(const char *index, const uint8_t *pinData, uint32_t pinDataLen, bool *outStatus, 
-    int32_t *retryCnt);
+int HksIpcServiceOnAuthUkeyPinAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *index, const struct HksParamSet *paramSet, int32_t *outStatus, int32_t *retryCnt);
 
 int HksIpcServiceOnGetVerifyPinStatusAdapter(const char *index, int32_t *pinStatus);
 int HksIpcServiceOnClearPinStatusAdapter(const char *index);

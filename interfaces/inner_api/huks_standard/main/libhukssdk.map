@@ -68,7 +68,6 @@
     HksRegisterProvider;
     HksUnregisterProvider;
     HksAuthUkeyPin;
-    HksAuthUkeyPinWithRetry;
     HksGetUkeyPinAuthState;
     HksOpenRemoteHandle;
     HksGetRemoteHandle;

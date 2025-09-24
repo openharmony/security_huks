@@ -697,7 +697,14 @@ static struct HksError g_errCodeTable[] = {
             .errorMsg = "import keystore check user id fail.",
             .data = NULL
         }
-    },
+    }, {
+        .innerErrCode = HUKS_ERR_CODE_PIN_CODE_ERROR,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_PIN_CODE_ERROR,
+            .errorMsg = "The pin is not correct, retryCnt is:",
+            .data = NULL
+        }
+    }
 };
 
 /**

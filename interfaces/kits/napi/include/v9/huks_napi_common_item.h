@@ -150,6 +150,8 @@ void HksReturnListAliasesResult(napi_env env, napi_ref callback, napi_deferred d
 
 napi_value CreateJsError(napi_env env, int32_t errCode, const char *errorMsg);
 
+void SetRetryCountIfExists(int32_t outStatus, int32_t retryCount);
+
 inline void HksNapiThrow(napi_env env, int32_t errCode, const char *errorMsg)
 {
     napi_throw(env, CreateJsError(env, errCode, errorMsg));
