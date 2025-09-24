@@ -31,11 +31,9 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
-class HksRemoteHandleManager : private OHOS::DelayedSingleton<HksRemoteHandleManager> {
+class HksRemoteHandleManager : private OHOS::DelayedSingleton<HksRemoteHandleManager>,
+    std::enable_shared_from_this<HksRemoteHandleManager> {
 public:
-    int32_t CreateKeyHandle(const std::string &abilityName, const std::string &index, const CppParamSet &paramSet);
-    
-    int32_t FindKeyHandle(const std::string &abilityName, const std::string &index, const CppParamSet &paramSet, HksBlob &keyHandle);
 
     static std::shared_ptr<HksRemoteHandleManager> GetInstanceWrapper();
     static void ReleaseInstance();
@@ -46,7 +44,7 @@ public:
     int32_t CloseRemoteHandle(const std::string &index, [[maybe_unused]] const CppParamSet &paramSet);
 
     // ukey PIN码管理
-    int32_t RemoteVerifyPin(const std::string &index, const HksBlob &pinData);
+    int32_t RemoteVerifyPin(const std::string &index, const CppParamSet &paramSet);
     int32_t RemoteVerifyPinStatus(const std::string &index, [[maybe_unused]] const CppParamSet &paramSet, std::string& state);
     int32_t RemoteClearPinStatus(const std::string &index);
 
@@ -65,11 +63,10 @@ public:
 
     static int32_t ParseIndexAndProviderInfo(const std::string &index, ProviderInfo &providerInfo, std::string &newIndex);
 
-    int32_t ValidateProviderInfo(const std::string &newIndex, const ProviderInfo &providerInfo);
-
 private:
 
-    int32_t ValidateAndGetHandle(const std::string &newIndex, const ProviderInfo &providerInfo, std::string &handle);
+    int32_t ValidateProviderInfo(const std::string &newIndex, ProviderInfo &providerInfo);
+    int32_t ValidateAndGetHandle(const std::string &newIndex, ProviderInfo &providerInfo, std::string &handle);
     int32_t ParseAndValidateIndex(const std::string &index, ProviderInfo &providerInfo,
                                     std::string &newIndex,std::string &handle);
     OHOS::sptr<IHuksAccessExtBase> GetProviderProxy(const ProviderInfo &providerInfo, int32_t &ret);

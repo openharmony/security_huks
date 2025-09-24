@@ -38,12 +38,12 @@ constexpr const char *BUNDLE_NAME_KEY = "bundleName";
 
 std::shared_ptr<HksRemoteHandleManager> HksRemoteHandleManager::GetInstanceWrapper()
 {
-    return OHOS::DelayedSingleton<HksRemoteHandleManager>::GetInstance();
+    return HksRemoteHandleManager::GetInstance();
 }
 
 void HksRemoteHandleManager::ReleaseInstance()
 {
-    OHOS::DelayedSingleton<HksRemoteHandleManager>::DestroyInstance();
+    HksRemoteHandleManager::DestroyInstance();
 }
 
 int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &index, 
@@ -53,22 +53,25 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
     CommJsonObject root = CommJsonObject::Parse(index);
     if (root.IsNull()) {
         HKS_LOG_E("Parse index failed, invalid JSON format");
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_JSON_PARSE_FAILED;
     }
 
     auto providerNameObj = root.GetValue(PROVIDER_NAME_KEY);
-    auto providerNameResult = providerNameObj.ToString();
-    
     auto abilityNameObj = root.GetValue(ABILITY_NAME_KEY);
-    auto abilityNameResult = abilityNameObj.ToString();
-    
     auto bundleNameObj = root.GetValue(BUNDLE_NAME_KEY);
+    
+    if (providerNameObj.IsNull() || abilityNameObj.IsNull() || bundleNameObj.IsNull()) {
+        HKS_LOG_E("Required provider info fields are missing");
+        return HKS_ERROR_JSON_MISSING_KEY;
+    }
+    auto providerNameResult = providerNameObj.ToString();
+    auto abilityNameResult = abilityNameObj.ToString();
     auto bundleNameResult = bundleNameObj.ToString();
     
     if (providerNameResult.first != HKS_SUCCESS || abilityNameResult.first != HKS_SUCCESS || 
         bundleNameResult.first != HKS_SUCCESS) {
         HKS_LOG_E("Get provider info fields failed");
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_JSON_TYPE_MISMATCH;
     }
     
     providerInfo.m_providerName = providerNameResult.second;
@@ -78,48 +81,50 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
     if (providerInfo.m_providerName.empty() || providerInfo.m_abilityName.empty() || 
         providerInfo.m_bundleName.empty()) {
         HKS_LOG_E("Provider info is incomplete");
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_JSON_INVALID_VALUE;
     }
     CommJsonObject newRoot = CommJsonObject::CreateObject();
+    if (newRoot.IsNull()) {
+        HKS_LOG_E("Create new JSON object failed");
+        return HKS_ERROR_JSON_SERIALIZE_FAILED;
+    }
 
     auto keys = root.GetKeys();
     for (const auto &key : keys) {
         if (key != PROVIDER_NAME_KEY && key != ABILITY_NAME_KEY && key != BUNDLE_NAME_KEY) {
             auto value = root.GetValue(key);
             if (value.IsNull()) {
-                HKS_LOG_W("Skip invalid field: %s", key.c_str());
                 continue;
             }
-            
+        
             if (!newRoot.SetValue(key, value)) {
                 HKS_LOG_E("Copy field %s failed", key.c_str());
-                return HKS_ERROR_INVALID_ARGUMENT;
+                return HKS_ERROR_JSON_SERIALIZE_FAILED;
             }
         }
     }
     
     std::string newJson = newRoot.Serialize(false);
-    newIndex = newJson;
-    
     if (newIndex.empty()) {
         HKS_LOG_E("New index is empty");
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_JSON_SERIALIZE_FAILED;
     }
+    newIndex = newJson;
 
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::ValidateProviderInfo(const std::string &newIndex, const ProviderInfo &providerInfo)
+int32_t HksRemoteHandleManager::ValidateProviderInfo(const std::string &newIndex, ProviderInfo &providerInfo)
 {
     ProviderInfo cachedProviderInfo;
     if (!newIndexToProviderInfo.Find(newIndex, cachedProviderInfo)) {
         HKS_LOG_E("Provider info not found for newIndex: %s", newIndex.c_str());
-        return HKS_ERROR_NOT_EXIST;
+        return HKS_ERROR_REMOTE_HANDLE_NOT_FOUND;
     }
     
     if (!(cachedProviderInfo == providerInfo)) {
         HKS_LOG_E("Provider info mismatch");
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_REMOTE_PROVIDER_MISMATCH;
     }
     
     return HKS_SUCCESS;
@@ -130,7 +135,7 @@ OHOS::sptr<IHuksAccessExtBase> HksRemoteHandleManager::GetProviderProxy(const Pr
     auto providerManager = HksProviderLifeCycleManager::GetInstanceWrapper();
     if (providerManager == nullptr) {
         HKS_LOG_E("Get provider manager instance failed");
-        ret = HKS_ERROR_INVALID_ARGUMENT;
+        ret = HKS_ERROR_NULL_POINTER;
         return nullptr;
     }
 
@@ -138,7 +143,7 @@ OHOS::sptr<IHuksAccessExtBase> HksRemoteHandleManager::GetProviderProxy(const Pr
     ret = providerManager->GetExtensionProxy(providerInfo, proxy);
     if (ret != HKS_SUCCESS || proxy == nullptr) {
         HKS_LOG_E("Get extension proxy failed for provider: %s", providerInfo.m_providerName.c_str());
-        ret = HKS_ERROR_INVALID_ARGUMENT;
+        ret = HKS_ERROR_REMOTE_PROXY_GET_FAILED;
         return nullptr;
     }
     
@@ -149,21 +154,24 @@ OHOS::sptr<IHuksAccessExtBase> HksRemoteHandleManager::GetProviderProxy(const Pr
 int32_t HksRemoteHandleManager::GetRemoteIndex(const ProviderInfo &providerInfo, [[maybe_unused]] const CppParamSet &paramSet, std::string &index)
 {
     CommJsonObject root = CommJsonObject::CreateObject();
+    if (root.IsNull()) {
+        HKS_LOG_E("Create JSON object failed");
+        return HKS_ERROR_JSON_SERIALIZE_FAILED;
+    }
     
     if (!root.SetValue(PROVIDER_NAME_KEY, providerInfo.m_providerName) ||
         !root.SetValue(ABILITY_NAME_KEY, providerInfo.m_abilityName) ||
         !root.SetValue(BUNDLE_NAME_KEY, providerInfo.m_bundleName)) {
         HKS_LOG_E("Set provider info to index failed");
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_JSON_SERIALIZE_FAILED;
     }
-    
     
     index = root.Serialize(false);
     return HKS_SUCCESS;
 }
 
 int32_t HksRemoteHandleManager::ValidateAndGetHandle(const std::string &newIndex, 
-                                                    const ProviderInfo &providerInfo, std::string &handle)
+                                                     ProviderInfo &providerInfo, std::string &handle)
 {
     int32_t ret = ValidateProviderInfo(newIndex, providerInfo);
     if (ret != HKS_SUCCESS) {
@@ -173,7 +181,7 @@ int32_t HksRemoteHandleManager::ValidateAndGetHandle(const std::string &newIndex
 
     if (!indexToHandle.Find(newIndex, handle)) {
         HKS_LOG_E("Remote handle not found for newIndex: %s", newIndex.c_str());
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_REMOTE_HANDLE_NOT_FOUND;
     }
     
     return HKS_SUCCESS;
@@ -217,18 +225,18 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const std::string &index, [[m
     
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Create remote handle failed: %d", ret);
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_REMOTE_OPERATION_FAILED;
     }
 
     if (!indexToHandle.Insert(newIndex, handle)) {
         HKS_LOG_E("Cache remote handle failed");
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_HANDLE_INSERT_ERROR;
     }
     
     if (!newIndexToProviderInfo.Insert(newIndex, providerInfo)) {
         indexToHandle.Erase(newIndex); 
         HKS_LOG_E("Cache provider info failed");
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_HANDLE_INSERT_ERROR;
     }
 
     HKS_LOG_I("Create remote handle success, newIndex: %s, handle: %s", 
@@ -255,7 +263,7 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const std::string &index, [[ma
     
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Close remote handle failed: %d", ret);
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_REMOTE_OPERATION_FAILED;
     }
 
     // 移除缓存
@@ -266,7 +274,7 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const std::string &index, [[ma
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::RemoteVerifyPin(const std::string &index, const HksBlob &pinData)
+int32_t HksRemoteHandleManager::RemoteVerifyPin(const std::string &index, const CppParamSet &paramSet)
 {
     ProviderInfo providerInfo;
     std::string newIndex;
@@ -281,11 +289,11 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const std::string &index, const 
         return ret;
     }
 
-    (void)proxy->AuthUkeyPin(handle, pinData, ret);
+    (void)proxy->AuthUkeyPin(handle, paramSet, ret);
     
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Remote verify pin failed: %d", ret);
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_REMOTE_OPERATION_FAILED;
     }
 
     return HKS_SUCCESS;
@@ -310,7 +318,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const std::string &index, 
     
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Remote verify pin status failed: %d", ret);
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_REMOTE_OPERATION_FAILED;
     }
 
     return HKS_SUCCESS;
@@ -337,7 +345,7 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const std::string &index)
     
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Remote clear pin status failed: %d", ret);
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_REMOTE_OPERATION_FAILED;
     }
 
     return HKS_SUCCESS;
@@ -364,7 +372,7 @@ int32_t HksRemoteHandleManager::RemoteHandleSign(const std::string &index, const
     
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Remote sign failed: %d", ret);
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_REMOTE_OPERATION_FAILED;
     }
 
     return HKS_SUCCESS;
@@ -390,7 +398,7 @@ int32_t HksRemoteHandleManager::RemoteHandleVerify(const std::string &index, con
     
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Remote verify failed: %d", ret);
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_REMOTE_OPERATION_FAILED;
     }
 
     return HKS_SUCCESS;
