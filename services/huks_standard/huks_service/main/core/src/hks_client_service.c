@@ -1004,7 +1004,7 @@ static int32_t GetAndImportKeystoreKey(const struct HksImportWrappedInnerArgs *a
     struct HksParamSet **newParamSet, struct HksBlob *keyOut)
 {
     struct HksBlob cipherKey = { 0, NULL };
-    struct HksImportKeyStoreArgs data = { .keyAlias = *args->keyAlias, .uidInt = args->processInfo->uidInt };
+    struct HksImportKeyStoreArgs data = { .keyAlias = *args->wrappingKeyAlias, .uidInt = args->processInfo->uidInt };
     int32_t ret = HksPluginImportWrappedKey(&data, &cipherKey);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
         "HksPluginImportWrappedKey failed, ret = %" LOG_PUBLIC "d", ret)
@@ -1015,7 +1015,7 @@ static int32_t GetAndImportKeystoreKey(const struct HksImportWrappedInnerArgs *a
         ret = CheckKeyCondition(args->processInfo, args->keyAlias, *newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check key condition failed, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HuksAccessImportWrappedKey(args->wrappingKeyAlias, &cipherKey, &cipherKey, *newParamSet, keyOut);
+        ret = HuksAccessImportWrappedKey(args->keyAlias, &cipherKey, &cipherKey, *newParamSet, keyOut);
         IfNotSuccAppendHdiErrorInfo(ret);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "access import wrappedKey failed, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
