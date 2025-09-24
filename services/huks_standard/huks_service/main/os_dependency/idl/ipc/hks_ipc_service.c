@@ -163,7 +163,31 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
 
 void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8_t *context) 
 {
+    
+}
 
+void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t *context) 
+{
+    int32_t ret;
+    struct HksBlob index = { 0, NULL };
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+
+    do {
+        ret  = HksClearPinAuthStateUnpack(srcData, &index);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClearPinAuthStateUnpack Ipc fail")
+
+        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
+
+        ret = HksIpcServiceOnClearPinStatusAdapter(&processInfo, &index);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceClearPinAuthState ret = %" LOG_PUBLIC "d", ret);
+    } while (0);
+
+    HksSendResponse(context, ret, NULL);
+
+    HKS_FREE_BLOB(index);
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
 }
 
 void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t *context) 

@@ -98,9 +98,7 @@ static int32_t BuildParamSetNotNull(const struct HksParamSet *paramSetIn, struct
 int32_t HksClientRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
 {
     HKS_LOG_D("======HksClientRegisterProvider enter RegisterProvider");
-    int32_t ret = HksCheckIpcDeleteKey(name, paramSetIn);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksClientRegisterProvider fail")
-
+    int32_t ret;
     struct HksBlob inBlob = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
 
@@ -347,8 +345,26 @@ int32_t HksClientGetPinAuthState(const struct HksBlob *index, uint32_t *stateOut
 
 int32_t HksClientClearPinAuthState(const struct HksBlob *index)
 {
-    // TODO: 接口不清晰
-    return 0;
+    HKS_LOG_D("======HksClientRegisterProvider enter RegisterProvider");
+    int32_t ret;
+
+    struct HksBlob inBlob = { 0, NULL };
+    inBlob.size = sizeof(index->size) + ALIGN_SIZE(index->size);
+    HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
+
+    do {
+        ret = CheckBlob(index);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksClientClearPinAuthState fail")
+
+        ret = HksClearPinAuthStatePack(index, &inBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientClearPinAuthStatePack fail")
+
+        ret = HksSendRequest(HKS_MSG_EXT_CLEAR_PIN_AUTH_STATE, &inBlob, NULL, NULL);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HKS_FREE_BLOB(inBlob);
+    return ret;
 }
 
 int32_t HksClientUkeySign(const struct HksBlob *index, const struct HksParamSet *paramSetIn,

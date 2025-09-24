@@ -5,7 +5,7 @@
 #include <vector>
 
 // 适配器模式
-int HksIpcServiceOnProviderRegisterAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *name, 
+int32_t HksIpcServiceOnProviderRegisterAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *name, 
     const struct HksParamSet *paramSet)
 {
     HKS_LOG_E("==========ksIpcServiceProviderRegisterAdapter income");
@@ -16,7 +16,7 @@ int HksIpcServiceOnProviderRegisterAdapter(const struct HksProcessInfo *processI
     return OHOS::Security::Huks::HksIpcServiceProviderRegister(processInfo, cppIndex, cppParamSet);
 }
 
-int HksIpcServiceOnProviderUnRegisterAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *name, 
+int32_t HksIpcServiceOnProviderUnRegisterAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *name, 
     const struct HksParamSet *paramSet)
 {
 
@@ -26,13 +26,13 @@ int HksIpcServiceOnProviderUnRegisterAdapter(const struct HksProcessInfo *proces
     return OHOS::Security::Huks::HksIpcServiceProviderRegister(processInfo, cppIndex, cppParamSet);
 }
 
-int HksIpcServiceOnCreateRemoteIndexAdapter(const char *providerName, const uint8_t *paramSet, uint32_t paramSetLen, 
+int32_t HksIpcServiceOnCreateRemoteIndexAdapter(const char *providerName, const uint8_t *paramSet, uint32_t paramSetLen, 
     char *outIndex, uint32_t outIndexLen)
 {
     return 0;
 }
 
-int HksIpcServiceOnCreateRemoteKeyHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *index, 
+int32_t HksIpcServiceOnCreateRemoteKeyHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *index, 
     const struct HksParamSet *paramSet, struct HksBlob *remoteHandleOut)
 {
     std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
@@ -49,7 +49,7 @@ int HksIpcServiceOnCreateRemoteKeyHandleAdapter(const struct HksProcessInfo *pro
     return 0;
 }
 
-int HksIpcServiceOnFindRemoteKeyHandleAdapter(const struct HksProcessInfo *processInfo,  
+int32_t HksIpcServiceOnFindRemoteKeyHandleAdapter(const struct HksProcessInfo *processInfo,  
     const struct HksBlob *index, const struct HksParamSet *paramSet, struct HksBlob *remoteHandleOut)
 {
     std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
@@ -66,7 +66,7 @@ int HksIpcServiceOnFindRemoteKeyHandleAdapter(const struct HksProcessInfo *proce
     return 0;
 }
 
-int HksIpcServiceOnCloseRemoteKeyHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *index, 
+int32_t HksIpcServiceOnCloseRemoteKeyHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *index, 
     const struct HksParamSet *paramSet)
 {
     std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
@@ -76,7 +76,7 @@ int HksIpcServiceOnCloseRemoteKeyHandleAdapter(const struct HksProcessInfo *proc
    
 }
 
-int HksIpcServiceOnSignedAdapter(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+int32_t HksIpcServiceOnSignedAdapter(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     const struct HksBlob *index, const struct HksBlob *srcData, struct HksBlob *signatureOut)
 {
     std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
@@ -94,7 +94,7 @@ int HksIpcServiceOnSignedAdapter(const struct HksProcessInfo *processInfo, const
     return 0;
 }
 
-int HksIpcServiceOnVerifyAdapter(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+int32_t HksIpcServiceOnVerifyAdapter(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     const struct HksBlob *index, const struct HksBlob *data, struct HksBlob *signatureOut)
 {
     std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
@@ -112,7 +112,7 @@ int HksIpcServiceOnVerifyAdapter(const struct HksProcessInfo *processInfo, const
     return 0;
 }
 
-int HksIpcServiceOnAuthUkeyPinAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *index, const struct HksParamSet *paramSet, int32_t *outStatus, int32_t *retryCnt)
+int32_t HksIpcServiceOnAuthUkeyPinAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *index, const struct HksParamSet *paramSet, int32_t *outStatus, int32_t *retryCnt)
 {
     std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
     CppParamSet cppParamSet(paramSet);
@@ -120,27 +120,29 @@ int HksIpcServiceOnAuthUkeyPinAdapter(const struct HksProcessInfo *processInfo, 
     return 0;
 }
 
-int HksIpcServiceOnGetVerifyPinStatusAdapter(const char *index, int32_t *pinStatus)
+int32_t HksIpcServiceOnGetVerifyPinStatusAdapter(const char *index, int32_t *pinStatus)
 {
     return 0;
 }
 
-int HksIpcServiceOnClearPinStatusAdapter(const char *index)
+int32_t HksIpcServiceOnClearPinStatusAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *index)
+{
+    std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
+    // return OHOS::Security::Huks::HksIpcServiceOnClearPinStatus(processInfo, cppIndex);
+    return 0;
+}
+
+int32_t HksIpcServiceOnListProvidersAdapter(uint8_t *providersOut, uint32_t *providersOutLen)
 {
     return 0;
 }
 
-int HksIpcServiceOnListProvidersAdapter(uint8_t *providersOut, uint32_t *providersOutLen)
+int32_t HksIpcServiceOnFindProviderCertificateAdapter(const char *index, uint8_t *certificatesOut, uint32_t *certificatesOutLen)
 {
     return 0;
 }
 
-int HksIpcServiceOnFindProviderCertificateAdapter(const char *index, uint8_t *certificatesOut, uint32_t *certificatesOutLen)
-{
-    return 0;
-}
-
-int HksIpcServiceOnListProviderAllCertificateAdapter(const char *providerName, char *certificatesOut, uint32_t certificatesOutLen)
+int32_t HksIpcServiceOnListProviderAllCertificateAdapter(const char *providerName, char *certificatesOut, uint32_t certificatesOutLen)
 {
     return 0;
 }
