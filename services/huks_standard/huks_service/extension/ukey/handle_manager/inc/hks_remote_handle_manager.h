@@ -44,8 +44,10 @@ public:
     int32_t CloseRemoteHandle(const std::string &index, [[maybe_unused]] const CppParamSet &paramSet);
 
     // ukey PIN码管理
-    int32_t RemoteVerifyPin(const std::string &index, const CppParamSet &paramSet);
-    int32_t RemoteVerifyPinStatus(const std::string &index, [[maybe_unused]] const CppParamSet &paramSet, std::string& state);
+    int32_t RemoteVerifyPin(const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet,
+        int32_t& authState, uint32_t& retryCnt);
+    int32_t RemoteVerifyPinStatus(const HksProcessInfo &processInfo,
+        const std::string &index, const CppParamSet &paramSet, uint32_t &state);
     int32_t RemoteClearPinStatus(const std::string &index);
 
     //证书查询

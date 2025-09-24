@@ -52,7 +52,9 @@ ErrCode HksCryptoExtStubImpl::CloseRemoteHandle(
 ErrCode HksCryptoExtStubImpl::AuthUkeyPin(
     const std::string& handle,
     const CppParamSet& params,
-    int32_t& errcode)
+    int32_t& errcode,
+    int32_t& authState,
+    uint32_t& retryCnt)
 {
     LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl AuthUkeyPin");
     if (extension_ == nullptr) {
@@ -66,7 +68,7 @@ ErrCode HksCryptoExtStubImpl::AuthUkeyPin(
 ErrCode HksCryptoExtStubImpl::GetUkeyPinAuthState(
     const std::string& handle,
     const CppParamSet& params,
-    std::string& state,
+    uint32_t& state,
     int32_t& errcode)
 {
     LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl GetUkeyPinAuthState");
@@ -75,7 +77,7 @@ ErrCode HksCryptoExtStubImpl::GetUkeyPinAuthState(
         return ERR_OK;
     }
     // 实现获取Ukey PIN认证状态的逻辑
-    state = "unknown"; // 设置默认状态
+    state = 0; // 设置默认状态
     return ERR_OK;
 }
 
@@ -110,6 +112,25 @@ ErrCode HksCryptoExtStubImpl::Verify(
     }
     // 实现验证逻辑
     // 设置errcode为验证结果
+    return ERR_OK;
+}
+
+ErrCode HksCryptoExtStubImpl::ExportCertificate(
+    const std::string& index,
+    const CppParamSet& params,
+    std::string& certJsonArr,
+    int32_t& errcode)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO ExportCertificate");
+    return ERR_OK;
+}
+
+ErrCode HksCryptoExtStubImpl::ExportProviderCertificates(
+    const CppParamSet& params,
+    std::string& certJsonArr,
+    int32_t& errcode)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO ExportProviderCertificates");
     return ERR_OK;
 }
 

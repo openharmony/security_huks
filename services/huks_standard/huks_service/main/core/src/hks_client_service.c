@@ -574,7 +574,7 @@ int32_t HksServiceUnregisterProvider(const struct HksProcessInfo *processInfo, c
     return 0;
 }
 
-int32_t HksServiceAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, uint32_t *outStatus, uint32_t *retryCount)
+int32_t HksServiceAuthUkeyPin(const struct HksProcessInfo *processInfo, const struct HksBlob *index, const struct HksParamSet *paramSetIn, uint32_t *outStatus, uint32_t *retryCount)
 {
     return 0;
 }

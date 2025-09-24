@@ -100,6 +100,17 @@ struct HksBlob {
     uint8_t *data;
 };
 
+struct HksExtCertInfo {
+    int32_t purpose;
+    struct HksBlob index;
+    struct HksBlob cert;
+};
+
+struct HksExtCertInfoSet {
+    uint32_t count;
+    struct HksExtCertInfo *certs;
+};
+
 /**
  * @brief hks param
  */
