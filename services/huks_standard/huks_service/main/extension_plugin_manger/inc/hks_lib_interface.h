@@ -48,7 +48,7 @@ public:
     int32_t OnFindRemoteKeyHandle(const std::string &index, std::string &keyIndex);
     int32_t OnCloseRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet);
-
+ 
     int32_t OnSigned(const std::string &index, const CppParamSet& paramSet, std::vector<uint8_t> &outData);
     int32_t OnAuthUkeyPin(const HksProcessInfo &processInfo,
         const std::string &index, const CppParamSet &paramSet, int32_t& authState, uint32_t& retryCnt);

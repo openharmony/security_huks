@@ -65,7 +65,7 @@ if (os_level == "standard") {
     ]
 
     sources = [
-      "src/hks_json_wrapper.cpp",
+      "src/hks_ukey_common.cpp",
     ]
     
     public_configs = [":IHuks_Access_Ext_Base_config"]

@@ -406,6 +406,54 @@ int32_t HksRemoteHandleManager::RemoteHandleVerify(const std::string &index, con
     return HKS_SUCCESS;
 }
 
+int32_t HksRemoteHandleManager::FindRemoteCertificate(const std::string &index, const CppParamSet &paramSet, std::string cert)
+{
+    ProviderInfo providerInfo;
+    std::string newIndex;
+    int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    auto proxy = GetProviderProxy(providerInfo, ret);
+    if (proxy == nullptr) {
+        return ret;
+    }
+
+    (void)proxy->ExportCertificate(newIndex, paramSet, cert, ret);
+    
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Remote ExportCertificate failed: %d", ret);
+        return HKS_ERROR_REMOTE_OPERATION_FAILED;
+    }
+
+    return HKS_SUCCESS;
+}
+int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const std::string &index,
+    const CppParamSet &paramSet, std::vector<std::string> certVec)
+{
+    ProviderInfo providerInfo;
+    std::string newIndex;
+    int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    auto proxy = GetProviderProxy(providerInfo, ret);
+    if (proxy == nullptr) {
+        return ret;
+    }
+
+    (void)proxy->ExportProviderCertificates(paramSet, certVec, ret);
+    
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Remote ExportProviderCertificates failed: %d", ret);
+        return HKS_ERROR_REMOTE_OPERATION_FAILED;
+    }
+
+    return HKS_SUCCESS;
+}
+
 int32_t HksRemoteHandleManager::ClearRemoteHandle()
 {
     indexToHandle.Clear();
