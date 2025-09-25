@@ -84,7 +84,7 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
         HKS_LOG_E("OnRegisterProvider failed, providerName: %" LOG_PUBLIC "s, already exist", providerName.c_str());
         return HKS_ERROR_ALREADY_EXISTS;
     }
-    HKS_LOG_I("OnRegisterProvider Success! providerName: %s", providerName.c_str());
+    HKS_LOG_I("OnRegisterProvider Success! providerName: %" LOG_PUBLIC "s", providerName.c_str());
     return HKS_SUCCESS;
 }
 
@@ -98,7 +98,7 @@ int32_t HksProviderLifeCycleManager::GetExtensionProxy(const ProviderInfo &provi
     }
     HKS_IF_TRUE_LOGE_RETURN(connectionInfo == nullptr, HKS_ERROR_NULL_POINTER, "connectionInfo is nullptr")
     HKS_IF_TRUE_LOGE_RETURN(connectionInfo->m_connection == nullptr, HKS_ERROR_NULL_POINTER, "m_connection is nullptr")
-    // proxy = connectionInfo->m_connection->GetExtConnectProxy();
+    proxy = connectionInfo->m_connection->GetExtConnectProxy();
     return HKS_SUCCESS;
 }
 
@@ -126,7 +126,7 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
     }
     connectionInfo->m_connection->OnDisconnect();
     m_providerMap.Erase(providerInfo);
-    HKS_LOG_I("OnUnRegisterProvider Success! providerName: %s", providerName.c_str());
+    HKS_LOG_I("OnUnRegisterProvider Success! providerName: %" LOG_PUBLIC "s", providerName.c_str());
     return HKS_SUCCESS;
 }
 

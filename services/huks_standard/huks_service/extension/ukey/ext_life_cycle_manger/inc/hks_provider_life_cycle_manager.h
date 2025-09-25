@@ -75,7 +75,7 @@ public:
     int32_t GetExtensionProxy(const ProviderInfo &providerInfo, sptr<IHuksAccessExtBase> &proxy);
 
 private:
-    // ProviderInfo, proxy
+    // ProviderInfo, connectionInfo
     OHOS::SafeMap<ProviderInfo, std::shared_ptr<HksExtAbilityConnectInfo>> m_providerMap{};
 };
 }
