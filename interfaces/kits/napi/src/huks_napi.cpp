@@ -53,7 +53,7 @@
 #include "huks_napi_update_finish.h"
 #include "huks_napi_update_finish_session.h"
 #include "huks_napi_wrap_key.h"
-// UKey functions moved to separate shared library huks_external_crypto
+// UKey functions moved to separate shared library huksexternalcrypto_napi
 
 namespace HuksNapi {
 inline void AddInt32Property(napi_env env, napi_value object, const char *name, int32_t value)
