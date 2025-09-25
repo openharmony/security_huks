@@ -61,24 +61,28 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
     int32_t ret = HksGetProviderInfo(processInfo, providerName, paramSet, providerInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_NULL_POINTER, "Fail to get provider info")
 
-    AAFwk::Want want{};
-    want.SetElementName(providerInfo.m_bundleName, providerInfo.m_abilityName);
-    sptr<ExtensionConnection> connect(new (std::nothrow) ExtensionConnection());
-    HKS_IF_TRUE_LOGE_RETURN(connect == nullptr, HKS_ERROR_NULL_POINTER, "new ExtensionConnection failed");
-
-    if (!connect->IsConnected()) {
-        HKS_LOG_I("Connect Extension Ability. m_bundleName: %" LOG_PUBLIC "s, m_abilityName: %" LOG_PUBLIC "s",
-            providerInfo.m_bundleName.c_str(), providerInfo.m_abilityName.c_str());
-        connect->OnConnection(want);
-    }
-
-    auto proxy = connect->GetExtConnectProxy();
-    HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NULL_POINTER, "GetExtConnectProxy failed.");
-
     std::shared_ptr<HksExtAbilityConnectInfo> connectInfo{nullptr};
     if (!m_providerMap.Find(providerInfo, connectInfo)) {
+        AAFwk::Want want{};
+        want.SetElementName(providerInfo.m_bundleName, providerInfo.m_abilityName);
+        sptr<ExtensionConnection> connect(new (std::nothrow) ExtensionConnection());
+        HKS_IF_TRUE_LOGE_RETURN(connect == nullptr, HKS_ERROR_NULL_POINTER, "new ExtensionConnection failed");
+
+        if (!connect->IsConnected()) {
+            HKS_LOG_I("First time connect the Extension Ability. "
+                "m_bundleName: %" LOG_PUBLIC "s, m_abilityName: %" LOG_PUBLIC "s",
+                providerInfo.m_bundleName.c_str(), providerInfo.m_abilityName.c_str());
+            connect->OnConnection(want);
+        }
+
+        auto proxy = connect->GetExtConnectProxy();
+        HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NULL_POINTER, "connected, bug getExtConnectProxy failed.");
+
         connectInfo = std::make_shared<HksExtAbilityConnectInfo>(want, connect);
         m_providerMap.Insert(providerInfo, connectInfo);
+    } else {
+        HKS_LOG_E("OnRegisterProvider failed, providerName: %" LOG_PUBLIC "s, already exist", providerName.c_str());
+        return HKS_ERROR_ALREADY_EXISTS;
     }
     HKS_LOG_I("OnRegisterProvider Success! providerName: %s", providerName.c_str());
     return HKS_SUCCESS;
@@ -120,9 +124,9 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
         HKS_LOG_E("OnUnRegisterProvider failed, refCount is not 2, maybe in use. refCount: %" LOG_PUBLIC "d", refCount);
         return HKS_ERROR_BAD_STATE;
     }
-    HKS_LOG_I("OnUnRegisterProvider Success! providerName: %s", providerName.c_str());
     connectionInfo->m_connection->OnDisconnect();
     m_providerMap.Erase(providerInfo);
+    HKS_LOG_I("OnUnRegisterProvider Success! providerName: %s", providerName.c_str());
     return HKS_SUCCESS;
 }
 
