@@ -187,7 +187,7 @@ int32_t CertInfoToString(const struct HksExtCertInfo& certInfo, std::string& jso
 }
 
 
-int32_t VectorToCertInfoSet(const std::string &certJsonArr, struct HksExtCertInfoSet& certSet) {
+int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCertInfoSet& certSet) {
     
     HKS_IF_TRUE_LOGE_RETURN(certJsonArr.empty(), HKS_ERROR_INVALID_ARGUMENT, 
         "Input json array string is empty");
@@ -239,7 +239,7 @@ int32_t VectorToCertInfoSet(const std::string &certJsonArr, struct HksExtCertInf
     return HKS_SUCCESS;
 }
 
-int32_t CertInfoSetToVector(const struct HksExtCertInfoSet& certSet, std::string& jsonArrayStr) {
+int32_t CertInfoSetToJsonArray(const struct HksExtCertInfoSet& certSet, std::string& jsonArrayStr) {
     
     HKS_IF_TRUE_LOGE_RETURN(IsHksExtCertInfoSetEmpty(certSet), HKS_ERROR_INVALID_ARGUMENT, 
         "Input cert set is empty");

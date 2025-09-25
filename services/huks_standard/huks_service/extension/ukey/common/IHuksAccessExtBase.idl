@@ -22,5 +22,5 @@ interface OHOS.Security.Huks.IHuksAccessExtBase {
     [ipccode 5] void Sign([in] String handle, [in] CppParamSet params, [in] unsigned char[] inData, [out] unsigned char[] outData, [out] int errcode);
     [ipccode 6] void Verify([in] String handle, [in] CppParamSet params, [in] unsigned char[] plainText, [in] unsigned char[] signature, [out] int errcode);
     [ipccode 7] void ExportCertificate([in] String index, [in] CppParamSet params, [out] String certJsonArr, [out] int errcode);
-    [ipccode 8] void ExportProviderCertificates([in] CppParamSet params, [out] String[] certJsonArr, [out] int errcode);
+    [ipccode 8] void ExportProviderCertificates([in] CppParamSet params, [out] String certJsonArr, [out] int errcode);
 }

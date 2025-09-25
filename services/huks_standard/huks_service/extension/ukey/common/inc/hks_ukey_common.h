@@ -35,9 +35,9 @@ namespace Huks {
 
     int32_t CertInfoToString(const struct HksExtCertInfo& certInfo, std::string& jsonStr);
 
-    int32_t VectorToCertInfoSet(const std::string &certJsonArr, struct HksExtCertInfoSet& certSet);
+    int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCertInfoSet& certSet);
 
-    int32_t CertInfoSetToVector(const struct HksExtCertInfoSet& certSet, std::string& jsonArrayStr);
+    int32_t CertInfoSetToJsonArray(const struct HksExtCertInfoSet& certSet, std::string& jsonArrayStr);
 
 }
 }

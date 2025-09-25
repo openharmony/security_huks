@@ -116,7 +116,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnExportCerticate(con
 }
 
 __attribute__((visibility("default"))) int32_t HksExtPluginOnExportProviderCerticates(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, std::vector<std::string> &certsJsonArr)
+    const std::string &index, const CppParamSet &paramSet, std::string &certsJsonArr)
 {
     HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();

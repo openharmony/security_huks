@@ -51,8 +51,8 @@ public:
     int32_t RemoteClearPinStatus(const std::string &index);
 
     //证书查询
-    int32_t FindRemoteCertificate(const std::string &index, const CppParamSet &paramSet, std::string cert);
-    int32_t FindRemoteAllCertificate(const std::string &index, const CppParamSet &paramSet, std::vector<std::string> certVec);
+    int32_t FindRemoteCertificate(const std::string &index, const CppParamSet &paramSet, const std::string certificatesOut);
+    int32_t FindRemoteAllCertificate(const std::string &index, const CppParamSet &paramSet, const std::string certificatesOut);
 
     //签名验签
     int32_t RemoteHandleSign(const std::string &index, const CppParamSet &paramSet,

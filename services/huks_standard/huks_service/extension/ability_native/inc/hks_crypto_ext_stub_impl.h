@@ -82,7 +82,7 @@ public:
 
     ErrCode ExportProviderCertificates(
         const CppParamSet& params,
-        std::vector<std::string>& certJsonArr,
+        std::string& certJsonArr,
         int32_t& errcode) override;
 private:
     std::shared_ptr<HksCryptoExtAbility> extension_;
