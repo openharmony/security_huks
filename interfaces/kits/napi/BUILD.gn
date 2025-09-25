@@ -104,7 +104,7 @@ ohos_shared_library("huks") {
   part_name = "huks"
 }
 
-ohos_shared_library("huks_external_crypto") {
+ohos_shared_library("huksexternalcrypto_napi") {
 
   branch_protector_ret = "pac_ret"
 
