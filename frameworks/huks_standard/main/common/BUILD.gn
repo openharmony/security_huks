@@ -44,7 +44,8 @@ if (os_level == "standard") {
       "src/hks_error_msg.c",
       "src/hks_param.c",
       "src/hks_tags_type_manager.c",
-      "src/hks_cpp_paramset.cpp"
+      "src/hks_cpp_paramset.cpp",
+      "src/hks_json_wrapper.cpp"
     ]
 
     complete_static_lib = true
@@ -66,6 +67,7 @@ if (os_level == "standard") {
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
+      "cJSON:cjson",
     ]
   }
 } else {

@@ -25,7 +25,6 @@ if (os_level == "standard") {
     include_dirs = [
       "inc",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger/inc",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common/inc",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc"
     ]
 
