@@ -57,8 +57,10 @@ public:
     int32_t OnClearPinStatus(const std::string &index);
     
     int32_t OnListProviders(std::vector<uint8_t> &providersOut);
-    int32_t OnFindProviderCertificate(const std::string &index, std::vector<uint8_t> &cetificatesOut); // 可能不需要
-    int32_t OnListProviderAllCertificate(const std::string &providerName, std::string &cetificatesOut); // 这里证书会带上index
+    int32_t OnListIndexCertificate(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, std::vector<std::string> &certsJsonArr);
+    int32_t OnListProviderAllCertificate(const HksProcessInfo &processInfo,
+    const std::string &provider, const CppParamSet &paramSet, std::vector<std::string> &certsJsonArr);
 
 private:
     std::mutex mapMutex_;

@@ -56,7 +56,7 @@ int32_t HksIpcServiceOnFindRemoteKeyHandleAdapter(const struct HksProcessInfo *p
     CppParamSet cppParamSet(paramSet);
 
     std::string remoteHandle;
-    OHOS::Security::Huks::HksIpcServiceOnFindRemoteKeyHandle(processInfo, cppIndex, cppParamSet, remoteHandle);
+    // OHOS::Security::Huks::HksIpcServiceOnFindRemoteKeyHandle(processInfo, cppIndex, cppParamSet, remoteHandle);
 
     uint32_t copyLen = std::min(remoteHandleOut->size, static_cast<uint32_t>(remoteHandle.size()));
     memcpy_s(remoteHandleOut->data, remoteHandleOut->size, remoteHandle.data(), copyLen);
@@ -72,8 +72,8 @@ int32_t HksIpcServiceOnCloseRemoteKeyHandleAdapter(const struct HksProcessInfo *
     std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
     CppParamSet cppParamSet(paramSet);
 
-    return OHOS::Security::Huks::HksIpcServiceOnCloseRemoteKeyHandle(processInfo, cppIndex, cppParamSet);
-   
+    // return OHOS::Security::Huks::HksIpcServiceOnCloseRemoteKeyHandle(processInfo, cppIndex, cppParamSet);
+    return 0;
 }
 
 int32_t HksIpcServiceOnSignedAdapter(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
@@ -84,7 +84,7 @@ int32_t HksIpcServiceOnSignedAdapter(const struct HksProcessInfo *processInfo, c
     CppParamSet cppParamSet(paramSet);
 
     std::string signature;
-    OHOS::Security::Huks::HksIpcServiceOnSigned(processInfo, cppIndex, cppParamSet, cppSrcData, signature);
+    // OHOS::Security::Huks::HksIpcServiceOnSigned(processInfo, cppIndex, cppParamSet, cppSrcData, signature);
 
     uint32_t copyLen = std::min(signatureOut->size, static_cast<uint32_t>(signature.size()));
     memcpy_s(signatureOut->data, signatureOut->size, signature.data(), copyLen);
@@ -102,7 +102,7 @@ int32_t HksIpcServiceOnVerifyAdapter(const struct HksProcessInfo *processInfo, c
     CppParamSet cppParamSet(paramSet);
 
     std::string signature;
-    OHOS::Security::Huks::HksIpcServiceOnVerify(processInfo, cppIndex, cppParamSet, cppData, signature);
+    // OHOS::Security::Huks::HksIpcServiceOnVerify(processInfo, cppIndex, cppParamSet, cppData, signature);
 
     uint32_t copyLen = std::min(signatureOut->size, static_cast<uint32_t>(signature.size()));
     memcpy_s(signatureOut->data, signatureOut->size, signature.data(), copyLen);
