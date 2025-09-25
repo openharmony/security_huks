@@ -30,9 +30,10 @@ void HuksPluginLoader::ReleaseInstance()
     return HuksPluginLoader::DestroyInstance();
 }
 
-int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const std::string& providerName, const CppParamSet& paramSet){
+int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const std::string& providerName,
+    const CppParamSet& paramSet){
     std::lock_guard<std::mutex> lock(libMutex);
-    HKS_IF_TRUE_RETURN(m_pluginHandle != nullptr, HKS_SUCCESS) //或者换成重复打开的消息码
+    HKS_IF_TRUE_RETURN(m_pluginHandle != nullptr, HKS_SUCCESS)
 
     m_pluginHandle = dlopen(PLUGIN_SO, RTLD_NOW);
     HKS_IF_NULL_LOGE_RETURN(m_pluginHandle, HKS_ERROR_OPEN_LIB_FAIL,
@@ -47,6 +48,7 @@ int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const s
             m_pluginProviderMap.clear();
             return HKS_ERROR_FIND_FUNC_MAP_FAIL;
         }
+
         dlerror();
         void* func = dlsym(m_pluginHandle, methodString.c_str());
         const char *dlsym_error = dlerror();
@@ -71,17 +73,6 @@ int32_t HuksPluginLoader::UnLoadPlugins(const struct HksProcessInfo &info, const
     const CppParamSet& paramSet) {
     std::lock_guard<std::mutex> lock(libMutex);
     HKS_IF_TRUE_RETURN(m_pluginHandle == nullptr, HKS_SUCCESS) //或者换成重复释放的消息码
-
-    auto it = m_pluginProviderMap.find(PluginMethodEnum::FUNC_ON_UN_REGISTER_PROVIDER);
-    HKS_IF_TRUE_LOGE_RETURN(it == m_pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
-        "unregist provider method enum not found in plugin provider map.")
-    
-    // HuksLibEntry::initProviderMap(m_pluginProviderMap);
-    auto libEntry = HuksLibEntry::GetInstanceWrapper();
-    
-    // int32_t ret = libEntry.OnUnRegistProvider();
-    // HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_EXEC_FUNC_FAIL,
-    //     "unregist provider method in plugin laoder is fail")
 
     m_pluginProviderMap.clear();
     dlclose(m_pluginHandle);

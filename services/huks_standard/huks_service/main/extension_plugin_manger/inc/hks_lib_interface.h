@@ -38,25 +38,26 @@ public:
     static std::shared_ptr<HuksLibEntry> GetInstanceWrapper();
     static void ReleaseInstance();
 
-    int32_t OnRegistProvider(const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet); // TODO
-    int32_t OnUnRegistProvider(const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet);
-    int32_t RegistLibFunction(int32_t funCode, void *fun); // TODO
+    int32_t OnRegistProvider(const HksProcessInfo &processInfo,
+        const std::string &providerName, const CppParamSet &paramSet);
+    int32_t OnUnRegistProvider(const HksProcessInfo &processInfo,
+        const std::string &providerName, const CppParamSet &paramSet);
 
     int32_t OnCreateRemoteIndex(const std::string &providerName, const CppParamSet& paramSet, std::string &outIndex);
-    int32_t OnCreateRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
+    int32_t OnOpenRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet, std::string &handle);
-    int32_t OnFindRemoteKeyHandle(const std::string &index, std::string &keyIndex);
+    //int32_t OnFindRemoteKeyHandle(const std::string &index, std::string &keyIndex);
     int32_t OnCloseRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet);
  
-    int32_t OnSigned(const std::string &index, const CppParamSet& paramSet, std::vector<uint8_t> &outData);
+    // int32_t OnSigned(const std::string &index, const CppParamSet& paramSet, std::vector<uint8_t> &outData);
     int32_t OnAuthUkeyPin(const HksProcessInfo &processInfo,
         const std::string &index, const CppParamSet &paramSet, int32_t& authState, uint32_t& retryCnt);
     int32_t OnGetVerifyPinStatus(const HksProcessInfo &processInfo,
         const std::string &index, const CppParamSet &paramSet, uint32_t &state);
-    int32_t OnClearPinStatus(const std::string &index);
+    // int32_t OnClearPinStatus(const std::string &index);
     
-    int32_t OnListProviders(std::vector<uint8_t> &providersOut);
+    //int32_t OnListProviders(std::vector<uint8_t> &providersOut);
     int32_t OnListIndexCertificate(const HksProcessInfo &processInfo,
         const std::string &index, const CppParamSet &paramSet, std::string &certsJson);
     int32_t OnListProviderAllCertificate(const HksProcessInfo &processInfo,

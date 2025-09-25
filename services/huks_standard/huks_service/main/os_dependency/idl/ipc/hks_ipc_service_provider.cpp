@@ -76,7 +76,7 @@ int32_t HksIpcServiceOnCreateRemoteKeyHandle(const struct HksProcessInfo *proces
     auto libInterface = GetExtLibInterfaceInstance();
     HKS_LOG_I("got libInterface instance");
 
-    int32_t ret = libInterface->OnCreateRemoteKeyHandle(*processInfo, index, paramSet, remoteHandleOut); // TODO:参数对齐OnCreateRemoteKeyHandle(const std::string &index)
+    int32_t ret = libInterface->OnOpenRemoteKeyHandle(*processInfo, index, paramSet, remoteHandleOut);
     return ret;
 }
 
@@ -90,16 +90,16 @@ int32_t HksIpcServiceOnCreateRemoteKeyHandle(const struct HksProcessInfo *proces
 //     return ret;
 // }
 
-// int32_t HksIpcServiceOnCloseRemoteKeyHandle(const struct HksProcessInfo *processInfo, 
-//     std::string index, CppParamSet &paramSet) 
-// {
-//     HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
-//     auto libInterface = GetExtLibInterfaceInstance();
-//     HKS_LOG_I("got libInterface instance");
+int32_t HksIpcServiceOnCloseRemoteKeyHandle(const struct HksProcessInfo *processInfo, 
+    std::string index, CppParamSet &paramSet) 
+{
+    HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
+    auto libInterface = GetExtLibInterfaceInstance();
+    HKS_LOG_I("got libInterface instance");
 
-//     int32_t ret = libInterface->OnCloseRemoteKeyHandle(*processInfo, index, paramSet); // TODO:参数对齐OnCloseRemoteKeyHandle(const std::string &index, std::string &keyIndex)
-//     return ret;
-// }
+    int32_t ret = libInterface->OnCloseRemoteKeyHandle(*processInfo, index, paramSet); // TODO:参数对齐OnCloseRemoteKeyHandle(const std::string &index, std::string &keyIndex)
+    return ret;
+}
 
 // int32_t HksIpcServiceOnSigned(const struct HksProcessInfo *processInfo, std::string index, 
 //     CppParamSet &paramSet, std::string srcData, std::string &signature) {
@@ -155,16 +155,18 @@ int32_t HksIpcServiceOnCreateRemoteKeyHandle(const struct HksProcessInfo *proces
 //     HKS_IF_TRUE_LOGI_RETURN_VOID(ret != HKS_SUCCESS, "HksIpcServiceOnListProviders fail")
 // }
 
-// void HksIpcServiceOnFindProviderCertificate(const std::string &index, std::vector<uint8_t> &cetificatesOut) {
+// void HksIpcServiceOnFindProviderCertificate(const HksProcessInfo &processInfo, const std::string &index,
+// const CppParamSet &paramSet, std::string &cetificatesOut) {
 //     HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
 //     auto libInterface = GetExtLibInterfaceInstance();
 //     HKS_LOG_I("got libInterface instance");
 
-//     int32_t ret = libInterface->OnFindProviderCertificate(index, cetificatesOut);
+//     int32_t ret = libInterface->OnListProviderCertificate(index, cetificatesOut);
 //     HKS_IF_TRUE_LOGI_RETURN_VOID(ret != HKS_SUCCESS, "HksIpcServiceOnFindProviderCertificate fail")
 // }
 
-// void HksIpcServiceOnListProviderAllCertificate(const std::string &providerName, std::string &cetificatesOut) {
+// void HksIpcServiceOnListProviderAllCertificate(const HksProcessInfo &processInfo, const std::string &index,
+// const CppParamSet &paramSet, std::string &cetificatesOut) {
 //     HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
 //     auto libInterface = GetExtLibInterfaceInstance();
 //     HKS_LOG_I("got libInterface instance");

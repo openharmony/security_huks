@@ -83,8 +83,10 @@ using OnGetVerifyPinStatusFunc = int32_t (*)(const HksProcessInfo &processInfo,
 using OnClearPinStatusFunc = int32_t (*)();
 
 using OnListProvidersFunc = int32_t (*)();
-using OnGetProviderCertificateFunc = int32_t (*)();
-using OnListProviderAllCertificateFunc = int32_t (*)();
+using OnGetProviderCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, std::string &certsJson);
+using OnListProviderAllCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr);
 }
 }
 }
