@@ -27,6 +27,16 @@ namespace Huks {
 using InputArgsParser = std::function<bool(napi_env&, napi_value*, size_t&)>;
 using ResultValueParser = std::function<bool(napi_env&, napi_value)>;
 
+typedef struct CryptoResultParam {
+    int32_t errCode {};
+    std::string handle {};
+    std::string index {};
+
+    std::condition_variable callJsCon;
+    std::atomic<bool> callJsExMethodDone {false};
+    std::mutex callJsMutex;
+} CryptoResultParam; 
+
 struct CallJsParam {
     std::mutex CryptoOperateMutex;
     std::condition_variable CryptoOperateCondition;
@@ -59,8 +69,10 @@ public:
     int test(const std::string &testIn, std::vector<std::string> &testOut) override;
     int OnCreateRemoteIndex(const std::string& abilityName, std::string& index) override;
     int OnGetRemoteHandle(const std::string& index, std::string& handle) override;
-    int OnOpenRemoteHandle(const std::string& handle) override;
     int OnCloseRemoteHandle(const std::string& index) override;
+    int OpenRemoteHandle(const std::string& index, const CppParamSet& params, std::string& handle,
+        int32_t& errcode) override;
+
 private:
     template <typename T>
     struct Value {
@@ -68,13 +80,32 @@ private:
         int code {ERR_OK};
     };
     napi_value CallObjectMethod(const char *name, napi_value const *argv = nullptr, size_t argc = 0);
-    napi_status GetStringValue(napi_env env, napi_value value, std::string &result);
+    static napi_status GetStringValue(napi_env env, napi_value value, std::string &result);
     int CallJsMethod(const std::string &funcName, AbilityRuntime::JsRuntime &jsRuntime, NativeReference *jsObj,
         InputArgsParser argParser, ResultValueParser retParser);
     void GetSrcPath(std::string &srcPath);
     bool ParserVectorStringJsResult(napi_env &env, napi_value nativeValue, Value<std::vector<std::string>> &results);
+    static bool ConvertFunctionResult(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
+    static napi_value PromiseCallback(napi_env env, napi_callback_info info);
+    void CallPromise(napi_env &env, napi_value funcResult, std::shared_ptr<CryptoResultParam> dataParam);
+
     AbilityRuntime::JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> jsObj_;
+};
+
+class PromiseCallbackInfo {
+public:
+    static PromiseCallbackInfo* Create(std::shared_ptr<CryptoResultParam> cryptoResultParam);
+ 
+    static void Destroy(PromiseCallbackInfo* callbackInfo);
+ 
+    std::shared_ptr<CryptoResultParam> GetJsCallBackParam();
+private:
+    explicit PromiseCallbackInfo(std::shared_ptr<CryptoResultParam> cryptoResultParam);
+ 
+    ~PromiseCallbackInfo();
+ 
+    std::shared_ptr<CryptoResultParam> cryptoResultParam_;
 };
 } // HUKS
 } // namespace Security

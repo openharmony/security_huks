@@ -135,6 +135,8 @@ napi_value ParseKeyData(napi_env env, napi_value value, HksBlob *&keyDataBlob);
 
 napi_value GetPropertyFromOptions(napi_env env, napi_value value, const std::string propertyStr);
 
+napi_value GenerateHksParamArray(napi_env env, const HksParamSet &paramSet);
+
 void SuccessReturnResultInit(struct HksSuccessReturnResult &resultData);
 
 void SuccessListAliasesReturnResultInit(struct HksSuccessListAliasesResult &resultData);
