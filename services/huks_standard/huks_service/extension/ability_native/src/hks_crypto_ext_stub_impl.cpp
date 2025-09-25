@@ -127,7 +127,7 @@ ErrCode HksCryptoExtStubImpl::ExportCertificate(
 
 ErrCode HksCryptoExtStubImpl::ExportProviderCertificates(
     const CppParamSet& params,
-    std::vector<std::string>& certJsonArr,
+    std::string& certJsonArr,
     int32_t& errcode)
 {
     LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO ExportProviderCertificates");

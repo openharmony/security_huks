@@ -406,7 +406,8 @@ int32_t HksRemoteHandleManager::RemoteHandleVerify(const std::string &index, con
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::FindRemoteCertificate(const std::string &index, const CppParamSet &paramSet, std::string cert)
+int32_t HksRemoteHandleManager::FindRemoteCertificate(const std::string &index,
+    const CppParamSet &paramSet, std::string cert)
 {
     ProviderInfo providerInfo;
     std::string newIndex;
@@ -430,7 +431,7 @@ int32_t HksRemoteHandleManager::FindRemoteCertificate(const std::string &index, 
     return HKS_SUCCESS;
 }
 int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const std::string &index,
-    const CppParamSet &paramSet, std::vector<std::string> certVec)
+    const CppParamSet &paramSet, std::string certVec)
 {
     ProviderInfo providerInfo;
     std::string newIndex;
