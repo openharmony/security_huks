@@ -17,6 +17,7 @@
 #include "ability_manager_client.h"
 #include "hks_log.h"
 #include "hks_template.h"
+#include "huks_access_ext_base_proxy.h"
 namespace OHOS {
 namespace Security {
 namespace Huks {
@@ -28,7 +29,7 @@ void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementNa
     const sptr<IRemoteObject>& remoteObject, int resultCode) {
     HKS_IF_TRUE_RETURN_VOID(remoteObject == nullptr)
 
-    extConnectProxy = iface_cast<IHuksAccessExtBase>(remoteObject);
+    extConnectProxy = iface_cast<HuksAccessExtBaseProxy>(remoteObject);
     HKS_IF_TRUE_RETURN_VOID(extConnectProxy == nullptr)
 
     AddExtDeathRecipient(extConnectProxy->AsObject()); // TODO:DesignAccessExtBase需要实现AsObject()

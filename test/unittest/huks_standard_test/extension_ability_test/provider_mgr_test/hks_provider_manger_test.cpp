@@ -40,7 +40,7 @@ void HksProviderMgrTest::TearDown() {
 * @tc.desc: connect success.
 * @tc.type: FUNC
 */
-HWTEST_F(HksProviderMgrTest, HksProviderMgrTest001, TestSize.Level10) {
+HWTEST_F(HksProviderMgrTest, HksProviderMgrTest001, TestSize.Level0) {
     auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
     EXPECT_NE(providerMgr, nullptr);
 }
