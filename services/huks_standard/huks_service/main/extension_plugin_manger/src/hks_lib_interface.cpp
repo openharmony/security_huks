@@ -172,7 +172,8 @@ int32_t HuksLibEntry::OnCreateRemoteKeyHandle(const HksProcessInfo &processInfo,
 //     return HKS_SUCCESS;
 // }
 
-// int32_t HuksLibEntry::OnFindProviderCertificate(const std::string &index, std::vector<uint8_t> &cetificatesOut) {
+// int32_t HuksLibEntry::OnFindProviderCertificate(const HksProcessInfo &processInfo,
+//    const std::string &index, const CppParamSet &paramSet, std::string &certsJson) {
 //     auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_GET_PROVIDER_CERTIFICATE);
 //     HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
 //         "FindProviderCertificate method enum not found in plugin provider map.")
@@ -184,7 +185,8 @@ int32_t HuksLibEntry::OnCreateRemoteKeyHandle(const HksProcessInfo &processInfo,
 //     return HKS_SUCCESS;
 // }
 
-// int32_t HuksLibEntry::OnListProviderAllCertificate(const std::string &providerName, std::string &cetificatesOut) {
+// int32_t HuksLibEntry::OnListProviderAllCertificate(const HksProcessInfo &processInfo,
+    // const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr) {
 //     auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_LIST_PROVIDER_ALL_CERTIFICATE);
 //     HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
 //         "ListProviderAllCertificate method enum not found in plugin provider map.")

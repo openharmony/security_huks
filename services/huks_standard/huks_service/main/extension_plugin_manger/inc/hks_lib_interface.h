@@ -58,9 +58,9 @@ public:
     
     int32_t OnListProviders(std::vector<uint8_t> &providersOut);
     int32_t OnListIndexCertificate(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, std::vector<std::string> &certsJsonArr);
+        const std::string &index, const CppParamSet &paramSet, std::string &certsJson);
     int32_t OnListProviderAllCertificate(const HksProcessInfo &processInfo,
-    const std::string &provider, const CppParamSet &paramSet, std::vector<std::string> &certsJsonArr);
+        const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr);
 
 private:
     std::mutex mapMutex_;
