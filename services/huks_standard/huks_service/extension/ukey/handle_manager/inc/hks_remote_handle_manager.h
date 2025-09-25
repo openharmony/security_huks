@@ -38,21 +38,24 @@ public:
     static std::shared_ptr<HksRemoteHandleManager> GetInstanceWrapper();
     static void ReleaseInstance();
 
-    int32_t GetRemoteIndex(const ProviderInfo &providerInfo, [[maybe_unused]] const CppParamSet &paramSet, std::string &index);
+    int32_t GetRemoteIndex(const ProviderInfo &providerInfo,
+            [[maybe_unused]] const CppParamSet &paramSet, std::string &index);
     // handle管理
     int32_t CreateRemoteHandle(const std::string &index, [[maybe_unused]] const CppParamSet &paramSet);
     int32_t CloseRemoteHandle(const std::string &index, [[maybe_unused]] const CppParamSet &paramSet);
 
     // ukey PIN码管理
     int32_t RemoteVerifyPin(const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet,
-        int32_t& authState, uint32_t& retryCnt);
+            int32_t& authState, uint32_t& retryCnt);
     int32_t RemoteVerifyPinStatus(const HksProcessInfo &processInfo,
-        const std::string &index, const CppParamSet &paramSet, uint32_t &state);
+            const std::string &index, const CppParamSet &paramSet, uint32_t &state);
     int32_t RemoteClearPinStatus(const std::string &index);
 
     //证书查询
-    int32_t FindRemoteCertificate(const std::string &index, const CppParamSet &paramSet, const std::string certificatesOut);
-    int32_t FindRemoteAllCertificate(const std::string &index, const CppParamSet &paramSet, const std::string certificatesOut);
+    int32_t FindRemoteCertificate(const std::string &index,
+            const CppParamSet &paramSet, const std::string certificatesOut);
+    int32_t FindRemoteAllCertificate(const HksProcessInfo &processInfo,
+            const std::string &providerName, const CppParamSet &paramSet, const std::string certificatesOut);
 
     //签名验签
     int32_t RemoteHandleSign(const std::string &index, const CppParamSet &paramSet,
@@ -63,7 +66,8 @@ public:
 
     int32_t ClearRemoteHandle();
 
-    static int32_t ParseIndexAndProviderInfo(const std::string &index, ProviderInfo &providerInfo, std::string &newIndex);
+    static int32_t ParseIndexAndProviderInfo(const std::string &index,
+            ProviderInfo &providerInfo, std::string &newIndex);
 
 private:
 

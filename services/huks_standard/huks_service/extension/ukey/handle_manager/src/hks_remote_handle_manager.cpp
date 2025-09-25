@@ -430,16 +430,19 @@ int32_t HksRemoteHandleManager::FindRemoteCertificate(const std::string &index,
 
     return HKS_SUCCESS;
 }
-int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const std::string &index,
-    const CppParamSet &paramSet, std::string certVec)
+int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &processInfo,
+        const std::string &providerName,const CppParamSet &paramSet, std::string certVec)
 {
+    auto providerLifeManager = HksProviderLifeCycleManager::GetInstanceWrapper();
+    if (providerLifeManager == nullptr) {
+        HKS_LOG_E("Get provider Life manager instance failed");
+        return HKS_ERROR_NULL_POINTER;
+    }
     ProviderInfo providerInfo;
-    std::string newIndex;
-    int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
+    int32_t ret = HksGetProviderInfo(processInfo, providerName, paramSet, providerInfo);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
-
     auto proxy = GetProviderProxy(providerInfo, ret);
     if (proxy == nullptr) {
         return ret;

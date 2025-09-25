@@ -116,12 +116,12 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnExportCerticate(con
 }
 
 __attribute__((visibility("default"))) int32_t HksExtPluginOnExportProviderCerticates(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, std::string &certsJsonArr)
+    const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr)
 {
     HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
-    auto ret = handleMgr->FindRemoteAllCertificate(index, paramSet, certsJsonArr);
+    auto ret = handleMgr->FindRemoteAllCertificate(processInfo, providerName, paramSet, certsJsonArr);
     HKS_LOG_E("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
