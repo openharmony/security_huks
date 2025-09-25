@@ -35,7 +35,7 @@ int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &in
     int preCount = m_refCount.fetch_add(1, std::memory_order_acq_rel);
     if (preCount == 0) {
         auto pluginLoader = HuksPluginLoader::GetInstanceWrapper();
-        ret = pluginLoader->Start(info, providerName, paramSet);
+        ret = pluginLoader->LoadPlugins(info, providerName, paramSet);
         if (ret != HKS_SUCCESS) {
             m_refCount.fetch_sub(1, std::memory_order_acq_rel);
             HKS_LOG_E("regist provider failed!");
@@ -46,7 +46,6 @@ int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &in
     ret = libEntry->OnRegistProvider(info, providerName, paramSet);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_EXEC_FUNC_FAIL,
         "regist provider method in plugin laoder is fail")
-    RecordProvider(providerName);
     return ret;
 }
 
@@ -56,19 +55,14 @@ int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &
     HKS_IF_TRUE_RETURN(preCount != 1, HKS_SUCCESS)
 
     auto pluginLoader = HuksPluginLoader::GetInstanceWrapper();
-    int32_t ret = pluginLoader->Stop(info, providerName, paramSet);
+    int32_t ret = pluginLoader->UnLoadPlugins(info, providerName, paramSet);
     if (ret != HKS_SUCCESS) {
         m_refCount.fetch_add(1, std::memory_order_acq_rel);
         HKS_LOG_E("unregist provider failed!, ret = %{public}d", ret);
         return ret; 
     }
+    HKS_LOG_I("unregist provider success!");
     return HKS_SUCCESS;
-}
-
-void HuksPluginLifeCycleMgr::RecordProvider(const std::string &providerName) {
-    //TODO:需要区分是否为重复注册的provider吗
-    //auto ret = registerProvider.Add(providerName);
-    //HKS_IF_TRUE_LOGI_RETURN_VOID(!ret, "repete record provider")
 }
 
 }

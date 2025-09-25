@@ -48,8 +48,6 @@ public:
 
 private:
     std::atomic<int> m_refCount{0};
-    //OHOS::SafeSet<std::string> registerProvider;
-    void RecordProvider(const std::string &providerName);
     static HuksPluginLifeCycleMgr instancePLCM;
 };
 }

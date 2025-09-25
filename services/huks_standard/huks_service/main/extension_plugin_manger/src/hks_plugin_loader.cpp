@@ -30,21 +30,6 @@ void HuksPluginLoader::ReleaseInstance()
     return HuksPluginLoader::DestroyInstance();
 }
 
-int32_t HuksPluginLoader::Start(const struct HksProcessInfo &info, const std::string& providerName,
-    const CppParamSet& paramSet) {
-    int32_t ret = LoadPlugins(info, providerName, paramSet);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "load plugins fail, ret = %{public}d", ret)
-
-    return HKS_SUCCESS;
-}
-
-int32_t HuksPluginLoader::Stop(const struct HksProcessInfo &info, const std::string& providerName,
-    const CppParamSet& paramSet) {
-    int32_t ret = UnLoadPlugins(info, providerName, paramSet);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "unload plugins fail, ret = %{public}d", ret)
-    return HKS_SUCCESS;
-}
-
 int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const std::string& providerName, const CppParamSet& paramSet){
     std::lock_guard<std::mutex> lock(libMutex);
     HKS_IF_TRUE_RETURN(m_pluginHandle != nullptr, HKS_SUCCESS) //或者换成重复打开的消息码
