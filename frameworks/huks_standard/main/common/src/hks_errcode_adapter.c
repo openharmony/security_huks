@@ -701,7 +701,7 @@ static struct HksError g_errCodeTable[] = {
         .innerErrCode = HUKS_ERR_CODE_PIN_CODE_ERROR,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_PIN_CODE_ERROR,
-            .errorMsg = "The pin is not correct, retryCnt is:",
+            .errorMsg = "The auth pin is not correct.",
             .data = NULL
         }
     }
