@@ -141,7 +141,8 @@ int32_t HksOpensslSm2GenerateKey(const struct HksKeySpec *spec, struct HksBlob *
 }
 #endif
 
-static int GetSm2Modules(const struct HksBlob *keyBlob, struct KeyMaterialEcc **out)
+static int GetSm2Modules(const struct HksBlob *keyBlob, uint32_t digest, enum HksKeyPurpose keyPurpose,
+    struct KeyMaterialEcc **out)
 {
     if (CheckBlob(keyBlob) != HKS_SUCCESS) {
         HKS_LOG_E("invalid keyBlob");
@@ -163,6 +164,11 @@ static int GetSm2Modules(const struct HksBlob *keyBlob, struct KeyMaterialEcc **
         (sizeof(struct KeyMaterialEcc) + keyMaterial->xSize + keyMaterial->ySize + keyMaterial->zSize !=
             keyBlob->size)) {
         HKS_LOG_E("invalid size");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    if ((keyPurpose == HKS_KEY_PURPOSE_SIGN) && (digest == HKS_DIGEST_SM3) &&
+        (keyMaterial->xSize == 0 || keyMaterial->ySize == 0)) {
+        HKS_LOG_E("public key is necessary for sm2 sign message");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     if (keyBlob->size < sizeof(struct KeyMaterialEcc) + keyMaterial->xSize + keyMaterial->ySize + keyMaterial->zSize) {
@@ -257,12 +263,12 @@ static OSSL_PARAM *ConstructSm2ParamsFromRawKey(const struct KeyMaterialEcc *mat
     return params;
 }
 
-static EVP_PKEY *Sm2InitKey(const struct HksBlob *keyBlob, enum HksKeyPurpose keyPurpose)
+static EVP_PKEY *Sm2InitKey(const struct HksBlob *keyBlob, uint32_t digest, enum HksKeyPurpose keyPurpose)
 {
     /* get ecc pubX,pubY,pri */
     struct KeyMaterialEcc *keyMaterial = NULL;
 
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetSm2Modules(keyBlob, &keyMaterial),
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetSm2Modules(keyBlob, digest, keyPurpose, &keyMaterial),
         NULL, "get sm2 key modules is failed")
 
     EVP_PKEY *sm2EvpPkey = NULL;
@@ -332,11 +338,10 @@ static int32_t SetDigestIfNeeded(enum HksKeyPurpose keyPurpose, uint32_t digest,
     }
 }
 
-#ifdef HKS_SUPPORT_SM2_SIGN_VERIFY
 static EVP_PKEY_CTX *InitSm2Ctx(const struct HksBlob *mainKey, uint32_t digest, enum HksKeyPurpose keyPurpose,
     const struct HksBlob *message)
 {
-    EVP_PKEY *key = Sm2InitKey(mainKey, keyPurpose);
+    EVP_PKEY *key = Sm2InitKey(mainKey, digest, keyPurpose);
     HKS_IF_NULL_LOGE_RETURN(key, NULL, "initialize sm2 key failed")
 
     int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
@@ -384,17 +389,147 @@ static EVP_PKEY_CTX *InitSm2Ctx(const struct HksBlob *mainKey, uint32_t digest, 
     return ctx;
 }
 
-int32_t HksOpensslSm2Verify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+#ifdef HKS_SUPPORT_SM2_SIGN_VERIFY
+static EVP_MD_CTX *InitSm2MdCtx(const struct HksBlob *mainKey, uint32_t digest, enum HksKeyPurpose keyPurpose)
+{
+    EVP_PKEY *key = Sm2InitKey(mainKey, digest, keyPurpose);
+    HKS_IF_NULL_LOGE_RETURN(key, NULL, "initialize sm2 key failed")
+
+    EVP_MD_CTX *mdCtx = NULL;
+    int osRet = 0;
+    do {
+        mdCtx = EVP_MD_CTX_new();
+        HKS_IF_NULL_LOGE_BREAK(mdCtx, "new md ctx failed")
+
+        if (keyPurpose == HKS_KEY_PURPOSE_SIGN) {
+            osRet = EVP_DigestSignInit(mdCtx, NULL, EVP_sm3(), NULL, key);
+        } else {
+            osRet = EVP_DigestVerifyInit(mdCtx, NULL, EVP_sm3(), NULL, key);
+        }
+        if (osRet != HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("sign/verify message, init md context failed, osRet = %" LOG_PUBLIC "d %" LOG_PUBLIC "s",
+                osRet, ERR_reason_error_string(ERR_get_error()));
+            SELF_FREE_PTR(mdCtx, EVP_MD_CTX_free)
+            break;
+        }
+        const uint8_t defaultUserId[] = {
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
+        };
+        osRet = EVP_PKEY_CTX_set1_id(EVP_MD_CTX_pkey_ctx(mdCtx), defaultUserId, sizeof(defaultUserId));
+        if (osRet != HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("set user id failed, osRet = %" LOG_PUBLIC "d", osRet);
+            HksLogOpensslError();
+            SELF_FREE_PTR(mdCtx, EVP_MD_CTX_free)
+        }
+    } while (0);
+
+    SELF_FREE_PTR(key, EVP_PKEY_free)
+    if (osRet != HKS_OPENSSL_SUCCESS) {
+        return NULL;
+    }
+    return mdCtx;
+}
+
+static int32_t HksOpensslSm2SignMessage(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, struct HksBlob *signature)
+{
+    EVP_MD_CTX *mdCtx = InitSm2MdCtx(key, usageSpec->digest, usageSpec->purpose);
+    HKS_IF_NULL_LOGE_RETURN(mdCtx, HKS_ERROR_INVALID_ARGUMENT, "initialize sm2 md context failed")
+
+    int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    do {
+        size_t sigSize = 0;
+        int osRet = EVP_DigestSign(mdCtx, NULL, &sigSize, message->data, message->size);
+        if (osRet != HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("sign message, get sigSize failed, osRet = %" LOG_PUBLIC "d %" LOG_PUBLIC "s",
+                osRet, ERR_reason_error_string(ERR_get_error()));
+            break;
+        }
+
+        if (signature->size < sigSize) {
+            HKS_LOG_E("sign message, outSize too small %" LOG_PUBLIC "u < %" LOG_PUBLIC "zu", signature->size, sigSize);
+            ret = HKS_ERROR_BUFFER_TOO_SMALL;
+            break;
+        }
+
+        osRet = EVP_DigestSign(mdCtx, signature->data, &sigSize, message->data, message->size);
+        if (osRet != HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("sign message failed, osRet = %" LOG_PUBLIC "d %" LOG_PUBLIC "s",
+                osRet, ERR_reason_error_string(ERR_get_error()));
+            break;
+        }
+        signature->size = (uint32_t)sigSize;
+        ret = HKS_SUCCESS;
+    } while (0);
+
+    SELF_FREE_PTR(mdCtx, EVP_MD_CTX_free)
+    return ret;
+}
+
+static int32_t HksOpensslSm2SignDigest(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, struct HksBlob *signature)
+{
+    EVP_PKEY_CTX *ctx = InitSm2Ctx(key, usageSpec->digest, usageSpec->purpose, message);
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_ARGUMENT, "initialize sm2 context failed")
+
+    int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    do {
+        size_t sigSize = 0;
+        int osRet = EVP_PKEY_sign(ctx, NULL, &sigSize, message->data, message->size);
+        if (osRet != HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("sign digest fail, get sigSize fail, osRet = %" LOG_PUBLIC "d %" LOG_PUBLIC "s",
+                osRet, ERR_reason_error_string(ERR_get_error()));
+            break;
+        }
+
+        if (signature->size < sigSize) {
+            HKS_LOG_E("sign digest fail, outSize too small %" LOG_PUBLIC "u < %" LOG_PUBLIC "zu",
+                signature->size, sigSize);
+            ret = HKS_ERROR_BUFFER_TOO_SMALL;
+            break;
+        }
+
+        osRet = EVP_PKEY_sign(ctx, signature->data, &sigSize, message->data, message->size);
+        if (osRet != HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("sign digest fail, osRet = %" LOG_PUBLIC "d %" LOG_PUBLIC "s",
+                osRet, ERR_reason_error_string(ERR_get_error()));
+            break;
+        }
+        signature->size = (uint32_t)sigSize;
+        ret = HKS_SUCCESS;
+    } while (false);
+
+    SELF_FREE_PTR(ctx, EVP_PKEY_CTX_free)
+    return ret;
+}
+
+static int32_t HksOpensslSm2VerifyMessage(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const struct HksBlob *signature)
 {
-    HKS_IF_TRUE_LOGE_RETURN(CheckBlob(message) != HKS_SUCCESS || CheckBlob(signature) != HKS_SUCCESS,
-        HKS_ERROR_INVALID_ARGUMENT, "sm sign invalid arg")
-    HKS_LOG_I("sm2 verify");
-    EVP_PKEY_CTX *ctx = InitSm2Ctx(key, usageSpec->digest, usageSpec->purpose, message);
-    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_KEY_INFO, "initialize sm2 context failed")
+    EVP_MD_CTX *mdCtx = InitSm2MdCtx(key, usageSpec->digest, usageSpec->purpose);
+    HKS_IF_NULL_LOGE_RETURN(mdCtx, HKS_ERROR_INVALID_ARGUMENT, "initialize sm2 md context failed")
 
-    if (EVP_PKEY_verify(ctx, signature->data, signature->size, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
-        HKS_LOG_D("verify data failed");
+    int ret = EVP_DigestVerify(mdCtx, signature->data, signature->size, message->data, message->size);
+    if (ret != HKS_OPENSSL_SUCCESS) {
+        HKS_LOG_D("verify message failed");
+        HksLogOpensslError();
+        SELF_FREE_PTR(mdCtx, EVP_MD_CTX_free)
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+
+    SELF_FREE_PTR(mdCtx, EVP_MD_CTX_free)
+    return HKS_SUCCESS;
+}
+
+static int32_t HksOpensslSm2VerifyDigest(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, const struct HksBlob *signature)
+{
+    EVP_PKEY_CTX *ctx = InitSm2Ctx(key, usageSpec->digest, usageSpec->purpose, message);
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_ARGUMENT, "initialize sm2 context failed")
+
+    int ret = EVP_PKEY_verify(ctx, signature->data, signature->size, message->data, message->size);
+    if (ret != HKS_OPENSSL_SUCCESS) {
+        HKS_LOG_D("verify digest failed");
         HksLogOpensslError();
         SELF_FREE_PTR(ctx, EVP_PKEY_CTX_free)
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
@@ -407,38 +542,40 @@ int32_t HksOpensslSm2Verify(const struct HksBlob *key, const struct HksUsageSpec
 int32_t HksOpensslSm2Sign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *signature)
 {
-    HKS_IF_TRUE_LOGE_RETURN(CheckBlob(message) != HKS_SUCCESS || CheckBlob(signature) != HKS_SUCCESS,
-        HKS_ERROR_INVALID_ARGUMENT, "sm sign invalid arg")
+    if (CheckBlob(message) != HKS_SUCCESS || CheckBlob(signature) != HKS_SUCCESS) {
+        HKS_LOG_E("sm2 sign invalid arg");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
     HKS_LOG_I("sm2 sign");
-    EVP_PKEY_CTX *ctx = InitSm2Ctx(key, usageSpec->digest, usageSpec->purpose, message);
-    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_KEY_INFO, "initialize sm2 context failed")
 
-    int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    do {
-        size_t sigSize = 0;
-        int osRet = EVP_PKEY_sign(ctx, NULL, &sigSize, message->data, message->size);
-        if (osRet != HKS_OPENSSL_SUCCESS) {
-            HKS_LOG_E("get sigSize failed osRet = %" LOG_PUBLIC "d %" LOG_PUBLIC "s",
-                osRet, ERR_reason_error_string(ERR_get_error()));
-            break;
-        }
+    int32_t ret;
+    if (usageSpec->digest == HKS_DIGEST_SM3) {
+        ret = HksOpensslSm2SignMessage(key, usageSpec, message, signature);
+        HKS_IF_NOT_SUCC_LOGE(ret, "sm2 sign message fail")
+    } else {
+        ret = HksOpensslSm2SignDigest(key, usageSpec, message, signature);
+        HKS_IF_NOT_SUCC_LOGE(ret, "sm2 sign digest fail")
+    }
+    return ret;
+}
 
-        if (signature->size < sigSize) {
-            HKS_LOG_E("out size too small %" LOG_PUBLIC "u < %" LOG_PUBLIC "zu", signature->size, sigSize);
-            ret = HKS_ERROR_BUFFER_TOO_SMALL;
-            break;
-        }
+int32_t HksOpensslSm2Verify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, const struct HksBlob *signature)
+{
+    if (CheckBlob(message) != HKS_SUCCESS || CheckBlob(signature) != HKS_SUCCESS) {
+        HKS_LOG_E("sm2 verify invalid arg");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    HKS_LOG_I("sm2 verify");
 
-        osRet = EVP_PKEY_sign(ctx, signature->data, &sigSize, message->data, message->size);
-        if (osRet != HKS_OPENSSL_SUCCESS) {
-            HKS_LOG_E("sign data failed osRet = %" LOG_PUBLIC "d %" LOG_PUBLIC "s",
-                osRet, ERR_reason_error_string(ERR_get_error()));
-            break;
-        }
-        signature->size = (uint32_t)sigSize;
-        ret = HKS_SUCCESS;
-    } while (false);
-    SELF_FREE_PTR(ctx, EVP_PKEY_CTX_free)
+    int32_t ret;
+    if (usageSpec->digest == HKS_DIGEST_SM3) {
+        ret = HksOpensslSm2VerifyMessage(key, usageSpec, message, signature);
+        HKS_IF_NOT_SUCC_LOGE(ret, "sm2 verify message fail")
+    } else {
+        ret = HksOpensslSm2VerifyDigest(key, usageSpec, message, signature);
+        HKS_IF_NOT_SUCC_LOGE(ret, "sm2 verify digest fail")
+    }
     return ret;
 }
 #endif
