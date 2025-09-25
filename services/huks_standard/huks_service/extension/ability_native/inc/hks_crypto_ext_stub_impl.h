@@ -32,10 +32,6 @@ public:
 
     virtual ~HksCryptoExtStubImpl() {}
 
-    // // bool CheckCallingPermission(const std::string &permission);
-    // ErrCode test(const std::string& testIn, std::vector<std::string> &testOut) override;
-    // ErrCode OnCreateRemoteIndex(const std::string& abilityName, std::string& index) override;
-    // ErrCode OnGetRemoteHandle(const std::string& index, std::string& handle) override;
     ErrCode OpenRemoteHandle(
         const std::string& index,
         const CppParamSet& params,

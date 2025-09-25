@@ -43,12 +43,14 @@ ohos_shared_library("crypto_extension_ability_native") {
 
     include_dirs = [
         "inc",
+        "//base/security/huks/interfaces/kits/napi/include/v9",
     ]
 
     sources = [
         # "${target_gen_dir}/extension_stub.cpp",
         # "${target_gen_dir}/extension_proxy.cpp",
 
+        "//base/security/huks/interfaces/kits/napi/src/v9/huks_napi_common_item.cpp",
         "src/log_utils.c",
         "src/hks_crypto_ext_ability.cpp",
         "src/hks_crypto_ext_stub_impl.cpp",

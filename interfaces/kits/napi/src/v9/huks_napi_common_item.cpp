@@ -408,7 +408,7 @@ static napi_value GenerateHksParam(napi_env env, const HksParam &param)
     return hksParam;
 }
 
-static napi_value GenerateHksParamArray(napi_env env, const HksParamSet &paramSet)
+napi_value GenerateHksParamArray(napi_env env, const HksParamSet &paramSet)
 {
     napi_value paramArray = nullptr;
     NAPI_CALL(env, napi_create_array(env, &paramArray));

@@ -33,7 +33,10 @@ ohos_shared_library("crypto_extension_module") {
     "//base/security/huks/services/huks_standard/huks_service/extension/ability_native/src/log_utils.c",
    ]
 
-  deps = [ "//base/security/huks/services/huks_standard/huks_service/extension/ability_native:crypto_extension_ability_native" ]
+  deps = [ 
+    "//base/security/huks/services/huks_standard/huks_service/extension/ability_native:crypto_extension_ability_native",
+    "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:huks_access_ext_base_include",
+    ]
 
   external_deps = [
     "ability_runtime:abilitykit_native",

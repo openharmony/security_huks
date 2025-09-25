@@ -31,7 +31,7 @@ ErrCode HksCryptoExtStubImpl::OpenRemoteHandle(
         LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
         return ERR_OK;
     }
-    // extension_->test(testIn, testOut);
+    extension_->OpenRemoteHandle(index, params, handle, errcode);
     return ERR_OK;
 }
 
