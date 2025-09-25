@@ -812,19 +812,6 @@ void SetRetryCountIfExists(int32_t outStatus, int32_t retryCount)
     }
 }
 
-// 错误上报时，将retryCount拼接到错误信息后面
-static napi_value AppendRetryCountToMessage(napi_env env, const std::string &errorMsg, int32_t retryCount)
-{
-    std::ostringstream oss;
-    oss << errorMsg << " " << retryCount;
-    std::string appendedMsg = oss.str();
-
-    std::vector<uint8_t> appendedBlobData(appendedMsg.begin(), appendedMsg.end());
-    struct HksBlob appendedBlob = { static_cast<uint32_t>(appendedBlobData.size()), appendedBlobData.data() };
-
-    return GenerateStringArray(env, &appendedBlob, 1);
-}
-
 static napi_value GenerateBusinessError(napi_env env, int32_t errorCode)
 {
     napi_value businessError = nullptr;
@@ -856,10 +843,6 @@ static napi_value GenerateBusinessError(napi_env env, int32_t errorCode)
         (void)memcpy_s(errorMsgBuf, errorMsgLen, errInfo.errorMsg, errorMsgLen);
         struct HksBlob msgBlob = { errorMsgLen, errorMsgBuf };
         msg = GenerateStringArray(env, &msgBlob, 1);
-        // ukey报错时需要在此处需要拼接 retryCount 上报给上层
-        if (errInfo.errorCode == HUKS_ERR_CODE_PIN_CODE_ERROR) {
-            msg = AppendRetryCountToMessage(env, errInfo.errorMsg, pinRetryCount);
-        }
         msg = ((msg == nullptr) ? GetNull(env) : msg);
 #endif
     }
@@ -871,6 +854,12 @@ static napi_value GenerateBusinessError(napi_env env, int32_t errorCode)
 
     // add errorData
     napi_value data = GetNull(env);
+    // ukey报错时需要在此处需要拼接 retryCount 上报给上层
+    if (errInfo.errorCode == HUKS_ERR_CODE_PIN_CODE_ERROR) {
+        if(napi_create_int32(env, pinRetryCount, &data) != napi_ok) {
+            data = GetNull(env);
+        }
+    }
     status = napi_set_named_property(env, businessError, BUSINESS_ERROR_PROPERTY_DATA.c_str(), data);
     if (status != napi_ok) {
         HKS_LOG_E("set errorData failed");
