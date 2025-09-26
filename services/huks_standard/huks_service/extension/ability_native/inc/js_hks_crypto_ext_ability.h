@@ -29,11 +29,14 @@ using ResultValueParser = std::function<bool(napi_env&, napi_value)>;
 
 typedef enum {
     OPEN_REMOTE_HANDLE = 0,
-    CLOSE_REMOTE_HANDLE
+    CLOSE_REMOTE_HANDLE,
+    AUTH_UKEY_PIN
 } CryptoResultParamType;
 
 typedef struct CryptoResultParam {
     int32_t errCode {};
+    int32_t authState {};
+    uint32_t retryCnt {};
     std::string handle {};
     std::string index {};
 
@@ -78,6 +81,8 @@ public:
     int OpenRemoteHandle(const std::string& index, const CppParamSet& params, std::string& handle,
         int32_t& errcode) override;
     int CloseRemoteHandle(const std::string& handle, const CppParamSet& params, int32_t& errcode) override;
+    int AuthUkeyPin(const std::string& handle, const CppParamSet& params, int32_t& errcode,
+        int32_t& authState, uint32_t& retryCnt) override;
 private:
     template <typename T>
     struct Value {
@@ -94,7 +99,7 @@ private:
     static napi_value PromiseCallback(napi_env env, napi_callback_info info);
     void CallPromise(napi_env &env, napi_value funcResult, std::shared_ptr<CryptoResultParam> dataParam);
     static void GetOpenRemoteHandleParams(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
-
+    static void GetAuthUkeyPin(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
     AbilityRuntime::JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> jsObj_;
 };

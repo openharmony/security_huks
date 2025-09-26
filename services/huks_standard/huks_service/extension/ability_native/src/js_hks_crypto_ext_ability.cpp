@@ -526,6 +526,22 @@ void JsHksCryptoExtAbility::GetOpenRemoteHandleParams(napi_env env, napi_value f
     LOGE("wqy !!!!!!!!!!!!!!!!!!!!!! ConvertFunctionResult %s", resultParams.handle.c_str());
 }
 
+void JsHksCryptoExtAbility::GetAuthUkeyPin(napi_env env, napi_value funcResult, CryptoResultParam &resultParams)
+{
+    napi_value napiAuthState = nullptr;
+    napi_get_named_property(env, funcResult, "authState", &napiAuthState);
+    if (napi_get_value_int32(env, napiAuthState, &resultParams.authState) != napi_ok) {
+        LOGE("Convert js value authState failed.");
+    }
+
+    napi_value napiRetryCnt = nullptr;
+    napi_get_named_property(env, funcResult, "retryCnt", &napiRetryCnt);
+    if (napi_get_value_uint32(env, napiRetryCnt, &resultParams.retryCnt) != napi_ok) {
+        LOGE("Convert js value retryCnt failed.");
+    }
+    LOGE("wqy !!!!!!!!!!!!!!!!!!!!!! ConvertFunctionResult %s", resultParams.handle.c_str());
+}
+
 bool JsHksCryptoExtAbility::ConvertFunctionResult(napi_env env, napi_value funcResult, CryptoResultParam &resultParams)
 {
     if (funcResult == nullptr) {
@@ -543,6 +559,9 @@ bool JsHksCryptoExtAbility::ConvertFunctionResult(napi_env env, napi_value funcR
     switch (resultParams.paramType) {
         case CryptoResultParamType::OPEN_REMOTE_HANDLE:
             GetOpenRemoteHandleParams(env, funcResult, resultParams);
+            break;
+        case CryptoResultParamType::AUTH_UKEY_PIN:
+            GetAuthUkeyPin(env, funcResult, resultParams);
             break;
         case CryptoResultParamType::CLOSE_REMOTE_HANDLE:
         default:
@@ -674,7 +693,7 @@ int JsHksCryptoExtAbility::CloseRemoteHandle(const std::string& handle, const Cp
 
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::CLOSE_REMOTE_HANDLE;
-    auto retParser = [&handle, &errcode, dataParam, this](napi_env &env, napi_value result) -> bool {
+    auto retParser = [dataParam, this](napi_env &env, napi_value result) -> bool {
         bool isPromise = false;
         LOGE("check promise");
         napi_is_promise(env, result, &isPromise);
@@ -701,6 +720,48 @@ int JsHksCryptoExtAbility::CloseRemoteHandle(const std::string& handle, const Cp
     return ERR_OK;
 }
 
+int JsHksCryptoExtAbility::AuthUkeyPin(const std::string& handle, const CppParamSet& params, int32_t& errcode,
+    int32_t& authState, uint32_t& retryCnt)
+{
+    LOGE("wqy !!!!!!!!!!!!!!!!!!JsHksCryptoExtAbility(JS) AuthUkeyPin");
+    auto argParser = [handle, params](napi_env &env, napi_value *argv, size_t &argc) -> bool {
+        struct HandleInfoParam param = {
+            handle,
+            params,
+        };
+        return BuildHandleInfoParam(env, param, argv, argc);
+    };
+
+    std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
+    dataParam->paramType = CryptoResultParamType::AUTH_UKEY_PIN;
+    auto retParser = [dataParam, this](napi_env &env, napi_value result) -> bool {
+        bool isPromise = false;
+        LOGE("check promise");
+        napi_is_promise(env, result, &isPromise);
+        if (!isPromise) {
+            LOGE("retParser is not promise");
+            return false;
+        }
+        LOGE("call Promise");
+        CallPromise(env, result, dataParam);
+        return true;
+    };
+
+    dataParam->callJsExMethodDone.store(false);
+    auto ret = CallJsMethod("onAuthUkeyPin", jsRuntime_, jsObj_.get(), argParser, retParser);
+    if (ret != ERR_OK) {
+        LOGE("CallJsMethod error, code:%d", ret);
+        return ret;
+    }
+    std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
+    LOGE("wait start");
+    dataParam->callJsCon.wait(lock, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    LOGE("wait end");
+    errcode = std::move(dataParam->errCode);
+    authState = std::move(dataParam->authState);
+    retryCnt = std::move(dataParam->retryCnt);
+    return ERR_OK;
+}
 
 PromiseCallbackInfo::PromiseCallbackInfo(std::shared_ptr<CryptoResultParam> cryptoResultParam)
     : cryptoResultParam_(cryptoResultParam)

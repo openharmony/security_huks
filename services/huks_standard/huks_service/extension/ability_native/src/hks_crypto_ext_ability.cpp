@@ -99,6 +99,13 @@ int HksCryptoExtAbility::CloseRemoteHandle(const std::string& handle, const CppP
     LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO CloseRemoteHandle(BASE)");
     return true;
 }
+
+int HksCryptoExtAbility::AuthUkeyPin(const std::string& handle, const CppParamSet& params, int32_t& errcode,
+    int32_t& authState, uint32_t& retryCnt)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO AuthUkeyPin(BASE)");
+    return true;
+}
 } // namespace HUKS
 } // namespace Security
 } // namespace OHOS
