@@ -46,9 +46,9 @@ public:
     virtual int OnCreateRemoteIndex(const std::string& abilityName, std::string& index);
     virtual int OnGetRemoteHandle(const std::string& index, std::string& handle);
     virtual int OnOpenRemoteHandle(const std::string& handle);
-    virtual int OnCloseRemoteHandle(const std::string& index);
     virtual int OpenRemoteHandle(const std::string& index, const CppParamSet& params, std::string& handle,
         int32_t& errcode);
+    virtual int CloseRemoteHandle(const std::string& handle, const CppParamSet& params, int32_t& errcode);
 private:
     static CreatorFunc creator_;
 };

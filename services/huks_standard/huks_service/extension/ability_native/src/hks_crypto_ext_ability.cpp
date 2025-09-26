@@ -87,16 +87,16 @@ int HksCryptoExtAbility::OnOpenRemoteHandle(const std::string& handle)
     return true;
 }
 
-int HksCryptoExtAbility::OnCloseRemoteHandle(const std::string& index)
-{
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO OnCloseRemoteHandle(BASE)");
-    return true;
-}
-
 int HksCryptoExtAbility::OpenRemoteHandle(const std::string& index, const CppParamSet& params, std::string& handle,
     int32_t& errcode)
 {
     LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO OpenRemoteHandle(BASE)");
+    return true;
+}
+
+int HksCryptoExtAbility::CloseRemoteHandle(const std::string& handle, const CppParamSet& params, int32_t& errcode)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO CloseRemoteHandle(BASE)");
     return true;
 }
 } // namespace HUKS
