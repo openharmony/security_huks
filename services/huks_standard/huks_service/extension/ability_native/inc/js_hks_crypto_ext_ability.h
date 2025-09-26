@@ -27,11 +27,17 @@ namespace Huks {
 using InputArgsParser = std::function<bool(napi_env&, napi_value*, size_t&)>;
 using ResultValueParser = std::function<bool(napi_env&, napi_value)>;
 
+typedef enum {
+    OPEN_REMOTE_HANDLE = 0,
+    CLOSE_REMOTE_HANDLE
+} CryptoResultParamType;
+
 typedef struct CryptoResultParam {
     int32_t errCode {};
     std::string handle {};
     std::string index {};
 
+    CryptoResultParamType paramType {};
     std::condition_variable callJsCon;
     std::atomic<bool> callJsExMethodDone {false};
     std::mutex callJsMutex;
@@ -69,10 +75,9 @@ public:
     int test(const std::string &testIn, std::vector<std::string> &testOut) override;
     int OnCreateRemoteIndex(const std::string& abilityName, std::string& index) override;
     int OnGetRemoteHandle(const std::string& index, std::string& handle) override;
-    int OnCloseRemoteHandle(const std::string& index) override;
     int OpenRemoteHandle(const std::string& index, const CppParamSet& params, std::string& handle,
         int32_t& errcode) override;
-
+    int CloseRemoteHandle(const std::string& handle, const CppParamSet& params, int32_t& errcode) override;
 private:
     template <typename T>
     struct Value {
@@ -88,6 +93,7 @@ private:
     static bool ConvertFunctionResult(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
     static napi_value PromiseCallback(napi_env env, napi_callback_info info);
     void CallPromise(napi_env &env, napi_value funcResult, std::shared_ptr<CryptoResultParam> dataParam);
+    static void GetOpenRemoteHandleParams(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
 
     AbilityRuntime::JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> jsObj_;

@@ -45,6 +45,11 @@ namespace {
 }
 
 struct HandleInfoParam {
+    std::string handle {};
+    CppParamSet params {};
+};
+
+struct IndexInfoParam {
     std::string index {};
     CppParamSet params {};
 };
@@ -453,41 +458,6 @@ int JsHksCryptoExtAbility::OnGetRemoteHandle(const std::string& index, std::stri
     return ERR_OK;
 }
 
-int JsHksCryptoExtAbility::OnCloseRemoteHandle(const std::string& index)
-{
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO JsHksCryptoExtAbility(JS) OnCloseRemoteHandle");
-
-    auto argParser = [index](napi_env &env, napi_value *argv, size_t &argc) -> bool {
-        napi_value nativeIndex = nullptr;
-        napi_create_string_utf8(env, index.c_str(), index.length(), &nativeIndex);
-        argv[ARGC_ZERO] = nativeIndex;
-        argc = ARGC_ONE;
-        return true;
-    };
-    auto resultCode = std::make_shared<int>();
-    auto retParser = [resultCode, this](napi_env &env, napi_value result) -> bool {
-        napi_value code = nullptr;
-        napi_get_named_property(env, result, "code", &code);
-        if (napi_get_value_int32(env, code, resultCode.get()) != napi_ok) {
-            LOGE("Convert js value resultCode fail.");
-            return napi_generic_failure;
-        }
-        return true;
-    };
-    auto errcode = CallJsMethod("OnCloseRemoteHandle", jsRuntime_, jsObj_.get(), argParser, retParser);
-    if (errcode != ERR_OK) {
-        LOGE("CallJsMethod error, code:%d.", errcode);
-        return errcode;
-    }
-
-    if (*resultCode != ERR_OK) {
-        LOGE("OnCloseRemoteHandle fail.");
-        return *resultCode;
-    }
-
-    return ERR_OK;
-}
-
 bool MakeJsNativeCppParamSet(napi_env &env, const CppParamSet &CppParamSet, napi_value nativeCppParamSet)
 {
     napi_value napiHksParam = HuksNapiItem::GenerateHksParamArray(env, *CppParamSet.GetParamSet());
@@ -499,6 +469,30 @@ bool MakeJsNativeCppParamSet(napi_env &env, const CppParamSet &CppParamSet, napi
 }
 
 static bool BuildHandleInfoParam(napi_env &env, HandleInfoParam &param,
+    napi_value *argv, size_t &argc)
+{
+    napi_value nativeHandle = nullptr;
+    napi_create_string_utf8(env, param.handle.c_str(), param.handle.length(), &nativeHandle);
+
+    napi_value nativeCppParamSet = nullptr;
+    if (param.params.GetParamSet()){
+        napi_create_object(env, &nativeCppParamSet);
+        if (nativeCppParamSet == nullptr) {
+            LOGE("Create js NativeValue object failed");
+            return false;
+        }
+        if (MakeJsNativeCppParamSet(env, param.params, nativeCppParamSet) != true) {
+            LOGE("Make js CppParamSet failed");
+            return false;
+        }
+    }
+    argv[ARGC_ZERO] = nativeHandle;
+    argv[ARGC_ONE] = nativeCppParamSet;
+    argc = ARGC_TWO;
+    return true;
+}
+
+static bool BuildIndexInfoParam(napi_env &env, IndexInfoParam &param,
     napi_value *argv, size_t &argc)
 {
     napi_value nativeIndex = nullptr;
@@ -522,6 +516,16 @@ static bool BuildHandleInfoParam(napi_env &env, HandleInfoParam &param,
     return true;
 }
 
+void JsHksCryptoExtAbility::GetOpenRemoteHandleParams(napi_env env, napi_value funcResult, CryptoResultParam &resultParams)
+{
+    napi_value napiHandle = nullptr;
+    napi_get_named_property(env, funcResult, "handle", &napiHandle);
+    if (GetStringValue(env, napiHandle, resultParams.handle) != napi_ok) {
+        LOGE("Convert js napiHandle fail.");
+    }
+    LOGE("wqy !!!!!!!!!!!!!!!!!!!!!! ConvertFunctionResult %s", resultParams.handle.c_str());
+}
+
 bool JsHksCryptoExtAbility::ConvertFunctionResult(napi_env env, napi_value funcResult, CryptoResultParam &resultParams)
 {
     if (funcResult == nullptr) {
@@ -535,14 +539,17 @@ bool JsHksCryptoExtAbility::ConvertFunctionResult(napi_env env, napi_value funcR
         LOGE("Convert js value napiCode failed.");
         return false;
     }
-    napi_value napiHandle = nullptr;
-    napi_get_named_property(env, funcResult, "handle", &napiHandle);
-    if (GetStringValue(env, napiHandle, resultParams.handle) != napi_ok) {
-        LOGE("Convert js napiHandle fail.");
-        return false;
+
+    switch (resultParams.paramType) {
+        case CryptoResultParamType::OPEN_REMOTE_HANDLE:
+            GetOpenRemoteHandleParams(env, funcResult, resultParams);
+            break;
+        case CryptoResultParamType::CLOSE_REMOTE_HANDLE:
+        default:
+            break;
     }
+
     LOGE("wqy !!!!!!!!!!!!!!!!!!!!!! ConvertFunctionResult %d", resultParams.errCode);
-    LOGE("wqy !!!!!!!!!!!!!!!!!!!!!! ConvertFunctionResult %s", resultParams.handle.c_str());
     return true;
 }
 
@@ -617,14 +624,15 @@ int JsHksCryptoExtAbility::OpenRemoteHandle(const std::string& index, const CppP
 {
     LOGE("wqy !!!!!!!!!!!!!!!!!!JsHksCryptoExtAbility(JS) OpenRemoteHandle");
     auto argParser = [index, params](napi_env &env, napi_value *argv, size_t &argc) -> bool {
-        struct HandleInfoParam param = {
+        struct IndexInfoParam param = {
             index,
             params,
         };
-        return BuildHandleInfoParam(env, param, argv, argc);
+        return BuildIndexInfoParam(env, param, argv, argc);
     };
 
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
+    dataParam->paramType = CryptoResultParamType::OPEN_REMOTE_HANDLE;
     auto retParser = [&handle, &errcode, dataParam, this](napi_env &env, napi_value result) -> bool {
         bool isPromise = false;
         LOGE("check promise");
@@ -652,6 +660,47 @@ int JsHksCryptoExtAbility::OpenRemoteHandle(const std::string& index, const CppP
     errcode = std::move(dataParam->errCode);
     return ERR_OK;
 }
+
+int JsHksCryptoExtAbility::CloseRemoteHandle(const std::string& handle, const CppParamSet& params, int32_t& errcode)
+{
+    LOGE("wqy !!!!!!!!!!!!!!!!!!JsHksCryptoExtAbility(JS) CloseRemoteHandle");
+    auto argParser = [handle, params](napi_env &env, napi_value *argv, size_t &argc) -> bool {
+        struct HandleInfoParam param = {
+            handle,
+            params,
+        };
+        return BuildHandleInfoParam(env, param, argv, argc);
+    };
+
+    std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
+    dataParam->paramType = CryptoResultParamType::CLOSE_REMOTE_HANDLE;
+    auto retParser = [&handle, &errcode, dataParam, this](napi_env &env, napi_value result) -> bool {
+        bool isPromise = false;
+        LOGE("check promise");
+        napi_is_promise(env, result, &isPromise);
+        if (!isPromise) {
+            LOGE("retParser is not promise");
+            return false;
+        }
+        LOGE("call Promise");
+        CallPromise(env, result, dataParam);
+        return true;
+    };
+
+    dataParam->callJsExMethodDone.store(false);
+    auto ret = CallJsMethod("onCloseRemoteHandle", jsRuntime_, jsObj_.get(), argParser, retParser);
+    if (ret != ERR_OK) {
+        LOGE("CallJsMethod error, code:%d", ret);
+        return ret;
+    }
+    std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
+    LOGE("wait start");
+    dataParam->callJsCon.wait(lock, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    LOGE("wait end");
+    errcode = std::move(dataParam->errCode);
+    return ERR_OK;
+}
+
 
 PromiseCallbackInfo::PromiseCallbackInfo(std::shared_ptr<CryptoResultParam> cryptoResultParam)
     : cryptoResultParam_(cryptoResultParam)

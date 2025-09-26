@@ -46,6 +46,7 @@ ErrCode HksCryptoExtStubImpl::CloseRemoteHandle(
         return ERR_OK;
     }
     // 实现具体的关闭远程句柄逻辑
+    extension_->CloseRemoteHandle(handle, params, errcode);
     return ERR_OK;
 }
 
