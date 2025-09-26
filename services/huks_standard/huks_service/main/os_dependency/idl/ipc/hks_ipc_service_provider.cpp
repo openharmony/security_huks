@@ -155,25 +155,23 @@ int32_t HksIpcServiceOnCloseRemoteKeyHandle(const struct HksProcessInfo *process
 //     HKS_IF_TRUE_LOGI_RETURN_VOID(ret != HKS_SUCCESS, "HksIpcServiceOnListProviders fail")
 // }
 
-// void HksIpcServiceOnFindProviderCertificate(const HksProcessInfo &processInfo, const std::string &index,
-// const CppParamSet &paramSet, std::string &cetificatesOut) {
-//     HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
-//     auto libInterface = GetExtLibInterfaceInstance();
-//     HKS_LOG_I("got libInterface instance");
+void HksIpcServiceOnFindProviderCertificate(const HksProcessInfo &processInfo, const std::string &index,
+const CppParamSet &paramSet, std::string &cetificatesOut) {
+    HKS_LOG_I("===========HksIpcServiceOnFindProviderCertificate income");
+    auto libInterface = GetExtLibInterfaceInstance();
 
-//     int32_t ret = libInterface->OnListProviderCertificate(index, cetificatesOut);
-//     HKS_IF_TRUE_LOGI_RETURN_VOID(ret != HKS_SUCCESS, "HksIpcServiceOnFindProviderCertificate fail")
-// }
+    int32_t ret = libInterface->OnListIndexCertificate(processInfo, index, paramSet, cetificatesOut);
+    HKS_IF_TRUE_LOGI_RETURN_VOID(ret != HKS_SUCCESS, "HksIpcServiceOnFindProviderCertificate fail")
+}
 
-// void HksIpcServiceOnListProviderAllCertificate(const HksProcessInfo &processInfo, const std::string &index,
-// const CppParamSet &paramSet, std::string &cetificatesOut) {
-//     HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
-//     auto libInterface = GetExtLibInterfaceInstance();
-//     HKS_LOG_I("got libInterface instance");
+void HksIpcServiceOnListProviderAllCertificate(const HksProcessInfo &processInfo, const std::string &index,
+const CppParamSet &paramSet, std::string &cetificatesOut) {
+    HKS_LOG_I("===========HksIpcServiceOnListProviderAllCertificate income");
+    auto libInterface = GetExtLibInterfaceInstance();
 
-//     int32_t ret = libInterface->OnListProviderAllCertificate(providerName, cetificatesOut);
-//     HKS_IF_TRUE_LOGI_RETURN_VOID(ret != HKS_SUCCESS, "HksIpcServiceOnListProviderAllCertificate fail")
-// }
+    int32_t ret = libInterface->OnListProviderAllCertificate(processInfo, index, paramSet, cetificatesOut);
+    HKS_IF_TRUE_LOGI_RETURN_VOID(ret != HKS_SUCCESS, "HksIpcServiceOnListProviderAllCertificate fail")
+}
 
 }
 }
