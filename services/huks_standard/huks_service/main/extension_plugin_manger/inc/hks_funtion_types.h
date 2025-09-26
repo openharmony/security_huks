@@ -36,15 +36,15 @@ enum class PluginMethodEnum{
     FUNC_ON_AUTH_UKEY_PIN,
     FUNC_ON_GET_VERIFY_PIN_STATUS,
     
-    FUNC_ON_FIND_REMOTE_KEY_HANDLE,
-    FUNC_ON_SIGNED,
-    FUNC_ON_CLEAR_PIN_STATUS,
+    // FUNC_ON_FIND_REMOTE_KEY_HANDLE,
+    // FUNC_ON_SIGNED,
+    // FUNC_ON_CLEAR_PIN_STATUS,
 
-    FUNC_ON_LIST_PROVIDER,
-    FUNC_ON_GET_PROVIDER_CERTIFICATE,
+    // FUNC_ON_LIST_PROVIDER,
+    FUNC_ON_LIST_INDEX_CERTIFICATE,
     FUNC_ON_LIST_PROVIDER_ALL_CERTIFICATE,
 
-    COUNT = 6,
+    COUNT = 9,
 };
 
 static const std::map<PluginMethodEnum, std::string> m_pluginMethodNameMap = {
@@ -54,13 +54,13 @@ static const std::map<PluginMethodEnum, std::string> m_pluginMethodNameMap = {
     {PluginMethodEnum::FUNC_ON_CREATE_REMOTE_KEY_HANDLE, "_ZN4OHOS8Security4Huks30HksExtPluginOnOpemRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_"},
     {PluginMethodEnum::FUNC_ON_CLOSE_REMOTE_KEY_HANDLE, "_ZN4OHOS8Security4Huks31HksExtPluginOnCloseRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet"},
     {PluginMethodEnum::FUNC_ON_AUTH_UKEY_PIN, "_ZN4OHOS8Security4Huks25HksExtPluginOnAuthUkeyPinERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRiRj"},
-    {PluginMethodEnum::FUNC_ON_GET_VERIFY_PIN_STATUS, "_ZN4OHOS8Security4Huks33HksExtPluginOnGetUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRj"}
+    {PluginMethodEnum::FUNC_ON_GET_VERIFY_PIN_STATUS, "_ZN4OHOS8Security4Huks33HksExtPluginOnGetUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRj"},
     // {PluginMethodEnum::FUNC_ON_FIND_REMOTE_KEY_HANDLE, ""},
     // {PluginMethodEnum::FUNC_ON_SIGNED, ""},
     // {PluginMethodEnum::FUNC_ON_CLEAR_PIN_STATUS, ""},
     // {PluginMethodEnum::FUNC_ON_LIST_PROVIDER, ""},
-    // {PluginMethodEnum::FUNC_ON_GET_PROVIDER_CERTIFICATE, ""},
-    // {PluginMethodEnum::FUNC_ON_LIST_PROVIDER_ALL_CERTIFICATE, ""}
+    {PluginMethodEnum::FUNC_ON_LIST_INDEX_CERTIFICATE, "_ZN4OHOS8Security4Huks29HksExtPluginOnExportCerticateERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_"},
+    {PluginMethodEnum::FUNC_ON_LIST_PROVIDER_ALL_CERTIFICATE, "_ZN4OHOS8Security4Huks38HksExtPluginOnExportProviderCerticatesERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_"}
 };
 
 using OnRegisterProviderFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &providerName,
@@ -83,7 +83,7 @@ using OnGetVerifyPinStatusFunc = int32_t (*)(const HksProcessInfo &processInfo,
 using OnClearPinStatusFunc = int32_t (*)();
 
 using OnListProvidersFunc = int32_t (*)();
-using OnGetProviderCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo,
+using OnListIndexCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, std::string &certsJson);
 using OnListProviderAllCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr);

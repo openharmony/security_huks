@@ -172,11 +172,11 @@ int32_t HuksLibEntry::OnGetVerifyPinStatus(const HksProcessInfo &processInfo,
 
 int32_t HuksLibEntry::OnListIndexCertificate(const HksProcessInfo &processInfo,
    const std::string &index, const CppParamSet &paramSet, std::string &certsJson) {
-    auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_GET_PROVIDER_CERTIFICATE);
+    auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_LIST_INDEX_CERTIFICATE);
     HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
         "FindProviderCertificate method enum not found in plugin provider map.")
     
-    int ret = (*reinterpret_cast<OnGetProviderCertificateFunc>(it->second))(processInfo, index, paramSet, certsJson);
+    int ret = (*reinterpret_cast<OnListIndexCertificateFunc>(it->second))(processInfo, index, paramSet, certsJson);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
         "FindProviderCertificate fail, ret = %{public}d", ret)
     HKS_LOG_I("list provider certificate success");
