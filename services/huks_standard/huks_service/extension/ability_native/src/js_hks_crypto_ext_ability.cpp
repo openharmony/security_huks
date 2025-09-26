@@ -539,7 +539,19 @@ void JsHksCryptoExtAbility::GetAuthUkeyPin(napi_env env, napi_value funcResult, 
     if (napi_get_value_uint32(env, napiRetryCnt, &resultParams.retryCnt) != napi_ok) {
         LOGE("Convert js value retryCnt failed.");
     }
-    LOGE("wqy !!!!!!!!!!!!!!!!!!!!!! ConvertFunctionResult %s", resultParams.handle.c_str());
+    LOGE("wqy !!!!!!!!!!!!!!!!!!!!!! ConvertFunctionResult authState %d", resultParams.authState);
+    LOGE("wqy !!!!!!!!!!!!!!!!!!!!!! ConvertFunctionResult retryCnt %d", resultParams.retryCnt);
+}
+
+void JsHksCryptoExtAbility::GetUkeyPinAuthStateParams(napi_env env, napi_value funcResult, CryptoResultParam &resultParams)
+{
+    napi_value napiAuthState = nullptr;
+    napi_get_named_property(env, funcResult, "authState", &napiAuthState);
+    if (napi_get_value_int32(env, napiAuthState, &resultParams.authState) != napi_ok) {
+        LOGE("Convert js value authState failed.");
+    }
+
+    LOGE("wqy !!!!!!!!!!!!!!!!!!!!!! ConvertFunctionResult authState %d", resultParams.authState);
 }
 
 bool JsHksCryptoExtAbility::ConvertFunctionResult(napi_env env, napi_value funcResult, CryptoResultParam &resultParams)
@@ -562,6 +574,9 @@ bool JsHksCryptoExtAbility::ConvertFunctionResult(napi_env env, napi_value funcR
             break;
         case CryptoResultParamType::AUTH_UKEY_PIN:
             GetAuthUkeyPin(env, funcResult, resultParams);
+            break;
+        case CryptoResultParamType::GET_UKEY_PIN_AUTH_STATE:
+            GetUkeyPinAuthStateParams(env, funcResult, resultParams);
             break;
         case CryptoResultParamType::CLOSE_REMOTE_HANDLE:
         default:
@@ -760,6 +775,48 @@ int JsHksCryptoExtAbility::AuthUkeyPin(const std::string& handle, const CppParam
     errcode = std::move(dataParam->errCode);
     authState = std::move(dataParam->authState);
     retryCnt = std::move(dataParam->retryCnt);
+    return ERR_OK;
+}
+
+int JsHksCryptoExtAbility::GetUkeyPinAuthState(const std::string& handle, const CppParamSet& params,
+    int32_t& authState, int32_t& errcode)
+{
+    LOGE("wqy !!!!!!!!!!!!!!!!!!JsHksCryptoExtAbility(JS) GetUkeyPinAuthState");
+    auto argParser = [handle, params](napi_env &env, napi_value *argv, size_t &argc) -> bool {
+        struct HandleInfoParam param = {
+            handle,
+            params,
+        };
+        return BuildHandleInfoParam(env, param, argv, argc);
+    };
+
+    std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
+    dataParam->paramType = CryptoResultParamType::GET_UKEY_PIN_AUTH_STATE;
+    auto retParser = [dataParam, this](napi_env &env, napi_value result) -> bool {
+        bool isPromise = false;
+        LOGE("check promise");
+        napi_is_promise(env, result, &isPromise);
+        if (!isPromise) {
+            LOGE("retParser is not promise");
+            return false;
+        }
+        LOGE("call Promise");
+        CallPromise(env, result, dataParam);
+        return true;
+    };
+
+    dataParam->callJsExMethodDone.store(false);
+    auto ret = CallJsMethod("onGetUkeyPinAuthState", jsRuntime_, jsObj_.get(), argParser, retParser);
+    if (ret != ERR_OK) {
+        LOGE("CallJsMethod error, code:%d", ret);
+        return ret;
+    }
+    std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
+    LOGE("wait start");
+    dataParam->callJsCon.wait(lock, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    LOGE("wait end");
+    errcode = std::move(dataParam->errCode);
+    authState = std::move(dataParam->authState);
     return ERR_OK;
 }
 

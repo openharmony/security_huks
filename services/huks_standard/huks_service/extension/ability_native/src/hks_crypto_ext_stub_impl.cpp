@@ -63,6 +63,7 @@ ErrCode HksCryptoExtStubImpl::AuthUkeyPin(
         return ERR_OK;
     }
     // 实现具体的Ukey PIN认证逻辑
+    extension_->AuthUkeyPin(handle, params, errcode, authState, retryCnt);
     return ERR_OK;
 }
 
@@ -79,6 +80,9 @@ ErrCode HksCryptoExtStubImpl::GetUkeyPinAuthState(
     }
     // 实现获取Ukey PIN认证状态的逻辑
     state = 0; // 设置默认状态
+    int32_t authState = 0;
+    extension_->GetUkeyPinAuthState(handle, params, authState, errcode);
+    state = static_cast<uint32_t>(authState);
     return ERR_OK;
 }
 
