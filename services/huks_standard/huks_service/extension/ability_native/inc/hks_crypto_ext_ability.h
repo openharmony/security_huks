@@ -41,11 +41,7 @@ public:
 
     static HksCryptoExtAbility* Create(const std::unique_ptr<AbilityRuntime::Runtime>& runtime);
     static void SetCreator(const CreatorFunc& creator);
-    
-    virtual int test(const std::string& testIn, std::vector<std::string>& testOut);
-    virtual int OnCreateRemoteIndex(const std::string& abilityName, std::string& index);
-    virtual int OnGetRemoteHandle(const std::string& index, std::string& handle);
-    virtual int OnOpenRemoteHandle(const std::string& handle);
+
     virtual int OpenRemoteHandle(const std::string& index, const CppParamSet& params, std::string& handle,
         int32_t& errcode);
     virtual int CloseRemoteHandle(const std::string& handle, const CppParamSet& params, int32_t& errcode);
@@ -53,6 +49,10 @@ public:
         int32_t& authState, uint32_t& retryCnt);
     virtual int GetUkeyPinAuthState(const std::string& handle, const CppParamSet& params,
         int32_t& authState, int32_t& errcode);
+    virtual int ExportCertificate(const std::string& index, const CppParamSet& params,
+        std::string& certJsonArr, int32_t& errcode);
+    virtual int ExportProviderCertificates( const CppParamSet& params, std::string& certJsonArr,
+        int32_t& errcode);
 private:
     static CreatorFunc creator_;
 };
