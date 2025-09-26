@@ -60,7 +60,7 @@ static int32_t HksBlobToBase64(const struct HksBlob& blob, std::string& base64St
     std::vector<uint8_t> vec(blob.data, blob.data + blob.size);
     auto result = U8Vec2Base64Str(vec);
     HKS_IF_NOT_SUCC_LOGE_RETURN(result.first, result.first, 
-        "Convert blob to base64 failed, ret: %d", result.first);
+        "Convert blob to base64 failed, ret: %" LOG_PUBLIC "d", result.first);
     
     base64Str = result.second;
     return HKS_SUCCESS;
@@ -74,17 +74,17 @@ static int32_t Base64ToHksBlob(const std::string& base64Str, struct HksBlob& blo
     
     auto result = Base64Str2U8Vec(base64Str);
     HKS_IF_NOT_SUCC_LOGE_RETURN(result.first, result.first, 
-        "Convert base64 to blob failed, ret: %d", result.first);
+        "Convert base64 to blob failed, ret: %" LOG_PUBLIC "d", result.first);
     
     blob.size = result.second.size();
     if (blob.size > 0) {
         blob.data = (uint8_t*)malloc(blob.size);
         HKS_IF_NULL_LOGE_RETURN(blob.data, HKS_ERROR_MALLOC_FAIL, 
-            "Malloc for blob data failed, size: %u", blob.size);
+            "Malloc for blob data failed, size: %" LOG_PUBLIC "u", blob.size);
         
         int32_t ret = memcpy_s(blob.data, blob.size, result.second.data(), blob.size);
         if (ret != EOK) {
-            HKS_LOG_E("memcpy_s for blob data failed, ret: %d", ret);
+            HKS_LOG_E("memcpy_s for blob data failed, ret: %" LOG_PUBLIC "d", ret);
             free(blob.data);
             blob.data = nullptr;
             blob.size = 0;
@@ -111,7 +111,7 @@ int32_t StringToCertInfo(const std::string &certInfoJson, struct HksExtCertInfo&
         
         auto result = purposeObj.ToNumber<int32_t>();
         HKS_IF_NOT_SUCC_LOGE_RETURN(result.first, result.first, 
-            "Get purpose value failed, ret: %d", result.first);
+            "Get purpose value failed, ret: %" LOG_PUBLIC "d", result.first);
         
         certInfo.purpose = result.second;
     }
@@ -123,11 +123,11 @@ int32_t StringToCertInfo(const std::string &certInfoJson, struct HksExtCertInfo&
         
         auto result = indexObj.ToString();
         HKS_IF_NOT_SUCC_LOGE_RETURN(result.first, result.first, 
-            "Get index string failed, ret: %d", result.first);
+            "Get index string failed, ret: %" LOG_PUBLIC "d", result.first);
         
         int32_t ret = Base64ToHksBlob(result.second, certInfo.index);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, 
-            "Convert index base64 to blob failed, ret: %d", ret);
+            "Convert index base64 to blob failed, ret: %" LOG_PUBLIC "d", ret);
     }
     
     if (jsonObj.HasKey("cert")) {
@@ -137,14 +137,14 @@ int32_t StringToCertInfo(const std::string &certInfoJson, struct HksExtCertInfo&
         
         auto result = certObj.ToString();
         HKS_IF_NOT_SUCC_LOGE_RETURN(result.first, result.first, 
-            "Get cert string failed, ret: %d", result.first);
+            "Get cert string failed, ret: %" LOG_PUBLIC "d", result.first);
         
         int32_t ret = Base64ToHksBlob(result.second, certInfo.cert);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, 
-            "Convert cert base64 to blob failed, ret: %d", ret);
+            "Convert cert base64 to blob failed, ret: %" LOG_PUBLIC "d", ret);
     }
     
-    HKS_LOG_I("Convert json to cert info success, purpose: %d", certInfo.purpose);
+    HKS_LOG_I("Convert json to cert info success, purpose: %" LOG_PUBLIC "d", certInfo.purpose);
     return HKS_SUCCESS;
 }
 
@@ -162,7 +162,7 @@ int32_t CertInfoToString(const struct HksExtCertInfo& certInfo, std::string& jso
     
     std::string indexBase64;
     int32_t ret = HksBlobToBase64(certInfo.index, indexBase64);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Convert index blob to base64 failed, ret: %d", ret);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Convert index blob to base64 failed, ret: %" LOG_PUBLIC "d", ret);
     
     if (!jsonObj.SetValue("index", indexBase64)) {
         HKS_LOG_E("Set index value failed");
@@ -171,7 +171,7 @@ int32_t CertInfoToString(const struct HksExtCertInfo& certInfo, std::string& jso
     
     std::string certBase64;
     ret = HksBlobToBase64(certInfo.cert, certBase64);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Convert cert blob to base64 failed, ret: %d", ret);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Convert cert blob to base64 failed, ret: %" LOG_PUBLIC "d", ret);
     
     if (!jsonObj.SetValue("cert", certBase64)) {
         HKS_LOG_E("Set cert value failed");
@@ -182,7 +182,7 @@ int32_t CertInfoToString(const struct HksExtCertInfo& certInfo, std::string& jso
     HKS_IF_TRUE_LOGE_RETURN(jsonStr.empty(), HKS_ERROR_INTERNAL_ERROR, 
         "Serialize json object failed");
     
-    HKS_LOG_I("Convert cert info to json success, purpose: %d", certInfo.purpose);
+    HKS_LOG_I("Convert cert info to json success, purpose: %" LOG_PUBLIC "d", certInfo.purpose);
     return HKS_SUCCESS;
 }
 
@@ -198,16 +198,16 @@ int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCert
     
     int32_t arraySize = jsonArray.ArraySize();
     HKS_IF_TRUE_LOGE_RETURN(arraySize <= 0, HKS_ERROR_INVALID_ARGUMENT, 
-        "Json array size invalid: %d", arraySize);
+        "Json array size invalid: %" LOG_PUBLIC "d", arraySize);
     
     certSet.count = arraySize;
     certSet.certs = (HksExtCertInfo*)malloc(arraySize * sizeof(HksExtCertInfo));
     HKS_IF_NULL_LOGE_RETURN(certSet.certs, HKS_ERROR_MALLOC_FAIL, 
-        "Malloc for cert set failed, size: %d", arraySize);
+        "Malloc for cert set failed, size: %" LOG_PUBLIC "d", arraySize);
     
     int32_t ret = memset_s(certSet.certs, arraySize * sizeof(HksExtCertInfo), 0, arraySize * sizeof(HksExtCertInfo));
     if (ret != EOK) {
-        HKS_LOG_E("memset_s for cert set failed, ret: %d", ret);
+        HKS_LOG_E("memset_s for cert set failed, ret: %" LOG_PUBLIC "d", ret);
         free(certSet.certs);
         certSet.certs = nullptr;
         certSet.count = 0;
@@ -225,7 +225,7 @@ int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCert
         std::string elementStr = element.ToString().second;
         ret = StringToCertInfo(elementStr, certSet.certs[i]);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Convert element %d failed, ret: %d", i, ret);
+            HKS_LOG_E("Convert element %d failed, ret: %" LOG_PUBLIC "d", i, ret);
             break;
         }
     }
@@ -235,7 +235,7 @@ int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCert
         return ret;
     }
     
-    HKS_LOG_I("Convert json array to cert set success, count: %u", certSet.count);
+    HKS_LOG_I("Convert json array to cert set success, count: %" LOG_PUBLIC "u", certSet.count);
     return HKS_SUCCESS;
 }
 
@@ -251,7 +251,7 @@ int32_t CertInfoSetToJsonArray(const struct HksExtCertInfoSet& certSet, std::str
     for (uint32_t i = 0; i < certSet.count; i++) {
         std::string certInfoJson;
         int32_t ret = CertInfoToString(certSet.certs[i], certInfoJson);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Convert cert info %u to string failed, ret: %d", i, ret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Convert cert info %u to string failed, ret: %" LOG_PUBLIC "d", i, ret);
         
         auto certInfoObj = CommJsonObject::Parse(certInfoJson);
         HKS_IF_TRUE_LOGE_BREAK(certInfoObj.IsNull(), "Parse cert info json failed");
@@ -266,7 +266,7 @@ int32_t CertInfoSetToJsonArray(const struct HksExtCertInfoSet& certSet, std::str
     HKS_IF_TRUE_LOGE_RETURN(jsonArrayStr.empty(), HKS_ERROR_INTERNAL_ERROR, 
         "Serialize json array failed");
     
-    HKS_LOG_I("Convert cert set to json array success, count: %u", certSet.count);
+    HKS_LOG_I("Convert cert set to json array success, count: %" LOG_PUBLIC "u", certSet.count);
     return HKS_SUCCESS;
 }
 
