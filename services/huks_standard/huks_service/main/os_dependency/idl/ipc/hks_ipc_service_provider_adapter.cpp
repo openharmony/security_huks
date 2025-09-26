@@ -186,3 +186,9 @@ int32_t HksIpcServiceOnListProviderAllCertificateAdapter(const char *providerNam
 {
     return 0;
 }
+
+int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *handle)
+{
+    return 0;
+}

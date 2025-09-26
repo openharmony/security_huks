@@ -154,14 +154,14 @@ ErrCode HksCryptoExtStubImpl::InitSession(
     return ERR_OK;
 }
 
-ErrCode HksCryptoExtStubImpl::UpdataSession(
+ErrCode HksCryptoExtStubImpl::UpdateSession(
     const std::string& handle,
     const CppParamSet& params,
     const std::vector<uint8_t>& inData,
     std::vector<uint8_t>& outData,
     int32_t& errcode)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO UpdataSession");
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO UpdateSession");
     return ERR_OK;
 }
 

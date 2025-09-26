@@ -68,6 +68,7 @@
 
 #ifdef L2_STANDARD
 #include "hks_ha_event_report.h"
+#include "hks_ukey_three_stage_adapter.h"
 #endif
 
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
@@ -574,13 +575,13 @@ int32_t HksServiceUnregisterProvider(const struct HksProcessInfo *processInfo, c
     return 0;
 }
 
-int32_t HksServiceExportProviderCertificates(const struct HksBlob *index, const struct HksParamSet *paramSetIn, 
+int32_t HksServiceExportProviderCertificates(const struct HksProcessInfo *processInfo, const struct HksBlob *index, const struct HksParamSet *paramSetIn, 
     struct HksExtCertInfoSet *certSet) 
 {
     return 0;
 }
 
-int32_t HksServiceExportCertificate(const struct HksBlob *index, const struct HksParamSet *paramSetIn, 
+int32_t HksServiceExportCertificate(const struct HksProcessInfo *processInfo, const struct HksBlob *index, const struct HksParamSet *paramSetIn, 
     struct HksExtCertInfoSet *certSet) 
 {
     return 0;
@@ -1571,6 +1572,13 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
 }
 #endif // HKS_SUPPORT_API_ATTEST_KEY
 
+#ifdef L2_STANDARD
+static int32_t HksCheckUkeyOperation(const struct HksParamSet *paramSet)
+{
+    return HKS_ERROR_BAD_STATE;
+}
+#endif
+
 int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *handle, struct HksBlob *token)
 {
@@ -1588,7 +1596,13 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
     do {
         ret = HksCheckServiceInitParams(&processInfo->processName, keyAlias, paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check ServiceInit params failed, ret = %" LOG_PUBLIC "d", ret)
-
+#ifdef L2_STANDARD
+        if(HksCheckUkeyOperation(paramSet) == HKS_SUCCESS) {
+            ret = HksServiceOnUkeyInitSession(processInfo, keyAlias, paramSet, handle);
+            HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyInitSession failed, ret = %" LOG_PUBLIC "d", ret)
+            break;
+        }
+#endif
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE(ret, "GetKeyAndNewParamSet failed, ret = %" LOG_PUBLIC "d", ret)
 
@@ -1660,9 +1674,16 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
     traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
     struct HksParamSet *newParamSet = NULL;
-    struct HksOperation *operation;
+    struct HksOperation *operation = NULL;
     int32_t ret;
     do {
+#ifdef L2_STANDARD
+        if(HksCheckUkeyOperation(paramSet) == HKS_SUCCESS) {
+            ret = HksServiceOnUkeyUpdateSession(processInfo, handle, paramSet, inData, outData);
+            HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyUpdateSession failed, ret = %" LOG_PUBLIC "d", ret)
+            break;
+        }
+#endif
         operation = QueryOperationAndMarkInUse(processInfo, handle);
         ret = (operation == NULL ? HKS_ERROR_NOT_EXIST : HKS_SUCCESS);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "operationHandle is not exist or being busy")
@@ -1760,6 +1781,13 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
             ret = InitOutputDataForFinish(&output, outData, isNeedStorage);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init output data failed")
         }
+#ifdef L2_STANDARD
+        if(HksCheckUkeyOperation(paramSet) == HKS_SUCCESS) {
+            ret = HksServiceOnUkeyFinishSession(processInfo, handle, paramSet, inData, outData);
+            HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyFinishSession failed, ret = %" LOG_PUBLIC "d", ret)
+            break;
+        }
+#endif
         ret = AppendAndQueryInFinish(handle, processInfo, &operation);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AppendAndQueryInFinish fail, ret = %" LOG_PUBLIC "d", ret)
 
