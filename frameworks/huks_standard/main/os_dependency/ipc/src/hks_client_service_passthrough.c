@@ -128,18 +128,6 @@ int32_t HksClientExportCertificate(const struct HksBlob *index, const struct Hks
     return HksServiceExportCertificate(&processInfo, index, paramSetIn, certSet);
 }
 
-
-    struct HksProcessInfo processInfo = {
-        { strlen(userId), (uint8_t *)userId },
-        { strlen(processName), (uint8_t *)processName },
-        0,
-        0,
-        0,
-        0
-    };
-    return HksServiceUnregisterProvider(&processInfo, name, paramSetIn);
-}
-
 int32_t HksClientOpenRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
 {
     char *processName = NULL;

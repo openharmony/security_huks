@@ -87,7 +87,7 @@ public:
         std::string& handle,
         int32_t& errcode) override;
 
-    ErrCode UpdataSession(
+    ErrCode UpdateSession(
         const std::string& handle,
         const CppParamSet& params,
         const std::vector<uint8_t>& inData,

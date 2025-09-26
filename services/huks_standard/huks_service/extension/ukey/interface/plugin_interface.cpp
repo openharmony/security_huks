@@ -17,6 +17,7 @@
 #include "hks_log.h"
 #include "hks_provider_life_cycle_manager.h"
 #include "hks_remote_handle_manager.h"
+#include "hks_session_manger.h"
 #include "hks_cpp_paramset.h"
 #include "hks_template.h"
 #include <string>
@@ -131,6 +132,9 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnInitSession(const H
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null");
+    ret = sessionMgr->ExtensionInitSession(processInfo, index, paramSet, handle);
     HKS_LOG_E("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
@@ -141,6 +145,9 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUpdateSession(const
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null");
+    ret = sessionMgr->ExtensionUpdateSession(processInfo, handle, paramSet, inData, outData);
     HKS_LOG_E("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
@@ -151,6 +158,9 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnFinishSession(const
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null");
+    ret = sessionMgr->ExtensionFinishSession(processInfo, handle, paramSet, inData, outData);
     HKS_LOG_E("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }

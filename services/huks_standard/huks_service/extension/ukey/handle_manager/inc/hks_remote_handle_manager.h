@@ -69,13 +69,13 @@ public:
     static int32_t ParseIndexAndProviderInfo(const std::string &index,
             ProviderInfo &providerInfo, std::string &newIndex);
 
-private:
+    int32_t ParseAndValidateIndex(const std::string &index, ProviderInfo &providerInfo,
+        std::string &newIndex,std::string &handle);
+    OHOS::sptr<IHuksAccessExtBase> GetProviderProxy(const ProviderInfo &providerInfo, int32_t &ret);
 
+private:
     int32_t ValidateProviderInfo(const std::string &newIndex, ProviderInfo &providerInfo);
     int32_t ValidateAndGetHandle(const std::string &newIndex, ProviderInfo &providerInfo, std::string &handle);
-    int32_t ParseAndValidateIndex(const std::string &index, ProviderInfo &providerInfo,
-                                    std::string &newIndex,std::string &handle);
-    OHOS::sptr<IHuksAccessExtBase> GetProviderProxy(const ProviderInfo &providerInfo, int32_t &ret);
 
     OHOS::SafeMap<std::string, std::string> indexToHandle;
 

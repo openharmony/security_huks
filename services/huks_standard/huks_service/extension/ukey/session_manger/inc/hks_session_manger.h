@@ -46,7 +46,7 @@ public:
         const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
         std::vector<uint8_t> &outData);
 private:
-    OHOS::SafeMap<uint32_t, std::pair<ProviderInfo, std::string>> handlers_;
+    OHOS::SafeMap<uint32_t, std::pair<ProviderInfo, std::string>> m_handlers{};
 };
 }
 }
