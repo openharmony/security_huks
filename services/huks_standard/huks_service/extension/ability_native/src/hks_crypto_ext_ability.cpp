@@ -63,30 +63,6 @@ void HksCryptoExtAbility::Init(const std::shared_ptr<AbilityRuntime::AbilityLoca
     ExtensionBase<>::Init(record, application, handler, token);
 }
 
-int HksCryptoExtAbility::test(const std::string& testIn, std::vector<std::string>& testOut)
-{
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO test(BASE)");
-    return true;
-}
-
-int HksCryptoExtAbility::OnCreateRemoteIndex(const std::string& abilityName, std::string& index)
-{
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO OnCreateRemoteIndex(BASE)");
-    return true;
-}
-
-int HksCryptoExtAbility::OnGetRemoteHandle(const std::string& index, std::string& handle)
-{
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO OnGetRemoteHandle(BASE)");
-    return true;
-}
-
-int HksCryptoExtAbility::OnOpenRemoteHandle(const std::string& handle)
-{
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO OnOpenRemoteHandle(BASE)");
-    return true;
-}
-
 int HksCryptoExtAbility::OpenRemoteHandle(const std::string& index, const CppParamSet& params, std::string& handle,
     int32_t& errcode)
 {
@@ -111,6 +87,20 @@ int HksCryptoExtAbility::GetUkeyPinAuthState(const std::string& handle, const Cp
         int32_t& authState, int32_t& errcode)
 {
     LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO GetUkeyPinAuthState(BASE)");
+    return true;
+}
+
+int HksCryptoExtAbility::ExportCertificate(const std::string& index, const CppParamSet& params,
+    std::string& certJsonArr, int32_t& errcode)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO ExportCertificate(BASE)");
+    return true;
+}
+
+int HksCryptoExtAbility::ExportProviderCertificates( const CppParamSet& params, std::string& certJsonArr,
+    int32_t& errcode)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO ExportProviderCertificates(BASE)");
     return true;
 }
 } // namespace HUKS

@@ -31,7 +31,9 @@ typedef enum {
     OPEN_REMOTE_HANDLE = 0,
     CLOSE_REMOTE_HANDLE,
     AUTH_UKEY_PIN,
-    GET_UKEY_PIN_AUTH_STATE
+    GET_UKEY_PIN_AUTH_STATE,
+    EXPORT_CERTIFICATE,
+    EXPORT_PROVIDER_CERTIFICATES
 } CryptoResultParamType;
 
 typedef struct CryptoResultParam {
@@ -76,9 +78,6 @@ public:
     static JsHksCryptoExtAbility* Create(const std::unique_ptr<AbilityRuntime::Runtime> &runtime);
     void OnStart(const AAFwk::Want &want) override;
     sptr<IRemoteObject> OnConnect(const AAFwk::Want &want) override;
-    int test(const std::string &testIn, std::vector<std::string> &testOut) override;
-    int OnCreateRemoteIndex(const std::string& abilityName, std::string& index) override;
-    int OnGetRemoteHandle(const std::string& index, std::string& handle) override;
     int OpenRemoteHandle(const std::string& index, const CppParamSet& params, std::string& handle,
         int32_t& errcode) override;
     int CloseRemoteHandle(const std::string& handle, const CppParamSet& params, int32_t& errcode) override;
@@ -86,6 +85,10 @@ public:
         int32_t& authState, uint32_t& retryCnt) override;
     int GetUkeyPinAuthState(const std::string& handle, const CppParamSet& params,
         int32_t& authState, int32_t& errcode) override;
+    int ExportCertificate(const std::string& index, const CppParamSet& params,
+        std::string& certJsonArr, int32_t& errcode) override;
+    int ExportProviderCertificates( const CppParamSet& params, std::string& certJsonArr,
+        int32_t& errcode) override;
 private:
     template <typename T>
     struct Value {
@@ -104,6 +107,8 @@ private:
     static void GetOpenRemoteHandleParams(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
     static void GetAuthUkeyPin(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
     static void GetUkeyPinAuthStateParams(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
+    static void GetExportCertificateParams(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
+    // static void GetUkeyPinAuthStateParams(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
 
     AbilityRuntime::JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> jsObj_;
