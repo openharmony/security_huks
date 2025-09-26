@@ -51,6 +51,8 @@ public:
     virtual int CloseRemoteHandle(const std::string& handle, const CppParamSet& params, int32_t& errcode);
     virtual int AuthUkeyPin(const std::string& handle, const CppParamSet& params, int32_t& errcode,
         int32_t& authState, uint32_t& retryCnt);
+    virtual int GetUkeyPinAuthState(const std::string& handle, const CppParamSet& params,
+        int32_t& authState, int32_t& errcode);
 private:
     static CreatorFunc creator_;
 };

@@ -106,6 +106,13 @@ int HksCryptoExtAbility::AuthUkeyPin(const std::string& handle, const CppParamSe
     LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO AuthUkeyPin(BASE)");
     return true;
 }
+
+int HksCryptoExtAbility::GetUkeyPinAuthState(const std::string& handle, const CppParamSet& params,
+        int32_t& authState, int32_t& errcode)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO GetUkeyPinAuthState(BASE)");
+    return true;
+}
 } // namespace HUKS
 } // namespace Security
 } // namespace OHOS
