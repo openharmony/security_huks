@@ -368,6 +368,42 @@ void HksIpcServiceExportProviderCertificates(const struct HksBlob *srcData, cons
     return;
 }
 
+void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t *context)
+{
+    struct HksBlob index = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksExtCertInfoSet *certInfoSet = NULL;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    struct HksBlob certOut = { 0, NULL };
+    int32_t ret;
+
+    do {
+        ret = HksDeleteKeyUnpack(srcData, &index, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDeleteKeyUnpack Ipc fail")
+
+        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcServiceExportCertificateAdapter(&processInfo, &index, paramSet, certInfoSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceExportCertificateAdapter fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCertificatesPackFromService(certInfoSet, &certOut);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCertificatesPackFromService fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HksSendResponse(context, ret, ret == HKS_SUCCESS && certOut.size != 0 ? &certOut : NULL);
+
+    // TODO: free certInfoSet
+    // HksFreeExtCertInfoSet(certInfoSet);
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(certOut);
+
+    return;
+}
 
 void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *context)
 {

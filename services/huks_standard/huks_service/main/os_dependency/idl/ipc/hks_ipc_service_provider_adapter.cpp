@@ -136,6 +136,22 @@ int32_t HksIpcServiceOnExportProviderCertificatesAdapter(const struct HksProcess
     return ret;
 }
 
+int32_t HksIpcServiceExportCertificateAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *index, const struct HksParamSet *paramSet, struct HksExtCertInfoSet *certInfoSet)
+{
+    int32_t ret = 0;
+    std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
+    std::string certificates;
+    CppParamSet cppParamSet(paramSet);
+
+    ret = OHOS::Security::Huks::HksIpcServiceOnFindIndexCertificate(processInfo, cppIndex, cppParamSet, certificates);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnFindIndexCertificate fail")
+
+    ret = OHOS::Security::Huks::JsonArrayToCertInfoSet(certificates, *certInfoSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "JsonArrayToCertInfoSet fail")
+
+    return ret;
+}
+
 int32_t HksIpcServiceOnAuthUkeyPinAdapter(const struct HksProcessInfo *processInfo,
     const struct HksBlob *index, const struct HksParamSet *paramSet, int32_t *outStatus, uint32_t *retryCount)
 {
