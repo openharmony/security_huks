@@ -80,15 +80,16 @@ int32_t HksIpcServiceOnCreateRemoteKeyHandle(const struct HksProcessInfo *proces
     return ret;
 }
 
-// int32_t HksIpcServiceOnFindRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string index, 
-//     CppParamSet &paramSet, std::string &remoteHandleOut) {
-//     HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
-//     auto libInterface = GetExtLibInterfaceInstance();
-//     HKS_LOG_I("got libInterface instance");
+int32_t HksIpcServiceOnFindRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string index, 
+    CppParamSet &paramSet, std::string &remoteHandleOut) {
+    return 0;
+    // HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
+    // auto libInterface = GetExtLibInterfaceInstance();
+    // HKS_LOG_I("got libInterface instance");
 
-//     int32_t ret = libInterface->OnFindRemoteKeyHandle(index, index); // TODO:参数对齐OnFindRemoteKeyHandle(const std::string &index, std::string &keyIndex)
-//     return ret;
-// }
+    // int32_t ret = libInterface->OnFindRemoteKeyHandle(index, index); // TODO:参数对齐OnFindRemoteKeyHandle(const std::string &index, std::string &keyIndex)
+    // return ret;
+}
 
 int32_t HksIpcServiceOnCloseRemoteKeyHandle(const struct HksProcessInfo *processInfo, 
     std::string index, CppParamSet &paramSet) 
@@ -101,76 +102,85 @@ int32_t HksIpcServiceOnCloseRemoteKeyHandle(const struct HksProcessInfo *process
     return ret;
 }
 
-// int32_t HksIpcServiceOnSigned(const struct HksProcessInfo *processInfo, std::string index, 
-//     CppParamSet &paramSet, std::string srcData, std::string &signature) {
-//     HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
-//     auto libInterface = GetExtLibInterfaceInstance();
-//     HKS_LOG_I("got libInterface instance");
-//     int32_t ret = 0;
-//     // int32_t ret = libInterface->OnSigned(index, paramSet, srcData); // TODO:参数对齐OnSigned(const std::string &index, const CppParamSet& paramSet, std::vector<uint8_t> &outData)
-//     return ret;
-// }
+int32_t HksIpcServiceOnSigned(const struct HksProcessInfo *processInfo, std::string index, 
+    CppParamSet &paramSet, std::string srcData, std::string &signature) {
+    return 0;
+    // HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
+    // auto libInterface = GetExtLibInterfaceInstance();
+    // HKS_LOG_I("got libInterface instance");
+    // int32_t ret = 0;
+    // // int32_t ret = libInterface->OnSigned(index, paramSet, srcData); // TODO:参数对齐OnSigned(const std::string &index, const CppParamSet& paramSet, std::vector<uint8_t> &outData)
+    // return ret;
+}
 
-// int HksIpcServiceOnVerify(const struct HksProcessInfo *processInfo, std::string index, 
-//     CppParamSet &paramSet, std::string srcData, std::string &signature) {
+int HksIpcServiceOnVerify(const struct HksProcessInfo *processInfo, std::string index, 
+    CppParamSet &paramSet, std::string srcData, std::string &signature) {
 
-//     return 0;
-// }
+    return 0;
+}
 
-// int32_t HksIpcServiceOnAuthUkeyPin(const std::string &index, const std::vector<uint8_t> &pinData,
-//     bool outStatus, int32_t *retryCnt) {
-//     HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
-//     auto libInterface = GetExtLibInterfaceInstance();
-//     HKS_LOG_I("got libInterface instance");
+int32_t HksIpcServiceOnAuthUkeyPin(const struct HksProcessInfo *processInfo, const std::string &index, const std::vector<uint8_t> &pinData,
+    int32_t &authState, uint32_t &retryCnt) {
+    return 0;
+    // HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
+    // auto libInterface = GetExtLibInterfaceInstance();
+    // HKS_LOG_I("got libInterface instance");
 
-//     int32_t ret = libInterface->OnAuthUkeyPin(processInfo, index, paramSet, authState, retryCnt);
-//     return ret;
-// }
+    // int32_t ret = libInterface->OnAuthUkeyPin(*processInfo, index, paramSet, authState, retryCnt);
+    // return ret;
+}
 
-// int32_t HksIpcServiceOnGetVerifyPinStatus(const HksProcessInfo &processInfo,
-//     const std::string &index, const CppParamSet &paramSet, uint32_t &state) {
-//     HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
-//     auto libInterface = GetExtLibInterfaceInstance();
-//     HKS_LOG_I("got libInterface instance");
+int32_t HksIpcServiceOnGetVerifyPinStatus(const struct HksProcessInfo *processInfo,
+    const std::string &index, const CppParamSet &paramSet, uint32_t &state) {
+    return 0;
+    // HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
+    // auto libInterface = GetExtLibInterfaceInstance();
+    // HKS_LOG_I("got libInterface instance");
 
-//     int32_t ret = libInterface->OnGetVerifyPinStatus(processInfo, index, paramSet, state);
-//     return ret;
-// }
+    // int32_t ret = libInterface->OnGetVerifyPinStatus(*processInfo,, index, paramSet, state);
+    // return ret;
+}
 
-// int32_t HksIpcServiceOnClearPinStatus(const std::string &index) {
-//     HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
-//     auto libInterface = GetExtLibInterfaceInstance();
-//     HKS_LOG_I("got libInterface instance");
+int32_t HksIpcServiceOnClearPinStatus(const struct HksProcessInfo *processInfo, std::string index) {
+    return 0;
+    // HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
+    // auto libInterface = GetExtLibInterfaceInstance();
+    // HKS_LOG_I("got libInterface instance");
 
-//     int32_t ret = libInterface->OnClearPinStatus(index);
-//     return ret;
-// }
+    // int32_t ret = libInterface->OnClearPinStatus(index);
+    // return ret;
+}
     
-// void HksIpcServiceOnListProviders(std::vector<uint8_t> &providersOut) {
-//     HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
-//     auto libInterface = GetExtLibInterfaceInstance();
-//     HKS_LOG_I("got libInterface instance");
+int32_t HksIpcServiceOnListProviders(std::vector<uint8_t> &providersOut) {
+    return 0;
+    // HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
+    // auto libInterface = GetExtLibInterfaceInstance();
+    // HKS_LOG_I("got libInterface instance");
 
-//     int32_t ret = libInterface->OnListProviders(providersOut);
-//     HKS_IF_TRUE_LOGI_RETURN_VOID(ret != HKS_SUCCESS, "HksIpcServiceOnListProviders fail")
-// }
+    // int32_t ret = libInterface->OnListProviders(providersOut);
+    // HKS_IF_TRUE_LOGI_RETURN_VOID(ret != HKS_SUCCESS, "HksIpcServiceOnListProviders fail")
+}
 
-void HksIpcServiceOnFindProviderCertificate(const HksProcessInfo &processInfo, const std::string &index,
+int32_t HksIpcServiceOnFindProviderCertificate(const struct HksProcessInfo *processInfo, const std::string &index,
 const CppParamSet &paramSet, std::string &cetificatesOut) {
     HKS_LOG_I("===========HksIpcServiceOnFindProviderCertificate income");
     auto libInterface = GetExtLibInterfaceInstance();
 
-    int32_t ret = libInterface->OnListIndexCertificate(processInfo, index, paramSet, cetificatesOut);
-    HKS_IF_TRUE_LOGI_RETURN_VOID(ret != HKS_SUCCESS, "HksIpcServiceOnFindProviderCertificate fail")
+    int32_t ret = libInterface->OnListIndexCertificate(*processInfo, index, paramSet, cetificatesOut);
+    HKS_IF_NOT_SUCC_LOGE(ret != HKS_SUCCESS, "HksIpcServiceOnFindProviderCertificate fail")
+
+    return ret;
 }
 
-void HksIpcServiceOnListProviderAllCertificate(const HksProcessInfo &processInfo, const std::string &index,
+int32_t HksIpcServiceOnListProviderAllCertificate(const struct HksProcessInfo *processInfo, const std::string &index,
 const CppParamSet &paramSet, std::string &cetificatesOut) {
     HKS_LOG_I("===========HksIpcServiceOnListProviderAllCertificate income");
     auto libInterface = GetExtLibInterfaceInstance();
 
-    int32_t ret = libInterface->OnListProviderAllCertificate(processInfo, index, paramSet, cetificatesOut);
-    HKS_IF_TRUE_LOGI_RETURN_VOID(ret != HKS_SUCCESS, "HksIpcServiceOnListProviderAllCertificate fail")
+    int32_t ret = libInterface->OnListProviderAllCertificate(*processInfo, index, paramSet, cetificatesOut);
+    HKS_IF_NOT_SUCC_LOGE(ret != HKS_SUCCESS, "HksIpcServiceOnListProviderAllCertificate fail")
+
+    return ret;
 }
 
 }

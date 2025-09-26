@@ -62,24 +62,11 @@
 #undef HKS_SUPPORT_API_GET_CERTIFICATE_CHAIN
 #endif
 
-HKS_API_EXPORT int32_t HksExportProviderCertificates(const struct HksBlob *providerName, const struct HksParamSet *paramSetIn, struct HksExtCertInfo *certSet)
-{
-    // TODO:
-    return 0;
-}
-
-HKS_API_EXPORT int32_t HksExportCertificate(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksExtCertInfo *certSet)
-{
-    // TODO:
-    return 0;
-}
-
 HKS_API_EXPORT int32_t HksRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter RegisterProvider");
     HKS_LOG_E("hks_api.c ======== enter RegisterProvider");
-    /* generate persistent keys */
     if ((paramSetIn == NULL) || (name == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
@@ -97,7 +84,6 @@ HKS_API_EXPORT int32_t HksUnregisterProvider(const struct HksBlob *name, const s
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter UnregisterProvider");
-    /* generate persistent keys */
     if (name == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
@@ -106,6 +92,42 @@ HKS_API_EXPORT int32_t HksUnregisterProvider(const struct HksBlob *name, const s
     return ret;
 #else
     (void)name;
+    (void)paramSetIn;
+    return 0;
+#endif
+}
+
+HKS_API_EXPORT int32_t HksExportProviderCertificates(const struct HksBlob *providerName, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter HksExportProviderCertificates");
+    HKS_LOG_E("hks_api.c ======== enter HksExportProviderCertificates");
+    if ((paramSetIn == NULL) || (providerName == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientExportProviderCertificates(providerName, paramSetIn, certSet);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave HksExportProviderCertificates, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)providerName;
+    (void)paramSetIn;
+    return 0;
+#endif
+}
+
+HKS_API_EXPORT int32_t HksExportCertificate(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter HksExportCertificate");
+    HKS_LOG_E("hks_api.c ======== enter HksExportCertificate");
+    if ((paramSetIn == NULL) || (index == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientExportCertificate(index, paramSetIn, certSet);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave HksExportCertificate, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)index;
     (void)paramSetIn;
     return 0;
 #endif
@@ -370,7 +392,6 @@ HKS_API_EXPORT int32_t HksGenerateKey(const struct HksBlob *keyAlias,
         return ret;
     }
 
-    /* generate persistent keys */
     if ((paramSetIn == NULL) || (keyAlias == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }

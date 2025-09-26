@@ -77,6 +77,8 @@ int32_t HksParamSetToParams(const struct HksParamSet *paramSet, struct HksParamO
 
 int32_t HksListAliasesUnpack(const struct HksBlob *srcData, struct HksParamSet **paramSet);
 
+int32_t HksCertificatesPackFromService(const struct HksExtCertInfoSet *certs, struct HksBlob *destData);
+
 int32_t HksListAliasesPackFromService(const struct HksKeyAliasSet *aliasSet, struct HksBlob *destData);
 
 int32_t HksRenameKeyAliasUnpack(const struct HksBlob *srcData, struct HksBlob *oldKeyAlias,

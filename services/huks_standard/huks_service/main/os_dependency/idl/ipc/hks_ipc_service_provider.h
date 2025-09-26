@@ -34,7 +34,7 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
-    using RegisterProviderFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &providerName,
+    using RegisterProviderFunc = int32_t (*)(const struct HksProcessInfo *processInfo, const std::string &providerName,
         const CppParamSet &paramSet);
 
 
@@ -67,15 +67,15 @@ namespace Huks {
         CppParamSet &paramSet, std::string srcData, std::string &signature);
 
     int32_t HksIpcServiceOnCreateRemoteIndex(const std::string &providerName, const CppParamSet& paramSet, std::string &outIndex);
-    int32_t HksIpcServiceOnAuthUkeyPin(const HksProcessInfo &processInfo,
-        const std::string &index, const CppParamSet &paramSet, int32_t& authState, uint32_t& retryCnt);
-    int32_t HksIpcServiceOnGetVerifyPinStatus(const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet, uint32_t &state);
+    int32_t HksIpcServiceOnAuthUkeyPin(const struct HksProcessInfo *processInfo, const std::string &index, const std::vector<uint8_t> &pinData,
+        int32_t &authState, uint32_t &retryCnt);
+    int32_t HksIpcServiceOnGetVerifyPinStatus(const struct HksProcessInfo *processInfo, const std::string &index, const CppParamSet &paramSet, uint32_t &state);
     int32_t HksIpcServiceOnClearPinStatus(const struct HksProcessInfo *processInfo, std::string index);
         
-    void HksIpcServiceOnListProviders(std::vector<uint8_t> &providersOut);
-    void HksIpcServiceOnFindProviderCertificate(const HksProcessInfo &processInfo, const std::string &index,
+    int32_t HksIpcServiceOnListProviders(std::vector<uint8_t> &providersOut);
+    int32_t HksIpcServiceOnFindProviderCertificate(const struct HksProcessInfo *processInfo, const std::string &index,
         const CppParamSet &paramSet, std::string &cetificatesOut);
-    void HksIpcServiceOnListProviderAllCertificate(const HksProcessInfo &processInfo, const std::string &index,
+    int32_t HksIpcServiceOnListProviderAllCertificate(const struct HksProcessInfo *processInfo, const std::string &index,
         const CppParamSet &paramSet, std::string &cetificatesOut);
 
 }

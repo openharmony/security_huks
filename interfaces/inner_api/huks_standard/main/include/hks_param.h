@@ -86,6 +86,13 @@ HKS_API_EXPORT void HksFreeParamSet(struct HksParamSet **paramSet);
 HKS_API_EXPORT void HksFreeKeyAliasSet(struct HksKeyAliasSet *aliasSet);
 
 /**
+ * @brief Free CertInfo set
+ * @param CertInfoSet required CertInfo set
+ * @return error code, see hks_type.h
+ */
+HKS_API_EXPORT void HksFreeCertSet(struct HksExtCertInfoSet *CertInfoSet);
+
+/**
  * @brief Get parameter set
  * @param inParamSet required parameter set
  * @param inParamSetSize input patamSet size

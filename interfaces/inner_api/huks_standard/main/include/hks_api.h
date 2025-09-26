@@ -36,8 +36,8 @@ HKS_API_EXPORT int32_t HksRegisterProvider(const struct HksBlob *name, const str
 HKS_API_EXPORT int32_t HksUnregisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
 
 // 证书接口HksExportProviderCertificates
-HKS_API_EXPORT int32_t HksExportProviderCertificates(const struct HksBlob *providerName, const struct HksParamSet *paramSetIn, struct HksExtCertInfo *certSet);
-HKS_API_EXPORT int32_t HksExportCertificate(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksExtCertInfo *certSet);
+HKS_API_EXPORT int32_t HksExportProviderCertificates(const struct HksBlob *providerName, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
+HKS_API_EXPORT int32_t HksExportCertificate(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
 // NDK
 // 句柄管理
 HKS_API_EXPORT int32_t HksOpenRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut);

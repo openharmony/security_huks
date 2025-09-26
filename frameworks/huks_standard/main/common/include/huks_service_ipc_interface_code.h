@@ -59,6 +59,7 @@ enum HksIpcInterfaceCode {
     HKS_MSG_EXT_UKEY_SIGN,
     HKS_MSG_EXT_UKEY_VERIFY,
     HKS_MSG_EXT_CLEAR_PIN_AUTH_STATE,
+    HKS_MSG_EXT_EXPORT_PROVIDER_CERTIFICATES,   
     /* new cmd type must be added before HKS_MSG_MAX */
     HKS_MSG_MAX,
 };

@@ -43,6 +43,7 @@ void HksIpcServiceUkeySign(const struct HksBlob *srcData, const uint8_t *context
 
 void HksIpcServiceUkeyVerify(const struct HksBlob *srcData, const uint8_t *context);
 
+void HksIpcServiceExportProviderCertificates(const struct HksBlob *srcData, const uint8_t *context);
 
 void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *context);
 
