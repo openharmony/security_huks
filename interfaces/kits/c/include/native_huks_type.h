@@ -821,6 +821,17 @@ struct OH_Huks_ParamSet {
     struct OH_Huks_Param params[];
 };
 
+struct OH_Huks_ExtCertInfo {
+    int32_t purpose;
+    struct OH_Huks_Blob index;
+    struct OH_Huks_Blob cert;
+};
+
+struct OH_Huks_ExtCertInfoSet {
+    uint32_t count;
+    struct OH_Huks_ExtCertInfo *certs;
+};
+
 /**
  * @brief Defines the structure of the certificate chain.
  *

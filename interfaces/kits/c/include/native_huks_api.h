@@ -62,6 +62,10 @@ struct OH_Huks_Result OH_Huks_GetSdkVersion(struct OH_Huks_Blob *sdkVersion);
 struct OH_Huks_Result OH_Huks_RegisterProvider(const struct OH_Huks_Blob *providerName, const struct OH_Huks_ParamSet *paramSet);
 struct OH_Huks_Result OH_Huks_UnregisterProvider(const struct OH_Huks_Blob *providerName, const struct OH_Huks_ParamSet *paramSet);
 
+// 证书导出
+struct OH_Huks_Result OH_Huks_ExportProviderCertificates(const struct OH_Huks_Blob *providerName, const struct OH_Huks_ParamSet *paramSetIn, struct OH_Huks_ExtCertInfoSet *certSet);
+
+
 // 句柄管理
 struct OH_Huks_Result OH_Huks_OpenRemoteHandle(const struct OH_Huks_Blob *index, const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_Blob *remoteHandleOut);
 struct OH_Huks_Result OH_Huks_GetRemoteHandle(const struct OH_Huks_Blob *index, const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_Blob *remoteHandleOut);

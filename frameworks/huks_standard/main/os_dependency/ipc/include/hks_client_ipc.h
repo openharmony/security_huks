@@ -30,6 +30,12 @@ int32_t HksClientRefreshKeyInfo(void);
 int32_t HksClientRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
 int32_t HksClientUnregisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
 
+// 证书管理
+int32_t HksClientExportProviderCertificates(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
+
+int32_t HksClientExportCertificate(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
+
+
 // NAPI侧PIN码认证
 int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, 
     uint32_t *outStatus, uint32_t *retryCount);

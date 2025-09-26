@@ -80,6 +80,8 @@ int32_t HksParamsToParamSet(struct HksParam *params, uint32_t cnt, struct HksPar
 
 int32_t EncodeCertChain(const struct HksBlob *inBlob, struct HksBlob *outBlob);
 
+int32_t HksCertificatesUnpackFromService(const struct HksBlob *srcBlob, struct HksExtCertInfoSet *destData);
+
 int32_t HksListAliasesPack(const struct HksParamSet *srcParamSet, struct HksBlob *destData);
 
 int32_t HksListAliasesUnpackFromService(const struct HksBlob *srcData, struct HksKeyAliasSet **destData);
