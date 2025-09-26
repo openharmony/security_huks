@@ -73,8 +73,10 @@ namespace Huks {
     int32_t HksIpcServiceOnClearPinStatus(const struct HksProcessInfo *processInfo, std::string index);
         
     void HksIpcServiceOnListProviders(std::vector<uint8_t> &providersOut);
-    void HksIpcServiceOnFindProviderCertificate(const std::string &index, std::vector<uint8_t> &cetificatesOut);
-    void HksIpcServiceOnListProviderAllCertificate(const std::string &providerName, std::string &cetificatesOut);
+    void HksIpcServiceOnFindProviderCertificate(const HksProcessInfo &processInfo, const std::string &index,
+        const CppParamSet &paramSet, std::string &cetificatesOut);
+    void HksIpcServiceOnListProviderAllCertificate(const HksProcessInfo &processInfo, const std::string &index,
+        const CppParamSet &paramSet, std::string &cetificatesOut);
 
 }
 }
