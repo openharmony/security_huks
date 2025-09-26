@@ -45,6 +45,10 @@ void HksIpcServiceUkeyVerify(const struct HksBlob *srcData, const uint8_t *conte
 
 void HksIpcServiceExportProviderCertificates(const struct HksBlob *srcData, const uint8_t *context);
 
+void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t *context);
+
+void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t *context);
+
 void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *context);
 
 void HksIpcServiceImportKey(const struct HksBlob *srcData, const uint8_t *context);

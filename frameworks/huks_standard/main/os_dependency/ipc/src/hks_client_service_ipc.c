@@ -152,7 +152,7 @@ int32_t HksClientUnregisterProvider(const struct HksBlob *name, const struct Hks
     return ret;
 }
 
-int32_t HksClientExportProviderCertificates(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet) 
+int32_t HksClientExportProviderCertificates(const struct HksBlob *name, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet) 
 {
     int32_t ret;
     struct HksBlob inBlob = { 0, NULL };
@@ -164,17 +164,17 @@ int32_t HksClientExportProviderCertificates(const struct HksBlob *index, const s
         return HKS_ERROR_NULL_POINTER;
     }
 
-    inBlob.size = sizeof(index->size) + ALIGN_SIZE(index->size) + ALIGN_SIZE(paramSetIn->paramSetSize);
+    inBlob.size = sizeof(name->size) + ALIGN_SIZE(name->size) + ALIGN_SIZE(paramSetIn->paramSetSize);
     inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
     HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
     do {
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret);
 
-        ret = HksCheckIpcDeleteKey(index, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIpcDeleteKey fail");
+        ret = HksCheckIpcDeleteKey(name, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientExportProviderCertificates fail");
 
-        ret = HksDeleteKeyPack(index, newParamSet, &inBlob);
+        ret = HksDeleteKeyPack(name, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksExportProviderCertificatesPack fail");
 
         ret = HksSendRequest(HKS_MSG_EXT_EXPORT_PROVIDER_CERTIFICATES, &inBlob, &outBlob, newParamSet);
@@ -195,6 +195,42 @@ int32_t HksClientExportProviderCertificates(const struct HksBlob *index, const s
 
 int32_t HksClientExportCertificate(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
 {
+    int32_t ret;
+    struct HksBlob inBlob = { 0, NULL };
+    struct HksBlob outBlob = { 0, NULL };
+    struct HksParamSet *newParamSet = NULL;
+
+    if(certSet != NULL) {
+        // TODO:错误码怎么写
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    inBlob.size = sizeof(index->size) + ALIGN_SIZE(index->size) + ALIGN_SIZE(paramSetIn->paramSetSize);
+    inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
+    HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
+    do {
+        ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret);
+
+        ret = HksCheckIpcDeleteKey(index, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientExportCertificate fail");
+
+        ret = HksDeleteKeyPack(index, newParamSet, &inBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksExportProviderCertificatesPack fail");
+
+        ret = HksSendRequest(HKS_MSG_EXT_EXPORT_CERTIFICATE, &inBlob, &outBlob, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret);    
+
+        ret = HksCertificatesUnpackFromService(&outBlob, certSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCertificateChainUnpackFromService fail, ret = %" LOG_PUBLIC "d", ret);
+    } while (0);
+
+    HKS_IF_NOT_SUCC_LOGE(ret, "HksClientExportProviderCertificates fail, ret = %" LOG_PUBLIC "d", ret);
+
+    HksFreeParamSet(&newParamSet);
+    HKS_FREE_BLOB(inBlob);
+    HKS_FREE_BLOB(outBlob);
+
     return 0;
 }
 

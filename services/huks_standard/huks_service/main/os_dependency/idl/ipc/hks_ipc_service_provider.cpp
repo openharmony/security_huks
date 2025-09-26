@@ -161,7 +161,7 @@ int32_t HksIpcServiceOnListProviders(std::vector<uint8_t> &providersOut) {
     // HKS_IF_TRUE_LOGI_RETURN_VOID(ret != HKS_SUCCESS, "HksIpcServiceOnListProviders fail")
 }
 
-int32_t HksIpcServiceOnFindProviderCertificate(const struct HksProcessInfo *processInfo, const std::string &index,
+int32_t HksIpcServiceOnFindIndexCertificate(const struct HksProcessInfo *processInfo, const std::string &index,
 const CppParamSet &paramSet, std::string &cetificatesOut) {
     HKS_LOG_I("===========HksIpcServiceOnFindProviderCertificate income");
     auto libInterface = GetExtLibInterfaceInstance();

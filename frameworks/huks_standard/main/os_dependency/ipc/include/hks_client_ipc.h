@@ -31,8 +31,7 @@ int32_t HksClientRegisterProvider(const struct HksBlob *name, const struct HksPa
 int32_t HksClientUnregisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
 
 // 证书管理
-int32_t HksClientExportProviderCertificates(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
-
+int32_t HksClientExportProviderCertificates(const struct HksBlob *name, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
 int32_t HksClientExportCertificate(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
 
 
