@@ -54,6 +54,12 @@ struct OH_Huks_Result OH_Huks_UnregisterProvider(const struct OH_Huks_Blob *prov
     return ConvertApiResult(result);
 }
 
+struct OH_Huks_Result OH_Huks_ExportCertificate(const struct OH_Huks_Blob *index, const struct OH_Huks_ParamSet *paramSetIn, struct OH_Huks_ExtCertInfoSet *certSet)
+{
+    int32_t result = HksExportCertificate((const struct HksBlob *) index, (const struct HksParamSet *) paramSetIn, (struct HksExtCertInfoSet *) certSet);
+    return ConvertApiResult(result);
+}
+
 struct OH_Huks_Result OH_Huks_ExportProviderCertificates(const struct OH_Huks_Blob *providerName, const struct OH_Huks_ParamSet *paramSetIn, struct OH_Huks_ExtCertInfoSet *certSet)
 {
     int32_t result = HksExportProviderCertificates((const struct HksBlob *) providerName, (const struct HksParamSet *) paramSetIn, (struct HksExtCertInfoSet *) certSet);

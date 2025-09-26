@@ -64,6 +64,7 @@ struct OH_Huks_Result OH_Huks_UnregisterProvider(const struct OH_Huks_Blob *prov
 
 // 证书导出
 struct OH_Huks_Result OH_Huks_ExportProviderCertificates(const struct OH_Huks_Blob *providerName, const struct OH_Huks_ParamSet *paramSetIn, struct OH_Huks_ExtCertInfoSet *certSet);
+struct OH_Huks_Result OH_Huks_ExportCertificate(const struct OH_Huks_Blob *index, const struct OH_Huks_ParamSet *paramSetIn, struct OH_Huks_ExtCertInfoSet *certSet);
 
 
 // 句柄管理
