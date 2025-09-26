@@ -126,4 +126,33 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnExportProviderCerti
     return ret;
 }
 
+__attribute__((visibility("default"))) int32_t HksExtPluginOnInitSession(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, uint32_t &handle)
+{
+    int32_t ret = HKS_SUCCESS;
+    HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    HKS_LOG_E("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
+    return ret;
+}
+
+__attribute__((visibility("default"))) int32_t HksExtPluginOnUpdateSession(const HksProcessInfo &processInfo,
+    const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
+    std::vector<uint8_t> &outData)
+{
+    int32_t ret = HKS_SUCCESS;
+    HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    HKS_LOG_E("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
+    return ret;
+}
+
+__attribute__((visibility("default"))) int32_t HksExtPluginOnFinishSession(const HksProcessInfo &processInfo,
+    const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
+    std::vector<uint8_t> &outData)
+{
+    int32_t ret = HKS_SUCCESS;
+    HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    HKS_LOG_E("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
+    return ret;
+}
+
 }

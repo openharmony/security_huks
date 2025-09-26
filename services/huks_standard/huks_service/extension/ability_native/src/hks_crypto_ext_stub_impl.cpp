@@ -135,6 +135,38 @@ ErrCode HksCryptoExtStubImpl::ExportProviderCertificates(
     return ERR_OK;
 }
 
+ErrCode HksCryptoExtStubImpl::InitSession(
+    const std::string& index,
+    const CppParamSet& params,
+    std::string& handle,
+    int32_t& errcode)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO InitSession");
+    return ERR_OK;
+}
+
+ErrCode HksCryptoExtStubImpl::UpdataSession(
+    const std::string& handle,
+    const CppParamSet& params,
+    const std::vector<uint8_t>& inData,
+    std::vector<uint8_t>& outData,
+    int32_t& errcode)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO UpdataSession");
+    return ERR_OK;
+}
+
+ErrCode HksCryptoExtStubImpl::FinishSession(
+    const std::string& handle,
+    const CppParamSet& params,
+    const std::vector<uint8_t>& inData,
+    std::vector<uint8_t>& outData,
+    int32_t& errcode)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO FinishSession");
+    return ERR_OK;
+}
+
 } // namespace Huks
 } // namespace Security
 } // namespace OHOS

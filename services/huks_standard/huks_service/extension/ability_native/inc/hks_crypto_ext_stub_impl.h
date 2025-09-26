@@ -80,6 +80,26 @@ public:
         const CppParamSet& params,
         std::string& certJsonArr,
         int32_t& errcode) override;
+
+    ErrCode InitSession(
+        const std::string& index,
+        const CppParamSet& params,
+        std::string& handle,
+        int32_t& errcode) override;
+
+    ErrCode UpdataSession(
+        const std::string& handle,
+        const CppParamSet& params,
+        const std::vector<uint8_t>& inData,
+        std::vector<uint8_t>& outData,
+        int32_t& errcode) override;
+
+    ErrCode FinishSession(
+        const std::string& handle,
+        const CppParamSet& params,
+        const std::vector<uint8_t>& inData,
+        std::vector<uint8_t>& outData,
+        int32_t& errcode) override;
 private:
     std::shared_ptr<HksCryptoExtAbility> extension_;
 };
