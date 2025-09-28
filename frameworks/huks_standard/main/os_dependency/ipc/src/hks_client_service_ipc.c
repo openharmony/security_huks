@@ -158,11 +158,18 @@ int32_t HksClientExportProviderCertificates(const struct HksBlob *name, const st
     struct HksBlob inBlob = { 0, NULL };
     struct HksBlob outBlob = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
+        
 
-    if(certSet != NULL) {
+    if(certSet == NULL || certSet->certs != NULL || certSet->count != 0) {
         // TODO:错误码怎么写
+        HKS_LOG_E("certSet is invalid, must be a empty set");
         return HKS_ERROR_NULL_POINTER;
     }
+
+    // TODO:这个地方提前申请多大的内存合适
+    outBlob.size = sizeof(HKS_MAX_KEY_ALIAS_COUNT) + (HKS_MAX_KEY_ALIAS_COUNT * HKS_MAX_KEY_ALIAS_LEN);
+    outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
+    HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
 
     inBlob.size = sizeof(name->size) + ALIGN_SIZE(name->size) + ALIGN_SIZE(paramSetIn->paramSetSize);
     inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
@@ -200,10 +207,16 @@ int32_t HksClientExportCertificate(const struct HksBlob *index, const struct Hks
     struct HksBlob outBlob = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
 
-    if(certSet != NULL) {
+    if(certSet == NULL || certSet->certs != NULL || certSet->count != 0) {
         // TODO:错误码怎么写
+        HKS_LOG_E("certSet is invalid, must be a empty set");
         return HKS_ERROR_NULL_POINTER;
     }
+
+    // TODO:这个地方提前申请多大的内存合适
+    outBlob.size = sizeof(HKS_MAX_KEY_ALIAS_COUNT) + (HKS_MAX_KEY_ALIAS_COUNT * HKS_MAX_KEY_ALIAS_LEN);
+    outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
+    HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
 
     inBlob.size = sizeof(index->size) + ALIGN_SIZE(index->size) + ALIGN_SIZE(paramSetIn->paramSetSize);
     inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
