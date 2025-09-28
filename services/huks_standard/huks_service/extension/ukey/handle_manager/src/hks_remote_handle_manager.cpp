@@ -346,7 +346,7 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const std::string &index)
     ret = HKS_SUCCESS;
     
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Remote clear pin status failed: %" LOG_PUBLIC "d", ret);
+        HKS_LOG_E("Remote clear pin status failed: %" "d", ret);
         return HKS_ERROR_REMOTE_OPERATION_FAILED;
     }
 
@@ -407,7 +407,7 @@ int32_t HksRemoteHandleManager::RemoteHandleVerify(const std::string &index, con
 }
 
 int32_t HksRemoteHandleManager::FindRemoteCertificate(const std::string &index,
-    const CppParamSet &paramSet, std::string cert)
+    const CppParamSet &paramSet, std::string& cert)
 {
     ProviderInfo providerInfo;
     std::string newIndex;
@@ -431,7 +431,7 @@ int32_t HksRemoteHandleManager::FindRemoteCertificate(const std::string &index,
     return HKS_SUCCESS;
 }
 int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &processInfo,
-        const std::string &providerName,const CppParamSet &paramSet, std::string certVec)
+        const std::string &providerName, const CppParamSet &paramSet, std::string& certVec)
 {
     auto providerLifeManager = HksProviderLifeCycleManager::GetInstanceWrapper();
     if (providerLifeManager == nullptr) {

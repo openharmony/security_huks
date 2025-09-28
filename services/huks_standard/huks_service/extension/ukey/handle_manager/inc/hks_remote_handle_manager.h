@@ -53,9 +53,9 @@ public:
 
     //证书查询
     int32_t FindRemoteCertificate(const std::string &index,
-            const CppParamSet &paramSet, const std::string certificatesOut);
+            const CppParamSet &paramSet, std::string& certificatesOut);
     int32_t FindRemoteAllCertificate(const HksProcessInfo &processInfo,
-            const std::string &providerName, const CppParamSet &paramSet, const std::string certificatesOut);
+            const std::string &providerName, const CppParamSet &paramSet, std::string& certificatesOut);
 
     //签名验签
     int32_t RemoteHandleSign(const std::string &index, const CppParamSet &paramSet,
