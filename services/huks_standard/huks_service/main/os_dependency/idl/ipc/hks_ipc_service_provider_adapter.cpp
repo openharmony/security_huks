@@ -45,9 +45,13 @@ int32_t HksIpcServiceOnCreateRemoteKeyHandleAdapter(const struct HksProcessInfo 
 
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnCreateRemoteKeyHandle fail")
 
-    uint32_t copyLen = std::min(remoteHandleOut->size, static_cast<uint32_t>(remoteHandle.size()));
-    memcpy_s(remoteHandleOut->data, remoteHandleOut->size, remoteHandle.data(), copyLen);
+    uint32_t copyLen = static_cast<uint32_t>(remoteHandle.size());
+    if (copyLen > static_cast<uint32_t>(MAX_OUT_BLOB_SIZE)) {
+        HKS_LOG_E("remoteHandle size is too large");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
     remoteHandleOut->size = copyLen;
+    memcpy_s(remoteHandleOut->data, remoteHandleOut->size, remoteHandle.data(), copyLen);
 
     return ret;
 }
@@ -64,9 +68,13 @@ int32_t HksIpcServiceOnFindRemoteKeyHandleAdapter(const struct HksProcessInfo *p
 
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnSigned fail")
 
-    uint32_t copyLen = std::min(remoteHandleOut->size, static_cast<uint32_t>(remoteHandle.size()));
-    memcpy_s(remoteHandleOut->data, remoteHandleOut->size, remoteHandle.data(), copyLen);
+    uint32_t copyLen = static_cast<uint32_t>(remoteHandle.size());
+    if (copyLen > static_cast<uint32_t>(MAX_OUT_BLOB_SIZE)) {
+        HKS_LOG_E("remoteHandle size is too large");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
     remoteHandleOut->size = copyLen;
+    memcpy_s(remoteHandleOut->data, remoteHandleOut->size, remoteHandle.data(), copyLen);
 
     return ret;
 }

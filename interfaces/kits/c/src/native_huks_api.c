@@ -94,9 +94,9 @@ struct OH_Huks_Result OH_Huks_AuthUkeyPin(const struct OH_Huks_Blob *index, cons
     return ConvertApiResult(ret);
 }
 
-struct OH_Huks_Result OH_Huks_GetPinAuthState(const struct OH_Huks_Blob *index, uint32_t *stateOut)
+struct OH_Huks_Result OH_Huks_GetUkeyPinAuthState(const struct OH_Huks_Blob *index, const struct OH_Huks_ParamSet *paramSetIn, int32_t *stateOut)
 {
-    int32_t ret = HksGetPinAuthState((const struct HksBlob *) index, stateOut);
+    int32_t ret = HksGetUkeyPinAuthState((const struct HksBlob *) index, (const struct HksParamSet *) paramSetIn, stateOut);
     return ConvertApiResult(ret);
 }
 struct OH_Huks_Result OH_Huks_ClearPinAuthState(const struct OH_Huks_Blob *index)

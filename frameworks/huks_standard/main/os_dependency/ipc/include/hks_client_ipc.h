@@ -35,11 +35,12 @@ int32_t HksClientExportProviderCertificates(const struct HksBlob *name, const st
 int32_t HksClientExportCertificate(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
 
 
-// NAPI侧PIN码认证
+// PIN码认证
 int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, 
     int32_t *outStatus, uint32_t *retryCount);
 int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, 
     int32_t *status);
+int32_t HksClientClearPinAuthState(const struct HksBlob *index);
 
 // 句柄管理    
 int32_t HksClientOpenRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
@@ -47,10 +48,6 @@ int32_t HksClientOpenRemoteHandle(const struct HksBlob *index, const struct HksP
 int32_t HksClientGetRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, 
     struct HksBlob *remoteHandleOut);
 int32_t HksClientCloseRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn);
-
-// PIN码认证
-int32_t HksClientGetPinAuthState(const struct HksBlob *index, uint32_t *stateOut);
-int32_t HksClientClearPinAuthState(const struct HksBlob *index);
 
 // 签名验签
 int32_t HksClientUkeySign(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
