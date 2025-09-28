@@ -202,6 +202,9 @@ static void AddHuksTagPart3(napi_env env, napi_value tag)
     AddInt32Property(env, tag, "HUKS_TAG_CHALLENGE_POS", HKS_TAG_CHALLENGE_POS);
     AddInt32Property(env, tag, "HUKS_TAG_KEY_AUTH_PURPOSE", HKS_TAG_KEY_AUTH_PURPOSE);
 
+    // UKEY
+    AddInt32Property(env, tag, "HUKS_TAG_KEY_CLASS", HKS_TAG_KEY_CLASS);
+
     /* ExtensionAbility TAGs moved to external crypto (ukey) module */
 }
 
@@ -575,6 +578,18 @@ static napi_value CreateHuksTagType(napi_env env)
     return tagType;
 }
 
+static napi_value CreateHuksKeyClassType(napi_env env)
+{
+    napi_value keyClassType = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &keyClassType));
+
+    AddInt32Property(env, keyClassType, "HUKS_KEY_CLASS_SELF", HKS_KEY_CLASS_SELF);
+    AddInt32Property(env, keyClassType, "HUKS_KEY_CLASS_EXTENSION", HKS_KEY_CLASS_EXTENSION);
+    AddInt32Property(env, keyClassType, "HUKS_KEY_CLASS_CERTIFICATE", HKS_KEY_CLASS_CERTIFICATE);
+
+    return keyClassType;
+}
+
 static napi_value CreateHuksImportKeyType(napi_env env)
 {
     napi_value ImportKeyType = nullptr;
@@ -764,6 +779,7 @@ static napi_value HuksNapiRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("HuksKeyFlag", CreateHuksKeyFlag(env)),
         DECLARE_NAPI_PROPERTY("HuksKeyStorageType", CreateHuksKeyStorageType(env)),
         DECLARE_NAPI_PROPERTY("HuksTagType", CreateHuksTagType(env)),
+        DECLARE_NAPI_PROPERTY("HuksKeyClassType", CreateHuksKeyClassType(env)),
         DECLARE_NAPI_PROPERTY("HuksTag", CreateHuksTag(env)),
         DECLARE_NAPI_PROPERTY("HuksImportKeyType", CreateHuksImportKeyType(env)),
         DECLARE_NAPI_PROPERTY("HuksUnwrapSuite", CreateHuksUnwrapSuite(env)),
@@ -777,6 +793,7 @@ static napi_value HuksNapiRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("HuksRsaPssSaltLenType", CreateHuksRsaPssSaltLenType(env)),
         DECLARE_NAPI_PROPERTY("HuksAuthStorageLevel", CreateHuksAuthStorageLevel(env)),
         DECLARE_NAPI_PROPERTY("HuksKeyWrapType", CreateHuksKeyWrapType(env)),
+
     };
     napi_property_descriptor desc[HKS_ARRAY_SIZE(NAPI_FUNC_DESC) + HKS_ARRAY_SIZE(propDesc)];
 

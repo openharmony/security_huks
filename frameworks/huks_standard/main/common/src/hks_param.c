@@ -165,7 +165,8 @@ static uint32_t g_validTags[] = {
     HKS_TAG_PIN,
     HKS_TAG_ABILITY_NAME,
     HKS_TAG_REMOTE_ABILITY_SN,
-    HKS_TAG_EXTRA_DATA
+    HKS_TAG_EXTRA_DATA,
+    HKS_TAG_KEY_CLASS,
 };
 
 HKS_API_EXPORT enum HksTagType GetTagType(enum HksTag tag)
