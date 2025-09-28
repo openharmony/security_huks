@@ -53,10 +53,16 @@ void HksProviderLifeCycleManager::ReleaseInstance()
     HksProviderLifeCycleManager::DestroyInstance();
 }
 
+constexpr int32_t HKS_MAX_PROVIDER_NUM = 20;
 int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet)
 {
     HKS_LOG_I("OnRegisterProvider providerName: %" LOG_PUBLIC "s", providerName.c_str());
+    if (m_providerMap.Size() > HKS_MAX_PROVIDER_NUM) {
+        HKS_LOG_E("OnRegisterProvider failed, providerNum is too much."
+            "providerNum: %" LOG_PUBLIC "d", m_providerMap.Size());
+        return HKS_ERROR_UKY_PROVIDER_MGR_REGESTER_REACH_MAX_NUM;
+    }
     ProviderInfo providerInfo{};
     int32_t ret = HksGetProviderInfo(processInfo, providerName, paramSet, providerInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_NULL_POINTER, "Fail to get provider info")
@@ -80,12 +86,13 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
 
         connectInfo = std::make_shared<HksExtAbilityConnectInfo>(want, connect);
         m_providerMap.Insert(providerInfo, connectInfo);
+        HKS_LOG_I("OnRegisterProvider Success! providerName: %" LOG_PUBLIC "s", providerName.c_str());
+        ret = HKS_SUCCESS;
     } else {
         HKS_LOG_E("OnRegisterProvider failed, providerName: %" LOG_PUBLIC "s, already exist", providerName.c_str());
-        return HKS_ERROR_ALREADY_EXISTS;
+        ret = HKS_ERROR_ALREADY_EXISTS;
     }
-    HKS_LOG_I("OnRegisterProvider Success! providerName: %" LOG_PUBLIC "s", providerName.c_str());
-    return HKS_SUCCESS;
+    return ret;
 }
 
 int32_t HksProviderLifeCycleManager::GetExtensionProxy(const ProviderInfo &providerInfo,
@@ -142,7 +149,7 @@ int32_t HksGetProviderInfo(const HksProcessInfo &processInfo, const std::string 
     auto bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(remoteObj);
     HKS_IF_NULL_LOGE_RETURN(bundleMgrProxy, HKS_ERROR_NULL_POINTER, "iface_cast IBundleMgr failed")
 
-    auto bundleRet = bundleMgrProxy->GetBundleNameForUid(processInfo.uidInt, providerInfo.m_bundleName);
+    auto bundleRet = bundleMgrProxy->GetBundleNameForUid(static_cast<int32_t>(processInfo.uidInt), providerInfo.m_bundleName);
     HKS_IF_TRUE_LOGE_RETURN(!bundleRet, HKS_ERROR_BAD_STATE, "GetBundleNameForUid failed")
     providerInfo.m_providerName = providerName;
 

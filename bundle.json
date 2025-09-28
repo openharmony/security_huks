@@ -65,7 +65,6 @@
       "ram": "4828KByte",
       "deps": {
         "components": [
-          "ability_runtime",
           "ability_base",
           "ability_runtime",
           "access_token",

@@ -69,7 +69,7 @@ std::pair<int32_t, uint32_t> HksSessionManager::GenRandomUint32()
     auto *randomNumPtr = static_cast<uint8_t *>(static_cast<void *>(&random));
     if (!GenerateRand(randomNumPtr, sizeof(uint32_t))) {
         HKS_LOG_E("GenerateRand failed");
-        return std::make_pair(HKS_ERROR_BAD_STATE, 0);
+        return std::make_pair(HKS_ERROR_GEN_RANDOM_FAIL, 0);
     }
     return std::make_pair(HKS_SUCCESS, random);
 }
@@ -79,29 +79,30 @@ int32_t HksSessionManager::ExtensionInitSession(const HksProcessInfo &processInf
 {
     ProviderInfo providerInfo;
     std::string newIndex;
-    int32_t ret = HksRemoteHandleManager::GetInstanceWrapper()->ParseIndexAndProviderInfo(index, providerInfo, newIndex);
+    std::string sIndexHandle;
+    int32_t ret = HksRemoteHandleManager::GetInstanceWrapper()->ParseAndValidateIndex(index, providerInfo, newIndex, sIndexHandle);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Parse index and provider info failed: %" LOG_PUBLIC "d", ret);
+        HKS_LOG_E("ParseAndValidateIndex failed: %" LOG_PUBLIC "d", ret);
         return ret;
     }
-    std::string sHandle;
+    std::string sessionHandle;
     auto proxy = HksRemoteHandleManager::GetInstanceWrapper()->GetProviderProxy(providerInfo, ret);
     if (proxy == nullptr) {
         return ret;
     }
-    (void)proxy->InitSession(newIndex, paramSet, sHandle, ret);
+    (void)proxy->InitSession(sIndexHandle, paramSet, sessionHandle, ret);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("InitSession get handle failed: %" LOG_PUBLIC "d", ret);
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
+        return HKS_ERROR_UKY_INIT_SESSION_FAIL;
     }
     auto random = GenRandomUint32();
     if (random.first != HKS_SUCCESS) {
         HKS_LOG_E("GenRandomUint32 failed");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_GEN_RANDOM_FAIL;
     }
-    handle = GenRandomUint32().second;
+    handle = random.second;
     HKS_LOG_I("ExtensionInitSession handle: %" LOG_PUBLIC "u", handle);
-    std::pair<ProviderInfo, std::string> handleInfo{providerInfo, sHandle};
+    std::pair<ProviderInfo, std::string> handleInfo{providerInfo, sessionHandle};
     m_handlers.Insert(handle, handleInfo);
     return HKS_SUCCESS;
 }
@@ -112,7 +113,7 @@ int32_t HksSessionManager::ExtensionUpdateSession(const HksProcessInfo &processI
     std::pair<ProviderInfo, std::string> handleInfo;
     if(!m_handlers.Find(handle, handleInfo)) {
         HKS_LOG_E("Find handle failed");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_UKY_FIND_SESSION_HANDLE_FAIL;
     }
     sptr<IHuksAccessExtBase> proxy{nullptr};
     int32_t ret = HksProviderLifeCycleManager::GetInstanceWrapper()->GetExtensionProxy(handleInfo.first, proxy);
@@ -123,7 +124,7 @@ int32_t HksSessionManager::ExtensionUpdateSession(const HksProcessInfo &processI
     (void)proxy->UpdateSession(handleInfo.second, paramSet, inData, outData, ret);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("UpdateSession failed: %" LOG_PUBLIC "d", ret);
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
+        return HKS_ERROR_UKY_UPDATE_SESSION_FAIL;
     }
     return HKS_SUCCESS;
 }
@@ -134,7 +135,7 @@ int32_t HksSessionManager::ExtensionFinishSession(const HksProcessInfo &processI
     std::pair<ProviderInfo, std::string> handleInfo;
     if(!m_handlers.Find(handle, handleInfo)) {
         HKS_LOG_E("Find handle failed");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_UKY_FIND_SESSION_HANDLE_FAIL;
     }
     sptr<IHuksAccessExtBase> proxy{nullptr};
     int32_t ret = HksProviderLifeCycleManager::GetInstanceWrapper()->GetExtensionProxy(handleInfo.first, proxy);
@@ -145,7 +146,7 @@ int32_t HksSessionManager::ExtensionFinishSession(const HksProcessInfo &processI
     (void)proxy->FinishSession(handleInfo.second, paramSet, inData, outData, ret);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("FinishSession failed: %" LOG_PUBLIC "d", ret);
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
+        return HKS_ERROR_UKY_FINISH_SESSION_FAIL;
     }
     m_handlers.Erase(handle);
     return HKS_SUCCESS;

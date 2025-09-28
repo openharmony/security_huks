@@ -84,7 +84,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnCloseRemoteHandle(c
 }
 
 __attribute__((visibility("default"))) int32_t HksExtPluginOnAuthUkeyPin(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, int32_t& authState, uint32_t& retryCnt)
+    const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t &retryCnt)
 {
     HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
