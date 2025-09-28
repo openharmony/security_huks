@@ -18,10 +18,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "hks_type.h"
+#include "hks_plugin_def.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+int32_t HksCheckIsUkeyOperation(const struct HksParamSet *paramSet);
 
 int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *handle);
