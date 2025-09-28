@@ -287,7 +287,7 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
 
     uint64_t enterTime = 0;
     (void)HksElapsedRealTime(&enterTime);
-    uint32_t currentSessionId = g_sessionId.fetch_add(1);
+    uint32_t currentSessionId = g_sessionId.fetch_add(1, std::memory_order_relaxed);
     auto callingUid = IPCSkeleton::GetCallingUid();
     int userId = HksGetOsAccountIdFromUid(callingUid);
 
@@ -298,7 +298,7 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         HiviewDFX::XCOLLIE_FLAG_LOG);
 #endif
 
-    HKS_LOG_I("code:%" LOG_PUBLIC "u,  callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC
+    HKS_LOG_I("code:%" LOG_PUBLIC "u, callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC
         "d, sessionId = %" LOG_PUBLIC "u", code, callingUid, userId, currentSessionId);
 
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
