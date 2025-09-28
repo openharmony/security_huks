@@ -335,7 +335,7 @@ void HksIpcServiceExportProviderCertificates(const struct HksBlob *srcData, cons
 {
     struct HksBlob providerName = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
-    struct HksExtCertInfoSet *certInfoSet = NULL;
+    struct HksExtCertInfoSet certInfoSet = {0, NULL};
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     struct HksBlob certOut = { 0, NULL };
     int32_t ret;
@@ -350,17 +350,16 @@ void HksIpcServiceExportProviderCertificates(const struct HksBlob *srcData, cons
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksIpcServiceOnExportProviderCertificatesAdapter(&processInfo, &providerName, paramSet, certInfoSet);
+        ret = HksIpcServiceOnExportProviderCertificatesAdapter(&processInfo, &providerName, paramSet, &certInfoSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceOnExportProviderCertificatesAdapter fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksCertificatesPackFromService(certInfoSet, &certOut);
+        ret = HksCertificatesPackFromService(&certInfoSet, &certOut);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCertificatesPackFromService fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     HksSendResponse(context, ret, ret == HKS_SUCCESS && certOut.size != 0 ? &certOut : NULL);
 
-    // TODO: free certInfoSet
-    // HksFreeExtCertInfoSet(certInfoSet);
+    HksFreeCertSet(&certInfoSet);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(certOut);
@@ -372,7 +371,7 @@ void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t
 {
     struct HksBlob index = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
-    struct HksExtCertInfoSet *certInfoSet = NULL;
+    struct HksExtCertInfoSet certInfoSet = {0, NULL};
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     struct HksBlob certOut = { 0, NULL };
     int32_t ret;
@@ -387,17 +386,16 @@ void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksIpcServiceExportCertificateAdapter(&processInfo, &index, paramSet, certInfoSet);
+        ret = HksIpcServiceExportCertificateAdapter(&processInfo, &index, paramSet, &certInfoSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceExportCertificateAdapter fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksCertificatesPackFromService(certInfoSet, &certOut);
+        ret = HksCertificatesPackFromService(&certInfoSet, &certOut);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCertificatesPackFromService fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     HksSendResponse(context, ret, ret == HKS_SUCCESS && certOut.size != 0 ? &certOut : NULL);
 
-    // TODO: free certInfoSet
-    // HksFreeExtCertInfoSet(certInfoSet);
+    HksFreeCertSet(&certInfoSet);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(certOut);
