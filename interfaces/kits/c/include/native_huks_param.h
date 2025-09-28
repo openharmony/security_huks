@@ -187,6 +187,8 @@ struct OH_Huks_Result OH_Huks_CheckParamMatch(const struct OH_Huks_Param *basePa
  */
 void OH_Huks_FreeKeyAliasSet(struct OH_Huks_KeyAliasSet *keyAliasSet);
 
+void OH_Huks_FreeCertSet(struct OH_Huks_ExtCertInfoSet *certSet);
+
 #ifdef __cplusplus
 }
 #endif

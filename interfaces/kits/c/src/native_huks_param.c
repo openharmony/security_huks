@@ -92,3 +92,8 @@ void OH_Huks_FreeKeyAliasSet(struct OH_Huks_KeyAliasSet *keyAliasSet)
 {
     HksFreeKeyAliasSet((struct HksKeyAliasSet *) keyAliasSet);
 }
+
+void OH_Huks_FreeCertSet(struct OH_Huks_ExtCertInfoSet *certSet)
+{
+    HksFreeCertSet((struct HksExtCertInfoSet *) certSet);
+}
