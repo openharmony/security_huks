@@ -32,13 +32,12 @@ extern "C" {
 
 // NAPI
 HKS_API_EXPORT int32_t HksRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
-
 HKS_API_EXPORT int32_t HksUnregisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
 
 // 证书接口HksExportProviderCertificates
 HKS_API_EXPORT int32_t HksExportProviderCertificates(const struct HksBlob *providerName, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
 HKS_API_EXPORT int32_t HksExportCertificate(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
-// NDK
+
 // 句柄管理
 HKS_API_EXPORT int32_t HksOpenRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut);
 HKS_API_EXPORT int32_t HksGetRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut);
@@ -48,7 +47,6 @@ HKS_API_EXPORT int32_t HksCloseRemoteHandle(const struct HksBlob *index, const s
 HKS_API_EXPORT int32_t HksAuthUkeyPinWrapper(const struct HksBlob *index, const struct HksParamSet *paramSetIn, uint32_t *retryCount);
 HKS_API_EXPORT int32_t HksAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, int32_t *outStatus, uint32_t *retryCount);
 HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *name, const struct HksParamSet *paramSetIn, int32_t *status);
-HKS_API_EXPORT int32_t HksGetPinAuthState(const struct HksBlob *index, uint32_t *stateOut);
 HKS_API_EXPORT int32_t HksClearPinAuthState(const struct HksBlob *index);
 
 // 签名验签

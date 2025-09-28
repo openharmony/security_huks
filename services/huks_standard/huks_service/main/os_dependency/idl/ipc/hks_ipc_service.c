@@ -68,7 +68,7 @@ void HksIpcServiceRegisterProvider(const struct HksBlob *srcData, const uint8_t 
     int32_t ret;
     do {
         ret  = HksDeleteKeyUnpack(srcData, &name, &paramSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDeleteKeyUnpack Ipc fail")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceRegisterProviderUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
@@ -77,7 +77,7 @@ void HksIpcServiceRegisterProvider(const struct HksBlob *srcData, const uint8_t 
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksIpcServiceOnProviderRegisterAdapter(&processInfo, &name, paramSet);
-        HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceOnCloseRemoteKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret)
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceOnProviderRegisterAdapter fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     HksSendResponse(context, ret, NULL);
@@ -94,7 +94,7 @@ void HksIpcServiceUnregisterProvider(const struct HksBlob *srcData, const uint8_
     int32_t ret;
     do {
         ret  = HksDeleteKeyUnpack(srcData, &name, &paramSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDeleteKeyUnpack Ipc fail")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceUnregisterProviderUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
@@ -103,7 +103,7 @@ void HksIpcServiceUnregisterProvider(const struct HksBlob *srcData, const uint8_
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksIpcServiceOnProviderUnRegisterAdapter(&processInfo, &name, paramSet);
-        HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceOnCloseRemoteKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret)
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceOnProviderUnRegisterAdapter fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     HksSendResponse(context, ret, NULL);
@@ -124,13 +124,13 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
 
     do {
         ret = HksGenerateKeyUnpack(srcData, &index, &paramSet, &outBlob);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGenerateKeyUnpack fail");
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceAuthUkeyPinUnpack fail");
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
 
         ret = HksIpcServiceOnAuthUkeyPinAdapter(&processInfo, &index, paramSet, &outStatus, &retryCount);
-        HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceAuthUkeyPin ret = %" LOG_PUBLIC "d", ret);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceOnAuthUkeyPinAdapter ret = %" LOG_PUBLIC "d", ret);
 
         if(outStatus != 0) {
             outBlob.size = sizeof(int32_t) * 2;
@@ -169,13 +169,13 @@ void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8
 
     do {
         ret = HksGenerateKeyUnpack(srcData, &index, &paramSet, &outBlob);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGenerateKeyUnpack fail");
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceGetUkeyPinAuthStateUnpack fail");
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
 
         ret = HksIpcServiceOnGetUkeyPinAuthStateAdapter(&processInfo, &index, paramSet, &outStatus);
-        HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceAuthUkeyPin ret = %" LOG_PUBLIC "d", ret);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceOnGetUkeyPinAuthStateAdapter ret = %" LOG_PUBLIC "d", ret);
 
         if(outStatus != 0) {
             outBlob.size = sizeof(int32_t) * 2;
@@ -210,13 +210,13 @@ void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t
 
     do {
         ret  = HksClearPinAuthStateUnpack(srcData, &index);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClearPinAuthStateUnpack Ipc fail")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceClearPinAuthStateUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
 
         ret = HksIpcServiceOnClearPinStatusAdapter(&processInfo, &index);
-        HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceClearPinAuthState ret = %" LOG_PUBLIC "d", ret);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceOnClearPinStatusAdapter ret = %" LOG_PUBLIC "d", ret);
     } while (0);
 
     HksSendResponse(context, ret, NULL);
@@ -235,8 +235,8 @@ void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t 
     int32_t ret;
 
     do {
-        ret  = HksExportPublicKeyUnpack(srcData, &index, &paramSet, &remoteHandleOut);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksExportremoteHandleOutUnpack Ipc fail")
+        ret  = HksDeleteKeyUnpack(srcData, &index, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceOpenRemoteHandleUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
@@ -245,7 +245,7 @@ void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t 
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksIpcServiceOnCreateRemoteKeyHandleAdapter(&processInfo, &index, paramSet, &remoteHandleOut);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceExportPublicremoteHandleOut fail, ret = %" LOG_PUBLIC "d", ret)
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceOnCreateRemoteKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     HksSendResponse(context, ret, ret == HKS_SUCCESS ? &remoteHandleOut : NULL);
@@ -264,8 +264,8 @@ void HksIpcServiceGetRemoteHandle(const struct HksBlob *srcData, const uint8_t *
     int32_t ret;
 
     do {
-        ret  = HksExportPublicKeyUnpack(srcData, &index, &paramSet, &handle);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksExportKeyUnpack Ipc fail")
+        ret  = HksDeleteKeyUnpack(srcData, &index, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceGetRemoteHandleUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
@@ -274,7 +274,7 @@ void HksIpcServiceGetRemoteHandle(const struct HksBlob *srcData, const uint8_t *
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksIpcServiceOnFindRemoteKeyHandleAdapter(&processInfo, &index, paramSet, &handle);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceExportPublicKey fail, ret = %" LOG_PUBLIC "d", ret)
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceOnFindRemoteKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     HksSendResponse(context, ret, ret == HKS_SUCCESS ? &handle : NULL);
@@ -292,7 +292,7 @@ void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t
     int32_t ret;
     do {
         ret  = HksDeleteKeyUnpack(srcData, &index, &paramSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDeleteKeyUnpack Ipc fail")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceCloseRemoteHandleUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
@@ -321,7 +321,7 @@ void HksIpcServiceUkeySign(const struct HksBlob *srcData, const uint8_t *context
 
     do {
         ret = HksAgreeKeyUnpack(srcData, &paramSet, &index, &data, &signatureOut);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAgreeKeyUnpack Ipc fail")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceUkeySignUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
@@ -330,7 +330,7 @@ void HksIpcServiceUkeySign(const struct HksBlob *srcData, const uint8_t *context
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksIpcServiceOnSignedAdapter(&processInfo, paramSet, &index, &data, &signatureOut);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceAgreeKey fail, ret = %" LOG_PUBLIC "d", ret)
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceOnSignedAdapter fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     HksSendResponse(context, ret, ret == HKS_SUCCESS ? &signatureOut : NULL);
@@ -351,7 +351,7 @@ void HksIpcServiceUkeyVerify(const struct HksBlob *srcData, const uint8_t *conte
 
     do {
         ret = HksAgreeKeyUnpack(srcData, &paramSet, &index, &data, &signatureOut);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAgreeKeyUnpack Ipc fail")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceUkeyVerifyUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
@@ -360,7 +360,7 @@ void HksIpcServiceUkeyVerify(const struct HksBlob *srcData, const uint8_t *conte
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksIpcServiceOnVerifyAdapter(&processInfo, paramSet, &index, &data, &signatureOut);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceAgreeKey fail, ret = %" LOG_PUBLIC "d", ret)
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceOnVerifyAdapter fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     HksSendResponse(context, ret, ret == HKS_SUCCESS ? &signatureOut : NULL);
@@ -381,7 +381,7 @@ void HksIpcServiceExportProviderCertificates(const struct HksBlob *srcData, cons
 
     do {
         ret = HksDeleteKeyUnpack(srcData, &providerName, &paramSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDeleteKeyUnpack Ipc fail")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceExportProviderCertificatesUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
@@ -417,7 +417,7 @@ void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t
 
     do {
         ret = HksDeleteKeyUnpack(srcData, &index, &paramSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDeleteKeyUnpack Ipc fail")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceExportCertificateUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)

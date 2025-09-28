@@ -218,15 +218,8 @@ int32_t HksClientCloseRemoteHandle(const struct HksBlob *index, const struct Hks
     return HksServiceCloseRemoteHandle(&processInfo, index, paramSetIn);
 }
 
-int32_t HksClientGetPinAuthState(const struct HksBlob *index, uint32_t *stateOut)
-{
-    // TODO: 接口不清晰
-    return 0;
-}
-
 int32_t HksClientClearPinAuthState(const struct HksBlob *index)
 {
-    // TODO: 接口不清晰
     return 0;
 }
 
