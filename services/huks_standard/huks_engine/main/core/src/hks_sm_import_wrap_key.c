@@ -297,22 +297,11 @@ static int32_t VerifyKekBySm2(const struct HksSmWrappedKeyDataBlob *dataParams)
     }
     struct HksUsageSpec usageSpec = { 0 };
     HksFillUsageSpec(verifyParamSet, &usageSpec);
-
-    struct HksBlob message = {0, NULL};
-    message.size = MAX_HASH_SIZE;
-    message.data = (uint8_t *)HksMalloc(message.size);
-    if (message.data == NULL) {
-        HKS_LOG_E("malloc message memory failed!");
-        HksFreeParamSet(&verifyParamSet);
-        return HKS_ERROR_MALLOC_FAIL;
+    ret = HksCryptoHalVerify(&dataParams->peerPublicKey, &usageSpec, &dataParams->kekData, &dataParams->signData);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksCryptoHalVerify failed!");
     }
-    do {
-        ret = HksCryptoHalHash(HKS_DIGEST_SM3, &dataParams->kekData, &message);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCryptoHalHash failed!")
-        ret = HksCryptoHalVerify(&dataParams->peerPublicKey, &usageSpec, &message, &dataParams->signData);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCryptoHalVerify failed!")
-    } while (0);
-    HKS_FREE_BLOB(message);
+
     HksFreeParamSet(&verifyParamSet);
     return ret;
 }
