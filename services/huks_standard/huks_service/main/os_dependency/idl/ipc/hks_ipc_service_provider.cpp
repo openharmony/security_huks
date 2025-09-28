@@ -131,7 +131,7 @@ int32_t HksIpcServiceOnAuthUkeyPin(const struct HksProcessInfo *processInfo, con
 }
 
 int32_t HksIpcServiceOnGetVerifyPinStatus(const struct HksProcessInfo *processInfo,
-    const std::string &index, const CppParamSet &paramSet, uint32_t &state) {
+    const std::string &index, const CppParamSet &paramSet, int32_t &state) {
     return 0;
     // HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
     // auto libInterface = GetExtLibInterfaceInstance();

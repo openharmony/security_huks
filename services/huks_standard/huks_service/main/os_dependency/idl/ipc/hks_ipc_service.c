@@ -160,7 +160,46 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
 
 void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8_t *context) 
 {
-    
+    struct HksBlob index = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    int32_t outStatus = 0;
+    struct HksBlob outBlob = { 0, NULL };
+    int32_t ret;
+
+    do {
+        ret = HksGenerateKeyUnpack(srcData, &index, &paramSet, &outBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGenerateKeyUnpack fail");
+
+        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
+
+        ret = HksIpcServiceOnGetUkeyPinAuthStateAdapter(&processInfo, &index, paramSet, &outStatus);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceAuthUkeyPin ret = %" LOG_PUBLIC "d", ret);
+
+        if(outStatus != 0) {
+            outBlob.size = sizeof(int32_t) * 2;
+            outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
+            if (outBlob.data == NULL) {
+                ret = HKS_ERROR_MALLOC_FAIL;
+                HKS_LOG_E("malloc fail");
+                break;
+            }
+            if (memcpy_s(outBlob.data, outBlob.size, &outStatus, sizeof(int32_t)) != EOK) {
+                ret = HKS_ERROR_BAD_STATE;
+                HKS_LOG_E("memcpy_s failed");
+                break;
+            }
+        }
+    } while (0);
+
+    HksSendResponse(context, ret, outStatus != 0 ? &outBlob: NULL);
+
+    HKS_FREE_BLOB(index);
+    HKS_FREE_BLOB(outBlob);
+    HksFreeParamSet(&paramSet);
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
 }
 
 void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t *context) 

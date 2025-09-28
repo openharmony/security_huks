@@ -35,7 +35,22 @@ struct HksSuccessReturnResult {
     struct HksBlob *outData;
     HksParamSet *paramSet;
     struct HksCertChain *certChain;
+
+    // ukey features
+    struct HksBlob *index;
+    uint32_t retryCount;
+    int32_t outStatus;
 };
+
+// struct HksExternalCrypoResult {
+//     bool isOnlyReturnBoolResult;
+//     bool boolReturned;
+//     struct HksBlob *handle;
+//     struct HksBlob *challenge;
+//     struct HksBlob *outData;
+//     HksParamSet *paramSet;
+//     struct HksCertChain *certChain;
+// };
 
 struct HksSuccessListAliasesResult {
     struct HksKeyAliasSet *aliasSet;
@@ -152,7 +167,7 @@ void HksReturnListAliasesResult(napi_env env, napi_ref callback, napi_deferred d
 
 napi_value CreateJsError(napi_env env, int32_t errCode, const char *errorMsg);
 
-void SetRetryCountIfExists(int32_t outStatus, int32_t retryCount);
+void SetRetryCountAndOutStatus(int32_t outStatus, int32_t retryCount, struct HksSuccessReturnResult &resultData);
 
 inline void HksNapiThrow(napi_env env, int32_t errCode, const char *errorMsg)
 {

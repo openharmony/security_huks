@@ -805,11 +805,11 @@ static napi_value GenerateResult(napi_env env, const struct HksSuccessReturnResu
 }
 
 // napi层将retryCount传递到这里
-void SetRetryCountIfExists(int32_t outStatus, int32_t retryCount)
+void SetRetryCountAndOutStatus(int32_t outStatus, int32_t retryCount, struct HksSuccessReturnResult &resultData)
 {
-    if (outStatus != HKS_SUCCESS && retryCount >= 0) {
-        pinRetryCount = retryCount;
-    }
+    pinRetryCount = retryCount; // 错误时需打印
+    resultData.outStatus = outStatus;
+    resultData.retryCount = retryCount;
 }
 
 static napi_value GenerateBusinessError(napi_env env, int32_t errorCode)
@@ -927,6 +927,11 @@ void SuccessReturnResultInit(struct HksSuccessReturnResult &resultData)
     resultData.outData = nullptr;
     resultData.paramSet = nullptr;
     resultData.certChain = nullptr;
+
+    // ukey feature
+    resultData.index = nullptr;
+    resultData.retryCount = 0;
+    resultData.outStatus = 0;
 }
 
 void SuccessListAliasesReturnResultInit(struct HksSuccessListAliasesResult &resultData)
