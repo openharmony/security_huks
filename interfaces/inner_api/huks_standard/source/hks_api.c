@@ -140,7 +140,7 @@ HKS_API_EXPORT int32_t HksAuthUkeyPinWrapper(const struct HksBlob *index, const 
     if ((index == NULL) || (paramSetIn == NULL) || (retryCount == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
-    uint32_t outStatus = 0;
+    int32_t outStatus = 0;
     int32_t ret = HksClientAuthUkeyPin(index, paramSetIn, &outStatus, retryCount);
     HKS_IF_NOT_SUCC_LOGE(ret, "leave AuthUkeyPin, result = %" LOG_PUBLIC "d", ret);
     return ret;
@@ -153,7 +153,7 @@ HKS_API_EXPORT int32_t HksAuthUkeyPinWrapper(const struct HksBlob *index, const 
 }
 
 
-HKS_API_EXPORT int32_t HksAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, uint32_t *outStatus, uint32_t *retryCount)
+HKS_API_EXPORT int32_t HksAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, int32_t *outStatus, uint32_t *retryCount)
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter AuthUkeyPin");
@@ -171,14 +171,14 @@ HKS_API_EXPORT int32_t HksAuthUkeyPin(const struct HksBlob *index, const struct 
 #endif
 }
 // NAPI接口
-HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut)
+HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, int32_t *status)
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter GetUkeyPinAuthState");
-    if ((index == NULL) || (paramSetIn == NULL) || (paramSetOut == NULL)) {
+    if ((index == NULL) || (paramSetIn == NULL) || (status == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
-    int32_t ret = HksClientGetUkeyPinAuthState(index, paramSetIn, paramSetOut);
+    int32_t ret = HksClientGetUkeyPinAuthState(index, paramSetIn, status);
     HKS_IF_NOT_SUCC_LOGE(ret, "leave GetUkeyPinAuthState, result = %" LOG_PUBLIC "d", ret);
     return ret;
 #else

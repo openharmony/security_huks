@@ -37,9 +37,9 @@ int32_t HksClientExportCertificate(const struct HksBlob *index, const struct Hks
 
 // NAPI侧PIN码认证
 int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, 
-    uint32_t *outStatus, uint32_t *retryCount);
+    int32_t *outStatus, uint32_t *retryCount);
 int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, 
-    struct HksParamSet *paramSetOut);
+    int32_t *status);
 
 // 句柄管理    
 int32_t HksClientOpenRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn,

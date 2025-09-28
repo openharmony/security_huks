@@ -260,7 +260,7 @@ napi_value HuksNapiAuthUkeyPin(napi_env env, napi_callback_info info)
         UkeyPinContext *napiContext = static_cast<UkeyPinContext *>(context);
         HksSuccessReturnResult resultData;
         SuccessReturnResultInit(resultData);
-        SetRetryCountIfExists(napiContext->outStatus, napiContext->retryCount);        
+        SetRetryCountAndOutStatus(napiContext->outStatus, napiContext->retryCount, resultData);        
         HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
     };
 
@@ -311,13 +311,14 @@ napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info)
 
     context->execute = [](napi_env env, void *data) {
         UkeyPinContext *napiContext = static_cast<UkeyPinContext *>(data);
-        napiContext->result = HksGetUkeyPinAuthState(napiContext->index, napiContext->paramSetIn, napiContext->paramSetOut);
+        napiContext->result = HksGetUkeyPinAuthState(napiContext->index, napiContext->paramSetIn, &napiContext->outStatus);
     };
 
     context->resolve = [](napi_env env, AsyncContext *context) {
         UkeyPinContext *napiContext = static_cast<UkeyPinContext *>(context);
         HksSuccessReturnResult resultData;
         SuccessReturnResultInit(resultData);
+        SetRetryCountAndOutStatus(napiContext->outStatus, napiContext->retryCount, resultData);   
         HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
     };
 

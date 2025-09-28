@@ -283,14 +283,13 @@ int32_t HksClientOpenRemoteHandle(const struct HksBlob *index, const struct HksP
     return ret;
 }
 
-int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, uint32_t *outStatus, uint32_t *retryCount)
+int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, int32_t *outStatus, uint32_t *retryCount)
 {
     int32_t ret;
-
-    if (retryCount == NULL) {
+    struct HksParamSet *newParamSet = NULL;
+    if (retryCount == NULL || outStatus == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
-
     struct HksBlob inBlob = { 0, NULL };
     /**
     *                +---------------------------+
@@ -299,11 +298,7 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
     *                +---------------------------+
     */
     struct HksBlob outBlob = { sizeof(int32_t) * 2, (uint8_t *)malloc(sizeof(int32_t) * 2) };
-    struct HksParamSet *newParamSet = NULL;
-    if (outBlob.data == NULL) {
-        HKS_FREE_BLOB(inBlob);
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL)
 
     inBlob.size = sizeof(index->size) + ALIGN_SIZE(index->size) + ALIGN_SIZE(paramSetIn->paramSetSize) + sizeof(outBlob.size);
     inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
@@ -337,23 +332,21 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
     return ret;
 }
 
-int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut)
+int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, int32_t *status)
 {
-    // TODO:出参不需要传递？ 没有提前分配内存此处可能有问题
     int32_t ret;
+    if (status == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
     struct HksBlob inBlob = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
-    struct HksBlob outBlob = { 0, NULL };
+    struct HksBlob outBlob = { sizeof(int32_t), (uint8_t *)malloc(sizeof(int32_t)) };
+    HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL)
 
     inBlob.size = sizeof(index->size) + ALIGN_SIZE(index->size) + ALIGN_SIZE(paramSetIn->paramSetSize) +
         sizeof(outBlob.size);
     inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
     HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
-    
-    if (paramSetOut != NULL) {
-        outBlob.size = paramSetOut->paramSetSize;
-        outBlob.data = (uint8_t *)paramSetOut;
-    }
 
     do {
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
@@ -368,24 +361,27 @@ int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct H
         ret = HksSendRequest(HKS_MSG_EXT_GET_UKEY_PIN_AUTH_STATE, &inBlob, &outBlob, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
 
-        if (paramSetOut != NULL) {
-            ret = HksFreshParamSet(paramSetOut, false);
-            HKS_IF_NOT_SUCC_LOGE(ret, "FreshParamSet fail, ret = %" LOG_PUBLIC "d", ret)
+        if (outBlob.data == NULL || ret != HKS_SUCCESS || outBlob.size < sizeof(int32_t)) {
+            ret = HUKS_ERR_CODE_PIN_CODE_ERROR;
+        } else {
+            (void)memcpy_s(status, sizeof(int32_t), outBlob.data, sizeof(int32_t));
         }
+        
     } while (0);
 
+    HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
+    HKS_FREE_BLOB(outBlob);
     return ret;
 }
 
 int32_t HksClientGetRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
 {
-    // TODO:出参不需要传递？ 没有提前分配内存此处可能有问题
+    // TODO： remoteHandleOut目前调用方必须分配内存，后续改成必须是一个空的，否则报错， size == 0, data == NULL，与其他保持一致
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob inBlob = { 0, NULL };
 
-    // TODO： remoteHandleOut必须是一个空的，否则报错， size == 0, data == NULL
     do {
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret)
@@ -414,6 +410,7 @@ int32_t HksClientGetRemoteHandle(const struct HksBlob *index, const struct HksPa
 
 int32_t HksClientCloseRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn)
 {
+    // TODO： remoteHandleOut目前调用方必须分配内存，后续改成必须是一个空的，否则报错， size == 0, data == NULL，与其他保持一致
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob inBlob = { 0, NULL };
