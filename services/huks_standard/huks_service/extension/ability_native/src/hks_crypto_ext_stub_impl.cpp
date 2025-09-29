@@ -156,6 +156,11 @@ ErrCode HksCryptoExtStubImpl::InitSession(
     int32_t& errcode)
 {
     LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO InitSession");
+    if (extension_ == nullptr) {
+        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        return ERR_OK;
+    }
+    extension_->InitSession(index, params, handle, errcode);
     return ERR_OK;
 }
 
@@ -167,6 +172,11 @@ ErrCode HksCryptoExtStubImpl::UpdateSession(
     int32_t& errcode)
 {
     LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO UpdateSession");
+    if (extension_ == nullptr) {
+        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        return ERR_OK;
+    }
+    extension_->UpdateSession(handle, params, inData, outData, errcode);
     return ERR_OK;
 }
 
@@ -178,6 +188,11 @@ ErrCode HksCryptoExtStubImpl::FinishSession(
     int32_t& errcode)
 {
     LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO FinishSession");
+    if (extension_ == nullptr) {
+        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        return ERR_OK;
+    }
+    extension_->FinishSession(handle, params, inData, outData, errcode);
     return ERR_OK;
 }
 
