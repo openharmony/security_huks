@@ -587,7 +587,7 @@ int32_t HksServiceExportCertificate(const struct HksProcessInfo *processInfo, co
     return 0;
 }
 
-int32_t HksServiceAuthUkeyPin(const struct HksProcessInfo *processInfo, const struct HksBlob *index, const struct HksParamSet *paramSetIn, uint32_t *outStatus, uint32_t *retryCount)
+int32_t HksServiceAuthUkeyPin(const struct HksProcessInfo *processInfo, const struct HksBlob *index, const struct HksParamSet *paramSetIn, int32_t *outStatus, uint32_t *retryCount)
 {
     return 0;
 }
@@ -1590,7 +1590,7 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
         ret = HksCheckServiceInitParams(&processInfo->processName, keyAlias, paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check ServiceInit params failed, ret = %" LOG_PUBLIC "d", ret)
 #ifdef L2_STANDARD
-        if(HksCheckIsUkeyOperation(paramSet) == HKS_SUCCESS) {
+        if (HksCheckIsUkeyOperation(paramSet) == HKS_SUCCESS) {
             ret = HksServiceOnUkeyInitSession(processInfo, keyAlias, paramSet, handle);
             HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyInitSession failed, ret = %" LOG_PUBLIC "d", ret)
             break;
@@ -1671,7 +1671,7 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
     int32_t ret;
     do {
 #ifdef L2_STANDARD
-        if(HksCheckIsUkeyOperation(paramSet) == HKS_SUCCESS) {
+        if (HksCheckIsUkeyOperation(paramSet) == HKS_SUCCESS) {
             ret = HksServiceOnUkeyUpdateSession(processInfo, handle, paramSet, inData, outData);
             HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyUpdateSession failed, ret = %" LOG_PUBLIC "d", ret)
             break;
@@ -1775,7 +1775,7 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init output data failed")
         }
 #ifdef L2_STANDARD
-        if(HksCheckIsUkeyOperation(paramSet) == HKS_SUCCESS) {
+        if (HksCheckIsUkeyOperation(paramSet) == HKS_SUCCESS) {
             ret = HksServiceOnUkeyFinishSession(processInfo, handle, paramSet, inData, outData);
             HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyFinishSession failed, ret = %" LOG_PUBLIC "d", ret)
             break;
