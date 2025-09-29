@@ -19,7 +19,6 @@
 #include "js_hks_crypto_ext_ability.h"
 #include "runtime.h"
 #include "refbase.h"
-// #include "hks_log.h"
 #include "log_utils.h"
 
 namespace OHOS {

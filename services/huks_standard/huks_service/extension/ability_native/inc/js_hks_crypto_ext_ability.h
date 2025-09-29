@@ -36,12 +36,19 @@ typedef enum {
     EXPORT_PROVIDER_CERTIFICATES
 } CryptoResultParamType;
 
+typedef struct HksCertInfo {
+    int32_t purpose {};
+    std::string index {};
+    struct HksBlob certsArray {};
+} HksCertInfo;
+
 typedef struct CryptoResultParam {
     int32_t errCode {};
     int32_t authState {};
     uint32_t retryCnt {};
     std::string handle {};
     std::string index {};
+    std::vector<HksCertInfo> certs {};
 
     CryptoResultParamType paramType {};
     std::condition_variable callJsCon;
@@ -97,6 +104,9 @@ private:
     };
     napi_value CallObjectMethod(const char *name, napi_value const *argv = nullptr, size_t argc = 0);
     static napi_status GetStringValue(napi_env env, napi_value value, std::string &result);
+    static napi_status GetHksCertInfoValue(napi_env env, napi_value value, HksCertInfo &certInfo);
+    static napi_status GetUint8ArrayValue(napi_env env, napi_value value, HksBlob &result);
+    static void HksCertInfoToString(std::vector<HksCertInfo> &certInfoVec, std::string &jsonStr);
     int CallJsMethod(const std::string &funcName, AbilityRuntime::JsRuntime &jsRuntime, NativeReference *jsObj,
         InputArgsParser argParser, ResultValueParser retParser);
     void GetSrcPath(std::string &srcPath);

@@ -26,7 +26,7 @@ ErrCode HksCryptoExtStubImpl::OpenRemoteHandle(
     std::string& handle,
     int32_t& errcode)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl test");
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl OpenRemoteHandle");
     if (extension_ == nullptr) {
         LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
         return ERR_OK;

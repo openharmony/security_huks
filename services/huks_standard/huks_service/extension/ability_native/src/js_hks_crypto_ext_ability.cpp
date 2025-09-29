@@ -29,6 +29,7 @@
 #include "napi_remote_object.h"
 #include "log_utils.h"
 #include "huks_napi_common_item.h"
+#include "hks_json_wrapper.h"
 
 namespace OHOS {
 namespace Security {
@@ -187,6 +188,76 @@ napi_status JsHksCryptoExtAbility::GetStringValue(napi_env env, napi_value value
     if (napi_get_value_string_utf8(env, value, result.data(), tempSize + 1, &tempSize) != napi_ok) {
         return napi_generic_failure;
     }
+    return napi_ok;
+}
+
+std::string BlobToString(const HksBlob &strBlob)
+{
+    std::string ret {};
+    if (strBlob.size == 0 || strBlob.data == nullptr) {
+        LOGE("BlobToString nullptr");
+        return nullptr;
+    }
+    return std::string(reinterpret_cast<const char*>(strBlob.data), strBlob.size);
+}
+
+napi_status JsHksCryptoExtAbility::GetUint8ArrayValue(napi_env env, napi_value value, HksBlob &result)
+{
+    size_t length = 0;
+    void *data = nullptr;
+    napi_typedarray_type type;
+    napi_value array = nullptr;
+    size_t offset = 0;
+    auto status = napi_get_typedarray_info(env, value, &type, &length, (void **)(&data), &array, &offset);
+    if (status != napi_ok) {
+        LOGE("napi_get_typedarray_info failed");
+        return napi_generic_failure;
+    }
+    LOGE("napi_get_typedarray_info data = %p, length = %zu, offset = %zu", data, length, offset);
+
+    uint8_t *uint8Data = nullptr;
+    size_t byte_length = 0;
+    status = napi_get_arraybuffer_info(env, array, (void **)&uint8Data, &byte_length);
+    if (status != napi_ok) {
+        LOGE("napi_get_typedarray_info %d", int(status));
+        return napi_generic_failure;
+    }
+
+    LOGE("napi_get_arraybuffer_info uint8Data = %p, byte_length = %zu", uint8Data, byte_length);
+    result.size = static_cast<uint32_t>(byte_length);
+    // TODO result.data 改用memcpy_s的方式
+    result.data = uint8Data;
+    return napi_ok;
+}
+
+napi_status JsHksCryptoExtAbility::GetHksCertInfoValue(napi_env env, napi_value value, HksCertInfo &certInfo)
+{
+    napi_value napiPurpose = nullptr;
+    napi_get_named_property(env, value, "purpose", &napiPurpose);
+    if (napi_get_value_int32(env, napiPurpose, &certInfo.purpose) != napi_ok) {
+        LOGE("GetHksCertInfoValue js value napiPurpose failed");
+        return napi_generic_failure;
+    }
+
+    LOGE("wqy !!!!!!!!!!!!!!!!!!!!!!!!! GetHksCertInfoValue purpose %d", certInfo.purpose);
+
+    napi_value napiIndex = nullptr;
+    napi_get_named_property(env, value, "index", &napiIndex);
+    if (GetStringValue(env, napiIndex, certInfo.index) != napi_ok) {
+        LOGE("GetHksCertInfoValue js value napiIndex failed");
+        return napi_generic_failure;
+    }
+
+    LOGE("wqy !!!!!!!!!!!!!!!!!!!!!!!!! GetHksCertInfoValue index %s", certInfo.index.c_str());
+    
+    napi_value napiCerts = nullptr;
+    napi_get_named_property(env, value, "cert", &napiCerts);
+    if (GetUint8ArrayValue(env, napiCerts, certInfo.certsArray) != napi_ok) {
+        LOGE("GetHksCertInfoValue js value napiCerts failed");
+        return napi_generic_failure;
+    }
+    LOGE("wqy !!!!!!!!!!!!!!!!!!!!!!!!! GetHksCertInfoValue cert size %d", certInfo.certsArray.size);
+    LOGE("wqy !!!!!!!!!!!!!!!!!!!!!!!!! GetHksCertInfoValue cert %s", BlobToString(certInfo.certsArray).c_str());
     return napi_ok;
 }
 
@@ -414,6 +485,50 @@ void JsHksCryptoExtAbility::GetUkeyPinAuthStateParams(napi_env env, napi_value f
     LOGE("wqy !!!!!!!!!!!!!!!!!!!!!! ConvertFunctionResult authState %d", resultParams.authState);
 }
 
+void JsHksCryptoExtAbility::HksCertInfoToString(std::vector<HksCertInfo> &certInfoVec, std::string &jsonStr)
+{
+    auto jsonObj = CommJsonObject::CreateArray();
+    if (jsonObj.IsNull()) {
+        LOGE("jsonObj is null");
+        return;
+    }
+    
+    for (auto certInfo : certInfoVec) {
+        auto certJsonObj = CommJsonObject::CreateObject();
+        if (certJsonObj.IsNull()) {
+            LOGE("certJsonObj is null");
+            break;
+        }
+
+        if (!certJsonObj.SetValue("purpose", certInfo.purpose)) {
+            LOGE("set purpose value failed");
+            break;
+        }
+
+        if (!certJsonObj.SetValue("index", certInfo.index)) {
+            LOGE("set index value failed");
+            break;
+        }
+
+        std::string certStr = BlobToString(certInfo.certsArray);
+        if (!certJsonObj.SetValue("cert", certStr)) {
+            LOGE("set index cert failed");
+            break;
+        }
+
+        if (jsonObj.AppendElement(certJsonObj)) {
+            LOGE("AppendElement error");
+        }
+    }
+    jsonStr = jsonObj.Serialize();
+    if (jsonStr.empty()) {
+        LOGE("jsonStr is empty");
+        return;
+    }
+    LOGE("HksCertInfoToString jsonStr: %s", jsonStr.c_str());
+    return ;
+}
+
 void JsHksCryptoExtAbility::GetExportCertificateParams(napi_env env, napi_value funcResult, CryptoResultParam &resultParams)
 {
     napi_value nativeArray = nullptr;
@@ -423,7 +538,28 @@ void JsHksCryptoExtAbility::GetExportCertificateParams(napi_env env, napi_value 
         LOGE("Convert js array object fail.");
         return;
     }
-    LOGE("wqy !!!!!!!!!!!!!!!!!!!!!! ConvertFunctionResult authState %d", resultParams.authState);
+
+    uint32_t length = 0;
+    if (napi_get_array_length(env, nativeArray, &length) != napi_ok) {
+        LOGE("Get nativeArray length fail.");
+        return;
+    }
+    for (uint32_t i = 0; i < length; i++) {
+        napi_value queryResult = nullptr;
+        napi_get_element(env, nativeArray, i, &queryResult);
+        if (queryResult == nullptr) {
+            LOGE("Get native queryResult fail.");
+            return;
+        }
+
+        HksCertInfo certInfo;
+        if (GetHksCertInfoValue(env, queryResult, certInfo) != napi_ok) {
+            LOGE("Convert js certInfo fail.");
+            return;
+        }
+        resultParams.certs.emplace_back(std::move(certInfo));
+    }
+    return;
 }
 
 bool JsHksCryptoExtAbility::ConvertFunctionResult(napi_env env, napi_value funcResult, CryptoResultParam &resultParams)
@@ -451,10 +587,8 @@ bool JsHksCryptoExtAbility::ConvertFunctionResult(napi_env env, napi_value funcR
             GetUkeyPinAuthStateParams(env, funcResult, resultParams);
             break;
         case CryptoResultParamType::EXPORT_CERTIFICATE:
-            GetExportCertificateParams(env, funcResult, resultParams);
-            break;
         case CryptoResultParamType::EXPORT_PROVIDER_CERTIFICATES:
-            // GetExportProviderCertificatesParams(env, funcResult, resultParams);
+            GetExportCertificateParams(env, funcResult, resultParams);
             break;
         case CryptoResultParamType::CLOSE_REMOTE_HANDLE:
         default:
@@ -736,6 +870,7 @@ int JsHksCryptoExtAbility::ExportCertificate(const std::string& index, const Cpp
     dataParam->callJsCon.wait(lock, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
     LOGE("wait end");
     errcode = std::move(dataParam->errCode);
+    HksCertInfoToString(dataParam->certs, certJsonArr);
     return ERR_OK;
 }
 
@@ -775,7 +910,7 @@ int JsHksCryptoExtAbility::ExportProviderCertificates(const CppParamSet& params,
     };
 
     dataParam->callJsExMethodDone.store(false);
-    auto ret = CallJsMethod("onExportProviderCertificates", jsRuntime_, jsObj_.get(), argParser, retParser);
+    auto ret = CallJsMethod("onEnumCertificates", jsRuntime_, jsObj_.get(), argParser, retParser);
     if (ret != ERR_OK) {
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
@@ -785,6 +920,7 @@ int JsHksCryptoExtAbility::ExportProviderCertificates(const CppParamSet& params,
     dataParam->callJsCon.wait(lock, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
     LOGE("wait end");
     errcode = std::move(dataParam->errCode);
+    HksCertInfoToString(dataParam->certs, certJsonArr);
     return ERR_OK;
 }
 
