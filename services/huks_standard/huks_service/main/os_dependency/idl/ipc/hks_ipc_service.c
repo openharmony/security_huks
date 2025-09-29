@@ -117,39 +117,40 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
     struct HksBlob index = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
-    int32_t outStatus = 0;
+    int32_t status = 0;
     uint32_t retryCount = 0;
     struct HksBlob outBlob = { 0, NULL };
     int32_t ret;
 
     do {
-        ret = HksGenerateKeyUnpack(srcData, &index, &paramSet, &outBlob);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceAuthUkeyPinUnpack fail");
+        ret = HksDeleteKeyUnpack(srcData, &index, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: unpack fail");
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: get process info fail ret=%" LOG_PUBLIC "d", ret);
 
-        ret = HksIpcServiceOnAuthUkeyPinAdapter(&processInfo, &index, paramSet, &outStatus, &retryCount);
-        HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceOnAuthUkeyPinAdapter ret = %" LOG_PUBLIC "d", ret);
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: permission check fail ret=%" LOG_PUBLIC "d", ret);
 
-        if(outStatus != 0) {
-            outBlob.size = sizeof(int32_t) * 2;
-            outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
-            if (outBlob.data == NULL) {
-                ret = HKS_ERROR_MALLOC_FAIL;
-                HKS_LOG_E("malloc fail");
-                break;
-            }
-            if (memcpy_s(outBlob.data, outBlob.size, &outStatus, sizeof(int32_t)) != EOK ||
-                memcpy_s(outBlob.data + sizeof(int32_t), outBlob.size - sizeof(int32_t), &retryCount, sizeof(int32_t)) != EOK) {
-                ret = HKS_ERROR_BAD_STATE;
-                HKS_LOG_E("memcpy_s failed");
-                break;
-            }
+        ret = HksIpcServiceOnAuthUkeyPinAdapter(&processInfo, &index, paramSet, &status, &retryCount);
+        HKS_IF_NOT_SUCC_LOGE(ret, "AuthUkeyPin: adapter ret=%" LOG_PUBLIC "d", ret);
+
+        outBlob.size = (sizeof(int32_t) + sizeof(uint32_t));
+        outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
+        if (outBlob.data == NULL) {
+            ret = HKS_ERROR_MALLOC_FAIL;
+            break;
+        }
+        if (memcpy_s(outBlob.data, outBlob.size, &status, sizeof(int32_t)) != EOK ||
+            memcpy_s(outBlob.data + sizeof(int32_t), outBlob.size - sizeof(int32_t),
+                &retryCount, sizeof(uint32_t)) != EOK) {
+            ret = HKS_ERROR_BAD_STATE;
+            HKS_LOG_E("AuthUkeyPin: memcpy fail");
+            break;
         }
     } while (0);
 
-    HksSendResponse(context, ret, outStatus != 0 ? &outBlob: NULL);
+    HksSendResponse(context, ret, (outBlob.data != NULL && outBlob.size == (sizeof(int32_t) + sizeof(uint32_t))) ? &outBlob : NULL);
 
     HKS_FREE_BLOB(index);
     HKS_FREE_BLOB(outBlob);
@@ -158,42 +159,43 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
     HKS_FREE_BLOB(processInfo.userId);
 }
 
-void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8_t *context) 
+void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob index = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
-    int32_t outStatus = 0;
+    int32_t status = 0;
     struct HksBlob outBlob = { 0, NULL };
     int32_t ret;
 
     do {
-        ret = HksGenerateKeyUnpack(srcData, &index, &paramSet, &outBlob);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceGetUkeyPinAuthStateUnpack fail");
+        ret = HksDeleteKeyUnpack(srcData, &index, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetUkeyPinAuthState: unpack fail");
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetUkeyPinAuthState: get process info fail ret=%" LOG_PUBLIC "d", ret);
 
-        ret = HksIpcServiceOnGetUkeyPinAuthStateAdapter(&processInfo, &index, paramSet, &outStatus);
-        HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceOnGetUkeyPinAuthStateAdapter ret = %" LOG_PUBLIC "d", ret);
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetUkeyPinAuthState: permission fail ret=%" LOG_PUBLIC "d", ret);
 
-        if(outStatus != 0) {
-            outBlob.size = sizeof(int32_t) * 2;
-            outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
-            if (outBlob.data == NULL) {
-                ret = HKS_ERROR_MALLOC_FAIL;
-                HKS_LOG_E("malloc fail");
-                break;
-            }
-            if (memcpy_s(outBlob.data, outBlob.size, &outStatus, sizeof(int32_t)) != EOK) {
-                ret = HKS_ERROR_BAD_STATE;
-                HKS_LOG_E("memcpy_s failed");
-                break;
-            }
+        ret = HksIpcServiceOnGetUkeyPinAuthStateAdapter(&processInfo, &index, paramSet, &status);
+        HKS_IF_NOT_SUCC_LOGE(ret, "GetUkeyPinAuthState: adapter ret=%" LOG_PUBLIC "d", ret);
+
+        outBlob.size = (uint32_t)sizeof(int32_t);
+        outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
+        if (outBlob.data == NULL) {
+            ret = HKS_ERROR_MALLOC_FAIL;
+            break;
+        }
+        if (memcpy_s(outBlob.data, outBlob.size, &status, sizeof(int32_t)) != EOK) {
+            ret = HKS_ERROR_BAD_STATE;
+            HKS_LOG_E("GetUkeyPinAuthState: memcpy fail");
+            break;
         }
     } while (0);
 
-    HksSendResponse(context, ret, outStatus != 0 ? &outBlob: NULL);
+    HksSendResponse(context, ret,
+        (outBlob.data != NULL && outBlob.size == (uint32_t)sizeof(int32_t)) ? &outBlob : NULL);
 
     HKS_FREE_BLOB(index);
     HKS_FREE_BLOB(outBlob);

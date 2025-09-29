@@ -95,6 +95,26 @@ static int32_t BuildParamSetNotNull(const struct HksParamSet *paramSetIn, struct
     return ret;
 }
 
+static inline int32_t HksAllocInBlob(struct HksBlob *inBlob,
+    const struct HksBlob *blob, const struct HksParamSet *paramSet)
+{
+    if (inBlob == NULL || blob == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    uint32_t size = (uint32_t)(sizeof(blob->size) + ALIGN_SIZE(blob->size));
+    if (paramSet != NULL) {
+        size += ALIGN_SIZE(paramSet->paramSetSize);
+    }
+    inBlob->size = size;
+    inBlob->data = (uint8_t *)HksMalloc(size);
+    if (inBlob->data == NULL) {
+        inBlob->size = 0;
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    return HKS_SUCCESS;
+}
+
+
 int32_t HksClientRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
 {
     HKS_LOG_D("======HksClientRegisterProvider enter RegisterProvider");
@@ -102,12 +122,12 @@ int32_t HksClientRegisterProvider(const struct HksBlob *name, const struct HksPa
     struct HksBlob inBlob = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
 
-    inBlob.size = sizeof(name->size) + ALIGN_SIZE(name->size) + ALIGN_SIZE(paramSetIn->paramSetSize);
-    inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-    HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
     do {
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret);
+
+        ret = HksAllocInBlob(&inBlob, name, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
         ret = HksCheckIpcDeleteKey(name, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientRegisterProvider fail")
@@ -130,12 +150,12 @@ int32_t HksClientUnregisterProvider(const struct HksBlob *name, const struct Hks
     struct HksBlob inBlob = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
 
-    inBlob.size = sizeof(name->size) + ALIGN_SIZE(name->size) + ALIGN_SIZE(paramSetIn->paramSetSize);
-    inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-    HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
     do {
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret);
+
+        ret = HksAllocInBlob(&inBlob, name, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
         ret = HksCheckIpcDeleteKey(name, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientUnregisterProvider fail")
@@ -170,12 +190,12 @@ int32_t HksClientExportProviderCertificates(const struct HksBlob *name, const st
     outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
     HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
 
-    inBlob.size = sizeof(name->size) + ALIGN_SIZE(name->size) + ALIGN_SIZE(paramSetIn->paramSetSize);
-    inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-    HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
     do {
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret);
+
+        ret = HksAllocInBlob(&inBlob, name, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
         ret = HksCheckIpcDeleteKey(name, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientExportProviderCertificates fail");
@@ -217,12 +237,12 @@ int32_t HksClientExportCertificate(const struct HksBlob *index, const struct Hks
     outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
     HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
 
-    inBlob.size = sizeof(index->size) + ALIGN_SIZE(index->size) + ALIGN_SIZE(paramSetIn->paramSetSize);
-    inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-    HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
     do {
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret);
+
+        ret = HksAllocInBlob(&inBlob, index, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
         ret = HksCheckIpcDeleteKey(index, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientExportCertificate fail");
@@ -246,46 +266,52 @@ int32_t HksClientExportCertificate(const struct HksBlob *index, const struct Hks
     return 0;
 }
 
-int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, int32_t *outStatus, uint32_t *retryCount)
+int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
+    int32_t *outStatus, uint32_t *retryCount)
 {
-    if (retryCount == NULL || outStatus == NULL) {
+    if (outStatus == NULL || retryCount == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
 
-    int32_t ret;
-    struct HksParamSet *newParamSet = NULL;
-    
-    struct HksBlob inBlob = { 0, NULL };
     /**
     *                +---------------------------+
-    * outBlob:       | uint32_t   | uint32_t     |
+    * outBlob:       | int32_t   | uint32_t     |
     *                | outStatus  |  retryCount  |
     *                +---------------------------+
     */
-    struct HksBlob outBlob = { sizeof(int32_t) * 2, (uint8_t *)malloc(sizeof(int32_t) * 2) };
-    HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL)
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    struct HksBlob inBlob  = { 0, NULL };
+    struct HksBlob outBlob = { 0, NULL };
 
-    inBlob.size = sizeof(index->size) + ALIGN_SIZE(index->size) + ALIGN_SIZE(paramSetIn->paramSetSize) + sizeof(outBlob.size);
-    inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-    HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
+    outBlob.size = (sizeof(int32_t) + sizeof(uint32_t));
+    outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
+    HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
 
     do {
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: build paramSet fail");
 
-        ret = HksCheckIpcGenerateKey(index, paramSetIn);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckIpcAuthUkeyPin fail");
+        ret = HksCheckIpcDeleteKey(index, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: check fail");
 
-        ret = HksGenerateKeyPack(&inBlob, index, paramSetIn, &outBlob);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAuthUkeyPinPack fail");
+        ret = HksAllocInBlob(&inBlob, index, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
+
+        ret = HksDeleteKeyPack(index, newParamSet, &inBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: pack fail");
 
         ret = HksSendRequest(HKS_MSG_EXT_AUTH_UKEY_PIN, &inBlob, &outBlob, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: send fail");
 
-        if (outBlob.data != NULL && ret != HKS_SUCCESS && outBlob.size >= sizeof(int32_t) * 2) {
-            // PIN码错误处理，上层感知outStatus和retryCount，用于抛出异常
-            (void)memcpy_s(outStatus, sizeof(int32_t), outBlob.data, sizeof(int32_t));
-            (void)memcpy_s(retryCount, sizeof(int32_t), outBlob.data + sizeof(int32_t), sizeof(int32_t));
+        if (outBlob.size < (sizeof(int32_t) + sizeof(uint32_t)) || outBlob.data == NULL) {
+            ret = HKS_ERROR_BAD_STATE;
+            break;
+        }
+        (void)memcpy_s(outStatus, sizeof(int32_t), outBlob.data, sizeof(int32_t));
+        (void)memcpy_s(retryCount, sizeof(uint32_t), outBlob.data + sizeof(int32_t), sizeof(uint32_t));
+
+        if (*outStatus != 0 && ret == HKS_SUCCESS) {
             ret = HUKS_ERR_CODE_PIN_CODE_ERROR;
         }
     } while (0);
@@ -293,46 +319,50 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
     HKS_FREE_BLOB(outBlob);
-
     return ret;
 }
 
-int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, int32_t *status)
+int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index,
+    const struct HksParamSet *paramSetIn, int32_t *status)
 {
     if (status == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
 
     int32_t ret;
-    struct HksBlob inBlob = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
-    struct HksBlob outBlob = { sizeof(int32_t), (uint8_t *)malloc(sizeof(int32_t)) };
-    HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL)
+    struct HksBlob inBlob  = { 0, NULL };
+    struct HksBlob outBlob = { 0, NULL };
 
-    inBlob.size = sizeof(index->size) + ALIGN_SIZE(index->size) + ALIGN_SIZE(paramSetIn->paramSetSize) +
-        sizeof(outBlob.size);
-    inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-    HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
+    outBlob.size = (uint32_t)sizeof(int32_t);
+    outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
+    HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
 
     do {
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetUkeyPinAuthState: build paramSet fail");
 
-        ret = HksCheckIpcGenerateKey(index, paramSetIn);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckIpcGetUkeyPinAuthState fail");
+        ret = HksCheckIpcDeleteKey(index, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetUkeyPinAuthState: check fail");
 
-        ret = HksGenerateKeyPack(&inBlob, index, newParamSet, &outBlob);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetUkeyPinAuthStatePack fail");
+        ret = HksAllocInBlob(&inBlob, index, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
+
+        ret = HksDeleteKeyPack(index, newParamSet, &inBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetUkeyPinAuthState: pack fail");
 
         ret = HksSendRequest(HKS_MSG_EXT_GET_UKEY_PIN_AUTH_STATE, &inBlob, &outBlob, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetUkeyPinAuthState: send fail");
 
-        if (outBlob.data == NULL || ret != HKS_SUCCESS || outBlob.size < sizeof(int32_t)) {
-            ret = HUKS_ERR_CODE_PIN_CODE_ERROR;
-        } else {
-            (void)memcpy_s(status, sizeof(int32_t), outBlob.data, sizeof(int32_t));
+        if (outBlob.size < (uint32_t)sizeof(int32_t) || outBlob.data == NULL) {
+            ret = HKS_ERROR_BAD_STATE;
+            break;
         }
-        
+        (void)memcpy_s(status, sizeof(int32_t), outBlob.data, sizeof(int32_t));
+
+        if (*status != 0 && ret == HKS_SUCCESS) {
+            ret = HUKS_ERR_CODE_PIN_CODE_ERROR;
+        }
     } while (0);
 
     HksFreeParamSet(&newParamSet);
@@ -365,12 +395,8 @@ int32_t HksClientGetRemoteHandle(const struct HksBlob *index, const struct HksPa
         ret = HksCheckIpcDeleteKey(index, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIpcGetRemoteHandle fail")
 
-        inBlob.size = sizeof(index->size) + ALIGN_SIZE(index->size) + ALIGN_SIZE(newParamSet->paramSetSize);
-        inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-        if (inBlob.data == NULL) {
-            ret = HKS_ERROR_MALLOC_FAIL;
-            break;
-        }
+        ret = HksAllocInBlob(&inBlob, index, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
         ret = HksDeleteKeyPack(index, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetRemoteHandlePack fail")
@@ -417,12 +443,8 @@ int32_t HksClientOpenRemoteHandle(const struct HksBlob *index, const struct HksP
         ret = HksCheckIpcDeleteKey(index, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientOpenRemoteHandle fail")
 
-        inBlob.size = sizeof(index->size) + ALIGN_SIZE(index->size) + ALIGN_SIZE(newParamSet->paramSetSize);
-        inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-        if (inBlob.data == NULL) {
-            ret = HKS_ERROR_MALLOC_FAIL;
-            break;
-        }
+        ret = HksAllocInBlob(&inBlob, index, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
         ret = HksDeleteKeyPack(index, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksOpenRemoteHandlePack fail")
@@ -452,12 +474,12 @@ int32_t HksClientCloseRemoteHandle(const struct HksBlob *index, const struct Hks
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob inBlob = { 0, NULL };
 
-    inBlob.size = sizeof(index->size) + ALIGN_SIZE(index->size) + ALIGN_SIZE(newParamSet->paramSetSize);
-    inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-    HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
     do {
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksAllocInBlob(&inBlob, index, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
         ret = HksCheckIpcDeleteKey(index, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIpcCloseRemoteHandle fail")
@@ -478,14 +500,14 @@ int32_t HksClientClearPinAuthState(const struct HksBlob *index)
 {
     HKS_LOG_D("======HksClientRegisterProvider enter RegisterProvider");
     int32_t ret;
-
     struct HksBlob inBlob = { 0, NULL };
-    inBlob.size = sizeof(index->size) + ALIGN_SIZE(index->size);
-    HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
-
+    
     do {
         ret = CheckBlob(index);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksClientClearPinAuthState fail")
+
+        ret = HksAllocInBlob(&inBlob, index, NULL);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
         ret = HksClearPinAuthStatePack(index, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientClearPinAuthStatePack fail")
@@ -505,14 +527,15 @@ int32_t HksClientUkeySign(const struct HksBlob *index, const struct HksParamSet 
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob inBlob = { 0, NULL };
-    inBlob.size = ALIGN_SIZE(paramSetIn->paramSetSize) + sizeof(index->size) + ALIGN_SIZE(index->size) +
-        sizeof(srcData->size) + ALIGN_SIZE(srcData->size) + sizeof(signatureOut->size);
-    inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-    HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
 
     do {
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret)
+
+        inBlob.size = ALIGN_SIZE(paramSetIn->paramSetSize) + sizeof(index->size) + ALIGN_SIZE(index->size) +
+            sizeof(srcData->size) + ALIGN_SIZE(srcData->size) + sizeof(signatureOut->size);
+        inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
+        HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
 
         ret = HksCheckIpcAgreeKey(paramSetIn, index, srcData, signatureOut);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckIpcUkeySign fail")
