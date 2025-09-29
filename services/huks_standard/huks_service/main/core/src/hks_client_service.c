@@ -598,8 +598,7 @@ int32_t HksServiceOpenRemoteHandle(const struct HksProcessInfo *processInfo, con
     return 0;
 }
 
-int32_t HksServiceGetUkeyPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn, struct HksParamSet *keyOut)
+int32_t HksServiceGetUkeyPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index, const struct HksParamSet *paramSetIn, int32_t *status)
 {
     return 0;
 }
