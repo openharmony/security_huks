@@ -171,15 +171,15 @@ int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct H
     HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
-    // struct HksProcessInfo processInfo = {
-    //     { strlen(userId), (uint8_t *)userId },
-    //     { strlen(processName), (uint8_t *)processName },
-    //     0,
-    //     0,
-    //     0,
-    //     0
-    // };
-    return 0;
+    struct HksProcessInfo processInfo = {
+        { strlen(userId), (uint8_t *)userId },
+        { strlen(processName), (uint8_t *)processName },
+        0,
+        0,
+        0,
+        0
+    };
+    return HksServiceGetUkeyPinAuthState(&processInfo, index, paramSetIn, status);
 }
 
 int32_t HksClientGetRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
