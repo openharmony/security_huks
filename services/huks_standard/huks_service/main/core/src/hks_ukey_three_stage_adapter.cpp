@@ -53,13 +53,14 @@ int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, co
 int32_t HksServiceOnUkeyUpdateSession(const struct HksProcessInfo *processInfo, const struct HksBlob *handle,
     const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
 {
-    uint32_t handleU32 = 0;
-    if (handle != nullptr && handle->size == sizeof(uint64_t)) { // TODO:或者32？
-        if (memcpy_s(&handleU32, sizeof(handleU32), handle->data, handle->size) != EOK) {
+    uint64_t handleU64 = 0;
+    if (handle != nullptr && handle->size == sizeof(uint64_t)) {
+        if (memcpy_s(&handleU64, sizeof(handleU64), handle->data, handle->size) != EOK) {
             return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
     }
 
+    uint32_t handleU32 = static_cast<uint32_t>(handleU64);
     CppParamSet cppParamSet(paramSet);
     std::vector<uint8_t> indata;
     if (inData != nullptr && inData->data != nullptr) {
@@ -91,12 +92,14 @@ int32_t HksServiceOnUkeyUpdateSession(const struct HksProcessInfo *processInfo, 
 int32_t HksServiceOnUkeyFinishSession(const struct HksProcessInfo *processInfo, const struct HksBlob *handle,
     const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
 {
-    uint32_t handleU32 = 0;
-    if (handle != nullptr && handle->size == sizeof(uint64_t)) { // TODO:或者64？
-        if (memcpy_s(&handleU32, sizeof(handleU32), handle->data, handle->size) != EOK) {
+    uint64_t handleU64 = 0;
+    if (handle != nullptr && handle->size == sizeof(uint64_t)) {
+        if (memcpy_s(&handleU64, sizeof(handleU64), handle->data, handle->size) != EOK) {
             return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
     }
+
+    uint32_t handleU32 = static_cast<uint32_t>(handleU64);
 
     CppParamSet cppParamSet(paramSet);
     std::vector<uint8_t> indata;
