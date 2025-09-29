@@ -43,8 +43,11 @@ enum class PluginMethodEnum{
     // FUNC_ON_LIST_PROVIDER,
     FUNC_ON_LIST_INDEX_CERTIFICATE,
     FUNC_ON_LIST_PROVIDER_ALL_CERTIFICATE,
+    FUNC_ON_INIT_SESSION,
+    FUNC_ON_UPDATE_SESSION,
+    FUNC_ON_FINISH_SESSION,
 
-    COUNT = 9,
+    COUNT = 12,
 };
 
 static const std::map<PluginMethodEnum, std::string> m_pluginMethodNameMap = {
@@ -60,7 +63,10 @@ static const std::map<PluginMethodEnum, std::string> m_pluginMethodNameMap = {
     // {PluginMethodEnum::FUNC_ON_CLEAR_PIN_STATUS, ""},
     // {PluginMethodEnum::FUNC_ON_LIST_PROVIDER, ""},
     {PluginMethodEnum::FUNC_ON_LIST_INDEX_CERTIFICATE, "_ZN4OHOS8Security4Huks29HksExtPluginOnExportCerticateERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_"},
-    {PluginMethodEnum::FUNC_ON_LIST_PROVIDER_ALL_CERTIFICATE, "_ZN4OHOS8Security4Huks38HksExtPluginOnExportProviderCerticatesERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_"}
+    {PluginMethodEnum::FUNC_ON_LIST_PROVIDER_ALL_CERTIFICATE, "_ZN4OHOS8Security4Huks38HksExtPluginOnExportProviderCerticatesERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_"},
+    {PluginMethodEnum::FUNC_ON_INIT_SESSION, "_ZN4OHOS8Security4Huks25HksExtPluginOnInitSessionERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRj"},
+    {PluginMethodEnum::FUNC_ON_UPDATE_SESSION, "_ZN4OHOS8Security4Huks27HksExtPluginOnUpdateSessionERK14HksProcessInfoRKjRK11CppParamSetRKNSt3__h6vectorIhNSA_9allocatorIhEEEERSE_"},
+    {PluginMethodEnum::FUNC_ON_FINISH_SESSION, "_ZN4OHOS8Security4Huks27HksExtPluginOnFinishSessionERK14HksProcessInfoRKjRK11CppParamSetRKNSt3__h6vectorIhNSA_9allocatorIhEEEERSE_"}
 };
 
 using OnRegisterProviderFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &providerName,
@@ -87,6 +93,12 @@ using OnListIndexCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo
     const std::string &index, const CppParamSet &paramSet, std::string &certsJson);
 using OnListProviderAllCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr);
+using OnInitSessionFunc = int32_t (*)(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, uint32_t &handle);
+using OnUpdateSessionFunc = int32_t (*)(const HksProcessInfo &processInfo, const uint32_t &handle,
+    const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
+using OnFinishSessionFunc = int32_t (*)(const HksProcessInfo &processInfo, const uint32_t &handle,
+    const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
 }
 }
 }

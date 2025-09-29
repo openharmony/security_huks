@@ -19,20 +19,20 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
-std::shared_ptr<HuksLibEntry> HuksLibEntry::GetInstanceWrapper() {
-    return HuksLibEntry::GetInstance();
+std::shared_ptr<HuksLibInterface> HuksLibInterface::GetInstanceWrapper() {
+    return HuksLibInterface::GetInstance();
 }
 
-void HuksLibEntry::ReleaseInstance() {
-    HuksLibEntry::DestroyInstance();
+void HuksLibInterface::ReleaseInstance() {
+    HuksLibInterface::DestroyInstance();
 }
 
-void HuksLibEntry::initProviderMap(std::unordered_map<PluginMethodEnum, void*>& mpluginProviderMap) {
+void HuksLibInterface::initProviderMap(std::unordered_map<PluginMethodEnum, void*>& mpluginProviderMap) {
     std::lock_guard<std::mutex> lock(mapMutex_);
     pluginProviderMap = mpluginProviderMap;
 }
 
-int32_t HuksLibEntry::OnRegistProvider(const HksProcessInfo &processInfo,
+int32_t HuksLibInterface::OnRegistProvider(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet) {
     auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_REGISTER_PROVIDER);
     HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -44,7 +44,7 @@ int32_t HuksLibEntry::OnRegistProvider(const HksProcessInfo &processInfo,
     return HKS_SUCCESS;
 }
 
-int32_t HuksLibEntry::OnUnRegistProvider(const HksProcessInfo &processInfo,
+int32_t HuksLibInterface::OnUnRegistProvider(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet) {
     auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_UN_REGISTER_PROVIDER);
     HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -57,7 +57,7 @@ int32_t HuksLibEntry::OnUnRegistProvider(const HksProcessInfo &processInfo,
     return HKS_SUCCESS;
 }
 
-int32_t HuksLibEntry::OnCreateRemoteIndex(const std::string &providerName, const CppParamSet& paramSet,
+int32_t HuksLibInterface::OnCreateRemoteIndex(const std::string &providerName, const CppParamSet& paramSet,
     std::string &outIndex) {
     auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_CREATE_REMOTE_INDEX);
     HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -70,7 +70,7 @@ int32_t HuksLibEntry::OnCreateRemoteIndex(const std::string &providerName, const
     return HKS_SUCCESS;
 }
 
-int32_t HuksLibEntry::OnOpenRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
+int32_t HuksLibInterface::OnOpenRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet, std::string &handle) {
     auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_CREATE_REMOTE_KEY_HANDLE);
     HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -83,7 +83,7 @@ int32_t HuksLibEntry::OnOpenRemoteKeyHandle(const HksProcessInfo &processInfo, c
     return HKS_SUCCESS;
 }
 
-// int32_t HuksLibEntry::OnFindRemoteKeyHandle(const std::string &index, std::string &keyIndex) {
+// int32_t HuksLibInterface::OnFindRemoteKeyHandle(const std::string &index, std::string &keyIndex) {
 //     auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_FIND_REMOTE_KEY_HANDLE);
 //     HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
 //         "FindRemoteKeyHandle method enum not found in plugin provider map.")
@@ -95,7 +95,7 @@ int32_t HuksLibEntry::OnOpenRemoteKeyHandle(const HksProcessInfo &processInfo, c
 //     return HKS_SUCCESS;
 // }
 
-int32_t HuksLibEntry::OnCloseRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
+int32_t HuksLibInterface::OnCloseRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet) {
     auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_CLOSE_REMOTE_KEY_HANDLE);
     HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -108,7 +108,7 @@ int32_t HuksLibEntry::OnCloseRemoteKeyHandle(const HksProcessInfo &processInfo, 
     return HKS_SUCCESS;
 }
 
-// int32_t HuksLibEntry::OnSigned(const std::string &index, const CppParamSet& paramSet, std::vector<uint8_t> &outData) {
+// int32_t HuksLibInterface::OnSigned(const std::string &index, const CppParamSet& paramSet, std::vector<uint8_t> &outData) {
 //     auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_SIGNED);
 //     HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
 //         "Signed method enum not found in plugin provider map.")
@@ -120,7 +120,7 @@ int32_t HuksLibEntry::OnCloseRemoteKeyHandle(const HksProcessInfo &processInfo, 
 //     return HKS_SUCCESS;
 // }
 
-int32_t HuksLibEntry::OnAuthUkeyPin(const HksProcessInfo &processInfo, 
+int32_t HuksLibInterface::OnAuthUkeyPin(const HksProcessInfo &processInfo, 
     const std::string &index, const CppParamSet &paramSet, int32_t& authState, uint32_t& retryCnt) {
     auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_AUTH_UKEY_PIN);
     HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -133,7 +133,7 @@ int32_t HuksLibEntry::OnAuthUkeyPin(const HksProcessInfo &processInfo,
     return HKS_SUCCESS;
 }
 
-int32_t HuksLibEntry::OnGetVerifyPinStatus(const HksProcessInfo &processInfo,
+int32_t HuksLibInterface::OnGetVerifyPinStatus(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, uint32_t &state) {
     auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_GET_VERIFY_PIN_STATUS);
     HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -146,7 +146,7 @@ int32_t HuksLibEntry::OnGetVerifyPinStatus(const HksProcessInfo &processInfo,
     return HKS_SUCCESS;
 }
 
-// int32_t HuksLibEntry::OnClearPinStatus(const std::string &index) {
+// int32_t HuksLibInterface::OnClearPinStatus(const std::string &index) {
 //     auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_CLEAR_PIN_STATUS);
 //     HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
 //         "ClearPinStatus method enum not found in plugin provider map.")
@@ -158,7 +158,7 @@ int32_t HuksLibEntry::OnGetVerifyPinStatus(const HksProcessInfo &processInfo,
 //     return HKS_SUCCESS;
 // }
 
-// int32_t HuksLibEntry::OnListProviders(std::vector<uint8_t> &providersOut) {
+// int32_t HuksLibInterface::OnListProviders(std::vector<uint8_t> &providersOut) {
 //     auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_LIST_PROVIDER);
 //     HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
 //         "ListProviders method enum not found in plugin provider map.")
@@ -170,7 +170,7 @@ int32_t HuksLibEntry::OnGetVerifyPinStatus(const HksProcessInfo &processInfo,
 //     return HKS_SUCCESS;
 // }
 
-int32_t HuksLibEntry::OnListIndexCertificate(const HksProcessInfo &processInfo,
+int32_t HuksLibInterface::OnListIndexCertificate(const HksProcessInfo &processInfo,
    const std::string &index, const CppParamSet &paramSet, std::string &certsJson) {
     auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_LIST_INDEX_CERTIFICATE);
     HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -183,7 +183,7 @@ int32_t HuksLibEntry::OnListIndexCertificate(const HksProcessInfo &processInfo,
     return HKS_SUCCESS;
 }
 
-int32_t HuksLibEntry::OnListProviderAllCertificate(const HksProcessInfo &processInfo,
+int32_t HuksLibInterface::OnListProviderAllCertificate(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr) {
     auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_LIST_PROVIDER_ALL_CERTIFICATE);
     HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -194,6 +194,45 @@ int32_t HuksLibEntry::OnListProviderAllCertificate(const HksProcessInfo &process
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
         "ListProviderAllCertificate fail, ret = %{public}d", ret)
     HKS_LOG_I("list provider all certificate success");
+    return HKS_SUCCESS;
+}
+
+int32_t HuksLibInterface::OnInitSession (const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, uint32_t &handle) {
+    auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_INIT_SESSION);
+    HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "InitSession method enum not found in plugin provider map.")
+    
+    int ret = (*reinterpret_cast<OnInitSessionFunc>(it->second))(processInfo, index, paramSet, handle);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "InitSession fail, ret = %{public}d", ret)
+    HKS_LOG_I("init session success");
+    return HKS_SUCCESS;
+}
+
+int32_t HuksLibInterface::OnUpdateSession (const HksProcessInfo &processInfo, const uint32_t &handle,
+    const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData) {
+    auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_UPDATE_SESSION);
+    HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "UpdateSession method enum not found in plugin provider map.")
+    
+    int ret = (*reinterpret_cast<OnUpdateSessionFunc>(it->second))(processInfo, handle, paramSet, inData, outData);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "UpdateSession fail, ret = %{public}d", ret)
+    HKS_LOG_I("update session success");
+    return HKS_SUCCESS;
+}
+
+int32_t HuksLibInterface::OnFinishSession (const HksProcessInfo &processInfo, const uint32_t &handle,
+    const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData) {
+    auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_FINISH_SESSION);
+    HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "FinishSession method enum not found in plugin provider map.")
+    
+    int ret = (*reinterpret_cast<OnFinishSessionFunc>(it->second))(processInfo, handle, paramSet, inData, outData);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "FinishSession fail, ret = %{public}d", ret)
+    HKS_LOG_I("finish session success");
     return HKS_SUCCESS;
 }
 

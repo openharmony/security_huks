@@ -25,8 +25,8 @@ std::shared_ptr<HuksPluginLifeCycleMgr> GetExtPluginMgrInstance() {
     return pluginManager;
 }
 
-std::shared_ptr<HuksLibEntry> GetExtLibInterfaceInstance() {
-    auto libInterface = OHOS::Security::Huks::HuksLibEntry::GetInstanceWrapper();
+std::shared_ptr<HuksLibInterface> GetExtLibInterfaceInstance() {
+    auto libInterface = OHOS::Security::Huks::HuksLibInterface::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, nullptr, "Failed to get lib interface instance.")
 
     return libInterface;
@@ -119,7 +119,7 @@ int HksIpcServiceOnVerify(const struct HksProcessInfo *processInfo, std::string 
     return 0;
 }
 
-int32_t HksIpcServiceOnAuthUkeyPin(const struct HksProcessInfo *processInfo, const std::string &index, const std::vector<uint8_t> &pinData,
+int32_t HksIpcServiceOnAuthUkeyPin(const struct HksProcessInfo *processInfo, const std::string &index, CppParamSet &pinData,
     int32_t &authState, uint32_t &retryCnt) {
     return 0;
     // HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");

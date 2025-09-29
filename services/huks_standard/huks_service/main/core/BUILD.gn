@@ -37,7 +37,6 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",  # hks_osaccount_check.h
       "//base/security/huks/services/huks_standard/huks_service/main/upgrade/lock/include",
       "//base/security/huks/services/huks_standard/huks_service/main/ha/include",
-
       
     ]
 
@@ -51,9 +50,6 @@ if (os_level == "standard") {
       "src/hks_client_service_common.c",
       "src/hks_client_service_util.c",
       "src/hks_session_manager.c",
-      # "ukey_plugin_manager/src/hks_plugin_lifecycle_manager.cpp",
-      # "ukey_plugin_manager/src/hks_plugin_loader.cpp",
-      # "ukey_plugin_manager/src/hks_lib_interface.cpp",
     ]
 
     defines = [ "HKS_ENABLE_CLEAN_FILE" ]
@@ -87,6 +83,8 @@ if (os_level == "standard") {
       "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
       "//base/security/huks/utils/list:libhuks_utils_list_static",
       "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
+      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
+
     ]
 
     if (enable_hks_mock) {
