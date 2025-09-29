@@ -21,9 +21,6 @@ int32_t HksCheckIsUkeyOperation(const struct HksParamSet *paramSet)
     return HKS_ERROR_INVALID_ARGUMENT;
 }
 
-namespace OHOS {
-namespace Security {
-namespace Huks {
 int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *inParamSet, struct HksBlob *handle)
 {
@@ -127,8 +124,4 @@ int32_t HksServiceOnUkeyFinishSession(const struct HksProcessInfo *processInfo, 
     }
 
     return ret;
-}
-
-}
-}
 }
