@@ -140,7 +140,12 @@ ErrCode HksCryptoExtStubImpl::ExportProviderCertificates(
     std::string& certJsonArr,
     int32_t& errcode)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO ExportProviderCertificates");
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO ExportCertificate");
+    if (extension_ == nullptr) {
+        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        return ERR_OK;
+    }
+    extension_->ExportProviderCertificates(params, certJsonArr, errcode);
     return ERR_OK;
 }
 
