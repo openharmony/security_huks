@@ -33,7 +33,10 @@ typedef enum {
     AUTH_UKEY_PIN,
     GET_UKEY_PIN_AUTH_STATE,
     EXPORT_CERTIFICATE,
-    EXPORT_PROVIDER_CERTIFICATES
+    EXPORT_PROVIDER_CERTIFICATES,
+    INIT_SESSION,
+    UPDATE_SESSION,
+    FINISH_SESSION
 } CryptoResultParamType;
 
 typedef struct HksCertInfo {
@@ -49,6 +52,7 @@ typedef struct CryptoResultParam {
     std::string handle {};
     std::string index {};
     std::vector<HksCertInfo> certs {};
+    std::vector<uint8_t> outData {};
 
     CryptoResultParamType paramType {};
     std::condition_variable callJsCon;
@@ -96,6 +100,12 @@ public:
         std::string& certJsonArr, int32_t& errcode) override;
     int ExportProviderCertificates( const CppParamSet& params, std::string& certJsonArr,
         int32_t& errcode) override;
+    int InitSession(const std::string& index, const CppParamSet& params, std::string& handle,
+        int32_t& errcode) override;
+    int UpdateSession(const std::string& handle, const CppParamSet& params, const std::vector<uint8_t>& inData,
+        std::vector<uint8_t>& outData, int32_t& errcode) override;
+    int FinishSession(const std::string& handle, const CppParamSet& params, const std::vector<uint8_t>& inData,
+        std::vector<uint8_t>& outData, int32_t& errcode) override;
 private:
     template <typename T>
     struct Value {
@@ -106,6 +116,7 @@ private:
     static napi_status GetStringValue(napi_env env, napi_value value, std::string &result);
     static napi_status GetHksCertInfoValue(napi_env env, napi_value value, HksCertInfo &certInfo);
     static napi_status GetUint8ArrayValue(napi_env env, napi_value value, HksBlob &result);
+    static void GetSessionParams(napi_env &env, napi_value &funcResult, CryptoResultParam &resultParams);
     static void HksCertInfoToString(std::vector<HksCertInfo> &certInfoVec, std::string &jsonStr);
     int CallJsMethod(const std::string &funcName, AbilityRuntime::JsRuntime &jsRuntime, NativeReference *jsObj,
         InputArgsParser argParser, ResultValueParser retParser);
@@ -118,7 +129,6 @@ private:
     static void GetAuthUkeyPin(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
     static void GetUkeyPinAuthStateParams(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
     static void GetExportCertificateParams(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
-    // static void GetUkeyPinAuthStateParams(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
 
     AbilityRuntime::JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> jsObj_;

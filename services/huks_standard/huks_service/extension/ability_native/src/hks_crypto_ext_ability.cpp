@@ -102,6 +102,26 @@ int HksCryptoExtAbility::ExportProviderCertificates( const CppParamSet& params, 
     LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO ExportProviderCertificates(BASE)");
     return true;
 }
+
+int HksCryptoExtAbility::InitSession(const std::string& index, const CppParamSet& params, std::string& handle,
+    int32_t& errcode)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO InitSession(BASE)");
+    return true;
+}
+
+int HksCryptoExtAbility::UpdateSession(const std::string& handle, const CppParamSet& params, const std::vector<uint8_t>& inData,
+    std::vector<uint8_t>& outData, int32_t& errcode)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO UpdateSession(BASE)");
+    return true;
+}
+int HksCryptoExtAbility::FinishSession(const std::string& handle, const CppParamSet& params, const std::vector<uint8_t>& inData,
+    std::vector<uint8_t>& outData, int32_t& errcode)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO FinishSession(BASE)");
+    return true;
+}
 } // namespace HUKS
 } // namespace Security
 } // namespace OHOS
