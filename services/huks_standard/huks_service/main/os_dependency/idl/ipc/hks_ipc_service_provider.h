@@ -39,7 +39,7 @@ namespace Huks {
 
 
     std::shared_ptr<HuksPluginLifeCycleMgr> GetExtPluginMgrInstance();
-    std::shared_ptr<HuksLibEntry> GetExtLibInterfaceInstance();
+    std::shared_ptr<HuksLibInterface> GetExtLibInterfaceInstance();
 
     int32_t HksIpcServiceProviderRegister(const struct HksProcessInfo *processInfo, std::string name, 
         CppParamSet &paramSet);

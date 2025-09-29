@@ -63,7 +63,7 @@ int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const s
         m_pluginProviderMap.emplace(std::make_pair(static_cast<PluginMethodEnum>(i), func));
     }
 
-    auto libEntry = HuksLibEntry::GetInstanceWrapper();
+    auto libEntry = HuksLibInterface::GetInstanceWrapper();
     libEntry->initProviderMap(m_pluginProviderMap);
 
     return HKS_SUCCESS;

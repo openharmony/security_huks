@@ -30,12 +30,12 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
-class HuksLibEntry : private OHOS::DelayedSingleton<HuksLibEntry> {
+class HuksLibInterface : private OHOS::DelayedSingleton<HuksLibInterface> {
 public:
     std::unordered_map<PluginMethodEnum, void*> pluginProviderMap;
 
     void initProviderMap(std::unordered_map<PluginMethodEnum, void*>& pluginProviderMap);
-    static std::shared_ptr<HuksLibEntry> GetInstanceWrapper();
+    static std::shared_ptr<HuksLibInterface> GetInstanceWrapper();
     static void ReleaseInstance();
 
     int32_t OnRegistProvider(const HksProcessInfo &processInfo,
@@ -62,6 +62,12 @@ public:
         const std::string &index, const CppParamSet &paramSet, std::string &certsJson);
     int32_t OnListProviderAllCertificate(const HksProcessInfo &processInfo,
         const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr);
+    int32_t OnInitSession (const HksProcessInfo &processInfo, const std::string &index,
+        const CppParamSet &paramSet, uint32_t &handle);
+    int32_t OnUpdateSession (const HksProcessInfo &processInfo, const uint32_t &handle,
+        const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
+    int32_t OnFinishSession (const HksProcessInfo &processInfo, const uint32_t &handle,
+        const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
 
 private:
     std::mutex mapMutex_;

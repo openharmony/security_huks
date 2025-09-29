@@ -43,7 +43,7 @@ int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &in
         }
     }
 
-    auto libEntry = HuksLibEntry::GetInstanceWrapper();
+    auto libEntry = HuksLibInterface::GetInstanceWrapper();
     ret = libEntry->OnRegistProvider(info, providerName, paramSet);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_EXEC_FUNC_FAIL,
         "regist provider method in plugin laoder is fail")
@@ -53,7 +53,7 @@ int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &in
 int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &info, const std::string& providerName,
     const CppParamSet& paramSet) {
     int preCount = m_refCount.fetch_sub(1, std::memory_order_acq_rel);
-    auto libEntry = HuksLibEntry::GetInstanceWrapper();
+    auto libEntry = HuksLibInterface::GetInstanceWrapper();
     int32_t ret = libEntry->OnUnRegistProvider(info, providerName, paramSet);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_CLOSE_PROVIDER_FAIL, "unregist provider failed!")
 
