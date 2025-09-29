@@ -85,7 +85,7 @@ using OnSignedFunc = int32_t (*)();
 using OnAuthUkeyPinFunc = int32_t (*)(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, int32_t& authState, uint32_t& retryCnt);
 using OnGetVerifyPinStatusFunc = int32_t (*)(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, uint32_t &state);
+    const std::string &index, const CppParamSet &paramSet, int32_t &state);
 using OnClearPinStatusFunc = int32_t (*)();
 
 using OnListProvidersFunc = int32_t (*)();

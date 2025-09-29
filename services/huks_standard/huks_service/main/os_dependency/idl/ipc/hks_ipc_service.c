@@ -152,9 +152,7 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
 
     HksSendResponse(context, ret, (outBlob.data != NULL && outBlob.size == (sizeof(int32_t) + sizeof(uint32_t))) ? &outBlob : NULL);
 
-    HKS_FREE_BLOB(index);
     HKS_FREE_BLOB(outBlob);
-    HksFreeParamSet(&paramSet);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
 }
@@ -197,9 +195,7 @@ void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8
     HksSendResponse(context, ret,
         (outBlob.data != NULL && outBlob.size == (uint32_t)sizeof(int32_t)) ? &outBlob : NULL);
 
-    HKS_FREE_BLOB(index);
     HKS_FREE_BLOB(outBlob);
-    HksFreeParamSet(&paramSet);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
 }
@@ -223,7 +219,6 @@ void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t
 
     HksSendResponse(context, ret, NULL);
 
-    HKS_FREE_BLOB(index);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
 }
@@ -250,7 +245,8 @@ void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t 
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceOnCreateRemoteKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
-    HksSendResponse(context, ret, ret == HKS_SUCCESS ? &remoteHandleOut : NULL);
+    // HksSendResponse(context, ret, ret == HKS_SUCCESS ? &remoteHandleOut : NULL);
+    HksSendResponse(context, ret, NULL);
 
     HKS_FREE_BLOB(remoteHandleOut);
     HKS_FREE_BLOB(processInfo.processName);
@@ -279,7 +275,8 @@ void HksIpcServiceGetRemoteHandle(const struct HksBlob *srcData, const uint8_t *
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceOnFindRemoteKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
-    HksSendResponse(context, ret, ret == HKS_SUCCESS ? &handle : NULL);
+    // HksSendResponse(context, ret, ret == HKS_SUCCESS ? &handle : NULL);
+    HksSendResponse(context, ret, NULL);
 
     HKS_FREE_BLOB(handle);
     HKS_FREE_BLOB(processInfo.processName);

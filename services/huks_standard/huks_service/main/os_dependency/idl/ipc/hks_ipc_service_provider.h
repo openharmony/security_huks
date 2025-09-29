@@ -67,7 +67,7 @@ namespace Huks {
         CppParamSet &paramSet, std::string srcData, std::string &signature);
 
     int32_t HksIpcServiceOnCreateRemoteIndex(const std::string &providerName, const CppParamSet& paramSet, std::string &outIndex);
-    int32_t HksIpcServiceOnAuthUkeyPin(const struct HksProcessInfo *processInfo, const std::string &index, const std::vector<uint8_t> &pinData,
+    int32_t HksIpcServiceOnAuthUkeyPin(const struct HksProcessInfo *processInfo, const std::string &index, CppParamSet &pinData,
         int32_t &authState, uint32_t &retryCnt);
     int32_t HksIpcServiceOnGetVerifyPinStatus(const struct HksProcessInfo *processInfo, const std::string &index, const CppParamSet &paramSet, int32_t &state);
     int32_t HksIpcServiceOnClearPinStatus(const struct HksProcessInfo *processInfo, std::string index);

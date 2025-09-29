@@ -121,24 +121,22 @@ int HksIpcServiceOnVerify(const struct HksProcessInfo *processInfo, std::string 
 
 int32_t HksIpcServiceOnAuthUkeyPin(const struct HksProcessInfo *processInfo, const std::string &index, CppParamSet &pinData,
     int32_t &authState, uint32_t &retryCnt) {
-    return 0;
-    // HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
-    // auto libInterface = GetExtLibInterfaceInstance();
-    // HKS_LOG_I("got libInterface instance");
+    HKS_LOG_I("===========HksIpcServiceOnAuthUkeyPin income");
+    auto libInterface = GetExtLibInterfaceInstance();
+    HKS_LOG_I("got libInterface instance");
 
-    // int32_t ret = libInterface->OnAuthUkeyPin(*processInfo, index, paramSet, authState, retryCnt);
-    // return ret;
+    int32_t ret = libInterface->OnAuthUkeyPin(*processInfo, index, pinData, authState, retryCnt);
+    return ret;
 }
 
 int32_t HksIpcServiceOnGetVerifyPinStatus(const struct HksProcessInfo *processInfo,
     const std::string &index, const CppParamSet &paramSet, int32_t &state) {
-    return 0;
-    // HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
-    // auto libInterface = GetExtLibInterfaceInstance();
-    // HKS_LOG_I("got libInterface instance");
+    HKS_LOG_I("===========HksIpcServiceOnGetVerifyPinStatus income");
+    auto libInterface = GetExtLibInterfaceInstance();
+    HKS_LOG_I("got libInterface instance");
 
-    // int32_t ret = libInterface->OnGetVerifyPinStatus(*processInfo,, index, paramSet, state);
-    // return ret;
+    int32_t ret = libInterface->OnGetVerifyPinStatus(*processInfo, index, paramSet, state);
+    return ret;
 }
 
 int32_t HksIpcServiceOnClearPinStatus(const struct HksProcessInfo *processInfo, std::string index) {
