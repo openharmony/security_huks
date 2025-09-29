@@ -53,6 +53,12 @@ public:
         std::string& certJsonArr, int32_t& errcode);
     virtual int ExportProviderCertificates( const CppParamSet& params, std::string& certJsonArr,
         int32_t& errcode);
+    virtual int InitSession(const std::string& index, const CppParamSet& params, std::string& handle,
+        int32_t& errcode);
+    virtual int UpdateSession(const std::string& handle, const CppParamSet& params, const std::vector<uint8_t>& inData,
+        std::vector<uint8_t>& outData, int32_t& errcode);
+    virtual int FinishSession(const std::string& handle, const CppParamSet& params, const std::vector<uint8_t>& inData,
+        std::vector<uint8_t>& outData, int32_t& errcode);
 private:
     static CreatorFunc creator_;
 };

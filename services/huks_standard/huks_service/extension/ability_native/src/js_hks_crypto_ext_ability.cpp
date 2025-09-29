@@ -38,7 +38,7 @@ namespace {
     constexpr size_t ARGC_ZERO = 0;
     constexpr size_t ARGC_ONE = 1;
     constexpr size_t ARGC_TWO = 2;
-    // constexpr size_t ARGC_THREE = 3;
+    constexpr size_t ARGC_THREE = 3;
     // constexpr size_t ARGC_FOUR = 4;
     constexpr size_t MAX_ARG_COUNT = 5;
     // constexpr int EXCEPTION = -1;
@@ -399,6 +399,24 @@ bool MakeJsNativeCppParamSet(napi_env &env, const CppParamSet &CppParamSet, napi
     return true;
 }
 
+bool MakeJsNativeVectorInData(napi_env &env, const std::vector<uint8_t>& inData, napi_value &nativeIndata)
+{
+    int length = inData.size();
+
+    napi_value inData_buffer;
+    void *inData_ptr = NULL;
+    napi_create_arraybuffer(env, length * sizeof(uint8_t), &inData_ptr, &inData_buffer);
+
+    napi_create_typedarray(env, napi_uint8_array, length, inData_buffer, 0, &nativeIndata);
+
+    uint8_t *inData_bytes = (uint8_t *)inData_ptr;
+    for (int i = 0; i < length; i++) {
+        inData_bytes[i] = inData[i];
+    }
+
+    return true;
+}
+
 static bool BuildHandleInfoParam(napi_env &env, HandleInfoParam &param,
     napi_value *argv, size_t &argc)
 {
@@ -444,6 +462,25 @@ static bool BuildIndexInfoParam(napi_env &env, IndexInfoParam &param,
     argv[ARGC_ZERO] = nativeIndex;
     argv[ARGC_ONE] = nativeCppParamSet;
     argc = ARGC_TWO;
+    return true;
+}
+
+static bool BuildHandleWithInData(napi_env &env, HandleInfoParam &param, const std::vector<uint8_t>& inData,
+    napi_value *argv, size_t &argc)
+{
+    auto ret = BuildHandleInfoParam(env, param, argv, argc);
+    if (!ret) {
+        LOGE("BuildHandleInfoParam failed");
+        return false;
+    }
+
+    napi_value nativeInData = nullptr;
+    if (MakeJsNativeVectorInData(env, inData, nativeInData) != napi_ok) {
+        LOGE("Make js CppParamSet failed");
+        return false;
+    }
+    argv[ARGC_TWO] = nativeInData;
+    argc = ARGC_THREE;
     return true;
 }
 
@@ -562,6 +599,37 @@ void JsHksCryptoExtAbility::GetExportCertificateParams(napi_env env, napi_value 
     return;
 }
 
+void JsHksCryptoExtAbility::GetSessionParams(napi_env &env, napi_value &funcResult, CryptoResultParam &resultParams)
+{
+    napi_value napiOutData = nullptr;
+    napi_create_array(env, &napiOutData);
+    napi_get_named_property(env, funcResult, "outData", &napiOutData);
+    if (napiOutData == nullptr) {
+        LOGE("Convert js array object fail.");
+        return;
+    }
+
+    napi_typedarray_type type;
+    napi_value nativeArray;
+    size_t byte_offset;
+    size_t length;
+    napi_get_typedarray_info(env, napiOutData, &type, &length, NULL, &nativeArray, &byte_offset);
+
+    void *data;
+    size_t byte_length;
+    napi_get_arraybuffer_info(env, nativeArray, &data, &byte_length);
+
+    if (type == napi_uint8_array) {
+        uint8_t *data_bytes = (uint8_t *)(data);
+        int num = length / sizeof(uint8_t);
+
+        for (int i = 0; i < num; i++) {
+            resultParams.outData.push_back(*((uint8_t *)(data_bytes) + i));
+        }
+        LOGE("GetSessionParams size %d", length);
+    }
+}
+
 bool JsHksCryptoExtAbility::ConvertFunctionResult(napi_env env, napi_value funcResult, CryptoResultParam &resultParams)
 {
     if (funcResult == nullptr) {
@@ -578,6 +646,7 @@ bool JsHksCryptoExtAbility::ConvertFunctionResult(napi_env env, napi_value funcR
 
     switch (resultParams.paramType) {
         case CryptoResultParamType::OPEN_REMOTE_HANDLE:
+        case CryptoResultParamType::INIT_SESSION:
             GetOpenRemoteHandleParams(env, funcResult, resultParams);
             break;
         case CryptoResultParamType::AUTH_UKEY_PIN:
@@ -589,6 +658,10 @@ bool JsHksCryptoExtAbility::ConvertFunctionResult(napi_env env, napi_value funcR
         case CryptoResultParamType::EXPORT_CERTIFICATE:
         case CryptoResultParamType::EXPORT_PROVIDER_CERTIFICATES:
             GetExportCertificateParams(env, funcResult, resultParams);
+            break;
+        case CryptoResultParamType::UPDATE_SESSION:
+        case CryptoResultParamType::FINISH_SESSION:
+            GetSessionParams(env, funcResult, resultParams);
             break;
         case CryptoResultParamType::CLOSE_REMOTE_HANDLE:
         default:
@@ -921,6 +994,132 @@ int JsHksCryptoExtAbility::ExportProviderCertificates(const CppParamSet& params,
     LOGE("wait end");
     errcode = std::move(dataParam->errCode);
     HksCertInfoToString(dataParam->certs, certJsonArr);
+    return ERR_OK;
+}
+
+int JsHksCryptoExtAbility::InitSession(const std::string& index, const CppParamSet& params, std::string& handle,
+    int32_t& errcode)
+{
+    LOGE("wqy !!!!!!!!!!!!!!!!!!JsHksCryptoExtAbility(JS) InitSession");
+    auto argParser = [index, params](napi_env &env, napi_value *argv, size_t &argc) -> bool {
+        struct IndexInfoParam param = {
+            index,
+            params,
+        };
+        return BuildIndexInfoParam(env, param, argv, argc);
+    };
+
+    std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
+    dataParam->paramType = CryptoResultParamType::INIT_SESSION;
+    auto retParser = [&handle, &errcode, dataParam, this](napi_env &env, napi_value result) -> bool {
+        bool isPromise = false;
+        LOGE("check promise");
+        napi_is_promise(env, result, &isPromise);
+        if (!isPromise) {
+            LOGE("retParser is not promise");
+            return false;
+        }
+        LOGE("call Promise");
+        CallPromise(env, result, dataParam);
+        return true;
+    };
+
+    dataParam->callJsExMethodDone.store(false);
+    auto ret = CallJsMethod("onInitSession", jsRuntime_, jsObj_.get(), argParser, retParser);
+    if (ret != ERR_OK) {
+        LOGE("CallJsMethod error, code:%d", ret);
+        return ret;
+    }
+    std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
+    LOGE("wait start");
+    dataParam->callJsCon.wait(lock, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    LOGE("wait end");
+    handle = std::move(dataParam->handle);
+    errcode = std::move(dataParam->errCode);
+    return ERR_OK;
+}
+
+int JsHksCryptoExtAbility::UpdateSession(const std::string& handle, const CppParamSet& params, const std::vector<uint8_t>& inData,
+    std::vector<uint8_t>& outData, int32_t& errcode)
+{
+    LOGE("wqy !!!!!!!!!!!!!!!!!!JsHksCryptoExtAbility(JS) UpdateSession");
+    auto argParser = [handle, params, inData](napi_env &env, napi_value *argv, size_t &argc) -> bool {
+        struct HandleInfoParam param = {
+            handle,
+            params,
+        };
+        return BuildHandleWithInData(env, param, inData, argv, argc);
+    };
+
+    std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
+    dataParam->paramType = CryptoResultParamType::UPDATE_SESSION;
+    auto retParser = [dataParam, this](napi_env &env, napi_value result) -> bool {
+        bool isPromise = false;
+        LOGE("check promise");
+        napi_is_promise(env, result, &isPromise);
+        if (!isPromise) {
+            LOGE("retParser is not promise");
+            return false;
+        }
+        LOGE("call Promise");
+        CallPromise(env, result, dataParam);
+        return true;
+    };
+
+    dataParam->callJsExMethodDone.store(false);
+    auto ret = CallJsMethod("onUpdateSession", jsRuntime_, jsObj_.get(), argParser, retParser);
+    if (ret != ERR_OK) {
+        LOGE("CallJsMethod error, code:%d", ret);
+        return ret;
+    }
+    std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
+    LOGE("wait start");
+    dataParam->callJsCon.wait(lock, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    LOGE("wait end");
+    errcode = std::move(dataParam->errCode);
+    outData = std::move(dataParam->outData);
+    return ERR_OK;
+}
+
+int JsHksCryptoExtAbility::FinishSession(const std::string& handle, const CppParamSet& params, const std::vector<uint8_t>& inData,
+    std::vector<uint8_t>& outData, int32_t& errcode)
+{
+    LOGE("wqy !!!!!!!!!!!!!!!!!!JsHksCryptoExtAbility(JS) FinishSession");
+    auto argParser = [handle, params, inData](napi_env &env, napi_value *argv, size_t &argc) -> bool {
+        struct HandleInfoParam param = {
+            handle,
+            params,
+        };
+        return BuildHandleWithInData(env, param, inData, argv, argc);
+    };
+
+    std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
+    dataParam->paramType = CryptoResultParamType::FINISH_SESSION;
+    auto retParser = [dataParam, this](napi_env &env, napi_value result) -> bool {
+        bool isPromise = false;
+        LOGE("check promise");
+        napi_is_promise(env, result, &isPromise);
+        if (!isPromise) {
+            LOGE("retParser is not promise");
+            return false;
+        }
+        LOGE("call Promise");
+        CallPromise(env, result, dataParam);
+        return true;
+    };
+
+    dataParam->callJsExMethodDone.store(false);
+    auto ret = CallJsMethod("onFinishSession", jsRuntime_, jsObj_.get(), argParser, retParser);
+    if (ret != ERR_OK) {
+        LOGE("CallJsMethod error, code:%d", ret);
+        return ret;
+    }
+    std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
+    LOGE("wait start");
+    dataParam->callJsCon.wait(lock, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    LOGE("wait end");
+    errcode = std::move(dataParam->errCode);
+    outData = std::move(dataParam->outData);
     return ERR_OK;
 }
 
