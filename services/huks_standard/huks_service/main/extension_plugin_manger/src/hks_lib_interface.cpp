@@ -134,7 +134,7 @@ int32_t HuksLibInterface::OnAuthUkeyPin(const HksProcessInfo &processInfo,
 }
 
 int32_t HuksLibInterface::OnGetVerifyPinStatus(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, uint32_t &state) {
+    const std::string &index, const CppParamSet &paramSet, int32_t &state) {
     auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_GET_VERIFY_PIN_STATUS);
     HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
         "GetVerifyPinStatus method enum not found in plugin provider map.")

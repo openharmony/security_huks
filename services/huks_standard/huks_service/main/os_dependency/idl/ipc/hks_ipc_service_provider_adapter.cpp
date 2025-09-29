@@ -163,19 +163,17 @@ int32_t HksIpcServiceExportCertificateAdapter(const struct HksProcessInfo *proce
 int32_t HksIpcServiceOnAuthUkeyPinAdapter(const struct HksProcessInfo *processInfo,
     const struct HksBlob *index, const struct HksParamSet *paramSet, int32_t *outStatus, uint32_t *retryCount)
 {
-    return 0;
-    // std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
-    // CppParamSet cppParamSet(paramSet);
-    // return OHOS::Security::Huks::HksIpcServiceOnAuthUkeyPin(processInfo, cppIndex, cppParamSet, *outStatus, *retryCount);
+    std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
+    CppParamSet cppParamSet(paramSet);
+    return OHOS::Security::Huks::HksIpcServiceOnAuthUkeyPin(processInfo, cppIndex, cppParamSet, *outStatus, *retryCount);
 }
 
 int32_t HksIpcServiceOnGetUkeyPinAuthStateAdapter(const struct HksProcessInfo *processInfo,
     const struct HksBlob *index, const struct HksParamSet *paramSet, int32_t *outStatus)
 {
-    return 0;
-    // std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
-    // CppParamSet cppParamSet(paramSet);
-    // return OHOS::Security::Huks::HksIpcServiceOnGetVerifyPinStatus(processInfo, cppIndex, cppParamSet, *outStatus);
+    std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
+    CppParamSet cppParamSet(paramSet);
+    return OHOS::Security::Huks::HksIpcServiceOnGetVerifyPinStatus(processInfo, cppIndex, cppParamSet, *outStatus);
 }
 
 int32_t HksIpcServiceOnGetVerifyPinStatusAdapter(const char *index, int32_t *pinStatus)

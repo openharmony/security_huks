@@ -54,7 +54,7 @@ public:
     int32_t OnAuthUkeyPin(const HksProcessInfo &processInfo,
         const std::string &index, const CppParamSet &paramSet, int32_t& authState, uint32_t& retryCnt);
     int32_t OnGetVerifyPinStatus(const HksProcessInfo &processInfo,
-        const std::string &index, const CppParamSet &paramSet, uint32_t &state);
+        const std::string &index, const CppParamSet &paramSet, int32_t &state);
     // int32_t OnClearPinStatus(const std::string &index);
     
     //int32_t OnListProviders(std::vector<uint8_t> &providersOut);

@@ -384,9 +384,8 @@ int32_t HksClientGetRemoteHandle(const struct HksBlob *index, const struct HksPa
     struct HksBlob inBlob = { 0, NULL };
     struct HksBlob outBlob = { 0, NULL };
 
-    // TODO:这个地方提前申请多大的内存合适
-    outBlob.size = MAX_OUT_BLOB_SIZE;
-    outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
+    // outBlob.size = MAX_OUT_BLOB_SIZE;
+    // outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
 
     do {
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
@@ -404,12 +403,12 @@ int32_t HksClientGetRemoteHandle(const struct HksBlob *index, const struct HksPa
         ret = HksSendRequest(HKS_MSG_EXT_GET_REMOTE_HANDLE, &inBlob, &outBlob, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
 
-        remoteHandleOut->size = outBlob.size;
-        if (memcpy_s(remoteHandleOut->data, remoteHandleOut->size, outBlob.data, outBlob.size) != EOK) {
-            HKS_FREE(remoteHandleOut->data);
-            remoteHandleOut->data = NULL;
-            ret = HKS_ERROR_INSUFFICIENT_MEMORY; // 或其他合适的错误码
-        }
+        // remoteHandleOut->size = outBlob.size;
+        // if (memcpy_s(remoteHandleOut->data, remoteHandleOut->size, outBlob.data, outBlob.size) != EOK) {
+        //     HKS_FREE(remoteHandleOut->data);
+        //     remoteHandleOut->data = NULL;
+        //     ret = HKS_ERROR_INSUFFICIENT_MEMORY; // 或其他合适的错误码
+        // }
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CopyData fail, ret = %" LOG_PUBLIC "d", ret);
     } while (0);
 
@@ -432,9 +431,8 @@ int32_t HksClientOpenRemoteHandle(const struct HksBlob *index, const struct HksP
     struct HksBlob inBlob = { 0, NULL };
     struct HksBlob outBlob = { 0, NULL };
 
-    // TODO:这个地方提前申请多大的内存合适
-    outBlob.size = MAX_OUT_BLOB_SIZE;
-    outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
+    // outBlob.size = MAX_OUT_BLOB_SIZE;
+    // outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
 
     do {
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
@@ -452,12 +450,12 @@ int32_t HksClientOpenRemoteHandle(const struct HksBlob *index, const struct HksP
         ret = HksSendRequest(HKS_MSG_EXT_OPEN_REMOTE_HANDLE, &inBlob, &outBlob, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret);
 
-        remoteHandleOut->size = outBlob.size;
-        if (memcpy_s(remoteHandleOut->data, remoteHandleOut->size, outBlob.data, outBlob.size) != EOK) {
-            HKS_FREE(remoteHandleOut->data);
-            remoteHandleOut->data = NULL;
-            ret = HKS_ERROR_INSUFFICIENT_MEMORY; // 或其他合适的错误码
-        }
+        // remoteHandleOut->size = outBlob.size;
+        // if (memcpy_s(remoteHandleOut->data, remoteHandleOut->size, outBlob.data, outBlob.size) != EOK) {
+        //     HKS_FREE(remoteHandleOut->data);
+        //     remoteHandleOut->data = NULL;
+        //     ret = HKS_ERROR_INSUFFICIENT_MEMORY; // 或其他合适的错误码
+        // }
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CopyData fail, ret = %" LOG_PUBLIC "d", ret);
 
     } while (0);
