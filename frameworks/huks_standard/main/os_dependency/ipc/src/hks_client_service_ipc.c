@@ -129,10 +129,10 @@ int32_t HksClientRegisterProvider(const struct HksBlob *name, const struct HksPa
         ret = HksAllocInBlob(&inBlob, name, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
-        ret = HksCheckIpcDeleteKey(name, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(name, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientRegisterProvider fail")
 
-        ret = HksDeleteKeyPack(name, newParamSet, &inBlob);
+        ret = HksUKeyGeneralPack(name, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRegisterProviderPack fail")
 
         ret = HksSendRequest(HKS_MSG_EXT_REGISTER, &inBlob, NULL, newParamSet);
@@ -157,10 +157,10 @@ int32_t HksClientUnregisterProvider(const struct HksBlob *name, const struct Hks
         ret = HksAllocInBlob(&inBlob, name, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
-        ret = HksCheckIpcDeleteKey(name, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(name, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientUnregisterProvider fail")
 
-        ret = HksDeleteKeyPack(name, newParamSet, &inBlob);
+        ret = HksUKeyGeneralPack(name, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRegisterProviderPack fail")
 
         ret = HksSendRequest(HKS_MSG_EXT_UNREGISTER, &inBlob, NULL, newParamSet);
@@ -197,10 +197,10 @@ int32_t HksClientExportProviderCertificates(const struct HksBlob *name, const st
         ret = HksAllocInBlob(&inBlob, name, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
-        ret = HksCheckIpcDeleteKey(name, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(name, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientExportProviderCertificates fail");
 
-        ret = HksDeleteKeyPack(name, newParamSet, &inBlob);
+        ret = HksUKeyGeneralPack(name, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksExportProviderCertificatesPack fail");
 
         ret = HksSendRequest(HKS_MSG_EXT_EXPORT_PROVIDER_CERTIFICATES, &inBlob, &outBlob, newParamSet);
@@ -244,10 +244,10 @@ int32_t HksClientExportCertificate(const struct HksBlob *index, const struct Hks
         ret = HksAllocInBlob(&inBlob, index, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
-        ret = HksCheckIpcDeleteKey(index, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(index, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientExportCertificate fail");
 
-        ret = HksDeleteKeyPack(index, newParamSet, &inBlob);
+        ret = HksUKeyGeneralPack(index, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksExportProviderCertificatesPack fail");
 
         ret = HksSendRequest(HKS_MSG_EXT_EXPORT_CERTIFICATE, &inBlob, &outBlob, newParamSet);
@@ -292,13 +292,13 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: build paramSet fail");
 
-        ret = HksCheckIpcDeleteKey(index, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(index, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: check fail");
 
         ret = HksAllocInBlob(&inBlob, index, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
-        ret = HksDeleteKeyPack(index, newParamSet, &inBlob);
+        ret = HksUKeyGeneralPack(index, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: pack fail");
 
         ret = HksSendRequest(HKS_MSG_EXT_AUTH_UKEY_PIN, &inBlob, &outBlob, newParamSet);
@@ -342,13 +342,13 @@ int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index,
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetUkeyPinAuthState: build paramSet fail");
 
-        ret = HksCheckIpcDeleteKey(index, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(index, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetUkeyPinAuthState: check fail");
 
         ret = HksAllocInBlob(&inBlob, index, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
-        ret = HksDeleteKeyPack(index, newParamSet, &inBlob);
+        ret = HksUKeyGeneralPack(index, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetUkeyPinAuthState: pack fail");
 
         ret = HksSendRequest(HKS_MSG_EXT_GET_UKEY_PIN_AUTH_STATE, &inBlob, &outBlob, newParamSet);
@@ -391,13 +391,13 @@ int32_t HksClientGetRemoteHandle(const struct HksBlob *index, const struct HksPa
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksCheckIpcDeleteKey(index, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(index, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIpcGetRemoteHandle fail")
 
         ret = HksAllocInBlob(&inBlob, index, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
-        ret = HksDeleteKeyPack(index, newParamSet, &inBlob);
+        ret = HksUKeyGeneralPack(index, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetRemoteHandlePack fail")
 
         ret = HksSendRequest(HKS_MSG_EXT_GET_REMOTE_HANDLE, &inBlob, &outBlob, newParamSet);
@@ -438,13 +438,13 @@ int32_t HksClientOpenRemoteHandle(const struct HksBlob *index, const struct HksP
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksCheckIpcDeleteKey(index, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(index, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientOpenRemoteHandle fail")
 
         ret = HksAllocInBlob(&inBlob, index, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
-        ret = HksDeleteKeyPack(index, newParamSet, &inBlob);
+        ret = HksUKeyGeneralPack(index, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksOpenRemoteHandlePack fail")
 
         ret = HksSendRequest(HKS_MSG_EXT_OPEN_REMOTE_HANDLE, &inBlob, &outBlob, newParamSet);
@@ -479,10 +479,10 @@ int32_t HksClientCloseRemoteHandle(const struct HksBlob *index, const struct Hks
         ret = HksAllocInBlob(&inBlob, index, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
-        ret = HksCheckIpcDeleteKey(index, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(index, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIpcCloseRemoteHandle fail")
 
-        ret = HksDeleteKeyPack(index, newParamSet, &inBlob);
+        ret = HksUKeyGeneralPack(index, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCloseRemoteHandlePack fail")
 
         ret = HksSendRequest(HKS_MSG_EXT_CLOSE_REMOTE_HANDLE, &inBlob, NULL, newParamSet);
@@ -501,7 +501,7 @@ int32_t HksClientClearPinAuthState(const struct HksBlob *index)
     struct HksBlob inBlob = { 0, NULL };
     
     do {
-        ret = CheckBlob(index);
+        ret = HksCheckIpcBlob(index);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksClientClearPinAuthState fail")
 
         ret = HksAllocInBlob(&inBlob, index, NULL);

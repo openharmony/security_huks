@@ -185,6 +185,19 @@ static int32_t MallocParamSetFromBuffer(const struct HksBlob *srcData, struct Hk
     return HKS_SUCCESS;
 }
 
+int32_t HksUKeyGeneralUnpack(const struct HksBlob *srcData, struct HksBlob *blob, struct HksParamSet **paramSet)
+{
+    uint32_t offset = 0;
+    int32_t ret = GetBlobFromBuffer(blob, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyAlias failed")
+    HKS_IF_TRUE_RETURN(offset == srcData->size, HKS_SUCCESS)
+
+    ret = GetParamSetFromBuffer(paramSet, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get paramSet failed")
+
+    return HKS_SUCCESS;
+}
+
 int32_t HksGenerateKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
     struct HksParamSet **paramSetIn, struct HksBlob *keyOut)
 {
