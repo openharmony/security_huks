@@ -31,25 +31,6 @@ bool IsHksExtCertInfoSetEmpty(const struct HksExtCertInfoSet& certSet) {
     return certSet.certs == nullptr || certSet.count == 0;
 }
 
-void FreeHksExtCertInfoSet(struct HksExtCertInfoSet* certSet) {
-    HKS_IF_NULL_RETURN_VOID(certSet);
-    
-    if (certSet->certs != nullptr) {
-        for (uint32_t i = 0; i < certSet->count; i++) {
-            if (certSet->certs[i].index.data != nullptr) {
-                free(certSet->certs[i].index.data);
-                certSet->certs[i].index.data = nullptr;
-            }
-            if (certSet->certs[i].cert.data != nullptr) {
-                free(certSet->certs[i].cert.data);
-                certSet->certs[i].cert.data = nullptr;
-            }
-        }
-        free(certSet->certs);
-        certSet->certs = nullptr;
-    }
-    certSet->count = 0;
-}
 
 static int32_t HksBlobToBase64(const struct HksBlob& blob, std::string& base64Str) {
     if (IsHksBlobEmpty(blob)) {
@@ -207,9 +188,6 @@ int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCert
     int32_t ret = memset_s(certSet.certs, arraySize * sizeof(HksExtCertInfo), 0, arraySize * sizeof(HksExtCertInfo));
     if (ret != EOK) {
         HKS_LOG_E("memset_s for cert set failed, ret: %" LOG_PUBLIC "d", ret);
-        free(certSet.certs);
-        certSet.certs = nullptr;
-        certSet.count = 0;
         return HKS_ERROR_INVALID_OPERATION;
     }
 
@@ -263,7 +241,6 @@ int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCert
     }
     
     if (ret != HKS_SUCCESS) {
-        FreeHksExtCertInfoSet(&certSet);
         return ret;
     }
     
