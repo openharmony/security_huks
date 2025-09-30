@@ -384,9 +384,7 @@ HKS_API_EXPORT void HksFreeCertSet(struct HksExtCertInfoSet *CertInfoSet)
     }
 
     CertInfoSet->count = 0;
-
     HKS_FREE(CertInfoSet->certs);
-    HKS_FREE(CertInfoSet);
     CertInfoSet = NULL;
 }
 
