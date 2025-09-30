@@ -228,7 +228,7 @@ CppParamSet *CppParamSet::Unmarshalling(OHOS::Parcel &parcel)
     int32_t ret = HksFreshParamSet(paramSet, false);
     if(ret != HKS_SUCCESS) {
         HKS_FREE(paramSet);
-        delete CppParamSet;
+        delete cppParamSet;
         return nullptr;
     }
 
