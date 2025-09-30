@@ -475,7 +475,7 @@ static bool BuildHandleWithInData(napi_env &env, HandleInfoParam &param, const s
     }
 
     napi_value nativeInData = nullptr;
-    if (MakeJsNativeVectorInData(env, inData, nativeInData) != napi_ok) {
+    if (MakeJsNativeVectorInData(env, inData, nativeInData) != true) {
         LOGE("Make js CppParamSet failed");
         return false;
     }
