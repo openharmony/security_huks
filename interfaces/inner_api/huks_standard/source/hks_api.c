@@ -141,7 +141,7 @@ HKS_API_EXPORT int32_t HksAuthUkeyPinWrapper(const struct HksBlob *index, const 
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t outStatus = 0;
-    int32_t ret = HksClientAuthUkeyPin(index, paramSetIn, &outStatus, retryCount);
+    int32_t ret = HksAuthUkeyPin(index, paramSetIn, &outStatus, retryCount);
     HKS_IF_NOT_SUCC_LOGE(ret, "leave AuthUkeyPin, result = %" LOG_PUBLIC "d", ret);
     return ret;
 #else
