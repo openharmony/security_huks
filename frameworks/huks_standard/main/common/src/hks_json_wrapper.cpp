@@ -542,9 +542,11 @@ std::pair<int32_t, std::vector<uint8_t>> Base64Str2U8Vec(const std::string &base
         }
         if (curPos < checkRet.second.size()) {
             checkRet.second[curPos] = byte2;
+            curPos++;
         }
         if (curPos < checkRet.second.size()) {
             checkRet.second[curPos] = byte3;
+            curPos++;
         }
     }
      
