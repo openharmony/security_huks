@@ -123,6 +123,17 @@ static int32_t GetParamSetFromBuffer(struct HksParamSet **paramSet,
     return HKS_SUCCESS;
 }
 
+int32_t HksUKeyGeneralPack(const struct HksBlob *blob, const struct HksParamSet *paramSet, struct HksBlob *destData)
+{
+    uint32_t offset = 0;
+    int32_t ret = CopyBlobToBuffer(blob, destData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy blob failed")
+
+    ret = CopyParamSetToBuffer(paramSet, destData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy paramSet failed")
+    return HKS_SUCCESS;
+}
+
 int32_t HksGenerateKeyPack(struct HksBlob *destData, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, const struct HksBlob *keyOut)
 {

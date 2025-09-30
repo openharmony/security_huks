@@ -31,6 +31,8 @@ extern "C" {
 
 int32_t CopyUint32ToBuffer(uint32_t value, const struct HksBlob *destBlob, uint32_t *destOffset);
 
+int32_t HksUKeyGeneralPack(const struct HksBlob *blob, const struct HksParamSet *paramSet, struct HksBlob *destData);
+
 int32_t HksGenerateKeyPack(struct HksBlob *destData, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, const struct HksBlob *keyOut);
 

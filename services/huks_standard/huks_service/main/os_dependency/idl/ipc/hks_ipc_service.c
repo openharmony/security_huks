@@ -67,7 +67,7 @@ void HksIpcServiceRegisterProvider(const struct HksBlob *srcData, const uint8_t 
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     int32_t ret;
     do {
-        ret  = HksDeleteKeyUnpack(srcData, &name, &paramSet);
+        ret = HksUKeyGeneralUnpack(srcData, &name, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceRegisterProviderUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
@@ -93,7 +93,7 @@ void HksIpcServiceUnregisterProvider(const struct HksBlob *srcData, const uint8_
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     int32_t ret;
     do {
-        ret  = HksDeleteKeyUnpack(srcData, &name, &paramSet);
+        ret = HksUKeyGeneralUnpack(srcData, &name, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceUnregisterProviderUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
@@ -123,7 +123,7 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
     int32_t ret;
 
     do {
-        ret = HksDeleteKeyUnpack(srcData, &index, &paramSet);
+        ret = HksUKeyGeneralUnpack(srcData, &index, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: unpack fail");
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
@@ -167,7 +167,7 @@ void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8
     int32_t ret;
 
     do {
-        ret = HksDeleteKeyUnpack(srcData, &index, &paramSet);
+        ret = HksUKeyGeneralUnpack(srcData, &index, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetUkeyPinAuthState: unpack fail");
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
@@ -232,7 +232,7 @@ void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t 
     int32_t ret;
 
     do {
-        ret  = HksDeleteKeyUnpack(srcData, &index, &paramSet);
+        ret  = HksUKeyGeneralUnpack(srcData, &index, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceOpenRemoteHandleUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
@@ -262,7 +262,7 @@ void HksIpcServiceGetRemoteHandle(const struct HksBlob *srcData, const uint8_t *
     int32_t ret;
 
     do {
-        ret  = HksDeleteKeyUnpack(srcData, &index, &paramSet);
+        ret  = HksUKeyGeneralUnpack(srcData, &index, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceGetRemoteHandleUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
@@ -290,7 +290,7 @@ void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     int32_t ret;
     do {
-        ret  = HksDeleteKeyUnpack(srcData, &index, &paramSet);
+        ret  = HksUKeyGeneralUnpack(srcData, &index, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceCloseRemoteHandleUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
@@ -379,7 +379,7 @@ void HksIpcServiceExportProviderCertificates(const struct HksBlob *srcData, cons
     int32_t ret;
 
     do {
-        ret = HksDeleteKeyUnpack(srcData, &providerName, &paramSet);
+        ret = HksUKeyGeneralUnpack(srcData, &providerName, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceExportProviderCertificatesUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
@@ -415,7 +415,7 @@ void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t
     int32_t ret;
 
     do {
-        ret = HksDeleteKeyUnpack(srcData, &index, &paramSet);
+        ret = HksUKeyGeneralUnpack(srcData, &index, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceExportCertificateUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);

@@ -25,6 +25,8 @@ extern "C" {
 
 int32_t GetBlobFromBuffer(struct HksBlob *blob, const struct HksBlob *srcBlob, uint32_t *srcOffset);
 
+int32_t HksUKeyGeneralUnpack(const struct HksBlob *srcData, struct HksBlob *blob, struct HksParamSet **paramSet);
+
 int32_t HksGenerateKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
     struct HksParamSet **paramSetIn, struct HksBlob *keyOut);
 
