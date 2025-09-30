@@ -29,8 +29,6 @@ namespace Huks {
 
     bool IsHksExtCertInfoSetEmpty(const struct HksExtCertInfoSet& certSet);
 
-    void FreeHksExtCertInfoSet(struct HksExtCertInfoSet* certSet);
-
     int32_t StringToCertInfo(const std::string &certInfoJson, struct HksExtCertInfo& certInfo);
 
     int32_t CertInfoToString(const struct HksExtCertInfo& certInfo, std::string& jsonStr);
