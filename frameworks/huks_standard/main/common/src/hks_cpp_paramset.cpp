@@ -189,6 +189,10 @@ bool CppParamSet::Marshalling(OHOS::Parcel &parcel) const
         HKS_LOG_E("CppParamSet Marshalling paramSetSize failed");
         return false;
     }
+    if(!parcel.WriteBuffer(ptr_, ptr_->paramSetSize)) {
+        HKS_LOG_E("CppParamSet Marshalling WriteBuffer failed");
+        return false;
+    }
     HKS_LOG_I("CppParamSet Marshalling success");
     return true;
 }
@@ -219,6 +223,12 @@ CppParamSet *CppParamSet::Unmarshalling(OHOS::Parcel &parcel)
         HKS_LOG_E("memcpy_s failed");
         HKS_FREE(paramSet);
         delete cppParamSet;
+        return nullptr;
+    }
+    int32_t ret = HksFreshParamSet(paramSet, false);
+    if(ret != HKS_SUCCESS) {
+        HKS_FREE(paramSet);
+        delete CppParamSet;
         return nullptr;
     }
 
