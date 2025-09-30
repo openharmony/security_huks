@@ -78,7 +78,7 @@ static int32_t Base64ToHksBlob(const std::string& base64Str, struct HksBlob& blo
     
     blob.size = result.second.size();
     if (blob.size > 0) {
-        blob.data = (uint8_t*)malloc(blob.size);
+        blob.data = (uint8_t*)HksMalloc(blob.size);
         HKS_IF_NULL_LOGE_RETURN(blob.data, HKS_ERROR_MALLOC_FAIL, 
             "Malloc for blob data failed, size: %" LOG_PUBLIC "u", blob.size);
         
@@ -200,7 +200,7 @@ int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCert
         "Json array size invalid: %" LOG_PUBLIC "d", arraySize);
     
     certSet.count = arraySize;
-    certSet.certs = (HksExtCertInfo*)malloc(arraySize * sizeof(HksExtCertInfo));
+    certSet.certs = (HksExtCertInfo*)HksMalloc(arraySize * sizeof(HksExtCertInfo));
     HKS_IF_NULL_LOGE_RETURN(certSet.certs, HKS_ERROR_MALLOC_FAIL, 
         "Malloc for cert set failed, size: %" LOG_PUBLIC "d", arraySize);
     
