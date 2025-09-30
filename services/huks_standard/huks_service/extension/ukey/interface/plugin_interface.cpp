@@ -99,7 +99,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnAuthUkeyPin(const H
 }
 
 __attribute__((visibility("default"))) int32_t HksExtPluginOnGetUkeyPinAuthState(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, uint32_t &state)
+    const std::string &index, const CppParamSet &paramSet, int32_t &state)
 {
     HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();

@@ -53,7 +53,7 @@ public:
     ErrCode GetUkeyPinAuthState(
         const std::string& handle,
         const CppParamSet& params,
-        uint32_t& state,
+        int32_t& state,
         int32_t& errcode) override;
 
     ErrCode Sign(
