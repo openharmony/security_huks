@@ -48,7 +48,7 @@ public:
     int32_t RemoteVerifyPin(const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet,
             int32_t& authState, uint32_t& retryCnt);
     int32_t RemoteVerifyPinStatus(const HksProcessInfo &processInfo,
-            const std::string &index, const CppParamSet &paramSet, uint32_t &state);
+            const std::string &index, const CppParamSet &paramSet, int32_t &state);
     int32_t RemoteClearPinStatus(const std::string &index);
 
     //证书查询

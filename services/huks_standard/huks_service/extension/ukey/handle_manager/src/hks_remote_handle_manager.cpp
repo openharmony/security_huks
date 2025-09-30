@@ -301,7 +301,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
 }
 
 int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, uint32_t &state)
+    const std::string &index, const CppParamSet &paramSet, int32_t &state)
 {
     ProviderInfo providerInfo;
     std::string newIndex;

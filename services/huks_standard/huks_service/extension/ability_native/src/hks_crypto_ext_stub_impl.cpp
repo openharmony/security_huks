@@ -70,7 +70,7 @@ ErrCode HksCryptoExtStubImpl::AuthUkeyPin(
 ErrCode HksCryptoExtStubImpl::GetUkeyPinAuthState(
     const std::string& handle,
     const CppParamSet& params,
-    uint32_t& state,
+    int32_t& state,
     int32_t& errcode)
 {
     LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl GetUkeyPinAuthState");
