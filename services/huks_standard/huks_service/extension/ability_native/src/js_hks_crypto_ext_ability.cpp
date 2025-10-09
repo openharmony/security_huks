@@ -19,7 +19,9 @@
 #include "hks_crypto_ext_stub_impl.h"
 #include "extension_context.h"
 #include "if_system_ability_manager.h"
+#include "image_type.h"
 #include "js_native_api.h"
+#include "js_native_api_types.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
 #include "napi/native_api.h"
@@ -28,7 +30,6 @@
 #include "napi_common_want.h"
 #include "napi_remote_object.h"
 #include "log_utils.h"
-#include "huks_napi_common_item.h"
 #include "hks_json_wrapper.h"
 
 namespace OHOS {
@@ -54,6 +55,13 @@ struct IndexInfoParam {
     std::string index {};
     CppParamSet params {};
 };
+
+inline napi_value GetNull(napi_env env)
+{
+    napi_value result = nullptr;
+    NAPI_CALL(env, napi_get_null(env, &result));
+    return result;
+}
 
 static int DoCallJsMethod(CallJsParam *param)
 {
@@ -389,9 +397,75 @@ bool JsHksCryptoExtAbility::ParserVectorStringJsResult(napi_env &env, napi_value
     return true;
 }
 
+static napi_value GenerateArrayBuffer(napi_env env, uint8_t *data, uint32_t size)
+{
+    napi_value buffer;
+    void *buffer_ptr = NULL;
+    napi_create_arraybuffer(env, size * sizeof(uint8_t), &buffer_ptr, &buffer);
+
+    napi_value outBuffer;
+    napi_create_typedarray(env, napi_uint8_array, size, buffer, 0, &outBuffer);
+    uint8_t *outPut_bytes = (uint8_t *)buffer_ptr;
+    for (uint32_t i = 0; i < size; ++i) {
+        outPut_bytes[i] = data[i];
+    }
+    return outBuffer;
+}
+
+static napi_value GenerateHksParam(napi_env env, const HksParam &param)
+{
+    napi_value hksParam = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &hksParam));
+
+    napi_value tag = nullptr;
+    NAPI_CALL(env, napi_create_uint32(env, param.tag, &tag));
+    NAPI_CALL(env, napi_set_named_property(env, hksParam, "tag", tag));
+
+    napi_value value = nullptr;
+    switch (param.tag & HKS_TAG_TYPE_MASK) {
+        case HKS_TAG_TYPE_INT:
+            NAPI_CALL(env, napi_create_int32(env, param.int32Param, &value));
+            break;
+        case HKS_TAG_TYPE_UINT:
+            NAPI_CALL(env, napi_create_uint32(env, param.uint32Param, &value));
+            break;
+        case HKS_TAG_TYPE_ULONG:
+            NAPI_CALL(env, napi_create_int64(env, param.uint64Param, &value));
+            break;
+        case HKS_TAG_TYPE_BOOL:
+            NAPI_CALL(env, napi_get_boolean(env, param.boolParam, &value));
+            break;
+        case HKS_TAG_TYPE_BYTES:
+            value = GenerateArrayBuffer(env, param.blob.data, param.blob.size);
+            break;
+        default:
+            value = GetNull(env);
+            break;
+    }
+    NAPI_CALL(env, napi_set_named_property(env, hksParam, "value", value));
+
+    return hksParam;
+}
+
+
+napi_value GenerateHksParamArray(napi_env env, const HksParamSet &paramSet)
+{
+    napi_value paramArray = nullptr;
+    NAPI_CALL(env, napi_create_array(env, &paramArray));
+
+    for (uint32_t i = 0; i < paramSet.paramsCnt; i++) {
+        napi_value element = nullptr;
+        element = GenerateHksParam(env, paramSet.params[i]);
+        napi_set_element(env, paramArray, i, element);
+    }
+
+    return paramArray;
+}
+
+
 bool MakeJsNativeCppParamSet(napi_env &env, const CppParamSet &CppParamSet, napi_value nativeCppParamSet)
 {
-    napi_value napiHksParam = HuksNapiItem::GenerateHksParamArray(env, *CppParamSet.GetParamSet());
+    napi_value napiHksParam = GenerateHksParamArray(env, *CppParamSet.GetParamSet());
     if (napi_set_named_property(env, nativeCppParamSet, "properties", napiHksParam) != napi_ok) {
         LOGE("Set property to nativeCppParamSet failed");
         return false;
