@@ -172,4 +172,25 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnFinishSe
     return ret;
 }
 
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksClearUkeyPinAuthState(const HksProcessInfo &processInfo,
+    const std::string &index))
+{
+    int32_t ret = HKS_SUCCESS;
+    HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    // TODO: handleMgr 调用 proxy的 ClearUkeyPinAuthState
+
+    HKS_LOG_E("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
+    return ret;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksGetRemoteProperty(const HksProcessInfo &processInfo,
+    const std::string &index, const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams))
+{
+    int32_t ret = HKS_SUCCESS;
+    HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    // TODO: handleMgr 调用 proxy的 GetProperty
+
+    HKS_LOG_E("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
+    return ret;
+}
 }
