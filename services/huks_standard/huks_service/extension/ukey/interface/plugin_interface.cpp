@@ -20,13 +20,14 @@
 #include "hks_session_manger.h"
 #include "hks_cpp_paramset.h"
 #include "hks_template.h"
+#include "hks_cfi.h"
 #include <string>
 #include <vector>
 
 namespace OHOS::Security::Huks {
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnRegisterProvider(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet)
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnRegisterProvider(
+    const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet))
 {
     HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
@@ -36,8 +37,8 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnRegisterProvider(co
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet)
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(
+    const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet))
 {
     HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
@@ -51,8 +52,9 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnCreateRemoteIndex(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet, std::string &index)
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnCreateRemoteIndex(
+    const HksProcessInfo &processInfo, const std::string &providerName,
+    const CppParamSet &paramSet, std::string &index))
 {
     HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
@@ -63,8 +65,8 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnCreateRemoteIndex(c
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnOpemRemoteHandle(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, std::string &handle)
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnOpemRemoteHandle(
+    const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet, std::string &handle))
 {
     HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     // handle is need to be set??
@@ -76,8 +78,8 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnOpemRemoteHandle(co
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnCloseRemoteHandle(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet)
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnCloseRemoteHandle(
+    const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet))
 {
     HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
@@ -87,8 +89,8 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnCloseRemoteHandle(c
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnAuthUkeyPin(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t &retryCnt)
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnAuthUkeyPin(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t &retryCnt))
 {
     HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
@@ -98,8 +100,8 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnAuthUkeyPin(const H
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnGetUkeyPinAuthState(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, int32_t &state)
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnGetUkeyPinAuthState(
+    const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet, int32_t &state))
 {
     HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
@@ -109,8 +111,8 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnGetUkeyPinAuthState
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnExportCerticate(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, std::string &certsJson)
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnExportCerticate(
+    const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet, std::string &certsJson))
 {
     HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
@@ -120,8 +122,9 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnExportCerticate(con
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnExportProviderCerticates(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr)
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnExportProviderCerticates(
+    const HksProcessInfo &processInfo, const std::string &providerName,
+    const CppParamSet &paramSet, std::string &certsJsonArr))
 {
     HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
@@ -131,8 +134,8 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnExportProviderCerti
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnInitSession(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, uint32_t &handle)
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnInitSession(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, uint32_t &handle))
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
@@ -143,9 +146,9 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnInitSession(const H
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnUpdateSession(const HksProcessInfo &processInfo,
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnUpdateSession(const HksProcessInfo &processInfo,
     const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
-    std::vector<uint8_t> &outData)
+    std::vector<uint8_t> &outData))
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
@@ -156,9 +159,9 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUpdateSession(const
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnFinishSession(const HksProcessInfo &processInfo,
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnFinishSession(const HksProcessInfo &processInfo,
     const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
-    std::vector<uint8_t> &outData)
+    std::vector<uint8_t> &outData))
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);

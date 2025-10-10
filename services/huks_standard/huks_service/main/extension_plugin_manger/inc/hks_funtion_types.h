@@ -57,7 +57,7 @@ static const std::map<PluginMethodEnum, std::string> m_pluginMethodNameMap = {
     {PluginMethodEnum::FUNC_ON_CREATE_REMOTE_KEY_HANDLE, "_ZN4OHOS8Security4Huks30HksExtPluginOnOpemRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_"},
     {PluginMethodEnum::FUNC_ON_CLOSE_REMOTE_KEY_HANDLE, "_ZN4OHOS8Security4Huks31HksExtPluginOnCloseRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet"},
     {PluginMethodEnum::FUNC_ON_AUTH_UKEY_PIN, "_ZN4OHOS8Security4Huks25HksExtPluginOnAuthUkeyPinERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRiRj"},
-    {PluginMethodEnum::FUNC_ON_GET_VERIFY_PIN_STATUS, "_ZN4OHOS8Security4Huks33HksExtPluginOnGetUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRj"},
+    {PluginMethodEnum::FUNC_ON_GET_VERIFY_PIN_STATUS, "_ZN4OHOS8Security4Huks33HksExtPluginOnGetUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRi"},
     // {PluginMethodEnum::FUNC_ON_FIND_REMOTE_KEY_HANDLE, ""},
     // {PluginMethodEnum::FUNC_ON_SIGNED, ""},
     // {PluginMethodEnum::FUNC_ON_CLEAR_PIN_STATUS, ""},
