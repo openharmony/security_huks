@@ -212,6 +212,19 @@ enum OH_Huks_KeySize {
 };
 
 /**
+ * @brief Enumerates the key classes.
+ *
+ * @since 22
+ * @version 1.0
+ */
+enum OH_Huks_KeyClassType {
+    /** Default key class. */
+    OH_HUKS_KEY_CLASS_DEFAULT = 0,
+    /** Extension key class. */
+    OH_HUKS_KEY_CLASS_EXTENSION = 1,
+};
+
+/**
  * @brief Enumerates the key algorithms.
  *
  * @since 9
@@ -707,6 +720,9 @@ enum OH_Huks_Tag {
      */
     OH_HUKS_TAG_AE_TAG_LEN = OH_HUKS_TAG_TYPE_UINT | 521,
 
+    
+    /** The tag indicates the key class. */
+    OH_HUKS_TAG_KEY_CLASS = OH_HUKS_TAG_TYPE_UINT | 601,
     /**
      * 601 to 1000 are reserved for other tags.
      *

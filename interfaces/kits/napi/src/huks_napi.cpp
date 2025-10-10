@@ -583,9 +583,8 @@ static napi_value CreateHuksKeyClassType(napi_env env)
     napi_value keyClassType = nullptr;
     NAPI_CALL(env, napi_create_object(env, &keyClassType));
 
-    AddInt32Property(env, keyClassType, "HUKS_KEY_CLASS_SELF", HKS_KEY_CLASS_SELF);
+    AddInt32Property(env, keyClassType, "HUKS_KEY_CLASS_DEFAULT", HKS_KEY_CLASS_DEFAULT);
     AddInt32Property(env, keyClassType, "HUKS_KEY_CLASS_EXTENSION", HKS_KEY_CLASS_EXTENSION);
-    AddInt32Property(env, keyClassType, "HUKS_KEY_CLASS_CERTIFICATE", HKS_KEY_CLASS_CERTIFICATE);
 
     return keyClassType;
 }
