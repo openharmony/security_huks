@@ -129,7 +129,7 @@ int32_t HksIpcExportProvCertsAdapter(const struct HksProcessInfo *processInfo, c
     std::string certificates;
     CppParamSet cppParamSet(paramSet);
 
-    ret = OHOS::Security::Huks::HksIpcServiceOnListProviderAllCertificate(processInfo, cppProviderName, cppParamSet, certificates);
+    ret = OHOS::Security::Huks::HksIpcServiceOnExportProviderAllCertificates(processInfo, cppProviderName, cppParamSet, certificates);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcExportProvCertsAdapter fail")
 
     ret = OHOS::Security::Huks::JsonArrayToCertInfoSet(certificates, *certInfoSet);
