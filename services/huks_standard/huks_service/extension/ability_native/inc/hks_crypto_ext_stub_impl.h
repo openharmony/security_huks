@@ -100,6 +100,23 @@ public:
         const std::vector<uint8_t>& inData,
         std::vector<uint8_t>& outData,
         int32_t& errcode) override;
+
+    ErrCode GetProperty(
+        const std::string& handle,
+        const std::string& propertyId,
+        const CppParamSet& params,
+        CppParamSet& OutParams,
+        int32_t& errcode) override;
+    
+    ErrCode GetResourceId(
+        const CppParamSet& params,
+        std::string& resourceId,
+        int32_t& errcode) override;
+    
+    ErrCode ClearUkeyPinAuthState(
+        const std::string& handle,
+        const CppParamSet& params,
+        int32_t& errcode) override;
 private:
     std::shared_ptr<HksCryptoExtAbility> extension_;
 };

@@ -196,6 +196,50 @@ ErrCode HksCryptoExtStubImpl::FinishSession(
     return ERR_OK;
 }
 
+ErrCode HksCryptoExtStubImpl::GetProperty(
+    const std::string& handle,
+    const std::string& propertyId,
+    const CppParamSet& params,
+    CppParamSet& OutParams,
+    int32_t& errcode)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO GetProperty");
+    if (extension_ == nullptr) {
+        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        return ERR_OK;
+    }
+    // TODO 实现具体的获取属性逻辑
+    return ERR_OK;
+}
+
+ErrCode HksCryptoExtStubImpl::GetResourceId(
+    const CppParamSet& params,
+    std::string& resourceId,
+    int32_t& errcode)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO GetResourceId");
+    if (extension_ == nullptr) {
+        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        return ERR_OK;
+    }
+    // TODO 实现具体的获取资源ID逻辑
+    return ERR_OK;
+}
+
+ErrCode HksCryptoExtStubImpl::ClearUkeyPinAuthState(
+    const std::string& handle,
+    const CppParamSet& params,
+    int32_t& errcode)
+{
+    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO ClearUkeyPinAuthState");
+    if (extension_ == nullptr) {
+        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        return ERR_OK;
+    }
+    // TODO 实现具体的清除Ukey PIN认证状态逻辑
+    return ERR_OK;
+}
+
 } // namespace Huks
 } // namespace Security
 } // namespace OHOS
