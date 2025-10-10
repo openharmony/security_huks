@@ -200,7 +200,7 @@ ErrCode HksCryptoExtStubImpl::GetProperty(
     const std::string& handle,
     const std::string& propertyId,
     const CppParamSet& params,
-    CppParamSet& OutParams,
+    CppParamSet& outParams,
     int32_t& errcode)
 {
     LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO GetProperty");
