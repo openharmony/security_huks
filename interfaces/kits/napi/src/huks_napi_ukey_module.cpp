@@ -7,15 +7,10 @@ using namespace HuksNapiItem;
 
 extern "C" {
 
-#define HKS_NAPI_CALL_FAIL_RETURN(theCall) \
-    if ((theCall) != napi_ok) { \
-        return nullptr; \
-    }
-
 static napi_value CreateU32(napi_env env, uint32_t value)
 {
     napi_value napiValue{};
-    HKS_NAPI_CALL_FAIL_RETURN(napi_create_uint32(env, value, &napiValue));
+    NAPI_CALL(env, napi_create_uint32(env, value, &napiValue));
     return napiValue;
 }
 

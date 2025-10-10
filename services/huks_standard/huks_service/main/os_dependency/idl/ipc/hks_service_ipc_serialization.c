@@ -597,10 +597,10 @@ int32_t HksCertificatesPackFromService(const struct HksExtCertInfoSet *certInfoS
 
     destData->size = sizeof(certInfoSet->count);
     for (uint32_t i = 0; i < certInfoSet->count; ++i) {
-        const struct HksExtCertInfo *ci = &certInfoSet->certs[i];
+        const struct HksExtCertInfo *certInfo = &certInfoSet->certs[i];
         destData->size += sizeof(int32_t); /* purpose */
-        destData->size += sizeof(ci->index.size) + ALIGN_SIZE(ci->index.size);
-        destData->size += sizeof(ci->cert.size)  + ALIGN_SIZE(ci->cert.size);
+        destData->size += sizeof(certInfo->index.size) + ALIGN_SIZE(certInfo->index.size);
+        destData->size += sizeof(certInfo->cert.size)  + ALIGN_SIZE(certInfo->cert.size);
     }
     destData->data = (uint8_t *)HksMalloc(destData->size);
     HKS_IF_NULL_RETURN(destData->data, HKS_ERROR_MALLOC_FAIL)

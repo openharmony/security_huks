@@ -528,26 +528,52 @@ int32_t HksParamsToParamSet(struct HksParam *params, uint32_t cnt, struct HksPar
     return ret;
 }
 
-static int32_t DeepCopyBlobFromBuffer(const struct HksBlob *srcBlob, uint32_t *offset, struct HksBlob *out)
+static int32_t UnpackInt32FromBuffer(const struct HksBlob *srcBlob, uint32_t *offset, int32_t *out)
+{
+    if ((*offset > srcBlob->size) || (srcBlob->size - *offset < sizeof(int32_t))) {
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
+    *out = *((int32_t *)(srcBlob->data + *offset));
+    *offset += sizeof(int32_t);
+    return HKS_SUCCESS;
+}
+
+static int32_t UnpackBlobFromBuffer(const struct HksBlob *srcBlob, uint32_t *offset, struct HksBlob *out)
 {
     struct HksBlob view = { 0, NULL };
     int32_t ret = GetBlobFromBuffer(&view, srcBlob, offset);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret);
-
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
     out->size = view.size;
     if (view.size == 0) {
         out->data = NULL;
         return HKS_SUCCESS;
     }
     out->data = (uint8_t *)HksMalloc(view.size);
-    HKS_IF_NULL_RETURN(out->data, HKS_ERROR_MALLOC_FAIL);
-
+    if (out->data == NULL) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
     if (memcpy_s(out->data, out->size, view.data, view.size) != EOK) {
         HKS_FREE(out->data);
         out->data = NULL;
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     return HKS_SUCCESS;
+}
+
+static int32_t UnpackExtCertInfoFromBuffer(const struct HksBlob *srcBlob, uint32_t *offset, struct HksExtCertInfo *certInfo)
+{
+    int32_t ret = UnpackInt32FromBuffer(srcBlob, offset, &certInfo->purpose);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    ret = UnpackBlobFromBuffer(srcBlob, offset, &certInfo->index);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    ret = UnpackBlobFromBuffer(srcBlob, offset, &certInfo->cert);
+    return ret;
 }
 
 int32_t HksCertificatesUnpackFromService(const struct HksBlob *srcBlob, struct HksExtCertInfoSet *destData)
@@ -568,27 +594,10 @@ int32_t HksCertificatesUnpackFromService(const struct HksBlob *srcBlob, struct H
     (void)memset_s(certs, sizeof(struct HksExtCertInfo) * cnt, 0, sizeof(struct HksExtCertInfo) * cnt);
 
     for (uint32_t i = 0; i < cnt; ++i) {
-        if ((offset > srcBlob->size) || (srcBlob->size - offset < sizeof(int32_t))) {
-            HKS_LOG_E("buffer too small for purpose, i=%" LOG_PUBLIC "u", i);
+        ret = UnpackExtCertInfoFromBuffer(srcBlob, &offset, &certs[i]);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("unpack cert info fail i=%" LOG_PUBLIC "u, ret=%d", i, ret);
             struct HksExtCertInfoSet tmp = { i, certs };
-            HksFreeCertSet(&tmp);
-            return HKS_ERROR_BUFFER_TOO_SMALL;
-        }
-        certs[i].purpose = *((int32_t *)(srcBlob->data + offset));
-        offset += sizeof(int32_t);
-
-        ret = DeepCopyBlobFromBuffer(srcBlob, &offset, &certs[i].index);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("copy index blob fail i=%" LOG_PUBLIC "u", i);
-            struct HksExtCertInfoSet tmp = { i + 1, certs }; 
-            HksFreeCertSet(&tmp);
-            return ret;
-        }
-
-        ret = DeepCopyBlobFromBuffer(srcBlob, &offset, &certs[i].cert);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("copy cert blob fail i=%" LOG_PUBLIC "u", i);
-            struct HksExtCertInfoSet tmp = { i + 1, certs };
             HksFreeCertSet(&tmp);
             return ret;
         }
