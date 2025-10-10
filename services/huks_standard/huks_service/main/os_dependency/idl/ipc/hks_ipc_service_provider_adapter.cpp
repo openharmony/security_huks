@@ -66,7 +66,7 @@ int32_t HksIpcServiceOnFindRemoteKeyHandleAdapter(const struct HksProcessInfo *p
     std::string remoteHandle;
     ret = OHOS::Security::Huks::HksIpcServiceOnFindRemoteKeyHandle(processInfo, cppIndex, cppParamSet, remoteHandle);
 
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnSigned fail")
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnFindRemoteKeyHandleAdapter fail")
 
     uint32_t copyLen = static_cast<uint32_t>(remoteHandle.size());
     if (copyLen > static_cast<uint32_t>(MAX_OUT_BLOB_SIZE)) {
