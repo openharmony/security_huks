@@ -44,10 +44,17 @@ extern "C" {
     HKS_TAG_TYPE_BYTES = 5 << 28,
 };
 
+/**
+ * @brief Enumerates the key classes.
+ *
+ * @since 22
+ * @version 1.0
+ */
 enum HuksKeyClassType {
-    HKS_KEY_CLASS_SELF = 0,
+    /** Default key class. */
+    HKS_KEY_CLASS_DEFAULT = 0,
+    /** Extension key class. */
     HKS_KEY_CLASS_EXTENSION = 1,
-    HKS_KEY_CLASS_CERTIFICATE = 2,
 };
 
 
@@ -139,8 +146,8 @@ enum HuksKeyClassType {
     HKS_ASSIGN_ENUM_VALUE(HKS_TAG_KEY_OVERRIDE, HKS_TAG_TYPE_BOOL | 520) \
     /* supported for indicate aead tag length */\
     HKS_ASSIGN_ENUM_VALUE(HKS_TAG_AE_TAG_LEN, HKS_TAG_TYPE_UINT | 521) \
-    /* ExtensionAbility TAG: 601 - 700 */\
-    HKS_ASSIGN_ENUM_VALUE(HKS_TAG_EXTENSION_ABILITY_NAME, HKS_TAG_TYPE_BYTES | 601) \
+    /* supported for key class. ukey or slef-defined */\
+    HKS_ASSIGN_ENUM_VALUE(HKS_TAG_KEY_CLASS, HKS_TAG_TYPE_UINT | 601) \
     /* Extention TAG: 1001 - 9999 */\
     HKS_ASSIGN_ENUM_VALUE(HKS_TAG_IS_KEY_ALIAS, HKS_TAG_TYPE_BOOL | 1001) \
     HKS_ASSIGN_ENUM_VALUE(HKS_TAG_KEY_STORAGE_FLAG, HKS_TAG_TYPE_UINT | 1002) /* choose from enum HksKeyStorageType */\
@@ -200,8 +207,6 @@ enum HuksKeyClassType {
     HKS_ASSIGN_ENUM_VALUE(HKS_TAG_ABILITY_NAME, HKS_TAG_TYPE_BYTES | 300005) \
     HKS_ASSIGN_ENUM_VALUE(HKS_TAG_REMOTE_ABILITY_SN, HKS_TAG_TYPE_BYTES | 300006) \
     HKS_ASSIGN_ENUM_VALUE(HKS_TAG_EXTRA_DATA, HKS_TAG_TYPE_BYTES | 300007) \
-    HKS_ASSIGN_ENUM_VALUE(HKS_TAG_KEY_CLASS, HKS_TAG_TYPE_UINT | 300008) \
-
 
 #define HKS_ASSIGN_PARAM_FILE_ENUM \
     HKS_ASSIGN_ENUM_VALUE(HKS_TAG_PROCESS_NAME, HKS_TAG_TYPE_BYTES | 10001) \
