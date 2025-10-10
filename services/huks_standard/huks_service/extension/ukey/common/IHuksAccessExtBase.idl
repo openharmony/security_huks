@@ -26,4 +26,7 @@ interface OHOS.Security.Huks.IHuksAccessExtBase {
     [ipccode 9] void InitSession([in] String index, [in] CppParamSet params, [out] String handle, [out] int errcode);
     [ipccode 10] void UpdateSession([in] String handle, [in] CppParamSet params, [in] unsigned char[] inData, [out] unsigned char[] outData, [out] int errcode);
     [ipccode 11] void FinishSession([in] String handle, [in] CppParamSet params, [in] unsigned char[] inData, [out] unsigned char[] outData, [out] int errcode);
+    [ipccode 12] void GetProperty([in] String handle, [in] String propertyId, [in] CppParamSet params, [out] CppParamSet OutParams, [out] int errcode);
+    [ipccode 13] void GetResourceId([in] CppParamSet params, [out] String resourceId, [out] int errcode);
+    [ipccode 14] void ClearUkeyPinAuthState([in] String handle, [in] CppParamSet params, [out] int errcode);
 }
