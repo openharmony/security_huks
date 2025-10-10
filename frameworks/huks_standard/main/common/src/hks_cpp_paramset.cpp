@@ -189,6 +189,7 @@ bool CppParamSet::Marshalling(OHOS::Parcel &parcel) const
         HKS_LOG_E("CppParamSet Marshalling paramSetSize failed");
         return false;
     }
+    HKS_LOG_I("CppParamSet WriteBuffer size: %" LOG_PUBLIC "d", ptr_->paramSetSize);
     if(!parcel.WriteBuffer(ptr_, ptr_->paramSetSize)) {
         HKS_LOG_E("CppParamSet Marshalling WriteBuffer failed");
         return false;
@@ -197,9 +198,10 @@ bool CppParamSet::Marshalling(OHOS::Parcel &parcel) const
     return true;
 }
 
+constexpr uint32_t SIZE_OFFSET = 3; 
 CppParamSet *CppParamSet::Unmarshalling(OHOS::Parcel &parcel)
 {
-    CppParamSet *cppParamSet = new (std::nothrow) CppParamSet();
+    auto *cppParamSet = new (std::nothrow) CppParamSet();
     if (cppParamSet == nullptr) {
         HKS_LOG_E("CppParamSet UnMarshalling cppParamSet == nullptr");
         return nullptr;
@@ -212,14 +214,16 @@ CppParamSet *CppParamSet::Unmarshalling(OHOS::Parcel &parcel)
         return cppParamSet;
     }
 
-    auto paramSet = static_cast<HksParamSet*>(HksMalloc(paramSetSize));
+    auto *paramSet = static_cast<HksParamSet*>(HksMalloc(paramSetSize));
     if (paramSet == nullptr) {
         HKS_LOG_E("CppParamSet UnMarshalling paramSetSize == nullptr");
         delete cppParamSet;
         return nullptr;
     }
-
-    if(memcpy_s(paramSet, paramSetSize, parcel.ReadBuffer(paramSetSize), paramSetSize) != EOK) {
+    auto offset = ((paramSetSize + SIZE_OFFSET) & (~SIZE_OFFSET)) - paramSetSize;
+    HKS_LOG_I("CppParamSet ReadBuffer offset size: %" LOG_PUBLIC "d", offset);
+    const auto *bufferTemp = parcel.ReadBuffer(paramSetSize + offset);
+    if(memcpy_s(paramSet, paramSetSize, bufferTemp, paramSetSize) != EOK) {
         HKS_LOG_E("memcpy_s failed");
         HKS_FREE(paramSet);
         delete cppParamSet;

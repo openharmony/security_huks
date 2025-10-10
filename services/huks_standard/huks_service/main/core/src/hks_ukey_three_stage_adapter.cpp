@@ -5,13 +5,15 @@
 #include "hks_lib_interface.h"
 #include "hks_template.h"
 #include "hks_mem.h"
-
+#include "hks_common_check.h"
 #include <string>
 #include <vector>
 #include "hks_template.h"
 
 int32_t HksCheckIsUkeyOperation(const struct HksParamSet *paramSet)
 {
+    int32_t ret = HksCheckParamSetValidity(paramSet);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksCheckParamSetValidity fail");
     CppParamSet paramSetCpp(paramSet);
     auto abilityName = paramSetCpp.GetParam<HKS_TAG_KEY_CLASS>();
     if(abilityName.first == HKS_SUCCESS && abilityName.second == HKS_KEY_CLASS_EXTENSION) {
@@ -24,6 +26,9 @@ int32_t HksCheckIsUkeyOperation(const struct HksParamSet *paramSet)
 int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *inParamSet, struct HksBlob *handle)
 {
+    int32_t ret = HksCheckBlob2(&processInfo->processName, index);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "Hks check processName or index fail")
+
     std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
     CppParamSet cppParamSet(inParamSet);
     uint32_t handleU32 = 0;
@@ -31,7 +36,7 @@ int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, co
     auto libInterface = OHOS::Security::Huks::HuksLibInterface::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get lib interface instance.")
     
-    int32_t ret = libInterface->OnInitSession(*processInfo, cppIndex, cppParamSet, handleU32);
+    ret = libInterface->OnInitSession(*processInfo, cppIndex, cppParamSet, handleU32);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnInitSession fail")
 
     uint64_t handleU64 = static_cast<uint64_t>(handleU32);
