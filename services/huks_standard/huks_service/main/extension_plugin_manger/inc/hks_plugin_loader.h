@@ -23,7 +23,6 @@
 #include <mutex>
 #include <atomic>
 #include <cstdint>
-
 #include "hks_lib_interface.h"
 #include "hks_cpp_paramset.h"
 #include "hks_template.h"
@@ -39,17 +38,19 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
-    class HuksPluginLoader : private OHOS::DelayedSingleton<HuksPluginLoader>{
+
+class HuksPluginLoader : private OHOS::DelayedSingleton<HuksPluginLoader> {
 public:
     std::unordered_map<PluginMethodEnum, void*> m_pluginProviderMap;
-    int32_t LoadPlugins(const struct HksProcessInfo &info, const std::string& providerName, const CppParamSet& paramSet);
-    int32_t UnLoadPlugins(const struct HksProcessInfo &info, const std::string& providerName, const CppParamSet& paramSet);
+    int32_t LoadPlugins(const struct HksProcessInfo &info, const std::string& providerName,
+        const CppParamSet& paramSet);
+    int32_t UnLoadPlugins(const struct HksProcessInfo &info, const std::string& providerName,
+        const CppParamSet& paramSet);
     static std::shared_ptr<HuksPluginLoader> GetInstanceWrapper();
     static void ReleaseInstance();
     
 private:
     void* m_pluginHandle = nullptr;
-    std::atomic<int> m_refCount{0};
     std::mutex libMutex;
     static std::string GetMethodByEnum(PluginMethodEnum methodEnum);
 };

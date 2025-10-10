@@ -21,7 +21,6 @@
 #include <mutex>
 #include <vector>
 #include <memory>
-
 #include "singleton.h"
 #include "hks_template.h"
 #include "hks_error_code.h"
@@ -30,6 +29,7 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
+
 class HuksLibInterface : private OHOS::DelayedSingleton<HuksLibInterface> {
 public:
     std::unordered_map<PluginMethodEnum, void*> pluginProviderMap;
@@ -37,30 +37,26 @@ public:
     void initProviderMap(std::unordered_map<PluginMethodEnum, void*>& pluginProviderMap);
     static std::shared_ptr<HuksLibInterface> GetInstanceWrapper();
     static void ReleaseInstance();
-
     int32_t OnRegistProvider(const HksProcessInfo &processInfo,
         const std::string &providerName, const CppParamSet &paramSet);
     int32_t OnUnRegistProvider(const HksProcessInfo &processInfo,
         const std::string &providerName, const CppParamSet &paramSet);
-
     int32_t OnCreateRemoteIndex(const std::string &providerName, const CppParamSet& paramSet, std::string &outIndex);
-    int32_t OnOpenRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
+    int32_t OnCreateRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet, std::string &handle);
     //int32_t OnFindRemoteKeyHandle(const std::string &index, std::string &keyIndex);
     int32_t OnCloseRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet);
- 
     // int32_t OnSigned(const std::string &index, const CppParamSet& paramSet, std::vector<uint8_t> &outData);
     int32_t OnAuthUkeyPin(const HksProcessInfo &processInfo,
         const std::string &index, const CppParamSet &paramSet, int32_t& authState, uint32_t& retryCnt);
     int32_t OnGetVerifyPinStatus(const HksProcessInfo &processInfo,
         const std::string &index, const CppParamSet &paramSet, int32_t &state);
     // int32_t OnClearPinStatus(const std::string &index);
-    
     //int32_t OnListProviders(std::vector<uint8_t> &providersOut);
-    int32_t OnListIndexCertificate(const HksProcessInfo &processInfo,
+    int32_t OnExportCertificate(const HksProcessInfo &processInfo,
         const std::string &index, const CppParamSet &paramSet, std::string &certsJson);
-    int32_t OnListProviderAllCertificate(const HksProcessInfo &processInfo,
+    int32_t OnExportProviderAllCertificates(const HksProcessInfo &processInfo,
         const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr);
     int32_t OnInitSession (const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet, uint32_t &handle);
@@ -71,7 +67,6 @@ public:
 
 private:
     std::mutex mapMutex_;
-
 };
 
 }

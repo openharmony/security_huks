@@ -15,7 +15,6 @@
 
 #include "hks_plugin_lifecycle_manager.h"
 #include "hks_plugin_loader.h"
-
 #include <vector>
 
 namespace OHOS::Security::Huks {
@@ -27,11 +26,11 @@ std::shared_ptr<HuksPluginLoader> HuksPluginLoader::GetInstanceWrapper()
 
 void HuksPluginLoader::ReleaseInstance()
 {
-    return HuksPluginLoader::DestroyInstance();
+    HuksPluginLoader::DestroyInstance();
 }
 
 int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const std::string& providerName,
-    const CppParamSet& paramSet){
+    const CppParamSet& paramSet) {
     std::lock_guard<std::mutex> lock(libMutex);
     HKS_IF_TRUE_RETURN(m_pluginHandle != nullptr, HKS_SUCCESS)
 
@@ -63,21 +62,20 @@ int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const s
         m_pluginProviderMap.emplace(std::make_pair(static_cast<PluginMethodEnum>(i), func));
     }
 
-    auto libEntry = HuksLibInterface::GetInstanceWrapper();
-    libEntry->initProviderMap(m_pluginProviderMap);
-
+    auto libInstance = HuksLibInterface::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(libInstance == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")
+    libInstance->initProviderMap(m_pluginProviderMap);
     return HKS_SUCCESS;
 }
 
 int32_t HuksPluginLoader::UnLoadPlugins(const struct HksProcessInfo &info, const std::string& providerName,
     const CppParamSet& paramSet) {
     std::lock_guard<std::mutex> lock(libMutex);
-    HKS_IF_TRUE_RETURN(m_pluginHandle == nullptr, HKS_SUCCESS) //或者换成重复释放的消息码
+    HKS_IF_TRUE_RETURN(m_pluginHandle == nullptr, HKS_SUCCESS)
 
     m_pluginProviderMap.clear();
     dlclose(m_pluginHandle);
     m_pluginHandle = nullptr;
-
     return HKS_SUCCESS;
 }
 

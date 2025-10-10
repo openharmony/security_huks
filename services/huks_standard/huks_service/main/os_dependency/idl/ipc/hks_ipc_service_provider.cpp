@@ -18,125 +18,75 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
-std::shared_ptr<HuksPluginLifeCycleMgr> GetExtPluginMgrInstance() {
-    auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, nullptr, "Failed to get plugin manager instance.")
 
-    return pluginManager;
-}
-
-std::shared_ptr<HuksLibInterface> GetExtLibInterfaceInstance() {
-    auto libInterface = OHOS::Security::Huks::HuksLibInterface::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, nullptr, "Failed to get lib interface instance.")
-
-    return libInterface;
-}
-
-int32_t HksIpcServiceProviderRegister(const struct HksProcessInfo *processInfo, std::string name, 
-    CppParamSet &paramSet)
-{
-    HKS_LOG_I("===========HksIpcServiceProviderRegister income");
-    auto pluginManager = GetExtPluginMgrInstance();
-    HKS_LOG_I("got pluginManager instance");
-
-    int32_t ret = pluginManager->RegisterProvider(*processInfo, name, paramSet); 
-    return ret;
+int32_t HksIpcServiceProviderRegister(const struct HksProcessInfo *processInfo,
+    std::string name, CppParamSet &paramSet) {
+    HKS_LOG_E("===========HksIpcServiceProviderRegister income==================");
+    auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
+    HKS_LOG_E("got pluginManager instance");
+    return pluginManager->RegisterProvider(*processInfo, name, paramSet);
 }
 
 int32_t HksIpcServiceProviderUnRegister(const struct HksProcessInfo *processInfo, std::string name, 
     CppParamSet &paramSet)
 {
-    HKS_LOG_I("===========HksIpcServiceProviderUnRegister income");
-    auto pluginManager = GetExtPluginMgrInstance();
-    HKS_LOG_I("got pluginManager instance");
-
-    int32_t ret = pluginManager->UnRegisterProvider(*processInfo, name, paramSet); 
-    return ret;
-}
-
-// TODO:注册具体功能？要存吗？
-int32_t HksIpcServiceRegistLibFunction(int32_t funCode, int *fun) {
-
-    return 0;
+    HKS_LOG_E("===========HksIpcServiceProviderUnRegister income");
+    auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
+    HKS_LOG_E("got pluginManager instance");
+    return pluginManager->UnRegisterProvider(*processInfo, name, paramSet);
 }
 
 int32_t HksIpcServiceOnCreateRemoteIndex(const std::string &providerName, const CppParamSet& paramSet,
     std::string &outIndex) {
-    HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
-    auto libInterface = GetExtLibInterfaceInstance();
-    HKS_LOG_I("got libInterface instance");
-
-    int32_t ret = libInterface->OnCreateRemoteIndex(providerName, paramSet, outIndex); 
-    return ret;
+    HKS_LOG_E("===========HksIpcServiceOnCreateRemoteInde income");
+    auto libInterface = HuksLibInterface::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")
+    HKS_LOG_E("got libInterface instance");
+    return libInterface->OnCreateRemoteIndex(providerName, paramSet, outIndex);
 }
 
 int32_t HksIpcServiceOnCreateRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string index, 
     CppParamSet &paramSet, std::string &remoteHandleOut) {
-    HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
-    auto libInterface = GetExtLibInterfaceInstance();
-    HKS_LOG_I("got libInterface instance");
-
-    int32_t ret = libInterface->OnOpenRemoteKeyHandle(*processInfo, index, paramSet, remoteHandleOut);
-    return ret;
+    HKS_LOG_E("===========HksIpcServiceOnCreateRemoteInde income");
+    auto libInterface = HuksLibInterface::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")
+    HKS_LOG_E("got libInterface instance");
+    return libInterface->OnCreateRemoteKeyHandle(*processInfo, index, paramSet, remoteHandleOut);
 }
 
-int32_t HksIpcServiceOnFindRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string index, 
-    CppParamSet &paramSet, std::string &remoteHandleOut) {
-    return 0;
-    // HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
-    // auto libInterface = GetExtLibInterfaceInstance();
-    // HKS_LOG_I("got libInterface instance");
-
-    // int32_t ret = libInterface->OnFindRemoteKeyHandle(index, index); // TODO:参数对齐OnFindRemoteKeyHandle(const std::string &index, std::string &keyIndex)
-    // return ret;
-}
-
-int32_t HksIpcServiceOnCloseRemoteKeyHandle(const struct HksProcessInfo *processInfo, 
-    std::string index, CppParamSet &paramSet) 
-{
-    HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
-    auto libInterface = GetExtLibInterfaceInstance();
-    HKS_LOG_I("got libInterface instance");
-
-    int32_t ret = libInterface->OnCloseRemoteKeyHandle(*processInfo, index, paramSet); // TODO:参数对齐OnCloseRemoteKeyHandle(const std::string &index, std::string &keyIndex)
-    return ret;
-}
-
-int32_t HksIpcServiceOnSigned(const struct HksProcessInfo *processInfo, std::string index, 
-    CppParamSet &paramSet, std::string srcData, std::string &signature) {
-    return 0;
-    // HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
-    // auto libInterface = GetExtLibInterfaceInstance();
-    // HKS_LOG_I("got libInterface instance");
-    // int32_t ret = 0;
-    // // int32_t ret = libInterface->OnSigned(index, paramSet, srcData); // TODO:参数对齐OnSigned(const std::string &index, const CppParamSet& paramSet, std::vector<uint8_t> &outData)
-    // return ret;
+int32_t HksIpcServiceOnCloseRemoteKeyHandle(const struct HksProcessInfo *processInfo,
+    std::string index, CppParamSet &paramSet) {
+    HKS_LOG_E("===========HksIpcServiceOnCreateRemoteInde income");
+    auto libInterface = HuksLibInterface::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")
+    HKS_LOG_E("got libInterface instance");
+    return libInterface->OnCloseRemoteKeyHandle(*processInfo, index, paramSet);
 }
 
 int HksIpcServiceOnVerify(const struct HksProcessInfo *processInfo, std::string index, 
     CppParamSet &paramSet, std::string srcData, std::string &signature) {
-
     return 0;
 }
 
-int32_t HksIpcServiceOnAuthUkeyPin(const struct HksProcessInfo *processInfo, const std::string &index, CppParamSet &pinData,
-    int32_t &authState, uint32_t &retryCnt) {
-    HKS_LOG_I("===========HksIpcServiceOnAuthUkeyPin income");
-    auto libInterface = GetExtLibInterfaceInstance();
-    HKS_LOG_I("got libInterface instance");
-
-    int32_t ret = libInterface->OnAuthUkeyPin(*processInfo, index, pinData, authState, retryCnt);
-    return ret;
+int32_t HksIpcServiceOnAuthUkeyPin(const struct HksProcessInfo *processInfo, const std::string &index,
+    CppParamSet &pinData, int32_t &authState, uint32_t &retryCnt) {
+    HKS_LOG_E("===========HksIpcServiceOnAuthUkeyPin income");
+    auto libInterface = HuksLibInterface::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")
+    HKS_LOG_E("got libInterface instance");
+    return libInterface->OnAuthUkeyPin(*processInfo, index, pinData, authState, retryCnt);
 }
 
 int32_t HksIpcServiceOnGetVerifyPinStatus(const struct HksProcessInfo *processInfo,
     const std::string &index, const CppParamSet &paramSet, int32_t &state) {
-    HKS_LOG_I("===========HksIpcServiceOnGetVerifyPinStatus income");
-    auto libInterface = GetExtLibInterfaceInstance();
-    HKS_LOG_I("got libInterface instance");
+    HKS_LOG_E("===========HksIpcServiceOnGetVerifyPinStatus income");
+    auto libInterface = HuksLibInterface::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")
+    HKS_LOG_E("got libInterface instance");
 
-    int32_t ret = libInterface->OnGetVerifyPinStatus(*processInfo, index, paramSet, state);
-    return ret;
+    return libInterface->OnGetVerifyPinStatus(*processInfo, index, paramSet, state);
 }
 
 int32_t HksIpcServiceOnClearPinStatus(const struct HksProcessInfo *processInfo, std::string index) {
@@ -159,26 +109,44 @@ int32_t HksIpcServiceOnListProviders(std::vector<uint8_t> &providersOut) {
     // HKS_IF_TRUE_LOGI_RETURN_VOID(ret != HKS_SUCCESS, "HksIpcServiceOnListProviders fail")
 }
 
-int32_t HksIpcServiceOnFindIndexCertificate(const struct HksProcessInfo *processInfo, const std::string &index,
+int32_t HksIpcServiceOnExportCertificate(const struct HksProcessInfo *processInfo, const std::string &index,
 const CppParamSet &paramSet, std::string &cetificatesOut) {
-    HKS_LOG_I("===========HksIpcServiceOnFindProviderCertificate income");
-    auto libInterface = GetExtLibInterfaceInstance();
-
-    int32_t ret = libInterface->OnListIndexCertificate(*processInfo, index, paramSet, cetificatesOut);
-    HKS_IF_NOT_SUCC_LOGE(ret != HKS_SUCCESS, "HksIpcServiceOnFindProviderCertificate fail")
-
-    return ret;
+    HKS_LOG_E("===========HksIpcServiceOnFindProviderCertificate income");
+    auto libInterface = HuksLibInterface::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")
+    HKS_LOG_E("got libInterface instance");
+    return libInterface->OnExportCertificate(*processInfo, index, paramSet, cetificatesOut);
 }
 
-int32_t HksIpcServiceOnListProviderAllCertificate(const struct HksProcessInfo *processInfo, const std::string &index,
+int32_t HksIpcServiceOnExportProviderAllCertificates(const struct HksProcessInfo *processInfo, const std::string &index,
 const CppParamSet &paramSet, std::string &cetificatesOut) {
-    HKS_LOG_I("===========HksIpcServiceOnListProviderAllCertificate income");
-    auto libInterface = GetExtLibInterfaceInstance();
+    HKS_LOG_E("===========HksIpcServiceOnListProviderAllCertificate income");
+    auto libInterface = HuksLibInterface::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")
+    HKS_LOG_E("got libInterface instance");
+    return libInterface->OnExportProviderAllCertificates(*processInfo, index, paramSet, cetificatesOut);
+}
 
-    int32_t ret = libInterface->OnListProviderAllCertificate(*processInfo, index, paramSet, cetificatesOut);
-    HKS_IF_NOT_SUCC_LOGE(ret != HKS_SUCCESS, "HksIpcServiceOnListProviderAllCertificate fail")
+int32_t HksIpcServiceOnFindRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string index, 
+    CppParamSet &paramSet, std::string &remoteHandleOut) {
+    return 0;
+    // HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
+    // auto libInterface = GetExtLibInterfaceInstance();
+    // HKS_LOG_I("got libInterface instance");
 
-    return ret;
+    // int32_t ret = libInterface->OnFindRemoteKeyHandle(index, index); // TODO:参数对齐OnFindRemoteKeyHandle(const std::string &index, std::string &keyIndex)
+    // return ret;
+}
+
+int32_t HksIpcServiceOnSigned(const struct HksProcessInfo *processInfo, std::string index, 
+    CppParamSet &paramSet, std::string srcData, std::string &signature) {
+    return 0;
+    // HKS_LOG_I("===========HksIpcServiceOnCreateRemoteInde income");
+    // auto libInterface = GetExtLibInterfaceInstance();
+    // HKS_LOG_I("got libInterface instance");
+    // int32_t ret = 0;
+    // // int32_t ret = libInterface->OnSigned(index, paramSet, srcData); // TODO:参数对齐OnSigned(const std::string &index, const CppParamSet& paramSet, std::vector<uint8_t> &outData)
+    // return ret;
 }
 
 }

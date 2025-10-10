@@ -18,6 +18,7 @@
 #include "hks_log.h"
 #include "hks_template.h"
 #include "huks_access_ext_base_proxy.h"
+
 namespace OHOS {
 namespace Security {
 namespace Huks {
@@ -32,8 +33,7 @@ void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementNa
     extConnectProxy = iface_cast<HuksAccessExtBaseProxy>(remoteObject);
     HKS_IF_TRUE_RETURN_VOID(extConnectProxy == nullptr)
 
-    AddExtDeathRecipient(extConnectProxy->AsObject()); // TODO:DesignAccessExtBase需要实现AsObject()
-    
+    AddExtDeathRecipient(extConnectProxy->AsObject());
     std::lock_guard<std::mutex> lock(proxyMutex_);
     isConnected_.store(true);
     isReady = true;
@@ -57,7 +57,7 @@ int32_t ExtensionConnection::OnConnection(const AAFwk::Want &want) {
 void ExtensionConnection::OnDisconnect() {
     std::unique_lock<std::mutex> lock(proxyMutex_);
     if (extConnectProxy != nullptr) {
-        // RemoveExtDeathRecipient(extConnectProxy->AsObject());
+        RemoveExtDeathRecipient(extConnectProxy->AsObject());
     }
     extConnectProxy = nullptr;
     isConnected_.store(false);
@@ -82,18 +82,15 @@ bool ExtensionConnection::IsConnected() {
 
 void ExtensionConnection::AddExtDeathRecipient(const wptr<IRemoteObject>& token) {
     std::unique_lock<std::mutex> lock(deathRecipientMutex_);
-    // 清理旧注册
     if (token != nullptr && callerDeathRecipient_ != nullptr) {
         token->RemoveDeathRecipient(callerDeathRecipient_);
     }
 
-    // 创建死亡接收器
     if (callerDeathRecipient_ == nullptr) {
         callerDeathRecipient_ = new ExtensionDeathRecipient(std::bind(&ExtensionConnection::OnRemoteDied,
             this, std::placeholders::_1));
     }
 
-    // 注册死亡通知
     if (token != nullptr) {
         token->AddDeathRecipient(callerDeathRecipient_);
     }
@@ -109,7 +106,6 @@ void ExtensionConnection::RemoveExtDeathRecipient(const wptr<IRemoteObject>& tok
 void ExtensionConnection::OnRemoteDied(const wptr<IRemoteObject> &remote) {
     std::unique_lock<std::mutex> lock(proxyMutex_);
     HKS_LOG_E("OnRemoteDied from ExtensionConnection");
-    // TODO: 冗余代码
     auto object = remote.promote();
     if (object) {
         object = nullptr;
