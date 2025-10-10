@@ -18,7 +18,6 @@
 
 #include <map>
 #include <string>
-
 #include "hks_plugin_def.h"
 #include "hks_cpp_paramset.h"
 
@@ -73,21 +72,18 @@ using OnRegisterProviderFunc = int32_t (*)(const HksProcessInfo &processInfo, co
     const CppParamSet &paramSet);
 using OnUnRegisterProviderFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &providerName,
     const CppParamSet &paramSet);
-
 using OnCreateRemoteIndexFunc = int32_t (*)();
 using OnCreateRemoteKeyHandleFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet, std::string &handle);
 using OnFindRemoteKeyHandleFunc = int32_t (*)();
 using OnCloseRemoteKeyHandleFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet);
-
 using OnSignedFunc = int32_t (*)();
 using OnAuthUkeyPinFunc = int32_t (*)(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, int32_t& authState, uint32_t& retryCnt);
 using OnGetVerifyPinStatusFunc = int32_t (*)(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, int32_t &state);
 using OnClearPinStatusFunc = int32_t (*)();
-
 using OnListProvidersFunc = int32_t (*)();
 using OnListIndexCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, std::string &certsJson);
@@ -99,6 +95,7 @@ using OnUpdateSessionFunc = int32_t (*)(const HksProcessInfo &processInfo, const
     const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
 using OnFinishSessionFunc = int32_t (*)(const HksProcessInfo &processInfo, const uint32_t &handle,
     const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
+
 }
 }
 }

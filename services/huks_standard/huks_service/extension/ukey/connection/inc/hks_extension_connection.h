@@ -19,13 +19,10 @@
 #include <shared_mutex>
 #include <string>
 #include <securec.h>
-
 #include "ability_connect_callback_stub.h"
 #include "iremote_object.h"
 #include "ihuks_access_ext_base.h"
-
 #include "want.h"
- 
 
 namespace OHOS {
 namespace Security {
@@ -38,7 +35,6 @@ public:
         const sptr<IRemoteObject>& remoteObject, int resultCode) override;
     void OnDisconnect();
     void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) override;
-    
     bool IsConnected();
     sptr<IHuksAccessExtBase> GetExtConnectProxy();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
@@ -47,12 +43,10 @@ private:
     std::condition_variable proxyConv_;
     std::mutex proxyMutex_;
     bool isReady = false;
-
     std::atomic<bool> isConnected_ = {false}; // 供provider检测连接状态
     std::mutex deathRecipientMutex_;
     sptr<IRemoteObject::DeathRecipient> callerDeathRecipient_ = nullptr;
     sptr<IHuksAccessExtBase> extConnectProxy;
-    
     void AddExtDeathRecipient(const wptr<IRemoteObject>& token);
     void RemoveExtDeathRecipient(const wptr<IRemoteObject>& token);
 };

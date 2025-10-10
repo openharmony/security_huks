@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef HKS_UKEY_THREE_STAGE_ADAPTER_H
 #define HKS_UKEY_THREE_STAGE_ADAPTER_H
 

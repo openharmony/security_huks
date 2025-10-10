@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "hks_ukey_three_stage_adapter.h"
 #include "hks_cpp_paramset.h"
 #include "securec.h"
@@ -16,7 +31,7 @@ int32_t HksCheckIsUkeyOperation(const struct HksParamSet *paramSet)
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksCheckParamSetValidity fail");
     CppParamSet paramSetCpp(paramSet);
     auto abilityName = paramSetCpp.GetParam<HKS_TAG_KEY_CLASS>();
-    if(abilityName.first == HKS_SUCCESS && abilityName.second == HKS_KEY_CLASS_EXTENSION) {
+    if (abilityName.first == HKS_SUCCESS && abilityName.second == HKS_KEY_CLASS_EXTENSION) {
         HKS_LOG_I("HksCheckIsUkeyOperation: is ukey operation");
         return HKS_SUCCESS;
     }
@@ -51,13 +66,11 @@ int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, co
         HKS_LOG_E("memcpy in HksServiceOnUkeyInitSession fail");
         return HKS_ERROR_COPY_FAIL;
     }
-
     return ret;
 }
 
 int32_t HksServiceOnUkeyUpdateSession(const struct HksProcessInfo *processInfo, const struct HksBlob *handle,
-    const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
-{
+    const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData) {
     uint64_t handleU64 = 0;
     if (handle != nullptr && handle->size == sizeof(uint64_t)) {
         if (memcpy_s(&handleU64, sizeof(handleU64), handle->data, handle->size) != EOK) {
@@ -90,22 +103,18 @@ int32_t HksServiceOnUkeyUpdateSession(const struct HksProcessInfo *processInfo, 
         HKS_LOG_E("memcpy in HksServiceOnUkeyUpdateSession fail");
         return HKS_ERROR_COPY_FAIL;
     }
-
-    return HKS_SUCCESS;
+    return ret;
 }
 
 int32_t HksServiceOnUkeyFinishSession(const struct HksProcessInfo *processInfo, const struct HksBlob *handle,
-    const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
-{
+    const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData) {
     uint64_t handleU64 = 0;
     if (handle != nullptr && handle->size == sizeof(uint64_t)) {
         if (memcpy_s(&handleU64, sizeof(handleU64), handle->data, handle->size) != EOK) {
             return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
     }
-
     uint32_t handleU32 = static_cast<uint32_t>(handleU64);
-
     CppParamSet cppParamSet(paramSet);
     std::vector<uint8_t> indata;
     if (inData != nullptr && inData->data != nullptr) {
@@ -130,6 +139,5 @@ int32_t HksServiceOnUkeyFinishSession(const struct HksProcessInfo *processInfo, 
         HKS_LOG_E("memcpy in HksServiceOnUkeyFinishSession fail");
         return HKS_ERROR_COPY_FAIL;
     }
-
     return ret;
 }

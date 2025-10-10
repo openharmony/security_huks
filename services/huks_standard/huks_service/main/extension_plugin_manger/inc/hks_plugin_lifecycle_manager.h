@@ -16,16 +16,9 @@
 #ifndef HKS_PLUGIN_LIFECYCLE_MANAGER_H
 #define HKS_PLUGIN_LIFECYCLE_MANAGER_H
 
-// #if defined(BUILDING_DYNAMIC_LIB)
-//   #define DYNAMIC_LIB_API __attribute__((visibility("default")))
-// #else
-//   #define DYNAMIC_LIB_API
-// #endif
-
 #include <atomic>
 #include <string>
 #include <memory>
-
 #include "hks_cpp_paramset.h"
 #include "hks_error_code.h"
 #include "hks_plugin_def.h"
@@ -37,19 +30,21 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
-class __attribute__((visibility("default"))) HuksPluginLifeCycleMgr : private OHOS::DelayedSingleton<HuksPluginLifeCycleMgr>{
+class __attribute__((visibility("default"))) HuksPluginLifeCycleMgr : 
+    private OHOS::DelayedSingleton<HuksPluginLifeCycleMgr>{
 public:
     static std::shared_ptr<HuksPluginLifeCycleMgr> GetInstanceWrapper();
     static void ReleaseInstance();
     int32_t RegisterProvider(const struct HksProcessInfo &info, const std::string &AbilityName,
-    const CppParamSet& paramSet);
+        const CppParamSet& paramSet);
     int32_t UnRegisterProvider(const struct HksProcessInfo &info, const std::string &AbilityName,
-    const CppParamSet& paramSet);
+        const CppParamSet& paramSet);
 
 private:
     std::atomic<int> m_refCount{0};
     static HuksPluginLifeCycleMgr instancePLCM;
 };
+
 }
 }
 }
