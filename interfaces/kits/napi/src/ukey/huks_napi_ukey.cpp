@@ -113,12 +113,12 @@ static napi_value CreateAsyncWork(napi_env env, napi_callback_info info, std::un
 
 napi_value HuksNapiRegisterProvider(napi_env env, napi_callback_info info)
 {
-    auto context = std::unique_ptr<RegisterAndUngisterProviderContext>(new (std::nothrow)RegisterAndUngisterProviderContext());
+    auto context = std::unique_ptr<ProviderRegContext>(new (std::nothrow)ProviderRegContext());
 
     NAPI_THROW(env, context == nullptr, HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not create context");
 
     context->parse = [](napi_env env, napi_callback_info info, AsyncContext *context) -> napi_status {
-        RegisterAndUngisterProviderContext *asyncContext = reinterpret_cast<RegisterAndUngisterProviderContext *>(context);
+        ProviderRegContext *asyncContext = reinterpret_cast<ProviderRegContext *>(context);
         size_t argc = HUKS_NAPI_TWO_ARGS;
         napi_value argv[HUKS_NAPI_TWO_ARGS] = { nullptr };
         NAPI_CALL_RETURN_ERR(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
@@ -147,12 +147,12 @@ napi_value HuksNapiRegisterProvider(napi_env env, napi_callback_info info)
     };
 
     context->execute = [](napi_env env, void *data) {
-        RegisterAndUngisterProviderContext *napiContext = static_cast<RegisterAndUngisterProviderContext *>(data);
+        ProviderRegContext *napiContext = static_cast<ProviderRegContext *>(data);
         napiContext->result = HksRegisterProvider(napiContext->name, napiContext->paramSetIn);
     };
 
     context->resolve = [](napi_env env, AsyncContext *context) {
-        RegisterAndUngisterProviderContext *napiContext = static_cast<RegisterAndUngisterProviderContext *>(context);
+        ProviderRegContext *napiContext = static_cast<ProviderRegContext *>(context);
         HksSuccessReturnResult resultData;
         SuccessReturnResultInit(resultData);
         HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
@@ -167,7 +167,7 @@ napi_value HuksNapiRegisterProvider(napi_env env, napi_callback_info info)
 
 napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
 {
-    auto context = std::unique_ptr<RegisterAndUngisterProviderContext>(new (std::nothrow)RegisterAndUngisterProviderContext());
+    auto context = std::unique_ptr<ProviderRegContext>(new (std::nothrow)ProviderRegContext());
 
     if (context == nullptr) {
         HKS_LOG_E("could not create context");
@@ -175,7 +175,7 @@ napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
     }
 
     context->parse = [](napi_env env, napi_callback_info info, AsyncContext *context) -> napi_status {
-        RegisterAndUngisterProviderContext *asyncContext = reinterpret_cast<RegisterAndUngisterProviderContext *>(context);
+        ProviderRegContext *asyncContext = reinterpret_cast<ProviderRegContext *>(context);
         size_t argc = HUKS_NAPI_TWO_ARGS;
         napi_value argv[HUKS_NAPI_TWO_ARGS] = { nullptr };
         NAPI_CALL_RETURN_ERR(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
@@ -204,12 +204,12 @@ napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
     };
 
     context->execute = [](napi_env env, void *data) {
-        RegisterAndUngisterProviderContext *napiContext = static_cast<RegisterAndUngisterProviderContext *>(data);
+        ProviderRegContext *napiContext = static_cast<ProviderRegContext *>(data);
         napiContext->result = HksUnregisterProvider(napiContext->name, napiContext->paramSetIn);
     };
 
     context->resolve = [](napi_env env, AsyncContext *context) {
-        RegisterAndUngisterProviderContext *napiContext = static_cast<RegisterAndUngisterProviderContext *>(context);
+        ProviderRegContext *napiContext = static_cast<ProviderRegContext *>(context);
         HksSuccessReturnResult resultData;
         SuccessReturnResultInit(resultData);
         HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);

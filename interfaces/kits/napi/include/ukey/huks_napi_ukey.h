@@ -79,10 +79,10 @@ public:
     struct HksParamSet *paramSetOut = nullptr;
 };
 
-class RegisterAndUngisterProviderContext : public AsyncContext
+class ProviderRegContext : public AsyncContext
 {
 public:
-    ~RegisterAndUngisterProviderContext()
+    ~ProviderRegContext()
     {
         if (name != nullptr)
         {

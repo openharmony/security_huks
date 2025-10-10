@@ -186,7 +186,7 @@ int32_t HksClientExportProviderCertificates(const struct HksBlob *name, const st
     struct HksParamSet *newParamSet = NULL;
 
     // TODO:这个地方提前申请多大的内存合适
-    outBlob.size = sizeof(HKS_MAX_KEY_ALIAS_COUNT) + (HKS_MAX_KEY_ALIAS_COUNT * HKS_MAX_KEY_ALIAS_LEN);
+    outBlob.size = MAX_OUT_BLOB_SIZE;
     outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
     HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
 
@@ -233,7 +233,7 @@ int32_t HksClientExportCertificate(const struct HksBlob *index, const struct Hks
     struct HksParamSet *newParamSet = NULL;
 
     // TODO:这个地方提前申请多大的内存合适
-    outBlob.size = sizeof(HKS_MAX_KEY_ALIAS_COUNT) + (HKS_MAX_KEY_ALIAS_COUNT * HKS_MAX_KEY_ALIAS_LEN);
+    outBlob.size = MAX_OUT_BLOB_SIZE;
     outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
     HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
 
