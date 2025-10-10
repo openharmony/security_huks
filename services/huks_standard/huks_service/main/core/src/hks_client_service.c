@@ -1586,8 +1586,6 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
 #endif
 
     do {
-        ret = HksCheckServiceInitParams(&processInfo->processName, keyAlias, paramSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check ServiceInit params failed, ret = %" LOG_PUBLIC "d", ret)
 #ifdef L2_STANDARD
         if (HksCheckIsUkeyOperation(paramSet) == HKS_SUCCESS) {
             ret = HksServiceOnUkeyInitSession(processInfo, keyAlias, paramSet, handle);
@@ -1595,6 +1593,8 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
             break;
         }
 #endif
+        ret = HksCheckServiceInitParams(&processInfo->processName, keyAlias, paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check ServiceInit params failed, ret = %" LOG_PUBLIC "d", ret)
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE(ret, "GetKeyAndNewParamSet failed, ret = %" LOG_PUBLIC "d", ret)
 

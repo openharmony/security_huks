@@ -51,12 +51,12 @@ static bool GenerateRand(uint8_t *buf, size_t len)
 {
     FILE *randfp = fopen("/dev/random", "rb");
     if (randfp == nullptr) {
-        HKS_LOG_E("open file failed");
+        HKS_LOG_E("fopen file failed");
         return false;
     }
     size_t readLen = fread(buf, sizeof(uint8_t), len, randfp);
     (void)fclose(randfp);
-    if (readLen == len) {
+    if (readLen != len) {
         HKS_LOG_E("read file failed");
         return false;
     }
@@ -101,7 +101,8 @@ int32_t HksSessionManager::ExtensionInitSession(const HksProcessInfo &processInf
         return HKS_ERROR_GEN_RANDOM_FAIL;
     }
     handle = random.second;
-    HKS_LOG_I("ExtensionInitSession handle: %" LOG_PUBLIC "u", handle);
+    HKS_LOG_I("ExtensionInitSession return sessionHandle: %" LOG_PUBLIC "s", sessionHandle.c_str());
+    HKS_LOG_I("ExtensionInitSession out handle: %" LOG_PUBLIC "u", handle);
     std::pair<ProviderInfo, std::string> handleInfo{providerInfo, sessionHandle};
     m_handlers.Insert(handle, handleInfo);
     return HKS_SUCCESS;
@@ -111,6 +112,7 @@ int32_t HksSessionManager::ExtensionUpdateSession(const HksProcessInfo &processI
     std::vector<uint8_t> &outData)
 {
     std::pair<ProviderInfo, std::string> handleInfo;
+    HKS_LOG_I("ExtensionUpdateSession handle: %" LOG_PUBLIC "u", handle);
     if(!m_handlers.Find(handle, handleInfo)) {
         HKS_LOG_E("Find handle failed");
         return HKS_ERROR_UKY_FIND_SESSION_HANDLE_FAIL;
