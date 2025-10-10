@@ -204,6 +204,7 @@ static void AddHuksTagPart3(napi_env env, napi_value tag)
 
     // UKEY
     AddInt32Property(env, tag, "HUKS_TAG_KEY_CLASS", HKS_TAG_KEY_CLASS);
+    AddInt32Property(env, tag, "HUKS_TAG_CALL_UID", HKS_TAG_CALL_UID);
 
     /* ExtensionAbility TAGs moved to external crypto (ukey) module */
 }
