@@ -38,10 +38,10 @@ int32_t HksServiceInitialize(void);
 
 int32_t HksServiceRefreshKeyInfo(const struct HksBlob *processName);
 
-int32_t HksServiceRegisterProvider(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+int32_t HksServiceRegisterProvider(const struct HksProcessInfo *processInfo, const struct HksBlob *name,
     const struct HksParamSet *paramSetIn);
 
-int32_t HksServiceUnregisterProvider(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+int32_t HksServiceUnregisterProvider(const struct HksProcessInfo *processInfo, const struct HksBlob *name,
     const struct HksParamSet *paramSetIn);
 
 int32_t HksServiceExportProviderCertificates(const struct HksProcessInfo *processInfo, const struct HksBlob *index, const struct HksParamSet *paramSetIn, 

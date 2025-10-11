@@ -133,34 +133,14 @@ HKS_API_EXPORT int32_t HksExportCertificate(const struct HksBlob *index, const s
 #endif
 }
 
-HKS_API_EXPORT int32_t HksAuthUkeyPinWrapper(const struct HksBlob *index, const struct HksParamSet *paramSetIn, uint32_t *retryCount)
-{
-#ifdef L2_STANDARD
-    HKS_LOG_D("enter HksAuthUkeyPinWrapper");
-    if ((index == NULL) || (paramSetIn == NULL) || (retryCount == NULL)) {
-        return HKS_ERROR_NULL_POINTER;
-    }
-    int32_t outStatus = 0;
-    int32_t ret = HksAuthUkeyPin(index, paramSetIn, &outStatus, retryCount);
-    HKS_IF_NOT_SUCC_LOGE(ret, "leave AuthUkeyPin, result = %" LOG_PUBLIC "d", ret);
-    return ret;
-#else
-    (void)index;
-    (void)paramSetIn;
-    (void)retryCount;
-    return HKS_ERROR_API_NOT_SUPPORTED;
-#endif
-}
-
-
-HKS_API_EXPORT int32_t HksAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, int32_t *outStatus, uint32_t *retryCount)
+HKS_API_EXPORT int32_t HksAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, uint32_t *retryCount)
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter AuthUkeyPin");
-    if ((index == NULL) || (paramSetIn == NULL) || (outStatus == NULL) || (retryCount == NULL)) {
+    if ((index == NULL) || (paramSetIn == NULL) || (retryCount == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
-    int32_t ret = HksClientAuthUkeyPin(index, paramSetIn, outStatus, retryCount);
+    int32_t ret = HksClientAuthUkeyPin(index, paramSetIn, retryCount);
     HKS_IF_NOT_SUCC_LOGE(ret, "leave AuthUkeyPin, result = %" LOG_PUBLIC "d", ret);
     return ret;
 #else

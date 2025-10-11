@@ -29,6 +29,7 @@ namespace HuksNapiItem {
 namespace {
 constexpr int HKS_MAX_DATA_LEN = 0x6400000; // The maximum length is 100M
 constexpr size_t ASYNCCALLBACK_ARGC = 2;
+constexpr size_t ASYNCCALLBACKVOID_ARGC = 1;
 static int32_t pinRetryCount = 0; //ukey retry count
 }  // namespace
 
@@ -805,11 +806,9 @@ static napi_value GenerateResult(napi_env env, const struct HksSuccessReturnResu
 }
 
 // napi层将retryCount传递到这里
-void SetRetryCountAndOutStatus(int32_t outStatus, int32_t retryCount, struct HksSuccessReturnResult &resultData)
+void SetRetryCount(const int32_t retryCount)
 {
     pinRetryCount = retryCount; // 错误时需打印
-    resultData.outStatus = outStatus;
-    resultData.retryCount = retryCount;
 }
 
 static napi_value GenerateBusinessError(napi_env env, int32_t errorCode)
@@ -899,6 +898,18 @@ static void CallbackResultSuccess(napi_env env, napi_ref callback, const struct 
     NAPI_CALL_RETURN_VOID(env, napi_call_function(env, recv, func, ASYNCCALLBACK_ARGC, params, &result));
 }
 
+static void CallbackVoidSuccess(napi_env env, napi_ref callback)
+{
+    napi_value params[ASYNCCALLBACKVOID_ARGC] = { GetNull(env) }; 
+    napi_value func = nullptr;
+    NAPI_CALL_RETURN_VOID(env, napi_get_reference_value(env, callback, &func));
+
+    napi_value recv = nullptr;
+    napi_value result = nullptr;
+    NAPI_CALL_RETURN_VOID(env, napi_get_undefined(env, &recv));
+    NAPI_CALL_RETURN_VOID(env, napi_call_function(env, recv, func, ASYNCCALLBACKVOID_ARGC, params, &result));
+}
+
 static void PromiseResultFailure(napi_env env, napi_deferred deferred, int32_t error)
 {
     if (error == HKS_SUCCESS) {
@@ -915,6 +926,13 @@ static void PromiseResultSuccess(napi_env env, napi_deferred deferred,
 {
     napi_value result = nullptr;
     result = GenerateResult(env, resultData);
+    napi_resolve_deferred(env, deferred, result);
+}
+
+static void PromiseVoidSuccess(napi_env env, napi_deferred deferred)
+{
+    napi_value result = nullptr;
+    NAPI_CALL_RETURN_VOID(env, napi_get_undefined(env, &result));
     napi_resolve_deferred(env, deferred, result);
 }
 
@@ -951,6 +969,23 @@ void HksReturnNapiResult(napi_env env, napi_ref callback, napi_deferred deferred
     } else {
         if (errorCode == HKS_SUCCESS) {
             CallbackResultSuccess(env, callback, resultData);
+        } else {
+            CallbackResultFailure(env, callback, errorCode);
+        }
+    }
+}
+
+void HksReturnNapiUndefined(napi_env env, napi_ref callback, napi_deferred deferred, int32_t errorCode)
+{
+    if (callback == nullptr) {
+        if (errorCode == HKS_SUCCESS) {
+            PromiseVoidSuccess(env, deferred);
+        } else {
+            PromiseResultFailure(env, deferred, errorCode);
+        }
+    } else {
+        if (errorCode == HKS_SUCCESS) {
+            CallbackVoidSuccess(env, callback);
         } else {
             CallbackResultFailure(env, callback, errorCode);
         }

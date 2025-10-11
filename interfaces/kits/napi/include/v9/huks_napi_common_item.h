@@ -159,6 +159,8 @@ void SuccessListAliasesReturnResultInit(struct HksSuccessListAliasesResult &resu
 void HksReturnNapiResult(napi_env env, napi_ref callback, napi_deferred deferred, int32_t errorCode,
     const struct HksSuccessReturnResult resultData);
 
+void HksReturnNapiUndefined(napi_env env, napi_ref callback, napi_deferred deferred, int32_t errorCode);
+
 void HksReturnKeyExistResult(napi_env env, napi_ref callback, napi_deferred deferred, int32_t errorCode,
     const struct HksSuccessReturnResult resultData);
 
@@ -167,7 +169,7 @@ void HksReturnListAliasesResult(napi_env env, napi_ref callback, napi_deferred d
 
 napi_value CreateJsError(napi_env env, int32_t errCode, const char *errorMsg);
 
-void SetRetryCountAndOutStatus(int32_t outStatus, int32_t retryCount, struct HksSuccessReturnResult &resultData);
+void SetRetryCount(int32_t retryCount);
 
 inline void HksNapiThrow(napi_env env, int32_t errCode, const char *errorMsg)
 {
