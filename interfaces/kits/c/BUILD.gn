@@ -64,3 +64,57 @@ ohos_shared_library("huks_ndk") {
   part_name = "huks"
   subsystem_name = "security"
 }
+
+ohos_shared_library("huks_external_ndk") {
+  public = [
+    "external_crypto/inc/native_huks_external_api.h",
+    "include/native_huks_param.h",
+    "include/native_huks_type.h",
+  ]
+
+  defines = [
+    "L2_STANDARD",
+    "_HARDWARE_ROOT_KEY_",
+    "_HUKS_LOG_ENABLE_",
+  ]
+
+  version_script = "libhuks_external_ndk.map"
+  branch_protector_ret = "pac_ret"
+
+  sanitize = {
+    integer_overflow = true
+    cfi = true
+    debug = false
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    ubsan = true
+  }
+
+  include_dirs = [
+    "//base/security/huks/interfaces/kits/c/include",
+    "//base/security/huks/interfaces/kits/c/external_crypto/inc",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
+    "//base/security/huks/frameworks/huks_standard/main/common/include",
+  ]
+
+  sources = [
+    "external_crypto/src/native_huks_external_api.c", 
+    "src/native_huks_param.c",
+  ]
+
+  deps = [
+    "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
+  ]
+
+  external_deps = [ "hilog:libhilog" ]
+
+  cflags_cc = [
+    "-Wall",
+    "-Werror",
+  ]
+
+  innerapi_tags = [ "platformsdk" ]
+  part_name = "huks"
+  subsystem_name = "security"
+}
+
