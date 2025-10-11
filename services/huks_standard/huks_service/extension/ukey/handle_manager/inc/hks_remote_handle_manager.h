@@ -49,7 +49,7 @@ public:
             int32_t& authState, uint32_t& retryCnt);
     int32_t RemoteVerifyPinStatus(const HksProcessInfo &processInfo,
             const std::string &index, const CppParamSet &paramSet, int32_t &state);
-    int32_t RemoteClearPinStatus(const std::string &index);
+    int32_t RemoteClearPinStatus(const std::string &index, const CppParamSet &paramSet);
 
     //证书查询
     int32_t FindRemoteCertificate(const std::string &index,
@@ -63,6 +63,8 @@ public:
     int32_t RemoteHandleVerify(const std::string &index, const CppParamSet &paramSet,
             const std::vector<uint8_t> &plainText, std::vector<uint8_t> &signature);
 
+    int32_t GetRemoteProperty(const std::string& index, const std::string& propertyId,
+        const CppParamSet& paramSet, CppParamSet& outParams);
 
     int32_t ClearRemoteHandle();
 

@@ -266,7 +266,6 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const std::string &index, [[ma
         return HKS_ERROR_REMOTE_OPERATION_FAILED;
     }
 
-    // 移除缓存
     indexToHandle.Erase(newIndex);
     newIndexToProviderInfo.Erase(newIndex);
 
@@ -326,7 +325,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::RemoteClearPinStatus(const std::string &index)
+int32_t HksRemoteHandleManager::RemoteClearPinStatus(const std::string &index, const CppParamSet &paramSet)
 {
     ProviderInfo providerInfo;
     std::string newIndex;
@@ -341,9 +340,7 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const std::string &index)
         return ret;
     }
 
-    // 调用远程provider的清除PIN状态方法
-    // ret = proxy->ClearPinStatus(newIndex, handle);
-    ret = HKS_SUCCESS;
+    (void)proxy->ClearUkeyPinAuthState(newIndex, paramSet, ret);
     
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Remote clear pin status failed: %" "d", ret);
@@ -452,6 +449,32 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
     
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Remote ExportProviderCertificates failed: %" LOG_PUBLIC "d", ret);
+        return HKS_ERROR_REMOTE_OPERATION_FAILED;
+    }
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksRemoteHandleManager::GetRemoteProperty(const std::string& index, const std::string& propertyId,
+        const CppParamSet& paramSet, CppParamSet& outParams)
+{
+    ProviderInfo providerInfo;
+    std::string newIndex;
+    std::string handle;
+    int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    auto proxy = GetProviderProxy(providerInfo, ret);
+    if (proxy == nullptr) {
+        return ret;
+    }
+
+    (void)proxy->GetProperty(handle, propertyId, paramSet, outParams, ret);
+    
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Remote GetProperty failed: %" LOG_PUBLIC "d", ret);
         return HKS_ERROR_REMOTE_OPERATION_FAILED;
     }
 
