@@ -42,14 +42,5 @@
     OH_Huks_WrapKey;
     OH_Huks_UnwrapKey;
     OH_Huks_FreeCertSet;
-
-    OH_Huks_OpenRemoteHandle;
-    OH_Huks_CloseRemoteHandle;
-    OH_Huks_AuthUkeyPin;
-    OH_Huks_GetUkeyPinAuthState;
-    OH_Huks_RegisterProvider;
-    OH_Huks_UnregisterProvider;
-    OH_Huks_ExportProviderCertificates;
-    OH_Huks_ExportCertificate;
   local: *;
 };
