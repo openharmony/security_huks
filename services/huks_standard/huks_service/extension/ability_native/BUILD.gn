@@ -17,15 +17,8 @@ import("//build/ohos.gni")
 config("crypto_extension_public_config") {
     include_dirs = [
         "inc",
-        # "${target_gen_dir}",
     ]
 }
-
-# idl_gen_interface("crypto_extension_interface") {
-#     sources = [
-#         "IExtension.idl",
-#     ]
-# }
 
 ohos_shared_library("crypto_extension_ability_native") {
     branch_protector_ret = "pac_ret"
@@ -43,14 +36,9 @@ ohos_shared_library("crypto_extension_ability_native") {
 
     include_dirs = [
         "inc",
-        "//base/security/huks/interfaces/kits/napi/include/v9",
     ]
 
     sources = [
-        # "${target_gen_dir}/extension_stub.cpp",
-        # "${target_gen_dir}/extension_proxy.cpp",
-
-        "//base/security/huks/interfaces/kits/napi/src/v9/huks_napi_common_item.cpp",
         "src/log_utils.c",
         "src/hks_crypto_ext_ability.cpp",
         "src/hks_crypto_ext_stub_impl.cpp",
@@ -62,7 +50,6 @@ ohos_shared_library("crypto_extension_ability_native") {
         "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
         "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
         "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
-        # ":crypto_extension_interface",
     ]
     
     external_deps = [
