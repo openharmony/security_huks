@@ -269,7 +269,7 @@ bool BuildPropertyData(const napi_env &env, const std::string& propertyId, const
 
     argv[ARGC_ZERO] = nativeHandle;
     argv[ARGC_ONE] = nativePropertyId;
-    argv[ARGC_TWO] = nativePropertyId;
+    argv[ARGC_TWO] = nativeCppParamSet;
     argc = ARGC_THREE;
     return true;
 }
@@ -795,7 +795,8 @@ void JsHksCryptoExtAbility::GetGetPropertyParams(napi_env &env, napi_value &func
         }
         paramVec.emplace_back(std::move(param));
     }
-    resultParams.paramSet.AddParams(paramVec);
+    CppParamSet cppParamSetTemp(paramVec);
+    resultParams.paramSet = std::move(cppParamSetTemp);
     return;
 }
 
