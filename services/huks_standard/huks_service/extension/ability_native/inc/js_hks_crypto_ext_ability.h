@@ -16,6 +16,7 @@
 #ifndef JS_HKS_CRYPTO_EXT_ABILITY_H
 #define JS_HKS_CRYPTO_EXT_ABILITY_H
 
+#include "hks_cpp_paramset.h"
 #include "hks_crypto_ext_ability.h"
 #include "js_runtime.h"
 #include "want.h"
@@ -36,7 +37,9 @@ typedef enum {
     EXPORT_PROVIDER_CERTIFICATES,
     INIT_SESSION,
     UPDATE_SESSION,
-    FINISH_SESSION
+    FINISH_SESSION,
+    GET_PROPERTY,
+    CLEAR_UKEY_PIN_AUTH
 } CryptoResultParamType;
 
 typedef struct HksCertInfo {
@@ -53,6 +56,7 @@ typedef struct CryptoResultParam {
     std::string index {};
     std::vector<HksCertInfo> certs {};
     std::vector<uint8_t> outData {};
+    CppParamSet paramSet {};
 
     CryptoResultParamType paramType {};
     std::condition_variable callJsCon;
@@ -106,6 +110,9 @@ public:
         std::vector<uint8_t>& outData, int32_t& errcode) override;
     int FinishSession(const std::string& handle, const CppParamSet& params, const std::vector<uint8_t>& inData,
         std::vector<uint8_t>& outData, int32_t& errcode) override;
+    int GetProperty(const std::string& handle, const std::string& propertyId, const CppParamSet& params,
+        CppParamSet& outParams, int32_t& errcode) override;
+    int ClearUkeyPinAuthState(const std::string& handle, const CppParamSet& params, int32_t& errcode) override; 
 private:
     template <typename T>
     struct Value {
@@ -116,6 +123,7 @@ private:
     static napi_status GetStringValue(napi_env env, napi_value value, std::string &result);
     static napi_status GetHksCertInfoValue(napi_env env, napi_value value, HksCertInfo &certInfo);
     static napi_status GetUint8ArrayValue(napi_env env, napi_value value, HksBlob &result);
+    static napi_status GetHksParamsfromValue(napi_env env, napi_value value, HksParam &param);
     static void GetSessionParams(napi_env &env, napi_value &funcResult, CryptoResultParam &resultParams);
     static void HksCertInfoToString(std::vector<HksCertInfo> &certInfoVec, std::string &jsonStr);
     int CallJsMethod(const std::string &funcName, AbilityRuntime::JsRuntime &jsRuntime, NativeReference *jsObj,
@@ -125,11 +133,11 @@ private:
     static bool ConvertFunctionResult(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
     static napi_value PromiseCallback(napi_env env, napi_callback_info info);
     void CallPromise(napi_env &env, napi_value funcResult, std::shared_ptr<CryptoResultParam> dataParam);
-    static void GetOpenRemoteHandleParams(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
+    static void GetOpenRemoteHandleParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams);
     static void GetAuthUkeyPin(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
     static void GetUkeyPinAuthStateParams(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
     static void GetExportCertificateParams(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
-
+    static void GetGetPropertyParams(napi_env &env, napi_value &funcResult, CryptoResultParam &resultParams);
     AbilityRuntime::JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> jsObj_;
 };

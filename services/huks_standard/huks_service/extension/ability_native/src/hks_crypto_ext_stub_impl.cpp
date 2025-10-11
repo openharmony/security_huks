@@ -15,7 +15,6 @@
 
 #include "hks_crypto_ext_stub_impl.h"
 #include "hks_cpp_paramset.h"
-// #include "hks_log.h"
 #include "log_utils.h"
 namespace OHOS {
 namespace Security {
@@ -26,13 +25,11 @@ ErrCode HksCryptoExtStubImpl::OpenRemoteHandle(
     std::string& handle,
     int32_t& errcode)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl OpenRemoteHandle");
     if (extension_ == nullptr) {
-        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        LOGE("extension is nullptr");
         return ERR_OK;
     }
-    extension_->OpenRemoteHandle(index, params, handle, errcode);
-    return ERR_OK;
+    return extension_->OpenRemoteHandle(index, params, handle, errcode);
 }
 
 ErrCode HksCryptoExtStubImpl::CloseRemoteHandle(
@@ -40,14 +37,11 @@ ErrCode HksCryptoExtStubImpl::CloseRemoteHandle(
     const CppParamSet& params,
     int32_t& errcode)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl CloseRemoteHandle");
     if (extension_ == nullptr) {
-        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        LOGE("extension is nullptr");
         return ERR_OK;
     }
-    // 实现具体的关闭远程句柄逻辑
-    extension_->CloseRemoteHandle(handle, params, errcode);
-    return ERR_OK;
+    return extension_->CloseRemoteHandle(handle, params, errcode);
 }
 
 ErrCode HksCryptoExtStubImpl::AuthUkeyPin(
@@ -57,14 +51,11 @@ ErrCode HksCryptoExtStubImpl::AuthUkeyPin(
     int32_t& authState,
     uint32_t& retryCnt)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl AuthUkeyPin");
     if (extension_ == nullptr) {
-        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        LOGE("extension is nullptr");
         return ERR_OK;
     }
-    // 实现具体的Ukey PIN认证逻辑
-    extension_->AuthUkeyPin(handle, params, errcode, authState, retryCnt);
-    return ERR_OK;
+    return extension_->AuthUkeyPin(handle, params, errcode, authState, retryCnt);
 }
 
 ErrCode HksCryptoExtStubImpl::GetUkeyPinAuthState(
@@ -73,17 +64,14 @@ ErrCode HksCryptoExtStubImpl::GetUkeyPinAuthState(
     int32_t& state,
     int32_t& errcode)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl GetUkeyPinAuthState");
     if (extension_ == nullptr) {
-        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        LOGE("extension is nullptr");
         return ERR_OK;
     }
-    // 实现获取Ukey PIN认证状态的逻辑
     state = 0; // 设置默认状态
     int32_t authState = 0;
     extension_->GetUkeyPinAuthState(handle, params, authState, errcode);
-    state = static_cast<uint32_t>(authState);
-    return ERR_OK;
+    return state = static_cast<uint32_t>(authState);
 }
 
 ErrCode HksCryptoExtStubImpl::Sign(
@@ -93,9 +81,8 @@ ErrCode HksCryptoExtStubImpl::Sign(
     std::vector<uint8_t>& outData,
     int32_t& errcode)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl Sign");
     if (extension_ == nullptr) {
-        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        LOGE("extension is nullptr");
         return ERR_OK;
     }
     // 实现签名逻辑
@@ -110,9 +97,8 @@ ErrCode HksCryptoExtStubImpl::Verify(
     const std::vector<uint8_t>& signature,
     int32_t& errcode)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO HksCryptoExtStubImpl Verify");
     if (extension_ == nullptr) {
-        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        LOGE("extension is nullptr");
         return ERR_OK;
     }
     // 实现验证逻辑
@@ -126,13 +112,11 @@ ErrCode HksCryptoExtStubImpl::ExportCertificate(
     std::string& certJsonArr,
     int32_t& errcode)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO ExportCertificate");
     if (extension_ == nullptr) {
-        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        LOGE("extension is nullptr");
         return ERR_OK;
     }
-    extension_->ExportCertificate(index, params, certJsonArr, errcode);
-    return ERR_OK;
+    return extension_->ExportCertificate(index, params, certJsonArr, errcode);
 }
 
 ErrCode HksCryptoExtStubImpl::ExportProviderCertificates(
@@ -140,13 +124,11 @@ ErrCode HksCryptoExtStubImpl::ExportProviderCertificates(
     std::string& certJsonArr,
     int32_t& errcode)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO ExportCertificate");
     if (extension_ == nullptr) {
-        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        LOGE("extension is nullptr");
         return ERR_OK;
     }
-    extension_->ExportProviderCertificates(params, certJsonArr, errcode);
-    return ERR_OK;
+    return extension_->ExportProviderCertificates(params, certJsonArr, errcode);
 }
 
 ErrCode HksCryptoExtStubImpl::InitSession(
@@ -155,13 +137,11 @@ ErrCode HksCryptoExtStubImpl::InitSession(
     std::string& handle,
     int32_t& errcode)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO InitSession");
     if (extension_ == nullptr) {
-        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        LOGE("extension is nullptr");
         return ERR_OK;
     }
-    extension_->InitSession(index, params, handle, errcode);
-    return ERR_OK;
+    return extension_->InitSession(index, params, handle, errcode);
 }
 
 ErrCode HksCryptoExtStubImpl::UpdateSession(
@@ -171,13 +151,11 @@ ErrCode HksCryptoExtStubImpl::UpdateSession(
     std::vector<uint8_t>& outData,
     int32_t& errcode)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO UpdateSession");
     if (extension_ == nullptr) {
-        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        LOGE("extension is nullptr");
         return ERR_OK;
     }
-    extension_->UpdateSession(handle, params, inData, outData, errcode);
-    return ERR_OK;
+    return extension_->UpdateSession(handle, params, inData, outData, errcode);
 }
 
 ErrCode HksCryptoExtStubImpl::FinishSession(
@@ -187,13 +165,11 @@ ErrCode HksCryptoExtStubImpl::FinishSession(
     std::vector<uint8_t>& outData,
     int32_t& errcode)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO FinishSession");
     if (extension_ == nullptr) {
-        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        LOGE("extension is nullptr");
         return ERR_OK;
     }
-    extension_->FinishSession(handle, params, inData, outData, errcode);
-    return ERR_OK;
+    return extension_->FinishSession(handle, params, inData, outData, errcode);
 }
 
 ErrCode HksCryptoExtStubImpl::GetProperty(
@@ -208,8 +184,7 @@ ErrCode HksCryptoExtStubImpl::GetProperty(
         LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
         return ERR_OK;
     }
-    // TODO 实现具体的获取属性逻辑
-    return ERR_OK;
+    return extension_->GetProperty(handle, propertyId, params, outParams, errcode);
 }
 
 ErrCode HksCryptoExtStubImpl::GetResourceId(
@@ -236,8 +211,7 @@ ErrCode HksCryptoExtStubImpl::ClearUkeyPinAuthState(
         LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
         return ERR_OK;
     }
-    // TODO 实现具体的清除Ukey PIN认证状态逻辑
-    return ERR_OK;
+    return extension_->ClearUkeyPinAuthState(handle, params, errcode);
 }
 
 } // namespace Huks
