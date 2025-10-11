@@ -15,13 +15,13 @@ int32_t HksIpcProviderRegAdapter(const struct HksProcessInfo *processInfo,  cons
 int32_t HksIpcProviderUnregAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *name, 
     const struct HksParamSet *paramSet);
 
-int32_t HksIpcCreateRemKeyHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *index, 
+int32_t HksIpcCreateRemKeyHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *resourceId, 
     const struct HksParamSet *paramSet, struct HksBlob *remoteHandleOut);
 
-int32_t HksIpcGetRemoteHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *index, 
+int32_t HksIpcGetRemoteHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *resourceId, 
     const struct HksParamSet *paramSet, struct HksBlob *remoteHandleOut);
 
-int32_t HksIpcCloseRemKeyHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *index, 
+int32_t HksIpcCloseRemKeyHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *resourceId, 
     const struct HksParamSet *paramSet);
 
 int32_t HksIpcSignAdapter(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,

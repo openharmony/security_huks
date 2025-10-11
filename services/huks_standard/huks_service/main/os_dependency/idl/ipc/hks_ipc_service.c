@@ -225,14 +225,14 @@ void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t
 
 void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t *context) 
 {
-    struct HksBlob index = { 0, NULL };
+    struct HksBlob resourceId = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksBlob remoteHandleOut = { 0, NULL };
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     int32_t ret;
 
     do {
-        ret  = HksUKeyGeneralUnpack(srcData, &index, &paramSet);
+        ret  = HksUKeyGeneralUnpack(srcData, &resourceId, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceOpenRemoteHandleUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
@@ -241,7 +241,7 @@ void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t 
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksIpcCreateRemKeyHandleAdapter(&processInfo, &index, paramSet, &remoteHandleOut);
+        ret = HksIpcCreateRemKeyHandleAdapter(&processInfo, &resourceId, paramSet, &remoteHandleOut);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcCreateRemKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
@@ -255,14 +255,14 @@ void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t 
 
 void HksIpcServiceGetRemoteHandle(const struct HksBlob *srcData, const uint8_t *context) 
 {
-    struct HksBlob index = { 0, NULL };
+    struct HksBlob resourceId = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksBlob handle = { 0, NULL };
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     int32_t ret;
 
     do {
-        ret  = HksUKeyGeneralUnpack(srcData, &index, &paramSet);
+        ret  = HksUKeyGeneralUnpack(srcData, &resourceId, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceGetRemoteHandleUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
@@ -271,7 +271,7 @@ void HksIpcServiceGetRemoteHandle(const struct HksBlob *srcData, const uint8_t *
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksIpcGetRemoteHandleAdapter(&processInfo, &index, paramSet, &handle);
+        ret = HksIpcGetRemoteHandleAdapter(&processInfo, &resourceId, paramSet, &handle);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcGetRemoteHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
@@ -285,12 +285,12 @@ void HksIpcServiceGetRemoteHandle(const struct HksBlob *srcData, const uint8_t *
 
 void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t *context) 
 {
-    struct HksBlob index = { 0, NULL };
+    struct HksBlob resourceId = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     int32_t ret;
     do {
-        ret  = HksUKeyGeneralUnpack(srcData, &index, &paramSet);
+        ret  = HksUKeyGeneralUnpack(srcData, &resourceId, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceCloseRemoteHandleUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
@@ -299,7 +299,7 @@ void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksIpcCloseRemKeyHandleAdapter(&processInfo, &index, paramSet);
+        ret = HksIpcCloseRemKeyHandleAdapter(&processInfo, &resourceId, paramSet);
         HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcCloseRemKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 

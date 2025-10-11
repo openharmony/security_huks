@@ -837,6 +837,34 @@ struct OH_Huks_ParamSet {
     struct OH_Huks_Param params[];
 };
 
+struct OH_Huks_ExternalCryptoParam {
+    /** Tag value. */
+    uint32_t tag;
+
+    union {
+        /** Parameter of the Boolean type. */
+        bool boolParam;
+        /** Parameter of the int32_t type. */
+        int32_t int32Param;
+        /** Parameter of the uint32_t type. */
+        uint32_t uint32Param;
+        /** Parameter of the uint64_t type. */
+        uint64_t uint64Param;
+        /** Parameter of the struct OH_Huks_Blob type. */
+        struct OH_Huks_Blob blob;
+    };
+};
+
+struct OH_Huks_ExternalCryptoParamSet {
+    /** Memory size of the parameter set. */
+    uint32_t paramSetSize;
+    /** Number of parameters in the parameter set. */
+    uint32_t paramsCnt;
+    /** Parameter array. */
+    struct OH_Huks_ExternalCryptoParam params[];
+};
+
+
 struct OH_Huks_ExtCertInfo {
     int32_t purpose;
     struct OH_Huks_Blob index;

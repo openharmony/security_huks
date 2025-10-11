@@ -371,7 +371,7 @@ int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index,
     return ret;
 }
 
-int32_t HksClientGetRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
+int32_t HksClientGetRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
 {
     if(remoteHandleOut == NULL || remoteHandleOut->data != NULL || remoteHandleOut->size != 0) {
         // TODO:错误码怎么写
@@ -391,13 +391,13 @@ int32_t HksClientGetRemoteHandle(const struct HksBlob *index, const struct HksPa
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksCheckIpcBlobAndParamSet(index, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(resourceId, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIpcGetRemoteHandle fail")
 
-        ret = HksAllocInBlob(&inBlob, index, newParamSet);
+        ret = HksAllocInBlob(&inBlob, resourceId, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
-        ret = HksUKeyGeneralPack(index, newParamSet, &inBlob);
+        ret = HksUKeyGeneralPack(resourceId, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetRemoteHandlePack fail")
 
         ret = HksSendRequest(HKS_MSG_EXT_GET_REMOTE_HANDLE, &inBlob, &outBlob, newParamSet);
@@ -417,7 +417,7 @@ int32_t HksClientGetRemoteHandle(const struct HksBlob *index, const struct HksPa
     return ret;
 }
 
-int32_t HksClientOpenRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
+int32_t HksClientOpenRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn,
     struct HksBlob *remoteHandleOut)
 {
     if(remoteHandleOut == NULL || remoteHandleOut->data != NULL || remoteHandleOut->size != 0) {
@@ -438,13 +438,13 @@ int32_t HksClientOpenRemoteHandle(const struct HksBlob *index, const struct HksP
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksCheckIpcBlobAndParamSet(index, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(resourceId, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientOpenRemoteHandle fail")
 
-        ret = HksAllocInBlob(&inBlob, index, newParamSet);
+        ret = HksAllocInBlob(&inBlob, resourceId, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
-        ret = HksUKeyGeneralPack(index, newParamSet, &inBlob);
+        ret = HksUKeyGeneralPack(resourceId, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksOpenRemoteHandlePack fail")
 
         ret = HksSendRequest(HKS_MSG_EXT_OPEN_REMOTE_HANDLE, &inBlob, &outBlob, newParamSet);
@@ -466,7 +466,7 @@ int32_t HksClientOpenRemoteHandle(const struct HksBlob *index, const struct HksP
     return ret;
 }
 
-int32_t HksClientCloseRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn)
+int32_t HksClientCloseRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn)
 {
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
@@ -476,13 +476,13 @@ int32_t HksClientCloseRemoteHandle(const struct HksBlob *index, const struct Hks
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksAllocInBlob(&inBlob, index, newParamSet);
+        ret = HksAllocInBlob(&inBlob, resourceId, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
-        ret = HksCheckIpcBlobAndParamSet(index, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(resourceId, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIpcCloseRemoteHandle fail")
 
-        ret = HksUKeyGeneralPack(index, newParamSet, &inBlob);
+        ret = HksUKeyGeneralPack(resourceId, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCloseRemoteHandlePack fail")
 
         ret = HksSendRequest(HKS_MSG_EXT_CLOSE_REMOTE_HANDLE, &inBlob, NULL, newParamSet);
