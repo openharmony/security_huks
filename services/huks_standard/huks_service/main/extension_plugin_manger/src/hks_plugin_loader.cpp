@@ -17,7 +17,9 @@
 #include "hks_plugin_loader.h"
 #include <vector>
 
-namespace OHOS::Security::Huks {
+namespace OHOS {
+namespace Security {
+namespace Huks {
 
 std::shared_ptr<HuksPluginLoader> HuksPluginLoader::GetInstanceWrapper()
 {
@@ -86,4 +88,6 @@ std::string HuksPluginLoader::GetMethodByEnum(PluginMethodEnum methodEnum) {
     return "";
 }
 
+}
+}
 }

@@ -24,7 +24,7 @@
 #include "singleton.h"
 #include "hks_template.h"
 #include "hks_error_code.h"
-#include "hks_funtion_types.h"
+#include "hks_function_types.h"
 
 namespace OHOS {
 namespace Security {
@@ -52,7 +52,9 @@ public:
         const std::string &index, const CppParamSet &paramSet, int32_t& authState, uint32_t& retryCnt);
     int32_t OnGetVerifyPinStatus(const HksProcessInfo &processInfo,
         const std::string &index, const CppParamSet &paramSet, int32_t &state);
-    // int32_t OnClearPinStatus(const std::string &index);
+    int32_t OnClearUkeyPinAuthStatus(const HksProcessInfo &processInfo, const std::string &index);
+    int32_t OnGetRemoteProperty(const HksProcessInfo &processInfo, const std::string &index,
+        const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams);
     //int32_t OnListProviders(std::vector<uint8_t> &providersOut);
     int32_t OnExportCertificate(const HksProcessInfo &processInfo,
         const std::string &index, const CppParamSet &paramSet, std::string &certsJson);

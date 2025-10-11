@@ -14,7 +14,7 @@
  */
 
 #include "hks_extension_connection_test.h"
-#include "gtest/gtest.h"
+
 using namespace testing::ext;
 
 namespace OHOS {

@@ -15,16 +15,18 @@
 
 #ifndef HKS_PLUGIN_MANAGER_TEST_H
 #define HKS_PLUGIN_MANAGER_TEST_H
+
 #include "hks_lib_interface.h"
 #include "hks_plugin_lifecycle_manager.h"
 #include "hks_plugin_loader.h"
-
+#include "hks_funtion_"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 namespace OHOS {
 namespace Security {
 namespace Huks {
+    
 class ExtensionPluginMgrTest : public testing::Test {
 protected:
     static void SetUpTestCase(void);
@@ -45,6 +47,7 @@ class MockHuksPluginLoader {
 public:
     MOCK_METHOD(int32_t, Start, (struct HksProcessInfo &, const std::string&, const CppParamSet&));
     MOCK_METHOD(int32_t, Stop, (struct HksProcessInfo &, const std::string&, const CppParamSet&));
+    
 };
 
 extern "C" {

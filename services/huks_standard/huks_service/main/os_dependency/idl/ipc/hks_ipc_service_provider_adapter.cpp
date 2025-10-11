@@ -170,8 +170,18 @@ int32_t HksIpcGetUkeyPinAuthStateAdapter(const struct HksProcessInfo *processInf
     return OHOS::Security::Huks::HksIpcServiceOnGetVerifyPinStatus(processInfo, cppresourceId, cppParamSet, *outStatus);
 }
 
-int32_t HksIpcClearPinStatusAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId)
-{
-    std::string cppresourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
-    return OHOS::Security::Huks::HksIpcServiceOnClearPinStatus(processInfo, cppresourceId);
+int32_t HksIpcClearPinStatusAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId) {
+    std::string cppResourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
+    return OHOS::Security::Huks::HksIpcServiceOnClearUkeyPinAuthStatus(processInfo, cppResourceId);
+}
+
+int32_t HksIpcServiceOnGetRemotePropertyAdapter(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *resourceId, const struct HksBlob *propertyId,
+    const struct HksParamSet *paramSet, const struct HksParamSet *outParams) {
+    std::string cppResourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
+    std::string cppPropertyId(reinterpret_cast<const char*>(propertyId->data), propertyId->size);
+    CppParamSet cppParamSet(paramSet);
+    CppParamSet cppOutParams(outParams);
+    return OHOS::Security::Huks::HksIpcServiceOnGetRemoteProperty(processInfo, cppResourceId,
+        cppPropertyId, cppParamSet, cppOutParams);
 }
