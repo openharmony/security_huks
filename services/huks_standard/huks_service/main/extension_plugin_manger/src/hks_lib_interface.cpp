@@ -14,7 +14,7 @@
  */
 
 #include "hks_lib_interface.h"
-#include "hks_funtion_types.h"
+#include "hks_function_types.h"
 
 namespace OHOS {
 namespace Security {
@@ -141,17 +141,29 @@ int32_t HuksLibInterface::OnGetVerifyPinStatus(const HksProcessInfo &processInfo
     return HKS_SUCCESS;
 }
 
-// int32_t HuksLibInterface::OnClearPinStatus(const std::string &index) {
-//     auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_CLEAR_PIN_STATUS);
-//     HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
-//         "ClearPinStatus method enum not found in plugin provider map.")
+int32_t HuksLibInterface::OnClearUkeyPinAuthStatus(const HksProcessInfo &processInfo, const std::string &index) {
+    auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_CLEAR_PIN_STATUS);
+    HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "ClearPinStatus method enum not found in plugin provider map.")
     
-//     int ret = (*reinterpret_cast<OnClearPinStatusFunc>(it->second))();
-//     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
-//         "ClearPinStatus fail, ret = %{public}d", ret)
-//     //HKS_LOG_I("clear pin status success")
-//     return HKS_SUCCESS;
-// }
+    int ret = (*reinterpret_cast<OnClearUkeyPinAuthStatusFunc>(it->second))(processInfo, index);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ClearPinStatus fail, ret = %{public}d", ret)
+    HKS_LOG_I("clear pin status success");
+    return HKS_SUCCESS;
+}
+
+int32_t HuksLibInterface::OnGetRemoteProperty(const HksProcessInfo &processInfo, const std::string &index,
+    const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams) {
+    auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_GET_REMOTE_PROPERTY);
+    HKS_IF_TRUE_LOGE_RETURN(it == pluginProviderMap.end(), HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "ClearPinStatus method enum not found in plugin provider map.")
+    
+    int ret = (*reinterpret_cast<OnGetRemotePropertyFunc>(it->second))(processInfo, index,
+        propertyId, paramSet, outParams);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ClearPinStatus fail, ret = %{public}d", ret)
+    HKS_LOG_I("get remote property success");
+    return HKS_SUCCESS;
+}
 
 // int32_t HuksLibInterface::OnListProviders(std::vector<uint8_t> &providersOut) {
 //     auto it = pluginProviderMap.find(PluginMethodEnum::FUNC_ON_LIST_PROVIDER);
@@ -225,6 +237,8 @@ int32_t HuksLibInterface::OnFinishSession (const HksProcessInfo &processInfo, co
     HKS_LOG_I("finish session success");
     return HKS_SUCCESS;
 }
+
+
 
 }
 }
