@@ -167,7 +167,7 @@ static uint32_t g_validTags[] = {
     HKS_TAG_REMOTE_ABILITY_SN,
     HKS_EXT_CRYPTO_TAG_EXTRA_DATA,
     HKS_TAG_KEY_CLASS,
-    HKS_TAG_CALL_UID
+    HKS_EXT_CRYPTO_TAG_UID
 };
 
 HKS_API_EXPORT enum HksTagType GetTagType(enum HksTag tag)
@@ -371,7 +371,7 @@ HKS_API_EXPORT void HksFreeKeyAliasSet(struct HksKeyAliasSet *aliasSet)
     aliasSet = NULL;
 }
 
-HKS_API_EXPORT void HksFreeCertSet(struct HksExtCertInfoSet *CertInfoSet)
+HKS_API_EXPORT void HksFreeExtCertSet(struct HksExtCertInfoSet *CertInfoSet)
 {
     if (CertInfoSet == NULL) {
         return;

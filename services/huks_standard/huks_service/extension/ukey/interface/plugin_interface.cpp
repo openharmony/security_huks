@@ -175,7 +175,7 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksClearUkeyPinAuthSta
     const std::string &index)) {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
-    struct HksParam uid = {.tag = HKS_TAG_CALL_UID, .int32Param = processInfo.uidInt};
+    struct HksParam uid = {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = processInfo.uidInt};
     CppParamSet paramSet = CppParamSet({uid});
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
