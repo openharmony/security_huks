@@ -42,11 +42,11 @@ int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct H
 int32_t HksClientClearPinAuthState(const struct HksBlob *index);
 
 // 句柄管理    
-int32_t HksClientOpenRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
+int32_t HksClientOpenRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn,
     struct HksBlob *remoteHandleOut);
-int32_t HksClientGetRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn, 
+int32_t HksClientGetRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn, 
     struct HksBlob *remoteHandleOut);
-int32_t HksClientCloseRemoteHandle(const struct HksBlob *index, const struct HksParamSet *paramSetIn);
+int32_t HksClientCloseRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn);
 
 // 签名验签
 int32_t HksClientUkeySign(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
