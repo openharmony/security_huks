@@ -14,17 +14,45 @@ static napi_value CreateU32(napi_env env, uint32_t value)
     return napiValue;
 }
 
+inline void AddInt32Property(napi_env env, napi_value object, const char *name, int32_t value)
+{
+    napi_value property = nullptr;
+    NAPI_CALL_RETURN_VOID(env, napi_create_int32(env, value, &property));
+    NAPI_CALL_RETURN_VOID(env, napi_set_named_property(env, object, name, property));
+}
+
+static napi_value CreateHuksExternalTagType(napi_env env)
+{
+    napi_value tagType = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &tagType));
+    AddInt32Property(env, tagType, "HUKS_EXT_CRYPTO_TAG_TYPE_BYTES", HKS_EXT_CRYPTO_TAG_TYPE_BYTES);
+    return tagType;
+}
+
+static napi_value CreateHuksExternalTag(napi_env env)
+{
+    napi_value tag = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &tag));
+
+    AddInt32Property(env, tag, "HUKS_EXT_CRYPTO_TAG_UKEY_PIN", HKS_EXT_CRYPTO_TAG_UKEY_PIN);
+    AddInt32Property(env, tag, "HUKS_EXT_CRYPTO_TAG_ABILITY_NAME", HKS_EXT_CRYPTO_TAG_ABILITY_NAME);
+    AddInt32Property(env, tag, "HUKS_EXT_CRYPTO_TAG_EXTRA_DATA", HKS_EXT_CRYPTO_TAG_EXTRA_DATA);
+
+    return tag;
+}
+
+
 static napi_value HuksExternalCryptoRegister(napi_env env, napi_value exports)
 {
     napi_property_descriptor propDesc[] = {
         DECLARE_NAPI_STATIC_PROPERTY("HUKS_TAG_REMOTE_DEVICE", CreateU32(env, HKS_TAG_REMOTE_DEVICE)),
         DECLARE_NAPI_STATIC_PROPERTY("HUKS_TAG_REMOTE_APP", CreateU32(env, HKS_TAG_REMOTE_APP)),
         DECLARE_NAPI_STATIC_PROPERTY("HUKS_TAG_REMOTE_CONTAINER", CreateU32(env, HKS_TAG_REMOTE_CONTAINER)),
-        DECLARE_NAPI_STATIC_PROPERTY("HUKS_TAG_PIN", CreateU32(env, HKS_TAG_PIN)),
-        DECLARE_NAPI_STATIC_PROPERTY("HUKS_TAG_ABILITY_NAME", CreateU32(env, HKS_TAG_ABILITY_NAME)),
         DECLARE_NAPI_STATIC_PROPERTY("HUKS_TAG_REMOTE_ABILITY_SN", CreateU32(env, HKS_TAG_REMOTE_ABILITY_SN)),
-        DECLARE_NAPI_STATIC_PROPERTY("HUKS_TAG_EXTRA_DATA", CreateU32(env, HKS_TAG_EXTRA_DATA)),
 
+
+        DECLARE_NAPI_PROPERTY("HuksExternalTagType", CreateHuksExternalTagType(env)),
+        DECLARE_NAPI_PROPERTY("HuksExternalTag", CreateHuksExternalTag(env)),
         DECLARE_NAPI_FUNCTION("registerProvider", HuksNapiRegisterProvider),
         DECLARE_NAPI_FUNCTION("unregisterProvider", HuksNapiUnregisterProvider),
         DECLARE_NAPI_FUNCTION("authUkeyPin", HuksNapiAuthUkeyPin),

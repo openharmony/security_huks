@@ -267,18 +267,21 @@ int32_t HksClientExportCertificate(const struct HksBlob *index, const struct Hks
 }
 
 int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
-    int32_t *outStatus, uint32_t *retryCount)
+    uint32_t *retryCount)
 {
-    if (outStatus == NULL || retryCount == NULL) {
+    if (retryCount == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
-
     /**
     *                +---------------------------+
     * outBlob:       | int32_t   | uint32_t     |
     *                | outStatus  |  retryCount  |
     *                +---------------------------+
     */
+    int32_t *outStatus = (int32_t *)HksMalloc(sizeof(int32_t));
+    if (outStatus == NULL) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob inBlob  = { 0, NULL };
@@ -360,9 +363,6 @@ int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index,
         }
         (void)memcpy_s(status, sizeof(int32_t), outBlob.data, sizeof(int32_t));
 
-        if (*status != 0 && ret == HKS_SUCCESS) {
-            ret = HUKS_ERR_CODE_PIN_CODE_ERROR;
-        }
     } while (0);
 
     HksFreeParamSet(&newParamSet);

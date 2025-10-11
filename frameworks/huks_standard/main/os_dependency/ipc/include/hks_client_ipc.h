@@ -36,8 +36,7 @@ int32_t HksClientExportCertificate(const struct HksBlob *index, const struct Hks
 
 
 // PIN码认证
-int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, 
-    int32_t *outStatus, uint32_t *retryCount);
+int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, uint32_t *retryCount);
 int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, 
     int32_t *status);
 int32_t HksClientClearPinAuthState(const struct HksBlob *index);

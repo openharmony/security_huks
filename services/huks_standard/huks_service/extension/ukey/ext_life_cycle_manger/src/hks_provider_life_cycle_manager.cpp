@@ -153,9 +153,9 @@ int32_t HksGetProviderInfo(const HksProcessInfo &processInfo, const std::string 
     HKS_IF_TRUE_LOGE_RETURN(!bundleRet, HKS_ERROR_BAD_STATE, "GetBundleNameForUid failed")
     providerInfo.m_providerName = providerName;
 
-    auto abilityName = paramSet.GetParam<HKS_TAG_ABILITY_NAME>();
+    auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
     HKS_IF_TRUE_LOGE_RETURN(abilityName.first != HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
-        "GetParam HKS_TAG_ABILITY_NAME failed")
+        "GetParam HKS_EXT_CRYPTO_TAG_ABILITY_NAME failed")
     providerInfo.m_abilityName = std::string(abilityName.second.begin(), abilityName.second.end());
     return HKS_SUCCESS;
 }

@@ -127,6 +127,20 @@ struct HksParam {
 };
 
 /**
+ * @brief hks externalCryptoParam
+ */
+struct HksExternalCryptoParam {
+    uint32_t tag;
+    union {
+        bool boolParam;
+        int32_t int32Param;
+        uint32_t uint32Param;
+        uint64_t uint64Param;
+        struct HksBlob blob;
+    };
+};
+
+/**
  * @brief hks param set
  */
 struct HksParamSet {

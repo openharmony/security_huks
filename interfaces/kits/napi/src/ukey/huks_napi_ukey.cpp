@@ -65,6 +65,49 @@ napi_value ParseHksBlob(napi_env env, napi_value object, HksBlob *&str)
     return GetInt32(env, 0);
 }
 
+napi_value ParseHksCryptoExternalParams(napi_env env, napi_value object, HksParamSet *&paramSet)
+{
+    if (paramSet != nullptr) {
+        HKS_LOG_E("param input invalid");
+        return nullptr;
+    }
+
+    std::vector<HksParam> params{};
+    HksParamSet *outParamSet = nullptr;
+    do {
+        if (HksInitParamSet(&outParamSet) != HKS_SUCCESS) {
+            napi_throw_error(env, NULL, "native error");
+            HKS_LOG_E("paramset init failed");
+            break;
+        }
+
+        if (ParseParams(env, object, params) == nullptr) {
+            HKS_LOG_E("parse params failed");
+            break;
+        }
+
+        if (!params.empty()) {
+            if (HksAddParams(outParamSet, params.data(), params.size()) != HKS_SUCCESS) {
+                HKS_LOG_E("add params failed");
+                break;
+            }
+        }
+
+        if (HksBuildParamSet(&outParamSet) != HKS_SUCCESS) {
+            HKS_LOG_E("HksBuildParamSet failed");
+            break;
+        }
+
+        FreeParsedParams(params);
+        paramSet = outParamSet;
+        return GetInt32(env, 0);
+    } while (0);
+
+    HksFreeParamSet(&outParamSet);
+    FreeParsedParams(params);
+    return nullptr;
+}
+
 
 static napi_value CreateAsyncWork(napi_env env, napi_callback_info info, std::unique_ptr<AsyncContext> context, const char *resource)
 {
@@ -139,7 +182,7 @@ napi_value HuksNapiRegisterProvider(napi_env env, napi_callback_info info)
             context->paramSetIn->paramSetSize = 0;
             return napi_ok;
         }
-        result = ParseGetHksParamSet(env, argv[1], context->paramSetIn);
+        result = ParseHksCryptoExternalParams(env, argv[1], context->paramSetIn);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure, 
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get paramSet");
 
@@ -210,9 +253,7 @@ napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
 
     context->resolve = [](napi_env env, AsyncContext *context) {
         ProviderRegContext *napiContext = static_cast<ProviderRegContext *>(context);
-        HksSuccessReturnResult resultData;
-        SuccessReturnResultInit(resultData);
-        HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+        HksReturnNapiUndefined(env, napiContext->callback, napiContext->deferred, napiContext->result);
     };
 
     napi_value result = CreateAsyncWork(env, info, std::move(context), __func__);
@@ -244,7 +285,7 @@ napi_value HuksNapiAuthUkeyPin(napi_env env, napi_callback_info info)
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure, 
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get stringname");
 
-        result = ParseGetHksParamSet(env, argv[1], context->paramSetIn);
+        result = ParseHksCryptoExternalParams(env, argv[1], context->paramSetIn);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure, 
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get paramSet");
 
@@ -253,15 +294,14 @@ napi_value HuksNapiAuthUkeyPin(napi_env env, napi_callback_info info)
 
     context->execute = [](napi_env env, void *data) {
         UkeyPinContext *napiContext = static_cast<UkeyPinContext *>(data);
-        napiContext->result = HksAuthUkeyPin(napiContext->index, napiContext->paramSetIn, &napiContext->outStatus, &napiContext->retryCount);
+        napiContext->result = HksAuthUkeyPin(napiContext->index, napiContext->paramSetIn, &napiContext->retryCount);
     };
 
     context->resolve = [](napi_env env, AsyncContext *context) {
         UkeyPinContext *napiContext = static_cast<UkeyPinContext *>(context);
-        HksSuccessReturnResult resultData;
-        SuccessReturnResultInit(resultData);
-        SetRetryCountAndOutStatus(napiContext->outStatus, napiContext->retryCount, resultData);        
-        HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+        HksReturnNapiUndefined(env, napiContext->callback, napiContext->deferred, napiContext->result);
+        SetRetryCount(napiContext->retryCount);
+        HksReturnNapiUndefined(env, napiContext->callback, napiContext->deferred, napiContext->result);
     };
 
     napi_value result = CreateAsyncWork(env, info, std::move(context), __func__);
@@ -302,7 +342,7 @@ napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info)
             context->paramSetIn->paramSetSize = 0;
             return napi_ok;
         }
-        result = ParseGetHksParamSet(env, argv[1], context->paramSetIn);
+        result = ParseHksCryptoExternalParams(env, argv[1], context->paramSetIn);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure, 
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get paramSet");
 
@@ -318,7 +358,8 @@ napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info)
         UkeyPinContext *napiContext = static_cast<UkeyPinContext *>(context);
         HksSuccessReturnResult resultData;
         SuccessReturnResultInit(resultData);
-        SetRetryCountAndOutStatus(napiContext->outStatus, napiContext->retryCount, resultData);   
+        resultData.isOnlyReturnBoolResult = true;
+        resultData.boolReturned = (napiContext->result == HKS_SUCCESS && napiContext->outStatus == 0);
         HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
     };
 
