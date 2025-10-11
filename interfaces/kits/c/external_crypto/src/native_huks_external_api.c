@@ -84,9 +84,20 @@ struct OH_Huks_Result OH_Huks_AuthUkeyPin(const struct OH_Huks_Blob *resourceId,
     return ConvertApiResult(ret);
 }
 
-struct OH_Huks_Result OH_Huks_GetUkeyPinAuthState(const struct OH_Huks_Blob *resourceId, const struct OH_Huks_ExternalCryptoParamSet *paramSetIn, int32_t *stateOut)
+struct OH_Huks_Result OH_Huks_GetUkeyPinAuthState(const struct OH_Huks_Blob *resourceId, const struct OH_Huks_ExternalCryptoParamSet *paramSetIn, bool *stateOut)
 {
-    int32_t ret = HksGetUkeyPinAuthState((const struct HksBlob *) resourceId, (const struct HksParamSet *) paramSetIn, stateOut);
+    if(stateOut == NULL) {
+        return ConvertApiResult(HKS_ERROR_NULL_POINTER);
+    }
+    int32_t state = 0;
+    int32_t ret = HksGetUkeyPinAuthState((const struct HksBlob *)resourceId,
+        (const struct HksParamSet *)paramSetIn, &state);
+
+    if (ret == 0) {
+        *stateOut = (state == 0);
+    } else {
+        *stateOut = false;
+    }
     return ConvertApiResult(ret);
 }
 struct OH_Huks_Result OH_Huks_ClearPinAuthState(const struct OH_Huks_Blob *resourceId)

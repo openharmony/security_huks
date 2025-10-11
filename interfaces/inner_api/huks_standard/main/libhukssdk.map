@@ -77,6 +77,6 @@
     HksUkeySign;
     HksExportProviderCertificates;
     HksExportCertificate;
-    HksFreeCertSet;
+    HksFreeExtCertSet;
   local: *;
 };

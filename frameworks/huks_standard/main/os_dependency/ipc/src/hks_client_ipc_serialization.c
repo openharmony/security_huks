@@ -598,7 +598,7 @@ int32_t HksCertificatesUnpackFromService(const struct HksBlob *srcBlob, struct H
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("unpack cert info fail i=%" LOG_PUBLIC "u, ret=%d", i, ret);
             struct HksExtCertInfoSet tmp = { i, certs };
-            HksFreeCertSet(&tmp);
+            HksFreeExtCertSet(&tmp);
             return ret;
         }
     }

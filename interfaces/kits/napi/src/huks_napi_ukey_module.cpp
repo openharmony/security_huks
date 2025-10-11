@@ -26,6 +26,7 @@ static napi_value CreateHuksExternalTagType(napi_env env)
     napi_value tagType = nullptr;
     NAPI_CALL(env, napi_create_object(env, &tagType));
     AddInt32Property(env, tagType, "HUKS_EXT_CRYPTO_TAG_TYPE_BYTES", HKS_EXT_CRYPTO_TAG_TYPE_BYTES);
+    AddInt32Property(env, tagType, "HUKS_EXT_CRYPTO_TAG_TYPE_INT", HKS_EXT_CRYPTO_TAG_TYPE_INT);
     return tagType;
 }
 
@@ -37,6 +38,7 @@ static napi_value CreateHuksExternalTag(napi_env env)
     AddInt32Property(env, tag, "HUKS_EXT_CRYPTO_TAG_UKEY_PIN", HKS_EXT_CRYPTO_TAG_UKEY_PIN);
     AddInt32Property(env, tag, "HUKS_EXT_CRYPTO_TAG_ABILITY_NAME", HKS_EXT_CRYPTO_TAG_ABILITY_NAME);
     AddInt32Property(env, tag, "HUKS_EXT_CRYPTO_TAG_EXTRA_DATA", HKS_EXT_CRYPTO_TAG_EXTRA_DATA);
+    AddInt32Property(env, tag, "HUKS_EXT_CRYPTO_TAG_UID", HKS_EXT_CRYPTO_TAG_UID);
 
     return tag;
 }

@@ -13,34 +13,8 @@
  * limitations under the License.
  */
 
-/**
- * @addtogroup HuksParamSetApi
- * @{
- *
- * @brief Defines the capabilities of OpenHarmony Universal KeyStore (HUKS) parameter sets.
- *    The HUKS APIs can be used to perform parameter set lifecycle management,
- *    including initializing a parameter set, adding parameters to a parameter set, constructing
- *    a parameter set, and destroying a parameter set.
- *    They can also be used to obtain parameters, copy parameter sets, and check parameter validity.
- *
- * @syscap SystemCapability.Security.Huks
- * @since 9
- * @version 1.0
- */
-
-/**
- * @file native_huks_param.h
- *
- * @brief Provides APIs for constructing, using, and destroying parameter sets.
- *
- * include "huks/include/native_huks_type.h"
- * @kit Universal Keystore Kit
- * @since 9
- * @version 1.0
- */
-
-#ifndef NATIVE_HUKS_PARAM_H
-#define NATIVE_HUKS_PARAM_H
+#ifndef NATIVE_HUKS_EXTERNAL_PARAM_H
+#define NATIVE_HUKS_EXTERNAL_PARAM_H
 
 #include "native_huks_type.h"
 
@@ -58,7 +32,7 @@ extern "C" {
  * @since 9
  * @version 1.0
  */
-struct OH_Huks_Result OH_Huks_InitParamSet(struct OH_Huks_ParamSet **paramSet);
+struct OH_Huks_Result OH_Huks_InitExtParamSet(struct OH_Huks_ExternalCryptoParamSet **paramSet);
 
 /**
  * @brief Adds parameters to a parameter set.
@@ -71,7 +45,7 @@ struct OH_Huks_Result OH_Huks_InitParamSet(struct OH_Huks_ParamSet **paramSet);
  * @since 9
  * @version 1.0
  */
-struct OH_Huks_Result OH_Huks_AddParams(struct OH_Huks_ParamSet *paramSet,
+struct OH_Huks_Result OH_Huks_AddExtParams(struct OH_Huks_ExternalCryptoParamSet *paramSet,
     const struct OH_Huks_Param *params, uint32_t paramCnt);
 
 /**
@@ -84,7 +58,7 @@ struct OH_Huks_Result OH_Huks_AddParams(struct OH_Huks_ParamSet *paramSet,
  * @since 9
  * @version 1.0
  */
-struct OH_Huks_Result OH_Huks_BuildParamSet(struct OH_Huks_ParamSet **paramSet);
+struct OH_Huks_Result OH_Huks_BuildExtParamSet(struct OH_Huks_ExternalCryptoParamSet **paramSet);
 
 /**
  * @brief Destroys a parameter set.
@@ -93,7 +67,7 @@ struct OH_Huks_Result OH_Huks_BuildParamSet(struct OH_Huks_ParamSet **paramSet);
  * @since 9
  * @version 1.0
  */
-void OH_Huks_FreeParamSet(struct OH_Huks_ParamSet **paramSet);
+void OH_Huks_FreeParamSet(struct OH_Huks_ExternalCryptoParamSet **paramSet);
 
 /**
  * @brief Copies a parameter set (deep copy).
@@ -108,8 +82,8 @@ void OH_Huks_FreeParamSet(struct OH_Huks_ParamSet **paramSet);
  * @since 9
  * @version 1.0
  */
-struct OH_Huks_Result OH_Huks_CopyParamSet(const struct OH_Huks_ParamSet *fromParamSet,
-    uint32_t fromParamSetSize, struct OH_Huks_ParamSet **paramSet);
+struct OH_Huks_Result OH_HuksExt_CopyExtParamSet(const struct OH_Huks_ExternalCryptoParamSet *fromParamSet,
+    uint32_t fromParamSetSize, struct OH_Huks_ExternalCryptoParamSet **paramSet);
 
 /**
  * @brief Obtains parameters from a parameter set.
@@ -123,7 +97,7 @@ struct OH_Huks_Result OH_Huks_CopyParamSet(const struct OH_Huks_ParamSet *fromPa
  * @since 9
  * @version 1.0
  */
-struct OH_Huks_Result OH_Huks_GetParam(const struct OH_Huks_ParamSet *paramSet, uint32_t tag,
+struct OH_Huks_Result OH_Huks_GetExtParam(const struct OH_Huks_ExternalCryptoParamSet *paramSet, uint32_t tag,
     struct OH_Huks_Param **param);
 
 /**
@@ -139,7 +113,7 @@ struct OH_Huks_Result OH_Huks_GetParam(const struct OH_Huks_ParamSet *paramSet, 
  * @since 9
  * @version 1.0
  */
-struct OH_Huks_Result OH_Huks_FreshParamSet(struct OH_Huks_ParamSet *paramSet, bool isCopy);
+struct OH_Huks_Result OH_Huks_FreshExtParamSet(struct OH_Huks_ExternalCryptoParamSet *paramSet, bool isCopy);
 
 /**
  * @brief Checks whether the parameters in a parameter set are valid.
@@ -151,7 +125,7 @@ struct OH_Huks_Result OH_Huks_FreshParamSet(struct OH_Huks_ParamSet *paramSet, b
  * @since 9
  * @version 1.0
  */
-struct OH_Huks_Result OH_Huks_IsParamSetTagValid(const struct OH_Huks_ParamSet *paramSet);
+struct OH_Huks_Result OH_Huks_IsExtParamSetTagValid(const struct OH_Huks_ExternalCryptoParamSet *paramSet);
 
 /**
  * @brief Checks whether a parameter set is of the valid size.
@@ -163,7 +137,7 @@ struct OH_Huks_Result OH_Huks_IsParamSetTagValid(const struct OH_Huks_ParamSet *
  * @since 9
  * @version 1.0
  */
-struct OH_Huks_Result OH_Huks_IsParamSetValid(const struct OH_Huks_ParamSet *paramSet, uint32_t size);
+struct OH_Huks_Result OH_Huks_IsExtParamSetValid(const struct OH_Huks_ExternalCryptoParamSet *paramSet, uint32_t size);
 
 /**
  * @brief Checks whether two parameters are the same.
@@ -176,20 +150,13 @@ struct OH_Huks_Result OH_Huks_IsParamSetValid(const struct OH_Huks_ParamSet *par
  * @since 9
  * @version 1.0
  */
-struct OH_Huks_Result OH_Huks_CheckParamMatch(const struct OH_Huks_Param *baseParam, const struct OH_Huks_Param *param);
+struct OH_Huks_Result OH_Huks_CheckExtParamMatch(const struct OH_Huks_Param *baseParam, const struct OH_Huks_Param *param);
 
-/**
- * @brief Destroys a parameter set.
- *
- * @param keyAliasSet Indicates the pointer to the parameter set to destroy.
- * @since 12
- * @version 1.0
- */
-void OH_Huks_FreeKeyAliasSet(struct OH_Huks_KeyAliasSet *keyAliasSet);
+void OH_Huks_FreeCertSet(struct OH_Huks_ExtCertInfoSet *certSet);
 
 #ifdef __cplusplus
 }
 #endif
 
 /** @} */
-#endif /* NATIVE_HUKS_PARAM_H */
+#endif /* NATIVE_HUKS_EXTERNAL_PARAM_H */

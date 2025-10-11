@@ -454,6 +454,16 @@ enum OH_Huks_TagType {
     OH_HUKS_TAG_TYPE_BYTES = 5 << 28,
 };
 
+enum OH_Huks_ExternalTag {
+    OH_HUKS_EXT_CRYPTO_TAG_UKEY_PIN = OH_HUKS_TAG_TYPE_BYTES | 200001,
+
+    OH_HUKS_EXT_CRYPTO_TAG_ABILITY_NAME = OH_HUKS_TAG_TYPE_BYTES | 200002,
+    
+    OH_HUKS_EXT_CRYPTO_TAG_EXTRA_DATA = OH_HUKS_TAG_TYPE_BYTES | 200003,
+
+    OH_HUKS_EXT_CRYPTO_TAG_UID = OH_HUKS_TAG_TYPE_BYTES | 200004,
+};
+
 /**
  * @brief Enumerates the user authentication types.
  *

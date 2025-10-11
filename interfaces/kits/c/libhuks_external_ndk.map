@@ -13,6 +13,15 @@
 
 1.0 {
   global:
+  OH_Huks_InitParamSet;
+    OH_Huks_AddParams;
+    OH_Huks_BuildParamSet;
+    OH_Huks_FreeParamSet;
+    OH_Huks_CopyParamSet;
+    OH_Huks_GetParam;
+    OH_Huks_FreshParamSet;
+    OH_Huks_FreeCertSet;
+
     OH_Huks_OpenRemoteHandle;
     OH_Huks_CloseRemoteHandle;
     OH_Huks_AuthUkeyPin;
