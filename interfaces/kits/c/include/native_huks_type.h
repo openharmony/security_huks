@@ -700,6 +700,12 @@ enum OH_Huks_Tag {
     OH_HUKS_TAG_ATTESTATION_ID_VERSION_INFO = OH_HUKS_TAG_TYPE_BYTES | 515,
     /** The tag indicates wheather to overwrite the kay with same alias. */
     OH_HUKS_TAG_KEY_OVERRIDE = OH_HUKS_TAG_TYPE_BOOL | 520,
+    /**
+     * @brief The tag indicates the length of AEAD for CCM mode.
+     *
+     * @since 22
+     */
+    OH_HUKS_TAG_AE_TAG_LEN = OH_HUKS_TAG_TYPE_UINT | 521,
 
     /**
      * 601 to 1000 are reserved for other tags.

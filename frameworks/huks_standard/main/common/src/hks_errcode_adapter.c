@@ -383,6 +383,13 @@ static struct HksError g_errCodeTable[] = {
             .data = NULL
         }
     }, {
+        .innerErrCode = HKS_ERROR_CODE_AEAD_TAG_LEN_INVALID,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_CRYPTO_ALG_ARGUMENT,
+            .errorMsg = "Invalid aead tag length.",
+            .data = NULL
+        }
+    }, {
         .innerErrCode = HKS_ERROR_STORAGE_FAILURE,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_FILE_OPERATION_FAIL,
@@ -583,6 +590,13 @@ static struct HksError g_errCodeTable[] = {
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
             .errorMsg = "The input parameter is invalid.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_CODE_AEAD_TAG_LEN_NOT_EQUAL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "AEAD tag length mismatch.",
             .data = NULL
         }
     }, {
