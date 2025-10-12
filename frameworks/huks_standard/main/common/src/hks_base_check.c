@@ -482,10 +482,6 @@ static int32_t CheckRsaCipherData(uint32_t cmdId, const struct ParamsValues *inp
 #endif
 #endif
 
-#ifdef HKS_SUPPORT_AES_C
-static int32_t CheckAesAeCipherData(uint32_t cmdId, const struct HksBlob *inData, const struct HksBlob *outData);
-#endif
-
 #if defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_DES_C) || defined(HKS_SUPPORT_3DES_C) || \
     defined(HKS_SUPPORT_SM4_C)
 static int32_t CheckBlockCbcCipherData(uint32_t mode, uint32_t cmdId, uint32_t padding,
@@ -550,8 +546,6 @@ static int32_t CheckBlockCipherData(uint32_t cmdId, const struct ParamsValues *i
         if (mode == HKS_MODE_CBC || mode == HKS_MODE_CTR || mode == HKS_MODE_ECB) {
             uint32_t padding = inputParams->padding.value;
             return CheckBlockCbcCipherData(mode, cmdId, padding, inData, outData);
-        } else if (mode == HKS_MODE_GCM || mode == HKS_MODE_CCM) {
-            return CheckAesAeCipherData(cmdId, inData, outData);
         }
     }
 #endif
@@ -626,40 +620,6 @@ static int32_t CheckAesPadding(const struct ParamsValues *inputParams)
 
     if ((mode == HKS_MODE_GCM) || (mode == HKS_MODE_CCM)) {
         return HksCheckValue(padding, g_aesAeadPadding, HKS_ARRAY_SIZE(g_aesAeadPadding));
-    }
-
-    return HKS_SUCCESS;
-}
-
-static int32_t CheckAesAeCipherData(uint32_t cmdId, const struct HksBlob *inData, const struct HksBlob *outData)
-{
-    /*
-     * encrypt: inSize greater than 0(has been checked),
-     *          outSize no less than inSize + 16(tagLen) (in: plain; out: cipher)
-     * decrypt: inSize greater than 16(tagLen), outSize no less than inSize - 16(tagLen)
-     * decryptFinal: inSize greater than 0(has been checked), outSize no less than inSize (in: cipher; out: plain)
-     */
-    switch (cmdId) {
-        case HKS_CMD_ID_ENCRYPT:
-            if (inData->size > (UINT32_MAX - HKS_AE_TAG_LEN)) {
-                HKS_LOG_E("encrypt, invalid inSize: %" LOG_PUBLIC "u", inData->size);
-                return HKS_ERROR_INVALID_ARGUMENT;
-            }
-            if (outData->size < (inData->size + HKS_AE_TAG_LEN)) {
-                HKS_LOG_E("encrypt, out buffer too small size: %" LOG_PUBLIC "u, inSize: %" LOG_PUBLIC "u",
-                    outData->size, inData->size);
-                return HKS_ERROR_BUFFER_TOO_SMALL;
-            }
-            break;
-        case HKS_CMD_ID_DECRYPT:
-            if ((inData->size < HKS_AE_TAG_LEN) || (outData->size < inData->size - HKS_AE_TAG_LEN)) {
-                HKS_LOG_E("decryptfinal, out buffer too small size: %" LOG_PUBLIC "u, inSize: %" LOG_PUBLIC "u",
-                    outData->size, inData->size);
-                return HKS_ERROR_BUFFER_TOO_SMALL;
-            }
-            break;
-        default:
-            return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     return HKS_SUCCESS;

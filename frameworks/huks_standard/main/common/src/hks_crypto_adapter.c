@@ -29,6 +29,7 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_template.h"
+#include "hks_check_paramset.h"
 #include "securec.h"
 
 void HksFillKeySpec(const struct HksParamSet *paramSet, struct HksKeySpec *spec)
@@ -134,15 +135,19 @@ int32_t HksFillAeadParam(
         return ret;
     }
 
+    uint32_t aeadTagLen = HKS_AE_TAG_LEN;
+    ret = HksGetAeadTagLength(paramSet, usageSpec->mode, &aeadTagLen);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret);
+
     struct HksParam tagParam;
     if (!isEncrypt) {
-        if (inputText->size <= HKS_AE_TAG_LEN) {
+        if (inputText->size <= aeadTagLen) {
             HKS_LOG_E("too small inputText size");
             return HKS_ERROR_INVALID_ARGUMENT;
         }
-        inputText->size -= HKS_AE_TAG_LEN;
+        inputText->size -= aeadTagLen;
 
-        tagParam.blob.size = HKS_AE_TAG_LEN;
+        tagParam.blob.size = aeadTagLen;
         tagParam.blob.data = inputText->data + inputText->size;
     }
 
@@ -152,7 +157,7 @@ int32_t HksFillAeadParam(
     if (!isEncrypt) {
         aeadParam->tagDec = tagParam.blob;
     } else {
-        aeadParam->tagLenEnc = HKS_AE_TAG_LEN;
+        aeadParam->tagLenEnc = aeadTagLen;
     }
 
     aeadParam->nonce = nonceParam->blob;
@@ -277,13 +282,17 @@ int32_t HksGetEncryptAeTag(
         return HKS_SUCCESS;
     }
 
-    if (outData->size < (inData->size + HKS_AE_TAG_LEN)) {
+    uint32_t aeadTagLen = HKS_AE_TAG_LEN;
+    ret = HksGetAeadTagLengthWithoutMode(paramSet, &aeadTagLen);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret);
+
+    if (outData->size < (inData->size + aeadTagLen)) {
         HKS_LOG_E("too small out buf!");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     tagAead->data = outData->data + inData->size;
-    tagAead->size = HKS_AE_TAG_LEN;
+    tagAead->size = aeadTagLen;
     return HKS_SUCCESS;
 }
 
@@ -314,6 +323,9 @@ int32_t HksGetDecryptAeTag(const struct HksParamSet *runtimeParamSet, struct Hks
         HKS_LOG_E("get aead tag failed!");
         return ret;
     }
+
+    HKS_IF_TRUE_LOGE_RETURN(tagParam->blob.size != aeadParam->tagDec.size, HKS_ERROR_CODE_AEAD_TAG_LEN_NOT_EQUAL,
+        "indicate aead %" LOG_PUBLIC "u, input aead %" LOG_PUBLIC "u", aeadParam->tagDec.size, tagParam->blob.size);
 
     aeadParam->tagDec = tagParam->blob;
     return HKS_SUCCESS;

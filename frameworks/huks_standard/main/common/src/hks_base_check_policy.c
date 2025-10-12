@@ -318,7 +318,7 @@ static const struct ExpectParamsValuesChecker g_expectRsaParams[] = {
 static const struct ParamsValuesChecker g_aesParamSet[] = {
     { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false},
         { true, 0, false} } },
-	{ HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false},
+    { HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false},
         { true, 0, false} } },
     { HKS_CHECK_TYPE_GEN_MAC_KEY, { { true, 0, false}, { false, 0, false}, { false, 0, false}, { true, 0, false},
         { false, 0, false} } },
