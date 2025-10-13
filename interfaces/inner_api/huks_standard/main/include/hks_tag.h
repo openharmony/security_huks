@@ -155,7 +155,7 @@ enum HuksKeyClassType {
     /* supported for indicate aead tag length */\
     HKS_ASSIGN_ENUM_VALUE(HKS_TAG_AE_TAG_LEN, HKS_TAG_TYPE_UINT | 521) \
     /* supported for key class. ukey or slef-defined */\
-    HKS_ASSIGN_ENUM_VALUE(HKS_TAG_KEY_CLASS, HKS_TAG_TYPE_UINT | 601) \
+    HKS_ASSIGN_ENUM_VALUE(HKS_TAG_KEY_CLASS, HKS_TAG_TYPE_UINT | 522) \
     /* Extention TAG: 1001 - 9999 */\
     HKS_ASSIGN_ENUM_VALUE(HKS_TAG_IS_KEY_ALIAS, HKS_TAG_TYPE_BOOL | 1001) \
     HKS_ASSIGN_ENUM_VALUE(HKS_TAG_KEY_STORAGE_FLAG, HKS_TAG_TYPE_UINT | 1002) /* choose from enum HksKeyStorageType */\
