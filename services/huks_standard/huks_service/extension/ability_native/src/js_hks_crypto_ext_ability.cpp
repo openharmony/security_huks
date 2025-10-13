@@ -768,7 +768,7 @@ void JsHksCryptoExtAbility::GetGetPropertyParams(napi_env &env, napi_value &func
 {
     napi_value nativeArray = nullptr;
     napi_create_array(env, &nativeArray);
-    napi_get_named_property(env, funcResult, "params", &nativeArray);
+    napi_get_named_property(env, funcResult, "property", &nativeArray);
     if (nativeArray == nullptr) {
         LOGE("Convert js array object fail.");
         return;
@@ -808,7 +808,7 @@ bool JsHksCryptoExtAbility::ConvertFunctionResult(napi_env env, napi_value funcR
     }
  
     napi_value napiCode = nullptr;
-    napi_get_named_property(env, funcResult, "errCode", &napiCode);
+    napi_get_named_property(env, funcResult, "resultCode", &napiCode);
     if (napi_get_value_int32(env, napiCode, &resultParams.errCode) != napi_ok) {
         LOGE("Convert js value napiCode failed.");
         return false;
@@ -932,7 +932,7 @@ int JsHksCryptoExtAbility::OpenRemoteHandle(const std::string& index, const CppP
     };
 
     dataParam->callJsExMethodDone.store(false);
-    auto ret = CallJsMethod("onOpenRemoteHandle", jsRuntime_, jsObj_.get(), argParser, retParser);
+    auto ret = CallJsMethod("onOpenResource", jsRuntime_, jsObj_.get(), argParser, retParser);
     if (ret != ERR_OK) {
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
@@ -969,7 +969,7 @@ int JsHksCryptoExtAbility::CloseRemoteHandle(const std::string& handle, const Cp
     };
 
     dataParam->callJsExMethodDone.store(false);
-    auto ret = CallJsMethod("onCloseRemoteHandle", jsRuntime_, jsObj_.get(), argParser, retParser);
+    auto ret = CallJsMethod("onCloseResource", jsRuntime_, jsObj_.get(), argParser, retParser);
     if (ret != ERR_OK) {
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
