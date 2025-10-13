@@ -21,6 +21,8 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 
+std::string pluginSo = "libhuks_external_crypto_ext_core.z.so";
+
 std::shared_ptr<HuksPluginLoader> HuksPluginLoader::GetInstanceWrapper()
 {
     return HuksPluginLoader::GetInstance();
@@ -36,14 +38,14 @@ int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const s
     std::lock_guard<std::mutex> lock(libMutex);
     HKS_IF_TRUE_RETURN(m_pluginHandle != nullptr, HKS_SUCCESS)
 
-    m_pluginHandle = dlopen(PLUGIN_SO, RTLD_NOW);
+    m_pluginHandle = dlopen(pluginSo.c_str(), RTLD_NOW);
     HKS_IF_NULL_LOGE_RETURN(m_pluginHandle, HKS_ERROR_OPEN_LIB_FAIL,
-        "dlopen " PLUGIN_SO " failed! %" LOG_PUBLIC "s", dlerror())
+        "dlopen %" LOG_PUBLIC "s failed! %" LOG_PUBLIC "s", pluginSo.c_str(), dlerror())
 
     for (auto i = 0; i < static_cast<int>(PluginMethodEnum::COUNT); ++i) {
         std::string methodString = GetMethodByEnum(static_cast<PluginMethodEnum>(i));
         if (methodString.empty()) {
-            HKS_LOG_E("the entry %{public}s is not include", PLUGIN_SO);
+            HKS_LOG_E("the entry %{public}s is not include", pluginSo.c_str());
             dlclose(m_pluginHandle);
             m_pluginHandle = nullptr;
             m_pluginProviderMap.clear();
@@ -86,6 +88,10 @@ std::string HuksPluginLoader::GetMethodByEnum(PluginMethodEnum methodEnum) {
     HKS_IF_TRUE_RETURN(it != m_pluginMethodNameMap.end(), it->second)
     HKS_LOG_E("enum = %{public}d can not find string", methodEnum);
     return "";
+}
+
+void HuksPluginLoader::SetPluginPath(std::string& pluginPath) {
+    pluginSo = pluginPath;
 }
 
 }

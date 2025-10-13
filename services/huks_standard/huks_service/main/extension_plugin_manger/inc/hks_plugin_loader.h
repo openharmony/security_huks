@@ -33,7 +33,7 @@
 #include "safe_map.h"
 #include "hks_function_types.h"
 
-#define PLUGIN_SO "libhuks_external_crypto_ext_core.z.so"
+
 
 namespace OHOS {
 namespace Security {
@@ -48,11 +48,13 @@ public:
         const CppParamSet& paramSet);
     static std::shared_ptr<HuksPluginLoader> GetInstanceWrapper();
     static void ReleaseInstance();
+    void SetPluginPath(std::string& pluginPath);
     
 private:
     void* m_pluginHandle = nullptr;
     std::mutex libMutex;
     static std::string GetMethodByEnum(PluginMethodEnum methodEnum);
+    
 };
 }
 }
