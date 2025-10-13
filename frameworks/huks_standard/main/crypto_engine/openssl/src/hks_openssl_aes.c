@@ -734,7 +734,11 @@ static int32_t OpensslAesAeadCipherInit(const struct HksBlob *key, const struct 
 
     if (isEncrypt && usageSpec->mode ==  HKS_MODE_CCM) {
         const struct HksAeadParam *aeadParam = (struct HksAeadParam *)(usageSpec->algParam);
-        HKS_IF_NULL_LOGE_RETURN(aeadParam, HKS_ERROR_NULL_POINTER, "aeadparam is NULL");
+        if (aeadParam == NULL) {
+            HKS_LOG_E("aeadparam is NULL");
+            EVP_CIPHER_CTX_free(ctx);
+            return HKS_ERROR_NULL_POINTER;
+        }
         if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, aeadParam->tagLenEnc, NULL) != HKS_OPENSSL_SUCCESS) {
             HKS_LOG_E("EVP_CIPHER_CTX_ctrl set tag len failed!");
             HksLogOpensslError();
