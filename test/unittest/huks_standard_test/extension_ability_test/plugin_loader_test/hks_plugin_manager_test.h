@@ -19,7 +19,7 @@
 #include "hks_lib_interface.h"
 #include "hks_plugin_lifecycle_manager.h"
 #include "hks_plugin_loader.h"
-#include "hks_funtion_"
+#include "hks_function_types.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -43,24 +43,17 @@ protected:
     CppParamSet paramSet_;
 };
 
-class MockHuksPluginLoader {
-public:
-    MOCK_METHOD(int32_t, Start, (struct HksProcessInfo &, const std::string&, const CppParamSet&));
-    MOCK_METHOD(int32_t, Stop, (struct HksProcessInfo &, const std::string&, const CppParamSet&));
-    
-};
+// extern "C" {
+// void* __real_dlopen(const char* filename, int flags);
+// void* __wrap_dlopen(const char* filename, int flags) {
+//     return reinterpret_cast<void*>(0x12345);
+// }
 
-extern "C" {
-void* __real_dlopen(const char* filename, int flags);
-void* __wrap_dlopen(const char* filename, int flags) {
-    return reinterpret_cast<void*>(0x12345);
-}
-
-void* __wrap_dlsym(void* handle, const char* symbol) {
-    static int32_t dummy_func() { return HKS_SUCCESS; }
-    return reinterpret_cast<void*>(&dummy_func);
-}
-}
+// void* __wrap_dlsym(void* handle, const char* symbol) {
+//     static int32_t dummy_func() { return HKS_SUCCESS; }
+//     return reinterpret_cast<void*>(&dummy_func);
+// }
+// }
 
 
 

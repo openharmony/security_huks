@@ -36,6 +36,8 @@ ohos_unittest("extension_unit_test") {
 
   sources = [
     "./provider_mgr_test/hks_provider_manger_test.cpp",
+    "./plugin_loader_test/hks_plugin_manager_test.cpp",
+    "./extension_connect_test/hks_extension_connection_test.cpp",
   ]
 
   configs = [
@@ -66,4 +68,47 @@ ohos_unittest("extension_unit_test") {
   subsystem_name = "security"
   part_name = "huks"
 }
+
+ohos_shared_library("fake_success") {
+  sources = [
+    "./plugin_loader_test/fake_success.cpp",
+  ]
+
+  include_dirs = [
+    ".", 
+    "include",
+  ]
+
+  cflags = [
+    "-fPIC",
+    "-Wall",
+  ]
+
+  output_name = "fake_success"
+
+  subsystem_name = "security"
+  part_name = "huks"
+}
+
+ohos_shared_library("fake_fail") {
+  sources = [
+    "./plugin_loader_test/fake_fail.cpp",
+  ]
+
+  include_dirs = [
+    ".", 
+    "include",
+  ]
+
+  cflags = [
+    "-fPIC",
+    "-Wall",
+  ]
+
+  output_name = "fake_success"
+
+  subsystem_name = "security"
+  part_name = "huks"
+}
+
 }
