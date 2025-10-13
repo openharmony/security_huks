@@ -14,7 +14,47 @@
  */
 
 class CryptoExtensionAbility {
-    test() {
+    onOpenResource(resourceId, params){
+        console.log();
+    }
+    
+    onCloseResource(handle, params) {
+        console.log();
+    }
+
+    onGetProperty(handle, params) {
+        console.log();
+    }
+
+    onAuthUkeyPin(handle, params) {
+        console.log();
+    }
+
+    onGerUkeyPinAuthState(handle, params) {
+        console.log();
+    }
+
+    onClearUkeyPinAuthState(handle, params) {
+        console.log();
+    }
+
+    onInitSession(handle, params) {
+        console.log();
+    }
+
+    onUpdateSession(initHandle, params) {
+        console.log();
+    }
+
+    onFinishSession(initHandle, params) {
+        console.log();
+    }
+
+    onExportCertificate(resourceId, params) {
+        console.log();
+    }
+
+    onEnumCertificates(params) {
         console.log();
     }
 }
