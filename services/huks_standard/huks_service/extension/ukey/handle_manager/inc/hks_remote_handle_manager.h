@@ -38,24 +38,23 @@ public:
     static std::shared_ptr<HksRemoteHandleManager> GetInstanceWrapper();
     static void ReleaseInstance();
 
-    int32_t GetRemoteIndex(const ProviderInfo &providerInfo,
-            [[maybe_unused]] const CppParamSet &paramSet, std::string &index);
+    int32_t CreateRemoteIndex(const ProviderInfo &providerInfo,const CppParamSet &paramSet, std::string &index);
     // handle管理
-    int32_t CreateRemoteHandle(const std::string &index, [[maybe_unused]] const CppParamSet &paramSet);
-    int32_t CloseRemoteHandle(const std::string &index, [[maybe_unused]] const CppParamSet &paramSet);
+    int32_t CreateRemoteHandle(const std::string &index, const CppParamSet &paramSet);
+    int32_t CloseRemoteHandle(const std::string &index, const CppParamSet &paramSet);
 
     // ukey PIN码管理
     int32_t RemoteVerifyPin(const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet,
-            int32_t& authState, uint32_t& retryCnt);
+            int32_t &authState, uint32_t &retryCnt);
     int32_t RemoteVerifyPinStatus(const HksProcessInfo &processInfo,
             const std::string &index, const CppParamSet &paramSet, int32_t &state);
     int32_t RemoteClearPinStatus(const std::string &index, const CppParamSet &paramSet);
 
     //证书查询
     int32_t FindRemoteCertificate(const std::string &index,
-            const CppParamSet &paramSet, std::string& certificatesOut);
+            const CppParamSet &paramSet, std::string &certificatesOut);
     int32_t FindRemoteAllCertificate(const HksProcessInfo &processInfo,
-            const std::string &providerName, const CppParamSet &paramSet, std::string& certificatesOut);
+            const std::string &providerName, const CppParamSet &paramSet, std::string &certificatesOut);
 
     //签名验签
     int32_t RemoteHandleSign(const std::string &index, const CppParamSet &paramSet,
@@ -66,7 +65,7 @@ public:
     int32_t GetRemoteProperty(const std::string& index, const std::string& propertyId,
         const CppParamSet& paramSet, CppParamSet& outParams);
 
-    int32_t ClearRemoteHandle();
+    int32_t ClearRemoteHandleMap();
 
     static int32_t ParseIndexAndProviderInfo(const std::string &index,
             ProviderInfo &providerInfo, std::string &newIndex);
@@ -79,9 +78,9 @@ private:
     int32_t ValidateProviderInfo(const std::string &newIndex, ProviderInfo &providerInfo);
     int32_t ValidateAndGetHandle(const std::string &newIndex, ProviderInfo &providerInfo, std::string &handle);
 
-    OHOS::SafeMap<std::string, std::string> indexToHandle;
+    OHOS::SafeMap<std::string, std::string> indexToHandle_;
 
-    OHOS::SafeMap<std::string, ProviderInfo> newIndexToProviderInfo;
+    OHOS::SafeMap<std::string, ProviderInfo> newIndexToProviderInfo_;
 };
 }
 }

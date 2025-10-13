@@ -47,7 +47,7 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegist
     HKS_LOG_E("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
 
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
-    ret = handleMgr->ClearRemoteHandle();
+    ret = handleMgr->ClearRemoteHandleMap();
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "clear index map fail");
     return ret;
 }
@@ -59,8 +59,7 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnCreateRe
     HKS_LOG_E("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
-    auto ret = HKS_SUCCESS;
-    // TODO: handleMgr
+    auto ret = handleMgr->CloseRemoteHandle(index, paramSet);
     HKS_LOG_E("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }

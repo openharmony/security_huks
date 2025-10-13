@@ -28,6 +28,7 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_json_wrapper.h"
+#include "hks_template.h"
 namespace OHOS {
 namespace Security {
 namespace Huks {
@@ -46,9 +47,8 @@ void HksRemoteHandleManager::ReleaseInstance()
     HksRemoteHandleManager::DestroyInstance();
 }
 
-int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &index, 
-                                                        ProviderInfo &providerInfo, 
-                                                        std::string &newIndex)
+int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &index,
+        ProviderInfo &providerInfo, std::string &newIndex)
 {
     CommJsonObject root = CommJsonObject::Parse(index);
     if (root.IsNull()) {
@@ -117,7 +117,7 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
 int32_t HksRemoteHandleManager::ValidateProviderInfo(const std::string &newIndex, ProviderInfo &providerInfo)
 {
     ProviderInfo cachedProviderInfo;
-    if (!newIndexToProviderInfo.Find(newIndex, cachedProviderInfo)) {
+    if (!newIndexToProviderInfo_.Find(newIndex, cachedProviderInfo)) {
         HKS_LOG_E("Provider info not found for newIndex: %" LOG_PUBLIC "s", newIndex.c_str());
         return HKS_ERROR_REMOTE_HANDLE_NOT_FOUND;
     }
@@ -151,7 +151,8 @@ OHOS::sptr<IHuksAccessExtBase> HksRemoteHandleManager::GetProviderProxy(const Pr
     return proxy;
 }
 
-int32_t HksRemoteHandleManager::GetRemoteIndex(const ProviderInfo &providerInfo, [[maybe_unused]] const CppParamSet &paramSet, std::string &index)
+int32_t HksRemoteHandleManager::CreateRemoteIndex(const ProviderInfo &providerInfo,
+         const CppParamSet &paramSet, std::string &index)
 {
     CommJsonObject root = CommJsonObject::CreateObject();
     if (root.IsNull()) {
@@ -174,12 +175,9 @@ int32_t HksRemoteHandleManager::ValidateAndGetHandle(const std::string &newIndex
                                                      ProviderInfo &providerInfo, std::string &handle)
 {
     int32_t ret = ValidateProviderInfo(newIndex, providerInfo);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Provider info validation failed: %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Provider info validation failed: %" LOG_PUBLIC "d", ret)
 
-    if (!indexToHandle.Find(newIndex, handle)) {
+    if (!indexToHandle_.Find(newIndex, handle)) {
         HKS_LOG_E("Remote handle not found for newIndex: %" LOG_PUBLIC "s", newIndex.c_str());
         return HKS_ERROR_REMOTE_HANDLE_NOT_FOUND;
     }
@@ -191,111 +189,82 @@ int32_t HksRemoteHandleManager::ParseAndValidateIndex(const std::string &index, 
                                     std::string &newIndex,std::string &handle)
 {
     int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Parse index and provider info failed: %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
-    
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Parse index and provider info failed: %" LOG_PUBLIC "d", ret)
+
     ret = ValidateAndGetHandle(newIndex, providerInfo, handle);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Validate provider info and get handle failed: %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Validate provider info and get handle failed: %" LOG_PUBLIC "d", ret)
     
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::CreateRemoteHandle(const std::string &index, [[maybe_unused]] const CppParamSet &paramSet)
+int32_t HksRemoteHandleManager::CreateRemoteHandle(const std::string &index, const CppParamSet &paramSet)
 {
     ProviderInfo providerInfo;
     std::string newIndex;
     int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Parse index and provider info failed: %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Parse index and provider info failed: %" LOG_PUBLIC "d", ret)
 
-    auto proxy = GetProviderProxy(providerInfo, ret);
-    if (proxy == nullptr) {
-        return ret;
-    }
+    auto proxy = GetProviderProxy(providerInfo, ret);  
+    HKS_IF_NULL_RETURN(proxy, ret)
     
     std::string handle = ""; 
-    (void)proxy->OpenRemoteHandle(newIndex, paramSet, handle, ret);
+    auto ipccode = proxy->OpenRemoteHandle(newIndex, paramSet, handle, ret);
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, ipccode, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Create remote handle failed: %" LOG_PUBLIC "d", ret);
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
+            "Create remote handle failed: %" LOG_PUBLIC "d", ret)
 
-    if (!indexToHandle.Insert(newIndex, handle)) {
-        HKS_LOG_E("Cache remote handle failed");
-        return HKS_ERROR_HANDLE_INSERT_ERROR;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(!indexToHandle_.Insert(newIndex, handle),
+        HKS_ERROR_HANDLE_INSERT_ERROR, "Cache remote handle failed")
     
-    if (!newIndexToProviderInfo.Insert(newIndex, providerInfo)) {
-        indexToHandle.Erase(newIndex); 
+    if (!newIndexToProviderInfo_.Insert(newIndex, providerInfo)) {
+        indexToHandle_.Erase(newIndex); 
         HKS_LOG_E("Cache provider info failed");
         return HKS_ERROR_HANDLE_INSERT_ERROR;
     }
-
-    HKS_LOG_I("Create remote handle success, newIndex: %" LOG_PUBLIC "s, handle: %" LOG_PUBLIC "s", 
-            newIndex.c_str(), handle.c_str());
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::CloseRemoteHandle(const std::string &index, [[maybe_unused]] const CppParamSet &paramSet)
+int32_t HksRemoteHandleManager::CloseRemoteHandle(const std::string &index, const CppParamSet &paramSet)
 {
     ProviderInfo providerInfo;
     std::string newIndex;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     auto proxy = GetProviderProxy(providerInfo, ret);
-    if (proxy == nullptr) {
-        return ret;
-    }
+    HKS_IF_NULL_RETURN(proxy, ret)
 
-    (void)proxy->CloseRemoteHandle(handle, paramSet, ret);
+    auto ipccode = proxy->CloseRemoteHandle(handle, paramSet, ret);
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, ipccode, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Close remote handle failed: %" LOG_PUBLIC "d", ret);
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
+            "Close remote handle failed: %" LOG_PUBLIC "d", ret)
 
-    indexToHandle.Erase(newIndex);
-    newIndexToProviderInfo.Erase(newIndex);
-
-    HKS_LOG_I("Close remote handle success, newIndex: %" LOG_PUBLIC "s", newIndex.c_str());
+    indexToHandle_.Erase(newIndex);
+    newIndexToProviderInfo_.Erase(newIndex);
     return HKS_SUCCESS;
 }
 
 int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, int32_t& authState, uint32_t& retryCnt)
+    const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t& retryCnt)
 {
     ProviderInfo providerInfo;
     std::string newIndex;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     auto proxy = GetProviderProxy(providerInfo, ret);
-    if (proxy == nullptr) {
-        return ret;
-    }
+    HKS_IF_NULL_RETURN(proxy, ret)
     
-    (void)proxy->AuthUkeyPin(handle, paramSet, ret, authState, retryCnt);
+    auto ipccode = proxy->AuthUkeyPin(handle, paramSet, ret, authState, retryCnt);
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, ipccode, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Remote verify pin failed: %" LOG_PUBLIC "d", ret);
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
-    }
-
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
+            "Remote verify pin failed: %" LOG_PUBLIC "d", ret)
     return HKS_SUCCESS;
 }
 
@@ -306,22 +275,16 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     std::string newIndex;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     auto proxy = GetProviderProxy(providerInfo, ret);
-    if (proxy == nullptr) {
-        return ret;
-    }
+    HKS_IF_NULL_RETURN(proxy, ret)
 
-    (void)proxy->GetUkeyPinAuthState(handle, paramSet, state, ret);
+    auto ipccode = proxy->GetUkeyPinAuthState(handle, paramSet, state, ret);
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, ipccode, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Remote verify pin status failed: %" LOG_PUBLIC "d", ret);
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
-    }
-
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
+            "Remote verify pin status failed: %" LOG_PUBLIC "d", ret)
     return HKS_SUCCESS;
 }
 
@@ -331,22 +294,16 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const std::string &index, c
     std::string newIndex;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     auto proxy = GetProviderProxy(providerInfo, ret);
-    if (proxy == nullptr) {
-        return ret;
-    }
+    HKS_IF_NULL_RETURN(proxy, ret)
 
-    (void)proxy->ClearUkeyPinAuthState(newIndex, paramSet, ret);
+    auto ipccode = proxy->ClearUkeyPinAuthState(newIndex, paramSet, ret);
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, ipccode, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Remote clear pin status failed: %" "d", ret);
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
-    }
-
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
+            "Remote clear pin status failed: %" "d", ret)
     return HKS_SUCCESS;
 }
 
@@ -357,23 +314,16 @@ int32_t HksRemoteHandleManager::RemoteHandleSign(const std::string &index, const
     std::string newIndex;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     auto proxy = GetProviderProxy(providerInfo, ret);
-    if (proxy == nullptr) {
-        return ret;
-    }
+    HKS_IF_NULL_RETURN(proxy, ret)
 
-    (void)proxy->Sign(handle, paramSet, inData, outData, ret);
-    ret = HKS_SUCCESS;
+    auto ipccode = proxy->Sign(handle, paramSet, inData, outData, ret);
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, ipccode, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Remote sign failed: %" LOG_PUBLIC "d", ret);
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
-    }
-
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
+            "Remote sign failed: %" LOG_PUBLIC "d", ret)
     return HKS_SUCCESS;
 }
 
@@ -384,51 +334,39 @@ int32_t HksRemoteHandleManager::RemoteHandleVerify(const std::string &index, con
     std::string newIndex;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     auto proxy = GetProviderProxy(providerInfo, ret);
-    if (proxy == nullptr) {
-        return ret;
-    }
+    HKS_IF_NULL_RETURN(proxy, ret)
 
-    (void)proxy->Verify(handle, paramSet, plainText, signature, ret);
+    auto ipccode = proxy->Verify(handle, paramSet, plainText, signature, ret);
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, ipccode, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Remote verify failed: %" LOG_PUBLIC "d", ret);
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
-    }
-
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
+            "Remote verify failed: %" LOG_PUBLIC "d", ret)
     return HKS_SUCCESS;
 }
 
 int32_t HksRemoteHandleManager::FindRemoteCertificate(const std::string &index,
-    const CppParamSet &paramSet, std::string& cert)
+    const CppParamSet &paramSet, std::string &cert)
 {
     ProviderInfo providerInfo;
     std::string newIndex;
     int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     auto proxy = GetProviderProxy(providerInfo, ret);
-    if (proxy == nullptr) {
-        return ret;
-    }
+    HKS_IF_NULL_RETURN(proxy, ret)
 
-    (void)proxy->ExportCertificate(newIndex, paramSet, cert, ret);
+    auto ipccode = proxy->ExportCertificate(newIndex, paramSet, cert, ret);
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, ipccode, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Remote ExportCertificate failed: %" LOG_PUBLIC "d", ret);
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
-    }
-
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
+            "Remote ExportCertificate failed: %" LOG_PUBLIC "d", ret)
     return HKS_SUCCESS;
 }
 int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &processInfo,
-        const std::string &providerName, const CppParamSet &paramSet, std::string& certVec)
+        const std::string &providerName, const CppParamSet &paramSet, std::string &certVec)
 {
     auto providerLifeManager = HksProviderLifeCycleManager::GetInstanceWrapper();
     if (providerLifeManager == nullptr) {
@@ -437,57 +375,45 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
     }
     ProviderInfo providerInfo;
     int32_t ret = HksGetProviderInfo(processInfo, providerName, paramSet, providerInfo);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
     auto proxy = GetProviderProxy(providerInfo, ret);
-    if (proxy == nullptr) {
-        return ret;
-    }
+    HKS_IF_NULL_RETURN(proxy, ret)
 
-    (void)proxy->ExportProviderCertificates(paramSet, certVec, ret);
+    auto ipccode = proxy->ExportProviderCertificates(paramSet, certVec, ret);
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, ipccode, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Remote ExportProviderCertificates failed: %" LOG_PUBLIC "d", ret);
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
-    }
-
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
+            "Remote ExportProviderCertificates failed: %" LOG_PUBLIC "d", ret)
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::GetRemoteProperty(const std::string& index, const std::string& propertyId,
-        const CppParamSet& paramSet, CppParamSet& outParams)
+int32_t HksRemoteHandleManager::GetRemoteProperty(const std::string &index, const std::string &propertyId,
+        const CppParamSet &paramSet, CppParamSet &outParams)
 {
     ProviderInfo providerInfo;
     std::string newIndex;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     auto proxy = GetProviderProxy(providerInfo, ret);
-    if (proxy == nullptr) {
-        return ret;
-    }
+    HKS_IF_NULL_RETURN(proxy, ret)
 
-    (void)proxy->GetProperty(handle, propertyId, paramSet, outParams, ret);
+    auto ipccode = proxy->GetProperty(handle, propertyId, paramSet, outParams, ret);
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, ipccode, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Remote GetProperty failed: %" LOG_PUBLIC "d", ret);
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
-    }
-
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
+            "Remote GetProperty failed: %" LOG_PUBLIC "d", ret)
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::ClearRemoteHandle()
+int32_t HksRemoteHandleManager::ClearRemoteHandleMap()
 {
-    indexToHandle.Clear();
-    newIndexToProviderInfo.Clear();
+    indexToHandle_.Clear();
+    newIndexToProviderInfo_.Clear();
     return HKS_SUCCESS;
 }
 
-}  // namespace Huks
-}  // namespace Security
-}  // namespace OHOS
+}
+}
+}
