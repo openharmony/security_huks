@@ -316,8 +316,8 @@ bool BuildPropertyData(const napi_env &env, const std::string& propertyId, const
             LOGE("Create js NativeValue object failed");
             return false;
         }
-        if (!MakeJsNativeCppParamSet(env, param.params, nativeCppParamSet)) {
-            LOGE("Make js CppParamSet failed");
+        nativeCppParamSet = GenerateHksParamArray(env, *param.params.GetParamSet());
+        if (nativeCppParamSet == nullptr) {
             return false;
         }
     }
@@ -742,7 +742,7 @@ void JsHksCryptoExtAbility::HksCertInfoToString(std::vector<HksCertInfo> &certIn
             break;
         }
 
-        if (jsonObj.AppendElement(certJsonObj)) {
+        if (!jsonObj.AppendElement(certJsonObj)) {
             LOGE("AppendElement error");
         }
     }
@@ -1157,8 +1157,8 @@ int JsHksCryptoExtAbility::ExportProviderCertificates(const CppParamSet& params,
             LOGE("Create js NativeValue object failed");
             return false;
         }
-        if (!MakeJsNativeCppParamSet(env, params, nativeCppParamSet)) {
-            LOGE("Make js CppParamSet failed");
+        nativeCppParamSet = GenerateHksParamArray(env, *params.GetParamSet());
+        if (nativeCppParamSet == nullptr) {
             return false;
         }
         argv[ARGC_ZERO] = nativeCppParamSet;
