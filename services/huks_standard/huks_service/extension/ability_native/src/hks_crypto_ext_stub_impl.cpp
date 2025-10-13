@@ -69,9 +69,7 @@ ErrCode HksCryptoExtStubImpl::GetUkeyPinAuthState(
         return ERR_OK;
     }
     state = 0; // 设置默认状态
-    int32_t authState = 0;
-    extension_->GetUkeyPinAuthState(handle, params, authState, errcode);
-    return state = static_cast<uint32_t>(authState);
+    return extension_->GetUkeyPinAuthState(handle, params, state, errcode);
 }
 
 ErrCode HksCryptoExtStubImpl::Sign(

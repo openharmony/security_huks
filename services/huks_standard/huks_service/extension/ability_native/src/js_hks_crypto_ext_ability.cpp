@@ -182,6 +182,33 @@ bool BuildHandleInfoParam(const napi_env &env, const HandleInfoParam &param,
             LOGE("Create js NativeValue object failed");
             return false;
         }
+        nativeCppParamSet = GenerateHksParamArray(env, *param.params.GetParamSet());
+        if (nativeCppParamSet == nullptr) {
+            return false;
+        }
+    }
+    argv[ARGC_ZERO] = nativeHandle;
+    argv[ARGC_ONE] = nativeCppParamSet;
+    argc = ARGC_TWO;
+    return true;
+}
+
+bool BuildHandleInfoParamWithHuksOption(const napi_env &env, const HandleInfoParam &param,
+    napi_value *argv, size_t &argc)
+{
+    napi_value nativeHandle = nullptr;
+    if (napi_create_string_utf8(env, param.handle.c_str(), param.handle.length(), &nativeHandle) != napi_ok) {
+        LOGE("create string utf8 failed");
+        return false;
+    };
+
+    napi_value nativeCppParamSet = nullptr;
+    if (param.params.GetParamSet()) {
+        napi_create_object(env, &nativeCppParamSet);
+        if (nativeCppParamSet == nullptr) {
+            LOGE("Create js NativeValue object failed");
+            return false;
+        }
         if (!MakeJsNativeCppParamSet(env, param.params, nativeCppParamSet)) {
             LOGE("Make js CppParamSet failed");
             return false;
@@ -194,6 +221,34 @@ bool BuildHandleInfoParam(const napi_env &env, const HandleInfoParam &param,
 }
 
 bool BuildIndexInfoParam(const napi_env &env, const IndexInfoParam &param,
+    napi_value *argv, size_t &argc)
+{
+    napi_value nativeIndex = nullptr;
+
+    if (napi_create_string_utf8(env, param.index.c_str(), param.index.length(), &nativeIndex) != napi_ok) {
+        LOGE("create string utf8 failed");
+        return false;
+    };
+
+    napi_value nativeCppParamSet = nullptr;
+    if (param.params.GetParamSet()) {
+        napi_create_object(env, &nativeCppParamSet);
+        if (nativeCppParamSet == nullptr) {
+            LOGE("Create js NativeValue object failed");
+            return false;
+        }
+        nativeCppParamSet = GenerateHksParamArray(env, *param.params.GetParamSet());
+        if (nativeCppParamSet == nullptr) {
+            return false;
+        }
+    }
+    argv[ARGC_ZERO] = nativeIndex;
+    argv[ARGC_ONE] = nativeCppParamSet;
+    argc = ARGC_TWO;
+    return true;
+}
+
+bool BuildIndexInfoParamWithHuksOption(const napi_env &env, const IndexInfoParam &param,
     napi_value *argv, size_t &argc)
 {
     napi_value nativeIndex = nullptr;
@@ -224,8 +279,8 @@ bool BuildIndexInfoParam(const napi_env &env, const IndexInfoParam &param,
 bool BuildHandleWithInData(const napi_env &env, const HandleInfoParam &param, const std::vector<uint8_t>& inData,
     napi_value *argv, size_t &argc)
 {
-    if (!BuildHandleInfoParam(env, param, argv, argc)) {
-        LOGE("BuildHandleInfoParam failed");
+    if (!BuildHandleInfoParamWithHuksOption(env, param, argv, argc)) {
+        LOGE("BuildHandleInfoParamWithHuksOption failed");
         return false;
     }
 
@@ -443,7 +498,7 @@ napi_status JsHksCryptoExtAbility::GetHksCertInfoValue(napi_env env, napi_value 
     }
 
     napi_value napiIndex = nullptr;
-    napi_get_named_property(env, value, "index", &napiIndex);
+    napi_get_named_property(env, value, "resourceId", &napiIndex);
     if (GetStringValue(env, napiIndex, certInfo.index) != napi_ok) {
         LOGE("GetHksCertInfoValue js value napiIndex failed");
         return napi_generic_failure;
@@ -1145,7 +1200,7 @@ int JsHksCryptoExtAbility::InitSession(const std::string& index, const CppParamS
             index,
             params,
         };
-        return BuildIndexInfoParam(env, param, argv, argc);
+        return BuildIndexInfoParamWithHuksOption(env, param, argv, argc);
     };
 
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
