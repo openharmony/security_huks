@@ -196,9 +196,7 @@ napi_value HuksNapiRegisterProvider(napi_env env, napi_callback_info info)
 
     context->resolve = [](napi_env env, AsyncContext *context) {
         ProviderRegContext *napiContext = static_cast<ProviderRegContext *>(context);
-        HksSuccessReturnResult resultData;
-        SuccessReturnResultInit(resultData);
-        HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+        HksReturnNapiUndefined(env, napiContext->callback, napiContext->deferred, napiContext->result);
     };
 
     napi_value result = CreateAsyncWork(env, info, std::move(context), __func__);
@@ -299,7 +297,6 @@ napi_value HuksNapiAuthUkeyPin(napi_env env, napi_callback_info info)
 
     context->resolve = [](napi_env env, AsyncContext *context) {
         UkeyPinContext *napiContext = static_cast<UkeyPinContext *>(context);
-        HksReturnNapiUndefined(env, napiContext->callback, napiContext->deferred, napiContext->result);
         SetRetryCount(napiContext->retryCount);
         HksReturnNapiUndefined(env, napiContext->callback, napiContext->deferred, napiContext->result);
     };
