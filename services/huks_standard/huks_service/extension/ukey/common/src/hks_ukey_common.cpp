@@ -33,13 +33,30 @@ bool IsHksExtCertInfoSetEmpty(const struct HksExtCertInfoSet& certSet)
     return certSet.certs == nullptr || certSet.count == 0;
 }
 
-
 HksBlob StringToBlob(const std::string &inStr)
 {
-    return {
-        .size = inStr.size(),
-        .data = reinterpret_cast<uint8_t *>(const_cast<char *>(inStr.c_str())),
-    };
+    HksBlob blob = {0, nullptr};
+    
+    if (inStr.empty()) {
+        return blob;
+    }
+    
+    blob.size = inStr.size();
+    blob.data = static_cast<uint8_t*>(HksMalloc(blob.size));
+    
+    if (blob.data != nullptr) {
+        if (memcpy_s(blob.data, blob.size, inStr.data(), blob.size) != EOK) {
+            HKS_LOG_E("memcpy_s failed in StringToBlob");
+            HksFree(blob.data);
+            blob.data = nullptr;
+            blob.size = 0;
+        }
+    } else {
+        HKS_LOG_E("Failed to allocate memory for HksBlob, size: %zu", blob.size);
+        blob.size = 0;
+    }
+    
+    return blob;
 }
 
 std::string BlobToString(const HksBlob &strBlob)
