@@ -33,6 +33,7 @@ bool IsHksExtCertInfoSetEmpty(const struct HksExtCertInfoSet& certSet)
     return certSet.certs == nullptr || certSet.count == 0;
 }
 
+//
 HksBlob StringToBlob(const std::string &inStr)
 {
     HksBlob blob = {0, nullptr};
@@ -52,7 +53,7 @@ HksBlob StringToBlob(const std::string &inStr)
             blob.size = 0;
         }
     } else {
-        HKS_LOG_E("Failed to allocate memory for HksBlob, size: %zu", blob.size);
+        HKS_LOG_E("Failed to allocate memory for HksBlob");
         blob.size = 0;
     }
     
