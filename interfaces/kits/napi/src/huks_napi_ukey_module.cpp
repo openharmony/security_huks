@@ -53,8 +53,8 @@ static napi_value HuksExternalCryptoRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_PROPERTY("HUKS_TAG_REMOTE_ABILITY_SN", CreateU32(env, HKS_TAG_REMOTE_ABILITY_SN)),
 
 
-        DECLARE_NAPI_PROPERTY("HuksExternalTagType", CreateHuksExternalTagType(env)),
-        DECLARE_NAPI_PROPERTY("HuksExternalTag", CreateHuksExternalTag(env)),
+        DECLARE_NAPI_PROPERTY("HuksExternalCryptoTagType", CreateHuksExternalTagType(env)),
+        DECLARE_NAPI_PROPERTY("HuksExternalCryptoTag", CreateHuksExternalTag(env)),
         DECLARE_NAPI_FUNCTION("registerProvider", HuksNapiRegisterProvider),
         DECLARE_NAPI_FUNCTION("unregisterProvider", HuksNapiUnregisterProvider),
         DECLARE_NAPI_FUNCTION("authUkeyPin", HuksNapiAuthUkeyPin),
