@@ -239,7 +239,7 @@ napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
             context->paramSetIn->paramSetSize = 0;
             return napi_ok;
         }
-        result = ParseGetHksParamSet(env, argv[1], context->paramSetIn);
+        result = ParseHksCryptoExternalParams(env, argv[1], context->paramSetIn);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure, 
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get paramSet");
 
