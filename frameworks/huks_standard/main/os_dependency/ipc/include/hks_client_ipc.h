@@ -54,6 +54,9 @@ int32_t HksClientUkeySign(const struct HksBlob *index, const struct HksParamSet 
 int32_t HksClientUkeyVerify(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
     const struct HksBlob *srcData, struct HksBlob *signatureOut);
 
+int32_t HksClientGetRemoteProperty(const struct HksBlob *resourceId, const struct HksBlob *propertyId,
+    const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut);
+
 int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
     struct HksParamSet *paramSetOut);
 

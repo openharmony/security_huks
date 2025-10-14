@@ -134,6 +134,24 @@ int32_t HksUKeyGeneralPack(const struct HksBlob *blob, const struct HksParamSet 
     return HKS_SUCCESS;
 }
 
+int32_t HksUkeyBlob2ParamSetPack(const struct HksBlob *oldKeyAlias, const struct HksBlob *newKeyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *destData)
+{
+    uint32_t offset = 0;
+    int32_t ret;
+    do {
+        ret = CopyBlobToBuffer(oldKeyAlias, destData, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy oldKeyAlias failed");
+
+        ret = CopyBlobToBuffer(newKeyAlias, destData, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy newKeyAlias failed");
+
+        ret = CopyParamSetToBuffer(paramSet, destData, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy paramSet failed");
+    } while (0);
+    return ret;
+}
+
 int32_t HksGenerateKeyPack(struct HksBlob *destData, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, const struct HksBlob *keyOut)
 {
@@ -606,6 +624,20 @@ int32_t HksCertificatesUnpackFromService(const struct HksBlob *srcBlob, struct H
     destData->count = cnt;
     destData->certs = certs;
     return HKS_SUCCESS;
+}
+
+int32_t HksRemotePropertyUnpackFromService(const struct HksBlob *srcBlob, struct HksParamSet **propertySetOut)
+{
+    int ret;
+    uint32_t offset = 0;
+    struct HksParamSet *paramSetView = NULL;
+    ret = GetParamSetFromBuffer(&paramSetView, srcBlob, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetParamSetFromBuffer fail")
+
+    ret = HksGetParamSet(paramSetView, paramSetView->paramSetSize, propertySetOut);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksGetParamSet fail")
+
+    return ret;
 }
 
 int32_t HksListAliasesPack(const struct HksParamSet *srcParamSet, struct HksBlob *destData)

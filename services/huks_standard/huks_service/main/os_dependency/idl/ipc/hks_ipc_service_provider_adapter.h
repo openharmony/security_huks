@@ -42,6 +42,10 @@ int32_t HksIpcGetUkeyPinAuthStateAdapter(const struct HksProcessInfo *processInf
 
 int32_t HksIpcClearPinStatusAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *index);
 
+int32_t HksIpcServiceOnGetRemotePropertyAdapter(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *resourceId, const struct HksBlob *propertyId,
+    const struct HksParamSet *paramSet, const uint8_t *remoteObject);
+
 #ifdef __cplusplus
 }
 #endif

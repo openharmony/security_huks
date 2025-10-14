@@ -98,6 +98,7 @@ static int32_t BuildParamSetNotNull(const struct HksParamSet *paramSetIn, struct
 static inline int32_t HksAllocInBlob(struct HksBlob *inBlob,
     const struct HksBlob *blob, const struct HksParamSet *paramSet)
 {
+    // TODO: 证书默认为空
     if (inBlob == NULL || blob == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
@@ -491,6 +492,46 @@ int32_t HksClientCloseRemoteHandle(const struct HksBlob *resourceId, const struc
 
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
+    return ret;
+}
+
+int32_t HksClientGetRemoteProperty(const struct HksBlob *resourceId, const struct HksBlob *propertyId,
+    const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut)
+{
+    if (propertySetOut == NULL || *propertySetOut != NULL) { 
+        HKS_LOG_E("propertySetOut must be NULL pointer");
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int32_t ret;
+    struct HksBlob inBlob = { 0, NULL };
+    struct HksBlob outBlob = { 0, NULL };
+    struct HksParamSet *newParamSet = NULL;
+
+    do {
+        ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksAllocInBlob(&inBlob, resourceId, NULL);
+        HKS_IF_NULL_LOGE_BREAK(inBlob.data, "malloc inBlob fail")
+
+        ret = HksCheckIpcRenameKeyAlias(resourceId, newParamSet, propertyId);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check remote property fail")
+
+        ret = HksUkeyBlob2ParamSetPack(resourceId, propertyId, newParamSet, &inBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "pack remote property fail")
+
+        ret = HksSendRequest(HKS_MSG_EXT_GET_REMOTE_PROPERTY, &inBlob, &outBlob, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "send request fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksRemotePropertyUnpackFromService(&outBlob, propertySetOut);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRemotePropertyUnpackFromService fail")
+
+    } while (0);
+
+    HksFreeParamSet(&newParamSet);
+    HKS_FREE_BLOB(inBlob);
+    HKS_FREE_BLOB(outBlob);
     return ret;
 }
 

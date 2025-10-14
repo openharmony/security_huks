@@ -21,6 +21,8 @@
 #include <iremote_stub.h>
 #include <memory>
 
+#include "huks_service_ipc_interface_code.h"
+
 namespace OHOS {
 namespace Security {
 namespace Hks {
@@ -55,6 +57,39 @@ public:
 private:
     static BrokerDelegator<HksProxy> delegator_;
 };
+
+class IHksExtService : public IRemoteBroker {
+public:
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.security.hks.service");
+    virtual void SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &sendData, uint32_t sendSize, uint32_t msgCode) = 0;
+};
+
+class HksExtStub : public IRemoteStub<IHksExtService> {
+public:
+    void SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &sendData, uint32_t sendSize, uint32_t msgCode) override;
+    std::tuple<uint32_t, std::unique_ptr<uint8_t[]>, uint32_t, uint32_t> WaitForAsyncReply(int timeout);
+    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+private:
+    int ProcessExtGetRemotePropertyReply(MessageParcel& data);
+    uint32_t mErrCode = 0;
+    uint32_t mSize = 0;
+    uint32_t mMsgCode = 0;
+    std::unique_ptr<uint8_t[]> mAsyncReply {};
+    std::atomic_bool received = false;
+    std::mutex mMutex;
+    std::condition_variable mCv;
+};
+
+class HksExtProxy : public IRemoteProxy<IHksExtService> {
+public:
+    explicit HksExtProxy(const sptr<IRemoteObject> &impl);
+    ~HksExtProxy() = default;
+    void SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &sendData, uint32_t sendSize, uint32_t msgCode) override;
+private:
+    static BrokerDelegator<HksExtProxy> delegator_;
+};
+
+
 } // namespace Hks
 } // namespace Security
 } // namespace OHOS

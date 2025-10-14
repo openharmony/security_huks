@@ -128,6 +128,42 @@ static int32_t HksSendAnonAttestRequestAndWaitAsyncReply(MessageParcel &data, co
 #endif
 }
 
+static int32_t HksExtSendAsyncMessage(MessageParcel &data, const struct HksParamSet *paramSet,
+    sptr<IRemoteObject> hksProxy, sptr<Security::Hks::HksExtStub> hksCallback, struct HksBlob *outBlob, uint32_t msgCode)
+{
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(outBlob), HKS_ERROR_INVALID_ARGUMENT, "invalid outBlob");
+
+    MessageParcel reply{};
+    MessageOption option = MessageOption::TF_SYNC;
+    int ret = hksProxy->SendRequest(msgCode, data, reply, option);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_IPC_MSG_FAIL, "hksProxy->SendRequest failed %" LOG_PUBLIC "d", ret);
+    
+    int timeout = 2; // seconds
+    struct HksParam *timeoutParam = nullptr;
+    if (HksGetParam(paramSet, HKS_EXT_CRYPTO_TAG_TIMEOUT, &timeoutParam) == HKS_SUCCESS) {
+        if (GetTagType((enum HksTag)timeoutParam->tag) == HKS_TAG_TYPE_UINT && timeoutParam->uint32Param > 0) {
+            timeout = timeoutParam->uint32Param;
+        }
+    }
+    
+    auto [errCode, receivedData, receivedSize, receivedCode] = hksCallback->WaitForAsyncReply(timeout);
+    if (errCode != HKS_SUCCESS || receivedData == nullptr || receivedSize == 0 || receivedCode != msgCode) {
+        HKS_LOG_E("errCode %" LOG_PUBLIC "u fail or not expand msg or receivedData empty or size %" LOG_PUBLIC "u 0", errCode, receivedSize);
+        return HUKS_ERR_CODE_EXTERNAL_ERROR;
+    }
+    
+    HKS_IF_TRUE_LOGE_RETURN(outBlob->size < receivedSize, HKS_ERROR_BUFFER_TOO_SMALL,
+        "outBlob too small %" LOG_PUBLIC "u < %" LOG_PUBLIC "u", outBlob->size, receivedSize);
+
+    HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(outBlob->data, outBlob->size, receivedData.get(), receivedSize),
+        HKS_ERROR_INSUFFICIENT_MEMORY, "memcpy_s failed destMax %" LOG_PUBLIC "u count %" LOG_PUBLIC "u",
+        outBlob->size, receivedSize);
+
+    outBlob->size = receivedSize;
+
+    return HKS_SUCCESS;
+}
+
 int32_t HksSendRequest(enum HksIpcInterfaceCode type, const struct HksBlob *inBlob,
     struct HksBlob *outBlob, const struct HksParamSet *paramSet)
 {
@@ -181,6 +217,15 @@ int32_t HksSendRequest(enum HksIpcInterfaceCode type, const struct HksBlob *inBl
             "WriteRemoteObject hksCallback failed %" LOG_PUBLIC "d", result)
         return HksSendAnonAttestRequestAndWaitAsyncReply(data, paramSet, hksProxy, hksCallback, outBlob);
         // If the mode is non-anonymous attest, we write a HksStub instance here, then go back and process as normal.
+    }
+    if(type == HKS_MSG_EXT_GET_REMOTE_PROPERTY) {
+        sptr<Security::Hks::HksExtStub> hksExtCallback = new (std::nothrow) Security::Hks::HksExtStub();
+        HKS_IF_NULL_LOGE_RETURN(hksExtCallback, HKS_ERROR_INSUFFICIENT_MEMORY, "new HksExtStub failed")
+        bool result = data.WriteRemoteObject(hksExtCallback);
+        HKS_IF_NOT_TRUE_LOGE_RETURN(result, HKS_ERROR_IPC_MSG_FAIL,
+            "WriteRemoteObject hksExtCallback failed %" LOG_PUBLIC "d", result)
+        return HksExtSendAsyncMessage(data, paramSet, hksProxy, hksExtCallback, outBlob, HKS_MSG_EXT_GET_REMOTE_PROPERTY);
+
     }
 
     int error = hksProxy->SendRequest(type, data, reply, option);

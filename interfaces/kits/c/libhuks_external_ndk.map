@@ -13,14 +13,11 @@
 
 1.0 {
   global:
-  OH_Huks_InitParamSet;
-    OH_Huks_AddParams;
-    OH_Huks_BuildParamSet;
-    OH_Huks_FreeParamSet;
-    OH_Huks_CopyParamSet;
-    OH_Huks_GetParam;
-    OH_Huks_FreshParamSet;
-    OH_Huks_FreeCertSet;
+    OH_Huks_InitExtParamSet;
+    OH_Huks_AddExtParams;
+    OH_Huks_BuildExtParamSet;
+    OH_Huks_FreeExtParamSet;
+    OH_Huks_GetExtParam;
 
     OH_Huks_OpenRemoteHandle;
     OH_Huks_CloseRemoteHandle;
@@ -28,7 +25,7 @@
     OH_Huks_GetUkeyPinAuthState;
     OH_Huks_RegisterProvider;
     OH_Huks_UnregisterProvider;
-    OH_Huks_ExportProviderCertificates;
-    OH_Huks_ExportCertificate;
+
+    OH_Huks_GetRemoteProperty;
   local: *;
 };
