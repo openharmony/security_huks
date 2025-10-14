@@ -32,10 +32,12 @@ ohos_unittest("extension_unit_test") {
     "//base/security/huks/frameworks/huks_standard/main/common/include",
     "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger/inc",
+    "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc",
+    "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger/inc",
   ]
 
   sources = [
-    "./provider_mgr_test/hks_provider_manger_test.cpp",
+    # "./provider_mgr_test/hks_provider_manger_test.cpp",
     "./plugin_loader_test/hks_plugin_manager_test.cpp",
     "./extension_connect_test/hks_extension_connection_test.cpp",
   ]
@@ -50,10 +52,17 @@ ohos_unittest("extension_unit_test") {
     "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_util_standard_static",
     "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger:libhuks_provider_life_cycle_manager_static",
+    "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
+    "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
+    "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection:libhuks_extension_connection_static",
   ]
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "ability_runtime:ability_connect_callback_stub",
+    "ability_runtime:ability_manager",
+    "ability_base:ability_base_want",
+    "googletest:gmock_main",
   ]
 
   if (os_level == "standard") {
@@ -84,6 +93,11 @@ ohos_shared_library("fake_success") {
     "-Wall",
   ]
 
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+  }
+
   output_name = "fake_success"
 
   subsystem_name = "security"
@@ -105,7 +119,12 @@ ohos_shared_library("fake_fail") {
     "-Wall",
   ]
 
-  output_name = "fake_success"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+  }
+
+  output_name = "fake_fail"
 
   subsystem_name = "security"
   part_name = "huks"

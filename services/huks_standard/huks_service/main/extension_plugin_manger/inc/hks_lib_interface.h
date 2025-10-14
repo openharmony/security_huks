@@ -25,6 +25,7 @@
 #include "hks_template.h"
 #include "hks_error_code.h"
 #include "hks_function_types.h"
+#include "safe_map.h"
 
 namespace OHOS {
 namespace Security {
@@ -32,16 +33,16 @@ namespace Huks {
 
 class HuksLibInterface : private OHOS::DelayedSingleton<HuksLibInterface> {
 public:
-    std::unordered_map<PluginMethodEnum, void*> pluginProviderMap;
+    OHOS::SafeMap<PluginMethodEnum, void*> m_pluginProviderMap;
 
-    void initProviderMap(std::unordered_map<PluginMethodEnum, void*>& pluginProviderMap);
+    void initProviderMap(OHOS::SafeMap<PluginMethodEnum, void*> &pluginProviderMap);
     static std::shared_ptr<HuksLibInterface> GetInstanceWrapper();
     static void ReleaseInstance();
     int32_t OnRegistProvider(const HksProcessInfo &processInfo,
         const std::string &providerName, const CppParamSet &paramSet);
     int32_t OnUnRegistProvider(const HksProcessInfo &processInfo,
         const std::string &providerName, const CppParamSet &paramSet);
-    int32_t OnCreateRemoteIndex(const std::string &providerName, const CppParamSet& paramSet, std::string &outIndex);
+    int32_t OnCreateRemoteIndex(const std::string &providerName, const CppParamSet &paramSet, std::string &outIndex);
     int32_t OnCreateRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet, std::string &handle);
     //int32_t OnFindRemoteKeyHandle(const std::string &index, std::string &keyIndex);
@@ -49,7 +50,7 @@ public:
         const CppParamSet &paramSet);
     // int32_t OnSigned(const std::string &index, const CppParamSet& paramSet, std::vector<uint8_t> &outData);
     int32_t OnAuthUkeyPin(const HksProcessInfo &processInfo,
-        const std::string &index, const CppParamSet &paramSet, int32_t& authState, uint32_t& retryCnt);
+        const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t &retryCnt);
     int32_t OnGetVerifyPinStatus(const HksProcessInfo &processInfo,
         const std::string &index, const CppParamSet &paramSet, int32_t &state);
     int32_t OnClearUkeyPinAuthStatus(const HksProcessInfo &processInfo, const std::string &index);
@@ -60,11 +61,11 @@ public:
         const std::string &index, const CppParamSet &paramSet, std::string &certsJson);
     int32_t OnExportProviderAllCertificates(const HksProcessInfo &processInfo,
         const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr);
-    int32_t OnInitSession (const HksProcessInfo &processInfo, const std::string &index,
+    int32_t OnInitSession(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet, uint32_t &handle);
-    int32_t OnUpdateSession (const HksProcessInfo &processInfo, const uint32_t &handle,
+    int32_t OnUpdateSession(const HksProcessInfo &processInfo, const uint32_t &handle,
         const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
-    int32_t OnFinishSession (const HksProcessInfo &processInfo, const uint32_t &handle,
+    int32_t OnFinishSession(const HksProcessInfo &processInfo, const uint32_t &handle,
         const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
 
 private:
