@@ -23,60 +23,34 @@
 
 namespace OHOS::Security::Huks {
 
-bool IsHksBlobEmpty(const struct HksBlob& blob) {
+bool IsHksBlobEmpty(const struct HksBlob& blob)
+{
     return blob.data == nullptr || blob.size == 0;
 }
 
-bool IsHksExtCertInfoSetEmpty(const struct HksExtCertInfoSet& certSet) {
+bool IsHksExtCertInfoSetEmpty(const struct HksExtCertInfoSet& certSet)
+{
     return certSet.certs == nullptr || certSet.count == 0;
 }
 
 
-static int32_t HksBlobToBase64(const struct HksBlob& blob, std::string& base64Str) {
-    if (IsHksBlobEmpty(blob)) {
-        base64Str = "";
-        return HKS_SUCCESS;
-    }
-    
-    std::vector<uint8_t> vec(blob.data, blob.data + blob.size);
-    auto result = U8Vec2Base64Str(vec);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(result.first, result.first, 
-        "Convert blob to base64 failed, ret: %" LOG_PUBLIC "d", result.first);
-    
-    base64Str = std::move(result.second);
-    return HKS_SUCCESS;
+HksBlob StringToBlob(const std::string &inStr)
+{
+    return {
+        .size = inStr.size(),
+        .data = reinterpret_cast<uint8_t *>(const_cast<char *>(inStr.c_str())),
+    };
 }
 
-static int32_t Base64ToHksBlob(const std::string& base64Str, struct HksBlob& blob) {
-    
-    if (base64Str.empty()) {
-        return HKS_SUCCESS;
-    }
-    
-    auto result = Base64Str2U8Vec(base64Str);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(result.first, result.first, 
-        "Convert base64 to blob failed, ret: %" LOG_PUBLIC "d", result.first);
-    
-    blob.size = result.second.size();
-    if (blob.size > 0) {
-        blob.data = (uint8_t*)HksMalloc(blob.size);
-        HKS_IF_NULL_LOGE_RETURN(blob.data, HKS_ERROR_MALLOC_FAIL, 
-            "Malloc for blob data failed, size: %" LOG_PUBLIC "u", blob.size);
-        
-        int32_t ret = memcpy_s(blob.data, blob.size, result.second.data(), blob.size);
-        if (ret != EOK) {
-            HKS_LOG_E("memcpy_s for blob data failed, ret: %" LOG_PUBLIC "d", ret);
-            free(blob.data);
-            blob.data = nullptr;
-            blob.size = 0;
-            return HKS_ERROR_INVALID_OPERATION;
-        }
-    }
-    
-    return HKS_SUCCESS;
+std::string BlobToString(const HksBlob &strBlob)
+{
+    std::string ret("");
+    HKS_IF_TRUE_RETURN(strBlob.size == 0 || strBlob.data == nullptr, ret)
+    return std::string(reinterpret_cast<const char*>(strBlob.data), strBlob.size);
 }
 
-int32_t StringToCertInfo(const std::string &certInfoJson, struct HksExtCertInfo& certInfo) {
+int32_t StringToCertInfo(const std::string &certInfoJson, struct HksExtCertInfo& certInfo)
+{
     
     HKS_IF_TRUE_LOGE_RETURN(certInfoJson.empty(), HKS_ERROR_INVALID_ARGUMENT, 
         "Input json string is empty");
@@ -106,9 +80,7 @@ int32_t StringToCertInfo(const std::string &certInfoJson, struct HksExtCertInfo&
         HKS_IF_NOT_SUCC_LOGE_RETURN(result.first, result.first, 
             "Get index string failed, ret: %" LOG_PUBLIC "d", result.first);
         
-        int32_t ret = Base64ToHksBlob(result.second, certInfo.index);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, 
-            "Convert index base64 to blob failed, ret: %" LOG_PUBLIC "d", ret);
+        certInfo.index = StringToBlob(result.second);
     }
     
     if (jsonObj.HasKey("cert")) {
@@ -120,15 +92,14 @@ int32_t StringToCertInfo(const std::string &certInfoJson, struct HksExtCertInfo&
         HKS_IF_NOT_SUCC_LOGE_RETURN(result.first, result.first, 
             "Get cert string failed, ret: %" LOG_PUBLIC "d", result.first);
         
-        int32_t ret = Base64ToHksBlob(result.second, certInfo.cert);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, 
-            "Convert cert base64 to blob failed, ret: %" LOG_PUBLIC "d", ret);
+        certInfo.cert = StringToBlob(result.second);
     }
     
     return HKS_SUCCESS;
 }
 
-int32_t CertInfoToString(const struct HksExtCertInfo& certInfo, std::string& jsonStr) {
+int32_t CertInfoToString(const struct HksExtCertInfo& certInfo, std::string& jsonStr)
+{
     jsonStr.clear();
     
     auto jsonObj = CommJsonObject::CreateObject();
@@ -140,20 +111,16 @@ int32_t CertInfoToString(const struct HksExtCertInfo& certInfo, std::string& jso
         return HKS_ERROR_INTERNAL_ERROR;
     }
     
-    std::string indexBase64;
-    int32_t ret = HksBlobToBase64(certInfo.index, indexBase64);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Convert index blob to base64 failed, ret: %" LOG_PUBLIC "d", ret);
+    std::string index = BlobToString(certInfo.index);
     
-    if (!jsonObj.SetValue("index", indexBase64)) {
+    if (!jsonObj.SetValue("index", index)) {
         HKS_LOG_E("Set index value failed");
         return HKS_ERROR_INTERNAL_ERROR;
     }
     
-    std::string certBase64;
-    ret = HksBlobToBase64(certInfo.cert, certBase64);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Convert cert blob to base64 failed, ret: %" LOG_PUBLIC "d", ret);
+    std::string cert = BlobToString(certInfo.cert);
     
-    if (!jsonObj.SetValue("cert", certBase64)) {
+    if (!jsonObj.SetValue("cert", cert)) {
         HKS_LOG_E("Set cert value failed");
         return HKS_ERROR_INTERNAL_ERROR;
     }
@@ -166,7 +133,8 @@ int32_t CertInfoToString(const struct HksExtCertInfo& certInfo, std::string& jso
 }
 
 
-int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCertInfoSet& certSet) {
+int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCertInfoSet& certSet)
+{
     HKS_IF_TRUE_LOGE_RETURN(certJsonArr.empty(), HKS_ERROR_INVALID_ARGUMENT, 
         "Input json array string is empty");
     
@@ -212,11 +180,7 @@ int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCert
             if (indexObj.IsString()) {
                 auto result = indexObj.ToString();
                 if (result.first == HKS_SUCCESS) {
-                    ret = Base64ToHksBlob(result.second, certSet.certs[i].index);
-                    if (ret != HKS_SUCCESS) {
-                        HKS_LOG_E("Convert index base64 to blob failed, ret: %" LOG_PUBLIC "d", ret);
-                        break;
-                    }
+                    certSet.certs[i].index = StringToBlob(result.second);
                 }
             }
         }
@@ -226,11 +190,7 @@ int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCert
             if (certObj.IsString()) {
                 auto result = certObj.ToString();
                 if (result.first == HKS_SUCCESS) {
-                    ret = Base64ToHksBlob(result.second, certSet.certs[i].cert);
-                    if (ret != HKS_SUCCESS) {
-                        HKS_LOG_E("Convert cert base64 to blob failed, ret: %" LOG_PUBLIC "d", ret);
-                        break;
-                    }
+                    certSet.certs[i].cert = StringToBlob(result.second);
                 }
             }
         }
@@ -245,7 +205,8 @@ int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCert
     return HKS_SUCCESS;
 }
 
-int32_t CertInfoSetToJsonArray(const struct HksExtCertInfoSet& certSet, std::string& jsonArrayStr) {
+int32_t CertInfoSetToJsonArray(const struct HksExtCertInfoSet& certSet, std::string& jsonArrayStr)
+{
     HKS_IF_TRUE_LOGE_RETURN(IsHksExtCertInfoSetEmpty(certSet), HKS_ERROR_INVALID_ARGUMENT, 
         "Input cert set is empty");
     
@@ -262,20 +223,16 @@ int32_t CertInfoSetToJsonArray(const struct HksExtCertInfoSet& certSet, std::str
             return HKS_ERROR_INTERNAL_ERROR;
         }
         
-        std::string indexBase64;
-        int32_t ret = HksBlobToBase64(certSet.certs[i].index, indexBase64);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Convert index blob to base64 failed, ret: %" LOG_PUBLIC "d", ret);
+        std::string index = BlobToString(certSet.certs[i].index);
         
-        if (!certInfoObj.SetValue("index", indexBase64)) {
+        if (!certInfoObj.SetValue("index", index)) {
             HKS_LOG_E("Set index value failed for index %u", i);
             return HKS_ERROR_INTERNAL_ERROR;
         }
         
-        std::string certBase64;
-        ret = HksBlobToBase64(certSet.certs[i].cert, certBase64);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Convert cert blob to base64 failed, ret: %" LOG_PUBLIC "d", ret);
+        std::string cert = BlobToString(certSet.certs[i].cert);;
         
-        if (!certInfoObj.SetValue("cert", certBase64)) {
+        if (!certInfoObj.SetValue("cert", cert)) {
             HKS_LOG_E("Set cert value failed for index %u", i);
             return HKS_ERROR_INTERNAL_ERROR;
         }
