@@ -50,7 +50,7 @@ int32_t HksIpcServiceOnSigned(const struct HksProcessInfo *processInfo, std::str
 int32_t HksIpcServiceOnVerify(const struct HksProcessInfo *processInfo, std::string &index, 
     CppParamSet &paramSet, std::string srcData, std::string &signature);
 int32_t HksIpcServiceOnCreateRemoteIndex(const std::string &providerName,
-    const CppParamSet& paramSet, std::string &outIndex);
+    const CppParamSet &paramSet, std::string &outIndex);
 int32_t HksIpcServiceOnAuthUkeyPin(const struct HksProcessInfo *processInfo, const std::string &index,
     CppParamSet &pinData, int32_t &authState, uint32_t &retryCnt);
 int32_t HksIpcServiceOnGetVerifyPinStatus(const struct HksProcessInfo *processInfo, const std::string &index,
