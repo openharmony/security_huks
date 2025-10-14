@@ -47,7 +47,7 @@ HksBlob StringToBlob(const std::string &inStr)
     if (blob.data != nullptr) {
         if (memcpy_s(blob.data, blob.size, inStr.data(), blob.size) != EOK) {
             HKS_LOG_E("memcpy_s failed in StringToBlob");
-            HksFree(blob.data);
+            HKS_FREE(blob.data);
             blob.data = nullptr;
             blob.size = 0;
         }
