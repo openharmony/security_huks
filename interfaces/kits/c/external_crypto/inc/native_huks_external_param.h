@@ -67,7 +67,7 @@ struct OH_Huks_Result OH_Huks_BuildExtParamSet(struct OH_Huks_ExternalCryptoPara
  * @since 9
  * @version 1.0
  */
-void OH_Huks_FreeParamSet(struct OH_Huks_ExternalCryptoParamSet **paramSet);
+void OH_Huks_FreeExtParamSet(struct OH_Huks_ExternalCryptoParamSet **paramSet);
 
 /**
  * @brief Copies a parameter set (deep copy).
@@ -82,7 +82,7 @@ void OH_Huks_FreeParamSet(struct OH_Huks_ExternalCryptoParamSet **paramSet);
  * @since 9
  * @version 1.0
  */
-struct OH_Huks_Result OH_HuksExt_CopyExtParamSet(const struct OH_Huks_ExternalCryptoParamSet *fromParamSet,
+struct OH_Huks_Result OH_Huks_CopyExtParamSet(const struct OH_Huks_ExternalCryptoParamSet *fromParamSet,
     uint32_t fromParamSetSize, struct OH_Huks_ExternalCryptoParamSet **paramSet);
 
 /**
@@ -152,7 +152,7 @@ struct OH_Huks_Result OH_Huks_IsExtParamSetValid(const struct OH_Huks_ExternalCr
  */
 struct OH_Huks_Result OH_Huks_CheckExtParamMatch(const struct OH_Huks_Param *baseParam, const struct OH_Huks_Param *param);
 
-void OH_Huks_FreeCertSet(struct OH_Huks_ExtCertInfoSet *certSet);
+void OH_Huks_FreeExtCertSet(struct OH_Huks_ExtCertInfoSet *certSet);
 
 #ifdef __cplusplus
 }

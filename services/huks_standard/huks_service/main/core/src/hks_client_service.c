@@ -627,6 +627,12 @@ int32_t HksServiceUkeyVerify(const struct HksProcessInfo *processInfo, const str
     return 0;
 }
 
+int32_t HksServiceGetRemoteProperty(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
+    const struct HksBlob *propertyId, const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut)
+{
+    return 0;
+}
+
 int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, struct HksBlob *keyOut)
 {

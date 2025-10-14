@@ -130,9 +130,15 @@ struct HksParam {
 };
 
 /**
- * @brief hks externalCryptoParam
+ * @brief hks param set
  */
-struct HksExternalCryptoParam {
+struct HksParamSet {
+    uint32_t paramSetSize;
+    uint32_t paramsCnt;
+    struct HksParam params[];
+};
+
+struct HksExtParam {
     uint32_t tag;
     union {
         bool boolParam;
@@ -143,14 +149,13 @@ struct HksExternalCryptoParam {
     };
 };
 
-/**
- * @brief hks param set
- */
-struct HksParamSet {
+struct HksExtParamSet {
     uint32_t paramSetSize;
     uint32_t paramsCnt;
-    struct HksParam params[];
+    struct HksExtParam params[];
 };
+
+typedef void (*HksOnFinish)(const struct HksExtParamSet *paramSet);
 
 /**
  * @brief hks certificate chain

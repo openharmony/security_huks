@@ -445,6 +445,34 @@ void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t
     return;
 }
 
+
+void HksIpcServiceGetRemoteProperty(const struct HksBlob *srcData, const uint8_t *context, const uint8_t *remoteObject)
+{
+    int32_t ret;
+    struct HksBlob resourceId = { 0, NULL };
+    struct HksBlob propertyId = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    do {
+        ret  = HksRenameKeyAliasUnpack(srcData, &resourceId, &propertyId, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRenameKeyAliasUnpack Ipc fail")
+
+        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &resourceId, &propertyId, paramSet, remoteObject);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceRenameKeyAliasy fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    // HksSendResponse(context, ret, NULL); 这个地方需要sendResponse?
+
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+}
+
 void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob keyAlias = { 0, NULL };

@@ -28,6 +28,7 @@ if (os_level == "standard") {
     include_dirs = [ 
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough",
       "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger/inc",
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",
     ]
 
     sources = [

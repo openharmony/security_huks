@@ -278,6 +278,25 @@ HKS_API_EXPORT int32_t HksUkeyVerify(const struct HksBlob *resourceId, const str
 #endif
 }
 
+HKS_API_EXPORT int32_t HksGetRemoteProperty(const struct HksBlob *resourceId, const struct HksBlob *propertyId, const struct HksParamSet *paramSetIn, struct HksParamSet *propertySetOut)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter GetRemoteProperty");
+    if ((resourceId == NULL) || (propertyId == NULL) || (paramSetIn == NULL) || (propertySetOut == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientGetRemoteProperty(resourceId, propertyId, paramSetIn, &propertySetOut);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave GetRemoteProperty, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)resourceId;
+    (void)propertyId;
+    (void)paramSetIn;
+    (void)propertySetOut;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+
 HKS_API_EXPORT int32_t HksGetSdkVersion(struct HksBlob *sdkVersion)
 {
     if ((sdkVersion == NULL) || (sdkVersion->data == NULL)) {

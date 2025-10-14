@@ -59,6 +59,11 @@ struct OH_Huks_Result OH_Huks_Sign(const struct OH_Huks_Blob *resourceId, const 
     const struct OH_Huks_Blob *srcData, struct OH_Huks_Blob *signatureOut);
 struct OH_Huks_Result OH_Huks_Verify(const struct OH_Huks_Blob *resourceId, const struct OH_Huks_ExternalCryptoParamSet *paramSet,
     const struct OH_Huks_Blob *srcData, struct OH_Huks_Blob *signatureOut);
+
+typedef void (*OH_Huks_OnFinish)(const struct OH_Huks_ExternalCryptoParamSet *paramSet);
+
+struct OH_Huks_Result OH_Huks_GetRemoteProperty(const struct OH_Huks_Blob *resourceId, const struct OH_Huks_Blob *propertyId, const struct OH_Huks_ExternalCryptoParamSet *paramSetIn, struct OH_Huks_ExternalCryptoParamSet *propertySetOut);
+
 #ifdef __cplusplus
 }
 #endif
