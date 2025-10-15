@@ -109,6 +109,30 @@ int32_t HksProviderLifeCycleManager::GetExtensionProxy(const ProviderInfo &provi
     return HKS_SUCCESS;
 }
 
+int32_t HksProviderLifeCycleManager::GetAllConnectInfoByProviderName(const HksProcessInfo &processInfo, const std::string &providerName,
+    std::vector<std::shared_ptr<HksExtAbilityConnectInfo>> &providerInfos)
+{
+    sptr<ISystemAbilityManager> saMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    HKS_IF_NULL_LOGE_RETURN(saMgr, HKS_ERROR_NULL_POINTER, "GetSystemAbilityManager failed")
+
+    sptr<IRemoteObject> remoteObj = saMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    HKS_IF_NULL_LOGE_RETURN(remoteObj, HKS_ERROR_NULL_POINTER, "GetSystemAbility failed")
+
+    auto bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(remoteObj);
+    HKS_IF_NULL_LOGE_RETURN(bundleMgrProxy, HKS_ERROR_NULL_POINTER, "iface_cast IBundleMgr failed")
+
+    std::string bundleName;
+    auto bundleRet = bundleMgrProxy->GetBundleNameForUid(static_cast<int32_t>(processInfo.uidInt), bundleName);
+    HKS_IF_TRUE_LOGE_RETURN(!bundleRet, HKS_ERROR_BAD_STATE, "GetBundleNameForUid failed")
+
+    m_providerMap.Iterate([&](const ProviderInfo &providerInfo, std::shared_ptr<HksExtAbilityConnectInfo> &connectionInfo) {
+        if (providerInfo.m_bundleName == bundleName && providerInfo.m_providerName == providerName) {
+            providerInfos.push_back(connectionInfo);
+        }
+    });
+    return HKS_SUCCESS;
+}
+
 int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &processInfo,
     const std::string &providerName, [[maybe_unused]] const CppParamSet &paramSet)
 {
@@ -116,23 +140,32 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
     ProviderInfo providerInfo{};
     int32_t ret = HksGetProviderInfo(processInfo, providerName, paramSet, providerInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_NULL_POINTER, "Fail to get provider info")
-    if(!m_providerMap.Find(providerInfo, connectionInfo)) {
-        HKS_LOG_E("OnUnRegisterProvider failed, unfound providerName: %s", providerName.c_str());
+
+    std::vector<std::shared_ptr<HksExtAbilityConnectInfo>> connectionInfos;
+    ret = GetAllConnectInfoByProviderName(processInfo, providerName, connectionInfos);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "Fail to get provider infos")
+    if (connectionInfos.empty()) {
+        HKS_LOG_E("OnUnRegisterProvider failed, unfound provider connections. providerName: %s", providerName.c_str());
         return HKS_ERROR_NOT_EXIST;
     }
-    HKS_IF_TRUE_LOGE_RETURN(connectionInfo == nullptr, HKS_ERROR_NULL_POINTER, "connectionInfo is nullptr")
-    HKS_IF_TRUE_LOGE_RETURN(connectionInfo->m_connection == nullptr, HKS_ERROR_NULL_POINTER, "m_connection is nullptr")
-
-    auto proxy = connectionInfo->m_connection->GetExtConnectProxy();
-    HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NULL_POINTER, "GetExtConnectProxy failed");
-
-    int32_t refCount = proxy->GetSptrRefCount();
-    if (refCount > HKS_PROVIDER_CAN_REMOVE_REF_COUNT) {
-        HKS_LOG_E("OnUnRegisterProvider failed, refCount is not 2, maybe in use. refCount: %" LOG_PUBLIC "d", refCount);
-        return HKS_ERROR_BAD_STATE;
+    for (auto &connectionInfo : connectionInfos) {
+        HKS_IF_TRUE_LOGE_RETURN(connectionInfo == nullptr, HKS_ERROR_NULL_POINTER, "connectionInfo is nullptr")
+        HKS_IF_TRUE_LOGE_RETURN(connectionInfo->m_connection == nullptr, HKS_ERROR_NULL_POINTER, "m_connection is nullptr")
+    
+        auto proxy = connectionInfo->m_connection->GetExtConnectProxy();
+        HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NULL_POINTER, "GetExtConnectProxy failed");
+    
+        int32_t refCount = proxy->GetSptrRefCount();
+        HKS_LOG_I("OnUnRegisterProvider connection want abilityName: %" LOG_PUBLIC "s",
+            connectionInfo->m_want.GetElement().GetAbilityName().c_str());
+        HKS_LOG_I("OnUnRegisterProvider refCount: %" LOG_PUBLIC "d", refCount);
+        if (refCount > HKS_PROVIDER_CAN_REMOVE_REF_COUNT) {
+            HKS_LOG_E("OnUnRegisterProvider failed, refCount is not 2, maybe in use.");
+            return HKS_ERROR_BAD_STATE;
+        }
+        connectionInfo->m_connection->OnDisconnect();
+        m_providerMap.Erase(providerInfo);
     }
-    connectionInfo->m_connection->OnDisconnect();
-    m_providerMap.Erase(providerInfo);
     HKS_LOG_I("OnUnRegisterProvider Success! providerName: %" LOG_PUBLIC "s", providerName.c_str());
     return HKS_SUCCESS;
 }
