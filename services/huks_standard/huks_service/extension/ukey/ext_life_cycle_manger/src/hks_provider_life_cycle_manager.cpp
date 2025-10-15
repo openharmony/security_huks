@@ -133,6 +133,21 @@ int32_t HksProviderLifeCycleManager::GetAllConnectInfoByProviderName(const HksPr
     return HKS_SUCCESS;
 }
 
+int32_t HksProviderLifeCycleManager::GetAllProviderInfosByProviderName(const std::string &providerName,
+    std::vector<ProviderInfo> &providerInfos)
+{
+    m_providerMap.Iterate([&](const ProviderInfo &providerInfo, std::shared_ptr<HksExtAbilityConnectInfo> &connectionInfo) {
+        if (providerInfo.m_providerName == providerName) {
+            ProviderInfo info = providerInfo;
+            info.m_bundleName = providerInfo.m_bundleName;
+            info.m_abilityName = providerInfo.m_abilityName;
+            info.m_providerName = providerInfo.m_providerName;
+            providerInfos.push_back(info);
+        }
+    });
+    return HKS_SUCCESS;
+}
+
 int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &processInfo,
     const std::string &providerName, [[maybe_unused]] const CppParamSet &paramSet)
 {

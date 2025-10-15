@@ -24,10 +24,12 @@
 #include <vector>
 
 #include "hks_cpp_paramset.h"
+#include "hks_error_code.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_json_wrapper.h"
+#include "hks_provider_life_cycle_manager.h"
 #include "hks_template.h"
 #include "hks_ukey_common.h"
 namespace OHOS {
@@ -423,9 +425,12 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
         HKS_LOG_E("Get provider Life manager instance failed");
         return HKS_ERROR_NULL_POINTER;
     }
-    ProviderInfo providerInfo;
-    int32_t ret = HksGetProviderInfo(processInfo, providerName, paramSet, providerInfo);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    std::vector<ProviderInfo> infos;
+    int32_t ret = providerLifeManager->GetAllProviderInfosByProviderName(providerName, infos);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+            "GetAllProviderInfosByProviderName failed: %" LOG_PUBLIC "d", ret)
+    // TODO: 应该要循环遍历infos中所有的provider，然后调用ExportProviderCertificates接口，然后拼接起来
+    ProviderInfo providerInfo = infos[0];
     auto proxy = GetProviderProxy(providerInfo, ret);
     HKS_IF_NULL_RETURN(proxy, ret)
 
