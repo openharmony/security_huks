@@ -184,7 +184,7 @@ static int32_t RemotePropertyPack(const CppParamSet &cppParamSet,
     const HksParamSet *hksParamSet = cppParamSet.GetParamSet();
     HKS_IF_NULL_LOGE_RETURN(hksParamSet, HKS_ERROR_NULL_POINTER, "paramSet null");
 
-    HksBlob outBlob { hksParamSet->paramSetSize, nullptr };
+    HksBlob outBlob { ALIGN_SIZE(hksParamSet->paramSetSize), nullptr };
     int32_t ret = 0;
     do {
         HKS_IF_TRUE_LOGE_BREAK(outBlob.size == 0 || outBlob.size > MAX_OUT_BLOB_SIZE,
@@ -192,7 +192,7 @@ static int32_t RemotePropertyPack(const CppParamSet &cppParamSet,
 
         outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
         HKS_IF_NULL_LOGE_BREAK(outBlob.data, "malloc outBlob.data failed");
-
+        
         ret = HksParamSetPack(&outBlob, hksParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksParamSetPack fail %" LOG_PUBLIC "d", ret);
 

@@ -60,7 +60,7 @@ private:
 
 class IHksExtService : public IRemoteBroker {
 public:
-    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.security.hks.service");
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.security.hksext.service");
     virtual void SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &sendData, uint32_t sendSize, uint32_t msgCode) = 0;
 };
 

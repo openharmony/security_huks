@@ -134,17 +134,17 @@ int32_t HksUKeyGeneralPack(const struct HksBlob *blob, const struct HksParamSet 
     return HKS_SUCCESS;
 }
 
-int32_t HksUkeyBlob2ParamSetPack(const struct HksBlob *oldKeyAlias, const struct HksBlob *newKeyAlias,
+int32_t HksUkeyBlob2ParamSetPack(const struct HksBlob *blob1, const struct HksBlob *blob2,
     const struct HksParamSet *paramSet, struct HksBlob *destData)
 {
     uint32_t offset = 0;
     int32_t ret;
     do {
-        ret = CopyBlobToBuffer(oldKeyAlias, destData, &offset);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy oldKeyAlias failed");
+        ret = CopyBlobToBuffer(blob1, destData, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy blob1 failed");
 
-        ret = CopyBlobToBuffer(newKeyAlias, destData, &offset);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy newKeyAlias failed");
+        ret = CopyBlobToBuffer(blob2, destData, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy blob2 failed");
 
         ret = CopyParamSetToBuffer(paramSet, destData, &offset);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy paramSet failed");
