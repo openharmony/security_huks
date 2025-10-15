@@ -45,33 +45,35 @@ public:
 
     // ukey PIN码管理
     int32_t RemoteVerifyPin(const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet,
-            int32_t &authState, uint32_t &retryCnt);
+                int32_t &authState, uint32_t &retryCnt);
     int32_t RemoteVerifyPinStatus(const HksProcessInfo &processInfo,
-            const std::string &index, const CppParamSet &paramSet, int32_t &state);
+                const std::string &index, const CppParamSet &paramSet, int32_t &state);
     int32_t RemoteClearPinStatus(const std::string &index, const CppParamSet &paramSet);
 
     //证书查询
     int32_t FindRemoteCertificate(const std::string &index,
-            const CppParamSet &paramSet, std::string &certificatesOut);
+                const CppParamSet &paramSet, std::string &certificatesOut);
     int32_t FindRemoteAllCertificate(const HksProcessInfo &processInfo,
-            const std::string &providerName, const CppParamSet &paramSet, std::string &certificatesOut);
+                const std::string &providerName, const CppParamSet &paramSet, std::string &certificatesOut);
+    int32_t ProcessAndWrapCertificates(const std::string &originalCertVec,
+                const ProviderInfo &providerInfo, std::string &processedCertVec);
 
     //签名验签
     int32_t RemoteHandleSign(const std::string &index, const CppParamSet &paramSet,
-            const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
+                const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
     int32_t RemoteHandleVerify(const std::string &index, const CppParamSet &paramSet,
-            const std::vector<uint8_t> &plainText, std::vector<uint8_t> &signature);
+                const std::vector<uint8_t> &plainText, std::vector<uint8_t> &signature);
 
     int32_t GetRemoteProperty(const std::string& index, const std::string& propertyId,
-        const CppParamSet& paramSet, CppParamSet& outParams);
+                const CppParamSet& paramSet, CppParamSet& outParams);
 
     int32_t ClearRemoteHandleMap();
 
     static int32_t ParseIndexAndProviderInfo(const std::string &index,
-            ProviderInfo &providerInfo, std::string &newIndex);
+                ProviderInfo &providerInfo, std::string &newIndex);
 
     int32_t ParseAndValidateIndex(const std::string &index, ProviderInfo &providerInfo,
-        std::string &newIndex,std::string &handle);
+                std::string &newIndex,std::string &handle);
     OHOS::sptr<IHuksAccessExtBase> GetProviderProxy(const ProviderInfo &providerInfo, int32_t &ret);
 
 private:

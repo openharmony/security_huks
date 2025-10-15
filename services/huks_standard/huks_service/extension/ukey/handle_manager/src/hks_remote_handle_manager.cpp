@@ -29,6 +29,7 @@
 #include "hks_param.h"
 #include "hks_json_wrapper.h"
 #include "hks_template.h"
+#include "hks_ukey_common.h"
 namespace OHOS {
 namespace Security {
 namespace Huks {
@@ -45,6 +46,55 @@ std::shared_ptr<HksRemoteHandleManager> HksRemoteHandleManager::GetInstanceWrapp
 void HksRemoteHandleManager::ReleaseInstance()
 {
     HksRemoteHandleManager::DestroyInstance();
+}
+
+static int32_t WrapIndexWithProviderInfo(const ProviderInfo& providerInfo, 
+                                        const std::string& originalIndex, 
+                                        std::string& wrappedIndex)
+{
+    CommJsonObject root = CommJsonObject::CreateObject();
+    if (root.IsNull()) {
+        HKS_LOG_E("Create JSON object failed");
+        return HKS_ERROR_JSON_SERIALIZE_FAILED;
+    }
+    if (!root.SetValue(PROVIDER_NAME_KEY, providerInfo.m_providerName) ||
+        !root.SetValue(ABILITY_NAME_KEY, providerInfo.m_abilityName) ||
+        !root.SetValue(BUNDLE_NAME_KEY, providerInfo.m_bundleName)) {
+        HKS_LOG_E("Set provider info to index failed");
+        return HKS_ERROR_JSON_SERIALIZE_FAILED;
+    }
+    if (!root.SetValue("originalIndex", originalIndex)) {
+        HKS_LOG_E("Set original index failed");
+        return HKS_ERROR_JSON_SERIALIZE_FAILED;
+    }
+    wrappedIndex = root.Serialize(false);
+    return HKS_SUCCESS;
+}
+
+int32_t HksRemoteHandleManager::ProcessAndWrapCertificates(const std::string &originalCertVec,
+        const ProviderInfo &providerInfo, std::string &processedCertVec)
+{
+    HksExtCertInfoSet certSet = {0, nullptr};
+    int32_t ret = JsonArrayToCertInfoSet(originalCertVec, certSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Parse cert set failed: %" LOG_PUBLIC "d", ret)
+
+    for (uint32_t i = 0; i < certSet.count; i++) {
+        std::string originalIndex = BlobToString(certSet.certs[i].index);
+        if (!originalIndex.empty()) {
+            std::string wrappedIndex;
+            ret = WrapIndexWithProviderInfo(providerInfo, originalIndex, wrappedIndex);
+            if (ret != HKS_SUCCESS) {
+                break;
+            }
+            HKS_FREE(certSet.certs[i].index.data);
+            certSet.certs[i].index = StringToBlob(wrappedIndex);
+        }
+    }
+    ret = CertInfoSetToJsonArray(certSet, processedCertVec);
+    
+    FreeCertInfoSet(certSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Convert cert set to json failed: %" LOG_PUBLIC "d", ret)
+    return HKS_SUCCESS;
 }
 
 int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &index,
@@ -379,11 +429,15 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
     auto proxy = GetProviderProxy(providerInfo, ret);
     HKS_IF_NULL_RETURN(proxy, ret)
 
-    auto ipccode = proxy->ExportProviderCertificates(paramSet, certVec, ret);
+    std::string tmpCertVec = "";
+    auto ipccode = proxy->ExportProviderCertificates(paramSet, tmpCertVec, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, ipccode, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
             "Remote ExportProviderCertificates failed: %" LOG_PUBLIC "d", ret)
+    
+    ret = ProcessAndWrapCertificates(tmpCertVec, providerInfo, certVec);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_JSON_SERIALIZE_FAILED,
+            "CertVec transfer failed: %" LOG_PUBLIC "d", ret)
     return HKS_SUCCESS;
 }
 
