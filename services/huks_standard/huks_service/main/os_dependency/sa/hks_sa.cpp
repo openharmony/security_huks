@@ -446,7 +446,7 @@ void HksService::OnStart()
     HKS_LOG_I("HksService start success.");
 }
 
-void HksService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
+void HksService::OnAddSystemAbility(int32_t systemAbilityId, [[maybe_unused]] const std::string &deviceId)
 {
     HKS_LOG_I("systemAbilityId is %" LOG_PUBLIC "d!", systemAbilityId);
 #ifdef SUPPORT_COMMON_EVENT
@@ -454,7 +454,7 @@ void HksService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &
 #endif
 }
 
-void HksService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
+void HksService::OnRemoveSystemAbility(int32_t systemAbilityId, [[maybe_unused]] const std::string& deviceId)
 {
     HKS_LOG_I("systemAbilityId is %" LOG_PUBLIC "d!", systemAbilityId);
 }

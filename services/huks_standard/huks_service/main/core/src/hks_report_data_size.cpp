@@ -145,12 +145,13 @@ int32_t HksParamSetToEventInfoForDataSize(const struct HksParamSet *paramSetIn, 
     return ret;
 }
 
-bool HksEventInfoIsNeedReportForDataSize(const struct HksEventInfo *eventInfo)
+bool HksEventInfoIsNeedReportForDataSize([[maybe_unused]] const struct HksEventInfo *eventInfo)
 {
     return true;
 }
 
-bool HksEventInfoIsEqualForDataSize(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
+bool HksEventInfoIsEqualForDataSize([[maybe_unused]] const struct HksEventInfo *eventInfo1,
+    [[maybe_unused]] const struct HksEventInfo *eventInfo2)
 {
     /* data size event is not a statistic event */
     return false;
