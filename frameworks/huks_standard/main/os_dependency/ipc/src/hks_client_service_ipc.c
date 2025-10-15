@@ -125,11 +125,30 @@ static int32_t BuildParamSetNotNull(const struct HksParamSet *paramSetIn, struct
 static inline int32_t HksAllocInBlob(struct HksBlob *inBlob,
     const struct HksBlob *blob, const struct HksParamSet *paramSet)
 {
-    // TODO: 证书默认为空
     if (inBlob == NULL || blob == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
     uint32_t size = (uint32_t)(sizeof(blob->size) + ALIGN_SIZE(blob->size));
+    if (paramSet != NULL) {
+        size += ALIGN_SIZE(paramSet->paramSetSize);
+    }
+    inBlob->size = size;
+    inBlob->data = (uint8_t *)HksMalloc(size);
+    if (inBlob->data == NULL) {
+        inBlob->size = 0;
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    return HKS_SUCCESS;
+}
+
+static inline int32_t HksAllocInBlobWithBlob2(struct HksBlob *inBlob,
+    const struct HksBlob *blob1, const struct HksBlob *blob2, const struct HksParamSet *paramSet)
+{
+    if (inBlob == NULL || blob1 == NULL || blob2 == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    uint32_t size = (uint32_t)(sizeof(blob1->size) + ALIGN_SIZE(blob1->size));
+    size += (uint32_t)(sizeof(blob2->size) + ALIGN_SIZE(blob2->size));
     if (paramSet != NULL) {
         size += ALIGN_SIZE(paramSet->paramSetSize);
     }
@@ -543,12 +562,16 @@ int32_t HksClientGetRemoteProperty(const struct HksBlob *resourceId, const struc
     struct HksBlob outBlob = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
 
+    outBlob.size = MAX_OUT_BLOB_SIZE;
+    outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
+    HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
+
     do {
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksAllocInBlob(&inBlob, resourceId, NULL);
-        HKS_IF_NULL_LOGE_BREAK(inBlob.data, "malloc inBlob fail")
+        ret = HksAllocInBlobWithBlob2(&inBlob, resourceId, propertyId, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
         ret = HksCheckIpcRenameKeyAlias(resourceId, newParamSet, propertyId);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check remote property fail")

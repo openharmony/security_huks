@@ -186,7 +186,7 @@ int HksExtStub::ProcessExtGetRemotePropertyReply(MessageParcel& data)
         receivedData = std::move(receivedPtr);
         receivedSize = size;
     } while (false);
-    SendAsyncReply(errCode, receivedData, receivedSize, HKS_MSG_EXT_GET_REMOTE_PROPERTY_REPLY);
+    SendAsyncReply(errCode, receivedData, receivedSize, HKS_MSG_EXT_GET_REMOTE_PROPERTY);
     return err;
 }
 
