@@ -67,6 +67,33 @@ int32_t HksClientRefreshKeyInfo(void)
     return HKS_SUCCESS;
 }
 
+static int32_t BuildBlobNotNull(const struct HksBlob *blobIn, struct HksBlob *blobOut)
+{
+    HKS_IF_NULL_LOGE_RETURN(blobOut, HKS_ERROR_NULL_POINTER, "blobOut null");
+
+    if (blobIn == NULL || blobIn->size == 0) {
+        return HKS_SUCCESS;
+    }
+
+    uint32_t dataSize  = blobIn->size;
+    if(dataSize > MAX_PROCESS_SIZE) {
+        HKS_LOG_E("blobIn size too large");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    blobOut->size = 0;
+    blobOut->data = (uint8_t *)HksMalloc(dataSize);
+    HKS_IF_NULL_LOGE_RETURN(blobOut->data, HKS_ERROR_MALLOC_FAIL, "malloc blob data fail");
+
+    if (memcpy_s(blobOut->data, dataSize, blobIn->data, dataSize) != EOK) {
+        HKS_FREE(blobOut->data);
+        blobOut->data = NULL;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+
+    blobOut->size = dataSize;
+    return HKS_SUCCESS;
+}
+
 static int32_t BuildParamSetNotNull(const struct HksParamSet *paramSetIn, struct HksParamSet **paramSetOut)
 {
     int32_t ret;
@@ -185,23 +212,26 @@ int32_t HksClientExportProviderCertificates(const struct HksBlob *name, const st
     struct HksBlob inBlob = { 0, NULL };
     struct HksBlob outBlob = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
-
+    struct HksBlob newName = { 0, NULL };
     // TODO:这个地方提前申请多大的内存合适
     outBlob.size = MAX_OUT_BLOB_SIZE;
     outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
     HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
 
     do {
+        ret = BuildBlobNotNull(name, &newName);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "BuildBlobNotNull fail, ret=%" LOG_PUBLIC "d", ret);
+
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret);
 
-        ret = HksAllocInBlob(&inBlob, name, newParamSet);
+        ret = HksAllocInBlob(&inBlob, &newName, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
-        ret = HksCheckIpcBlobAndParamSet(name, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(&newName, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientExportProviderCertificates fail");
 
-        ret = HksUKeyGeneralPack(name, newParamSet, &inBlob);
+        ret = HksUKeyGeneralPack(&newName, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksExportProviderCertificatesPack fail");
 
         ret = HksSendRequest(HKS_MSG_EXT_EXPORT_PROVIDER_CERTIFICATES, &inBlob, &outBlob, newParamSet);
@@ -216,55 +246,60 @@ int32_t HksClientExportProviderCertificates(const struct HksBlob *name, const st
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
     HKS_FREE_BLOB(outBlob);
-
+    HKS_FREE_BLOB(newName);
     return 0;
 }
 
-int32_t HksClientExportCertificate(const struct HksBlob *index, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
+int32_t HksClientExportCertificate(const struct HksBlob *index,
+    const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
 {
-    if(certSet == NULL || certSet->certs != NULL || certSet->count != 0) {
-        // TODO:错误码怎么写
-        HKS_LOG_E("certSet is invalid, must be a empty set");
-        return HKS_ERROR_NULL_POINTER;
+    if (certSet == NULL || certSet->certs != NULL || certSet->count != 0) {
+        HKS_LOG_E("certSet invalid (must be empty)");
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     int32_t ret;
-    struct HksBlob inBlob = { 0, NULL };
+    struct HksBlob inBlob  = { 0, NULL };
     struct HksBlob outBlob = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
+    struct HksBlob newIndex = { 0, NULL };
 
-    // TODO:这个地方提前申请多大的内存合适
     outBlob.size = MAX_OUT_BLOB_SIZE;
     outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
     HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
 
     do {
+        ret = BuildBlobNotNull(index, &newIndex);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "BuildBlobNotNull fail, ret=%" LOG_PUBLIC "d", ret);
+
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "BuildParamSetNotNull fail, ret=%" LOG_PUBLIC "d", ret);
 
-        ret = HksAllocInBlob(&inBlob, index, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
+        ret = HksAllocInBlob(&inBlob, &newIndex, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAllocInBlob fail");
 
-        ret = HksCheckIpcBlobAndParamSet(index, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientExportCertificate fail");
+        ret = HksCheckIpcBlobAndParamSet(&newIndex, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Check blob+paramSet fail");
 
-        ret = HksUKeyGeneralPack(index, newParamSet, &inBlob);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksExportProviderCertificatesPack fail");
+        ret = HksUKeyGeneralPack(&newIndex, newParamSet, &inBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Pack fail");
 
         ret = HksSendRequest(HKS_MSG_EXT_EXPORT_CERTIFICATE, &inBlob, &outBlob, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret);    
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "SendRequest fail, ret=%" LOG_PUBLIC "d", ret);
 
         ret = HksCertificatesUnpackFromService(&outBlob, certSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCertificateChainUnpackFromService fail, ret = %" LOG_PUBLIC "d", ret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Unpack certs fail, ret=%" LOG_PUBLIC "d", ret);
     } while (0);
 
-    HKS_IF_NOT_SUCC_LOGE(ret, "HksClientExportProviderCertificates fail, ret = %" LOG_PUBLIC "d", ret);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksClientExportCertificate fail, ret=%" LOG_PUBLIC "d", ret);
+    }
 
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
     HKS_FREE_BLOB(outBlob);
-
-    return 0;
+    HKS_FREE_BLOB(newIndex);
+    return ret;
 }
 
 int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
