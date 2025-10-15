@@ -1647,11 +1647,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest019, TestSize.Level0)
 
     ret = HksAesCcmCipherTestDecrypt(&keyAlias, decParamSet, &cipherText, &plainText, &inData,
         CCM_MIN_AEAD_SIZE - 2);
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
     EXPECT_EQ(ret, HKS_ERROR_CODE_AEAD_TAG_LEN_INVALID) << "not HKS_ERROR_CODE_AEAD_TAG_LEN_INVALID error code.";
-#else
-    EXPECT_EQ(ret, HKS_FAILURE) << "not HKS_FAILURE error code.";
-#endif
     HksFreeParamSet(&decParamSet);
     
     // aead len 3
@@ -1662,11 +1658,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest019, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksAesCcmCipherTestDecrypt(&keyAlias, decParamSet, &cipherText, &plainText, &inData, CCM_MIN_AEAD_SIZE - 1);
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
     EXPECT_EQ(ret, HKS_ERROR_CODE_AEAD_TAG_LEN_INVALID) << "not HKS_ERROR_CODE_AEAD_TAG_LEN_INVALID error code.";
-#else
-    EXPECT_EQ(ret, HKS_FAILURE) << "not HKS_FAILURE error code.";
-#endif
     HksFreeParamSet(&decParamSet);
 
     EXPECT_EQ(HksDeleteKeyForDe(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
@@ -1713,11 +1705,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest020, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksAesCcmCipherTestDecrypt(&keyAlias, decParamSet, &cipherText, &plainText, &inData, 17);
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
     EXPECT_EQ(ret, HKS_ERROR_CODE_AEAD_TAG_LEN_INVALID) << "not HKS_ERROR_CODE_AEAD_TAG_LEN_INVALID error code.";
-#else
-    EXPECT_EQ(ret, HKS_FAILURE) << "not HKS_FAILURE error code.";
-#endif
     HksFreeParamSet(&decParamSet);
 
     // aead len 18
@@ -1728,11 +1716,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest020, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksAesCcmCipherTestDecrypt(&keyAlias, decParamSet, &cipherText, &plainText, &inData, 18);
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
     EXPECT_EQ(ret, HKS_ERROR_CODE_AEAD_TAG_LEN_INVALID) << "not HKS_ERROR_CODE_AEAD_TAG_LEN_INVALID error code.";
-#else
-    EXPECT_EQ(ret, HKS_FAILURE) << "not HKS_FAILURE error code.";
-#endif
     HksFreeParamSet(&decParamSet);
 
     EXPECT_EQ(HksDeleteKeyForDe(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";

@@ -777,6 +777,22 @@ static int32_t UpdateNonceForAesAeMode(struct HksParamSet **runtimeParamSet, con
     return HKS_SUCCESS;
 }
 
+static int32_t CheckAeadLength(const struct HksParamSet *paramSet, const struct HksUsageSpec *usageSpec)
+{
+    HKS_IF_TRUE_RETURN(paramSet == NULL || usageSpec == NULL, HKS_ERROR_NULL_POINTER);
+
+    struct HksAeadParam *aeadParam = (struct HksAeadParam *)(usageSpec->algParam);
+    struct HksParam *tagParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_AE_TAG, &tagParam);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret);
+    if (tagParam->blob.size != aeadParam->tagDec.size) {
+        HKS_LOG_E("indicate len %" LOG_PUBLIC "u != input len %" LOG_PUBLIC "u",
+            aeadParam->tagDec.size, tagParam->blob.size);
+        return HKS_ERROR_CODE_AEAD_TAG_LEN_NOT_EQUAL;
+    }
+    return HKS_SUCCESS;
+}
+
 static int32_t CoreCipherInit(const struct HuksKeyNode *keyNode)
 {
     int32_t ret = UpdateNonceForAesAeMode((struct HksParamSet **)(unsigned long)&keyNode->runtimeParamSet,
@@ -809,14 +825,8 @@ static int32_t CoreCipherInit(const struct HuksKeyNode *keyNode)
         } else {
             if (usageSpec->algType == HKS_ALG_AES &&
                 (usageSpec->mode == HKS_MODE_CCM || usageSpec->mode == HKS_MODE_GCM)) {
-                struct HksAeadParam *aeadParam = (struct HksAeadParam *)(usageSpec->algParam);
-                struct HksParam *tagParam = NULL;
-                ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_AE_TAG, &tagParam);
-                HKS_IF_NOT_SUCC_RETURN(ret, ret);
-                HKS_IF_NOT_TRUE_LOGE_RETURN(tagParam->blob.size == aeadParam->tagDec.size,
-                    HKS_ERROR_CODE_AEAD_TAG_LEN_NOT_EQUAL,
-                    "indicate len %" LOG_PUBLIC "u != input len %" LOG_PUBLIC "u",
-                    aeadParam->tagDec.size, tagParam->blob.size);
+                    ret = CheckAeadLength(keyNode->runtimeParamSet, usageSpec);
+                    HKS_IF_NOT_SUCC_BREAK(ret);
             }
             ret = HksCryptoHalDecryptInit(&rawKey, usageSpec, &ctx);
         }
