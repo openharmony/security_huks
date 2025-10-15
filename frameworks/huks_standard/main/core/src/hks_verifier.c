@@ -503,8 +503,7 @@ static int32_t GetClaimDataParamSet(uint8_t *data, uint32_t len, struct HksParam
     return HKS_SUCCESS;
 }
 
-static int32_t FillAttestExtendParamSet(uint8_t *data, uint32_t length,
-    uint8_t version, struct HksParamSet *paramSetOut)
+static int32_t FillAttestExtendParamSet(uint8_t *data, uint32_t length, struct HksParamSet *paramSetOut)
 {
     if ((data == NULL) || (length < ASN_1_MIN_HEADER_LEN)) {
         HKS_LOG_E("invalid argument data");
@@ -561,8 +560,7 @@ static int32_t FillAttestExtendInfo(uint8_t *data, uint32_t length, struct HksPa
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    ret = FillAttestExtendParamSet(data + TLV_VERSION_NEED_SIZE, length - TLV_VERSION_NEED_SIZE,
-        *version, paramSetOut);
+    ret = FillAttestExtendParamSet(data + TLV_VERSION_NEED_SIZE, length - TLV_VERSION_NEED_SIZE, paramSetOut);
     HKS_IF_NOT_SUCC_LOGE(ret, "fill attest extend paramSet fail")
 
     HKS_FREE(version);
