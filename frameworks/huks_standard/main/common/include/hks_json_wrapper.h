@@ -13,7 +13,7 @@ struct cJSON;
 namespace OHOS {
 namespace Security {
 namespace Huks {
-constexpr int32_t INVAILD_ARRAY_SIZE = -1;
+constexpr int32_t INVALID_ARRAY_SIZE = -1;
 using Var = std::variant<bool, uint8_t, int32_t, uint32_t, int64_t, double, std::string>;
 
 class CommJsonObject {

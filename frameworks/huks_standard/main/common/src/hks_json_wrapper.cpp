@@ -220,7 +220,7 @@ std::vector<std::string> CommJsonObject::GetKeys() const
 int32_t CommJsonObject::ArraySize() const
 {
     if (!CheckIsArray()) {
-        return INVAILD_ARRAY_SIZE;
+        return INVALID_ARRAY_SIZE;
     }
     return cJSON_GetArraySize(mJson_.get());
 }
