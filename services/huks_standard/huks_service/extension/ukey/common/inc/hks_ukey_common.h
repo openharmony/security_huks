@@ -40,6 +40,8 @@ namespace Huks {
 
     int32_t CertInfoSetToJsonArray(const struct HksExtCertInfoSet& certSet, std::string& jsonArrayStr);
 
+    void FreeCertInfoSet(HksExtCertInfoSet &certSet);
+
 }
 }
 }

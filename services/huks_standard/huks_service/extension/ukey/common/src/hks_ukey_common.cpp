@@ -267,4 +267,17 @@ int32_t CertInfoSetToJsonArray(const struct HksExtCertInfoSet& certSet, std::str
     
     return HKS_SUCCESS;
 }
+
+void FreeCertInfoSet(HksExtCertInfoSet &certSet)
+{
+    if (certSet.certs != nullptr) {
+        for (uint32_t i = 0; i < certSet.count; i++) {
+            HKS_FREE(certSet.certs[i].index.data);
+            HKS_FREE(certSet.certs[i].cert.data);
+        }
+        HKS_FREE(certSet.certs);
+        certSet.certs = nullptr;
+    }
+    certSet.count = 0;
+}
 }
