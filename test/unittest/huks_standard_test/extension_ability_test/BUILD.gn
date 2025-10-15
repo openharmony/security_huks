@@ -34,12 +34,14 @@ ohos_unittest("extension_unit_test") {
     "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger/inc",
     "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc",
     "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger/inc",
+    "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common/inc"
   ]
 
   sources = [
     # "./provider_mgr_test/hks_provider_manger_test.cpp",
     "./plugin_loader_test/hks_plugin_manager_test.cpp",
     "./extension_connect_test/hks_extension_connection_test.cpp",
+    "./ukey_common_test/ukey_common_test.cpp"
   ]
 
   configs = [
