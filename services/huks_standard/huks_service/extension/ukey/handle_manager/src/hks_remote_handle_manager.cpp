@@ -84,7 +84,7 @@ int32_t HksRemoteHandleManager::ProcessAndWrapCertificates(const std::string &or
             std::string wrappedIndex;
             ret = WrapIndexWithProviderInfo(providerInfo, originalIndex, wrappedIndex);
             if (ret != HKS_SUCCESS) {
-                break;
+                return ret;
             }
             HKS_FREE(certSet.certs[i].index.data);
             certSet.certs[i].index = StringToBlob(wrappedIndex);
@@ -435,9 +435,11 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
             "Remote ExportProviderCertificates failed: %" LOG_PUBLIC "d", ret)
     
+    HKS_LOG_E("ProcessAndWrapCertificates before--- %" LOG_PUBLIC "s", tmpCertVec.c_str());
     ret = ProcessAndWrapCertificates(tmpCertVec, providerInfo, certVec);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_JSON_SERIALIZE_FAILED,
             "CertVec transfer failed: %" LOG_PUBLIC "d", ret)
+    HKS_LOG_E("ProcessAndWrapCertificates after--- %" LOG_PUBLIC "s", certVec.c_str());
     return HKS_SUCCESS;
 }
 
