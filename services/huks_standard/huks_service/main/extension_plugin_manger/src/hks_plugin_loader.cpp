@@ -33,38 +33,37 @@ void HuksPluginLoader::ReleaseInstance()
     HuksPluginLoader::DestroyInstance();
 }
 
-int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info,
-    const std::string &providerName, const CppParamSet &paramSet)
-{
+int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const std::string& providerName,
+    const CppParamSet& paramSet) {
     std::lock_guard<std::mutex> lock(libMutex);
-    HKS_IF_TRUE_RETURN(m_pluginHandle != nullptr, HKS_ERROR_LIB_HAS_OPENED)
-    InitMethodNameMap();
+    HKS_IF_TRUE_RETURN(m_pluginHandle != nullptr, HKS_SUCCESS)
+
     m_pluginHandle = dlopen(pluginSo.c_str(), RTLD_NOW);
     HKS_IF_NULL_LOGE_RETURN(m_pluginHandle, HKS_ERROR_OPEN_LIB_FAIL,
-        "dlopen %{public}s failed! %{public}s", pluginSo.c_str(), dlerror())
+        "dlopen %" LOG_PUBLIC "s failed! %" LOG_PUBLIC "s", pluginSo.c_str(), dlerror())
 
-    for (auto i = 0; i < static_cast<int32_t>(PluginMethodEnum::COUNT); ++i) {
+    for (auto i = 0; i < static_cast<int>(PluginMethodEnum::COUNT); ++i) {
         std::string methodString = GetMethodByEnum(static_cast<PluginMethodEnum>(i));
         if (methodString.empty()) {
             HKS_LOG_E("the entry %{public}s is not include", pluginSo.c_str());
             dlclose(m_pluginHandle);
             m_pluginHandle = nullptr;
-            m_pluginProviderMap.Clear();
+            m_pluginProviderMap.clear();
             return HKS_ERROR_FIND_FUNC_MAP_FAIL;
         }
 
         dlerror();
-        void *func = dlsym(m_pluginHandle, methodString.c_str());
+        void* func = dlsym(m_pluginHandle, methodString.c_str());
         const char *dlsym_error = dlerror();
         if (dlsym_error != nullptr) {
-            HKS_LOG_E("failed to Find entry %{public}s in dynamic link liberary, error is %{public}s",
+            HKS_LOG_E("failed to find entry %{public}s in dynamic link liberary, error is %{public}s",
                 methodString.c_str(), dlsym_error);
             dlclose(m_pluginHandle);
             m_pluginHandle= nullptr;
-            m_pluginProviderMap.Clear();
+            m_pluginProviderMap.clear();
             return HKS_ERROR_GET_FUNC_POINTER_FAIL;
         }
-        m_pluginProviderMap.Insert(static_cast<PluginMethodEnum>(i), func);
+        m_pluginProviderMap.emplace(std::make_pair(static_cast<PluginMethodEnum>(i), func));
     }
 
     auto libInstance = HuksLibInterface::GetInstanceWrapper();
@@ -73,33 +72,25 @@ int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info,
     return HKS_SUCCESS;
 }
 
-int32_t HuksPluginLoader::UnLoadPlugins(const struct HksProcessInfo &info,
-    const std::string &providerName, const CppParamSet &paramSet)
-{
+int32_t HuksPluginLoader::UnLoadPlugins(const struct HksProcessInfo &info, const std::string& providerName,
+    const CppParamSet& paramSet) {
     std::lock_guard<std::mutex> lock(libMutex);
     HKS_IF_TRUE_RETURN(m_pluginHandle == nullptr, HKS_SUCCESS)
 
-    m_pluginProviderMap.Clear();
-    dlerror();
+    m_pluginProviderMap.clear();
     dlclose(m_pluginHandle);
-    const char *dlsym_error = dlerror();
-    HKS_IF_TRUE_LOGE_RETURN(dlsym_error != nullptr, HKS_ERROR_CLOSE_LIB_FAIL,
-        "close lib fail, error:%{public}s", dlsym_error)
     m_pluginHandle = nullptr;
     return HKS_SUCCESS;
 }
 
-std::string HuksPluginLoader::GetMethodByEnum(PluginMethodEnum methodEnum)
-{
-    std::string methodString = "";
-    bool isFindMethodEnum = m_pluginMethodNameMap.Find(methodEnum, methodString);
-    HKS_IF_TRUE_RETURN(isFindMethodEnum, methodString)
-    HKS_LOG_E("don't find enum = %{public}d", methodEnum);
+std::string HuksPluginLoader::GetMethodByEnum(PluginMethodEnum methodEnum) {
+    const auto& it = m_pluginMethodNameMap.find(methodEnum);
+    HKS_IF_TRUE_RETURN(it != m_pluginMethodNameMap.end(), it->second)
+    HKS_LOG_E("enum = %{public}d can not find string", methodEnum);
     return "";
 }
 
-void HuksPluginLoader::SetPluginPath(std::string &pluginPath)
-{
+void HuksPluginLoader::SetPluginPath(std::string& pluginPath) {
     pluginSo = pluginPath;
 }
 

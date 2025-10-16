@@ -16,8 +16,6 @@
 #include "hks_extension_connection_test.h"
 
 using namespace testing::ext;
-using ::testing::_;
-using ::testing::Return;
 
 namespace OHOS {
 namespace Security {
@@ -42,19 +40,17 @@ void ExtensionConnectionTest::TearDown() {
  * @tc.desc: connect success.
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest001, TestSize.Level0) {
-    EXPECT_CALL(*mockProxy, AsObject()).WillRepeatedly(testing::Return(mockRemoteObject));
-    EXPECT_CALL(*mockRemoteObject, AddDeathRecipient(_)).Times(1);
+HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest001, TestSize.Level10) {
+    EXPECT_CALL(*mockProxy, AsObject()).WillRepeatedly(Return(mockRemoteObject));
+    EXPECT_CALL(*mockRemoteObject, AddDeathRecipient(_, _)).Times(1);
 
     AppExecFwk::ElementName element;
     int resultCode = 0;
-    // extensionConn->OnAbilityConnectDone(element, mockRemoteObject, resultCode);
-    extensionConn->OnAbilityConnectDone(element, mockProxy->AsObject(), resultCode);
-
+    extensionConn->OnAbilityConnectDone(element, mockRemoteObject, resultCode);
 
     EXPECT_EQ(extensionConn->IsConnected(), true) << "IsConnected is false";
     EXPECT_NE(extensionConn->GetExtConnectProxy(), nullptr) << "extConnectProxy is nullptr";
-    EXPECT_EQ(extensionConn->GetExtConnectProxy(), sptr<IHuksAccessExtBase>(mockProxy)) << "proxy is not mockProxy";
+    EXPECT_EQ(extensionConn->GetExtConnectProxy(), mockProxy) << "proxy is not mockProxy";
 }
 
 /**
@@ -62,7 +58,7 @@ HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest001, TestSize.Level0) {
  * @tc.desc: connect fail.
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest002, TestSize.Level0) {
+HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest002, TestSize.Level10) {
     AppExecFwk::ElementName element;
     int resultCode = 0;
     extensionConn->OnAbilityConnectDone(element, nullptr, resultCode);
@@ -76,8 +72,8 @@ HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest002, TestSize.Level0) {
  * @tc.desc: connect time out.
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest003, TestSize.Level0) {
-    AAFwk::Want want;
+HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest003, TestSize.Level10) {
+    Want want;
     int32_t ret = extensionConn->OnConnection(want);
 
     EXPECT_EQ(ret, HKS_ERROR_CONNECT_TIME_OUT) << "ret is not time out";
@@ -90,14 +86,12 @@ HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest003, TestSize.Level0) {
  * @tc.desc: connect and disconnect.
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest004, TestSize.Level0) {
-    EXPECT_CALL(*mockProxy, AsObject()).WillRepeatedly(testing::Return(mockRemoteObject));
-    EXPECT_CALL(*mockRemoteObject, AddDeathRecipient(_)).Times(1);
+HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest004, TestSize.Level10) {
+    EXPECT_CALL(*mockProxy, AsObject()).WillRepeatedly(Return(mockRemoteObject)) << "mockProxy is nullptr";
+    EXPECT_CALL(*mockRemoteObject, AddDeathRecipient(_, _)).Times(1) << "AddDeathRecipient fail";
 
     AppExecFwk::ElementName element;
-    // extensionConn->OnAbilityConnectDone(element, mockRemoteObject, 0);
-    extensionConn->OnAbilityConnectDone(element, mockProxy->AsObject(), 0);
-
+    extensionConn->OnAbilityConnectDone(element, mockRemoteObject, 0);
 
     EXPECT_EQ(extensionConn->IsConnected(), true) << "connection fail";
 
@@ -114,14 +108,12 @@ HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest004, TestSize.Level0) {
  * @tc.desc: death recipient callback.
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest005, TestSize.Level0) {
-    EXPECT_CALL(*mockProxy, AsObject()).WillRepeatedly(testing::Return(mockRemoteObject));
-    EXPECT_CALL(*mockRemoteObject, AddDeathRecipient(_)).Times(1);
+HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest005, TestSize.Level10) {
+    EXPECT_CALL(*mockProxy, AsObject()).WillRepeatedly(Return(mockRemoteObject));
+    EXPECT_CALL(*mockRemoteObject, AddDeathRecipient(_, _)).Times(1);
 
     AppExecFwk::ElementName element;
-    // extensionConn->OnAbilityConnectDone(element, mockProxy, 0);
-    extensionConn->OnAbilityConnectDone(element, mockProxy->AsObject(), 0);
-
+    extensionConn->OnAbilityConnectDone(element, mockProxy, 0);
     EXPECT_EQ(extensionConn->IsConnected(), true) << "IsConnected is false";
 
     wptr<IRemoteObject> remote(mockRemoteObject);
