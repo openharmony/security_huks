@@ -34,14 +34,17 @@ ohos_unittest("extension_unit_test") {
     "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger/inc",
     "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc",
     "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger/inc",
-    "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common/inc"
+    "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common/inc",
+    "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager/inc",
+    "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager/src",
   ]
 
   sources = [
     "./provider_mgr_test/hks_provider_manger_test.cpp",
     "./plugin_loader_test/hks_plugin_manager_test.cpp",
     "./extension_connect_test/hks_extension_connection_test.cpp",
-    "./ukey_common_test/ukey_common_test.cpp"
+    "./ukey_common_test/ukey_common_test.cpp",
+    "./handle_mgr_test/hks_handle_manager_test.cpp"
   ]
 
   configs = [
@@ -54,6 +57,10 @@ ohos_unittest("extension_unit_test") {
     "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_util_standard_static",
     "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger:libhuks_provider_life_cycle_manager_static",
+    "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
+    "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
+    "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection:libhuks_extension_connection_static",
+    "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager:libhuks_remote_handle_manager_static"
   ]
   external_deps = [
     "c_utils:utils",
