@@ -27,6 +27,7 @@
 #include <vector>
 #include "safe_map.h"
 #include "ihuks_access_ext_base.h"
+#include "hks_json_wrapper.h"
 
 namespace OHOS {
 namespace Security {
@@ -55,8 +56,8 @@ public:
                 const CppParamSet &paramSet, std::string &certificatesOut);
     int32_t FindRemoteAllCertificate(const HksProcessInfo &processInfo,
                 const std::string &providerName, const CppParamSet &paramSet, std::string &certificatesOut);
-    int32_t ProcessAndWrapCertificates(const std::string &originalCertVec,
-                const ProviderInfo &providerInfo, std::string &processedCertVec);
+    int32_t MergeProviderCertificates(const ProviderInfo &providerInfo, const std::string &providerCertVec,
+                CommJsonObject &combinedArray);
 
     //签名验签
     int32_t RemoteHandleSign(const std::string &index, const CppParamSet &paramSet,
