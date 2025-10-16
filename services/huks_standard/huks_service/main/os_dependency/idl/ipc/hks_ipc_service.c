@@ -60,7 +60,7 @@ static enum HksTag g_idList[] = {
 };
 #endif
 
-void HksIpcServiceRegisterProvider(const struct HksBlob *srcData, const uint8_t *context) 
+void HksIpcServiceRegisterProvider(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob name = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
@@ -86,7 +86,7 @@ void HksIpcServiceRegisterProvider(const struct HksBlob *srcData, const uint8_t 
     HKS_FREE_BLOB(processInfo.userId);
 }
 
-void HksIpcServiceUnregisterProvider(const struct HksBlob *srcData, const uint8_t *context) 
+void HksIpcServiceUnregisterProvider(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob name = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
@@ -150,7 +150,8 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
         }
     } while (0);
 
-    HksSendResponse(context, ret, (outBlob.data != NULL && outBlob.size == (sizeof(int32_t) + sizeof(uint32_t))) ? &outBlob : NULL);
+    HksSendResponse(context, ret,
+        (outBlob.data != NULL && outBlob.size == (sizeof(int32_t) + sizeof(uint32_t))) ? &outBlob : NULL);
 
     HKS_FREE_BLOB(outBlob);
     HKS_FREE_BLOB(processInfo.processName);
@@ -200,7 +201,7 @@ void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8
     HKS_FREE_BLOB(processInfo.userId);
 }
 
-void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t *context) 
+void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t *context)
 {
     int32_t ret;
     struct HksBlob index = { 0, NULL };
@@ -223,7 +224,7 @@ void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t
     HKS_FREE_BLOB(processInfo.userId);
 }
 
-void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t *context) 
+void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob resourceId = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
@@ -253,7 +254,7 @@ void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t 
     HKS_FREE_BLOB(processInfo.userId);
 }
 
-void HksIpcServiceGetRemoteHandle(const struct HksBlob *srcData, const uint8_t *context) 
+void HksIpcServiceGetRemoteHandle(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob resourceId = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
@@ -283,7 +284,7 @@ void HksIpcServiceGetRemoteHandle(const struct HksBlob *srcData, const uint8_t *
     HKS_FREE_BLOB(processInfo.userId);
 }
 
-void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t *context) 
+void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob resourceId = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
@@ -309,7 +310,7 @@ void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t
     HKS_FREE_BLOB(processInfo.userId);
 }
 
-void HksIpcServiceUkeySign(const struct HksBlob *srcData, const uint8_t *context) 
+void HksIpcServiceUkeySign(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob index = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
@@ -339,7 +340,7 @@ void HksIpcServiceUkeySign(const struct HksBlob *srcData, const uint8_t *context
     HKS_FREE_BLOB(processInfo.userId);
 }
 
-void HksIpcServiceUkeyVerify(const struct HksBlob *srcData, const uint8_t *context) 
+void HksIpcServiceUkeyVerify(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob index = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
@@ -397,7 +398,7 @@ void HksIpcServiceExportProviderCertificates(const struct HksBlob *srcData, cons
 
     HksSendResponse(context, ret, ret == HKS_SUCCESS && certOut.size != 0 ? &certOut : NULL);
 
-    if(ret == HKS_SUCCESS) {
+    if (ret == HKS_SUCCESS) {
         HksFreeExtCertSet(&certInfoSet);
     }
     HKS_FREE_BLOB(processInfo.processName);
@@ -435,7 +436,7 @@ void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t
 
     HksSendResponse(context, ret, ret == HKS_SUCCESS && certOut.size != 0 ? &certOut : NULL);
 
-    if(ret == HKS_SUCCESS) {
+    if (ret == HKS_SUCCESS) {
         HksFreeExtCertSet(&certInfoSet);
     }
     HKS_FREE_BLOB(processInfo.processName);

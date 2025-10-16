@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -150,7 +150,8 @@ struct OH_Huks_Result OH_Huks_IsExtParamSetValid(const struct OH_Huks_ExternalCr
  * @since 9
  * @version 1.0
  */
-struct OH_Huks_Result OH_Huks_CheckExtParamMatch(const struct OH_Huks_Param *baseParam, const struct OH_Huks_Param *param);
+struct OH_Huks_Result OH_Huks_CheckExtParamMatch(const struct OH_Huks_Param *baseParam,
+    const struct OH_Huks_Param *param);
 
 void OH_Huks_FreeExtCertSet(struct OH_Huks_ExtCertInfoSet *certSet);
 

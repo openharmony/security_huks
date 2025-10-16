@@ -8,7 +8,7 @@
 #include <vector>
 
 // 适配器模式
-int32_t HksIpcProviderRegAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *name, 
+int32_t HksIpcProviderRegAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *name,
     const struct HksParamSet *paramSet)
 {
     HKS_LOG_E("==========ksIpcServiceProviderRegisterAdapter income");
@@ -19,7 +19,7 @@ int32_t HksIpcProviderRegAdapter(const struct HksProcessInfo *processInfo,  cons
     return OHOS::Security::Huks::HksIpcServiceProviderRegister(processInfo, cppresourceId, cppParamSet);
 }
 
-int32_t HksIpcProviderUnregAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *name, 
+int32_t HksIpcProviderUnregAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *name,
     const struct HksParamSet *paramSet)
 {
 
@@ -29,7 +29,7 @@ int32_t HksIpcProviderUnregAdapter(const struct HksProcessInfo *processInfo,  co
     return OHOS::Security::Huks::HksIpcServiceProviderUnRegister(processInfo, cppresourceId, cppParamSet);
 }
 
-int32_t HksIpcCreateRemKeyHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *resourceId, 
+int32_t HksIpcCreateRemKeyHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *resourceId,
     const struct HksParamSet *paramSet, struct HksBlob *remoteHandleOut)
 {
     int32_t ret;
@@ -37,7 +37,8 @@ int32_t HksIpcCreateRemKeyHandleAdapter(const struct HksProcessInfo *processInfo
     CppParamSet cppParamSet(paramSet);
 
     std::string remoteHandle;
-    ret = OHOS::Security::Huks::HksIpcServiceOnCreateRemoteKeyHandle(processInfo, cppresourceId, cppParamSet, remoteHandle);
+    ret = OHOS::Security::Huks::HksIpcServiceOnCreateRemoteKeyHandle(processInfo, cppresourceId,
+        cppParamSet, remoteHandle);
 
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnCreateRemoteKeyHandle fail")
 
@@ -52,7 +53,7 @@ int32_t HksIpcCreateRemKeyHandleAdapter(const struct HksProcessInfo *processInfo
     return ret;
 }
 
-int32_t HksIpcGetRemoteHandleAdapter(const struct HksProcessInfo *processInfo,  
+int32_t HksIpcGetRemoteHandleAdapter(const struct HksProcessInfo *processInfo,
     const struct HksBlob *resourceId, const struct HksParamSet *paramSet, struct HksBlob *remoteHandleOut)
 {
     int32_t ret;
@@ -60,7 +61,8 @@ int32_t HksIpcGetRemoteHandleAdapter(const struct HksProcessInfo *processInfo,
     CppParamSet cppParamSet(paramSet);
 
     std::string remoteHandle;
-    ret = OHOS::Security::Huks::HksIpcServiceOnFindRemoteKeyHandle(processInfo, cppresourceId, cppParamSet, remoteHandle);
+    ret = OHOS::Security::Huks::HksIpcServiceOnFindRemoteKeyHandle(processInfo, cppresourceId,
+        cppParamSet, remoteHandle);
 
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnSigned fail")
 
@@ -75,7 +77,7 @@ int32_t HksIpcGetRemoteHandleAdapter(const struct HksProcessInfo *processInfo,
     return ret;
 }
 
-int32_t HksIpcCloseRemKeyHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *resourceId, 
+int32_t HksIpcCloseRemKeyHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *resourceId,
     const struct HksParamSet *paramSet)
 {
     std::string cppresourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
@@ -124,14 +126,16 @@ int32_t HksIpcVerifyAdapter(const struct HksProcessInfo *processInfo, const stru
     return ret;
 }
 
-int32_t HksIpcExportProvCertsAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *providerName, const struct HksParamSet *paramSet, struct HksExtCertInfoSet *certInfoSet)
+int32_t HksIpcExportProvCertsAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *providerName,
+    const struct HksParamSet *paramSet, struct HksExtCertInfoSet *certInfoSet)
 {
     int32_t ret = 0;
     std::string cppProviderName(reinterpret_cast<const char*>(providerName->data), providerName->size);
     std::string certificates;
     CppParamSet cppParamSet(paramSet);
 
-    ret = OHOS::Security::Huks::HksIpcServiceOnExportProviderAllCertificates(processInfo, cppProviderName, cppParamSet, certificates);
+    ret = OHOS::Security::Huks::HksIpcServiceOnExportProviderAllCertificates(processInfo, cppProviderName,
+        cppParamSet, certificates);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcExportProvCertsAdapter fail")
 
     ret = OHOS::Security::Huks::JsonArrayToCertInfoSet(certificates, *certInfoSet);
@@ -140,7 +144,8 @@ int32_t HksIpcExportProvCertsAdapter(const struct HksProcessInfo *processInfo, c
     return ret;
 }
 
-int32_t HksIpcExportCertAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId, const struct HksParamSet *paramSet, struct HksExtCertInfoSet *certInfoSet)
+int32_t HksIpcExportCertAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
+    const struct HksParamSet *paramSet, struct HksExtCertInfoSet *certInfoSet)
 {
     int32_t ret = 0;
     std::string cppresourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
@@ -161,7 +166,8 @@ int32_t HksIpcAuthUkeyPinAdapter(const struct HksProcessInfo *processInfo,
 {
     std::string cppresourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
     CppParamSet cppParamSet(paramSet);
-    return OHOS::Security::Huks::HksIpcServiceOnAuthUkeyPin(processInfo, cppresourceId, cppParamSet, *outStatus, *retryCount);
+    return OHOS::Security::Huks::HksIpcServiceOnAuthUkeyPin(processInfo, cppresourceId, cppParamSet,
+        *outStatus, *retryCount);
 }
 
 int32_t HksIpcGetUkeyPinAuthStateAdapter(const struct HksProcessInfo *processInfo,
@@ -192,11 +198,11 @@ static int32_t RemotePropertyPack(const CppParamSet &cppParamSet,
 
         outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
         HKS_IF_NULL_LOGE_BREAK(outBlob.data, "malloc outBlob.data failed");
-        
+
         ret = HksParamSetPack(&outBlob, hksParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksParamSetPack fail %" LOG_PUBLIC "d", ret);
 
-        std::unique_ptr<uint8_t[]> tmp(new (std::nothrow) uint8_t[outBlob.size]());
+        auto tmp = std::make_unique<uint8_t[]>(outBlob.size);
         HKS_IF_NULL_LOGE_BREAK(tmp, "alloc replyData failed");
 
         HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(tmp.get(), outBlob.size, outBlob.data, outBlob.size),
@@ -226,7 +232,7 @@ int32_t HksIpcServiceOnGetRemotePropertyAdapter(const struct HksProcessInfo *pro
         cppPropertyId, cppParamSet, cppOutParams);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "JsonArrayToCertInfoSet fail");
     HKS_IF_NULL_LOGE_RETURN(hksExtProxy, HKS_ERROR_NULL_POINTER, "hksExtProxy is null");
-    
+
     std::unique_ptr<uint8_t[]> outData;
     uint32_t outSize = 0;
     ret = RemotePropertyPack(cppOutParams, outData, outSize);

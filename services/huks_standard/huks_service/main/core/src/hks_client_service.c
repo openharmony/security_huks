@@ -320,10 +320,10 @@ static int32_t DksAppendKeyAliasAndNewParamSet(struct HksParamSet *paramSet, con
         };
         ret = HksAddParams(newParamSet, paramArray, HKS_ARRAY_SIZE(paramArray));
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add key alias, ret = %" LOG_PUBLIC "d", ret)
-        
+
         ret = HksBuildParamSet(&newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build new param set failed, ret = %" LOG_PUBLIC "d", ret)
-        
+
         HksFreeParamSet(&paramSet);
         *outParamSet = newParamSet;
         return ret;
@@ -575,19 +575,20 @@ int32_t HksServiceUnregisterProvider(const struct HksProcessInfo *processInfo, c
     return 0;
 }
 
-int32_t HksServiceExportProviderCertificates(const struct HksProcessInfo *processInfo, const struct HksBlob *providerName, const struct HksParamSet *paramSetIn, 
-    struct HksExtCertInfoSet *certSet) 
+int32_t HksServiceExportProviderCertificates(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *providerName, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
 {
     return 0;
 }
 
-int32_t HksServiceExportCertificate(const struct HksProcessInfo *processInfo, const struct HksBlob *index, const struct HksParamSet *paramSetIn, 
-    struct HksExtCertInfoSet *certSet) 
+int32_t HksServiceExportCertificate(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
+    const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
 {
     return 0;
 }
 
-int32_t HksServiceAuthUkeyPin(const struct HksProcessInfo *processInfo, const struct HksBlob *index, const struct HksParamSet *paramSetIn, int32_t *outStatus, uint32_t *retryCount)
+int32_t HksServiceAuthUkeyPin(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
+    const struct HksParamSet *paramSetIn, int32_t *outStatus, uint32_t *retryCount)
 {
     return 0;
 }
@@ -598,7 +599,8 @@ int32_t HksServiceOpenRemoteHandle(const struct HksProcessInfo *processInfo, con
     return 0;
 }
 
-int32_t HksServiceGetUkeyPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index, const struct HksParamSet *paramSetIn, int32_t *status)
+int32_t HksServiceGetUkeyPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
+    const struct HksParamSet *paramSetIn, int32_t *status)
 {
     return 0;
 }

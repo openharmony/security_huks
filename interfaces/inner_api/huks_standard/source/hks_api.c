@@ -97,7 +97,8 @@ HKS_API_EXPORT int32_t HksUnregisterProvider(const struct HksBlob *name, const s
 #endif
 }
 
-HKS_API_EXPORT int32_t HksExportProviderCertificates(const struct HksBlob *providerName, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
+HKS_API_EXPORT int32_t HksExportProviderCertificates(const struct HksBlob *providerName,
+    const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter HksExportProviderCertificates");
@@ -115,7 +116,8 @@ HKS_API_EXPORT int32_t HksExportProviderCertificates(const struct HksBlob *provi
 #endif
 }
 
-HKS_API_EXPORT int32_t HksExportCertificate(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
+HKS_API_EXPORT int32_t HksExportCertificate(const struct HksBlob *resourceId,
+    const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter HksExportCertificate");
@@ -133,7 +135,8 @@ HKS_API_EXPORT int32_t HksExportCertificate(const struct HksBlob *resourceId, co
 #endif
 }
 
-HKS_API_EXPORT int32_t HksAuthUkeyPin(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn, uint32_t *retryCount)
+HKS_API_EXPORT int32_t HksAuthUkeyPin(const struct HksBlob *resourceId,
+    const struct HksParamSet *paramSetIn, uint32_t *retryCount)
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter AuthUkeyPin");
@@ -151,7 +154,8 @@ HKS_API_EXPORT int32_t HksAuthUkeyPin(const struct HksBlob *resourceId, const st
 #endif
 }
 
-HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn, int32_t *status)
+HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *resourceId,
+    const struct HksParamSet *paramSetIn, int32_t *status)
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter GetUkeyPinAuthState");
@@ -169,7 +173,8 @@ HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *resourceId, 
 #endif
 }
 
-HKS_API_EXPORT int32_t HksOpenRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
+HKS_API_EXPORT int32_t HksOpenRemoteHandle(const struct HksBlob *resourceId,
+    const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter OpenRemoteHandle");
@@ -187,7 +192,8 @@ HKS_API_EXPORT int32_t HksOpenRemoteHandle(const struct HksBlob *resourceId, con
 #endif
 }
 
-HKS_API_EXPORT int32_t HksGetRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
+HKS_API_EXPORT int32_t HksGetRemoteHandle(const struct HksBlob *resourceId,
+    const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter GetRemoteHandle");
@@ -204,7 +210,8 @@ HKS_API_EXPORT int32_t HksGetRemoteHandle(const struct HksBlob *resourceId, cons
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
-HKS_API_EXPORT int32_t HksCloseRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn)
+HKS_API_EXPORT int32_t HksCloseRemoteHandle(const struct HksBlob *resourceId,
+    const struct HksParamSet *paramSetIn)
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter CloseRemoteHandle");
@@ -278,7 +285,8 @@ HKS_API_EXPORT int32_t HksUkeyVerify(const struct HksBlob *resourceId, const str
 #endif
 }
 
-HKS_API_EXPORT int32_t HksGetRemoteProperty(const struct HksBlob *resourceId, const struct HksBlob *propertyId, const struct HksParamSet *paramSetIn, struct HksParamSet *propertySetOut)
+HKS_API_EXPORT int32_t HksGetRemoteProperty(const struct HksBlob *resourceId, const struct HksBlob *propertyId,
+    const struct HksParamSet *paramSetIn, struct HksParamSet *propertySetOut)
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter GetRemoteProperty");
@@ -354,7 +362,6 @@ static int32_t CheckifNeedOverrideKey(const struct HksBlob *keyAlias,
             return ret;
         }
     }
-    
     return HKS_SUCCESS;
 }
 

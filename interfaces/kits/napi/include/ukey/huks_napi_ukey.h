@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #ifndef HUKS_NAPI_UKEY_H
 #define HUKS_NAPI_UKEY_H
 
@@ -9,14 +24,6 @@
 
 namespace HuksNapiItem
 {
-
-#define NAPI_TYPE_CHECK(env, valueType, expectType, code, msg) \
-    if ((valueType) != (expectType))                           \
-    {                                                          \
-        HksNapiThrow((env), (code), (msg));                    \
-        HKS_LOG_E("%s", (msg));                                \
-        return nullptr;                                        \
-    }
 
 #define NAPI_CALL_RETURN_ERR(env, ret)   \
     if ((ret) != napi_ok)                \
@@ -42,25 +49,21 @@ namespace HuksNapiItem
 class AsyncContext
 {
 public:
-    virtual ~AsyncContext()
+    virtual ~AsyncContext() 
     {
-        if (asyncWork != nullptr && env != nullptr)
-        {
+        if (asyncWork != nullptr && env != nullptr) {
             napi_delete_async_work(env, asyncWork);
         }
 
-        if (callback != nullptr)
-        {
+        if (callback != nullptr) {
             napi_delete_reference(env, callback);
             callback = nullptr;
         }
 
-        if (paramSetIn != nullptr)
-        {
+        if (paramSetIn != nullptr) {
             HksFreeParamSet(&paramSetIn);
         }
-        if (paramSetOut != nullptr)
-        {
+        if (paramSetOut != nullptr) {
             HksFreeParamSet(&paramSetOut);
         }
     }
@@ -84,8 +87,7 @@ class ProviderRegContext : public AsyncContext
 public:
     ~ProviderRegContext()
     {
-        if (name != nullptr)
-        {
+        if (name != nullptr) {
             FreeHksBlob(name);
         }
     }
@@ -97,8 +99,7 @@ class UkeyPinContext : public AsyncContext
 public:
     ~UkeyPinContext()
     {
-        if (index != nullptr)
-        {
+        if (index != nullptr) {
             FreeHksBlob(index);
         }
     }

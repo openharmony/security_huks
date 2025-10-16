@@ -42,16 +42,6 @@ struct HksSuccessReturnResult {
     int32_t outStatus;
 };
 
-// struct HksExternalCrypoResult {
-//     bool isOnlyReturnBoolResult;
-//     bool boolReturned;
-//     struct HksBlob *handle;
-//     struct HksBlob *challenge;
-//     struct HksBlob *outData;
-//     HksParamSet *paramSet;
-//     struct HksCertChain *certChain;
-// };
-
 struct HksSuccessListAliasesResult {
     struct HksKeyAliasSet *aliasSet;
 };

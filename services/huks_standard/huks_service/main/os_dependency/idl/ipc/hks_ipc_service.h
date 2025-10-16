@@ -29,7 +29,7 @@ void HksIpcServiceUnregisterProvider(const struct HksBlob *srcData, const uint8_
 
 void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *context);
 
-void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8_t *context); 
+void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8_t *context);
 
 void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t *context);
 
