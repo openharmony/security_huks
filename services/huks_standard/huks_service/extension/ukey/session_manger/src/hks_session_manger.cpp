@@ -33,6 +33,7 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_json_wrapper.h"
+#include "hks_template.h"
 namespace OHOS {
 namespace Security {
 namespace Huks {
@@ -90,10 +91,11 @@ int32_t HksSessionManager::ExtensionInitSession(const HksProcessInfo &processInf
     if (proxy == nullptr) {
         return ret;
     }
-    (void)proxy->InitSession(sIndexHandle, paramSet, sessionHandle, ret);
+    auto ipcCode = proxy->InitSession(sIndexHandle, paramSet, sessionHandle, ret);
+    HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy InitSession ipcCode: %" LOG_PUBLIC "d", ipcCode)
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("InitSession get handle failed: %" LOG_PUBLIC "d", ret);
-        return HKS_ERROR_UKY_INIT_SESSION_FAIL;
+        return HKS_ERROR_REMOTE_OPERATION_FAILED;
     }
     auto random = GenRandomUint32();
     if (random.first != HKS_SUCCESS) {
@@ -123,10 +125,11 @@ int32_t HksSessionManager::ExtensionUpdateSession(const HksProcessInfo &processI
         HKS_LOG_E("GetExtensionProxy failed: %" LOG_PUBLIC "d", ret);
         return ret;
     }
-    (void)proxy->UpdateSession(handleInfo.second, paramSet, inData, outData, ret);
+    auto ipcCode = proxy->UpdateSession(handleInfo.second, paramSet, inData, outData, ret);
+    HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy UpdateSession ipcCode: %" LOG_PUBLIC "d", ipcCode)
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("UpdateSession failed: %" LOG_PUBLIC "d", ret);
-        return HKS_ERROR_UKY_UPDATE_SESSION_FAIL;
+        return HKS_ERROR_REMOTE_OPERATION_FAILED;
     }
     return HKS_SUCCESS;
 }
@@ -145,10 +148,11 @@ int32_t HksSessionManager::ExtensionFinishSession(const HksProcessInfo &processI
         HKS_LOG_E("GetExtensionProxy failed: %" LOG_PUBLIC "d", ret);
         return ret;
     }
-    (void)proxy->FinishSession(handleInfo.second, paramSet, inData, outData, ret);
+    auto ipcCode = proxy->FinishSession(handleInfo.second, paramSet, inData, outData, ret);
+    HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy FinishSession ipcCode: %" LOG_PUBLIC "d", ipcCode)
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("FinishSession failed: %" LOG_PUBLIC "d", ret);
-        return HKS_ERROR_UKY_FINISH_SESSION_FAIL;
+        return HKS_ERROR_REMOTE_OPERATION_FAILED;
     }
     m_handlers.Erase(handle);
     return HKS_SUCCESS;

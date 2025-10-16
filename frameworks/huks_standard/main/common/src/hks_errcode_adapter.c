@@ -711,6 +711,13 @@ static struct HksError g_errCodeTable[] = {
             .errorMsg = "The auth pin is not correct.",
             .data = NULL
         }
+    }, {
+        .innerErrCode = HKS_ERROR_REMOTE_OPERATION_FAILED,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
+            .errorMsg = "The auth pin is not correct.",
+            .data = NULL
+        }
     }
 };
 
