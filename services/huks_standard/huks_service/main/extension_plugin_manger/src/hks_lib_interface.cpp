@@ -91,18 +91,6 @@ int32_t HuksLibInterface::OnCreateRemoteKeyHandle(const HksProcessInfo &processI
     return HKS_SUCCESS;
 }
 
-// int32_t HuksLibInterface::OnFindRemoteKeyHandle(const std::string &index, std::string &keyIndex) {
-//     bool isFindMethod = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_FIND_REMOTE_KEY_HANDLE);
-//     HKS_IF_TRUE_LOGE_RETURN(isFindMethod, HKS_ERROR_FIND_FUNC_MAP_FAIL,
-//         "FindRemoteKeyHandle method enum not found in plugin provider map.")
-    
-//     int32_t ret = (*reinterpret_cast<OnFindRemoteKeyHandleFunc>(funcPtr))();
-//     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
-//         "FindRemoteKeyHandle fail, ret = %{public}d", ret)
-//     HKS_LOG_I("Find remote key handle success")
-//     return HKS_SUCCESS;
-// }
-
 int32_t HuksLibInterface::OnCloseRemoteKeyHandle(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet)
 {
@@ -117,19 +105,7 @@ int32_t HuksLibInterface::OnCloseRemoteKeyHandle(const HksProcessInfo &processIn
     return HKS_SUCCESS;
 }
 
-// int32_t HuksLibInterface::OnSigned(const std::string &index, const CppParamSet& paramSet, std::vector<uint8_t> &outData) {
-//     bool isFindMethod = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_SIGNED);
-//     HKS_IF_TRUE_LOGE_RETURN(isFindMethod, HKS_ERROR_FIND_FUNC_MAP_FAIL,
-//         "Signed method enum not found in plugin provider map.")
-    
-//     int32_t ret = (*reinterpret_cast<OnSignedFunc>(funcPtr))();
-//     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
-//         "Signed fail, ret = %{public}d", ret)
-//     HKS_LOG_I("sign success")
-//     return HKS_SUCCESS;
-// }
-
-int32_t HuksLibInterface::OnAuthUkeyPin(const HksProcessInfo &processInfo, 
+int32_t HuksLibInterface::OnAuthUkeyPin(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t &retryCnt)
 {
     void *funcPtr = nullptr;
@@ -184,18 +160,6 @@ int32_t HuksLibInterface::OnGetRemoteProperty(const HksProcessInfo &processInfo,
     HKS_LOG_I("get remote property success");
     return HKS_SUCCESS;
 }
-
-// int32_t HuksLibInterface::OnListProviders(std::vector<uint8_t> &providersOut) {
-//     bool isFindMethod = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_LIST_PROVIDER);
-//     HKS_IF_TRUE_LOGE_RETURN(isFindMethod, HKS_ERROR_FIND_FUNC_MAP_FAIL,
-//         "ListProviders method enum not found in plugin provider map.")
-    
-//     int32_t ret = (*reinterpret_cast<OnListProvidersFunc>(funcPtr))();
-//     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
-//         "ListProviders fail, ret = %{public}d", ret)
-//     //HKS_LOG_I("list providers success")
-//     return HKS_SUCCESS;
-// }
 
 int32_t HuksLibInterface::OnExportCertificate(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet, std::string &certsJson)

@@ -43,8 +43,7 @@ public:
 private: 
     std::condition_variable proxyConv_;
     std::mutex proxyMutex_;
-    sptr<ExtensionConnection> m_conn;
-    std::atomic<bool> isConnected_ = {false}; // 供provider检测连接状态
+    std::atomic<bool> isConnected_ = {false};
     std::mutex deathRecipientMutex_;
     sptr<IRemoteObject::DeathRecipient> callerDeathRecipient_ = nullptr;
     sptr<IHuksAccessExtBase> extConnectProxy;

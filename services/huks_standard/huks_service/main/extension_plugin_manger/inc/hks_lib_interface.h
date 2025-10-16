@@ -45,10 +45,8 @@ public:
     int32_t OnCreateRemoteIndex(const std::string &providerName, const CppParamSet &paramSet, std::string &outIndex);
     int32_t OnCreateRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet, std::string &handle);
-    //int32_t OnFindRemoteKeyHandle(const std::string &index, std::string &keyIndex);
     int32_t OnCloseRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet);
-    // int32_t OnSigned(const std::string &index, const CppParamSet& paramSet, std::vector<uint8_t> &outData);
     int32_t OnAuthUkeyPin(const HksProcessInfo &processInfo,
         const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t &retryCnt);
     int32_t OnGetVerifyPinStatus(const HksProcessInfo &processInfo,
@@ -56,7 +54,6 @@ public:
     int32_t OnClearUkeyPinAuthStatus(const HksProcessInfo &processInfo, const std::string &index);
     int32_t OnGetRemoteProperty(const HksProcessInfo &processInfo, const std::string &index,
         const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams);
-    //int32_t OnListProviders(std::vector<uint8_t> &providersOut);
     int32_t OnExportCertificate(const HksProcessInfo &processInfo,
         const std::string &index, const CppParamSet &paramSet, std::string &certsJson);
     int32_t OnExportProviderAllCertificates(const HksProcessInfo &processInfo,

@@ -26,7 +26,7 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 
-enum class PluginMethodEnum{
+enum class PluginMethodEnum {
     FUNC_ON_UN_REGISTER_PROVIDER = 0,
     FUNC_ON_REGISTER_PROVIDER,
 
@@ -35,13 +35,10 @@ enum class PluginMethodEnum{
     FUNC_ON_CLOSE_REMOTE_KEY_HANDLE,
     FUNC_ON_AUTH_UKEY_PIN,
     FUNC_ON_GET_VERIFY_PIN_STATUS,
-    
-    // FUNC_ON_FIND_REMOTE_KEY_HANDLE,
-    // FUNC_ON_SIGNED,
+
     FUNC_ON_CLEAR_PIN_STATUS,
     FUNC_ON_GET_REMOTE_PROPERTY,
 
-    // FUNC_ON_LIST_PROVIDER,
     FUNC_ON_LIST_INDEX_CERTIFICATE,
     FUNC_ON_LIST_PROVIDER_ALL_CERTIFICATE,
     FUNC_ON_INIT_SESSION,
