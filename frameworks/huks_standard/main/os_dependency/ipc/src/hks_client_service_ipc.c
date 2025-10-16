@@ -219,7 +219,7 @@ int32_t HksClientUnregisterProvider(const struct HksBlob *name, const struct Hks
     return ret;
 }
 
-int32_t HksClientExportProviderCertificates(const struct HksBlob *name, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet) 
+int32_t HksClientExportProviderCertificates(const struct HksBlob *providerName, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet) 
 {
     if(certSet == NULL || certSet->certs != NULL || certSet->count != 0) {
         // TODO:错误码怎么写
@@ -231,26 +231,26 @@ int32_t HksClientExportProviderCertificates(const struct HksBlob *name, const st
     struct HksBlob inBlob = { 0, NULL };
     struct HksBlob outBlob = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
-    struct HksBlob newName = { 0, NULL };
+    struct HksBlob newProviderName = { 0, NULL };
     // TODO:这个地方提前申请多大的内存合适
     outBlob.size = MAX_OUT_BLOB_SIZE;
     outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
     HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
 
     do {
-        ret = BuildBlobNotNull(name, &newName);
+        ret = BuildBlobNotNull(providerName, &newProviderName);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "BuildBlobNotNull fail, ret=%" LOG_PUBLIC "d", ret);
 
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret);
 
-        ret = HksAllocInBlob(&inBlob, &newName, newParamSet);
+        ret = HksAllocInBlob(&inBlob, &newProviderName, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
-        ret = HksCheckIpcBlobAndParamSet(&newName, newParamSet);
+        ret = HksCheckIpcOptionalBlobAndParamSet(&newProviderName, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientExportProviderCertificates fail");
 
-        ret = HksUKeyGeneralPack(&newName, newParamSet, &inBlob);
+        ret = HksUKeyGeneralPack(&newProviderName, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksExportProviderCertificatesPack fail");
 
         ret = HksSendRequest(HKS_MSG_EXT_EXPORT_PROVIDER_CERTIFICATES, &inBlob, &outBlob, newParamSet);
@@ -265,7 +265,7 @@ int32_t HksClientExportProviderCertificates(const struct HksBlob *name, const st
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
     HKS_FREE_BLOB(outBlob);
-    HKS_FREE_BLOB(newName);
+    HKS_FREE_BLOB(newProviderName);
     return 0;
 }
 
@@ -281,26 +281,22 @@ int32_t HksClientExportCertificate(const struct HksBlob *index,
     struct HksBlob inBlob  = { 0, NULL };
     struct HksBlob outBlob = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
-    struct HksBlob newIndex = { 0, NULL };
 
     outBlob.size = MAX_OUT_BLOB_SIZE;
     outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
     HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
 
     do {
-        ret = BuildBlobNotNull(index, &newIndex);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "BuildBlobNotNull fail, ret=%" LOG_PUBLIC "d", ret);
-
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "BuildParamSetNotNull fail, ret=%" LOG_PUBLIC "d", ret);
 
-        ret = HksAllocInBlob(&inBlob, &newIndex, newParamSet);
+        ret = HksAllocInBlob(&inBlob, index, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAllocInBlob fail");
 
-        ret = HksCheckIpcBlobAndParamSet(&newIndex, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(index, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Check blob+paramSet fail");
 
-        ret = HksUKeyGeneralPack(&newIndex, newParamSet, &inBlob);
+        ret = HksUKeyGeneralPack(index, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Pack fail");
 
         ret = HksSendRequest(HKS_MSG_EXT_EXPORT_CERTIFICATE, &inBlob, &outBlob, newParamSet);
@@ -317,7 +313,6 @@ int32_t HksClientExportCertificate(const struct HksBlob *index,
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
     HKS_FREE_BLOB(outBlob);
-    HKS_FREE_BLOB(newIndex);
     return ret;
 }
 

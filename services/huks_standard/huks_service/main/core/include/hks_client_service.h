@@ -44,7 +44,7 @@ int32_t HksServiceRegisterProvider(const struct HksProcessInfo *processInfo, con
 int32_t HksServiceUnregisterProvider(const struct HksProcessInfo *processInfo, const struct HksBlob *name,
     const struct HksParamSet *paramSetIn);
 
-int32_t HksServiceExportProviderCertificates(const struct HksProcessInfo *processInfo, const struct HksBlob *index, const struct HksParamSet *paramSetIn, 
+int32_t HksServiceExportProviderCertificates(const struct HksProcessInfo *processInfo, const struct HksBlob *providerName, const struct HksParamSet *paramSetIn, 
 struct HksExtCertInfoSet *certSet);
 
 int32_t HksServiceExportCertificate(const struct HksProcessInfo *processInfo, const struct HksBlob *index, const struct HksParamSet *paramSetIn, 

@@ -57,6 +57,18 @@ int32_t HksCheckIpcBlob(const struct HksBlob *blob)
     return HKS_SUCCESS;
 }
 
+int32_t HksCheckIpcOptionalBlobAndParamSet(const struct HksBlob *blob,
+    const struct HksParamSet *paramSet)
+{
+    if(blob == NULL) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    if (blob->data == NULL || blob->size == 0) {
+        return HksCheckParamSetValidity(paramSet);
+    }
+    return HksCheckIpcBlobAndParamSet(blob, paramSet);
+}
+
 int32_t HksCheckIpcGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn)
 {
     int32_t ret = HksCheckBlobAndParamSet(keyAlias, paramSetIn);
