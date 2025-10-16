@@ -33,8 +33,9 @@ void HuksPluginLoader::ReleaseInstance()
     HuksPluginLoader::DestroyInstance();
 }
 
-int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const std::string& providerName,
-    const CppParamSet& paramSet) {
+int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const std::string &providerName,
+    const CppParamSet &paramSet)
+{
     std::lock_guard<std::mutex> lock(libMutex);
     HKS_IF_TRUE_RETURN(m_pluginHandle != nullptr, HKS_SUCCESS)
 
@@ -48,7 +49,7 @@ int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const s
             HKS_LOG_E("the entry %{public}s is not include", pluginSo.c_str());
             dlclose(m_pluginHandle);
             m_pluginHandle = nullptr;
-            m_pluginProviderMap.clear();
+            m_pluginProviderMap.Clear();
             return HKS_ERROR_FIND_FUNC_MAP_FAIL;
         }
 
@@ -56,14 +57,14 @@ int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const s
         void* func = dlsym(m_pluginHandle, methodString.c_str());
         const char *dlsym_error = dlerror();
         if (dlsym_error != nullptr) {
-            HKS_LOG_E("failed to find entry %{public}s in dynamic link liberary, error is %{public}s",
+            HKS_LOG_E("failed to Find entry %{public}s in dynamic link liberary, error is %{public}s",
                 methodString.c_str(), dlsym_error);
             dlclose(m_pluginHandle);
             m_pluginHandle= nullptr;
-            m_pluginProviderMap.clear();
+            m_pluginProviderMap.Clear();
             return HKS_ERROR_GET_FUNC_POINTER_FAIL;
         }
-        m_pluginProviderMap.emplace(std::make_pair(static_cast<PluginMethodEnum>(i), func));
+        m_pluginProviderMap.Insert(static_cast<PluginMethodEnum>(i), func);
     }
 
     auto libInstance = HuksLibInterface::GetInstanceWrapper();
@@ -72,25 +73,29 @@ int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const s
     return HKS_SUCCESS;
 }
 
-int32_t HuksPluginLoader::UnLoadPlugins(const struct HksProcessInfo &info, const std::string& providerName,
-    const CppParamSet& paramSet) {
+int32_t HuksPluginLoader::UnLoadPlugins(const struct HksProcessInfo &info, const std::string &providerName,
+    const CppParamSet &paramSet)
+{
     std::lock_guard<std::mutex> lock(libMutex);
     HKS_IF_TRUE_RETURN(m_pluginHandle == nullptr, HKS_SUCCESS)
 
-    m_pluginProviderMap.clear();
+    m_pluginProviderMap.Clear();
     dlclose(m_pluginHandle);
     m_pluginHandle = nullptr;
     return HKS_SUCCESS;
 }
 
-std::string HuksPluginLoader::GetMethodByEnum(PluginMethodEnum methodEnum) {
-    const auto& it = m_pluginMethodNameMap.find(methodEnum);
-    HKS_IF_TRUE_RETURN(it != m_pluginMethodNameMap.end(), it->second)
-    HKS_LOG_E("enum = %{public}d can not find string", methodEnum);
+std::string HuksPluginLoader::GetMethodByEnum(PluginMethodEnum methodEnum)
+{
+    std::string methodString = "";
+    bool isFind = m_pluginMethodNameMap.Find(methodEnum, methodString);
+    HKS_IF_TRUE_RETURN(isFind, methodString)
+    HKS_LOG_E("enum = %{public}d can not Find string", methodEnum);
     return "";
 }
 
-void HuksPluginLoader::SetPluginPath(std::string& pluginPath) {
+void HuksPluginLoader::SetPluginPath(std::string &pluginPath)
+{
     pluginSo = pluginPath;
 }
 

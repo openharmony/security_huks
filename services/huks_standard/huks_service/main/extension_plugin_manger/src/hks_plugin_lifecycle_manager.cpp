@@ -20,16 +20,19 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 
-std::shared_ptr<HuksPluginLifeCycleMgr> HuksPluginLifeCycleMgr::GetInstanceWrapper() {
+std::shared_ptr<HuksPluginLifeCycleMgr> HuksPluginLifeCycleMgr::GetInstanceWrapper()
+{
     return HuksPluginLifeCycleMgr::GetInstance();
 }
 
-void HuksPluginLifeCycleMgr::ReleaseInstance() {
+void HuksPluginLifeCycleMgr::ReleaseInstance()
+{
     HuksPluginLifeCycleMgr::DestroyInstance();
 }
 
-int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &info, const std::string& providerName,
-    const CppParamSet& paramSet){
+int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &info,
+    const std::string &providerName, const CppParamSet &paramSet)
+{
     int32_t ret;
     int preCount = m_refCount.fetch_add(1, std::memory_order_acq_rel);
     if (preCount == 0) {
@@ -54,8 +57,9 @@ int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &in
     return ret;
 }
 
-int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &info, const std::string& providerName,
-    const CppParamSet& paramSet) {
+int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &info, const std::string &providerName,
+    const CppParamSet &paramSet)
+{
     int preCount = m_refCount.fetch_sub(1, std::memory_order_acq_rel);
     auto libInstance = HuksLibInterface::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(libInstance == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")

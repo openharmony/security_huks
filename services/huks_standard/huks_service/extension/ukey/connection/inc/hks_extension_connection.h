@@ -39,11 +39,11 @@ public:
     sptr<IHuksAccessExtBase> GetExtConnectProxy();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
 
-private: 
+private:
     std::condition_variable proxyConv_;
     std::mutex proxyMutex_;
     bool isReady = false;
-    std::atomic<bool> isConnected_ = {false}; // 供provider检测连接状态
+    std::atomic<bool> isConnected_ = {false};
     std::mutex deathRecipientMutex_;
     sptr<IRemoteObject::DeathRecipient> callerDeathRecipient_ = nullptr;
     sptr<IHuksAccessExtBase> extConnectProxy;
