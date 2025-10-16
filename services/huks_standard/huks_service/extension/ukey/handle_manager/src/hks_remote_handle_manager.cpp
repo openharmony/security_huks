@@ -113,8 +113,8 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
 
     auto providerNameObj = root.GetValue(PROVIDER_NAME_KEY);
     auto abilityNameObj = root.GetValue(ABILITY_NAME_KEY);
-    auto bundleNameObj = root.GetValue(BUNDLE_NAME_KEY);  
-    HKS_IF_TRUE_LOGE_RETURN(providerNameObj.IsNull() || abilityNameObj.IsNull() || 
+    auto bundleNameObj = root.GetValue(BUNDLE_NAME_KEY);
+    HKS_IF_TRUE_LOGE_RETURN(providerNameObj.IsNull() || abilityNameObj.IsNull() ||
         bundleNameObj.IsNull(), HKS_ERROR_JSON_MISSING_KEY, "Required provider info fields are missing")
     auto providerNameResult = providerNameObj.ToString();
     auto abilityNameResult = abilityNameObj.ToString();

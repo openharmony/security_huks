@@ -68,7 +68,6 @@ std::string BlobToString(const HksBlob &strBlob)
 
 int32_t StringToCertInfo(const std::string &certInfoJson, struct HksExtCertInfo& certInfo)
 {
-    
     HKS_IF_TRUE_LOGE_RETURN(certInfoJson.empty(), HKS_ERROR_INVALID_ARGUMENT,
         "Input json string is empty")
     auto jsonObj = CommJsonObject::Parse(certInfoJson);
@@ -91,7 +90,7 @@ int32_t StringToCertInfo(const std::string &certInfoJson, struct HksExtCertInfo&
             "Index field is not string")
         
         auto result = indexObj.ToString();
-        HKS_IF_NOT_SUCC_LOGE_RETURN(result.first, result.first, 
+        HKS_IF_NOT_SUCC_LOGE_RETURN(result.first, result.first,
             "Get index string failed, ret: %" LOG_PUBLIC "d", result.first)
         
         certInfo.index = StringToBlob(result.second);
@@ -115,34 +114,28 @@ int32_t StringToCertInfo(const std::string &certInfoJson, struct HksExtCertInfo&
 int32_t CertInfoToString(const struct HksExtCertInfo& certInfo, std::string& jsonStr)
 {
     jsonStr.clear();
-    
     auto jsonObj = CommJsonObject::CreateObject();
-    HKS_IF_TRUE_LOGE_RETURN(jsonObj.IsNull(), HKS_ERROR_MALLOC_FAIL, 
+    HKS_IF_TRUE_LOGE_RETURN(jsonObj.IsNull(), HKS_ERROR_MALLOC_FAIL,
         "Create json object failed");
-    
     if (!jsonObj.SetValue("purpose", certInfo.purpose)) {
         HKS_LOG_E("Set purpose value failed");
         return HKS_ERROR_INTERNAL_ERROR;
     }
     
     std::string index = BlobToString(certInfo.index);
-    
     if (!jsonObj.SetValue("index", index)) {
         HKS_LOG_E("Set index value failed");
         return HKS_ERROR_INTERNAL_ERROR;
     }
-    
     std::string cert = BlobToString(certInfo.cert);
-    
     if (!jsonObj.SetValue("cert", cert)) {
         HKS_LOG_E("Set cert value failed");
         return HKS_ERROR_INTERNAL_ERROR;
     }
     
     jsonStr = jsonObj.Serialize();
-    HKS_IF_TRUE_LOGE_RETURN(jsonStr.empty(), HKS_ERROR_INTERNAL_ERROR, 
+    HKS_IF_TRUE_LOGE_RETURN(jsonStr.empty(), HKS_ERROR_INTERNAL_ERROR,
         "Serialize json object failed")
-    
     return HKS_SUCCESS;
 }
 
@@ -161,7 +154,7 @@ int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCert
     certSet.certs = (HksExtCertInfo*)HksMalloc(arraySize * sizeof(HksExtCertInfo));
     HKS_IF_NULL_LOGE_RETURN(certSet.certs, HKS_ERROR_MALLOC_FAIL,
         "Malloc for cert set failed, size: %" LOG_PUBLIC "d", arraySize)
-    int32_t ret = memset_s(certSet.certs, arraySize * sizeof(HksExtCertInfo), 0, 
+    int32_t ret = memset_s(certSet.certs, arraySize * sizeof(HksExtCertInfo), 0,
         arraySize * sizeof(HksExtCertInfo));
     HKS_IF_TRUE_LOGE_RETURN(ret != EOK, HKS_ERROR_INVALID_OPERATION,
         "memset_s for cert set failed, ret: %" LOG_PUBLIC "d", ret)
@@ -200,7 +193,7 @@ int32_t CertInfoSetToJsonArray(const struct HksExtCertInfoSet& certSet, std::str
         "Input cert set is empty")
     
     auto jsonArray = CommJsonObject::CreateArray();
-    HKS_IF_TRUE_LOGE_RETURN(jsonArray.IsNull(), HKS_ERROR_MALLOC_FAIL, 
+    HKS_IF_TRUE_LOGE_RETURN(jsonArray.IsNull(), HKS_ERROR_MALLOC_FAIL,
         "Create json array failed")
     
     for (uint32_t i = 0; i < certSet.count; i++) {
@@ -218,14 +211,11 @@ int32_t CertInfoSetToJsonArray(const struct HksExtCertInfoSet& certSet, std::str
             HKS_LOG_E("Set index value failed for index %u", i);
             return HKS_ERROR_INTERNAL_ERROR;
         }
-        
         std::string cert = BlobToString(certSet.certs[i].cert);
-        
         if (!certInfoObj.SetValue("cert", cert)) {
             HKS_LOG_E("Set cert value failed for index %u", i);
             return HKS_ERROR_INTERNAL_ERROR;
         }
-        
         if (!jsonArray.AppendElement(certInfoObj)) {
             HKS_LOG_E("Append element %u to array failed", i);
             return HKS_ERROR_INTERNAL_ERROR;
