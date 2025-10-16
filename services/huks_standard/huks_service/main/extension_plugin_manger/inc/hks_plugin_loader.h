@@ -41,19 +41,21 @@ namespace Huks {
 
 class HuksPluginLoader : private OHOS::DelayedSingleton<HuksPluginLoader> {
 public:
-    std::unordered_map<PluginMethodEnum, void*> m_pluginProviderMap;
-    int32_t LoadPlugins(const struct HksProcessInfo &info, const std::string& providerName,
-        const CppParamSet& paramSet);
-    int32_t UnLoadPlugins(const struct HksProcessInfo &info, const std::string& providerName,
-        const CppParamSet& paramSet);
+    OHOS::SafeMap<PluginMethodEnum, void*> m_pluginProviderMap;
+    OHOS::SafeMap<PluginMethodEnum, std::string> m_pluginMethodNameMap;
+    int32_t LoadPlugins(const struct HksProcessInfo &info, const std::string &providerName,
+        const CppParamSet &paramSet);
+    int32_t UnLoadPlugins(const struct HksProcessInfo &info, const std::string &providerName,
+        const CppParamSet &paramSet);
     static std::shared_ptr<HuksPluginLoader> GetInstanceWrapper();
     static void ReleaseInstance();
-    void SetPluginPath(std::string& pluginPath);
+    void SetPluginPath(std::string &pluginPath);
+    void InitMethodNameMap();
     
 private:
     void* m_pluginHandle = nullptr;
     std::mutex libMutex;
-    static std::string GetMethodByEnum(PluginMethodEnum methodEnum);
+    std::string GetMethodByEnum(PluginMethodEnum methodEnum);
     
 };
 }

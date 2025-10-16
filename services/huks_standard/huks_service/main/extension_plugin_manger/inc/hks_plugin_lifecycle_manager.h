@@ -30,15 +30,15 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
-class __attribute__((visibility("default"))) HuksPluginLifeCycleMgr :
-    private OHOS::DelayedSingleton<HuksPluginLifeCycleMgr>{
+class __attribute__((visibility("default"))) HuksPluginLifeCycleMgr : 
+    private OHOS::DelayedSingleton<HuksPluginLifeCycleMgr> {
 public:
     static std::shared_ptr<HuksPluginLifeCycleMgr> GetInstanceWrapper();
     static void ReleaseInstance();
     int32_t RegisterProvider(const struct HksProcessInfo &info, const std::string &AbilityName,
-        const CppParamSet& paramSet);
+        const CppParamSet &paramSet);
     int32_t UnRegisterProvider(const struct HksProcessInfo &info, const std::string &AbilityName,
-        const CppParamSet& paramSet);
+        const CppParamSet &paramSet);
 
 private:
     std::atomic<int> m_refCount{0};

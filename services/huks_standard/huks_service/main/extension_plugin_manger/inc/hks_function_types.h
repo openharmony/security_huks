@@ -25,7 +25,7 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 
-enum class PluginMethodEnum{
+enum class PluginMethodEnum {
     FUNC_ON_REGISTER_PROVIDER,
     FUNC_ON_UN_REGISTER_PROVIDER,
 
@@ -47,26 +47,6 @@ enum class PluginMethodEnum{
     COUNT = 14,
 };
 
-static const std::map<PluginMethodEnum, std::string> m_pluginMethodNameMap = {
-    {PluginMethodEnum::FUNC_ON_REGISTER_PROVIDER, "_ZN4OHOS8Security4Huks30HksExtPluginOnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet"},
-    {PluginMethodEnum::FUNC_ON_UN_REGISTER_PROVIDER, "_ZN4OHOS8Security4Huks32HksExtPluginOnUnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet"},
-    {PluginMethodEnum::FUNC_ON_CREATE_REMOTE_INDEX, "_ZN4OHOS8Security4Huks31HksExtPluginOnCreateRemoteIndexERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_"},
-    {PluginMethodEnum::FUNC_ON_CREATE_REMOTE_KEY_HANDLE, "_ZN4OHOS8Security4Huks30HksExtPluginOnOpemRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_"},
-    {PluginMethodEnum::FUNC_ON_CLOSE_REMOTE_KEY_HANDLE, "_ZN4OHOS8Security4Huks31HksExtPluginOnCloseRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet"},
-    {PluginMethodEnum::FUNC_ON_AUTH_UKEY_PIN, "_ZN4OHOS8Security4Huks25HksExtPluginOnAuthUkeyPinERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRiRj"},
-    {PluginMethodEnum::FUNC_ON_GET_VERIFY_PIN_STATUS, "_ZN4OHOS8Security4Huks33HksExtPluginOnGetUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRi"},
-    // {PluginMethodEnum::FUNC_ON_FIND_REMOTE_KEY_HANDLE, ""},
-    // {PluginMethodEnum::FUNC_ON_SIGNED, ""},
-    {PluginMethodEnum::FUNC_ON_CLEAR_PIN_STATUS, "_ZN4OHOS8Security4Huks24HksClearUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEE"},
-    {PluginMethodEnum::FUNC_ON_GET_REMOTE_PROPERTY, "_ZN4OHOS8Security4Huks20HksGetRemotePropertyERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEESD_RK11CppParamSetRSE_"},
-    // {PluginMethodEnum::FUNC_ON_LIST_PROVIDER, ""},
-    {PluginMethodEnum::FUNC_ON_LIST_INDEX_CERTIFICATE, "_ZN4OHOS8Security4Huks29HksExtPluginOnExportCerticateERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_"},
-    {PluginMethodEnum::FUNC_ON_LIST_PROVIDER_ALL_CERTIFICATE, "_ZN4OHOS8Security4Huks38HksExtPluginOnExportProviderCerticatesERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_"},
-    {PluginMethodEnum::FUNC_ON_INIT_SESSION, "_ZN4OHOS8Security4Huks25HksExtPluginOnInitSessionERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRj"},
-    {PluginMethodEnum::FUNC_ON_UPDATE_SESSION, "_ZN4OHOS8Security4Huks27HksExtPluginOnUpdateSessionERK14HksProcessInfoRKjRK11CppParamSetRKNSt3__h6vectorIhNSA_9allocatorIhEEEERSE_"},
-    {PluginMethodEnum::FUNC_ON_FINISH_SESSION, "_ZN4OHOS8Security4Huks27HksExtPluginOnFinishSessionERK14HksProcessInfoRKjRK11CppParamSetRKNSt3__h6vectorIhNSA_9allocatorIhEEEERSE_"}
-};
-
 using OnRegisterProviderFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &providerName,
     const CppParamSet &paramSet);
 using OnUnRegisterProviderFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &providerName,
@@ -85,7 +65,6 @@ using OnGetVerifyPinStatusFunc = int32_t (*)(const HksProcessInfo &processInfo,
 using OnClearUkeyPinAuthStatusFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index);
 using OnGetRemotePropertyFunc = int32_t (*)(const HksProcessInfo &processInfo,
     const std::string &index, const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams);
-// using OnListProvidersFunc = int32_t (*)();
 using OnListIndexCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, std::string &certsJson);
 using OnListProviderAllCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo,

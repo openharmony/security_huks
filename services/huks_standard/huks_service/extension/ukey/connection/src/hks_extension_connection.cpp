@@ -26,8 +26,9 @@ namespace Huks {
 constexpr int WAIT_TIME = 3;
 constexpr int32_t DEFAULT_USER_ID = 100;
 
-void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementName& element,
-    const sptr<IRemoteObject>& remoteObject, int resultCode) {
+void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementName &element,
+    const sptr<IRemoteObject> &remoteObject, int resultCode)
+{
     HKS_IF_TRUE_RETURN_VOID(remoteObject == nullptr)
 
     extConnectProxy = iface_cast<HuksAccessExtBaseProxy>(remoteObject);
@@ -40,7 +41,8 @@ void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementNa
     proxyConv_.notify_all();
 }
 
-int32_t ExtensionConnection::OnConnection(const AAFwk::Want &want) {
+int32_t ExtensionConnection::OnConnection(const AAFwk::Want &want)
+{
     int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, this, DEFAULT_USER_ID);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_EXEC_FUNC_FAIL, "fail to connect ability by AMS")
 
