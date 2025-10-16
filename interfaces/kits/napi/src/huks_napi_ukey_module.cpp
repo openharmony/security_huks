@@ -21,7 +21,6 @@
 using namespace HuksNapiItem;
 
 extern "C" {
-
 static napi_value CreateU32(napi_env env, uint32_t value)
 {
     napi_value napiValue{};
@@ -69,7 +68,6 @@ static napi_value HuksExternalCryptoRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_PROPERTY("HUKS_TAG_REMOTE_APP", CreateU32(env, HKS_TAG_REMOTE_APP)),
         DECLARE_NAPI_STATIC_PROPERTY("HUKS_TAG_REMOTE_CONTAINER", CreateU32(env, HKS_TAG_REMOTE_CONTAINER)),
         DECLARE_NAPI_STATIC_PROPERTY("HUKS_TAG_REMOTE_ABILITY_SN", CreateU32(env, HKS_TAG_REMOTE_ABILITY_SN)),
-
 
         DECLARE_NAPI_PROPERTY("HuksExternalCryptoTagType", CreateHuksExternalTagType(env)),
         DECLARE_NAPI_PROPERTY("HuksExternalCryptoTag", CreateHuksExternalTag(env)),

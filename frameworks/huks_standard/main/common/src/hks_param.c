@@ -373,22 +373,22 @@ HKS_API_EXPORT void HksFreeKeyAliasSet(struct HksKeyAliasSet *aliasSet)
     aliasSet = NULL;
 }
 
-HKS_API_EXPORT void HksFreeExtCertSet(struct HksExtCertInfoSet *CertInfoSet)
+HKS_API_EXPORT void HksFreeExtCertSet(struct HksExtCertInfoSet *certInfoSet)
 {
-    if (CertInfoSet == NULL) {
+    if (certInfoSet == NULL) {
         return;
     }
 
-    if (CertInfoSet->count > 0 && CertInfoSet->certs != NULL) {
-        for (uint32_t i = 0; i < CertInfoSet->count; i++) {
-            HKS_FREE_BLOB(CertInfoSet->certs[i].index);
-            HKS_FREE_BLOB(CertInfoSet->certs[i].cert);
+    if (certInfoSet->count > 0 && certInfoSet->certs != NULL) {
+        for (uint32_t i = 0; i < certInfoSet->count; i++) {
+            HKS_FREE_BLOB(certInfoSet->certs[i].index);
+            HKS_FREE_BLOB(certInfoSet->certs[i].cert);
         }
     }
 
-    CertInfoSet->count = 0;
-    HKS_FREE(CertInfoSet->certs);
-    CertInfoSet = NULL;
+    certInfoSet->count = 0;
+    HKS_FREE(certInfoSet->certs);
+    certInfoSet = NULL;
 }
 
 static int32_t FreshParamSet(struct HksParamSet *paramSet, bool isCopy)

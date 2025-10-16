@@ -35,7 +35,7 @@ extern "C" {
 /**
  * @brief hks tag type
  */
- enum HksTagType {
+enum HksTagType {
     HKS_TAG_TYPE_INVALID = 0 << 28,
     HKS_TAG_TYPE_INT = 1 << 28,
     HKS_TAG_TYPE_UINT = 2 << 28,
@@ -47,7 +47,7 @@ extern "C" {
 /**
  * @brief hksexternalCrypto tag type
  */
- enum HksExternalTagType {
+enum HksExternalTagType {
     HKS_EXT_CRYPTO_TAG_TYPE_INT = 1 << 28,
     HKS_EXT_CRYPTO_TAG_TYPE_UINT = 2 << 28,
     HKS_EXT_CRYPTO_TAG_TYPE_BYTES = 5 << 28,

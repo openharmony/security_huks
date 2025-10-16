@@ -359,8 +359,11 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
             ret = HKS_ERROR_BAD_STATE;
             break;
         }
-        (void)memcpy_s(outStatus, sizeof(int32_t), outBlob.data, sizeof(int32_t));
-        (void)memcpy_s(retryCount, sizeof(uint32_t), outBlob.data + sizeof(int32_t), sizeof(uint32_t));
+
+        HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(outStatus, sizeof(int32_t),
+            outBlob.data, sizeof(int32_t)), "memcpy_s outStatus failed")
+        HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(retryCount, sizeof(uint32_t),
+            outBlob.data + sizeof(int32_t), sizeof(uint32_t)), "memcpy_s retryCount failed")
 
         if (*outStatus != 0 && ret == HKS_SUCCESS) {
             ret = HUKS_ERR_CODE_PIN_CODE_ERROR;
@@ -409,8 +412,8 @@ int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index,
             ret = HKS_ERROR_BAD_STATE;
             break;
         }
-        (void)memcpy_s(status, sizeof(int32_t), outBlob.data, sizeof(int32_t));
-
+        HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(status, sizeof(int32_t), outBlob.data,
+            sizeof(int32_t)), "memcpy_s status failed");
     } while (0);
 
     HksFreeParamSet(&newParamSet);
@@ -486,7 +489,6 @@ int32_t HksClientOpenRemoteHandle(const struct HksBlob *resourceId, const struct
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret);
 
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CopyData fail, ret = %" LOG_PUBLIC "d", ret);
-
     } while (0);
 
     HksFreeParamSet(&newParamSet);
@@ -558,7 +560,6 @@ int32_t HksClientGetRemoteProperty(const struct HksBlob *resourceId, const struc
 
         ret = HksRemotePropertyUnpackFromService(&outBlob, propertySetOut);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRemotePropertyUnpackFromService fail")
-
     } while (0);
 
     HksFreeParamSet(&newParamSet);

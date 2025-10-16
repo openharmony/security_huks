@@ -246,7 +246,6 @@ void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t 
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcCreateRemKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
-    // HksSendResponse(context, ret, ret == HKS_SUCCESS ? &remoteHandleOut : NULL);
     HksSendResponse(context, ret, NULL);
 
     HKS_FREE_BLOB(remoteHandleOut);
@@ -276,7 +275,6 @@ void HksIpcServiceGetRemoteHandle(const struct HksBlob *srcData, const uint8_t *
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcGetRemoteHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
-    // HksSendResponse(context, ret, ret == HKS_SUCCESS ? &handle : NULL);
     HksSendResponse(context, ret, NULL);
 
     HKS_FREE_BLOB(handle);
@@ -467,8 +465,6 @@ void HksIpcServiceGetRemoteProperty(const struct HksBlob *srcData, const uint8_t
         ret = HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &resourceId, &propertyId, paramSet, remoteObject);
         HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceRenameKeyAliasy fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
-
-    // HksSendResponse(context, ret, NULL); 这个地方需要sendResponse?
 
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);

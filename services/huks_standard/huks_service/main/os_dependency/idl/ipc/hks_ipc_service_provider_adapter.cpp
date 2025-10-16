@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "hks_ipc_service_provider_adapter.h"
 #include "hks_ipc_service_provider.h"
 #include "hks_ukey_common.h"
@@ -11,8 +26,6 @@
 int32_t HksIpcProviderRegAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *name,
     const struct HksParamSet *paramSet)
 {
-    HKS_LOG_E("==========ksIpcServiceProviderRegisterAdapter income");
-
     std::string cppresourceId(reinterpret_cast<const char*>(name->data), name->size);
     CppParamSet cppParamSet(paramSet);
 
@@ -22,7 +35,6 @@ int32_t HksIpcProviderRegAdapter(const struct HksProcessInfo *processInfo,  cons
 int32_t HksIpcProviderUnregAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *name,
     const struct HksParamSet *paramSet)
 {
-
     std::string cppresourceId(reinterpret_cast<const char*>(name->data), name->size);
     CppParamSet cppParamSet(paramSet);
 
@@ -178,7 +190,8 @@ int32_t HksIpcGetUkeyPinAuthStateAdapter(const struct HksProcessInfo *processInf
     return OHOS::Security::Huks::HksIpcServiceOnGetVerifyPinStatus(processInfo, cppresourceId, cppParamSet, *outStatus);
 }
 
-int32_t HksIpcClearPinStatusAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId) {
+int32_t HksIpcClearPinStatusAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId)
+{
     std::string cppResourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
     return OHOS::Security::Huks::HksIpcServiceOnClearUkeyPinAuthStatus(processInfo, cppResourceId);
 }
@@ -197,16 +210,16 @@ static int32_t RemotePropertyPack(const CppParamSet &cppParamSet,
             "invalid outBlob.size %" LOG_PUBLIC "u", outBlob.size);
 
         outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
-        HKS_IF_NULL_LOGE_BREAK(outBlob.data, "malloc outBlob.data failed");
+        HKS_IF_NULL_LOGE_BREAK(outBlob.data, "malloc outBlob.data failed")
 
         ret = HksParamSetPack(&outBlob, hksParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksParamSetPack fail %" LOG_PUBLIC "d", ret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksParamSetPack fail %" LOG_PUBLIC "d", ret)
 
         auto tmp = std::make_unique<uint8_t[]>(outBlob.size);
-        HKS_IF_NULL_LOGE_BREAK(tmp, "alloc replyData failed");
+        HKS_IF_NULL_LOGE_BREAK(tmp, "alloc replyData failed")
 
         HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(tmp.get(), outBlob.size, outBlob.data, outBlob.size),
-            "memcpy_s replyData failed");
+            "memcpy_s replyData failed")
 
         replySize = outBlob.size;
         replyData = std::move(tmp);
@@ -218,7 +231,8 @@ static int32_t RemotePropertyPack(const CppParamSet &cppParamSet,
 
 int32_t HksIpcServiceOnGetRemotePropertyAdapter(const struct HksProcessInfo *processInfo,
     const struct HksBlob *resourceId, const struct HksBlob *propertyId,
-    const struct HksParamSet *paramSet, const uint8_t *remoteObject) {
+    const struct HksParamSet *paramSet, const uint8_t *remoteObject)
+{
     int32_t ret = 0;
     std::string cppResourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
     std::string cppPropertyId(reinterpret_cast<const char*>(propertyId->data), propertyId->size);

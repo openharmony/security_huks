@@ -61,12 +61,14 @@ private:
 class IHksExtService : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.security.hksext.service");
-    virtual void SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &sendData, uint32_t sendSize, uint32_t msgCode) = 0;
+    virtual void SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &sendData,
+        uint32_t sendSize, uint32_t msgCode) = 0;
 };
 
 class HksExtStub : public IRemoteStub<IHksExtService> {
 public:
-    void SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &sendData, uint32_t sendSize, uint32_t msgCode) override;
+    void SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &sendData, uint32_t sendSize,
+        uint32_t msgCode) override;
     std::tuple<uint32_t, std::unique_ptr<uint8_t[]>, uint32_t, uint32_t> WaitForAsyncReply(int timeout);
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 private:
@@ -84,11 +86,11 @@ class HksExtProxy : public IRemoteProxy<IHksExtService> {
 public:
     explicit HksExtProxy(const sptr<IRemoteObject> &impl);
     ~HksExtProxy() = default;
-    void SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &sendData, uint32_t sendSize, uint32_t msgCode) override;
+    void SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &sendData, uint32_t sendSize,
+        uint32_t msgCode) override;
 private:
     static BrokerDelegator<HksExtProxy> delegator_;
 };
-
 
 } // namespace Hks
 } // namespace Security

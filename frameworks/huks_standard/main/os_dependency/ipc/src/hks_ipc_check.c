@@ -60,7 +60,7 @@ int32_t HksCheckIpcBlob(const struct HksBlob *blob)
 int32_t HksCheckIpcOptionalBlobAndParamSet(const struct HksBlob *blob,
     const struct HksParamSet *paramSet)
 {
-    if(blob == NULL) {
+    if (blob == NULL) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     if (blob->data == NULL || blob->size == 0) {
