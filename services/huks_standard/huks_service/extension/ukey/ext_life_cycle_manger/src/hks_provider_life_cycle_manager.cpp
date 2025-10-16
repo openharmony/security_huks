@@ -34,7 +34,7 @@ namespace OHOS::Security::Huks {
 
 bool ProviderInfo::operator==(const ProviderInfo &other) const
 {
-    return m_bundleName == other.m_bundleName && m_providerName == other.m_providerName && 
+    return m_bundleName == other.m_bundleName && m_providerName == other.m_providerName &&
         m_abilityName == other.m_abilityName;
 }
 
@@ -99,7 +99,7 @@ int32_t HksProviderLifeCycleManager::GetExtensionProxy(const ProviderInfo &provi
     sptr<IHuksAccessExtBase> &proxy)
 {
     std::shared_ptr<HksExtAbilityConnectInfo> connectionInfo = nullptr;
-    if(!m_providerMap.Find(providerInfo, connectionInfo)) {
+    if (!m_providerMap.Find(providerInfo, connectionInfo)) {
         HKS_LOG_E("GetExtensionProxy failed, providerName: %s", providerInfo.m_providerName.c_str());
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -109,8 +109,8 @@ int32_t HksProviderLifeCycleManager::GetExtensionProxy(const ProviderInfo &provi
     return HKS_SUCCESS;
 }
 
-int32_t HksProviderLifeCycleManager::GetAllConnectInfoByProviderName(const HksProcessInfo &processInfo, const std::string &providerName,
-    std::vector<std::shared_ptr<HksExtAbilityConnectInfo>> &providerInfos)
+int32_t HksProviderLifeCycleManager::GetAllConnectInfoByProviderName(const HksProcessInfo &processInfo,
+    const std::string &providerName, std::vector<std::shared_ptr<HksExtAbilityConnectInfo>> &providerInfos)
 {
     sptr<ISystemAbilityManager> saMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     HKS_IF_NULL_LOGE_RETURN(saMgr, HKS_ERROR_NULL_POINTER, "GetSystemAbilityManager failed")
@@ -125,7 +125,8 @@ int32_t HksProviderLifeCycleManager::GetAllConnectInfoByProviderName(const HksPr
     auto bundleRet = bundleMgrProxy->GetBundleNameForUid(static_cast<int32_t>(processInfo.uidInt), bundleName);
     HKS_IF_TRUE_LOGE_RETURN(!bundleRet, HKS_ERROR_BAD_STATE, "GetBundleNameForUid failed")
 
-    m_providerMap.Iterate([&](const ProviderInfo &providerInfo, std::shared_ptr<HksExtAbilityConnectInfo> &connectionInfo) {
+    m_providerMap.Iterate([&](const ProviderInfo &providerInfo,
+        std::shared_ptr<HksExtAbilityConnectInfo> &connectionInfo) {
         if (providerInfo.m_bundleName == bundleName && providerInfo.m_providerName == providerName) {
             providerInfos.push_back(connectionInfo);
         }
@@ -136,7 +137,8 @@ int32_t HksProviderLifeCycleManager::GetAllConnectInfoByProviderName(const HksPr
 int32_t HksProviderLifeCycleManager::GetAllProviderInfosByProviderName(const std::string &providerName,
     std::vector<ProviderInfo> &providerInfos)
 {
-    m_providerMap.Iterate([&](const ProviderInfo &providerInfo, std::shared_ptr<HksExtAbilityConnectInfo> &connectionInfo) {
+    m_providerMap.Iterate([&](const ProviderInfo &providerInfo,
+        std::shared_ptr<HksExtAbilityConnectInfo> &connectionInfo) {
         if (providerInfo.m_providerName == providerName) {
             ProviderInfo info = providerInfo;
             info.m_bundleName = providerInfo.m_bundleName;
@@ -165,11 +167,10 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
     }
     for (auto &connectionInfo : connectionInfos) {
         HKS_IF_TRUE_LOGE_RETURN(connectionInfo == nullptr, HKS_ERROR_NULL_POINTER, "connectionInfo is nullptr")
-        HKS_IF_TRUE_LOGE_RETURN(connectionInfo->m_connection == nullptr, HKS_ERROR_NULL_POINTER, "m_connection is nullptr")
-    
+        HKS_IF_TRUE_LOGE_RETURN(connectionInfo->m_connection == nullptr, HKS_ERROR_NULL_POINTER,
+            "m_connection is nullptr")
         auto proxy = connectionInfo->m_connection->GetExtConnectProxy();
         HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NULL_POINTER, "GetExtConnectProxy failed");
-    
         int32_t refCount = proxy->GetSptrRefCount();
         HKS_LOG_I("OnUnRegisterProvider connection want abilityName: %" LOG_PUBLIC "s",
             connectionInfo->m_want.GetElement().GetAbilityName().c_str());
@@ -197,7 +198,8 @@ int32_t HksGetProviderInfo(const HksProcessInfo &processInfo, const std::string 
     auto bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(remoteObj);
     HKS_IF_NULL_LOGE_RETURN(bundleMgrProxy, HKS_ERROR_NULL_POINTER, "iface_cast IBundleMgr failed")
 
-    auto bundleRet = bundleMgrProxy->GetBundleNameForUid(static_cast<int32_t>(processInfo.uidInt), providerInfo.m_bundleName);
+    auto bundleRet = bundleMgrProxy->GetBundleNameForUid(static_cast<int32_t>(processInfo.uidInt),
+        providerInfo.m_bundleName);
     HKS_IF_TRUE_LOGE_RETURN(!bundleRet, HKS_ERROR_BAD_STATE, "GetBundleNameForUid failed")
     providerInfo.m_providerName = providerName;
 
