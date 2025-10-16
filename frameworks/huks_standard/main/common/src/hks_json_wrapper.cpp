@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <iostream>
 #include <cmath>
 #include <utility>
@@ -27,7 +42,7 @@ CommJsonObject::CommJsonObject(cJSON *json, int32_t err, std::string parentKeyNa
 }
 
 CommJsonObject::CommJsonObject(CommJsonObject &&other) noexcept
-    : mJson_(std::move(other.mJson_)), err_(other.err_), parentKeyName_(std::move(other.parentKeyName_)){}
+    : mJson_(std::move(other.mJson_)), err_(other.err_), parentKeyName_(std::move(other.parentKeyName_)) {}
 
 CommJsonObject &CommJsonObject::operator = (CommJsonObject &&other) noexcept
 {
@@ -99,11 +114,11 @@ bool CommJsonObject::IsObject() const
 
 std::pair<int32_t, std::string> CommJsonObject::ToString() const
 {
-    if(err_ != HKS_SUCCESS) {
+    if (err_ != HKS_SUCCESS) {
         HKS_LOG_E("operate an error json object %" LOG_PUBLIC "d %" LOG_PUBLIC "s", err_, parentKeyName_.c_str());
         return {err_, ""};
     }
-    if(!CheckIsVaild()) {
+    if (!CheckIsVaild()) {
         return {HKS_ERROR_NULL_JSON, ""};
     }
     if (!IsString()) {
@@ -115,11 +130,11 @@ std::pair<int32_t, std::string> CommJsonObject::ToString() const
 
 std::pair<int32_t, double> CommJsonObject::ToDouble() const
 {
-    if(err_ != HKS_SUCCESS) {
+    if (err_ != HKS_SUCCESS) {
         HKS_LOG_E("operate an error json object %" LOG_PUBLIC "d %" LOG_PUBLIC "s", err_, parentKeyName_.c_str());
         return {err_, HUGE_VAL};
     }
-    if(!CheckIsVaild()) {
+    if (!CheckIsVaild()) {
         return {HKS_ERROR_NULL_JSON, HUGE_VAL};
     }
     if (!IsNumber()) {
@@ -131,11 +146,11 @@ std::pair<int32_t, double> CommJsonObject::ToDouble() const
 
 std::pair<int32_t, bool> CommJsonObject::ToBool() const
 {
-    if(err_ != HKS_SUCCESS) {
+    if (err_ != HKS_SUCCESS) {
         HKS_LOG_E("operate an error json object %" LOG_PUBLIC "d %" LOG_PUBLIC "s", err_, parentKeyName_.c_str());
         return {err_, false};
     }
-    if(!CheckIsVaild()) {
+    if (!CheckIsVaild()) {
         return {HKS_ERROR_NULL_JSON, false};
     }
     if (!IsBool()) {
@@ -227,10 +242,10 @@ int32_t CommJsonObject::ArraySize() const
 
 CommJsonObject CommJsonObject::GetElement(int32_t index) const
 {
-    if(!CheckIsVaild()) {
+    if (!CheckIsVaild()) {
         return CommJsonObject::CreateNull(HKS_ERROR_NULL_JSON);
     }
-    if(!CheckIsArray()) {
+    if (!CheckIsArray()) {
         return CommJsonObject::CreateNull(HKS_ERROR_JSON_NOT_ARRAY);
     }
     cJSON *item = cJSON_GetArrayItem(mJson_.get(), index);
@@ -327,29 +342,30 @@ bool CommJsonObject::AddKeyValueToArray(CommJsonObject &array, const std::string
     bool setRet = true;
     std::visit([&](auto&& val) {
         using T = std::decay_t<decltype(val)>;
-        if constexpr (std::is_same_v<T,int32_t>) {
+        if constexpr (std::is_same_v<T, int32_t>) {
             HKS_IF_NOT_TRUE_EXCU(item.SetValue("Type", std::string("int32")), setRet = false);
         }
-        else if constexpr (std::is_same_v<T,uint32_t>) {
+        else if constexpr (std::is_same_v<T, uint32_t>) {
             HKS_IF_NOT_TRUE_EXCU(item.SetValue("Type", std::string("uint32")), setRet = false);
         }
-        else if constexpr (std::is_same_v<T,int64_t>) {
+        else if constexpr (std::is_same_v<T, int64_t>) {
             HKS_IF_NOT_TRUE_EXCU(item.SetValue("Type", std::string("int64")), setRet = false);
         }
-        else if constexpr (std::is_same_v<T,bool>) {
+        else if constexpr (std::is_same_v<T, bool>) {
             HKS_IF_NOT_TRUE_EXCU(item.SetValue("Type", std::string("bool")), setRet = false);
         }
-        else if constexpr (std::is_same_v<T,uint8_t>) {
+        else if constexpr (std::is_same_v<T, uint8_t>) {
             HKS_IF_NOT_TRUE_EXCU(item.SetValue("Type", std::string("uint8")), setRet = false);
         }
-        else if constexpr (std::is_same_v<T,double>) {
+        else if constexpr (std::is_same_v<T, double>) {
             HKS_IF_NOT_TRUE_EXCU(item.SetValue("Type", std::string("double")), setRet = false);
         }
-        else if constexpr (std::is_same_v<T,std::string>) {
+        else if constexpr (std::is_same_v<T, std::string>) {
             HKS_IF_NOT_TRUE_EXCU(item.SetValue("Type", std::string("string")), setRet = false);
         }
         HKS_IF_NOT_TRUE_EXCU(item.SetValue("Value", val), setRet = false);
-    }, value);
+    },
+        value);
     HKS_IF_TRUE_LOGE_RETURN(!setRet, false, "AddKeyValueToArray, but setValue fail")
     return array.AppendElement(item);
 }
@@ -359,7 +375,7 @@ std::pair<int32_t, std::string> CommJsonObject::MapToJson(const std::map<std::st
     CommJsonObject array = CommJsonObject::CreateArray();
     bool jsonRet = false;
     for (const auto& [k, v] : map) {
-        jsonRet = AddKeyValueToArray(array, k ,v);
+        jsonRet = AddKeyValueToArray(array, k , v);
         HKS_IF_TRUE_LOGE_RETURN(!jsonRet, std::make_pair(HKS_JSON_INVAILD, ""),
             "AddKeyValueToArray failed. now key = %" LOG_PUBLIC "s", k.c_str())
     }
@@ -453,24 +469,24 @@ std::pair<int32_t, std::string> U8Vec2Base64Str(const std::vector<uint8_t> &srcB
 
     const char *base64Table = Base64Table.c_str();
     uint32_t strLen = srcBuffer.size();
-    uint32_t outputLength = ((strLen + 2) / 3) * 4;
+    uint32_t outputLength = ((strLen + NUM2) / NUM3) * NUM4;
     base64Str.resize(outputLength);
     
     uint32_t strPos = 0;
-    for (uint32_t i = 0; i < strLen; i +=3) {
+    for (uint32_t i = 0; i < strLen; i += NUM3) {
         uint8_t byte1 = srcBuffer[i];
         uint8_t byte2 = (i + 1 < strLen) ? srcBuffer[i + 1] : 0;
-        uint8_t byte3 = (i + 2 < strLen) ? srcBuffer[i + 2] : 0;
+        uint8_t byte3 = (i + NUM2 < strLen) ? srcBuffer[i + NUM2] : 0;
         
-        base64Str[strPos++] = base64Table[(byte1 >> 2) & MASK_6BIT];
+        base64Str[strPos++] = base64Table[(byte1 >> NUM2) & MASK_6BIT];
         base64Str[strPos++] = base64Table[((byte1 & MASK_2BIT) << OFFSET_4BIT) | ((byte2 >> OFFSET_4BIT) & MASK_4BIT)];
         base64Str[strPos++] = base64Table[((byte1 & MASK_4BIT) << OFFSET_2BIT) | ((byte2 >> OFFSET_6BIT) & MASK_2BIT)];
         base64Str[strPos++] = base64Table[(byte3 & MASK_6BIT)];
 
-        if(i + 1 >= strLen) {
-            base64Str[strPos - 2] = '=';
+        if (i + 1 >= strLen) {
+            base64Str[strPos - PADDING_MAX_NUM] = '=';
             base64Str[strPos - 1] = '=';
-        } else if (i + 2 >= strLen) {
+        } else if (i + PADDING_MAX_NUM >= strLen) {
             base64Str[strPos - 1] = '=';
         }
     }
@@ -478,7 +494,7 @@ std::pair<int32_t, std::string> U8Vec2Base64Str(const std::vector<uint8_t> &srcB
     return {HKS_SUCCESS, base64Str};
 }
 
-inline std::pair<int32_t, std::vector<uint8_t>> CheckAndGetInitBuffer(const std::string &base64Str)
+std::pair<int32_t, std::vector<uint8_t>> CheckAndGetInitBuffer(const std::string &base64Str)
 {
     std::vector<uint8_t> outBuffer;
     if (base64Str.empty()) {
@@ -496,7 +512,7 @@ inline std::pair<int32_t, std::vector<uint8_t>> CheckAndGetInitBuffer(const std:
             return {HKS_COMM_BASE64_CHAR_INVAILD, outBuffer };
         }
 
-        if (tempChar == '=' && i != strLen - 1 && i != strLen -2) {
+        if (tempChar == '=' && i != strLen - 1 && i != strLen -NUM2) {
             return {HKS_COMM_BASE64_PADDING_INVAILD, outBuffer };
         }
     }
@@ -506,10 +522,10 @@ inline std::pair<int32_t, std::vector<uint8_t>> CheckAndGetInitBuffer(const std:
         return { HKS_COMM_BASE64_PADDING_INVAILD, outBuffer };
     }
     
-    if ((strLen / 4) * 3 < padding) {
+    if ((strLen / NUM4) * NUM3 < padding) {
         return { HKS_COMM_BASE64_PADDING_INVAILD, outBuffer };
     }
-    outBuffer.resize(static_cast<uint32_t>((strLen / 4) * 3 -padding));
+    outBuffer.resize(static_cast<uint32_t>((strLen / NUM4) * NUM3 -padding));
      
     return {HKS_SUCCESS, outBuffer};
 }
@@ -522,11 +538,11 @@ std::pair<int32_t, std::vector<uint8_t>> Base64Str2U8Vec(const std::string &base
     }
     uint32_t strLen = base64Str.size();
     uint32_t curPos = 0;
-    for (uint32_t i = 0; i < strLen; i += 4) {
+    for (uint32_t i = 0; i < strLen; i += NUM4) {
         char char1 = base64Str[i];
         char char2 = base64Str[i + 1];
-        char char3 = base64Str[i + 2];
-        char char4 = base64Str[i + 3];
+        char char3 = base64Str[i + NUM2];
+        char char4 = base64Str[i + NUM3];
 
         uint8_t value1 = Base64Table.find(char1);
         uint8_t value2 = Base64Table.find(char2);

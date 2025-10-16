@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #ifndef HKS_JSON_WRAPPER_H
 #define HKS_JSON_WRAPPER_H
 
@@ -55,27 +70,27 @@ public:
     [[nodiscard]] bool SetValue(const std::string &key, CommJsonObject &&value);
     [[nodiscard]] bool SetValue(const std::string &key, CommJsonObject &value);
 
-    template <typename T,std::enable_if_t<
+    template <typename T, std::enable_if_t<
         std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, uint8_t> ||
         std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, int32_t> ||
         std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, uint32_t> ||
         std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, int64_t> ||
         std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, size_t> ||
-        std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, double>, int> =0>
+        std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, double>, int> = 0>
     [[nodiscard]] bool SetValue(const std::string &key, T &&value)
     {
         return SetValue(key, CreateNumber(std::forward<T>(value)));
     }
 
-    template <typename T,std::enable_if_t<
-        std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, std::string>, int> =0>
+    template <typename T, std::enable_if_t<
+        std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, std::string>, int> = 0>
     [[nodiscard]] bool SetValue(const std::string &key, T &&value)
     {
         return SetValue(key, CreateString(std::forward<T>(value)));
     }
 
-    template <typename T,std::enable_if_t<
-        std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, bool>, int> =0>
+    template <typename T, std::enable_if_t<
+        std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, bool>, int> = 0>
     [[nodiscard]] bool SetValue(const std::string &key, T &&value)
     {
         return SetValue(key, CreateBool(std::forward<T>(value)));
@@ -128,6 +143,9 @@ constexpr uint8_t OFFSET_4BIT = 4;
 constexpr uint8_t OFFSET_2BIT = 2;
 constexpr uint8_t BASE64_BLOCK_SIZE = 4;
 constexpr uint8_t PADDING_MAX_NUM = 2;
+constexpr uint8_t NUM2 = 2;
+constexpr uint8_t NUM3 = 3;
+constexpr uint8_t NUM4 = 4;
 const std::string Base64Table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 }
 }
