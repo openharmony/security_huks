@@ -29,6 +29,8 @@ int32_t HksCheckIpcBlobAndParamSet(const struct HksBlob *blob, const struct HksP
 
 int32_t HksCheckIpcBlob(const struct HksBlob *blob);
 
+int32_t HksCheckIpcOptionalBlobAndParamSet(const struct HksBlob *blob, const struct HksParamSet *paramSet);
+
 int32_t HksCheckIpcGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn);
 
 int32_t HksCheckIpcImportKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,

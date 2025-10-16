@@ -575,7 +575,7 @@ int32_t HksServiceUnregisterProvider(const struct HksProcessInfo *processInfo, c
     return 0;
 }
 
-int32_t HksServiceExportProviderCertificates(const struct HksProcessInfo *processInfo, const struct HksBlob *index, const struct HksParamSet *paramSetIn, 
+int32_t HksServiceExportProviderCertificates(const struct HksProcessInfo *processInfo, const struct HksBlob *providerName, const struct HksParamSet *paramSetIn, 
     struct HksExtCertInfoSet *certSet) 
 {
     return 0;
