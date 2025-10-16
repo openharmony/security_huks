@@ -44,18 +44,21 @@ int32_t HksServiceRegisterProvider(const struct HksProcessInfo *processInfo, con
 int32_t HksServiceUnregisterProvider(const struct HksProcessInfo *processInfo, const struct HksBlob *name,
     const struct HksParamSet *paramSetIn);
 
-int32_t HksServiceExportProviderCertificates(const struct HksProcessInfo *processInfo, const struct HksBlob *providerName, const struct HksParamSet *paramSetIn, 
-struct HksExtCertInfoSet *certSet);
+int32_t HksServiceExportProviderCertificates(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *providerName, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
 
-int32_t HksServiceExportCertificate(const struct HksProcessInfo *processInfo, const struct HksBlob *index, const struct HksParamSet *paramSetIn, 
+int32_t HksServiceExportCertificate(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
+    const struct HksParamSet *paramSetIn,
     struct HksExtCertInfoSet *certSet);
 
-int32_t HksServiceAuthUkeyPin(const struct HksProcessInfo *processInfo, const struct HksBlob *index, const struct HksParamSet *paramSetIn, int32_t *outStatus, uint32_t *retryCount);
+int32_t HksServiceAuthUkeyPin(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
+    const struct HksParamSet *paramSetIn, int32_t *outStatus, uint32_t *retryCount);
 
 int32_t HksServiceOpenRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut);
 
-int32_t HksServiceGetUkeyPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index, const struct HksParamSet *paramSetIn, int32_t *status);
+int32_t HksServiceGetUkeyPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
+    const struct HksParamSet *paramSetIn, int32_t *status);
 
 int32_t HksServiceGetRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut);
@@ -65,7 +68,7 @@ int32_t HksServiceCloseRemoteHandle(const struct HksProcessInfo *processInfo, co
 
 int32_t HksServiceUkeySign(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn, const struct HksBlob *srcData, struct HksBlob *signatureOut);
-    
+
 int32_t HksServiceUkeyVerify(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn, const struct HksBlob *srcData, struct HksBlob *signatureOut);
 

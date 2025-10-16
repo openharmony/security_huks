@@ -82,7 +82,8 @@ struct OH_Huks_Result OH_Huks_IsExtParamSetValid(const struct OH_Huks_ExternalCr
     return ConvertExtParamResult(result);
 }
 
-struct OH_Huks_Result OH_Huks_CheckExtParamMatch(const struct OH_Huks_Param *baseParam, const struct OH_Huks_Param *param)
+struct OH_Huks_Result OH_Huks_CheckExtParamMatch(const struct OH_Huks_Param *baseParam,
+    const struct OH_Huks_Param *param)
 {
     int32_t result = HksCheckParamMatch((const struct HksParam *) baseParam, (const struct HksParam *) param);
     return ConvertExtParamResult(result);

@@ -580,7 +580,8 @@ static int32_t UnpackBlobFromBuffer(const struct HksBlob *srcBlob, uint32_t *off
     return HKS_SUCCESS;
 }
 
-static int32_t UnpackExtCertInfoFromBuffer(const struct HksBlob *srcBlob, uint32_t *offset, struct HksExtCertInfo *certInfo)
+static int32_t UnpackExtCertInfoFromBuffer(const struct HksBlob *srcBlob, uint32_t *offset,
+    struct HksExtCertInfo *certInfo)
 {
     int32_t ret = UnpackInt32FromBuffer(srcBlob, offset, &certInfo->purpose);
     if (ret != HKS_SUCCESS) {

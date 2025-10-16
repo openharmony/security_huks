@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 #ifndef NATIVE_HUKS_EXTERNAL_API_H
 #define NATIVE_HUKS_EXTERNAL_API_H
@@ -36,33 +35,46 @@ extern "C" {
 struct OH_Huks_Result OH_Huks_GetSdkVersion(struct OH_Huks_Blob *sdkVersion);
 
 // 注册&注销
-struct OH_Huks_Result OH_Huks_RegisterProvider(const struct OH_Huks_Blob *providerName, const struct OH_Huks_ExternalCryptoParamSet *paramSet);
-struct OH_Huks_Result OH_Huks_UnregisterProvider(const struct OH_Huks_Blob *providerName, const struct OH_Huks_ExternalCryptoParamSet *paramSet);
+struct OH_Huks_Result OH_Huks_RegisterProvider(const struct OH_Huks_Blob *providerName,
+    const struct OH_Huks_ExternalCryptoParamSet *paramSet);
+struct OH_Huks_Result OH_Huks_UnregisterProvider(const struct OH_Huks_Blob *providerName,
+    const struct OH_Huks_ExternalCryptoParamSet *paramSet);
 
 // 证书导出
-struct OH_Huks_Result OH_Huks_ExportProviderCertificates(const struct OH_Huks_Blob *providerName, const struct OH_Huks_ExternalCryptoParamSet *paramSetIn, struct OH_Huks_ExtCertInfoSet *certSet);
-struct OH_Huks_Result OH_Huks_ExportCertificate(const struct OH_Huks_Blob *resourceId, const struct OH_Huks_ExternalCryptoParamSet *paramSetIn, struct OH_Huks_ExtCertInfoSet *certSet);
+struct OH_Huks_Result OH_Huks_ExportProviderCertificates(const struct OH_Huks_Blob *providerName,
+    const struct OH_Huks_ExternalCryptoParamSet *paramSetIn, struct OH_Huks_ExtCertInfoSet *certSet);
+struct OH_Huks_Result OH_Huks_ExportCertificate(const struct OH_Huks_Blob *resourceId,
+    const struct OH_Huks_ExternalCryptoParamSet *paramSetIn, struct OH_Huks_ExtCertInfoSet *certSet);
 
 
 // 句柄管理
-struct OH_Huks_Result OH_Huks_OpenRemoteHandle(const struct OH_Huks_Blob *resourceId, const struct OH_Huks_ExternalCryptoParamSet *paramSet, struct OH_Huks_Blob *remoteHandleOut);
-struct OH_Huks_Result OH_Huks_GetRemoteHandle(const struct OH_Huks_Blob *resourceId, const struct OH_Huks_ExternalCryptoParamSet *paramSet, struct OH_Huks_Blob *remoteHandleOut);
-struct OH_Huks_Result OH_Huks_CloseRemoteHandle(const struct OH_Huks_Blob *resourceId, const struct OH_Huks_ExternalCryptoParamSet *paramSet);
+struct OH_Huks_Result OH_Huks_OpenRemoteHandle(const struct OH_Huks_Blob *resourceId,
+    const struct OH_Huks_ExternalCryptoParamSet *paramSet, struct OH_Huks_Blob *remoteHandleOut);
+struct OH_Huks_Result OH_Huks_GetRemoteHandle(const struct OH_Huks_Blob *resourceId,
+    const struct OH_Huks_ExternalCryptoParamSet *paramSet, struct OH_Huks_Blob *remoteHandleOut);
+struct OH_Huks_Result OH_Huks_CloseRemoteHandle(const struct OH_Huks_Blob *resourceId,
+    const struct OH_Huks_ExternalCryptoParamSet *paramSet);
 
 // PIN码认证
-struct OH_Huks_Result OH_Huks_AuthUkeyPin(const struct OH_Huks_Blob *resourceId, const struct OH_Huks_ExternalCryptoParamSet *paramSetIn, uint32_t *retryCount);
-struct OH_Huks_Result OH_Huks_GetUkeyPinAuthState(const struct OH_Huks_Blob *resourceId, const struct OH_Huks_ExternalCryptoParamSet *paramSetIn, bool *stateOut);
+struct OH_Huks_Result OH_Huks_AuthUkeyPin(const struct OH_Huks_Blob *resourceId,
+    const struct OH_Huks_ExternalCryptoParamSet *paramSetIn, uint32_t *retryCount);
+struct OH_Huks_Result OH_Huks_GetUkeyPinAuthState(const struct OH_Huks_Blob *resourceId,
+    const struct OH_Huks_ExternalCryptoParamSet *paramSetIn, bool *stateOut);
 struct OH_Huks_Result OH_Huks_ClearPinAuthState(const struct OH_Huks_Blob *resourceId);
 
 // 签名验签
-struct OH_Huks_Result OH_Huks_Sign(const struct OH_Huks_Blob *resourceId, const struct OH_Huks_ExternalCryptoParamSet *paramSet,
-    const struct OH_Huks_Blob *srcData, struct OH_Huks_Blob *signatureOut);
-struct OH_Huks_Result OH_Huks_Verify(const struct OH_Huks_Blob *resourceId, const struct OH_Huks_ExternalCryptoParamSet *paramSet,
+struct OH_Huks_Result OH_Huks_Sign(const struct OH_Huks_Blob *resourceId,
+    const struct OH_Huks_ExternalCryptoParamSet *paramSet, const struct OH_Huks_Blob *srcData,
+    struct OH_Huks_Blob *signatureOut);
+struct OH_Huks_Result OH_Huks_Verify(const struct OH_Huks_Blob *resourceId,
+    const struct OH_Huks_ExternalCryptoParamSet *paramSet,
     const struct OH_Huks_Blob *srcData, struct OH_Huks_Blob *signatureOut);
 
 typedef void (*OH_Huks_OnFinish)(const struct OH_Huks_ExternalCryptoParamSet *paramSet);
 
-struct OH_Huks_Result OH_Huks_GetRemoteProperty(const struct OH_Huks_Blob *resourceId, const struct OH_Huks_Blob *propertyId, const struct OH_Huks_ExternalCryptoParamSet *paramSetIn, struct OH_Huks_ExternalCryptoParamSet *propertySetOut);
+struct OH_Huks_Result OH_Huks_GetRemoteProperty(const struct OH_Huks_Blob *resourceId,
+    const struct OH_Huks_Blob *propertyId, const struct OH_Huks_ExternalCryptoParamSet *paramSetIn,
+    struct OH_Huks_ExternalCryptoParamSet *propertySetOut);
 
 #ifdef __cplusplus
 }

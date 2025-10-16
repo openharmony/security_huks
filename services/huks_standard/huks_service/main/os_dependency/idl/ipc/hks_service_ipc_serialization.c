@@ -64,7 +64,8 @@ static int32_t CopyBlobToBuffer(const struct HksBlob *blob, const struct HksBlob
     return HKS_SUCCESS;
 }
 
-static int32_t CopyExtCertInfoToBuffer(const struct HksExtCertInfo *certInfo, const struct HksBlob *destBlob, uint32_t *destOffset)
+static int32_t CopyExtCertInfoToBuffer(const struct HksExtCertInfo *certInfo, const struct HksBlob *destBlob,
+    uint32_t *destOffset)
 {
     int32_t ret = CopyInt32ToBuffer(certInfo->purpose, destBlob, destOffset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy CopyExtCertInfoToBuffer failed")
@@ -588,7 +589,8 @@ int32_t HksListAliasesUnpack(const struct HksBlob *srcData, struct HksParamSet *
     return ret;
 }
 
-static int32_t HksCopyExtCertInfosAndCntToBlob(const struct HksExtCertInfo *srcCerts, uint32_t cnt, struct HksBlob *destBlob)
+static int32_t HksCopyExtCertInfosAndCntToBlob(const struct HksExtCertInfo *srcCerts, uint32_t cnt,
+    struct HksBlob *destBlob)
 {
     uint32_t offset = 0;
     int32_t ret = CopyUint32ToBuffer(cnt, destBlob, &offset);

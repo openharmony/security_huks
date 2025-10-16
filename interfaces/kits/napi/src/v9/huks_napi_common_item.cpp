@@ -30,7 +30,7 @@ namespace {
 constexpr int HKS_MAX_DATA_LEN = 0x6400000; // The maximum length is 100M
 constexpr size_t ASYNCCALLBACK_ARGC = 2;
 constexpr size_t ASYNCCALLBACKVOID_ARGC = 1;
-static int32_t pinRetryCount = 0; //ukey retry count
+static int32_t g_pinRetryCount = 0; //ukey retry count
 }  // namespace
 
 napi_value ParseKeyAlias(napi_env env, napi_value object, HksBlob *&alias)
@@ -808,7 +808,7 @@ static napi_value GenerateResult(napi_env env, const struct HksSuccessReturnResu
 // napi层将retryCount传递到这里
 void SetRetryCount(const int32_t retryCount)
 {
-    pinRetryCount = retryCount; // 错误时需打印
+    g_pinRetryCount = retryCount; // 错误时需打印
 }
 
 static napi_value GenerateBusinessError(napi_env env, int32_t errorCode)
@@ -855,7 +855,7 @@ static napi_value GenerateBusinessError(napi_env env, int32_t errorCode)
     napi_value data = GetNull(env);
     // ukey报错时需要在此处需要拼接 retryCount 上报给上层
     if (errInfo.errorCode == HUKS_ERR_CODE_PIN_CODE_ERROR) {
-        if(napi_create_int32(env, pinRetryCount, &data) != napi_ok) {
+        if(napi_create_int32(env, g_pinRetryCount, &data) != napi_ok) {
             data = GetNull(env);
         }
     }
@@ -900,7 +900,7 @@ static void CallbackResultSuccess(napi_env env, napi_ref callback, const struct 
 
 static void CallbackVoidSuccess(napi_env env, napi_ref callback)
 {
-    napi_value params[ASYNCCALLBACKVOID_ARGC] = { GetNull(env) }; 
+    napi_value params[ASYNCCALLBACKVOID_ARGC] = { GetNull(env) };
     napi_value func = nullptr;
     NAPI_CALL_RETURN_VOID(env, napi_get_reference_value(env, callback, &func));
 
