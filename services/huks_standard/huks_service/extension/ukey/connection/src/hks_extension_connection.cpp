@@ -44,10 +44,11 @@ void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementNa
 int32_t ExtensionConnection::OnConnection(const AAFwk::Want &want)
 {
     int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, this, DEFAULT_USER_ID);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_EXEC_FUNC_FAIL, "fail to connect ability by AMS")
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_EXEC_FUNC_FAIL,
+        "fail to connect ability by ability manager service")
 
     std::unique_lock<std::mutex> lock(proxyMutex_);
-    if (!proxyConv_.wait_for(lock, std::chrono::seconds(WAIT_TIME), [this]{
+    if (!proxyConv_.wait_for(lock, std::chrono::seconds(WAIT_TIME), [this] {
         return extConnectProxy != nullptr && isReady;
     })) {
         HKS_LOG_E("wait connect timeout");
@@ -56,7 +57,8 @@ int32_t ExtensionConnection::OnConnection(const AAFwk::Want &want)
     return HKS_SUCCESS;
 }
 
-void ExtensionConnection::OnDisconnect() {
+void ExtensionConnection::OnDisconnect()
+{
     std::unique_lock<std::mutex> lock(proxyMutex_);
     if (extConnectProxy != nullptr) {
         RemoveExtDeathRecipient(extConnectProxy->AsObject());
@@ -68,13 +70,15 @@ void ExtensionConnection::OnDisconnect() {
     HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS, "disconnect ability fail, ret = %{public}d", ret)
 }
 
-void ExtensionConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) {
+void ExtensionConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode)
+{
     extConnectProxy = nullptr;
     isConnected_.store(false);
     isReady = false;
 }
 
-sptr<IHuksAccessExtBase> ExtensionConnection::GetExtConnectProxy() {
+sptr<IHuksAccessExtBase> ExtensionConnection::GetExtConnectProxy()
+{
     return extConnectProxy;
 }
 
@@ -82,7 +86,8 @@ bool ExtensionConnection::IsConnected() {
     return isConnected_.load();
 }
 
-void ExtensionConnection::AddExtDeathRecipient(const wptr<IRemoteObject>& token) {
+void ExtensionConnection::AddExtDeathRecipient(const wptr<IRemoteObject>& token)
+{
     std::unique_lock<std::mutex> lock(deathRecipientMutex_);
     if (token != nullptr && callerDeathRecipient_ != nullptr) {
         token->RemoveDeathRecipient(callerDeathRecipient_);
@@ -98,14 +103,16 @@ void ExtensionConnection::AddExtDeathRecipient(const wptr<IRemoteObject>& token)
     }
 }
 
-void ExtensionConnection::RemoveExtDeathRecipient(const wptr<IRemoteObject>& token) {
+void ExtensionConnection::RemoveExtDeathRecipient(const wptr<IRemoteObject>& token)
+{
     std::unique_lock<std::mutex> lock(deathRecipientMutex_);
     if (token != nullptr && callerDeathRecipient_ != nullptr) {
         token->RemoveDeathRecipient(callerDeathRecipient_);
     }
 }
 
-void ExtensionConnection::OnRemoteDied(const wptr<IRemoteObject> &remote) {
+void ExtensionConnection::OnRemoteDied(const wptr<IRemoteObject> &remote)
+{
     std::unique_lock<std::mutex> lock(proxyMutex_);
     HKS_LOG_E("OnRemoteDied from ExtensionConnection");
     auto object = remote.promote();
@@ -119,13 +126,16 @@ void ExtensionConnection::OnRemoteDied(const wptr<IRemoteObject> &remote) {
     }
 }
 
-ExtensionDeathRecipient::ExtensionDeathRecipient(RemoteDiedHandler handler) : handler_(handler) {
+ExtensionDeathRecipient::ExtensionDeathRecipient(RemoteDiedHandler handler) : handler_(handler)
+{
 }
 
-ExtensionDeathRecipient::~ExtensionDeathRecipient() {
+ExtensionDeathRecipient::~ExtensionDeathRecipient()
+{
 }
 
-void ExtensionDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote) {
+void ExtensionDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
+{
     HKS_LOG_E("OnRemoteDied from ExtensionDeathRecipient");
     if (handler_) {
         handler_(remote);

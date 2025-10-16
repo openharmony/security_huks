@@ -106,7 +106,7 @@ int32_t HuksLibInterface::OnCloseRemoteKeyHandle(const HksProcessInfo &processIn
     return HKS_SUCCESS;
 }
 
-int32_t HuksLibInterface::OnAuthUkeyPin(const HksProcessInfo &processInfo, 
+int32_t HuksLibInterface::OnAuthUkeyPin(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t &retryCnt)
 {
     void *funcPtr = nullptr;
@@ -163,7 +163,7 @@ int32_t HuksLibInterface::OnGetRemoteProperty(const HksProcessInfo &processInfo,
 }
 
 int32_t HuksLibInterface::OnExportCertificate(const HksProcessInfo &processInfo,
-   const std::string &index, const CppParamSet &paramSet, std::string &certsJson)
+    const std::string &index, const CppParamSet &paramSet, std::string &certsJson)
 {
     void *funcPtr = nullptr;
     bool isFind = pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_LIST_INDEX_CERTIFICATE, funcPtr);

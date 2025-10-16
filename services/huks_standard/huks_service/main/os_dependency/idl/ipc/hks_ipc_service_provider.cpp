@@ -20,7 +20,8 @@ namespace Security {
 namespace Huks {
 
 int32_t HksIpcServiceProviderRegister(const struct HksProcessInfo *processInfo,
-    std::string &name, CppParamSet &paramSet) {
+    std::string &name, CppParamSet &paramSet)
+{
     HKS_LOG_E("===========HksIpcServiceProviderRegister income==================");
     auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
@@ -147,7 +148,7 @@ int32_t HksIpcServiceOnFindRemoteKeyHandle(const struct HksProcessInfo *processI
     return 0;
 }
 
-int32_t HksIpcServiceOnSigned(const struct HksProcessInfo *processInfo, std::string &index, 
+int32_t HksIpcServiceOnSigned(const struct HksProcessInfo *processInfo, std::string &index,
     CppParamSet &paramSet, std::string srcData, std::string &signature)
 {
     return 0;
