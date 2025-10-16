@@ -44,7 +44,6 @@ extern "C" __attribute__((visibility("default"))) void SetCreator(const CreatorF
 std::map<std::string, std::string> HksCryptoExtAbilityModuleLoader::GetParams()
 {
     std::map<std::string, std::string> params;
-    // TODO 根据BMS最终代码，要更换 35的具体值
     const std::string CRYPTO_ACCESS_TYPE = "35";
     params.insert(std::pair<std::string, std::string>("type", CRYPTO_ACCESS_TYPE));
     params.insert(std::pair<std::string, std::string>("name", "CryptoExtensionAbility"));
