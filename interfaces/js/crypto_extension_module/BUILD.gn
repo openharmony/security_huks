@@ -33,7 +33,7 @@ gen_js_obj("crypto_extension_ability_abc") {
   output = target_out_dir + "/crypto_extension_ability_abc.o"
   dep = ":gen_crypto_extension_ability_abc"
 }
-
+if (os_level == "standard") {
 ohos_shared_library("cryptoextensionability_napi") {
   branch_protector_ret = "pac_ret"
   sanitize = {
@@ -57,4 +57,5 @@ ohos_shared_library("cryptoextensionability_napi") {
   relative_install_dir = "module/application"
   subsystem_name = "security"
   part_name = "huks"
+}
 }

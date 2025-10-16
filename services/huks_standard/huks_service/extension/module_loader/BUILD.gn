@@ -12,6 +12,7 @@
 # limitations under the License.
 import("//build/ohos.gni")
 
+if (os_level == "standard") {
 ohos_shared_library("crypto_extension_module") {
   branch_protector_ret = "pac_ret"
   sanitize = {
@@ -53,4 +54,5 @@ ohos_shared_library("crypto_extension_module") {
   relative_install_dir = "extensionability/"
   subsystem_name = "security"
   part_name = "huks"
+}
 }

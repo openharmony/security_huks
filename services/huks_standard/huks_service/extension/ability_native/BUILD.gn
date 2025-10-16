@@ -19,7 +19,7 @@ config("crypto_extension_public_config") {
         "inc",
     ]
 }
-
+if (os_level == "standard") {
 ohos_shared_library("crypto_extension_ability_native") {
     branch_protector_ret = "pac_ret"
 
@@ -77,4 +77,5 @@ ohos_shared_library("crypto_extension_ability_native") {
     relative_install_dir = "extensionability"
     subsystem_name = "security"
     part_name = "huks"
+}
 }
