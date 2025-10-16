@@ -90,7 +90,7 @@ HKS_API_EXPORT void HksFreeKeyAliasSet(struct HksKeyAliasSet *aliasSet);
  * @param CertInfoSet required CertInfo set
  * @return error code, see hks_type.h
  */
-HKS_API_EXPORT void HksFreeExtCertSet(struct HksExtCertInfoSet *CertInfoSet);
+HKS_API_EXPORT void HksFreeExtCertSet(struct HksExtCertInfoSet *certInfoSet);
 
 /**
  * @brief Get parameter set

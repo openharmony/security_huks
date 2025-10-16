@@ -124,7 +124,7 @@ napi_value ParseHksCryptoExternalParams(napi_env env, napi_value object, HksPara
 }
 
 
-static napi_value CreateAsyncWork(napi_env env, napi_callback_info info, std::unique_ptr<AsyncContext> context, 
+static napi_value CreateAsyncWork(napi_env env, napi_callback_info info, std::unique_ptr<AsyncContext> context,
     const char *resource)
 {
     if (context->parse != nullptr) {
@@ -367,7 +367,7 @@ napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info)
 
     context->execute = [](napi_env env, void *data) {
         UkeyPinContext *napiContext = static_cast<UkeyPinContext *>(data);
-        napiContext->result = HksGetUkeyPinAuthState(napiContext->index, napiContext->paramSetIn, 
+        napiContext->result = HksGetUkeyPinAuthState(napiContext->index, napiContext->paramSetIn,
             &napiContext->outStatus);
     };
 

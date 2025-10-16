@@ -855,7 +855,7 @@ static napi_value GenerateBusinessError(napi_env env, int32_t errorCode)
     napi_value data = GetNull(env);
     // ukey报错时需要在此处需要拼接 retryCount 上报给上层
     if (errInfo.errorCode == HUKS_ERR_CODE_PIN_CODE_ERROR) {
-        if(napi_create_int32(env, g_pinRetryCount, &data) != napi_ok) {
+        if (napi_create_int32(env, g_pinRetryCount, &data) != napi_ok) {
             data = GetNull(env);
         }
     }

@@ -46,11 +46,9 @@ namespace HuksNapiItem
 #define NAPI_THROW_RETURN_ERR(env, condition, ret, code, message) \
     NAPI_THROW_BASE(env, condition, ret, code, message)
 
-class AsyncContext
-{
+class AsyncContext {
 public:
-    virtual ~AsyncContext() 
-    {
+    virtual ~AsyncContext() {
         if (asyncWork != nullptr && env != nullptr) {
             napi_delete_async_work(env, asyncWork);
         }
@@ -82,11 +80,9 @@ public:
     struct HksParamSet *paramSetOut = nullptr;
 };
 
-class ProviderRegContext : public AsyncContext
-{
+class ProviderRegContext : public AsyncContext {
 public:
-    ~ProviderRegContext()
-    {
+    ~ProviderRegContext() {
         if (name != nullptr) {
             FreeHksBlob(name);
         }
@@ -94,11 +90,9 @@ public:
     struct HksBlob *name = nullptr;
 };
 
-class UkeyPinContext : public AsyncContext
-{
+class UkeyPinContext : public AsyncContext {
 public:
-    ~UkeyPinContext()
-    {
+    ~UkeyPinContext() {
         if (index != nullptr) {
             FreeHksBlob(index);
         }

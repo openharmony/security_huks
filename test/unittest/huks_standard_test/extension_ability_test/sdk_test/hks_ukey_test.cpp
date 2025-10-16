@@ -196,12 +196,56 @@ HWTEST_F(HksUKeyTest, HksUnregisterProviderWithoutNameTest, TestSize.Level0)
 
 HWTEST_F(HksUKeyTest, HksAuthUkeyPin, TestSize.Level0)
 {
+    uint32_t times = 1;
+    uint32_t index = 0;
+    const HksTestGenKeyParams &testParams = g_testGenKeyParams[index];
+    struct HksBlob *resourceId = NULL;
+    int32_t ret = ConstructTestBlob(&resourceId, testParams);
+    EXPECT_TRUE(ret == 0);
 
+    struct HksParamSet *paramSet = NULL;
+    ret = ConstructTestParamSet(&paramSet, testParams);
+    EXPECT_TRUE(ret == 0);
+
+    uint32_t retryCount = 0;
+
+    ret = HksAuthUkeyPin(resourceId, paramSet, &retryCount);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("failed, ret[%u] = %d", testParams.testId, ret);
+    }
+    EXPECT_TRUE(ret == 0);
+
+    TestFreeBlob(&resourceId);
+    HksFreeParamSet(&paramSet);
+    HKS_TEST_LOG_I("[%u]TestRegisterProvider, Testcase_RegisterProvider_[%03u] pass!", times, testParams.testId);
+    ASSERT_TRUE(ret == 0);
 }
 
 HWTEST_F(HksUKeyTest, HksGetUkeyPinAuthState, TestSize.Level0)
 {
+    uint32_t times = 1;
+    uint32_t index = 0;
+    const HksTestGenKeyParams &testParams = g_testGenKeyParams[index];
+    struct HksBlob *resourceId = NULL;
+    int32_t ret = ConstructTestBlob(&resourceId, testParams);
+    EXPECT_TRUE(ret == 0);
 
+    struct HksParamSet *paramSet = NULL;
+    ret = ConstructTestParamSet(&paramSet, testParams);
+    EXPECT_TRUE(ret == 0);
+    
+    int32_t status = 0;
+
+    ret = HksGetUkeyPinAuthState(resourceId, paramSet, &status);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("failed, ret[%u] = %d", testParams.testId, ret);
+    }
+    EXPECT_TRUE(ret == 0);
+
+    TestFreeBlob(&resourceId);
+    HksFreeParamSet(&paramSet);
+    HKS_TEST_LOG_I("[%u]TestRegisterProvider, Testcase_RegisterProvider_[%03u] pass!", times, testParams.testId);
+    ASSERT_TRUE(ret == 0);
 }
 
 HWTEST_F(HksUKeyTest, HksOpenRemoteHandle, TestSize.Level0)
