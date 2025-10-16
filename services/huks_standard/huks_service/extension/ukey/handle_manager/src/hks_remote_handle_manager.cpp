@@ -28,7 +28,6 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
-#include "hks_json_wrapper.h"
 #include "hks_provider_life_cycle_manager.h"
 #include "hks_template.h"
 #include "hks_ukey_common.h"
@@ -49,7 +48,6 @@ void HksRemoteHandleManager::ReleaseInstance()
 {
     HksRemoteHandleManager::DestroyInstance();
 }
-
 static int32_t WrapIndexWithProviderInfo(const ProviderInfo& providerInfo, 
                                         const std::string& originalIndex, 
                                         std::string& wrappedIndex)
@@ -73,29 +71,43 @@ static int32_t WrapIndexWithProviderInfo(const ProviderInfo& providerInfo,
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::ProcessAndWrapCertificates(const std::string &originalCertVec,
-        const ProviderInfo &providerInfo, std::string &processedCertVec)
+int32_t HksRemoteHandleManager::MergeProviderCertificates(const ProviderInfo &providerInfo,
+    const std::string &providerCertVec, CommJsonObject &combinedArray)
 {
-    HksExtCertInfoSet certSet = {0, nullptr};
-    int32_t ret = JsonArrayToCertInfoSet(originalCertVec, certSet);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Parse cert set failed: %" LOG_PUBLIC "d", ret)
-
-    for (uint32_t i = 0; i < certSet.count; i++) {
-        std::string originalIndex = BlobToString(certSet.certs[i].index);
-        if (!originalIndex.empty()) {
-            std::string wrappedIndex;
-            ret = WrapIndexWithProviderInfo(providerInfo, originalIndex, wrappedIndex);
-            if (ret != HKS_SUCCESS) {
-                return ret;
+    CommJsonObject providerArray = CommJsonObject::Parse(providerCertVec);
+    if (providerArray.IsNull() || !providerArray.IsArray()) {
+        HKS_LOG_E("Parse provider certificate array failed");
+        return HKS_ERROR_JSON_PARSE_FAILED;
+    }
+    
+    int32_t certCount = providerArray.ArraySize();
+    for (int32_t i = 0; i < certCount; i++) {
+        CommJsonObject certObj = providerArray.GetElement(i);
+        if (certObj.IsNull()) {
+            continue;
+        }  
+        auto indexValue = certObj.GetValue("index");
+        if (!indexValue.IsNull()) {
+            auto indexResult = indexValue.ToString();
+            if (indexResult.first == HKS_SUCCESS && !indexResult.second.empty()) {
+                std::string wrappedIndex;
+                int32_t ret = WrapIndexWithProviderInfo(providerInfo, indexResult.second, wrappedIndex);
+                if (ret == HKS_SUCCESS) {
+                    if (!certObj.SetValue("index", wrappedIndex)) {
+                        HKS_LOG_E("Set wrapped index failed");
+                    }
+                } else {
+                    HKS_LOG_E("Wrap index failed: %" LOG_PUBLIC "d", ret);
+                }
             }
-            HKS_FREE(certSet.certs[i].index.data);
-            certSet.certs[i].index = StringToBlob(wrappedIndex);
+        }
+        
+        if (!combinedArray.AppendElement(certObj)) {
+            HKS_LOG_E("Add certificate to combined array failed");
+            return HKS_ERROR_JSON_SERIALIZE_FAILED;
         }
     }
-    ret = CertInfoSetToJsonArray(certSet, processedCertVec);
     
-    FreeCertInfoSet(certSet);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Convert cert set to json failed: %" LOG_PUBLIC "d", ret)
     return HKS_SUCCESS;
 }
 
@@ -417,6 +429,7 @@ int32_t HksRemoteHandleManager::FindRemoteCertificate(const std::string &index,
             "Remote ExportCertificate failed: %" LOG_PUBLIC "d", ret)
     return HKS_SUCCESS;
 }
+
 int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &processInfo,
         const std::string &providerName, const CppParamSet &paramSet, std::string &certVec)
 {
@@ -429,22 +442,27 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
     int32_t ret = providerLifeManager->GetAllProviderInfosByProviderName(providerName, infos);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
             "GetAllProviderInfosByProviderName failed: %" LOG_PUBLIC "d", ret)
-    // TODO: 应该要循环遍历infos中所有的provider，然后调用ExportProviderCertificates接口，然后拼接起来
-    ProviderInfo providerInfo = infos[0];
-    auto proxy = GetProviderProxy(providerInfo, ret);
-    HKS_IF_NULL_RETURN(proxy, ret)
-
-    std::string tmpCertVec = "";
-    auto ipccode = proxy->ExportProviderCertificates(paramSet, tmpCertVec, ret);
-    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
-            "Remote ExportProviderCertificates failed: %" LOG_PUBLIC "d", ret)
     
-    HKS_LOG_E("ProcessAndWrapCertificates before--- %" LOG_PUBLIC "s", tmpCertVec.c_str());
-    ret = ProcessAndWrapCertificates(tmpCertVec, providerInfo, certVec);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_JSON_SERIALIZE_FAILED,
-            "CertVec transfer failed: %" LOG_PUBLIC "d", ret)
-    HKS_LOG_E("ProcessAndWrapCertificates after--- %" LOG_PUBLIC "s", certVec.c_str());
+    CommJsonObject combinedArray = CommJsonObject::CreateArray();
+    HKS_IF_TRUE_LOGE_RETURN(combinedArray.IsNull(), HKS_ERROR_JSON_SERIALIZE_FAILED, "Create combined array failed")
+    
+    for (const auto &providerInfo : infos) {
+        int32_t ret = HKS_SUCCESS;
+        auto proxy = GetProviderProxy(providerInfo, ret);
+        HKS_IF_TRUE_LOGE_CONTINUE(proxy == nullptr || ret != HKS_SUCCESS,
+            "Get proxy for provider failed, skipping")
+        std::string tmpCertVec = "";
+        auto ipccode = proxy->ExportProviderCertificates(paramSet, tmpCertVec, ret);
+        HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK || ret != HKS_SUCCESS, ret,
+            "ExportProviderCertificates for provider failed")
+        
+        ret = MergeProviderCertificates(providerInfo, tmpCertVec, combinedArray);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Merge certificates for provider failed")
+    }
+    
+    certVec = combinedArray.Serialize(false);
+    HKS_IF_TRUE_LOGE_RETURN(certVec.empty(), HKS_ERROR_JSON_SERIALIZE_FAILED, "Serialize certificate array failed")
+    
     return HKS_SUCCESS;
 }
 
