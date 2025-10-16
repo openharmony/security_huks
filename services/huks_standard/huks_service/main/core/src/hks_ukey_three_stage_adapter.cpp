@@ -56,7 +56,7 @@ int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, co
 
     uint64_t handleU64 = static_cast<uint64_t>(handleU32);
     handle->size = static_cast<uint64_t>(sizeof(handleU64));
-    handle->data = (uint8_t *)malloc(handle->size);
+    handle->data = new uint8_t[handle->size];
     HKS_IF_TRUE_LOGE_RETURN(handle->data == nullptr, HKS_ERROR_MALLOC_FAIL, "handle malloc fail")
 
     ret = memcpy_s(handle->data, handle->size, &handleU64, sizeof(handleU64));
@@ -70,7 +70,8 @@ int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, co
 }
 
 int32_t HksServiceOnUkeyUpdateSession(const struct HksProcessInfo *processInfo, const struct HksBlob *handle,
-    const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData) {
+    const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
+{
     uint64_t handleU64 = 0;
     if (handle != nullptr && handle->size == sizeof(uint64_t)) {
         if (memcpy_s(&handleU64, sizeof(handleU64), handle->data, handle->size) != EOK) {
@@ -93,7 +94,7 @@ int32_t HksServiceOnUkeyUpdateSession(const struct HksProcessInfo *processInfo, 
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnUpdateSession fail")
 
     outData->size = static_cast<uint32_t>(outdata.size());
-    outData->data = (uint8_t *)malloc(outdata.size());
+    outData->data = new uint8_t[outData->size];
     HKS_IF_TRUE_LOGE_RETURN(outData->data == nullptr, HKS_ERROR_MALLOC_FAIL, "outData malloc fail")
 
     ret = memcpy_s(outData->data, outData->size, outdata.data(), outdata.size());
@@ -107,7 +108,8 @@ int32_t HksServiceOnUkeyUpdateSession(const struct HksProcessInfo *processInfo, 
 }
 
 int32_t HksServiceOnUkeyFinishSession(const struct HksProcessInfo *processInfo, const struct HksBlob *handle,
-    const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData) {
+    const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
+{
     uint64_t handleU64 = 0;
     if (handle != nullptr && handle->size == sizeof(uint64_t)) {
         if (memcpy_s(&handleU64, sizeof(handleU64), handle->data, handle->size) != EOK) {
@@ -125,11 +127,11 @@ int32_t HksServiceOnUkeyFinishSession(const struct HksProcessInfo *processInfo, 
     auto libInterface = OHOS::Security::Huks::HuksLibInterface::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get lib interface instance.")
 
-    int32_t ret = libInterface->OnFinishSession(*processInfo, handleU32, cppParamSet, indata, outdata); 
+    int32_t ret = libInterface->OnFinishSession(*processInfo, handleU32, cppParamSet, indata, outdata);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnFinishSession fail")
 
     outData->size = static_cast<uint32_t>(outdata.size());
-    outData->data = (uint8_t *)malloc(outdata.size());
+    outData->data = new uint8_t[outData->size];
     HKS_IF_TRUE_LOGE_RETURN(outData->data == nullptr, HKS_ERROR_MALLOC_FAIL, "outData malloc fail")
 
     ret = memcpy_s(outData->data, outData->size, outdata.data(), outdata.size());

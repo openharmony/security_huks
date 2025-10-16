@@ -42,14 +42,11 @@ void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementNa
 
 int32_t ExtensionConnection::OnConnection(const AAFwk::Want &want)
 {
-    if (m_conn == nullptr) {
-        m_conn = new (std::nothrow) ExtensionConnection();
-    }
-    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, m_conn, DEFAULT_USER_ID);
-    HKS_IF_TRUE_LOGE_RETURN(ret != ERR_OK, HKS_ERROR_CONNECT_AMS_FAIL, "connect AMS fail")
+    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, this, DEFAULT_USER_ID);
+    HKS_IF_TRUE_LOGE_RETURN(ret != ERR_OK, HKS_ERROR_UKEY_CONNECT_FAIL, "connect ability manager system fail")
 
     std::unique_lock<std::mutex> lock(proxyMutex_);
-    if (!proxyConv_.wait_for(lock, std::chrono::seconds(WAIT_TIME), [this]{
+    if (!proxyConv_.wait_for(lock, std::chrono::seconds(WAIT_TIME), [this] {
         return extConnectProxy != nullptr;
     })) {
         HKS_LOG_E("wait connect timeout");
@@ -67,10 +64,7 @@ void ExtensionConnection::OnDisconnect()
         }
     }
     
-    if (m_conn == nullptr) {
-        m_conn = new (std::nothrow) ExtensionConnection();
-    }
-    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->DisconnectAbility(m_conn);
+    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->DisconnectAbility(this);
     HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS, "disconnect ability fail, ret = %{public}d", ret)
 }
 
@@ -99,11 +93,8 @@ void ExtensionConnection::AddExtDeathRecipient(const wptr<IRemoteObject> &token)
     }
 
     if (callerDeathRecipient_ == nullptr) {
-        if (m_conn == nullptr) {
-            m_conn = new (std::nothrow) ExtensionConnection();
-        }
         callerDeathRecipient_ = new ExtensionDeathRecipient(std::bind(&ExtensionConnection::OnRemoteDied,
-            m_conn, std::placeholders::_1));
+            this, std::placeholders::_1));
     }
 
     if (token != nullptr) {
