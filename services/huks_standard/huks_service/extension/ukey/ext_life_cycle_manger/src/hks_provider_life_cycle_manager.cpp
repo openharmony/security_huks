@@ -90,7 +90,7 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
         ret = HKS_SUCCESS;
     } else {
         HKS_LOG_E("OnRegisterProvider failed, providerName: %" LOG_PUBLIC "s, already exist", providerName.c_str());
-        ret = HKS_ERROR_ALREADY_EXISTS;
+        ret = HKS_ERROR_PROVIDER_HAS_REGISTERED;
     }
     return ret;
 }
