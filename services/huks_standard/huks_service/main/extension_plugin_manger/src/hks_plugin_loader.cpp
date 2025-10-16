@@ -106,47 +106,47 @@ void HuksPluginLoader::SetPluginPath(std::string &pluginPath)
 void HuksPluginLoader::InitMethodNameMap()
 {
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_REGISTER_PROVIDER,
-        R"(_ZN4OHOS8Security4Huks30HksExtPluginOnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_
-        11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet)");
+        "_ZN4OHOS8Security4Huks30HksExtPluginOnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_UN_REGISTER_PROVIDER,
-        R"(_ZN4OHOS8Security4Huks32HksExtPluginOnUnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_
-        11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet)");
+        "_ZN4OHOS8Security4Huks32HksExtPluginOnUnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_CREATE_REMOTE_INDEX,
-        R"(_ZN4OHOS8Security4Huks31HksExtPluginOnCreateRemoteIndexERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_
-        11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_)");
+        "_ZN4OHOS8Security4Huks31HksExtPluginOnCreateRemoteIndexERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_CREATE_REMOTE_KEY_HANDLE,
-        R"(_ZN4OHOS8Security4Huks30HksExtPluginOnOpemRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_
-        11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_)");
+        "_ZN4OHOS8Security4Huks30HksExtPluginOnOpemRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_CLOSE_REMOTE_KEY_HANDLE,
-        R"(_ZN4OHOS8Security4Huks31HksExtPluginOnCloseRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_
-        11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet)");
+        "_ZN4OHOS8Security4Huks31HksExtPluginOnCloseRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_AUTH_UKEY_PIN,
-        R"(_ZN4OHOS8Security4Huks25HksExtPluginOnAuthUkeyPinERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_
-        traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRiRj)");
+        "_ZN4OHOS8Security4Huks25HksExtPluginOnAuthUkeyPinERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRiRj");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_GET_VERIFY_PIN_STATUS,
-        R"(_ZN4OHOS8Security4Huks33HksExtPluginOnGetUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_
-        11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRi)");
+        "_ZN4OHOS8Security4Huks33HksExtPluginOnGetUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRi");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_CLEAR_PIN_STATUS,
-        R"(_ZN4OHOS8Security4Huks24HksClearUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_
-        traitsIcEENS5_9allocatorIcEEEE)");
+        "_ZN4OHOS8Security4Huks24HksClearUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEE");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_GET_REMOTE_PROPERTY,
-        R"(_ZN4OHOS8Security4Huks20HksGetRemotePropertyERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_
-        traitsIcEENS5_9allocatorIcEEEESD_RK11CppParamSetRSE_)");
+        "_ZN4OHOS8Security4Huks20HksGetRemotePropertyERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEESD_RK11CppParamSetRSE_");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_LIST_INDEX_CERTIFICATE,
-        R"(_ZN4OHOS8Security4Huks29HksExtPluginOnExportCerticateERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_
-        traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_)");
+        "_ZN4OHOS8Security4Huks29HksExtPluginOnExportCerticateERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_LIST_PROVIDER_ALL_CERTIFICATE,
-        R"(_ZN4OHOS8Security4Huks38HksExtPluginOnExportProviderCerticatesERK14HksProcessInfoRKNSt3__h12basic_
-        stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_)");
+        "_ZN4OHOS8Security4Huks38HksExtPluginOnExportProviderCerticatesERK14HksProcessInfo"
+        "RKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_INIT_SESSION,
-        R"(_ZN4OHOS8Security4Huks25HksExtPluginOnInitSessionERK14HksProcessInfoRKNSt3__h12basic_stringIcNS5_11char_
-        traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRj)");
+        "_ZN4OHOS8Security4Huks25HksExtPluginOnInitSessionERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRj");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_UPDATE_SESSION,
-        R"(_ZN4OHOS8Security4Huks27HksExtPluginOnUpdateSessionERK14HksProcessInfoRKjRK11CppParamSetRKNSt3__
-        h6vectorIhNSA_9allocatorIhEEEERSE_)");
+        "_ZN4OHOS8Security4Huks27HksExtPluginOnUpdateSessionERK14HksProcessInfoRKjRK11CppParamSet"
+        "RKNSt3__h6vectorIhNSA_9allocatorIhEEEERSE_");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_FINISH_SESSION,
-        R"(_ZN4OHOS8Security4Huks27HksExtPluginOnFinishSessionERK14HksProcessInfoRKjRK11CppParamSetRKNSt3__
-        h6vectorIhNSA_9allocatorIhEEEERSE_)");
+        "_ZN4OHOS8Security4Huks27HksExtPluginOnFinishSessionERK14HksProcessInfoRKjRK11CppParamSet"
+        "RKNSt3__h6vectorIhNSA_9allocatorIhEEEERSE_");
 }
 
 }
