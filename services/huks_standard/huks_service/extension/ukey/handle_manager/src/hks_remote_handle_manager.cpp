@@ -262,7 +262,7 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const std::string &index, con
     
     std::string handle = ""; 
     auto ipccode = proxy->OpenRemoteHandle(newIndex, paramSet, handle, ret);
-    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, ipccode, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
             "Create remote handle failed: %" LOG_PUBLIC "d", ret)
@@ -290,7 +290,7 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const std::string &index, cons
     HKS_IF_NULL_RETURN(proxy, ret)
 
     auto ipccode = proxy->CloseRemoteHandle(handle, paramSet, ret);
-    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, ipccode, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
             "Close remote handle failed: %" LOG_PUBLIC "d", ret)
@@ -313,7 +313,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     HKS_IF_NULL_RETURN(proxy, ret)
     
     auto ipccode = proxy->AuthUkeyPin(handle, paramSet, ret, authState, retryCnt);
-    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, ipccode, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
             "Remote verify pin failed: %" LOG_PUBLIC "d", ret)
@@ -333,7 +333,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     HKS_IF_NULL_RETURN(proxy, ret)
 
     auto ipccode = proxy->GetUkeyPinAuthState(handle, paramSet, state, ret);
-    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, ipccode, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
             "Remote verify pin status failed: %" LOG_PUBLIC "d", ret)
@@ -352,7 +352,7 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const std::string &index, c
     HKS_IF_NULL_RETURN(proxy, ret)
 
     auto ipccode = proxy->ClearUkeyPinAuthState(newIndex, paramSet, ret);
-    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, ipccode, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
             "Remote clear pin status failed: %" "d", ret)
@@ -372,7 +372,7 @@ int32_t HksRemoteHandleManager::RemoteHandleSign(const std::string &index, const
     HKS_IF_NULL_RETURN(proxy, ret)
 
     auto ipccode = proxy->Sign(handle, paramSet, inData, outData, ret);
-    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, ipccode, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
             "Remote sign failed: %" LOG_PUBLIC "d", ret)
@@ -392,7 +392,7 @@ int32_t HksRemoteHandleManager::RemoteHandleVerify(const std::string &index, con
     HKS_IF_NULL_RETURN(proxy, ret)
 
     auto ipccode = proxy->Verify(handle, paramSet, plainText, signature, ret);
-    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, ipccode, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
             "Remote verify failed: %" LOG_PUBLIC "d", ret)
@@ -411,7 +411,7 @@ int32_t HksRemoteHandleManager::FindRemoteCertificate(const std::string &index,
     HKS_IF_NULL_RETURN(proxy, ret)
 
     auto ipccode = proxy->ExportCertificate(newIndex, paramSet, cert, ret);
-    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, ipccode, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
             "Remote ExportCertificate failed: %" LOG_PUBLIC "d", ret)
@@ -436,7 +436,7 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
 
     std::string tmpCertVec = "";
     auto ipccode = proxy->ExportProviderCertificates(paramSet, tmpCertVec, ret);
-    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, ipccode, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
             "Remote ExportProviderCertificates failed: %" LOG_PUBLIC "d", ret)
     
@@ -461,7 +461,7 @@ int32_t HksRemoteHandleManager::GetRemoteProperty(const std::string &index, cons
     HKS_IF_NULL_RETURN(proxy, ret)
 
     auto ipccode = proxy->GetProperty(handle, propertyId, paramSet, outParams, ret);
-    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, ipccode, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
             "Remote GetProperty failed: %" LOG_PUBLIC "d", ret)
