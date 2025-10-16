@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include "hks_error_code.h"
 #include "hks_provider_life_cycle_manager.h"
 #include "hks_remote_handle_manager.h"
@@ -81,7 +81,8 @@ int32_t HksSessionManager::ExtensionInitSession(const HksProcessInfo &processInf
     ProviderInfo providerInfo;
     std::string newIndex;
     std::string sIndexHandle;
-    int32_t ret = HksRemoteHandleManager::GetInstanceWrapper()->ParseAndValidateIndex(index, providerInfo, newIndex, sIndexHandle);
+    int32_t ret = HksRemoteHandleManager::GetInstanceWrapper()->ParseAndValidateIndex(index, providerInfo, newIndex,
+        sIndexHandle);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("ParseAndValidateIndex failed: %" LOG_PUBLIC "d", ret);
         return ret;
@@ -92,7 +93,8 @@ int32_t HksSessionManager::ExtensionInitSession(const HksProcessInfo &processInf
         return ret;
     }
     auto ipcCode = proxy->InitSession(sIndexHandle, paramSet, sessionHandle, ret);
-    HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy InitSession ipcCode: %" LOG_PUBLIC "d", ipcCode)
+    HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy InitSession ipcCode: %" LOG_PUBLIC "d",
+        ipcCode)
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("InitSession get handle failed: %" LOG_PUBLIC "d", ret);
         return HKS_ERROR_REMOTE_OPERATION_FAILED;
@@ -126,7 +128,8 @@ int32_t HksSessionManager::ExtensionUpdateSession(const HksProcessInfo &processI
         return ret;
     }
     auto ipcCode = proxy->UpdateSession(handleInfo.second, paramSet, inData, outData, ret);
-    HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy UpdateSession ipcCode: %" LOG_PUBLIC "d", ipcCode)
+    HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy UpdateSession ipcCode: %" LOG_PUBLIC "d",
+        ipcCode)
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("UpdateSession failed: %" LOG_PUBLIC "d", ret);
         return HKS_ERROR_REMOTE_OPERATION_FAILED;
@@ -138,7 +141,7 @@ int32_t HksSessionManager::ExtensionFinishSession(const HksProcessInfo &processI
     std::vector<uint8_t> &outData)
 {
     std::pair<ProviderInfo, std::string> handleInfo;
-    if(!m_handlers.Find(handle, handleInfo)) {
+    if (!m_handlers.Find(handle, handleInfo)) {
         HKS_LOG_E("Find handle failed");
         return HKS_ERROR_UKY_FIND_SESSION_HANDLE_FAIL;
     }
@@ -149,7 +152,8 @@ int32_t HksSessionManager::ExtensionFinishSession(const HksProcessInfo &processI
         return ret;
     }
     auto ipcCode = proxy->FinishSession(handleInfo.second, paramSet, inData, outData, ret);
-    HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy FinishSession ipcCode: %" LOG_PUBLIC "d", ipcCode)
+    HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy FinishSession ipcCode: %" LOG_PUBLIC "d",
+        ipcCode)
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("FinishSession failed: %" LOG_PUBLIC "d", ret);
         return HKS_ERROR_REMOTE_OPERATION_FAILED;

@@ -24,7 +24,7 @@
 #include "hks_type_enum.h"
 #include <parcel.h>
 
-class CppParamSet : public virtual OHOS::Parcelable{
+class CppParamSet : public virtual OHOS::Parcelable {
 public:
     explicit CppParamSet() = default;
     explicit CppParamSet(const HksParamSet *paramSetIn);
@@ -56,19 +56,19 @@ public:
             if (ret == HKS_SUCCESS && param != nullptr) {
                 return std::pair<int32_t, int32_t>(ret, param->int32Param);
             }
-            return std::pair<int32_t, int32_t>{ret, 0}; 
+            return std::pair<int32_t, int32_t>{ret, 0};
         }
         if constexpr (GetTagType(tag) == HKS_TAG_TYPE_UINT) {
             if (ret == HKS_SUCCESS && param != nullptr) {
                 return std::pair<int32_t, uint32_t>(ret, param->uint32Param);
             }
-            return std::pair<int32_t, uint32_t>{ret, 0}; 
+            return std::pair<int32_t, uint32_t>{ret, 0};
         }
         if constexpr (GetTagType(tag) == HKS_TAG_TYPE_ULONG) {
             if (ret == HKS_SUCCESS && param != nullptr) {
                 return std::pair<int32_t, uint64_t>(ret, param->uint64Param);
             }
-            return std::pair<int32_t, uint64_t>{ret, 0}; 
+            return std::pair<int32_t, uint64_t>{ret, 0};
         }
         if constexpr (GetTagType(tag) == HKS_TAG_TYPE_BOOL) {
             if (ret == HKS_SUCCESS && param != nullptr) {
@@ -78,9 +78,10 @@ public:
         }
         if constexpr (GetTagType(tag) == HKS_TAG_TYPE_BYTES) {
             if (ret == HKS_SUCCESS && param != nullptr) {
-                return std::pair<int32_t, std::vector<uint8_t>>(ret, {param->blob.data, param->blob.data + param->blob.size});
+                return std::pair<int32_t, std::vector<uint8_t>>(ret, {param->blob.data,
+                    param->blob.data + param->blob.size});
             }
-            return std::pair<int32_t, std::vector<uint8_t>>{ret, {}}; 
+            return std::pair<int32_t, std::vector<uint8_t>>{ret, {}};
         }
     }
 

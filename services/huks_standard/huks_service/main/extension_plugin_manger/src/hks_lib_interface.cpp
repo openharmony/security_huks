@@ -231,9 +231,6 @@ int32_t HuksLibInterface::OnFinishSession(const HksProcessInfo &processInfo, con
     HKS_LOG_I("finish session success");
     return HKS_SUCCESS;
 }
-
 }
 }
 }
-
-
