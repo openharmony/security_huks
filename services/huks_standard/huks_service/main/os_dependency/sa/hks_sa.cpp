@@ -217,7 +217,7 @@ void HksDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remoteObject)
 void HksDeathRecipient::NotifyExtOnBinderDied(int32_t uid)
 {
     OHOS::AAFwk::Want want;
-    want.SetAction("ohos.hks.action.BINDER_DIED");
+    want.SetAction(COMMON_EVENT_HKS_BINDER_DIED);
     want.SetParam("uid", uid);
     
     OHOS::EventFwk::CommonEventData eventData;
