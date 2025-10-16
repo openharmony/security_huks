@@ -36,13 +36,13 @@ public:
     static std::shared_ptr<HuksPluginLifeCycleMgr> GetInstanceWrapper();
     static void ReleaseInstance();
     int32_t RegisterProvider(const struct HksProcessInfo &info, const std::string &AbilityName,
-        const CppParamSet &paramSet);
+        const CppParamSet& paramSet);
     int32_t UnRegisterProvider(const struct HksProcessInfo &info, const std::string &AbilityName,
-        const CppParamSet &paramSet);
+        const CppParamSet& paramSet);
 
 private:
-    std::atomic<int32_t> m_refCount{0};
-    std::mutex m_libMutex;
+    std::atomic<int> m_refCount{0};
+    static HuksPluginLifeCycleMgr instancePLCM;
 };
 
 }

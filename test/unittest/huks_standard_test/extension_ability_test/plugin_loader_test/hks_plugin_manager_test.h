@@ -20,6 +20,7 @@
 #include "hks_plugin_lifecycle_manager.h"
 #include "hks_plugin_loader.h"
 #include "hks_function_types.h"
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 namespace OHOS {
@@ -36,7 +37,7 @@ protected:
 
     void TearDown() override;
 
-    std::shared_ptr<HuksPluginLifeCycleMgr> pluginManager_;
+    std::shared_ptr<HuksExtensionPluginManager> pluginManager_;
     HksProcessInfo info_;
     std::string providerName_;
     CppParamSet paramSet_;
