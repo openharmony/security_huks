@@ -704,6 +704,13 @@ static struct HksError g_errCodeTable[] = {
             .errorMsg = "The auth pin is not correct.",
             .data = NULL
         }
+    }, {
+        .innerErrCode = HKS_ERROR_PROVIDER_HAS_REGISTERED,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_PROVIDER_REGISTED,
+            .errorMsg = "The auth pin is not correct.",
+            .data = NULL
+        }
     }
 };
 
