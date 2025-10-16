@@ -207,14 +207,27 @@ void HksDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remoteObject)
     while (HksServiceAbortByPid(callingPid_) == HKS_SUCCESS && index < MAX_OPERATIONS_EACH_PID) {
         index++;
     }
+
+    NotifyExtOnBinderDied(callingUid_);
+
     HKS_LOG_I("The death process[%" LOG_PUBLIC "d] cache has been cleared [%" LOG_PUBLIC "d] operations!",
         callingPid_, index);
 }
 
-HksDeathRecipient::HksDeathRecipient(int32_t callingPid)
+void HksDeathRecipient::NotifyExtOnBinderDied(int32_t uid)
 {
-    callingPid_ = callingPid;
+    OHOS::AAFwk::Want want;
+    want.SetAction("ohos.hks.action.BINDER_DIED");
+    want.SetParam("uid", uid);
+    
+    OHOS::EventFwk::CommonEventData eventData;
+    eventData.SetWant(want);
+    
+    HksPluginOnReceiveEvent(&eventData);
 }
+
+HksDeathRecipient::HksDeathRecipient(int32_t callingPid, int32_t callingUid)
+    : callingPid_(callingPid), callingUid_(callingUid) {}
 
 static int32_t ProcessAttestOrNormalMessage(
     uint32_t code, MessageParcel &data, uint32_t outSize, const struct HksBlob &srcData, MessageParcel &reply)
@@ -236,8 +249,9 @@ static int32_t ProcessAttestOrNormalMessage(
         sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
         if (remoteObject != HKS_NULL_POINTER) {
             int32_t callingPid = IPCSkeleton::GetCallingPid();
-            remoteObject->AddDeathRecipient(new OHOS::Security::Hks::HksDeathRecipient(callingPid));
-            HKS_LOG_I("Add bundleDead for pid: %" LOG_PUBLIC "d", callingPid);
+            int32_t callingUid = IPCSkeleton::GetCallingUid();
+            remoteObject->AddDeathRecipient(new OHOS::Security::Hks::HksDeathRecipient(callingPid, callingUid));
+            HKS_LOG_I("Add bundleDead for pid: %" LOG_PUBLIC "d, uid: %" LOG_PUBLIC "d", callingPid, callingUid);
         }
     }
     return ProcessMessage(code, outSize, srcData, reply);
