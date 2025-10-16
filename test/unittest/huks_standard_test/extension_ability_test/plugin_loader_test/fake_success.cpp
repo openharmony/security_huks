@@ -20,9 +20,11 @@
 extern "C" {
 
 int OnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet) {
+    HKS_LOG_I("libfake_success.so coming OnRegisterProvider");
     return 0;
 }
 int OnUnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet) {
+    HKS_LOG_I("libfake_success.so coming OnUnRegisterProvider");
     return 0;
 }
 

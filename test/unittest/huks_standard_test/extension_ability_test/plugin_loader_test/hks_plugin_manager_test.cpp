@@ -21,7 +21,7 @@ using namespace testing::ext;
 
 const std::string TEST_PROVIDER = "testProvider";
 std::string PLUGIN_PATH_SUCCESS = "libfake_success.so";
-std::string PLUGIN_PATH_FAIL = "libfake_gfail.so";
+std::string PLUGIN_PATH_FAIL = "libfake_fail.so";
 std::string PLUGIN_PATH_NOT_EXIST = "not_exist.so";
 
 namespace OHOS {
