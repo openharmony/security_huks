@@ -83,8 +83,6 @@ ErrCode HksCryptoExtStubImpl::Sign(
         LOGE("extension is nullptr");
         return ERR_OK;
     }
-    // 实现签名逻辑
-    // outData = ...; // 设置签名结果
     return ERR_OK;
 }
 
@@ -99,8 +97,6 @@ ErrCode HksCryptoExtStubImpl::Verify(
         LOGE("extension is nullptr");
         return ERR_OK;
     }
-    // 实现验证逻辑
-    // 设置errcode为验证结果
     return ERR_OK;
 }
 
@@ -177,9 +173,8 @@ ErrCode HksCryptoExtStubImpl::GetProperty(
     CppParamSet& outParams,
     int32_t& errcode)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO GetProperty");
     if (extension_ == nullptr) {
-        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        LOGE("extension_ nullptr");
         return ERR_OK;
     }
     return extension_->GetProperty(handle, propertyId, params, outParams, errcode);
@@ -190,12 +185,10 @@ ErrCode HksCryptoExtStubImpl::GetResourceId(
     std::string& resourceId,
     int32_t& errcode)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO GetResourceId");
     if (extension_ == nullptr) {
-        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        LOGE("extension_ nullptr");
         return ERR_OK;
     }
-    // TODO 实现具体的获取资源ID逻辑
     return ERR_OK;
 }
 
@@ -204,9 +197,8 @@ ErrCode HksCryptoExtStubImpl::ClearUkeyPinAuthState(
     const CppParamSet& params,
     int32_t& errcode)
 {
-    LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO ClearUkeyPinAuthState");
     if (extension_ == nullptr) {
-        LOGE("wqy!!!!!!!!!!!!!!!!!!!!!!!!!TODO extension_ nullptr");
+        LOGE("extension_ nullptr");
         return ERR_OK;
     }
     return extension_->ClearUkeyPinAuthState(handle, params, errcode);

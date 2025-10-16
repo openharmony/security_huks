@@ -62,7 +62,7 @@ typedef struct CryptoResultParam {
     std::condition_variable callJsCon;
     std::atomic<bool> callJsExMethodDone {false};
     std::mutex callJsMutex;
-} CryptoResultParam; 
+} CryptoResultParam;
 
 struct CallJsParam {
     std::mutex CryptoOperateMutex;
@@ -93,51 +93,57 @@ public:
     static JsHksCryptoExtAbility* Create(const std::unique_ptr<AbilityRuntime::Runtime> &runtime);
     void OnStart(const AAFwk::Want &want) override;
     sptr<IRemoteObject> OnConnect(const AAFwk::Want &want) override;
-    int OpenRemoteHandle(const std::string& index, const CppParamSet& params, std::string& handle,
-        int32_t& errcode) override;
-    int CloseRemoteHandle(const std::string& handle, const CppParamSet& params, int32_t& errcode) override;
-    int AuthUkeyPin(const std::string& handle, const CppParamSet& params, int32_t& errcode,
-        int32_t& authState, uint32_t& retryCnt) override;
-    int GetUkeyPinAuthState(const std::string& handle, const CppParamSet& params,
-        int32_t& authState, int32_t& errcode) override;
-    int ExportCertificate(const std::string& index, const CppParamSet& params,
-        std::string& certJsonArr, int32_t& errcode) override;
-    int ExportProviderCertificates( const CppParamSet& params, std::string& certJsonArr,
-        int32_t& errcode) override;
-    int InitSession(const std::string& index, const CppParamSet& params, std::string& handle,
-        int32_t& errcode) override;
-    int UpdateSession(const std::string& handle, const CppParamSet& params, const std::vector<uint8_t>& inData,
-        std::vector<uint8_t>& outData, int32_t& errcode) override;
-    int FinishSession(const std::string& handle, const CppParamSet& params, const std::vector<uint8_t>& inData,
-        std::vector<uint8_t>& outData, int32_t& errcode) override;
-    int GetProperty(const std::string& handle, const std::string& propertyId, const CppParamSet& params,
-        CppParamSet& outParams, int32_t& errcode) override;
-    int ClearUkeyPinAuthState(const std::string& handle, const CppParamSet& params, int32_t& errcode) override; 
+    int32_t OpenRemoteHandle(const std::string &index, const CppParamSet &params, std::string &handle,
+        int32_t &errcode) override;
+    int32_t CloseRemoteHandle(const std::string &handle, const CppParamSet &params, int32_t &errcode) override;
+    int32_t AuthUkeyPin(const std::string &handle, const CppParamSet &params, int32_t &errcode,
+        int32_t &authState, uint32_t &retryCnt) override;
+    int32_t GetUkeyPinAuthState(const std::string &handle, const CppParamSet &params,
+        int32_t &authState, int32_t &errcode) override;
+    int32_t ExportCertificate(const std::string &index, const CppParamSet &params,
+        std::string &certJsonArr, int32_t &errcode) override;
+    int32_t ExportProviderCertificates(const CppParamSet &params, std::string &certJsonArr,
+        int32_t &errcode) override;
+    int32_t InitSession(const std::string &index, const CppParamSet &params, std::string &handle,
+        int32_t &errcode) override;
+    int32_t UpdateSession(const std::string &handle, const CppParamSet &params, const std::vector<uint8_t> &inData,
+        std::vector<uint8_t> &outData, int32_t &errcode) override;
+    int32_t FinishSession(const std::string &handle, const CppParamSet &params, const std::vector<uint8_t> &inData,
+        std::vector<uint8_t> &outData, int32_t &errcode) override;
+    int32_t GetProperty(const std::string &handle, const std::string &propertyId, const CppParamSet &params,
+        CppParamSet &outParams, int32_t &errcode) override;
+    int32_t ClearUkeyPinAuthState(const std::string &handle, const CppParamSet &params, int32_t &errcode) override;
+
 private:
     template <typename T>
     struct Value {
         T data;
-        int code {ERR_OK};
+        int32_t code {ERR_OK};
     };
     napi_value CallObjectMethod(const char *name, napi_value const *argv = nullptr, size_t argc = 0);
     static napi_status GetStringValue(napi_env env, napi_value value, std::string &result);
     static napi_status GetHksCertInfoValue(napi_env env, napi_value value, HksCertInfo &certInfo);
     static napi_status GetUint8ArrayValue(napi_env env, napi_value value, HksBlob &result);
     static napi_status GetHksParamsfromValue(napi_env env, napi_value value, HksParam &param);
-    static void GetSessionParams(napi_env &env, napi_value &funcResult, CryptoResultParam &resultParams);
+    static void GetSessionParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams);
     static void HksCertInfoToString(std::vector<HksCertInfo> &certInfoVec, std::string &jsonStr);
-    int CallJsMethod(const std::string &funcName, AbilityRuntime::JsRuntime &jsRuntime, NativeReference *jsObj,
+    int32_t CallJsMethod(const std::string &funcName, AbilityRuntime::JsRuntime &jsRuntime, NativeReference *jsObj,
         InputArgsParser argParser, ResultValueParser retParser);
     void GetSrcPath(std::string &srcPath);
-    bool ParserVectorStringJsResult(napi_env &env, napi_value nativeValue, Value<std::vector<std::string>> &results);
-    static bool ConvertFunctionResult(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
+    static bool ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
+        CryptoResultParam &resultParams);
     static napi_value PromiseCallback(napi_env env, napi_callback_info info);
     void CallPromise(napi_env &env, napi_value funcResult, std::shared_ptr<CryptoResultParam> dataParam);
-    static void GetOpenRemoteHandleParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams);
-    static void GetAuthUkeyPin(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
-    static void GetUkeyPinAuthStateParams(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
-    static void GetExportCertificateParams(napi_env env, napi_value funcResult, CryptoResultParam &resultParams);
-    static void GetGetPropertyParams(napi_env &env, napi_value &funcResult, CryptoResultParam &resultParams);
+    static void GetOpenRemoteHandleParams(const napi_env &env, const napi_value &funcResult,
+        CryptoResultParam &resultParams);
+    static void GetAuthUkeyPinParams(const napi_env &env, const napi_value &funcResult,
+        CryptoResultParam &resultParams);
+    static void GetUkeyPinAuthStateParams(const napi_env &env, const napi_value &funcResult,
+        CryptoResultParam &resultParams);
+    static void GetExportCertificateParams(const napi_env &env, const napi_value &funcResult,
+        CryptoResultParam &resultParams);
+    static void GetGetPropertyParams(const napi_env &env, const napi_value &funcResult,
+        CryptoResultParam &resultParams);
     AbilityRuntime::JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> jsObj_;
 };

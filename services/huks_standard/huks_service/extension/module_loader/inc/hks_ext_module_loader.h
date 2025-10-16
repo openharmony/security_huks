@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
- #ifndef HKS_EXT_MODULE_LOADER_H
- #define HKS_EXT_MODULE_LOADER_H
- 
- #include <map>
- #include <memory>
- 
- #include "extension.h"
- #include "extension_module_loader.h"
- #include "runtime.h"
- #include "singleton.h"
+#ifndef HKS_EXT_MODULE_LOADER_H
+#define HKS_EXT_MODULE_LOADER_H
+
+#include <map>
+#include <memory>
+
+#include "extension.h"
+#include "extension_module_loader.h"
+#include "runtime.h"
+#include "singleton.h"
  
 namespace OHOS {
 namespace Security {

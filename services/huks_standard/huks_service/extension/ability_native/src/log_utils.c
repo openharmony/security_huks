@@ -35,7 +35,7 @@
 
 static void OutPrint(const char * buf, CryptogLevel level)
 {
-    switch (level){
+    switch (level) {
         case LOG_LEVEL_DEBUG:
             LOG_DEBUG(buf);
             break;

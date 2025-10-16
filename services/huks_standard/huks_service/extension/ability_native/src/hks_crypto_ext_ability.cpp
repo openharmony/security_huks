@@ -57,76 +57,77 @@ void HksCryptoExtAbility::Init(const std::shared_ptr<AbilityRuntime::AbilityLoca
     ExtensionBase<>::Init(record, application, handler, token);
 }
 
-int HksCryptoExtAbility::OpenRemoteHandle(const std::string& index, const CppParamSet& params, std::string& handle,
-    int32_t& errcode)
+int32_t HksCryptoExtAbility::OpenRemoteHandle(const std::string &index, const CppParamSet &params, std::string &handle,
+    int32_t &errcode)
 {
     LOGE("HksCryptoExtAbility::OpenRemoteHandle Undefined operation");
     return true;
 }
 
-int HksCryptoExtAbility::CloseRemoteHandle(const std::string& handle, const CppParamSet& params, int32_t& errcode)
+int32_t HksCryptoExtAbility::CloseRemoteHandle(const std::string &handle, const CppParamSet &params, int32_t &errcode)
 {
     LOGE("HksCryptoExtAbility::CloseRemoteHandle Undefined operation");
     return true;
 }
 
-int HksCryptoExtAbility::AuthUkeyPin(const std::string& handle, const CppParamSet& params, int32_t& errcode,
-    int32_t& authState, uint32_t& retryCnt)
+int32_t HksCryptoExtAbility::AuthUkeyPin(const std::string &handle, const CppParamSet &params, int32_t &errcode,
+    int32_t &authState, uint32_t &retryCnt)
 {
     LOGE("HksCryptoExtAbility::AuthUkeyPin Undefined operation");
     return true;
 }
 
-int HksCryptoExtAbility::GetUkeyPinAuthState(const std::string& handle, const CppParamSet& params,
-        int32_t& authState, int32_t& errcode)
+int32_t HksCryptoExtAbility::GetUkeyPinAuthState(const std::string &handle, const CppParamSet &params,
+    int32_t &authState, int32_t &errcode)
 {
     LOGE("HksCryptoExtAbility::GetUkeyPinAuthState Undefined operation");
     return true;
 }
 
-int HksCryptoExtAbility::ExportCertificate(const std::string& index, const CppParamSet& params,
-    std::string& certJsonArr, int32_t& errcode)
+int32_t HksCryptoExtAbility::ExportCertificate(const std::string &index, const CppParamSet &params,
+    std::string &certJsonArr, int32_t &errcode)
 {
     LOGE("HksCryptoExtAbility::ExportCertificate Undefined operation");
     return true;
 }
 
-int HksCryptoExtAbility::ExportProviderCertificates(const CppParamSet& params, std::string& certJsonArr,
-    int32_t& errcode)
+int32_t HksCryptoExtAbility::ExportProviderCertificates(const CppParamSet &params, std::string &certJsonArr,
+    int32_t &errcode)
 {
     LOGE("HksCryptoExtAbility::ExportProviderCertificates Undefined operation");
     return true;
 }
 
-int HksCryptoExtAbility::InitSession(const std::string& index, const CppParamSet& params, std::string& handle,
-    int32_t& errcode)
+int32_t HksCryptoExtAbility::InitSession(const std::string &index, const CppParamSet &params, std::string &handle,
+    int32_t &errcode)
 {
     LOGE("HksCryptoExtAbility::InitSession Undefined operation");
     return true;
 }
 
-int HksCryptoExtAbility::UpdateSession(const std::string& handle, const CppParamSet& params, const std::vector<uint8_t>& inData,
-    std::vector<uint8_t>& outData, int32_t& errcode)
+int32_t HksCryptoExtAbility::UpdateSession(const std::string &handle, const CppParamSet &params,
+    const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData, int32_t &errcode)
 {
     LOGE("HksCryptoExtAbility::UpdateSession Undefined operation");
     return true;
 }
 
-int HksCryptoExtAbility::FinishSession(const std::string& handle, const CppParamSet& params, const std::vector<uint8_t>& inData,
-    std::vector<uint8_t>& outData, int32_t& errcode)
+int32_t HksCryptoExtAbility::FinishSession(const std::string &handle, const CppParamSet &params,
+    const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData, int32_t &errcode)
 {
     LOGE("HksCryptoExtAbility::FinishSession Undefined operation");
     return true;
 }
 
-int HksCryptoExtAbility::GetProperty(const std::string& handle, const std::string& propertyId, const CppParamSet& params,
-    CppParamSet& outParams, int32_t& errcode)
+int32_t HksCryptoExtAbility::GetProperty(const std::string &handle, const std::string &propertyId,
+    const CppParamSet &params, CppParamSet &outParams, int32_t &errcode)
 {
     LOGE("HksCryptoExtAbility::GetProperty Undefined operation");
     return true;
 }
 
-int HksCryptoExtAbility::ClearUkeyPinAuthState(const std::string& handle, const CppParamSet& params, int32_t& errcode)
+int32_t HksCryptoExtAbility::ClearUkeyPinAuthState(const std::string &handle,
+    const CppParamSet &params, int32_t &errcode)
 {
     LOGE("HksCryptoExtAbility::ClearUkeyPinAuthState Undefined operation");
     return true;
