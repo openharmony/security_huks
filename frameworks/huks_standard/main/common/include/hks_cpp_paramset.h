@@ -78,8 +78,8 @@ public:
         }
         if constexpr (GetTagType(tag) == HKS_TAG_TYPE_BYTES) {
             if (ret == HKS_SUCCESS && param != nullptr) {
-                return std::pair<int32_t, std::vector<uint8_t>>(ret, {param->blob.data,
-                    param->blob.data + param->blob.size});
+                return std::pair<int32_t, std::vector<uint8_t>>(ret,
+                    {param->blob.data, param->blob.data + param->blob.size});
             }
             return std::pair<int32_t, std::vector<uint8_t>>{ret, {}};
         }

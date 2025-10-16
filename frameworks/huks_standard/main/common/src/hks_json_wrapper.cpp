@@ -344,23 +344,17 @@ bool CommJsonObject::AddKeyValueToArray(CommJsonObject &array, const std::string
         using T = std::decay_t<decltype(val)>;
         if constexpr (std::is_same_v<T, int32_t>) {
             HKS_IF_NOT_TRUE_EXCU(item.SetValue("Type", std::string("int32")), setRet = false);
-        }
-        else if constexpr (std::is_same_v<T, uint32_t>) {
+        } else if constexpr (std::is_same_v<T, uint32_t>) {
             HKS_IF_NOT_TRUE_EXCU(item.SetValue("Type", std::string("uint32")), setRet = false);
-        }
-        else if constexpr (std::is_same_v<T, int64_t>) {
+        } else if constexpr (std::is_same_v<T, int64_t>) {
             HKS_IF_NOT_TRUE_EXCU(item.SetValue("Type", std::string("int64")), setRet = false);
-        }
-        else if constexpr (std::is_same_v<T, bool>) {
+        } else if constexpr (std::is_same_v<T, bool>) {
             HKS_IF_NOT_TRUE_EXCU(item.SetValue("Type", std::string("bool")), setRet = false);
-        }
-        else if constexpr (std::is_same_v<T, uint8_t>) {
+        } else if constexpr (std::is_same_v<T, uint8_t>) {
             HKS_IF_NOT_TRUE_EXCU(item.SetValue("Type", std::string("uint8")), setRet = false);
-        }
-        else if constexpr (std::is_same_v<T, double>) {
+        } else if constexpr (std::is_same_v<T, double>) {
             HKS_IF_NOT_TRUE_EXCU(item.SetValue("Type", std::string("double")), setRet = false);
-        }
-        else if constexpr (std::is_same_v<T, std::string>) {
+        } else if constexpr (std::is_same_v<T, std::string>) {
             HKS_IF_NOT_TRUE_EXCU(item.SetValue("Type", std::string("string")), setRet = false);
         }
         HKS_IF_NOT_TRUE_EXCU(item.SetValue("Value", val), setRet = false);
@@ -375,7 +369,7 @@ std::pair<int32_t, std::string> CommJsonObject::MapToJson(const std::map<std::st
     CommJsonObject array = CommJsonObject::CreateArray();
     bool jsonRet = false;
     for (const auto& [k, v] : map) {
-        jsonRet = AddKeyValueToArray(array, k , v);
+        jsonRet = AddKeyValueToArray(array, k, v);
         HKS_IF_TRUE_LOGE_RETURN(!jsonRet, std::make_pair(HKS_JSON_INVAILD, ""),
             "AddKeyValueToArray failed. now key = %" LOG_PUBLIC "s", k.c_str())
     }
