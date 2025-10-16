@@ -39,7 +39,7 @@ public:
     static std::shared_ptr<HksRemoteHandleManager> GetInstanceWrapper();
     static void ReleaseInstance();
 
-    int32_t CreateRemoteIndex(const ProviderInfo &providerInfo,const CppParamSet &paramSet, std::string &index);
+    int32_t CreateRemoteIndex(const ProviderInfo &providerInfo, const CppParamSet &paramSet, std::string &index);
     // handle管理
     int32_t CreateRemoteHandle(const std::string &index, const CppParamSet &paramSet);
     int32_t CloseRemoteHandle(const std::string &index, const CppParamSet &paramSet);
@@ -74,7 +74,7 @@ public:
                 ProviderInfo &providerInfo, std::string &newIndex);
 
     int32_t ParseAndValidateIndex(const std::string &index, ProviderInfo &providerInfo,
-                std::string &newIndex,std::string &handle);
+                std::string &newIndex, std::string &handle);
     OHOS::sptr<IHuksAccessExtBase> GetProviderProxy(const ProviderInfo &providerInfo, int32_t &ret);
 
 private:
