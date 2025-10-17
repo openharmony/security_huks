@@ -48,6 +48,7 @@ ohos_static_library("huks_3.0_test_common") {
     "hks_test_file_operator.c",
     "hks_test_log.c",
     "hks_test_mem.c",
+    "hks_test_three_stage.c"
   ]
 
   include_dirs =
