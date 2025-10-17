@@ -62,7 +62,7 @@ static int32_t WrapIndexWithProviderInfo(const ProviderInfo& providerInfo, const
         HKS_LOG_E("Set provider info to index failed");
         return HKS_ERROR_JSON_SERIALIZE_FAILED;
     }
-    if (!root.SetValue("originalIndex", originalIndex)) {
+    if (!root.SetValue("index", originalIndex)) {
         HKS_LOG_E("Set original index failed");
         return HKS_ERROR_JSON_SERIALIZE_FAILED;
     }
