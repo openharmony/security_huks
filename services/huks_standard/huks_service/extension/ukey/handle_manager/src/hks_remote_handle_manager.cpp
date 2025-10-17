@@ -74,33 +74,27 @@ int32_t HksRemoteHandleManager::MergeProviderCertificates(const ProviderInfo &pr
     const std::string &providerCertVec, CommJsonObject &combinedArray)
 {
     CommJsonObject providerArray = CommJsonObject::Parse(providerCertVec);
-    if (providerArray.IsNull() || !providerArray.IsArray()) {
-        HKS_LOG_E("Parse provider certificate array failed");
-        return HKS_ERROR_JSON_PARSE_FAILED;
-    }
-    
+    HKS_IF_TRUE_LOGE_RETURN(providerArray.IsNull() || !providerArray.IsArray(), HKS_ERROR_JSON_PARSE_FAILED,
+        "Parse provider certificate array failed")
+
     int32_t certCount = providerArray.ArraySize();
     for (int32_t i = 0; i < certCount; i++) {
         CommJsonObject certObj = providerArray.GetElement(i);
         HKS_IF_TRUE_CONTINUE(certObj.IsNull())
+        
         auto indexValue = certObj.GetValue("index");
-        HKS_IF_TRUE_LOGE_RETURN(certObj.IsNull(), HKS_ERROR_JSON_PARSE_FAILED,
-            "Parse provider certificate array failed")
+        HKS_IF_TRUE_CONTINUE(indexValue.IsNull())
+        certObj.RemoveKey("index");
         auto indexResult = indexValue.ToString();
-        if (indexResult.first == HKS_SUCCESS && !indexResult.second.empty()) {
-            std::string wrappedIndex;
-            int32_t ret = WrapIndexWithProviderInfo(providerInfo, indexResult.second, wrappedIndex);
-            if (ret == HKS_SUCCESS) {
-                HKS_IF_TRUE_LOGE_RETURN(!certObj.SetValue("index", wrappedIndex), HKS_ERROR_JSON_SERIALIZE_FAILED,
-                    "Set wrapped index failed")
-            } else {
-                HKS_LOG_E("Wrap index failed: %" LOG_PUBLIC "d", ret);
-            }
+        HKS_IF_TRUE_CONTINUE(indexResult.first != HKS_SUCCESS || indexResult.second.empty())
+        std::string wrappedIndex;
+        if (WrapIndexWithProviderInfo(providerInfo, indexResult.second, wrappedIndex) == HKS_SUCCESS) {
+            HKS_IF_TRUE_LOGE_RETURN(!certObj.SetValue("index", wrappedIndex), HKS_ERROR_JSON_SERIALIZE_FAILED,
+                "Set wrapped index failed")
         }
         HKS_IF_TRUE_LOGE_RETURN(!combinedArray.AppendElement(certObj), HKS_ERROR_JSON_SERIALIZE_FAILED,
             "Add certificate to combined array failed")
     }
-    
     return HKS_SUCCESS;
 }
 
