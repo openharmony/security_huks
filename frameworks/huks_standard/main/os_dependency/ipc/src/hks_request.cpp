@@ -218,10 +218,11 @@ int32_t HksSendRequest(enum HksIpcInterfaceCode type, const struct HksBlob *inBl
     enum HksSendType sendType = (ret == HKS_SUCCESS) ? static_cast<enum HksSendType>(sendTypeParam->uint32Param)
         : HKS_SEND_TYPE_SYNC;
 
-    MessageParcel data, reply;
+    MessageParcel data;
+    MessageParcel reply;
     MessageOption option((sendType == HKS_SEND_TYPE_SYNC) ? MessageOption::TF_SYNC : MessageOption::TF_ASYNC);
     ret = WriteCommonRequestData(data, inBlob, outBlob);
-    if(ret != HKS_SUCCESS) {
+    if (ret != HKS_SUCCESS) {
         HKS_LOG_E("WriteCommonRequestData failed %" LOG_PUBLIC "d", ret);
         return ret;
     }

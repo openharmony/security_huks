@@ -147,7 +147,8 @@ void HksProxy::SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &cert
         "Remote()->SendRequest HKS_MSG_ATTEST_KEY_ASYNC_REPLY failed %" LOG_PUBLIC "d", res)
 }
 
-void HksExtStub::SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &sendData, uint32_t sendSize, uint32_t msgCode)
+void HksExtStub::SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &sendData, uint32_t sendSize,
+    uint32_t msgCode)
 {
     std::unique_lock<std::mutex> lck(mMutex);
     received = true;
@@ -211,7 +212,8 @@ std::tuple<uint32_t, std::unique_ptr<uint8_t[]>, uint32_t, uint32_t> HksExtStub:
 int HksExtStub::OnRemoteRequest(uint32_t code,
     MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    (void)reply; (void)option;
+    (void)reply;
+    (void)option;
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         return ERR_INVALID_DATA;
     }
@@ -230,7 +232,8 @@ HksExtProxy::HksExtProxy(const sptr<IRemoteObject> &impl)
 {
 }
 
-void HksExtProxy::SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &sendData, uint32_t sendSize, uint32_t msgCode)
+void HksExtProxy::SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &sendData, uint32_t sendSize,
+    uint32_t msgCode)
 {
     HKS_IF_NULL_LOGE_RETURN_VOID(Remote(), "Remote() is nullptr! Would not SendRequest!")
     MessageParcel data;
