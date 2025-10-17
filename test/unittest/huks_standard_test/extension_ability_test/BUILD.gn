@@ -65,6 +65,10 @@ ohos_unittest("extension_unit_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "googletest:gmock",
+    "ability_runtime:ability_connect_callback_stub",
+    "ability_runtime:ability_manager",
+    "ability_base:ability_base_want",
   ]
 
   if (os_level == "standard") {
@@ -95,6 +99,15 @@ ohos_shared_library("fake_success") {
     "-Wall",
   ]
 
+  sanitize = {
+    integer_overflow = true
+    cfi = true
+    debug = false
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    ubsan = true
+  }
+
   output_name = "fake_success"
 
   subsystem_name = "security"
@@ -116,7 +129,16 @@ ohos_shared_library("fake_fail") {
     "-Wall",
   ]
 
-  output_name = "fake_success"
+  sanitize = {
+    integer_overflow = true
+    cfi = true
+    debug = false
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    ubsan = true
+  }
+
+  output_name = "fake_fail"
 
   subsystem_name = "security"
   part_name = "huks"
