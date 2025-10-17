@@ -191,7 +191,7 @@ int32_t HuksLibInterface::OnExportProviderAllCertificates(const HksProcessInfo &
     return HKS_SUCCESS;
 }
 
-int32_t HuksLibInterface::OnInitSession (const HksProcessInfo &processInfo, const std::string &index,
+int32_t HuksLibInterface::OnInitSession(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet, uint32_t &handle)
 {
     void *funcPtr = nullptr;
@@ -205,7 +205,7 @@ int32_t HuksLibInterface::OnInitSession (const HksProcessInfo &processInfo, cons
     return HKS_SUCCESS;
 }
 
-int32_t HuksLibInterface::OnUpdateSession (const HksProcessInfo &processInfo, const uint32_t &handle,
+int32_t HuksLibInterface::OnUpdateSession(const HksProcessInfo &processInfo, const uint32_t &handle,
     const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData)
 {
     void *funcPtr = nullptr;
@@ -219,7 +219,7 @@ int32_t HuksLibInterface::OnUpdateSession (const HksProcessInfo &processInfo, co
     return HKS_SUCCESS;
 }
 
-int32_t HuksLibInterface::OnFinishSession (const HksProcessInfo &processInfo, const uint32_t &handle,
+int32_t HuksLibInterface::OnFinishSession(const HksProcessInfo &processInfo, const uint32_t &handle,
     const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData)
 {
     void *funcPtr = nullptr;

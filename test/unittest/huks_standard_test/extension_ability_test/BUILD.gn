@@ -124,34 +124,34 @@ if (os_level == "standard") {
     part_name = "huks"
   }
 
-  ohos_shared_library("fake_fail") {
-    sources = [
-      "./plugin_loader_test/fake_fail.cpp",
-    ]
+  subsystem_name = "security"
+  part_name = "huks"
+}
 
-    include_dirs = [
-      ".", 
-      "include",
-    ]
+ohos_shared_library("fake_fail") {
+  sources = [
+    "./plugin_loader_test/fake_fail.cpp",
+  ]
 
-    cflags = [
-      "-fPIC",
-      "-Wall",
-    ]
+  include_dirs = [
+    ".", 
+    "include",
+  ]
 
-    sanitize = {
-      integer_overflow = true
-      cfi = true
-      debug = false
-      cfi_cross_dso = true
-      boundary_sanitize = true
-      ubsan = true
-    }
+  cflags = [
+    "-fPIC",
+    "-Wall",
+  ]
 
-    output_name = "fake_fail"
-
-    subsystem_name = "security"
-    part_name = "huks"
+  sanitize = {
+    integer_overflow = true
+    cfi = true
+    debug = false
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    ubsan = true
   }
 
+  subsystem_name = "security"
+  part_name = "huks"
 }
