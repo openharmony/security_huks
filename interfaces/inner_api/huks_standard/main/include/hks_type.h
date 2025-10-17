@@ -155,8 +155,6 @@ struct HksExtParamSet {
     struct HksExtParam params[];
 };
 
-typedef void (*HksOnFinish)(const struct HksExtParamSet *paramSet);
-
 /**
  * @brief hks certificate chain
  */

@@ -24,7 +24,6 @@
 
 namespace HuksNapiItem
 {
-
 #define NAPI_CALL_RETURN_ERR(env, ret)   \
     if ((ret) != napi_ok)                \
     {                                    \
@@ -48,7 +47,8 @@ namespace HuksNapiItem
 
 class AsyncContext {
 public:
-    virtual ~AsyncContext() {
+    virtual ~AsyncContext()
+    {
         if (asyncWork != nullptr && env != nullptr) {
             napi_delete_async_work(env, asyncWork);
         }
@@ -82,7 +82,8 @@ public:
 
 class ProviderRegContext : public AsyncContext {
 public:
-    ~ProviderRegContext() {
+    ~ProviderRegContext()
+    {
         if (name != nullptr) {
             FreeHksBlob(name);
         }
@@ -92,7 +93,8 @@ public:
 
 class UkeyPinContext : public AsyncContext {
 public:
-    ~UkeyPinContext() {
+    ~UkeyPinContext()
+    {
         if (index != nullptr) {
             FreeHksBlob(index);
         }

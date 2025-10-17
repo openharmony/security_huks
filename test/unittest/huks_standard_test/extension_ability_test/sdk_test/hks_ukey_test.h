@@ -20,13 +20,11 @@ int HksRegisterProviderTest(void);
 int HksRegisterProviderWithoutNameTest(void);
 int HksUnregisterProviderTest(void);
 int HksUnregisterProviderWithoutNameTest(void);
-int HksAuthUkeyPin(void);
-int HksGetUkeyPinAuthState(void);
-int HksOpenRemoteHandle(void);
-int HksGetRemoteHandle(void);
-int HksGetPinAuthState(void);
-int HksClearPinAuthState(void);
-int HksUkeySign(void);
-
+int HksAuthUkeyPinTest(void);
+int HksGetUkeyPinAuthStateTest(void);
+int HksOpenRemoteHandleTest(void);
+int HksGetRemoteHandleTest(void);
+int HksClearPinAuthStateTest(void);
+int HksGetRemotePropertyTest(void);
 
 #endif
