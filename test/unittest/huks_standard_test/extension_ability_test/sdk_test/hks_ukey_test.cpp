@@ -21,8 +21,6 @@
 #include "hks_api.h"
 #include "hks_param.h"
 #include "hks_tag.h"
-#include "hks_test_adapt_for_de.h"
-#include "hks_test_api_performance.h"
 #include "hks_test_common.h"
 #include "hks_test_log.h"
 
@@ -36,15 +34,15 @@ public:
     void TearDown();
 
 protected:
-    static int32_t StringToHuksBlob(const char *str) {
-        uint32_t size = static_cast<uint32_t>(strlen(str));
-        uint8_t *data = new uint8_t[size];
-        int32_t ret = memcpy_s(data, size, str, size);
-        if (ret != 0) {
-            delete[] data;
-            return { nullptr, 0 };
-        }
-        return { data, size };
+    static struct HksBlob *StringToHuksBlob(const char *str)
+    {
+        if (!str) return nullptr;
+        uint32_t size = strlen(str);
+        struct HksBlob *blob = new HksBlob;
+        blob->data = new uint8_t[size];
+        memcpy(blob->data, str, size);
+        blob->size = size;
+        return blob;
     }
 
     // 工具函数：构造 HksParamSet
@@ -59,13 +57,15 @@ protected:
                 .tag = HKS_EXT_CRYPTO_TAG_UKEY_PIN,
                 .blob = StringToHuksBlob("123789")
             }
-        }
+        };
 
-        HksParamSet paramSet = {
-            .paramSetSize = sizeof(HksParamSet) + sizeof(HksParam) * (sizeof(params) / sizeof(params[0])),
-            .params = params,
-            .paramCount = sizeof(params) / sizeof(params[0]),
-        };  
+        *paramSet = (struct HksParamSet *)HksMalloc(sizeof(struct HksParamSet));
+        if (*paramSet == NULL) {
+            return HKS_ERROR_MALLOC_FAIL;
+        }
+        (*paramSet)->paramSetSize = sizeof(HksParamSet) + sizeof(HksParam) * (sizeof(params) / sizeof(params[0]));
+        (*paramSet)->params = params;
+        (*paramSet)->paramsCnt = sizeof(params) / sizeof(params[0]);
     }
 };
 
@@ -96,12 +96,12 @@ HWTEST_F(HksUKeyTest, HksRegisterProviderTest, TestSize.Level0)
     EXPECT_TRUE(name != nullptr);
 
     struct HksParamSet *paramSet = NULL;
-    ret = ConstructTestParamSet(&paramSet);
+    int32_t ret = ConstructTestParamSet(&paramSet);
     EXPECT_TRUE(ret == 0);
 
     ret = HksRegisterProvider(name, paramSet);
     if (ret != 0) {
-        HKS_TEST_LOG_I("failed, ret[%u] = %d", testParams.testId, ret);
+        HKS_TEST_LOG_I("HksRegisterProviderTest, ret = %d", ret);
     }
     EXPECT_TRUE(ret == 0);
 
@@ -114,12 +114,12 @@ HWTEST_F(HksUKeyTest, HksRegisterProviderTest, TestSize.Level0)
 HWTEST_F(HksUKeyTest, HksRegisterProviderWithoutNameTest, TestSize.Level0)
 {
     struct HksParamSet *paramSet = NULL;
-    ret = ConstructTestParamSet(&paramSet);
+    int32_t ret = ConstructTestParamSet(&paramSet);
     EXPECT_TRUE(ret == 0);
 
     ret = HksRegisterProvider(nullptr, paramSet);
     if (ret != HKS_ERROR_NULL_POINTER) {
-        HKS_TEST_LOG_I("failed, ret[%u] = %d", testParams.testId, ret);
+        HKS_TEST_LOG_I("failed, HksRegisterProviderWithoutNameTest ret = %d", ret);
     }
     EXPECT_TRUE(ret == HKS_ERROR_NULL_POINTER);
 
@@ -136,12 +136,12 @@ HWTEST_F(HksUKeyTest, HksUnregisterProvider, TestSize.Level0)
     EXPECT_TRUE(name != nullptr);
 
     struct HksParamSet *paramSet = NULL;
-    ret = ConstructTestParamSet(&paramSet);
+    int32_t ret = ConstructTestParamSet(&paramSet);
     EXPECT_TRUE(ret == 0);
 
     ret = HksRegisterProvider(name, paramSet);
     if (ret != 0) {
-        HKS_TEST_LOG_I("failed, ret[%u] = %d", testParams.testId, ret);
+        HKS_TEST_LOG_I("falied, HksUnregisterProvider, ret = %d", ret);
     }
     EXPECT_TRUE(ret == 0);
 
@@ -154,16 +154,15 @@ HWTEST_F(HksUKeyTest, HksUnregisterProvider, TestSize.Level0)
 HWTEST_F(HksUKeyTest, HksUnregisterProviderWithoutNameTest, TestSize.Level0)
 {
     struct HksParamSet *paramSet = NULL;
-    ret = ConstructTestParamSet(&paramSet);
+    int32_t ret = ConstructTestParamSet(&paramSet);
     EXPECT_TRUE(ret == 0);
 
     ret = HksRegisterProvider(nullptr, paramSet);
     if (ret != HKS_ERROR_NULL_POINTER) {
-        HKS_TEST_LOG_I("failed, ret[%u] = %d", testParams.testId, ret);
+        HKS_TEST_LOG_I("failed, HksRegisterProviderWithoutNameTest ret = %d", ret);
     }
     EXPECT_TRUE(ret == HKS_ERROR_NULL_POINTER);
 
-    TestFreeBlob(&name);
     HksFreeParamSet(&paramSet);
     HKS_TEST_LOG_I("TestHksUKey, Testcase_UnregisterProviderWithoutNameTest pass!");
     ASSERT_TRUE(ret == HKS_ERROR_NULL_POINTER);
@@ -180,14 +179,14 @@ HWTEST_F(HksUKeyTest, HksAuthUkeyPinTest, TestSize.Level0)
     EXPECT_TRUE(resourceId != nullptr);
 
     struct HksParamSet *paramSet = NULL;
-    ret = ConstructTestParamSet(&paramSet);
+    int32_t ret = ConstructTestParamSet(&paramSet);
     EXPECT_TRUE(ret == 0);
 
     uint32_t retryCount = 0;
 
-    ret = HksAuthUkeyPin(resourceId, par    amSet, &retryCount);
+    ret = HksAuthUkeyPin(resourceId, paramSet, &retryCount);
     if (ret != 0) {
-        HKS_TEST_LOG_I("failed, ret[%u] = %d", testParams.testId, ret);
+        HKS_TEST_LOG_I("failed, HksAuthUkeyPin ret = %d", ret);
     }
     EXPECT_TRUE(ret == 0);
 
@@ -208,14 +207,14 @@ HWTEST_F(HksUKeyTest, HksGetUkeyPinAuthStateTest, TestSize.Level0)
     EXPECT_TRUE(resourceId != nullptr);
 
     struct HksParamSet *paramSet = NULL;
-    ret = ConstructTestParamSet(&paramSet);
+    int32_t ret = ConstructTestParamSet(&paramSet);
     EXPECT_TRUE(ret == 0);
 
     int32_t status = 0;
 
     ret = HksGetUkeyPinAuthState(resourceId, paramSet, &status);
     if (ret != 0) {
-        HKS_TEST_LOG_I("failed, ret[%u] = %d", testParams.testId, ret);
+        HKS_TEST_LOG_I("failed, HksGetUkeyPinAuthState ret = %d", ret);
     }
     EXPECT_TRUE(ret == 0);
 
@@ -238,12 +237,12 @@ HWTEST_F(HksUKeyTest, HksOpenRemoteHandleTest, TestSize.Level0)
     struct HksBlob remoteHandleOut = { 0, NULL };
 
     struct HksParamSet *paramSet = NULL;
-    ret = ConstructTestParamSet(&paramSet);
+    int32_t ret = ConstructTestParamSet(&paramSet);
     EXPECT_TRUE(ret == 0);
 
     ret = HksOpenRemoteHandle(resourceId, paramSet, &remoteHandleOut);
     if (ret != 0) {
-        HKS_TEST_LOG_I("failed, ret[%u] = %d", testParams.testId, ret);
+        HKS_TEST_LOG_I("failed, HksOpenRemoteHandle ret = %d", ret);
     }
     EXPECT_TRUE(ret == 0);
 
@@ -267,12 +266,12 @@ HWTEST_F(HksUKeyTest, HksGetRemoteHandleTest, TestSize.Level0)
     struct HksBlob remoteHandleOut = { 0, NULL };
 
     struct HksParamSet *paramSet = NULL;
-    ret = ConstructTestParamSet(&paramSet);
+    int32_t ret = ConstructTestParamSet(&paramSet);
     EXPECT_TRUE(ret == 0);
 
     ret = HksOpenRemoteHandle(resourceId, paramSet, &remoteHandleOut);
     if (ret != 0) {
-        HKS_TEST_LOG_I("failed, ret[%u] = %d", testParams.testId, ret);
+        HKS_TEST_LOG_I("failed, HksOpenRemoteHandle ret = %d", ret);
     }
     EXPECT_TRUE(ret == 0);
 
@@ -294,7 +293,7 @@ HWTEST_F(HksUKeyTest, HksClearPinAuthStateTest, TestSize.Level0)
 
     ret = HksClearPinAuthState(resourceId);
     if (ret != 0) {
-        HKS_TEST_LOG_I("failed, ret[%u] = %d", testParams.testId, ret);
+        HKS_TEST_LOG_I("failed, HksClearPinAuthState ret = %d", ret);
     }
     EXPECT_TRUE(ret == 0);
 
@@ -320,7 +319,7 @@ HWTEST_F(HksUKeyTest, HksGetRemotePropertyTest, TestSize.Level0)
 
     ret = HksGetRemoteProperty(resourceId, propertyId, &propertySetOut);
     if (ret != 0) {
-        HKS_TEST_LOG_I("failed, ret[%u] = %d", testParams.testId, ret);
+        HKS_TEST_LOG_I("failed, HksGetRemoteProperty ret = %d", ret);
     }
     EXPECT_TRUE(ret == 0);
 
@@ -330,3 +329,4 @@ HWTEST_F(HksUKeyTest, HksGetRemotePropertyTest, TestSize.Level0)
     HKS_TEST_LOG_I("TestHksUKey, Testcase_GetUkeyPinAuthState pass!");
     ASSERT_TRUE(ret == 0);
 }
+} // namespace

@@ -62,6 +62,7 @@ static enum HksTag g_idList[] = {
 
 void HksIpcServiceRegisterProvider(const struct HksBlob *srcData, const uint8_t *context)
 {
+#ifdef L2_STANDARD
     struct HksBlob name = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
@@ -84,10 +85,15 @@ void HksIpcServiceRegisterProvider(const struct HksBlob *srcData, const uint8_t 
 
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+#endif
 }
 
 void HksIpcServiceUnregisterProvider(const struct HksBlob *srcData, const uint8_t *context)
 {
+#ifdef L2_STANDARD
     struct HksBlob name = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
@@ -110,10 +116,15 @@ void HksIpcServiceUnregisterProvider(const struct HksBlob *srcData, const uint8_
 
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+#endif
 }
 
 void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *context)
 {
+#ifdef L2_STANDARD
     struct HksBlob index = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
@@ -156,10 +167,15 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
     HKS_FREE_BLOB(outBlob);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+#endif
 }
 
 void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8_t *context)
 {
+#ifdef L2_STANDARD
     struct HksBlob index = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
@@ -199,10 +215,15 @@ void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8
     HKS_FREE_BLOB(outBlob);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+#endif
 }
 
 void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t *context)
 {
+#ifdef L2_STANDARD
     int32_t ret;
     struct HksBlob index = { 0, NULL };
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
@@ -222,10 +243,15 @@ void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t
 
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+#endif
 }
 
 void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t *context)
 {
+#ifdef L2_STANDARD
     struct HksBlob resourceId = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksBlob remoteHandleOut = { 0, NULL };
@@ -251,10 +277,15 @@ void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t 
     HKS_FREE_BLOB(remoteHandleOut);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+#endif
 }
 
 void HksIpcServiceGetRemoteHandle(const struct HksBlob *srcData, const uint8_t *context)
 {
+#ifdef L2_STANDARD
     struct HksBlob resourceId = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksBlob handle = { 0, NULL };
@@ -280,10 +311,15 @@ void HksIpcServiceGetRemoteHandle(const struct HksBlob *srcData, const uint8_t *
     HKS_FREE_BLOB(handle);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+#endif
 }
 
 void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t *context)
 {
+#ifdef L2_STANDARD
     struct HksBlob resourceId = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
@@ -306,10 +342,15 @@ void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t
 
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+#endif
 }
 
 void HksIpcServiceUkeySign(const struct HksBlob *srcData, const uint8_t *context)
 {
+#ifdef L2_STANDARD
     struct HksBlob index = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksBlob data = { 0, NULL };
@@ -336,10 +377,15 @@ void HksIpcServiceUkeySign(const struct HksBlob *srcData, const uint8_t *context
     HKS_FREE_BLOB(signatureOut);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+#endif
 }
 
 void HksIpcServiceUkeyVerify(const struct HksBlob *srcData, const uint8_t *context)
 {
+#ifdef L2_STANDARD
     struct HksBlob index = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksBlob data = { 0, NULL };
@@ -366,10 +412,15 @@ void HksIpcServiceUkeyVerify(const struct HksBlob *srcData, const uint8_t *conte
     HKS_FREE_BLOB(signatureOut);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+#endif
 }
 
 void HksIpcServiceExportProviderCertificates(const struct HksBlob *srcData, const uint8_t *context)
 {
+#ifdef L2_STANDARD
     struct HksBlob providerName = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksExtCertInfoSet certInfoSet = {0, NULL};
@@ -402,12 +453,15 @@ void HksIpcServiceExportProviderCertificates(const struct HksBlob *srcData, cons
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(certOut);
-
-    return;
+#else
+    (void)srcData;
+    (void)context;
+#endif
 }
 
 void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t *context)
 {
+#ifdef L2_STANDARD
     struct HksBlob index = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksExtCertInfoSet certInfoSet = {0, NULL};
@@ -440,13 +494,16 @@ void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(certOut);
-
-    return;
+#else
+    (void)srcData;
+    (void)context;
+#endif
 }
 
 
 void HksIpcServiceGetRemoteProperty(const struct HksBlob *srcData, const uint8_t *context, const uint8_t *remoteObject)
 {
+#ifdef L2_STANDARD
     int32_t ret;
     struct HksBlob resourceId = { 0, NULL };
     struct HksBlob propertyId = { 0, NULL };
@@ -468,6 +525,11 @@ void HksIpcServiceGetRemoteProperty(const struct HksBlob *srcData, const uint8_t
 
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+    (void)remoteObject;
+#endif
 }
 
 void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *context)
