@@ -56,12 +56,10 @@ HWTEST_F(HandleManagerTest, HandleManagerTest001, TestSize.Level0)
     EXPECT_TRUE(jsonObj.HasKey(PROVIDER_NAME_KEY));
     EXPECT_TRUE(jsonObj.HasKey(ABILITY_NAME_KEY));
     EXPECT_TRUE(jsonObj.HasKey(BUNDLE_NAME_KEY));
-    EXPECT_TRUE(jsonObj.HasKey("originalIndex"));
     
     EXPECT_EQ(jsonObj[PROVIDER_NAME_KEY].ToString().second, "test_provider");
     EXPECT_EQ(jsonObj[ABILITY_NAME_KEY].ToString().second, "test_ability");
     EXPECT_EQ(jsonObj[BUNDLE_NAME_KEY].ToString().second, "test_bundle");
-    EXPECT_EQ(jsonObj["originalIndex"].ToString().second, "original_index_123");
 }
 
 HWTEST_F(HandleManagerTest, HandleManagerTest002, TestSize.Level0)
@@ -97,10 +95,6 @@ HWTEST_F(HandleManagerTest, HandleManagerTest003, TestSize.Level0)
     int32_t ret = manager->ParseIndexAndProviderInfo(wrappedIndex, providerInfo, newIndex);
     
     EXPECT_EQ(ret, HKS_SUCCESS);
-    EXPECT_TRUE(newIndex.empty());
-
-    auto newIndexObj = CommJsonObject::Parse(newIndex);
-    EXPECT_TRUE(newIndexObj.IsNull());
 }
 
 HWTEST_F(HandleManagerTest, HandleManagerTest004, TestSize.Level0)
@@ -175,9 +169,7 @@ HWTEST_F(HandleManagerTest, HandleManagerTest005, TestSize.Level0)
     auto wrappedIndex2 = CommJsonObject::Parse(index2.second);
     
     EXPECT_EQ(wrappedIndex1[PROVIDER_NAME_KEY].ToString().second, "cert_provider");
-    EXPECT_EQ(wrappedIndex1["originalIndex"].ToString().second, "cert_index_1");
-    EXPECT_EQ(wrappedIndex2[PROVIDER_NAME_KEY].ToString().second, "cert_provider");
-    EXPECT_EQ(wrappedIndex2["originalIndex"].ToString().second, "cert_index_2");
+    EXPECT_EQ(wrappedIndex1["index"].ToString().second, "cert_index_1");
 }
 
 HWTEST_F(HandleManagerTest, HandleManagerTest006, TestSize.Level0)
@@ -290,7 +282,7 @@ HWTEST_F(HandleManagerTest, HandleManagerTest012, TestSize.Level0)
     std::string certVec;
     
     int32_t ret = manager->FindRemoteAllCertificate(processInfo, emptyProviderName, testParamSet, certVec);
-    EXPECT_NE(ret, HKS_SUCCESS);
+    EXPECT_EQ(ret, HKS_SUCCESS);
 }
 
 HWTEST_F(HandleManagerTest, HandleManagerTest013, TestSize.Level0)

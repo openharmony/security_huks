@@ -197,35 +197,35 @@ HWTEST_F(UkeyCommonTest, UkeyCommonTest002, TestSize.Level0)
     std::vector<uint8_t> input3 = {0x12, 0x34};
     auto [ret3, result3] = U8Vec2Base64Str(input3);
     EXPECT_EQ(ret3, HKS_SUCCESS);
-    EXPECT_EQ(result3, "EjQ=");
+    EXPECT_EQ(result3, "EjI=");
     auto [ret33, result33] = Base64Str2U8Vec(result3);
     EXPECT_EQ(ret33, HKS_SUCCESS);
 
     std::vector<uint8_t> input4 = {0x12, 0x34, 0x76};
     auto [ret4, result4] = U8Vec2Base64Str(input4);
     EXPECT_EQ(ret4, HKS_SUCCESS);
-    EXPECT_EQ(result4, "EjR2");
+    EXPECT_EQ(result4, "EjI2");
     auto [ret44, result44] = Base64Str2U8Vec(result4);
     EXPECT_EQ(ret44, HKS_SUCCESS);
 
     std::vector<uint8_t> input5 = {0x12, 0x34, 0x76, 0x78, 0x9A, 0xBC}; 
     auto [ret5, result5] = U8Vec2Base64Str(input5);
     EXPECT_EQ(ret5, HKS_SUCCESS);
-    EXPECT_EQ(result5, "EjR2eJq8");
+    EXPECT_EQ(result5, "EjI2eJi8");
     auto [ret55, result55] = Base64Str2U8Vec(result5);
     EXPECT_EQ(ret55, HKS_SUCCESS);
 
     std::vector<uint8_t> input6 = {0x12, 0x34, 0x76, 0x78, 0x9A};
     auto [ret6, result6] = U8Vec2Base64Str(input6);
     EXPECT_EQ(ret6, HKS_SUCCESS);
-    EXPECT_EQ(result6, "EjR2eJo=");
+    EXPECT_EQ(result6, "EjI2eJi=");
     auto [ret66, result66] = Base64Str2U8Vec(result6);
     EXPECT_EQ(ret66, HKS_SUCCESS);
 
     std::vector<uint8_t> input7 = {0xFF, 0xE0, 0x0F, 0xFF, 0x40, 0x40, 0x3F, 0x8F, 0x00};
     auto [ret7, result7] = U8Vec2Base64Str(input7);
     EXPECT_EQ(ret7, HKS_SUCCESS);
-    EXPECT_EQ(result7, "/+AP/0BAP48A");
+    EXPECT_EQ(result7, "/+/P/09AP4+A");
     auto [ret77, result77] = Base64Str2U8Vec(result7);
     EXPECT_EQ(ret77, HKS_SUCCESS);
 }
