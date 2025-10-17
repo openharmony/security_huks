@@ -58,12 +58,12 @@ int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, co
 
     uint64_t handleU64 = static_cast<uint64_t>(handleU32);
     handle->size = static_cast<uint64_t>(sizeof(handleU64));
-    handle->data = (uint8_t *)HksMalloc(handle->size);
+    handle->data = static_cast<uint8_t *>HksMalloc(handle->size);
     HKS_IF_TRUE_LOGE_RETURN(handle->data == nullptr, HKS_ERROR_MALLOC_FAIL, "handle malloc fail")
 
     ret = memcpy_s(handle->data, handle->size, &handleU64, sizeof(handleU64));
     if (ret != EOK) {
-        free(handle->data);
+        HKS_FREE(handle->data);
         handle->data = nullptr;
         handle->size = 0;
         HKS_LOG_E("memcpy in HksServiceOnUkeyInitSession fail");
@@ -99,12 +99,12 @@ int32_t HksServiceOnUkeyUpdateSession(const struct HksProcessInfo *processInfo, 
     HKS_IF_TRUE_LOGI_RETURN(outData->size == 0, ret, "outData size is 0. ret: %" LOG_PUBLIC "d", ret);
     HKS_IF_TRUE_LOGI_RETURN(outData->data == nullptr, ret, "outData data is nullptr. ret: %" LOG_PUBLIC "d", ret);
     outData->size = static_cast<uint32_t>(outdata.size());
-    outData->data = (uint8_t *)HksMalloc(outData->size);
+    outData->data = static_cast<uint8_t *>HksMalloc(outData->size);
     HKS_IF_TRUE_LOGE_RETURN(outData->data == nullptr, HKS_ERROR_MALLOC_FAIL, "outData malloc fail")
 
     ret = memcpy_s(outData->data, outData->size, outdata.data(), outdata.size());
     if (ret != EOK) {
-        free(outData->data);
+        HKS_FREE(outData->data);
         outData->data = nullptr;
         outData->size = 0;
         HKS_LOG_E("memcpy in HksServiceOnUkeyUpdateSession fail");
@@ -139,12 +139,12 @@ int32_t HksServiceOnUkeyFinishSession(const struct HksProcessInfo *processInfo, 
     HKS_IF_TRUE_LOGI_RETURN(outData->size == 0, ret, "outData size is 0. ret: %" LOG_PUBLIC "d", ret);
     HKS_IF_TRUE_LOGI_RETURN(outData->data == nullptr, ret, "outData data is nullptr. ret: %" LOG_PUBLIC "d", ret);
     outData->size = static_cast<uint32_t>(outdata.size());
-    outData->data = (uint8_t *)HksMalloc(outData->size);
+    outData->data = static_cast<uint8_t *>HksMalloc(outData->size);
     HKS_IF_TRUE_LOGE_RETURN(outData->data == nullptr, HKS_ERROR_MALLOC_FAIL, "outData malloc fail")
 
     ret = memcpy_s(outData->data, outData->size, outdata.data(), outdata.size());
     if (ret != EOK) {
-        free(outData->data);
+        HKS_FREE(outData->data);
         outData->data = nullptr;
         outData->size = 0;
         HKS_LOG_E("memcpy in HksServiceOnUkeyFinishSession fail");
