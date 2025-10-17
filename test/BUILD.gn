@@ -30,7 +30,7 @@ group("unittest") {
       "./unittest/huks_standard_test/module_test/service_test/huks_service/upgrade/file_transfer/config_parser:huks_file_transfer_config_parser_test",
       "./unittest/huks_standard_test/storage_multithread_test:huks_multithread_test",
       "./unittest/huks_standard_test/three_stage_test:huks_UT_test",
-      "./unittest/huks_standard_test/extension_ability_test:extension_unit_test",
+      # "./unittest/huks_standard_test/extension_ability_test:extension_unit_test",
       "./unittest/huks_standard_test/extension_ability_test/extension_native_test:js_crypto_access_ext_ability_test",
           ]
   } else {

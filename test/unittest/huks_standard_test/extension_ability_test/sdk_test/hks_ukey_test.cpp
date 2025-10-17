@@ -51,7 +51,7 @@ protected:
         HksParam params[] = {
             {
                 .tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME,
-                .blob = { (uint8_t *)"ability_name_value", 18 }
+                .blob = { 18, (uint8_t *)"ability_name_value" }
             },
             {
                 .tag = HKS_EXT_CRYPTO_TAG_UKEY_PIN,
@@ -283,6 +283,7 @@ HWTEST_F(HksUKeyTest, HksGetRemoteHandleTest, TestSize.Level0)
 
 HWTEST_F(HksUKeyTest, HksClearPinAuthStateTest, TestSize.Level0)
 {
+    int32_t ret = 0;
     const char *index =
         "{\"providerName\":\"testHap\","
         "\"abilityName\":\"com.cryptoapplication\","
@@ -304,6 +305,7 @@ HWTEST_F(HksUKeyTest, HksClearPinAuthStateTest, TestSize.Level0)
 
 HWTEST_F(HksUKeyTest, HksGetRemotePropertyTest, TestSize.Level0)
 {
+    int32_t ret = 0;
     const char *index =
         "{\"providerName\":\"testHap\","
         "\"abilityName\":\"com.cryptoapplication\","
