@@ -77,8 +77,8 @@ public:
     void OnRemoteDied(const wptr<IRemoteObject>& remoteObject) override;
 private:
     void NotifyExtOnBinderDied(int32_t pid);
-    int32_t callingUid_;
     int32_t callingPid_;
+    int32_t callingUid_;    
 };
 
 } // namespace Hks
