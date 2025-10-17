@@ -117,7 +117,7 @@ int32_t HksSessionManager::ExtensionUpdateSession(const HksProcessInfo &processI
 {
     std::pair<ProviderInfo, std::string> handleInfo;
     HKS_LOG_I("ExtensionUpdateSession handle: %" LOG_PUBLIC "u", handle);
-    if(!m_handlers.Find(handle, handleInfo)) {
+    if (!m_handlers.Find(handle, handleInfo)) {
         HKS_LOG_E("Find handle failed");
         return HKS_ERROR_UKY_FIND_SESSION_HANDLE_FAIL;
     }

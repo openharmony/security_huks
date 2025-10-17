@@ -19,6 +19,7 @@
 #include "hks_cpp_paramset.h"
 #include "hks_crypto_ext_stub_impl.h"
 #include "extension_context.h"
+#include "hks_error_code.h"
 #include "if_system_ability_manager.h"
 #include "image_type.h"
 #include "js_native_api.h"
@@ -32,6 +33,7 @@
 #include "napi_remote_object.h"
 #include "log_utils.h"
 #include "hks_json_wrapper.h"
+#include <vector>
 
 namespace OHOS {
 namespace Security {
@@ -60,13 +62,19 @@ napi_value GetNull(const napi_env &env)
     return result;
 }
 
-std::string BlobToString(const HksBlob &strBlob)
+std::string BlobToBase64String(const HksBlob &strBlob)
 {
     if (strBlob.size == 0 || strBlob.data == nullptr) {
         LOGE("strBlob is nullptr");
         return nullptr;
     }
-    return std::string(reinterpret_cast<const char*>(strBlob.data), strBlob.size);
+    std::vector<uint8_t> strVector(strBlob.data, strBlob.data + strBlob.size);
+    auto base64Str = U8Vec2Base64Str(strVector);
+    if (base64Str.first != HKS_SUCCESS) {
+        LOGE("U8Vec2Base64Str failed. ret = %d", base64Str.first);
+        return nullptr;
+    }
+    return base64Str.second;
 }
 
 napi_value GenerateArrayBuffer(const napi_env &env, uint8_t *data, uint32_t size)
@@ -696,7 +704,7 @@ void JsHksCryptoExtAbility::HksCertInfoToString(std::vector<HksCertInfo> &certIn
             break;
         }
 
-        std::string certStr = BlobToString(certInfo.certsArray);
+        std::string certStr = BlobToBase64String(certInfo.certsArray);
         if (!certJsonObj.SetValue("cert", certStr)) {
             LOGE("set index cert failed");
             break;
