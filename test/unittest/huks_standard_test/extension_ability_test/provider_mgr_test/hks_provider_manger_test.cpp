@@ -20,6 +20,15 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Security {
 namespace Huks {
+
+class HksProviderMgrTest : public testing::Test {
+public:
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp() override;
+    void TearDown() override;
+};
+
 void HksProviderMgrTest::SetUpTestCase(void) {
 }
 
@@ -27,12 +36,11 @@ void HksProviderMgrTest::TearDownTestCase(void) {
 }
 
 void HksProviderMgrTest::SetUp() {
-    extensionConn = std::make_shared<ExtensionConnection>();
+    auto extensionConn = std::make_shared<ExtensionConnection>();
     ASSERT_NE(extensionConn, nullptr);
 }
 
 void HksProviderMgrTest::TearDown() {
-    extensionConn = nullptr;
 }
 
 /**
