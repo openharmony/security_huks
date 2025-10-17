@@ -89,8 +89,8 @@ HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest003, TestSize.Level0) {
  * @tc.type: FUNC
  */
 HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest004, TestSize.Level0) {
-    EXPECT_CALL(*mockProxy, AsObject()).WillRepeatedly(testing::Return(mockRemoteObject)) << "mockProxy is nullptr";
-    EXPECT_CALL(*mockRemoteObject, AddDeathRecipient(_)).Times(1) << "AddDeathRecipient fail";
+    EXPECT_CALL(*mockProxy, AsObject()).WillRepeatedly(testing::Return(mockRemoteObject));
+    EXPECT_CALL(*mockRemoteObject, AddDeathRecipient(_)).Times(1);
 
     AppExecFwk::ElementName element;
     extensionConn->OnAbilityConnectDone(element, mockRemoteObject, 0);
