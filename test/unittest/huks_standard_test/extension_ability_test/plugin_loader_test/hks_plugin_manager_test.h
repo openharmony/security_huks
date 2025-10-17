@@ -36,7 +36,7 @@ protected:
 
     void TearDown() override;
 
-    std::shared_ptr<HuksExtensionPluginManager> pluginManager_;
+    std::shared_ptr<HuksPluginLifeCycleMgr> pluginManager_;
     HksProcessInfo info_;
     std::string providerName_;
     CppParamSet paramSet_;
