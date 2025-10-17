@@ -168,7 +168,7 @@ HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *resourceId,
 #else
     (void)resourceId;
     (void)paramSetIn;
-    (void)paramSetOut;
+    (void)status;
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
@@ -224,7 +224,6 @@ HKS_API_EXPORT int32_t HksCloseRemoteHandle(const struct HksBlob *resourceId,
 #else
     (void)resourceId;
     (void)paramSetIn;
-    (void)remoteHandleOut;
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }

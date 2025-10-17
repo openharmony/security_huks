@@ -139,7 +139,13 @@ int32_t HksProviderLifeCycleManager::GetAllProviderInfosByProviderName(const std
 {
     m_providerMap.Iterate([&](const ProviderInfo &providerInfo,
         std::shared_ptr<HksExtAbilityConnectInfo> &connectionInfo) {
-        if (providerInfo.m_providerName == providerName) {
+        if (providerName == "HksInnerNullProviderName") {
+            ProviderInfo info = providerInfo;
+            info.m_bundleName = providerInfo.m_bundleName;
+            info.m_abilityName = providerInfo.m_abilityName;
+            info.m_providerName = providerInfo.m_providerName;
+            providerInfos.push_back(info);
+        } else if (providerInfo.m_providerName == providerName) {
             ProviderInfo info = providerInfo;
             info.m_bundleName = providerInfo.m_bundleName;
             info.m_abilityName = providerInfo.m_abilityName;

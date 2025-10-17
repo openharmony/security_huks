@@ -14,7 +14,9 @@
  */
 
 #include "hks_ukey_three_stage_adapter.h"
+#include "hilog/log_c.h"
 #include "hks_cpp_paramset.h"
+#include "hks_log.h"
 #include "securec.h"
 #include "hks_plugin_lifecycle_manager.h"
 #include "hks_lib_interface.h"
@@ -93,6 +95,8 @@ int32_t HksServiceOnUkeyUpdateSession(const struct HksProcessInfo *processInfo, 
     int32_t ret = libInterface->OnUpdateSession(*processInfo, handleU32, cppParamSet, indata, outdata);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnUpdateSession fail")
 
+    HKS_IF_TRUE_LOGI_RETURN(outData->size == 0, ret, "outData size is 0. ret: %" LOG_PUBLIC "d", ret);
+    HKS_IF_TRUE_LOGI_RETURN(outData->data == nullptr, ret, "outData data is nullptr. ret: %" LOG_PUBLIC "d", ret);
     outData->size = static_cast<uint32_t>(outdata.size());
     outData->data = new uint8_t[outData->size];
     HKS_IF_TRUE_LOGE_RETURN(outData->data == nullptr, HKS_ERROR_MALLOC_FAIL, "outData malloc fail")
@@ -130,6 +134,8 @@ int32_t HksServiceOnUkeyFinishSession(const struct HksProcessInfo *processInfo, 
     int32_t ret = libInterface->OnFinishSession(*processInfo, handleU32, cppParamSet, indata, outdata);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnFinishSession fail")
 
+    HKS_IF_TRUE_LOGI_RETURN(outData->size == 0, ret, "outData size is 0. ret: %" LOG_PUBLIC "d", ret);
+    HKS_IF_TRUE_LOGI_RETURN(outData->data == nullptr, ret, "outData data is nullptr. ret: %" LOG_PUBLIC "d", ret);
     outData->size = static_cast<uint32_t>(outdata.size());
     outData->data = new uint8_t[outData->size];
     HKS_IF_TRUE_LOGE_RETURN(outData->data == nullptr, HKS_ERROR_MALLOC_FAIL, "outData malloc fail")
