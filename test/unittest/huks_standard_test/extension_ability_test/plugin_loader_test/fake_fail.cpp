@@ -18,12 +18,88 @@
 #include "hks_cpp_paramset.h"
 extern "C" {
 
-int OnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet) {
-    HKS_LOG_I("libfake_fail.so coming OnRegisterProvider");
+int32_t HksExtPluginOnRegisterProvider(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet)
+{
     return -1;
 }
-int OnUnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet) {
-    HKS_LOG_I("libfake_fail.so coming OnUnRegisterProvider");
+
+int32_t HksExtPluginOnUnRegisterProvider(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet)
+{
+    return -1;
+}
+
+int32_t HksExtPluginOnCreateRemoteIndex(const HksProcessInfo &processInfo, const std::string &providerName,
+    const CppParamSet &paramSet, std::string &index)
+{
+    return -1;
+}
+
+int32_t HksExtPluginOnOpemRemoteHandle(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, std::string &handle)
+{
+    return -1;
+}
+
+int32_t HksExtPluginOnCloseRemoteHandle(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet)
+{
+    return -1;
+}
+
+int32_t HksExtPluginOnAuthUkeyPin(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, int32_t &authState, uint32_t &retryCnt)
+{
+    return -1;
+}
+
+int32_t HksExtPluginOnGetUkeyPinAuthState(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, int32_t &state)
+{
+    return -1;
+}
+
+int32_t HksExtPluginOnExportCerticate(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, std::string &certsJson)
+{
+    return -1;
+}
+
+int32_t HksExtPluginOnExportProviderCerticates(
+    const HksProcessInfo &processInfo, const std::string &providerName,
+    const CppParamSet &paramSet, std::string &certsJsonArr)
+{
+    return -1;
+}
+
+int32_t HksExtPluginOnInitSession(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, uint32_t &handle)
+{
+    return -1;
+}
+
+int32_t HksExtPluginOnUpdateSession(const HksProcessInfo &processInfo, const uint32_t &handle,
+    const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData)
+{
+    return -1;
+}
+
+int32_t HksExtPluginOnFinishSession(const HksProcessInfo &processInfo, const uint32_t &handle,
+    const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData)
+{
+    return -1;
+}
+
+int32_t HksClearUkeyPinAuthState(const HksProcessInfo &processInfo,
+    const std::string &index)
+{
+    return -1;
+}
+
+int32_t HksGetRemoteProperty(const HksProcessInfo &processInfo,
+    const std::string &index, const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams)
+{
     return -1;
 }
 

@@ -20,9 +20,9 @@
 using namespace testing::ext;
 
 const std::string TEST_PROVIDER = "testProvider";
-std::string PLUGIN_PATH_SUCCESS = "libfake_success.so";
-std::string PLUGIN_PATH_FAIL = "libfake_fail.so";
-std::string PLUGIN_PATH_NOT_EXIST = "not_exist.so";
+std::string PLUGIN_PATH_SUCCESS = "libfake_success.z.so";
+std::string PLUGIN_PATH_FAIL = "libfake_fail.z.so";
+std::string PLUGIN_PATH_NOT_EXIST = "not_exist.z.so";
 
 namespace OHOS {
 namespace Security {
@@ -45,14 +45,6 @@ void ExtensionPluginMgrTest::TearDown() {
     HuksPluginLifeCycleMgr::ReleaseInstance();
 }
 
-/*
-    模拟dlopen返回的函数指针
-    1. 第一次调用注册函数，动态库加载成功，且register函数执行成功；
-    2. 第一次调用注册函数，打开动态库失败；
-    3. 第二次调用注册函数，register函数执行失败;非最后一次调用解注册函数，且函数执行失败；
-    4. 最后一次调用解注册函数，函数执行成功，且动态库关闭成功；
-*/
-
 /**
  * @tc.name: ExtensionPluginMgrTest.ExtensionPluginMgrTest001
  * @tc.desc: 第一次注册，动态库加载成功且注册函数执行成功
@@ -69,6 +61,31 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest001, TestSize.Level0)
 
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, 0) << "fail: regist fail";
+
+    std::string outIndex = "";
+    auto libInterface = HuksLibInterface::GetInstanceWrapper();
+    ret = libInterface->OnCreateRemoteIndex(TEST_PROVIDER, paramSet, outIndex);
+    EXPECT_EQ(ret, 0) << "fail: OnCreateRemoteIndex fail";
+
+    std::string index = "";
+    std::string handle = "";
+    ret = libInterface->OnCreateRemoteKeyHandle(processInfo, index, paramSet, handle);
+    EXPECT_EQ(ret, 0) << "fail: OnCreateRemoteKeyHandle fail";
+
+    ret = libInterface->OnCloseRemoteKeyHandle(processInfo, index, paramSet);
+    EXPECT_EQ(ret, 0) << "fail: OnCloseRemoteKeyHandle fail";
+
+    int32_t authState = 0;
+    uint32_t retryCnt = 0;
+    ret = libInterface->OnAuthUkeyPin(processInfo, index, paramSet, authState, retryCnt);
+    EXPECT_EQ(ret, 0) << "fail: OnAuthUkeyPin fail";
+
+    int32_t state = 0;
+    ret = libInterface->OnGetVerifyPinStatus(processInfo, index, paramSet, state);
+    EXPECT_EQ(ret, 0) << "fail: OnGetVerifyPinStatus fail";
+
+    ret = libInterface->OnClearUkeyPinAuthStatus(processInfo, index);
+    EXPECT_EQ(ret, 0) << "fail: OnClearUkeyPinAuthStatus fail";
 }
 
 /**
@@ -83,7 +100,7 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest002, TestSize.Level0)
     CppParamSet paramSet;
 
     auto plugionLoader = HuksPluginLoader::GetInstanceWrapper();
-    plugionLoader->SetPluginPath(PLUGIN_PATH_SUCCESS);
+    plugionLoader->SetPluginPath(PLUGIN_PATH_NOT_EXIST);
 
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, HKS_ERROR_OPEN_LIB_FAIL) << "fail: plugin path exist";
@@ -101,7 +118,7 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest003, TestSize.Level0)
     CppParamSet paramSet;
 
     auto plugionLoader = HuksPluginLoader::GetInstanceWrapper();
-    plugionLoader->SetPluginPath(PLUGIN_PATH_SUCCESS);
+    plugionLoader->SetPluginPath(PLUGIN_PATH_FAIL);
 
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, -1) << "fail: regist success";
@@ -130,6 +147,34 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest004, TestSize.Level0)
 
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, 0) << "fail: regist fail";
+
+    auto libInterface = HuksLibInterface::GetInstanceWrapper();
+
+    std::string propertyId = "";
+    CppParamSet outParams;
+    const std::string index = "";
+    ret = libInterface->OnGetRemoteProperty(processInfo, index, propertyId, paramSet, outParams);
+    EXPECT_EQ(ret, 0) << "fail: OnGetRemoteProperty fail";
+
+    std::string certsJson = "";
+    ret = libInterface->OnExportCertificate(processInfo, index, paramSet, certsJson);
+    EXPECT_EQ(ret, 0) << "fail: OnExportCertificate fail";
+
+    std::string certsJsonArr = "";
+    ret = libInterface->OnExportProviderAllCertificates(processInfo, TEST_PROVIDER, paramSet, certsJsonArr);
+    EXPECT_EQ(ret, 0) << "fail: OnExportProviderAllCertificates fail";
+
+    uint32_t uhandle = 0;
+    ret = libInterface->OnInitSession(processInfo, index, paramSet, uhandle);
+    EXPECT_EQ(ret, 0) << "fail: OnInitSession fail";
+
+    std::vector<uint8_t> inData;
+    std::vector<uint8_t> outData;
+    ret = libInterface->OnUpdateSession(processInfo, uhandle, paramSet, inData, outData);
+    EXPECT_EQ(ret, 0) << "fail: OnUpdateSession fail";
+
+    ret = libInterface->OnFinishSession(processInfo, uhandle, paramSet, inData, outData);
+    EXPECT_EQ(ret, 0) << "fail: OnUpdateSession fail";
 
     ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, 0) << "fail: unregist fail";
