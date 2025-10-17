@@ -77,8 +77,7 @@ public:
 class MockIRemoteObject : public IRemoteObject {
 public:
     MOCK_METHOD(int32_t, GetObjectRefCount, (), (override));
-    MOCK_METHOD(int, SendRequest,
-        (uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option),
+    MOCK_METHOD(int, SendRequest, (uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option),
         (override));
     MOCK_METHOD(bool, AddDeathRecipient, (const sptr<DeathRecipient> &recipient), (override));
     MOCK_METHOD(bool, RemoveDeathRecipient, (const sptr<DeathRecipient> &recipient), (override));
@@ -95,7 +94,7 @@ protected:
 
     void TearDown() override;
     
-    std::shared_ptr<ExtensionConnection> extensionConn;
+    sptr<ExtensionConnection> extensionConn;
     sptr<MockIRemoteObject> mockRemoteObject = new MockIRemoteObject();
     sptr<MockIHuksAccessExtBase> mockProxy = new MockIHuksAccessExtBase();
 };

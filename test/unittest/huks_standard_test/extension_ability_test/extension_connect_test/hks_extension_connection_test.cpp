@@ -29,7 +29,7 @@ void ExtensionConnectionTest::TearDownTestCase(void) {
 }
 
 void ExtensionConnectionTest::SetUp() {
-    extensionConn = std::make_shared<ExtensionConnection>();
+    sptr<ExtensionConnection> extensionConn(new (std::nothrow) ExtensionConnection());
     ASSERT_NE(extensionConn, nullptr);
 }
 

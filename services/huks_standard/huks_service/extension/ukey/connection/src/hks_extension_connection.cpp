@@ -82,7 +82,8 @@ sptr<IHuksAccessExtBase> ExtensionConnection::GetExtConnectProxy()
     return extConnectProxy;
 }
 
-bool ExtensionConnection::IsConnected() {
+bool ExtensionConnection::IsConnected()
+{
     return isConnected_.load();
 }
 
