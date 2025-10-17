@@ -37,9 +37,6 @@ void ExtensionPluginMgrTest::SetUp() {
     HuksPluginLoader::ReleaseInstance();
     HuksLibInterface::ReleaseInstance();
     HuksPluginLifeCycleMgr::ReleaseInstance();
-    // 清空 provider map to ensure reproducible tests
-    std::unordered_map<PluginMethodEnum, void*> empty;
-    lib->initProviderMap(empty);
 }
 
 void ExtensionPluginMgrTest::TearDown() {
@@ -61,12 +58,14 @@ void ExtensionPluginMgrTest::TearDown() {
  * @tc.desc: 第一次注册，动态库加载成功且注册函数执行成功
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest001, TestSize.Level10) {
+HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest001, TestSize.Level0)
+{
     auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HksProcessInfo processInfo {};
     CppParamSet paramSet;
 
-    mgr->SetPluginPath(PLUGIN_PATH_SUCCESS.c_str());
+    auto plugionLoader = HuksPluginLoader::GetInstanceWrapper();
+    plugionLoader->SetPluginPath(PLUGIN_PATH_SUCCESS);
 
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, 0) << "fail: regist fail";
@@ -77,12 +76,15 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest001, TestSize.Level10) {
  * @tc.desc: 第一次注册，动态库打开失败
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest002, TestSize.Level10) {
+HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest002, TestSize.Level0)
+{
     auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HksProcessInfo processInfo {};
     CppParamSet paramSet;
 
-    mgr->SetPluginPath(PLUGIN_PATH_NOT_EXIST.c_str());
+    auto plugionLoader = HuksPluginLoader::GetInstanceWrapper();
+    plugionLoader->SetPluginPath(PLUGIN_PATH_SUCCESS);
+
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, HKS_ERROR_OPEN_LIB_FAIL) << "fail: plugin path exist";
 }
@@ -92,12 +94,15 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest002, TestSize.Level10) {
  * @tc.desc: 第二次调用注册函数，register函数执行失败;非最后一次调用解注册函数，且函数执行失败
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest003, TestSize.Level10) {
+HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest003, TestSize.Level0)
+{
     auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HksProcessInfo processInfo {};
     CppParamSet paramSet;
 
-    mgr->SetPluginPath(PLUGIN_PATH_FAIL.c_str());
+    auto plugionLoader = HuksPluginLoader::GetInstanceWrapper();
+    plugionLoader->SetPluginPath(PLUGIN_PATH_SUCCESS);
+
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, -1) << "fail: regist success";
 
@@ -114,12 +119,15 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest003, TestSize.Level10) {
  * @tc.desc: 最后一次调用解注册函数，函数执行成功，且动态库关闭成功
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest004, TestSize.Level10) {
+HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest004, TestSize.Level0)
+{
     auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HksProcessInfo processInfo {};
     CppParamSet paramSet;
 
-    mgr->SetPluginPath(PLUGIN_PATH_SUCCESS.c_str());
+    auto plugionLoader = HuksPluginLoader::GetInstanceWrapper();
+    plugionLoader->SetPluginPath(PLUGIN_PATH_SUCCESS);
+
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, 0) << "fail: regist fail";
 

@@ -20,7 +20,6 @@
 #include "hks_plugin_lifecycle_manager.h"
 #include "hks_plugin_loader.h"
 #include "hks_function_types.h"
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 namespace OHOS {
@@ -42,18 +41,6 @@ protected:
     std::string providerName_;
     CppParamSet paramSet_;
 };
-
-// extern "C" {
-// void* __real_dlopen(const char* filename, int flags);
-// void* __wrap_dlopen(const char* filename, int flags) {
-//     return reinterpret_cast<void*>(0x12345);
-// }
-
-// void* __wrap_dlsym(void* handle, const char* symbol) {
-//     static int32_t dummy_func() { return HKS_SUCCESS; }
-//     return reinterpret_cast<void*>(&dummy_func);
-// }
-// }
 
 
 
