@@ -56,8 +56,7 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest001, TestSize.Level0)
     HksProcessInfo processInfo {};
     CppParamSet paramSet;
 
-    auto plugionLoader = HuksPluginLoader::GetInstanceWrapper();
-    plugionLoader->SetPluginPath(PLUGIN_PATH_SUCCESS);
+    mgr->SetPluginSoPath(PLUGIN_PATH_SUCCESS);
 
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, 0) << "fail: regist fail";
@@ -99,8 +98,7 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest002, TestSize.Level0)
     HksProcessInfo processInfo {};
     CppParamSet paramSet;
 
-    auto plugionLoader = HuksPluginLoader::GetInstanceWrapper();
-    plugionLoader->SetPluginPath(PLUGIN_PATH_NOT_EXIST);
+    mgr->SetPluginSoPath(PLUGIN_PATH_SUCCESS);
 
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, HKS_ERROR_OPEN_LIB_FAIL) << "fail: plugin path exist";
@@ -117,8 +115,7 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest003, TestSize.Level0)
     HksProcessInfo processInfo {};
     CppParamSet paramSet;
 
-    auto plugionLoader = HuksPluginLoader::GetInstanceWrapper();
-    plugionLoader->SetPluginPath(PLUGIN_PATH_FAIL);
+    mgr->SetPluginSoPath(PLUGIN_PATH_SUCCESS);
 
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, -1) << "fail: regist success";
@@ -142,8 +139,7 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest004, TestSize.Level0)
     HksProcessInfo processInfo {};
     CppParamSet paramSet;
 
-    auto plugionLoader = HuksPluginLoader::GetInstanceWrapper();
-    plugionLoader->SetPluginPath(PLUGIN_PATH_SUCCESS);
+    mgr->SetPluginSoPath(PLUGIN_PATH_SUCCESS);
 
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, 0) << "fail: regist fail";

@@ -95,7 +95,7 @@ std::string HuksPluginLoader::GetMethodByEnum(PluginMethodEnum methodEnum)
     return "";
 }
 
-void HuksPluginLoader::SetPluginPath(std::string &pluginPath)
+void HuksPluginLoader::SetPluginPath(const std::string &pluginPath)
 {
     pluginSo = pluginPath;
 }

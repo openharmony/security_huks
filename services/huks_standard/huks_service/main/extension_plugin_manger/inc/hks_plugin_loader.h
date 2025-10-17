@@ -33,8 +33,6 @@
 #include "safe_map.h"
 #include "hks_function_types.h"
 
-
-
 namespace OHOS {
 namespace Security {
 namespace Huks {
@@ -49,7 +47,7 @@ public:
         const CppParamSet &paramSet);
     static std::shared_ptr<HuksPluginLoader> GetInstanceWrapper();
     static void ReleaseInstance();
-    void SetPluginPath(std::string &pluginPath);
+    void SetPluginPath(const std::string &pluginPath);
     void InitMethodNameMap();
     
 private:

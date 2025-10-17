@@ -42,7 +42,7 @@ int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &in
         if (ret != HKS_SUCCESS) {
             m_refCount.fetch_sub(1, std::memory_order_acq_rel);
             HKS_LOG_E("regist provider failed!");
-            return ret; 
+            return ret;
         }
     }
 
@@ -78,11 +78,18 @@ int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &
     if (ret != HKS_SUCCESS) {
         m_refCount.fetch_add(1, std::memory_order_acq_rel);
         HKS_LOG_E("close lib failed!, ret = %{public}d", ret);
-        return ret; 
+        return ret;
     }
     
     HKS_LOG_E("unregist provider success!");
     return HKS_SUCCESS;
+}
+
+void HuksPluginLifeCycleMgr::SetPluginSoPath(const std::string path)
+{
+    auto pluginLoader = HuksPluginLoader::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN_VOID(pluginLoader == nullptr, "Failed to get pluginLoader instance.")
+    pluginLoader->SetPluginPath(path);
 }
 
 }
