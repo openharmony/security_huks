@@ -566,72 +566,128 @@ static void HksReportEvent(const char *funcName, const struct HksHitraceId *trac
 int32_t HksServiceRegisterProvider(const struct HksProcessInfo *processInfo, const struct HksBlob *name,
     const struct HksParamSet *paramSetIn)
 {
+    (void)processInfo;
+    (void)name;
+    (void)paramSetIn;
     return 0;
 }
 
 int32_t HksServiceUnregisterProvider(const struct HksProcessInfo *processInfo, const struct HksBlob *name,
     const struct HksParamSet *paramSetIn)
 {
+    (void)processInfo;
+    (void)name;
+    (void)paramSetIn;
     return 0;
 }
 
 int32_t HksServiceExportProviderCertificates(const struct HksProcessInfo *processInfo,
     const struct HksBlob *providerName, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
 {
+    (void)processInfo;
+    (void)providerName;
+    (void)paramSetIn;
+    (void)certSet;
     return 0;
 }
 
 int32_t HksServiceExportCertificate(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
 {
+    (void)processInfo;
+    (void)index;
+    (void)paramSetIn;
+    (void)certSet;
     return 0;
 }
 
 int32_t HksServiceAuthUkeyPin(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn, int32_t *outStatus, uint32_t *retryCount)
 {
+    (void)processInfo;
+    (void)index;
+    (void)paramSetIn;
+    (void)outStatus;
+    (void)retryCount;
     return 0;
 }
 
 int32_t HksServiceOpenRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
 {
+    (void)processInfo;
+    (void)index;
+    (void)paramSetIn;
+    (void)remoteHandleOut;
     return 0;
 }
 
 int32_t HksServiceGetUkeyPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn, int32_t *status)
 {
+    (void)processInfo;
+    (void)index;
+    (void)paramSetIn;
+    (void)status;
     return 0;
 }
 
 int32_t HksServiceGetRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
 {
+    (void)processInfo;
+    (void)index;
+    (void)paramSetIn;
+    (void)remoteHandleOut;
     return 0;
 }
 
 int32_t HksServiceCloseRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn)
 {
+    (void)processInfo;
+    (void)index;
+    (void)paramSetIn;
+    return 0;
+}
+
+int32_t HksServiceClearPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index)
+{
+    (void)processInfo;
+    (void)index;
     return 0;
 }
 
 int32_t HksServiceUkeySign(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn, const struct HksBlob *srcData, struct HksBlob *signature)
 {
+    (void)processInfo;
+    (void)index;
+    (void)paramSetIn;
+    (void)srcData;
+    (void)signature;
     return 0;
 }
 
 int32_t HksServiceUkeyVerify(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn, const struct HksBlob *srcData, struct HksBlob *signature)
 {
+    (void)processInfo;
+    (void)index;
+    (void)paramSetIn;
+    (void)srcData;
+    (void)signature;
     return 0;
 }
 
 int32_t HksServiceGetRemoteProperty(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
     const struct HksBlob *propertyId, const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut)
 {
+    (void)processInfo;
+    (void)resourceId;
+    (void)propertyId;
+    (void)paramSetIn;
+    (void)propertySetOut;
     return 0;
 }
 
