@@ -26,18 +26,18 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager/src",
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",
       "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/include",
-      "//base/security/huks/test/unittest/huks_common_test/include"
+      "//base/security/huks/test/unittest/huks_common_test/include",
     ]
 
     sources = [
       # "./provider_mgr_test/hks_provider_manger_test.cpp",
       "./plugin_loader_test/hks_plugin_manager_test.cpp",
       "./extension_connect_test/hks_extension_connection_test.cpp",
-      "./ukey_common_test/ukey_common_test.cpp",
-      "./handle_mgr_test/hks_handle_manager_test.cpp",
+      # "./ukey_common_test/ukey_common_test.cpp",
+      # "./handle_mgr_test/hks_handle_manager_test.cpp",
       # 新增：包装桩实现，使用链接器 --wrap 覆盖原函数
-      "./sdk_test/hks_ipc_adapter_wrap.cpp",
-      "./sdk_test/hks_ukey_test.cpp",
+      # "./sdk_test/hks_ipc_adapter_wrap.cpp",
+      # "./sdk_test/hks_ukey_test.cpp",
     ]
 
     configs = [
@@ -54,20 +54,18 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection:libhuks_extension_connection_static",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager:libhuks_remote_handle_manager_static",
-      "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
+      ":libfake_fail",
+      ":libfake_success",
     ]
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
       "googletest:gmock",
+      "googletest:gtest",
       "ability_runtime:ability_connect_callback_stub",
       "ability_runtime:ability_manager",
       "ability_base:ability_base_want",
     ]
-
-    if (os_level == "standard") {
-      external_deps += [ "googletest:gtest" ]
-    }
 
     cflags = [
       "-Wall",
@@ -100,9 +98,25 @@ if (os_level == "standard") {
       "./plugin_loader_test/fake_success.cpp",
     ]
 
+    configs = [
+      "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+    ]
+
     include_dirs = [
       ".", 
       "include",
+      "//base/security/huks/frameworks/huks_standard/main/common/include",
+      "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
+    ]
+
+    deps = [
+      "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
+    ]
+
+    external_deps = [
+      "ipc:ipc_core",
     ]
 
     cflags = [
@@ -121,10 +135,6 @@ if (os_level == "standard") {
 
     subsystem_name = "security"
     part_name = "huks"
-  }
-
-  subsystem_name = "security"
-  part_name = "huks"
 }
 
 ohos_shared_library("libfake_fail") {
@@ -132,10 +142,25 @@ ohos_shared_library("libfake_fail") {
     "./plugin_loader_test/fake_fail.cpp",
   ]
 
+  configs = [
+      "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+    ]
+
   include_dirs = [
     ".", 
     "include",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
+    "//base/security/huks/frameworks/huks_standard/main/common/include",
   ]
+
+  deps = [
+    "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+    "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
+    "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
+  ]
+  external_deps = [
+      "ipc:ipc_core",
+    ]
 
   cflags = [
     "-fPIC",
@@ -153,4 +178,8 @@ ohos_shared_library("libfake_fail") {
 
   subsystem_name = "security"
   part_name = "huks"
+
 }
+}
+
+

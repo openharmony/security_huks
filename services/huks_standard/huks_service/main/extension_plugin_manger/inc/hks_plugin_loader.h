@@ -41,6 +41,8 @@ class HuksPluginLoader : private OHOS::DelayedSingleton<HuksPluginLoader> {
 public:
     OHOS::SafeMap<PluginMethodEnum, void*> m_pluginProviderMap;
     OHOS::SafeMap<PluginMethodEnum, std::string> m_pluginMethodNameMap;
+    HuksPluginLoader();
+    ~HuksPluginLoader();
     int32_t LoadPlugins(const struct HksProcessInfo &info, const std::string &providerName,
         const CppParamSet &paramSet);
     int32_t UnLoadPlugins(const struct HksProcessInfo &info, const std::string &providerName,
@@ -48,7 +50,7 @@ public:
     static std::shared_ptr<HuksPluginLoader> GetInstanceWrapper();
     static void ReleaseInstance();
     void SetPluginPath(const std::string &pluginPath);
-    void InitMethodNameMap();
+    void SetMethodNameMapLoader(std::map<PluginMethodEnum, std::string> &methodNameMap);
     
 private:
     void* m_pluginHandle = nullptr;

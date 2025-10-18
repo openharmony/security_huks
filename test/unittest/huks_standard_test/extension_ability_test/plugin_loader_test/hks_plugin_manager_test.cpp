@@ -57,6 +57,7 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest001, TestSize.Level0)
     CppParamSet paramSet;
 
     mgr->SetPluginSoPath(PLUGIN_PATH_SUCCESS);
+    mgr->SetMethodNameMap(failMap);
 
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, 0) << "fail: regist fail";
@@ -98,7 +99,8 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest002, TestSize.Level0)
     HksProcessInfo processInfo {};
     CppParamSet paramSet;
 
-    mgr->SetPluginSoPath(PLUGIN_PATH_SUCCESS);
+    mgr->SetPluginSoPath(PLUGIN_PATH_NOT_EXIST);
+    mgr->SetMethodNameMap(failMap);
 
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, HKS_ERROR_OPEN_LIB_FAIL) << "fail: plugin path exist";
@@ -115,7 +117,8 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest003, TestSize.Level0)
     HksProcessInfo processInfo {};
     CppParamSet paramSet;
 
-    mgr->SetPluginSoPath(PLUGIN_PATH_SUCCESS);
+    mgr->SetPluginSoPath(PLUGIN_PATH_FAIL);
+    mgr->SetMethodNameMap(failMap);
 
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, -1) << "fail: regist success";
