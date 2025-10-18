@@ -112,6 +112,7 @@ HKS_API_EXPORT int32_t HksExportProviderCertificates(const struct HksBlob *provi
 #else
     (void)providerName;
     (void)paramSetIn;
+    (void)certSet;
     return 0;
 #endif
 }
@@ -131,6 +132,7 @@ HKS_API_EXPORT int32_t HksExportCertificate(const struct HksBlob *resourceId,
 #else
     (void)resourceId;
     (void)paramSetIn;
+    (void)certSet;
     return 0;
 #endif
 }
