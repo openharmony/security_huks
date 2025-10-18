@@ -63,7 +63,7 @@ int HksStub::ProcessAttestKeyAsyncReply(MessageParcel& data)
             "invalid sz %" LOG_PUBLIC "u", sz)
         const uint8_t *ptr = data.ReadBuffer(sz);
         HKS_IF_NULL_LOGE_BREAK(ptr, "ReadBuffer %" LOG_PUBLIC "u size ptr is nullptr", sz)
-        std::unique_ptr<uint8_t[]> receivedPtr(new (std::nothrow) uint8_t[sz]());
+        auto receivedPtr = std::make_unique<uint8_t[]>(sz);
         if (receivedPtr == nullptr) {
             HKS_LOG_E("new receivedPtr failed");
             err = ERR_NO_MEMORY;
@@ -176,7 +176,7 @@ int HksExtStub::ProcessExtGetRemotePropertyReply(MessageParcel& data)
             "invalid size %" LOG_PUBLIC "u", size)
         const uint8_t *ptr = data.ReadBuffer(size);
         HKS_IF_NULL_LOGE_BREAK(ptr, "ReadBuffer %" LOG_PUBLIC "u size ptr is nullptr", size)
-        std::unique_ptr<uint8_t[]> receivedPtr(new (std::nothrow) uint8_t[size]());
+        auto receivedPtr = std::make_unique<uint8_t[]>(size);
         if (receivedPtr == nullptr) {
             HKS_LOG_E("new receivedPtr failed");
             err = ERR_NO_MEMORY;
