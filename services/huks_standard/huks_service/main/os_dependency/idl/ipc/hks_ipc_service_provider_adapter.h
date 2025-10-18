@@ -16,7 +16,6 @@
 #ifndef HKS_IPC_SERVICE_PROVIDER_ADAPTER_H
 #define HKS_IPC_SERVICE_PROVIDER_ADAPTER_H
 
-#include <stdint.h>
 #include "hks_type.h"
 
 #ifdef __cplusplus

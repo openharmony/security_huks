@@ -53,7 +53,8 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
       "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection:libhuks_extension_connection_static",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager:libhuks_remote_handle_manager_static"
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager:libhuks_remote_handle_manager_static",
+      "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
     ]
     external_deps = [
       "c_utils:utils",
