@@ -40,9 +40,9 @@ HksBlob Base64StringToBlob(const std::string &inStr)
     auto decodeVec = Base64Str2U8Vec(inStr);
     HKS_IF_TRUE_LOGE_RETURN(decodeVec.first != HKS_SUCCESS, blob, "Base64Str2U8Vec failed, ret: %" LOG_PUBLIC "d",
         decodeVec.first)
-    blob.size = decodeVec.second.size();
-    blob.data = static_cast<uint8_t*>(HksMalloc(blob.size));
+    blob.data = static_cast<uint8_t*>(HksMalloc(decodeVec.second.size()));
     HKS_IF_NULL_LOGE_RETURN(blob.data, blob, "Failed to allocate memory for HksBlob")
+    blob.size = decodeVec.second.size();
     if (memcpy_s(blob.data, blob.size, decodeVec.second.data(), decodeVec.second.size()) != EOK) {
         HKS_LOG_E("memcpy_s failed in StringToBlob");
         HKS_FREE(blob.data);
