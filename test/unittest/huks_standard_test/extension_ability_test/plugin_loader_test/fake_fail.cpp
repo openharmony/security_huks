@@ -97,7 +97,7 @@ int32_t HksClearUkeyPinAuthState(const HksProcessInfo &processInfo,
     return -1;
 }
 
-int32_t HksGetRemoteProperty(const HksProcessInfo &processInfo,
+int32_t HksGetUkeyRemoteProperty(const HksProcessInfo &processInfo,
     const std::string &index, const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams)
 {
     return -1;

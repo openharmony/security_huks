@@ -94,7 +94,7 @@ if (os_level == "standard") {
     part_name = "huks"
   }
 
-  ohos_shared_library("fake_success") {
+  ohos_shared_library("libfake_success") {
     sources = [
       "./plugin_loader_test/fake_success.cpp",
     ]
@@ -118,8 +118,6 @@ if (os_level == "standard") {
       ubsan = true
     }
 
-    output_name = "fake_success"
-
     subsystem_name = "security"
     part_name = "huks"
   }
@@ -128,7 +126,7 @@ if (os_level == "standard") {
   part_name = "huks"
 }
 
-ohos_shared_library("fake_fail") {
+ohos_shared_library("libfake_fail") {
   sources = [
     "./plugin_loader_test/fake_fail.cpp",
   ]

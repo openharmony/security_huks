@@ -54,7 +54,6 @@ private:
     void* m_pluginHandle = nullptr;
     std::mutex libMutex;
     std::string GetMethodByEnum(PluginMethodEnum methodEnum);
-    
 };
 }
 }
