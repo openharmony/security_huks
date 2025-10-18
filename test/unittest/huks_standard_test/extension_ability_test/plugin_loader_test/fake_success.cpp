@@ -16,88 +16,93 @@
 #include <string>
 #include "hks_plugin_def.h"
 #include "hks_cpp_paramset.h"
+#include "hks_cfi.h"
 
-int32_t HksExtPluginOnRegisterProvider(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet)
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnRegisterProvider(
+    const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet))
 {
     return 0;
 }
 
-int32_t HksExtPluginOnUnRegisterProvider(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet)
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(
+    const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet))
 {
     return 0;
 }
 
-int32_t HksExtPluginOnCreateRemoteIndex(const HksProcessInfo &processInfo, const std::string &providerName,
-    const CppParamSet &paramSet, std::string &index)
-{
-    return 0;
-}
-
-int32_t HksExtPluginOnOpemRemoteHandle(const HksProcessInfo &processInfo, const std::string &index,
-    const CppParamSet &paramSet, std::string &handle)
-{
-    return 0;
-}
-
-int32_t HksExtPluginOnCloseRemoteHandle(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet)
-{
-    return 0;
-}
-
-int32_t HksExtPluginOnAuthUkeyPin(const HksProcessInfo &processInfo, const std::string &index,
-    const CppParamSet &paramSet, int32_t &authState, uint32_t &retryCnt)
-{
-    return 0;
-}
-
-int32_t HksExtPluginOnGetUkeyPinAuthState(const HksProcessInfo &processInfo, const std::string &index,
-    const CppParamSet &paramSet, int32_t &state)
-{
-    return 0;
-}
-
-int32_t HksExtPluginOnExportCerticate(const HksProcessInfo &processInfo, const std::string &index,
-    const CppParamSet &paramSet, std::string &certsJson)
-{
-    return 0;
-}
-
-int32_t HksExtPluginOnExportProviderCerticates(
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnCreateRemoteIndex(
     const HksProcessInfo &processInfo, const std::string &providerName,
-    const CppParamSet &paramSet, std::string &certsJsonArr)
+    const CppParamSet &paramSet, std::string &index))
 {
     return 0;
 }
 
-int32_t HksExtPluginOnInitSession(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, uint32_t &handle)
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnOpemRemoteHandle(
+    const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, std::string &handle))
 {
     return 0;
 }
 
-int32_t HksExtPluginOnUpdateSession(const HksProcessInfo &processInfo, const uint32_t &handle,
-    const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData)
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnCloseRemoteHandle(
+    const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet))
 {
     return 0;
 }
 
-int32_t HksExtPluginOnFinishSession(const HksProcessInfo &processInfo, const uint32_t &handle,
-    const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData)
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnAuthUkeyPin(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t &retryCnt))
 {
     return 0;
 }
 
-int32_t HksClearUkeyPinAuthState(const HksProcessInfo &processInfo,
-    const std::string &index)
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnGetUkeyPinAuthState(
+    const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet, int32_t &state))
 {
     return 0;
 }
 
-int32_t HksGetRemoteProperty(const HksProcessInfo &processInfo,
-    const std::string &index, const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams)
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnExportCerticate(
+    const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet, std::string &certsJson))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnExportProviderCerticates(
+    const HksProcessInfo &processInfo, const std::string &providerName,
+    const CppParamSet &paramSet, std::string &certsJsonArr))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnInitSession(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, uint32_t &handle))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnUpdateSession(const HksProcessInfo &processInfo,
+    const uint32_t &handle, const CppParamSet &paramSet,
+    const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnFinishSession(const HksProcessInfo &processInfo,
+    const uint32_t &handle, const CppParamSet &paramSet,
+    const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksClearUkeyPinAuthState(const HksProcessInfo &processInfo,
+    const std::string &index))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksGetUkeyRemoteProperty(const HksProcessInfo &processInfo,
+    const std::string &index, const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams))
 {
     return 0;
 }

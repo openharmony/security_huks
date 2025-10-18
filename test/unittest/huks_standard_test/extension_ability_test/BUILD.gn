@@ -119,10 +119,7 @@ if (os_level == "standard") {
       "ipc:ipc_core",
     ]
 
-    cflags = [
-      "-fPIC",
-      "-Wall",
-    ]
+    cflags = []
 
     sanitize = {
       integer_overflow = true
@@ -159,13 +156,10 @@ ohos_shared_library("libfake_fail") {
     "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
   ]
   external_deps = [
-      "ipc:ipc_core",
-    ]
-
-  cflags = [
-    "-fPIC",
-    "-Wall",
+    "ipc:ipc_core",
   ]
+
+  cflags = []
 
   sanitize = {
     integer_overflow = true
