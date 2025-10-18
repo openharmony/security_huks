@@ -29,6 +29,7 @@ namespace Huks {
 
     bool IsHksExtCertInfoSetEmpty(const struct HksExtCertInfoSet& certSet);
     HksBlob Base64StringToBlob(const std::string &inStr);
+    std::string BlobToBase64String(const struct HksBlob &strBlob);
     HksBlob StringToBlob(const std::string &inStr);
     std::string BlobToString(const HksBlob &strBlob);
 
