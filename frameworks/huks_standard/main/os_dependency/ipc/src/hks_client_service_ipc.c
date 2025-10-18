@@ -45,6 +45,8 @@
 #include <unistd.h>
 #endif
 
+static const char HKS_INNER_NULL_PROVIDER_NAME[] = "HksInnerNullProviderName";
+
 int32_t HksClientInitialize(void)
 {
 #ifdef HKS_L1_SMALL
@@ -70,12 +72,19 @@ int32_t HksClientRefreshKeyInfo(void)
 static int32_t BuildBlobNotNull(const struct HksBlob *blobIn, struct HksBlob *blobOut)
 {
     HKS_IF_NULL_LOGE_RETURN(blobOut, HKS_ERROR_NULL_POINTER, "blobOut null");
-
+    uint32_t dataSize = 0;
     if (blobIn == NULL || blobIn->size == 0) {
+        dataSize = strlen(HKS_INNER_NULL_PROVIDER_NAME) + 1;
+        blobOut->data = (uint8_t *)HksMalloc(dataSize);
+        HKS_IF_NULL_LOGE_RETURN(blobOut->data, HKS_ERROR_MALLOC_FAIL, "malloc blob data fail");
+
+        HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(blobOut->data, dataSize,
+            HKS_INNER_NULL_PROVIDER_NAME, dataSize), HKS_ERROR_INSUFFICIENT_MEMORY, "memcpy_s outStatus failed")
+        blobOut->size = dataSize;
         return HKS_SUCCESS;
     }
 
-    uint32_t dataSize  = blobIn->size;
+    dataSize = blobIn->size;
     if (dataSize > MAX_PROCESS_SIZE) {
         HKS_LOG_E("blobIn size too large");
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -84,11 +93,8 @@ static int32_t BuildBlobNotNull(const struct HksBlob *blobIn, struct HksBlob *bl
     blobOut->data = (uint8_t *)HksMalloc(dataSize);
     HKS_IF_NULL_LOGE_RETURN(blobOut->data, HKS_ERROR_MALLOC_FAIL, "malloc blob data fail");
 
-    if (memcpy_s(blobOut->data, dataSize, blobIn->data, dataSize) != EOK) {
-        HKS_FREE(blobOut->data);
-        blobOut->data = NULL;
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(blobOut->data, dataSize,
+            blobIn->data, dataSize), HKS_ERROR_INSUFFICIENT_MEMORY, "memcpy_s outStatus failed")
 
     blobOut->size = dataSize;
     return HKS_SUCCESS;
@@ -245,7 +251,7 @@ int32_t HksClientExportProviderCertificates(const struct HksBlob *providerName,
         ret = HksAllocInBlob(&inBlob, &newProviderName, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
-        ret = HksCheckIpcOptionalBlobAndParamSet(&newProviderName, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(&newProviderName, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientExportProviderCertificates fail");
 
         ret = HksUKeyGeneralPack(&newProviderName, newParamSet, &inBlob);
