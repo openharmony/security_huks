@@ -74,12 +74,12 @@ static int32_t BuildBlobNotNull(const struct HksBlob *blobIn, struct HksBlob *bl
     HKS_IF_NULL_LOGE_RETURN(blobOut, HKS_ERROR_NULL_POINTER, "blobOut null");
     uint32_t dataSize = 0;
     if (blobIn == NULL || blobIn->size == 0) {
-        dataSize = strlen(HKS_INNER_NULL_PROVIDER_NAME) + 1;
+        dataSize = strlen(HKS_INNER_NULL_PROVIDER_NAME);
         blobOut->data = (uint8_t *)HksMalloc(dataSize);
-        HKS_IF_NULL_LOGE_RETURN(blobOut->data, HKS_ERROR_MALLOC_FAIL, "malloc blob data fail");
+        HKS_IF_NULL_LOGE_RETURN(blobOut->data, HKS_ERROR_MALLOC_FAIL, "malloc blobOut data fail");
 
         HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(blobOut->data, dataSize,
-            HKS_INNER_NULL_PROVIDER_NAME, dataSize), HKS_ERROR_INSUFFICIENT_MEMORY, "memcpy_s outStatus failed")
+            HKS_INNER_NULL_PROVIDER_NAME, dataSize), HKS_ERROR_INSUFFICIENT_MEMORY, "memcpy_s blobOut failed")
         blobOut->size = dataSize;
         return HKS_SUCCESS;
     }
