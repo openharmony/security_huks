@@ -133,7 +133,7 @@ int32_t StringToCertInfo(const std::string &certInfoJson, struct HksExtCertInfo&
         HKS_IF_NOT_SUCC_LOGE_RETURN(result.first, result.first,
             "Get cert string failed, ret: %" LOG_PUBLIC "d", result.first)
         
-        certInfo.cert = StringToBlob(result.second);
+        certInfo.cert = Base64StringToBlob(result.second);
     }
     
     return HKS_SUCCESS;
@@ -155,7 +155,7 @@ int32_t CertInfoToString(const struct HksExtCertInfo& certInfo, std::string& jso
         HKS_LOG_E("Set index value failed");
         return HKS_ERROR_INTERNAL_ERROR;
     }
-    std::string cert = BlobToString(certInfo.cert);
+    std::string cert = BlobToBase64String(certInfo.cert);
     if (!jsonObj.SetValue("cert", cert)) {
         HKS_LOG_E("Set cert value failed");
         return HKS_ERROR_INTERNAL_ERROR;
