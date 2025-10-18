@@ -65,7 +65,8 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
     }
     ProviderInfo providerInfo{};
     int32_t ret = HksGetProviderInfo(processInfo, providerName, paramSet, providerInfo);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_NULL_POINTER, "Fail to get provider info")
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "Fail to get provider info. providerName: %" LOG_PUBLIC "s. ret: %" LOG_PUBLIC "d", providerName.c_str(), ret)
 
     std::shared_ptr<HksExtAbilityConnectInfo> connectInfo{nullptr};
     if (!m_providerMap.Find(providerInfo, connectInfo)) {
@@ -109,7 +110,7 @@ int32_t HksProviderLifeCycleManager::GetExtensionProxy(const ProviderInfo &provi
     return HKS_SUCCESS;
 }
 
-int32_t HksProviderLifeCycleManager::GetAllConnectInfoByProviderName(const HksProcessInfo &processInfo,
+int32_t HksProviderLifeCycleManager::HapGetAllConnectInfoByProviderName(const HksProcessInfo &processInfo,
     const std::string &providerName, std::vector<std::shared_ptr<HksExtAbilityConnectInfo>> &providerInfos)
 {
     sptr<ISystemAbilityManager> saMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -123,7 +124,8 @@ int32_t HksProviderLifeCycleManager::GetAllConnectInfoByProviderName(const HksPr
 
     std::string bundleName;
     auto bundleRet = bundleMgrProxy->GetBundleNameForUid(static_cast<int32_t>(processInfo.uidInt), bundleName);
-    HKS_IF_TRUE_LOGE_RETURN(!bundleRet, HKS_ERROR_BAD_STATE, "GetBundleNameForUid failed")
+    HKS_IF_TRUE_LOGE_RETURN(!bundleRet, HKS_ERROR_BAD_STATE,
+        "GetBundleNameForUid failed. external ret: %" LOG_PUBLIC "d", bundleRet)
 
     m_providerMap.Iterate([&](const ProviderInfo &providerInfo,
         std::shared_ptr<HksExtAbilityConnectInfo> &connectionInfo) {
@@ -162,13 +164,16 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
     std::shared_ptr<HksExtAbilityConnectInfo> connectionInfo = nullptr;
     ProviderInfo providerInfo{};
     int32_t ret = HksGetProviderInfo(processInfo, providerName, paramSet, providerInfo);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_NULL_POINTER, "Fail to get provider info")
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_NULL_POINTER,
+        "Fail to get provider info. providerName: %" LOG_PUBLIC "s", providerName.c_str())
 
     std::vector<std::shared_ptr<HksExtAbilityConnectInfo>> connectionInfos;
-    ret = GetAllConnectInfoByProviderName(processInfo, providerName, connectionInfos);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "Fail to get provider infos")
+    ret = HapGetAllConnectInfoByProviderName(processInfo, providerName, connectionInfos);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "Fail to get provider infos. providerName: %" LOG_PUBLIC "s. ret: %" LOG_PUBLIC "d", providerName.c_str(), ret)
     if (connectionInfos.empty()) {
-        HKS_LOG_E("OnUnRegisterProvider failed, unfound provider connections. providerName: %s", providerName.c_str());
+        HKS_LOG_E("OnUnRegisterProvider failed, unfound provider connections. providerName: %" LOG_PUBLIC "s",
+            providerName.c_str());
         return HKS_ERROR_NOT_EXIST;
     }
     for (auto &connectionInfo : connectionInfos) {
@@ -182,7 +187,7 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
             connectionInfo->m_want.GetElement().GetAbilityName().c_str());
         HKS_LOG_I("OnUnRegisterProvider refCount: %" LOG_PUBLIC "d", refCount);
         if (refCount > HKS_PROVIDER_CAN_REMOVE_REF_COUNT) {
-            HKS_LOG_E("OnUnRegisterProvider failed, refCount is not 2, maybe in use.");
+            HKS_LOG_E("OnUnRegisterProvider failed, refCount is more than 2, maybe in use.");
             return HKS_ERROR_BAD_STATE;
         }
         connectionInfo->m_connection->OnDisconnect();
@@ -206,7 +211,8 @@ int32_t HksGetProviderInfo(const HksProcessInfo &processInfo, const std::string 
 
     auto bundleRet = bundleMgrProxy->GetBundleNameForUid(static_cast<int32_t>(processInfo.uidInt),
         providerInfo.m_bundleName);
-    HKS_IF_TRUE_LOGE_RETURN(!bundleRet, HKS_ERROR_BAD_STATE, "GetBundleNameForUid failed")
+    HKS_IF_TRUE_LOGE_RETURN(!bundleRet, HKS_ERROR_BAD_STATE,
+        "GetBundleNameForUid failed. external ret: %" LOG_PUBLIC "d", bundleRet)
     providerInfo.m_providerName = providerName;
 
     auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();

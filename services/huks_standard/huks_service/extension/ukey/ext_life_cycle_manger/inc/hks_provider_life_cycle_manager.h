@@ -74,7 +74,7 @@ public:
         const CppParamSet &paramSet);
     int32_t GetExtensionProxy(const ProviderInfo &providerInfo, sptr<IHuksAccessExtBase> &proxy);
 
-    int32_t GetAllConnectInfoByProviderName(const HksProcessInfo &processInfo, const std::string &providerName,
+    int32_t HapGetAllConnectInfoByProviderName(const HksProcessInfo &processInfo, const std::string &providerName,
         std::vector<std::shared_ptr<HksExtAbilityConnectInfo>> &providerInfos);
     int32_t GetAllProviderInfosByProviderName(const std::string &providerName,
         std::vector<ProviderInfo> &providerInfos);

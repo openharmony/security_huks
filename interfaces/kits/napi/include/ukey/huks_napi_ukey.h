@@ -22,8 +22,7 @@
 
 #include "hks_param.h"
 
-namespace HuksNapiItem
-{
+namespace HuksNapiItem {
 #define NAPI_CALL_RETURN_ERR(env, ret)   \
     if ((ret) != napi_ok)                \
     {                                    \

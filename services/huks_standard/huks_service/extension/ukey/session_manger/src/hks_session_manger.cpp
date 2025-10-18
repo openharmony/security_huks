@@ -101,8 +101,8 @@ int32_t HksSessionManager::ExtensionInitSession(const HksProcessInfo &processInf
     }
     auto random = GenRandomUint32();
     if (random.first != HKS_SUCCESS) {
-        HKS_LOG_E("GenRandomUint32 failed");
-        return HKS_ERROR_GEN_RANDOM_FAIL;
+        HKS_LOG_E("GenRandomUint32 failed. ret: %" LOG_PUBLIC "d", random.first);
+        return random.first;
     }
     handle = random.second;
     HKS_LOG_I("ExtensionInitSession return sessionHandle: %" LOG_PUBLIC "s", sessionHandle.c_str());
@@ -161,7 +161,6 @@ int32_t HksSessionManager::ExtensionFinishSession(const HksProcessInfo &processI
     m_handlers.Erase(handle);
     return HKS_SUCCESS;
 }
-
 }
 }
 }

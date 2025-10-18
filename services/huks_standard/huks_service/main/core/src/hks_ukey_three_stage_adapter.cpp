@@ -30,7 +30,7 @@
 int32_t HksCheckIsUkeyOperation(const struct HksParamSet *paramSet)
 {
     int32_t ret = HksCheckParamSetValidity(paramSet);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksCheckParamSetValidity fail");
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksCheckParamSetValidity fail. ret: %" LOG_PUBLIC "d", ret);
     CppParamSet paramSetCpp(paramSet);
     auto abilityName = paramSetCpp.GetParam<HKS_TAG_KEY_CLASS>();
     if (abilityName.first == HKS_SUCCESS && abilityName.second == HKS_KEY_CLASS_EXTENSION) {
@@ -44,7 +44,7 @@ int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, co
     const struct HksParamSet *inParamSet, struct HksBlob *handle)
 {
     int32_t ret = HksCheckBlob2(&processInfo->processName, index);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "Hks check processName or index fail")
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "Hks check processName or index fail. ret: %" LOG_PUBLIC "d", ret)
 
     std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
     CppParamSet cppParamSet(inParamSet);
@@ -66,7 +66,7 @@ int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, co
         HKS_FREE(handle->data);
         handle->data = nullptr;
         handle->size = 0;
-        HKS_LOG_E("memcpy in HksServiceOnUkeyInitSession fail");
+        HKS_LOG_E("memcpy in HksServiceOnUkeyInitSession fail. ret: %" LOG_PUBLIC "d", ret);
         return HKS_ERROR_COPY_FAIL;
     }
     return ret;
@@ -94,7 +94,7 @@ int32_t HksServiceOnUkeyUpdateSession(const struct HksProcessInfo *processInfo, 
     HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get lib interface instance.")
 
     int32_t ret = libInterface->OnUpdateSession(*processInfo, handleU32, cppParamSet, indata, outdata);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnUpdateSession fail")
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnUpdateSession fail. ret: %" LOG_PUBLIC "d", ret)
 
     HKS_IF_TRUE_LOGI_RETURN(outData->size == 0, ret, "outData size is 0. ret: %" LOG_PUBLIC "d", ret);
     HKS_IF_TRUE_LOGI_RETURN(outData->data == nullptr, ret, "outData data is nullptr. ret: %" LOG_PUBLIC "d", ret);
@@ -107,7 +107,7 @@ int32_t HksServiceOnUkeyUpdateSession(const struct HksProcessInfo *processInfo, 
         HKS_FREE(outData->data);
         outData->data = nullptr;
         outData->size = 0;
-        HKS_LOG_E("memcpy in HksServiceOnUkeyUpdateSession fail");
+        HKS_LOG_E("memcpy in HksServiceOnUkeyUpdateSession fail. ret: %" LOG_PUBLIC "d", ret);
         return HKS_ERROR_COPY_FAIL;
     }
     return ret;
@@ -147,7 +147,7 @@ int32_t HksServiceOnUkeyFinishSession(const struct HksProcessInfo *processInfo, 
         HKS_FREE(outData->data);
         outData->data = nullptr;
         outData->size = 0;
-        HKS_LOG_E("memcpy in HksServiceOnUkeyFinishSession fail");
+        HKS_LOG_E("memcpy in HksServiceOnUkeyFinishSession fail. ret: %" LOG_PUBLIC "d", ret);
         return HKS_ERROR_COPY_FAIL;
     }
     return ret;
