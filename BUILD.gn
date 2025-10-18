@@ -63,6 +63,17 @@ group("cipher_napi") {
   }
 }
 
+group("huks_crypto_extension") {
+  if (os_level == "standard") {
+    deps = [
+      "//base/security/huks/interfaces/js/crypto_extension_module:cryptoextensionability_napi",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ability_native:crypto_extension_ability_native",
+      "//base/security/huks/services/huks_standard/huks_service/extension/module_loader:crypto_extension_module",
+      "//base/security/huks/interfaces/kits/napi:huksexternalcrypto_napi"
+    ]
+  }
+}
+
 group("fwk_group") {
   if (os_level == "standard") {
     deps = [
@@ -71,6 +82,7 @@ group("fwk_group") {
       "//base/security/huks:huks_capi",
       "//base/security/huks:huks_napi",
       "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
+      "//base/security/huks:huks_crypto_extension",
     ]
   } else if (os_level == "small") {
     deps = [
@@ -106,15 +118,4 @@ group("huks_components") {
     "//base/security/huks:fwk_group",
     "//base/security/huks:service_group",
   ]
-}
-
-group("huks_crypto_extension") {
-  if (os_level == "standard") {
-    deps = [
-      "//base/security/huks/interfaces/js/crypto_extension_module:cryptoextensionability_napi",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ability_native:crypto_extension_ability_native",
-      "//base/security/huks/services/huks_standard/huks_service/extension/module_loader:crypto_extension_module",
-      "//base/security/huks/interfaces/kits/napi:huksexternalcrypto_napi"
-    ]
-  }
 }
