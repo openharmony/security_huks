@@ -1719,69 +1719,88 @@ static void HksUpdateEnd(struct HksOperation **operation, struct HksHitraceId *t
     HksHitraceEnd(traceId);
 }
 
+struct HksUpdateCommon {
+    uint64_t startTime;
+    struct HksHitraceId traceId;
+    struct HksParamSet *newParamSet;
+    struct HksOperation *operation;
+    int32_t ret;
+};
+
+static int32_t CheckBatchOperation(struct HksOperation *operation, const struct HksBlob *handle)
+{
+    int32_t ret = HKS_SUCCESS;
+    if (operation->isBatchOperation) {
+        ret = HksServiceCheckBatchUpdateTime(operation);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksServiceCheckBatchUpdateTime fail, ret = %" LOG_PUBLIC "d", ret);
+            MarkAndDeleteOperation(&operation, handle);
+        }
+    }
+    return ret;
+}
+
+static int32_t ExecuteUpdate(const struct HksBlob *handle, struct HksParamSet *newParamSet,
+    const struct HksBlob *inData, struct HksBlob *outData, struct HksOperation *operation)
+{
+    int32_t ret = HuksAccessUpdate(handle, newParamSet, inData, outData);
+    IfNotSuccAppendHdiErrorInfo(ret);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HuksAccessUpdate fail, ret = %" LOG_PUBLIC "d", ret);
+        MarkAndDeleteOperation(&operation, handle);
+    }
+    return ret;
+}
+
 int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
 {
-    uint64_t startTime = 0;
-    (void)HksElapsedRealTime(&startTime);
-    struct HksHitraceId traceId = {0};
+    struct HksUpdateCommon common = {0, {0}, NULL, NULL, 0};
+    (void)HksElapsedRealTime(&common.startTime);
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
+    common.traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
-    struct HksParamSet *newParamSet = NULL;
-    struct HksOperation *operation = NULL;
-    int32_t ret;
     do {
 #ifdef L2_STANDARD
         if (HksCheckIsUkeyOperation(paramSet) == HKS_SUCCESS) {
-            ret = HksServiceOnUkeyUpdateSession(processInfo, handle, paramSet, inData, outData);
-            HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyUpdateSession failed, ret = %" LOG_PUBLIC "d", ret)
+            common.ret = HksServiceOnUkeyUpdateSession(processInfo, handle, paramSet, inData, outData);
+            HKS_IF_NOT_SUCC_LOGE(common.ret, "HksServiceOnUkeyUpdateSession failed, ret = %" LOG_PUBLIC "d", common.ret)
             break;
         }
 #endif
-        operation = QueryOperationAndMarkInUse(processInfo, handle);
-        ret = (operation == NULL ? HKS_ERROR_NOT_EXIST : HKS_SUCCESS);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "operationHandle is not exist or being busy")
+        common.operation = QueryOperationAndMarkInUse(processInfo, handle);
+        common.ret = (common.operation == NULL ? HKS_ERROR_NOT_EXIST : HKS_SUCCESS);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "operationHandle is not exist or being busy")
 
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
-        if (operation->accessTokenId != processInfo->accessTokenId) {
+        if (common.operation->accessTokenId != processInfo->accessTokenId) {
             HKS_LOG_E("compare access token id failed, unauthorized calling");
-            ret = HKS_ERROR_BAD_STATE;
+            common.ret = HKS_ERROR_BAD_STATE;
             break;
         }
 #endif
 
-        if (operation->isBatchOperation) {
-            ret = HksServiceCheckBatchUpdateTime(operation);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("HksServiceCheckBatchUpdateTime fail, ret = %" LOG_PUBLIC "d", ret);
-                MarkAndDeleteOperation(&operation, handle);
-                break;
-            }
-        }
-        ret = AppendProcessInfoAndDefaultStrategy(paramSet, processInfo, operation, &newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append process info failed, ret = %" LOG_PUBLIC "d", ret)
+        common.ret = CheckBatchOperation(common.operation, handle);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "CheckBatchOperation fail, ret = %" LOG_PUBLIC "d", common.ret)
 
-        ret = HksCheckAcrossAccountsPermission(newParamSet, processInfo->userIdInt);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+        common.ret = AppendProcessInfoAndDefaultStrategy(paramSet, processInfo, common.operation, &common.newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "append process info failed, ret = %" LOG_PUBLIC "d", common.ret)
 
-        ret = HuksAccessUpdate(handle, newParamSet, inData, outData);
-        IfNotSuccAppendHdiErrorInfo(ret);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HuksAccessUpdate fail, ret = %" LOG_PUBLIC "d", ret);
-            MarkAndDeleteOperation(&operation, handle);
-            break;
-        }
+        common.ret = HksCheckAcrossAccountsPermission(common.newParamSet, processInfo->userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "CheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", common.ret)
+
+        common.ret = ExecuteUpdate(handle, common.newParamSet, inData, outData, common.operation);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "update execution failed, ret = %" LOG_PUBLIC "d", common.ret);
     } while (0);
 #ifdef L2_STANDARD
-    HksThreeStageReportInfo info = { ret, inData->size, HKS_UPDATE, startTime, traceId.traceId.chainId,
-        handle, operation };
+    HksThreeStageReportInfo info = { common.ret, inData->size, HKS_UPDATE, common.startTime,
+        common.traceId.traceId.chainId, handle, common.operation };
     (void)HksThreeStageReport(__func__, processInfo, paramSet, &info);
 #endif
-    HksUpdateEnd(&operation, &traceId);
-    HksFreeParamSet(&newParamSet);
-    return ret;
+    HksUpdateEnd(&common.operation, &common.traceId);
+    HksFreeParamSet(&common.newParamSet);
+    return common.ret;
 }
 
 static int32_t AppendAndQueryInFinish(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
@@ -1812,69 +1831,72 @@ static int32_t InitOutputDataForFinish(struct HksBlob *output, const struct HksB
     return HKS_SUCCESS;
 }
 
+struct HksFinshCommon {
+    uint64_t startTime;
+    struct HksHitraceId traceId;
+    struct HksParamSet *newParamSet;
+    bool isNeedStorage;
+    uint32_t outSize;
+    struct HksOperation *operation;
+    int32_t ret;
+};
+
 int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
 {
-    uint64_t startTime = 0;
-    (void)HksElapsedRealTime(&startTime);
-    struct HksHitraceId traceId = {0};
+    struct HksFinshCommon common = {0, {0}, NULL, false, outData->size, NULL, 0};
+    (void)HksElapsedRealTime(&common.startTime);
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
+    common.traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
-
-    struct HksParamSet *newParamSet = NULL;
-    bool isNeedStorage = false;
-    uint32_t outSize = outData->size;
-    int32_t ret = HksCheckKeyNeedStored(paramSet, &isNeedStorage);
-    if (ret == HKS_SUCCESS && isNeedStorage) {
-        outSize = MAX_KEY_SIZE;
+    if (HksCheckKeyNeedStored(paramSet, &common.isNeedStorage) == HKS_SUCCESS && common.isNeedStorage) {
+        common.outSize = MAX_KEY_SIZE;
     }
-    struct HksBlob output = { outSize, NULL };
-    struct HksOperation *operation = NULL;
+    struct HksBlob output = { common.outSize, NULL };
     do {
-        if (outSize != 0) {
-            ret = InitOutputDataForFinish(&output, outData, isNeedStorage);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init output data failed")
+        if (common.outSize != 0) {
+            common.ret = InitOutputDataForFinish(&output, outData, common.isNeedStorage);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "init output data failed")
         }
 #ifdef L2_STANDARD
         if (HksCheckIsUkeyOperation(paramSet) == HKS_SUCCESS) {
-            ret = HksServiceOnUkeyFinishSession(processInfo, handle, paramSet, inData, outData);
-            HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyFinishSession failed, ret = %" LOG_PUBLIC "d", ret)
+            common.ret = HksServiceOnUkeyFinishSession(processInfo, handle, paramSet, inData, outData);
+            HKS_IF_NOT_SUCC_LOGE(common.ret, "HksServiceOnUkeyFinishSession failed, ret = %" LOG_PUBLIC "d", common.ret)
             break;
         }
 #endif
-        ret = AppendAndQueryInFinish(handle, processInfo, &operation);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AppendAndQueryInFinish fail, ret = %" LOG_PUBLIC "d", ret)
+        common.ret = AppendAndQueryInFinish(handle, processInfo, &common.operation);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "AppendAndQueryInFinish fail, ret = %" LOG_PUBLIC "d", common.ret)
 
-        ret = AppendProcessInfoAndDefaultStrategy(paramSet, processInfo, operation, &newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append process info failed, ret = %" LOG_PUBLIC "d", ret)
+        common.ret = AppendProcessInfoAndDefaultStrategy(paramSet, processInfo, common.operation, &common.newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "append process info failed, ret = %" LOG_PUBLIC "d", common.ret)
 
-        ret = HksCheckAcrossAccountsPermission(newParamSet, processInfo->userIdInt);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+        common.ret = HksCheckAcrossAccountsPermission(common.newParamSet, processInfo->userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "CheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", common.ret)
 
-        ret = HuksAccessFinish(handle, newParamSet, inData, &output);
-        IfNotSuccAppendHdiErrorInfo(ret);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAccessFinish fail, ret = %" LOG_PUBLIC "d", ret)
+        common.ret = HuksAccessFinish(handle, common.newParamSet, inData, &output);
+        IfNotSuccAppendHdiErrorInfo(common.ret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "HuksAccessFinish fail, ret = %" LOG_PUBLIC "d", common.ret)
 
-        ret = StoreOrCopyKeyBlob(newParamSet, processInfo, &output, outData, isNeedStorage);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "StoreOrCopyKeyBlob fail, ret = %" LOG_PUBLIC "d", ret)
+        common.ret = StoreOrCopyKeyBlob(common.newParamSet, processInfo, &output, outData, common.isNeedStorage);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "StoreOrCopyKeyBlob fail, ret = %" LOG_PUBLIC "d", common.ret)
     } while (0);
     if (output.data != NULL) {
         (void)memset_s(output.data, output.size, 0, output.size);
     }
     HKS_FREE_BLOB(output);
-    if (operation != NULL) {
+    if (common.operation != NULL) {
 #ifdef L2_STANDARD
-        HksThreeStageReportInfo info = { ret, inData->size, HKS_FINISH, startTime, traceId.traceId.chainId,
-            handle, operation };
+        HksThreeStageReportInfo info = { common.ret, inData->size, HKS_FINISH, common.startTime,
+            common.traceId.traceId.chainId, handle, common.operation };
         (void)HksThreeStageReport(__func__, processInfo, paramSet, &info);
 #endif
-        MarkAndDeleteOperation(&operation, handle);
+        MarkAndDeleteOperation(&common.operation, handle);
     }
-    HksFreeParamSet(&newParamSet);
-    HksHitraceEnd(&traceId);
-    return ret;
+    HksFreeParamSet(&common.newParamSet);
+    HksHitraceEnd(&common.traceId);
+    return common.ret;
 }
 
 int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
