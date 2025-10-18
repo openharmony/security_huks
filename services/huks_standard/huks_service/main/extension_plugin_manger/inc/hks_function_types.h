@@ -75,7 +75,6 @@ using OnUpdateSessionFunc = int32_t (*)(const HksProcessInfo &processInfo, const
     const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
 using OnFinishSessionFunc = int32_t (*)(const HksProcessInfo &processInfo, const uint32_t &handle,
     const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
-
 }
 }
 }

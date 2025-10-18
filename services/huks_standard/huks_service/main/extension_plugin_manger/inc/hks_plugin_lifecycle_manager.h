@@ -30,7 +30,7 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
-class __attribute__((visibility("default"))) HuksPluginLifeCycleMgr : 
+class __attribute__((visibility("default"))) HuksPluginLifeCycleMgr :
     private OHOS::DelayedSingleton<HuksPluginLifeCycleMgr> {
 public:
     static std::shared_ptr<HuksPluginLifeCycleMgr> GetInstanceWrapper();

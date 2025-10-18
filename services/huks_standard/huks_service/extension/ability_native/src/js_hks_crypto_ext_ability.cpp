@@ -485,7 +485,6 @@ napi_status JsHksCryptoExtAbility::GetUint8ArrayValue(napi_env env, napi_value v
     }
 
     result.size = static_cast<uint32_t>(byte_length);
-    // TODO result.data 改用memcpy_s的方式
     result.data = uint8Data;
     return napi_ok;
 }

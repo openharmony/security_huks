@@ -130,7 +130,7 @@ int32_t StringToCertInfo(const std::string &certInfoJson, struct HksExtCertInfo&
             "Cert field is not string")
         
         auto result = certObj.ToString();
-        HKS_IF_NOT_SUCC_LOGE_RETURN(result.first, result.first, 
+        HKS_IF_NOT_SUCC_LOGE_RETURN(result.first, result.first,
             "Get cert string failed, ret: %" LOG_PUBLIC "d", result.first)
         
         certInfo.cert = StringToBlob(result.second);
