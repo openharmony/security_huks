@@ -19,12 +19,13 @@
 #include <atomic>
 #include <string>
 #include <memory>
+#include <map>
 #include "hks_cpp_paramset.h"
 #include "hks_error_code.h"
 #include "hks_plugin_def.h"
 #include "singleton.h"
-#include "safe_map.h"
 #include "hks_template.h"
+#include "hks_function_types.h"
 
 
 namespace OHOS {
@@ -40,6 +41,7 @@ public:
     int32_t UnRegisterProvider(const struct HksProcessInfo &info, const std::string &AbilityName,
         const CppParamSet &paramSet);
     void SetPluginSoPath(const std::string path);
+    void SetMethodNameMap(std::map<PluginMethodEnum, std::string> &newMethodNameMap);
 
 private:
     std::atomic<int> m_refCount{0};

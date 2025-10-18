@@ -16,7 +16,6 @@
 #include <string>
 #include "hks_plugin_def.h"
 #include "hks_cpp_paramset.h"
-extern "C" {
 
 int32_t HksExtPluginOnRegisterProvider(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet)
@@ -101,6 +100,4 @@ int32_t HksGetUkeyRemoteProperty(const HksProcessInfo &processInfo,
     const std::string &index, const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams)
 {
     return -1;
-}
-
 }

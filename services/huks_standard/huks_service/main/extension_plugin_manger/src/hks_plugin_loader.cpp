@@ -38,7 +38,6 @@ int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const s
 {
     std::lock_guard<std::mutex> lock(libMutex);
     HKS_IF_TRUE_RETURN(m_pluginHandle != nullptr, HKS_SUCCESS)
-    InitMethodNameMap();
 
     m_pluginHandle = dlopen(pluginSo.c_str(), RTLD_NOW);
     HKS_IF_NULL_LOGE_RETURN(m_pluginHandle, HKS_ERROR_OPEN_LIB_FAIL,
@@ -100,7 +99,15 @@ void HuksPluginLoader::SetPluginPath(const std::string &pluginPath)
     pluginSo = pluginPath;
 }
 
-void HuksPluginLoader::InitMethodNameMap()
+void HuksPluginLoader::SetMethodNameMapLoader(std::map<PluginMethodEnum, std::string> &methodNameMap)
+{
+    m_pluginMethodNameMap.Clear();
+    for (auto &iter : methodNameMap) {
+        m_pluginMethodNameMap.Insert(iter.first, iter.second);
+    }
+}
+
+HuksPluginLoader::HuksPluginLoader()
 {
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_REGISTER_PROVIDER,
         "_ZN4OHOS8Security4Huks30HksExtPluginOnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_string"
@@ -144,6 +151,10 @@ void HuksPluginLoader::InitMethodNameMap()
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_FINISH_SESSION,
         "_ZN4OHOS8Security4Huks27HksExtPluginOnFinishSessionERK14HksProcessInfoRKjRK11CppParamSet"
         "RKNSt3__h6vectorIhNSA_9allocatorIhEEEERSE_");
+}
+
+HuksPluginLoader::~HuksPluginLoader()
+{
 }
 
 }

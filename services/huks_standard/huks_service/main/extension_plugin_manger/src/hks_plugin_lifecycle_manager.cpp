@@ -92,6 +92,13 @@ void HuksPluginLifeCycleMgr::SetPluginSoPath(const std::string path)
     pluginLoader->SetPluginPath(path);
 }
 
+void HuksPluginLifeCycleMgr::SetMethodNameMap(std::map<PluginMethodEnum, std::string> &newMethodNameMap)
+{
+    auto pluginLoader = HuksPluginLoader::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN_VOID(pluginLoader == nullptr, "Failed to get pluginLoader instance.")
+    pluginLoader->SetMethodNameMapLoader(newMethodNameMap);
+}
+
 }
 }
 }
