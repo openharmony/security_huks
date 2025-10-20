@@ -40,8 +40,8 @@ if (os_level == "standard") {
       # "./ukey_common_test/ukey_common_test.cpp",
       # "./handle_mgr_test/hks_handle_manager_test.cpp",
       # 新增：包装桩实现，使用链接器 --wrap 覆盖原函数
-      # "./sdk_test/hks_ipc_adapter_wrap.cpp",
-      # "./sdk_test/hks_ukey_test.cpp",
+      "./sdk_test/hks_ipc_adapter_wrap.cpp",
+      "./sdk_test/hks_ukey_test.cpp",
     ]
 
     configs = [
@@ -58,6 +58,7 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection:libhuks_extension_connection_static",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager:libhuks_remote_handle_manager_static",
+      "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
       ":libfake_fail",
       ":libfake_success",
     ]
