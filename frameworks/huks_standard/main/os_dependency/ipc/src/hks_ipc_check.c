@@ -45,6 +45,20 @@ int32_t HksCheckIpcBlobAndParamSet(const struct HksBlob *blob, const struct HksP
     return HKS_SUCCESS;
 }
 
+int32_t HksCheckIpcBlob2ParamSet(const struct HksBlob *blob1, const struct HksBlob *blob2,
+    const struct HksParamSet *paramSet)
+{
+    int32_t ret = HksCheckBlob2AndParamSet(blob1, blob2, paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check keyAlias or paramSet failed")
+
+    if ((MAX_PROCESS_SIZE - sizeof(blob1->size) - ALIGN_SIZE(blob1->size) -
+        sizeof(blob2->size) - ALIGN_SIZE(blob2->size) < ALIGN_SIZE(paramSet->paramSetSize))) {
+        HKS_LOG_E("ipc rename key alias check size failed");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    return HKS_SUCCESS;
+}
+
 int32_t HksCheckIpcBlob(const struct HksBlob *blob)
 {
     int32_t ret = CheckBlob(blob);

@@ -66,7 +66,6 @@ HKS_API_EXPORT int32_t HksRegisterProvider(const struct HksBlob *name, const str
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter RegisterProvider");
-    HKS_LOG_E("hks_api.c ======== enter RegisterProvider");
     if ((paramSetIn == NULL) || (name == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
@@ -102,7 +101,6 @@ HKS_API_EXPORT int32_t HksExportProviderCertificates(const struct HksBlob *provi
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter HksExportProviderCertificates");
-    HKS_LOG_E("hks_api.c ======== enter HksExportProviderCertificates");
     if ((paramSetIn == NULL) || (providerName == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
