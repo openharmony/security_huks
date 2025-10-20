@@ -474,7 +474,7 @@ std::pair<int32_t, std::string> U8Vec2Base64Str(const std::vector<uint8_t> &srcB
         
         base64Str[strPos++] = base64Table[(byte1 >> NUM2) & MASK_6BIT];
         base64Str[strPos++] = base64Table[((byte1 & MASK_2BIT) << OFFSET_4BIT) | ((byte2 >> OFFSET_4BIT) & MASK_4BIT)];
-        base64Str[strPos++] = base64Table[((byte1 & MASK_4BIT) << OFFSET_2BIT) | ((byte2 >> OFFSET_6BIT) & MASK_2BIT)];
+        base64Str[strPos++] = base64Table[((byte2 & MASK_4BIT) << OFFSET_2BIT) | ((byte2 >> OFFSET_6BIT) & MASK_2BIT)];
         base64Str[strPos++] = base64Table[(byte3 & MASK_6BIT)];
 
         if (i + 1 >= strLen) {
