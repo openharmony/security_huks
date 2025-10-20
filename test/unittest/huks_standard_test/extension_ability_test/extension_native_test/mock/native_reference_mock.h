@@ -13,15 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef TEST_UNITTEST_MOCK_NATIVE_REFERENCE_MOCK_H
-#define TEST_UNITTEST_MOCK_NATIVE_REFERENCE_MOCK_H
+#ifndef HKS_MOCK_NATIVE_REFERENCE_MOCK_H
+#define HKS_MOCK_NATIVE_REFERENCE_MOCK_H
 
 #include <gmock/gmock.h>
 
 #include "native_engine/native_reference.h"
 
 namespace OHOS {
-namespace FileAccessFwk {
 class NativeReferenceMock : public NativeReference {
 public:
     NativeReferenceMock() = default;
@@ -39,6 +38,5 @@ public:
     MOCK_METHOD0(GetFinalRun, bool());
     MOCK_METHOD0(GetNapiValue, napi_value());
 };
-} // End of namespace FileAccessFwk
 } // End of namespace OHOS
-#endif // TEST_UNITTEST_MOCK_NATIVE_REFERENCE_MOCK_H
+#endif // HKS_MOCK_NATIVE_REFERENCE_MOCK_H
