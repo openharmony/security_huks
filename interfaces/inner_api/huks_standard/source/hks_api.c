@@ -289,7 +289,7 @@ HKS_API_EXPORT int32_t HksGetRemoteProperty(const struct HksBlob *resourceId, co
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter GetRemoteProperty");
-    if ((resourceId == NULL) || (propertyId == NULL) || (paramSetIn == NULL) || (propertySetOut == NULL)) {
+    if ((resourceId == NULL) || (propertyId == NULL) || (paramSetIn == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = HksClientGetRemoteProperty(resourceId, propertyId, paramSetIn, &propertySetOut);
