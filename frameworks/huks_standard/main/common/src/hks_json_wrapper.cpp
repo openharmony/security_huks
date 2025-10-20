@@ -118,7 +118,7 @@ std::pair<int32_t, std::string> CommJsonObject::ToString() const
         HKS_LOG_E("operate an error json object %" LOG_PUBLIC "d %" LOG_PUBLIC "s", err_, parentKeyName_.c_str());
         return {err_, ""};
     }
-    if (!CheckIsVaild()) {
+    if (!CheckIsValid()) {
         return {HKS_ERROR_NULL_JSON, ""};
     }
     if (!IsString()) {
@@ -134,7 +134,7 @@ std::pair<int32_t, double> CommJsonObject::ToDouble() const
         HKS_LOG_E("operate an error json object %" LOG_PUBLIC "d %" LOG_PUBLIC "s", err_, parentKeyName_.c_str());
         return {err_, HUGE_VAL};
     }
-    if (!CheckIsVaild()) {
+    if (!CheckIsValid()) {
         return {HKS_ERROR_NULL_JSON, HUGE_VAL};
     }
     if (!IsNumber()) {
@@ -150,7 +150,7 @@ std::pair<int32_t, bool> CommJsonObject::ToBool() const
         HKS_LOG_E("operate an error json object %" LOG_PUBLIC "d %" LOG_PUBLIC "s", err_, parentKeyName_.c_str());
         return {err_, false};
     }
-    if (!CheckIsVaild()) {
+    if (!CheckIsValid()) {
         return {HKS_ERROR_NULL_JSON, false};
     }
     if (!IsBool()) {
@@ -162,12 +162,12 @@ std::pair<int32_t, bool> CommJsonObject::ToBool() const
 
 bool CommJsonObject::HasKey(const std::string &key) const
 {
-    return CheckIsVaild() && CheckIsObject() && cJSON_HasObjectItem(mJson_.get(), key.c_str());
+    return CheckIsValid() && CheckIsObject() && cJSON_HasObjectItem(mJson_.get(), key.c_str());
 }
 
 CommJsonObject CommJsonObject::GetValue(const std::string &key) const
 {
-    if (!CheckIsVaild()) {
+    if (!CheckIsValid()) {
         return CreateNull(HKS_ERROR_NULL_JSON);
     }
     if (!CheckIsObject()) {
@@ -186,7 +186,7 @@ CommJsonObject CommJsonObject::GetValue(const std::string &key) const
 
 bool CommJsonObject::SetValue(const std::string &key, CommJsonObject &&value)
 {
-    if (!CheckIsVaild() || !CheckIsObject()) {
+    if (!CheckIsValid() || !CheckIsObject()) {
         return false;
     }
     if (value.mJson_) {
@@ -203,7 +203,7 @@ bool CommJsonObject::SetValue(const std::string &key, CommJsonObject &&value)
 
 bool CommJsonObject::SetValue(const std::string &key, CommJsonObject &value)
 {
-    if (!CheckIsVaild() || !CheckIsObject()) {
+    if (!CheckIsValid() || !CheckIsObject()) {
         return false;
     }
     return cJSON_AddItemToObject(mJson_.get(), key.c_str(), cJSON_Duplicate(value.mJson_.get(), true)) != 0;
@@ -211,7 +211,7 @@ bool CommJsonObject::SetValue(const std::string &key, CommJsonObject &value)
 
 void CommJsonObject::RemoveKey(const std::string &key)
 {
-    if (CheckIsVaild() && CheckIsObject()) {
+    if (CheckIsValid() && CheckIsObject()) {
         cJSON_DeleteItemFromObject(mJson_.get(), key.c_str());
     }
 }
@@ -219,7 +219,7 @@ void CommJsonObject::RemoveKey(const std::string &key)
 std::vector<std::string> CommJsonObject::GetKeys() const
 {
     std::vector<std::string> keys;
-    if (!CheckIsVaild() || !CheckIsObject()) {
+    if (!CheckIsValid() || !CheckIsObject()) {
         return keys;
     }
     
@@ -242,7 +242,7 @@ int32_t CommJsonObject::ArraySize() const
 
 CommJsonObject CommJsonObject::GetElement(int32_t index) const
 {
-    if (!CheckIsVaild()) {
+    if (!CheckIsValid()) {
         return CommJsonObject::CreateNull(HKS_ERROR_NULL_JSON);
     }
     if (!CheckIsArray()) {
@@ -256,19 +256,19 @@ CommJsonObject CommJsonObject::GetElement(int32_t index) const
 
 bool CommJsonObject::SetElement(int32_t index, const CommJsonObject &value)
 {
-    HKS_IF_TRUE_RETURN(!CheckIsVaild() || !CheckIsArray(), false)
+    HKS_IF_TRUE_RETURN(!CheckIsValid() || !CheckIsArray(), false)
     return cJSON_ReplaceItemInArray(mJson_.get(), index, cJSON_Duplicate(value.mJson_.get(), true)) != 0;
 }
 
 bool CommJsonObject::AppendElement(const CommJsonObject &value)
 {
-    HKS_IF_TRUE_RETURN(!CheckIsVaild() || !CheckIsArray(), false)
+    HKS_IF_TRUE_RETURN(!CheckIsValid() || !CheckIsArray(), false)
     return cJSON_AddItemToArray(mJson_.get(), cJSON_Duplicate(value.mJson_.get(), true)) != 0;
 }
 
 bool CommJsonObject::AppendElement(CommJsonObject &&value)
 {
-    HKS_IF_TRUE_RETURN(!CheckIsVaild() || !CheckIsArray(), false)
+    HKS_IF_TRUE_RETURN(!CheckIsValid() || !CheckIsArray(), false)
     cJSON *item = value.mJson_.release();
     if (!static_cast<bool>(cJSON_AddItemToArray(mJson_.get(), item))) {
         value.mJson_.reset(item);
@@ -280,14 +280,14 @@ bool CommJsonObject::AppendElement(CommJsonObject &&value)
 
 void CommJsonObject::RemoveElement(int32_t index)
 {
-    HKS_IF_TRUE_RETURN_VOID(!CheckIsVaild() || !CheckIsArray())
+    HKS_IF_TRUE_RETURN_VOID(!CheckIsValid() || !CheckIsArray())
     cJSON_DeleteItemFromArray(mJson_.get(), index);
 }
 
 std::string CommJsonObject::Serialize(bool formatted) const
 {
     std::string ret = "";
-    HKS_IF_TRUE_RETURN(!CheckIsVaild(), ret)
+    HKS_IF_TRUE_RETURN(!CheckIsValid(), ret)
     char *jsonStr = formatted ? cJSON_Print(mJson_.get()) : cJSON_PrintUnformatted(mJson_.get());
     HKS_IF_NULL_LOGE_RETURN(jsonStr, ret, "Failed to serialize JSON")
     std::string result(jsonStr);
@@ -427,7 +427,7 @@ std::pair<int32_t, std::map<std::string, Var>> CommJsonObject::JsonToMap(const s
     return { HKS_SUCCESS, map };
 }
 
-bool CommJsonObject::CheckIsVaild() const
+bool CommJsonObject::CheckIsValid() const
 {
     if (mJson_ == nullptr) {
         HKS_LOG_E("Invaild JSON value");
@@ -474,7 +474,7 @@ std::pair<int32_t, std::string> U8Vec2Base64Str(const std::vector<uint8_t> &srcB
         
         base64Str[strPos++] = base64Table[(byte1 >> NUM2) & MASK_6BIT];
         base64Str[strPos++] = base64Table[((byte1 & MASK_2BIT) << OFFSET_4BIT) | ((byte2 >> OFFSET_4BIT) & MASK_4BIT)];
-        base64Str[strPos++] = base64Table[((byte2 & MASK_4BIT) << OFFSET_2BIT) | ((byte2 >> OFFSET_6BIT) & MASK_2BIT)];
+        base64Str[strPos++] = base64Table[((byte2 & MASK_4BIT) << OFFSET_2BIT) | ((byte3 >> OFFSET_6BIT) & MASK_2BIT)];
         base64Str[strPos++] = base64Table[(byte3 & MASK_6BIT)];
 
         if (i + 1 >= strLen) {

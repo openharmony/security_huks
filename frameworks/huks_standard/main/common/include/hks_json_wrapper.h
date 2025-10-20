@@ -126,7 +126,7 @@ private:
     int32_t err_{};
     const std::string parentKeyName_{};
 
-    [[nodiscard]] bool CheckIsVaild() const;
+    [[nodiscard]] bool CheckIsValid() const;
     [[nodiscard]] bool CheckIsObject() const;
     [[nodiscard]] bool CheckIsArray() const;
 };
