@@ -179,11 +179,11 @@ int32_t HksClientRegisterProvider(const struct HksBlob *name, const struct HksPa
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret);
 
-        ret = HksAllocInBlob(&inBlob, name, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
-
         ret = HksCheckIpcBlobAndParamSet(name, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientRegisterProvider fail")
+
+        ret = HksAllocInBlob(&inBlob, name, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
         ret = HksUKeyGeneralPack(name, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRegisterProviderPack fail")
@@ -207,11 +207,11 @@ int32_t HksClientUnregisterProvider(const struct HksBlob *name, const struct Hks
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret);
 
-        ret = HksAllocInBlob(&inBlob, name, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
-
         ret = HksCheckIpcBlobAndParamSet(name, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientUnregisterProvider fail")
+
+        ret = HksAllocInBlob(&inBlob, name, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
         ret = HksUKeyGeneralPack(name, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRegisterProviderPack fail")
@@ -248,20 +248,20 @@ int32_t HksClientExportProviderCertificates(const struct HksBlob *providerName,
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret);
 
+        ret = HksCheckIpcBlobAndParamSet(&newProviderName, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientExportProviderCertificates fail")
+
         ret = HksAllocInBlob(&inBlob, &newProviderName, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
-        ret = HksCheckIpcBlobAndParamSet(&newProviderName, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientExportProviderCertificates fail");
-
         ret = HksUKeyGeneralPack(&newProviderName, newParamSet, &inBlob);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksExportProviderCertificatesPack fail");
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksExportProviderCertificatesPack fail")
 
         ret = HksSendRequest(HKS_MSG_EXT_EXPORT_PROVIDER_CERTIFICATES, &inBlob, &outBlob, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCertificatesUnpackFromService(&outBlob, certSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCertificateChainUnpackFromService fail, ret = %" LOG_PUBLIC "d", ret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCertificateChainUnpackFromService fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     HKS_IF_NOT_SUCC_LOGE(ret, "HksClientExportProviderCertificates fail, ret = %" LOG_PUBLIC "d", ret);
@@ -294,11 +294,11 @@ int32_t HksClientExportCertificate(const struct HksBlob *index,
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "BuildParamSetNotNull fail, ret=%" LOG_PUBLIC "d", ret);
 
-        ret = HksAllocInBlob(&inBlob, index, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAllocInBlob fail");
-
         ret = HksCheckIpcBlobAndParamSet(index, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Check blob+paramSet fail");
+
+        ret = HksAllocInBlob(&inBlob, index, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAllocInBlob fail");
 
         ret = HksUKeyGeneralPack(index, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Pack fail");
@@ -513,11 +513,11 @@ int32_t HksClientCloseRemoteHandle(const struct HksBlob *resourceId, const struc
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksAllocInBlob(&inBlob, resourceId, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
-
         ret = HksCheckIpcBlobAndParamSet(resourceId, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIpcCloseRemoteHandle fail")
+
+        ret = HksAllocInBlob(&inBlob, resourceId, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
         ret = HksUKeyGeneralPack(resourceId, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCloseRemoteHandlePack fail")
@@ -552,11 +552,11 @@ int32_t HksClientGetRemoteProperty(const struct HksBlob *resourceId, const struc
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret)
 
+        ret = HksCheckIpcBlob2ParamSet(resourceId, propertyId, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check remote property fail")
+
         ret = HksAllocInBlobWithBlob2(&inBlob, resourceId, propertyId, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
-
-        ret = HksCheckIpcRenameKeyAlias(resourceId, newParamSet, propertyId);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check remote property fail")
 
         ret = HksUkeyBlob2ParamSetPack(resourceId, propertyId, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "pack remote property fail")
