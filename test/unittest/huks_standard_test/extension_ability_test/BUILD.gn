@@ -9,6 +9,10 @@ config("json_config") {
   cflags_cc = [ "-fexceptions" ]
 }
 
+config("fake_so_config") {
+  ldflags = [ "-Wl,--build-id=md5" ]
+}
+
 if (os_level == "standard") {
   ohos_unittest("extension_unit_test") {
     module_out_path = module_output_path
@@ -89,24 +93,37 @@ if (os_level == "standard") {
       "-Wl,--wrap=HksIpcServiceOnGetRemotePropertyAdapter",
     ]
 
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+      cfi_cross_dso = true
+      boundary_sanitize = true
+      ubsan = true
+    }
+
     subsystem_name = "security"
     part_name = "huks"
   }
 
   ohos_shared_library("libfake_success") {
-    sources = [
-      "./plugin_loader_test/fake_success.cpp",
-    ]
+    subsystem_name = "security"
+    part_name = "huks"
 
     configs = [
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]
 
+    configs += [ ":fake_so_config" ]
+
     include_dirs = [
       ".", 
-      "include",
       "//base/security/huks/frameworks/huks_standard/main/common/include",
       "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
+    ]
+    
+    sources = [
+      "plugin_loader_test/fake_success.cpp",
     ]
 
     deps = [
@@ -116,6 +133,50 @@ if (os_level == "standard") {
     ]
 
     external_deps = [
+      "ipc:ipc_core",
+      "hilog:libhilog",
+    ]
+
+    cflags = []
+
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+      cfi_cross_dso = true
+      boundary_sanitize = true
+      ubsan = true
+    }
+  }
+
+  ohos_shared_library("libfake_fail") {
+    subsystem_name = "security"
+    part_name = "huks"
+
+    configs = [
+      "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+    ]
+
+    configs += [ ":fake_so_config" ]
+
+    include_dirs = [
+      ".", 
+      "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
+      "//base/security/huks/frameworks/huks_standard/main/common/include",
+    ]
+
+    sources = [
+      "plugin_loader_test/fake_fail.cpp",
+    ]
+
+    deps = [
+      "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
+    ]
+
+    external_deps = [
+      "hilog:libhilog",
       "ipc:ipc_core",
     ]
 
@@ -129,51 +190,7 @@ if (os_level == "standard") {
       boundary_sanitize = true
       ubsan = true
     }
-
-    subsystem_name = "security"
-    part_name = "huks"
-}
-
-ohos_shared_library("libfake_fail") {
-  sources = [
-    "./plugin_loader_test/fake_fail.cpp",
-  ]
-
-  configs = [
-      "//base/security/huks/frameworks/config/build:l2_standard_common_config",
-    ]
-
-  include_dirs = [
-    ".", 
-    "include",
-    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
-    "//base/security/huks/frameworks/huks_standard/main/common/include",
-  ]
-
-  deps = [
-    "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
-    "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
-    "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
-  ]
-  external_deps = [
-    "ipc:ipc_core",
-  ]
-
-  cflags = []
-
-  sanitize = {
-    integer_overflow = true
-    cfi = true
-    debug = false
-    cfi_cross_dso = true
-    boundary_sanitize = true
-    ubsan = true
   }
-
-  subsystem_name = "security"
-  part_name = "huks"
-
-}
 }
 
 
