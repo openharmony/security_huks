@@ -197,35 +197,41 @@ int32_t HksIpcClearPinStatusAdapter(const struct HksProcessInfo *processInfo, co
 }
 
 static int32_t RemotePropertyPack(const CppParamSet &cppParamSet,
-    std::unique_ptr<uint8_t[]> &replyData, uint32_t &replySize)
+    std::unique_ptr<uint8_t[]> &replyData, uint32_t &replySize, int32_t returnResult)
 {
+    int32_t ret = 0;
     replySize = 0;
     const HksParamSet *hksParamSet = cppParamSet.GetParamSet();
-    HKS_IF_NULL_LOGE_RETURN(hksParamSet, HKS_ERROR_NULL_POINTER, "paramSet null");
 
-    HksBlob outBlob { ALIGN_SIZE(hksParamSet->paramSetSize), nullptr };
-    int32_t ret = 0;
     do {
-        HKS_IF_TRUE_LOGE_BREAK(outBlob.size == 0 || outBlob.size > MAX_OUT_BLOB_SIZE,
-            "invalid outBlob.size %" LOG_PUBLIC "u", outBlob.size);
+        uint32_t resultSize = ALIGN_SIZE(sizeof(returnResult));
+        uint32_t paramSetSize = 0;
+        uint32_t totalSize = resultSize;
 
-        outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
-        HKS_IF_NULL_LOGE_BREAK(outBlob.data, "malloc outBlob.data failed")
+        if (hksParamSet != nullptr) {
+            paramSetSize = ALIGN_SIZE(hksParamSet->paramSetSize);
+            totalSize += paramSetSize;
+        }
 
-        ret = HksParamSetPack(&outBlob, hksParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksParamSetPack fail %" LOG_PUBLIC "d", ret)
+        HKS_IF_TRUE_LOGE_BREAK(totalSize == 0 || totalSize > MAX_OUT_BLOB_SIZE,
+            "invalid totalSize %" LOG_PUBLIC "u", totalSize);
 
-        auto tmp = std::make_unique<uint8_t[]>(outBlob.size);
+        auto tmp = std::make_unique<uint8_t[]>(totalSize);
         HKS_IF_NULL_LOGE_BREAK(tmp, "alloc replyData failed")
 
-        HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(tmp.get(), outBlob.size, outBlob.data, outBlob.size),
-            "memcpy_s replyData failed")
+        ret = memcpy_s(tmp.get(), totalSize, &returnResult, sizeof(returnResult));
+        HKS_IF_NOT_EOK_LOGE_BREAK(ret, "memcpy_s returnResult failed")
 
-        replySize = outBlob.size;
+        if (hksParamSet != nullptr) {
+            ret = memcpy_s(tmp.get() + resultSize, totalSize - resultSize,
+                hksParamSet, hksParamSet->paramSetSize);
+            HKS_IF_NOT_EOK_LOGE_BREAK(ret, "memcpy_s hksParamSet failed")
+        }
+
+        replySize = totalSize;
         replyData = std::move(tmp);
     } while (0);
 
-    HKS_FREE_BLOB(outBlob);
     return ret;
 }
 
@@ -249,7 +255,7 @@ int32_t HksIpcServiceOnGetRemotePropertyAdapter(const struct HksProcessInfo *pro
 
     std::unique_ptr<uint8_t[]> outData;
     uint32_t outSize = 0;
-    ret = RemotePropertyPack(cppOutParams, outData, outSize);
+    ret = RemotePropertyPack(cppOutParams, outData, outSize, ret);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "PackRemoteProperty fail");
 
     hksExtProxy->SendAsyncReply(HKS_SUCCESS, outData, outSize, HKS_MSG_EXT_GET_REMOTE_PROPERTY_REPLY);

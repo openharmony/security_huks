@@ -629,9 +629,24 @@ int32_t HksCertificatesUnpackFromService(const struct HksBlob *srcBlob, struct H
 
 int32_t HksRemotePropertyUnpackFromService(const struct HksBlob *srcBlob, struct HksParamSet **propertySetOut)
 {
-    int ret;
+    int32_t ret;
+    int32_t returnResult;
     uint32_t offset = 0;
+
+    ret = UnpackInt32FromBuffer(srcBlob, &offset, &returnResult);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "UnpackInt32FromBuffer fail")
+
     struct HksParamSet *paramSetView = NULL;
+
+    if (returnResult != 0) {
+        ret = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR;
+        HKS_LOG_E("remote property get failed, returnResult=%" LOG_PUBLIC "d", returnResult);
+    }
+
+    if (offset == srcBlob->size) {
+        return ret;
+    }
+
     ret = GetParamSetFromBuffer(&paramSetView, srcBlob, &offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetParamSetFromBuffer fail")
 
