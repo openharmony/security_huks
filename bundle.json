@@ -96,8 +96,7 @@
         "group_type": {
           "base_group": [],
           "fwk_group": [
-            "//base/security/huks:fwk_group",
-            "//base/security/huks:huks_crypto_extension"
+            "//base/security/huks:fwk_group"
           ],
           "service_group": [
             "//base/security/huks/etc:param_files",
