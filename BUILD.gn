@@ -82,8 +82,12 @@ group("fwk_group") {
       "//base/security/huks:huks_capi",
       "//base/security/huks:huks_napi",
       "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
-      "//base/security/huks:huks_crypto_extension",
     ]
+    if (huks_security_level == "trusted_environment") {
+        deps += [
+          "//base/security/huks:huks_crypto_extension",
+        ]
+    }
   } else if (os_level == "small") {
     deps = [
       "//base/security/huks/frameworks/crypto_lite/cipher:cipher_shared",
@@ -99,9 +103,11 @@ group("service_group") {
   if (os_level == "standard") {
     deps = [
       "//base/security/huks/services/huks_standard:huks_service",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey:libhuks_external_crypto_ext_core",
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/sa_profile:huks_sa_profile",
     ]
+    if (huks_security_level == "trusted_environment") {
+      deps += [ "//base/security/huks/services/huks_standard/huks_service/extension/ukey:libhuks_external_crypto_ext_core" ]
+    }
     if (huks_use_rkc_in_standard) {
       deps += [ "//base/security/huks/services/huks_standard/huks_service/main:hks_compatibility_bin" ]
     }
