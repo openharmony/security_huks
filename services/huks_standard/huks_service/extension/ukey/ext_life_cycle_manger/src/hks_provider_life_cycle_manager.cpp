@@ -53,7 +53,7 @@ void HksProviderLifeCycleManager::ReleaseInstance()
     HksProviderLifeCycleManager::DestroyInstance();
 }
 
-constexpr int32_t HKS_MAX_PROVIDER_NUM = 20;
+constexpr int32_t HKS_MAX_PROVIDER_NUM = 10;
 int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet)
 {
@@ -101,7 +101,7 @@ int32_t HksProviderLifeCycleManager::GetExtensionProxy(const ProviderInfo &provi
 {
     std::shared_ptr<HksExtAbilityConnectInfo> connectionInfo = nullptr;
     if (!m_providerMap.Find(providerInfo, connectionInfo)) {
-        HKS_LOG_E("GetExtensionProxy failed, providerName: %s", providerInfo.m_providerName.c_str());
+        HKS_LOG_E("GetExtensionProxy failed, providerName: %" LOG_PUBLIC "s", providerInfo.m_providerName.c_str());
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     HKS_IF_TRUE_LOGE_RETURN(connectionInfo == nullptr, HKS_ERROR_NULL_POINTER, "connectionInfo is nullptr")
