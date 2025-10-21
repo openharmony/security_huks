@@ -28,7 +28,6 @@
 #include "hks_function_types.h"
 #include <shared_mutex>
 
-
 namespace OHOS {
 namespace Security {
 namespace Huks {
