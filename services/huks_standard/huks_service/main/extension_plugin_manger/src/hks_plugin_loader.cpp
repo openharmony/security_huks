@@ -17,8 +17,6 @@
 #include "hks_plugin_loader.h"
 #include <vector>
 
-
-
 namespace OHOS {
 namespace Security {
 namespace Huks {
