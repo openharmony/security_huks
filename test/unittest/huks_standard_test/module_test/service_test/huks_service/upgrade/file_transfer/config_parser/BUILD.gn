@@ -39,8 +39,8 @@ ohos_unittest("huks_file_transfer_config_parser_test") {
     "../../../../../../../../../frameworks/huks_standard/main/common:libhuks_common_standard_static",
     "../../../../../../../../../frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
     "../../../../../../../../../services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
-    "../../../../../../../../../services/huks_standard/huks_service/main/upgrade/file_transfer:libhuks_upgrade_file_transfer_static",
     "../../../../../../../../../services/huks_standard/huks_service/main/os_dependency:libhuks_service_os_dependency_standard_static",
+    "../../../../../../../../../services/huks_standard/huks_service/main/upgrade/file_transfer:libhuks_upgrade_file_transfer_static",
   ]
 
   external_deps = [

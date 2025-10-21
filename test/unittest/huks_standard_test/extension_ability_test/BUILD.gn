@@ -31,9 +31,10 @@ if (os_level == "standard") {
 
     sources = [
       # "./provider_mgr_test/hks_provider_manger_test.cpp",
+      "./extension_connect_test/hks_extension_connection_test.cpp",
       "./plugin_loader_test/hks_plugin_manager_test.cpp",
       "./plugin_loader_test/plugin_interface_wrap.cpp",
-      "./extension_connect_test/hks_extension_connection_test.cpp",
+
       # "./ukey_common_test/ukey_common_test.cpp",
       # "./handle_mgr_test/hks_handle_manager_test.cpp",
       # 新增：包装桩实现，使用链接器 --wrap 覆盖原函数
@@ -49,20 +50,20 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_util_standard_static",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger:libhuks_provider_life_cycle_manager_static",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
-      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection:libhuks_extension_connection_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger:libhuks_provider_life_cycle_manager_static",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager:libhuks_remote_handle_manager_static",
+      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
       "//base/security/huks/test/unittest/huks_standard_test/module_test/inner_kits_passthrough:libhukssdk_static",
     ]
     external_deps = [
+      "ability_base:ability_base_want",
+      "ability_runtime:ability_manager",
       "c_utils:utils",
-      "hilog:libhilog",
       "googletest:gmock",
       "googletest:gtest",
-      "ability_runtime:ability_manager",
-      "ability_base:ability_base_want",
+      "hilog:libhilog",
     ]
 
     cflags = [
@@ -87,9 +88,7 @@ if (os_level == "standard") {
       "-Wl,--wrap=HksIpcServiceOnGetRemotePropertyAdapter",
     ]
 
-    ldflags += [
-      "-Wl,--wrap=dlsym",
-    ]
+    ldflags += [ "-Wl,--wrap=dlsym" ]
 
     sanitize = {
       integer_overflow = true
@@ -104,5 +103,3 @@ if (os_level == "standard") {
     part_name = "huks"
   }
 }
-
-
