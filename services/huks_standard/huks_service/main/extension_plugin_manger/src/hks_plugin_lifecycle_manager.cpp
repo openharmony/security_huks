@@ -85,20 +85,6 @@ int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &
     return HKS_SUCCESS;
 }
 
-void HuksPluginLifeCycleMgr::SetPluginSoPath(const std::string path)
-{
-    auto pluginLoader = HuksPluginLoader::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN_VOID(pluginLoader == nullptr, "Failed to get pluginLoader instance.")
-    pluginLoader->SetPluginPath(path);
-}
-
-void HuksPluginLifeCycleMgr::SetMethodNameMap(std::map<PluginMethodEnum, std::string> &newMethodNameMap)
-{
-    auto pluginLoader = HuksPluginLoader::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN_VOID(pluginLoader == nullptr, "Failed to get pluginLoader instance.")
-    pluginLoader->SetMethodNameMapLoader(newMethodNameMap);
-}
-
 }
 }
 }
