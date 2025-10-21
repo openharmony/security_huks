@@ -23,11 +23,6 @@
 
 namespace OHOS::Security::Huks {
 
-bool IsHksBlobEmpty(const struct HksBlob& blob)
-{
-    return blob.data == nullptr || blob.size == 0;
-}
-
 bool IsHksExtCertInfoSetEmpty(const struct HksExtCertInfoSet& certSet)
 {
     return certSet.certs == nullptr || certSet.count == 0;
@@ -54,15 +49,8 @@ HksBlob Base64StringToBlob(const std::string &inStr)
 
 std::string BlobToBase64String(const struct HksBlob &strBlob)
 {
-    std::string base64Str = "";
-    HKS_IF_TRUE_RETURN(strBlob.data == nullptr || strBlob.size == 0, base64Str)
-    std::vector<uint8_t> dataVec(strBlob.data, strBlob.data + strBlob.size);
-    
-    auto encodeResult = U8Vec2Base64Str(dataVec);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(encodeResult.first, base64Str,
-        "U8Vec2Base64Str failed, ret: %" LOG_PUBLIC "d", encodeResult.first)
-    base64Str = encodeResult.second;
-    return base64Str;
+    HKS_IF_TRUE_RETURN(strBlob.data == nullptr || strBlob.size == 0, "")
+    return U8Vec2Base64Str({strBlob.data, strBlob.data + strBlob.size}).second;
 }
 
 HksBlob StringToBlob(const std::string &inStr)
@@ -92,51 +80,6 @@ std::string BlobToString(const HksBlob &strBlob)
     std::string ret("");
     HKS_IF_TRUE_RETURN(strBlob.size == 0 || strBlob.data == nullptr, ret)
     return std::string(reinterpret_cast<const char*>(strBlob.data), strBlob.size);
-}
-
-int32_t StringToCertInfo(const std::string &certInfoJson, struct HksExtCertInfo& certInfo)
-{
-    HKS_IF_TRUE_LOGE_RETURN(certInfoJson.empty(), HKS_ERROR_INVALID_ARGUMENT,
-        "Input json string is empty")
-    auto jsonObj = CommJsonObject::Parse(certInfoJson);
-    HKS_IF_TRUE_LOGE_RETURN(jsonObj.IsNull(), HKS_ERROR_INVALID_ARGUMENT,
-        "Parse json string failed")
-
-    if (jsonObj.HasKey("purpose")) {
-        auto purposeObj = jsonObj.GetValue("purpose");
-        HKS_IF_TRUE_LOGE_RETURN(!purposeObj.IsNumber(), HKS_ERROR_INVALID_ARGUMENT,
-            "Purpose field is not number")
-        auto result = purposeObj.ToNumber<int32_t>();
-        HKS_IF_NOT_SUCC_LOGE_RETURN(result.first, result.first,
-            "Get purpose value failed, ret: %" LOG_PUBLIC "d", result.first)
-        certInfo.purpose = result.second;
-    }
-    
-    if (jsonObj.HasKey("index")) {
-        auto indexObj = jsonObj.GetValue("index");
-        HKS_IF_TRUE_LOGE_RETURN(!indexObj.IsString(), HKS_ERROR_INVALID_ARGUMENT,
-            "Index field is not string")
-        
-        auto result = indexObj.ToString();
-        HKS_IF_NOT_SUCC_LOGE_RETURN(result.first, result.first,
-            "Get index string failed, ret: %" LOG_PUBLIC "d", result.first)
-        
-        certInfo.index = StringToBlob(result.second);
-    }
-    
-    if (jsonObj.HasKey("cert")) {
-        auto certObj = jsonObj.GetValue("cert");
-        HKS_IF_TRUE_LOGE_RETURN(!certObj.IsString(), HKS_ERROR_INVALID_ARGUMENT,
-            "Cert field is not string")
-        
-        auto result = certObj.ToString();
-        HKS_IF_NOT_SUCC_LOGE_RETURN(result.first, result.first,
-            "Get cert string failed, ret: %" LOG_PUBLIC "d", result.first)
-        
-        certInfo.cert = Base64StringToBlob(result.second);
-    }
-    
-    return HKS_SUCCESS;
 }
 
 int32_t CertInfoToString(const struct HksExtCertInfo& certInfo, std::string& jsonStr)
@@ -179,92 +122,30 @@ int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCert
     HKS_IF_TRUE_LOGE_RETURN(arraySize == 0, HKS_ERROR_INVALID_ARGUMENT,
         "Json array size invalid: %" LOG_PUBLIC "d", arraySize)
     certSet.count = arraySize;
-    certSet.certs = (HksExtCertInfo*)HksMalloc(arraySize * sizeof(HksExtCertInfo));
+    certSet.certs = (HksExtCertInfo *)HksMalloc(arraySize * sizeof(HksExtCertInfo));
     HKS_IF_NULL_LOGE_RETURN(certSet.certs, HKS_ERROR_MALLOC_FAIL,
         "Malloc for cert set failed, size: %" LOG_PUBLIC "d", arraySize)
     int32_t ret = memset_s(certSet.certs, arraySize * sizeof(HksExtCertInfo), 0,
         arraySize * sizeof(HksExtCertInfo));
-    HKS_IF_TRUE_LOGE_RETURN(ret != EOK, HKS_ERROR_INVALID_OPERATION,
-        "memset_s for cert set failed, ret: %" LOG_PUBLIC "d", ret)
+    if(ret != EOK) {
+        HKS_FREE(certSet.certs);
+        certSet.certs = nullptr;
+        HKS_LOG_E("memset_s for cert set failed, ret: %" LOG_PUBLIC "d", ret);
+        return ret;
+    }    
     for (int32_t i = 0; i < arraySize; i++) {
         auto element = jsonArray.GetElement(i);
-        if (element.IsNull() || !element.IsObject()) {
-            HKS_LOG_E("Element %" LOG_PUBLIC "d is not valid json object", i);
-            ret = HKS_ERROR_INVALID_ARGUMENT;
-            break;
-        }
-        auto purposeObj = element.GetValue("purpose");
-        auto indexObj = element.GetValue("index");
-        auto certObj = element.GetValue("cert");
-        HKS_IF_TRUE_LOGE_RETURN(purposeObj.IsNull() || indexObj.IsNull() || certObj.IsNull(),
-            HKS_ERROR_INVALID_ARGUMENT, "element is not valid")
-        auto purposeRes = purposeObj.ToNumber<int32_t>();
-        if (purposeRes.first == HKS_SUCCESS) {
-            certSet.certs[i].purpose = purposeRes.second;
-        }
-        auto indexRes = indexObj.ToString();
-        if (indexRes.first == HKS_SUCCESS) {
-            certSet.certs[i].index = StringToBlob(indexRes.second);
-        }
-        auto certRes = certObj.ToString();
-        if (certRes.first == HKS_SUCCESS) {
-            certSet.certs[i].cert = Base64StringToBlob(certRes.second);
-        }
+        auto purposeObj = element.GetValue("purpose").ToNumber<int32_t>();
+        auto indexObj = element.GetValue("index").ToString();
+        auto certObj = element.GetValue("cert").ToString();
+        HKS_IF_NOT_TRUE_LOGE_RETURN(purposeObj.first == HKS_SUCCESS && indexObj.first == HKS_SUCCESS &&
+            certObj.first == HKS_SUCCESS, HKS_ERROR_JSON_INVALID_VALUE, "element invalid value")
+        certSet.certs[i].purpose = purposeObj.second;
+        certSet.certs[i].index = StringToBlob(indexObj.second);
+        certSet.certs[i].cert = Base64StringToBlob(certObj.second);
     }
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Parse cert info failed: %" LOG_PUBLIC "d", ret)
     return HKS_SUCCESS;
 }
 
-int32_t CertInfoSetToJsonArray(const struct HksExtCertInfoSet& certSet, std::string& jsonArrayStr)
-{
-    HKS_IF_TRUE_LOGE_RETURN(IsHksExtCertInfoSetEmpty(certSet), HKS_ERROR_INVALID_ARGUMENT,
-        "Input cert set is empty")
-    
-    auto jsonArray = CommJsonObject::CreateArray();
-    HKS_IF_TRUE_LOGE_RETURN(jsonArray.IsNull(), HKS_ERROR_MALLOC_FAIL,
-        "Create json array failed")
-    
-    for (uint32_t i = 0; i < certSet.count; i++) {
-        auto certInfoObj = CommJsonObject::CreateObject();
-        HKS_IF_TRUE_LOGE_BREAK(certInfoObj.IsNull(), "Create json object failed")
-        
-        if (!certInfoObj.SetValue("purpose", certSet.certs[i].purpose)) {
-            HKS_LOG_E("Set purpose value failed for index %u", i);
-            return HKS_ERROR_INTERNAL_ERROR;
-        }
-        std::string index = BlobToString(certSet.certs[i].index);
-        if (!certInfoObj.SetValue("index", index)) {
-            HKS_LOG_E("Set index value failed for index %u", i);
-            return HKS_ERROR_INTERNAL_ERROR;
-        }
-        std::string cert = BlobToBase64String(certSet.certs[i].cert);
-        if (!certInfoObj.SetValue("cert", cert)) {
-            HKS_LOG_E("Set cert value failed for index %u", i);
-            return HKS_ERROR_INTERNAL_ERROR;
-        }
-        if (!jsonArray.AppendElement(certInfoObj)) {
-            HKS_LOG_E("Append element %u to array failed", i);
-            return HKS_ERROR_INTERNAL_ERROR;
-        }
-    }
-    
-    jsonArrayStr = jsonArray.Serialize();
-    HKS_IF_TRUE_LOGE_RETURN(jsonArrayStr.empty(), HKS_ERROR_INTERNAL_ERROR,
-        "Serialize json array failed")
-    
-    return HKS_SUCCESS;
-}
-
-void FreeCertInfoSet(HksExtCertInfoSet &certSet)
-{
-    if (certSet.certs != nullptr) {
-        for (uint32_t i = 0; i < certSet.count; i++) {
-            HKS_FREE(certSet.certs[i].index.data);
-            HKS_FREE(certSet.certs[i].cert.data);
-        }
-        HKS_FREE(certSet.certs);
-        certSet.certs = nullptr;
-    }
-    certSet.count = 0;
-}
 }

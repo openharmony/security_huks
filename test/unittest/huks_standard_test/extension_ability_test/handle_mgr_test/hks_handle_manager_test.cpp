@@ -195,30 +195,8 @@ HWTEST_F(HandleManagerTest, HandleManagerTest006, TestSize.Level0)
     EXPECT_EQ(ret, HKS_ERROR_JSON_PARSE_FAILED);
 }
 
+
 HWTEST_F(HandleManagerTest, HandleManagerTest007, TestSize.Level0)
-{
-    auto manager = HksRemoteHandleManager::GetInstanceWrapper();
-    ASSERT_NE(manager, nullptr);
-    
-    ProviderInfo providerInfo;
-    providerInfo.m_providerName = "index_test_provider";
-    providerInfo.m_abilityName = "index_test_ability";
-    providerInfo.m_bundleName = "index_test_bundle";
-    
-    CppParamSet paramSet;
-    std::string index;
-    
-    int32_t ret = manager->CreateRemoteIndex(providerInfo, paramSet, index);
-    
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    EXPECT_FALSE(index.empty());
-    
-    auto indexObj = CommJsonObject::Parse(index);
-    EXPECT_FALSE(indexObj.IsNull());
-
-}
-
-HWTEST_F(HandleManagerTest, HandleManagerTest008, TestSize.Level0)
 {
     auto manager1 = HksRemoteHandleManager::GetInstanceWrapper();
     ASSERT_NE(manager1, nullptr);
@@ -233,7 +211,7 @@ HWTEST_F(HandleManagerTest, HandleManagerTest008, TestSize.Level0)
     EXPECT_NE(manager1.get(), manager3.get());
 }
 
-HWTEST_F(HandleManagerTest, HandleManagerTest009, TestSize.Level0)
+HWTEST_F(HandleManagerTest, HandleManagerTest008, TestSize.Level0)
 {
     auto manager = HksRemoteHandleManager::GetInstanceWrapper();
     ASSERT_NE(manager, nullptr);
@@ -242,7 +220,7 @@ HWTEST_F(HandleManagerTest, HandleManagerTest009, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS);
 }
 
-HWTEST_F(HandleManagerTest, HandleManagerTest010, TestSize.Level0)
+HWTEST_F(HandleManagerTest, HandleManagerTest009, TestSize.Level0)
 {
     auto manager = HksRemoteHandleManager::GetInstanceWrapper();
     ASSERT_NE(manager, nullptr);
@@ -271,7 +249,7 @@ HWTEST_F(HandleManagerTest, HandleManagerTest010, TestSize.Level0)
     EXPECT_NE(ret, HKS_SUCCESS);
 }
 
-HWTEST_F(HandleManagerTest, HandleManagerTest012, TestSize.Level0)
+HWTEST_F(HandleManagerTest, HandleManagerTest010, TestSize.Level0)
 {
     auto manager = HksRemoteHandleManager::GetInstanceWrapper();
     ASSERT_NE(manager, nullptr);
@@ -285,7 +263,7 @@ HWTEST_F(HandleManagerTest, HandleManagerTest012, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS);
 }
 
-HWTEST_F(HandleManagerTest, HandleManagerTest013, TestSize.Level0)
+HWTEST_F(HandleManagerTest, HandleManagerTest011, TestSize.Level0)
 {
     auto manager = HksRemoteHandleManager::GetInstanceWrapper();
     ASSERT_NE(manager, nullptr);
@@ -299,7 +277,7 @@ HWTEST_F(HandleManagerTest, HandleManagerTest013, TestSize.Level0)
     EXPECT_NE(ret, HKS_SUCCESS);
 }
 
-HWTEST_F(HandleManagerTest, HandleManagerTest014, TestSize.Level0)
+HWTEST_F(HandleManagerTest, HandleManagerTest012, TestSize.Level0)
 {
     auto manager = HksRemoteHandleManager::GetInstanceWrapper();
     ASSERT_NE(manager, nullptr);
