@@ -15,67 +15,63 @@ import("//build/config/components/idl_tool/idl.gni")
 import("//build/ohos.gni")
 
 config("crypto_extension_public_config") {
-    include_dirs = [
-        "inc",
-    ]
+  include_dirs = [ "inc" ]
 }
 if (os_level == "standard") {
-ohos_shared_library("crypto_extension_ability_native") {
+  ohos_shared_library("crypto_extension_ability_native") {
     branch_protector_ret = "pac_ret"
 
     sanitize = {
-        integer_overflow = true
-        ubsan = true
-        boundary_sanitize = true
-        cfi = true
-        cfi_cross_dso = true
-        debug = false
+      integer_overflow = true
+      ubsan = true
+      boundary_sanitize = true
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
     }
 
-    public_configs = [":crypto_extension_public_config"]
+    public_configs = [ ":crypto_extension_public_config" ]
 
-    include_dirs = [
-        "inc",
-    ]
+    include_dirs = [ "inc" ]
 
     sources = [
-        "src/log_utils.c",
-        "src/hks_crypto_ext_ability.cpp",
-        "src/hks_crypto_ext_stub_impl.cpp",
-        "src/js_hks_crypto_ext_ability.cpp",
+      "src/hks_crypto_ext_ability.cpp",
+      "src/hks_crypto_ext_stub_impl.cpp",
+      "src/js_hks_crypto_ext_ability.cpp",
+      "src/log_utils.c",
     ]
 
     deps = [
-        "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:huks_access_ext_base_include",
-        "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
-        "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
-        "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:huks_access_ext_base_include",
     ]
-    
+
     external_deps = [
-        "ability_base:want",
-        "ability_runtime:ability_context_native",
-        "ability_runtime:abilitykit_native",
-        "ability_runtime:app_context",
-        "ability_runtime:appkit_native",
-        "ability_runtime:extensionkit_native",
-        "ability_runtime:napi_common",
-        "ability_runtime:runtime",
-        "ability_runtime:service_extension",
-        "ability_runtime:ability_manager",
-        "bundle_framework:appexecfwk_core",
-        "bundle_framework:appexecfwk_base",
-        "bundle_framework:bms_ani_common",
-        "c_utils:utils",
-        "hilog:libhilog",
-        "ipc:ipc_core",
-        "ipc:ipc_napi",
-        "napi:ace_napi",
-        "samgr:samgr_proxy",
+      "ability_base:want",
+      "ability_runtime:ability_context_native",
+      "ability_runtime:ability_manager",
+      "ability_runtime:abilitykit_native",
+      "ability_runtime:app_context",
+      "ability_runtime:appkit_native",
+      "ability_runtime:extensionkit_native",
+      "ability_runtime:napi_common",
+      "ability_runtime:runtime",
+      "ability_runtime:service_extension",
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_core",
+      "bundle_framework:bms_ani_common",
+      "c_utils:utils",
+      "hilog:libhilog",
+      "ipc:ipc_core",
+      "ipc:ipc_napi",
+      "napi:ace_napi",
+      "samgr:samgr_proxy",
     ]
 
     relative_install_dir = "extensionability"
     subsystem_name = "security"
     part_name = "huks"
-}
+  }
 }

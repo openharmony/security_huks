@@ -25,20 +25,17 @@ if (os_level == "standard") {
     include_dirs = [
       "inc",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger/inc",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc"
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc",
     ]
 
-    sources = [
-      "src/hks_remote_handle_manager.cpp",
-    ]
-    
+    sources = [ "src/hks_remote_handle_manager.cpp" ]
 
     deps = [
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger:libhuks_provider_life_cycle_manager_static",
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
-      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger:libhuks_provider_life_cycle_manager_static",
     ]
     complete_static_lib = true
     cflags = []
@@ -55,14 +52,14 @@ if (os_level == "standard") {
     }
 
     external_deps = [
+      "ability_runtime:ability_connect_callback_stub",
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_core",
+      "bundle_framework:appexecfwk_core",
       "c_utils:utils",
       "hilog:libhilog",
       "ipc:ipc_single",
-      "bundle_framework:appexecfwk_base",
-      "bundle_framework:appexecfwk_core",
-      "ability_runtime:ability_connect_callback_stub",
-      "bundle_framework:appexecfwk_base",
-      "bundle_framework:appexecfwk_core",
       "samgr:samgr_proxy",
     ]
   }

@@ -98,8 +98,8 @@ ohos_shared_library("huks_external_ndk") {
   ]
 
   sources = [
-    "external_crypto/src/native_huks_external_api.c", 
-    "external_crypto/src/native_huks_external_param.c", 
+    "external_crypto/src/native_huks_external_api.c",
+    "external_crypto/src/native_huks_external_param.c",
   ]
 
   deps = [
@@ -117,4 +117,3 @@ ohos_shared_library("huks_external_ndk") {
   part_name = "huks"
   subsystem_name = "security"
 }
-
