@@ -18,12 +18,97 @@
 #include <cstdio>
 #include <string>
 #include "hks_cpp_paramset.h"
+#include "hks_plugin_def.h"
+#include "hks_cfi.h"
 
-extern "C" void* _wrap_dlsym(void* handle, const char* symbol)
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName,
+    const CppParamSet &paramSet))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnUnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName,
+    const CppParamSet &paramSet))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnCreateRemoteIndex(const HksProcessInfo &processInfo, const std::string &providerName,
+    const CppParamSet &paramSet, std::string &index))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnOpemRemoteHandle(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, std::string &handle))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnCloseRemoteHandle(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnAuthUkeyPin(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, int32_t &authState, uint32_t &retryCnt))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnGetUkeyPinAuthState(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, int32_t &state))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnExportCerticate(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, std::string &certsJson))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnExportProviderCerticates(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnInitSession(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, uint32_t &handle))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnUpdateSession(const HksProcessInfo &processInfo, const uint32_t &handle,
+    const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnFinishSession(const HksProcessInfo &processInfo, const uint32_t &handle,
+    const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksClearUkeyPinAuthState(const HksProcessInfo &processInfo, const std::string &index))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksGetUkeyRemoteProperty(const HksProcessInfo &processInfo, const std::string &index,
+    const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams))
+{
+    return 0;
+}
+
+extern "C" void *__wrap_dlsym(void* handle, const char* symbol)
 {
     static const struct {
-        const char* name;
-        void* fake;
+        const char *name;
+        void *fake;
     } kFakeSymbols[] = {
         {"_ZN4OHOS8Security4Huks30HksExtPluginOnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet", 
@@ -69,95 +154,12 @@ extern "C" void* _wrap_dlsym(void* handle, const char* symbol)
          (void*)Fake_HksExtPluginOnFinishSession},
     };
 
-    for (auto& item : kFakeSymbols) {
+    for (auto &item : kFakeSymbols) {
         if (strcmp(symbol, item.name) == 0) {
             return item.fake;
         }
     }
 
-    void* real_sym = __real_dlsym(handle, symbol);
+    void *real_sym = dlsym(handle, symbol);
     return real_sym;
-}
-
-int32_t Fake_HksExtPluginOnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName,
-    const CppParamSet &paramSet)
-{
-    return 0;
-}
-
-int32_t Fake_HksExtPluginOnUnRegisterProvider(
-    const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet)
-{
-    return 0;
-}
-
-int32_t Fake_HksExtPluginOnCreateRemoteIndex(const HksProcessInfo &processInfo, const std::string &providerName,
-    const CppParamSet &paramSet, std::string &index)
-{
-    return 0;
-}
-
-int32_t Fake_HksExtPluginOnOpemRemoteHandle(const HksProcessInfo &processInfo, const std::string &index,
-    const CppParamSet &paramSet, std::string &handle)
-{
-    return 0;
-}
-
-int32_t Fake_HksExtPluginOnCloseRemoteHandle(const HksProcessInfo &processInfo, const std::string &index,
-    const CppParamSet &paramSet)
-{
-    return 0;
-}
-
-int32_t Fake_HksExtPluginOnAuthUkeyPin(const HksProcessInfo &processInfo, const std::string &index,
-    const CppParamSet &paramSet, int32_t &authState, uint32_t &retryCnt)
-{
-    return 0;
-}
-
-int32_t Fake_HksExtPluginOnGetUkeyPinAuthState(const HksProcessInfo &processInfo, const std::string &index,
-    const CppParamSet &paramSet, int32_t &state)
-{
-    return 0;
-}
-
-int32_t Fake_HksExtPluginOnExportCerticate(const HksProcessInfo &processInfo, const std::string &index,
-    const CppParamSet &paramSet, std::string &certsJson)
-{
-    return 0;
-}
-
-int32_t Fake_HksExtPluginOnExportProviderCerticates(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr)
-{
-    return 0;
-}
-
-int32_t Fake_HksExtPluginOnInitSession(const HksProcessInfo &processInfo, const std::string &index,
-    const CppParamSet &paramSet, uint32_t &handle)
-{
-    return 0;
-}
-
-int32_t Fake_HksExtPluginOnUpdateSession(const HksProcessInfo &processInfo, const uint32_t &handle,
-    const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData)
-{
-    return 0;
-}
-
-int32_t Fake_HksExtPluginOnFinishSession(const HksProcessInfo &processInfo, const uint32_t &handle,
-    const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData)
-{
-    return 0;
-}
-
-int32_t Fake_HksClearUkeyPinAuthState(const HksProcessInfo &processInfo, const std::string &index)
-{
-    return 0;
-}
-
-int32_t Fake_HksGetUkeyRemoteProperty(const HksProcessInfo &processInfo, const std::string &index,
-    const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams)
-{
-    return 0;
 }

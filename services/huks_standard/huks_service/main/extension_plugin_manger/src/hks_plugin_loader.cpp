@@ -54,7 +54,7 @@ int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const s
         }
 
         dlerror();
-        void* func = dlsym(m_pluginHandle, methodString.c_str());
+        void *func = dlsym(m_pluginHandle, methodString.c_str());
         const char *dlsym_error = dlerror();
         if (dlsym_error != nullptr) {
             HKS_LOG_E("failed to Find entry %{public}s in dynamic link liberary, error is %{public}s",
