@@ -502,7 +502,7 @@ HWTEST_F(UkeyCommonTest, UkeyCommonTest011, TestSize.Level0)
     // index and cert are empty by default
     
     std::string minimalOutput;
-    ret = CertInfoToString(minimalCert, minimalOutput);
+    int32_t ret = CertInfoToString(minimalCert, minimalOutput);
     EXPECT_EQ(ret, HKS_SUCCESS);
     EXPECT_FALSE(minimalOutput.empty());
 
