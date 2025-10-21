@@ -113,7 +113,6 @@ HWTEST_F(HksUKeyTest, HksRegisterProviderTest, TestSize.Level0)
     }
     EXPECT_TRUE(ret == 0);
 
-    HKS_FREE_BLOB(name);
     HksFreeParamSet(&paramSet);
     HKS_TEST_LOG_I("TestHksUKey, Testcase_RegisterProvider pass!");
     ASSERT_TRUE(ret == 0);
@@ -154,7 +153,6 @@ HWTEST_F(HksUKeyTest, HksUnregisterProvider, TestSize.Level0)
     }
     EXPECT_TRUE(ret == 0);
 
-    HKS_FREE_BLOB(name);
     HksFreeParamSet(&paramSet);
     HKS_TEST_LOG_I("TestHksUKey, Testcase_UnregisterProvider pass!");
     ASSERT_TRUE(ret == 0);
@@ -201,7 +199,6 @@ HWTEST_F(HksUKeyTest, HksAuthUkeyPinTest, TestSize.Level0)
     }
     EXPECT_TRUE(ret == 0);
 
-    HKS_FREE_BLOB(resourceId);
     HksFreeParamSet(&paramSet);
     HKS_TEST_LOG_I("TestHksUKey, Testcase_AuthUkeyPin pass!");
     ASSERT_TRUE(ret == 0);
@@ -230,7 +227,6 @@ HWTEST_F(HksUKeyTest, HksGetUkeyPinAuthStateTest, TestSize.Level0)
     }
     EXPECT_TRUE(ret == 0);
 
-    HKS_FREE_BLOB(resourceId);
     HksFreeParamSet(&paramSet);
     HKS_TEST_LOG_I("TestHksUKey, Testcase_GetUkeyPinAuthState pass!");
     ASSERT_TRUE(ret == 0);
@@ -259,7 +255,6 @@ HWTEST_F(HksUKeyTest, HksOpenRemoteHandleTest, TestSize.Level0)
     }
     EXPECT_TRUE(ret == 0);
 
-    HKS_FREE_BLOB(resourceId);
     HksFreeParamSet(&paramSet);
     HKS_TEST_LOG_I("TestHksUKey, Testcase_GetUkeyPinAuthState pass!");
     ASSERT_TRUE(ret == 0);
@@ -289,7 +284,6 @@ HWTEST_F(HksUKeyTest, HksGetRemoteHandleTest, TestSize.Level0)
     }
     EXPECT_TRUE(ret == 0);
 
-    HKS_FREE_BLOB(resourceId);
     HksFreeParamSet(&paramSet);
     HKS_TEST_LOG_I("TestHksUKey, Testcase_GetUkeyPinAuthState pass!");
     ASSERT_TRUE(ret == 0);
@@ -312,7 +306,6 @@ HWTEST_F(HksUKeyTest, HksClearPinAuthStateTest, TestSize.Level0)
     }
     EXPECT_TRUE(ret == 0);
 
-    HKS_FREE_BLOB(resourceId);
     HKS_TEST_LOG_I("TestHksUKey, Testcase_GetUkeyPinAuthState pass!");
     ASSERT_TRUE(ret == 0);
 }
@@ -343,8 +336,6 @@ HWTEST_F(HksUKeyTest, HksGetRemotePropertyTest, TestSize.Level0)
     }
     EXPECT_TRUE(ret == 0);
 
-    HKS_FREE_BLOB(resourceId);
-    HKS_FREE_BLOB(propertyId);
     HksFreeParamSet(&propertySetOut);
     HKS_TEST_LOG_I("TestHksUKey, Testcase_GetUkeyPinAuthState pass!");
     ASSERT_TRUE(ret == 0);
