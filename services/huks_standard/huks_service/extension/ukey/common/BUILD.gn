@@ -42,7 +42,6 @@ ohos_source_set("huks_access_ext_base_include") {
 
   external_deps = [
     "ability_base:want",
-    "ability_runtime:ability_connect_callback_stub",
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
@@ -96,7 +95,6 @@ if (os_level == "standard") {
       "ipc:ipc_single",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
-      "ability_runtime:ability_connect_callback_stub",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "samgr:samgr_proxy",

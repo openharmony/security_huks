@@ -61,7 +61,6 @@ if (os_level == "standard") {
       "hilog:libhilog",
       "googletest:gmock",
       "googletest:gtest",
-      "ability_runtime:ability_connect_callback_stub",
       "ability_runtime:ability_manager",
       "ability_base:ability_base_want",
     ]
