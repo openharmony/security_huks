@@ -15,34 +15,31 @@ import("//base/security/huks/build/config.gni")
 import("//build/ohos.gni")
 
 config("huks_ext_plugin_manager_config") {
-  include_dirs = [
-    "inc",
-  ]
+  include_dirs = [ "inc" ]
 }
 
 if (os_level == "standard") {
   ohos_static_library("libhuks_ukey_plugin_extesnion_static") {
     subsystem_name = "security"
     part_name = "huks"
+
     # version_script = "libhuks_external_crypto_ext_core.map"
     configs = [
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]
 
-    include_dirs = [
-      "inc",
-    ]
+    include_dirs = [ "inc" ]
     public_configs = [ ":huks_ext_plugin_manager_config" ]
     sources = [
+      "src/hks_lib_interface.cpp",
       "src/hks_plugin_lifecycle_manager.cpp",
       "src/hks_plugin_loader.cpp",
-      "src/hks_lib_interface.cpp",
     ]
 
     deps = [
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
-      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
     ]
 
     cflags = []
