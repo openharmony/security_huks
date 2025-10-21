@@ -94,19 +94,6 @@ std::string HuksPluginLoader::GetMethodByEnum(PluginMethodEnum methodEnum)
     return "";
 }
 
-void HuksPluginLoader::SetPluginPath(const std::string &pluginPath)
-{
-    pluginSo = pluginPath;
-}
-
-void HuksPluginLoader::SetMethodNameMapLoader(std::map<PluginMethodEnum, std::string> &methodNameMap)
-{
-    m_pluginMethodNameMap.Clear();
-    for (auto &iter : methodNameMap) {
-        m_pluginMethodNameMap.Insert(iter.first, iter.second);
-    }
-}
-
 HuksPluginLoader::HuksPluginLoader()
 {
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_REGISTER_PROVIDER,

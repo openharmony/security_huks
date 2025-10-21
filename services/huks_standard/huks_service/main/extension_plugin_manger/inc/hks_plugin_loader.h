@@ -49,8 +49,6 @@ public:
         const CppParamSet &paramSet);
     static std::shared_ptr<HuksPluginLoader> GetInstanceWrapper();
     static void ReleaseInstance();
-    void SetPluginPath(const std::string &pluginPath);
-    void SetMethodNameMapLoader(std::map<PluginMethodEnum, std::string> &methodNameMap);
     
 private:
     void* m_pluginHandle = nullptr;

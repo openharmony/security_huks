@@ -40,8 +40,6 @@ public:
         const CppParamSet &paramSet);
     int32_t UnRegisterProvider(const struct HksProcessInfo &info, const std::string &AbilityName,
         const CppParamSet &paramSet);
-    void SetPluginSoPath(const std::string path);
-    void SetMethodNameMap(std::map<PluginMethodEnum, std::string> &newMethodNameMap);
 
 private:
     std::atomic<int> m_refCount{0};
