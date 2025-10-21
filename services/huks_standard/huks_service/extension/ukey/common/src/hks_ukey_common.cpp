@@ -127,12 +127,12 @@ int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCert
         "Malloc for cert set failed, size: %" LOG_PUBLIC "d", arraySize)
     int32_t ret = memset_s(certSet.certs, arraySize * sizeof(HksExtCertInfo), 0,
         arraySize * sizeof(HksExtCertInfo));
-    if(ret != EOK) {
+    if (ret != EOK) {
         HKS_FREE(certSet.certs);
         certSet.certs = nullptr;
         HKS_LOG_E("memset_s for cert set failed, ret: %" LOG_PUBLIC "d", ret);
         return ret;
-    }    
+    }
     for (int32_t i = 0; i < arraySize; i++) {
         auto element = jsonArray.GetElement(i);
         auto purposeObj = element.GetValue("purpose").ToNumber<int32_t>();
