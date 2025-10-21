@@ -26,6 +26,7 @@
 #include "singleton.h"
 #include "hks_template.h"
 #include "hks_function_types.h"
+#include <shared_mutex>
 
 
 namespace OHOS {
@@ -42,8 +43,9 @@ public:
         const CppParamSet &paramSet);
 
 private:
-    std::atomic<int> m_refCount{0};
+    std::atomic<int32_t> m_refCount{0};
     static HuksPluginLifeCycleMgr instancePLCM;
+    std::mutex soMutex;
 };
 
 }

@@ -34,7 +34,8 @@ int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &in
     const std::string &providerName, const CppParamSet &paramSet)
 {
     int32_t ret;
-    int preCount = m_refCount.fetch_add(1, std::memory_order_acq_rel);
+    std::unique_lock<std::mutex> lock(soMutex);
+    int32_t preCount = m_refCount.fetch_add(1, std::memory_order_acq_rel);
     if (preCount == 0) {
         auto pluginLoader = HuksPluginLoader::GetInstanceWrapper();
         HKS_IF_TRUE_LOGE_RETURN(pluginLoader == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get pluginLoader instance.")
@@ -60,7 +61,8 @@ int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &in
 int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &info, const std::string &providerName,
     const CppParamSet &paramSet)
 {
-    int preCount = m_refCount.fetch_sub(1, std::memory_order_acq_rel);
+    std::unique_lock<std::mutex> lock(soMutex);
+    int32_t preCount = m_refCount.fetch_sub(1, std::memory_order_acq_rel);
     auto libInstance = HuksLibInterface::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(libInstance == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")
     int32_t ret = libInstance->OnUnRegistProvider(info, providerName, paramSet);
@@ -70,7 +72,10 @@ int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &
         return HKS_ERROR_CLOSE_PROVIDER_FAIL;
     }
 
-    HKS_IF_TRUE_LOGE_RETURN(preCount != 1, HKS_SUCCESS, "close lib fail, refCount = %{public}d", preCount)
+    if (preCount != 1) {
+        HKS_LOG_I("don't need close lib, refCount = %{public}d", preCount);
+        return HKS_SUCCESS;
+    }
 
     auto pluginLoader = HuksPluginLoader::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(pluginLoader == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get pluginLoader instance.")

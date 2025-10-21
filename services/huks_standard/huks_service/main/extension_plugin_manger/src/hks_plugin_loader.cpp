@@ -17,6 +17,8 @@
 #include "hks_plugin_loader.h"
 #include <vector>
 
+
+
 namespace OHOS {
 namespace Security {
 namespace Huks {
@@ -43,7 +45,7 @@ int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const s
     HKS_IF_NULL_LOGE_RETURN(m_pluginHandle, HKS_ERROR_OPEN_LIB_FAIL,
         "dlopen %" LOG_PUBLIC "s failed! %" LOG_PUBLIC "s", pluginSo.c_str(), dlerror())
 
-    for (auto i = 0; i < static_cast<int>(PluginMethodEnum::COUNT); ++i) {
+    for (auto i = 0; i < static_cast<int32_t>(PluginMethodEnum::COUNT); ++i) {
         std::string methodString = GetMethodByEnum(static_cast<PluginMethodEnum>(i));
         if (methodString.empty()) {
             HKS_LOG_E("the entry %{public}s is not include", pluginSo.c_str());
@@ -57,9 +59,14 @@ int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const s
         void *func = dlsym(m_pluginHandle, methodString.c_str());
         const char *dlsym_error = dlerror();
         if (dlsym_error != nullptr) {
-            HKS_LOG_E("failed to Find entry %{public}s in dynamic link liberary, error is %{public}s",
+            HKS_LOG_E("failed to Find entry %{public}s in dynamic link liberary, error: %{public}s",
                 methodString.c_str(), dlsym_error);
-            dlclose(m_pluginHandle);
+
+            dlsym_error = dlerror();
+            int32_t ret = dlclose(m_pluginHandle);
+            HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_DLCLOSE_FAIL,
+                "dlclose fail, error: %{public}s", dlsym_error)
+
             m_pluginHandle= nullptr;
             m_pluginProviderMap.Clear();
             return HKS_ERROR_GET_FUNC_POINTER_FAIL;

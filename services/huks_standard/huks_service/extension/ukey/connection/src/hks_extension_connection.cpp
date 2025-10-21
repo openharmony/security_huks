@@ -32,24 +32,23 @@ void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementNa
     HKS_IF_TRUE_RETURN_VOID(remoteObject == nullptr)
 
     extConnectProxy = iface_cast<HuksAccessExtBaseProxy>(remoteObject);
-    HKS_IF_TRUE_RETURN_VOID(extConnectProxy == nullptr)
+    HKS_IF_TRUE_LOGE_RETURN_VOID(extConnectProxy, "iface_cast fail in OnAbilityConnectDone")
 
     AddExtDeathRecipient(extConnectProxy->AsObject());
     std::lock_guard<std::mutex> lock(proxyMutex_);
     isConnected_.store(true);
-    isReady = true;
     proxyConv_.notify_all();
 }
 
 int32_t ExtensionConnection::OnConnection(const AAFwk::Want &want)
 {
     int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, this, DEFAULT_USER_ID);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_EXEC_FUNC_FAIL,
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_ABILITY_MGR_CONNECT_FAIL,
         "fail to connect ability by ability manager service")
 
     std::unique_lock<std::mutex> lock(proxyMutex_);
     if (!proxyConv_.wait_for(lock, std::chrono::seconds(WAIT_TIME), [this] {
-        return extConnectProxy != nullptr && isReady;
+        return extConnectProxy != nullptr;
     })) {
         HKS_LOG_E("wait connect timeout");
         return HKS_ERROR_CONNECT_TIME_OUT;
@@ -63,18 +62,19 @@ void ExtensionConnection::OnDisconnect()
     if (extConnectProxy != nullptr) {
         RemoveExtDeathRecipient(extConnectProxy->AsObject());
     }
-    extConnectProxy = nullptr;
-    isConnected_.store(false);
-    isReady = false;
+
     int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->DisconnectAbility(this);
     HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS, "disconnect ability fail, ret = %{public}d", ret)
+
+    extConnectProxy = nullptr;
+    isConnected_.store(false);
 }
 
 void ExtensionConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode)
 {
+    std::lock_guard<std::mutex> lock(proxyMutex_);
     extConnectProxy = nullptr;
     isConnected_.store(false);
-    isReady = false;
 }
 
 sptr<IHuksAccessExtBase> ExtensionConnection::GetExtConnectProxy()
@@ -121,7 +121,6 @@ void ExtensionConnection::OnRemoteDied(const wptr<IRemoteObject> &remote)
         object = nullptr;
     }
     isConnected_.store(false);
-    isReady = false;
     if (extConnectProxy) {
         extConnectProxy = nullptr;
     }
