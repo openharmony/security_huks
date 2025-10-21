@@ -18,6 +18,7 @@ if (os_level == "standard") {
   ohos_shared_library("libhuks_external_crypto_ext_core") {
     subsystem_name = "security"
     part_name = "huks"
+
     # version_script = "libhuks_external_crypto_ext_core.map"
     configs = [
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
@@ -30,20 +31,17 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/session_manger/inc",
     ]
 
-    sources = [
-      "interface/plugin_interface.cpp",
-    ]
+    sources = [ "interface/plugin_interface.cpp" ]
 
     deps = [
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
-      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
-
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger:libhuks_provider_life_cycle_manager_static",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection:libhuks_extension_connection_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger:libhuks_provider_life_cycle_manager_static",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager:libhuks_remote_handle_manager_static",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/session_manger:libhuks_session_manager_static",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
     ]
 
     cflags = []
@@ -59,12 +57,12 @@ if (os_level == "standard") {
       ubsan = true
     }
     external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-      "ipc:ipc_core",
       "ability_runtime:ability_connect_callback_stub",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
+      "c_utils:utils",
+      "hilog:libhilog",
+      "ipc:ipc_core",
     ]
   }
 }

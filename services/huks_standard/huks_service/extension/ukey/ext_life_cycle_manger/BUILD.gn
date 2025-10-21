@@ -18,6 +18,7 @@ if (os_level == "standard") {
   ohos_static_library("libhuks_provider_life_cycle_manager_static") {
     subsystem_name = "security"
     part_name = "huks"
+
     # version_script = "libhuks_external_crypto_ext_core.map"
     configs = [
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
@@ -25,22 +26,18 @@ if (os_level == "standard") {
 
     include_dirs = [
       "inc",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc"
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc",
     ]
 
-    sources = [
-      "src/hks_provider_life_cycle_manager.cpp",
-    ]
+    sources = [ "src/hks_provider_life_cycle_manager.cpp" ]
 
-    defines = [
-        "L2_STANDARD",
-    ]
+    defines = [ "L2_STANDARD" ]
     deps = [
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
-      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection:libhuks_extension_connection_static",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection:libhuks_extension_connection_static",
     ]
     complete_static_lib = true
     cflags = []
@@ -57,12 +54,12 @@ if (os_level == "standard") {
     }
 
     external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-      "ipc:ipc_single",
       "ability_runtime:ability_connect_callback_stub",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
+      "c_utils:utils",
+      "hilog:libhilog",
+      "ipc:ipc_single",
       "samgr:samgr_proxy",
     ]
   }

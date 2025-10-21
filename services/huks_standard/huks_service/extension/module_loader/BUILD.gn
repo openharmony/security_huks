@@ -13,46 +13,46 @@
 import("//build/ohos.gni")
 
 if (os_level == "standard") {
-ohos_shared_library("crypto_extension_module") {
-  branch_protector_ret = "pac_ret"
-  sanitize = {
-    integer_overflow = true
-    ubsan = true
-    boundary_sanitize = true
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
+  ohos_shared_library("crypto_extension_module") {
+    branch_protector_ret = "pac_ret"
+    sanitize = {
+      integer_overflow = true
+      ubsan = true
+      boundary_sanitize = true
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
 
-  include_dirs = [
-    "inc",
-    "//base/security/huks/services/huks_standard/huks_service/extension/ability_native/inc/",
-  ]
-
-  sources = [
-    "src/hks_ext_module_loader.cpp",
-    "//base/security/huks/services/huks_standard/huks_service/extension/ability_native/src/log_utils.c",
-   ]
-
-  deps = [ 
-    "//base/security/huks/services/huks_standard/huks_service/extension/ability_native:crypto_extension_ability_native",
-    "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:huks_access_ext_base_include",
+    include_dirs = [
+      "inc",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ability_native/inc/",
     ]
 
-  external_deps = [
-    "ability_runtime:abilitykit_native",
-    "ability_runtime:runtime",
-    "bundle_framework:appexecfwk_base",
-    "c_utils:utils",
-    "common_event_service:cesfwk_innerkits",
-    "hilog:libhilog",
-    "ipc:ipc_napi",
-    "ipc:ipc_single",
-    "napi:ace_napi",
-  ]
+    sources = [
+      "//base/security/huks/services/huks_standard/huks_service/extension/ability_native/src/log_utils.c",
+      "src/hks_ext_module_loader.cpp",
+    ]
 
-  relative_install_dir = "extensionability/"
-  subsystem_name = "security"
-  part_name = "huks"
-}
+    deps = [
+      "//base/security/huks/services/huks_standard/huks_service/extension/ability_native:crypto_extension_ability_native",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:huks_access_ext_base_include",
+    ]
+
+    external_deps = [
+      "ability_runtime:abilitykit_native",
+      "ability_runtime:runtime",
+      "bundle_framework:appexecfwk_base",
+      "c_utils:utils",
+      "common_event_service:cesfwk_innerkits",
+      "hilog:libhilog",
+      "ipc:ipc_napi",
+      "ipc:ipc_single",
+      "napi:ace_napi",
+    ]
+
+    relative_install_dir = "extensionability/"
+    subsystem_name = "security"
+    part_name = "huks"
+  }
 }
