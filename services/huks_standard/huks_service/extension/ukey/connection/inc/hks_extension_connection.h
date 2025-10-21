@@ -42,7 +42,6 @@ public:
 private:
     std::condition_variable proxyConv_;
     std::mutex proxyMutex_;
-    bool isReady = false;
     std::atomic<bool> isConnected_ = {false};
     std::mutex deathRecipientMutex_;
     sptr<IRemoteObject::DeathRecipient> callerDeathRecipient_ = nullptr;

@@ -33,7 +33,7 @@ namespace Huks {
 
 class HuksLibInterface : private OHOS::DelayedSingleton<HuksLibInterface> {
 public:
-    OHOS::SafeMap<PluginMethodEnum, void*> pluginProviderMap;
+    OHOS::SafeMap<PluginMethodEnum, void*> m_pluginProviderMap;
 
     void initProviderMap(OHOS::SafeMap<PluginMethodEnum, void*> &pluginProviderMap);
     static std::shared_ptr<HuksLibInterface> GetInstanceWrapper();

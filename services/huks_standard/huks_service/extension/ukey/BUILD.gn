@@ -62,6 +62,7 @@ if (os_level == "standard") {
       "c_utils:utils",
       "hilog:libhilog",
       "ipc:ipc_core",
+      "ability_runtime:ability_connect_callback_stub",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
     ]
