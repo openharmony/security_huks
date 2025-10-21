@@ -230,6 +230,8 @@ HWTEST_F(UkeyCommonTest, UkeyCommonTest002, TestSize.Level0)
     EXPECT_EQ(ret77, HKS_SUCCESS);
 }
 
+
+
 /* *
  * @tc.name: UkeyCommonTest.UkeyCommonTest003
  * @tc.desc: success
@@ -394,18 +396,6 @@ HWTEST_F(UkeyCommonTest, UkeyCommonTest007, TestSize.Level0)
 
 HWTEST_F(UkeyCommonTest, UkeyCommonTest008, TestSize.Level0)
 {
-    // Test IsHksBlobEmpty
-    HksBlob emptyBlob = {0, nullptr};
-    EXPECT_TRUE(IsHksBlobEmpty(emptyBlob));
-
-    HksBlob validBlob = {5, reinterpret_cast<uint8_t*>(HksMalloc(5))};
-    EXPECT_FALSE(IsHksBlobEmpty(validBlob));
-    HKS_FREE(validBlob.data);
-
-    HksBlob zeroSizeBlob = {0, reinterpret_cast<uint8_t*>(HksMalloc(5))};
-    EXPECT_TRUE(IsHksBlobEmpty(zeroSizeBlob));
-    HKS_FREE(zeroSizeBlob.data);
-
     // Test IsHksExtCertInfoSetEmpty
     HksExtCertInfoSet emptyCertSet = {0, nullptr};
     EXPECT_TRUE(IsHksExtCertInfoSetEmpty(emptyCertSet));
@@ -423,15 +413,9 @@ HWTEST_F(UkeyCommonTest, UkeyCommonTest008, TestSize.Level0)
  */
 HWTEST_F(UkeyCommonTest, UkeyCommonTest009, TestSize.Level0)
 {
-    // Test StringToBlob with empty string
-    std::string emptyStr;
-    HksBlob emptyBlob = StringToBlob(emptyStr);
-    EXPECT_TRUE(IsHksBlobEmpty(emptyBlob));
-
     // Test StringToBlob with valid string
     std::string testStr = "Hello, World!";
     HksBlob testBlob = StringToBlob(testStr);
-    EXPECT_FALSE(IsHksBlobEmpty(testBlob));
     EXPECT_EQ(testBlob.size, testStr.size());
     EXPECT_EQ(memcmp(testBlob.data, testStr.data(), testStr.size()), 0);
 
@@ -450,78 +434,10 @@ HWTEST_F(UkeyCommonTest, UkeyCommonTest009, TestSize.Level0)
 
 /* *
  * @tc.name: UkeyCommonTest.UkeyCommonTest010
- * @tc.desc: Test StringToCertInfo and CertInfoToString functions
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyCommonTest, UkeyCommonTest010, TestSize.Level0)
-{
-    // Test StringToCertInfo with empty string
-    std::string emptyJson;
-    HksExtCertInfo certInfo = {0};
-    int32_t ret = StringToCertInfo(emptyJson, certInfo);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
-
-    // Test StringToCertInfo with invalid JSON
-    std::string invalidJson = "invalid json";
-    ret = StringToCertInfo(invalidJson, certInfo);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
-
-    // Test StringToCertInfo with valid JSON containing all fields
-    std::string validJson = R"({
-        "purpose": 1,
-        "index": "test_index",
-        "cert": "test_cert_data"
-    })";
-    ret = StringToCertInfo(validJson, certInfo);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    EXPECT_EQ(certInfo.purpose, 1);
-    EXPECT_FALSE(IsHksBlobEmpty(certInfo.index));
-    EXPECT_FALSE(IsHksBlobEmpty(certInfo.cert));
-    
-    std::string indexStr = BlobToString(certInfo.index);
-    std::string certStr = BlobToString(certInfo.cert);
-    EXPECT_EQ(indexStr, "test_index");
-    EXPECT_EQ(certStr, "test_cert_data");
-
-    // Test CertInfoToString
-    std::string outputJson;
-    ret = CertInfoToString(certInfo, outputJson);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    EXPECT_FALSE(outputJson.empty());
-
-    // Verify the output can be parsed back
-    HksExtCertInfo parsedCertInfo = {0};
-    ret = StringToCertInfo(outputJson, parsedCertInfo);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    EXPECT_EQ(parsedCertInfo.purpose, certInfo.purpose);
-    
-    std::string parsedIndexStr = BlobToString(parsedCertInfo.index);
-    std::string parsedCertStr = BlobToString(parsedCertInfo.cert);
-    EXPECT_EQ(parsedIndexStr, indexStr);
-    EXPECT_EQ(parsedCertStr, certStr);
-
-    // Clean up
-    HKS_FREE(certInfo.index.data);
-    HKS_FREE(certInfo.cert.data);
-    HKS_FREE(parsedCertInfo.index.data);
-    HKS_FREE(parsedCertInfo.cert.data);
-
-    // Test StringToCertInfo with partial JSON (only purpose)
-    std::string partialJson = R"({"purpose": 2})";
-    HksExtCertInfo partialCertInfo = {0};
-    ret = StringToCertInfo(partialJson, partialCertInfo);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    EXPECT_EQ(partialCertInfo.purpose, 2);
-    EXPECT_TRUE(IsHksBlobEmpty(partialCertInfo.index));
-    EXPECT_TRUE(IsHksBlobEmpty(partialCertInfo.cert));
-}
-
-/* *
- * @tc.name: UkeyCommonTest.UkeyCommonTest011
  * @tc.desc: Test JsonArrayToCertInfoSet and CertInfoSetToJsonArray functions
  * @tc.type: FUNC
  */
-HWTEST_F(UkeyCommonTest, UkeyCommonTest011, TestSize.Level0)
+HWTEST_F(UkeyCommonTest, UkeyCommonTest010, TestSize.Level0)
 {
     // Test JsonArrayToCertInfoSet with empty string
     std::string emptyArray;
@@ -566,22 +482,6 @@ HWTEST_F(UkeyCommonTest, UkeyCommonTest011, TestSize.Level0)
     EXPECT_EQ(index2, "index2");
     EXPECT_EQ(cert2, "cert2");
 
-    // Test CertInfoSetToJsonArray
-    std::string outputArray;
-    ret = CertInfoSetToJsonArray(certSet, outputArray);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    EXPECT_FALSE(outputArray.empty());
-
-    // Verify the output can be parsed back
-    HksExtCertInfoSet parsedCertSet = {0, nullptr};
-    ret = JsonArrayToCertInfoSet(outputArray, parsedCertSet);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    EXPECT_EQ(parsedCertSet.count, certSet.count);
-
-    // Clean up
-    FreeCertInfoSet(certSet);
-    FreeCertInfoSet(parsedCertSet);
-
     // Test JsonArrayToCertInfoSet with empty array
     std::string emptyJsonArray = "[]";
     HksExtCertInfoSet emptyCertSet = {0, nullptr};
@@ -590,66 +490,13 @@ HWTEST_F(UkeyCommonTest, UkeyCommonTest011, TestSize.Level0)
 }
 
 /* *
- * @tc.name: UkeyCommonTest.UkeyCommonTest012
- * @tc.desc: Test FreeCertInfoSet function
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyCommonTest, UkeyCommonTest012, TestSize.Level0)
-{
-    // Test FreeCertInfoSet with empty set
-    HksExtCertInfoSet emptySet = {0, nullptr};
-    FreeCertInfoSet(emptySet);
-    EXPECT_EQ(emptySet.count, 0);
-    EXPECT_EQ(emptySet.certs, nullptr);
-
-    // Test FreeCertInfoSet with valid set
-    HksExtCertInfoSet validSet = {2, 
-        reinterpret_cast<HksExtCertInfo*>(HksMalloc(2 * sizeof(HksExtCertInfo)))};
-    
-    // Initialize the certs
-    for (uint32_t i = 0; i < validSet.count; i++) {
-        validSet.certs[i].purpose = i + 1;
-        validSet.certs[i].index = StringToBlob("index_" + std::to_string(i));
-        validSet.certs[i].cert = StringToBlob("cert_" + std::to_string(i));
-    }
-
-    FreeCertInfoSet(validSet);
-    EXPECT_EQ(validSet.count, 0);
-    EXPECT_EQ(validSet.certs, nullptr);
-}
-
-/* *
- * @tc.name: UkeyCommonTest.UkeyCommonTest013
+ * @tc.name: UkeyCommonTest.UkeyCommonTest011
  * @tc.desc: Test edge cases for certificate info conversion functions
  * @tc.type: FUNC
  */
-HWTEST_F(UkeyCommonTest, UkeyCommonTest013, TestSize.Level0)
+HWTEST_F(UkeyCommonTest, UkeyCommonTest011, TestSize.Level0)
 {
-    // Test StringToCertInfo with JSON missing some fields
-    std::string minimalJson = R"({"purpose": 3})";
-    HksExtCertInfo certInfo = {0};
-    int32_t ret = StringToCertInfo(minimalJson, certInfo);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    EXPECT_EQ(certInfo.purpose, 3);
-    EXPECT_TRUE(IsHksBlobEmpty(certInfo.index));
-    EXPECT_TRUE(IsHksBlobEmpty(certInfo.cert));
     
-    // Test with only index field
-    std::string indexOnlyJson = R"({"index": "test_index_value"})";
-    HksExtCertInfo indexOnlyCert = {0};
-    ret = StringToCertInfo(indexOnlyJson, indexOnlyCert);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    EXPECT_EQ(indexOnlyCert.purpose, 0); // default value
-    EXPECT_FALSE(IsHksBlobEmpty(indexOnlyCert.index));
-    EXPECT_TRUE(IsHksBlobEmpty(indexOnlyCert.cert));
-    
-    std::string indexValue = BlobToString(indexOnlyCert.index);
-    EXPECT_EQ(indexValue, "test_index_value");
-
-    // Clean up
-    HKS_FREE(indexOnlyCert.index.data);
-
-    // Test CertInfoToString with minimal cert info
     HksExtCertInfo minimalCert = {0};
     minimalCert.purpose = 5;
     // index and cert are empty by default
@@ -669,19 +516,14 @@ HWTEST_F(UkeyCommonTest, UkeyCommonTest013, TestSize.Level0)
 }
 
 /* *
- * @tc.name: UkeyCommonTest.UkeyCommonTest014
+ * @tc.name: UkeyCommonTest.UkeyCommonTest012
  * @tc.desc: Test memory allocation failure scenarios
  * @tc.type: FUNC
  */
-HWTEST_F(UkeyCommonTest, UkeyCommonTest014, TestSize.Level0)
+HWTEST_F(UkeyCommonTest, UkeyCommonTest012, TestSize.Level0)
 {
-    // Note: This test is mostly for documentation purposes since we can't
-    // easily simulate memory allocation failures in unit tests
-    
-    // Test large string to blob conversion
     std::string largeString(10000, 'A'); // 10KB string
     HksBlob largeBlob = StringToBlob(largeString);
-    EXPECT_FALSE(IsHksBlobEmpty(largeBlob));
     EXPECT_EQ(largeBlob.size, largeString.size());
     
     std::string convertedBack = BlobToString(largeBlob);
@@ -692,7 +534,6 @@ HWTEST_F(UkeyCommonTest, UkeyCommonTest014, TestSize.Level0)
     // Test with special characters in strings
     std::string specialChars = "Line1\nLine2\tTab\x01Binary";
     HksBlob specialBlob = StringToBlob(specialChars);
-    EXPECT_FALSE(IsHksBlobEmpty(specialBlob));
     
     std::string specialBack = BlobToString(specialBlob);
     EXPECT_EQ(specialBack, specialChars);

@@ -25,23 +25,13 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 
-    bool IsHksBlobEmpty(const struct HksBlob& blob);
-
     bool IsHksExtCertInfoSetEmpty(const struct HksExtCertInfoSet& certSet);
     HksBlob Base64StringToBlob(const std::string &inStr);
     std::string BlobToBase64String(const struct HksBlob &strBlob);
     HksBlob StringToBlob(const std::string &inStr);
     std::string BlobToString(const HksBlob &strBlob);
-
-    int32_t StringToCertInfo(const std::string &certInfoJson, struct HksExtCertInfo& certInfo);
-
     int32_t CertInfoToString(const struct HksExtCertInfo& certInfo, std::string& jsonStr);
-
     int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCertInfoSet& certSet);
-
-    int32_t CertInfoSetToJsonArray(const struct HksExtCertInfoSet& certSet, std::string& jsonArrayStr);
-
-    void FreeCertInfoSet(HksExtCertInfoSet &certSet);
 
 }
 }

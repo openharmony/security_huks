@@ -74,26 +74,19 @@ int32_t HksRemoteHandleManager::MergeProviderCertificates(const ProviderInfo &pr
     const std::string &providerCertVec, CommJsonObject &combinedArray)
 {
     CommJsonObject providerArray = CommJsonObject::Parse(providerCertVec);
-    HKS_IF_TRUE_LOGE_RETURN(providerArray.IsNull() || !providerArray.IsArray(), HKS_ERROR_JSON_PARSE_FAILED,
-        "Parse provider certificate array failed")
-
     int32_t certCount = providerArray.ArraySize();
+    HKS_IF_TRUE_LOGE_RETURN(certCount < 0, HKS_ERROR_JSON_SERIALIZE_FAILED, "invalid providerCertVec")
     for (int32_t i = 0; i < certCount; i++) {
         CommJsonObject certObj = providerArray.GetElement(i);
-        HKS_IF_TRUE_CONTINUE(certObj.IsNull())
-        
         auto indexValue = certObj.GetValue("index");
-        HKS_IF_TRUE_CONTINUE(indexValue.IsNull())
         certObj.RemoveKey("index");
         auto indexResult = indexValue.ToString();
         HKS_IF_TRUE_CONTINUE(indexResult.first != HKS_SUCCESS || indexResult.second.empty())
         std::string wrappedIndex;
         if (WrapIndexWithProviderInfo(providerInfo, indexResult.second, wrappedIndex) == HKS_SUCCESS) {
-            HKS_IF_TRUE_LOGE_RETURN(!certObj.SetValue("index", wrappedIndex), HKS_ERROR_JSON_SERIALIZE_FAILED,
-                "Set wrapped index failed")
+            HKS_IF_TRUE_CONTINUE(!certObj.SetValue("index", wrappedIndex))
         }
-        HKS_IF_TRUE_LOGE_RETURN(!combinedArray.AppendElement(certObj), HKS_ERROR_JSON_SERIALIZE_FAILED,
-            "Add certificate to combined array failed")
+        HKS_IF_TRUE_CONTINUE(!combinedArray.AppendElement(certObj))
     }
     return HKS_SUCCESS;
 }
@@ -104,15 +97,9 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
     CommJsonObject root = CommJsonObject::Parse(index);
     HKS_IF_TRUE_LOGE_RETURN(root.IsNull(), HKS_ERROR_JSON_PARSE_FAILED,
         "Parse index failed, invalid JSON format")
-
-    auto providerNameObj = root.GetValue(PROVIDER_NAME_KEY);
-    auto abilityNameObj = root.GetValue(ABILITY_NAME_KEY);
-    auto bundleNameObj = root.GetValue(BUNDLE_NAME_KEY);
-    HKS_IF_TRUE_LOGE_RETURN(providerNameObj.IsNull() || abilityNameObj.IsNull() ||
-        bundleNameObj.IsNull(), HKS_ERROR_JSON_MISSING_KEY, "Required provider info fields are missing")
-    auto providerNameResult = providerNameObj.ToString();
-    auto abilityNameResult = abilityNameObj.ToString();
-    auto bundleNameResult = bundleNameObj.ToString();
+    auto providerNameResult = root.GetValue(PROVIDER_NAME_KEY).ToString();
+    auto abilityNameResult = root.GetValue(ABILITY_NAME_KEY).ToString();
+    auto bundleNameResult = root.GetValue(BUNDLE_NAME_KEY).ToString();
     HKS_IF_TRUE_LOGE_RETURN(providerNameResult.first != HKS_SUCCESS || abilityNameResult.first != HKS_SUCCESS ||
         bundleNameResult.first != HKS_SUCCESS, HKS_ERROR_JSON_TYPE_MISMATCH, "Get provider info fields failed")
 
@@ -122,24 +109,10 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
     HKS_IF_TRUE_LOGE_RETURN(providerInfo.m_providerName.empty() || providerInfo.m_abilityName.empty() ||
         providerInfo.m_bundleName.empty(), HKS_ERROR_JSON_INVALID_VALUE, "Provider info is incomplete")
 
-    CommJsonObject newRoot = CommJsonObject::CreateObject();
-    HKS_IF_TRUE_LOGE_RETURN(newRoot.IsNull(), HKS_ERROR_JSON_SERIALIZE_FAILED,
-        "Create new JSON object failed")
-
-    auto keys = root.GetKeys();
-    for (const auto &key : keys) {
-        if (key == PROVIDER_NAME_KEY || key == ABILITY_NAME_KEY || key == BUNDLE_NAME_KEY) {
-            continue;
-        }
-        auto value = root.GetValue(key);
-        if (!value.IsNull() && !newRoot.SetValue(key, value)) {
-            HKS_LOG_E("Copy field %s failed", key.c_str());
-            return HKS_ERROR_JSON_SERIALIZE_FAILED;
-        }
-    }
-    newIndex = newRoot.Serialize(false);
-    HKS_IF_TRUE_LOGE_RETURN(newIndex.empty(), HKS_ERROR_JSON_SERIALIZE_FAILED,
+    auto res = root.GetValue("index").ToString();
+    HKS_IF_TRUE_LOGE_RETURN(res.first != HKS_SUCCESS, HKS_ERROR_JSON_SERIALIZE_FAILED,
         "New index is empty")
+    newIndex = res.second;
     return HKS_SUCCESS;
 }
 
@@ -178,26 +151,6 @@ OHOS::sptr<IHuksAccessExtBase> HksRemoteHandleManager::GetProviderProxy(const Pr
     
     ret = HKS_SUCCESS;
     return proxy;
-}
-
-int32_t HksRemoteHandleManager::CreateRemoteIndex(const ProviderInfo &providerInfo,
-    const CppParamSet &paramSet, std::string &index)
-{
-    CommJsonObject root = CommJsonObject::CreateObject();
-    if (root.IsNull()) {
-        HKS_LOG_E("Create JSON object failed");
-        return HKS_ERROR_JSON_SERIALIZE_FAILED;
-    }
-    
-    if (!root.SetValue(PROVIDER_NAME_KEY, providerInfo.m_providerName) ||
-        !root.SetValue(ABILITY_NAME_KEY, providerInfo.m_abilityName) ||
-        !root.SetValue(BUNDLE_NAME_KEY, providerInfo.m_bundleName)) {
-        HKS_LOG_E("Set provider info to index failed");
-        return HKS_ERROR_JSON_SERIALIZE_FAILED;
-    }
-    
-    index = root.Serialize(false);
-    return HKS_SUCCESS;
 }
 
 int32_t HksRemoteHandleManager::ValidateAndGetHandle(const std::string &newIndex,
@@ -379,7 +332,7 @@ int32_t HksRemoteHandleManager::RemoteHandleVerify(const std::string &index, con
 int32_t HksRemoteHandleManager::FindRemoteCertificate(const std::string &index,
     const CppParamSet &paramSet, std::string &cert)
 {
-    ProviderInfo providerInfo;
+    ProviderInfo providerInfo = {"", "", ""};
     std::string newIndex;
     int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
@@ -418,11 +371,12 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
             "Get proxy for provider failed, skipping")
         std::string tmpCertVec = "";
         auto ipccode = proxy->ExportProviderCertificates(paramSet, tmpCertVec, ret);
-        HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK || ret != HKS_SUCCESS, ret,
-            "ExportProviderCertificates for provider failed")
-        
+        HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL,
+            "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
+        HKS_IF_TRUE_LOGE_CONTINUE(ret != HKS_SUCCESS, "ExportProviderCertificates for provider failed")
+
         ret = MergeProviderCertificates(providerInfo, tmpCertVec, combinedArray);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Merge certificates for provider failed")
+        HKS_IF_TRUE_LOGE_CONTINUE(ret != HKS_SUCCESS, "Merge certificates for provider failed")
     }
     
     certVec = combinedArray.Serialize(false);

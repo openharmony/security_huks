@@ -38,8 +38,6 @@ public:
 
     static std::shared_ptr<HksRemoteHandleManager> GetInstanceWrapper();
     static void ReleaseInstance();
-
-    int32_t CreateRemoteIndex(const ProviderInfo &providerInfo, const CppParamSet &paramSet, std::string &index);
     // handle管理
     int32_t CreateRemoteHandle(const std::string &index, const CppParamSet &paramSet);
     int32_t CloseRemoteHandle(const std::string &index, const CppParamSet &paramSet);
