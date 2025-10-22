@@ -121,7 +121,7 @@ int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCert
     int32_t arraySize = jsonArray.ArraySize();
     HKS_IF_TRUE_LOGE_RETURN(arraySize == 0, HKS_ERROR_INVALID_ARGUMENT,
         "Json array size invalid: %" LOG_PUBLIC "d", arraySize)
-    certSet.count = arraySize;
+    certSet.count = static_cast<uint32_t>(arraySize);
     certSet.certs = (HksExtCertInfo *)HksMalloc(arraySize * sizeof(HksExtCertInfo));
     HKS_IF_NULL_LOGE_RETURN(certSet.certs, HKS_ERROR_MALLOC_FAIL,
         "Malloc for cert set failed, size: %" LOG_PUBLIC "d", arraySize)

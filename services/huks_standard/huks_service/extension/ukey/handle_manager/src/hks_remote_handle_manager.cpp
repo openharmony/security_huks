@@ -109,10 +109,24 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
     HKS_IF_TRUE_LOGE_RETURN(providerInfo.m_providerName.empty() || providerInfo.m_abilityName.empty() ||
         providerInfo.m_bundleName.empty(), HKS_ERROR_JSON_INVALID_VALUE, "Provider info is incomplete")
 
-    auto res = root.GetValue("index").ToString();
-    HKS_IF_TRUE_LOGE_RETURN(res.first != HKS_SUCCESS, HKS_ERROR_JSON_SERIALIZE_FAILED,
+     CommJsonObject newRoot = CommJsonObject::CreateObject();	
+    HKS_IF_TRUE_LOGE_RETURN(newRoot.IsNull(), HKS_ERROR_JSON_SERIALIZE_FAILED,	
+        "Create new JSON object failed")
+
+    auto keys = root.GetKeys();
+    for (const auto &key : keys) {
+        if (key == PROVIDER_NAME_KEY || key == ABILITY_NAME_KEY || key == BUNDLE_NAME_KEY) {
+            continue;
+        }
+        auto value = root.GetValue(key);
+        if (!value.IsNull() && !newRoot.SetValue(key, value)) {
+            HKS_LOG_E("Copy field %s failed", key.c_str());
+            return HKS_ERROR_JSON_SERIALIZE_FAILED;
+        }
+    }
+    newIndex = newRoot.Serialize(false);
+    HKS_IF_TRUE_LOGE_RETURN(newIndex.empty(), HKS_ERROR_JSON_SERIALIZE_FAILED,
         "New index is empty")
-    newIndex = res.second;
     return HKS_SUCCESS;
 }
 
