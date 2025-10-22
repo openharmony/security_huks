@@ -216,6 +216,7 @@ void HksDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remoteObject)
 
 void HksDeathRecipient::NotifyExtOnBinderDied(int32_t uid)
 {
+#ifdef SUPPORT_COMMON_EVENT
     OHOS::AAFwk::Want want;
     want.SetAction(COMMON_EVENT_HKS_BINDER_DIED);
     want.SetParam("uid", uid);
@@ -224,6 +225,9 @@ void HksDeathRecipient::NotifyExtOnBinderDied(int32_t uid)
     eventData.SetWant(want);
     
     HksPluginOnReceiveEvent(&eventData);
+#else
+    HKS_LOG_E("not support common event on binder died");
+#endif
 }
 
 HksDeathRecipient::HksDeathRecipient(int32_t callingPid, int32_t callingUid)
