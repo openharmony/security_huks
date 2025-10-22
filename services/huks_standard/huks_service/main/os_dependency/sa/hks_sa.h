@@ -72,12 +72,13 @@ private:
 
 class HksDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
-    HksDeathRecipient() {}
-    explicit HksDeathRecipient(int32_t callingPid);
+    explicit HksDeathRecipient(int32_t callingPid, int32_t callingUid);
     ~HksDeathRecipient() override = default;
     void OnRemoteDied(const wptr<IRemoteObject>& remoteObject) override;
 private:
+    void NotifyExtOnBinderDied(int32_t pid);
     int32_t callingPid_;
+    int32_t callingUid_;
 };
 
 } // namespace Hks

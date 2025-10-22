@@ -326,6 +326,7 @@ struct HksKeyAliasSet {
 #define HKS_KEY_MATERIAL_NUM 3
 #define HKS_MAX_KEY_LEN (HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_4096) * HKS_KEY_MATERIAL_NUM)
 #define HKS_MAX_KEY_MATERIAL_LEN (sizeof(struct HksPubKeyInfo) + HKS_MAX_KEY_LEN + HKS_AE_TAG_LEN)
+#define COMMON_EVENT_HKS_BINDER_DIED "ohos.hks.action.BINDER_DIED"
 
 /**
  * @brief hks store header info
