@@ -35,6 +35,11 @@ struct HksSuccessReturnResult {
     struct HksBlob *outData;
     HksParamSet *paramSet;
     struct HksCertChain *certChain;
+
+    // ukey features
+    struct HksBlob *index;
+    uint32_t retryCount;
+    int32_t outStatus;
 };
 
 struct HksSuccessListAliasesResult {
@@ -135,12 +140,16 @@ napi_value ParseKeyData(napi_env env, napi_value value, HksBlob *&keyDataBlob);
 
 napi_value GetPropertyFromOptions(napi_env env, napi_value value, const std::string propertyStr);
 
+napi_value GenerateHksParamArray(napi_env env, const HksParamSet &paramSet);
+
 void SuccessReturnResultInit(struct HksSuccessReturnResult &resultData);
 
 void SuccessListAliasesReturnResultInit(struct HksSuccessListAliasesResult &resultData);
 
 void HksReturnNapiResult(napi_env env, napi_ref callback, napi_deferred deferred, int32_t errorCode,
     const struct HksSuccessReturnResult resultData);
+
+void HksReturnNapiUndefined(napi_env env, napi_ref callback, napi_deferred deferred, int32_t errorCode);
 
 void HksReturnKeyExistResult(napi_env env, napi_ref callback, napi_deferred deferred, int32_t errorCode,
     const struct HksSuccessReturnResult resultData);
@@ -149,6 +158,8 @@ void HksReturnListAliasesResult(napi_env env, napi_ref callback, napi_deferred d
     const struct HksSuccessListAliasesResult resultData);
 
 napi_value CreateJsError(napi_env env, int32_t errCode, const char *errorMsg);
+
+void SetRetryCount(int32_t retryCount);
 
 inline void HksNapiThrow(napi_env env, int32_t errCode, const char *errorMsg)
 {

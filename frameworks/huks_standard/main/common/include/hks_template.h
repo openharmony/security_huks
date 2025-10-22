@@ -274,4 +274,9 @@ if (!(RESULT)) { \
     return (ERROR_CODE); \
 }
 
+#define HKS_IF_NOT_TRUE_EXCU(BOOL_FUNC, EXCU_FUNC) \
+({ if (!(BOOL_FUNC)) { \
+    (EXCU_FUNC); \
+} })
+
 #endif /* HKS_TEMPLATE_H */

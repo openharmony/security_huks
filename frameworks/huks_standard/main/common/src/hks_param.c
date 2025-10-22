@@ -158,6 +158,18 @@ static uint32_t g_validTags[] = {
     HKS_TAG_WRAP_DATA_ASSET_EXTRA_AAD,
     DKS_TAG_IS_USE_DISTRIBUTED_KEY,
     DKS_TAG_IS_ALLOW_REMOTE_OPERATE,
+
+    HKS_TAG_REMOTE_DEVICE,
+    HKS_TAG_REMOTE_APP,
+    HKS_TAG_REMOTE_CONTAINER,
+    HKS_EXT_CRYPTO_TAG_UKEY_PIN,
+    HKS_EXT_CRYPTO_TAG_ABILITY_NAME,
+    HKS_TAG_REMOTE_ABILITY_SN,
+    HKS_EXT_CRYPTO_TAG_EXTRA_DATA,
+    HKS_TAG_KEY_CLASS,
+    HKS_EXT_CRYPTO_TAG_UID,
+    HKS_EXT_CRYPTO_TAG_PURPOSE,
+    HKS_EXT_CRYPTO_TAG_TIMEOUT
 };
 
 HKS_API_EXPORT enum HksTagType GetTagType(enum HksTag tag)
@@ -359,6 +371,24 @@ HKS_API_EXPORT void HksFreeKeyAliasSet(struct HksKeyAliasSet *aliasSet)
     HKS_FREE(aliasSet->aliases);
     HKS_FREE(aliasSet);
     aliasSet = NULL;
+}
+
+HKS_API_EXPORT void HksFreeExtCertSet(struct HksExtCertInfoSet *certInfoSet)
+{
+    if (certInfoSet == NULL) {
+        return;
+    }
+
+    if (certInfoSet->count > 0 && certInfoSet->certs != NULL) {
+        for (uint32_t i = 0; i < certInfoSet->count; i++) {
+            HKS_FREE_BLOB(certInfoSet->certs[i].index);
+            HKS_FREE_BLOB(certInfoSet->certs[i].cert);
+        }
+    }
+
+    certInfoSet->count = 0;
+    HKS_FREE(certInfoSet->certs);
+    certInfoSet = NULL;
 }
 
 static int32_t FreshParamSet(struct HksParamSet *paramSet, bool isCopy)

@@ -39,6 +39,8 @@ ohos_unittest("service_ipc_test") {
   sources += [
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc/hks_ipc_service.c",
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc/hks_service_ipc_serialization.c",
+
+    # "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc/hks_ipc_service_provider_adapter.cpp",
   ]
 
   deps = [

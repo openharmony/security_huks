@@ -25,14 +25,20 @@ extern "C" {
 
 int32_t GetBlobFromBuffer(struct HksBlob *blob, const struct HksBlob *srcBlob, uint32_t *srcOffset);
 
+int32_t HksUKeyGeneralUnpack(const struct HksBlob *srcData, struct HksBlob *blob, struct HksParamSet **paramSet);
+
 int32_t HksGenerateKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
     struct HksParamSet **paramSetIn, struct HksBlob *keyOut);
+
+int32_t HksParamSetPack(struct HksBlob *inBlob, const struct HksParamSet *paramSet);
 
 int32_t HksImportKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias, struct HksParamSet **paramSet,
     struct HksBlob *key);
 
 int32_t HksImportWrappedKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
     struct HksBlob *wrappingKeyAlias, struct HksParamSet **paramSet, struct HksBlob *wrappedKeyData);
+
+int32_t HksClearPinAuthStateUnpack(const struct HksBlob *srcData, struct HksBlob *index);
 
 int32_t HksDeleteKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias, struct HksParamSet **paramSet);
 
@@ -74,6 +80,8 @@ int32_t HksCertificateChainUnpack(const struct HksBlob *srcData, struct HksBlob 
 int32_t HksParamSetToParams(const struct HksParamSet *paramSet, struct HksParamOut *outParams, uint32_t cnt);
 
 int32_t HksListAliasesUnpack(const struct HksBlob *srcData, struct HksParamSet **paramSet);
+
+int32_t HksCertificatesPackFromService(const struct HksExtCertInfoSet *certs, struct HksBlob *destData);
 
 int32_t HksListAliasesPackFromService(const struct HksKeyAliasSet *aliasSet, struct HksBlob *destData);
 

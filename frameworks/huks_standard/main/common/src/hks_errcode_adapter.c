@@ -697,7 +697,28 @@ static struct HksError g_errCodeTable[] = {
             .errorMsg = "import keystore check user id fail.",
             .data = NULL
         }
-    },
+    }, {
+        .innerErrCode = HUKS_ERR_CODE_PIN_CODE_ERROR,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_PIN_CODE_ERROR,
+            .errorMsg = "The auth pin is not correct.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_PROVIDER_HAS_REGISTERED,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_PROVIDER_REGISTED,
+            .errorMsg = "The auth pin is not correct.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_REMOTE_OPERATION_FAILED,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
+            .errorMsg = "The auth pin is not correct.",
+            .data = NULL
+        }
+    }
 };
 
 /**
