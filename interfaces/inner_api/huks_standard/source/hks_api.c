@@ -205,7 +205,6 @@ HKS_API_EXPORT int32_t HksGetRemoteHandle(const struct HksBlob *resourceId,
 #else
     (void)resourceId;
     (void)paramSetIn;
-    (void)remoteHandleOut;
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
