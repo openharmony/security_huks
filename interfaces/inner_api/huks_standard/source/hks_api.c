@@ -174,33 +174,32 @@ HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *resourceId,
 }
 
 HKS_API_EXPORT int32_t HksOpenRemoteHandle(const struct HksBlob *resourceId,
-    const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
+    const struct HksParamSet *paramSetIn)
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter OpenRemoteHandle");
-    if ((resourceId == NULL) || (paramSetIn == NULL) || (remoteHandleOut == NULL)) {
+    if ((resourceId == NULL) || (paramSetIn == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
-    int32_t ret = HksClientOpenRemoteHandle(resourceId, paramSetIn, remoteHandleOut);
+    int32_t ret = HksClientOpenRemoteHandle(resourceId, paramSetIn);
     HKS_IF_NOT_SUCC_LOGE(ret, "leave OpenRemoteHandle, result = %" LOG_PUBLIC "d", ret);
     return ret;
 #else
     (void)resourceId;
     (void)paramSetIn;
-    (void)remoteHandleOut;
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
 
 HKS_API_EXPORT int32_t HksGetRemoteHandle(const struct HksBlob *resourceId,
-    const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
+    const struct HksParamSet *paramSetIn)
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter GetRemoteHandle");
-    if ((resourceId == NULL) || (paramSetIn == NULL) || (remoteHandleOut == NULL)) {
+    if ((resourceId == NULL) || (paramSetIn == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
-    int32_t ret = HksClientGetRemoteHandle(resourceId, paramSetIn, remoteHandleOut);
+    int32_t ret = HksClientGetRemoteHandle(resourceId, paramSetIn);
     HKS_IF_NOT_SUCC_LOGE(ret, "leave GetRemoteHandle, result = %" LOG_PUBLIC "d", ret);
     return ret;
 #else
@@ -227,10 +226,10 @@ HKS_API_EXPORT int32_t HksCloseRemoteHandle(const struct HksBlob *resourceId,
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
-HKS_API_EXPORT int32_t HksClearPinAuthState(const struct HksBlob *resourceId)
+HKS_API_EXPORT int32_t HksClearUkeyPinAuthState(const struct HksBlob *resourceId)
 {
 #ifdef L2_STANDARD
-    HKS_LOG_D("enter ClearPinAuthState");
+    HKS_LOG_D("enter ClearUkeyPinAuthState");
     if (resourceId == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
@@ -285,14 +284,14 @@ HKS_API_EXPORT int32_t HksUkeyVerify(const struct HksBlob *resourceId, const str
 }
 
 HKS_API_EXPORT int32_t HksGetRemoteProperty(const struct HksBlob *resourceId, const struct HksBlob *propertyId,
-    const struct HksParamSet *paramSetIn, struct HksParamSet *propertySetOut)
+    const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut)
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter GetRemoteProperty");
     if ((resourceId == NULL) || (propertyId == NULL) || (paramSetIn == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
-    int32_t ret = HksClientGetRemoteProperty(resourceId, propertyId, paramSetIn, &propertySetOut);
+    int32_t ret = HksClientGetRemoteProperty(resourceId, propertyId, paramSetIn, propertySetOut);
     HKS_IF_NOT_SUCC_LOGE(ret, "leave GetRemoteProperty, result = %" LOG_PUBLIC "d", ret);
     return ret;
 #else
