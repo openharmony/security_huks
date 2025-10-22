@@ -53,6 +53,7 @@
 #include "huks_napi_update_finish.h"
 #include "huks_napi_update_finish_session.h"
 #include "huks_napi_wrap_key.h"
+// UKey functions moved to separate shared library huksexternalcrypto_napi
 
 namespace HuksNapi {
 inline void AddInt32Property(napi_env env, napi_value object, const char *name, int32_t value)
@@ -200,6 +201,11 @@ static void AddHuksTagPart3(napi_env env, napi_value tag)
     AddInt32Property(env, tag, "HUKS_TAG_CHALLENGE_TYPE", HKS_TAG_CHALLENGE_TYPE);
     AddInt32Property(env, tag, "HUKS_TAG_CHALLENGE_POS", HKS_TAG_CHALLENGE_POS);
     AddInt32Property(env, tag, "HUKS_TAG_KEY_AUTH_PURPOSE", HKS_TAG_KEY_AUTH_PURPOSE);
+
+    // UKEY
+    AddInt32Property(env, tag, "HUKS_TAG_KEY_CLASS", HKS_TAG_KEY_CLASS);
+
+    /* ExtensionAbility TAGs moved to external crypto (ukey) module */
 }
 
 static napi_value CreateHuksTag(napi_env env)
@@ -572,6 +578,17 @@ static napi_value CreateHuksTagType(napi_env env)
     return tagType;
 }
 
+static napi_value CreateHuksKeyClassType(napi_env env)
+{
+    napi_value keyClassType = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &keyClassType));
+
+    AddInt32Property(env, keyClassType, "HUKS_KEY_CLASS_DEFAULT", HKS_KEY_CLASS_DEFAULT);
+    AddInt32Property(env, keyClassType, "HUKS_KEY_CLASS_EXTENSION", HKS_KEY_CLASS_EXTENSION);
+
+    return keyClassType;
+}
+
 static napi_value CreateHuksImportKeyType(napi_env env)
 {
     napi_value ImportKeyType = nullptr;
@@ -743,6 +760,7 @@ napi_property_descriptor NAPI_FUNC_DESC[] = {
     DECLARE_NAPI_FUNCTION("listAliases", HuksNapiListAliases),
     DECLARE_NAPI_FUNCTION("wrapKeyItem", HuksNapiWrapKey),
     DECLARE_NAPI_FUNCTION("unwrapKeyItem", HuksNapiUnwrapKey),
+
 };
 
 static napi_value HuksNapiRegister(napi_env env, napi_value exports)
@@ -760,6 +778,7 @@ static napi_value HuksNapiRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("HuksKeyFlag", CreateHuksKeyFlag(env)),
         DECLARE_NAPI_PROPERTY("HuksKeyStorageType", CreateHuksKeyStorageType(env)),
         DECLARE_NAPI_PROPERTY("HuksTagType", CreateHuksTagType(env)),
+        DECLARE_NAPI_PROPERTY("HuksKeyClassType", CreateHuksKeyClassType(env)),
         DECLARE_NAPI_PROPERTY("HuksTag", CreateHuksTag(env)),
         DECLARE_NAPI_PROPERTY("HuksImportKeyType", CreateHuksImportKeyType(env)),
         DECLARE_NAPI_PROPERTY("HuksUnwrapSuite", CreateHuksUnwrapSuite(env)),
@@ -773,6 +792,7 @@ static napi_value HuksNapiRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("HuksRsaPssSaltLenType", CreateHuksRsaPssSaltLenType(env)),
         DECLARE_NAPI_PROPERTY("HuksAuthStorageLevel", CreateHuksAuthStorageLevel(env)),
         DECLARE_NAPI_PROPERTY("HuksKeyWrapType", CreateHuksKeyWrapType(env)),
+
     };
     napi_property_descriptor desc[HKS_ARRAY_SIZE(NAPI_FUNC_DESC) + HKS_ARRAY_SIZE(propDesc)];
 

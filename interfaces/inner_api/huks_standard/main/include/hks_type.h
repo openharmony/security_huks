@@ -89,8 +89,12 @@ extern "C" {
 #define HKS_KEY_BLOB_AT_KEY_SIZE 256
 #define HKS_KEY_BLOB_AT_KEY_BYTES 32
 
+#define HKS_MAX_CERT_COUNT 2048
 #define HKS_MAX_KEY_ALIAS_COUNT 2048
 #define MAX_ERROR_MESSAGE_LEN 512
+
+#define OH_HUKS_EXTERNAL_CRYPTO_MAX_PROVIDER_NAME_LEN 100
+#define OH_HUKS_EXTERNAL_CRYPTO_MAX_RESOURCE_ID_LEN 512
 
 /**
  * @brief hks blob
@@ -98,6 +102,17 @@ extern "C" {
 struct HksBlob {
     uint32_t size;
     uint8_t *data;
+};
+
+struct HksExtCertInfo {
+    int32_t purpose;
+    struct HksBlob index;
+    struct HksBlob cert;
+};
+
+struct HksExtCertInfoSet {
+    uint32_t count;
+    struct HksExtCertInfo *certs;
 };
 
 /**
@@ -121,6 +136,23 @@ struct HksParamSet {
     uint32_t paramSetSize;
     uint32_t paramsCnt;
     struct HksParam params[];
+};
+
+struct HksExtParam {
+    uint32_t tag;
+    union {
+        bool boolParam;
+        int32_t int32Param;
+        uint32_t uint32Param;
+        uint64_t uint64Param;
+        struct HksBlob blob;
+    };
+};
+
+struct HksExtParamSet {
+    uint32_t paramSetSize;
+    uint32_t paramsCnt;
+    struct HksExtParam params[];
 };
 
 /**

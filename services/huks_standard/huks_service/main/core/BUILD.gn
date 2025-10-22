@@ -78,6 +78,7 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_util_standard_static",
+      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
       "//base/security/huks/services/huks_standard/huks_service/main/ha:libhuks_service_ha_static",
       "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
       "//base/security/huks/utils/list:libhuks_utils_list_static",
@@ -110,15 +111,16 @@ if (os_level == "standard") {
       "src/hks_report.c",
       "src/hks_report_check_key_exited.cpp",
       "src/hks_report_common.cpp",
+      "src/hks_report_data_size.cpp",
       "src/hks_report_delete_key.cpp",
       "src/hks_report_generate_key.cpp",
       "src/hks_report_import_key.cpp",
       "src/hks_report_list_aliases.cpp",
       "src/hks_report_rename_key.cpp",
-      "src/hks_report_data_size.cpp",
       "src/hks_report_three_stage.cpp",
       "src/hks_report_three_stage_build.cpp",
       "src/hks_report_three_stage_get.cpp",
+      "src/hks_ukey_three_stage_adapter.cpp",
     ]
 
     deps += [

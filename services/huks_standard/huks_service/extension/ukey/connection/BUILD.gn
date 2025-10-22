@@ -1,0 +1,62 @@
+# Copyright (C) 2021-2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//base/security/huks/build/config.gni")
+import("//build/ohos.gni")
+
+if (os_level == "standard") {
+  ohos_static_library("libhuks_extension_connection_static") {
+    subsystem_name = "security"
+    part_name = "huks"
+
+    # version_script = "libhuks_external_crypto_ext_core.map"
+    configs = [
+      "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+    ]
+
+    include_dirs = [ "inc" ]
+
+    sources = [ "src/hks_extension_connection.cpp" ]
+
+    deps = [
+      "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:huks_access_ext_base_include",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
+    ]
+
+    complete_static_lib = true
+    cflags = []
+
+    branch_protector_ret = "pac_ret"
+
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+      cfi_cross_dso = true
+      boundary_sanitize = true
+      ubsan = true
+    }
+
+    external_deps = [
+      "ability_base:ability_base_want",
+      "ability_runtime:ability_connect_callback_stub",
+      "ability_runtime:ability_manager",
+      "c_utils:utils",
+      "hilog:libhilog",
+      "ipc:ipc_core",
+    ]
+  }
+}

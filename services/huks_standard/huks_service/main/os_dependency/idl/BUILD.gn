@@ -25,10 +25,16 @@ if (os_level == "standard") {
     part_name = "huks"
     public_configs = [ ":huks_config" ]
 
-    include_dirs = [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough" ]
+    include_dirs = [
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough",
+      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger/inc",
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",
+    ]
 
     sources = [
       "ipc/hks_ipc_service.c",
+      "ipc/hks_ipc_service_provider.cpp",
+      "ipc/hks_ipc_service_provider_adapter.cpp",
       "ipc/hks_permission_check.cpp",
       "ipc/hks_response.cpp",
       "ipc/hks_service_ipc_serialization.c",
@@ -45,6 +51,9 @@ if (os_level == "standard") {
 
     deps = [
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+
+      # "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
       "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/at_wrapper:libhuks_at_systemapi_wrap_static",
     ]
@@ -97,6 +106,7 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough",
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/sa_mgr",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/include",
+      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger/inc",
     ]
     configs = [
       "//base/security/huks/frameworks/config/build:l1_small_common_config",

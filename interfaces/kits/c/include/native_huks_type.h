@@ -212,6 +212,19 @@ enum OH_Huks_KeySize {
 };
 
 /**
+ * @brief Enumerates the key classes.
+ *
+ * @since 22
+ * @version 1.0
+ */
+enum OH_Huks_KeyClassType {
+    /** Default key class. */
+    OH_HUKS_KEY_CLASS_DEFAULT = 0,
+    /** Extension key class. */
+    OH_HUKS_KEY_CLASS_EXTENSION = 1,
+};
+
+/**
  * @brief Enumerates the key algorithms.
  *
  * @since 9
@@ -439,6 +452,20 @@ enum OH_Huks_TagType {
     OH_HUKS_TAG_TYPE_BOOL = 4 << 28,
     /** OH_Huks_Blob. */
     OH_HUKS_TAG_TYPE_BYTES = 5 << 28,
+};
+
+enum OH_Huks_ExternalTag {
+    OH_HUKS_EXT_CRYPTO_TAG_UKEY_PIN = OH_HUKS_TAG_TYPE_BYTES | 200001,
+
+    OH_HUKS_EXT_CRYPTO_TAG_ABILITY_NAME = OH_HUKS_TAG_TYPE_BYTES | 200002,
+    
+    OH_HUKS_EXT_CRYPTO_TAG_EXTRA_DATA = OH_HUKS_TAG_TYPE_BYTES | 200003,
+
+    OH_HUKS_EXT_CRYPTO_TAG_UID = OH_HUKS_TAG_TYPE_INT | 200004,
+
+    OH_HUKS_EXT_CRYPTO_TAG_PURPOSE = OH_HUKS_TAG_TYPE_INT | 200005,
+
+    OH_HUKS_EXT_CRYPTO_TAG_TIMEOUT = OH_HUKS_TAG_TYPE_UINT | 200006,
 };
 
 /**
@@ -707,6 +734,8 @@ enum OH_Huks_Tag {
      */
     OH_HUKS_TAG_AE_TAG_LEN = OH_HUKS_TAG_TYPE_UINT | 521,
 
+    /** The tag indicates the key class. */
+    OH_HUKS_TAG_KEY_CLASS = OH_HUKS_TAG_TYPE_UINT | 601,
     /**
      * 601 to 1000 are reserved for other tags.
      *
@@ -819,6 +848,45 @@ struct OH_Huks_ParamSet {
     uint32_t paramsCnt;
     /** Parameter array. */
     struct OH_Huks_Param params[];
+};
+
+struct OH_Huks_ExternalCryptoParam {
+    /** Tag value. */
+    uint32_t tag;
+
+    union {
+        /** Parameter of the Boolean type. */
+        bool boolParam;
+        /** Parameter of the int32_t type. */
+        int32_t int32Param;
+        /** Parameter of the uint32_t type. */
+        uint32_t uint32Param;
+        /** Parameter of the uint64_t type. */
+        uint64_t uint64Param;
+        /** Parameter of the struct OH_Huks_Blob type. */
+        struct OH_Huks_Blob blob;
+    };
+};
+
+struct OH_Huks_ExternalCryptoParamSet {
+    /** Memory size of the parameter set. */
+    uint32_t paramSetSize;
+    /** Number of parameters in the parameter set. */
+    uint32_t paramsCnt;
+    /** Parameter array. */
+    struct OH_Huks_ExternalCryptoParam params[];
+};
+
+
+struct OH_Huks_ExtCertInfo {
+    int32_t purpose;
+    struct OH_Huks_Blob index;
+    struct OH_Huks_Blob cert;
+};
+
+struct OH_Huks_ExtCertInfoSet {
+    uint32_t count;
+    struct OH_Huks_ExtCertInfo *certs;
 };
 
 /**

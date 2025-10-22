@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "hks_crypto_hal.h"
 #define HUKS_DISABLE_LOG_AT_FILE_TO_REDUCE_ROM_SIZE
 
 #include "hks_type_enum.h"
@@ -60,6 +61,248 @@
 #undef HKS_SUPPORT_API_ATTEST_KEY
 #undef HKS_SUPPORT_API_GET_CERTIFICATE_CHAIN
 #endif
+
+HKS_API_EXPORT int32_t HksRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter RegisterProvider");
+    if ((paramSetIn == NULL) || (name == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientRegisterProvider(name, paramSetIn);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave RegisterProvider, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)name;
+    (void)paramSetIn;
+    return 0;
+#endif
+}
+
+HKS_API_EXPORT int32_t HksUnregisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter UnregisterProvider");
+    if (name == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientUnregisterProvider(name, paramSetIn);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave UnregisterProvider, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)name;
+    (void)paramSetIn;
+    return 0;
+#endif
+}
+
+HKS_API_EXPORT int32_t HksExportProviderCertificates(const struct HksBlob *providerName,
+    const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter HksExportProviderCertificates");
+    if ((paramSetIn == NULL) || (providerName == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientExportProviderCertificates(providerName, paramSetIn, certSet);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave HksExportProviderCertificates, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)providerName;
+    (void)paramSetIn;
+    (void)certSet;
+    return 0;
+#endif
+}
+
+HKS_API_EXPORT int32_t HksExportCertificate(const struct HksBlob *resourceId,
+    const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter HksExportCertificate");
+    HKS_LOG_E("hks_api.c ======== enter HksExportCertificate");
+    if ((paramSetIn == NULL) || (resourceId == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientExportCertificate(resourceId, paramSetIn, certSet);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave HksExportCertificate, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)resourceId;
+    (void)paramSetIn;
+    (void)certSet;
+    return 0;
+#endif
+}
+
+HKS_API_EXPORT int32_t HksAuthUkeyPin(const struct HksBlob *resourceId,
+    const struct HksParamSet *paramSetIn, uint32_t *retryCount)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter AuthUkeyPin");
+    if ((resourceId == NULL) || (paramSetIn == NULL) || (retryCount == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientAuthUkeyPin(resourceId, paramSetIn, retryCount);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave AuthUkeyPin, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)resourceId;
+    (void)paramSetIn;
+    (void)retryCount;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+
+HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *resourceId,
+    const struct HksParamSet *paramSetIn, int32_t *status)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter GetUkeyPinAuthState");
+    if ((resourceId == NULL) || (paramSetIn == NULL) || (status == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientGetUkeyPinAuthState(resourceId, paramSetIn, status);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave GetUkeyPinAuthState, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)resourceId;
+    (void)paramSetIn;
+    (void)status;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+
+HKS_API_EXPORT int32_t HksOpenRemoteHandle(const struct HksBlob *resourceId,
+    const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter OpenRemoteHandle");
+    if ((resourceId == NULL) || (paramSetIn == NULL) || (remoteHandleOut == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientOpenRemoteHandle(resourceId, paramSetIn, remoteHandleOut);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave OpenRemoteHandle, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)resourceId;
+    (void)paramSetIn;
+    (void)remoteHandleOut;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+
+HKS_API_EXPORT int32_t HksGetRemoteHandle(const struct HksBlob *resourceId,
+    const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter GetRemoteHandle");
+    if ((resourceId == NULL) || (paramSetIn == NULL) || (remoteHandleOut == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientGetRemoteHandle(resourceId, paramSetIn, remoteHandleOut);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave GetRemoteHandle, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)resourceId;
+    (void)paramSetIn;
+    (void)remoteHandleOut;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+HKS_API_EXPORT int32_t HksCloseRemoteHandle(const struct HksBlob *resourceId,
+    const struct HksParamSet *paramSetIn)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter CloseRemoteHandle");
+    if ((resourceId == NULL) || (paramSetIn == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientCloseRemoteHandle(resourceId, paramSetIn);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave CloseRemoteHandle, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)resourceId;
+    (void)paramSetIn;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+HKS_API_EXPORT int32_t HksClearPinAuthState(const struct HksBlob *resourceId)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter ClearPinAuthState");
+    if (resourceId == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientClearPinAuthState(resourceId);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave ClearPinAuthState, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)resourceId;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+
+// 签名验签
+HKS_API_EXPORT int32_t HksUkeySign(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn,
+    const struct HksBlob *srcData, struct HksBlob *signatureOut)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter UkeySign");
+    if ((resourceId == NULL) || (paramSetIn == NULL) || (srcData == NULL) || (signatureOut == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientUkeySign(resourceId, paramSetIn, srcData, signatureOut);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave UkeySign, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)resourceId;
+    (void)paramSetIn;
+    (void)srcData;
+    (void)signatureOut;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+
+HKS_API_EXPORT int32_t HksUkeyVerify(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn,
+    const struct HksBlob *srcData, struct HksBlob *signatureOut)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter UkeyVerify");
+    if ((resourceId == NULL) || (paramSetIn == NULL) || (srcData == NULL) || (signatureOut == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientUkeyVerify(resourceId, paramSetIn, srcData, signatureOut);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave UkeyVerify, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)resourceId;
+    (void)paramSetIn;
+    (void)srcData;
+    (void)signatureOut;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+
+HKS_API_EXPORT int32_t HksGetRemoteProperty(const struct HksBlob *resourceId, const struct HksBlob *propertyId,
+    const struct HksParamSet *paramSetIn, struct HksParamSet *propertySetOut)
+{
+#ifdef L2_STANDARD
+    HKS_LOG_D("enter GetRemoteProperty");
+    if ((resourceId == NULL) || (propertyId == NULL) || (paramSetIn == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientGetRemoteProperty(resourceId, propertyId, paramSetIn, &propertySetOut);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave GetRemoteProperty, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)resourceId;
+    (void)propertyId;
+    (void)paramSetIn;
+    (void)propertySetOut;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
 
 HKS_API_EXPORT int32_t HksGetSdkVersion(struct HksBlob *sdkVersion)
 {
@@ -118,7 +361,6 @@ static int32_t CheckifNeedOverrideKey(const struct HksBlob *keyAlias,
             return ret;
         }
     }
-    
     return HKS_SUCCESS;
 }
 
@@ -138,7 +380,6 @@ HKS_API_EXPORT int32_t HksGenerateKey(const struct HksBlob *keyAlias,
         return ret;
     }
 
-    /* generate persistent keys */
     if ((paramSetIn == NULL) || (keyAlias == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }

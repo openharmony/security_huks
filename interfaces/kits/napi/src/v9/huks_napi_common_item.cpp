@@ -17,6 +17,7 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 
 #include "hks_errcode_adapter.h"
 #include "hks_log.h"
@@ -28,6 +29,8 @@ namespace HuksNapiItem {
 namespace {
 constexpr int HKS_MAX_DATA_LEN = 0x6400000; // The maximum length is 100M
 constexpr size_t ASYNCCALLBACK_ARGC = 2;
+constexpr size_t ASYNCCALLBACKVOID_ARGC = 1;
+static int32_t g_pinRetryCount = 0; //ukey retry count
 }  // namespace
 
 napi_value ParseKeyAlias(napi_env env, napi_value object, HksBlob *&alias)
@@ -406,7 +409,7 @@ static napi_value GenerateHksParam(napi_env env, const HksParam &param)
     return hksParam;
 }
 
-static napi_value GenerateHksParamArray(napi_env env, const HksParamSet &paramSet)
+napi_value GenerateHksParamArray(napi_env env, const HksParamSet &paramSet)
 {
     napi_value paramArray = nullptr;
     NAPI_CALL(env, napi_create_array(env, &paramArray));
@@ -802,6 +805,12 @@ static napi_value GenerateResult(napi_env env, const struct HksSuccessReturnResu
     return result;
 }
 
+// napi层将retryCount传递到这里
+void SetRetryCount(const int32_t retryCount)
+{
+    g_pinRetryCount = retryCount; // 错误时需打印
+}
+
 static napi_value GenerateBusinessError(napi_env env, int32_t errorCode)
 {
     napi_value businessError = nullptr;
@@ -844,6 +853,12 @@ static napi_value GenerateBusinessError(napi_env env, int32_t errorCode)
 
     // add errorData
     napi_value data = GetNull(env);
+    // ukey报错时需要在此处需要拼接 retryCount 上报给上层
+    if (errInfo.errorCode == HUKS_ERR_CODE_PIN_CODE_ERROR) {
+        if (napi_create_int32(env, g_pinRetryCount, &data) != napi_ok) {
+            data = GetNull(env);
+        }
+    }
     status = napi_set_named_property(env, businessError, BUSINESS_ERROR_PROPERTY_DATA.c_str(), data);
     if (status != napi_ok) {
         HKS_LOG_E("set errorData failed");
@@ -883,6 +898,18 @@ static void CallbackResultSuccess(napi_env env, napi_ref callback, const struct 
     NAPI_CALL_RETURN_VOID(env, napi_call_function(env, recv, func, ASYNCCALLBACK_ARGC, params, &result));
 }
 
+static void CallbackVoidSuccess(napi_env env, napi_ref callback)
+{
+    napi_value params[ASYNCCALLBACKVOID_ARGC] = { GetNull(env) };
+    napi_value func = nullptr;
+    NAPI_CALL_RETURN_VOID(env, napi_get_reference_value(env, callback, &func));
+
+    napi_value recv = nullptr;
+    napi_value result = nullptr;
+    NAPI_CALL_RETURN_VOID(env, napi_get_undefined(env, &recv));
+    NAPI_CALL_RETURN_VOID(env, napi_call_function(env, recv, func, ASYNCCALLBACKVOID_ARGC, params, &result));
+}
+
 static void PromiseResultFailure(napi_env env, napi_deferred deferred, int32_t error)
 {
     if (error == HKS_SUCCESS) {
@@ -902,6 +929,13 @@ static void PromiseResultSuccess(napi_env env, napi_deferred deferred,
     napi_resolve_deferred(env, deferred, result);
 }
 
+static void PromiseVoidSuccess(napi_env env, napi_deferred deferred)
+{
+    napi_value result = nullptr;
+    NAPI_CALL_RETURN_VOID(env, napi_get_undefined(env, &result));
+    napi_resolve_deferred(env, deferred, result);
+}
+
 void SuccessReturnResultInit(struct HksSuccessReturnResult &resultData)
 {
     resultData.isOnlyReturnBoolResult = false;
@@ -911,6 +945,11 @@ void SuccessReturnResultInit(struct HksSuccessReturnResult &resultData)
     resultData.outData = nullptr;
     resultData.paramSet = nullptr;
     resultData.certChain = nullptr;
+
+    // ukey feature
+    resultData.index = nullptr;
+    resultData.retryCount = 0;
+    resultData.outStatus = 0;
 }
 
 void SuccessListAliasesReturnResultInit(struct HksSuccessListAliasesResult &resultData)
@@ -930,6 +969,23 @@ void HksReturnNapiResult(napi_env env, napi_ref callback, napi_deferred deferred
     } else {
         if (errorCode == HKS_SUCCESS) {
             CallbackResultSuccess(env, callback, resultData);
+        } else {
+            CallbackResultFailure(env, callback, errorCode);
+        }
+    }
+}
+
+void HksReturnNapiUndefined(napi_env env, napi_ref callback, napi_deferred deferred, int32_t errorCode)
+{
+    if (callback == nullptr) {
+        if (errorCode == HKS_SUCCESS) {
+            PromiseVoidSuccess(env, deferred);
+        } else {
+            PromiseResultFailure(env, deferred, errorCode);
+        }
+    } else {
+        if (errorCode == HKS_SUCCESS) {
+            CallbackVoidSuccess(env, callback);
         } else {
             CallbackResultFailure(env, callback, errorCode);
         }
@@ -1012,4 +1068,5 @@ void HksReturnListAliasesResult(napi_env env, napi_ref callback, napi_deferred d
         }
     }
 }
+
 }  // namespace HuksNapiItem
