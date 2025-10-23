@@ -735,7 +735,7 @@ enum OH_Huks_Tag {
     OH_HUKS_TAG_AE_TAG_LEN = OH_HUKS_TAG_TYPE_UINT | 521,
 
     /** The tag indicates the key class. */
-    OH_HUKS_TAG_KEY_CLASS = OH_HUKS_TAG_TYPE_UINT | 601,
+    OH_HUKS_TAG_KEY_CLASS = OH_HUKS_TAG_TYPE_UINT | 522,
     /**
      * 601 to 1000 are reserved for other tags.
      *
