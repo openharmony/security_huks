@@ -33,6 +33,7 @@ namespace {
 constexpr int SA_ID_KEYSTORE_SERVICE = 3510;
 const std::u16string SA_KEYSTORE_SERVICE_DESCRIPTOR = u"ohos.security.hks.service";
 static volatile std::atomic_bool g_isInitBundleDead = false;
+constexpr uint32_t DEFAULT_TIME = 2;
 sptr<Security::Hks::HksStub> g_hks_callback;
 }
 
@@ -143,10 +144,10 @@ static int32_t HksExtSendAsyncMessage(const HksExtAsyncCtx &ctx)
 
     MessageParcel reply {};
     MessageOption option = MessageOption::TF_SYNC;
-    int ret = ctx.hksProxy->SendRequest(ctx.msgCode, *ctx.data, reply, option);
+    int32_t ret = ctx.hksProxy->SendRequest(ctx.msgCode, *ctx.data, reply, option);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_IPC_MSG_FAIL, "SendRequest failed %" LOG_PUBLIC "d", ret);
 
-    int timeout = 2; // default seconds
+    uint32_t timeout = DEFAULT_TIME; // default seconds
     struct HksParam *timeoutParam = nullptr;
     if (HksGetParam(ctx.paramSet, HKS_EXT_CRYPTO_TAG_TIMEOUT, &timeoutParam) == HKS_SUCCESS) {
         if (GetTagType((enum HksTag)timeoutParam->tag) == HKS_TAG_TYPE_UINT && timeoutParam->uint32Param > 0) {
