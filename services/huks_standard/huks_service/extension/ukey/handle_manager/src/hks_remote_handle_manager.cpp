@@ -110,7 +110,7 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
         providerInfo.m_bundleName.empty(), HKS_ERROR_JSON_INVALID_VALUE, "Provider info is incomplete")
 
     CommJsonObject newRoot = CommJsonObject::CreateObject();
-    HKS_IF_TRUE_LOGE_RETURN(newRoot.IsNull(), HKS_ERROR_JSON_SERIALIZE_FAILED,
+    HKS_IF_TRUE_LOGE_RETURN(newRoot.IsNull(), HKS_ERROR_JSON_NOT_OBJECT,
         "Create new JSON object failed")
 
     auto keys = root.GetKeys();
@@ -121,7 +121,7 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
         auto value = root.GetValue(key);
         if (!value.IsNull() && !newRoot.SetValue(key, value)) {
             HKS_LOG_E("Copy field %s failed", key.c_str());
-            return HKS_ERROR_JSON_SERIALIZE_FAILED;
+            return HKS_ERROR_JSON_INVALID_VALUE;
         }
     }
     newIndex = newRoot.Serialize(false);
