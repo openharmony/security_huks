@@ -109,8 +109,8 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
     HKS_IF_TRUE_LOGE_RETURN(providerInfo.m_providerName.empty() || providerInfo.m_abilityName.empty() ||
         providerInfo.m_bundleName.empty(), HKS_ERROR_JSON_INVALID_VALUE, "Provider info is incomplete")
 
-     CommJsonObject newRoot = CommJsonObject::CreateObject();	
-    HKS_IF_TRUE_LOGE_RETURN(newRoot.IsNull(), HKS_ERROR_JSON_SERIALIZE_FAILED,	
+    CommJsonObject newRoot = CommJsonObject::CreateObject();
+    HKS_IF_TRUE_LOGE_RETURN(newRoot.IsNull(), HKS_ERROR_JSON_SERIALIZE_FAILED,
         "Create new JSON object failed")
 
     auto keys = root.GetKeys();
