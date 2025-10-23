@@ -226,12 +226,9 @@ int32_t HksClientCloseRemoteHandle(const struct HksBlob *resourceId, const struc
 
 int32_t HksClientClearPinAuthState(const struct HksBlob *index)
 {
-    char *processName = NULL;
-    char *userId = NULL;
-
     struct HksProcessInfo processInfo = {
-        { strlen(userId), (uint8_t *)userId },
-        { strlen(processName), (uint8_t *)processName },
+        { 0, NULL }, // userId
+        { 0, NULL }, // processName
         0,
         0,
         0,
