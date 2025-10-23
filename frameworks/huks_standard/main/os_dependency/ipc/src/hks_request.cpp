@@ -33,7 +33,7 @@ namespace {
 constexpr int SA_ID_KEYSTORE_SERVICE = 3510;
 const std::u16string SA_KEYSTORE_SERVICE_DESCRIPTOR = u"ohos.security.hks.service";
 static volatile std::atomic_bool g_isInitBundleDead = false;
-constexpr int32_t DEFAULT_TIME = 2;
+constexpr uint32_t DEFAULT_TIME = 2;
 sptr<Security::Hks::HksStub> g_hks_callback;
 }
 
