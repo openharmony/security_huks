@@ -28,14 +28,14 @@ static struct OH_Huks_Result ConvertApiResult(int32_t ret)
 }
 
 struct OH_Huks_Result OH_Huks_RegisterProvider(const struct OH_Huks_Blob *providerName,
-    const struct OH_Huks_ExternalCryptoParamSet *paramSet)
+    const OH_Huks_ExternalCryptoParamSet *paramSet)
 {
     int32_t result = HksRegisterProvider((const struct HksBlob *) providerName, (const struct HksParamSet *) paramSet);
     return ConvertApiResult(result);
 }
 
 struct OH_Huks_Result OH_Huks_UnregisterProvider(const struct OH_Huks_Blob *providerName,
-    const struct OH_Huks_ExternalCryptoParamSet *paramSet)
+    const OH_Huks_ExternalCryptoParamSet *paramSet)
 {
     int32_t result = HksUnregisterProvider((const struct HksBlob *) providerName,
         (const struct HksParamSet *) paramSet);
@@ -43,7 +43,7 @@ struct OH_Huks_Result OH_Huks_UnregisterProvider(const struct OH_Huks_Blob *prov
 }
 
 struct OH_Huks_Result OH_Huks_OpenResource(const struct OH_Huks_Blob *resourceId,
-    const struct OH_Huks_ExternalCryptoParamSet *paramSet)
+    const OH_Huks_ExternalCryptoParamSet *paramSet)
 {
     int32_t ret = HksOpenRemoteHandle((const struct HksBlob *) resourceId,
         (const struct HksParamSet *) paramSet);
@@ -58,8 +58,8 @@ struct OH_Huks_Result OH_Huks_GetResource(const struct OH_Huks_Blob *resourceId,
     return ConvertApiResult(ret);
 }
 
-struct OH_Huks_Result OH_Huks_CloseRemoteHandle(const struct OH_Huks_Blob *resourceId,
-    const struct OH_Huks_ExternalCryptoParamSet *paramSet)
+struct OH_Huks_Result OH_Huks_CloseResource(const struct OH_Huks_Blob *resourceId,
+    const OH_Huks_ExternalCryptoParamSet *paramSet)
 {
     int32_t ret = HksCloseRemoteHandle((const struct HksBlob *) resourceId,
         (const struct HksParamSet *) paramSet);
@@ -75,7 +75,7 @@ struct OH_Huks_Result OH_Huks_AuthUkeyPin(const struct OH_Huks_Blob *resourceId,
 }
 
 struct OH_Huks_Result OH_Huks_GetUkeyPinAuthState(const struct OH_Huks_Blob *resourceId,
-    const struct OH_Huks_ExternalCryptoParamSet *paramSetIn, bool *authState)
+    const OH_Huks_ExternalCryptoParamSet *paramSetIn, bool *authState)
 {
     if (authState == NULL) {
         return ConvertApiResult(HKS_ERROR_NULL_POINTER);
@@ -90,9 +90,9 @@ struct OH_Huks_Result OH_Huks_GetUkeyPinAuthState(const struct OH_Huks_Blob *res
     return ConvertApiResult(ret);
 }
 
-struct OH_Huks_Result OH_Huks_GetRemoteProperty(const struct OH_Huks_Blob *resourceId,
-    const struct OH_Huks_Blob *propertyId, const struct OH_Huks_ExternalCryptoParamSet *paramSetIn,
-    struct OH_Huks_ExternalCryptoParamSet **paramSetOut)
+struct OH_Huks_Result OH_Huks_GetProperty(const struct OH_Huks_Blob *resourceId,
+    const struct OH_Huks_Blob *propertyId, const OH_Huks_ExternalCryptoParamSet *paramSetIn,
+    OH_Huks_ExternalCryptoParamSet **paramSetOut)
 {
     if (paramSetOut == NULL) {
         return ConvertApiResult(HKS_ERROR_NULL_POINTER);
@@ -113,32 +113,32 @@ static struct OH_Huks_Result ConvertExtParamResult(int32_t ret)
     return *((struct OH_Huks_Result *)(&result));
 }
 
-struct OH_Huks_Result OH_Huks_InitExternalCryptoParamSet(struct OH_Huks_ExternalCryptoParamSet **paramSet)
+struct OH_Huks_Result OH_Huks_InitExternalCryptoParamSet(OH_Huks_ExternalCryptoParamSet **paramSet)
 {
     int32_t result = HksInitParamSet((struct HksParamSet **) paramSet);
     return ConvertExtParamResult(result);
 }
 
-struct OH_Huks_Result OH_Huks_AddExternalCryptoParams(struct OH_Huks_ExternalCryptoParamSet *paramSet,
-    const struct OH_Huks_ExternalCryptoParam *params, uint32_t paramCnt)
+struct OH_Huks_Result OH_Huks_AddExternalCryptoParams(OH_Huks_ExternalCryptoParamSet *paramSet,
+    const OH_Huks_ExternalCryptoParam *params, uint32_t paramCnt)
 {
     int32_t result = HksAddParams((struct HksParamSet *) paramSet,
         (const struct HksParam *) params, paramCnt);
     return ConvertExtParamResult(result);
 }
 
-struct OH_Huks_Result OH_Huks_BuildExternalCryptoParamSet(struct OH_Huks_ExternalCryptoParamSet **paramSet)
+struct OH_Huks_Result OH_Huks_BuildExternalCryptoParamSet(OH_Huks_ExternalCryptoParamSet **paramSet)
 {
     int32_t result = HksBuildParamSet((struct HksParamSet **) paramSet);
     return ConvertExtParamResult(result);
 }
 
-void OH_Huks_FreeExternalCryptoParamSet(struct OH_Huks_ExternalCryptoParamSet **paramSet)
+void OH_Huks_FreeExternalCryptoParamSet(OH_Huks_ExternalCryptoParamSet **paramSet)
 {
     HksFreeParamSet((struct HksParamSet **) paramSet);
 }
 
-struct OH_Huks_Result OH_Huks_GetExternalCryptoParam(const struct OH_Huks_ExternalCryptoParamSet *paramSet,
+struct OH_Huks_Result OH_Huks_GetExternalCryptoParam(struct OH_Huks_ExternalCryptoParamSet *paramSet,
     uint32_t tag, struct OH_Huks_ExternalCryptoParam **param)
 {
     int32_t result = HksGetParam((const struct HksParamSet *) paramSet, tag, (struct HksParam **) param);

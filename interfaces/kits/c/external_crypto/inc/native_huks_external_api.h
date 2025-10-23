@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +29,7 @@
  *
  * @brief Defines the Universal Keystore Kit APIs special for external crypto extension.
  *
+ * @library libhuks_external_crypto_ndk.z.so
  * @syscap SystemCapability.Security.Huks.CryptoExtension
  *
  * include "huks/include/native_huks_external_crypto_type.h"
@@ -168,9 +170,9 @@ struct OH_Huks_Result OH_Huks_GetUkeyPinAuthState(
  *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_EXTERNAL_ERROR} 12000020 - If the provider exec failed.
  * @since 22
  */
-struct OH_Huks_Result OH_Huks_GetRemoteProperty(const struct OH_Huks_Blob *resourceId,
-    const struct OH_Huks_Blob *propertyId, const struct OH_Huks_ExternalCryptoParamSet *paramSetIn,
-    struct OH_Huks_ExternalCryptoParamSet **paramSetOut);
+struct OH_Huks_Result OH_Huks_GetProperty(const struct OH_Huks_Blob *resourceId,
+    const struct OH_Huks_Blob *propertyId, const OH_Huks_ExternalCryptoParamSet *paramSetIn,
+    OH_Huks_ExternalCryptoParamSet **paramSetOut);
 
 /**
  * @brief Initializes a parameter set.
@@ -181,7 +183,7 @@ struct OH_Huks_Result OH_Huks_GetRemoteProperty(const struct OH_Huks_Blob *resou
  *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 401 - If the paramset is null.
  * @since 22
  */
-struct OH_Huks_Result OH_Huks_InitExternalCryptoParamSet(struct OH_Huks_ExternalCryptoParamSet **paramSet);
+struct OH_Huks_Result OH_Huks_InitExternalCryptoParamSet(OH_Huks_ExternalCryptoParamSet **paramSet);
 
 /**
  * @brief Adds parameters to a parameter set.
@@ -193,8 +195,8 @@ struct OH_Huks_Result OH_Huks_InitExternalCryptoParamSet(struct OH_Huks_External
  *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 401 - If params is null or paramSet is invalid.
  * @since 22
  */
-struct OH_Huks_Result OH_Huks_AddExternalCryptoParams(struct OH_Huks_ExternalCryptoParamSet *paramSet,
-    const struct OH_Huks_ExternalCryptoParam *params, uint32_t paramCnt);
+struct OH_Huks_Result OH_Huks_AddExternalCryptoParams(OH_Huks_ExternalCryptoParamSet *paramSet,
+    const OH_Huks_ExternalCryptoParam *params, uint32_t paramCnt);
 
 /**
  * @brief Constructs a parameter set.
@@ -205,7 +207,7 @@ struct OH_Huks_Result OH_Huks_AddExternalCryptoParams(struct OH_Huks_ExternalCry
  *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_INSUFFICIENT_MEMORY} 12000014 - If the memory is insufficient.
  * @since 22
  */
-struct OH_Huks_Result OH_Huks_BuildExternalCryptoParamSet(struct OH_Huks_ExternalCryptoParamSet **paramSet);
+struct OH_Huks_Result OH_Huks_BuildExternalCryptoParamSet(OH_Huks_ExternalCryptoParamSet **paramSet);
 
 /**
  * @brief Destroys a parameter set.
@@ -213,7 +215,7 @@ struct OH_Huks_Result OH_Huks_BuildExternalCryptoParamSet(struct OH_Huks_Externa
  * @param paramSet Indicates the double pointer to the parameter set to destroy.
  * @since 22
  */
-void OH_Huks_FreeExternalCryptoParamSet(struct OH_Huks_ExternalCryptoParamSet **paramSet);
+void OH_Huks_FreeExternalCryptoParamSet(OH_Huks_ExternalCryptoParamSet **paramSet);
 
 /**
  * @brief Obtains parameters from a parameter set.
@@ -226,8 +228,8 @@ void OH_Huks_FreeExternalCryptoParamSet(struct OH_Huks_ExternalCryptoParamSet **
  *             or if the param doesn't exist in the pararmset.
  * @since 22
  */
-struct OH_Huks_Result OH_Huks_GetExternalCryptoParam(const struct OH_Huks_ExternalCryptoParamSet *paramSet,
-    uint32_t tag, struct OH_Huks_ExternalCryptoParam **param);
+struct OH_Huks_Result OH_Huks_GetExternalCryptoParam(OH_Huks_ExternalCryptoParamSet *paramSet,
+    const uint32_t tag, OH_Huks_ExternalCryptoParam **param);
 #ifdef __cplusplus
 }
 #endif
