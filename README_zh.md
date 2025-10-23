@@ -61,23 +61,23 @@ HUKS部件架构如下图所示：
 
 ### 接口说明
 
-[接口文档](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis-universal-keystore-kit/Readme-CN.md)
+[接口文档](https://gitcode.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis-universal-keystore-kit/Readme-CN.md)
 
 ### 使用说明
 
-[开发指导](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/security/UniversalKeystoreKit/Readme-CN.md)
+[开发指导](https://gitcode.com/openharmony/docs/blob/master/zh-cn/application-dev/security/UniversalKeystoreKit/Readme-CN.md)
 
-<font color = grey> 注：HUKS部件包含密钥管理及密钥的密码学操作等功能，如果仅需要进行密钥的密码学操作而不需要密钥管理，建议使用[加解密算法库框架](https://gitee.com/openharmony/security_crypto_framework)。</font>
+<font color = grey> 注：HUKS部件包含密钥管理及密钥的密码学操作等功能，如果仅需要进行密钥的密码学操作而不需要密钥管理，建议使用[加解密算法库框架](https://gitcode.com/openharmony/security_crypto_framework)。</font>
 
 
 ## 相关仓
 
-[security_crypto_framework](https://gitee.com/openharmony/security_crypto_framework)
+[security_crypto_framework](https://gitcode.com/openharmony/security_crypto_framework)
 
-[security_certificate_manager](https://gitee.com/openharmony/security_certificate_manager)
+[security_certificate_manager](https://gitcode.com/openharmony/security_certificate_manager)
 
-[**security_huks**](https://gitee.com/openharmony/security_huks)
+[**security_huks**](https://gitcode.com/openharmony/security_huks)
 
-[third_party_openssl](https://gitee.com/openharmony/third_party_openssl)
+[third_party_openssl](https://gitcode.com/openharmony/third_party_openssl)
 
-[third_party_mbedtls](https://gitee.com/openharmony/third_party_mbedtls)
+[third_party_mbedtls](https://gitcode.com/openharmony/third_party_mbedtls)
