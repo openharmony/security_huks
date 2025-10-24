@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "native_huks_external_api.h"
+#include "native_huks_external_crypto_api.h"
 
 #include "hks_api.h"
 #include "hks_param.h"
