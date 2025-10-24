@@ -41,4 +41,4 @@ base/security/huks/
 
 **Security subsystem**
 
-**[security_huks](https://gitee.com/openharmony/security_huks)**
+**[security_huks](https://gitcode.com/openharmony/security_huks)**
