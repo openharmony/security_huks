@@ -12,8 +12,8 @@
       "install": "DEST_PATH=${DEP_BUNDLE_BASE}/base/security/huks && mkdir -p $DEST_PATH && cp -r ./* $DEST_PATH"
     },
     "author": {},
-    "homePage": "https://gitee.com/openharmony",
-    "repository": "https://gitee.com/openharmony/security_huks",
+    "homePage": "https://gitcode.com/openharmony",
+    "repository": "https://gitcode.com/openharmony/security_huks",
     "supplier": "Organization: OpenHarmony",
     "component": {
       "name": "huks",
