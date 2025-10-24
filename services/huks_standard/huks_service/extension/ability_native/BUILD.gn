@@ -70,7 +70,6 @@ if (os_level == "standard") {
       "samgr:samgr_proxy",
     ]
 
-    relative_install_dir = "extensionability"
     subsystem_name = "security"
     part_name = "huks"
   }
