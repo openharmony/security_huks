@@ -44,7 +44,7 @@ constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
 constexpr size_t MAX_ARG_COUNT = 5;
-
+constexpr int32_t MAX_WAIT_TIME = 3;
 struct HandleInfoParam {
     std::string handle {};
     CppParamSet params {};
@@ -624,8 +624,11 @@ int32_t JsHksCryptoExtAbility::CallJsMethod(const std::string &funcName, Ability
         LOGE("failed to napi_send_event, ret:%d.", ret);
         return EINVAL;
     }
+    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
     std::unique_lock<std::mutex> lock(param->CryptoOperateMutex);
-    param->CryptoOperateCondition.wait(lock, [param]() { return param->isReady; });
+    if (!param->isReady) {
+        param->CryptoOperateCondition.wait_for(lock, maxWaitTime, [param]() { return param->isReady; });
+    }
     return ERR_OK;
 }
 
@@ -964,8 +967,12 @@ int32_t JsHksCryptoExtAbility::OpenRemoteHandle(const std::string &index, const 
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
+    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
-    dataParam->callJsCon.wait(lock, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    if (!dataParam->callJsExMethodDone.load()) {
+        dataParam->callJsCon.wait_for(
+            lock, [this, maxWaitTime, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    }
 
     handle = std::move(dataParam->handle);
     errcode = std::move(dataParam->errCode);
@@ -1001,8 +1008,12 @@ int32_t JsHksCryptoExtAbility::CloseRemoteHandle(const std::string &handle, cons
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
+    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
-    dataParam->callJsCon.wait(lock, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    if (!dataParam->callJsExMethodDone.load()) {
+        dataParam->callJsCon.wait_for(
+            lock, [this, maxWaitTime, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    }
     errcode = std::move(dataParam->errCode);
     return ERR_OK;
 }
@@ -1037,8 +1048,12 @@ int32_t JsHksCryptoExtAbility::AuthUkeyPin(const std::string &handle, const CppP
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
+    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
-    dataParam->callJsCon.wait(lock, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    if (!dataParam->callJsExMethodDone.load()) {
+        dataParam->callJsCon.wait_for(
+            lock, [this, maxWaitTime, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    }
     errcode = std::move(dataParam->errCode);
     authState = std::move(dataParam->authState);
     retryCnt = std::move(dataParam->retryCnt);
@@ -1075,8 +1090,12 @@ int32_t JsHksCryptoExtAbility::GetUkeyPinAuthState(const std::string &handle, co
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
+    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
-    dataParam->callJsCon.wait(lock, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    if (!dataParam->callJsExMethodDone.load()) {
+        dataParam->callJsCon.wait_for(
+            lock, [this, maxWaitTime, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    }
     errcode = std::move(dataParam->errCode);
     authState = std::move(dataParam->authState);
     return ERR_OK;
@@ -1112,8 +1131,12 @@ int32_t JsHksCryptoExtAbility::ExportCertificate(const std::string &index, const
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
+    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
-    dataParam->callJsCon.wait(lock, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    if (!dataParam->callJsExMethodDone.load()) {
+        dataParam->callJsCon.wait_for(
+            lock, [this, maxWaitTime, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    }
     errcode = std::move(dataParam->errCode);
     HksCertInfoToString(dataParam->certs, certJsonArr);
     return ERR_OK;
@@ -1157,8 +1180,12 @@ int32_t JsHksCryptoExtAbility::ExportProviderCertificates(const CppParamSet &par
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
+    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
-    dataParam->callJsCon.wait(lock, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    if (!dataParam->callJsExMethodDone.load()) {
+        dataParam->callJsCon.wait_for(
+            lock, [this, maxWaitTime, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    }
     errcode = std::move(dataParam->errCode);
     HksCertInfoToString(dataParam->certs, certJsonArr);
     return ERR_OK;
@@ -1194,8 +1221,12 @@ int32_t JsHksCryptoExtAbility::InitSession(const std::string &index, const CppPa
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
+    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
-    dataParam->callJsCon.wait(lock, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    if (!dataParam->callJsExMethodDone.load()) {
+        dataParam->callJsCon.wait_for(
+            lock, [this, maxWaitTime, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    }
     handle = std::move(dataParam->handle);
     errcode = std::move(dataParam->errCode);
     return ERR_OK;
@@ -1231,8 +1262,12 @@ int32_t JsHksCryptoExtAbility::UpdateSession(const std::string &handle, const Cp
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
+    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
-    dataParam->callJsCon.wait(lock, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    if (!dataParam->callJsExMethodDone.load()) {
+        dataParam->callJsCon.wait_for(
+            lock, [this, maxWaitTime, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    }
     errcode = std::move(dataParam->errCode);
     outData = std::move(dataParam->outData);
     return ERR_OK;
@@ -1268,8 +1303,12 @@ int32_t JsHksCryptoExtAbility::FinishSession(const std::string &handle, const Cp
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
+    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
-    dataParam->callJsCon.wait(lock, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    if (!dataParam->callJsExMethodDone.load()) {
+        dataParam->callJsCon.wait_for(
+            lock, [this, maxWaitTime, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    }
     errcode = std::move(dataParam->errCode);
     outData = std::move(dataParam->outData);
     return ERR_OK;
@@ -1304,8 +1343,12 @@ int32_t JsHksCryptoExtAbility::GetProperty(const std::string &handle, const std:
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
+    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
-    dataParam->callJsCon.wait(lock, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    if (!dataParam->callJsExMethodDone.load()) {
+        dataParam->callJsCon.wait_for(
+            lock, [this, maxWaitTime, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    }
     outParams = std::move(dataParam->paramSet);
     errcode = std::move(dataParam->errCode);
     return ERR_OK;
@@ -1340,8 +1383,12 @@ int32_t JsHksCryptoExtAbility::ClearUkeyPinAuthState(const std::string &handle, 
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
+    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
-    dataParam->callJsCon.wait(lock, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    if (!dataParam->callJsExMethodDone.load()) {
+        dataParam->callJsCon.wait_for(
+            lock, [this, maxWaitTime, dataParam] { return dataParam->callJsExMethodDone.load(); });
+    }
     errcode = std::move(dataParam->errCode);
     return ERR_OK;
 }
