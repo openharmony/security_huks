@@ -429,10 +429,10 @@ int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index,
 }
 
 int32_t HksClientGetRemoteHandle(const struct HksBlob *resourceId,
-    const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
+    const struct HksParamSet *paramSetIn)
 {
-    if (remoteHandleOut == NULL || remoteHandleOut->data != NULL || remoteHandleOut->size != 0) {
-        HKS_LOG_E("certSet is invalid, must be a empty set");
+    if (paramSetIn == NULL) {
+        HKS_LOG_E("paramSetIn is NULL");
         return HKS_ERROR_NULL_POINTER;
     }
 
@@ -465,11 +465,10 @@ int32_t HksClientGetRemoteHandle(const struct HksBlob *resourceId,
     return ret;
 }
 
-int32_t HksClientOpenRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn,
-    struct HksBlob *remoteHandleOut)
+int32_t HksClientOpenRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn)
 {
-    if (remoteHandleOut == NULL || remoteHandleOut->data != NULL || remoteHandleOut->size != 0) {
-        HKS_LOG_E("certSet is invalid, must be a empty set");
+    if (resourceId == NULL || paramSetIn == NULL) {
+        HKS_LOG_E("resourceId or paramSetIn is NULL");
         return HKS_ERROR_NULL_POINTER;
     }
 

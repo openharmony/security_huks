@@ -67,8 +67,8 @@ ohos_shared_library("huks_ndk") {
 
 ohos_shared_library("huks_external_ndk") {
   public = [
-    "external_crypto/inc/native_huks_external_api.h",
-    "external_crypto/inc/native_huks_external_param.h",
+    "external_crypto/inc/native_huks_external_crypto_api.h",
+    "external_crypto/inc/native_huks_external_crypto_type.h",
     "include/native_huks_type.h",
   ]
 
@@ -98,8 +98,7 @@ ohos_shared_library("huks_external_ndk") {
   ]
 
   sources = [
-    "external_crypto/src/native_huks_external_api.c",
-    "external_crypto/src/native_huks_external_param.c",
+    "external_crypto/src/native_huks_external_crypto_api.c", 
   ]
 
   deps = [
