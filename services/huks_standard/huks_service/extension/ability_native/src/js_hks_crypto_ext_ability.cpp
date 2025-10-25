@@ -971,7 +971,7 @@ int32_t JsHksCryptoExtAbility::OpenRemoteHandle(const std::string &index, const 
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
     if (!dataParam->callJsExMethodDone.load()) {
         dataParam->callJsCon.wait_for(
-            lock, [this, maxWaitTime, dataParam] { return dataParam->callJsExMethodDone.load(); });
+            lock, maxWaitTime, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
     }
 
     handle = std::move(dataParam->handle);
@@ -1012,7 +1012,7 @@ int32_t JsHksCryptoExtAbility::CloseRemoteHandle(const std::string &handle, cons
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
     if (!dataParam->callJsExMethodDone.load()) {
         dataParam->callJsCon.wait_for(
-            lock, [this, maxWaitTime, dataParam] { return dataParam->callJsExMethodDone.load(); });
+            lock, maxWaitTime, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
     }
     errcode = std::move(dataParam->errCode);
     return ERR_OK;
@@ -1052,7 +1052,7 @@ int32_t JsHksCryptoExtAbility::AuthUkeyPin(const std::string &handle, const CppP
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
     if (!dataParam->callJsExMethodDone.load()) {
         dataParam->callJsCon.wait_for(
-            lock, [this, maxWaitTime, dataParam] { return dataParam->callJsExMethodDone.load(); });
+            lock, maxWaitTime, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
     }
     errcode = std::move(dataParam->errCode);
     authState = std::move(dataParam->authState);
@@ -1094,7 +1094,7 @@ int32_t JsHksCryptoExtAbility::GetUkeyPinAuthState(const std::string &handle, co
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
     if (!dataParam->callJsExMethodDone.load()) {
         dataParam->callJsCon.wait_for(
-            lock, [this, maxWaitTime, dataParam] { return dataParam->callJsExMethodDone.load(); });
+            lock, maxWaitTime, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
     }
     errcode = std::move(dataParam->errCode);
     authState = std::move(dataParam->authState);
@@ -1135,7 +1135,7 @@ int32_t JsHksCryptoExtAbility::ExportCertificate(const std::string &index, const
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
     if (!dataParam->callJsExMethodDone.load()) {
         dataParam->callJsCon.wait_for(
-            lock, [this, maxWaitTime, dataParam] { return dataParam->callJsExMethodDone.load(); });
+            lock, maxWaitTime, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
     }
     errcode = std::move(dataParam->errCode);
     HksCertInfoToString(dataParam->certs, certJsonArr);
@@ -1184,7 +1184,7 @@ int32_t JsHksCryptoExtAbility::ExportProviderCertificates(const CppParamSet &par
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
     if (!dataParam->callJsExMethodDone.load()) {
         dataParam->callJsCon.wait_for(
-            lock, [this, maxWaitTime, dataParam] { return dataParam->callJsExMethodDone.load(); });
+            lock, maxWaitTime, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
     }
     errcode = std::move(dataParam->errCode);
     HksCertInfoToString(dataParam->certs, certJsonArr);
@@ -1225,7 +1225,7 @@ int32_t JsHksCryptoExtAbility::InitSession(const std::string &index, const CppPa
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
     if (!dataParam->callJsExMethodDone.load()) {
         dataParam->callJsCon.wait_for(
-            lock, [this, maxWaitTime, dataParam] { return dataParam->callJsExMethodDone.load(); });
+            lock, maxWaitTime, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
     }
     handle = std::move(dataParam->handle);
     errcode = std::move(dataParam->errCode);
@@ -1266,7 +1266,7 @@ int32_t JsHksCryptoExtAbility::UpdateSession(const std::string &handle, const Cp
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
     if (!dataParam->callJsExMethodDone.load()) {
         dataParam->callJsCon.wait_for(
-            lock, [this, maxWaitTime, dataParam] { return dataParam->callJsExMethodDone.load(); });
+            lock, maxWaitTime, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
     }
     errcode = std::move(dataParam->errCode);
     outData = std::move(dataParam->outData);
@@ -1307,7 +1307,7 @@ int32_t JsHksCryptoExtAbility::FinishSession(const std::string &handle, const Cp
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
     if (!dataParam->callJsExMethodDone.load()) {
         dataParam->callJsCon.wait_for(
-            lock, [this, maxWaitTime, dataParam] { return dataParam->callJsExMethodDone.load(); });
+            lock, maxWaitTime, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
     }
     errcode = std::move(dataParam->errCode);
     outData = std::move(dataParam->outData);
@@ -1347,7 +1347,7 @@ int32_t JsHksCryptoExtAbility::GetProperty(const std::string &handle, const std:
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
     if (!dataParam->callJsExMethodDone.load()) {
         dataParam->callJsCon.wait_for(
-            lock, [this, maxWaitTime, dataParam] { return dataParam->callJsExMethodDone.load(); });
+            lock, maxWaitTime, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
     }
     outParams = std::move(dataParam->paramSet);
     errcode = std::move(dataParam->errCode);
@@ -1387,7 +1387,7 @@ int32_t JsHksCryptoExtAbility::ClearUkeyPinAuthState(const std::string &handle, 
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
     if (!dataParam->callJsExMethodDone.load()) {
         dataParam->callJsCon.wait_for(
-            lock, [this, maxWaitTime, dataParam] { return dataParam->callJsExMethodDone.load(); });
+            lock, maxWaitTime, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
     }
     errcode = std::move(dataParam->errCode);
     return ERR_OK;
