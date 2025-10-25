@@ -131,7 +131,7 @@ int32_t HksClientExportCertificate(const struct HksBlob *index,
 }
 
 int32_t HksClientOpenRemoteHandle(const struct HksBlob *resourceId,
-    const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
+    const struct HksParamSet *paramSetIn)
 {
     char *processName = NULL;
     char *userId = NULL;
@@ -146,7 +146,7 @@ int32_t HksClientOpenRemoteHandle(const struct HksBlob *resourceId,
         0,
         0
     };
-    return HksServiceOpenRemoteHandle(&processInfo, resourceId, paramSetIn, remoteHandleOut);
+    return HksServiceOpenRemoteHandle(&processInfo, resourceId, paramSetIn);
 }
 
 
@@ -188,7 +188,7 @@ int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct H
 }
 
 int32_t HksClientGetRemoteHandle(const struct HksBlob *resourceId,
-    const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut)
+    const struct HksParamSet *paramSetIn)
 {
     char *processName = NULL;
     char *userId = NULL;
@@ -203,7 +203,7 @@ int32_t HksClientGetRemoteHandle(const struct HksBlob *resourceId,
         0,
         0
     };
-    return HksServiceGetRemoteHandle(&processInfo, resourceId, paramSetIn, remoteHandleOut);
+    return HksServiceGetRemoteHandle(&processInfo, resourceId, paramSetIn);
 }
 
 int32_t HksClientCloseRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn)
@@ -226,12 +226,9 @@ int32_t HksClientCloseRemoteHandle(const struct HksBlob *resourceId, const struc
 
 int32_t HksClientClearPinAuthState(const struct HksBlob *index)
 {
-    char *processName = NULL;
-    char *userId = NULL;
-
     struct HksProcessInfo processInfo = {
-        { strlen(userId), (uint8_t *)userId },
-        { strlen(processName), (uint8_t *)processName },
+        { 0, NULL }, // userId
+        { 0, NULL }, // processName
         0,
         0,
         0,
