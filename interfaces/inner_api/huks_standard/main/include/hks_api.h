@@ -41,9 +41,9 @@ HKS_API_EXPORT int32_t HksExportCertificate(const struct HksBlob *resourceId,
 
 // 句柄管理
 HKS_API_EXPORT int32_t HksOpenRemoteHandle(const struct HksBlob *resourceId,
-    const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut);
+    const struct HksParamSet *paramSetIn);
 HKS_API_EXPORT int32_t HksGetRemoteHandle(const struct HksBlob *resourceId,
-    const struct HksParamSet *paramSetIn, struct HksBlob *remoteHandleOut);
+    const struct HksParamSet *paramSetIn);
 HKS_API_EXPORT int32_t HksCloseRemoteHandle(const struct HksBlob *resourceId,
     const struct HksParamSet *paramSetIn);
 
@@ -52,7 +52,7 @@ HKS_API_EXPORT int32_t HksAuthUkeyPin(const struct HksBlob *resourceId, const st
     uint32_t *retryCount);
 HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *name, const struct HksParamSet *paramSetIn,
     int32_t *status);
-HKS_API_EXPORT int32_t HksClearPinAuthState(const struct HksBlob *resourceId);
+HKS_API_EXPORT int32_t HksClearUkeyPinAuthState(const struct HksBlob *resourceId);
 
 // 签名验签
 HKS_API_EXPORT int32_t HksUkeySign(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn,
@@ -61,7 +61,7 @@ HKS_API_EXPORT int32_t HksUkeyVerify(const struct HksBlob *resourceId, const str
     const struct HksBlob *srcData, struct HksBlob *signatureOut);
 
 HKS_API_EXPORT int32_t HksGetRemoteProperty(const struct HksBlob *resourceId, const struct HksBlob *propertyId,
-    const struct HksParamSet *paramSetIn, struct HksParamSet *propertySetOut);
+    const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut);
 
 /**
  * @brief Get HUKS sdk version
