@@ -1403,7 +1403,7 @@ void HksIpcChangeStorageLevel(const struct HksBlob *srcData, const uint8_t *cont
 
 void HksIpcWrapKey(const struct HksBlob *srcData, const uint8_t *context)
 {
-    if (HksServiceUnwrapKey(srcData, context) == HKS_ERROR_API_NOT_SUPPORTED) {
+    if (HksServiceWrapKey(srcData, context) == HKS_ERROR_API_NOT_SUPPORTED) {
         HksSendResponse(context, HKS_ERROR_API_NOT_SUPPORTED, NULL);
     }
 }
