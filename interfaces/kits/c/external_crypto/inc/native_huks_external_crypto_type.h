@@ -30,6 +30,7 @@
  *
  * @brief Defines the structure and enumeration. special for external crypto extension.
  *
+ * @library libhuks_external_crypto.z.so
  * @syscap SystemCapability.Security.Huks.CryptoExtension
  *
  * include "huks/include/native_huks_type.h"
