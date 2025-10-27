@@ -29,6 +29,7 @@
  *
  * @brief Defines the Universal Keystore Kit APIs special for external crypto extension.
  *
+ * @library libhuks_external_crypto.z.so
  * @syscap SystemCapability.Security.Huks.CryptoExtension
  *
  * include "huks/include/native_huks_external_crypto_type.h"

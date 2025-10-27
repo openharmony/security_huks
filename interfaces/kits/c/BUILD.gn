@@ -65,7 +65,7 @@ ohos_shared_library("huks_ndk") {
   subsystem_name = "security"
 }
 
-ohos_shared_library("huks_external_ndk") {
+ohos_shared_library("huks_external_crypto") {
   public = [
     "external_crypto/inc/native_huks_external_crypto_api.h",
     "external_crypto/inc/native_huks_external_crypto_type.h",
@@ -78,7 +78,7 @@ ohos_shared_library("huks_external_ndk") {
     "_HUKS_LOG_ENABLE_",
   ]
 
-  version_script = "libhuks_external_ndk.map"
+  version_script = "libhuks_external_crypto.map"
   branch_protector_ret = "pac_ret"
 
   sanitize = {

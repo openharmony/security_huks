@@ -24,6 +24,6 @@
     OH_Huks_GetUkeyPinAuthState;
     OH_Huks_RegisterProvider;
     OH_Huks_UnregisterProvider;
-    OH_Huks_GetRemoteProperty;
+    OH_Huks_GetProperty;
   local: *;
 };

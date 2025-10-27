@@ -30,7 +30,7 @@ group("huks_capi") {
   if (os_level == "standard") {
     # Include both original NDK library and the new external crypto library
     deps = [
-      "//base/security/huks/interfaces/kits/c:huks_external_ndk",
+      "//base/security/huks/interfaces/kits/c:huks_external_crypto",
       "//base/security/huks/interfaces/kits/c:huks_ndk",
     ]
   }
