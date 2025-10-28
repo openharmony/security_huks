@@ -247,12 +247,12 @@ int32_t HksIpcServiceOnGetRemotePropertyAdapter(const struct HksProcessInfo *pro
 
     auto hksExtProxy = OHOS::iface_cast<OHOS::Security::Hks::IHksExtService>(
         reinterpret_cast<OHOS::IRemoteObject *>(const_cast<uint8_t *>(remoteObject)));
+    HKS_IF_NULL_LOGE_RETURN(hksExtProxy, HKS_ERROR_NULL_POINTER, "hksExtProxy is null");
 
     ret = OHOS::Security::Huks::HksIpcServiceOnGetRemoteProperty(processInfo, cppResourceId,
         cppPropertyId, cppParamSet, cppOutParams);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "JsonArrayToCertInfoSet fail");
-    HKS_IF_NULL_LOGE_RETURN(hksExtProxy, HKS_ERROR_NULL_POINTER, "hksExtProxy is null");
-
+    HKS_IF_NOT_SUCC_LOGE(ret, "JsonArrayToCertInfoSet fail");
+    
     std::unique_ptr<uint8_t[]> outData;
     uint32_t outSize = 0;
     ret = RemotePropertyPack(cppOutParams, outData, outSize, ret);
