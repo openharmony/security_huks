@@ -510,7 +510,7 @@ void HksIpcServiceGetRemoteProperty(const struct HksBlob *srcData, const uint8_t
     struct HksParamSet *paramSet = NULL;
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     do {
-        ret  = HksRenameKeyAliasUnpack(srcData, &resourceId, &propertyId, &paramSet);
+        ret  = HksUkeyBlob2ParamSetUnpack(srcData, &resourceId, &propertyId, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRenameKeyAliasUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
