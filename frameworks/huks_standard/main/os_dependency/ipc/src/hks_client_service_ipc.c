@@ -170,7 +170,6 @@ static int32_t HksAllocInBlobWithBlob2(struct HksBlob *inBlob,
 
 int32_t HksClientRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
 {
-    HKS_LOG_D("======HksClientRegisterProvider enter RegisterProvider");
     int32_t ret;
     struct HksBlob inBlob = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
@@ -575,7 +574,6 @@ int32_t HksClientGetRemoteProperty(const struct HksBlob *resourceId, const struc
 
 int32_t HksClientClearPinAuthState(const struct HksBlob *index)
 {
-    HKS_LOG_D("======HksClientRegisterProvider enter RegisterProvider");
     int32_t ret;
     struct HksBlob inBlob = { 0, NULL };
     do {
