@@ -71,7 +71,6 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
     std::shared_ptr<HksExtAbilityConnectInfo> connectInfo{nullptr};
     std::lock_guard<std::mutex> lock(m_registerMutex);
     if (!m_providerMap.Find(providerInfo, connectInfo)) {
-        std::lock_guard<std::mutex> lock(m_registerMutex);
         AAFwk::Want want{};
         want.SetElementName(providerInfo.m_bundleName, providerInfo.m_abilityName);
         sptr<ExtensionConnection> connect(new (std::nothrow) ExtensionConnection());
