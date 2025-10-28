@@ -42,7 +42,6 @@ public:
         const std::string &providerName, const CppParamSet &paramSet);
     int32_t OnUnRegistProvider(const HksProcessInfo &processInfo,
         const std::string &providerName, const CppParamSet &paramSet);
-    int32_t OnCreateRemoteIndex(const std::string &providerName, const CppParamSet &paramSet, std::string &outIndex);
     int32_t OnCreateRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet, std::string &handle);
     int32_t OnCloseRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,

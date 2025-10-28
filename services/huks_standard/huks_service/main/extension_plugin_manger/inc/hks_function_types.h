@@ -29,7 +29,6 @@ enum class PluginMethodEnum {
     FUNC_ON_REGISTER_PROVIDER,
     FUNC_ON_UN_REGISTER_PROVIDER,
 
-    FUNC_ON_CREATE_REMOTE_INDEX,
     FUNC_ON_CREATE_REMOTE_KEY_HANDLE,
     FUNC_ON_CLOSE_REMOTE_KEY_HANDLE,
     FUNC_ON_AUTH_UKEY_PIN,
@@ -45,20 +44,17 @@ enum class PluginMethodEnum {
     FUNC_ON_FINISH_SESSION,
     FUNC_ON_ABORT_SESSION,
 
-    COUNT = 15,
+    COUNT = 13,
 };
 
 using OnRegisterProviderFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &providerName,
     const CppParamSet &paramSet);
 using OnUnRegisterProviderFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &providerName,
     const CppParamSet &paramSet);
-using OnCreateRemoteIndexFunc = int32_t (*)();
 using OnCreateRemoteKeyHandleFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet, std::string &handle);
-using OnFindRemoteKeyHandleFunc = int32_t (*)();
 using OnCloseRemoteKeyHandleFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet);
-using OnSignedFunc = int32_t (*)();
 using OnAuthUkeyPinFunc = int32_t (*)(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, int32_t& authState, uint32_t& retryCnt);
 using OnGetVerifyPinStatusFunc = int32_t (*)(const HksProcessInfo &processInfo,
