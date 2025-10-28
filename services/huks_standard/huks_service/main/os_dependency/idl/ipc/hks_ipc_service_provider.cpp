@@ -39,16 +39,6 @@ int32_t HksIpcServiceProviderUnRegister(const struct HksProcessInfo *processInfo
     return pluginManager->UnRegisterProvider(*processInfo, name, paramSet);
 }
 
-int32_t HksIpcServiceOnCreateRemoteIndex(const std::string &providerName, const CppParamSet &paramSet,
-    std::string &outIndex)
-{
-    HKS_LOG_E("===========HksIpcServiceOnCreateRemoteInde income");
-    auto libInterface = HuksLibInterface::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")
-    HKS_LOG_E("got libInterface instance");
-    return libInterface->OnCreateRemoteIndex(providerName, paramSet, outIndex);
-}
-
 int32_t HksIpcServiceOnCreateRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string &index,
     CppParamSet &paramSet, std::string &remoteHandleOut)
 {
