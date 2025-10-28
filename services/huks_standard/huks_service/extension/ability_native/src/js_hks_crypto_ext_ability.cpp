@@ -44,7 +44,9 @@ constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
 constexpr size_t MAX_ARG_COUNT = 5;
+constexpr size_t MAX_CERT_SIZE = 5 * 8196;
 constexpr int32_t MAX_WAIT_TIME = 3;
+
 struct HandleInfoParam {
     std::string handle {};
     CppParamSet params {};
@@ -55,35 +57,33 @@ struct IndexInfoParam {
     CppParamSet params {};
 };
 
-napi_value GetNull(const napi_env &env)
-{
-    napi_value result = nullptr;
-    NAPI_CALL(env, napi_get_null(env, &result));
-    return result;
-}
-
-std::string BlobToBase64String(const HksBlob &strBlob)
+int32_t BlobToBase64String(const HksBlob &strBlob, std::string &outStr)
 {
     if (strBlob.size == 0 || strBlob.data == nullptr) {
         LOGE("strBlob is nullptr");
-        return nullptr;
+        return HKS_ERROR_EXT_BASE64_FAILED;
     }
     std::vector<uint8_t> strVector(strBlob.data, strBlob.data + strBlob.size);
     auto base64Str = U8Vec2Base64Str(strVector);
     if (base64Str.first != HKS_SUCCESS) {
         LOGE("U8Vec2Base64Str failed. ret = %d", base64Str.first);
-        return nullptr;
+        return HKS_ERROR_EXT_BASE64_FAILED;
     }
-    return base64Str.second;
+    outStr = std::move(base64Str.second);
+    return HKS_SUCCESS;
 }
 
 napi_value GenerateArrayBuffer(const napi_env &env, uint8_t *data, uint32_t size)
 {
     napi_value buffer;
     void *bufferPtr = nullptr;
-    NAPI_CALL(env, napi_create_arraybuffer(env, size * sizeof(uint8_t), &bufferPtr, &buffer));
+    if (napi_create_arraybuffer(env, size * sizeof(uint8_t), &bufferPtr, &buffer) != napi_ok) {
+        return nullptr;
+    }
     napi_value outBuffer;
-    NAPI_CALL(env, napi_create_typedarray(env, napi_uint8_array, size, buffer, 0, &outBuffer));
+    if (napi_create_typedarray(env, napi_uint8_array, size, buffer, 0, &outBuffer) != napi_ok) {
+        return nullptr;
+    }
     uint8_t *outPut_bytes = (uint8_t *)bufferPtr;
     for (uint32_t i = 0; i < size; ++i) {
         outPut_bytes[i] = data[i];
@@ -91,50 +91,78 @@ napi_value GenerateArrayBuffer(const napi_env &env, uint8_t *data, uint32_t size
     return outBuffer;
 }
 
-static napi_value GenerateHksParam(napi_env env, const HksParam &param)
+static int32_t GenerateHksParam(const napi_env &env, const HksParam &param, napi_value &element)
 {
     napi_value hksParam = nullptr;
-    NAPI_CALL(env, napi_create_object(env, &hksParam));
+    if (napi_create_object(env, &hksParam) != napi_ok) {
+        LOGE("napi create object failed");
+        return HKS_ERROR_EXT_CREATE_VALUE_FAILED;
+    }
 
     napi_value tag = nullptr;
-    NAPI_CALL(env, napi_create_uint32(env, param.tag, &tag));
-    NAPI_CALL(env, napi_set_named_property(env, hksParam, "tag", tag));
+    if (napi_create_uint32(env, param.tag, &tag) != napi_ok) {
+        LOGE("napi create uint32t failed");
+        return HKS_ERROR_EXT_CREATE_VALUE_FAILED;
+    }
+    
+    if (napi_set_named_property(env, hksParam, "tag", tag) != napi_ok) {
+        LOGE("napi set name failed");
+        return HKS_ERROR_EXT_SET_NAME_PROPERTY_FAILED;
+    }
 
     napi_value value = nullptr;
+    napi_status status = napi_ok;
     switch (param.tag & HKS_TAG_TYPE_MASK) {
         case HKS_TAG_TYPE_INT:
-            NAPI_CALL(env, napi_create_int32(env, param.int32Param, &value));
+            status = napi_create_int32(env, param.int32Param, &value);
             break;
         case HKS_TAG_TYPE_UINT:
-            NAPI_CALL(env, napi_create_uint32(env, param.uint32Param, &value));
+            status = napi_create_uint32(env, param.uint32Param, &value);
             break;
         case HKS_TAG_TYPE_ULONG:
-            NAPI_CALL(env, napi_create_int64(env, param.uint64Param, &value));
+            status = napi_create_int64(env, param.uint64Param, &value);
             break;
         case HKS_TAG_TYPE_BOOL:
-            NAPI_CALL(env, napi_get_boolean(env, param.boolParam, &value));
+            status = napi_get_boolean(env, param.boolParam, &value);
             break;
         case HKS_TAG_TYPE_BYTES:
             value = GenerateArrayBuffer(env, param.blob.data, param.blob.size);
             break;
         default:
-            value = GetNull(env);
-            break;
+            LOGE("hks tag Undefined");
+            return HKS_ERROR_EXT_TAG_UNDEFINED;
     }
-    NAPI_CALL(env, napi_set_named_property(env, hksParam, "value", value));
-
-    return hksParam;
+    if (status != napi_ok || value == nullptr) {
+        LOGE("napi Create value failed");
+        return HKS_ERROR_EXT_CREATE_VALUE_FAILED;
+    }
+    if (napi_set_named_property(env, hksParam, "value", value) != napi_ok) {
+        LOGE("napi set name property failed");
+        return HKS_ERROR_EXT_SET_NAME_PROPERTY_FAILED;
+    }
+    element = std::move(hksParam);
+    return HKS_SUCCESS;
 }
 
 napi_value GenerateHksParamArray(const napi_env env, const HksParamSet &paramSet)
 {
     napi_value paramArray = nullptr;
-    NAPI_CALL(env, napi_create_array(env, &paramArray));
+    if (napi_create_array(env, &paramArray) != napi_ok) {
+        LOGE("create array failed");
+        return nullptr;
+    }
 
     for (uint32_t i = 0; i < paramSet.paramsCnt; i++) {
         napi_value element = nullptr;
-        element = GenerateHksParam(env, paramSet.params[i]);
-        napi_set_element(env, paramArray, i, element);
+        auto ret = GenerateHksParam(env, paramSet.params[i], element);
+        if (ret != HKS_SUCCESS) {
+            LOGE("GenerateHksParam failed");
+            return nullptr;
+        }
+        if (napi_set_element(env, paramArray, i, element) != napi_ok) {
+            LOGE("napi set element failed");
+            return nullptr;
+        }
     }
 
     return paramArray;
@@ -143,6 +171,9 @@ napi_value GenerateHksParamArray(const napi_env env, const HksParamSet &paramSet
 bool MakeJsNativeCppParamSet(const napi_env &env, const CppParamSet &CppParamSet, napi_value nativeCppParamSet)
 {
     napi_value napiHksParam = GenerateHksParamArray(env, *CppParamSet.GetParamSet());
+    if (nativeCppParamSet == nullptr) {
+        return false;
+    }
     if (napi_set_named_property(env, nativeCppParamSet, "properties", napiHksParam) != napi_ok) {
         LOGE("Set property to nativeCppParamSet failed");
         return false;
@@ -167,7 +198,7 @@ bool MakeJsNativeVectorInData(const napi_env &env, const std::vector<uint8_t> &i
     }
 
     uint8_t *inData_bytes = (uint8_t *)inDataPtr;
-    for (size_t i = 0; i < length; i++) {
+    for (size_t i = 0; i < length; ++i) {
         inData_bytes[i] = inData[i];
     }
 
@@ -331,11 +362,11 @@ bool BuildPropertyData(const napi_env &env, const std::string &propertyId, const
     return true;
 }
 
-int32_t DoCallJsMethod(CallJsParam *param)
+int32_t DoCallJsMethod(std::shared_ptr<CallJsParam> param)
 {
     if (param == nullptr || param->jsRuntime == nullptr) {
         LOGE("failed to get jsRuntime.");
-        return napi_generic_failure;
+        return HKS_ERROR_EXT_NULLPTR;
     }
     AbilityRuntime::JsRuntime *jsRuntime = param->jsRuntime;
 
@@ -344,11 +375,9 @@ int32_t DoCallJsMethod(CallJsParam *param)
     auto env = reinterpret_cast<napi_env>(&nativeEngine);
     size_t argc = 0;
     napi_value argv[MAX_ARG_COUNT] = { nullptr };
-    if (param->argParser != nullptr) {
-        if (!param->argParser(env, argv, argc)) {
-            LOGE("failed to get params.");
-            return napi_generic_failure;
-        }
+    if (!param->argParser(env, argv, argc)) {
+        LOGE("failed to get params.");
+        return HKS_ERROR_EXT_PARSE_FUNC_FAILED;
     }
 
     napi_value value = nullptr;
@@ -356,114 +385,52 @@ int32_t DoCallJsMethod(CallJsParam *param)
     napi_get_reference_value(env, ref, &value);
     if (value == nullptr) {
         LOGE("failed to get native value object.");
-        return napi_generic_failure;
+        return HKS_ERROR_EXT_GET_VALUE_FAILED;
     }
     napi_value method = nullptr;
     napi_get_named_property(env, value, param->funcName.c_str(), &method);
     if (method == nullptr) {
         LOGE("failed to get %s from FileExtAbility object.", param->funcName.c_str());
-        return napi_generic_failure;
+        return HKS_ERROR_EXT_GET_NAME_PROPERTY_FAILED;
     }
     if (param->retParser == nullptr) {
         LOGE("ResultValueParser must not null.");
-        return napi_generic_failure;
+        return HKS_ERROR_EXT_PARSE_FUNC_FAILED;
     }
     napi_value result = nullptr;
     napi_call_function(env, value, method, argc, argv, &result);
     if (result == nullptr) {
         LOGE("Napi call function fail.");
-        return napi_generic_failure;
+        return HKS_ERROR_EXT_CALL_FUNCTION_FAILED;
     }
     if (!param->retParser(env, handleEscape.Escape(result))) {
         LOGE("Parser js result fail.");
-        return napi_generic_failure;
+        return HKS_ERROR_EXT_PARSE_FUNC_FAILED;
     }
-    return ERR_OK;
-}
-} // namespace
-
-JsHksCryptoExtAbility *JsHksCryptoExtAbility::Create(const std::unique_ptr<AbilityRuntime::Runtime> &runtime)
-{
-    return new JsHksCryptoExtAbility(static_cast<AbilityRuntime::JsRuntime &>(*runtime));
+    return HKS_SUCCESS;
 }
 
-JsHksCryptoExtAbility::JsHksCryptoExtAbility(AbilityRuntime::JsRuntime &jsRuntime) : jsRuntime_(jsRuntime) {}
-
-JsHksCryptoExtAbility::~JsHksCryptoExtAbility()
-{
-    jsRuntime_.FreeNativeReference(std::move(jsObj_));
-}
-
-void JsHksCryptoExtAbility::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalRecord> &record,
-    const std::shared_ptr<AbilityRuntime::OHOSApplication> &application,
-    std::shared_ptr<AbilityRuntime::AbilityHandler> &handler, const sptr<IRemoteObject> &token)
-{
-    HksCryptoExtAbility::Init(record, application, handler, token);
-    std::string srcPath = "";
-    if (abilityInfo_ == nullptr) {
-        LOGE("abilityInfo_ is nullptr");
-        return;
-    }
-    GetSrcPath(srcPath);
-    if (srcPath.empty()) {
-        LOGE("Failed to get srcPath");
-        return;
-    }
-    std::string moduleName(abilityInfo_->moduleName);
-    moduleName.append("::").append(abilityInfo_->name);
-    AbilityRuntime::HandleScope handleScope(jsRuntime_);
-    jsObj_ = jsRuntime_.LoadModule(moduleName, srcPath, abilityInfo_->hapPath,
-        abilityInfo_->compileMode == AbilityRuntime::CompileMode::ES_MODULE);
-    if (jsObj_ == nullptr) {
-        LOGE("Failed to get jsObj_");
-        return;
-    }
-
-    if (jsObj_->GetNapiValue() == nullptr) {
-        LOGE("Failed to get JsHksCryptoExtAbility value");
-        return;
-    }
-}
-
-void JsHksCryptoExtAbility::OnStart(const AAFwk::Want &want)
-{
-    Extension::OnStart(want);
-    AbilityRuntime::HandleScope handleScope(jsRuntime_);
-    napi_env env = reinterpret_cast<napi_env>(&jsRuntime_.GetNativeEngine());
-    napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
-    napi_value argv[] = { napiWant };
-    CallObjectMethod("onCreate", argv, ARGC_ONE);
-}
-
-sptr<IRemoteObject> JsHksCryptoExtAbility::OnConnect(const AAFwk::Want &want)
-{
-    Extension::OnConnect(want);
-    sptr<HksCryptoExtStubImpl> remoteObject(
-        new (std::nothrow) HksCryptoExtStubImpl(std::static_pointer_cast<JsHksCryptoExtAbility>(shared_from_this()),
-        reinterpret_cast<napi_env>(&jsRuntime_.GetNativeEngine())));
-    if (remoteObject == nullptr) {
-        LOGE("No memory allocated for HksCryptoExtStubImpl");
-        return nullptr;
-    }
-
-    return remoteObject->AsObject();
-}
-
-napi_status JsHksCryptoExtAbility::GetStringValue(napi_env env, napi_value value, std::string &result)
+napi_status GetStringValue(napi_env env, napi_value value, std::string &result)
 {
     size_t tempSize = 0;
     if (napi_get_value_string_utf8(env, value, nullptr, 0, &tempSize) != napi_ok) {
+        LOGE("get_length_string_utf8 failed");
+        return napi_generic_failure;
+    }
+    if (tempSize > MAX_CERT_SIZE) {
+        LOGE("exceed the max size");
         return napi_generic_failure;
     }
     result.reserve(tempSize + 1);
     result.resize(tempSize);
     if (napi_get_value_string_utf8(env, value, result.data(), tempSize + 1, &tempSize) != napi_ok) {
+        LOGE("get_value_string_utf8 failed");
         return napi_generic_failure;
     }
     return napi_ok;
 }
 
-napi_status JsHksCryptoExtAbility::GetUint8ArrayValue(napi_env env, napi_value value, HksBlob &result)
+napi_status GetUint8ArrayValue(napi_env env, napi_value value, HksBlob &result)
 {
     size_t length = 0;
     void *data = nullptr;
@@ -489,7 +456,7 @@ napi_status JsHksCryptoExtAbility::GetUint8ArrayValue(napi_env env, napi_value v
     return napi_ok;
 }
 
-napi_status JsHksCryptoExtAbility::GetHksCertInfoValue(napi_env env, napi_value value, HksCertInfo &certInfo)
+napi_status GetHksCertInfoValue(napi_env env, napi_value value, HksCertInfo &certInfo)
 {
     napi_value napiPurpose = nullptr;
     napi_get_named_property(env, value, "purpose", &napiPurpose);
@@ -514,7 +481,7 @@ napi_status JsHksCryptoExtAbility::GetHksCertInfoValue(napi_env env, napi_value 
     return napi_ok;
 }
 
-napi_status JsHksCryptoExtAbility::GetHksParamsfromValue(napi_env env, napi_value value, HksParam &param)
+napi_status GetHksParamsfromValue(napi_env env, napi_value value, HksParam &param)
 {
     napi_value napiTag = nullptr;
     napi_get_named_property(env, value, "tag", &napiTag);
@@ -553,99 +520,48 @@ napi_status JsHksCryptoExtAbility::GetHksParamsfromValue(napi_env env, napi_valu
     return napi_ok;
 }
 
-napi_value JsHksCryptoExtAbility::CallObjectMethod(const char *name, napi_value const *argv, size_t argc)
-{
-    if (!jsObj_) {
-        LOGE("JsHksCryptoExtAbility::CallObjectMethod jsObj Not found FileAccessExtAbility.js");
-        return nullptr;
-    }
-
-    OHOS::AbilityRuntime::HandleEscape handleEscape(jsRuntime_);
-    auto &nativeEngine = jsRuntime_.GetNativeEngine();
-    auto env = reinterpret_cast<napi_env>(&nativeEngine);
-
-    napi_value value = jsObj_->GetNapiValue();
-    if (value == nullptr) {
-        LOGE("Failed to get HksCryptoExtAbility value");
-        return nullptr;
-    }
-
-    napi_value method = nullptr;
-    napi_get_named_property(env, value, name, &method);
-    if (method == nullptr) {
-        LOGE("Failed to get '%s' from HksCryptoExtAbility object", name);
-        return nullptr;
-    }
-
-    napi_value result = nullptr;
-    if (napi_call_function(env, value, method, argc, argv, &result) != napi_ok) {
-        LOGE("Call function fail");
-        return nullptr;
-    }
-    return handleEscape.Escape(result);
-}
-
-int32_t JsHksCryptoExtAbility::CallJsMethod(const std::string &funcName, AbilityRuntime::JsRuntime &jsRuntime,
+int32_t CallJsMethod(const std::string &funcName, AbilityRuntime::JsRuntime &jsRuntime,
     NativeReference *jsObj, InputArgsParser argParser, ResultValueParser retParser)
 {
-    uv_loop_s *loop = nullptr;
-    napi_status status = napi_get_uv_event_loop(reinterpret_cast<napi_env>(&jsRuntime.GetNativeEngine()), &loop);
-    if (status != napi_ok) {
-        LOGE("failed to get uv event loop.");
-        return EINVAL;
-    }
     auto param = std::make_shared<CallJsParam>(funcName, &jsRuntime, jsObj, argParser, retParser);
     if (param == nullptr) {
         LOGE("failed to new param.");
         return EINVAL;
     }
 
-    auto task = [param {param.get()}]() {
+    auto weakPtrParam = std::weak_ptr<CallJsParam>(param);
+    auto task = [weakPtrParam]() {
+        auto param = weakPtrParam.lock();
         if (param == nullptr || param->jsRuntime == nullptr) {
             LOGE("failed to get CallJsParam.");
+            param->errcode = HKS_ERROR_EXT_NULLPTR;
             return;
         }
 
-        napi_handle_scope scope = nullptr;
-        napi_env env = reinterpret_cast<napi_env>(&(param->jsRuntime->GetNativeEngine()));
-        napi_open_handle_scope(env, &scope);
-
-        if (DoCallJsMethod(param) != ERR_OK) {
+        AbilityRuntime::HandleScope handleScope(*param->jsRuntime);
+        param->errcode = DoCallJsMethod(param);
+        if (param->errcode != HKS_SUCCESS) {
             LOGE("failed to call DoCallJsMethod.");
         }
 
         std::unique_lock<std::mutex> lock(param->CryptoOperateMutex);
         param->isReady = true;
         param->CryptoOperateCondition.notify_one();
-        napi_close_handle_scope(env, scope);
     };
     auto ret = napi_send_event(jsRuntime.GetNapiEnv(), task, napi_eprio_high);
     if (ret != napi_ok) {
         LOGE("failed to napi_send_event, ret:%d.", ret);
-        return EINVAL;
+        return HKS_ERROR_EXT_SEND_EVENT_FAILED;
     }
     const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
     std::unique_lock<std::mutex> lock(param->CryptoOperateMutex);
     if (!param->isReady) {
         param->CryptoOperateCondition.wait_for(lock, maxWaitTime, [param]() { return param->isReady; });
     }
-    return ERR_OK;
+    return param->errcode;
 }
 
-
-void JsHksCryptoExtAbility::GetSrcPath(std::string &srcPath)
-{
-    if (abilityInfo_ == nullptr) {
-        LOGE("abilityInfo_ is nullptr");
-        return;
-    }
-    srcPath.append(abilityInfo_->moduleName + "/");
-    srcPath.append(abilityInfo_->srcEntrance);
-    srcPath.erase(srcPath.rfind('.'));
-    srcPath.append(".abc");
-}
-
-void JsHksCryptoExtAbility::GetOpenRemoteHandleParams(const napi_env &env, const napi_value &funcResult,
+void GetOpenRemoteHandleParams(const napi_env &env, const napi_value &funcResult,
     CryptoResultParam &resultParams)
 {
     napi_value napiHandle = nullptr;
@@ -655,7 +571,7 @@ void JsHksCryptoExtAbility::GetOpenRemoteHandleParams(const napi_env &env, const
     }
 }
 
-void JsHksCryptoExtAbility::GetAuthUkeyPinParams(const napi_env &env, const napi_value &funcResult,
+void GetAuthUkeyPinParams(const napi_env &env, const napi_value &funcResult,
     CryptoResultParam &resultParams)
 {
     napi_value napiAuthState = nullptr;
@@ -671,7 +587,7 @@ void JsHksCryptoExtAbility::GetAuthUkeyPinParams(const napi_env &env, const napi
     }
 }
 
-void JsHksCryptoExtAbility::GetUkeyPinAuthStateParams(const napi_env &env, const napi_value &funcResult,
+void GetUkeyPinAuthStateParams(const napi_env &env, const napi_value &funcResult,
     CryptoResultParam &resultParams)
 {
     napi_value napiAuthState = nullptr;
@@ -681,7 +597,7 @@ void JsHksCryptoExtAbility::GetUkeyPinAuthStateParams(const napi_env &env, const
     }
 }
 
-void JsHksCryptoExtAbility::HksCertInfoToString(std::vector<HksCertInfo> &certInfoVec, std::string &jsonStr)
+void HksCertInfoToString(std::vector<HksCertInfo> &certInfoVec, std::string &jsonStr)
 {
     auto jsonObj = CommJsonObject::CreateArray();
     if (jsonObj.IsNull()) {
@@ -706,7 +622,12 @@ void JsHksCryptoExtAbility::HksCertInfoToString(std::vector<HksCertInfo> &certIn
             break;
         }
 
-        std::string certStr = BlobToBase64String(certInfo.certsArray);
+        std::string certStr = "";
+        if (BlobToBase64String(certInfo.certsArray, certStr) != HKS_SUCCESS)
+        {
+            LOGE("blob to base64 failed");
+            break;
+        }
         if (!certJsonObj.SetValue("cert", certStr)) {
             LOGE("set index cert failed");
             break;
@@ -721,15 +642,18 @@ void JsHksCryptoExtAbility::HksCertInfoToString(std::vector<HksCertInfo> &certIn
         LOGE("jsonStr is empty");
         return;
     }
-    LOGE("HksCertInfoToString jsonStr: %s", jsonStr.c_str());
     return ;
 }
 
-void JsHksCryptoExtAbility::GetExportCertificateParams(const napi_env &env, const napi_value &funcResult,
+void GetExportCertificateParams(const napi_env &env, const napi_value &funcResult,
     CryptoResultParam &resultParams)
 {
     napi_value nativeArray = nullptr;
-    napi_create_array(env, &nativeArray);
+    if (napi_create_array(env, &nativeArray) != napi_ok) {
+        LOGE("create_array failed");
+        return;
+    }
+
     napi_get_named_property(env, funcResult, "certs", &nativeArray);
     if (nativeArray == nullptr) {
         LOGE("Convert js array object fail.");
@@ -759,11 +683,14 @@ void JsHksCryptoExtAbility::GetExportCertificateParams(const napi_env &env, cons
     return;
 }
 
-void JsHksCryptoExtAbility::GetSessionParams(const napi_env &env, const napi_value &funcResult,
+void GetSessionParams(const napi_env &env, const napi_value &funcResult,
     CryptoResultParam &resultParams)
 {
     napi_value napiOutData = nullptr;
-    napi_create_array(env, &napiOutData);
+    if (napi_create_array(env, &napiOutData) != napi_ok) {
+        LOGE("create_array failed");
+        return;
+    }
     napi_get_named_property(env, funcResult, "outData", &napiOutData);
     if (napiOutData == nullptr) {
         LOGE("Convert js array object fail.");
@@ -774,28 +701,37 @@ void JsHksCryptoExtAbility::GetSessionParams(const napi_env &env, const napi_val
     napi_value nativeArray;
     size_t byte_offset;
     size_t length;
-    napi_get_typedarray_info(env, napiOutData, &type, &length, nullptr, &nativeArray, &byte_offset);
+    if (napi_get_typedarray_info(env, napiOutData, &type, &length, nullptr, &nativeArray, &byte_offset) != napi_ok) {
+        LOGE("get typedarray info failed");
+        return;
+    }
 
     void *data;
     size_t byte_length;
-    napi_get_arraybuffer_info(env, nativeArray, &data, &byte_length);
+    if (napi_get_arraybuffer_info(env, nativeArray, &data, &byte_length) != napi_ok) {
+        LOGE("get arraybuffer info failed");
+        return;
+    }
 
     if (type == napi_uint8_array) {
         uint8_t *data_bytes = (uint8_t *)(data);
-        int32_t  num = length / sizeof(uint8_t);
+        size_t num = length / sizeof(uint8_t);
 
-        for (int32_t i = 0; i < num; i++) {
+        for (size_t i = 0; i < num; ++i) {
             resultParams.outData.push_back(*((uint8_t *)(data_bytes) + i));
         }
-        LOGE("GetSessionParams size %d", length);
+        LOGE("GetSessionParams size %zu", length);
     }
 }
 
-void JsHksCryptoExtAbility::GetGetPropertyParams(const napi_env &env, const napi_value &funcResult,
+void GetGetPropertyParams(const napi_env &env, const napi_value &funcResult,
     CryptoResultParam &resultParams)
 {
     napi_value nativeArray = nullptr;
-    napi_create_array(env, &nativeArray);
+    if (napi_create_array(env, &nativeArray) != napi_ok) {
+        LOGE("create_array failed");
+        return;
+    }
     napi_get_named_property(env, funcResult, "property", &nativeArray);
     if (nativeArray == nullptr) {
         LOGE("Convert js array object fail.");
@@ -828,7 +764,7 @@ void JsHksCryptoExtAbility::GetGetPropertyParams(const napi_env &env, const napi
     return;
 }
 
-bool JsHksCryptoExtAbility::ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
+bool ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
     CryptoResultParam &resultParams)
 {
     if (funcResult == nullptr) {
@@ -873,7 +809,7 @@ bool JsHksCryptoExtAbility::ConvertFunctionResult(const napi_env &env, const nap
     return true;
 }
 
-napi_value JsHksCryptoExtAbility::PromiseCallback(napi_env env, napi_callback_info info)
+napi_value PromiseCallback(napi_env env, napi_callback_info info)
 {
     if (info == nullptr) {
         LOGE("PromiseCallback, invalid input info");
@@ -904,11 +840,14 @@ napi_value JsHksCryptoExtAbility::PromiseCallback(napi_env env, napi_callback_in
     return nullptr;
 }
  
-void JsHksCryptoExtAbility::CallPromise(napi_env &env, napi_value funcResult,
+void CallPromise(napi_env &env, napi_value funcResult,
     std::shared_ptr<CryptoResultParam> dataParam)
 {
     napi_value promiseThen = nullptr;
-    napi_get_named_property(env, funcResult, "then", &promiseThen);
+    if (napi_get_named_property(env, funcResult, "then", &promiseThen)) {
+        LOGE("get then from promiseValue failed");
+        return;
+    }
  
     bool isCallable = false;
     napi_is_callable(env, promiseThen, &isCallable);
@@ -923,10 +862,14 @@ void JsHksCryptoExtAbility::CallPromise(napi_env &env, napi_value funcResult,
         LOGE("Failed to new promise callbackInfo.");
         return;
     }
-    napi_create_function(env, "promiseCallback", strlen("promiseCallback"), PromiseCallback,
+    napi_status status = napi_create_function(env, "promiseCallback", strlen("promiseCallback"), PromiseCallback,
         callbackInfo, &promiseCallback);
- 
-    napi_status status;
+    if (status != napi_ok) {
+        LOGE("create promiseCallback function failed");
+        PromiseCallbackInfo::Destroy(callbackInfo);
+        return;
+    }
+
     napi_value argvPromise[1] = { promiseCallback };
  
     status = napi_call_function(env, funcResult, promiseThen, ARGS_ONE, argvPromise, nullptr);
@@ -935,6 +878,110 @@ void JsHksCryptoExtAbility::CallPromise(napi_env &env, napi_value funcResult,
         PromiseCallbackInfo::Destroy(callbackInfo);
         return;
     }
+}
+} // namespace
+
+JsHksCryptoExtAbility *JsHksCryptoExtAbility::Create(const std::unique_ptr<AbilityRuntime::Runtime> &runtime)
+{
+    return new JsHksCryptoExtAbility(static_cast<AbilityRuntime::JsRuntime &>(*runtime));
+}
+
+JsHksCryptoExtAbility::JsHksCryptoExtAbility(AbilityRuntime::JsRuntime &jsRuntime) : jsRuntime_(jsRuntime) {}
+
+JsHksCryptoExtAbility::~JsHksCryptoExtAbility()
+{
+    jsRuntime_.FreeNativeReference(std::move(jsObj_));
+}
+
+void JsHksCryptoExtAbility::GetSrcPath(std::string &srcPath)
+{
+    srcPath.append(abilityInfo_->moduleName + "/");
+    srcPath.append(abilityInfo_->srcEntrance);
+    srcPath.erase(srcPath.rfind('.'));
+    srcPath.append(".abc");
+}
+
+void JsHksCryptoExtAbility::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalRecord> &record,
+    const std::shared_ptr<AbilityRuntime::OHOSApplication> &application,
+    std::shared_ptr<AbilityRuntime::AbilityHandler> &handler, const sptr<IRemoteObject> &token)
+{
+    HksCryptoExtAbility::Init(record, application, handler, token);
+    std::string srcPath = "";
+    if (abilityInfo_ == nullptr) {
+        LOGE("abilityInfo_ is nullptr");
+        return;
+    }
+    GetSrcPath(srcPath);
+    
+    std::string moduleName(abilityInfo_->moduleName);
+    moduleName.append("::").append(abilityInfo_->name);
+    AbilityRuntime::HandleScope handleScope(jsRuntime_);
+    jsObj_ = jsRuntime_.LoadModule(moduleName, srcPath, abilityInfo_->hapPath,
+        abilityInfo_->compileMode == AbilityRuntime::CompileMode::ES_MODULE);
+    if (jsObj_ == nullptr) {
+        LOGE("Failed to get jsObj_");
+        return;
+    }
+
+    if (jsObj_->GetNapiValue() == nullptr) {
+        LOGE("Failed to get JsHksCryptoExtAbility value");
+        return;
+    }
+}
+
+void JsHksCryptoExtAbility::OnStart(const AAFwk::Want &want)
+{
+    Extension::OnStart(want);
+    AbilityRuntime::HandleScope handleScope(jsRuntime_);
+    napi_env env = reinterpret_cast<napi_env>(&jsRuntime_.GetNativeEngine());
+    napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
+    napi_value argv[] = { napiWant };
+    CallObjectMethod("onCreate", argv, ARGC_ONE);
+}
+
+sptr<IRemoteObject> JsHksCryptoExtAbility::OnConnect(const AAFwk::Want &want)
+{
+    Extension::OnConnect(want);
+    sptr<HksCryptoExtStubImpl> remoteObject(
+        new (std::nothrow) HksCryptoExtStubImpl(std::static_pointer_cast<JsHksCryptoExtAbility>(shared_from_this())));
+    if (remoteObject == nullptr) {
+        LOGE("No memory allocated for HksCryptoExtStubImpl");
+        return nullptr;
+    }
+
+    return remoteObject->AsObject();
+}
+
+napi_value JsHksCryptoExtAbility::CallObjectMethod(const char *name, napi_value const *argv, size_t argc)
+{
+    if (!jsObj_) {
+        LOGE("CallObjectMethod jsObj Not found HksCryptoExtAbility.js");
+        return nullptr;
+    }
+
+    OHOS::AbilityRuntime::HandleEscape handleEscape(jsRuntime_);
+    auto &nativeEngine = jsRuntime_.GetNativeEngine();
+    auto env = reinterpret_cast<napi_env>(&nativeEngine);
+
+    napi_value value = jsObj_->GetNapiValue();
+    if (value == nullptr) {
+        LOGE("Failed to get HksCryptoExtAbility value");
+        return nullptr;
+    }
+
+    napi_value method = nullptr;
+    napi_get_named_property(env, value, name, &method);
+    if (method == nullptr) {
+        LOGE("Failed to get '%s' from HksCryptoExtAbility object", name);
+        return nullptr;
+    }
+
+    napi_value result = nullptr;
+    if (napi_call_function(env, value, method, argc, argv, &result) != napi_ok) {
+        LOGE("Call function fail");
+        return nullptr;
+    }
+    return handleEscape.Escape(result);
 }
 
 int32_t JsHksCryptoExtAbility::OpenRemoteHandle(const std::string &index, const CppParamSet &params,
@@ -950,7 +997,7 @@ int32_t JsHksCryptoExtAbility::OpenRemoteHandle(const std::string &index, const 
 
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::OPEN_REMOTE_HANDLE;
-    auto retParser = [&handle, &errcode, dataParam, this](napi_env &env, napi_value result) -> bool {
+    auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
         bool isPromise = false;
         napi_is_promise(env, result, &isPromise);
         if (!isPromise) {
@@ -971,7 +1018,7 @@ int32_t JsHksCryptoExtAbility::OpenRemoteHandle(const std::string &index, const 
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
     if (!dataParam->callJsExMethodDone.load()) {
         dataParam->callJsCon.wait_for(
-            lock, maxWaitTime, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); });
     }
 
     handle = std::move(dataParam->handle);
@@ -991,7 +1038,7 @@ int32_t JsHksCryptoExtAbility::CloseRemoteHandle(const std::string &handle, cons
 
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::CLOSE_REMOTE_HANDLE;
-    auto retParser = [dataParam, this](napi_env &env, napi_value result) -> bool {
+    auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
         bool isPromise = false;
         napi_is_promise(env, result, &isPromise);
         if (!isPromise) {
@@ -1012,7 +1059,7 @@ int32_t JsHksCryptoExtAbility::CloseRemoteHandle(const std::string &handle, cons
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
     if (!dataParam->callJsExMethodDone.load()) {
         dataParam->callJsCon.wait_for(
-            lock, maxWaitTime, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); });
     }
     errcode = std::move(dataParam->errCode);
     return ERR_OK;
@@ -1031,7 +1078,7 @@ int32_t JsHksCryptoExtAbility::AuthUkeyPin(const std::string &handle, const CppP
 
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::AUTH_UKEY_PIN;
-    auto retParser = [dataParam, this](napi_env &env, napi_value result) -> bool {
+    auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
         bool isPromise = false;
         napi_is_promise(env, result, &isPromise);
         if (!isPromise) {
@@ -1052,7 +1099,7 @@ int32_t JsHksCryptoExtAbility::AuthUkeyPin(const std::string &handle, const CppP
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
     if (!dataParam->callJsExMethodDone.load()) {
         dataParam->callJsCon.wait_for(
-            lock, maxWaitTime, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); });
     }
     errcode = std::move(dataParam->errCode);
     authState = std::move(dataParam->authState);
@@ -1073,7 +1120,7 @@ int32_t JsHksCryptoExtAbility::GetUkeyPinAuthState(const std::string &handle, co
 
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::GET_UKEY_PIN_AUTH_STATE;
-    auto retParser = [dataParam, this](napi_env &env, napi_value result) -> bool {
+    auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
         bool isPromise = false;
         napi_is_promise(env, result, &isPromise);
         if (!isPromise) {
@@ -1094,7 +1141,7 @@ int32_t JsHksCryptoExtAbility::GetUkeyPinAuthState(const std::string &handle, co
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
     if (!dataParam->callJsExMethodDone.load()) {
         dataParam->callJsCon.wait_for(
-            lock, maxWaitTime, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); });
     }
     errcode = std::move(dataParam->errCode);
     authState = std::move(dataParam->authState);
@@ -1114,7 +1161,7 @@ int32_t JsHksCryptoExtAbility::ExportCertificate(const std::string &index, const
 
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::EXPORT_CERTIFICATE;
-    auto retParser = [dataParam, this](napi_env &env, napi_value result) -> bool {
+    auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
         bool isPromise = false;
         napi_is_promise(env, result, &isPromise);
         if (!isPromise) {
@@ -1135,7 +1182,7 @@ int32_t JsHksCryptoExtAbility::ExportCertificate(const std::string &index, const
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
     if (!dataParam->callJsExMethodDone.load()) {
         dataParam->callJsCon.wait_for(
-            lock, maxWaitTime, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); });
     }
     errcode = std::move(dataParam->errCode);
     HksCertInfoToString(dataParam->certs, certJsonArr);
@@ -1163,7 +1210,7 @@ int32_t JsHksCryptoExtAbility::ExportProviderCertificates(const CppParamSet &par
 
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::EXPORT_PROVIDER_CERTIFICATES;
-    auto retParser = [dataParam, this](napi_env &env, napi_value result) -> bool {
+    auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
         bool isPromise = false;
         napi_is_promise(env, result, &isPromise);
         if (!isPromise) {
@@ -1184,7 +1231,7 @@ int32_t JsHksCryptoExtAbility::ExportProviderCertificates(const CppParamSet &par
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
     if (!dataParam->callJsExMethodDone.load()) {
         dataParam->callJsCon.wait_for(
-            lock, maxWaitTime, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); });
     }
     errcode = std::move(dataParam->errCode);
     HksCertInfoToString(dataParam->certs, certJsonArr);
@@ -1204,7 +1251,7 @@ int32_t JsHksCryptoExtAbility::InitSession(const std::string &index, const CppPa
 
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::INIT_SESSION;
-    auto retParser = [&handle, &errcode, dataParam, this](napi_env &env, napi_value result) -> bool {
+    auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
         bool isPromise = false;
         napi_is_promise(env, result, &isPromise);
         if (!isPromise) {
@@ -1225,7 +1272,7 @@ int32_t JsHksCryptoExtAbility::InitSession(const std::string &index, const CppPa
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
     if (!dataParam->callJsExMethodDone.load()) {
         dataParam->callJsCon.wait_for(
-            lock, maxWaitTime, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); });
     }
     handle = std::move(dataParam->handle);
     errcode = std::move(dataParam->errCode);
@@ -1245,7 +1292,7 @@ int32_t JsHksCryptoExtAbility::UpdateSession(const std::string &handle, const Cp
 
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::UPDATE_SESSION;
-    auto retParser = [dataParam, this](napi_env &env, napi_value result) -> bool {
+    auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
         bool isPromise = false;
         napi_is_promise(env, result, &isPromise);
         if (!isPromise) {
@@ -1266,7 +1313,7 @@ int32_t JsHksCryptoExtAbility::UpdateSession(const std::string &handle, const Cp
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
     if (!dataParam->callJsExMethodDone.load()) {
         dataParam->callJsCon.wait_for(
-            lock, maxWaitTime, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); });
     }
     errcode = std::move(dataParam->errCode);
     outData = std::move(dataParam->outData);
@@ -1286,7 +1333,7 @@ int32_t JsHksCryptoExtAbility::FinishSession(const std::string &handle, const Cp
 
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::FINISH_SESSION;
-    auto retParser = [dataParam, this](napi_env &env, napi_value result) -> bool {
+    auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
         bool isPromise = false;
         napi_is_promise(env, result, &isPromise);
         if (!isPromise) {
@@ -1307,7 +1354,7 @@ int32_t JsHksCryptoExtAbility::FinishSession(const std::string &handle, const Cp
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
     if (!dataParam->callJsExMethodDone.load()) {
         dataParam->callJsCon.wait_for(
-            lock, maxWaitTime, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); });
     }
     errcode = std::move(dataParam->errCode);
     outData = std::move(dataParam->outData);
@@ -1326,7 +1373,7 @@ int32_t JsHksCryptoExtAbility::GetProperty(const std::string &handle, const std:
     };
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::GET_PROPERTY;
-    auto retParser = [dataParam, this](napi_env &env, napi_value result) -> bool {
+    auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
         bool isPromise = false;
         napi_is_promise(env, result, &isPromise);
         if (!isPromise) {
@@ -1347,7 +1394,7 @@ int32_t JsHksCryptoExtAbility::GetProperty(const std::string &handle, const std:
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
     if (!dataParam->callJsExMethodDone.load()) {
         dataParam->callJsCon.wait_for(
-            lock, maxWaitTime, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); });
     }
     outParams = std::move(dataParam->paramSet);
     errcode = std::move(dataParam->errCode);
@@ -1366,7 +1413,7 @@ int32_t JsHksCryptoExtAbility::ClearUkeyPinAuthState(const std::string &handle, 
     };
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::CLEAR_UKEY_PIN_AUTH;
-    auto retParser = [dataParam, this](napi_env &env, napi_value result) -> bool {
+    auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
         bool isPromise = false;
         napi_is_promise(env, result, &isPromise);
         if (!isPromise) {
@@ -1387,7 +1434,7 @@ int32_t JsHksCryptoExtAbility::ClearUkeyPinAuthState(const std::string &handle, 
     std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
     if (!dataParam->callJsExMethodDone.load()) {
         dataParam->callJsCon.wait_for(
-            lock, maxWaitTime, [this, dataParam] { return dataParam->callJsExMethodDone.load(); });
+            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); });
     }
     errcode = std::move(dataParam->errCode);
     return ERR_OK;

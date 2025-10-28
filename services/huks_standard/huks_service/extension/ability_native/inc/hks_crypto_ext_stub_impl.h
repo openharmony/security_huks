@@ -27,7 +27,7 @@ namespace Security {
 namespace Huks {
 class HksCryptoExtStubImpl : public HuksAccessExtBaseStub {
 public:
-    explicit HksCryptoExtStubImpl(const std::shared_ptr<HksCryptoExtAbility>& extension, napi_env env)
+    explicit HksCryptoExtStubImpl(const std::shared_ptr<HksCryptoExtAbility>& extension)
         : extension_(extension) {}
 
     virtual ~HksCryptoExtStubImpl() {}

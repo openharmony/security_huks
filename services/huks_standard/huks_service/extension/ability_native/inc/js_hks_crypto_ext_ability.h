@@ -68,6 +68,7 @@ struct CallJsParam {
     std::mutex CryptoOperateMutex;
     std::condition_variable CryptoOperateCondition;
     bool isReady = false;
+    int32_t errcode {};
     std::string funcName;
     AbilityRuntime::JsRuntime *jsRuntime;
     NativeReference *jsObj;
@@ -120,30 +121,8 @@ private:
         T data;
         int32_t code {ERR_OK};
     };
-    napi_value CallObjectMethod(const char *name, napi_value const *argv = nullptr, size_t argc = 0);
-    static napi_status GetStringValue(napi_env env, napi_value value, std::string &result);
-    static napi_status GetHksCertInfoValue(napi_env env, napi_value value, HksCertInfo &certInfo);
-    static napi_status GetUint8ArrayValue(napi_env env, napi_value value, HksBlob &result);
-    static napi_status GetHksParamsfromValue(napi_env env, napi_value value, HksParam &param);
-    static void GetSessionParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams);
-    static void HksCertInfoToString(std::vector<HksCertInfo> &certInfoVec, std::string &jsonStr);
-    int32_t CallJsMethod(const std::string &funcName, AbilityRuntime::JsRuntime &jsRuntime, NativeReference *jsObj,
-        InputArgsParser argParser, ResultValueParser retParser);
     void GetSrcPath(std::string &srcPath);
-    static bool ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
-        CryptoResultParam &resultParams);
-    static napi_value PromiseCallback(napi_env env, napi_callback_info info);
-    void CallPromise(napi_env &env, napi_value funcResult, std::shared_ptr<CryptoResultParam> dataParam);
-    static void GetOpenRemoteHandleParams(const napi_env &env, const napi_value &funcResult,
-        CryptoResultParam &resultParams);
-    static void GetAuthUkeyPinParams(const napi_env &env, const napi_value &funcResult,
-        CryptoResultParam &resultParams);
-    static void GetUkeyPinAuthStateParams(const napi_env &env, const napi_value &funcResult,
-        CryptoResultParam &resultParams);
-    static void GetExportCertificateParams(const napi_env &env, const napi_value &funcResult,
-        CryptoResultParam &resultParams);
-    static void GetGetPropertyParams(const napi_env &env, const napi_value &funcResult,
-        CryptoResultParam &resultParams);
+    napi_value CallObjectMethod(const char *name, napi_value const *argv, size_t argc);
     AbilityRuntime::JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> jsObj_;
 };

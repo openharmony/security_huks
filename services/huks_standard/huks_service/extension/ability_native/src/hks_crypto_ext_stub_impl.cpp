@@ -27,7 +27,7 @@ ErrCode HksCryptoExtStubImpl::OpenRemoteHandle(
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
-        return ERR_OK;
+        return HKS_ERROR_EXT_NULLPTR;
     }
     return extension_->OpenRemoteHandle(index, params, handle, errcode);
 }
@@ -39,7 +39,7 @@ ErrCode HksCryptoExtStubImpl::CloseRemoteHandle(
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
-        return ERR_OK;
+        return HKS_ERROR_EXT_NULLPTR;
     }
     return extension_->CloseRemoteHandle(handle, params, errcode);
 }
@@ -53,7 +53,7 @@ ErrCode HksCryptoExtStubImpl::AuthUkeyPin(
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
-        return ERR_OK;
+        return HKS_ERROR_EXT_NULLPTR;
     }
     return extension_->AuthUkeyPin(handle, params, errcode, authState, retryCnt);
 }
@@ -66,7 +66,7 @@ ErrCode HksCryptoExtStubImpl::GetUkeyPinAuthState(
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
-        return ERR_OK;
+        return HKS_ERROR_EXT_NULLPTR;
     }
     state = 0; // 设置默认状态
     return extension_->GetUkeyPinAuthState(handle, params, state, errcode);
@@ -81,7 +81,7 @@ ErrCode HksCryptoExtStubImpl::Sign(
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
-        return ERR_OK;
+        return HKS_ERROR_EXT_NULLPTR;
     }
     return ERR_OK;
 }
@@ -95,7 +95,7 @@ ErrCode HksCryptoExtStubImpl::Verify(
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
-        return ERR_OK;
+        return HKS_ERROR_EXT_NULLPTR;
     }
     return ERR_OK;
 }
@@ -108,7 +108,7 @@ ErrCode HksCryptoExtStubImpl::ExportCertificate(
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
-        return ERR_OK;
+        return HKS_ERROR_EXT_NULLPTR;
     }
     return extension_->ExportCertificate(index, params, certJsonArr, errcode);
 }
@@ -120,7 +120,7 @@ ErrCode HksCryptoExtStubImpl::ExportProviderCertificates(
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
-        return ERR_OK;
+        return HKS_ERROR_EXT_NULLPTR;
     }
     return extension_->ExportProviderCertificates(params, certJsonArr, errcode);
 }
@@ -133,7 +133,7 @@ ErrCode HksCryptoExtStubImpl::InitSession(
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
-        return ERR_OK;
+        return HKS_ERROR_EXT_NULLPTR;
     }
     return extension_->InitSession(index, params, handle, errcode);
 }
@@ -147,7 +147,7 @@ ErrCode HksCryptoExtStubImpl::UpdateSession(
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
-        return ERR_OK;
+        return HKS_ERROR_EXT_NULLPTR;
     }
     return extension_->UpdateSession(handle, params, inData, outData, errcode);
 }
@@ -161,7 +161,7 @@ ErrCode HksCryptoExtStubImpl::FinishSession(
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
-        return ERR_OK;
+        return HKS_ERROR_EXT_NULLPTR;
     }
     return extension_->FinishSession(handle, params, inData, outData, errcode);
 }
@@ -174,8 +174,8 @@ ErrCode HksCryptoExtStubImpl::GetProperty(
     int32_t& errcode)
 {
     if (extension_ == nullptr) {
-        LOGE("extension_ nullptr");
-        return ERR_OK;
+        LOGE("extension is nullptr");
+        return HKS_ERROR_EXT_NULLPTR;
     }
     return extension_->GetProperty(handle, propertyId, params, outParams, errcode);
 }
@@ -186,8 +186,8 @@ ErrCode HksCryptoExtStubImpl::GetResourceId(
     int32_t& errcode)
 {
     if (extension_ == nullptr) {
-        LOGE("extension_ nullptr");
-        return ERR_OK;
+        LOGE("extension is nullptr");
+        return HKS_ERROR_EXT_NULLPTR;
     }
     return ERR_OK;
 }
@@ -198,8 +198,8 @@ ErrCode HksCryptoExtStubImpl::ClearUkeyPinAuthState(
     int32_t& errcode)
 {
     if (extension_ == nullptr) {
-        LOGE("extension_ nullptr");
-        return ERR_OK;
+        LOGE("extension is nullptr");
+        return HKS_ERROR_EXT_NULLPTR;
     }
     return extension_->ClearUkeyPinAuthState(handle, params, errcode);
 }

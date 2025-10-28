@@ -27,7 +27,6 @@ ohos_unittest("js_crypto_access_ext_ability_test") {
   include_dirs = [ "mock" ]
 
   sources = [
-    "//base/security/huks/services/huks_standard/huks_service/extension/ability_native/src/js_hks_crypto_ext_ability.cpp",
     "js_hks_crypto_ext_ability_test.cpp",
     "mock/js_native_api_mock.cpp",
   ]
