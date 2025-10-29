@@ -48,12 +48,6 @@ int32_t HksClientOpenRemoteHandle(const struct HksBlob *resourceId, const struct
 int32_t HksClientGetRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn);
 int32_t HksClientCloseRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn);
 
-// 签名验签
-int32_t HksClientUkeySign(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
-    const struct HksBlob *srcData, struct HksBlob *signatureOut);
-int32_t HksClientUkeyVerify(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
-    const struct HksBlob *srcData, struct HksBlob *signatureOut);
-
 int32_t HksClientGetRemoteProperty(const struct HksBlob *resourceId, const struct HksBlob *propertyId,
     const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut);
 

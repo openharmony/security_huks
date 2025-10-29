@@ -120,7 +120,6 @@ HKS_API_EXPORT int32_t HksExportCertificate(const struct HksBlob *resourceId,
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter HksExportCertificate");
-    HKS_LOG_E("hks_api.c ======== enter HksExportCertificate");
     if ((paramSetIn == NULL) || (resourceId == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
@@ -237,47 +236,6 @@ HKS_API_EXPORT int32_t HksClearUkeyPinAuthState(const struct HksBlob *resourceId
     return ret;
 #else
     (void)resourceId;
-    return HKS_ERROR_API_NOT_SUPPORTED;
-#endif
-}
-
-// 签名验签
-HKS_API_EXPORT int32_t HksUkeySign(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn,
-    const struct HksBlob *srcData, struct HksBlob *signatureOut)
-{
-#ifdef L2_STANDARD
-    HKS_LOG_D("enter UkeySign");
-    if ((resourceId == NULL) || (paramSetIn == NULL) || (srcData == NULL) || (signatureOut == NULL)) {
-        return HKS_ERROR_NULL_POINTER;
-    }
-    int32_t ret = HksClientUkeySign(resourceId, paramSetIn, srcData, signatureOut);
-    HKS_IF_NOT_SUCC_LOGE(ret, "leave UkeySign, result = %" LOG_PUBLIC "d", ret);
-    return ret;
-#else
-    (void)resourceId;
-    (void)paramSetIn;
-    (void)srcData;
-    (void)signatureOut;
-    return HKS_ERROR_API_NOT_SUPPORTED;
-#endif
-}
-
-HKS_API_EXPORT int32_t HksUkeyVerify(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn,
-    const struct HksBlob *srcData, struct HksBlob *signatureOut)
-{
-#ifdef L2_STANDARD
-    HKS_LOG_D("enter UkeyVerify");
-    if ((resourceId == NULL) || (paramSetIn == NULL) || (srcData == NULL) || (signatureOut == NULL)) {
-        return HKS_ERROR_NULL_POINTER;
-    }
-    int32_t ret = HksClientUkeyVerify(resourceId, paramSetIn, srcData, signatureOut);
-    HKS_IF_NOT_SUCC_LOGE(ret, "leave UkeyVerify, result = %" LOG_PUBLIC "d", ret);
-    return ret;
-#else
-    (void)resourceId;
-    (void)paramSetIn;
-    (void)srcData;
-    (void)signatureOut;
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }

@@ -55,12 +55,6 @@ int32_t HksIpcServiceOnCloseRemoteKeyHandle(const struct HksProcessInfo *process
     return libInterface->OnCloseRemoteKeyHandle(*processInfo, index, paramSet);
 }
 
-int32_t HksIpcServiceOnVerify(const struct HksProcessInfo *processInfo, std::string &index,
-    CppParamSet &paramSet, std::string srcData, std::string &signature)
-{
-    return 0;
-}
-
 int32_t HksIpcServiceOnAuthUkeyPin(const struct HksProcessInfo *processInfo, const std::string &index,
     CppParamSet &pinData, int32_t &authState, uint32_t &retryCnt)
 {
@@ -124,12 +118,6 @@ int32_t HksIpcServiceOnExportProviderAllCertificates(const struct HksProcessInfo
 
 int32_t HksIpcServiceOnFindRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string &index,
     CppParamSet &paramSet, std::string &remoteHandleOut)
-{
-    return 0;
-}
-
-int32_t HksIpcServiceOnSigned(const struct HksProcessInfo *processInfo, std::string &index,
-    CppParamSet &paramSet, std::string srcData, std::string &signature)
 {
     return 0;
 }
