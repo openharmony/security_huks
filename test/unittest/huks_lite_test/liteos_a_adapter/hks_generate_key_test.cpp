@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <map>
 
 #include "hks_generate_key_test.h"
 
@@ -48,7 +49,7 @@ void HksGenerateKeyTest::TearDownTestCase(void)
 
 void HksGenerateKeyTest::SetUp()
 {
-    EXPECT_EQ(HksInitialize(), 0);
+    EXPECT_EQ(HksInitialize(), HKS_SUCCESS);
 }
 
 void HksGenerateKeyTest::TearDown()
@@ -73,6 +74,78 @@ const struct HksTestGenKeyParams g_testGenKeyParams[] = {
     },
 };
 
+struct HksTestGenKeyParams g_testHmacGenKeyParams = {
+    /* hmac */
+    0,
+    HKS_SUCCESS,
+    {
+        true, DEFAULT_KEY_ALIAS_SIZE, true, DEFAULT_KEY_ALIAS_SIZE
+    },
+    {
+        true,
+        true, HKS_ALG_HMAC,
+        true, 0,
+        true, HKS_KEY_PURPOSE_MAC,
+        false, 0,
+        false, 0,
+        false, 0,
+        true, HKS_STORAGE_TEMP
+    },
+    {
+        true, 1024
+    },
+};
+
+void TestGenerateKey(const struct HksTestGenKeyParams &params)
+{
+    uint32_t performTimes = 1;
+    uint32_t times = 1;
+    struct HksBlob *keyAlias = nullptr;
+    int32_t ret = TestConstuctBlob(&keyAlias,
+        params.keyAliasParams.blobExist, params.keyAliasParams.blobSize,
+        params.keyAliasParams.blobDataExist, params.keyAliasParams.blobDataSize);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *paramSet = nullptr;
+    struct GenerateKeyParamSetStructure paramStruct = {
+        &paramSet,
+        params.paramSetParams.paramSetExist,
+        params.paramSetParams.setAlg, params.paramSetParams.alg,
+        params.paramSetParams.setKeySize, params.paramSetParams.keySize,
+        params.paramSetParams.setPurpose, params.paramSetParams.purpose,
+        params.paramSetParams.setDigest, params.paramSetParams.digest,
+        params.paramSetParams.setPadding, params.paramSetParams.padding,
+        params.paramSetParams.setBlockMode,
+        params.paramSetParams.mode,
+        params.paramSetParams.setKeyStorageFlag,
+        params.paramSetParams.keyStorageFlag
+    };
+    ret = TestConstructGenerateKeyParamSet(&paramStruct);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *paramSetOut = nullptr;
+    ret = TestConstructGenerateKeyParamSetOut(&paramSetOut,
+        params.paramSetParamsOut.paramSetExist,
+        params.paramSetParamsOut.paramSetSize);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksGenerateKeyRun(keyAlias, paramSet, paramSetOut, performTimes);
+    if (ret != params.expectResult) {
+        HKS_TEST_LOG_I("failed, ret[%u] = %d", params.testId, ret);
+    }
+    EXPECT_EQ(ret, params.expectResult);
+
+    if ((ret == HKS_SUCCESS) && !(params.paramSetParams.setKeyStorageFlag) &&
+        (params.paramSetParams.keyStorageFlag == HKS_STORAGE_TEMP)) {
+        EXPECT_EQ(HksDeleteKeyForDe(keyAlias, nullptr), HKS_SUCCESS);
+    }
+    TestFreeBlob(&keyAlias);
+    HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&paramSetOut);
+    HKS_TEST_LOG_I("[%u]TestGenerateKey, Testcase_GenerateKey_[%03u] pass!", times, params.testId);
+    ASSERT_EQ(ret, params.expectResult);
+}
+
 /**
  * @tc.name: HksGenerateKeyTest.HksGenerateKeyTest001
  * @tc.desc: The static function will return true;
@@ -80,54 +153,36 @@ const struct HksTestGenKeyParams g_testGenKeyParams[] = {
  */
 HWTEST_F(HksGenerateKeyTest, HksGenerateKeyTest001, TestSize.Level0)
 {
-    uint32_t index = 0;
-    uint32_t performTimes = 1;
-    uint32_t times = 1;
-    struct HksBlob *keyAlias = NULL;
-    int32_t ret = TestConstuctBlob(&keyAlias,
-        g_testGenKeyParams[index].keyAliasParams.blobExist,
-        g_testGenKeyParams[index].keyAliasParams.blobSize,
-        g_testGenKeyParams[index].keyAliasParams.blobDataExist,
-        g_testGenKeyParams[index].keyAliasParams.blobDataSize);
-    HKS_TEST_ASSERT(ret == 0);
-
-    struct HksParamSet *paramSet = NULL;
-    struct GenerateKeyParamSetStructure paramStruct = { &paramSet,
-        g_testGenKeyParams[index].paramSetParams.paramSetExist,
-        g_testGenKeyParams[index].paramSetParams.setAlg, g_testGenKeyParams[index].paramSetParams.alg,
-        g_testGenKeyParams[index].paramSetParams.setKeySize, g_testGenKeyParams[index].paramSetParams.keySize,
-        g_testGenKeyParams[index].paramSetParams.setPurpose, g_testGenKeyParams[index].paramSetParams.purpose,
-        g_testGenKeyParams[index].paramSetParams.setDigest, g_testGenKeyParams[index].paramSetParams.digest,
-        g_testGenKeyParams[index].paramSetParams.setPadding, g_testGenKeyParams[index].paramSetParams.padding,
-        g_testGenKeyParams[index].paramSetParams.setBlockMode,
-        g_testGenKeyParams[index].paramSetParams.mode,
-        g_testGenKeyParams[index].paramSetParams.setKeyStorageFlag,
-        g_testGenKeyParams[index].paramSetParams.keyStorageFlag };
-    ret = TestConstructGenerateKeyParamSet(&paramStruct);
-    HKS_TEST_ASSERT(ret == 0);
-
-    struct HksParamSet *paramSetOut = NULL;
-    ret = TestConstructGenerateKeyParamSetOut(&paramSetOut,
-        g_testGenKeyParams[index].paramSetParamsOut.paramSetExist,
-        g_testGenKeyParams[index].paramSetParamsOut.paramSetSize);
-    HKS_TEST_ASSERT(ret == 0);
-
-    ret = HksGenerateKeyRun(keyAlias, paramSet, paramSetOut, performTimes);
-    if (ret != g_testGenKeyParams[index].expectResult) {
-        HKS_TEST_LOG_I("failed, ret[%u] = %d", g_testGenKeyParams[index].testId, ret);
-    }
-    HKS_TEST_ASSERT(ret == g_testGenKeyParams[index].expectResult);
-
-    if ((ret == HKS_SUCCESS) &&
-        !(g_testGenKeyParams[index].paramSetParams.setKeyStorageFlag) &&
-        (g_testGenKeyParams[index].paramSetParams.keyStorageFlag == HKS_STORAGE_TEMP)) {
-        HKS_TEST_ASSERT(HksDeleteKeyForDe(keyAlias, NULL) == 0);
-    }
-    TestFreeBlob(&keyAlias);
-    HksFreeParamSet(&paramSet);
-    HksFreeParamSet(&paramSetOut);
-    HKS_TEST_LOG_I("[%u]TestGenerateKey, Testcase_GenerateKey_[%03u] pass!", times, g_testGenKeyParams[index].testId);
-    ASSERT_TRUE(ret == 0);
+    TestGenerateKey(g_testGenKeyParams[0]);
 }
+
+/**
+ * @tc.name: HksGenerateKeyTest.HksGenerateKeyTest002
+ * @tc.desc: test generate key --- HKS_ALG_HMAC;
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksGenerateKeyTest, HksGenerateKeyTest002, TestSize.Level0)
+{
+    std::map<uint32_t, int32_t> testKeyLen = {
+        {0, HKS_ERROR_INVALID_ARGUMENT},
+        {1, HKS_ERROR_INVALID_ARGUMENT},
+        {8, HKS_SUCCESS},
+        {9, HKS_ERROR_INVALID_ARGUMENT},
+        {10, HKS_ERROR_INVALID_ARGUMENT},
+        {16, HKS_SUCCESS},
+        {24, HKS_SUCCESS},
+        {1008, HKS_SUCCESS},
+        {1024, HKS_SUCCESS},
+        {1040, HKS_SUCCESS},
+    };
+
+    for (auto &[keyLen, ret] : testKeyLen) {
+        HKS_TEST_LOG_I("test generate %u length hamc key", keyLen);
+        g_testHmacGenKeyParams.expectResult = ret;
+        g_testHmacGenKeyParams.paramSetParams.keySize = keyLen;
+        TestGenerateKey(g_testHmacGenKeyParams);
+    }
+}
+
 #endif /* _CUT_AUTHENTICATE_ */
 }

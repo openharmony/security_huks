@@ -43,6 +43,7 @@ unittest("huks_3.0_test") {
     "hks_hash_test.cpp",
     "hks_mac_test.cpp",
     "hks_others_test.cpp",
+    "hks_import_test.cpp",
   ]
   if (hks_enable_test) {
     if (huks_enable_upgrade_small_to_service) {
