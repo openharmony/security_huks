@@ -122,7 +122,6 @@ int32_t GenerateHksParamValue(const napi_env &env, const HksParam &param, napi_v
         LOGE("napi Create value failed %d", status);
         return HKS_ERROR_EXT_CREATE_VALUE_FAILED;
     }
-    outValue = std::move(value);
     return HKS_SUCCESS;
 }
 
