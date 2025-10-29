@@ -211,6 +211,10 @@ CppParamSet *CppParamSet::Unmarshalling(OHOS::Parcel &parcel)
         HKS_LOG_E("CppParamSet UnMarshalling paramSetSize == 0");
         return cppParamSet;
     }
+    if (paramSetSize > HKS_DEFAULT_PARAM_SET_SIZE) {
+        HKS_LOG_E("CppParamSet UnMarshalling paramSetSize > 1024");
+        return cppParamSet;
+    }
     auto *paramSet = static_cast<HksParamSet*>(HksMalloc(paramSetSize));
     if (paramSet == nullptr) {
         HKS_LOG_E("CppParamSet UnMarshalling paramSetSize == nullptr");
