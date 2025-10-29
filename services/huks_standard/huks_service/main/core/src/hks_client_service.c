@@ -656,28 +656,6 @@ int32_t HksServiceClearPinAuthState(const struct HksProcessInfo *processInfo, co
     return 0;
 }
 
-int32_t HksServiceUkeySign(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn, const struct HksBlob *srcData, struct HksBlob *signature)
-{
-    (void)processInfo;
-    (void)index;
-    (void)paramSetIn;
-    (void)srcData;
-    (void)signature;
-    return 0;
-}
-
-int32_t HksServiceUkeyVerify(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn, const struct HksBlob *srcData, struct HksBlob *signature)
-{
-    (void)processInfo;
-    (void)index;
-    (void)paramSetIn;
-    (void)srcData;
-    (void)signature;
-    return 0;
-}
-
 int32_t HksServiceGetRemoteProperty(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
     const struct HksBlob *propertyId, const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut)
 {

@@ -300,7 +300,7 @@ HWTEST_F(HksUKeyTest, HksClearPinAuthStateTest, TestSize.Level0)
     struct HksBlob resourceId = StringToHuksBlob(index);
     EXPECT_TRUE(resourceId.data != nullptr);
 
-    ret = HksClearPinAuthState(&resourceId);
+    ret = HksClearUkeyPinAuthState(&resourceId);
     if (ret != 0) {
         HKS_TEST_LOG_I("failed, HksClearPinAuthState ret = %d", ret);
     }

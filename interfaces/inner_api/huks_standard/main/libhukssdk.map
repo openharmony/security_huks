@@ -70,11 +70,9 @@
     HksAuthUkeyPin;
     HksGetUkeyPinAuthState;
     HksOpenRemoteHandle;
-    HksGetRemoteHandle;
     HksCloseRemoteHandle;
     HksGetPinAuthState;
     HksClearUkeyPinAuthState;
-    HksUkeySign;
     HksExportProviderCertificates;
     HksExportCertificate;
     HksFreeExtCertSet;

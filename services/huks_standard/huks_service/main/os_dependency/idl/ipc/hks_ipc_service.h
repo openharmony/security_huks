@@ -35,13 +35,7 @@ void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t
 
 void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t *context);
 
-void HksIpcServiceGetRemoteHandle(const struct HksBlob *srcData, const uint8_t *context);
-
 void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t *context);
-
-void HksIpcServiceUkeySign(const struct HksBlob *srcData, const uint8_t *context);
-
-void HksIpcServiceUkeyVerify(const struct HksBlob *srcData, const uint8_t *context);
 
 void HksIpcServiceExportProviderCertificates(const struct HksBlob *srcData, const uint8_t *context);
 
