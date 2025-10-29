@@ -49,6 +49,7 @@ typedef struct HksCertInfo {
 } HksCertInfo;
 
 typedef struct CryptoResultParam {
+    int32_t hksErrorCode {};
     int32_t errCode {};
     int32_t authState {};
     uint32_t retryCnt {};
