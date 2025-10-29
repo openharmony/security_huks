@@ -982,7 +982,10 @@ void JsHksCryptoExtAbility::GetSrcPath(std::string &srcPath)
 {
     srcPath.append(abilityInfo_->moduleName + "/");
     srcPath.append(abilityInfo_->srcEntrance);
-    srcPath.erase(srcPath.rfind('.'));
+    auto dotPos = srcPath.rfind('.');
+    if (dotPos != std::string::npos) {
+        srcPath.erase(dotPos);
+    }
     srcPath.append(".abc");
 }
 
