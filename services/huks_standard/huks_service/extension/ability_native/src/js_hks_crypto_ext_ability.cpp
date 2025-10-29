@@ -95,7 +95,7 @@ napi_value GenerateArrayBuffer(const napi_env &env, uint8_t *data, uint32_t size
     return outBuffer;
 }
 
-napi_status GenerateHksParamValue(const napi_env &env, const HksParam &param, napi_value &value)
+int32_t GenerateHksParamValue(const napi_env &env, const HksParam &param, napi_value &value)
 {
     napi_status status = napi_ok;
     switch (param.tag & HKS_TAG_TYPE_MASK) {
@@ -118,8 +118,12 @@ napi_status GenerateHksParamValue(const napi_env &env, const HksParam &param, na
             LOGE("hks tag Undefined");
             return HKS_ERROR_EXT_TAG_UNDEFINED;
     }
+    if (status != napi_ok || value == nullptr) {
+        LOGE("napi Create value failed %d", status);
+        return HKS_ERROR_EXT_CREATE_VALUE_FAILED;
+    }
     outValue = std::move(value);
-    return status;
+    return HKS_SUCCESS;
 }
 
 static int32_t GenerateHksParam(const napi_env &env, const HksParam &param, napi_value &element)
@@ -144,10 +148,10 @@ static int32_t GenerateHksParam(const napi_env &env, const HksParam &param, napi
         return HKS_ERROR_EXT_SET_NAME_PROPERTY_FAILED;
     }
     napi_value value = nullptr;
-    status = GenerateHksParamValue(env, param, value);
-    if (status != napi_ok || value == nullptr) {
-        LOGE("napi Create value failed %d", status);
-        return HKS_ERROR_EXT_CREATE_VALUE_FAILED;
+    int32_t result = GenerateHksParamValue(env, param, value);
+    if (result != HKS_SUCCESS) {
+        LOGE("GenerateHksParamValue failed");
+        return result;
     }
     status = napi_set_named_property(env, hksParam, "value", value);
     if (status != napi_ok) {
