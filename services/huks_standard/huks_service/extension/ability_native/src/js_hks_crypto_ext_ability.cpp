@@ -190,7 +190,7 @@ napi_value GenerateHksParamArray(const napi_env env, const HksParamSet &paramSet
 bool MakeJsNativeCppParamSet(const napi_env &env, const CppParamSet &CppParamSet, napi_value nativeCppParamSet)
 {
     napi_value napiHksParam = GenerateHksParamArray(env, *CppParamSet.GetParamSet());
-    if (nativeCppParamSet == nullptr) {
+    if (napiHksParam == nullptr) {
         return false;
     }
     auto status = napi_set_named_property(env, nativeCppParamSet, "properties", napiHksParam);
@@ -553,7 +553,7 @@ napi_status GetHksParamsfromValue(napi_env env, napi_value value, HksParam &para
             break;
         case HKS_TAG_TYPE_ULONG:
             lossLess = false;
-            status = napi_get_value_bigint_uint64(env, value, &param.uint64Param, &lossLess);
+            status = napi_get_value_bigint_uint64(env, napiValue, &param.uint64Param, &lossLess);
             break;
         case HKS_TAG_TYPE_BOOL:
             status = napi_get_value_bool(env, napiValue, &param.boolParam);
@@ -747,8 +747,8 @@ void GetExportCertificateParams(const napi_env &env, const napi_value &funcResul
 
         HksCertInfo certInfo;
         auto result = GetHksCertInfoValue(env, queryResult, certInfo);
-        if (status != napi_ok) {
-            LOGE("Convert js certInfo fail. status:%d", result);
+        if (result != napi_ok) {
+            LOGE("Convert js certInfo fail. result:%d", result);
             return;
         }
         resultParams.certs.emplace_back(std::move(certInfo));
