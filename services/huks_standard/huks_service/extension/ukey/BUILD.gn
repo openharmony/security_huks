@@ -19,7 +19,7 @@ if (os_level == "standard") {
     subsystem_name = "security"
     part_name = "huks"
 
-    # version_script = "libhuks_external_crypto_ext_core.map"
+    version_script = "libhuks_external_crypto_ext_core.map"
     configs = [
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]

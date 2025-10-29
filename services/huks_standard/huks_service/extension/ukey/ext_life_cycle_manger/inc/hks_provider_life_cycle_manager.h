@@ -59,7 +59,7 @@ public:
     sptr<ExtensionConnection> m_connection{nullptr};
 };
 
-constexpr int32_t HKS_PROVIDER_CAN_REMOVE_REF_COUNT = 3;
+constexpr int32_t HKS_PROVIDER_CAN_REMOVE_REF_COUNT = 2;
 int32_t HksGetProviderInfo(const HksProcessInfo &processInfo, const std::string &providerName,
     const CppParamSet &paramSet, ProviderInfo &providerInfo);
 
@@ -81,6 +81,7 @@ public:
 private:
     // ProviderInfo, connectionInfo
     OHOS::SafeMap<ProviderInfo, std::shared_ptr<HksExtAbilityConnectInfo>> m_providerMap{};
+    std::mutex m_registerMutex{};
 };
 }
 }
