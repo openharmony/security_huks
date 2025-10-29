@@ -95,6 +95,33 @@ napi_value GenerateArrayBuffer(const napi_env &env, uint8_t *data, uint32_t size
     return outBuffer;
 }
 
+napi_status GenerateHksParamValue(const napi_env &env, const HksParam &param, napi_value &value)
+{
+    napi_status status = napi_ok;
+    switch (param.tag & HKS_TAG_TYPE_MASK) {
+        case HKS_TAG_TYPE_INT:
+            status = napi_create_int32(env, param.int32Param, &value);
+            break;
+        case HKS_TAG_TYPE_UINT:
+            status = napi_create_uint32(env, param.uint32Param, &value);
+            break;
+        case HKS_TAG_TYPE_ULONG:
+            status = napi_create_bigint_uint64(env, param.uint64Param, &value);
+            break;
+        case HKS_TAG_TYPE_BOOL:
+            status = napi_get_boolean(env, param.boolParam, &value);
+            break;
+        case HKS_TAG_TYPE_BYTES:
+            value = GenerateArrayBuffer(env, param.blob.data, param.blob.size);
+            break;
+        default:
+            LOGE("hks tag Undefined");
+            return HKS_ERROR_EXT_TAG_UNDEFINED;
+    }
+    outValue = std::move(value);
+    return status;
+}
+
 static int32_t GenerateHksParam(const napi_env &env, const HksParam &param, napi_value &element)
 {
     napi_value hksParam = nullptr;
@@ -116,28 +143,8 @@ static int32_t GenerateHksParam(const napi_env &env, const HksParam &param, napi
         LOGE("napi set name failed, status:%d", status);
         return HKS_ERROR_EXT_SET_NAME_PROPERTY_FAILED;
     }
-
     napi_value value = nullptr;
-    switch (param.tag & HKS_TAG_TYPE_MASK) {
-        case HKS_TAG_TYPE_INT:
-            status = napi_create_int32(env, param.int32Param, &value);
-            break;
-        case HKS_TAG_TYPE_UINT:
-            status = napi_create_uint32(env, param.uint32Param, &value);
-            break;
-        case HKS_TAG_TYPE_ULONG:
-            status = napi_create_bigint_uint64(env, param.uint64Param, &value);
-            break;
-        case HKS_TAG_TYPE_BOOL:
-            status = napi_get_boolean(env, param.boolParam, &value);
-            break;
-        case HKS_TAG_TYPE_BYTES:
-            value = GenerateArrayBuffer(env, param.blob.data, param.blob.size);
-            break;
-        default:
-            LOGE("hks tag Undefined");
-            return HKS_ERROR_EXT_TAG_UNDEFINED;
-    }
+    status = GenerateHksParamValue(env, param, value);
     if (status != napi_ok || value == nullptr) {
         LOGE("napi Create value failed %d", status);
         return HKS_ERROR_EXT_CREATE_VALUE_FAILED;
