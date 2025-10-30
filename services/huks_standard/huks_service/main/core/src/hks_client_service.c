@@ -567,61 +567,139 @@ static void HksReportEvent(const char *funcName, const struct HksHitraceId *trac
 int32_t HksServiceRegisterProvider(const struct HksProcessInfo *processInfo, const struct HksBlob *name,
     const struct HksParamSet *paramSetIn)
 {
+    /* Only meaningful under L2_STANDARD; LiteOS/non-standard returns not supported */
+#ifdef L2_STANDARD
     return HksIpcProviderRegAdapter(processInfo, name, paramSetIn);
+#else
+    (void)processInfo;
+    (void)name;
+    (void)paramSetIn;
+    return HKS_ERROR_NOT_SUPPORTED;
+#endif
 }
 
 int32_t HksServiceUnregisterProvider(const struct HksProcessInfo *processInfo, const struct HksBlob *name,
     const struct HksParamSet *paramSetIn)
 {
+#ifdef L2_STANDARD
     return HksIpcProviderUnregAdapter(processInfo, name, paramSetIn);
+#else
+    (void)processInfo;
+    (void)name;
+    (void)paramSetIn;
+    return HKS_ERROR_NOT_SUPPORTED;
+#endif
 }
 
 int32_t HksServiceExportProviderCertificates(const struct HksProcessInfo *processInfo,
     const struct HksBlob *providerName, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
 {
+#ifdef L2_STANDARD
     return HksIpcExportProvCertsAdapter(processInfo, providerName, paramSetIn, certSet);
+#else
+    (void)processInfo;
+    (void)providerName;
+    (void)paramSetIn;
+    (void)certSet;
+    return HKS_ERROR_NOT_SUPPORTED;
+#endif
 }
 
 int32_t HksServiceExportCertificate(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
 {
+#ifdef L2_STANDARD
     return HksIpcExportCertAdapter(processInfo, index, paramSetIn, certSet);
+#else
+    (void)processInfo;
+    (void)index;
+    (void)paramSetIn;
+    (void)certSet;
+    return HKS_ERROR_NOT_SUPPORTED;
+#endif
 }
 
 int32_t HksServiceAuthUkeyPin(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn, int32_t *outStatus, uint32_t *retryCount)
 {
+#ifdef L2_STANDARD
     return HksIpcAuthUkeyPinAdapter(processInfo, index, paramSetIn, outStatus, retryCount);
+#else
+    (void)processInfo;
+    (void)index;
+    (void)paramSetIn;
+    (void)outStatus;
+    (void)retryCount;
+    return HKS_ERROR_NOT_SUPPORTED;
+#endif
 }
 
 int32_t HksServiceOpenRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn)
 {
+#ifdef L2_STANDARD
     struct HksBlob remoteHandle = {0, NULL};
     return HksIpcCreateRemKeyHandleAdapter(processInfo, index, paramSetIn, &remoteHandle);
+#else
+    (void)processInfo;
+    (void)index;
+    (void)paramSetIn;
+    return HKS_ERROR_NOT_SUPPORTED;
+#endif
 }
 
 int32_t HksServiceGetUkeyPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn, int32_t *status)
 {
+#ifdef L2_STANDARD
     return HksIpcGetUkeyPinAuthStateAdapter(processInfo, index, paramSetIn, status);
+#else
+    (void)processInfo;
+    (void)index;
+    (void)paramSetIn;
+    (void)status;
+    return HKS_ERROR_NOT_SUPPORTED;
+#endif
 }
 
 int32_t HksServiceCloseRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn)
 {
+#ifdef L2_STANDARD
     return HksIpcCloseRemKeyHandleAdapter(processInfo, index, paramSetIn);
+#else
+    (void)processInfo;
+    (void)index;
+    (void)paramSetIn;
+    return HKS_ERROR_NOT_SUPPORTED;
+#endif
 }
 
 int32_t HksServiceClearPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index)
 {
+#ifdef L2_STANDARD
     return HksIpcClearPinStatusAdapter(processInfo, index);
+#else
+    (void)processInfo;
+    (void)index;
+    (void)paramSetIn;
+    return HKS_ERROR_NOT_SUPPORTED;
+#endif
 }
 
 int32_t HksServiceGetRemoteProperty(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
     const struct HksBlob *propertyId, const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut)
 {
+#ifdef L2_STANDARD
     return HksIpcServiceOnGetRemotePropertyAdapter(processInfo, resourceId, propertyId, paramSetIn, NULL);
+#else
+    (void)processInfo;
+    (void)resourceId;
+    (void)propertyId;
+    (void)paramSetIn;
+    (void)propertySetOut;
+    return HKS_ERROR_NOT_SUPPORTED;
+#endif
 }
 
 int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
