@@ -60,9 +60,6 @@ int32_t HksServiceOpenRemoteHandle(const struct HksProcessInfo *processInfo, con
 int32_t HksServiceGetUkeyPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn, int32_t *status);
 
-int32_t HksServiceGetRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn);
-
 int32_t HksServiceCloseRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn);
 

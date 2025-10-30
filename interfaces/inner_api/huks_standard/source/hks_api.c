@@ -101,7 +101,7 @@ HKS_API_EXPORT int32_t HksExportProviderCertificates(const struct HksBlob *provi
 {
 #ifdef L2_STANDARD
     HKS_LOG_D("enter HksExportProviderCertificates");
-    if ((paramSetIn == NULL) || (providerName == NULL)) {
+    if (paramSetIn == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = HksClientExportProviderCertificates(providerName, paramSetIn, certSet);
@@ -190,23 +190,6 @@ HKS_API_EXPORT int32_t HksOpenRemoteHandle(const struct HksBlob *resourceId,
 #endif
 }
 
-HKS_API_EXPORT int32_t HksGetRemoteHandle(const struct HksBlob *resourceId,
-    const struct HksParamSet *paramSetIn)
-{
-#ifdef L2_STANDARD
-    HKS_LOG_D("enter GetRemoteHandle");
-    if ((resourceId == NULL) || (paramSetIn == NULL)) {
-        return HKS_ERROR_NULL_POINTER;
-    }
-    int32_t ret = HksClientGetRemoteHandle(resourceId, paramSetIn);
-    HKS_IF_NOT_SUCC_LOGE(ret, "leave GetRemoteHandle, result = %" LOG_PUBLIC "d", ret);
-    return ret;
-#else
-    (void)resourceId;
-    (void)paramSetIn;
-    return HKS_ERROR_API_NOT_SUPPORTED;
-#endif
-}
 HKS_API_EXPORT int32_t HksCloseRemoteHandle(const struct HksBlob *resourceId,
     const struct HksParamSet *paramSetIn)
 {
