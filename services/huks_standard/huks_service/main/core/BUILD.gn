@@ -46,6 +46,8 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_utils.c",
       "src/hks_client_check.c",
       "src/hks_client_service.c",
+      "src/hks_ipc_service_provider.cpp",
+      "src/hks_ipc_service_provider_adapter.cpp",
       "src/hks_client_service_common.c",
       "src/hks_client_service_util.c",
       "src/hks_session_manager.c",
@@ -121,8 +123,6 @@ if (os_level == "standard") {
       "src/hks_report_three_stage_build.cpp",
       "src/hks_report_three_stage_get.cpp",
       "src/hks_ukey_three_stage_adapter.cpp",
-      "src/hks_ipc_service_provider.cpp",
-      "src/hks_ipc_service_provider_adapter.cpp"
     ]
 
     deps += [

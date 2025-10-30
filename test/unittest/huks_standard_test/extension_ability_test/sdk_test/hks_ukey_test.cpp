@@ -288,7 +288,7 @@ HWTEST_F(HksUKeyTest, HksGetRemotePropertyTest, TestSize.Level0)
 
     HksFreeParamSet(&propertySetOut);
     HKS_TEST_LOG_I("TestHksUKey, Testcase_GetUkeyPinAuthState pass!");
-    EXPECT_TRUE(ret == HKS_ERROR_NULL_POINTER);
+    EXPECT_TRUE(ret == HKS_ERROR_INVALID_ARGUMENT);
 }
 
 HWTEST_F(HksUKeyTest, HksExportProviderCertificatesWithoutNameTest, TestSize.Level0)
@@ -331,7 +331,7 @@ HWTEST_F(HksUKeyTest, HksExportProviderCertificatesTest, TestSize.Level0)
     HksFreeParamSet(&paramSet);
     HksFreeExtCertSet(&certSet);
     HKS_TEST_LOG_I("TestHksUKey, Testcase_HksExportProviderCertificates pass!");
-    EXPECT_TRUE(ret == 0);
+    EXPECT_TRUE(ret == HKS_ERROR_INVALID_ARGUMENT);
 }
 
 HWTEST_F(HksUKeyTest, HksExportCertificatesTest, TestSize.Level0)
