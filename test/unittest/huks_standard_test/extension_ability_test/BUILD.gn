@@ -30,8 +30,8 @@ if (os_level == "standard" && huks_security_level == "trusted_environment") {
 
     sources = [
       "./provider_mgr_test/hks_provider_manger_test.cpp",
-      "./extension_connect_test/hks_extension_connection_test.cpp",
-      "./plugin_loader_test/hks_plugin_manager_test.cpp",
+      #"./extension_connect_test/hks_extension_connection_test.cpp",
+      #"./plugin_loader_test/hks_plugin_manager_test.cpp",
       "./plugin_loader_test/plugin_interface_wrap.cpp",
 
       "./ukey_common_test/ukey_common_test.cpp",

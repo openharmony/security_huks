@@ -14,9 +14,9 @@
  */
 
 #include <gtest/gtest.h>
+#include <string>
 
 #include "hks_ukey_test.h"
-
 #include "file_ex.h"
 #include "hks_api.h"
 #include "hks_param.h"
@@ -202,13 +202,11 @@ HWTEST_F(HksUKeyTest, HksOpenRemoteHandleTest, TestSize.Level0)
     struct HksBlob resourceId = StringToHuksBlob(index);
     EXPECT_TRUE(resourceId.data != nullptr);
 
-    struct HksBlob remoteHandleOut = { 0, nullptr };
-
     struct HksParamSet *paramSet = nullptr;
     ret = ConstructTestParamSet(&paramSet);
     EXPECT_TRUE(ret == 0);
 
-    ret = HksOpenRemoteHandle(&resourceId, paramSet, &remoteHandleOut);
+    ret = HksOpenRemoteHandle(&resourceId, paramSet);
     if (ret != 0) {
         HKS_TEST_LOG_I("failed, HksOpenRemoteHandle ret = %d", ret);
     }
@@ -283,7 +281,7 @@ HWTEST_F(HksUKeyTest, HksGetRemotePropertyTest, TestSize.Level0)
 
     struct HksParamSet *propertySetOut = nullptr;
 
-    ret = HksGetRemoteProperty(&resourceId, &propertyId, paramSet, propertySetOut);
+    ret = HksGetRemoteProperty(&resourceId, &propertyId, paramSet, &propertySetOut);
     if (ret != 0) {
         HKS_TEST_LOG_I("failed, HksGetRemoteProperty ret = %d", ret);
     }
