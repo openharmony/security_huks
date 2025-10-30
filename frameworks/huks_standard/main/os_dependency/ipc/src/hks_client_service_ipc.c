@@ -427,43 +427,6 @@ int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index,
     return ret;
 }
 
-int32_t HksClientGetRemoteHandle(const struct HksBlob *resourceId,
-    const struct HksParamSet *paramSetIn)
-{
-    if (paramSetIn == NULL) {
-        HKS_LOG_E("paramSetIn is NULL");
-        return HKS_ERROR_NULL_POINTER;
-    }
-
-    int32_t ret;
-    struct HksParamSet *newParamSet = NULL;
-    struct HksBlob inBlob = { 0, NULL };
-    struct HksBlob outBlob = { 0, NULL };
-
-    do {
-        ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = HksCheckIpcBlobAndParamSet(resourceId, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIpcGetRemoteHandle fail")
-
-        ret = HksAllocInBlob(&inBlob, resourceId, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
-
-        ret = HksUKeyGeneralPack(resourceId, newParamSet, &inBlob);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetRemoteHandlePack fail")
-
-        ret = HksSendRequest(HKS_MSG_EXT_GET_REMOTE_HANDLE, &inBlob, &outBlob, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
-
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CopyData fail, ret = %" LOG_PUBLIC "d", ret);
-    } while (0);
-
-    HksFreeParamSet(&newParamSet);
-    HKS_FREE_BLOB(inBlob);
-    return ret;
-}
-
 int32_t HksClientOpenRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn)
 {
     if (resourceId == NULL || paramSetIn == NULL) {

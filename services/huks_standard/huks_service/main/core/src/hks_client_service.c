@@ -69,6 +69,7 @@
 #ifdef L2_STANDARD
 #include "hks_ha_event_report.h"
 #include "hks_ukey_three_stage_adapter.h"
+#include "hks_ipc_service_provider_adapter.h"
 #endif
 
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
@@ -566,105 +567,61 @@ static void HksReportEvent(const char *funcName, const struct HksHitraceId *trac
 int32_t HksServiceRegisterProvider(const struct HksProcessInfo *processInfo, const struct HksBlob *name,
     const struct HksParamSet *paramSetIn)
 {
-    (void)processInfo;
-    (void)name;
-    (void)paramSetIn;
-    return 0;
+    return HksIpcProviderRegAdapter(processInfo, name, paramSetIn);
 }
 
 int32_t HksServiceUnregisterProvider(const struct HksProcessInfo *processInfo, const struct HksBlob *name,
     const struct HksParamSet *paramSetIn)
 {
-    (void)processInfo;
-    (void)name;
-    (void)paramSetIn;
-    return 0;
+    return HksIpcProviderUnregAdapter(processInfo, name, paramSetIn);
 }
 
 int32_t HksServiceExportProviderCertificates(const struct HksProcessInfo *processInfo,
     const struct HksBlob *providerName, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
 {
-    (void)processInfo;
-    (void)providerName;
-    (void)paramSetIn;
-    (void)certSet;
-    return 0;
+    return HksIpcExportProvCertsAdapter(processInfo, providerName, paramSetIn, certSet);
 }
 
 int32_t HksServiceExportCertificate(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
 {
-    (void)processInfo;
-    (void)index;
-    (void)paramSetIn;
-    (void)certSet;
-    return 0;
+    return HksIpcExportCertAdapter(processInfo, index, paramSetIn, certSet);
 }
 
 int32_t HksServiceAuthUkeyPin(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn, int32_t *outStatus, uint32_t *retryCount)
 {
-    (void)processInfo;
-    (void)index;
-    (void)paramSetIn;
-    (void)outStatus;
-    (void)retryCount;
-    return 0;
+    return HksIpcAuthUkeyPinAdapter(processInfo, index, paramSetIn, outStatus, retryCount);
 }
 
 int32_t HksServiceOpenRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn)
 {
-    (void)processInfo;
-    (void)index;
-    (void)paramSetIn;
-    return 0;
+    struct HksBlob remoteHandle = {0, NULL};
+    return HksIpcCreateRemKeyHandleAdapter(processInfo, index, paramSetIn, &remoteHandle);
 }
 
 int32_t HksServiceGetUkeyPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn, int32_t *status)
 {
-    (void)processInfo;
-    (void)index;
-    (void)paramSetIn;
-    (void)status;
-    return 0;
-}
-
-int32_t HksServiceGetRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn)
-{
-    (void)processInfo;
-    (void)index;
-    (void)paramSetIn;
-    return 0;
+    return HksIpcGetUkeyPinAuthStateAdapter(processInfo, index, paramSetIn, status);
 }
 
 int32_t HksServiceCloseRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn)
 {
-    (void)processInfo;
-    (void)index;
-    (void)paramSetIn;
-    return 0;
+    return HksIpcCloseRemKeyHandleAdapter(processInfo, index, paramSetIn);
 }
 
 int32_t HksServiceClearPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index)
 {
-    (void)processInfo;
-    (void)index;
-    return 0;
+    return HksIpcClearPinStatusAdapter(processInfo, index);
 }
 
 int32_t HksServiceGetRemoteProperty(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
     const struct HksBlob *propertyId, const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut)
 {
-    (void)processInfo;
-    (void)resourceId;
-    (void)propertyId;
-    (void)paramSetIn;
-    (void)propertySetOut;
-    return 0;
+    return HksIpcServiceOnGetRemotePropertyAdapter(processInfo, resourceId, propertyId, paramSetIn, NULL);
 }
 
 int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
