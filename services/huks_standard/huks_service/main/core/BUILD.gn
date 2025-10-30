@@ -121,11 +121,14 @@ if (os_level == "standard") {
       "src/hks_report_three_stage_build.cpp",
       "src/hks_report_three_stage_get.cpp",
       "src/hks_ukey_three_stage_adapter.cpp",
+      "src/hks_ipc_service_provider.cpp",
+      "src/hks_ipc_service_provider_adapter.cpp"
     ]
 
     deps += [
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hitrace_meter_wrapper:libhuks_utils_hitrace_meter_wrapper_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
     ]
 
     if (huks_enable_upgrade_key_storage_secure_level) {
