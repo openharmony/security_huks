@@ -97,9 +97,7 @@ ohos_shared_library("huks_external_crypto") {
     "//base/security/huks/frameworks/huks_standard/main/common/include",
   ]
 
-  sources = [
-    "external_crypto/src/native_huks_external_crypto_api.c", 
-  ]
+  sources = [ "external_crypto/src/native_huks_external_crypto_api.c" ]
 
   deps = [
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
