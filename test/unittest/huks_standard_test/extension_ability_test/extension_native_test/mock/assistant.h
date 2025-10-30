@@ -43,6 +43,7 @@ public:
     virtual napi_status napi_get_value_int64(napi_env, napi_value, int64_t*) = 0;
     virtual napi_status napi_create_string_utf8(napi_env, const char*, size_t, napi_value*) = 0;
     virtual napi_status napi_create_int32(napi_env, int32_t, napi_value*) = 0;
+    virtual napi_status napi_create_uint32(napi_env, uint32_t, napi_value*) = 0;
     virtual napi_status napi_create_int64(napi_env, int64_t, napi_value*) = 0;
     virtual napi_status napi_get_value_string_utf8(napi_env, napi_value, char*, size_t, size_t*) = 0;
     virtual napi_status napi_get_boolean(napi_env, bool, napi_value*) = 0;
@@ -59,6 +60,10 @@ public:
     virtual napi_status napi_get_cb_info(napi_env, napi_callback_info, size_t*, napi_value*, napi_value*, void**) = 0;
     virtual napi_status napi_get_undefined(napi_env, napi_value*) = 0;
     virtual napi_status napi_get_value_bool(napi_env, napi_value, bool*) = 0;
+    virtual napi_status napi_create_arraybuffer(napi_env env, size_t byte_length, void** data, napi_value* result) = 0;
+    virtual napi_status napi_create_typedarray(napi_env env, napi_typedarray_type type,
+        size_t length, napi_value arraybuffer, size_t byte_offset, napi_value* result) = 0;
+    virtual napi_status napi_create_bigint_uint64(napi_env env, uint64_t value, napi_value* result) = 0;
 public:
     static inline std::shared_ptr<Assistant> ins_ = nullptr;
 };
@@ -79,6 +84,7 @@ public:
     MOCK_METHOD3(napi_create_int64, napi_status(napi_env, int64_t, napi_value*));
     MOCK_METHOD4(napi_create_string_utf8, napi_status(napi_env, const char*, size_t, napi_value*));
     MOCK_METHOD3(napi_create_int32, napi_status(napi_env, int32_t, napi_value*));
+    MOCK_METHOD3(napi_create_uint32, napi_status(napi_env, uint32_t, napi_value*));
     MOCK_METHOD5(napi_get_value_string_utf8, napi_status(napi_env, napi_value, char*, size_t, size_t*));
     MOCK_METHOD3(napi_get_boolean, napi_status(napi_env, bool, napi_value*));
     MOCK_METHOD2(napi_create_array, napi_status(napi_env, napi_value*));
@@ -95,6 +101,11 @@ public:
         void**));
     MOCK_METHOD2(napi_get_undefined, napi_status(napi_env, napi_value*));
     MOCK_METHOD3(napi_get_value_bool, napi_status(napi_env, napi_value, bool*));
+    MOCK_METHOD4(napi_create_arraybuffer, napi_status(
+        napi_env env, size_t byte_length, void** data, napi_value* result));
+    MOCK_METHOD6(napi_create_typedarray, napi_status(napi_env env, napi_typedarray_type type,
+        size_t length, napi_value arraybuffer, size_t byte_offset, napi_value* result));
+    MOCK_METHOD3(napi_create_bigint_uint64, napi_status(napi_env env, uint64_t value, napi_value* result));
 };
 
 } // OHOS::Security::Huks

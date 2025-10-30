@@ -414,7 +414,7 @@ int32_t DoCallJsMethod(std::shared_ptr<CallJsParam> param)
     }
     napi_value method = nullptr;
     status = napi_get_named_property(env, value, param->funcName.c_str(), &method);
-    if (method == nullptr) {
+    if (method == nullptr || status != napi_ok) {
         LOGE("failed to get %s from FileExtAbility object.status:%d", param->funcName.c_str(), status);
         return HKS_ERROR_EXT_GET_NAME_PROPERTY_FAILED;
     }
@@ -424,7 +424,7 @@ int32_t DoCallJsMethod(std::shared_ptr<CallJsParam> param)
     }
     napi_value result = nullptr;
     status = napi_call_function(env, value, method, argc, argv, &result);
-    if (result == nullptr) {
+    if (result == nullptr || status != napi_ok) {
         LOGE("Napi call function fail, status:%d", status);
         return HKS_ERROR_EXT_CALL_FUNCTION_FAILED;
     }
@@ -726,7 +726,7 @@ void GetExportCertificateParams(const napi_env &env, const napi_value &funcResul
     }
 
     status = napi_get_named_property(env, funcResult, "certs", &nativeArray);
-    if (nativeArray == nullptr) {
+    if (nativeArray == nullptr || status != napi_ok) {
         LOGE("napi_get_named_property failed. status:%d", status);
         return;
     }
@@ -766,7 +766,7 @@ void GetSessionParams(const napi_env &env, const napi_value &funcResult,
         return;
     }
     status = napi_get_named_property(env, funcResult, "outData", &napiOutData);
-    if (napiOutData == nullptr) {
+    if (napiOutData == nullptr || status != napi_ok) {
         LOGE("Convert js array object fail, status:%d", status);
         return;
     }

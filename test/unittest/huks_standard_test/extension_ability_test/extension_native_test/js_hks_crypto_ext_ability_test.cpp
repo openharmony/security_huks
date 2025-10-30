@@ -190,4 +190,86 @@ HWTEST_F(JsCryptoExtAbilityTest, DoCallJsMethod_0001, testing::ext::TestSize.Lev
     result = CallJsMethod(funcNameIn, *jsRuntime, jsObj, argParser, retParserFalse);
     EXPECT_EQ(result, HKS_ERROR_EXT_PARSE_FUNC_FAILED);
 }
+
+HWTEST_F(JsCryptoExtAbilityTest, BlobToBase64String_0000, testing::ext::TestSize.Level0)
+{
+    HksBlob blob;
+    string outStr = "";
+    uint8_t arr[10] = { 1, 2, 3, 4, 5};
+    EXPECT_EQ(BlobToBase64String(blob, outStr), HKS_ERROR_EXT_BASE64_FAILED);
+    blob.size = 5;
+    blob.data = nullptr;
+    EXPECT_EQ(BlobToBase64String(blob, outStr), HKS_ERROR_EXT_BASE64_FAILED);
+    blob.data = arr;
+    EXPECT_EQ(BlobToBase64String(blob, outStr), HKS_SUCCESS);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, BlobToBase64String_0000, testing::ext::TestSize.Level0)
+{
+    HksBlob blob;
+    string outStr = "";
+    uint8_t arr[10] = { 1, 2, 3, 4, 5};
+    EXPECT_EQ(BlobToBase64String(blob, outStr), HKS_ERROR_EXT_BASE64_FAILED);
+    blob.size = 5;
+    blob.data = nullptr;
+    EXPECT_EQ(BlobToBase64String(blob, outStr), HKS_ERROR_EXT_BASE64_FAILED);
+    blob.data = arr;
+    EXPECT_EQ(BlobToBase64String(blob, outStr), HKS_SUCCESS);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, GenerateArrayBuffer_0000, testing::ext::TestSize.Level0)
+{
+    std::string pinStr = "123456";
+    std::vertor<std::uint8_t> u8Vec(pinStr.begin(), pinStr.end());
+    u8Vec.push_back('\0');
+    struct HksParam tmpParams = { .tag = HKS_EXT_CRYPTO_TAG_UKEY_PIN,
+        .blob = { .size = u8Vec.size(), .data = u8Vec.data() }};
+    EXPECT_CALL(*insMoc, napi_create_arraybuffer(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    auto result = GenerateArrayBuffer(env, tmpParams.blob.data, tmpParams.blob.size);
+    EXPECT_TRUE(result == nullptr);
+
+    EXPECT_CALL(*insMoc, napi_create_arraybuffer(_, _, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_typedarray(_, _, _, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    auto result = GenerateArrayBuffer(env, tmpParams.blob.data, tmpParams.blob.size);
+    EXPECT_TRUE(result == nullptr);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, GenerateHksParamValue_0000, testing::ext::TestSize.Level0)
+{
+    std::string pinStr = "123456";
+    std::vertor<std::uint8_t> u8Vec(pinStr.begin(), pinStr.end());
+    u8Vec.push_back('\0');
+    struct HksParam tmpParams = { .tag = HKS_EXT_CRYPTO_TAG_UKEY_PIN,
+        .blob = { .size = u8Vec.size(), .data = u8Vec.data() }};
+    EXPECT_CALL(*insMoc, napi_create_arraybuffer(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(GenerateHksParamValue(env, tmpParams, value), HKS_ERROR_EXT_CREATE_VALUE_FAILED);
+    tmpParams = { .tag = HKS_TAG_TYPE_INT,
+        .blob = { .size = u8Vec.size(), .data = u8Vec.data() }};
+    EXPECT_CALL(*insMoc, napi_create_int32(_, _, _)).WillOnce(Return(napi_invalid_arg));  
+    EXPECT_EQ(GenerateHksParamValue(env, tmpParams, value), HKS_ERROR_EXT_CREATE_VALUE_FAILED);
+
+    tmpParams = { .tag = HKS_TAG_TYPE_UINT,
+        .blob = { .size = u8Vec.size(), .data = u8Vec.data() }};
+    EXPECT_CALL(*insMoc, napi_create_uint32(_, _, _)).WillOnce(Return(napi_invalid_arg));  
+    EXPECT_EQ(GenerateHksParamValue(env, tmpParams, value), HKS_ERROR_EXT_CREATE_VALUE_FAILED);
+
+    tmpParams = { .tag = HKS_TAG_TYPE_ULONG,
+        .blob = { .size = u8Vec.size(), .data = u8Vec.data() }};
+    EXPECT_CALL(*insMoc, napi_create_bigint_uint64(_, _, _)).WillOnce(Return(napi_invalid_arg));  
+    EXPECT_EQ(GenerateHksParamValue(env, tmpParams, value), HKS_ERROR_EXT_CREATE_VALUE_FAILED);
+
+    tmpParams = { .tag = HKS_TAG_TYPE_BOOL,
+        .blob = { .size = u8Vec.size(), .data = u8Vec.data() }};
+    EXPECT_CALL(*insMoc, napi_get_boolean(_, _, _)).WillOnce(Return(napi_invalid_arg));  
+    EXPECT_EQ(GenerateHksParamValue(env, tmpParams, value), HKS_ERROR_EXT_CREATE_VALUE_FAILED);
+
+    tmpParams = { .tag = HKS_TAG_TYPE_INVALID,
+        .blob = { .size = u8Vec.size(), .data = u8Vec.data() }};
+    EXPECT_EQ(GenerateHksParamValue(env, tmpParams, value), HKS_ERROR_EXT_TAG_UNDEFINED);
+
+    napi_value rslt = nullptr;
+    EXPECT_CALL(*insMoc, napi_create_int32(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_EQ(GenerateHksParamValue(env, tmpParams, value), HKS_ERROR_EXT_TAG_UNDEFINED);
+}
 }
