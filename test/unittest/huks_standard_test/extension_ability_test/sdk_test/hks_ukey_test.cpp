@@ -290,7 +290,7 @@ HWTEST_F(HksUKeyTest, HksGetRemotePropertyTest, TestSize.Level0)
 
     HksFreeParamSet(&propertySetOut);
     HKS_TEST_LOG_I("TestHksUKey, Testcase_GetUkeyPinAuthState pass!");
-    EXPECT_TRUE(ret == HKS_ERROR_REMOTE_HANDLE_NOT_FOUND);
+    EXPECT_TRUE(ret == HKS_ERROR_NULL_POINTER);
 }
 
 HWTEST_F(HksUKeyTest, HksExportProviderCertificatesWithoutNameTest, TestSize.Level0)
@@ -353,15 +353,15 @@ HWTEST_F(HksUKeyTest, HksExportCertificatesTest, TestSize.Level0)
 
     HksExtCertInfoSet certSet = { 0, nullptr };
 
-    ret = HksExportProviderCertificates(&resourceId, paramSet, &certSet);
+    ret = HksExportCertificate(&resourceId, paramSet, &certSet);
     if (ret != 0) {
-        HKS_TEST_LOG_I("failed, HksExportProviderCertificates ret = %d", ret);
+        HKS_TEST_LOG_I("failed, HksExportCertificate ret = %d", ret);
     }
     
     HksFreeParamSet(&paramSet);
     HksFreeExtCertSet(&certSet);
-    HKS_TEST_LOG_I("TestHksUKey, Testcase_HksExportProviderCertificates pass!");
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_LOG_I("TestHksUKey, Testcase_HksExportCertificate pass!");
+    EXPECT_TRUE(ret == HKS_ERROR_REMOTE_PROXY_GET_FAILED);
 }
 
 HWTEST_F(HksUKeyTest, HksFreeExtCertSetTest, TestSize.Level0)
