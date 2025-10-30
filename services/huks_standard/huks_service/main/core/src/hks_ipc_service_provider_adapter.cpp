@@ -23,6 +23,10 @@
 #include <string>
 #include <vector>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static int32_t HksIpcCheckBlob(const struct HksBlob *blob, uint32_t minSize, uint32_t maxSize)
 {
     if (blob == nullptr || blob->data == nullptr || blob->size < minSize || blob->size > maxSize) {
@@ -234,3 +238,7 @@ int32_t HksIpcServiceOnGetRemotePropertyAdapter(const struct HksProcessInfo *pro
     hksExtProxy->SendAsyncReply(HKS_SUCCESS, outData, outSize, HKS_MSG_EXT_GET_REMOTE_PROPERTY_REPLY);
     return HKS_SUCCESS;
 }
+
+#ifdef __cplusplus
+}
+#endif
