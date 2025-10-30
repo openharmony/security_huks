@@ -14,9 +14,9 @@
  */
 
 #include <gtest/gtest.h>
-#include <string>
 
 #include "hks_ukey_test.h"
+#include "securec.h"
 #include "file_ex.h"
 #include "hks_api.h"
 #include "hks_param.h"
@@ -323,7 +323,7 @@ HWTEST_F(HksUKeyTest, HksExportProviderCertificatesTest, TestSize.Level0)
 
     HksExtCertInfoSet certSet = { 0, nullptr };
 
-    ret = HksExportProviderCertificates(&resourceId, paramSet, &certSet);
+    ret = HksExportProviderCertificates(&name, paramSet, &certSet);
     if (ret != 0) {
         HKS_TEST_LOG_I("failed, HksExportProviderCertificates ret = %d", ret);
     }
