@@ -682,7 +682,6 @@ int32_t HksServiceClearPinAuthState(const struct HksProcessInfo *processInfo, co
 #else
     (void)processInfo;
     (void)index;
-    (void)paramSetIn;
     return HKS_ERROR_NOT_SUPPORTED;
 #endif
 }
