@@ -415,7 +415,7 @@ static ani_object ConstructArrayString(ani_env *env, uint32_t sz, struct HksBlob
         status = env->String_NewUTF8(reinterpret_cast<char *>(blobs[i].data), blobs[i].size, &aniCert);
         HKS_ANI_IF_NOT_SUCC_LOGE_RETURN(status, ani_object{}, "String_NewUTF8 fail %" LOG_PUBLIC "u", status);
 
-        std::string methodSig = arkts::ani_signature::SignatureBuilder().AddInt().AddClass({"std", "core", "Object"}).
+        std::string methodSig = arkts::ani_signature::SignatureBuilder().AddInt().AddAny().
             BuildSignatureDescriptor();
         status = env->Object_CallMethodByName_Void(arrayObj, "$_set", methodSig.c_str(), i, aniCert);
         HKS_ANI_IF_NOT_SUCC_LOGE_RETURN(status, ani_object{}, "Object_CallMethodByName_Void $_set fail %"
