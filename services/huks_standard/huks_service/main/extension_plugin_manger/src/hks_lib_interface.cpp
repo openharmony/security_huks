@@ -232,6 +232,20 @@ int32_t HuksLibInterface::OnFinishSession(const HksProcessInfo &processInfo, con
     HKS_LOG_I("finish session success");
     return HKS_SUCCESS;
 }
+
+int32_t HuksLibInterface::OnAbortSession(const HksProcessInfo &processInfo, const uint32_t &handle,
+    const CppParamSet &paramSet)
+{
+    void *funcPtr = nullptr;
+    bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_ABORT_SESSION, funcPtr);
+    HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "AbortSession method enum not found in plugin provider map.")
+    
+    int32_t ret = (*reinterpret_cast<OnAbortSessionFunc>(funcPtr))(processInfo, handle, paramSet);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "AbortSession fail, ret = %" LOG_PUBLIC "d", ret)
+    HKS_LOG_I("abort session success");
+    return HKS_SUCCESS;
+}
 }
 }
 }

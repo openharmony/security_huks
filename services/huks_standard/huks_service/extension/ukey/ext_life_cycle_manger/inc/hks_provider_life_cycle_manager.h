@@ -72,13 +72,14 @@ public:
         const CppParamSet &paramSet);
     int32_t OnUnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName,
         const CppParamSet &paramSet);
-    int32_t GetExtensionProxy(const ProviderInfo &providerInfo, sptr<IHuksAccessExtBase> &proxy);
-
-    int32_t HapGetAllConnectInfoByProviderName(const HksProcessInfo &processInfo, const std::string &providerName,
-        std::vector<std::shared_ptr<HksExtAbilityConnectInfo>> &providerInfos);
     int32_t GetAllProviderInfosByProviderName(const std::string &providerName,
         std::vector<ProviderInfo> &providerInfos);
+    int32_t GetExtensionProxy(const ProviderInfo &providerInfo, sptr<IHuksAccessExtBase> &proxy);
 private:
+    int32_t HapGetAllConnectInfoByProviderName(const std::string &bundleName, const std::string &providerName,
+        std::vector<std::shared_ptr<HksExtAbilityConnectInfo>> &providerInfos);
+    int32_t HksHapGetConnectInfos(const HksProcessInfo &processInfo, const std::string &providerName,
+        const CppParamSet &paramSet, std::vector<std::shared_ptr<HksExtAbilityConnectInfo>> &connectionInfos);
     // ProviderInfo, connectionInfo
     OHOS::SafeMap<ProviderInfo, std::shared_ptr<HksExtAbilityConnectInfo>> m_providerMap{};
     std::mutex m_registerMutex{};
