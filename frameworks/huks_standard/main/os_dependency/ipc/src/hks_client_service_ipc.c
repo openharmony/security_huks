@@ -178,7 +178,7 @@ int32_t HksClientRegisterProvider(const struct HksBlob *name, const struct HksPa
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret);
 
-        ret = HksCheckIpcBlobAndParamSet(name, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(name, newParamSet, HKS_EXT_MAX_PROVIDER_NAME_LEN);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientRegisterProvider fail")
 
         ret = HksAllocInBlob(&inBlob, name, newParamSet);
@@ -206,7 +206,7 @@ int32_t HksClientUnregisterProvider(const struct HksBlob *name, const struct Hks
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret);
 
-        ret = HksCheckIpcBlobAndParamSet(name, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(name, newParamSet, HKS_EXT_MAX_PROVIDER_NAME_LEN);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientUnregisterProvider fail")
 
         ret = HksAllocInBlob(&inBlob, name, newParamSet);
@@ -247,7 +247,7 @@ int32_t HksClientExportProviderCertificates(const struct HksBlob *providerName,
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret);
 
-        ret = HksCheckIpcBlobAndParamSet(&newProviderName, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(&newProviderName, newParamSet, HKS_EXT_MAX_PROVIDER_NAME_LEN);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientExportProviderCertificates fail")
 
         ret = HksAllocInBlob(&inBlob, &newProviderName, newParamSet);
@@ -293,7 +293,7 @@ int32_t HksClientExportCertificate(const struct HksBlob *index,
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "BuildParamSetNotNull fail, ret=%" LOG_PUBLIC "d", ret);
 
-        ret = HksCheckIpcBlobAndParamSet(index, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(index, newParamSet, HKS_EXT_MAX_RESOURCE_ID_LEN);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Check blob+paramSet fail");
 
         ret = HksAllocInBlob(&inBlob, index, newParamSet);
@@ -348,7 +348,7 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: build paramSet fail");
 
-        ret = HksCheckIpcBlobAndParamSet(index, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(index, newParamSet, HKS_EXT_MAX_RESOURCE_ID_LEN);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: check fail");
 
         ret = HksAllocInBlob(&inBlob, index, newParamSet);
@@ -401,7 +401,7 @@ int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index,
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetUkeyPinAuthState: build paramSet fail");
 
-        ret = HksCheckIpcBlobAndParamSet(index, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(index, newParamSet, HKS_EXT_MAX_RESOURCE_ID_LEN);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetUkeyPinAuthState: check fail");
 
         ret = HksAllocInBlob(&inBlob, index, newParamSet);
@@ -443,7 +443,7 @@ int32_t HksClientOpenRemoteHandle(const struct HksBlob *resourceId, const struct
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksCheckIpcBlobAndParamSet(resourceId, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(resourceId, newParamSet, HKS_EXT_MAX_RESOURCE_ID_LEN);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientOpenRemoteHandle fail")
 
         ret = HksAllocInBlob(&inBlob, resourceId, newParamSet);
@@ -474,7 +474,7 @@ int32_t HksClientCloseRemoteHandle(const struct HksBlob *resourceId, const struc
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksCheckIpcBlobAndParamSet(resourceId, newParamSet);
+        ret = HksCheckIpcBlobAndParamSet(resourceId, newParamSet, HKS_EXT_MAX_RESOURCE_ID_LEN);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIpcCloseRemoteHandle fail")
 
         ret = HksAllocInBlob(&inBlob, resourceId, newParamSet);
@@ -513,7 +513,8 @@ int32_t HksClientGetRemoteProperty(const struct HksBlob *resourceId, const struc
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksCheckIpcBlob2ParamSet(resourceId, propertyId, newParamSet);
+        ret = HksCheckIpcBlob2ParamSet(resourceId, propertyId, newParamSet, HKS_EXT_MAX_RESOURCE_ID_LEN,
+            HKS_EXT_MAX_PROPERTY_ID_LEN);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check remote property fail")
 
         ret = HksAllocInBlobWithBlob2(&inBlob, resourceId, propertyId, newParamSet);
@@ -540,7 +541,7 @@ int32_t HksClientClearPinAuthState(const struct HksBlob *index)
     int32_t ret;
     struct HksBlob inBlob = { 0, NULL };
     do {
-        ret = HksCheckIpcBlob(index);
+        ret = HksCheckIpcBlob(index, HKS_EXT_MAX_RESOURCE_ID_LEN);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksClientClearPinAuthState fail")
 
         ret = HksAllocInBlob(&inBlob, index, NULL);
