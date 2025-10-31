@@ -529,7 +529,7 @@ static int32_t ParsePropertiesArray(ani_env *&env, const ani_object &optionsObj,
     for (int32_t i = 0; i < static_cast<int32_t>(length); i++) {
         ani_ref paramEntryRef;
         std::string methodSig = arkts::ani_signature::SignatureBuilder().AddInt().
-            SetReturnClass({"std", "core", "Object"}).BuildSignatureDescriptor();
+            SetReturnAny().BuildSignatureDescriptor();
         if (env->Object_CallMethodByName_Ref(propertiesArray, "$_get",
             methodSig.c_str(), &paramEntryRef, i) != ANI_OK) {
             HKS_LOG_E("Object_CallMethodByName_Ref get ani object Failed");
