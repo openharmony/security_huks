@@ -53,12 +53,6 @@ HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *name, const 
     int32_t *status);
 HKS_API_EXPORT int32_t HksClearUkeyPinAuthState(const struct HksBlob *resourceId);
 
-// 签名验签
-HKS_API_EXPORT int32_t HksUkeySign(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn,
-    const struct HksBlob *srcData, struct HksBlob *signatureOut);
-HKS_API_EXPORT int32_t HksUkeyVerify(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn,
-    const struct HksBlob *srcData, struct HksBlob *signatureOut);
-
 HKS_API_EXPORT int32_t HksGetRemoteProperty(const struct HksBlob *resourceId, const struct HksBlob *propertyId,
     const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut);
 
