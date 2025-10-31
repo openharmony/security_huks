@@ -718,6 +718,13 @@ static struct HksError g_errCodeTable[] = {
             .errorMsg = "The auth pin is not correct.",
             .data = NULL
         }
+    }, {
+        .innerErrCode = HKS_ERROR_UKY_PROVIDER_MGR_REGESTER_REACH_MAX_NUM,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_ILLEGAL_ARGUMENT,
+            .errorMsg = "The provider manager register reach max num.",
+            .data = NULL
+        }
     }
 };
 

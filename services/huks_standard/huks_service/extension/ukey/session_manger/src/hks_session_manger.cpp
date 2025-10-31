@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <fcntl.h>
 #include <limits>
 #include <memory>
 #include <random>
@@ -30,9 +31,6 @@
 
 #include "hks_cpp_paramset.h"
 #include "hks_log.h"
-#include "hks_mem.h"
-#include "hks_param.h"
-#include "hks_json_wrapper.h"
 #include "hks_template.h"
 namespace OHOS {
 namespace Security {
@@ -51,16 +49,11 @@ void HksSessionManager::ReleaseInstance()
 static bool GenerateRand(uint8_t *buf, size_t len)
 {
     FILE *randfp = fopen("/dev/random", "rb");
-    if (randfp == nullptr) {
-        HKS_LOG_E("fopen file failed");
-        return false;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(randfp == nullptr, false, "fopen file failed")
+
     size_t readLen = fread(buf, sizeof(uint8_t), len, randfp);
     (void)fclose(randfp);
-    if (readLen != len) {
-        HKS_LOG_E("read file failed");
-        return false;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(readLen != len, false, "read file failed")
     return true;
 }
 
@@ -75,39 +68,37 @@ std::pair<int32_t, uint32_t> HksSessionManager::GenRandomUint32()
     return std::make_pair(HKS_SUCCESS, random);
 }
 
+constexpr int32_t MAX_HANDLE_SIZE = 100;
 int32_t HksSessionManager::ExtensionInitSession(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, uint32_t &handle)
 {
+    HKS_IF_TRUE_LOGE_RETURN(m_handlers.Size() >= MAX_HANDLE_SIZE, HKS_ERROR_INVALID_ARGUMENT,
+        "handle too many, please realse the old")
     ProviderInfo providerInfo;
     std::string newIndex;
     std::string sIndexHandle;
     int32_t ret = HksRemoteHandleManager::GetInstanceWrapper()->ParseAndValidateIndex(index, providerInfo, newIndex,
         sIndexHandle);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("ParseAndValidateIndex failed: %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ParseAndValidateIndex failed: %" LOG_PUBLIC "d", ret)
+
     std::string sessionHandle;
     auto proxy = HksRemoteHandleManager::GetInstanceWrapper()->GetProviderProxy(providerInfo, ret);
-    if (proxy == nullptr) {
-        return ret;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NULL_POINTER, "GetProviderProxy proxy is null")
+
     auto ipcCode = proxy->InitSession(sIndexHandle, paramSet, sessionHandle, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy InitSession ipcCode: %" LOG_PUBLIC "d",
         ipcCode)
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("InitSession get handle failed: %" LOG_PUBLIC "d", ret);
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_REMOTE_OPERATION_FAILED,
+        "proxy InitSession get handle failed: %" LOG_PUBLIC "d", ret)
+
     auto random = GenRandomUint32();
-    if (random.first != HKS_SUCCESS) {
-        HKS_LOG_E("GenRandomUint32 failed. ret: %" LOG_PUBLIC "d", random.first);
-        return random.first;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(random.first != HKS_SUCCESS, random.first,
+        "GenRandomUint32 failed. ret: %" LOG_PUBLIC "d", random.first)
+
     handle = random.second;
     HKS_LOG_I("ExtensionInitSession return sessionHandle: %" LOG_PUBLIC "s", sessionHandle.c_str());
     HKS_LOG_I("ExtensionInitSession out handle: %" LOG_PUBLIC "u", handle);
-    std::pair<ProviderInfo, std::string> handleInfo{providerInfo, sessionHandle};
+    HandleInfo handleInfo{sessionHandle, providerInfo, processInfo.uidInt};
     m_handlers.Insert(handle, handleInfo);
     return HKS_SUCCESS;
 }
@@ -115,50 +106,71 @@ int32_t HksSessionManager::ExtensionUpdateSession(const HksProcessInfo &processI
     const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
     std::vector<uint8_t> &outData)
 {
-    std::pair<ProviderInfo, std::string> handleInfo;
+    HandleInfo handleInfo;
     HKS_LOG_I("ExtensionUpdateSession handle: %" LOG_PUBLIC "u", handle);
-    if (!m_handlers.Find(handle, handleInfo)) {
-        HKS_LOG_E("Find handle failed");
-        return HKS_ERROR_UKY_FIND_SESSION_HANDLE_FAIL;
-    }
+    int32_t ret = HksGetHandleInfo(processInfo, handle, handleInfo);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksGetHandleInfo ret = %" LOG_PUBLIC "d", ret)
+
     sptr<IHuksAccessExtBase> proxy{nullptr};
-    int32_t ret = HksProviderLifeCycleManager::GetInstanceWrapper()->GetExtensionProxy(handleInfo.first, proxy);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("GetExtensionProxy failed: %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
-    auto ipcCode = proxy->UpdateSession(handleInfo.second, paramSet, inData, outData, ret);
+    ret = HksProviderLifeCycleManager::GetInstanceWrapper()->GetExtensionProxy(handleInfo.m_providerInfo,
+        proxy);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetExtensionProxy failed: %" LOG_PUBLIC "d", ret)
+
+    auto ipcCode = proxy->UpdateSession(handleInfo.m_skfSessionHandle, paramSet, inData, outData, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy UpdateSession ipcCode: %" LOG_PUBLIC "d",
         ipcCode)
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("UpdateSession failed: %" LOG_PUBLIC "d", ret);
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_REMOTE_OPERATION_FAILED,
+        "proxy UpdateSession failed: %" LOG_PUBLIC "d", ret)
+
     return HKS_SUCCESS;
 }
 int32_t HksSessionManager::ExtensionFinishSession(const HksProcessInfo &processInfo,
     const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
     std::vector<uint8_t> &outData)
 {
-    std::pair<ProviderInfo, std::string> handleInfo;
-    if (!m_handlers.Find(handle, handleInfo)) {
-        HKS_LOG_E("Find handle failed");
-        return HKS_ERROR_UKY_FIND_SESSION_HANDLE_FAIL;
-    }
+    HandleInfo handleInfo;
+    int32_t ret = HksGetHandleInfo(processInfo, handle, handleInfo);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksGetHandleInfo ret = %" LOG_PUBLIC "d", ret)
+
     sptr<IHuksAccessExtBase> proxy{nullptr};
-    int32_t ret = HksProviderLifeCycleManager::GetInstanceWrapper()->GetExtensionProxy(handleInfo.first, proxy);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("GetExtensionProxy failed: %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
-    auto ipcCode = proxy->FinishSession(handleInfo.second, paramSet, inData, outData, ret);
+    ret = HksProviderLifeCycleManager::GetInstanceWrapper()->GetExtensionProxy(handleInfo.m_providerInfo, proxy);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetExtensionProxy failed: %" LOG_PUBLIC "d", ret)
+
+    auto ipcCode = proxy->FinishSession(handleInfo.m_skfSessionHandle, paramSet, inData, outData, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy FinishSession ipcCode: %" LOG_PUBLIC "d",
         ipcCode)
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("FinishSession failed: %" LOG_PUBLIC "d", ret);
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_REMOTE_OPERATION_FAILED,
+        "FinishSession failed: %" LOG_PUBLIC "d", ret)
     m_handlers.Erase(handle);
+    return HKS_SUCCESS;
+}
+
+int32_t HksSessionManager::ExtensionAbortSession(const HksProcessInfo &processInfo,
+    const uint32_t &handle, const CppParamSet &paramSet)
+{
+    HandleInfo handleInfo;
+    int32_t ret = HksGetHandleInfo(processInfo, handle, handleInfo);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksGetHandleInfo ret = %" LOG_PUBLIC "d", ret)
+
+    sptr<IHuksAccessExtBase> proxy{nullptr};
+    ret = HksProviderLifeCycleManager::GetInstanceWrapper()->GetExtensionProxy(handleInfo.m_providerInfo, proxy);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetExtensionProxy failed: %" LOG_PUBLIC "d", ret)
+
+    int32_t abortRet = 0;
+    auto ipcCode = proxy->CloseRemoteHandle(handleInfo.m_skfSessionHandle, paramSet, abortRet);
+    HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL,
+        "proxy use CloseRemoteHandle to abort ipcCode: %" LOG_PUBLIC "d", ipcCode)
+    m_handlers.Erase(handle);
+    return HKS_SUCCESS;
+}
+
+int32_t HksSessionManager::HksGetHandleInfo(const HksProcessInfo &processInfo, const uint32_t &handle,
+    HandleInfo &infos)
+{
+    HandleInfo infoNew{};
+    HKS_IF_TRUE_LOGE_RETURN(!m_handlers.Find(handle, infoNew), HKS_ERROR_NOT_EXIST, "Find handle failed")
+    HKS_IF_TRUE_LOGE_RETURN(infoNew.m_uid != processInfo.uidInt, HKS_ERROR_NO_PERMISSION, "uid not crrect")
+    infos = std::move(infoNew);
     return HKS_SUCCESS;
 }
 }

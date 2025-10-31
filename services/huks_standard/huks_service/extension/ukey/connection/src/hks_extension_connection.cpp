@@ -43,15 +43,15 @@ void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementNa
 int32_t ExtensionConnection::OnConnection(const AAFwk::Want &want)
 {
     int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, this, DEFAULT_USER_ID);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_ABILITY_MGR_CONNECT_FAIL,
-        "fail to connect ability by ability manager service")
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_REMOTE_OPERATION_FAILED,
+        "fail to connect ability by ability manager service. ext error = %" LOG_PUBLIC "d", ret)
 
     std::unique_lock<std::mutex> lock(proxyMutex_);
     if (!proxyConv_.wait_for(lock, std::chrono::seconds(WAIT_TIME), [this] {
         return extConnectProxy != nullptr;
     })) {
-        HKS_LOG_E("wait connect timeout");
-        return HKS_ERROR_CONNECT_TIME_OUT;
+        HKS_LOG_E("wait connected timeout");
+        return HKS_ERROR_REMOTE_OPERATION_FAILED;
     }
     return HKS_SUCCESS;
 }
