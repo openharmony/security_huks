@@ -382,11 +382,9 @@ void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t
 
     HksSendResponse(context, ret, ret == HKS_SUCCESS && certOut.size != 0 ? &certOut : NULL);
 
-    if (ret == HKS_SUCCESS) {
-        HksFreeExtCertSet(&certInfoSet);
-    }
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
+    HksFreeExtCertSet(&certInfoSet);
     HKS_FREE_BLOB(certOut);
 #else
     (void)srcData;
