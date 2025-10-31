@@ -558,36 +558,6 @@ int32_t HksClientClearPinAuthState(const struct HksBlob *index)
     return ret;
 }
 
-int32_t HksClientUkeySign(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
-    const struct HksBlob *srcData, struct HksBlob *signatureOut)
-{
-    int32_t ret;
-    struct HksParamSet *newParamSet = NULL;
-    struct HksBlob inBlob = { 0, NULL };
-
-    do {
-        ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret)
-
-        inBlob.size = ALIGN_SIZE(paramSetIn->paramSetSize) + sizeof(index->size) + ALIGN_SIZE(index->size) +
-            sizeof(srcData->size) + ALIGN_SIZE(srcData->size) + sizeof(signatureOut->size);
-        inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-        HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
-
-        ret = HksCheckIpcAgreeKey(paramSetIn, index, srcData, signatureOut);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckIpcUkeySign fail")
-
-        ret = HksAgreeKeyPack(&inBlob, newParamSet, index, srcData, signatureOut);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksUkeySignPack fail")
-
-        ret = HksSendRequest(HKS_MSG_EXT_UKEY_SIGN, &inBlob, signatureOut, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
-    } while (0);
-
-    HKS_FREE_BLOB(inBlob);
-    return ret;
-}
-
 int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
     struct HksParamSet *paramSetOut)
 {
