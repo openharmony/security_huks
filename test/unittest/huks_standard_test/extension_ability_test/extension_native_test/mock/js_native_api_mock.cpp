@@ -245,7 +245,7 @@ napi_status napi_create_typedarray(napi_env env, napi_typedarray_type type,
     if (OHOS::Security::Huks::Assistant::ins_ == nullptr) {
         return napi_invalid_arg;
     }
-    return OHOS::Security::Huks::Assistant::ins_->napi_create_arraybuffer(
+    return OHOS::Security::Huks::Assistant::ins_->napi_create_typedarray(
         env, type, length, arraybuffer, byte_offset, result);
 }
 
