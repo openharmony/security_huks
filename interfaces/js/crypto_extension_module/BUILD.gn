@@ -55,7 +55,7 @@ if (os_level == "standard") {
 
     external_deps = [ "napi:ace_napi" ]
 
-    relative_install_dir = "module/application"
+    relative_install_dir = "module/security"
     subsystem_name = "security"
     part_name = "huks"
   }
