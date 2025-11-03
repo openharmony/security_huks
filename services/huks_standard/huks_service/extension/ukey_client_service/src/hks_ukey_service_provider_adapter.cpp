@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "hks_ipc_service_provider_adapter.h"
-#include "hks_ipc_service_provider.h"
+#include "hks_ukey_service_provider_adapter.h"
+#include "hks_ukey_service_provider.h"
 #include "hks_ukey_common.h"
 #include "hks_sa_interface.h"
 #include "hks_type.h"

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_ipc_service_provider.h"
+#include "hks_ukey_service_provider.h"
 
 namespace OHOS {
 namespace Security {

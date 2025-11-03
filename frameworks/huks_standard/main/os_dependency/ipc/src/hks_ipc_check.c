@@ -46,7 +46,7 @@ int32_t HksCheckIpcBlobAndParamSet(const struct HksBlob *blob, const struct HksP
     return HKS_SUCCESS;
 }
 
-int32_t HksCheckIpcBlob2ParamSet(const struct HksBlob *blob1, const struct HksBlob *blob2,
+int32_t HksCheckIpcTwoBlobsParamSet(const struct HksBlob *blob1, const struct HksBlob *blob2,
     const struct HksParamSet *paramSet, uint32_t maxSize1, uint32_t maxSize2)
 {
     int32_t ret = HksCheckBlob2AndParamSet(blob1, blob2, paramSet);
