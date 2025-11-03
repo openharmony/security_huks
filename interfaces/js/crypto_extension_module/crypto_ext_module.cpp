@@ -22,12 +22,12 @@ extern const char _binary_crypto_extension_ability_abc_start[];
 extern const char _binary_crypto_extension_ability_abc_end[];
 
 extern "C" __attribute__((constructor))
-void NAPI_application_CryptoExtensionAbility_AutoRegister()
+void NAPI_security_CryptoExtensionAbility_AutoRegister()
 {
     auto moduleManager = NativeModuleManager::GetInstance();
     NativeModule newModuleInfo = {
-        .name = "application.CryptoExtensionAbility",
-        .fileName = "application/libcryptoextensionability_napi.so/CryptoExtensionAbility.js",
+        .name = "security.CryptoExtensionAbility",
+        .fileName = "security/libcryptoextensionability_napi.so/CryptoExtensionAbility.js",
     };
     if (moduleManager != nullptr) {
         moduleManager->Register(&newModuleInfo);
@@ -35,7 +35,7 @@ void NAPI_application_CryptoExtensionAbility_AutoRegister()
 }
 
 extern "C" __attribute__((visibility("default")))
-void NAPI_application_CryptoExtensionAbility_GetJSCode(const char **buf, int *bufLen)
+void NAPI_security_CryptoExtensionAbility_GetJSCode(const char **buf, int *bufLen)
 {
     if (buf != nullptr) {
         *buf = _binary_crypto_extension_ability_js_start;
@@ -48,7 +48,7 @@ void NAPI_application_CryptoExtensionAbility_GetJSCode(const char **buf, int *bu
 
 // file extension ability JS register
 extern "C" __attribute__((visibility("default")))
-void NAPI_application_CryptoExtensionAbility_GetABCCode(const char **buf, int *buflen)
+void NAPI_security_CryptoExtensionAbility_GetABCCode(const char **buf, int *buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_crypto_extension_ability_abc_start;
