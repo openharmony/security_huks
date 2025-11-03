@@ -233,7 +233,7 @@ int32_t HksIpcServiceOnGetRemotePropertyAdapter(const struct HksProcessInfo *pro
     std::unique_ptr<uint8_t[]> outData;
     uint32_t outSize = 0;
     ret = RemotePropertyPack(cppOutParams, outData, outSize, ret);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "PackRemoteProperty fail");
+    HKS_IF_NOT_SUCC_LOGE(ret, "PackRemoteProperty fail");
 
     hksExtProxy->SendAsyncReply(HKS_SUCCESS, outData, outSize, HKS_MSG_EXT_GET_REMOTE_PROPERTY_REPLY);
     return HKS_SUCCESS;

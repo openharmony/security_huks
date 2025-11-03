@@ -78,8 +78,11 @@ static int32_t BuildBlobNotNull(const struct HksBlob *blobIn, struct HksBlob *bl
         blobOut->data = (uint8_t *)HksMalloc(dataSize);
         HKS_IF_NULL_LOGE_RETURN(blobOut->data, HKS_ERROR_MALLOC_FAIL, "malloc blobOut data fail");
 
-        HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(blobOut->data, dataSize,
-            HKS_INNER_NULL_PROVIDER_NAME, dataSize), HKS_ERROR_INSUFFICIENT_MEMORY, "memcpy_s blobOut failed")
+        if (memcpy_s(blobOut->data, dataSize, HKS_INNER_NULL_PROVIDER_NAME, dataSize) != EOK) {
+            HKS_LOG_E("memcpy_s blobOut failed");
+            HKS_FREE_BLOB(*blobOut);
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
+        }
         blobOut->size = dataSize;
         return HKS_SUCCESS;
     }
@@ -93,8 +96,11 @@ static int32_t BuildBlobNotNull(const struct HksBlob *blobIn, struct HksBlob *bl
     blobOut->data = (uint8_t *)HksMalloc(dataSize);
     HKS_IF_NULL_LOGE_RETURN(blobOut->data, HKS_ERROR_MALLOC_FAIL, "malloc blob data fail");
 
-    HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(blobOut->data, dataSize,
-            blobIn->data, dataSize), HKS_ERROR_INSUFFICIENT_MEMORY, "memcpy_s outStatus failed")
+    if (memcpy_s(blobOut->data, dataSize, blobIn->data, dataSize) != EOK) {
+        HKS_LOG_E("memcpy_s blobOut data failed");
+        HKS_FREE_BLOB(*blobOut);
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
 
     blobOut->size = dataSize;
     return HKS_SUCCESS;
@@ -138,12 +144,9 @@ static int32_t HksAllocInBlob(struct HksBlob *inBlob,
     if (paramSet != NULL) {
         size += ALIGN_SIZE(paramSet->paramSetSize);
     }
-    inBlob->size = size;
     inBlob->data = (uint8_t *)HksMalloc(size);
-    if (inBlob->data == NULL) {
-        inBlob->size = 0;
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(inBlob->data, HKS_ERROR_MALLOC_FAIL, "malloc inBlob fail");
+    inBlob->size = size;
     return HKS_SUCCESS;
 }
 
@@ -158,12 +161,9 @@ static int32_t HksAllocInBlobWithBlob2(struct HksBlob *inBlob,
     if (paramSet != NULL) {
         size += ALIGN_SIZE(paramSet->paramSetSize);
     }
-    inBlob->size = size;
     inBlob->data = (uint8_t *)HksMalloc(size);
-    if (inBlob->data == NULL) {
-        inBlob->size = 0;
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(inBlob->data, HKS_ERROR_MALLOC_FAIL, "malloc inBlob fail");
+    inBlob->size = size;
     return HKS_SUCCESS;
 }
 
@@ -331,10 +331,7 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
     *                | outStatus  |  retryCount  |
     *                +---------------------------+
     */
-    int32_t *outStatus = (int32_t *)HksMalloc(sizeof(int32_t));
-    if (outStatus == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    int32_t *outStatus = NULL;
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob inBlob  = { 0, NULL };
@@ -343,6 +340,12 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
     outBlob.size = (sizeof(int32_t) + sizeof(uint32_t));
     outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
     HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
+
+    outStatus = (int32_t *)HksMalloc(sizeof(int32_t));
+    if (outStatus == NULL) {
+        HKS_FREE_BLOB(outBlob);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
 
     do {
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
@@ -378,6 +381,7 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
     HKS_FREE_BLOB(outBlob);
+    HKS_FREE(outStatus);
     return ret;
 }
 
@@ -393,6 +397,7 @@ int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index,
     struct HksBlob inBlob  = { 0, NULL };
     struct HksBlob outBlob = { 0, NULL };
 
+    // todo
     outBlob.size = (uint32_t)sizeof(int32_t);
     outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
     HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
