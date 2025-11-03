@@ -143,7 +143,7 @@ static int32_t HksAllocInBlob(struct HksBlob *inBlob,
     return HKS_SUCCESS;
 }
 
-static int32_t HksAllocInBlobWithBlob2(struct HksBlob *inBlob,
+static int32_t HksAllocInBlobWithTwoBlobs(struct HksBlob *inBlob,
     const struct HksBlob *blob1, const struct HksBlob *blob2, const struct HksParamSet *paramSet)
 {
     if (inBlob == NULL || blob1 == NULL || blob2 == NULL) {
@@ -159,7 +159,6 @@ static int32_t HksAllocInBlobWithBlob2(struct HksBlob *inBlob,
     inBlob->size = size;
     return HKS_SUCCESS;
 }
-
 
 int32_t HksClientRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
 {
@@ -371,7 +370,6 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
     HKS_FREE_BLOB(outBlob);
-    HKS_FREE(outStatus);
     return ret;
 }
 
@@ -387,7 +385,6 @@ int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index,
     struct HksBlob inBlob  = { 0, NULL };
     struct HksBlob outBlob = { 0, NULL };
 
-    // todo
     outBlob.size = (uint32_t)sizeof(int32_t);
     outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
     HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
@@ -432,7 +429,6 @@ int32_t HksClientOpenRemoteHandle(const struct HksBlob *resourceId, const struct
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob inBlob = { 0, NULL };
-    struct HksBlob outBlob = { 0, NULL };
 
     do {
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
@@ -447,15 +443,12 @@ int32_t HksClientOpenRemoteHandle(const struct HksBlob *resourceId, const struct
         ret = HksUKeyGeneralPack(resourceId, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksOpenRemoteHandlePack fail")
 
-        ret = HksSendRequest(HKS_MSG_EXT_OPEN_REMOTE_HANDLE, &inBlob, &outBlob, newParamSet);
+        ret = HksSendRequest(HKS_MSG_EXT_OPEN_REMOTE_HANDLE, &inBlob, NULL, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret);
-
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CopyData fail, ret = %" LOG_PUBLIC "d", ret);
     } while (0);
 
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
-    HKS_FREE_BLOB(outBlob);
     return ret;
 }
 
@@ -508,11 +501,11 @@ int32_t HksClientGetRemoteProperty(const struct HksBlob *resourceId, const struc
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksCheckIpcBlob2ParamSet(resourceId, propertyId, newParamSet, HKS_EXT_MAX_RESOURCE_ID_LEN,
+        ret = HksCheckIpcTwoBlobsParamSet(resourceId, propertyId, newParamSet, HKS_EXT_MAX_RESOURCE_ID_LEN,
             HKS_EXT_MAX_PROPERTY_ID_LEN);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check remote property fail")
 
-        ret = HksAllocInBlobWithBlob2(&inBlob, resourceId, propertyId, newParamSet);
+        ret = HksAllocInBlobWithTwoBlobs(&inBlob, resourceId, propertyId, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
         ret = HksUkeyBlob2ParamSetPack(resourceId, propertyId, newParamSet, &inBlob);
