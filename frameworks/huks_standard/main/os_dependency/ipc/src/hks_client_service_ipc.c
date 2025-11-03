@@ -90,13 +90,11 @@ static int32_t BuildBlobNotNull(const struct HksBlob *blobIn, struct HksBlob *bl
             ret = HKS_ERROR_MALLOC_FAIL;
             break;
         }
-
         if (memcpy_s(blobOut->data, tmp.size, tmp.data, tmp.size) != EOK) {
             HKS_LOG_E("memcpy_s blobOut failed");
             ret = HKS_ERROR_INSUFFICIENT_MEMORY;
             break;
         }
-
         blobOut->size = tmp.size;
     } while (0);
 
