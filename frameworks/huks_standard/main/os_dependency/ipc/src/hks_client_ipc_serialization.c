@@ -610,7 +610,12 @@ int32_t HksCertificatesUnpackFromService(const struct HksBlob *srcBlob, struct H
 
     struct HksExtCertInfo *certs = (struct HksExtCertInfo *)HksMalloc(sizeof(struct HksExtCertInfo) * cnt);
     HKS_IF_NULL_LOGE_RETURN(certs, HKS_ERROR_MALLOC_FAIL, "malloc certs array fail");
-    (void)memset_s(certs, sizeof(struct HksExtCertInfo) * cnt, 0, sizeof(struct HksExtCertInfo) * cnt);
+
+    if (memset_s(certs, sizeof(struct HksExtCertInfo) * cnt, 0, sizeof(struct HksExtCertInfo) * cnt) != EOK) {
+        HKS_LOG_E("memset_s certs array fail");
+        HKS_FREE(certs);
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
 
     for (uint32_t i = 0; i < cnt; ++i) {
         ret = UnpackExtCertInfoFromBuffer(srcBlob, &offset, &certs[i]);
