@@ -776,7 +776,7 @@ void GetSessionParams(const napi_env &env, const napi_value &funcResult,
     size_t byte_offset;
     size_t length;
     status = napi_get_typedarray_info(env, napiOutData, &type, &length, nullptr, &nativeArray, &byte_offset);
-    if (status != napi_ok) {
+    if (status != napi_ok || data == nullptr) {
         LOGE("get typedarray info failed, status:%d", status);
         return;
     }
