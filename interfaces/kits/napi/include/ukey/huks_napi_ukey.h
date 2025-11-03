@@ -22,6 +22,8 @@
 
 #include "hks_param.h"
 
+#include <vector>
+
 namespace HuksNapiItem {
 #define NAPI_CALL_RETURN_ERR(env, ret)   \
     if ((ret) != napi_ok)                \
@@ -81,24 +83,12 @@ public:
 
 class ProviderRegContext : public AsyncContext {
 public:
-    ~ProviderRegContext()
-    {
-        if (name != nullptr) {
-            FreeHksBlob(name);
-        }
-    }
-    struct HksBlob *name = nullptr;
+    std::vector<uint8_t> name{};
 };
 
 class UkeyPinContext : public AsyncContext {
 public:
-    ~UkeyPinContext()
-    {
-        if (index != nullptr) {
-            FreeHksBlob(index);
-        }
-    }
-    struct HksBlob *index = nullptr;
+    std::vector<uint8_t> index{};
     int32_t outStatus = 0;
     uint32_t retryCount = 0;
 };
@@ -115,7 +105,7 @@ napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info);
 // 工具函数
 napi_value NapiCreateError(napi_env env, int32_t errCode, const char *errMsg);
 
-napi_value ParseString(napi_env env, napi_value object, HksBlob *&alias);
+napi_value ParseString(napi_env env, napi_value object, std::vector<uint8_t> &alias);
 
 } // namespace HuksNapiItem
 
