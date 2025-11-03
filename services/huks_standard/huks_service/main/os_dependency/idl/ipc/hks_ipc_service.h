@@ -17,7 +17,7 @@
 #define HKS_IPC_SERVICE_H
 
 #include "hks_type_inner.h"
-#include "hks_ipc_service_provider_adapter.h"
+#include "hks_ukey_service_provider_adapter.h"
 
 #ifdef __cplusplus
 extern "C" {

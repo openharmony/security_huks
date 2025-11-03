@@ -144,11 +144,15 @@ static int32_t HksExtSendAsyncMessage(MessageParcel &data, const struct HksParam
 
     uint32_t timeout = DEFAULT_TIME; // default seconds
     struct HksParam *timeoutParam = nullptr;
-    // TODO:自定义这里怎么做
     if (HksGetParam(paramSet, HKS_EXT_CRYPTO_TAG_TIMEOUT, &timeoutParam) == HKS_SUCCESS) {
-        if (GetTagType((enum HksTag)timeoutParam->tag) == HKS_TAG_TYPE_UINT && timeoutParam->uint32Param > 0) {
-            timeout = timeoutParam->uint32Param;
-        }
+        HKS_IF_TRUE_LOGE_RETURN(GetTagType((enum HksTag)timeoutParam->tag) != HKS_TAG_TYPE_UINT,
+            HKS_ERROR_INVALID_ARGUMENT, "timeout tag type invalid");
+
+        uint32_t val = timeoutParam->uint32Param;
+        HKS_IF_TRUE_LOGE_RETURN(val > 3 || val == 0, HKS_ERROR_INVALID_ARGUMENT,
+            "timeout %" LOG_PUBLIC "u not supported, must between 0 - 3", val);
+
+        timeout = val;
     }
 
     auto [errCode, receivedData, receivedSize, receivedCode] = hksCallback->WaitForAsyncReply(timeout);

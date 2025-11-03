@@ -33,7 +33,8 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough",
       "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger/inc",
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",
-      "//base/security/huks/services/huks_standard/huks_service/main/core/include"
+      "//base/security/huks/services/huks_standard/huks_service/main/core/include",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey_client_service/inc"
     ]
 
     sources = [
@@ -58,6 +59,9 @@ if (os_level == "standard") {
       # "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
       "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/at_wrapper:libhuks_at_systemapi_wrap_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey_client_service: libhuks_service_ukey_standard_static"
+      
+
     ]
 
     if (enable_bundle_framework) {

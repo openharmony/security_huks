@@ -69,7 +69,6 @@
 #ifdef L2_STANDARD
 #include "hks_ha_event_report.h"
 #include "hks_ukey_three_stage_adapter.h"
-#include "hks_ipc_service_provider_adapter.h"
 #endif
 
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
