@@ -321,7 +321,6 @@ HWTEST_F(JsCryptoExtAbilityTest, GenerateHksParam_0001, testing::ext::TestSize.L
 
 HWTEST_F(JsCryptoExtAbilityTest, GenerateHksParamArray_0000, testing::ext::TestSize.Level0)
 {    
-    // napi_value outValue;
     napi_value rslt = nullptr;
     std::string pinStr = "123456";
     std::vector<std::uint8_t> u8Vec(pinStr.begin(), pinStr.end());
@@ -349,7 +348,7 @@ HWTEST_F(JsCryptoExtAbilityTest, GenerateHksParamArray_0000, testing::ext::TestS
     EXPECT_CALL(*insMoc, napi_set_element(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
     EXPECT_TRUE(GenerateHksParamArray(env, *paramSet.GetParamSet()) == nullptr);
 
-        EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_create_object(_, _)).WillOnce(Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_create_uint32(_, _, _)).WillOnce(Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_set_named_property(_, _, _, _))
@@ -357,6 +356,59 @@ HWTEST_F(JsCryptoExtAbilityTest, GenerateHksParamArray_0000, testing::ext::TestS
     EXPECT_CALL(*insMoc, napi_create_int32(_, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
     EXPECT_CALL(*insMoc, napi_set_element(_, _, _, _)).WillOnce(Return(napi_ok));
-    EXPECT_TRUE(GenerateHksParamArray(env, *paramSet.GetParamSet()) != nullptr);
+    EXPECT_TRUE(GenerateHksParamArray(env, *paramSet.GetParamSet()) == nullptr);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, MakeJsNativeCppParamSet_0000, testing::ext::TestSize.Level0)
+{
+    napi_value outValue = nullptr;
+    napi_value rslt = nullptr;
+    std::string pinStr = "123456";
+    std::vector<std::uint8_t> u8Vec(pinStr.begin(), pinStr.end());
+    u8Vec.push_back('\0');
+    struct HksParam tmpParams = { .tag = HKS_TAG_TYPE_INT,
+        .blob = { .size = u8Vec.size(), .data = u8Vec.data() }};
+    std::vector<HksParam> paramsVec;
+    paramsVec.emplace_back(tmpParams);
+    CppParamSet paramSet(paramsVec);
+
+    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_FALSE(MakeJsNativeCppParamSet(env, paramSet, outValue));
+
+    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_object(_, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_uint32(_, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_set_named_property(_, _, _, _))
+        .WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_create_int32(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_set_element(_, _, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_FALSE(MakeJsNativeCppParamSet(env, paramSet, outValue));
+
+    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_object(_, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_uint32(_, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_set_named_property(_, _, _, _))
+        .WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_int32(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_set_element(_, _, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_TRUE(MakeJsNativeCppParamSet(env, paramSet, outValue));
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, MakeJsNativeVectorInData_0000, testing::ext::TestSize.Level0)
+{
+    std::string pinStr = "123456";
+    std::vector<std::uint8_t> u8Vec(pinStr.begin(), pinStr.end());
+    u8Vec.push_back('\0');
+    napi_value value;
+    EXPECT_CALL(*insMoc, napi_create_arraybuffer(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    auto result = MakeJsNativeVectorInData(env, u8Vec, value);
+    EXPECT_TRUE(result);
+
+    EXPECT_CALL(*insMoc, napi_create_arraybuffer(_, _, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_typedarray(_, _, _, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    result = MakeJsNativeVectorInData(env, u8Vec, value);
+    EXPECT_TRUE(result);
 }
 }
