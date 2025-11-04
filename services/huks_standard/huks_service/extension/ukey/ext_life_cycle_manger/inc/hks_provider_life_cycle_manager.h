@@ -82,6 +82,7 @@ private:
         const CppParamSet &paramSet, std::vector<std::shared_ptr<HksExtAbilityConnectInfo>> &connectionInfos);
     // ProviderInfo, connectionInfo
     OHOS::SafeMap<ProviderInfo, std::shared_ptr<HksExtAbilityConnectInfo>> m_providerMap{};
+    std::mutex m_registerMutex{};
 };
 }
 }
