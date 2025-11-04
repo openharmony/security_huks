@@ -18,9 +18,6 @@ import("//build/ohos.gni")
 config("huks_config") {
   include_dirs = [
     "include",
-    "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/dcm/include",
-    "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/include",
-    "//base/security/huks/services/huks_standard/huks_service/main/plugin_proxy/include",
   ]
 }
 
@@ -31,20 +28,15 @@ if (os_level == "standard") {
     public_configs = [ ":huks_config" ]
 
     include_dirs = [
-      "//base/security/huks/utils/list",
-      "//base/security/huks/utils/mutex",
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",  # hks_response.h
-      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",  # hks_osaccount_check.h
-      "//base/security/huks/services/huks_standard/huks_service/main/upgrade/lock/include",
       "//base/security/huks/services/huks_standard/huks_service/main/ha/include",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey_client_service/inc",
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",
+      "//base/security/huks/services/huks_standard/huks_service/main/core/include",
+      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger/inc"
     ]
 
     sources = [
-      "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage.c",
-      "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_file_lock.c",
-      "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_manager.c",
-      "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_utils.c",
-      "src/hks_client_check.c",
       "src/hks_ukey_client_service.c",
       "src/hks_ukey_service_provider.cpp",
       "src/hks_ukey_service_provider_adapter.cpp",
@@ -52,39 +44,15 @@ if (os_level == "standard") {
 
     defines = [ "HKS_ENABLE_CLEAN_FILE" ]
 
-    if (huks_security_level == "trusted_environment") {
-      sources += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/dcm/src/hks_client_service_dcm.cpp" ]
-    }
-
-    sources += [ "../plugin_proxy/src/hks_plugin_adapter.cpp" ]
-
-    sources += [
-      "src/hks_upgrade_helper.c",
-      "src/hks_upgrade_key_accesser.c",
-    ]
-
-    if (non_rwlock_support) {
-      sources += [ "../hks_storage/src/hks_lock_lite.c" ]
-    } else {
-      sources += [ "../hks_storage/src/hks_lock.c" ]
-    }
-
     deps = [
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_util_standard_static",
-      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
       "//base/security/huks/services/huks_standard/huks_service/main/ha:libhuks_service_ha_static",
       "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
       "//base/security/huks/utils/list:libhuks_utils_list_static",
       "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
     ]
-
-    if (enable_hks_mock) {
-      deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_mock:libhuks_service_systemapi_mock_static" ]
-    } else {
-      deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static" ]
-    }
 
     cflags = [
       "-DHUKS_CHANGE_STORAGE_LEVEL_CONFIG=${huks_change_storage_level_config}",
@@ -103,18 +71,8 @@ if (os_level == "standard") {
     }
 
     deps += [
-      "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
-      "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hitrace_meter_wrapper:libhuks_utils_hitrace_meter_wrapper_static",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
     ]
-
-    if (huks_enable_upgrade_key_storage_secure_level) {
-      deps += [ "//base/security/huks/services/huks_standard/huks_service/main/upgrade/file_transfer:libhuks_upgrade_file_transfer_static" ]
-    }
-
-    if (enable_bundle_framework) {
-      deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms:libhuks_bms_systemapi_wrap_static" ]
-    }
 
     configs = [
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
