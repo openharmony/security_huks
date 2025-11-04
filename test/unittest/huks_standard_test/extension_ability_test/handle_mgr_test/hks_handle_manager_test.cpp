@@ -97,32 +97,32 @@ HWTEST_F(HandleManagerTest, HandleManagerTest003, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS);
 }
 
-// HWTEST_F(HandleManagerTest, HandleManagerTest004, TestSize.Level0)
-// {
-//     auto manager = HksRemoteHandleManager::GetInstanceWrapper();
-//     ASSERT_NE(manager, nullptr);
+HWTEST_F(HandleManagerTest, HandleManagerTest004, TestSize.Level0)
+{
+    auto manager = HksRemoteHandleManager::GetInstanceWrapper();
+    ASSERT_NE(manager, nullptr);
     
-//     ProviderInfo providerInfo;
-//     std::string newIndex;
+    ProviderInfo providerInfo;
+    std::string newIndex;
     
-//     int32_t ret = manager->ParseIndexAndProviderInfo("", providerInfo, newIndex);
-//     EXPECT_EQ(ret, HKS_ERROR_JSON_PARSE_FAILED);
+    int32_t ret = manager->ParseIndexAndProviderInfo("", providerInfo, newIndex);
+    EXPECT_EQ(ret, HKS_ERROR_JSON_PARSE_FAILED);
     
-//     ret = manager->ParseIndexAndProviderInfo("invalid json", providerInfo, newIndex);
-//     EXPECT_EQ(ret, HKS_ERROR_JSON_PARSE_FAILED);
+    ret = manager->ParseIndexAndProviderInfo("invalid json", providerInfo, newIndex);
+    EXPECT_EQ(ret, HKS_ERROR_JSON_PARSE_FAILED);
     
-//     std::string missingFields = R"({"originalIndex": "test"})";
-//     ret = manager->ParseIndexAndProviderInfo(missingFields, providerInfo, newIndex);
-//     EXPECT_EQ(ret, HKS_ERROR_JSON_MISSING_KEY);
+    std::string missingFields = R"({"originalIndex": "test"})";
+    ret = manager->ParseIndexAndProviderInfo(missingFields, providerInfo, newIndex);
+    EXPECT_EQ(ret, HKS_ERROR_JSON_MISSING_KEY);
     
-//     std::string emptyProviderInfo = R"({
-//         "providerName": "",
-//         "abilityName": "test_ability", 
-//         "bundleName": "test_bundle"
-//     })";
-//     ret = manager->ParseIndexAndProviderInfo(emptyProviderInfo, providerInfo, newIndex);
-//     EXPECT_EQ(ret, HKS_ERROR_JSON_INVALID_VALUE);
-// }
+    std::string emptyProviderInfo = R"({
+        "providerName": "",
+        "abilityName": "test_ability", 
+        "bundleName": "test_bundle"
+    })";
+    ret = manager->ParseIndexAndProviderInfo(emptyProviderInfo, providerInfo, newIndex);
+    EXPECT_EQ(ret, HKS_ERROR_JSON_INVALID_VALUE);
+}
 
 HWTEST_F(HandleManagerTest, HandleManagerTest005, TestSize.Level0)
 {
@@ -172,28 +172,28 @@ HWTEST_F(HandleManagerTest, HandleManagerTest005, TestSize.Level0)
     EXPECT_EQ(wrappedIndex1["index"].ToString().second, "cert_index_1");
 }
 
-// HWTEST_F(HandleManagerTest, HandleManagerTest006, TestSize.Level0)
-// {
-//     auto manager = HksRemoteHandleManager::GetInstanceWrapper();
-//     ASSERT_NE(manager, nullptr);
+HWTEST_F(HandleManagerTest, HandleManagerTest006, TestSize.Level0)
+{
+    auto manager = HksRemoteHandleManager::GetInstanceWrapper();
+    ASSERT_NE(manager, nullptr);
     
-//     ProviderInfo providerInfo;
-//     providerInfo.m_providerName = "test_provider";
+    ProviderInfo providerInfo;
+    providerInfo.m_providerName = "test_provider";
     
-//     CommJsonObject combinedArray = CommJsonObject::CreateArray();
+    CommJsonObject combinedArray = CommJsonObject::CreateArray();
     
-//     std::string emptyCertVec = "";
-//     int32_t ret = manager->MergeProviderCertificates(providerInfo, emptyCertVec, combinedArray);
-//     EXPECT_EQ(ret, HKS_ERROR_JSON_PARSE_FAILED);
+    std::string emptyCertVec = "";
+    int32_t ret = manager->MergeProviderCertificates(providerInfo, emptyCertVec, combinedArray);
+    EXPECT_EQ(ret, HKS_ERROR_JSON_PARSE_FAILED);
     
-//     std::string invalidJson = "invalid json";
-//     ret = manager->MergeProviderCertificates(providerInfo, invalidJson, combinedArray);
-//     EXPECT_EQ(ret, HKS_ERROR_JSON_PARSE_FAILED);
+    std::string invalidJson = "invalid json";
+    ret = manager->MergeProviderCertificates(providerInfo, invalidJson, combinedArray);
+    EXPECT_EQ(ret, HKS_ERROR_JSON_PARSE_FAILED);
     
-//     std::string nonArrayJson = R"({"key": "value"})";
-//     ret = manager->MergeProviderCertificates(providerInfo, nonArrayJson, combinedArray);
-//     EXPECT_EQ(ret, HKS_ERROR_JSON_PARSE_FAILED);
-// }
+    std::string nonArrayJson = R"({"key": "value"})";
+    ret = manager->MergeProviderCertificates(providerInfo, nonArrayJson, combinedArray);
+    EXPECT_EQ(ret, HKS_ERROR_JSON_PARSE_FAILED);
+}
 
 
 HWTEST_F(HandleManagerTest, HandleManagerTest007, TestSize.Level0)
