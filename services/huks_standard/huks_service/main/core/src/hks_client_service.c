@@ -1738,18 +1738,6 @@ static int32_t CheckBatchOperation(struct HksOperation *operation, const struct 
     return ret;
 }
 
-static int32_t ExecuteUpdate(const struct HksBlob *handle, struct HksParamSet *newParamSet,
-    const struct HksBlob *inData, struct HksBlob *outData, struct HksOperation *operation)
-{
-    int32_t ret = HuksAccessUpdate(handle, newParamSet, inData, outData);
-    IfNotSuccAppendHdiErrorInfo(ret);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HuksAccessUpdate fail, ret = %" LOG_PUBLIC "d", ret);
-        MarkAndDeleteOperation(&operation, handle);
-    }
-    return ret;
-}
-
 int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
 {
@@ -1788,7 +1776,12 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
         common.ret = HksCheckAcrossAccountsPermission(common.newParamSet, processInfo->userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "CheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", common.ret)
 
-        common.ret = ExecuteUpdate(handle, common.newParamSet, inData, outData, common.operation);
+        common.ret =  HuksAccessUpdate(handle, common.newParamSet, inData, outData);
+        IfNotSuccAppendHdiErrorInfo(common.ret);
+        if (common.ret != HKS_SUCCESS) {
+            HKS_LOG_E("HuksAccessUpdate fail, ret = %" LOG_PUBLIC "d", common.ret);
+            MarkAndDeleteOperation(&common.operation, handle);
+        }
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "update execution failed, ret = %" LOG_PUBLIC "d", common.ret);
     } while (0);
 #ifdef L2_STANDARD
