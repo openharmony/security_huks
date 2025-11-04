@@ -198,7 +198,6 @@ void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8
 
         outBlob.size = (uint32_t)sizeof(int32_t);
         outBlob.data = (uint8_t *)(&status);
-        
     } while (0);
 
     HksSendResponse(context, ret,
