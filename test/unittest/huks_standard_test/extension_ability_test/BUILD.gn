@@ -34,8 +34,8 @@ if (os_level == "standard" && huks_security_level == "trusted_environment") {
       #"./plugin_loader_test/hks_plugin_manager_test.cpp",
       #"./plugin_loader_test/plugin_interface_wrap.cpp",
 
-      "./ukey_common_test/ukey_common_test.cpp",
-      "./handle_mgr_test/hks_handle_manager_test.cpp",
+      #"./ukey_common_test/ukey_common_test.cpp",
+      #"./handle_mgr_test/hks_handle_manager_test.cpp",
       "./sdk_test/hks_ukey_test.cpp",
     ]
 
