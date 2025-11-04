@@ -64,6 +64,7 @@ public:
     virtual napi_status napi_create_typedarray(napi_env env, napi_typedarray_type type,
         size_t length, napi_value arraybuffer, size_t byte_offset, napi_value* result) = 0;
     virtual napi_status napi_create_bigint_uint64(napi_env env, uint64_t value, napi_value* result) = 0;
+    virtual napi_status napi_set_element(napi_env env, napi_value object, uint32_t index, napi_value value) = 0;
 public:
     static inline std::shared_ptr<Assistant> ins_ = nullptr;
 };
@@ -106,6 +107,7 @@ public:
     MOCK_METHOD6(napi_create_typedarray, napi_status(napi_env env, napi_typedarray_type type,
         size_t length, napi_value arraybuffer, size_t byte_offset, napi_value* result));
     MOCK_METHOD3(napi_create_bigint_uint64, napi_status(napi_env env, uint64_t value, napi_value* result));
+    MOCK_METHOD4(napi_set_element, napi_status(napi_env env, napi_value object, uint32_t index, napi_value value));
 };
 
 } // OHOS::Security::Huks
