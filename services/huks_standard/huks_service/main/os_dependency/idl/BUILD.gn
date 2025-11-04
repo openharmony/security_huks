@@ -108,7 +108,7 @@ if (os_level == "standard") {
   }
 } else {
   ohos_static_library("libhuks_service_idl_small_static") {
-    public_configs = [ ":huks_config" ]
+    public_configs = [ ":huks_config", ":idl_export_core_includes" ]
 
     include_dirs = [
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough",
