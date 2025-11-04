@@ -784,7 +784,7 @@ void GetSessionParams(const napi_env &env, const napi_value &funcResult,
     void *data;
     size_t byte_length;
     status = napi_get_arraybuffer_info(env, nativeArray, &data, &byte_length);
-    if (status != napi_ok) {
+    if (status != napi_ok || data == nullptr) {
         LOGE("get arraybuffer info failed, status:%d", status);
         return;
     }
