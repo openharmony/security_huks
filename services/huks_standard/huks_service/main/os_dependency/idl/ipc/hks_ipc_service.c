@@ -197,16 +197,8 @@ void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8
         HKS_IF_NOT_SUCC_LOGE(ret, "GetUkeyPinAuthState: adapter ret=%" LOG_PUBLIC "d", ret);
 
         outBlob.size = (uint32_t)sizeof(int32_t);
-        outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
-        if (outBlob.data == NULL) {
-            ret = HKS_ERROR_MALLOC_FAIL;
-            break;
-        }
-        if (memcpy_s(outBlob.data, outBlob.size, &status, sizeof(int32_t)) != EOK) {
-            ret = HKS_ERROR_BAD_STATE;
-            HKS_LOG_E("GetUkeyPinAuthState: memcpy fail");
-            break;
-        }
+        outBlob.data = (uint8_t *)(&status);
+        
     } while (0);
 
     HksSendResponse(context, ret,
