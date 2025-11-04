@@ -256,3 +256,11 @@ napi_status napi_create_bigint_uint64(napi_env env, uint64_t value, napi_value* 
     }
     return OHOS::Security::Huks::Assistant::ins_->napi_create_bigint_uint64(env, value, result);
 }
+
+napi_status napi_set_element(napi_env env, napi_value object, uint32_t index, napi_value value)
+{
+    if (OHOS::Security::Huks::Assistant::ins_ == nullptr) {
+        return napi_invalid_arg;
+    }
+    return OHOS::Security::Huks::Assistant::ins_->napi_set_element(env, object, index, value);
+}
