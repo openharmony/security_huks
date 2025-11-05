@@ -283,3 +283,11 @@ napi_status napi_get_typedarray_info(napi_env env, napi_value typedarray,
     return OHOS::Security::Huks::Assistant::ins_->napi_get_typedarray_info(env, typedarray,
         type, length, data, arraybuffer, byte_offset);
 }
+
+napi_status napi_get_value_uint32(napi_env env, napi_value value, uint32_t* result)
+{
+    if (OHOS::Security::Huks::Assistant::ins_ == nullptr) {
+        return napi_invalid_arg;
+    }
+    return OHOS::Security::Huks::Assistant::ins_->napi_get_value_uint32(env, value, result);
+}
