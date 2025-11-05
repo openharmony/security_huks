@@ -32,7 +32,7 @@ using namespace testing::ext;
 const int ARG_INDEX_FIRST = 1;
 const int ARG_INDEX_SECOND = 2;
 const int ARG_INDEX_THIRD = 3;
-// const int ARG_INDEX_FOUR = 4;
+const int ARG_INDEX_FOUR = 4;
 const int ARG_INDEX_FIFTH = 5;
 
 class JsCryptoExtAbilityTest : public testing::Test {
@@ -708,7 +708,8 @@ HWTEST_F(JsCryptoExtAbilityTest, GetStringValue_0000, testing::ext::TestSize.Lev
     for (auto i = 0; i < MAX_CERT_SIZE * 2; ++i) {
         result += "0";
     }
-    EXPECT_CALL(*insMoc, napi_get_value_string_utf8(_, _, _, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_value_string_utf8(_, _, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FOUR>(MAX_CERT_SIZE * 2), Return(napi_ok)));
     EXPECT_EQ(GetStringValue(env, value, result), HKS_ERROR_EXT_EXCEED_MAX_SIZE);
 }
 
@@ -756,6 +757,65 @@ HWTEST_F(JsCryptoExtAbilityTest, GetHksCertInfoValue_0000, testing::ext::TestSiz
     EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _)).WillOnce(Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_get_value_string_utf8(_, _, _, _, _))
         .WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok));
-    EXPECT_EQ(GetHksCertInfoValue(env, value, certInfo), HKS_ERROR_EXT_GET_VALUE_FAILED);
+    EXPECT_EQ(GetHksCertInfoValue(env, value, certInfo), napi_invalid_arg);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, GetHksCertInfoValue_0001, testing::ext::TestSize.Level0)
+{
+    HksCertInfo certInfo;
+    napi_value value = nullptr;
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+        .WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_value_string_utf8(_, _, _, _, _))
+        .WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_typedarray_info(_, _, _, _, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(GetHksCertInfoValue(env, value, certInfo), napi_invalid_arg);
+
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+        .WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_value_string_utf8(_, _, _, _, _))
+        .WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_typedarray_info(_, _, _, _, _, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_arraybuffer_info(_, _, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_EQ(GetHksCertInfoValue(env, value, certInfo), napi_ok);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, GetHksParamsfromValue_0000, testing::ext::TestSize.Level0)
+{
+    HksParam param;
+    napi_value value = nullptr;
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _)).WillOnce(testing::Return(napi_invalid_arg));
+    EXPECT_EQ(GetHksParamsfromValue(env, value, param), napi_invalid_arg);
+
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _)).WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_value_uint32(_, _, _)).WillOnce(testing::Return(napi_invalid_arg));
+    EXPECT_EQ(GetHksParamsfromValue(env, value, param), napi_invalid_arg);
+    
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+        .WillOnce(testing::Return(napi_ok)).WillOnce(testing::Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_get_value_uint32(_, _, _)).WillOnce(testing::Return(napi_ok));
+    EXPECT_EQ(GetHksParamsfromValue(env, value, param), napi_invalid_arg);
+
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+        .WillOnce(testing::Return(napi_ok)).WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_value_uint32(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(HKS_TAG_TYPE_INVALID), Return(napi_ok)));
+    EXPECT_EQ(GetHksParamsfromValue(env, value, param), napi_ok);
+
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+        .WillOnce(testing::Return(napi_ok)).WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_value_uint32(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(HKS_TAG_TYPE_INT), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _)).WillOnce(testing::Return(napi_invalid_arg));
+    EXPECT_EQ(GetHksParamsfromValue(env, value, param), napi_invalid_arg);
+
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+        .WillOnce(testing::Return(napi_ok)).WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_value_uint32(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(HKS_TAG_TYPE_INT), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _)).WillOnce(testing::Return(napi_ok));
+    EXPECT_EQ(GetHksParamsfromValue(env, value, param), napi_ok);
 }
 }

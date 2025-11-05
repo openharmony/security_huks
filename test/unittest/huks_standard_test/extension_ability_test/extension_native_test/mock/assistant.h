@@ -69,6 +69,7 @@ public:
         napi_env env, napi_value arraybuffer, void** data, size_t* byte_length) = 0;
     virtual napi_status napi_get_typedarray_info(napi_env env, napi_value typedarray,
         napi_typedarray_type* type, size_t* length, void** data, napi_value* arraybuffer, size_t* byte_offset) = 0;
+    virtual napi_status napi_get_value_uint32(napi_env env, napi_value value, uint32_t* result) = 0;
 public:
     static inline std::shared_ptr<Assistant> ins_ = nullptr;
 };
@@ -116,6 +117,7 @@ public:
         napi_status(napi_env env, napi_value arraybuffer, void** data, size_t* byte_length));
     MOCK_METHOD7(napi_get_typedarray_info, napi_status(napi_env env, napi_value typedarray,
         napi_typedarray_type* type, size_t* length, void** data, napi_value* arraybuffer, size_t* byte_offset));
+    MOCK_METHOD3(napi_get_value_uint32, napi_status(napi_env env, napi_value value, uint32_t* result));
 };
 
 } // OHOS::Security::Huks
