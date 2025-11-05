@@ -291,3 +291,11 @@ napi_status napi_get_value_uint32(napi_env env, napi_value value, uint32_t* resu
     }
     return OHOS::Security::Huks::Assistant::ins_->napi_get_value_uint32(env, value, result);
 }
+
+napi_status napi_get_value_bigint_uint64(napi_env env, napi_value value, uint64_t* result, bool* lossless)
+{
+    if (OHOS::Security::Huks::Assistant::ins_ == nullptr) {
+        return napi_invalid_arg;
+    }
+    return OHOS::Security::Huks::Assistant::ins_->napi_get_value_bigint_uint64(env, value, result, lossless);
+}
