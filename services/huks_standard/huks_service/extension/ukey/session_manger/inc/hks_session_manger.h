@@ -22,6 +22,7 @@
 #include "singleton.h"
 #include <memory>
 #include <shared_mutex>
+#include <stdint.h>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -32,9 +33,15 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
+
+struct HandleInfo {
+    std::string m_skfSessionHandle;
+    ProviderInfo m_providerInfo;
+    uint32_t m_uid;
+};
+
 class HksSessionManager : private OHOS::DelayedSingleton<HksSessionManager> {
 public:
-    std::pair<int32_t, uint32_t> GenRandomUint32();
     static std::shared_ptr<HksSessionManager> GetInstanceWrapper();
     static void ReleaseInstance();
     int32_t ExtensionInitSession(const HksProcessInfo &processInfo,
@@ -45,8 +52,12 @@ public:
     int32_t ExtensionFinishSession(const HksProcessInfo &processInfo,
         const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
         std::vector<uint8_t> &outData);
+    int32_t ExtensionAbortSession(const HksProcessInfo &processInfo,
+        const uint32_t &handle, const CppParamSet &paramSet);
 private:
-    OHOS::SafeMap<uint32_t, std::pair<ProviderInfo, std::string>> m_handlers{};
+    int32_t HksGetHandleInfo(const HksProcessInfo &processInfo, const uint32_t &handle, HandleInfo &infos);
+    std::pair<int32_t, uint32_t> GenRandomUint32();
+    OHOS::SafeMap<uint32_t, HandleInfo> m_handlers{};
 };
 }
 }

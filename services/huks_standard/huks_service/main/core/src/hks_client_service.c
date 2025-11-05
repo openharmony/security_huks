@@ -1901,9 +1901,16 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
     traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
     struct HksParamSet *newParamSet = NULL;
-    struct HksOperation *operation;
+    struct HksOperation *operation = NULL;
     int32_t ret;
     do {
+#ifdef L2_STANDARD
+        if (HksCheckIsUkeyOperation(paramSet) == HKS_SUCCESS) {
+            ret = HksServiceOnUkeyAbortSession(processInfo, handle, paramSet);
+            HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyFinishSession failed, ret = %" LOG_PUBLIC "d", ret)
+            break;
+        }
+#endif
         operation = QueryOperationAndMarkInUse(processInfo, handle);
         if (operation == NULL) {
             HKS_LOG_E("operationHandle is not exist or being busy");
