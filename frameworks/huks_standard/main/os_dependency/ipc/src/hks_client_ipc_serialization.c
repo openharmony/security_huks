@@ -644,7 +644,7 @@ int32_t HksRemotePropertyUnpackFromService(const struct HksBlob *srcBlob, struct
     struct HksParamSet *paramSetView = NULL;
 
     if (returnResult != 0) {
-        ret = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR;
+        ret = HKS_ERROR_REMOTE_OPERATION_FAILED;
         HKS_LOG_E("remote property get failed, returnResult=%" LOG_PUBLIC "d", returnResult);
     }
 
