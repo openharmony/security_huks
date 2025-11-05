@@ -176,12 +176,14 @@ static napi_value CreateAsyncWork(napi_env env, napi_callback_info info, std::un
     }
 
     napi_value promise = nullptr;
+    napi_status status;
     if (context->callback == nullptr) {
-        NAPI_CALL(env, napi_create_promise(env, &context->deferred, &promise));
+        status = napi_create_promise(env, &context->deferred, &promise);
+        NAPI_THROW(env, status != napi_ok, HKS_ERROR_BAD_STATE, "could not create promise");
     }
 
     napi_value resourceName = nullptr;
-    napi_status status = napi_create_string_utf8(env, resource, NAPI_AUTO_LENGTH, &resourceName);
+    status = napi_create_string_utf8(env, resource, NAPI_AUTO_LENGTH, &resourceName);
     NAPI_THROW(env, status != napi_ok, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get string");
 
     status = napi_create_async_work(

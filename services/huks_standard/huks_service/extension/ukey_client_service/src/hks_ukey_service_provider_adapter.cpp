@@ -89,7 +89,7 @@ int32_t HksIpcCloseRemKeyHandleAdapter(const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet)
 {
     int32_t ret = HksIpcCheckBlob(resourceId, 1, HKS_EXT_MAX_RESOURCE_ID_LEN);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcCreateRemKeyHandleAdapter invalid resourceId blob")
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcCloseRemKeyHandleAdapter invalid resourceId blob")
 
     std::string cppresourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
     CppParamSet cppParamSet(paramSet);
