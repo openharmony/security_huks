@@ -16,6 +16,8 @@
 #include "hks_plugin_lifecycle_manager.h"
 #include "hks_plugin_loader.h"
 
+#define NO_EXTENSION 0
+#define ONE_EXTENSION 1
 namespace OHOS {
 namespace Security {
 namespace Huks {
@@ -36,7 +38,7 @@ int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &in
     int32_t ret;
     std::unique_lock<std::mutex> lock(soMutex);
     int32_t preCount = m_refCount.fetch_add(1, std::memory_order_acq_rel);
-    if (preCount == 0) {
+    if (preCount == NO_EXTENSION) {
         auto pluginLoader = HuksPluginLoader::GetInstanceWrapper();
         HKS_IF_TRUE_LOGE_RETURN(pluginLoader == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get pluginLoader instance.")
         ret = pluginLoader->LoadPlugins(info, providerName, paramSet);
@@ -63,6 +65,10 @@ int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &
 {
     std::unique_lock<std::mutex> lock(soMutex);
     int32_t preCount = m_refCount.fetch_sub(1, std::memory_order_acq_rel);
+    if (preCount < NO_EXTENSION) {
+        HKJS_LOG_E("illegal unregister, %{public}s not exist", providerName.c_str());
+        return HKS_ERROR_REPEAT_UNREGISTER;
+    }
     auto libInstance = HuksLibInterface::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(libInstance == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")
     int32_t ret = libInstance->OnUnRegistProvider(info, providerName, paramSet);
@@ -72,7 +78,7 @@ int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &
         return HKS_ERROR_CLOSE_PROVIDER_FAIL;
     }
 
-    if (preCount != 1) {
+    if (preCount != ONE_EXTENSION) {
         HKS_LOG_I("don't need close lib, refCount = %{public}d", preCount);
         return HKS_SUCCESS;
     }
