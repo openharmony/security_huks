@@ -69,6 +69,7 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
         "Fail to get provider info. providerName: %" LOG_PUBLIC "s. ret: %" LOG_PUBLIC "d", providerName.c_str(), ret)
 
     std::shared_ptr<HksExtAbilityConnectInfo> connectInfo{nullptr};
+    std::lock_guard<std::mutex> lock(m_registerMutex);
     if (!m_providerMap.Find(providerInfo, connectInfo)) {
         AAFwk::Want want{};
         want.SetElementName(providerInfo.m_bundleName, providerInfo.m_abilityName);
@@ -190,7 +191,6 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
         "Fail to get provider info. providerName: %" LOG_PUBLIC "s", providerName.c_str())
 
     std::vector<std::shared_ptr<HksExtAbilityConnectInfo>> connectionInfos;
-    std::lock_guard<std::mutex> lock(m_registerMutex);
     ret = HapGetAllConnectInfoByProviderName(processInfo, providerName, connectionInfos);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
         "Fail to get provider infos. providerName: %" LOG_PUBLIC "s. ret: %" LOG_PUBLIC "d", providerName.c_str(), ret)
