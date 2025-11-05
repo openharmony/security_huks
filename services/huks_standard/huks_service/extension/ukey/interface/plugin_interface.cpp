@@ -170,8 +170,20 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnFinishSe
     return ret;
 }
 
-ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksClearUkeyPinAuthState(const HksProcessInfo &processInfo,
-    const std::string &index))
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnAbortSession(const HksProcessInfo &processInfo,
+    const uint32_t &handle, const CppParamSet &paramSet))
+{
+    int32_t ret = HKS_SUCCESS;
+    HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null");
+    ret = sessionMgr->ExtensionAbortSession(processInfo, handle, paramSet);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
+    return ret;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnClearUkeyPinAuthState(
+    const HksProcessInfo &processInfo, const std::string &index))
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
@@ -184,8 +196,9 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksClearUkeyPinAuthSta
     return ret;
 }
 
-ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksGetRemoteProperty(const HksProcessInfo &processInfo,
-    const std::string &index, const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams))
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnGetRemoteProperty(
+    const HksProcessInfo &processInfo, const std::string &index, const std::string &propertyId,
+    const CppParamSet &paramSet, CppParamSet &outParams))
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);

@@ -36,6 +36,9 @@ int32_t HksServiceOnUkeyUpdateSession(const struct HksProcessInfo *processInfo, 
 int32_t HksServiceOnUkeyFinishSession(const struct HksProcessInfo *processInfo, const struct HksBlob *handle,
     const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData);
 
+int32_t HksServiceOnUkeyAbortSession(const struct HksProcessInfo *processInfo, const struct HksBlob *handle,
+    const struct HksParamSet *paramSet);
+
 #ifdef __cplusplus
 }
 #endif

@@ -43,8 +43,9 @@ enum class PluginMethodEnum {
     FUNC_ON_INIT_SESSION,
     FUNC_ON_UPDATE_SESSION,
     FUNC_ON_FINISH_SESSION,
+    FUNC_ON_ABORT_SESSION,
 
-    COUNT = 14,
+    COUNT = 15,
 };
 
 using OnRegisterProviderFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &providerName,
@@ -75,6 +76,8 @@ using OnUpdateSessionFunc = int32_t (*)(const HksProcessInfo &processInfo, const
     const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
 using OnFinishSessionFunc = int32_t (*)(const HksProcessInfo &processInfo, const uint32_t &handle,
     const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
+using OnAbortSessionFunc = int32_t (*)(const HksProcessInfo &processInfo, const uint32_t &handle,
+    const CppParamSet &paramSet);
 }
 }
 }

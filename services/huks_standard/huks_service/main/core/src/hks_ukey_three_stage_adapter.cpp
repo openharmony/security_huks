@@ -27,6 +27,8 @@
 #include <vector>
 #include "hks_template.h"
 
+constexpr uint32_t MAX_INDEX_SIZE = 512;
+
 int32_t HksCheckIsUkeyOperation(const struct HksParamSet *paramSet)
 {
     int32_t ret = HksCheckParamSetValidity(paramSet);
@@ -46,13 +48,15 @@ int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, co
     int32_t ret = HksCheckBlob2(&processInfo->processName, index);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "Hks check processName or index fail. ret: %" LOG_PUBLIC "d", ret)
 
+    HKS_IF_TRUE_LOGE_RETURN(index->size > MAX_INDEX_SIZE, HKS_ERROR_INVALID_ARGUMENT,
+        "index size is too large. size: %" LOG_PUBLIC "d", index->size)
     std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
     CppParamSet cppParamSet(inParamSet);
     uint32_t handleU32 = 0;
 
     auto libInterface = OHOS::Security::Huks::HuksLibInterface::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get lib interface instance.")
-    
+
     ret = libInterface->OnInitSession(*processInfo, cppIndex, cppParamSet, handleU32);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnInitSession fail")
 
@@ -77,9 +81,9 @@ int32_t HksServiceOnUkeyUpdateSession(const struct HksProcessInfo *processInfo, 
 {
     uint64_t handleU64 = 0;
     if (handle != nullptr && handle->size == sizeof(uint64_t)) {
-        if (memcpy_s(&handleU64, sizeof(handleU64), handle->data, handle->size) != EOK) {
-            return HKS_ERROR_INSUFFICIENT_MEMORY;
-        }
+        auto mcpRet = memcpy_s(&handleU64, sizeof(handleU64), handle->data, handle->size);
+        HKS_IF_TRUE_LOGE_RETURN(mcpRet != EOK, HKS_ERROR_INSUFFICIENT_MEMORY,
+        "memcpy_s faild. ret = %" LOG_PUBLIC "d", mcpRet)
     }
 
     uint32_t handleU32 = static_cast<uint32_t>(handleU64);
@@ -118,9 +122,9 @@ int32_t HksServiceOnUkeyFinishSession(const struct HksProcessInfo *processInfo, 
 {
     uint64_t handleU64 = 0;
     if (handle != nullptr && handle->size == sizeof(uint64_t)) {
-        if (memcpy_s(&handleU64, sizeof(handleU64), handle->data, handle->size) != EOK) {
-            return HKS_ERROR_INSUFFICIENT_MEMORY;
-        }
+        auto mcpRet = memcpy_s(&handleU64, sizeof(handleU64), handle->data, handle->size);
+        HKS_IF_TRUE_LOGE_RETURN(mcpRet != EOK, HKS_ERROR_INSUFFICIENT_MEMORY,
+        "memcpy_s faild. ret = %" LOG_PUBLIC "d", mcpRet)
     }
     uint32_t handleU32 = static_cast<uint32_t>(handleU64);
     CppParamSet cppParamSet(paramSet);
@@ -150,5 +154,23 @@ int32_t HksServiceOnUkeyFinishSession(const struct HksProcessInfo *processInfo, 
         HKS_LOG_E("memcpy in HksServiceOnUkeyFinishSession fail. ret: %" LOG_PUBLIC "d", ret);
         return HKS_ERROR_COPY_FAIL;
     }
+    return ret;
+}
+
+int32_t HksServiceOnUkeyAbortSession(const struct HksProcessInfo *processInfo, const struct HksBlob *handle,
+    const struct HksParamSet *paramSet)
+{
+    uint64_t handleU64 = 0;
+    if (handle != nullptr && handle->size == sizeof(uint64_t)) {
+        auto mcpRet = memcpy_s(&handleU64, sizeof(handleU64), handle->data, handle->size);
+        HKS_IF_TRUE_LOGE_RETURN(mcpRet != EOK, HKS_ERROR_INSUFFICIENT_MEMORY,
+            "memcpy_s faild. ret = %" LOG_PUBLIC "d", mcpRet)
+    }
+    auto handleU32 = static_cast<uint32_t>(handleU64);
+    auto libInterface = OHOS::Security::Huks::HuksLibInterface::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get lib interface instance.")
+    CppParamSet cppParamSet(paramSet);
+    int32_t ret = libInterface->OnAbortSession(*processInfo, handleU32, cppParamSet);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnAbortSession fail. ret = %" LOG_PUBLIC "d", ret)
     return ret;
 }
