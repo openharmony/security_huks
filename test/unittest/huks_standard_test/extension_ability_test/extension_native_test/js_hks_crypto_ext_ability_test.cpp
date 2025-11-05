@@ -446,10 +446,10 @@ HWTEST_F(JsCryptoExtAbilityTest, BuildHandleInfoParam_0000, testing::ext::TestSi
 
     EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_create_object(_, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)))
+        .WillOnce(Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_create_array(_, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
-    EXPECT_CALL(*insMoc, napi_create_object(_, _)).WillOnce(Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_create_uint32(_, _, _)).WillOnce(Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_set_named_property(_, _, _, _))
         .WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok));
@@ -491,10 +491,10 @@ HWTEST_F(JsCryptoExtAbilityTest, BuildIndexInfoParam_0000, testing::ext::TestSiz
     
     EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_create_object(_, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)))
+        .WillOnce(Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_create_array(_, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
-    EXPECT_CALL(*insMoc, napi_create_object(_, _)).WillOnce(Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_create_uint32(_, _, _)).WillOnce(Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_set_named_property(_, _, _, _))
         .WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok));
@@ -502,5 +502,78 @@ HWTEST_F(JsCryptoExtAbilityTest, BuildIndexInfoParam_0000, testing::ext::TestSiz
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
     EXPECT_CALL(*insMoc, napi_set_element(_, _, _, _)).WillOnce(Return(napi_ok));
     EXPECT_TRUE(BuildIndexInfoParam(env, param, &argv, argc));
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, BuildIndexInfoParamWithHuksOption_0000, testing::ext::TestSize.Level0)
+{
+    napi_value rslt = 0;
+    std::string pinStr = "123456";
+    std::vector<std::uint8_t> u8Vec(pinStr.begin(), pinStr.end());
+    u8Vec.push_back('\0');
+    struct HksParam tmpParams = { .tag = HKS_TAG_TYPE_INT,
+        .blob = { .size = u8Vec.size(), .data = u8Vec.data() }};
+    std::vector<HksParam> paramsVec;
+    paramsVec.emplace_back(tmpParams);
+    CppParamSet paramSet(paramsVec);
+    IndexInfoParam param = { "test", paramSet };
+    napi_value argv = 0;
+    size_t argc;
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_FALSE(BuildIndexInfoParamWithHuksOption(env, param, &argv, argc));
+
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_object(_, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_FALSE(BuildIndexInfoParamWithHuksOption(env, param, &argv, argc));
+
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_object(_, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_FALSE(BuildIndexInfoParamWithHuksOption(env, param, &argv, argc));
+
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_TRUE(BuildIndexInfoParamWithHuksOption(env, {}, &argv, argc));
+    
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_object(_, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)))
+        .WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_array(_, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_uint32(_, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_set_named_property(_, _, _, _))
+        .WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_int32(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_set_element(_, _, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_TRUE(BuildIndexInfoParamWithHuksOption(env, param, &argv, argc));
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, BuildHandleWithInData_0000, testing::ext::TestSize.Level0)
+{
+    napi_value rslt = 0;
+    std::string pinStr = "123456";
+    std::vector<std::uint8_t> u8Vec(pinStr.begin(), pinStr.end());
+    u8Vec.push_back('\0');
+    struct HksParam tmpParams = { .tag = HKS_TAG_TYPE_INT,
+        .blob = { .size = u8Vec.size(), .data = u8Vec.data() }};
+    std::vector<HksParam> paramsVec;
+    paramsVec.emplace_back(tmpParams);
+    CppParamSet paramSet(paramsVec);
+    HandleInfoParam param = { "test", paramSet };
+    napi_value argv = 0;
+    size_t argc;
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_FALSE(BuildHandleWithInData(env, param, u8Vec, &argv, argc));
+
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_object(_, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_FALSE(BuildHandleWithInData(env, param, u8Vec, &argv, argc));
+
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_object(_, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_FALSE(BuildHandleWithInData(env, param, u8Vec, &argv, argc));
 }
 }
