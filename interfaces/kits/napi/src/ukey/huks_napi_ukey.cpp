@@ -121,6 +121,8 @@ napi_value ParseString(napi_env env, napi_value object, std::vector<uint8_t> &st
     NAPI_THROW(env, status != napi_ok, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get string");
     NAPI_THROW(env, result != length, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "string length mismatch");
 
+    // remove '\0' added by napi_get_value_string_utf8
+    str.pop_back();
     return GetInt32(env, 0);
 }
 

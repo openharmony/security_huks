@@ -191,7 +191,8 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
         "Fail to get provider info. providerName: %" LOG_PUBLIC "s", providerName.c_str())
 
     std::vector<std::shared_ptr<HksExtAbilityConnectInfo>> connectionInfos;
-    ret = HapGetAllConnectInfoByProviderName(processInfo, providerName, connectionInfos);
+    std::lock_guard<std::mutex> lock(m_registerMutex);
+    ret = HksHapGetConnectInfos(processInfo, providerName, paramSet, connectionInfos);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
         "Fail to get provider infos. providerName: %" LOG_PUBLIC "s. ret: %" LOG_PUBLIC "d", providerName.c_str(), ret)
     HKS_IF_TRUE_LOGE_RETURN(connectionInfos.empty(), HKS_ERROR_NOT_EXIST,
