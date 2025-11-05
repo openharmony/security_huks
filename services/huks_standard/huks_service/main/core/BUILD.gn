@@ -126,7 +126,6 @@ if (os_level == "standard") {
     deps += [
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hitrace_meter_wrapper:libhuks_utils_hitrace_meter_wrapper_static",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
     ]
 
     if (huks_enable_upgrade_key_storage_secure_level) {
