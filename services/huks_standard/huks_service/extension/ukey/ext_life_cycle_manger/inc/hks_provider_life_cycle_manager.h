@@ -40,6 +40,8 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 
+constexpr int32_t HKS_MAX_PROVIDER_NUM = 10;
+constexpr int32_t MAX_ABILITY_NAME_LEN = 128;
 class ProviderInfo {
 public:
     std::string m_providerName{};

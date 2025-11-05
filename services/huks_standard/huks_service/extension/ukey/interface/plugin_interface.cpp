@@ -47,8 +47,14 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegist
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
 
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
+    HKS_IF_NULL_LOGE_RETURN(handleMgr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
     ret = handleMgr->ClearRemoteHandleMap();
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "clear index map fail");
+
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    HKS_IF_NULL_LOGE_RETURN(sessionMgr, HKS_ERROR_NULL_POINTER, "sessionMgr is null")
+    auto retBool = sessionMgr->HksClearHandle(processInfo, paramSet);
+    HKS_IF_TRUE_LOGE_RETURN(!retBool, ret, "clear handle map fail");
     return ret;
 }
 

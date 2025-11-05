@@ -1776,7 +1776,7 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
         common.ret = HksCheckAcrossAccountsPermission(common.newParamSet, processInfo->userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "CheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", common.ret)
 
-        common.ret =  HuksAccessUpdate(handle, common.newParamSet, inData, outData);
+        common.ret = HuksAccessUpdate(handle, common.newParamSet, inData, outData);
         IfNotSuccAppendHdiErrorInfo(common.ret);
         if (common.ret != HKS_SUCCESS) {
             HKS_LOG_E("HuksAccessUpdate fail, ret = %" LOG_PUBLIC "d", common.ret);

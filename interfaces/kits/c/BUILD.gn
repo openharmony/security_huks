@@ -110,7 +110,10 @@ ohos_shared_library("huks_external_crypto") {
     "-Werror",
   ]
 
-  innerapi_tags = [ "platformsdk" ]
+  innerapi_tags = [
+    "ndk",
+    "platformsdk",
+  ]
   part_name = "huks"
   subsystem_name = "security"
 }
