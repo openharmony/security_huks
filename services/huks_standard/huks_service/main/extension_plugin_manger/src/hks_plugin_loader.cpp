@@ -87,6 +87,7 @@ int32_t HuksPluginLoader::UnLoadPlugins(const struct HksProcessInfo &info, const
     m_pluginProviderMap.Clear();
     dlclose(m_pluginHandle);
     m_pluginHandle = nullptr;
+    HKS_LOG_I("lib close success!");
     return HKS_SUCCESS;
 }
 

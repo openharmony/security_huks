@@ -54,7 +54,7 @@ int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &in
     ret = libInstance->OnRegistProvider(info, providerName, paramSet);
     if (ret != HKS_SUCCESS) {
         m_refCount.fetch_sub(1, std::memory_order_acq_rel);
-        HKS_LOG_E("regist provider method in plugin laoder is fail");
+        HKS_LOG_E("regist provider method in plugin loader is fail");
         return HKS_ERROR_EXEC_FUNC_FAIL;
     }
     return ret;
@@ -66,8 +66,8 @@ int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &
     std::unique_lock<std::mutex> lock(soMutex);
     int32_t preCount = m_refCount.fetch_sub(1, std::memory_order_acq_rel);
     if (preCount < NO_EXTENSION) {
-        HKJS_LOG_E("illegal unregister, %{public}s not exist", providerName.c_str());
-        return HKS_ERROR_REPEAT_UNREGISTER;
+        HKS_LOG_E("lib has closed!");
+        return HKS_ERROR_LIB_REPEAT_CLOSE;
     }
     auto libInstance = HuksLibInterface::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(libInstance == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")
