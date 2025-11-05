@@ -34,8 +34,8 @@ public:
     virtual int Int() = 0;
 public:
     virtual napi_status napi_get_uv_event_loop(napi_env, struct uv_loop_s**) = 0;
-    virtual napi_status napi_call_function(napi_env, napi_value, napi_value, size_t, const napi_value*, napi_value*)
-        = 0;
+    virtual napi_status napi_call_function(
+        napi_env, napi_value, napi_value, size_t, const napi_value*, napi_value*) = 0;
     virtual napi_status napi_get_reference_value(napi_env, napi_ref, napi_value*) = 0;
     virtual napi_status napi_get_named_property(napi_env, napi_value, const char*, napi_value*) = 0;
     virtual napi_status napi_send_event(napi_env, const std::function<void()>&, napi_event_priority) = 0;
@@ -65,6 +65,10 @@ public:
         size_t length, napi_value arraybuffer, size_t byte_offset, napi_value* result) = 0;
     virtual napi_status napi_create_bigint_uint64(napi_env env, uint64_t value, napi_value* result) = 0;
     virtual napi_status napi_set_element(napi_env env, napi_value object, uint32_t index, napi_value value) = 0;
+    virtual napi_status napi_get_arraybuffer_info(
+        napi_env env, napi_value arraybuffer, void** data, size_t* byte_length) = 0;
+    virtual napi_status napi_get_typedarray_info(napi_env env, napi_value typedarray,
+        napi_typedarray_type* type, size_t* length, void** data, napi_value* arraybuffer, size_t* byte_offset) = 0;
 public:
     static inline std::shared_ptr<Assistant> ins_ = nullptr;
 };
@@ -108,6 +112,10 @@ public:
         size_t length, napi_value arraybuffer, size_t byte_offset, napi_value* result));
     MOCK_METHOD3(napi_create_bigint_uint64, napi_status(napi_env env, uint64_t value, napi_value* result));
     MOCK_METHOD4(napi_set_element, napi_status(napi_env env, napi_value object, uint32_t index, napi_value value));
+    MOCK_METHOD4(napi_get_arraybuffer_info,
+        napi_status(napi_env env, napi_value arraybuffer, void** data, size_t* byte_length));
+    MOCK_METHOD7(napi_get_typedarray_info, napi_status(napi_env env, napi_value typedarray,
+        napi_typedarray_type* type, size_t* length, void** data, napi_value* arraybuffer, size_t* byte_offset));
 };
 
 } // OHOS::Security::Huks

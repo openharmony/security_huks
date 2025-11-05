@@ -264,3 +264,22 @@ napi_status napi_set_element(napi_env env, napi_value object, uint32_t index, na
     }
     return OHOS::Security::Huks::Assistant::ins_->napi_set_element(env, object, index, value);
 }
+
+napi_status napi_get_arraybuffer_info(
+    napi_env env, napi_value arraybuffer, void** data, size_t* byte_length)
+{
+    if (OHOS::Security::Huks::Assistant::ins_ == nullptr) {
+        return napi_invalid_arg;
+    }
+    return OHOS::Security::Huks::Assistant::ins_->napi_get_arraybuffer_info(env, arraybuffer, data, byte_length);
+}
+
+napi_status napi_get_typedarray_info(napi_env env, napi_value typedarray,
+    napi_typedarray_type* type, size_t* length, void** data, napi_value* arraybuffer, size_t* byte_offset)
+{
+    if (OHOS::Security::Huks::Assistant::ins_ == nullptr) {
+        return napi_invalid_arg;
+    }
+    return OHOS::Security::Huks::Assistant::ins_->napi_get_typedarray_info(env, typedarray,
+        type, length, data, arraybuffer, byte_offset);
+}
