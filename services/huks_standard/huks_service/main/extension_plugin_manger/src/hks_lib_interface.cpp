@@ -65,8 +65,8 @@ ENABLE_CFI(int32_t HuksLibInterface::OnUnRegistProvider(const HksProcessInfo &pr
     return HKS_SUCCESS;
 }
 
-ENABLE_CFI(int32_t HuksLibInterface::OnCreateRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
-    const CppParamSet &paramSet, std::string &handle))
+ENABLE_CFI(int32_t HuksLibInterface::OnCreateRemoteKeyHandle(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, std::string &handle))
 {
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_CREATE_REMOTE_KEY_HANDLE, funcPtr);
@@ -121,7 +121,8 @@ ENABLE_CFI(int32_t HuksLibInterface::OnGetVerifyPinStatus(const HksProcessInfo &
     return HKS_SUCCESS;
 }
 
-ENABLE_CFI(int32_t HuksLibInterface::OnClearUkeyPinAuthStatus(const HksProcessInfo &processInfo, const std::string &index))
+ENABLE_CFI(int32_t HuksLibInterface::OnClearUkeyPinAuthStatus(const HksProcessInfo &processInfo,
+    const std::string &index))
 {
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_CLEAR_PIN_STATUS, funcPtr);
