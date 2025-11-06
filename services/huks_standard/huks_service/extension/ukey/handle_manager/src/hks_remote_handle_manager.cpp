@@ -264,9 +264,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     
     auto ipccode = proxy->AuthUkeyPin(handle, paramSet, ret, authState, retryCnt);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    HKS_IF_TRUE_LOGE_RETURN(retryCnt > 0, HKS_SUCCESS, "AuthUkeyPin failed: %" LOG_PUBLIC "d", ret)
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
-            "Remote verify pin failed: %" LOG_PUBLIC "d", ret)
+    HKS_IF_TRUE_LOGE(retryCnt > 0, "AuthUkeyPin failed: %" LOG_PUBLIC "d", ret)
     return HKS_SUCCESS;
 }
 
