@@ -48,7 +48,8 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegist
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
     if (abilityName.first == HKS_SUCCESS) {
-        ret = handleMgr->ClearRemoteHandleMap(providerName, abilityName.second);
+        std::string str(abilityName.second.begin(), abilityName.second.end());
+        ret = handleMgr->ClearRemoteHandleMap(providerName, str);
     } else {
         ret = handleMgr->ClearRemoteHandleMap(providerName, "");
     }
