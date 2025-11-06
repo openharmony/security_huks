@@ -55,7 +55,7 @@ int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &in
     if (ret != HKS_SUCCESS) {
         m_refCount.fetch_sub(1, std::memory_order_acq_rel);
         HKS_LOG_E("regist provider method in plugin loader is fail");
-        return HKS_ERROR_EXEC_FUNC_FAIL;
+        return ret;
     }
     return ret;
 }
@@ -75,7 +75,7 @@ int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &
     if (ret != HKS_SUCCESS) {
         m_refCount.fetch_add(1, std::memory_order_acq_rel);
         HKS_LOG_E("unregist provider failed!");
-        return HKS_ERROR_CLOSE_PROVIDER_FAIL;
+        return ret;
     }
 
     if (preCount != ONE_EXTENSION) {
