@@ -15,6 +15,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <string>
 
 #include "assistant.h"
 #include "extension_context.h"
@@ -898,21 +899,70 @@ HWTEST_F(JsCryptoExtAbilityTest, GetOpenRemoteHandleParams_0000, testing::ext::T
 {
     CryptoResultParam resultParams;
     napi_value value = nullptr;
-    GetOpenRemoteHandleParams(env, value, resultParams);
     EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _)).WillOnce(testing::Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_get_value_string_utf8(_, _, _, _, _)).WillOnce(testing::Return(napi_invalid_arg));
+    GetOpenRemoteHandleParams(env, value, resultParams);
+    EXPECT_EQ(resultParams.handle, "");
+
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _)).WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_value_string_utf8(_, _, _, _, _)).WillOnce(testing::Return(napi_invalid_arg));
+    GetOpenRemoteHandleParams(env, value, resultParams);
     EXPECT_EQ(resultParams.handle, "");
 
     EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _)).WillOnce(testing::Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_get_value_string_utf8(_, _, _, _, _))
-        .WillOnce(testing::Return(napi_invalid_arg));
-    EXPECT_EQ(resultParams.handle, "");
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FOUR>(std::size("test")), Return(napi_ok)))
+        .WillOnce([](napi_env env, napi_value value, char* data, size_t size, size_t* length) -> napi_status {
+            std::char_traits<char>::copy(data, "test", size);
+            return napi_ok;
+        });
+    GetOpenRemoteHandleParams(env, value, resultParams);
+    EXPECT_NE(resultParams.handle, "");
+}
 
-    char expected_buffer[] = "test_string";
+HWTEST_F(JsCryptoExtAbilityTest, GetAuthUkeyPinParams_0000, testing::ext::TestSize.Level0)
+{
+    CryptoResultParam resultParams;
+    napi_value value = nullptr;
+    int32_t num = 1;
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+        .WillOnce(testing::Return(napi_ok)).WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(num), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_get_value_uint32(_, _, _)).WillOnce(testing::Return(napi_ok));
+    GetAuthUkeyPinParams(env, value, resultParams);
+    EXPECT_EQ(resultParams.authState, 1);
+
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+        .WillOnce(testing::Return(napi_invalid_arg)).WillOnce(testing::Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _)).WillOnce(testing::Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_get_value_uint32(_, _, _)).WillOnce(testing::Return(napi_invalid_arg));
+    GetAuthUkeyPinParams(env, value, resultParams);
+    EXPECT_EQ(resultParams.authState, 0);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, GetUkeyPinAuthStateParams_0000, testing::ext::TestSize.Level0)
+{
+    CryptoResultParam resultParams;
+    napi_value value = nullptr;
+    int32_t num = 1;
     EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _)).WillOnce(testing::Return(napi_ok));
-    EXPECT_CALL(*insMoc, napi_get_value_string_utf8(_, _, _, _, _))
-        .WillOnce(testing::Return(napi_ok))
-        .WillOnce(DoAll(testing::SetArrayArgument<2>(
-            expected_buffer, expected_buffer + strlen(expected_buffer) + 1), Return(napi_ok)));
-    EXPECT_EQ(resultParams.handle, "test_string");
+    EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(num), Return(napi_ok)));
+    GetUkeyPinAuthStateParams(env, value, resultParams);
+    EXPECT_EQ(resultParams.authState, 1);
+
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _)).WillOnce(testing::Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _)).WillOnce(testing::Return(napi_invalid_arg));
+    GetUkeyPinAuthStateParams(env, value, resultParams);
+    EXPECT_EQ(resultParams.authState, 9);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, HksCertInfoToString_0000, testing::ext::TestSize.Level0)
+{
+    std::vector<HksCertInfo> certInfoVec;
+    std::string jsonStr;
+    HksCertInfoToString(certInfoVec, jsonStr);
+    EXPECT_TRUE(jsonStr.empty());
 }
 }
