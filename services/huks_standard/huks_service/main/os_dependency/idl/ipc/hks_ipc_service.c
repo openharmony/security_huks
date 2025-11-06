@@ -44,6 +44,7 @@
 #include "hks_service_ipc_serialization.h"
 #include "hks_template.h"
 #define MAX_KEY_SIZE         2048
+#define UKEY_PERMISSION_REGISTER "ohos.permission.CRYPTO_EXTENSION_REGISTER"
 
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
 static enum HksTag g_idList[] = {
@@ -74,8 +75,8 @@ void HksIpcServiceRegisterProvider(const struct HksBlob *srcData, const uint8_t 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+        ret = HksCheckUkeyPermission(UKEY_PERMISSION_REGISTER);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckUkeyPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksIpcProviderRegAdapter(&processInfo, &name, paramSet);
         HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcProviderRegAdapter fail, ret = %" LOG_PUBLIC "d", ret)
@@ -105,8 +106,8 @@ void HksIpcServiceUnregisterProvider(const struct HksBlob *srcData, const uint8_
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+        ret = HksCheckUkeyPermission(UKEY_PERMISSION_REGISTER);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckUkeyPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksIpcProviderUnregAdapter(&processInfo, &name, paramSet);
         HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcProviderUnregAdapter fail, ret = %" LOG_PUBLIC "d", ret)
