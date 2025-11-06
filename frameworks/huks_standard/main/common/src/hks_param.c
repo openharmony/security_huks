@@ -375,7 +375,7 @@ HKS_API_EXPORT void HksFreeKeyAliasSet(struct HksKeyAliasSet *aliasSet)
 
 HKS_API_EXPORT void HksFreeExtCertSet(struct HksExtCertInfoSet *certInfoSet)
 {
-    if (certInfoSet == NULL) {
+    if (certInfoSet == NULL || certInfoSet->certs == NULL || certInfoSet->count == 0) {
         return;
     }
 

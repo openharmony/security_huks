@@ -17,7 +17,9 @@
 #define HKS_IPC_SERVICE_H
 
 #include "hks_type_inner.h"
-#include "hks_ipc_service_provider_adapter.h"
+#ifdef L2_STANDARD
+#include "hks_ukey_service_provider_adapter.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,13 +37,7 @@ void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t
 
 void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t *context);
 
-void HksIpcServiceGetRemoteHandle(const struct HksBlob *srcData, const uint8_t *context);
-
 void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t *context);
-
-void HksIpcServiceUkeySign(const struct HksBlob *srcData, const uint8_t *context);
-
-void HksIpcServiceUkeyVerify(const struct HksBlob *srcData, const uint8_t *context);
 
 void HksIpcServiceExportProviderCertificates(const struct HksBlob *srcData, const uint8_t *context);
 
