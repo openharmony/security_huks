@@ -65,20 +65,6 @@ ENABLE_CFI(int32_t HuksLibInterface::OnUnRegistProvider(const HksProcessInfo &pr
     return HKS_SUCCESS;
 }
 
-ENABLE_CFI(int32_t HuksLibInterface::OnCreateRemoteIndex(const std::string &providerName,
-    const CppParamSet &paramSet, std::string &outIndex))
-{
-    void *funcPtr = nullptr;
-    bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_CREATE_REMOTE_INDEX, funcPtr);
-    HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
-        "CreateRemoteIndex method enum not found in plugin provider map.")
-    
-    int32_t ret = (*reinterpret_cast<OnCreateRemoteIndexFunc>(funcPtr))();
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "CreateRemoteIndex fail, ret = %{public}d", ret)
-    HKS_LOG_I("create remote index success");
-    return HKS_SUCCESS;
-}
-
 ENABLE_CFI(int32_t HuksLibInterface::OnCreateRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet, std::string &handle))
 {
