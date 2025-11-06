@@ -36,7 +36,7 @@ void HuksLibInterface::initProviderMap(OHOS::SafeMap<PluginMethodEnum, void*> &p
     m_pluginProviderMap = pluginProviderMap;
 }
 
-ENABLE_CFI(HuksLibInterface::OnRegistProvider(const HksProcessInfo &processInfo,
+ENABLE_CFI(int32_t HuksLibInterface::OnRegistProvider(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet))
 {
     void *funcPtr = nullptr;
