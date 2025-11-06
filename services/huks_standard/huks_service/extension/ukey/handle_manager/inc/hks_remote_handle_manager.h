@@ -66,7 +66,7 @@ public:
     int32_t GetRemoteProperty(const std::string& index, const std::string& propertyId,
                 const CppParamSet& paramSet, CppParamSet& outParams);
 
-    int32_t ClearRemoteHandleMap();
+    int32_t ClearRemoteHandleMap(const std::string &providerName, const std::string &abilityName);
 
     static int32_t ParseIndexAndProviderInfo(const std::string &index,
                 ProviderInfo &providerInfo, std::string &newIndex);
