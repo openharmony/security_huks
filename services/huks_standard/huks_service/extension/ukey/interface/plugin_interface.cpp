@@ -20,7 +20,6 @@
 #include "hks_session_manger.h"
 #include "hks_cpp_paramset.h"
 #include "hks_template.h"
-#include "hks_cfi.h"
 #include <string>
 #include <vector>
 
