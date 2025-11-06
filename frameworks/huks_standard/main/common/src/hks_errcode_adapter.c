@@ -725,6 +725,13 @@ static struct HksError g_errCodeTable[] = {
             .errorMsg = "The provider manager register reach max num.",
             .data = NULL
         }
+    }, {
+        .innerErrCode = HUKS_ERR_CODE_ITEM_NOT_EXIST,
+        .hksResult = {
+            .errorCode = HKS_ERROR_LIB_REPEAT_CLOSE,
+            .errorMsg = "the provider is not found.",
+            .data = NULL
+        }
     }
 };
 

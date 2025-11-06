@@ -65,7 +65,7 @@ int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &
 {
     std::unique_lock<std::mutex> lock(soMutex);
     int32_t preCount = m_refCount.fetch_sub(1, std::memory_order_acq_rel);
-    if (preCount < NO_EXTENSION) {
+    if (preCount < ONE_EXTENSION) {
         HKS_LOG_E("lib has closed!");
         return HKS_ERROR_LIB_REPEAT_CLOSE;
     }
