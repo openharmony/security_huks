@@ -45,9 +45,13 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegist
     HKS_IF_TRUE_LOGE_RETURN(providerMgr == nullptr, HKS_ERROR_NULL_POINTER, "providerMgr is null");
     auto ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
-
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
-    ret = handleMgr->ClearRemoteHandleMap();
+    auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
+    if (abilityName.first == HKS_SUCCESS) {
+        ret = handleMgr->ClearRemoteHandleMap(providerName, abilityName.second);
+    } else {
+        ret = handleMgr->ClearRemoteHandleMap(providerName, "");
+    }
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "clear index map fail");
     return ret;
 }
