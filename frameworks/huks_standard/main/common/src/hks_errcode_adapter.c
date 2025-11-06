@@ -726,9 +726,9 @@ static struct HksError g_errCodeTable[] = {
             .data = NULL
         }
     }, {
-        .innerErrCode = HUKS_ERR_CODE_ITEM_NOT_EXIST,
+        .innerErrCode = HKS_ERROR_LIB_REPEAT_CLOSE,
         .hksResult = {
-            .errorCode = HKS_ERROR_LIB_REPEAT_CLOSE,
+            .errorCode = HUKS_ERR_CODE_ITEM_NOT_EXIST,
             .errorMsg = "the provider is not found.",
             .data = NULL
         }
