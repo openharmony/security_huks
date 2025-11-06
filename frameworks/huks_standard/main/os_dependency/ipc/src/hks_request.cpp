@@ -37,15 +37,6 @@ constexpr uint32_t DEFAULT_TIME = 2;
 sptr<Security::Hks::HksStub> g_hks_callback;
 }
 
-struct HksExtAsyncCtx {
-    MessageParcel *data {};
-    const HksParamSet *paramSet {};
-    sptr<IRemoteObject> hksProxy;
-    sptr<Security::Hks::HksExtStub> hksCallback;
-    HksBlob *outBlob {};
-    uint32_t msgCode {};
-};
-
 static sptr<IRemoteObject> GetHksProxy()
 {
     auto registry = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -138,38 +129,47 @@ static int32_t HksSendAnonAttestRequestAndWaitAsyncReply(MessageParcel &data, co
 #endif
 }
 
-static int32_t HksExtSendAsyncMessage(const HksExtAsyncCtx &ctx)
+static int32_t HksExtSendAsyncMessage(MessageParcel &data, const struct HksParamSet *paramSet,
+    sptr<IRemoteObject> &proxy, struct HksBlob *outBlob, enum HksIpcInterfaceCode msgCode)
 {
-    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(ctx.outBlob), HKS_ERROR_INVALID_ARGUMENT, "invalid outBlob");
+    auto hksCallback = sptr<Security::Hks::HksExtStub>(new (std::nothrow) Security::Hks::HksExtStub());
+    HKS_IF_NULL_LOGE_RETURN(hksCallback, HKS_ERROR_INSUFFICIENT_MEMORY, "new HksExtStub failed");
+    HKS_IF_NOT_TRUE_LOGE_RETURN(data.WriteRemoteObject(hksCallback), HKS_ERROR_IPC_MSG_FAIL,
+        "WriteRemoteObject fail");
 
     MessageParcel reply {};
     MessageOption option = MessageOption::TF_SYNC;
-    int32_t ret = ctx.hksProxy->SendRequest(ctx.msgCode, *ctx.data, reply, option);
+    int32_t ret = proxy->SendRequest(msgCode, data, reply, option);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_IPC_MSG_FAIL, "SendRequest failed %" LOG_PUBLIC "d", ret);
 
     uint32_t timeout = DEFAULT_TIME; // default seconds
     struct HksParam *timeoutParam = nullptr;
-    if (HksGetParam(ctx.paramSet, HKS_EXT_CRYPTO_TAG_TIMEOUT, &timeoutParam) == HKS_SUCCESS) {
-        if (GetTagType((enum HksTag)timeoutParam->tag) == HKS_TAG_TYPE_UINT && timeoutParam->uint32Param > 0) {
-            timeout = timeoutParam->uint32Param;
-        }
+    if (HksGetParam(paramSet, HKS_EXT_CRYPTO_TAG_TIMEOUT, &timeoutParam) == HKS_SUCCESS) {
+        HKS_IF_TRUE_LOGE_RETURN(GetTagType((enum HksTag)timeoutParam->tag) != HKS_TAG_TYPE_UINT,
+            HKS_ERROR_INVALID_ARGUMENT, "timeout tag type invalid");
+
+        uint32_t val = timeoutParam->uint32Param;
+        HKS_IF_TRUE_LOGE_RETURN(val > 3 || val == 0, HKS_ERROR_INVALID_ARGUMENT,
+            "timeout %" LOG_PUBLIC "u not supported, must between 0 - 3", val);
+
+        timeout = val;
     }
 
-    auto [errCode, receivedData, receivedSize, receivedCode] = ctx.hksCallback->WaitForAsyncReply(timeout);
-    if (errCode != HKS_SUCCESS || receivedData == nullptr || receivedSize == 0 || receivedCode != ctx.msgCode) {
+    auto [errCode, receivedData, receivedSize, receivedCode] = hksCallback->WaitForAsyncReply(timeout);
+    if (errCode != HKS_SUCCESS || receivedData == nullptr || receivedSize == 0 || receivedCode != msgCode) {
         HKS_LOG_E("async fail errCode=%" LOG_PUBLIC "u size=%" LOG_PUBLIC "u code=%" LOG_PUBLIC "u",
             errCode, receivedSize, receivedCode);
         return HUKS_ERR_CODE_EXTERNAL_ERROR;
     }
 
-    HKS_IF_TRUE_LOGE_RETURN(ctx.outBlob->size < receivedSize, HKS_ERROR_BUFFER_TOO_SMALL,
-        "outBlob too small %" LOG_PUBLIC "u < %" LOG_PUBLIC "u", ctx.outBlob->size, receivedSize);
+    HKS_IF_TRUE_LOGE_RETURN(outBlob->size < receivedSize, HKS_ERROR_BUFFER_TOO_SMALL,
+        "outBlob too small %" LOG_PUBLIC "u < %" LOG_PUBLIC "u", outBlob->size, receivedSize);
 
-    HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(ctx.outBlob->data, ctx.outBlob->size, receivedData.get(), receivedSize),
+    HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(outBlob->data, outBlob->size, receivedData.get(), receivedSize),
         HKS_ERROR_INSUFFICIENT_MEMORY, "memcpy_s failed destMax %" LOG_PUBLIC "u count %" LOG_PUBLIC "u",
-        ctx.outBlob->size, receivedSize);
+        outBlob->size, receivedSize);
 
-    ctx.outBlob->size = receivedSize;
+    outBlob->size = receivedSize;
     return HKS_SUCCESS;
 }
 
@@ -198,12 +198,7 @@ static int32_t HandleSpecialAsyncTypes(enum HksIpcInterfaceCode type, MessagePar
         return HksSendAnonAttestRequestAndWaitAsyncReply(data, paramSet, proxy, hksCallback, outBlob);
     }
     if (type == HKS_MSG_EXT_GET_REMOTE_PROPERTY) {
-        auto hksCallback = sptr<Security::Hks::HksExtStub>(new (std::nothrow) Security::Hks::HksExtStub());
-        HKS_IF_NULL_LOGE_RETURN(hksCallback, HKS_ERROR_INSUFFICIENT_MEMORY, "new HksExtStub failed");
-        HKS_IF_NOT_TRUE_LOGE_RETURN(data.WriteRemoteObject(hksCallback), HKS_ERROR_IPC_MSG_FAIL,
-            "WriteRemoteObject fail");
-        HksExtAsyncCtx ctx { &data, paramSet, proxy, hksCallback, outBlob, HKS_MSG_EXT_GET_REMOTE_PROPERTY };
-        return HksExtSendAsyncMessage(ctx);
+        return HksExtSendAsyncMessage(data, paramSet, proxy, outBlob, HKS_MSG_EXT_GET_REMOTE_PROPERTY);
     }
     return HKS_SUCCESS;
 }

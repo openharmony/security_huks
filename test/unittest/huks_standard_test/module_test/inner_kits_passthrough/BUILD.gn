@@ -64,6 +64,7 @@ huks_sources = [
   "//base/security/huks/frameworks/huks_standard/main/core/src/hks_local_engine.c",
   "//base/security/huks/frameworks/huks_standard/main/core/src/hks_verifier.c",
   "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_client_service_passthrough.c",
+  "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ukey_client_service_passthrough.c",
   "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ipc_check.c",
   "//base/security/huks/frameworks/huks_standard/main/os_dependency/posix/hks_mem.c",
   "//base/security/huks/frameworks/huks_standard/main/os_dependency/sysinfo/src/hks_get_process_info_passthrough.c",
@@ -183,6 +184,7 @@ ohos_static_library("libhukssdk_static") {
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",  # hks_response.h
     "//base/security/huks/services/huks_standard/huks_service/main/plugin_proxy/include",
     "//base/security/huks/services/huks_standard/huks_service/main/ha/include",
+    "//base/security/huks/services/huks_standard/huks_service/extension/ukey_client_service/inc"
   ]
   deps = []
 
@@ -195,6 +197,7 @@ ohos_static_library("libhukssdk_static") {
     "//base/security/huks/services/huks_standard/huks_engine/main/core_dependency:libhuks_core_hal_api_static",
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
     "//base/security/huks/utils/condition:libhuks_utils_condition_static",
+    "//base/security/huks/services/huks_standard/huks_service/extension/ukey_client_service:libhuks_service_ukey_standard_static"
   ]
   external_deps = [
     "access_token:libaccesstoken_sdk",

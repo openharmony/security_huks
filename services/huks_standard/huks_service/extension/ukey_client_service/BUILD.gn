@@ -1,0 +1,85 @@
+# Copyright (C) 2025-2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//base/security/huks/build/config.gni")
+import("//base/security/huks/huks.gni")
+import("//build/ohos.gni")
+
+config("huks_config") {
+  include_dirs = [
+    "include",
+  ]
+}
+
+if (os_level == "standard") {
+  ohos_static_library("libhuks_service_ukey_standard_static") {
+    subsystem_name = "security"
+    part_name = "huks"
+    public_configs = [ ":huks_config" ]
+
+    include_dirs = [
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",  # hks_response.h
+      "//base/security/huks/services/huks_standard/huks_service/main/ha/include",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey_client_service/inc",
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",
+      "//base/security/huks/services/huks_standard/huks_service/main/core/include",
+      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger/inc"
+    ]
+
+    sources = [
+      "src/hks_ukey_client_service.c",
+      "src/hks_ukey_service_provider.cpp",
+      "src/hks_ukey_service_provider_adapter.cpp",
+    ]
+
+    defines = [ "HKS_ENABLE_CLEAN_FILE" ]
+
+    deps = [
+      "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_util_standard_static",
+    ]
+
+    cflags = [
+      "-DHUKS_CHANGE_STORAGE_LEVEL_CONFIG=${huks_change_storage_level_config}",
+    ]
+    complete_static_lib = true
+
+    branch_protector_ret = "pac_ret"
+
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+      cfi_cross_dso = true
+      boundary_sanitize = true
+      ubsan = true
+    }
+
+    deps += [
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
+    ]
+
+    configs = [
+      "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+    ]
+    external_deps = [
+      "access_token:libaccesstoken_sdk",
+      "bounds_checking_function:libsec_shared",
+      "c_utils:utils",
+      "hilog:libhilog",
+      "hitrace:libhitracechain",
+      "init:libbegetutil",
+      "ipc:ipc_single",
+    ]
+  }
+}

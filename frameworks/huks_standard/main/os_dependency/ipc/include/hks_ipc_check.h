@@ -25,12 +25,12 @@
 extern "C" {
 #endif
 
-int32_t HksCheckIpcBlobAndParamSet(const struct HksBlob *blob, const struct HksParamSet *paramSet);
+int32_t HksCheckIpcBlobAndParamSet(const struct HksBlob *blob, const struct HksParamSet *paramSet, uint32_t maxSize);
 
-int32_t HksCheckIpcBlob2ParamSet(const struct HksBlob *blob1, const struct HksBlob *blob2,
-    const struct HksParamSet *paramSet);
+int32_t HksCheckIpcTwoBlobsParamSet(const struct HksBlob *blob1, const struct HksBlob *blob2,
+    const struct HksParamSet *paramSet, uint32_t maxSize1, uint32_t maxSize2);
 
-int32_t HksCheckIpcBlob(const struct HksBlob *blob);
+int32_t HksCheckIpcBlob(const struct HksBlob *blob, uint32_t maxSize);
 
 int32_t HksCheckIpcGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn);
 
