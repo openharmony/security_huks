@@ -372,7 +372,7 @@ int32_t HksRemoteHandleManager::FindRemoteCertificate(const std::string &index,
     auto indexValue = certJson.GetValue("index");
     auto indexResult = indexValue.ToString();
     HKS_IF_TRUE_LOGE_RETURN(indexResult.first != HKS_SUCCESS || indexResult.second.empty() ||
-            indexResult.second.size() >= MAX_INDEX_SIZE, HKS_ERROR_INVALID_ARGUMENT, "index invalid")
+        indexResult.second.size() >= MAX_INDEX_SIZE, HKS_ERROR_INVALID_ARGUMENT, "index invalid")
     std::string wrappedIndex;
     ret = WrapIndexWithProviderInfo(providerInfo, indexResult.second, wrappedIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Wrap index with provider info failed: %" LOG_PUBLIC "d", ret)
