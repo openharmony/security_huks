@@ -46,6 +46,7 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegist
     auto ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
     auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
     if (abilityName.first == HKS_SUCCESS) {
         std::string str(abilityName.second.begin(), abilityName.second.end());
