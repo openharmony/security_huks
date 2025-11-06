@@ -60,7 +60,6 @@ int32_t HuksLibInterface::OnUnRegistProvider(const HksProcessInfo &processInfo,
     int32_t ret = (*reinterpret_cast<OnUnRegisterProviderFunc>(funcPtr))(processInfo, providerName, paramSet);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
         "UnRegistProvider fail, ret = %{public}d", ret)
-    m_pluginProviderMap.Clear();
     HKS_LOG_I("unregist provider success");
     return HKS_SUCCESS;
 }
