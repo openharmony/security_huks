@@ -448,8 +448,8 @@ int32_t HksRemoteHandleManager::ClearRemoteHandleMap(const std::string &provider
 {
     std::vector<std::string> indicesToRemove;
     auto collectToRemoveFunc = [&](std::string key, ProviderInfo &value) {
-        if (value.providerName == providerName) {
-            if (abilityName.empty() || value.abilityName == abilityName) {
+        if (value.m_providerName == providerName) {
+            if (abilityName.empty() || value.m_abilityName == abilityName) {
                 indicesToRemove.push_back(key);
             }
         }
