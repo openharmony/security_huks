@@ -1008,15 +1008,15 @@ HWTEST_F(JsCryptoExtAbilityTest, GetExportCertificateParams_0000, testing::ext::
     EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(testing::Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
-    GetExportCertificateParams(env, value, resultParams);
     EXPECT_CALL(*insMoc, napi_get_array_length(_, _, _)).WillOnce(testing::Return(napi_invalid_arg));
+    GetExportCertificateParams(env, value, resultParams);
     EXPECT_EQ(resultParams.certs.size(), 0);
 
     EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(testing::Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
-    GetExportCertificateParams(env, value, resultParams);
     EXPECT_CALL(*insMoc, napi_get_array_length(_, _, _)).WillOnce(testing::Return(napi_ok));
+    GetExportCertificateParams(env, value, resultParams);
     EXPECT_EQ(resultParams.certs.size(), 0);
 }
 
@@ -1028,17 +1028,16 @@ HWTEST_F(JsCryptoExtAbilityTest, GetExportCertificateParams_0001, testing::ext::
     EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(testing::Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
-    GetExportCertificateParams(env, value, resultParams);
     EXPECT_CALL(*insMoc, napi_get_array_length(_, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(1), Return(napi_ok)));
     EXPECT_CALL(*insMoc, napi_get_element(_, _, _, _)).WillOnce(testing::Return(napi_invalid_arg));
+    GetExportCertificateParams(env, value, resultParams);
     EXPECT_EQ(resultParams.certs.size(), 0);
 
     EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(testing::Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)))
         .WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok));
-    GetExportCertificateParams(env, value, resultParams);
     EXPECT_CALL(*insMoc, napi_get_array_length(_, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(1), Return(napi_ok)));
     EXPECT_CALL(*insMoc, napi_get_element(_, _, _, _))
@@ -1048,17 +1047,123 @@ HWTEST_F(JsCryptoExtAbilityTest, GetExportCertificateParams_0001, testing::ext::
         .WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_get_typedarray_info(_, _, _, _, _, _, _)).WillOnce(Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_get_arraybuffer_info(_, _, _, _)).WillOnce(Return(napi_ok));
+    GetExportCertificateParams(env, value, resultParams);
     EXPECT_EQ(resultParams.certs.size(), 1);
 
     EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(testing::Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)))
         .WillOnce(Return(napi_invalid_arg));
-    GetExportCertificateParams(env, value, resultParams);
     EXPECT_CALL(*insMoc, napi_get_array_length(_, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(1), Return(napi_ok)));
     EXPECT_CALL(*insMoc, napi_get_element(_, _, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    GetExportCertificateParams(env, value, resultParams);
     EXPECT_EQ(resultParams.certs.size(), 1);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, GetSessionParams_0000, testing::ext::TestSize.Level0)
+{
+    CryptoResultParam resultParams;
+    napi_value value = nullptr;
+    napi_value rslt = 0;
+    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(testing::Return(napi_invalid_arg));
+    GetSessionParams(env, value, resultParams);
+    EXPECT_EQ(resultParams.outData.size(), 0);
+
+    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    GetSessionParams(env, value, resultParams);
+    EXPECT_EQ(resultParams.outData.size(), 0);
+
+    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_invalid_arg)));
+    GetSessionParams(env, value, resultParams);
+    EXPECT_EQ(resultParams.outData.size(), 0);
+
+    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_get_typedarray_info(_, _, _, _, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    GetSessionParams(env, value, resultParams);
+    EXPECT_EQ(resultParams.outData.size(), 0);
+
+    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_get_typedarray_info(_, _, _, _, _, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_arraybuffer_info(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    GetSessionParams(env, value, resultParams);
+    EXPECT_EQ(resultParams.outData.size(), 0);
+
+    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_get_typedarray_info(_, _, _, _, _, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_arraybuffer_info(_, _, _, _)).WillOnce(DoAll(
+        SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)), Return(napi_invalid_arg)));
+    GetSessionParams(env, value, resultParams);
+    EXPECT_EQ(resultParams.outData.size(), 0);
+
+    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_get_typedarray_info(_, _, _, _, _, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_arraybuffer_info(_, _, _, _)).WillOnce(Return(napi_ok));
+    GetSessionParams(env, value, resultParams);
+    EXPECT_EQ(resultParams.outData.size(), 0);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, GetSessionParams_0001, testing::ext::TestSize.Level0)
+{
+    CryptoResultParam resultParams;
+    napi_value value = nullptr;
+    napi_value rslt = 0;
+    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_get_typedarray_info(_, _, _, _, _, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_arraybuffer_info(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    GetSessionParams(env, value, resultParams);
+    EXPECT_EQ(resultParams.outData.size(), 0);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, GetGetPropertyParams_0000, testing::ext::TestSize.Level0)
+{
+    CryptoResultParam resultParams;
+    napi_value value = nullptr;
+    napi_value rslt = 0;
+
+    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(testing::Return(napi_invalid_arg));
+    GetSessionParams(env, value, resultParams);
+    EXPECT_EQ(resultParams.outData.size(), 0);
+
+    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _)).WillOnce(testing::Return(napi_ok));
+    GetSessionParams(env, value, resultParams);
+    EXPECT_EQ(resultParams.outData.size(), 0);
+
+    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_get_array_length(_, _, _)).WillOnce(testing::Return(napi_invalid_arg));
+    GetSessionParams(env, value, resultParams);
+    EXPECT_EQ(resultParams.outData.size(), 0);
+
+    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_get_array_length(_, _, _)).WillOnce(testing::Return(napi_ok));
+    GetSessionParams(env, value, resultParams);
+    EXPECT_EQ(resultParams.outData.size(), 0);
+
+    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_get_array_length(_, _, _)).WillOnce(testing::Return(napi_ok));
+    GetSessionParams(env, value, resultParams);
+    EXPECT_EQ(resultParams.outData.size(), 0);
 }
 }
