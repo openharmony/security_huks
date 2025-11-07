@@ -53,12 +53,11 @@ void HksProviderLifeCycleManager::ReleaseInstance()
     HksProviderLifeCycleManager::DestroyInstance();
 }
 
-constexpr int32_t HKS_MAX_PROVIDER_NUM = 10;
 int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet)
 {
     HKS_LOG_I("OnRegisterProvider providerName: %" LOG_PUBLIC "s", providerName.c_str());
-    if (m_providerMap.Size() > HKS_MAX_PROVIDER_NUM) {
+    if (m_providerMap.Size() >= HKS_MAX_PROVIDER_NUM) {
         HKS_LOG_E("OnRegisterProvider failed, providerNum is too much."
             "providerNum: %" LOG_PUBLIC "d", m_providerMap.Size());
         return HKS_ERROR_UKY_PROVIDER_MGR_REGESTER_REACH_MAX_NUM;
@@ -166,6 +165,8 @@ int32_t HksProviderLifeCycleManager::HksHapGetConnectInfos(const HksProcessInfo 
 
     auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
     if (abilityName.first == HKS_SUCCESS) {
+        HKS_IF_TRUE_LOGE_RETURN(abilityName.second.size() > MAX_ABILITY_NAME_LEN, HKS_ERROR_INVALID_ARGUMENT,
+            "the abilityName is too long. size: %" LOG_PUBLIC "zu", abilityName.second.size())
         std::string abilityNameStr = std::string(abilityName.second.begin(), abilityName.second.end());
         HKS_LOG_I("HksHapGetConnectInfos abilityName: %" LOG_PUBLIC "s", abilityNameStr.c_str());
         m_providerMap.Iterate([&](const ProviderInfo &providerInfo,
@@ -240,6 +241,8 @@ int32_t HksGetProviderInfo(const HksProcessInfo &processInfo, const std::string 
     auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
     HKS_IF_TRUE_LOGE_RETURN(abilityName.first != HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
         "GetParam HKS_EXT_CRYPTO_TAG_ABILITY_NAME failed. ret: %" LOG_PUBLIC "d", abilityName.first)
+    HKS_IF_TRUE_LOGE_RETURN(abilityName.second.size() > MAX_ABILITY_NAME_LEN, HKS_ERROR_INVALID_ARGUMENT,
+        "the abilityName is too long. ret: %" LOG_PUBLIC "d", abilityName.first)
     providerInfo.m_abilityName = std::string(abilityName.second.begin(), abilityName.second.end());
     return HKS_SUCCESS;
 }
