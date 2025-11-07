@@ -1362,6 +1362,13 @@ HWTEST_F(JsCryptoExtAbilityTest, CallPromise_0000, testing::ext::TestSize.Level0
     EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _)).WillOnce(testing::Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_is_callable(_, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(true), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_function(_, _, _, _, _, _)).WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_call_function(_, _, _, _, _, _)).WillOnce(testing::Return(napi_invalid_arg));
+    EXPECT_EQ(CallPromise(env, value, dataParam), HKS_ERROR_EXT_CALL_FUNCTION_FAILED);
+
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _)).WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_is_callable(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(true), Return(napi_ok)));
     EXPECT_CALL(*insMoc, napi_create_function(_, _, _, _, _, _))
         .WillOnce([](napi_env env, const char* str, size_t size, napi_callback info,
             void* callback, napi_value* callbackValue) -> napi_status {
@@ -1371,5 +1378,15 @@ HWTEST_F(JsCryptoExtAbilityTest, CallPromise_0000, testing::ext::TestSize.Level0
             });
     EXPECT_CALL(*insMoc, napi_call_function(_, _, _, _, _, _)).WillOnce(testing::Return(napi_ok));
     EXPECT_EQ(CallPromise(env, value, dataParam), HKS_SUCCESS);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, abilityTest_0000, testing::ext::TestSize.Level0)
+{
+    std::unique_ptr<AbilityRuntime::Runtime> runtimePtr = std::make_unique<AbilityRuntime::JsRuntime>();
+    auto ptr = ability->Create(runtimePtr);
+    delete ptr;
+    std::string str = "";
+    ability->GetSrcPath(str);
+    EXPECT_NE(str, "");
 }
 }
