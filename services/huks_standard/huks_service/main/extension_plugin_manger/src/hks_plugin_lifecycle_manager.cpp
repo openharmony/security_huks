@@ -93,7 +93,7 @@ int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &
 
         ret = pluginLoader->UnLoadPlugins(info, providerName, paramSet);
         HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS, "close lib failed!, ret = %{public}d", ret)
-    } while (0)
+    } while (0);
 
     if (ret == HKS_SUCCESS) {
         m_refCount.fetch_sub(1, std::memory_order_acq_rel);
