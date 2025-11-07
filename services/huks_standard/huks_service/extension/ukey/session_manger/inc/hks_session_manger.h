@@ -54,9 +54,14 @@ public:
         std::vector<uint8_t> &outData);
     int32_t ExtensionAbortSession(const HksProcessInfo &processInfo,
         const uint32_t &handle, const CppParamSet &paramSet);
+    bool HksClearHandle(const HksProcessInfo &processInfo, const CppParamSet &paramSet);
 private:
+    std::vector<uint32_t> FindToRemoveHandle(uint32_t uid, std::string &abilityName);
+    std::vector<uint32_t> FindToRemoveHandle(uint32_t uid);
     int32_t HksGetHandleInfo(const HksProcessInfo &processInfo, const uint32_t &handle, HandleInfo &infos);
+    bool CheckSingleCallerCanInitSession(const HksProcessInfo &processInfo);
     std::pair<int32_t, uint32_t> GenRandomUint32();
+    void ClearSessionHandleMap(std::vector<uint32_t> &toRemove);
     OHOS::SafeMap<uint32_t, HandleInfo> m_handlers{};
 };
 }

@@ -32,7 +32,7 @@ void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementNa
     HKS_IF_TRUE_RETURN_VOID(remoteObject == nullptr)
 
     extConnectProxy = iface_cast<HuksAccessExtBaseProxy>(remoteObject);
-    HKS_IF_TRUE_LOGE_RETURN_VOID(extConnectProxy, "iface_cast fail in OnAbilityConnectDone")
+    HKS_IF_TRUE_LOGE_RETURN_VOID(extConnectProxy == nullptr, "iface_cast fail in OnAbilityConnectDone")
 
     AddExtDeathRecipient(extConnectProxy->AsObject());
     std::lock_guard<std::mutex> lock(proxyMutex_);

@@ -16,6 +16,8 @@
 #include "hks_plugin_lifecycle_manager.h"
 #include "hks_plugin_loader.h"
 
+#define NO_EXTENSION 0
+#define ONE_EXTENSION 1
 namespace OHOS {
 namespace Security {
 namespace Huks {
@@ -36,7 +38,7 @@ int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &in
     int32_t ret;
     std::unique_lock<std::mutex> lock(soMutex);
     int32_t preCount = m_refCount.fetch_add(1, std::memory_order_acq_rel);
-    if (preCount == 0) {
+    if (preCount == NO_EXTENSION) {
         auto pluginLoader = HuksPluginLoader::GetInstanceWrapper();
         HKS_IF_TRUE_LOGE_RETURN(pluginLoader == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get pluginLoader instance.")
         ret = pluginLoader->LoadPlugins(info, providerName, paramSet);
@@ -52,8 +54,8 @@ int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &in
     ret = libInstance->OnRegistProvider(info, providerName, paramSet);
     if (ret != HKS_SUCCESS) {
         m_refCount.fetch_sub(1, std::memory_order_acq_rel);
-        HKS_LOG_E("regist provider method in plugin laoder is fail");
-        return HKS_ERROR_EXEC_FUNC_FAIL;
+        HKS_LOG_E("regist provider method in plugin loader is fail");
+        return ret;
     }
     return ret;
 }
@@ -63,16 +65,20 @@ int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &
 {
     std::unique_lock<std::mutex> lock(soMutex);
     int32_t preCount = m_refCount.fetch_sub(1, std::memory_order_acq_rel);
+    if (preCount < ONE_EXTENSION) {
+        HKS_LOG_E("lib has closed!");
+        return HKS_ERROR_LIB_REPEAT_CLOSE;
+    }
     auto libInstance = HuksLibInterface::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(libInstance == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")
     int32_t ret = libInstance->OnUnRegistProvider(info, providerName, paramSet);
     if (ret != HKS_SUCCESS) {
         m_refCount.fetch_add(1, std::memory_order_acq_rel);
         HKS_LOG_E("unregist provider failed!");
-        return HKS_ERROR_CLOSE_PROVIDER_FAIL;
+        return ret;
     }
 
-    if (preCount != 1) {
+    if (preCount != ONE_EXTENSION) {
         HKS_LOG_I("don't need close lib, refCount = %{public}d", preCount);
         return HKS_SUCCESS;
     }
