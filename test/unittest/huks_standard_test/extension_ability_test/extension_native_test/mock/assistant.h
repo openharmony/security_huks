@@ -72,6 +72,7 @@ public:
     virtual napi_status napi_get_value_uint32(napi_env env, napi_value value, uint32_t* result) = 0;
     virtual napi_status napi_get_value_bigint_uint64(
         napi_env env, napi_value value, uint64_t* result, bool* lossless) = 0;
+    virtual napi_status napi_is_callable(napi_env env, napi_value value, bool* result) = 0;
 public:
     static inline std::shared_ptr<Assistant> ins_ = nullptr;
 };
@@ -122,6 +123,7 @@ public:
     MOCK_METHOD3(napi_get_value_uint32, napi_status(napi_env env, napi_value value, uint32_t* result));
     MOCK_METHOD4(napi_get_value_bigint_uint64, napi_status(
         napi_env env, napi_value value, uint64_t* result, bool* lossless));
+    MOCK_METHOD3(napi_is_callable, napi_status(napi_env env, napi_value value, bool* result));
 };
 
 } // OHOS::Security::Huks

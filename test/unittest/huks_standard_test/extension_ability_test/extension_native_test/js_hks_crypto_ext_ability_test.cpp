@@ -1336,7 +1336,40 @@ HWTEST_F(JsCryptoExtAbilityTest, PromiseCallback_0000, testing::ext::TestSize.Le
     dataParam->paramType = static_cast<CryptoResultParamType>(99);
     auto *callbackInfo = PromiseCallbackInfo::Create(dataParam);
     EXPECT_CALL(*insMoc, napi_get_cb_info(_, _, _, _, _, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIFTH>((void**)&callbackInfo), Return(napi_ok)));
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIFTH>(callbackInfo), Return(napi_ok)));
     EXPECT_TRUE(PromiseCallback(env, info) == nullptr);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, CallPromise_0000, testing::ext::TestSize.Level0)
+{
+    napi_value value = (napi_value)1;
+    std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
+    dataParam->paramType = static_cast<CryptoResultParamType>(99);
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _)).WillOnce(testing::Return(napi_invalid_arg));
+    EXPECT_EQ(CallPromise(env, value, dataParam), HKS_ERROR_EXT_SET_NAME_PROPERTY_FAILED);
+
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _)).WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_is_callable(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(false), Return(napi_ok)));
+    EXPECT_EQ(CallPromise(env, value, dataParam), HKS_ERROR_EXT_THEN_IS_NOT_CALLABLE);
+
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _)).WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_is_callable(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(true), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_function(_, _, _, _, _, _)).WillOnce(testing::Return(napi_invalid_arg));
+    EXPECT_EQ(CallPromise(env, value, dataParam), HKS_ERROR_EXT_CREATE_FUNCTION_FAILED);
+
+    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _)).WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_is_callable(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(true), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_function(_, _, _, _, _, _))
+        .WillOnce([](napi_env env, const char* str, size_t size, napi_callback info,
+            void* callback, napi_value* callbackValue) -> napi_status {
+                auto *callbackInfo = static_cast<PromiseCallbackInfo *>(callback);
+                PromiseCallbackInfo::Destroy(callbackInfo);
+                return napi_ok;
+            });
+    EXPECT_CALL(*insMoc, napi_call_function(_, _, _, _, _, _)).WillOnce(testing::Return(napi_ok));
+    EXPECT_EQ(CallPromise(env, value, dataParam), HKS_SUCCESS);
 }
 }
