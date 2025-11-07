@@ -67,6 +67,7 @@ int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &
     int32_t preCount = m_refCount.fetch_sub(1, std::memory_order_acq_rel);
     if (preCount < ONE_EXTENSION) {
         HKS_LOG_E("lib has closed!");
+        m_refCount.fetch_add(1, std::memory_order_acq_rel);
         return HKS_ERROR_LIB_REPEAT_CLOSE;
     }
     auto libInstance = HuksLibInterface::GetInstanceWrapper();
