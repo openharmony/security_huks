@@ -44,10 +44,15 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(
     HKS_IF_TRUE_LOGE_RETURN(providerMgr == nullptr, HKS_ERROR_NULL_POINTER, "providerMgr is null");
     auto ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
-
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
-    HKS_IF_NULL_LOGE_RETURN(handleMgr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
-    ret = handleMgr->ClearRemoteHandleMap();
+    HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
+    auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
+    if (abilityName.first == HKS_SUCCESS) {
+        std::string str(abilityName.second.begin(), abilityName.second.end());
+        ret = handleMgr->ClearRemoteHandleMap(providerName, str);
+    } else {
+        ret = handleMgr->ClearRemoteHandleMap(providerName, "");
+    }
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "clear index map fail");
 
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
