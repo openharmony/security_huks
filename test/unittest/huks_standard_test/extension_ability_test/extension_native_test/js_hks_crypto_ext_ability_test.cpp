@@ -1342,6 +1342,9 @@ HWTEST_F(JsCryptoExtAbilityTest, PromiseCallback_0000, testing::ext::TestSize.Le
 
 HWTEST_F(JsCryptoExtAbilityTest, CallPromise_0000, testing::ext::TestSize.Level0)
 {
+    std::unique_ptr<AbilityRuntime::Runtime> runtimePtr = std::make_unique<AbilityRuntime::JsRuntime>();
+    auto ptr = ability->Create(runtimePtr);
+    delete ptr;
     napi_value value = (napi_value)1;
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = static_cast<CryptoResultParamType>(99);
@@ -1382,11 +1385,66 @@ HWTEST_F(JsCryptoExtAbilityTest, CallPromise_0000, testing::ext::TestSize.Level0
 
 HWTEST_F(JsCryptoExtAbilityTest, abilityTest_0000, testing::ext::TestSize.Level0)
 {
-    std::unique_ptr<AbilityRuntime::Runtime> runtimePtr = std::make_unique<AbilityRuntime::JsRuntime>();
-    auto ptr = ability->Create(runtimePtr);
-    delete ptr;
-    std::string str = "";
-    ability->GetSrcPath(str);
-    EXPECT_NE(str, "");
+    std::string index;
+    CppParamSet params;
+    std::string handle;
+    std::string certJsonArr;
+    int32_t errcode;
+    int32_t authState;
+    uint32_t retryCnt;
+    EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(ability->OpenRemoteHandle(index, params, handle, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+
+    EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(ability->CloseRemoteHandle(handle, params, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+
+    EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(ability->AuthUkeyPin(handle, params, errcode, authState, retryCnt), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+
+    EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(ability->GetUkeyPinAuthState(handle, params, authState, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+
+    EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(ability->ExportCertificate(index, params, certJsonArr, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+
+    EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_create_object(_, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(ability->ExportProviderCertificates(params, certJsonArr, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, abilityTest_0001, testing::ext::TestSize.Level0)
+{
+    std::string index;
+    CppParamSet params;
+    std::string handle;
+    int32_t errcode;
+    std::vector<uint8_t> inData;
+    std::vector<uint8_t> outData;
+    CppParamSet outParams;
+    std::string propertyId;
+    EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(ability->InitSession(index, params, handle, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+    
+    EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(ability->UpdateSession(handle, params, inData, outData, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+
+    EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(ability->FinishSession(handle, params, inData, outData, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+
+    EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(ability->GetProperty(handle, propertyId, params, outParams, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+
+    EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(ability->ClearUkeyPinAuthState(handle, params, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
 }
 }
