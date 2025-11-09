@@ -96,7 +96,9 @@ static int32_t CallHksGetUkeyPinAuthState(const std::vector<uint8_t> &index, str
     return HksGetUkeyPinAuthState(&indexBlob, paramSetIn, status);
 }
 
-// NOTICE! str last byte is '\0'! str length is ```str.size() - 1```!
+// NOTE: ParseString fills `str` with UTF-8 bytes WITHOUT a trailing NUL.
+// `str.size()` equals the byte length. Do NOT pass str.data() to APIs expecting C strings.
+// Convert to std::string or append '\0' when a NUL-terminated buffer is required.
 napi_value ParseString(napi_env env, napi_value object, std::vector<uint8_t> &str)
 {
     napi_valuetype valueType = napi_valuetype::napi_undefined;
@@ -112,6 +114,7 @@ napi_value ParseString(napi_env env, napi_value object, std::vector<uint8_t> &st
 
     str.resize(length + 1);
     if (length == 0) {
+        str.clear();
         return GetInt32(env, 0);
     }
     

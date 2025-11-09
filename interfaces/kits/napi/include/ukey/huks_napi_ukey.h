@@ -93,7 +93,6 @@ public:
     uint32_t retryCount = 0;
 };
 
-// 对外接口
 napi_value HuksNapiRegisterProvider(napi_env env, napi_callback_info info);
 
 napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info);
@@ -102,7 +101,6 @@ napi_value HuksNapiAuthUkeyPin(napi_env env, napi_callback_info info);
 
 napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info);
 
-// 工具函数
 napi_value NapiCreateError(napi_env env, int32_t errCode, const char *errMsg);
 
 napi_value ParseString(napi_env env, napi_value object, std::vector<uint8_t> &alias);
