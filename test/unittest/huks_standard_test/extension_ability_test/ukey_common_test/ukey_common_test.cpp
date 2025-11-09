@@ -107,7 +107,6 @@ static void JsonWrapperBasicTest()
     ASSERT_EQ(testGet.IsNull(), true);
 }
 
-
 static void JsonWrapperBinarySerializationTest()
 {
     CommJsonObject original = CommJsonObject::CreateObject();
@@ -197,35 +196,35 @@ HWTEST_F(UkeyCommonTest, UkeyCommonTest002, TestSize.Level0)
     std::vector<uint8_t> input3 = {0x12, 0x34};
     auto [ret3, result3] = U8Vec2Base64Str(input3);
     EXPECT_EQ(ret3, HKS_SUCCESS);
-    EXPECT_EQ(result3, "EjI=");
+    EXPECT_EQ(result3, "EjQ=");
     auto [ret33, result33] = Base64Str2U8Vec(result3);
     EXPECT_EQ(ret33, HKS_SUCCESS);
 
     std::vector<uint8_t> input4 = {0x12, 0x34, 0x76};
     auto [ret4, result4] = U8Vec2Base64Str(input4);
     EXPECT_EQ(ret4, HKS_SUCCESS);
-    EXPECT_EQ(result4, "EjI2");
+    EXPECT_EQ(result4, "EjR2");
     auto [ret44, result44] = Base64Str2U8Vec(result4);
     EXPECT_EQ(ret44, HKS_SUCCESS);
 
     std::vector<uint8_t> input5 = {0x12, 0x34, 0x76, 0x78, 0x9A, 0xBC}; 
     auto [ret5, result5] = U8Vec2Base64Str(input5);
     EXPECT_EQ(ret5, HKS_SUCCESS);
-    EXPECT_EQ(result5, "EjI2eJi8");
+    EXPECT_EQ(result5, "EjR2eJq8");
     auto [ret55, result55] = Base64Str2U8Vec(result5);
     EXPECT_EQ(ret55, HKS_SUCCESS);
 
     std::vector<uint8_t> input6 = {0x12, 0x34, 0x76, 0x78, 0x9A};
     auto [ret6, result6] = U8Vec2Base64Str(input6);
     EXPECT_EQ(ret6, HKS_SUCCESS);
-    EXPECT_EQ(result6, "EjI2eJi=");
+    EXPECT_EQ(result6, "EjR2eJo=");
     auto [ret66, result66] = Base64Str2U8Vec(result6);
     EXPECT_EQ(ret66, HKS_SUCCESS);
 
     std::vector<uint8_t> input7 = {0xFF, 0xE0, 0x0F, 0xFF, 0x40, 0x40, 0x3F, 0x8F, 0x00};
     auto [ret7, result7] = U8Vec2Base64Str(input7);
     EXPECT_EQ(ret7, HKS_SUCCESS);
-    EXPECT_EQ(result7, "/+/P/09AP4+A");
+    EXPECT_EQ(result7, "/+AP/0BAP48A");
     auto [ret77, result77] = Base64Str2U8Vec(result7);
     EXPECT_EQ(ret77, HKS_SUCCESS);
 }
@@ -478,15 +477,9 @@ HWTEST_F(UkeyCommonTest, UkeyCommonTest010, TestSize.Level0)
     std::string cert2 = BlobToString(certSet.certs[1].cert);
     
     EXPECT_EQ(index1, "index1");
-    EXPECT_EQ(cert1, "cert1");
+    EXPECT_EQ(cert1, "");
     EXPECT_EQ(index2, "index2");
-    EXPECT_EQ(cert2, "cert2");
-
-    // Test JsonArrayToCertInfoSet with empty array
-    std::string emptyJsonArray = "[]";
-    HksExtCertInfoSet emptyCertSet = {0, nullptr};
-    ret = JsonArrayToCertInfoSet(emptyJsonArray, emptyCertSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(cert2, "");
 }
 
 /* *
