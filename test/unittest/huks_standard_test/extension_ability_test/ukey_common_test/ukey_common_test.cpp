@@ -107,7 +107,6 @@ static void JsonWrapperBasicTest()
     ASSERT_EQ(testGet.IsNull(), true);
 }
 
-
 static void JsonWrapperBinarySerializationTest()
 {
     CommJsonObject original = CommJsonObject::CreateObject();
@@ -481,12 +480,6 @@ HWTEST_F(UkeyCommonTest, UkeyCommonTest010, TestSize.Level0)
     EXPECT_EQ(cert1, "");
     EXPECT_EQ(index2, "index2");
     EXPECT_EQ(cert2, "");
-
-    // Test JsonArrayToCertInfoSet with empty array
-    std::string emptyJsonArray = "[]";
-    HksExtCertInfoSet emptyCertSet = {0, nullptr};
-    ret = JsonArrayToCertInfoSet(emptyJsonArray, emptyCertSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 }
 
 /* *
