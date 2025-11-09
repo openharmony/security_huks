@@ -44,7 +44,7 @@ enum class PluginMethodEnum {
     FUNC_ON_FINISH_SESSION,
     FUNC_ON_ABORT_SESSION,
 
-    COUNT = 13,
+    COUNT = 14,
 };
 
 using OnRegisterProviderFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &providerName,

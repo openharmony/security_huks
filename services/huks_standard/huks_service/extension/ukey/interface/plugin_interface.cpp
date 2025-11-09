@@ -40,10 +40,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(
     const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
-    auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(providerMgr == nullptr, HKS_ERROR_NULL_POINTER, "providerMgr is null");
-    auto ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet);
-    HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
+    int32_t ret = HKS_SUCCESS;
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
     auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
@@ -53,12 +50,18 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(
     } else {
         ret = handleMgr->ClearRemoteHandleMap(providerName, "");
     }
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "clear index map fail");
+    HKS_IF_TRUE_LOGE(ret != HKS_SUCCESS, "clear index map fail");
 
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_NULL_LOGE_RETURN(sessionMgr, HKS_ERROR_NULL_POINTER, "sessionMgr is null")
     auto retBool = sessionMgr->HksClearHandle(processInfo, paramSet);
-    HKS_IF_TRUE_LOGE_RETURN(!retBool, ret, "clear handle map fail");
+    HKS_IF_TRUE_LOGE(!retBool, "clear handle map fail");
+
+    auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(providerMgr == nullptr, HKS_ERROR_NULL_POINTER, "providerMgr is null");
+    ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
+    HKS_IF_TRUE_RETURN(ret != HKS_SUCCESS, ret)
     return ret;
 }
 
