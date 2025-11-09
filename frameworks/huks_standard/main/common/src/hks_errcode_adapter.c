@@ -707,21 +707,21 @@ static struct HksError g_errCodeTable[] = {
     }, {
         .innerErrCode = HKS_ERROR_PROVIDER_HAS_REGISTERED,
         .hksResult = {
-            .errorCode = HUKS_ERR_CODE_PROVIDER_REGISTED,
-            .errorMsg = "The auth pin is not correct.",
+            .errorCode = HUKS_ERR_CODE_ITEM_EXISTS,
+            .errorMsg = "the provider is already registered.",
             .data = NULL
         }
     }, {
         .innerErrCode = HKS_ERROR_REMOTE_OPERATION_FAILED,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
-            .errorMsg = "The auth pin is not correct.",
+            .errorMsg = "an error occured in the dependent module.",
             .data = NULL
         }
     }, {
         .innerErrCode = HKS_ERROR_UKY_PROVIDER_MGR_REGESTER_REACH_MAX_NUM,
         .hksResult = {
-            .errorCode = HUKS_ERR_CODE_ILLEGAL_ARGUMENT,
+            .errorCode = HUKS_ERR_CODE_EXCEED_LIMIT,
             .errorMsg = "The provider manager register reach max num.",
             .data = NULL
         }
@@ -730,6 +730,27 @@ static struct HksError g_errCodeTable[] = {
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_ITEM_NOT_EXIST,
             .errorMsg = "the provider is not found.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_PROVIDER_ABILITY_NAME_NOT_EXIST,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_MISSING_CRYPTO_ALG_ARGUMENT,
+            .errorMsg = "the ability name param is missing.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_PROVIDER_NOT_FOUND,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_ITEM_NOT_EXIST,
+            .errorMsg = "the provider is not found.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_PROVIDER_IN_USE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_BUSY,
+            .errorMsg = "the provider is in using",
             .data = NULL
         }
     }
