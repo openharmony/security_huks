@@ -87,6 +87,7 @@ int32_t HuksPluginLoader::UnLoadPlugins(const struct HksProcessInfo &info, const
     m_pluginProviderMap.Clear();
     dlclose(m_pluginHandle);
     m_pluginHandle = nullptr;
+    HKS_LOG_I("lib close success!");
     return HKS_SUCCESS;
 }
 
@@ -107,9 +108,6 @@ HuksPluginLoader::HuksPluginLoader()
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_UN_REGISTER_PROVIDER,
         "_ZN4OHOS8Security4Huks32HksExtPluginOnUnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet");
-    m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_CREATE_REMOTE_INDEX,
-        "_ZN4OHOS8Security4Huks31HksExtPluginOnCreateRemoteIndexERK14HksProcessInfoRKNSt3__h12basic_string"
-        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_CREATE_REMOTE_KEY_HANDLE,
         "_ZN4OHOS8Security4Huks30HksExtPluginOnOpemRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_");
@@ -123,10 +121,10 @@ HuksPluginLoader::HuksPluginLoader()
         "_ZN4OHOS8Security4Huks33HksExtPluginOnGetUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRi");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_CLEAR_PIN_STATUS,
-        "_ZN4OHOS8Security4Huks24HksClearUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_string"
+        "_ZN4OHOS8Security4Huks35HksExtPluginOnClearUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEE");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_GET_REMOTE_PROPERTY,
-        "_ZN4OHOS8Security4Huks20HksGetRemotePropertyERK14HksProcessInfoRKNSt3__h12basic_string"
+        "_ZN4OHOS8Security4Huks31HksExtPluginOnGetRemotePropertyERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEESD_RK11CppParamSetRSE_");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_LIST_INDEX_CERTIFICATE,
         "_ZN4OHOS8Security4Huks29HksExtPluginOnExportCerticateERK14HksProcessInfoRKNSt3__h12basic_string"
@@ -143,6 +141,8 @@ HuksPluginLoader::HuksPluginLoader()
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_FINISH_SESSION,
         "_ZN4OHOS8Security4Huks27HksExtPluginOnFinishSessionERK14HksProcessInfoRKjRK11CppParamSet"
         "RKNSt3__h6vectorIhNSA_9allocatorIhEEEERSE_");
+    m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_ABORT_SESSION,
+        "_ZN4OHOS8Security4Huks26HksExtPluginOnAbortSessionERK14HksProcessInfoRKjRK11CppParamSet");
 }
 
 HuksPluginLoader::~HuksPluginLoader()

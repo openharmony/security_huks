@@ -339,11 +339,11 @@ static int32_t AppendErrorMsg(struct HksBlob *blob, const char *errorMsg, uint32
     uint8_t *oldData = blob->data;
     uint32_t totalLen = oldSize + errorMsgLen - 1;
     uint8_t *newData = static_cast<uint8_t *>(HksMalloc(totalLen));
-    HKS_IF_NULL_LOGE_RETURN(newData, HKS_ERROR_MALLOC_FAIL, "AppendErrorMsg: malloc fail")
+    HKS_IF_NULL_LOGE_RETURN(newData, HKS_ERROR_MALLOC_FAIL, "malloc fail")
 
     if (oldSize > 1) {
         if (memcpy_s(newData, totalLen, oldData, oldSize - 1) != EOK) {
-            HKS_LOG_E("AppendErrorMsg: memcpy_s fail for oldData");
+            HKS_LOG_E("memcpy_s fail for oldData");
             HKS_FREE(newData);
             return HKS_ERROR_INTERNAL_ERROR;
         }
@@ -351,7 +351,7 @@ static int32_t AppendErrorMsg(struct HksBlob *blob, const char *errorMsg, uint32
 
     uint32_t offset = (oldSize > 1) ? (oldSize - 1) : 0;
     if (memcpy_s(newData + offset, totalLen - offset, errorMsg, errorMsgLen) != EOK) {
-        HKS_LOG_E("AppendErrorMsg: memcpy_s fail for errorMsg");
+        HKS_LOG_E("memcpy_s fail for errorMsg");
         HKS_FREE(newData);
         return HKS_ERROR_INTERNAL_ERROR;
     }
@@ -359,7 +359,9 @@ static int32_t AppendErrorMsg(struct HksBlob *blob, const char *errorMsg, uint32
     HKS_FREE_BLOB(*blob);
     blob->data = newData;
     blob->size = totalLen;
-    HKS_LOG_I("blob->data in AppendErrorMsg content: %" LOG_PUBLIC "s", blob->data);
+    if (totalLen > 0) {
+        HKS_LOG_I("errMsg is: %" LOG_PUBLIC "s", blob->data);
+    }
 
     return HKS_SUCCESS;
 }

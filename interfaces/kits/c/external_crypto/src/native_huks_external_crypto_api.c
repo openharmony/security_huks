@@ -50,14 +50,6 @@ struct OH_Huks_Result OH_Huks_OpenResource(const struct OH_Huks_Blob *resourceId
     return ConvertApiResult(ret);
 }
 
-struct OH_Huks_Result OH_Huks_GetResource(const struct OH_Huks_Blob *resourceId,
-    const struct OH_Huks_ExternalCryptoParamSet *paramSet)
-{
-    int32_t ret = HksGetRemoteHandle((const struct HksBlob *) resourceId,
-        (const struct HksParamSet *) paramSet);
-    return ConvertApiResult(ret);
-}
-
 struct OH_Huks_Result OH_Huks_CloseResource(const struct OH_Huks_Blob *resourceId,
     const OH_Huks_ExternalCryptoParamSet *paramSet)
 {

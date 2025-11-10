@@ -666,7 +666,7 @@ void GetAuthUkeyPinParams(const napi_env &env, const napi_value &funcResult,
     }
 
     napi_value napiRetryCnt = nullptr;
-    status = napi_get_named_property(env, funcResult, "retryCnt", &napiRetryCnt);
+    status = napi_get_named_property(env, funcResult, "retryCount", &napiRetryCnt);
     if (status != napi_ok) {
         LOGE("napi_get_named_property failed, status:%d", status);
     }

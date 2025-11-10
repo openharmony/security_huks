@@ -31,17 +31,8 @@ int32_t HksIpcProviderUnregAdapter(const struct HksProcessInfo *processInfo,  co
 int32_t HksIpcCreateRemKeyHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *resourceId,
     const struct HksParamSet *paramSet, struct HksBlob *remoteHandleOut);
 
-int32_t HksIpcGetRemoteHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *resourceId,
-    const struct HksParamSet *paramSet, struct HksBlob *remoteHandleOut);
-
 int32_t HksIpcCloseRemKeyHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *resourceId,
     const struct HksParamSet *paramSet);
-
-int32_t HksIpcSignAdapter(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
-    const struct HksBlob *index, const struct HksBlob *data, struct HksBlob *signatureOut);
-
-int32_t HksIpcVerifyAdapter(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
-    const struct HksBlob *index, const struct HksBlob *data, struct HksBlob *signatureOut);
 
 int32_t HksIpcExportProvCertsAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *providerName,
     const struct HksParamSet *paramSet, struct HksExtCertInfoSet *certInfoSet);

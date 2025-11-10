@@ -40,6 +40,9 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 
+constexpr int32_t HKS_MAX_PROVIDER_NUM = 10;
+constexpr int32_t MAX_ABILITY_NAME_LEN = 128;
+constexpr int32_t MAX_PROVIDER_NAME_LEN = 128;
 class ProviderInfo {
 public:
     std::string m_providerName{};
@@ -62,7 +65,7 @@ public:
 constexpr int32_t HKS_PROVIDER_CAN_REMOVE_REF_COUNT = 2;
 int32_t HksGetProviderInfo(const HksProcessInfo &processInfo, const std::string &providerName,
     const CppParamSet &paramSet, ProviderInfo &providerInfo);
-
+bool CheckStringParamLenIsOk(const std::string &str, uint8_t mim, uint8_t max);
 class HksProviderLifeCycleManager : private OHOS::DelayedSingleton<HksProviderLifeCycleManager>,
     std::enable_shared_from_this<HksProviderLifeCycleManager> {
 public:
@@ -72,13 +75,16 @@ public:
         const CppParamSet &paramSet);
     int32_t OnUnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName,
         const CppParamSet &paramSet);
-    int32_t GetExtensionProxy(const ProviderInfo &providerInfo, sptr<IHuksAccessExtBase> &proxy);
-
-    int32_t HapGetAllConnectInfoByProviderName(const HksProcessInfo &processInfo, const std::string &providerName,
-        std::vector<std::shared_ptr<HksExtAbilityConnectInfo>> &providerInfos);
     int32_t GetAllProviderInfosByProviderName(const std::string &providerName,
         std::vector<ProviderInfo> &providerInfos);
+    int32_t GetExtensionProxy(const ProviderInfo &providerInfo, sptr<IHuksAccessExtBase> &proxy);
 private:
+    void PrintRegisterProviders();
+    int32_t HapGetAllConnectInfoByProviderName(const std::string &bundleName, const std::string &providerName,
+        std::vector<std::pair<ProviderInfo, std::shared_ptr<HksExtAbilityConnectInfo>>> &providerInfos);
+    int32_t HksHapGetConnectInfos(const HksProcessInfo &processInfo, const std::string &providerName,
+        const CppParamSet &paramSet,
+        std::vector<std::pair<ProviderInfo, std::shared_ptr<HksExtAbilityConnectInfo>>> &connectionInfos);
     // ProviderInfo, connectionInfo
     OHOS::SafeMap<ProviderInfo, std::shared_ptr<HksExtAbilityConnectInfo>> m_providerMap{};
     std::mutex m_registerMutex{};

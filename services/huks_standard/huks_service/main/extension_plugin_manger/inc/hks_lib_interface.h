@@ -42,7 +42,6 @@ public:
         const std::string &providerName, const CppParamSet &paramSet);
     int32_t OnUnRegistProvider(const HksProcessInfo &processInfo,
         const std::string &providerName, const CppParamSet &paramSet);
-    int32_t OnCreateRemoteIndex(const std::string &providerName, const CppParamSet &paramSet, std::string &outIndex);
     int32_t OnCreateRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet, std::string &handle);
     int32_t OnCloseRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
@@ -64,7 +63,8 @@ public:
         const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
     int32_t OnFinishSession (const HksProcessInfo &processInfo, const uint32_t &handle,
         const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
-
+    int32_t OnAbortSession(const HksProcessInfo &processInfo, const uint32_t &handle,
+        const CppParamSet &paramSet);
 private:
     std::mutex mapMutex_;
 };

@@ -187,25 +187,6 @@ int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct H
     return HksServiceGetUkeyPinAuthState(&processInfo, index, paramSetIn, status);
 }
 
-int32_t HksClientGetRemoteHandle(const struct HksBlob *resourceId,
-    const struct HksParamSet *paramSetIn)
-{
-    char *processName = NULL;
-    char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
-        "get process info failed")
-
-    struct HksProcessInfo processInfo = {
-        { strlen(userId), (uint8_t *)userId },
-        { strlen(processName), (uint8_t *)processName },
-        0,
-        0,
-        0,
-        0
-    };
-    return HksServiceGetRemoteHandle(&processInfo, resourceId, paramSetIn);
-}
-
 int32_t HksClientCloseRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn)
 {
     char *processName = NULL;
@@ -235,44 +216,6 @@ int32_t HksClientClearPinAuthState(const struct HksBlob *index)
         0
     };
     return HksServiceClearPinAuthState(&processInfo, index);
-}
-
-int32_t HksClientUkeySign(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
-    const struct HksBlob *srcData, struct HksBlob *signatureOut)
-{
-    char *processName = NULL;
-    char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
-        "get process info failed")
-
-    struct HksProcessInfo processInfo = {
-        { strlen(userId), (uint8_t *)userId },
-        { strlen(processName), (uint8_t *)processName },
-        0,
-        0,
-        0,
-        0
-    };
-    return HksServiceUkeySign(&processInfo, index, paramSetIn, srcData, signatureOut);
-}
-
-int32_t HksClientUkeyVerify(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
-    const struct HksBlob *srcData, struct HksBlob *signatureOut)
-{
-    char *processName = NULL;
-    char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
-        "get process info failed")
-
-    struct HksProcessInfo processInfo = {
-        { strlen(userId), (uint8_t *)userId },
-        { strlen(processName), (uint8_t *)processName },
-        0,
-        0,
-        0,
-        0
-    };
-    return HksServiceUkeyVerify(&processInfo, index, paramSetIn, srcData, signatureOut);
 }
 
 int32_t HksClientGetRemoteProperty(const struct HksBlob *resourceId, const struct HksBlob *propertyId,
