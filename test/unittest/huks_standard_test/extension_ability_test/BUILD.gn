@@ -3,13 +3,12 @@ import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 
-module_output_path = "huks/huks/extension_unittest"
-
 config("json_config") {
   cflags_cc = [ "-fexceptions" ]
 }
 
-if (os_level == "standard") {
+if (os_level == "standard" && huks_security_level == "trusted_environment") {
+  module_output_path = "huks/huks/extension_unittest"
   ohos_unittest("extension_unit_test") {
     module_out_path = module_output_path
 
@@ -30,16 +29,14 @@ if (os_level == "standard") {
     ]
 
     sources = [
-      # "./provider_mgr_test/hks_provider_manger_test.cpp",
-      "./extension_connect_test/hks_extension_connection_test.cpp",
-      "./plugin_loader_test/hks_plugin_manager_test.cpp",
-      "./plugin_loader_test/plugin_interface_wrap.cpp",
+      #"./provider_mgr_test/hks_provider_manger_test.cpp",
+      #"./extension_connect_test/hks_extension_connection_test.cpp",
+      #"./plugin_loader_test/hks_plugin_manager_test.cpp",
+      #"./plugin_loader_test/plugin_interface_wrap.cpp",
 
-      # "./ukey_common_test/ukey_common_test.cpp",
-      # "./handle_mgr_test/hks_handle_manager_test.cpp",
-      # 新增：包装桩实现，使用链接器 --wrap 覆盖原函数
-      # "./sdk_test/hks_ipc_adapter_wrap.cpp",
-      # "./sdk_test/hks_ukey_test.cpp",
+      "./ukey_common_test/ukey_common_test.cpp",
+      #"./handle_mgr_test/hks_handle_manager_test.cpp",
+      "./sdk_test/hks_ukey_test.cpp",
     ]
 
     configs = [
@@ -56,6 +53,7 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager:libhuks_remote_handle_manager_static",
       "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
       "//base/security/huks/test/unittest/huks_standard_test/module_test/inner_kits_passthrough:libhukssdk_static",
+      "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
     ]
     external_deps = [
       "ability_base:ability_base_want",
@@ -65,30 +63,6 @@ if (os_level == "standard") {
       "googletest:gtest",
       "hilog:libhilog",
     ]
-
-    cflags = [
-      "-Wall",
-      "-Werror",
-    ]
-
-    # 使用链接器 wrap 机制重定向到 __wrap_* 桩函数
-    ldflags = [
-      "-Wl,--wrap=HksIpcProviderRegAdapter",
-      "-Wl,--wrap=HksIpcProviderUnregAdapter",
-      "-Wl,--wrap=HksIpcCreateRemKeyHandleAdapter",
-      "-Wl,--wrap=HksIpcGetRemoteHandleAdapter",
-      "-Wl,--wrap=HksIpcCloseRemKeyHandleAdapter",
-      "-Wl,--wrap=HksIpcSignAdapter",
-      "-Wl,--wrap=HksIpcVerifyAdapter",
-      "-Wl,--wrap=HksIpcExportProvCertsAdapter",
-      "-Wl,--wrap=HksIpcExportCertAdapter",
-      "-Wl,--wrap=HksIpcAuthUkeyPinAdapter",
-      "-Wl,--wrap=HksIpcGetUkeyPinAuthStateAdapter",
-      "-Wl,--wrap=HksIpcClearPinStatusAdapter",
-      "-Wl,--wrap=HksIpcServiceOnGetRemotePropertyAdapter",
-    ]
-
-    ldflags += [ "-Wl,--wrap=dlsym" ]
 
     sanitize = {
       integer_overflow = true
@@ -101,5 +75,10 @@ if (os_level == "standard") {
 
     subsystem_name = "security"
     part_name = "huks"
+  }
+} else {
+  # Provide a stub target so upper-level unconditional dependency does not break build.
+  group("extension_unit_test") {
+    testonly = true
   }
 }

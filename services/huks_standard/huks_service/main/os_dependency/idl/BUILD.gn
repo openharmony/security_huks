@@ -19,22 +19,28 @@ config("huks_config") {
   include_dirs = [ "ipc" ]
 }
 
+config("idl_export_core_includes") {
+  include_dirs = [ 
+    "//base/security/huks/services/huks_standard/huks_service/main/core/include",
+    "//base/security/huks/services/huks_standard/huks_service/extension/ukey_client_service/inc",
+  ]
+}
+
 if (os_level == "standard") {
   ohos_static_library("libhuks_service_idl_standard_static") {
     subsystem_name = "security"
     part_name = "huks"
-    public_configs = [ ":huks_config" ]
+    public_configs = [ ":huks_config", ":idl_export_core_includes" ]
 
     include_dirs = [
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough",
       "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger/inc",
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",
+      "//base/security/huks/services/huks_standard/huks_service/main/core/include",
     ]
 
     sources = [
       "ipc/hks_ipc_service.c",
-      "ipc/hks_ipc_service_provider.cpp",
-      "ipc/hks_ipc_service_provider_adapter.cpp",
       "ipc/hks_permission_check.cpp",
       "ipc/hks_response.cpp",
       "ipc/hks_service_ipc_serialization.c",
@@ -53,9 +59,9 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
 
       # "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
       "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/at_wrapper:libhuks_at_systemapi_wrap_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey_client_service:libhuks_service_ukey_standard_static"
     ]
 
     if (enable_bundle_framework) {
@@ -100,7 +106,7 @@ if (os_level == "standard") {
   }
 } else {
   ohos_static_library("libhuks_service_idl_small_static") {
-    public_configs = [ ":huks_config" ]
+    public_configs = [ ":huks_config"]
 
     include_dirs = [
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough",

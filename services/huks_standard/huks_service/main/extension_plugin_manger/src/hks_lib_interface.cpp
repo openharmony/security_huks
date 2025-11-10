@@ -15,6 +15,7 @@
 
 #include "hks_lib_interface.h"
 #include "hks_function_types.h"
+#include "hks_cfi.h"
 
 namespace OHOS {
 namespace Security {
@@ -35,8 +36,8 @@ void HuksLibInterface::initProviderMap(OHOS::SafeMap<PluginMethodEnum, void*> &p
     m_pluginProviderMap = pluginProviderMap;
 }
 
-int32_t HuksLibInterface::OnRegistProvider(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet)
+ENABLE_CFI(int32_t HuksLibInterface::OnRegistProvider(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet))
 {
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_REGISTER_PROVIDER, funcPtr);
@@ -49,8 +50,8 @@ int32_t HuksLibInterface::OnRegistProvider(const HksProcessInfo &processInfo,
     return HKS_SUCCESS;
 }
 
-int32_t HuksLibInterface::OnUnRegistProvider(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet)
+ENABLE_CFI(int32_t HuksLibInterface::OnUnRegistProvider(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet))
 {
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_UN_REGISTER_PROVIDER, funcPtr);
@@ -64,22 +65,8 @@ int32_t HuksLibInterface::OnUnRegistProvider(const HksProcessInfo &processInfo,
     return HKS_SUCCESS;
 }
 
-int32_t HuksLibInterface::OnCreateRemoteIndex(const std::string &providerName,
-    const CppParamSet &paramSet, std::string &outIndex)
-{
-    void *funcPtr = nullptr;
-    bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_CREATE_REMOTE_INDEX, funcPtr);
-    HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
-        "CreateRemoteIndex method enum not found in plugin provider map.")
-    
-    int32_t ret = (*reinterpret_cast<OnCreateRemoteIndexFunc>(funcPtr))();
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "CreateRemoteIndex fail, ret = %{public}d", ret)
-    HKS_LOG_I("create remote index success");
-    return HKS_SUCCESS;
-}
-
-int32_t HuksLibInterface::OnCreateRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
-    const CppParamSet &paramSet, std::string &handle)
+ENABLE_CFI(int32_t HuksLibInterface::OnCreateRemoteKeyHandle(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, std::string &handle))
 {
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_CREATE_REMOTE_KEY_HANDLE, funcPtr);
@@ -92,8 +79,8 @@ int32_t HuksLibInterface::OnCreateRemoteKeyHandle(const HksProcessInfo &processI
     return HKS_SUCCESS;
 }
 
-int32_t HuksLibInterface::OnCloseRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
-    const CppParamSet &paramSet)
+ENABLE_CFI(int32_t HuksLibInterface::OnCloseRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet))
 {
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_CLOSE_REMOTE_KEY_HANDLE, funcPtr);
@@ -106,8 +93,8 @@ int32_t HuksLibInterface::OnCloseRemoteKeyHandle(const HksProcessInfo &processIn
     return HKS_SUCCESS;
 }
 
-int32_t HuksLibInterface::OnAuthUkeyPin(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t &retryCnt)
+ENABLE_CFI(int32_t HuksLibInterface::OnAuthUkeyPin(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t &retryCnt))
 {
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_AUTH_UKEY_PIN, funcPtr);
@@ -120,8 +107,8 @@ int32_t HuksLibInterface::OnAuthUkeyPin(const HksProcessInfo &processInfo,
     return HKS_SUCCESS;
 }
 
-int32_t HuksLibInterface::OnGetVerifyPinStatus(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, int32_t &state)
+ENABLE_CFI(int32_t HuksLibInterface::OnGetVerifyPinStatus(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, int32_t &state))
 {
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_GET_VERIFY_PIN_STATUS, funcPtr);
@@ -134,7 +121,8 @@ int32_t HuksLibInterface::OnGetVerifyPinStatus(const HksProcessInfo &processInfo
     return HKS_SUCCESS;
 }
 
-int32_t HuksLibInterface::OnClearUkeyPinAuthStatus(const HksProcessInfo &processInfo, const std::string &index)
+ENABLE_CFI(int32_t HuksLibInterface::OnClearUkeyPinAuthStatus(const HksProcessInfo &processInfo,
+    const std::string &index))
 {
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_CLEAR_PIN_STATUS, funcPtr);
@@ -147,8 +135,8 @@ int32_t HuksLibInterface::OnClearUkeyPinAuthStatus(const HksProcessInfo &process
     return HKS_SUCCESS;
 }
 
-int32_t HuksLibInterface::OnGetRemoteProperty(const HksProcessInfo &processInfo, const std::string &index,
-    const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams)
+ENABLE_CFI(int32_t HuksLibInterface::OnGetRemoteProperty(const HksProcessInfo &processInfo, const std::string &index,
+    const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams))
 {
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_GET_REMOTE_PROPERTY, funcPtr);
@@ -162,8 +150,8 @@ int32_t HuksLibInterface::OnGetRemoteProperty(const HksProcessInfo &processInfo,
     return HKS_SUCCESS;
 }
 
-int32_t HuksLibInterface::OnExportCertificate(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, std::string &certsJson)
+ENABLE_CFI(int32_t HuksLibInterface::OnExportCertificate(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, std::string &certsJson))
 {
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_LIST_INDEX_CERTIFICATE, funcPtr);
@@ -176,8 +164,8 @@ int32_t HuksLibInterface::OnExportCertificate(const HksProcessInfo &processInfo,
     return HKS_SUCCESS;
 }
 
-int32_t HuksLibInterface::OnExportProviderAllCertificates(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr)
+ENABLE_CFI(int32_t HuksLibInterface::OnExportProviderAllCertificates(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr))
 {
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_LIST_PROVIDER_ALL_CERTIFICATE, funcPtr);
@@ -191,8 +179,8 @@ int32_t HuksLibInterface::OnExportProviderAllCertificates(const HksProcessInfo &
     return HKS_SUCCESS;
 }
 
-int32_t HuksLibInterface::OnInitSession(const HksProcessInfo &processInfo, const std::string &index,
-    const CppParamSet &paramSet, uint32_t &handle)
+ENABLE_CFI(int32_t HuksLibInterface::OnInitSession(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, uint32_t &handle))
 {
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_INIT_SESSION, funcPtr);
@@ -205,8 +193,8 @@ int32_t HuksLibInterface::OnInitSession(const HksProcessInfo &processInfo, const
     return HKS_SUCCESS;
 }
 
-int32_t HuksLibInterface::OnUpdateSession(const HksProcessInfo &processInfo, const uint32_t &handle,
-    const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData)
+ENABLE_CFI(int32_t HuksLibInterface::OnUpdateSession(const HksProcessInfo &processInfo, const uint32_t &handle,
+    const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData))
 {
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_UPDATE_SESSION, funcPtr);
@@ -219,8 +207,8 @@ int32_t HuksLibInterface::OnUpdateSession(const HksProcessInfo &processInfo, con
     return HKS_SUCCESS;
 }
 
-int32_t HuksLibInterface::OnFinishSession(const HksProcessInfo &processInfo, const uint32_t &handle,
-    const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData)
+ENABLE_CFI(int32_t HuksLibInterface::OnFinishSession(const HksProcessInfo &processInfo, const uint32_t &handle,
+    const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData))
 {
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_FINISH_SESSION, funcPtr);
@@ -230,6 +218,20 @@ int32_t HuksLibInterface::OnFinishSession(const HksProcessInfo &processInfo, con
     int32_t ret = (*reinterpret_cast<OnFinishSessionFunc>(funcPtr))(processInfo, handle, paramSet, inData, outData);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "FinishSession fail, ret = %{public}d", ret)
     HKS_LOG_I("finish session success");
+    return HKS_SUCCESS;
+}
+
+ENABLE_CFI(int32_t HuksLibInterface::OnAbortSession(const HksProcessInfo &processInfo, const uint32_t &handle,
+    const CppParamSet &paramSet))
+{
+    void *funcPtr = nullptr;
+    bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_ABORT_SESSION, funcPtr);
+    HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "AbortSession method enum not found in plugin provider map.")
+    
+    int32_t ret = (*reinterpret_cast<OnAbortSessionFunc>(funcPtr))(processInfo, handle, paramSet);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "AbortSession fail, ret = %" LOG_PUBLIC "d", ret)
+    HKS_LOG_I("abort session success");
     return HKS_SUCCESS;
 }
 }

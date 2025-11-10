@@ -203,7 +203,7 @@ std::tuple<uint32_t, std::unique_ptr<uint8_t[]>, uint32_t, uint32_t> HksExtStub:
     mErrCode = HKS_SUCCESS;
     HKS_LOG_I("begin wait for async reply");
     if (mCv.wait_for(lck, std::chrono::seconds(timeout)) == std::cv_status::timeout) {
-        HKS_LOG_E("WaitForAsyncReply timeout! %d seconds", timeout);
+        HKS_LOG_E("WaitForAsyncReply timeout! %" LOG_PUBLIC "u seconds", timeout);
         return {HKS_ERROR_BAD_STATE, nullptr, 0, 0};
     }
     return {mErrCode, std::move(mAsyncReply), mSize, mMsgCode};
@@ -245,7 +245,7 @@ void HksExtProxy::SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &s
     writeResult = data.WriteUint32(errCode);
     HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(writeResult, "WriteUint32 errCode %" LOG_PUBLIC "u failed %" LOG_PUBLIC "d",
         errCode, writeResult)
-    if (errCode != DCM_SUCCESS) {
+    if (errCode != HKS_SUCCESS) {
         HKS_LOG_E("ukey callback fail errCode %" LOG_PUBLIC "u", errCode);
         int res = Remote()->SendRequest(msgCode, data, reply, option);
         HKS_IF_TRUE_LOGE(res != ERR_OK, "send fail reply errCode failed %" LOG_PUBLIC "d", res)

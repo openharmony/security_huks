@@ -563,132 +563,6 @@ static void HksReportEvent(const char *funcName, const struct HksHitraceId *trac
 #endif
 }
 
-int32_t HksServiceRegisterProvider(const struct HksProcessInfo *processInfo, const struct HksBlob *name,
-    const struct HksParamSet *paramSetIn)
-{
-    (void)processInfo;
-    (void)name;
-    (void)paramSetIn;
-    return 0;
-}
-
-int32_t HksServiceUnregisterProvider(const struct HksProcessInfo *processInfo, const struct HksBlob *name,
-    const struct HksParamSet *paramSetIn)
-{
-    (void)processInfo;
-    (void)name;
-    (void)paramSetIn;
-    return 0;
-}
-
-int32_t HksServiceExportProviderCertificates(const struct HksProcessInfo *processInfo,
-    const struct HksBlob *providerName, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
-{
-    (void)processInfo;
-    (void)providerName;
-    (void)paramSetIn;
-    (void)certSet;
-    return 0;
-}
-
-int32_t HksServiceExportCertificate(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
-{
-    (void)processInfo;
-    (void)index;
-    (void)paramSetIn;
-    (void)certSet;
-    return 0;
-}
-
-int32_t HksServiceAuthUkeyPin(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn, int32_t *outStatus, uint32_t *retryCount)
-{
-    (void)processInfo;
-    (void)index;
-    (void)paramSetIn;
-    (void)outStatus;
-    (void)retryCount;
-    return 0;
-}
-
-int32_t HksServiceOpenRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn)
-{
-    (void)processInfo;
-    (void)index;
-    (void)paramSetIn;
-    return 0;
-}
-
-int32_t HksServiceGetUkeyPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn, int32_t *status)
-{
-    (void)processInfo;
-    (void)index;
-    (void)paramSetIn;
-    (void)status;
-    return 0;
-}
-
-int32_t HksServiceGetRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn)
-{
-    (void)processInfo;
-    (void)index;
-    (void)paramSetIn;
-    return 0;
-}
-
-int32_t HksServiceCloseRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn)
-{
-    (void)processInfo;
-    (void)index;
-    (void)paramSetIn;
-    return 0;
-}
-
-int32_t HksServiceClearPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index)
-{
-    (void)processInfo;
-    (void)index;
-    return 0;
-}
-
-int32_t HksServiceUkeySign(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn, const struct HksBlob *srcData, struct HksBlob *signature)
-{
-    (void)processInfo;
-    (void)index;
-    (void)paramSetIn;
-    (void)srcData;
-    (void)signature;
-    return 0;
-}
-
-int32_t HksServiceUkeyVerify(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn, const struct HksBlob *srcData, struct HksBlob *signature)
-{
-    (void)processInfo;
-    (void)index;
-    (void)paramSetIn;
-    (void)srcData;
-    (void)signature;
-    return 0;
-}
-
-int32_t HksServiceGetRemoteProperty(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
-    const struct HksBlob *propertyId, const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut)
-{
-    (void)processInfo;
-    (void)resourceId;
-    (void)propertyId;
-    (void)paramSetIn;
-    (void)propertySetOut;
-    return 0;
-}
-
 int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, struct HksBlob *keyOut)
 {
@@ -1738,18 +1612,6 @@ static int32_t CheckBatchOperation(struct HksOperation *operation, const struct 
     return ret;
 }
 
-static int32_t ExecuteUpdate(const struct HksBlob *handle, struct HksParamSet *newParamSet,
-    const struct HksBlob *inData, struct HksBlob *outData, struct HksOperation *operation)
-{
-    int32_t ret = HuksAccessUpdate(handle, newParamSet, inData, outData);
-    IfNotSuccAppendHdiErrorInfo(ret);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HuksAccessUpdate fail, ret = %" LOG_PUBLIC "d", ret);
-        MarkAndDeleteOperation(&operation, handle);
-    }
-    return ret;
-}
-
 int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
 {
@@ -1788,7 +1650,12 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
         common.ret = HksCheckAcrossAccountsPermission(common.newParamSet, processInfo->userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "CheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", common.ret)
 
-        common.ret = ExecuteUpdate(handle, common.newParamSet, inData, outData, common.operation);
+        common.ret = HuksAccessUpdate(handle, common.newParamSet, inData, outData);
+        IfNotSuccAppendHdiErrorInfo(common.ret);
+        if (common.ret != HKS_SUCCESS) {
+            HKS_LOG_E("HuksAccessUpdate fail, ret = %" LOG_PUBLIC "d", common.ret);
+            MarkAndDeleteOperation(&common.operation, handle);
+        }
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "update execution failed, ret = %" LOG_PUBLIC "d", common.ret);
     } while (0);
 #ifdef L2_STANDARD
@@ -1908,9 +1775,16 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
     traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
     struct HksParamSet *newParamSet = NULL;
-    struct HksOperation *operation;
+    struct HksOperation *operation = NULL;
     int32_t ret;
     do {
+#ifdef L2_STANDARD
+        if (HksCheckIsUkeyOperation(paramSet) == HKS_SUCCESS) {
+            ret = HksServiceOnUkeyAbortSession(processInfo, handle, paramSet);
+            HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyFinishSession failed, ret = %" LOG_PUBLIC "d", ret)
+            break;
+        }
+#endif
         operation = QueryOperationAndMarkInUse(processInfo, handle);
         if (operation == NULL) {
             HKS_LOG_E("operationHandle is not exist or being busy");

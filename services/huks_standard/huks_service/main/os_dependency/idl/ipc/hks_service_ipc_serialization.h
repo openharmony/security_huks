@@ -27,6 +27,9 @@ int32_t GetBlobFromBuffer(struct HksBlob *blob, const struct HksBlob *srcBlob, u
 
 int32_t HksUKeyGeneralUnpack(const struct HksBlob *srcData, struct HksBlob *blob, struct HksParamSet **paramSet);
 
+int32_t HksUkeyBlob2ParamSetUnpack(const struct HksBlob *srcData, struct HksBlob *blob1,
+    struct HksBlob *blob2, struct HksParamSet **paramSet);
+
 int32_t HksGenerateKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
     struct HksParamSet **paramSetIn, struct HksBlob *keyOut);
 

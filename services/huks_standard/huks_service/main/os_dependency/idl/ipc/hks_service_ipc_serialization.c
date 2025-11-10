@@ -620,7 +620,7 @@ int32_t HksCertificatesPackFromService(const struct HksExtCertInfoSet *certInfoS
 {
     HKS_IF_TRUE_LOGE_RETURN(destData == NULL || destData->size != 0, HKS_ERROR_INVALID_ARGUMENT,
         "HksCertificatesPackFromService invalid param")
-    HKS_IF_TRUE_RETURN(certInfoSet == NULL || certInfoSet->count == 0, HKS_SUCCESS)
+    HKS_IF_TRUE_RETURN(certInfoSet == NULL, HKS_SUCCESS)
 
     destData->size = sizeof(certInfoSet->count);
     for (uint32_t i = 0; i < certInfoSet->count; ++i) {
