@@ -61,17 +61,17 @@ HWTEST_F(CryptoExtAbilityTest, HksCryptoExtAbilityTestAbilityTest_0000, testing:
     std::vector<uint8_t> outData;
     CppParamSet outParams;
     std::string propertyId;
-    HksCryptoExtAbility ability;
-    EXPECT_EQ(ability.OpenRemoteHandle(index, params, handle, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
-    EXPECT_EQ(ability.CloseRemoteHandle(handle, params, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
-    EXPECT_EQ(ability.AuthUkeyPin(handle, params, errcode, authState, retryCnt), HKS_ERROR_EXT_UNDEFINED_OPERATION);
-    EXPECT_EQ(ability.GetUkeyPinAuthState(handle, params, authState, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
-    EXPECT_EQ(ability.ExportCertificate(index, params, certJsonArr, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
-    EXPECT_EQ(ability.ExportProviderCertificates(params, certJsonArr, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
-    EXPECT_EQ(ability.InitSession(index, params, handle, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
-    EXPECT_EQ(ability.UpdateSession(handle, params, inData, outData, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
-    EXPECT_EQ(ability.FinishSession(handle, params, inData, outData, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
-    EXPECT_EQ(ability.GetProperty(handle, propertyId, params, outParams, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
-    EXPECT_EQ(ability.ClearUkeyPinAuthState(handle, params, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+    HksCryptoExtAbility HksAbility;
+    EXPECT_EQ(HksAbility.OpenRemoteHandle(index, params, handle, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.CloseRemoteHandle(handle, params, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.AuthUkeyPin(handle, params, errcode, authState, retryCnt), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.GetUkeyPinAuthState(handle, params, authState, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.ExportCertificate(index, params, certJsonArr, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.ExportProviderCertificates(params, certJsonArr, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.InitSession(index, params, handle, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.UpdateSession(handle, params, inData, outData, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.FinishSession(handle, params, inData, outData, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.GetProperty(handle, propertyId, params, outParams, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.ClearUkeyPinAuthState(handle, params, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
 }
 }
