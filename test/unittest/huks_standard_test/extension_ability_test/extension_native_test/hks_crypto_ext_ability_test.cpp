@@ -41,15 +41,11 @@ public:
     void TearDown() {};
 };
 
-HWTEST_F(CryptoExtAbilityTest, HksCryptoExtAbilityTest_0000, testing::ext::TestSize.Level0)
+HWTEST_F(CryptoExtAbilityTest, HksCryptoExtAbilityTestAbilityTest_0000, testing::ext::TestSize.Level0)
 {
     CreatorFunc creator;
     HksCryptoExtAbility hksCryptoExtAbility;
     hksCryptoExtAbility.SetCreator(creator);
-}
-
-HWTEST_F(CryptoExtAbilityTest, HksCryptoExtAbilityTestAbilityTest_0000, testing::ext::TestSize.Level0)
-{
     std::string index;
     CppParamSet params;
     std::string handle;
