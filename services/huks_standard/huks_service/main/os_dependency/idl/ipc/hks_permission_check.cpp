@@ -41,6 +41,7 @@
 
 #include "hks_param.h"
 #include <stdint.h>
+#define CERT_UID_INT 3512
 
 #ifdef L2_STANDARD
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
@@ -139,6 +140,14 @@ int32_t HksCheckUkeyPermission(const char *permission)
     }
 
     HKS_LOG_E("Check Ukey Permission failed!%" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", permission, result);
+    return HKS_ERROR_NO_PERMISSION;
+}
+
+int32_t CheckUkeyCertCaller(const struct HksProcessInfo *processInfo)
+{
+    HKS_IF_NULL_RETURN(processInfo, HKS_ERROR_INVALID_ARGUMENT);
+    HKS_IF_TRUE_LOGI_RETURN(processInfo->uidInt == CERT_UID_INT, HKS_SUCCESS, "CheckUkeyCertCaller success");
+    HKS_LOG_E("CheckUkeyCertCaller fail, caller is not asset.");
     return HKS_ERROR_NO_PERMISSION;
 }
 #endif
