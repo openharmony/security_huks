@@ -128,6 +128,19 @@ int32_t HksCheckAcrossAccountsPermission(const struct HksParamSet *paramSet, int
     }
     return HKS_SUCCESS;
 }
+
+int32_t HksCheckUkeyPermission(const char *permission)
+{
+    OHOS::Security::AccessToken::AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
+    int result = OHOS::Security::AccessToken::AccessTokenKit::VerifyAccessToken(tokenId, permission);
+    if (result == OHOS::Security::AccessToken::PERMISSION_GRANTED) {
+        HKS_LOG_D("Check Ukey Permission success!");
+        return HKS_SUCCESS;
+    }
+
+    HKS_LOG_E("Check Ukey Permission failed!%" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", permission, result);
+    return HKS_ERROR_NO_PERMISSION;
+}
 #endif
 #else
 int32_t HksCheckAcrossAccountsPermission(const struct HksParamSet *paramSet, int32_t callerUserId)
