@@ -29,6 +29,7 @@ ohos_unittest("js_crypto_access_ext_ability_test") {
   sources = [
     "js_hks_crypto_ext_ability_test.cpp",
     "hks_crypto_ext_ability_test.cpp",
+    "hks_crypto_ext_stub_impl_test.cpp",
     "mock/js_native_api_mock.cpp",
     
     "//base/security/huks/services/huks_standard/huks_service/extension/ability_native/src/log_utils.c",
