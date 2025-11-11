@@ -28,6 +28,8 @@ int32_t SystemApiPermissionCheck(int callerUserId);
 
 int32_t HksCheckAcrossAccountsPermission(const struct HksParamSet *paramSet, int32_t callerUserId);
 
+int32_t HksCheckUkeyPermission(const char *permission);
+
 #ifdef __cplusplus
 }
 #endif
