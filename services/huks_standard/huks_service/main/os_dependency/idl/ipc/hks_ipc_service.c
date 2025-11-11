@@ -322,8 +322,8 @@ void HksIpcServiceExportProviderCertificates(const struct HksBlob *srcData, cons
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+        ret = CheckUkeyCertCaller(&processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckUkeyCertCaller fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksIpcExportProvCertsAdapter(&processInfo, &providerName, paramSet, &certInfoSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcExportProvCertsAdapter fail, ret = %" LOG_PUBLIC "d", ret)
@@ -361,8 +361,8 @@ void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+        ret = CheckUkeyCertCaller(&processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckUkeyCertCaller fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksIpcExportCertAdapter(&processInfo, &index, paramSet, &certInfoSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcExportCertAdapter fail, ret = %" LOG_PUBLIC "d", ret)
