@@ -38,25 +38,25 @@
 #define CHECK_IS_PROMISE_AND_CALL_PROMISE(env, result, dataParam) \
 do { \
     bool isPromise = false; \
-    auto status = napi_is_promise(env, result, &isPromise); \
+    auto status = napi_is_promise((env), (result), &isPromise); \
     if (!isPromise) { \
         LOGE("retParser is not promise, status:%d", status); \
-        dataParam->hksErrorCode = HKS_ERROR_EXT_IS_NOT_PROMISE; \
+        (dataParam)->hksErrorCode = HKS_ERROR_EXT_IS_NOT_PROMISE; \
         return false; \
     } \
-    dataParam->hksErrorCode = CallPromise(env, result, dataParam); \
+    (dataParam)->hksErrorCode = CallPromise((env), (result), (dataParam)); \
     return true; \
 } while (0)
 
 #define WAIT_FOR_CALL_JS_EX_METHOD_DONE(dataParam, MAX_WAIT_TIME) \
 do { \
-    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME); \
-    std::unique_lock<std::mutex> lock(dataParam->callJsMutex); \
-    if (!dataParam->callJsExMethodDone.load()) { \
-        dataParam->callJsCon.wait_for( \
-            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); }); \
+    const auto maxWaitTime = std::chrono::seconds((MAX_WAIT_TIME)); \
+    std::unique_lock<std::mutex> lock((dataParam)->callJsMutex); \
+    if (!(dataParam)->callJsExMethodDone.load()) { \
+        (dataParam)->callJsCon.wait_for( \
+            lock, maxWaitTime, [dataParam] { return (dataParam)->callJsExMethodDone.load(); }); \
     } \
-    errcode = std::move(dataParam->errCode); \
+    errcode = std::move((dataParam)->errCode); \
 } while (0) \
 
 namespace OHOS {
