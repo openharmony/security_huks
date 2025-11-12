@@ -106,9 +106,9 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0004, testing
     int32_t errcode;
     const std::vector<uint8_t> inData;
     std::vector<uint8_t> outData;
-    EXPECT_EQ(hksCryptoExtStubImpl.Sign(handle, params, inData, outData, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(hksCryptoExtStubImpl.Sign(handle, params, inData, outData, errcode), ERR_OK);
     HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
-    EXPECT_EQ(hksCryptoExtStubImplNullptr.Sign(handle, params, inData, outData, errcode), ERR_OK);
+    EXPECT_EQ(hksCryptoExtStubImplNullptr.Sign(handle, params, inData, outData, errcode), HKS_ERROR_EXT_NULLPTR);
 }
 
 HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0005, testing::ext::TestSize.Level0)
@@ -121,10 +121,10 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0005, testing
     std::vector<uint8_t> plainText;
     std::vector<uint8_t> signature;
     EXPECT_EQ(hksCryptoExtStubImpl.Verify(
-        handle, params, plainText, signature, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+        handle, params, plainText, signature, errcode), ERR_OK);
     HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
     EXPECT_EQ(hksCryptoExtStubImplNullptr.Verify(
-        handle, params, plainText, signature, errcode), ERR_OK);
+        handle, params, plainText, signature, errcode), HKS_ERROR_EXT_NULLPTR);
 }
 
 HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0006, testing::ext::TestSize.Level0)
@@ -224,10 +224,10 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0012, testing
     std::string resourceId;
     int32_t errcode;
     EXPECT_EQ(hksCryptoExtStubImpl.GetResourceId(
-        params, resourceId, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+        params, resourceId, errcode), ERR_OK);
     HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
     EXPECT_EQ(hksCryptoExtStubImplNullptr.GetResourceId(
-        params, resourceId, errcode), ERR_OK);
+        params, resourceId, errcode), HKS_ERROR_EXT_NULLPTR);
 }
 
 HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0013, testing::ext::TestSize.Level0)
