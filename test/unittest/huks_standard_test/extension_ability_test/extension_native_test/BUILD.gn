@@ -42,7 +42,6 @@ ohos_unittest("js_crypto_access_ext_ability_test") {
     "//base/security/huks/services/huks_standard/huks_service/extension/ability_native:crypto_extension_ability_native",
     "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:huks_access_ext_base_include",
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
-    "//base/security/huks/frameworks/huks_standard/main/crypto_engine/openssl:libhuks_openssl_standard_static",
   ]
 
   external_deps = [
