@@ -127,7 +127,7 @@ int32_t HksProviderLifeCycleManager::GetExtensionProxy(const ProviderInfo &provi
     std::shared_ptr<HksExtAbilityConnectInfo> connectionInfo = nullptr;
     if (!m_providerMap.Find(providerInfo, connectionInfo)) {
         HKS_LOG_E("GetExtensionProxy failed, providerName: %" LOG_PUBLIC "s", providerInfo.m_providerName.c_str());
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_NOT_EXIST;
     }
     HKS_IF_TRUE_LOGE_RETURN(connectionInfo == nullptr, HKS_ERROR_NULL_POINTER, "connectionInfo is nullptr")
     HKS_IF_TRUE_LOGE_RETURN(connectionInfo->m_connection == nullptr, HKS_ERROR_NULL_POINTER, "m_connection is nullptr")

@@ -89,7 +89,7 @@ int32_t HksRemoteHandleManager::MergeProviderCertificates(const ProviderInfo &pr
         certObj.RemoveKey("index");
         auto indexResult = indexValue.ToString();
         HKS_IF_TRUE_CONTINUE(indexResult.first != HKS_SUCCESS || indexResult.second.empty() ||
-            indexResult.second.size() >= MAX_INDEX_SIZE)
+            indexResult.second.size() > MAX_INDEX_SIZE)
         std::string wrappedIndex;
         if (WrapIndexWithProviderInfo(providerInfo, indexResult.second, wrappedIndex) == HKS_SUCCESS) {
             HKS_IF_TRUE_CONTINUE(!certObj.SetValue("index", wrappedIndex))
@@ -195,7 +195,7 @@ int32_t HksRemoteHandleManager::ParseAndValidateIndex(const std::string &index, 
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
         "Parse index and provider info failed: %" LOG_PUBLIC "d", ret)
     ret = ValidateAndGetHandle(newIndex, providerInfo, handle);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NOT_EXIST,
         "Validate provider info and get handle failed: %" LOG_PUBLIC "d", ret)
     return HKS_SUCCESS;
 }
@@ -365,18 +365,11 @@ int32_t HksRemoteHandleManager::FindRemoteCertificate(const std::string &index,
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
             "Remote ExportCertificate failed: %" LOG_PUBLIC "d", ret)
     
-    CommJsonObject certJson = CommJsonObject::Parse(cert);
-    HKS_IF_TRUE_LOGE_RETURN(certJson.IsNull(), HKS_ERROR_INVALID_ARGUMENT, "JSON parse failed")
-    auto indexValue = certJson.GetValue("index");
-    auto indexResult = indexValue.ToString();
-    HKS_IF_TRUE_LOGE_RETURN(indexResult.first != HKS_SUCCESS || indexResult.second.empty() ||
-        indexResult.second.size() >= MAX_INDEX_SIZE, HKS_ERROR_INVALID_ARGUMENT, "index invalid")
-    std::string wrappedIndex;
-    ret = WrapIndexWithProviderInfo(providerInfo, indexResult.second, wrappedIndex);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Wrap index with provider info failed: %" LOG_PUBLIC "d", ret)
-    HKS_IF_TRUE_LOGE_RETURN(!certJson.SetValue("index", wrappedIndex),
-        HKS_ERROR_INVALID_ARGUMENT, "Set index failed")
-    cert = certJson.Serialize(false);
+    CommJsonObject combinedArray = CommJsonObject::CreateArray();
+    HKS_IF_TRUE_LOGE_RETURN(combinedArray.IsNull(), HKS_ERROR_JSON_SERIALIZE_FAILED, "Create combined array failed")
+    ret = MergeProviderCertificates(providerInfo, cert, combinedArray);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Merge provider certificates failed: %" LOG_PUBLIC "d", ret)
+    cert = combinedArray.Serialize(false);
     HKS_IF_TRUE_LOGE_RETURN(cert.empty(), HKS_ERROR_INVALID_ARGUMENT, "Serialize failed")
     return HKS_SUCCESS;
 }
