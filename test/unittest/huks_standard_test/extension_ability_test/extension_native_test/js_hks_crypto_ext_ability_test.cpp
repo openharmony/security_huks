@@ -26,7 +26,7 @@
 #include "native_reference_mock.h"
 #include "../../../../../services/huks_standard/huks_service/extension/ability_native/src/js_hks_crypto_ext_ability.cpp"
 #include "../../../../../services/huks_standard/huks_service/extension/ability_native/src/hks_crypto_ext_ability.cpp"
-#include "../../../../../security/huks/services/huks_standard/huks_service/extension/ability_native/src/hks_crypto_ext_stub_impl.cpp"
+#include "../../../../../services/huks_standard/huks_service/extension/ability_native/src/hks_crypto_ext_stub_impl.cpp"
 namespace OHOS::Security::Huks {
 using namespace testing;
 using namespace testing::ext;
