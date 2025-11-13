@@ -30,6 +30,8 @@ int32_t HksCheckAcrossAccountsPermission(const struct HksParamSet *paramSet, int
 
 int32_t HksCheckUkeyPermission(const char *permission);
 
+int32_t CheckUkeyCertCaller(const struct HksProcessInfo *processInfo);
+
 #ifdef __cplusplus
 }
 #endif
