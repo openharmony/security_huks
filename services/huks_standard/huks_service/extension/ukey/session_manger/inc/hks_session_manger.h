@@ -64,6 +64,8 @@ private:
     void ClearSessionHandleMap(std::vector<uint32_t> &toRemove);
     OHOS::SafeMap<uint32_t, HandleInfo> m_handlers{};
 };
+
+bool CheckAndAppendProcessInfo(CppParamSet &paramSet, const HksProcessInfo &processInfo);
 }
 }
 }

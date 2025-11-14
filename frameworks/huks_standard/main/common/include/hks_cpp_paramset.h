@@ -29,7 +29,7 @@ public:
     explicit CppParamSet() = default;
     explicit CppParamSet(const HksParamSet *paramSetIn);
     explicit CppParamSet(const std::vector<HksParam> &params);
-    CppParamSet(HksParamSet *paramSetIn, bool takeOwnership);
+    CppParamSet(HksParamSet *paramSetIn, bool takeOwnership = false);
     CppParamSet(const HksBlob &inBlob);
     CppParamSet(const HksParamSet *inPs, const std::vector<HksParam> &params);
     CppParamSet(const CppParamSet &inCppPs, const std::vector<HksParam> &params);

@@ -23,6 +23,16 @@
 
 namespace OHOS::Security::Huks {
 
+bool CheckStringParamLenIsOk(const std::string &str, uint32_t min, uint32_t max)
+{
+    if (str.size() < min || str.size() > max) {
+        HKS_LOG_E("CheckStringParamLenIsOk failed, str.size: %" LOG_PUBLIC "zu"
+            "min: %" LOG_PUBLIC "d, max: %" LOG_PUBLIC "d", str.size(), min, max);
+        return false;
+    }
+    return true;
+}
+
 bool IsHksExtCertInfoSetEmpty(const struct HksExtCertInfoSet& certSet)
 {
     return certSet.certs == nullptr || certSet.count == 0;
