@@ -28,7 +28,11 @@ ohos_unittest("js_crypto_access_ext_ability_test") {
 
   sources = [
     "js_hks_crypto_ext_ability_test.cpp",
+    "hks_crypto_ext_ability_test.cpp",
+    "hks_crypto_ext_stub_impl_test.cpp",
     "mock/js_native_api_mock.cpp",
+    
+    "//base/security/huks/services/huks_standard/huks_service/extension/ability_native/src/log_utils.c",
   ]
 
   deps = [
@@ -37,6 +41,7 @@ ohos_unittest("js_crypto_access_ext_ability_test") {
     "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
     "//base/security/huks/services/huks_standard/huks_service/extension/ability_native:crypto_extension_ability_native",
     "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:huks_access_ext_base_include",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
   ]
 
   external_deps = [

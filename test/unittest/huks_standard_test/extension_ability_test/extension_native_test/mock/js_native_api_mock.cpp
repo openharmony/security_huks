@@ -81,6 +81,14 @@ napi_status napi_create_int32(napi_env env, int32_t value, napi_value* result)
     return OHOS::Security::Huks::Assistant::ins_->napi_create_int32(env, value, result);
 }
 
+napi_status napi_create_uint32(napi_env env, uint32_t value, napi_value* result)
+{
+    if (OHOS::Security::Huks::Assistant::ins_ == nullptr) {
+        return napi_invalid_arg;
+    }
+    return OHOS::Security::Huks::Assistant::ins_->napi_create_uint32(env, value, result);
+}
+
 napi_status napi_create_int64(napi_env env, int64_t value, napi_value* result)
 {
     if (OHOS::Security::Huks::Assistant::ins_ == nullptr) {
@@ -221,4 +229,81 @@ napi_status napi_send_event(napi_env env, const std::function<void()>& cb, napi_
         return napi_invalid_arg;
     }
     return OHOS::Security::Huks::Assistant::ins_->napi_send_event(env, cb, priority);
+}
+
+napi_status napi_create_arraybuffer(napi_env env, size_t byte_length, void** data, napi_value* result)
+{
+    if (OHOS::Security::Huks::Assistant::ins_ == nullptr) {
+        return napi_invalid_arg;
+    }
+    return OHOS::Security::Huks::Assistant::ins_->napi_create_arraybuffer(env, byte_length, data, result);
+}
+
+napi_status napi_create_typedarray(napi_env env, napi_typedarray_type type,
+    size_t length, napi_value arraybuffer, size_t byte_offset, napi_value* result)
+{
+    if (OHOS::Security::Huks::Assistant::ins_ == nullptr) {
+        return napi_invalid_arg;
+    }
+    return OHOS::Security::Huks::Assistant::ins_->napi_create_typedarray(
+        env, type, length, arraybuffer, byte_offset, result);
+}
+
+napi_status napi_create_bigint_uint64(napi_env env, uint64_t value, napi_value* result)
+{
+    if (OHOS::Security::Huks::Assistant::ins_ == nullptr) {
+        return napi_invalid_arg;
+    }
+    return OHOS::Security::Huks::Assistant::ins_->napi_create_bigint_uint64(env, value, result);
+}
+
+napi_status napi_set_element(napi_env env, napi_value object, uint32_t index, napi_value value)
+{
+    if (OHOS::Security::Huks::Assistant::ins_ == nullptr) {
+        return napi_invalid_arg;
+    }
+    return OHOS::Security::Huks::Assistant::ins_->napi_set_element(env, object, index, value);
+}
+
+napi_status napi_get_arraybuffer_info(
+    napi_env env, napi_value arraybuffer, void** data, size_t* byte_length)
+{
+    if (OHOS::Security::Huks::Assistant::ins_ == nullptr) {
+        return napi_invalid_arg;
+    }
+    return OHOS::Security::Huks::Assistant::ins_->napi_get_arraybuffer_info(env, arraybuffer, data, byte_length);
+}
+
+napi_status napi_get_typedarray_info(napi_env env, napi_value typedarray,
+    napi_typedarray_type* type, size_t* length, void** data, napi_value* arraybuffer, size_t* byte_offset)
+{
+    if (OHOS::Security::Huks::Assistant::ins_ == nullptr) {
+        return napi_invalid_arg;
+    }
+    return OHOS::Security::Huks::Assistant::ins_->napi_get_typedarray_info(env, typedarray,
+        type, length, data, arraybuffer, byte_offset);
+}
+
+napi_status napi_get_value_uint32(napi_env env, napi_value value, uint32_t* result)
+{
+    if (OHOS::Security::Huks::Assistant::ins_ == nullptr) {
+        return napi_invalid_arg;
+    }
+    return OHOS::Security::Huks::Assistant::ins_->napi_get_value_uint32(env, value, result);
+}
+
+napi_status napi_get_value_bigint_uint64(napi_env env, napi_value value, uint64_t* result, bool* lossless)
+{
+    if (OHOS::Security::Huks::Assistant::ins_ == nullptr) {
+        return napi_invalid_arg;
+    }
+    return OHOS::Security::Huks::Assistant::ins_->napi_get_value_bigint_uint64(env, value, result, lossless);
+}
+
+napi_status napi_is_callable(napi_env env, napi_value value, bool* result)
+{
+    if (OHOS::Security::Huks::Assistant::ins_ == nullptr) {
+        return napi_invalid_arg;
+    }
+    return OHOS::Security::Huks::Assistant::ins_->napi_is_callable(env, value, result);
 }

@@ -32,7 +32,7 @@ group("unittest") {
       "./unittest/huks_standard_test/three_stage_test:huks_UT_test",
 
       "./unittest/huks_standard_test/extension_ability_test:extension_unit_test",
-      # "./unittest/huks_standard_test/extension_ability_test/extension_native_test:js_crypto_access_ext_ability_test",
+      "./unittest/huks_standard_test/extension_ability_test/extension_native_test:js_crypto_access_ext_ability_test",
     ]
   } else {
     if (ohos_kernel_type == "liteos_m") {
