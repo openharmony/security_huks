@@ -31,7 +31,6 @@ if (os_level == "standard") {
     include_dirs = [ "inc" ]
     public_configs = [ ":huks_ext_plugin_manager_config" ]
     sources = [
-      "src/hks_lib_interface.cpp",
       "src/hks_plugin_lifecycle_manager.cpp",
       "src/hks_plugin_loader.cpp",
     ]

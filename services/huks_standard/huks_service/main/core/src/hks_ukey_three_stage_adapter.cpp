@@ -19,7 +19,6 @@
 #include "hks_log.h"
 #include "securec.h"
 #include "hks_plugin_lifecycle_manager.h"
-#include "hks_lib_interface.h"
 #include "hks_template.h"
 #include "hks_mem.h"
 #include "hks_common_check.h"
@@ -54,10 +53,10 @@ int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, co
     CppParamSet cppParamSet(inParamSet);
     uint32_t handleU32 = 0;
 
-    auto libInterface = OHOS::Security::Huks::HuksLibInterface::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get lib interface instance.")
+    auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
 
-    ret = libInterface->OnInitSession(*processInfo, cppIndex, cppParamSet, handleU32);
+    ret = pluginManager->OnInitSession(*processInfo, cppIndex, cppParamSet, handleU32);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnInitSession fail")
 
     uint64_t handleU64 = static_cast<uint64_t>(handleU32);
@@ -94,10 +93,10 @@ int32_t HksServiceOnUkeyUpdateSession(const struct HksProcessInfo *processInfo, 
     }
     std::vector<uint8_t> outdata;
 
-    auto libInterface = OHOS::Security::Huks::HuksLibInterface::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get lib interface instance.")
+    auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
 
-    int32_t ret = libInterface->OnUpdateSession(*processInfo, handleU32, cppParamSet, indata, outdata);
+    int32_t ret = pluginManager->OnUpdateSession(*processInfo, handleU32, cppParamSet, indata, outdata);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnUpdateSession fail. ret: %" LOG_PUBLIC "d", ret)
 
     HKS_IF_TRUE_LOGI_RETURN(outData->size == 0, ret, "outData size is 0. ret: %" LOG_PUBLIC "d", ret);
@@ -134,10 +133,10 @@ int32_t HksServiceOnUkeyFinishSession(const struct HksProcessInfo *processInfo, 
     }
     std::vector<uint8_t> outdata;
 
-    auto libInterface = OHOS::Security::Huks::HuksLibInterface::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get lib interface instance.")
+    auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
 
-    int32_t ret = libInterface->OnFinishSession(*processInfo, handleU32, cppParamSet, indata, outdata);
+    int32_t ret = pluginManager->OnFinishSession(*processInfo, handleU32, cppParamSet, indata, outdata);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnFinishSession fail")
 
     HKS_IF_TRUE_LOGI_RETURN(outData->size == 0, ret, "outData size is 0. ret: %" LOG_PUBLIC "d", ret);
@@ -167,10 +166,10 @@ int32_t HksServiceOnUkeyAbortSession(const struct HksProcessInfo *processInfo, c
             "memcpy_s faild. ret = %" LOG_PUBLIC "d", mcpRet)
     }
     auto handleU32 = static_cast<uint32_t>(handleU64);
-    auto libInterface = OHOS::Security::Huks::HuksLibInterface::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get lib interface instance.")
+    auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
     CppParamSet cppParamSet(paramSet);
-    int32_t ret = libInterface->OnAbortSession(*processInfo, handleU32, cppParamSet);
+    int32_t ret = pluginManager->OnAbortSession(*processInfo, handleU32, cppParamSet);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnAbortSession fail. ret = %" LOG_PUBLIC "d", ret)
     return ret;
 }
