@@ -68,7 +68,7 @@ ErrCode HksCryptoExtStubImpl::GetUkeyPinAuthState(
         LOGE("extension is nullptr");
         return HKS_ERROR_EXT_NULLPTR;
     }
-    state = 0; // 设置默认状态
+    state = 0;
     return extension_->GetUkeyPinAuthState(handle, params, state, errcode);
 }
 

@@ -35,6 +35,30 @@
 #include "hks_json_wrapper.h"
 #include <vector>
 
+#define RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam) \
+do { \
+    bool isPromise = false; \
+    auto status = napi_is_promise((env), (result), &isPromise); \
+    if (!isPromise) { \
+        LOGE("retParser is not promise, status:%d", status); \
+        (dataParam)->hksErrorCode = HKS_ERROR_EXT_IS_NOT_PROMISE; \
+        return false; \
+    } \
+    (dataParam)->hksErrorCode = CallPromise((env), (result), (dataParam)); \
+    return true; \
+} while (0)
+
+#define WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME) \
+do { \
+    const auto maxWaitTime = std::chrono::seconds((MAX_WAIT_TIME)); \
+    std::unique_lock<std::mutex> lock((dataParam)->callJsMutex); \
+    if (!(dataParam)->callJsExMethodDone.load()) { \
+        (dataParam)->callJsCon.wait_for( \
+            lock, maxWaitTime, [dataParam] { return (dataParam)->callJsExMethodDone.load(); }); \
+    } \
+    errcode = std::move((dataParam)->errCode); \
+} while (0) \
+
 namespace OHOS {
 namespace Security {
 namespace Huks {
@@ -414,7 +438,7 @@ int32_t DoCallJsMethod(std::shared_ptr<CallJsParam> param)
     }
     napi_value method = nullptr;
     status = napi_get_named_property(env, value, param->funcName.c_str(), &method);
-    if (method == nullptr) {
+    if (method == nullptr || status != napi_ok) {
         LOGE("failed to get %s from FileExtAbility object.status:%d", param->funcName.c_str(), status);
         return HKS_ERROR_EXT_GET_NAME_PROPERTY_FAILED;
     }
@@ -424,7 +448,7 @@ int32_t DoCallJsMethod(std::shared_ptr<CallJsParam> param)
     }
     napi_value result = nullptr;
     status = napi_call_function(env, value, method, argc, argv, &result);
-    if (result == nullptr) {
+    if (result == nullptr || status != napi_ok) {
         LOGE("Napi call function fail, status:%d", status);
         return HKS_ERROR_EXT_CALL_FUNCTION_FAILED;
     }
@@ -726,7 +750,7 @@ void GetExportCertificateParams(const napi_env &env, const napi_value &funcResul
     }
 
     status = napi_get_named_property(env, funcResult, "certs", &nativeArray);
-    if (nativeArray == nullptr) {
+    if (nativeArray == nullptr || status != napi_ok) {
         LOGE("napi_get_named_property failed. status:%d", status);
         return;
     }
@@ -766,7 +790,7 @@ void GetSessionParams(const napi_env &env, const napi_value &funcResult,
         return;
     }
     status = napi_get_named_property(env, funcResult, "outData", &napiOutData);
-    if (napiOutData == nullptr) {
+    if (napiOutData == nullptr || status != napi_ok) {
         LOGE("Convert js array object fail, status:%d", status);
         return;
     }
@@ -1087,15 +1111,7 @@ int32_t JsHksCryptoExtAbility::OpenRemoteHandle(const std::string &index, const 
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::OPEN_REMOTE_HANDLE;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
-        bool isPromise = false;
-        auto status = napi_is_promise(env, result, &isPromise);
-        if (!isPromise) {
-            LOGE("retParser is not promise, status:%d", status);
-            dataParam->hksErrorCode = HKS_ERROR_EXT_IS_NOT_PROMISE;
-            return false;
-        }
-        dataParam->hksErrorCode = CallPromise(env, result, dataParam);
-        return true;
+        RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
@@ -1104,15 +1120,8 @@ int32_t JsHksCryptoExtAbility::OpenRemoteHandle(const std::string &index, const 
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
-    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
-    std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
-    if (!dataParam->callJsExMethodDone.load()) {
-        dataParam->callJsCon.wait_for(
-            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); });
-    }
-
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     handle = std::move(dataParam->handle);
-    errcode = std::move(dataParam->errCode);
     return dataParam->hksErrorCode;
 }
 
@@ -1129,15 +1138,7 @@ int32_t JsHksCryptoExtAbility::CloseRemoteHandle(const std::string &handle, cons
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::CLOSE_REMOTE_HANDLE;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
-        bool isPromise = false;
-        auto status = napi_is_promise(env, result, &isPromise);
-        if (!isPromise) {
-            LOGE("retParser is not promise, status:%d", status);
-            dataParam->hksErrorCode = HKS_ERROR_EXT_IS_NOT_PROMISE;
-            return false;
-        }
-        dataParam->hksErrorCode = CallPromise(env, result, dataParam);
-        return true;
+        RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
@@ -1146,13 +1147,7 @@ int32_t JsHksCryptoExtAbility::CloseRemoteHandle(const std::string &handle, cons
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
-    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
-    std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
-    if (!dataParam->callJsExMethodDone.load()) {
-        dataParam->callJsCon.wait_for(
-            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); });
-    }
-    errcode = std::move(dataParam->errCode);
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     return dataParam->hksErrorCode;
 }
 
@@ -1170,15 +1165,7 @@ int32_t JsHksCryptoExtAbility::AuthUkeyPin(const std::string &handle, const CppP
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::AUTH_UKEY_PIN;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
-        bool isPromise = false;
-        auto status = napi_is_promise(env, result, &isPromise);
-        if (!isPromise) {
-            LOGE("retParser is not promise, status:%d", status);
-            dataParam->hksErrorCode = HKS_ERROR_EXT_IS_NOT_PROMISE;
-            return false;
-        }
-        dataParam->hksErrorCode = CallPromise(env, result, dataParam);
-        return true;
+        RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
@@ -1187,13 +1174,7 @@ int32_t JsHksCryptoExtAbility::AuthUkeyPin(const std::string &handle, const CppP
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
-    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
-    std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
-    if (!dataParam->callJsExMethodDone.load()) {
-        dataParam->callJsCon.wait_for(
-            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); });
-    }
-    errcode = std::move(dataParam->errCode);
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     authState = std::move(dataParam->authState);
     retryCnt = std::move(dataParam->retryCnt);
     return dataParam->hksErrorCode;
@@ -1213,15 +1194,7 @@ int32_t JsHksCryptoExtAbility::GetUkeyPinAuthState(const std::string &handle, co
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::GET_UKEY_PIN_AUTH_STATE;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
-        bool isPromise = false;
-        auto status = napi_is_promise(env, result, &isPromise);
-        if (!isPromise) {
-            LOGE("retParser is not promise, status:%d", status);
-            dataParam->hksErrorCode = HKS_ERROR_EXT_IS_NOT_PROMISE;
-            return false;
-        }
-        dataParam->hksErrorCode = CallPromise(env, result, dataParam);
-        return true;
+        RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
@@ -1230,13 +1203,7 @@ int32_t JsHksCryptoExtAbility::GetUkeyPinAuthState(const std::string &handle, co
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
-    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
-    std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
-    if (!dataParam->callJsExMethodDone.load()) {
-        dataParam->callJsCon.wait_for(
-            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); });
-    }
-    errcode = std::move(dataParam->errCode);
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     authState = std::move(dataParam->authState);
     return dataParam->hksErrorCode;
 }
@@ -1255,15 +1222,7 @@ int32_t JsHksCryptoExtAbility::ExportCertificate(const std::string &index, const
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::EXPORT_CERTIFICATE;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
-        bool isPromise = false;
-        auto status = napi_is_promise(env, result, &isPromise);
-        if (!isPromise) {
-            LOGE("retParser is not promise, status:%d", status);
-            dataParam->hksErrorCode = HKS_ERROR_EXT_IS_NOT_PROMISE;
-            return false;
-        }
-        dataParam->hksErrorCode = CallPromise(env, result, dataParam);
-        return true;
+        RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
@@ -1272,13 +1231,7 @@ int32_t JsHksCryptoExtAbility::ExportCertificate(const std::string &index, const
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
-    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
-    std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
-    if (!dataParam->callJsExMethodDone.load()) {
-        dataParam->callJsCon.wait_for(
-            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); });
-    }
-    errcode = std::move(dataParam->errCode);
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     HksCertInfoToString(dataParam->certs, certJsonArr);
     return dataParam->hksErrorCode;
 }
@@ -1305,15 +1258,7 @@ int32_t JsHksCryptoExtAbility::ExportProviderCertificates(const CppParamSet &par
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::EXPORT_PROVIDER_CERTIFICATES;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
-        bool isPromise = false;
-        auto status = napi_is_promise(env, result, &isPromise);
-        if (!isPromise) {
-            LOGE("retParser is not promise, status:%d", status);
-            dataParam->hksErrorCode = HKS_ERROR_EXT_IS_NOT_PROMISE;
-            return false;
-        }
-        dataParam->hksErrorCode = CallPromise(env, result, dataParam);
-        return true;
+        RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
@@ -1322,13 +1267,7 @@ int32_t JsHksCryptoExtAbility::ExportProviderCertificates(const CppParamSet &par
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
-    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
-    std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
-    if (!dataParam->callJsExMethodDone.load()) {
-        dataParam->callJsCon.wait_for(
-            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); });
-    }
-    errcode = std::move(dataParam->errCode);
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     HksCertInfoToString(dataParam->certs, certJsonArr);
     return dataParam->hksErrorCode;
 }
@@ -1347,15 +1286,7 @@ int32_t JsHksCryptoExtAbility::InitSession(const std::string &index, const CppPa
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::INIT_SESSION;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
-        bool isPromise = false;
-        auto status = napi_is_promise(env, result, &isPromise);
-        if (!isPromise) {
-            LOGE("retParser is not promise, status:%d", status);
-            dataParam->hksErrorCode = HKS_ERROR_EXT_IS_NOT_PROMISE;
-            return false;
-        }
-        dataParam->hksErrorCode = CallPromise(env, result, dataParam);
-        return true;
+        RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
@@ -1364,14 +1295,8 @@ int32_t JsHksCryptoExtAbility::InitSession(const std::string &index, const CppPa
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
-    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
-    std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
-    if (!dataParam->callJsExMethodDone.load()) {
-        dataParam->callJsCon.wait_for(
-            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); });
-    }
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     handle = std::move(dataParam->handle);
-    errcode = std::move(dataParam->errCode);
     return dataParam->hksErrorCode;
 }
 
@@ -1389,15 +1314,7 @@ int32_t JsHksCryptoExtAbility::UpdateSession(const std::string &handle, const Cp
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::UPDATE_SESSION;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
-        bool isPromise = false;
-        auto status = napi_is_promise(env, result, &isPromise);
-        if (!isPromise) {
-            LOGE("retParser is not promise, status:%d", status);
-            dataParam->hksErrorCode = HKS_ERROR_EXT_IS_NOT_PROMISE;
-            return false;
-        }
-        dataParam->hksErrorCode = CallPromise(env, result, dataParam);
-        return true;
+        RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
@@ -1406,13 +1323,7 @@ int32_t JsHksCryptoExtAbility::UpdateSession(const std::string &handle, const Cp
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
-    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
-    std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
-    if (!dataParam->callJsExMethodDone.load()) {
-        dataParam->callJsCon.wait_for(
-            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); });
-    }
-    errcode = std::move(dataParam->errCode);
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     outData = std::move(dataParam->outData);
     return dataParam->hksErrorCode;
 }
@@ -1431,15 +1342,7 @@ int32_t JsHksCryptoExtAbility::FinishSession(const std::string &handle, const Cp
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::FINISH_SESSION;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
-        bool isPromise = false;
-        auto status = napi_is_promise(env, result, &isPromise);
-        if (!isPromise) {
-            LOGE("retParser is not promise, status:%d", status);
-            dataParam->hksErrorCode = HKS_ERROR_EXT_IS_NOT_PROMISE;
-            return false;
-        }
-        dataParam->hksErrorCode = CallPromise(env, result, dataParam);
-        return true;
+        RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
@@ -1448,13 +1351,7 @@ int32_t JsHksCryptoExtAbility::FinishSession(const std::string &handle, const Cp
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
-    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
-    std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
-    if (!dataParam->callJsExMethodDone.load()) {
-        dataParam->callJsCon.wait_for(
-            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); });
-    }
-    errcode = std::move(dataParam->errCode);
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     outData = std::move(dataParam->outData);
     return dataParam->hksErrorCode;
 }
@@ -1472,15 +1369,7 @@ int32_t JsHksCryptoExtAbility::GetProperty(const std::string &handle, const std:
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::GET_PROPERTY;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
-        bool isPromise = false;
-        auto status = napi_is_promise(env, result, &isPromise);
-        if (!isPromise) {
-            LOGE("retParser is not promise, status:%d", status);
-            dataParam->hksErrorCode = HKS_ERROR_EXT_IS_NOT_PROMISE;
-            return false;
-        }
-        dataParam->hksErrorCode = CallPromise(env, result, dataParam);
-        return true;
+        RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
@@ -1489,14 +1378,8 @@ int32_t JsHksCryptoExtAbility::GetProperty(const std::string &handle, const std:
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
-    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
-    std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
-    if (!dataParam->callJsExMethodDone.load()) {
-        dataParam->callJsCon.wait_for(
-            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); });
-    }
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     outParams = std::move(dataParam->paramSet);
-    errcode = std::move(dataParam->errCode);
     return dataParam->hksErrorCode;
 }
 
@@ -1513,15 +1396,7 @@ int32_t JsHksCryptoExtAbility::ClearUkeyPinAuthState(const std::string &handle, 
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::CLEAR_UKEY_PIN_AUTH;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
-        bool isPromise = false;
-        auto status = napi_is_promise(env, result, &isPromise);
-        if (!isPromise) {
-            LOGE("retParser is not promise, status:%d", status);
-            dataParam->hksErrorCode = HKS_ERROR_EXT_IS_NOT_PROMISE;
-            return false;
-        }
-        dataParam->hksErrorCode = CallPromise(env, result, dataParam);
-        return true;
+        RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
@@ -1530,13 +1405,7 @@ int32_t JsHksCryptoExtAbility::ClearUkeyPinAuthState(const std::string &handle, 
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
-    const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
-    std::unique_lock<std::mutex> lock(dataParam->callJsMutex);
-    if (!dataParam->callJsExMethodDone.load()) {
-        dataParam->callJsCon.wait_for(
-            lock, maxWaitTime, [dataParam] { return dataParam->callJsExMethodDone.load(); });
-    }
-    errcode = std::move(dataParam->errCode);
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     return dataParam->hksErrorCode;
 }
 
