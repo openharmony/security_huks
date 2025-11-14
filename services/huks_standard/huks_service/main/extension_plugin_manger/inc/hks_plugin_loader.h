@@ -23,7 +23,6 @@
 #include <mutex>
 #include <atomic>
 #include <cstdint>
-#include "hks_lib_interface.h"
 #include "hks_cpp_paramset.h"
 #include "hks_template.h"
 #include "singleton.h"
@@ -39,17 +38,16 @@ namespace Huks {
 
 class HuksPluginLoader : private OHOS::DelayedSingleton<HuksPluginLoader> {
 public:
-    OHOS::SafeMap<PluginMethodEnum, void*> m_pluginProviderMap;
     OHOS::SafeMap<PluginMethodEnum, std::string> m_pluginMethodNameMap;
     HuksPluginLoader();
     ~HuksPluginLoader();
     int32_t LoadPlugins(const struct HksProcessInfo &info, const std::string &providerName,
-        const CppParamSet &paramSet);
+        const CppParamSet &paramSet, OHOS::SafeMap<PluginMethodEnum, void*> &pluginProviderMap);
     int32_t UnLoadPlugins(const struct HksProcessInfo &info, const std::string &providerName,
-        const CppParamSet &paramSet);
+        const CppParamSet &paramSet, OHOS::SafeMap<PluginMethodEnum, void*> &pluginProviderMap);
     static std::shared_ptr<HuksPluginLoader> GetInstanceWrapper();
     static void ReleaseInstance();
-    
+
 private:
     void* m_pluginHandle = nullptr;
     std::mutex libMutex;

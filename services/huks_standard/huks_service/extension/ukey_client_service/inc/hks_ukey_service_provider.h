@@ -25,7 +25,6 @@
 #include "hks_mem.h"
 #include "hks_cpp_paramset.h"
 #include "hks_plugin_lifecycle_manager.h"
-#include "hks_lib_interface.h"
 #include <cstdint>
 #include <string>
 #include <vector>
