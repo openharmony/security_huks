@@ -27,7 +27,7 @@
 #include <vector>
 #include "hks_template.h"
 
-constexpr uint32_t MAX_INDEX_SIZE = 512;
+constexpr uint32_t MAX_SESSION_INDEX_SIZE = 1024;
 
 int32_t HksCheckIsUkeyOperation(const struct HksParamSet *paramSet)
 {
@@ -48,8 +48,8 @@ int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, co
     int32_t ret = HksCheckBlob2(&processInfo->processName, index);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "Hks check processName or index fail. ret: %" LOG_PUBLIC "d", ret)
 
-    HKS_IF_TRUE_LOGE_RETURN(index->size > MAX_INDEX_SIZE, HKS_ERROR_INVALID_ARGUMENT,
-        "index size is too large. size: %" LOG_PUBLIC "d", index->size)
+    HKS_IF_TRUE_LOGE_RETURN(index->size > MAX_SESSION_INDEX_SIZE, HKS_ERROR_INVALID_ARGUMENT,
+        "index size too large. size: %" LOG_PUBLIC "d. maxSize: %" LOG_PUBLIC "d", index->size, MAX_SESSION_INDEX_SIZE)
     std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
     CppParamSet cppParamSet(inParamSet);
     uint32_t handleU32 = 0;
