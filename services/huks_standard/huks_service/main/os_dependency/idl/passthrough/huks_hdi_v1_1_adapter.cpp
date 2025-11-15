@@ -16,7 +16,6 @@
 #include "huks_hdi_v1_1_adapter.h"
 
 #include "v1_1/ihuks.h"
-#include "v1_1/ihuks_type.h"
 
 struct IHuks *GeyHuksHdiInstanceV1_1()
 {
