@@ -39,6 +39,8 @@ constexpr const char *PROVIDER_NAME_KEY = "providerName";
 constexpr const char *ABILITY_NAME_KEY = "abilityName";
 constexpr const char *BUNDLE_NAME_KEY = "bundleName";
 constexpr const size_t MAX_INDEX_SIZE = 512;
+constexpr const size_t MAX_PROVIDER_TOTAL_NUM = 100;
+constexpr const size_t MAX_PROVIDER_NUM_PER_UID = 10;
 const std::vector<std::string> VALID_PROPERTYID = {
     "SKF_EnumDev",
     "SKF_GetDevInfo",
@@ -219,11 +221,16 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const std::string &index, con
 
     HKS_IF_TRUE_LOGE_RETURN(!indexToHandle_.Insert(newIndex, handle),
         HKS_ERROR_CODE_KEY_ALREADY_EXIST, "Cache remote handle failed")
-    
     if (!newIndexToProviderInfo_.Insert(newIndex, providerInfo)) {
         indexToHandle_.Erase(newIndex);
         HKS_LOG_E("Cache provider info failed");
         return HKS_ERROR_CODE_KEY_ALREADY_EXIST;
+    }
+    HKS_IF_TRUE_LOGE_RETURN(IsProviderNumExceedLimit(providerInfo),
+        HKS_ERROR_CODE_KEY_ALREADY_EXIST, "Provider num exceed limit")
+    int32_t num = 0;
+    if (providerInfoToNum_.Find(providerInfo, num)) {
+        providerInfoToNum_.EnsureInsert(providerInfo, num + 1);
     }
     return HKS_SUCCESS;
 }
@@ -241,12 +248,27 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const std::string &index, cons
 
     auto ipccode = proxy->CloseRemoteHandle(handle, paramSet, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
             "Close remote handle failed: %" LOG_PUBLIC "d", ret)
-
     indexToHandle_.Erase(newIndex);
     newIndexToProviderInfo_.Erase(newIndex);
+    int32_t num = 0;
+    if (providerInfoToNum_.Find(providerInfo, num)) {
+        if (num == 1) {
+            providerInfoToNum_.Erase(providerInfo);
+        } else {
+            providerInfoToNum_.EnsureInsert(providerInfo, num - 1);
+        }
+    }
+    std::vector<std::pair<uint32_t, std::string>> keysToRemove;
+    uidIndexToAuthState_.Iterate([&](std::pair<uint32_t, std::string> key, std::string value) {
+        if (key.first == processInfo.uidInt && key.second == index) {
+            keysToRemove.push_back(key);
+        }
+    });
+    for (auto &key : keysToRemove) {
+        uidIndexToAuthState_.Erase(key);
+    }
     return HKS_SUCCESS;
 }
 
@@ -265,6 +287,9 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     auto ipccode = proxy->AuthUkeyPin(handle, paramSet, ret, authState, retryCnt);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     HKS_IF_TRUE_LOGE(retryCnt > 0, "AuthUkeyPin failed: %" LOG_PUBLIC "d", ret)
+    if (authState == HKS_SUCCESS) {
+        uidIndexToAuthState_.EnsureInsert(std::make_pair(processInfo.uidInt, index), newIndex);
+    }
     return HKS_SUCCESS;
 }
 
@@ -285,6 +310,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
             "Remote verify pin status failed: %" LOG_PUBLIC "d", ret)
+    ClearAuthState(processInfo);
     return HKS_SUCCESS;
 }
 
@@ -438,10 +464,12 @@ int32_t HksRemoteHandleManager::GetRemoteProperty(const std::string &index, cons
 int32_t HksRemoteHandleManager::ClearRemoteHandleMap(const std::string &providerName, const std::string &abilityName)
 {
     std::vector<std::string> indicesToRemove;
+    std::vector<ProviderInfo> providersToRemove;
     auto collectToRemoveFunc = [&](std::string key, ProviderInfo &value) {
         if (value.m_providerName == providerName) {
             if (abilityName.empty() || value.m_abilityName == abilityName) {
                 indicesToRemove.push_back(key);
+                providersToRemove.push_back(value);
             }
         }
     };
@@ -450,7 +478,40 @@ int32_t HksRemoteHandleManager::ClearRemoteHandleMap(const std::string &provider
         indexToHandle_.Erase(index);
         newIndexToProviderInfo_.Erase(index);
     }
+    for (ProviderInfo providerInfo : providersToRemove) {
+        providerInfoToNum_.Erase(providerInfo);
+    }
     return HKS_SUCCESS;
+}
+
+bool HksRemoteHandleManager::CheckAuthStateIsOk(const HksProcessInfo &processInfo, std::string &index)
+{
+    return uidIndexToAuthState_.Find(std::make_pair(processInfo.uidInt, index), index);
+}
+
+void HksRemoteHandleManager::ClearAuthState(const HksProcessInfo &processInfo)
+{
+    std::vector<std::pair<uint32_t, std::string>> keysToRemove;
+    auto iterFunc = [&](std::pair<uint32_t, std::string> key, std::string &value) {
+        if (key.first == processInfo.uidInt) {
+            keysToRemove.push_back(key);
+        }
+    };
+    uidIndexToAuthState_.Iterate(iterFunc);
+    for (auto &key : keysToRemove) {
+        uidIndexToAuthState_.Erase(key);
+    }
+}
+
+bool HksRemoteHandleManager::IsProviderNumExceedLimit(const ProviderInfo &providerInfo)
+{
+    int32_t num = providerInfoToNum_.Find(providerInfo);
+    int32_t totalNum = 0;
+    auto iterFunc = [&](ProviderInfo key, int32_t value) {
+        totalNum += value;
+    };
+    providerInfoToNum_.Iterate(iterFunc);
+    return (totalNum >= MAX_PROVIDER_TOTAL_NUM - 1) && (num >= MAX_PROVIDER_NUM_PER_UID - 1);
 }
 
 }

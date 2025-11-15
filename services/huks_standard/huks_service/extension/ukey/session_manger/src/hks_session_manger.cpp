@@ -78,7 +78,20 @@ bool HksSessionManager::CheckSingleCallerCanInitSession(const HksProcessInfo &pr
             curHandleNum++;
         }
     });
-    return curHandleNum < MAX_SINGLE_CALLER_HANDLE_SIZE;
+    return curHandleNum <= MAX_SINGLE_CALLER_HANDLE_SIZE;
+}
+
+bool HksSessionManager::CheckParmSetPurposeAndCheckAuth(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet)
+{
+    auto purpose = paramSet.GetParam<HKS_TAG_PURPOSE>();
+    HKS_IF_TRUE_LOGE_RETURN(purpose.first != HKS_SUCCESS, false,
+        "Get purpose tag failed. ret: %" LOG_PUBLIC "d", purpose.first)
+    if (purpose.second == HKS_KEY_PURPOSE_SIGN || purpose.second == HKS_PURPOSE_DECRYPT) {
+        HKS_IF_TRUE_LOGE_RETURN(!CheckAuthStateIsOk(processInfo, index), false,
+            "ukey resource no auth")
+    }
+    return true;
 }
 
 constexpr int32_t MAX_HANDLE_SIZE = 96;
@@ -89,6 +102,8 @@ int32_t HksSessionManager::ExtensionInitSession(const HksProcessInfo &processInf
         "handle too many, please realse the old")
     HKS_IF_TRUE_LOGE_RETURN(m_handlers.Size() >= MAX_HANDLE_SIZE, HKS_ERROR_SESSION_REACHED_LIMIT,
         "The handle maximum quantity has been reached")
+    HKS_IF_TRUE_LOGE_RETURN(!CheckParmSetPurposeAndCheckAuth(processInfo, paramSet), HKS_ERROR_PIN_NO_AUTH,
+        "CheckParmSetPurposeAndCheckAuth failed")
     ProviderInfo providerInfo;
     std::string newIndex;
     std::string sIndexHandle;

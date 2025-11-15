@@ -48,7 +48,7 @@ public:
     int32_t RemoteVerifyPinStatus(const HksProcessInfo &processInfo,
                 const std::string &index, const CppParamSet &paramSet, int32_t &state);
     int32_t RemoteClearPinStatus(const std::string &index, const CppParamSet &paramSet);
-
+    bool CheckAuthStateIsOk(const HksProcessInfo &processInfo, std::string &index);
     //证书查询
     int32_t FindRemoteCertificate(const std::string &index,
                 const CppParamSet &paramSet, std::string &certificatesOut);
@@ -67,7 +67,7 @@ public:
                 const CppParamSet& paramSet, CppParamSet& outParams);
 
     int32_t ClearRemoteHandleMap(const std::string &providerName, const std::string &abilityName);
-
+    void ClearAuthState(const HksProcessInfo &processInfo);
     static int32_t ParseIndexAndProviderInfo(const std::string &index,
                 ProviderInfo &providerInfo, std::string &newIndex);
 
@@ -78,10 +78,12 @@ public:
 private:
     int32_t ValidateProviderInfo(const std::string &newIndex, ProviderInfo &providerInfo);
     int32_t ValidateAndGetHandle(const std::string &newIndex, ProviderInfo &providerInfo, std::string &handle);
+    bool IsProviderNumExceedLimit(const ProviderInfo &providerInfo);
 
     OHOS::SafeMap<std::string, std::string> indexToHandle_;
-
     OHOS::SafeMap<std::string, ProviderInfo> newIndexToProviderInfo_;
+    OHOS::SafeMap<std::pair<uint32_t, std::string>, std::string> uidIndexToAuthState_;
+    OHOS::SafeMap<ProviderInfo, int32_t> providerInfoToNum_;
 };
 }
 }

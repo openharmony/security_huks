@@ -43,6 +43,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(
     int32_t ret = HKS_SUCCESS;
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
+    handleMgr->ClearAuthState(processInfo);
     auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
     if (abilityName.first == HKS_SUCCESS) {
         std::string str(abilityName.second.begin(), abilityName.second.end());
@@ -204,7 +205,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnClearUkeyPinAuthSta
     CppParamSet paramSet = CppParamSet({uid});
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
-    ret = handleMgr->RemoteClearPinStatus(index, paramSet);
+    ret = handleMgr->RemoteClearPinStatus(processInfo, index, paramSet);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }

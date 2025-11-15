@@ -56,6 +56,8 @@ public:
         const uint32_t &handle, const CppParamSet &paramSet);
     bool HksClearHandle(const HksProcessInfo &processInfo, const CppParamSet &paramSet);
 private:
+    bool CheckParmSetPurposeAndCheckAuth(const HksProcessInfo &processInfo, const std::string &index,
+        const CppParamSet &paramSet);
     std::vector<uint32_t> FindToRemoveHandle(uint32_t uid, std::string &abilityName);
     std::vector<uint32_t> FindToRemoveHandle(uint32_t uid);
     int32_t HksGetHandleInfo(const HksProcessInfo &processInfo, const uint32_t &handle, HandleInfo &infos);
