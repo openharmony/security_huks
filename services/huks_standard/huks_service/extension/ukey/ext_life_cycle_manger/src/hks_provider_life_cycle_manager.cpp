@@ -19,6 +19,7 @@
 #include "bundle_mgr_client.h"
 #include "bundle_mgr_interface.h"
 #include "bundle_info.h"
+#include "hks_ukey_common.h"
 #include "system_ability_definition.h"
 #include <iservice_registry.h>
 #include "hks_error_code.h"
@@ -31,18 +32,9 @@
 #include <string>
 #include <tuple>
 #include <utility>
-
+#include <chrono>
+#include <thread>
 namespace OHOS::Security::Huks {
-
-bool CheckStringParamLenIsOk(const std::string &str, uint8_t mim, uint8_t max)
-{
-    if (str.size() < mim || str.size() > max) {
-        HKS_LOG_E("CheckStringParamLenIsOk failed, str.size: %" LOG_PUBLIC "zu"
-            "mim: %" LOG_PUBLIC "d, max: %" LOG_PUBLIC "d", str.size(), mim, max);
-        return false;
-    }
-    return true;
-}
 
 bool ProviderInfo::operator==(const ProviderInfo &other) const
 {
@@ -101,7 +93,7 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
             HKS_LOG_I("First time connect the Extension Ability. "
                 "m_bundleName: %" LOG_PUBLIC "s, m_abilityName: %" LOG_PUBLIC "s",
                 providerInfo.m_bundleName.c_str(), providerInfo.m_abilityName.c_str());
-            ret = connect->OnConnection(want);
+            ret = connect->OnConnection(want, connect);
             HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "Connect extAbility failed. ret: %" LOG_PUBLIC "d", ret)
         }
 
@@ -207,6 +199,8 @@ int32_t HksProviderLifeCycleManager::HksHapGetConnectInfos(const HksProcessInfo 
     return HapGetAllConnectInfoByProviderName(bundleName, providerName, connectionInfos);
 }
 
+constexpr int WAIT_TIME_MS = 5;
+constexpr int WAIT_ITERATION = 6;
 int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &processInfo,
     const std::string &providerName, [[maybe_unused]] const CppParamSet &paramSet)
 {
@@ -236,8 +230,17 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
         HKS_LOG_I("OnUnRegisterProvider refCount: %" LOG_PUBLIC "d", refCount);
         HKS_IF_TRUE_LOGE_RETURN(refCount > HKS_PROVIDER_CAN_REMOVE_REF_COUNT, HKS_ERROR_PROVIDER_IN_USE,
             "OnUnRegisterProvider failed, refCount is more than 2, maybe in use.")
-        connectionInfo.second->m_connection->OnDisconnect();
+        connectionInfo.second->m_connection->OnDisconnect(connectionInfo.second->m_connection);
         m_providerMap.Erase(connectionInfo.first);
+        auto &stub = connectionInfo.second->m_connection;
+        uint8_t waitIteration = WAIT_ITERATION;
+        HKS_LOG_I("stub refcount: %" LOG_PUBLIC "d", stub->GetSptrRefCount());
+        while ((stub->GetSptrRefCount() > 1) && (waitIteration > 0)) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long long>(WAIT_TIME_MS)));
+            HKS_LOG_I("iter stub refcount: %" LOG_PUBLIC "d", stub->GetSptrRefCount());
+            waitIteration--;
+            HKS_IF_TRUE_LOGE(waitIteration == 0, "waitIteration is 0, but stub refcount is not 1.")
+        }
     }
     HKS_LOG_I("OnUnRegisterProvider Success! providerName: %" LOG_PUBLIC "s", providerName.c_str());
     return HKS_SUCCESS;
@@ -264,8 +267,8 @@ int32_t HksGetProviderInfo(const HksProcessInfo &processInfo, const std::string 
     auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
     HKS_IF_TRUE_LOGE_RETURN(abilityName.first != HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
         "GetParam HKS_EXT_CRYPTO_TAG_ABILITY_NAME failed. ret: %" LOG_PUBLIC "d", abilityName.first)
-    HKS_IF_TRUE_LOGE_RETURN(abilityName.second.size() > MAX_ABILITY_NAME_LEN, HKS_ERROR_PROVIDER_ABILITY_NAME_NOT_EXIST,
-        "the abilityName is too long. ret: %" LOG_PUBLIC "d", abilityName.first)
+    HKS_IF_TRUE_LOGE_RETURN(abilityName.second.size() > MAX_ABILITY_NAME_LEN, HKS_ERROR_INVALID_ARGUMENT,
+        "the abilityName is too long. size: %" LOG_PUBLIC "zu", abilityName.second.size())
     providerInfo.m_abilityName = std::string(abilityName.second.begin(), abilityName.second.end());
     return HKS_SUCCESS;
 }

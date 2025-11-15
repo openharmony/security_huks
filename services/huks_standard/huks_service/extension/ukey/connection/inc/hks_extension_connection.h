@@ -30,22 +30,23 @@ namespace Huks {
 
 class ExtensionConnection : public OHOS::AAFwk::AbilityConnectionStub {
 public:
-    int32_t OnConnection(const AAFwk::Want &want);
+    int32_t OnConnection(const AAFwk::Want &want, sptr<ExtensionConnection> &connect);
     void OnAbilityConnectDone(const AppExecFwk::ElementName& element,
         const sptr<IRemoteObject>& remoteObject, int resultCode) override;
-    void OnDisconnect();
+    void OnDisconnect(sptr<ExtensionConnection> &connect);
     void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) override;
     bool IsConnected();
     sptr<IHuksAccessExtBase> GetExtConnectProxy();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
 
 private:
-    std::condition_variable proxyConv_;
-    std::mutex proxyMutex_;
+    std::condition_variable proxyConv_{};
+    std::condition_variable disConnectConv_{};
+    std::mutex proxyMutex_{};
     std::atomic<bool> isConnected_ = {false};
-    std::mutex deathRecipientMutex_;
-    sptr<IRemoteObject::DeathRecipient> callerDeathRecipient_ = nullptr;
-    sptr<IHuksAccessExtBase> extConnectProxy;
+    std::mutex deathRecipientMutex_{};
+    sptr<IRemoteObject::DeathRecipient> callerDeathRecipient_{nullptr};
+    sptr<IHuksAccessExtBase> extConnectProxy{};
     void AddExtDeathRecipient(const wptr<IRemoteObject>& token);
     void RemoveExtDeathRecipient(const wptr<IRemoteObject>& token);
 };

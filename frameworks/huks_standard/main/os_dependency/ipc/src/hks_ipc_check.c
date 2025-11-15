@@ -34,7 +34,7 @@ int32_t HksCheckIpcBlobAndParamSet(const struct HksBlob *blob, const struct HksP
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check blob or paramSet failed")
 
     if (blob->size > maxSize) {
-        HKS_LOG_E("ipc blob check size failed");
+        HKS_LOG_E("check size failed. blob size: %" LOG_PUBLIC "d, maxSize: %" LOG_PUBLIC "d", blob->size, maxSize);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
