@@ -41,7 +41,7 @@
 
 #include "hks_param.h"
 #include <stdint.h>
-#define CERT_UID_INT 3512
+#define CERT_UID_INT 3515
 
 #ifdef L2_STANDARD
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
