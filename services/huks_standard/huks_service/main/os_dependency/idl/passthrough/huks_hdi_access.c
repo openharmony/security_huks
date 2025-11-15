@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "hks_error_code.h"
-#include <stdint.h>
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
 #else
@@ -30,7 +28,6 @@
 #include "v1_1/ihuks.h"
 #include "v1_1/ihuks_types.h"
 
-#include "huks_hdi_v1_0_adapter.h"
 #include "huks_hdi_v1_1_adapter.h"
 
 #include "hks_log.h"
@@ -55,7 +52,6 @@ typedef struct {
 // version sequence must in order, get instance from front to back
 static const HdiInstance HDI_INSTANCE_LIST[] = {
     { V1_1, GeyHuksHdiInstanceV1_1 },
-    { V1_0, GeyHuksHdiInstanceV1_0 },
 };
 
 static enum HdiVersion g_hdiInstanceVersion;
@@ -66,7 +62,7 @@ static pthread_mutex_t g_hdiProxyMutex = PTHREAD_MUTEX_INITIALIZER;
 
 ENABLE_CFI(static int32_t InitHdiInstance())
 {
-    for (uint32_t i = 0; i < (sizeof(HDI_INSTANCE_LIST)/sizeof(HdiInstance)); i++) {
+    for (uint32_t i = 0; i < (sizeof(HDI_INSTANCE_LIST) / sizeof(HdiInstance)); i++) {
         g_hksHdiProxyInstance = HDI_INSTANCE_LIST[i].func();
         if (g_hksHdiProxyInstance != NULL) {
             g_hdiInstanceVersion = HDI_INSTANCE_LIST[i].version;
@@ -111,7 +107,7 @@ ENABLE_CFI(int32_t HuksAccessModuleInit(void))
 {
     HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_0), HKS_ERROR_NOT_SUPPORTED,
+    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_1), HKS_ERROR_NOT_SUPPORTED,
         "global hdi version is %" LOG_PUBLIC "d", g_hdiInstanceVersion)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->ModuleInit, HKS_ERROR_NULL_POINTER,
@@ -124,7 +120,7 @@ ENABLE_CFI(int32_t HuksAccessModuleDestroy(void))
 {
     HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_0), HKS_ERROR_NOT_SUPPORTED,
+    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_1), HKS_ERROR_NOT_SUPPORTED,
         "global hdi version is %" LOG_PUBLIC "d", g_hdiInstanceVersion)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->ModuleDestroy, HKS_ERROR_NULL_POINTER,
@@ -143,7 +139,7 @@ static int32_t HdiProxyGenerateKey(const struct HuksBlob* keyAlias, const struct
 {
     HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_0), HKS_ERROR_NOT_SUPPORTED,
+    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_1), HKS_ERROR_NOT_SUPPORTED,
         "global hdi version is %" LOG_PUBLIC "d", g_hdiInstanceVersion)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->GenerateKey, HKS_ERROR_NULL_POINTER,
@@ -165,7 +161,7 @@ static int32_t HdiProxyImportKey(const struct HuksBlob *keyAlias, const struct H
 {
     HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_0), HKS_ERROR_NOT_SUPPORTED,
+    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_1), HKS_ERROR_NOT_SUPPORTED,
         "global hdi version is %" LOG_PUBLIC "d", g_hdiInstanceVersion)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->ImportKey, HKS_ERROR_NULL_POINTER,
@@ -186,7 +182,7 @@ static int32_t HdiProxyImportWrappedKey(const struct HuksBlob *wrappingKeyAlias,
 {
     HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_0), HKS_ERROR_NOT_SUPPORTED,
+    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_1), HKS_ERROR_NOT_SUPPORTED,
         "global hdi version is %" LOG_PUBLIC "d", g_hdiInstanceVersion)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->ImportWrappedKey, HKS_ERROR_NULL_POINTER,
@@ -209,7 +205,7 @@ static int32_t HdiProxyExportPublicKey(const struct HuksBlob *key, const struct 
 {
     HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_0), HKS_ERROR_NOT_SUPPORTED,
+    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_1), HKS_ERROR_NOT_SUPPORTED,
         "global hdi version is %" LOG_PUBLIC "d", g_hdiInstanceVersion)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->ExportPublicKey, HKS_ERROR_NULL_POINTER,
@@ -230,7 +226,7 @@ static int32_t HdiProxyInit(const struct  HuksBlob *key, const struct HuksParamS
 {
     HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_0), HKS_ERROR_NOT_SUPPORTED,
+    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_1), HKS_ERROR_NOT_SUPPORTED,
         "global hdi version is %" LOG_PUBLIC "d", g_hdiInstanceVersion)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->Init, HKS_ERROR_NULL_POINTER,
@@ -251,7 +247,7 @@ static int32_t HdiProxyUpdate(const struct HuksBlob *handle, const struct HuksPa
 {
     HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_0), HKS_ERROR_NOT_SUPPORTED,
+    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_1), HKS_ERROR_NOT_SUPPORTED,
         "global hdi version is %" LOG_PUBLIC "d", g_hdiInstanceVersion)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->Update, HKS_ERROR_NULL_POINTER,
@@ -272,7 +268,7 @@ static int32_t HdiProxyFinish(const struct HuksBlob *handle, const struct HuksPa
 {
     HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_0), HKS_ERROR_NOT_SUPPORTED,
+    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_1), HKS_ERROR_NOT_SUPPORTED,
         "global hdi version is %" LOG_PUBLIC "d", g_hdiInstanceVersion)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->Finish, HKS_ERROR_NULL_POINTER,
@@ -292,7 +288,7 @@ static int32_t HdiProxyAbort(const struct HuksBlob *handle, const struct HuksPar
 {
     HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_0), HKS_ERROR_NOT_SUPPORTED,
+    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_1), HKS_ERROR_NOT_SUPPORTED,
         "global hdi version is %" LOG_PUBLIC "d", g_hdiInstanceVersion)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->Abort, HKS_ERROR_NULL_POINTER,
@@ -311,7 +307,7 @@ static int32_t HdiProxyCheckKeyValidity(const struct HuksParamSet* paramSet, con
 {
     HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_0), HKS_ERROR_NOT_SUPPORTED,
+    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_1), HKS_ERROR_NOT_SUPPORTED,
         "global hdi version is %" LOG_PUBLIC "d", g_hdiInstanceVersion)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->CheckKeyValidity, HKS_ERROR_NULL_POINTER,
@@ -343,7 +339,7 @@ static int32_t HdiProxySign(const struct HuksBlob *key, const struct HuksParamSe
 {
     HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_0), HKS_ERROR_NOT_SUPPORTED,
+    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_1), HKS_ERROR_NOT_SUPPORTED,
         "global hdi version is %" LOG_PUBLIC "d", g_hdiInstanceVersion)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->Sign, HKS_ERROR_NULL_POINTER,
@@ -364,7 +360,7 @@ static int32_t HdiProxyVerify(const struct HuksBlob *key, const struct HuksParam
 {
     HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_0), HKS_ERROR_NOT_SUPPORTED,
+    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_1), HKS_ERROR_NOT_SUPPORTED,
         "global hdi version is %" LOG_PUBLIC "d", g_hdiInstanceVersion)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->Verify, HKS_ERROR_NULL_POINTER,
@@ -385,7 +381,7 @@ static int32_t HdiProxyEncrypt(const struct HuksBlob *key, const struct HuksPara
 {
     HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_0), HKS_ERROR_NOT_SUPPORTED,
+    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_1), HKS_ERROR_NOT_SUPPORTED,
         "global hdi version is %" LOG_PUBLIC "d", g_hdiInstanceVersion)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->Encrypt, HKS_ERROR_NULL_POINTER,
@@ -406,7 +402,7 @@ static int32_t HdiProxyDecrypt(const struct HuksBlob *key, const struct HuksPara
 {
     HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_0), HKS_ERROR_NOT_SUPPORTED,
+    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_1), HKS_ERROR_NOT_SUPPORTED,
         "global hdi version is %" LOG_PUBLIC "d", g_hdiInstanceVersion)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->Decrypt, HKS_ERROR_NULL_POINTER,
@@ -427,7 +423,7 @@ static int32_t HdiProxyAgreeKey(const struct HuksParamSet *paramSet, const struc
 {
     HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_0), HKS_ERROR_NOT_SUPPORTED,
+    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_1), HKS_ERROR_NOT_SUPPORTED,
         "global hdi version is %" LOG_PUBLIC "d", g_hdiInstanceVersion)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->AgreeKey, HKS_ERROR_NULL_POINTER,
@@ -448,7 +444,7 @@ static int32_t HdiProxyDeriveKey(const struct HuksParamSet *paramSet, const stru
 {
     HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_0), HKS_ERROR_NOT_SUPPORTED,
+    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_1), HKS_ERROR_NOT_SUPPORTED,
         "global hdi version is %" LOG_PUBLIC "d", g_hdiInstanceVersion)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->DeriveKey, HKS_ERROR_NULL_POINTER,
@@ -469,7 +465,7 @@ static int32_t HdiProxyMac(const struct HuksBlob *key, const struct HuksParamSet
 {
     HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_0), HKS_ERROR_NOT_SUPPORTED,
+    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_1), HKS_ERROR_NOT_SUPPORTED,
         "global hdi version is %" LOG_PUBLIC "d", g_hdiInstanceVersion)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->Mac, HKS_ERROR_NULL_POINTER,
@@ -530,7 +526,7 @@ static int32_t HdiProxyUpgradeKey(const struct HuksBlob *oldKey, const struct Hu
 {
     HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_0), HKS_ERROR_NOT_SUPPORTED,
+    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_1), HKS_ERROR_NOT_SUPPORTED,
         "global hdi version is %" LOG_PUBLIC "d", g_hdiInstanceVersion)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->UpgradeKey, HKS_ERROR_NULL_POINTER,
@@ -553,7 +549,7 @@ static int32_t HdiProxyAttestKey(const struct HuksBlob *key, const struct HuksPa
 {
     HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_0), HKS_ERROR_NOT_SUPPORTED,
+    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_1), HKS_ERROR_NOT_SUPPORTED,
         "global hdi version is %" LOG_PUBLIC "d", g_hdiInstanceVersion)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->AttestKey, HKS_ERROR_NULL_POINTER,
@@ -576,7 +572,7 @@ static int32_t HdiProxyGenerateRandom(const struct HuksParamSet *paramSet, struc
 {
     HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_0), HKS_ERROR_NOT_SUPPORTED,
+    HKS_IF_NOT_TRUE_LOGE_RETURN(IsCallable(V1_1), HKS_ERROR_NOT_SUPPORTED,
         "global hdi version is %" LOG_PUBLIC "d", g_hdiInstanceVersion)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->GenerateRandom, HKS_ERROR_NULL_POINTER,
