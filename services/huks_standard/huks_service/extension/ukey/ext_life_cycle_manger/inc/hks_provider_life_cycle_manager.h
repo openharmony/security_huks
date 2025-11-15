@@ -65,7 +65,6 @@ public:
 constexpr int32_t HKS_PROVIDER_CAN_REMOVE_REF_COUNT = 2;
 int32_t HksGetProviderInfo(const HksProcessInfo &processInfo, const std::string &providerName,
     const CppParamSet &paramSet, ProviderInfo &providerInfo);
-bool CheckStringParamLenIsOk(const std::string &str, uint8_t mim, uint8_t max);
 class HksProviderLifeCycleManager : private OHOS::DelayedSingleton<HksProviderLifeCycleManager>,
     std::enable_shared_from_this<HksProviderLifeCycleManager> {
 public:

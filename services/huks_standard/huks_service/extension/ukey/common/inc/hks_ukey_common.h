@@ -24,7 +24,7 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
-
+    bool CheckStringParamLenIsOk(const std::string &str, uint32_t min, uint32_t max);
     bool IsHksExtCertInfoSetEmpty(const struct HksExtCertInfoSet& certSet);
     HksBlob Base64StringToBlob(const std::string &inStr);
     std::string BlobToBase64String(const struct HksBlob &strBlob);

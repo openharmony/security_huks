@@ -40,9 +40,9 @@ void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementNa
     proxyConv_.notify_all();
 }
 
-int32_t ExtensionConnection::OnConnection(const AAFwk::Want &want)
+int32_t ExtensionConnection::OnConnection(const AAFwk::Want &want, sptr<ExtensionConnection> &connect)
 {
-    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, this, DEFAULT_USER_ID);
+    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, connect, DEFAULT_USER_ID);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_REMOTE_OPERATION_FAILED,
         "fail to connect ability by ability manager service. ext error = %" LOG_PUBLIC "d", ret)
 
@@ -56,16 +56,21 @@ int32_t ExtensionConnection::OnConnection(const AAFwk::Want &want)
     return HKS_SUCCESS;
 }
 
-void ExtensionConnection::OnDisconnect()
+void ExtensionConnection::OnDisconnect(sptr<ExtensionConnection> &connect)
 {
     std::unique_lock<std::mutex> lock(proxyMutex_);
     if (extConnectProxy != nullptr) {
         RemoveExtDeathRecipient(extConnectProxy->AsObject());
     }
 
-    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->DisconnectAbility(this);
+    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->DisconnectAbility(connect);
+    if (!disConnectConv_.wait_for(lock, std::chrono::seconds(WAIT_TIME), [connect] {
+        HKS_IF_TRUE_LOGE(connect->extConnectProxy == nullptr, "proxy is null, not need to wait!")
+        return connect->extConnectProxy == nullptr;
+    })) {
+        HKS_LOG_E("wait disconnected timeout or, not need to wait");
+    };
     HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS, "disconnect ability fail, ret = %{public}d", ret)
-
     extConnectProxy = nullptr;
     isConnected_.store(false);
 }
@@ -75,6 +80,7 @@ void ExtensionConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName&
     std::lock_guard<std::mutex> lock(proxyMutex_);
     extConnectProxy = nullptr;
     isConnected_.store(false);
+    disConnectConv_.notify_all();
 }
 
 sptr<IHuksAccessExtBase> ExtensionConnection::GetExtConnectProxy()
