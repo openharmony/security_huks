@@ -484,7 +484,7 @@ int32_t HksRemoteHandleManager::ClearRemoteHandleMap(const std::string &provider
     return HKS_SUCCESS;
 }
 
-bool HksRemoteHandleManager::CheckAuthStateIsOk(const HksProcessInfo &processInfo, std::string &index)
+bool HksRemoteHandleManager::CheckAuthStateIsOk(const HksProcessInfo &processInfo, const std::string &index)
 {
     return uidIndexToAuthState_.Find(std::make_pair(processInfo.uidInt, index), index);
 }
