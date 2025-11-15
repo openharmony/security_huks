@@ -17,16 +17,18 @@
 #define HKS_PLUGIN_LIFECYCLE_MANAGER_H
 
 #include <atomic>
-#include <string>
-#include <memory>
 #include <map>
+#include <memory>
+#include <safe_map.h>
+#include <shared_mutex>
+#include <singleton.h>
+#include <string>
+
 #include "hks_cpp_paramset.h"
 #include "hks_error_code.h"
-#include "hks_plugin_def.h"
-#include "singleton.h"
-#include "hks_template.h"
 #include "hks_function_types.h"
-#include <shared_mutex>
+#include "hks_plugin_def.h"
+#include "hks_template.h"
 
 namespace OHOS {
 namespace Security {
@@ -41,10 +43,38 @@ public:
     int32_t UnRegisterProvider(const struct HksProcessInfo &info, const std::string &AbilityName,
         const CppParamSet &paramSet);
 
+    int32_t OnRegistProvider(const HksProcessInfo &processInfo,
+        const std::string &providerName, const CppParamSet &paramSet);
+    int32_t OnUnRegistProvider(const HksProcessInfo &processInfo,
+        const std::string &providerName, const CppParamSet &paramSet);
+    int32_t OnCreateRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
+        const CppParamSet &paramSet, std::string &handle);
+    int32_t OnCloseRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
+        const CppParamSet &paramSet);
+    int32_t OnAuthUkeyPin(const HksProcessInfo &processInfo,
+        const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t &retryCnt);
+    int32_t OnGetVerifyPinStatus(const HksProcessInfo &processInfo,
+        const std::string &index, const CppParamSet &paramSet, int32_t &state);
+    int32_t OnClearUkeyPinAuthStatus(const HksProcessInfo &processInfo, const std::string &index);
+    int32_t OnGetRemoteProperty(const HksProcessInfo &processInfo, const std::string &index,
+        const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams);
+    int32_t OnExportCertificate(const HksProcessInfo &processInfo,
+        const std::string &index, const CppParamSet &paramSet, std::string &certsJson);
+    int32_t OnExportProviderAllCertificates(const HksProcessInfo &processInfo,
+        const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr);
+    int32_t OnInitSession (const HksProcessInfo &processInfo, const std::string &index,
+        const CppParamSet &paramSet, uint32_t &handle);
+    int32_t OnUpdateSession (const HksProcessInfo &processInfo, const uint32_t &handle,
+        const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
+    int32_t OnFinishSession (const HksProcessInfo &processInfo, const uint32_t &handle,
+        const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
+    int32_t OnAbortSession(const HksProcessInfo &processInfo, const uint32_t &handle,
+        const CppParamSet &paramSet);
+
 private:
     std::atomic<int32_t> m_refCount{0};
-    static HuksPluginLifeCycleMgr instancePLCM;
-    std::mutex soMutex;
+    std::mutex soMutex{};
+    OHOS::SafeMap<PluginMethodEnum, void*> m_pluginProviderMap{};
 };
 
 }

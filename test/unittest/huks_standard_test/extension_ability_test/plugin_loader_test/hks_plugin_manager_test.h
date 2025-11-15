@@ -16,7 +16,6 @@
 #ifndef HKS_PLUGIN_MANAGER_TEST_H
 #define HKS_PLUGIN_MANAGER_TEST_H
 
-#include "hks_lib_interface.h"
 #include "hks_plugin_lifecycle_manager.h"
 #include "hks_plugin_loader.h"
 #include "hks_function_types.h"
