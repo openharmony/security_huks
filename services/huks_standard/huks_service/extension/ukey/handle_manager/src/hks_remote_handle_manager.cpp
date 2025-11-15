@@ -235,7 +235,8 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const std::string &index, con
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::CloseRemoteHandle(const std::string &index, const CppParamSet &paramSet)
+int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet)
 {
     ProviderInfo providerInfo;
     std::string newIndex;
@@ -261,7 +262,7 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const std::string &index, cons
         }
     }
     std::vector<std::pair<uint32_t, std::string>> keysToRemove;
-    uidIndexToAuthState_.Iterate([&](std::pair<uint32_t, std::string> key, std::string value) {
+    uidIndexToAuthState_.Iterate([&](std::pair<uint32_t, std::string> key, int32_t value) {
         if (key.first == processInfo.uidInt && key.second == index) {
             keysToRemove.push_back(key);
         }
@@ -288,7 +289,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     HKS_IF_TRUE_LOGE(retryCnt > 0, "AuthUkeyPin failed: %" LOG_PUBLIC "d", ret)
     if (authState == HKS_SUCCESS) {
-        uidIndexToAuthState_.EnsureInsert(std::make_pair(processInfo.uidInt, index), newIndex);
+        uidIndexToAuthState_.EnsureInsert(std::make_pair(processInfo.uidInt, index), HKS_SUCCESS);
     }
     return HKS_SUCCESS;
 }
@@ -486,13 +487,14 @@ int32_t HksRemoteHandleManager::ClearRemoteHandleMap(const std::string &provider
 
 bool HksRemoteHandleManager::CheckAuthStateIsOk(const HksProcessInfo &processInfo, const std::string &index)
 {
-    return uidIndexToAuthState_.Find(std::make_pair(processInfo.uidInt, index), index);
+    int32_t state = 0;
+    return uidIndexToAuthState_.Find(std::make_pair(processInfo.uidInt, index), state);
 }
 
 void HksRemoteHandleManager::ClearAuthState(const HksProcessInfo &processInfo)
 {
     std::vector<std::pair<uint32_t, std::string>> keysToRemove;
-    auto iterFunc = [&](std::pair<uint32_t, std::string> key, std::string &value) {
+    auto iterFunc = [&](std::pair<uint32_t, std::string> key, int32_t &value) {
         if (key.first == processInfo.uidInt) {
             keysToRemove.push_back(key);
         }
@@ -505,13 +507,16 @@ void HksRemoteHandleManager::ClearAuthState(const HksProcessInfo &processInfo)
 
 bool HksRemoteHandleManager::IsProviderNumExceedLimit(const ProviderInfo &providerInfo)
 {
-    int32_t num = providerInfoToNum_.Find(providerInfo);
+    int32_t num = 0;
+    if (providerInfoToNum_.Find(providerInfo, num)) {
+        return num >= MAX_PROVIDER_NUM_PER_UID - 1;
+    }
     int32_t totalNum = 0;
     auto iterFunc = [&](ProviderInfo key, int32_t value) {
         totalNum += value;
     };
     providerInfoToNum_.Iterate(iterFunc);
-    return (totalNum >= MAX_PROVIDER_TOTAL_NUM - 1) && (num >= MAX_PROVIDER_NUM_PER_UID - 1);
+    return totalNum >= MAX_PROVIDER_TOTAL_NUM - 1;
 }
 
 }
