@@ -39,8 +39,8 @@ constexpr const char *PROVIDER_NAME_KEY = "providerName";
 constexpr const char *ABILITY_NAME_KEY = "abilityName";
 constexpr const char *BUNDLE_NAME_KEY = "bundleName";
 constexpr const size_t MAX_INDEX_SIZE = 512;
-constexpr const size_t MAX_PROVIDER_TOTAL_NUM = 100;
-constexpr const size_t MAX_PROVIDER_NUM_PER_UID = 10;
+constexpr const int32_t MAX_PROVIDER_TOTAL_NUM = 100;
+constexpr const int32_t MAX_PROVIDER_NUM_PER_UID = 10;
 const std::vector<std::string> VALID_PROPERTYID = {
     "SKF_EnumDev",
     "SKF_GetDevInfo",
@@ -497,7 +497,7 @@ bool HksRemoteHandleManager::CheckAuthStateIsOk(const HksProcessInfo &processInf
 void HksRemoteHandleManager::ClearAuthState(const HksProcessInfo &processInfo)
 {
     std::vector<std::pair<uint32_t, std::string>> keysToRemove;
-    auto iterFunc = [&](std::pair<uint32_t, std::string> key, std::string &value) {
+    auto iterFunc = [&](std::pair<uint32_t, std::string> key, int32_t &value) {
         if (key.first == processInfo.uidInt) {
             keysToRemove.push_back(key);
         }
@@ -510,11 +510,11 @@ void HksRemoteHandleManager::ClearAuthState(const HksProcessInfo &processInfo)
 
 bool HksRemoteHandleManager::IsProviderNumExceedLimit(const ProviderInfo &providerInfo)
 {
-    uint32_t num = 0;
+    int32_t num = 0;
     if (providerInfoToNum_.Find(providerInfo, num)) {
         return num >= MAX_PROVIDER_NUM_PER_UID - 1;
     }
-    uint32_t totalNum = 0;
+    int32_t totalNum = 0;
     auto iterFunc = [&](ProviderInfo key, int32_t value) {
         totalNum += value;
     };
