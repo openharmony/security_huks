@@ -367,7 +367,6 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
             outBlob.data, sizeof(int32_t)), "memcpy_s outStatus failed")
         HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(retryCount, sizeof(uint32_t),
             outBlob.data + sizeof(int32_t), sizeof(uint32_t)), "memcpy_s retryCount failed")
-
     } while (0);
 
     HksFreeParamSet(&newParamSet);
