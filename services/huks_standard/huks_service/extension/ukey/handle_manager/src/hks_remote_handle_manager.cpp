@@ -261,15 +261,7 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
             providerInfoToNum_.EnsureInsert(providerInfo, num - 1);
         }
     }
-    std::vector<std::pair<uint32_t, std::string>> keysToRemove;
-    uidIndexToAuthState_.Iterate([&](std::pair<uint32_t, std::string> key, int32_t value) {
-        if (key.first == processInfo.uidInt && key.second == index) {
-            keysToRemove.push_back(key);
-        }
-    });
-    for (auto &key : keysToRemove) {
-        uidIndexToAuthState_.Erase(key);
-    }
+    ClearAuthState(processInfo, index);
     return HKS_SUCCESS;
 }
 
@@ -313,14 +305,13 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
 
     auto ipccode = proxy->GetUkeyPinAuthState(handle, paramSet, state, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
-            "Remote verify pin status failed: %" LOG_PUBLIC "d", ret)
-    ClearAuthState(processInfo);
-    return HKS_SUCCESS;
+    HKS_IF_TRUE_LOGE_RETURN(ret != HUKS_ERR_CODE_PIN_LOCKED || ret != HKS_SUCCESS, HKS_ERROR_REMOTE_OPERATION_FAILED,
+        "Remote verify pin status failed: %" LOG_PUBLIC "d", ret)
+    return ret;
 }
 
-int32_t HksRemoteHandleManager::RemoteClearPinStatus(const std::string &index, const CppParamSet &paramSet)
+int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet)
 {
     ProviderInfo providerInfo;
     std::string newIndex;
@@ -336,6 +327,7 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const std::string &index, c
     
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
             "Remote clear pin status failed: %" "d", ret)
+    ClearAuthState(processInfo, index);
     return HKS_SUCCESS;
 }
 
@@ -496,11 +488,11 @@ bool HksRemoteHandleManager::CheckAuthStateIsOk(const HksProcessInfo &processInf
     return uidIndexToAuthState_.Find(std::make_pair(processInfo.uidInt, index), state);
 }
 
-void HksRemoteHandleManager::ClearAuthState(const HksProcessInfo &processInfo)
+void HksRemoteHandleManager::ClearAuthState(const HksProcessInfo &processInfo, const std::string& index)
 {
     std::vector<std::pair<uint32_t, std::string>> keysToRemove;
     auto iterFunc = [&](std::pair<uint32_t, std::string> key, int32_t &value) {
-        if (key.first == processInfo.uidInt) {
+        if (key.first == processInfo.uidInt && key.second == index) {
             keysToRemove.push_back(key);
         }
     };
