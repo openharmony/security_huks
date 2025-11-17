@@ -760,6 +760,13 @@ static struct HksError g_errCodeTable[] = {
             .errorMsg = "The auth pin is not correct.",
             .data = NULL
         }
+    }, {
+        .innerErrCode = HUKS_ERR_CODE_PIN_LOCKED,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_PIN_LOCKED,
+            .errorMsg = "The auth pin is locked.",
+            .data = NULL
+        }
     }
 };
 
