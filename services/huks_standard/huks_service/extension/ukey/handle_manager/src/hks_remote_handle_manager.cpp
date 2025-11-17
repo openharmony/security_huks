@@ -496,11 +496,11 @@ bool HksRemoteHandleManager::CheckAuthStateIsOk(const HksProcessInfo &processInf
 
 bool HksRemoteHandleManager::IsProviderNumExceedLimit(const ProviderInfo &providerInfo)
 {
-    int32_t num = 0;
+    uint32_t num = 0;
     if (providerInfoToNum_.Find(providerInfo, num)) {
         return num >= MAX_PROVIDER_NUM_PER_UID - 1;
     }
-    int32_t totalNum = 0;
+    uint32_t totalNum = 0;
     auto iterFunc = [&](ProviderInfo key, int32_t value) {
         totalNum += value;
     };
