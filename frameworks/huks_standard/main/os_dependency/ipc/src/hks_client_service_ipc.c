@@ -356,17 +356,16 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: pack fail");
 
         ret = HksSendRequest(HKS_MSG_EXT_AUTH_UKEY_PIN, &inBlob, &outBlob, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: send fail");
-
-        if (outBlob.size < (sizeof(int32_t) + sizeof(uint32_t)) || outBlob.data == NULL) {
-            ret = HKS_ERROR_BAD_STATE;
-            break;
-        }
-
-        HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(&outStatus, sizeof(int32_t),
-            outBlob.data, sizeof(int32_t)), "memcpy_s outStatus failed")
-        HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(retryCount, sizeof(uint32_t),
-            outBlob.data + sizeof(int32_t), sizeof(uint32_t)), "memcpy_s retryCount failed")
+        if (ret == HUKS_ERR_CODE_PIN_CODE_ERROR || ret == HUKS_ERR_CODE_PIN_LOCKED) {
+            if (outBlob.size < (sizeof(int32_t) + sizeof(uint32_t)) || outBlob.data == NULL) {
+                ret = HKS_ERROR_BAD_STATE;
+                break;
+            }
+            HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(&outStatus, sizeof(int32_t),
+                outBlob.data, sizeof(int32_t)), "memcpy_s outStatus failed")
+            HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(retryCount, sizeof(uint32_t),
+                outBlob.data + sizeof(int32_t), sizeof(uint32_t)), "memcpy_s retryCount failed")
+        } 
     } while (0);
 
     HksFreeParamSet(&newParamSet);
