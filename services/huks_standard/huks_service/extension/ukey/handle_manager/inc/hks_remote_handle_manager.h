@@ -69,7 +69,6 @@ public:
                 const CppParamSet& paramSet, CppParamSet& outParams);
 
     int32_t ClearRemoteHandleMap(const std::string &providerName, const std::string &abilityName);
-    void ClearAuthState(const HksProcessInfo &processInfo, const std::string& index);
     static int32_t ParseIndexAndProviderInfo(const std::string &index,
                 ProviderInfo &providerInfo, std::string &newIndex);
 

@@ -261,7 +261,15 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
             providerInfoToNum_.EnsureInsert(providerInfo, num - 1);
         }
     }
-    ClearAuthState(processInfo, index);
+    std::vector<std::pair<uint32_t, std::string>> keysToRemove;
+    uidIndexToAuthState_.Iterate([&](std::pair<uint32_t, std::string> key, int32_t value) {
+        if (key.first == processInfo.uidInt && key.second == index) {
+            keysToRemove.push_back(key);
+        }
+    });
+    for (auto &key : keysToRemove) {
+        uidIndexToAuthState_.Erase(key);
+    }
     return HKS_SUCCESS;
 }
 
@@ -310,8 +318,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     return ret;
 }
 
-int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet)
+int32_t HksRemoteHandleManager::RemoteClearPinStatus(const std::string &index, const CppParamSet &paramSet)
 {
     ProviderInfo providerInfo;
     std::string newIndex;
@@ -327,7 +334,6 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &proce
     
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
             "Remote clear pin status failed: %" "d", ret)
-    ClearAuthState(processInfo, index);
     return HKS_SUCCESS;
 }
 
@@ -486,20 +492,6 @@ bool HksRemoteHandleManager::CheckAuthStateIsOk(const HksProcessInfo &processInf
 {
     int32_t state = 0;
     return uidIndexToAuthState_.Find(std::make_pair(processInfo.uidInt, index), state);
-}
-
-void HksRemoteHandleManager::ClearAuthState(const HksProcessInfo &processInfo, const std::string& index)
-{
-    std::vector<std::pair<uint32_t, std::string>> keysToRemove;
-    auto iterFunc = [&](std::pair<uint32_t, std::string> key, int32_t &value) {
-        if (key.first == processInfo.uidInt && key.second == index) {
-            keysToRemove.push_back(key);
-        }
-    };
-    uidIndexToAuthState_.Iterate(iterFunc);
-    for (auto &key : keysToRemove) {
-        uidIndexToAuthState_.Erase(key);
-    }
 }
 
 bool HksRemoteHandleManager::IsProviderNumExceedLimit(const ProviderInfo &providerInfo)
