@@ -48,7 +48,8 @@ public:
                 int32_t &authState, uint32_t &retryCnt);
     int32_t RemoteVerifyPinStatus(const HksProcessInfo &processInfo,
                 const std::string &index, const CppParamSet &paramSet, int32_t &state);
-    int32_t RemoteClearPinStatus(const std::string &index, const CppParamSet &paramSet);
+    int32_t RemoteClearPinStatus(const HksProcessInfo &processInfo, const std::string &index,
+                const CppParamSet &paramSet);
     bool CheckAuthStateIsOk(const HksProcessInfo &processInfo, const std::string &index);
     //证书查询
     int32_t FindRemoteCertificate(const std::string &index,
@@ -68,7 +69,7 @@ public:
                 const CppParamSet& paramSet, CppParamSet& outParams);
 
     int32_t ClearRemoteHandleMap(const std::string &providerName, const std::string &abilityName);
-    void ClearAuthState(const HksProcessInfo &processInfo);
+    void ClearAuthState(const HksProcessInfo &processInfo, const std::string& index);
     static int32_t ParseIndexAndProviderInfo(const std::string &index,
                 ProviderInfo &providerInfo, std::string &newIndex);
 
