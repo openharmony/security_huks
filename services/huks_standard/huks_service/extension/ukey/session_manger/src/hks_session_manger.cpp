@@ -88,7 +88,9 @@ bool HksSessionManager::CheckParmSetPurposeAndCheckAuth(const HksProcessInfo &pr
     HKS_IF_TRUE_LOGE_RETURN(purpose.first != HKS_SUCCESS, false,
         "Get purpose tag failed. ret: %" LOG_PUBLIC "d", purpose.first)
     if (purpose.second == HKS_KEY_PURPOSE_SIGN || purpose.second == HKS_KEY_PURPOSE_DECRYPT) {
-        HKS_IF_TRUE_LOGE_RETURN(!CheckAuthStateIsOk(processInfo, index), false,
+        auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
+        HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, false, "handleMgr is null");
+        HKS_IF_TRUE_LOGE_RETURN(!handleMgr->CheckAuthStateIsOk(processInfo, index), false,
             "ukey resource no auth")
     }
     return true;
