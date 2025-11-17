@@ -494,6 +494,20 @@ bool HksRemoteHandleManager::CheckAuthStateIsOk(const HksProcessInfo &processInf
     return uidIndexToAuthState_.Find(std::make_pair(processInfo.uidInt, index), state);
 }
 
+void HksRemoteHandleManager::ClearAuthState(const HksProcessInfo &processInfo)
+{
+    std::vector<std::pair<uint32_t, std::string>> keysToRemove;
+    auto iterFunc = [&](std::pair<uint32_t, std::string> key, std::string &value) {
+        if (key.first == processInfo.uidInt) {
+            keysToRemove.push_back(key);
+        }
+    };
+    uidIndexToAuthState_.Iterate(iterFunc);
+    for (auto &key : keysToRemove) {
+        uidIndexToAuthState_.Erase(key);
+    }
+}
+
 bool HksRemoteHandleManager::IsProviderNumExceedLimit(const ProviderInfo &providerInfo)
 {
     uint32_t num = 0;

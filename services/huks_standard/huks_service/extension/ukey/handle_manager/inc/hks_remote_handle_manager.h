@@ -70,7 +70,7 @@ public:
     int32_t ClearRemoteHandleMap(const std::string &providerName, const std::string &abilityName);
     static int32_t ParseIndexAndProviderInfo(const std::string &index,
                 ProviderInfo &providerInfo, std::string &newIndex);
-
+    void ClearAuthState(const HksProcessInfo &processInfo);
     int32_t ParseAndValidateIndex(const std::string &index, ProviderInfo &providerInfo,
                 std::string &newIndex, std::string &handle);
     OHOS::sptr<IHuksAccessExtBase> GetProviderProxy(const ProviderInfo &providerInfo, int32_t &ret);
