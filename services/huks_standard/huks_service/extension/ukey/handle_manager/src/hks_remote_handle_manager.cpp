@@ -227,7 +227,7 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const std::string &index, con
         return HKS_ERROR_CODE_KEY_ALREADY_EXIST;
     }
     HKS_IF_TRUE_LOGE_RETURN(IsProviderNumExceedLimit(providerInfo),
-        HKS_ERROR_CODE_KEY_ALREADY_EXIST, "Provider num exceed limit")
+        HUKS_ERR_CODE_EXCEED_LIMIT, "Provider num exceed limit")
     int32_t num = 0;
     if (providerInfoToNum_.Find(providerInfo, num)) {
         providerInfoToNum_.EnsureInsert(providerInfo, num + 1);
@@ -287,11 +287,16 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     
     auto ipccode = proxy->AuthUkeyPin(handle, paramSet, ret, authState, retryCnt);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    HKS_IF_TRUE_LOGE(retryCnt > 0, "AuthUkeyPin failed: %" LOG_PUBLIC "d", ret)
     if (authState == HKS_SUCCESS) {
         uidIndexToAuthState_.EnsureInsert(std::make_pair(processInfo.uidInt, index), HKS_SUCCESS);
     }
-    return HKS_SUCCESS;
+    if (ret == HUKS_ERR_CODE_PIN_CODE_ERROR || ret == HUKS_ERR_CODE_PIN_LOCKED) {
+        HKS_IF_TRUE_LOGE(retryCnt > 0, "AuthUkeyPin failed: %" LOG_PUBLIC "d", ret)
+    } else {
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
+            "Remote verify pin failed: %" LOG_PUBLIC "d", ret)
+    }
+    return ret;
 }
 
 int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &processInfo,

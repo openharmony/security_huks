@@ -250,7 +250,7 @@ bool HksSessionManager::HksClearHandle(const HksProcessInfo &processInfo, const 
     std::vector<uint32_t> toRemove;
     do {
         auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
-        HKS_IF_TRUE_LOGE_RETURN(abilityName.second.size() > MAX_ABILITY_NAME_LEN, false,
+        HKS_IF_TRUE_LOGE_RETURN(abilityName.second.size() >= MAX_ABILITY_NAME_LEN, false,
             "the abilityName is too long. size: %" LOG_PUBLIC "zu", abilityName.second.size())
         if (abilityName.first == HKS_SUCCESS) {
             std::string abilityNameStr = std::string(abilityName.second.begin(), abilityName.second.end());
