@@ -44,7 +44,7 @@
 #include "hks_service_ipc_serialization.h"
 #include "hks_template.h"
 #define MAX_KEY_SIZE         2048
-#define AUTH_RET_SIZE    2
+#define RET_NUM    2
 #define UKEY_PERMISSION_REGISTER "ohos.permission.CRYPTO_EXTENSION_REGISTER"
 
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
@@ -156,7 +156,7 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
         }
         if (memcpy_s(outBlob.data, outBlob.size, &ret, sizeof(int32_t)) != EOK ||
             memcpy_s(outBlob.data + sizeof(int32_t), outBlob.size - sizeof(int32_t), &status, sizeof(int32_t)) != EOK ||
-            memcpy_s(outBlob.data + sizeof(int32_t) * AUTH_RET_SIZE, outBlob.size - sizeof(int32_t) * AUTH_RET_SIZE,
+            memcpy_s(outBlob.data + sizeof(int32_t) * RET_NUM, outBlob.size - sizeof(int32_t) * RET_NUM,
                 &retryCount, sizeof(uint32_t)) != EOK) {
             ret = HKS_ERROR_BAD_STATE;
             HKS_LOG_E("AuthUkeyPin: memcpy fail");
@@ -165,7 +165,7 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
     } while (0);
 
     HksSendResponse(context, (ret == HKS_ERROR_BAD_STATE || ret == HKS_ERROR_MALLOC_FAIL) ? ret : HKS_SUCCESS,
-        (outBlob.data != NULL && outBlob.size == (sizeof(int32_t) * AUTH_RET_SIZE + sizeof(uint32_t))) ? &outBlob : NULL);
+        (outBlob.data != NULL && outBlob.size == (sizeof(int32_t) * RET_NUM + sizeof(uint32_t))) ? &outBlob : NULL);
 
     HKS_FREE_BLOB(outBlob);
     HKS_FREE_BLOB(processInfo.processName);
