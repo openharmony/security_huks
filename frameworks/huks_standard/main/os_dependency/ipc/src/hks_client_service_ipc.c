@@ -335,7 +335,7 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
     struct HksBlob inBlob  = { 0, NULL };
     struct HksBlob outBlob = { 0, NULL };
 
-    outBlob.size = (sizeof(int32_t) + sizeof(uint32_t));
+    outBlob.size = (sizeof(int32_t) + sizeof(int32_t) + sizeof(uint32_t));
     outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
     if (outBlob.data == NULL) {
         HKS_LOG_E("malloc outBlob memory data failed");
@@ -356,16 +356,17 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: pack fail");
 
         ret = HksSendRequest(HKS_MSG_EXT_AUTH_UKEY_PIN, &inBlob, &outBlob, newParamSet);
-        if (ret == HUKS_ERR_CODE_PIN_CODE_ERROR || ret == HUKS_ERR_CODE_PIN_LOCKED) {
-            if (outBlob.size < (sizeof(int32_t) + sizeof(uint32_t)) || outBlob.data == NULL) {
-                ret = HKS_ERROR_BAD_STATE;
-                break;
-            }
-            HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(&outStatus, sizeof(int32_t),
-                outBlob.data, sizeof(int32_t)), "memcpy_s outStatus failed")
-            HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(retryCount, sizeof(uint32_t),
-                outBlob.data + sizeof(int32_t), sizeof(uint32_t)), "memcpy_s retryCount failed")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: send request fail");
+        if (outBlob.size < (sizeof(int32_t) + sizeof(int32_t) + sizeof(uint32_t)) || outBlob.data == NULL) {
+            ret = HKS_ERROR_BAD_STATE;
+            break;
         }
+        HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(&ret, sizeof(int32_t),
+            outBlob.data, sizeof(int32_t)), "memcpy_s ret failed")
+        HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(&outStatus, sizeof(int32_t),
+            outBlob.data + sizeof(int32_t), sizeof(int32_t)), "memcpy_s outStatus failed")
+        HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(retryCount, sizeof(uint32_t),
+            outBlob.data + sizeof(int32_t) * 2, sizeof(uint32_t)), "memcpy_s retryCount failed")
     } while (0);
 
     HksFreeParamSet(&newParamSet);

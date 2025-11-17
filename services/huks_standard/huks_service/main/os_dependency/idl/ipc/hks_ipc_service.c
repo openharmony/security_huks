@@ -147,14 +147,15 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
         ret = HksIpcAuthUkeyPinAdapter(&processInfo, &index, paramSet, &status, &retryCount);
         HKS_IF_NOT_SUCC_LOGE(ret, "AuthUkeyPin: adapter ret=%" LOG_PUBLIC "d", ret);
 
-        outBlob.size = (sizeof(int32_t) + sizeof(uint32_t));
+        outBlob.size = (sizeof(int32_t) + sizeof(int32_t) + sizeof(uint32_t));
         outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
         if (outBlob.data == NULL) {
             ret = HKS_ERROR_MALLOC_FAIL;
             break;
         }
-        if (memcpy_s(outBlob.data, outBlob.size, &status, sizeof(int32_t)) != EOK ||
-            memcpy_s(outBlob.data + sizeof(int32_t), outBlob.size - sizeof(int32_t),
+        if (memcpy_s(outBlob.data, outBlob.size, &ret, sizeof(int32_t)) != EOK ||
+            memcpy_s(outBlob.data + sizeof(int32_t), outBlob.size - sizeof(int32_t), &status, sizeof(int32_t)) != EOK ||
+            memcpy_s(outBlob.data + sizeof(int32_t) * 2, outBlob.size - sizeof(int32_t) * 2,
                 &retryCount, sizeof(uint32_t)) != EOK) {
             ret = HKS_ERROR_BAD_STATE;
             HKS_LOG_E("AuthUkeyPin: memcpy fail");
@@ -162,8 +163,8 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
         }
     } while (0);
 
-    HksSendResponse(context, ret,
-        (outBlob.data != NULL && outBlob.size == (sizeof(int32_t) + sizeof(uint32_t))) ? &outBlob : NULL);
+    HksSendResponse(context, (ret == HKS_ERROR_BAD_STATE || ret == HKS_ERROR_MALLOC_FAIL) ? ret : HKS_SUCCESS,
+        (outBlob.data != NULL && outBlob.size == (sizeof(int32_t) * 2 + sizeof(uint32_t))) ? &outBlob : NULL);
 
     HKS_FREE_BLOB(outBlob);
     HKS_FREE_BLOB(processInfo.processName);
