@@ -359,9 +359,6 @@ static int32_t AppendErrorMsg(struct HksBlob *blob, const char *errorMsg, uint32
     HKS_FREE_BLOB(*blob);
     blob->data = newData;
     blob->size = totalLen;
-    if (totalLen > 0) {
-        HKS_LOG_I("errMsg is: %" LOG_PUBLIC "s", blob->data);
-    }
 
     return HKS_SUCCESS;
 }
