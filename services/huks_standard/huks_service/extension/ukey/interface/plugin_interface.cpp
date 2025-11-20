@@ -25,19 +25,19 @@
 
 namespace OHOS::Security::Huks {
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnRegisterProvider(
-    const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet)
+__attribute__((visibility("default"))) int32_t HksExtPluginOnRegisterProvider(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet, std::function<void(bool)> callback)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(providerMgr == nullptr, HKS_ERROR_NULL_POINTER, "providerMgr is null");
-    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet);
+    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet, callback);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(
-    const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet)
+__attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet, bool isdeath)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     int32_t ret = HKS_SUCCESS;
@@ -59,7 +59,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(
 
     auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(providerMgr == nullptr, HKS_ERROR_NULL_POINTER, "providerMgr is null");
-    ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet);
+    ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, isdeath);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     HKS_IF_TRUE_RETURN(ret != HKS_SUCCESS, ret)
     return ret;

@@ -71,9 +71,9 @@ public:
     static std::shared_ptr<HksProviderLifeCycleManager> GetInstanceWrapper();
     static void ReleaseInstance();
     int32_t OnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName,
-        const CppParamSet &paramSet);
+        const CppParamSet &paramSet, std::function<void(bool)> callback);
     int32_t OnUnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName,
-        const CppParamSet &paramSet);
+        const CppParamSet &paramSet, bool isdeath);
     int32_t GetAllProviderInfosByProviderName(const std::string &providerName,
         std::vector<ProviderInfo> &providerInfos);
     int32_t GetExtensionProxy(const ProviderInfo &providerInfo, sptr<IHuksAccessExtBase> &proxy);
