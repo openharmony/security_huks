@@ -68,7 +68,7 @@ void HksProviderLifeCycleManager::PrintRegisterProviders()
 }
 
 int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet)
+    const std::string &providerName, const CppParamSet &paramSet, std::function<void(bool)> callback)
 {
     HKS_LOG_I("OnRegisterProvider providerName: %" LOG_PUBLIC "s", providerName.c_str());
     HKS_IF_TRUE_RETURN(!CheckStringParamLenIsOk(providerName, 1, MAX_PROVIDER_NAME_LEN), HKS_ERROR_INVALID_ARGUMENT)
@@ -87,6 +87,7 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
         AAFwk::Want want{};
         want.SetElementName(providerInfo.m_bundleName, providerInfo.m_abilityName);
         sptr<ExtensionConnection> connect(new (std::nothrow) ExtensionConnection());
+        connect->callBackFromPlugin(callback);
         HKS_IF_TRUE_LOGE_RETURN(connect == nullptr, HKS_ERROR_NULL_POINTER, "new ExtensionConnection failed");
 
         if (!connect->IsConnected()) {
@@ -202,7 +203,7 @@ int32_t HksProviderLifeCycleManager::HksHapGetConnectInfos(const HksProcessInfo 
 constexpr int WAIT_TIME_MS = 5;
 constexpr int WAIT_ITERATION = 6;
 int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &processInfo,
-    const std::string &providerName, [[maybe_unused]] const CppParamSet &paramSet)
+    const std::string &providerName, [[maybe_unused]] const CppParamSet &paramSet, bool isdeath)
 {
     HKS_IF_TRUE_RETURN(!CheckStringParamLenIsOk(providerName, 1, MAX_PROVIDER_NAME_LEN), HKS_ERROR_INVALID_ARGUMENT)
     std::vector<std::pair<ProviderInfo, std::shared_ptr<HksExtAbilityConnectInfo>>> connectionInfos;
@@ -230,7 +231,12 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
         HKS_LOG_I("OnUnRegisterProvider refCount: %" LOG_PUBLIC "d", refCount);
         HKS_IF_TRUE_LOGE_RETURN(refCount > HKS_PROVIDER_CAN_REMOVE_REF_COUNT, HKS_ERROR_PROVIDER_IN_USE,
             "OnUnRegisterProvider failed, refCount is more than 2, maybe in use.")
-        connectionInfo.second->m_connection->OnDisconnect(connectionInfo.second->m_connection);
+        
+        if (!isdeath) {
+            HKS_IF_TRUE_LOGE_RETURN(connectionInfo.second->m_connection == nullptr,
+                HKS_ERROR_NULL_POINTER, "connectionInfo is nullptr")
+            connectionInfo.second->m_connection->OnDisconnect(connectionInfo.second->m_connection);
+        }
         m_providerMap.Erase(connectionInfo.first);
         auto &stub = connectionInfo.second->m_connection;
         uint8_t waitIteration = WAIT_ITERATION;
