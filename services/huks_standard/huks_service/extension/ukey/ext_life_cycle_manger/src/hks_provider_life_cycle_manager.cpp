@@ -183,7 +183,7 @@ int32_t HksProviderLifeCycleManager::HksHapGetConnectInfos(const HksProcessInfo 
 
     auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
     if (abilityName.first == HKS_SUCCESS) {
-        HKS_IF_TRUE_LOGE_RETURN(abilityName.second.size() > MAX_ABILITY_NAME_LEN, HKS_ERROR_INVALID_ARGUMENT,
+        HKS_IF_TRUE_LOGE_RETURN(abilityName.second.size() >= MAX_ABILITY_NAME_LEN, HKS_ERROR_INVALID_ARGUMENT,
             "the abilityName is too long. size: %" LOG_PUBLIC "zu", abilityName.second.size())
         std::string abilityNameStr = std::string(abilityName.second.begin(), abilityName.second.end());
         HKS_LOG_I("HksHapGetConnectInfos abilityName: %" LOG_PUBLIC "s", abilityNameStr.c_str());
@@ -273,7 +273,7 @@ int32_t HksGetProviderInfo(const HksProcessInfo &processInfo, const std::string 
     auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
     HKS_IF_TRUE_LOGE_RETURN(abilityName.first != HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
         "GetParam HKS_EXT_CRYPTO_TAG_ABILITY_NAME failed. ret: %" LOG_PUBLIC "d", abilityName.first)
-    HKS_IF_TRUE_LOGE_RETURN(abilityName.second.size() > MAX_ABILITY_NAME_LEN, HKS_ERROR_INVALID_ARGUMENT,
+    HKS_IF_TRUE_LOGE_RETURN(abilityName.second.size() >= MAX_ABILITY_NAME_LEN, HKS_ERROR_INVALID_ARGUMENT,
         "the abilityName is too long. size: %" LOG_PUBLIC "zu", abilityName.second.size())
     providerInfo.m_abilityName = std::string(abilityName.second.begin(), abilityName.second.end());
     return HKS_SUCCESS;
