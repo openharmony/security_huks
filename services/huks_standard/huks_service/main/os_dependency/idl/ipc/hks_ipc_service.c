@@ -141,8 +141,8 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: get process info fail ret=%" LOG_PUBLIC "d", ret);
 
-        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: permission check fail ret=%" LOG_PUBLIC "d", ret);
+        ret = SystemApiPermissionCheck(processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: SystemApiPermissionCheck fail ret=%" LOG_PUBLIC "d", ret);
 
         ret = HksIpcAuthUkeyPinAdapter(&processInfo, &index, paramSet, &status, &retryCount);
         HKS_IF_NOT_SUCC_LOGE(ret, "AuthUkeyPin: adapter ret=%" LOG_PUBLIC "d", ret);
