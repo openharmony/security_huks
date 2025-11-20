@@ -23,6 +23,7 @@
 #include "iremote_object.h"
 #include "ihuks_access_ext_base.h"
 #include "want.h"
+#include "functional"
 
 namespace OHOS {
 namespace Security {
@@ -38,6 +39,9 @@ public:
     bool IsConnected();
     sptr<IHuksAccessExtBase> GetExtConnectProxy();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
+    bool isDeathRemoted = false;
+    std::function<void(bool)> callBackPlugin;
+    void callBackFromPlugin(std::function<void(bool)> callback);
 
 private:
     std::condition_variable proxyConv_{};
