@@ -130,6 +130,16 @@ void ExtensionConnection::OnRemoteDied(const wptr<IRemoteObject> &remote)
     if (extConnectProxy) {
         extConnectProxy = nullptr;
     }
+
+    isDeathRemoted = true;
+    if (callBackPlugin) {
+        callBackPlugin(isDeathRemoted);
+    }
+}
+
+void ExtensionConnection::callBackFromPlugin(std::function<void(bool)> callback)
+{
+    callBackPlugin = callback;
 }
 
 ExtensionDeathRecipient::ExtensionDeathRecipient(RemoteDiedHandler handler) : handler_(handler)

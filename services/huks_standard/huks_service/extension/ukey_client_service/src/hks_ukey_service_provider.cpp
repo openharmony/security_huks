@@ -32,7 +32,8 @@ int32_t HksIpcServiceProviderUnRegister(const struct HksProcessInfo *processInfo
 {
     auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
-    return pluginManager->UnRegisterProvider(*processInfo, name, paramSet);
+    bool isDeath = false;
+    return pluginManager->UnRegisterProvider(*processInfo, name, paramSet, isDeath);
 }
 
 int32_t HksIpcServiceOnCreateRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string &index,
