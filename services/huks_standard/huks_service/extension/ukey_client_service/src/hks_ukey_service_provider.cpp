@@ -24,7 +24,6 @@ int32_t HksIpcServiceProviderRegister(const struct HksProcessInfo *processInfo,
 {
     auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
-    HKS_LOG_E("got pluginManager instance");
     return pluginManager->RegisterProvider(*processInfo, name, paramSet);
 }
 
@@ -33,92 +32,85 @@ int32_t HksIpcServiceProviderUnRegister(const struct HksProcessInfo *processInfo
 {
     auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
-    HKS_LOG_E("got pluginManager instance");
     return pluginManager->UnRegisterProvider(*processInfo, name, paramSet);
 }
 
 int32_t HksIpcServiceOnCreateRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string &index,
     CppParamSet &paramSet, std::string &remoteHandleOut)
 {
-    auto libInterface = HuksLibInterface::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")
-    HKS_LOG_E("got libInterface instance");
-    return libInterface->OnCreateRemoteKeyHandle(*processInfo, index, paramSet, remoteHandleOut);
+    auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
+    return pluginManager->OnCreateRemoteKeyHandle(*processInfo, index, paramSet, remoteHandleOut);
 }
 
 int32_t HksIpcServiceOnCloseRemoteKeyHandle(const struct HksProcessInfo *processInfo,
     std::string &index, CppParamSet &paramSet)
 {
-    auto libInterface = HuksLibInterface::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")
-    HKS_LOG_E("got libInterface instance");
-    return libInterface->OnCloseRemoteKeyHandle(*processInfo, index, paramSet);
+    auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
+    return pluginManager->OnCloseRemoteKeyHandle(*processInfo, index, paramSet);
 }
 
 int32_t HksIpcServiceOnAuthUkeyPin(const struct HksProcessInfo *processInfo, const std::string &index,
     CppParamSet &pinData, int32_t &authState, uint32_t &retryCnt)
 {
-    auto libInterface = HuksLibInterface::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")
-    HKS_LOG_E("got libInterface instance");
-    return libInterface->OnAuthUkeyPin(*processInfo, index, pinData, authState, retryCnt);
+    auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
+    return pluginManager->OnAuthUkeyPin(*processInfo, index, pinData, authState, retryCnt);
 }
 
 int32_t HksIpcServiceOnGetVerifyPinStatus(const struct HksProcessInfo *processInfo,
     const std::string &index, const CppParamSet &paramSet, int32_t &state)
 {
-    auto libInterface = HuksLibInterface::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")
-    HKS_LOG_E("got libInterface instance");
+    auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
 
-    return libInterface->OnGetVerifyPinStatus(*processInfo, index, paramSet, state);
+    return pluginManager->OnGetVerifyPinStatus(*processInfo, index, paramSet, state);
 }
 
 int32_t HksIpcServiceOnClearUkeyPinAuthStatus(const struct HksProcessInfo *processInfo, const std::string &index)
 {
-    auto libInterface = HuksLibInterface::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")
-    HKS_LOG_E("got libInterface instance");
-    int32_t ret = libInterface->OnClearUkeyPinAuthStatus(*processInfo, index);
+    auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
+    int32_t ret = pluginManager->OnClearUkeyPinAuthStatus(*processInfo, index);
     return ret;
 }
 
 int32_t HksIpcServiceOnGetRemoteProperty(const HksProcessInfo *processInfo, const std::string &index,
     const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams)
 {
-    auto libInterface = HuksLibInterface::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")
-    HKS_LOG_E("got libInterface instance");
-    int32_t ret = libInterface->OnGetRemoteProperty(*processInfo, index, propertyId, paramSet, outParams);
+    auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
+    int32_t ret = pluginManager->OnGetRemoteProperty(*processInfo, index, propertyId, paramSet, outParams);
     return ret;
 }
     
 int32_t HksIpcServiceOnListProviders(std::vector<uint8_t> &providersOut)
 {
+    HKS_LOG_E("no impl for HksIpcServiceOnListProviders");
     return 0;
 }
 
 int32_t HksIpcServiceOnExportCertificate(const struct HksProcessInfo *processInfo, const std::string &index,
     const CppParamSet &paramSet, std::string &cetificatesOut)
 {
-    auto libInterface = HuksLibInterface::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")
-    HKS_LOG_E("got libInterface instance");
-    return libInterface->OnExportCertificate(*processInfo, index, paramSet, cetificatesOut);
+    auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
+    return pluginManager->OnExportCertificate(*processInfo, index, paramSet, cetificatesOut);
 }
 
 int32_t HksIpcServiceOnExportProviderAllCertificates(const struct HksProcessInfo *processInfo, const std::string &index,
     const CppParamSet &paramSet, std::string &cetificatesOut)
 {
-    auto libInterface = HuksLibInterface::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(libInterface == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")
-    HKS_LOG_E("got libInterface instance");
-    return libInterface->OnExportProviderAllCertificates(*processInfo, index, paramSet, cetificatesOut);
+    auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
+    return pluginManager->OnExportProviderAllCertificates(*processInfo, index, paramSet, cetificatesOut);
 }
 
 int32_t HksIpcServiceOnFindRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string &index,
     CppParamSet &paramSet, std::string &remoteHandleOut)
 {
+    HKS_LOG_E("no impl for HksIpcServiceOnFindRemoteKeyHandle");
     return 0;
 }
 

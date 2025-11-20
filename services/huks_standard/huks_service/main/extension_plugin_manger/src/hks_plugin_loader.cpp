@@ -34,7 +34,7 @@ void HuksPluginLoader::ReleaseInstance()
 }
 
 int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const std::string &providerName,
-    const CppParamSet &paramSet)
+    const CppParamSet &paramSet, OHOS::SafeMap<PluginMethodEnum, void*> &pluginProviderMap)
 {
     std::lock_guard<std::mutex> lock(libMutex);
     HKS_IF_TRUE_RETURN(m_pluginHandle != nullptr, HKS_SUCCESS)
@@ -49,7 +49,7 @@ int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const s
             HKS_LOG_E("the entry %{public}s is not include", pluginSo.c_str());
             dlclose(m_pluginHandle);
             m_pluginHandle = nullptr;
-            m_pluginProviderMap.Clear();
+            pluginProviderMap.Clear();
             return HKS_ERROR_FIND_FUNC_MAP_FAIL;
         }
 
@@ -66,25 +66,22 @@ int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const s
                 "dlclose fail, error: %{public}s", dlsym_error)
 
             m_pluginHandle= nullptr;
-            m_pluginProviderMap.Clear();
+            pluginProviderMap.Clear();
             return HKS_ERROR_GET_FUNC_POINTER_FAIL;
         }
-        m_pluginProviderMap.Insert(static_cast<PluginMethodEnum>(i), func);
+        pluginProviderMap.Insert(static_cast<PluginMethodEnum>(i), func);
     }
 
-    auto libInstance = HuksLibInterface::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(libInstance == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get LibInterface instance.")
-    libInstance->initProviderMap(m_pluginProviderMap);
     return HKS_SUCCESS;
 }
 
 int32_t HuksPluginLoader::UnLoadPlugins(const struct HksProcessInfo &info, const std::string &providerName,
-    const CppParamSet &paramSet)
+    const CppParamSet &paramSet, OHOS::SafeMap<PluginMethodEnum, void*> &pluginProviderMap)
 {
     std::lock_guard<std::mutex> lock(libMutex);
     HKS_IF_TRUE_RETURN(m_pluginHandle == nullptr, HKS_SUCCESS)
 
-    m_pluginProviderMap.Clear();
+    pluginProviderMap.Clear();
     dlclose(m_pluginHandle);
     m_pluginHandle = nullptr;
     HKS_LOG_I("lib close success!");

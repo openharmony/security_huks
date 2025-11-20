@@ -32,13 +32,11 @@ void ExtensionPluginMgrTest::TearDownTestCase(void) {
 
 void ExtensionPluginMgrTest::SetUp() {
     HuksPluginLoader::ReleaseInstance();
-    HuksLibInterface::ReleaseInstance();
     HuksPluginLifeCycleMgr::ReleaseInstance();
 }
 
 void ExtensionPluginMgrTest::TearDown() {
     HuksPluginLoader::ReleaseInstance();
-    HuksLibInterface::ReleaseInstance();
     HuksPluginLifeCycleMgr::ReleaseInstance();
 }
 
@@ -57,28 +55,27 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest001, TestSize.Level0)
     EXPECT_EQ(ret, 0) << "fail: regist fail";
 
     std::string outIndex = "";
-    auto libInterface = HuksLibInterface::GetInstanceWrapper();
-    ret = libInterface->OnCreateRemoteIndex(TEST_PROVIDER, paramSet, outIndex);
+    ret = mgr->OnCreateRemoteIndex(TEST_PROVIDER, paramSet, outIndex);
     EXPECT_EQ(ret, 0) << "fail: OnCreateRemoteIndex fail";
 
     std::string index = "";
     std::string handle = "";
-    ret = libInterface->OnCreateRemoteKeyHandle(processInfo, index, paramSet, handle);
+    ret = mgr->OnCreateRemoteKeyHandle(processInfo, index, paramSet, handle);
     EXPECT_EQ(ret, 0) << "fail: OnCreateRemoteKeyHandle fail";
 
-    ret = libInterface->OnCloseRemoteKeyHandle(processInfo, index, paramSet);
+    ret = mgr->OnCloseRemoteKeyHandle(processInfo, index, paramSet);
     EXPECT_EQ(ret, 0) << "fail: OnCloseRemoteKeyHandle fail";
 
     int32_t authState = 0;
     uint32_t retryCnt = 0;
-    ret = libInterface->OnAuthUkeyPin(processInfo, index, paramSet, authState, retryCnt);
+    ret = mgr->OnAuthUkeyPin(processInfo, index, paramSet, authState, retryCnt);
     EXPECT_EQ(ret, 0) << "fail: OnAuthUkeyPin fail";
 
     int32_t state = 0;
-    ret = libInterface->OnGetVerifyPinStatus(processInfo, index, paramSet, state);
+    ret = mgr->OnGetVerifyPinStatus(processInfo, index, paramSet, state);
     EXPECT_EQ(ret, 0) << "fail: OnGetVerifyPinStatus fail";
 
-    ret = libInterface->OnClearUkeyPinAuthStatus(processInfo, index);
+    ret = mgr->OnClearUkeyPinAuthStatus(processInfo, index);
     EXPECT_EQ(ret, 0) << "fail: OnClearUkeyPinAuthStatus fail";
 }
 
@@ -133,32 +130,30 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest004, TestSize.Level0)
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, 0) << "fail: regist fail";
 
-    auto libInterface = HuksLibInterface::GetInstanceWrapper();
-
     std::string propertyId = "";
     CppParamSet outParams;
     const std::string index = "";
-    ret = libInterface->OnGetRemoteProperty(processInfo, index, propertyId, paramSet, outParams);
+    ret = mgr->OnGetRemoteProperty(processInfo, index, propertyId, paramSet, outParams);
     EXPECT_EQ(ret, 0) << "fail: OnGetRemoteProperty fail";
 
     std::string certsJson = "";
-    ret = libInterface->OnExportCertificate(processInfo, index, paramSet, certsJson);
+    ret = mgr->OnExportCertificate(processInfo, index, paramSet, certsJson);
     EXPECT_EQ(ret, 0) << "fail: OnExportCertificate fail";
 
     std::string certsJsonArr = "";
-    ret = libInterface->OnExportProviderAllCertificates(processInfo, TEST_PROVIDER, paramSet, certsJsonArr);
+    ret = mgr->OnExportProviderAllCertificates(processInfo, TEST_PROVIDER, paramSet, certsJsonArr);
     EXPECT_EQ(ret, 0) << "fail: OnExportProviderAllCertificates fail";
 
     uint32_t uhandle = 0;
-    ret = libInterface->OnInitSession(processInfo, index, paramSet, uhandle);
+    ret = mgr->OnInitSession(processInfo, index, paramSet, uhandle);
     EXPECT_EQ(ret, 0) << "fail: OnInitSession fail";
 
     std::vector<uint8_t> inData;
     std::vector<uint8_t> outData;
-    ret = libInterface->OnUpdateSession(processInfo, uhandle, paramSet, inData, outData);
+    ret = mgr->OnUpdateSession(processInfo, uhandle, paramSet, inData, outData);
     EXPECT_EQ(ret, 0) << "fail: OnUpdateSession fail";
 
-    ret = libInterface->OnFinishSession(processInfo, uhandle, paramSet, inData, outData);
+    ret = mgr->OnFinishSession(processInfo, uhandle, paramSet, inData, outData);
     EXPECT_EQ(ret, 0) << "fail: OnUpdateSession fail";
 
     ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, paramSet);
