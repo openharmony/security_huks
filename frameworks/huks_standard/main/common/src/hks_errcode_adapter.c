@@ -754,6 +754,13 @@ static struct HksError g_errCodeTable[] = {
             .data = NULL
         }
     }, {
+        .innerErrCode = HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "method not found in map.",
+            .data = NULL
+        }
+    }, {
         .innerErrCode = HKS_ERROR_PIN_NO_AUTH,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_PIN_NO_AUTH,
