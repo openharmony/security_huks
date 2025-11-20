@@ -276,9 +276,6 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
 int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t& retryCnt)
 {
-    auto uid = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
-    HKS_IF_TRUE_LOGE_RETURN(uid.first != HKS_SUCCESS, false,
-        "Get uid tag failed. ret: %" LOG_PUBLIC "d", uid.first)
     ProviderInfo providerInfo;
     std::string newIndex;
     std::string handle;
@@ -291,7 +288,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     auto ipccode = proxy->AuthUkeyPin(handle, paramSet, ret, authState, retryCnt);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     if (authState == HKS_SUCCESS) {
-        uidIndexToAuthState_.EnsureInsert(std::make_pair(static_cast<uint32_t>(uid.second), index), HKS_SUCCESS);
+        uidIndexToAuthState_.EnsureInsert(std::make_pair(processInfo.uidInt, index), HKS_SUCCESS);
     }
     if (ret == HUKS_ERR_CODE_PIN_CODE_ERROR || ret == HUKS_ERR_CODE_PIN_LOCKED) {
         HKS_IF_TRUE_LOGE(retryCnt > 0, "AuthUkeyPin failed: %" LOG_PUBLIC "d", ret)
