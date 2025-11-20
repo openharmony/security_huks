@@ -59,6 +59,24 @@ int32_t SensitivePermissionCheck(const char *permission)
     return HKS_ERROR_NO_PERMISSION;
 }
 
+int32_t CheckUkeyAuthPinType(void)
+{
+    auto accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
+    auto tokenType = OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(
+        static_cast<OHOS::Security::AccessToken::AccessTokenID>(accessTokenIDEx));
+    switch (tokenType) {
+        case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_HAP:
+            HKS_IF_NOT_TRUE_LOGE_RETURN(
+                OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx),
+                HKS_ERROR_NOT_SYSTEM_APP,
+                "not system hap, check permission failed, accessTokenIDEx %" LOG_PUBLIC PRIu64, accessTokenIDEx);
+            return HKS_SUCCESS;
+        default:
+            HKS_LOG_E("unknown tokenid, accessTokenIDEx %" LOG_PUBLIC PRIu64, accessTokenIDEx);
+            return HKS_ERROR_INVALID_ACCESS_TYPE;
+    }
+}
+
 namespace {
 static int32_t CheckTokenType(void)
 {
