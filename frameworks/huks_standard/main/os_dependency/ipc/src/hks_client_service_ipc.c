@@ -356,7 +356,7 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: pack fail");
 
         ret = HksSendRequest(HKS_MSG_EXT_AUTH_UKEY_PIN, &inBlob, &outBlob, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: send request fail");
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: send request fail, ret=%" LOG_PUBLIC "d", ret);
         if (outBlob.size < (sizeof(int32_t) + sizeof(int32_t) + sizeof(uint32_t)) || outBlob.data == NULL) {
             ret = HKS_ERROR_BAD_STATE;
             break;
