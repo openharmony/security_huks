@@ -15,13 +15,11 @@
 
 #include "hks_provider_life_cycle_manager.h"
 #include "hks_cpp_paramset.h"
-#include "if_system_ability_manager.h"
 #include "bundle_mgr_client.h"
 #include "bundle_mgr_interface.h"
 #include "bundle_info.h"
 #include "hks_ukey_common.h"
-#include "system_ability_definition.h"
-#include <iservice_registry.h>
+#include "hks_external_adapter.h"
 #include "hks_error_code.h"
 #include "hks_log.h"
 #include "hks_template.h"
@@ -81,36 +79,32 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
     HKS_LOG_I("bundleName: %" LOG_PUBLIC "s, abilityName: %" LOG_PUBLIC "s",
         providerInfo.m_bundleName.c_str(), providerInfo.m_abilityName.c_str());
     std::shared_ptr<HksExtAbilityConnectInfo> connectInfo{nullptr};
+
     std::lock_guard<std::mutex> lock(m_registerMutex);
     this->PrintRegisterProviders();
-    if (!m_providerMap.Find(providerInfo, connectInfo)) {
-        AAFwk::Want want{};
-        want.SetElementName(providerInfo.m_bundleName, providerInfo.m_abilityName);
-        sptr<ExtensionConnection> connect(new (std::nothrow) ExtensionConnection());
-        connect->callBackFromPlugin(callback);
-        HKS_IF_TRUE_LOGE_RETURN(connect == nullptr, HKS_ERROR_NULL_POINTER, "new ExtensionConnection failed");
-
-        if (!connect->IsConnected()) {
-            HKS_LOG_I("First time connect the Extension Ability. "
-                "m_bundleName: %" LOG_PUBLIC "s, m_abilityName: %" LOG_PUBLIC "s",
-                providerInfo.m_bundleName.c_str(), providerInfo.m_abilityName.c_str());
-            ret = connect->OnConnection(want, connect);
-            HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "Connect extAbility failed. ret: %" LOG_PUBLIC "d", ret)
-        }
-
-        auto proxy = connect->GetExtConnectProxy();
-        HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NULL_POINTER, "connected, but getExtConnectProxy failed.");
-
-        connectInfo = std::make_shared<HksExtAbilityConnectInfo>(want, connect);
-        m_providerMap.Insert(providerInfo, connectInfo);
-        HKS_LOG_I("OnRegisterProvider Success! providerName: %" LOG_PUBLIC "s", providerName.c_str());
-        ret = HKS_SUCCESS;
-    } else {
-        HKS_LOG_E("OnRegisterProvider failed, providerName: %" LOG_PUBLIC "s, bundleName: %" LOG_PUBLIC "s, "
-            "abilityName: %" LOG_PUBLIC "s, already exist", providerName.c_str(), providerInfo.m_bundleName.c_str(),
-            providerInfo.m_abilityName.c_str());
-        ret = HKS_ERROR_PROVIDER_HAS_REGISTERED;
+    HKS_IF_TRUE_LOGE_RETURN(m_providerMap.Find(providerInfo, connectInfo),
+        HKS_ERROR_PROVIDER_HAS_REGISTERED, "OnRegisterProvider failed, providerName: %" LOG_PUBLIC "s,"
+        "bundleName: %" LOG_PUBLIC "s, abilityName: %" LOG_PUBLIC "s, already exist", providerName.c_str(),
+        providerInfo.m_bundleName.c_str(), providerInfo.m_abilityName.c_str())
+    AAFwk::Want want{};
+    want.SetElementName(providerInfo.m_bundleName, providerInfo.m_abilityName);
+    sptr<ExtensionConnection> connect(new (std::nothrow) ExtensionConnection());
+    connect->callBackFromPlugin(callback);
+    HKS_IF_TRUE_LOGE_RETURN(connect == nullptr, HKS_ERROR_NULL_POINTER, "new ExtensionConnection failed");
+    if (!connect->IsConnected()) {
+        HKS_LOG_I("First time connect the Extension Ability. "
+            "m_bundleName: %" LOG_PUBLIC "s, m_abilityName: %" LOG_PUBLIC "s",
+            providerInfo.m_bundleName.c_str(), providerInfo.m_abilityName.c_str());
+        ret = connect->OnConnection(want, connect);
+        HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "Connect extAbility failed. ret: %" LOG_PUBLIC "d", ret)
     }
+
+    auto proxy = connect->GetExtConnectProxy();
+    HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NULL_POINTER, "connected, but getExtConnectProxy failed.");
+
+    connectInfo = std::make_shared<HksExtAbilityConnectInfo>(want, connect);
+    m_providerMap.Insert(providerInfo, connectInfo);
+    HKS_LOG_I("OnRegisterProvider Success! providerName: %" LOG_PUBLIC "s", providerName.c_str());
     return ret;
 }
 
@@ -167,19 +161,10 @@ int32_t HksProviderLifeCycleManager::HksHapGetConnectInfos(const HksProcessInfo 
     const std::string &providerName, const CppParamSet &paramSet,
     std::vector<std::pair<ProviderInfo, std::shared_ptr<HksExtAbilityConnectInfo>>> &connectionInfos)
 {
-    sptr<ISystemAbilityManager> saMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    HKS_IF_NULL_LOGE_RETURN(saMgr, HKS_ERROR_NULL_POINTER, "GetSystemAbilityManager failed")
-
-    sptr<IRemoteObject> remoteObj = saMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    HKS_IF_NULL_LOGE_RETURN(remoteObj, HKS_ERROR_NULL_POINTER, "GetSystemAbility failed")
-
-    auto bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(remoteObj);
-    HKS_IF_NULL_LOGE_RETURN(bundleMgrProxy, HKS_ERROR_NULL_POINTER, "iface_cast IBundleMgr failed")
-
     std::string bundleName;
-    auto bundleRet = bundleMgrProxy->GetBundleNameForUid(static_cast<int32_t>(processInfo.uidInt), bundleName);
-    HKS_IF_TRUE_LOGE_RETURN(!bundleRet, HKS_ERROR_BAD_STATE,
-        "GetBundleNameForUid failed. external ret: %" LOG_PUBLIC "d", bundleRet)
+    int32_t ret = HksGetBundleNameFromUid(processInfo.uidInt, bundleName);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "HksGetBundleNameFromUid failed. ret: %" LOG_PUBLIC "d", ret)
 
     auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
     if (abilityName.first == HKS_SUCCESS) {
@@ -255,21 +240,11 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
 int32_t HksGetProviderInfo(const HksProcessInfo &processInfo, const std::string &providerName,
     const CppParamSet &paramSet, ProviderInfo &providerInfo)
 {
-    sptr<ISystemAbilityManager> saMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    HKS_IF_NULL_LOGE_RETURN(saMgr, HKS_ERROR_NULL_POINTER, "GetSystemAbilityManager failed")
+    int32_t ret = HksGetBundleNameFromUid(processInfo.uidInt, providerInfo.m_bundleName);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "HksGetBundleNameFromUid failed. ret: %" LOG_PUBLIC "d", ret)
 
-    sptr<IRemoteObject> remoteObj = saMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    HKS_IF_NULL_LOGE_RETURN(remoteObj, HKS_ERROR_NULL_POINTER, "GetSystemAbility bms failed")
-
-    auto bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(remoteObj);
-    HKS_IF_NULL_LOGE_RETURN(bundleMgrProxy, HKS_ERROR_NULL_POINTER, "iface_cast IBundleMgr failed")
-
-    auto bundleRet = bundleMgrProxy->GetBundleNameForUid(static_cast<int32_t>(processInfo.uidInt),
-        providerInfo.m_bundleName);
-    HKS_IF_TRUE_LOGE_RETURN(!bundleRet, HKS_ERROR_BAD_STATE,
-        "GetBundleNameForUid failed. external ret: %" LOG_PUBLIC "d", bundleRet)
     providerInfo.m_providerName = providerName;
-
     auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
     HKS_IF_TRUE_LOGE_RETURN(abilityName.first != HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
         "GetParam HKS_EXT_CRYPTO_TAG_ABILITY_NAME failed. ret: %" LOG_PUBLIC "d", abilityName.first)
