@@ -29,7 +29,10 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc",
     ]
 
-    sources = [ "src/hks_provider_life_cycle_manager.cpp" ]
+    sources = [
+      "src/hks_provider_life_cycle_manager.cpp",
+      "src/hks_external_adapter.cpp"
+    ]
 
     defines = [ "L2_STANDARD" ]
     deps = [
