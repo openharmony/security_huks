@@ -509,6 +509,13 @@ static void AddHuksErrCodePart(napi_env env, napi_value errorCode)
     AddInt32Property(env, errorCode, "HUKS_ERR_CODE_DEVICE_PASSWORD_UNSET", HUKS_ERR_CODE_DEVICE_PASSWORD_UNSET);
     AddInt32Property(env, errorCode, "HUKS_ERR_CODE_KEY_ALREADY_EXIST", HUKS_ERR_CODE_KEY_ALREADY_EXIST);
     AddInt32Property(env, errorCode, "HUKS_ERR_CODE_INVALID_ARGUMENT", HUKS_ERR_CODE_INVALID_ARGUMENT);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_ITEM_EXISTS", HUKS_ERR_CODE_ITEM_EXISTS);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR", HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_PIN_LOCKED", HUKS_ERR_CODE_PIN_LOCKED);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_PIN_CODE_ERROR", HUKS_ERR_CODE_PIN_CODE_ERROR);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_PIN_NO_AUTH", HUKS_ERR_CODE_PIN_NO_AUTH);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_BUSY", HUKS_ERR_CODE_BUSY);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_EXCEED_LIMIT", HUKS_ERR_CODE_EXCEED_LIMIT);
 }
 
 static napi_value CreateHuksErrCode(napi_env env)
