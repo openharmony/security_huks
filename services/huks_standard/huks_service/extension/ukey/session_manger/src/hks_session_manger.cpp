@@ -114,7 +114,8 @@ int32_t HksSessionManager::ExtensionInitSession(const HksProcessInfo &processInf
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ParseAndValidateIndex failed: %" LOG_PUBLIC "d", ret)
 
     std::string sessionHandle;
-    auto proxy = HksRemoteHandleManager::GetInstanceWrapper()->GetProviderProxy(providerInfo, ret);
+    OHOS::sptr<IHuksAccessExtBase> proxy;
+    ret = HksRemoteHandleManager::GetInstanceWrapper()->GetProviderProxy(providerInfo, proxy);
     HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NULL_POINTER, "GetProviderProxy proxy is null")
     CppParamSet newParamSet(paramSet);
     HKS_IF_TRUE_LOGE_RETURN(!CheckAndAppendProcessInfo(newParamSet, processInfo), HKS_ERROR_INVALID_ARGUMENT,

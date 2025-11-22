@@ -61,20 +61,15 @@ static int32_t WrapIndexWithProviderInfo(const ProviderInfo& providerInfo, const
     std::string& wrappedIndex)
 {
     CommJsonObject root = CommJsonObject::CreateObject();
-    if (root.IsNull()) {
-        HKS_LOG_E("Create JSON object failed");
-        return HKS_ERROR_JSON_SERIALIZE_FAILED;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(root.IsNull(), HKS_ERROR_JSON_SERIALIZE_FAILED, "Create JSON object failed")
     if (!root.SetValue(PROVIDER_NAME_KEY, providerInfo.m_providerName) ||
         !root.SetValue(ABILITY_NAME_KEY, providerInfo.m_abilityName) ||
         !root.SetValue(BUNDLE_NAME_KEY, providerInfo.m_bundleName)) {
         HKS_LOG_E("Set provider info to index failed");
         return HKS_ERROR_JSON_SERIALIZE_FAILED;
     }
-    if (!root.SetValue("index", originalIndex)) {
-        HKS_LOG_E("Set original index failed");
-        return HKS_ERROR_JSON_SERIALIZE_FAILED;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(!root.SetValue("index", originalIndex), HKS_ERROR_JSON_SERIALIZE_FAILED,
+        "Set original index failed")
     wrappedIndex = root.Serialize(false);
     return HKS_SUCCESS;
 }
@@ -152,7 +147,8 @@ int32_t HksRemoteHandleManager::ValidateProviderInfo(const std::string &newIndex
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::GetProviderProxy(const ProviderInfo &providerInfo, OHOS::sptr<IHuksAccessExtBase> &proxy)
+int32_t HksRemoteHandleManager::GetProviderProxy(const ProviderInfo &providerInfo,
+    OHOS::sptr<IHuksAccessExtBase> &proxy)
 {
     auto providerManager = HksProviderLifeCycleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(providerManager == nullptr, HKS_ERROR_NULL_POINTER,
@@ -161,7 +157,7 @@ int32_t HksRemoteHandleManager::GetProviderProxy(const ProviderInfo &providerInf
     if (ret != HKS_SUCCESS || proxy == nullptr) {
         HKS_LOG_E("Get extension proxy failed for provider: %" LOG_PUBLIC "s", providerInfo.m_providerName.c_str());
         return HKS_ERROR_NOT_EXIST;
-    } 
+    }
     return HKS_SUCCESS;
 }
 
@@ -170,12 +166,8 @@ int32_t HksRemoteHandleManager::ValidateAndGetHandle(const std::string &newIndex
 {
     int32_t ret = ValidateProviderInfo(newIndex, providerInfo);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Provider info validation failed: %" LOG_PUBLIC "d", ret)
-
-    if (!indexToHandle_.Find(newIndex, handle)) {
-        HKS_LOG_E("Remote handle not found for newIndex: %" LOG_PUBLIC "s", newIndex.c_str());
-        return HKS_ERROR_REMOTE_HANDLE_NOT_FOUND;
-    }
-    
+    HKS_IF_TRUE_LOGE_RETURN(!indexToHandle_.Find(newIndex, handle), HKS_ERROR_REMOTE_HANDLE_NOT_FOUND,
+        "Remote handle not found for newIndex: %" LOG_PUBLIC "s", newIndex.c_str())
     return HKS_SUCCESS;
 }
 

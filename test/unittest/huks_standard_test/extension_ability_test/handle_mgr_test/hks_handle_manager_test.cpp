@@ -116,7 +116,39 @@ HWTEST_F(HksRemoteHandleManagerTest, CreateCloseRemoteHandleTest, TestSize.Level
     
     ret = manager->CloseRemoteHandle(processInfo, index, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
+    CommJsonObject root = CommJsonObject::CreateObject();
+    EXPECT_TRUE(root.SetValue("providerName", std::string("testProvider")));
+    EXPECT_TRUE(root.SetValue("abilityName", std::string("testAbility")));
+    EXPECT_TRUE(root.SetValue("bundleName", std::string("com.teds.bundle")));
+    EXPECT_TRUE(root.SetValue("index", std::string("testIndex3213")));
+    std::string index2 = root.Serialize(false);
+    ret = manager->CreateRemoteHandle(index2, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
 
+    root = CommJsonObject::CreateObject();
+    EXPECT_TRUE(root.SetValue("providerName", std::string("testProvider")));
+    EXPECT_TRUE(root.SetValue("abilityName", std::string("testAbility")));
+    EXPECT_TRUE(root.SetValue("bundleName", std::string("com.teds.bundle")));
+    EXPECT_TRUE(root.SetValue("index", std::string("testIndexsf123")));
+    std::string index3 = root.Serialize(false);
+    ret = manager->CreateRemoteHandle(index3, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    root = CommJsonObject::CreateObject();
+    EXPECT_TRUE(root.SetValue("providerName", std::string("testProvider")));
+    EXPECT_TRUE(root.SetValue("abilityName", std::string("testAbility")));
+    EXPECT_TRUE(root.SetValue("bundleName", std::string("com.teds.bundle")));
+    EXPECT_TRUE(root.SetValue("index", std::string("tes2424")));
+    std::string index4 = root.Serialize(false);
+    int32_t authState = 0;
+    uint32_t retryCnt = 0;
+    ret = manager->RemoteVerifyPin(processInfo, index4, paramSet, authState, retryCnt);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    ret = manager->CreateRemoteHandle(index4, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    ret = manager->CloseRemoteHandle(processInfo, index4, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(processInfo.processName);
 }
