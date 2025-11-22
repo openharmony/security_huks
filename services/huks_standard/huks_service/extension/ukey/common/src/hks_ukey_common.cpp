@@ -98,22 +98,12 @@ int32_t CertInfoToString(const struct HksExtCertInfo& certInfo, std::string& jso
     auto jsonObj = CommJsonObject::CreateObject();
     HKS_IF_TRUE_LOGE_RETURN(jsonObj.IsNull(), HKS_ERROR_MALLOC_FAIL,
         "Create json object failed");
-    if (!jsonObj.SetValue("purpose", certInfo.purpose)) {
-        HKS_LOG_E("Set purpose value failed");
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
-    
-    std::string index = BlobToString(certInfo.index);
-    if (!jsonObj.SetValue("index", index)) {
-        HKS_LOG_E("Set index value failed");
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
-    std::string cert = BlobToBase64String(certInfo.cert);
-    if (!jsonObj.SetValue("cert", cert)) {
-        HKS_LOG_E("Set cert value failed");
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
-    
+    HKS_IF_TRUE_LOGE_RETURN(!jsonObj.SetValue("purpose", certInfo.purpose),
+        HKS_ERROR_INTERNAL_ERROR, "Set purpose value failed")
+    HKS_IF_TRUE_LOGE_RETURN(!jsonObj.SetValue("index", BlobToString(certInfo.index)),
+        HKS_ERROR_INTERNAL_ERROR, "Set index value failed")
+    HKS_IF_TRUE_LOGE_RETURN(!jsonObj.SetValue("cert", BlobToBase64String(certInfo.cert)),
+        HKS_ERROR_INTERNAL_ERROR, "Set cert value failed")
     jsonStr = jsonObj.Serialize();
     HKS_IF_TRUE_LOGE_RETURN(jsonStr.empty(), HKS_ERROR_INTERNAL_ERROR,
         "Serialize json object failed")

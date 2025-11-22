@@ -89,7 +89,7 @@ public:
 
     if (!certObj.SetValue("purpose", 1) ||
         !certObj.SetValue("index", std::string("test_cert_index")) ||
-        !certObj.SetValue("cert", std::string("MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtestcertificatedata"))) {
+        !certObj.SetValue("cert", std::string("MIIBIjANBgkqh"))) {
         errcode = HKS_ERROR_JSON_SERIALIZE_FAILED;
         return ERR_OK;
     }
@@ -122,7 +122,7 @@ ErrCode ExportProviderCertificates(
         }
 
         std::string indexStr = "cert_index_" + std::to_string(i);
-        std::string certData = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAcertdata" + std::to_string(i);
+        std::string certData = "MIIBIjANBgkqhkEAcertdata" + std::to_string(i);
 
         if (!certObj.SetValue("purpose", i + 1) ||
             !certObj.SetValue("index", indexStr) ||
@@ -226,6 +226,17 @@ int32_t HksProviderLifeCycleManager::HapGetAllConnectInfoByProviderName(const st
 int32_t HksProviderLifeCycleManager::GetAllProviderInfosByProviderName(const std::string &providerName,
     std::vector<ProviderInfo> &providerInfos)
 {
+    ProviderInfo provider1;
+    provider1.m_bundleName = "com.example.crypto.provider1";
+    provider1.m_providerName = providerName;
+    provider1.m_abilityName = "CryptoExtensionAbility";
+    providerInfos.push_back(provider1);
+    
+    ProviderInfo provider2;
+    provider2.m_bundleName = "com.example.security.provider2";
+    provider2.m_providerName = providerName;
+    provider2.m_abilityName = "SecurityExtensionAbility";
+    providerInfos.push_back(provider2);
     return HKS_SUCCESS;
 }
 
