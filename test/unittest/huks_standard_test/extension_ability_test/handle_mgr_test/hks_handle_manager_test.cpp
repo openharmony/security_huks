@@ -22,6 +22,7 @@
 #include "hks_type.h"
 #include "hks_json_wrapper.h"
 #include "gtest/gtest.h"
+#include "../../../../../services/huks_standard/huks_service/extension/ukey/handle_manager/src/hks_remote_handle_manager.cpp"
 using namespace testing::ext;
 
 namespace OHOS {
@@ -106,13 +107,13 @@ HWTEST_F(HksRemoteHandleManagerTest, CreateCloseRemoteHandleTest, TestSize.Level
 
     std::string index = CreateTestIndex();
     CppParamSet paramSet = CreateTestParamSet();
-
-    // Test create remote handle
-    int32_t ret = manager->CreateRemoteHandle(index, paramSet);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-
-    // Test close remote handle
     HksProcessInfo processInfo = CreateTestProcessInfo();
+
+    int32_t ret = manager->CloseRemoteHandle(processInfo, index, paramSet);
+    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST);
+    ret = manager->CreateRemoteHandle(index, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    
     ret = manager->CloseRemoteHandle(processInfo, index, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
@@ -160,22 +161,18 @@ HWTEST_F(HksRemoteHandleManagerTest, SignVerifyTest, TestSize.Level0)
     std::string index = CreateTestIndex();
     CppParamSet paramSet = CreateTestParamSet();
 
-    // First create handle
     int32_t ret = manager->CreateRemoteHandle(index, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    // Test sign operation
     std::vector<uint8_t> inData = {0x01, 0x02, 0x03, 0x04};
     std::vector<uint8_t> outData;
     ret = manager->RemoteHandleSign(index, paramSet, inData, outData);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    // Test verify operation
-    std::vector<uint8_t> signature = outData; // Use the signed data as signature
+    std::vector<uint8_t> signature = outData;
     ret = manager->RemoteHandleVerify(index, paramSet, inData, signature);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    // Cleanup
     HksProcessInfo processInfo = CreateTestProcessInfo();
     manager->CloseRemoteHandle(processInfo, index, paramSet);
     HKS_FREE_BLOB(processInfo.userId);
@@ -206,23 +203,17 @@ HWTEST_F(HksRemoteHandleManagerTest, PinManagementTest, TestSize.Level0)
     ret = manager->RemoteVerifyPin(processInfo, index, paramSet, authState, retryCnt);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    // Test verify PIN status
     int32_t state = 0;
     ret = manager->RemoteVerifyPinStatus(processInfo, index, paramSet, state);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    // Test clear PIN status
     ret = manager->RemoteClearPinStatus(index, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    // Test check auth state
     bool authOk = manager->CheckAuthStateIsOk(processInfo, index);
     EXPECT_TRUE(authOk);
 
-    // Test clear auth state
     manager->ClearAuthState(processInfo);
-
-    // Cleanup
     manager->CloseRemoteHandle(processInfo, index, paramSet);
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(processInfo.processName);

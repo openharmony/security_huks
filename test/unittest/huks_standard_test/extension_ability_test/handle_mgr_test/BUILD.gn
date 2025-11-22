@@ -21,7 +21,6 @@ if (os_level == "standard") {
       "../../../huks_common_test/hks_mock_common/hks_mock_common.cpp",
       "./hks_provider_manager_mock.cpp",
       "./hks_handle_manager_test.cpp",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager/src/hks_remote_handle_manager.cpp",
     ]
 
     configs = [
