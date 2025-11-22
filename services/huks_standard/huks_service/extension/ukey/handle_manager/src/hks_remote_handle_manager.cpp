@@ -389,10 +389,8 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
     const std::string &providerName, const CppParamSet &paramSet, std::string &certVec)
 {
     auto providerLifeManager = HksProviderLifeCycleManager::GetInstanceWrapper();
-    if (providerLifeManager == nullptr) {
-        HKS_LOG_E("Get provider Life manager instance failed");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(providerLifeManager == nullptr, HKS_ERROR_NULL_POINTER,
+        "Get provider Life manager instance failed")
     std::vector<ProviderInfo> infos;
     int32_t ret = providerLifeManager->GetAllProviderInfosByProviderName(providerName, infos);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
