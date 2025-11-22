@@ -30,6 +30,8 @@
 #define HKS_DIGEST_SHA512_LEN 64
 #define HKS_DIGEST_SM3_LEN 32
 
+#define HKS_DIGEST_SHA256_HEX_STRING_LEN 64
+
 #ifdef __cplusplus
 extern "C" {
 #endif

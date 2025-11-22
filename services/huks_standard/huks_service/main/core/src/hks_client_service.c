@@ -562,7 +562,48 @@ static void HksReportEvent(const char *funcName, const struct HksHitraceId *trac
     (void)ret;
 #endif
 }
+#if defined(L2_STANDARD) && defined(HKS_SUPPORT_GET_BUNDLE_INFO)
+static int32_t AppendGroupKeyInfo(const struct HksProcessInfo *processInfo, struct HksParamSet **outParamSet)
+{
+    int32_t ret = HksCheckAssetAccessGroup(processInfo, *outParamSet);
+    HKS_IF_TRUE_RETURN(ret == HKS_ERROR_PARAM_NOT_EXIST, HKS_SUCCESS)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "groupid is invalid")
 
+    struct HksParamSet *paramSet = *outParamSet;
+    struct HksParamSet *newParamSet = NULL;
+    struct HksBlob developerId = { 0, NULL };
+    do {
+        if (paramSet != NULL) {
+            ret = AppendToNewParamSet(paramSet, &newParamSet);
+        } else {
+            ret = HksInitParamSet(&newParamSet);
+        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append tag to new paramset failed")
+
+        ret = HksGetDeveloperId(processInfo, &developerId);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get developerId failed")
+
+        struct HksParam paramArr[] = {
+            { .tag = HKS_TAG_DEVELOPER_ID, .blob = developerId },
+        };
+
+        ret = HksAddParams(newParamSet, paramArr, HKS_ARRAY_SIZE(paramArr));
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add developerInfo failed")
+
+        ret = HksBuildParamSet(&newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build paramset failed")
+
+        HksFreeParamSet(outParamSet);
+        *outParamSet = newParamSet;
+        HKS_FREE_BLOB(developerId);
+        return HKS_SUCCESS;
+    } while (0);
+
+    HKS_FREE_BLOB(developerId);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+#endif
 int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, struct HksBlob *keyOut)
 {
@@ -822,6 +863,10 @@ int32_t HksServiceDeleteKey(const struct HksProcessInfo *processInfo, const stru
 #ifdef L2_STANDARD
         ret = AppendStorageLevelIfNotExistInner(processInfo, paramSet, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append storage level failed")
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+        ret = AppendGroupKeyInfo(processInfo, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append group key info failed, ret = %" LOG_PUBLIC "d", ret)
+#endif
 #endif
         /*
         * Detele key first, record log if failed; then delete cert chain, return error if failed;
@@ -862,6 +907,10 @@ int32_t HksServiceKeyExist(const struct HksProcessInfo *processInfo, const struc
     struct HksParamSet *newParamSet = NULL;
     ret = AppendStorageLevelIfNotExistInner(processInfo, paramSet, &newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append storage level failed")
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+    ret = AppendGroupKeyInfo(processInfo, &newParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append group key info failed, ret = %" LOG_PUBLIC "d", ret)
+#endif
 #else
     const struct HksParamSet *newParamSet = paramSet;
 #endif
@@ -1914,7 +1963,10 @@ int32_t HksServiceListAliases(const struct HksProcessInfo *processInfo, const st
     do {
         ret = AppendStorageLevelIfNotExistInner(processInfo, paramSet, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append storage level failed")
-
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+        ret = AppendGroupKeyInfo(processInfo, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append group key info failed, ret = %" LOG_PUBLIC "d", ret)
+#endif
         ret = HksCheckListAliasesParam(&(processInfo->processName));
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check list aliases param failed, ret = %" LOG_PUBLIC "d", ret)
 

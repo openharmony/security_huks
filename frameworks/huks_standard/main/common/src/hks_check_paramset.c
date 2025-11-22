@@ -35,6 +35,7 @@
 #include "hks_param.h"
 #include "hks_template.h"
 #include "hks_cmd_id.h"
+#include "hks_mem.h"
 #include "securec.h"
 
 #ifdef _CUT_AUTHENTICATE_
@@ -217,7 +218,8 @@ static uint32_t g_unwrapSuite[] = {
 #endif
 #if defined(HKS_SUPPORT_SM2_C) && defined(HKS_SUPPORT_SM4_C)
     HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7_WITH_VERIFY_DIG_SM3,
-    HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7
+    HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7,
+    HKS_UNWRAP_SUITE_SM2_SM4_ECB_NOPADDING,
 #endif
 };
 #endif /* _CUT_AUTHENTICATE_ */
@@ -1437,4 +1439,24 @@ int32_t HksGetAeadTagLengthWithoutMode(const struct HksParamSet *paramSet, uint3
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_MODE_FAIL, "get mode failed!");
 
     return HksGetAeadTagLength(paramSet, modeParam->uint32Param, aeadTagLen);
+}
+
+int32_t HksCheckBlobParamIsEqual(const struct HksParamSet *paramSet, const struct HksParamSet *keyBlobParamSet,
+    enum HksTag tag)
+{
+    struct HksParam *param1 = NULL;
+    int32_t ret = HksGetParam(paramSet, tag, &param1);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get param1 failed")
+
+    struct HksParam *param2 = NULL;
+    ret = HksGetParam(keyBlobParamSet, tag, &param2);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get param2 failed")
+
+    HKS_IF_TRUE_LOGE_RETURN(param1->blob.size != param2->blob.size, HKS_ERROR_BAD_STATE,
+        "param1 size: %" LOG_PUBLIC "u != param2 size: %" LOG_PUBLIC "u", param1->blob.size, param2->blob.size)
+
+    HKS_IF_TRUE_LOGE_RETURN(HksMemCmp(param1->blob.data, param2->blob.data, param1->blob.size) != 0,
+        HKS_ERROR_BAD_STATE, "compare tag %" LOG_PUBLIC "u failed", (uint32_t)tag)
+
+    return HKS_SUCCESS;
 }

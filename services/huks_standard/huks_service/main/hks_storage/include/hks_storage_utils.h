@@ -77,6 +77,8 @@ struct HksStoreMaterial {
     char *storageTypePath;
 
     char *keyAliasPath;
+    char *assetAccessGroup;
+    char *developerId;
 };
 
 struct HksFileEntry {
@@ -90,7 +92,9 @@ enum KeyOperation {
     KEY_OPERATION_DELETE = 2,
     KEY_OPERATION_CHECK = 3,
 };
-
+#ifdef L2_STANDARD
+int32_t GetHashValueToChar(const char *input, char *output);
+#endif
 int32_t ConstructPlainName(const struct HksBlob *blob, char *targetName, uint32_t nameLen);
 
 int32_t ConstructName(const struct HksBlob *blob, char *targetName, uint32_t nameLen);

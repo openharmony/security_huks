@@ -142,6 +142,9 @@ static void AddHuksTagPart2(napi_env env, napi_value tag)
     AddInt32Property(env, tag, "HUKS_TAG_ATTESTATION_ID_UDID", HKS_TAG_ATTESTATION_ID_UDID);
     AddInt32Property(env, tag, "HUKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO", HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO);
     AddInt32Property(env, tag, "HUKS_TAG_ATTESTATION_ID_VERSION_INFO", HKS_TAG_ATTESTATION_ID_VERSION_INFO);
+    AddInt32Property(env, tag, "HUKS_TAG_KEY_OVERRIDE", HKS_TAG_KEY_OVERRIDE);
+    AddInt32Property(env, tag, "HUKS_TAG_AE_TAG_LEN", HKS_TAG_AE_TAG_LEN);
+    AddInt32Property(env, tag, "HUKS_TAG_KEY_ACCESS_GROUP", HKS_TAG_KEY_ACCESS_GROUP);
 
     /*
      * Other reserved TAG: 601 - 1000
@@ -160,8 +163,6 @@ static void AddHuksTagPart2(napi_env env, napi_value tag)
     AddInt32Property(env, tag, "HUKS_TAG_SECURE_KEY_UUID", HKS_TAG_SECURE_KEY_UUID);
     AddInt32Property(env, tag, "HUKS_TAG_KEY_DOMAIN", HKS_TAG_KEY_DOMAIN);
     AddInt32Property(env, tag, "HUKS_TAG_IS_DEVICE_PASSWORD_SET", HKS_TAG_IS_DEVICE_PASSWORD_SET);
-    AddInt32Property(env, tag, "HUKS_TAG_KEY_OVERRIDE", HKS_TAG_KEY_OVERRIDE);
-    AddInt32Property(env, tag, "HUKS_TAG_AE_TAG_LEN", HKS_TAG_AE_TAG_LEN);
 
     /* Inner-use TAG: 10001 - 10999 */
     AddInt32Property(env, tag, "HUKS_TAG_PROCESS_NAME", HKS_TAG_PROCESS_NAME);
@@ -361,6 +362,8 @@ static napi_value CreateHuksUnwrapSuite(napi_env env)
                      HKS_UNWRAP_SUITE_X25519_AES_256_GCM_NOPADDING);
     AddInt32Property(env, huksUnwrapSuite, "HUKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING",
                      HKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING);
+    AddInt32Property(env, huksUnwrapSuite, "HUKS_UNWRAP_SUITE_SM2_SM4_ECB_NOPADDING",
+                     HKS_UNWRAP_SUITE_SM2_SM4_ECB_NOPADDING);
     return huksUnwrapSuite;
 }
 

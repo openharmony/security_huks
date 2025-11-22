@@ -31,6 +31,7 @@
 #include "hks_type_inner.h"
 #include "hks_template.h"
 #include "hks_util.h"
+#include "hks_check_paramset.h"
 
 #ifdef HKS_ENABLE_IS_PASSWORD_SET
 #include "hks_useridm_api_wrap.h"
@@ -1144,23 +1145,16 @@ static int32_t HksCheckCompareUserId(const struct HksParamSet *blobParamSet,
     return (blobUserId->uint32Param == runtimeUserId->uint32Param) ? HKS_SUCCESS : HKS_ERROR_BAD_STATE;
 }
 
-static int32_t HksCheckCompareProcessName(const struct HksParamSet *blobParamSet,
+static int32_t HksCheckCompareProcessInfo(const struct HksParamSet *blobParamSet,
     const struct HksParamSet *runtimeParamSet)
 {
-    struct HksParam *blobProcessName = NULL;
-    int32_t ret = HksGetParam(blobParamSet, HKS_TAG_PROCESS_NAME, &blobProcessName);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "no process name in keyblob")
+    int32_t ret = HksCheckCompareAccessTokenId(blobParamSet, runtimeParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "access token compare failed")
 
-    struct HksParam *runtimeProcessName = NULL;
-    ret = HksGetParam(runtimeParamSet, HKS_TAG_PROCESS_NAME, &runtimeProcessName);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get process name form runtime paramSet failed")
+    ret = HksCheckBlobParamIsEqual(blobParamSet, runtimeParamSet, HKS_TAG_PROCESS_NAME);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "process name compare failed")
 
-    if (blobProcessName->blob.size == runtimeProcessName->blob.size &&
-        HksMemCmp(blobProcessName->blob.data, runtimeProcessName->blob.data,
-            blobProcessName->blob.size) == HKS_SUCCESS) {
-        return HKS_SUCCESS;
-    }
-    return HKS_ERROR_BAD_STATE;
+    return ret;
 }
 #endif /** _STORAGE_LITE_ */
 
@@ -1197,15 +1191,22 @@ int32_t HksProcessIdentityVerify(const struct HksParamSet *blobParamSet, const s
     int32_t ret = HKS_SUCCESS;
 
 #ifndef _STORAGE_LITE_
-    ret = HksCheckCompareAccessTokenId(blobParamSet, runtimeParamSet);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "access token compare failed")
-
     ret = HksCheckCompareUserId(blobParamSet, runtimeParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "user id compare failed")
-
-    ret = HksCheckCompareProcessName(blobParamSet, runtimeParamSet);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "process name compare failed")
-
+#ifdef L2_STANDARD
+    ret = HksCheckBlobParamIsEqual(blobParamSet, runtimeParamSet, HKS_TAG_KEY_ACCESS_GROUP);
+    if (ret == HKS_SUCCESS) {
+        ret = HksCheckBlobParamIsEqual(blobParamSet, runtimeParamSet, HKS_TAG_DEVELOPER_ID);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_DEVELOPER_ID, "developerId compare failed")
+    } else if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+        ret = HksCheckCompareProcessInfo(blobParamSet, runtimeParamSet);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "process info compare failed")
+    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ACCESS_GROUP, "access group compare failed");
+#else
+    ret = HksCheckCompareProcessInfo(blobParamSet, runtimeParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "process info compare failed")
+#endif
     ret = CheckIfNeedIsDevicePasswordSet(blobParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "need password but not set yet!")
 #else
