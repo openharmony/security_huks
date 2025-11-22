@@ -140,11 +140,11 @@ HWTEST_F(HksRemoteHandleManagerTest, CreateCloseRemoteHandleTest, TestSize.Level
     EXPECT_TRUE(root.SetValue("bundleName", std::string("com.teds.bundle")));
     EXPECT_TRUE(root.SetValue("index", std::string("tes2424")));
     std::string index4 = root.Serialize(false);
+    ret = manager->CreateRemoteHandle(index4, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
     int32_t authState = 0;
     uint32_t retryCnt = 0;
     ret = manager->RemoteVerifyPin(processInfo, index4, paramSet, authState, retryCnt);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    ret = manager->CreateRemoteHandle(index4, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     ret = manager->CloseRemoteHandle(processInfo, index4, paramSet);
