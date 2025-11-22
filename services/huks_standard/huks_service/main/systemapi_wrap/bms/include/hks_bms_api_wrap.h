@@ -18,6 +18,7 @@
 
 #ifdef __cplusplus
 #include <string>
+#include <vector>
 #endif
 #include "hks_type_inner.h"
 
@@ -42,6 +43,17 @@ int32_t HksGetSaInfo(const struct HksProcessInfo *processInfo, struct HksBlob *s
 int32_t GetCallerName(const struct HksProcessInfo *processInfo, struct HksBlob *appInfo);
 
 enum HksCallerType HksGetCallerType(void);
+
+#ifdef L2_STANDARD
+#ifdef __cplusplus
+int32_t HksGetDeleteGroups(const struct HksProcessInfo *processInfo, const std::string &developerId,
+    const std::vector<std::string> &thisGroups, std::vector<std::string> &deleteGroups);
+#endif
+
+int32_t HksGetDeveloperId(const struct HksProcessInfo *processInfo, struct HksBlob *developerId);
+
+int32_t HksCheckAssetAccessGroup(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet);
+#endif
 
 #ifdef __cplusplus
 }

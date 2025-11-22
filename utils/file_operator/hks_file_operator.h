@@ -64,7 +64,7 @@
 #define HKS_KEY_STORE_ROOT_KEY_PATH   "info"
 
 #define HKS_PROCESS_INFO_LEN    128
-#define HKS_MAX_DIRENT_FILE_LEN 128
+#define HKS_MAX_DIRENT_FILE_LEN 256
 struct HksFileDirentInfo {
     char fileName[HKS_MAX_DIRENT_FILE_LEN + 1]; /* point to dirent->d_name */
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,10 @@
 
 #include "common_event_support.h"
 #include "rwlock.h"
+#include <cstdint>
+#include <string>
+#include <sstream>
+#include <vector>
 #ifdef HAS_OS_ACCOUNT_PART
 #include "os_account_manager.h"
 #endif
@@ -30,8 +34,15 @@
 #include "hks_upgrade.h"
 #include "hks_upgrade_lock.h"
 #include "hks_report_data_size.h"
-
 #include "securec.h"
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+#include "hks_bms_api_wrap.h"
+#endif
+#include "hks_storage.h"
+
+const static std::string DEVELOPER_ID = "developerId";
+const static std::string ASSET_ACCESS_GROUPS = "assetAccessGroups";
+const char GROUP_SEPARATOR = ',';
 
 #define USER_ID_ROOT                  "0"
 #ifndef HAS_OS_ACCOUNT_PART
@@ -75,6 +86,37 @@ static void GetUserId(int userId, struct HksBlob *userIdBlob)
     userIdBlob->data = userIdData;
 }
 
+#ifdef L2_STANDARD
+static void ParseGroups(const std::string groupsStr, std::vector<std::string> &thisGroups)
+{
+    std::stringstream ss(groupsStr);
+    std::string group{};
+    while (std::getline(ss, group, GROUP_SEPARATOR)) {
+        thisGroups.push_back(group);
+    }
+}
+
+static void HksServiceDeleteGroupKey(const struct HksProcessInfo *processInfo, const OHOS::AAFwk::Want &want)
+{
+    std::string developerId = want.GetStringParam(DEVELOPER_ID);
+    std::string groupsStr = want.GetStringParam(ASSET_ACCESS_GROUPS);
+    HKS_IF_TRUE_LOGI_RETURN_VOID(groupsStr.size() == 0, "not belong to any group")
+
+    std::vector<std::string> thisGroups{};
+    ParseGroups(groupsStr, thisGroups);
+
+    std::vector<std::string> deleteGroups{};
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+    int32_t ret = HksGetDeleteGroups(processInfo, developerId, thisGroups, deleteGroups);
+    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(ret, "get delete groups fail")
+#endif
+
+    for (auto &deleteGroup : deleteGroups) {
+        HksServiceDeleteGroupKeyFile(processInfo, developerId.c_str(), deleteGroup.c_str());
+    }
+}
+#endif
+
 namespace OHOS {
 namespace Security {
 namespace Hks {
@@ -109,6 +151,9 @@ void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData
 
         GetProcessInfo(userId, uid, &processInfo);
         HksServiceDeleteProcessInfo(&processInfo);
+#ifdef L2_STANDARD
+        HksServiceDeleteGroupKey(&processInfo, want);
+#endif
     } else if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED) {
         int userId = data.GetCode();
         HKS_LOG_I("HksService user removed: userId is %" LOG_PUBLIC "d", userId);
