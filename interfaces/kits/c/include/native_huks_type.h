@@ -290,6 +290,8 @@ enum OH_Huks_AlgSuite {
      *  |   key_material_size_len     (4 Byte) |  key_material_size  |   key_mat_enc_length (4 Byte) | key_mat_enc_data
      */
     OH_HUKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING = 2,
+
+    OH_HUKS_UNWRAP_SUITE_SM2_SM4_ECB_NOPADDING = 5,
 };
 
 /**
@@ -722,6 +724,7 @@ enum OH_Huks_Tag {
 
     /** The tag indicates the key class. */
     OH_HUKS_TAG_KEY_CLASS = OH_HUKS_TAG_TYPE_UINT | 522,
+    OH_HUKS_TAG_KEY_ACCESS_GROUP = OH_HUKS_TAG_TYPE_BYTES | 523,
     /**
      * 601 to 1000 are reserved for other tags.
      *

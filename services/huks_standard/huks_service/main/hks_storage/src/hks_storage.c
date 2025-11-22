@@ -38,6 +38,7 @@
 #include "huks_access.h"
 #include "securec.h"
 #include "hks_storage_utils.h"
+#include "hks_common_check.h"
 
 #ifdef HKS_SUPPORT_THREAD
 static HksStorageFileLock *CreateStorageFileLock(const char *path, const char *fileName)
@@ -642,6 +643,43 @@ static void DeleteUidMainPathAndBakPath(const char *userData, const char *uidDat
     }
 }
 
+static void DeleteGroupMainPathAndBakPath(const char *userData, const char *developerId, const char *group,
+    const char *deDataPath, const char *ceOrEceDataPath)
+{
+    char dePath[HKS_MAX_DIRENT_FILE_LEN] = "";
+    int32_t offset = sprintf_s(dePath, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s",
+        deDataPath, userData, developerId, group);
+    if (offset > 0) {
+        HKS_LOG_I("delete de path, userid: %" LOG_PUBLIC "s, developerId: %" LOG_PUBLIC "s, group: %" LOG_PUBLIC "s",
+            userData, developerId, group);
+        (void)HksDeleteDir(dePath);
+    } else {
+        HKS_LOG_E("get de path failed");
+    }
+
+    char cePath[HKS_MAX_DIRENT_FILE_LEN] = "";
+    offset = sprintf_s(cePath, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s/%s",
+        HKS_CE_ROOT_PATH, userData, ceOrEceDataPath, developerId, group);
+    if (offset > 0) {
+        HKS_LOG_I("delete ce path, userid: %" LOG_PUBLIC "s, developerId: %" LOG_PUBLIC "s, group: %" LOG_PUBLIC "s",
+            userData, developerId, group);
+        (void)HksDeleteDir(cePath);
+    } else {
+        HKS_LOG_E("get ce path failed");
+    }
+
+    char ecePath[HKS_MAX_DIRENT_FILE_LEN] = "";
+    offset = sprintf_s(ecePath, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s/%s",
+        HKS_ECE_ROOT_PATH, userData, ceOrEceDataPath, developerId, group);
+    if (offset > 0) {
+        HKS_LOG_I("delete ece path, userid: %" LOG_PUBLIC "s, developerId: %" LOG_PUBLIC "s, group: %" LOG_PUBLIC "s",
+            userData, developerId, group);
+        (void)HksDeleteDir(ecePath);
+    } else {
+        HKS_LOG_E("get ece path failed");
+    }
+}
+
 static void DeleteUidPath(const struct HksProcessInfo *processInfo)
 {
     int32_t ret;
@@ -749,7 +787,44 @@ void HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo *processInfo)
     HKS_FREE(userData);
     HKS_FREE(uidData);
 }
+#ifdef L2_STANDARD
+void HksServiceDeleteGroupKeyFile(const struct HksProcessInfo *processInfo, const char *developerId, const char *group)
+{
+    char *userData = NULL;
+    char groupHash[HKS_DIGEST_SHA256_HEX_STRING_LEN + 1] = { 0 };
+    char developerHash[HKS_DIGEST_SHA256_HEX_STRING_LEN + 1] = { 0 };
 
+    int32_t ret = GetHashValueToChar(group, groupHash);
+    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(ret, "access group hash failed")
+
+    ret = GetHashValueToChar(developerId, developerHash);
+    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(ret, "developerId hash failed")
+    do {
+        userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
+        HKS_IF_NULL_LOGE_BREAK(userData, "malloc user data failed")
+
+        ret = ConstructPlainName(&processInfo->userId, userData, HKS_MAX_FILE_NAME_LEN);
+        HKS_IF_NOT_SUCC_BREAK(ret, "construct user id name failed, ret = %" LOG_PUBLIC "d", ret)
+
+        char userProcess[HKS_MAX_DIRENT_FILE_LEN] = "";
+        int32_t offset = sprintf_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s",
+            HKS_KEY_STORE_PATH, userData, developerHash, groupHash);
+        if (offset < 0) {
+            HKS_LOG_E("concatenate uidPath failed.");
+            ret = HKS_ERROR_BUFFER_TOO_SMALL;
+            break;
+        }
+
+        (void)DeleteGroupMainPathAndBakPath(userData, developerHash, groupHash, HKS_KEY_STORE_PATH,
+            HKS_STORE_SERVICE_PATH);
+#ifdef SUPPORT_STORAGE_BACKUP
+        (void)DeleteGroupMainPathAndBakPath(userData, developerHash, groupHash, HKS_KEY_STORE_BAK_PATH,
+            HKS_STORE_SERVICE_BAK_PATH);
+#endif
+    } while (0);
+    HKS_FREE(userData);
+}
+#endif
 static int32_t GetHksKeyAliasSet(const struct HksFileEntry *fileNameList, const uint32_t fileCount,
     struct HksKeyAliasSet **outData)
 {

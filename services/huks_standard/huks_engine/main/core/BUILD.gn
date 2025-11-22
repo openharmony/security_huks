@@ -35,6 +35,7 @@ if (os_level == "standard") {
       "//base/security/huks/utils/crypto_adapter",
       "//base/security/huks/utils/list",
       "//base/security/huks/utils/mutex",
+      "//base/security/huks/frameworks/huks_standard/main/crypto_engine/openssl/include/",
     ]
 
     sources = [
