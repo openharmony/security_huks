@@ -63,6 +63,9 @@ int32_t HksGetAeadTagLength(const struct HksParamSet *paramSet, const uint32_t m
 
 int32_t HksGetAeadTagLengthWithoutMode(const struct HksParamSet *paramSet, uint32_t *aeadTagLen);
 
+int32_t HksCheckBlobParamIsEqual(const struct HksParamSet *paramSet, const struct HksParamSet *keyBlobParamSet,
+    enum HksTag tag);
+
 #ifdef __cplusplus
 }
 #endif

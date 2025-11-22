@@ -72,6 +72,10 @@ void HksServiceDeleteUserIDKeyAliasFile(const struct HksBlob *userId);
 
 void HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo *processInfo);
 
+#ifdef L2_STANDARD
+void HksServiceDeleteGroupKeyFile(const struct HksProcessInfo *processInfo, const char *developerId, const char *group);
+#endif
+
 int32_t HksListAliasesByProcessName(const struct HksStoreFileInfo *fileInfo, struct HksKeyAliasSet **outData);
 
 int32_t HksStorageCopyKeyBlobFile(const char *srcPath, const char *srcFileName,

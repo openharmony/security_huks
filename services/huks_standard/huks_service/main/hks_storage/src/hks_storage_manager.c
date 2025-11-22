@@ -249,7 +249,49 @@ static void FreeStorageMaterial(struct HksStoreMaterial *material)
     HKS_FREE(material->uidPath);
     HKS_FREE(material->storageTypePath);
     HKS_FREE(material->keyAliasPath);
+    HKS_FREE(material->assetAccessGroup);
+    HKS_FREE(material->developerId);
 }
+
+#ifdef L2_STANDARD
+#define HKS_MAX_ACCESS_GROUP_LEN 128
+#define HKS_MAX_DEVELOPER_ID_LEN 64
+static int32_t GetAssetAccessGroupPath(const struct HksParamSet *paramSet, struct HksStoreMaterial *outMaterial)
+{
+    struct HksParam *accessGroupParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_ACCESS_GROUP, &accessGroupParam);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    uint32_t blobSize = accessGroupParam->blob.size;
+    HKS_IF_TRUE_LOGE_RETURN(blobSize > HKS_MAX_ACCESS_GROUP_LEN, HKS_FAILURE,
+        "access group len %" LOG_PUBLIC "u is invalid", blobSize)
+
+    outMaterial->assetAccessGroup = (char *)HksMalloc(blobSize + 1);
+    HKS_IF_NULL_LOGE_RETURN(outMaterial->assetAccessGroup, HKS_ERROR_MALLOC_FAIL, "malloc access group failed")
+    (void)memcpy_s(outMaterial->assetAccessGroup, blobSize, accessGroupParam->blob.data, blobSize);
+    outMaterial->assetAccessGroup[blobSize] = '\0';
+
+    return HKS_SUCCESS;
+}
+
+static int32_t GetDeveloperIdPath(const struct HksParamSet *paramSet,  struct HksStoreMaterial *outMaterial)
+{
+    struct HksParam *developerParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_DEVELOPER_ID, &developerParam);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret);
+
+    uint32_t blobSize = developerParam->blob.size;
+    HKS_IF_TRUE_LOGE_RETURN(blobSize > HKS_MAX_DEVELOPER_ID_LEN, HKS_FAILURE,
+        "developId len %" LOG_PUBLIC "u is invalid", blobSize)
+
+    outMaterial->developerId = (char *)HksMalloc(blobSize + 1);
+    HKS_IF_NULL_LOGE_RETURN(outMaterial->developerId, HKS_ERROR_MALLOC_FAIL, "malloc developerId failed")
+    (void)memcpy_s(outMaterial->developerId, blobSize, developerParam->blob.data, blobSize);
+    outMaterial->developerId[blobSize] = '\0';
+
+    return HKS_SUCCESS;
+}
+#endif
 
 static int32_t InitStorageMaterial(const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct HksBlob *keyAlias, uint32_t storageType,
@@ -265,7 +307,7 @@ static int32_t InitStorageMaterial(const struct HksProcessInfo *processInfo,
 #endif
     bool isPlainPath = GetIsPlainPath(storageLevel);
 
-    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0, 0, 0 };
     do {
         ret = GetPathType(processInfo, storageType, storageLevel, &material);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get path type failed.")
@@ -275,7 +317,14 @@ static int32_t InitStorageMaterial(const struct HksProcessInfo *processInfo,
 
         ret = GetUidPath(isPlainPath, &processInfo->processName, &material);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get uid path failed.")
-
+#ifdef L2_STANDARD
+        ret = GetAssetAccessGroupPath(paramSet, &material);
+        if (ret == HKS_SUCCESS) {
+            ret = GetDeveloperIdPath(paramSet, &material);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get developerId failed.")
+        }
+        HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS && ret != HKS_ERROR_PARAM_NOT_EXIST, "get group failed.")
+#endif
         ret = GetStorageTypePath(storageType, &material);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get storage type path failed.")
 
@@ -313,7 +362,7 @@ int32_t HksManageStoreKeyBlob(const struct HksProcessInfo *processInfo, const st
 #else
     struct HksStoreFileInfo fileInfo = { { 0 } };
 #endif
-    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0, 0, 0 };
     int32_t ret;
     do {
 #ifdef _STORAGE_LITE_
@@ -352,7 +401,7 @@ int32_t HksManageStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo, co
 #else
     struct HksStoreFileInfo fileInfo = { { 0 } };
 #endif
-    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0, 0, 0 };
     int32_t ret;
     do {
 #ifdef _STORAGE_LITE_
@@ -384,7 +433,7 @@ int32_t HksManageStoreIsKeyBlobExist(const struct HksProcessInfo *processInfo, c
 #else
     struct HksStoreFileInfo fileInfo = { { 0 } };
 #endif
-    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0, 0, 0 };
     int32_t ret;
     do {
 #ifdef _STORAGE_LITE_
@@ -416,7 +465,7 @@ int32_t HksManageStoreGetKeyBlob(const struct HksProcessInfo *processInfo, const
 #else
     struct HksStoreFileInfo fileInfo = { { 0 } };
 #endif
-    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0, 0, 0 };
     int32_t ret;
     do {
 #ifdef _STORAGE_LITE_
@@ -459,7 +508,7 @@ int32_t HksManageStoreGetKeyBlobSize(const struct HksProcessInfo *processInfo, c
 #else
     struct HksStoreFileInfo fileInfo = { { 0 } };
 #endif
-    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0, 0, 0 };
     int32_t ret;
     do {
 #ifdef _STORAGE_LITE_
@@ -497,7 +546,7 @@ int32_t HksManageGetKeyAliasByProcessName(const struct HksProcessInfo *processIn
 #else
     struct HksStoreFileInfo fileInfo = { { 0 } };
 #endif
-    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0, 0, 0 };
     int32_t ret;
     do {
         ret = InitStorageMaterial(processInfo, paramSet, NULL, HKS_STORAGE_TYPE_KEY, &material);
@@ -525,7 +574,7 @@ int32_t HksManageGetKeyCountByProcessName(const struct HksProcessInfo *processIn
 #else
     struct HksStoreFileInfo fileInfo = { { 0 } };
 #endif
-    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0, 0, 0 };
     int32_t ret;
     do {
 #ifdef _STORAGE_LITE_
@@ -557,7 +606,7 @@ int32_t HksManageListAliasesByProcessName(const struct HksProcessInfo *processIn
 #else
     struct HksStoreFileInfo fileInfo = { { 0 } };
 #endif
-    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0, 0, 0 };
     int32_t ret;
     do {
         ret = InitStorageMaterial(processInfo, paramSet, NULL, HKS_STORAGE_TYPE_KEY, &material);
@@ -589,8 +638,8 @@ int32_t HksManageStoreRenameKeyAlias(const struct HksProcessInfo *processInfo,
     UnlockIfDe(paramSet);
     struct HksStoreFileInfo oldKeyFileInfo = { { 0 } };
     struct HksStoreFileInfo newKeyFileInfo = { { 0 } };
-    struct HksStoreMaterial oldKeyMaterial = { DE_PATH, 0, 0, 0, 0 };
-    struct HksStoreMaterial newKeyMaterial = { DE_PATH, 0, 0, 0, 0 };
+    struct HksStoreMaterial oldKeyMaterial = { DE_PATH, 0, 0, 0, 0, 0, 0 };
+    struct HksStoreMaterial newKeyMaterial = { DE_PATH, 0, 0, 0, 0, 0, 0 };
     int32_t ret;
     do {
         ret = InitStorageMaterial(processInfo, paramSet, oldKeyAlias, storageType, &oldKeyMaterial);

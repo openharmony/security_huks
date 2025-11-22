@@ -791,6 +791,12 @@ int32_t HksCoreImportWrappedKey(const struct HksBlob *keyAlias, const struct Hks
     int32_t ret = HksCoreCheckImportWrappedKeyParams(wrappingKey, wrappedKeyData, paramSet, keyOut, &unwrapSuite);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check import wrapped key params failed!")
 
+#ifdef L2_STANDARD
+    if (unwrapSuite == HKS_UNWRAP_SUITE_SM2_SM4_ECB_NOPADDING) {
+        return HksEnvelopImportWrapedKey(keyAlias, wrappingKey, wrappedKeyData, paramSet, keyOut);
+    }
+#endif
+
     if ((unwrapSuite == HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7_WITH_VERIFY_DIG_SM3) ||
         (unwrapSuite == HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7)) {
         return HksSmImportWrappedKey(keyAlias, paramSet, wrappingKey, wrappedKeyData, keyOut);

@@ -153,3 +153,54 @@ int32_t GetHksPubKeyInnerFormat(const struct HksParamSet *paramSet,
     }
 }
 
+#ifdef HKS_SUPPORT_API_IMPORT_WRAPPED_KEY
+static int32_t GetAndTransPK(const struct HksParamSet *paramSet, struct HksBlob *innerKey,
+    struct HksParamSet *paramSetOut)
+{
+    struct HksParam *unwrapItem = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &unwrapItem);
+    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+        ret = HksAddParams(paramSetOut, paramSet->params, paramSet->paramsCnt);
+        return ret;
+    }
+    ret = GetHksPubKeyInnerFormat(paramSet, &unwrapItem->blob, innerKey);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Envelop Pubkey to Inner Fail!!")
+    struct HksParam newParm = {
+        .tag = HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA,
+        .blob = *innerKey
+    };
+    for (uint32_t i = 0; i < paramSet->paramsCnt; i++) {
+        if (paramSet->params[i].tag != HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA) {
+            ret = HksAddParams(paramSetOut, &paramSet->params[i], 1);
+            HKS_IF_NOT_SUCC_BREAK(ret, "Envelop PubKey AddParams Fail!!");
+        } else {
+            ret = HksAddParams(paramSetOut, &newParm, 1);
+            HKS_IF_NOT_SUCC_BREAK(ret, "Envelop NewKey AddParams Fail!!");
+        }
+    }
+    return ret;
+}
+
+int32_t HksGetEnvelopParamSet(const struct HksParamSet *paramSet, struct HksParamSet **newParamSet)
+{
+    struct HksBlob innerFormatPK = {0, NULL};
+    int32_t ret = HKS_SUCCESS;
+    struct HksParamSet *tempParamSet = NULL;
+    do {
+        ret = HksInitParamSet(&tempParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Client Envelop Param Init Fail!!")
+
+        ret = GetAndTransPK(paramSet, &innerFormatPK, tempParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Client Envelop TransPubKey to Inner Fail")
+
+        ret = HksBuildParamSet(&tempParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Client Envelop BuildParam Fail!!")
+
+        *newParamSet = tempParamSet;
+        tempParamSet = NULL;
+    } while (0);
+    HKS_FREE_BLOB(innerFormatPK);
+    HksFreeParamSet(&tempParamSet);
+    return ret;
+}
+#endif

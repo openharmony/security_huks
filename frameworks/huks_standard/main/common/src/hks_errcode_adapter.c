@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -597,6 +597,20 @@ static struct HksError g_errCodeTable[] = {
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
             .errorMsg = "AEAD tag length mismatch.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_INVALID_ACCESS_GROUP,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "invalid access group.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_INVALID_DEVELOPER_ID,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "invalid developer id.",
             .data = NULL
         }
     }, {

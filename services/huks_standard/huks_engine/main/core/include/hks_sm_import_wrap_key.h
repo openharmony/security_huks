@@ -36,6 +36,9 @@ struct HksSmWrappedKeyDataBlob {
     uint32_t signatureDataLength;
 };
 
+int32_t HksEnvelopImportWrapedKey(const struct HksBlob *keyAlias, const struct HksBlob *wrappingKey,
+    const struct HksBlob *wrappedKeyData, const struct HksParamSet *paramSet, struct HksBlob *keyOut);
+
 int32_t HksSmImportWrappedKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksBlob *wrappingKey, const struct HksBlob *wrappedKeyData, struct HksBlob *keyOut);
 #ifdef __cplusplus
