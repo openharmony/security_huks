@@ -15,20 +15,15 @@
 #include "hks_provider_life_cycle_manager.h"
 #include "hks_cpp_paramset.h"
 #include "hks_ukey_common.h"
-#include "hks_external_adapter.h"
 #include "hks_error_code.h"
 #include "hks_log.h"
 #include "hks_template.h"
 #include "huks_access_ext_base_stub.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
-#include "refbase.h"
-#include <memory>
 #include <string>
 #include <tuple>
-#include <utility>
-#include <chrono>
-#include <thread>
+#include "hks_json_wrapper.h"
 namespace OHOS::Security::Huks {
 
 class HksCryptoExtStubImpl : public HuksAccessExtBaseStub {
@@ -75,15 +70,75 @@ public:
         int32_t& errcode) { return HKS_SUCCESS; };
 
     ErrCode ExportCertificate(
-        const std::string& index,
-        const CppParamSet& params,
-        std::string& certJsonArr,
-        int32_t& errcode) { return HKS_SUCCESS; };
+    const std::string& index,
+    const CppParamSet& params,
+    std::string& certJsonArr,
+    int32_t& errcode) 
+{ 
+    CommJsonObject certArray = CommJsonObject::CreateArray();
+    if (certArray.IsNull()) {
+        errcode = HKS_ERROR_MALLOC_FAIL;
+        return ERR_OK;
+    }
 
-    ErrCode ExportProviderCertificates(
-        const CppParamSet& params,
-        std::string& certJsonArr,
-        int32_t& errcode) { return HKS_SUCCESS; };
+    CommJsonObject certObj = CommJsonObject::CreateObject();
+    if (certObj.IsNull()) {
+        errcode = HKS_ERROR_MALLOC_FAIL;
+        return ERR_OK;
+    }
+
+    if (!certObj.SetValue("purpose", 1) ||
+        !certObj.SetValue("index", std::string("test_cert_index")) ||
+        !certObj.SetValue("cert", std::string("MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtestcertificatedata"))) {
+        errcode = HKS_ERROR_JSON_SERIALIZE_FAILED;
+        return ERR_OK;
+    }
+
+    if (!certArray.AppendElement(certObj)) {
+        errcode = HKS_ERROR_JSON_SERIALIZE_FAILED;
+        return ERR_OK;
+    }
+
+    certJsonArr = certArray.Serialize(false);
+    errcode = HKS_SUCCESS;
+    return ERR_OK; 
+};
+
+ErrCode ExportProviderCertificates(
+    const CppParamSet& params,
+    std::string& certJsonArr,
+    int32_t& errcode) 
+{ 
+    CommJsonObject certArray = CommJsonObject::CreateArray();
+    if (certArray.IsNull()) {
+        errcode = HKS_ERROR_MALLOC_FAIL;
+        return ERR_OK;
+    }
+    for (int i = 0; i < 3; i++) {
+        CommJsonObject certObj = CommJsonObject::CreateObject();
+        if (certObj.IsNull()) {
+            errcode = HKS_ERROR_MALLOC_FAIL;
+            return ERR_OK;
+        }
+
+        std::string indexStr = "cert_index_" + std::to_string(i);
+        std::string certData = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAcertdata" + std::to_string(i);
+
+        if (!certObj.SetValue("purpose", i + 1) ||
+            !certObj.SetValue("index", indexStr) ||
+            !certObj.SetValue("cert", certData)) {
+            errcode = HKS_ERROR_JSON_SERIALIZE_FAILED;
+            return ERR_OK;
+        }
+        if (!certArray.AppendElement(certObj)) {
+            errcode = HKS_ERROR_JSON_SERIALIZE_FAILED;
+            return ERR_OK;
+        }
+    }
+    certJsonArr = certArray.Serialize(false);
+    errcode = HKS_SUCCESS;
+    return ERR_OK; 
+};
 
     ErrCode InitSession(
         const std::string& index,

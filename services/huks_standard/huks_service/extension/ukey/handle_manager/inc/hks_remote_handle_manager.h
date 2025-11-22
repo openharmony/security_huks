@@ -73,7 +73,7 @@ public:
     void ClearAuthState(const HksProcessInfo &processInfo);
     int32_t ParseAndValidateIndex(const std::string &index, ProviderInfo &providerInfo,
                 std::string &newIndex, std::string &handle);
-    OHOS::sptr<IHuksAccessExtBase> GetProviderProxy(const ProviderInfo &providerInfo, int32_t &ret);
+    int32_t GetProviderProxy(const ProviderInfo &providerInfo, OHOS::sptr<IHuksAccessExtBase> &proxy);
 
 private:
     int32_t ValidateProviderInfo(const std::string &newIndex, ProviderInfo &providerInfo);
