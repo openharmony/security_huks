@@ -274,9 +274,9 @@ void FileInfoFree(struct HksStoreFileInfo *fileInfo)
 }
 
 /*
- * keyAlias: xxxxxxxxxxxxxxxxxxx********************xxxxxxxxxxxxxxxxxx
- *                              |<- anonymous len ->||<- suffix len ->|
- *           |<----------------- keyAlias len ----------------------->|
+ * keyAlias: xxxxxxxxxxxxxxxxxx*xxxxxxxxxxxxxxxxxx
+ *                only show one anonymous char
+ *          |<----------- keyAliasLen ----------->|
  */
 int32_t AnonymizeKeyAlias(const char *keyAlias, char **anonymousKeyAlias)
 {
@@ -286,19 +286,23 @@ int32_t AnonymizeKeyAlias(const char *keyAlias, char **anonymousKeyAlias)
 
     (void)memset_s(*anonymousKeyAlias, bufSize, 0, bufSize);
 
+    uint32_t length = 0;
     uint32_t keyAliasLen = strlen(keyAlias);
-    uint32_t anoyLen = (keyAliasLen + 1) / 2;
-    uint32_t suffixLen = anoyLen / 2;
-    (*anonymousKeyAlias)[0] = keyAlias[0]; // keyAliasLen > 0;
-    for (uint32_t i = 1; i < keyAliasLen; ++i) {
-        if ((keyAliasLen < (i + 1 + anoyLen + suffixLen)) &&
-            ((i + 1 + suffixLen) <= keyAliasLen)) {
-            (*anonymousKeyAlias)[i] = '*';
-        } else {
-            (*anonymousKeyAlias)[i] = keyAlias[i];
-        }
+    uint32_t anonymousLen = (keyAliasLen + 1) >> 1;
+    uint32_t suffixLen = (keyAliasLen + 1) >> 2;
+    uint32_t prefixLen = keyAliasLen - anonymousLen - suffixLen;
+    (*anonymousKeyAlias)[length++] = keyAlias[0]; // keyAliasLen > 0;
+    for (uint32_t i = 1; i < prefixLen; ++i) {
+        (*anonymousKeyAlias)[length++] = keyAlias[i];
     }
-    (*anonymousKeyAlias)[keyAliasLen] = '\0';
+    if (length < keyAliasLen) {
+        (*anonymousKeyAlias)[length++] = '*';
+    }
+    for (uint32_t i = 0; i < suffixLen; ++i) {
+        (*anonymousKeyAlias)[length++] = keyAlias[keyAliasLen - suffixLen + i];
+    }
+
+    (*anonymousKeyAlias)[length] = '\0';
     return HKS_SUCCESS;
 }
 
