@@ -11,6 +11,8 @@ if (os_level == "standard" && huks_security_level == "trusted_environment") {
     include_dirs = [
       ".",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger/inc",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/session_manger/inc",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager/inc",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc",
       "//base/security/huks/test/unittest/huks_common_test/hks_mock_common",
       "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
@@ -21,7 +23,9 @@ if (os_level == "standard" && huks_security_level == "trusted_environment") {
       "./hks_extension_connection_mock.cpp",
       "./hks_external_adapter_mock.cpp",
       "./hks_provider_manger_test.cpp",
+      "./hks_session_manger_test.cpp",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger/src/hks_provider_life_cycle_manager.cpp",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/session_manger/src/hks_session_manger.cpp",
     ]
 
     configs = [
@@ -34,6 +38,7 @@ if (os_level == "standard" && huks_security_level == "trusted_environment") {
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_util_standard_static",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:huks_access_ext_base_include",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager:libhuks_remote_handle_manager_static",
     ]
     external_deps = [
       "ability_base:want",
