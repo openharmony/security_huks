@@ -32,7 +32,15 @@ public:
         const std::string& index,
         const CppParamSet& params,
         std::string& handle,
-        int32_t& errcode) { return -1; };
+        int32_t& errcode)
+    {
+        if(index == R"({"index":"HksSessionMgrTest003"})") {
+            handle = "HksSessionMgrTest003";
+            errcode = 0;
+            return 0;
+        }
+        return -1;
+    };
 
     ErrCode CloseRemoteHandle(
         const std::string& handle,
@@ -44,7 +52,15 @@ public:
         const CppParamSet& params,
         int32_t& errcode,
         int32_t& authState,
-        uint32_t& retryCnt) { return -1; };
+        uint32_t& retryCnt)
+    {
+        if(handle == "HksSessionMgrTest003") {
+            authState = 0;
+            errcode = 0;
+            return 0;
+        }
+        return -1;
+    };
 
     ErrCode GetUkeyPinAuthState(
         const std::string& handle,
@@ -81,7 +97,15 @@ public:
         const std::string& index,
         const CppParamSet& params,
         std::string& handle,
-        int32_t& errcode) { return -1; };
+        int32_t& errcode)
+    {
+        if(index == "HksSessionMgrTest003") {
+            handle = "HksSessionMgrTest003";
+            errcode = 0;
+            return 0;
+        }
+        return -1;
+    };
 
     ErrCode UpdateSession(
         const std::string& handle,

@@ -62,10 +62,8 @@ std::pair<int32_t, uint32_t> HksSessionManager::GenRandomUint32()
 {
     uint32_t random = std::numeric_limits<uint32_t>::max();
     auto *randomNumPtr = static_cast<uint8_t *>(static_cast<void *>(&random));
-    if (!GenerateRand(randomNumPtr, sizeof(uint32_t))) {
-        HKS_LOG_E("GenerateRand failed");
-        return std::make_pair(HKS_ERROR_GEN_RANDOM_FAIL, 0);
-    }
+    HKS_IF_TRUE_LOGE_RETURN(!GenerateRand(randomNumPtr, sizeof(uint32_t)),
+        std::make_pair(HKS_ERROR_GEN_RANDOM_FAIL, 0), "GenerateRand failed")
     return std::make_pair(HKS_SUCCESS, random);
 }
 
@@ -74,9 +72,7 @@ bool HksSessionManager::CheckSingleCallerCanInitSession(const HksProcessInfo &pr
 {
     uint8_t curHandleNum = 0;
     m_handlers.Iterate([&](const uint32_t &handle, HandleInfo &handleInfo) {
-        if (processInfo.uidInt == handleInfo.m_uid) {
-            curHandleNum++;
-        }
+        HKS_IF_TRUE_EXCU(processInfo.uidInt == handleInfo.m_uid, curHandleNum++);
     });
     return curHandleNum <= MAX_SINGLE_CALLER_HANDLE_SIZE;
 }
@@ -228,10 +224,8 @@ std::vector<uint32_t> HksSessionManager::FindToRemoveHandle(uint32_t uid, std::s
 {
     std::vector<uint32_t> toRemove;
     m_handlers.Iterate([&](const uint32_t &handle, HandleInfo &handleInfo) {
-        if (uid == handleInfo.m_uid &&
-            handleInfo.m_providerInfo.m_abilityName == abilityName) {
-            toRemove.emplace_back(handle);
-        }
+        HKS_IF_TRUE_EXCU(uid == handleInfo.m_uid && handleInfo.m_providerInfo.m_abilityName == abilityName,
+            toRemove.emplace_back(handle));
     });
     return toRemove;
 }
@@ -240,9 +234,7 @@ std::vector<uint32_t> HksSessionManager::FindToRemoveHandle(uint32_t uid)
 {
     std::vector<uint32_t> toRemove;
     m_handlers.Iterate([&](const uint32_t &handle, HandleInfo &handleInfo) {
-        if (uid == handleInfo.m_uid) {
-            toRemove.emplace_back(handle);
-        }
+        HKS_IF_TRUE_EXCU(uid == handleInfo.m_uid, toRemove.emplace_back(handle));
     });
     return toRemove;
 }
