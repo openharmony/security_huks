@@ -23,6 +23,9 @@
 
 static struct OH_Huks_Result ConvertApiResult(int32_t ret)
 {
+    if (ret == HKS_ERROR_INVALID_ARGUMENT) {
+        ret = HKS_ERROR_NEW_INVALID_ARGUMENT;
+    }
     struct HksResult result = HksConvertErrCode(ret);
     return *((struct OH_Huks_Result *)(&result));
 }

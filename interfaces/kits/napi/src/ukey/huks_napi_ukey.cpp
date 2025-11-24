@@ -255,6 +255,9 @@ napi_value HuksNapiRegisterProvider(napi_env env, napi_callback_info info)
 
     context->resolve = [](napi_env env, AsyncContext *context) {
         ProviderRegContext *napiContext = static_cast<ProviderRegContext *>(context);
+        if (napiContext->result == HKS_ERROR_INVALID_ARGUMENT) {
+            napiContext->result = HKS_ERROR_NEW_INVALID_ARGUMENT;
+        }
         HksReturnNapiUndefined(env, napiContext->callback, napiContext->deferred, napiContext->result);
     };
 
@@ -307,6 +310,9 @@ napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
 
     context->resolve = [](napi_env env, AsyncContext *context) {
         ProviderRegContext *napiContext = static_cast<ProviderRegContext *>(context);
+        if (napiContext->result == HKS_ERROR_INVALID_ARGUMENT) {
+            napiContext->result = HKS_ERROR_NEW_INVALID_ARGUMENT;
+        }
         HksReturnNapiUndefined(env, napiContext->callback, napiContext->deferred, napiContext->result);
     };
 
@@ -351,6 +357,9 @@ napi_value HuksNapiAuthUkeyPin(napi_env env, napi_callback_info info)
     context->resolve = [](napi_env env, AsyncContext *context) {
         UkeyPinContext *napiContext = static_cast<UkeyPinContext *>(context);
         SetRetryCount(napiContext->retryCount);
+        if (napiContext->result == HKS_ERROR_INVALID_ARGUMENT) {
+            napiContext->result = HKS_ERROR_NEW_INVALID_ARGUMENT;
+        }
         HksReturnNapiUndefined(env, napiContext->callback, napiContext->deferred, napiContext->result);
     };
 
@@ -402,6 +411,9 @@ napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info)
         SuccessReturnResultInit(resultData);
         resultData.isOnlyReturnBoolResult = true;
         resultData.boolReturned = (napiContext->result == HKS_SUCCESS && napiContext->outStatus == 0);
+        if (napiContext->result == HKS_ERROR_INVALID_ARGUMENT) {
+            napiContext->result = HKS_ERROR_NEW_INVALID_ARGUMENT;
+        }
         HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
     };
     napi_value result = CreateAsyncWork(env, info, std::move(context), __func__);
