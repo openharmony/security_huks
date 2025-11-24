@@ -153,8 +153,7 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
     outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
     if (outBlob.data == NULL) {
         ret = HKS_ERROR_MALLOC_FAIL;
-    }
-    if (memcpy_s(outBlob.data, outBlob.size, &ret, sizeof(int32_t)) != EOK ||
+    } else if (memcpy_s(outBlob.data, outBlob.size, &ret, sizeof(int32_t)) != EOK ||
         memcpy_s(outBlob.data + sizeof(int32_t), outBlob.size - sizeof(int32_t), &status, sizeof(int32_t)) != EOK ||
         memcpy_s(outBlob.data + sizeof(int32_t) * RET_NUM, outBlob.size - sizeof(int32_t) * RET_NUM,
             &retryCount, sizeof(uint32_t)) != EOK) {
