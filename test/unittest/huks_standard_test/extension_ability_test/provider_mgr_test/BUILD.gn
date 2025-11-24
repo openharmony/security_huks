@@ -3,7 +3,7 @@ import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 
-if (os_level == "standard") {
+if (os_level == "standard" && huks_security_level == "trusted_environment") {
   module_output_path = "huks/huks/extension_unittest"
   ohos_unittest("provider_mgr_test") {
     module_out_path = module_output_path
@@ -65,5 +65,9 @@ if (os_level == "standard") {
 
     subsystem_name = "security"
     part_name = "huks"
+  }
+} else {
+    group("provider_mgr_test") {
+    testonly = true
   }
 }

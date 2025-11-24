@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "hks_error_code.h"
 #define HUKS_DISABLE_LOG_AT_FILE_TO_REDUCE_ROM_SIZE
 
 #include "hks_keyblob.h"
@@ -82,26 +83,91 @@ static int32_t GetEncryptKey(struct HksBlob *mainKey)
     return HksCryptoHalGetMainKey(NULL, mainKey);
 }
 
+#ifdef L2_STANDARD
+static int32_t GetGroupKeyBlob(const struct HksParamSet *paramSet, struct HksBlob *groupKeyInfo)
+{
+    struct HksParam *developerIdParam = NULL;
+    struct HksParam *accessGroupParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_ACCESS_GROUP, &accessGroupParam);
+    HKS_IF_TRUE_RETURN(ret == HKS_ERROR_PARAM_NOT_EXIST, HKS_SUCCESS)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get access group failed")
+
+    ret = HksGetParam(paramSet, HKS_TAG_DEVELOPER_ID, &developerIdParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get developer id failed")
+
+    groupKeyInfo->data = (uint8_t *)HksMalloc(developerIdParam->blob.size + accessGroupParam->blob.size);
+    HKS_IF_NULL_LOGE_RETURN(groupKeyInfo->data, HKS_ERROR_MALLOC_FAIL, "malloc groupKeyInfo failed")
+    groupKeyInfo->size = developerIdParam->blob.size + accessGroupParam->blob.size;
+    do {
+        ret = HKS_ERROR_INSUFFICIENT_MEMORY;
+        HKS_IF_NOT_EOK_LOGE_BREAK(
+            memcpy_s(groupKeyInfo->data, groupKeyInfo->size, developerIdParam->blob.data, developerIdParam->blob.size),
+                "memcpy developerId failed")
+        HKS_IF_NOT_EOK_LOGE_BREAK(
+            memcpy_s(groupKeyInfo->data + developerIdParam->blob.size, groupKeyInfo->size - developerIdParam->blob.size,
+                accessGroupParam->blob.data, accessGroupParam->blob.size), "memcpy accessGroup failed")
+        return HKS_SUCCESS;
+    } while (0);
+
+    HKS_FREE_BLOB(*groupKeyInfo);
+    return ret;
+}
+#endif
+
+static int32_t GetAppIdInfo(const struct HksParamSet *paramSet, struct HksBlob *deriveInfoBlob)
+{
+    HKS_IF_TRUE_RETURN(deriveInfoBlob->data != NULL, HKS_SUCCESS)
+
+    struct HksParam *appIdParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_PROCESS_NAME, &appIdParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get appid failed!")
+    HKS_IF_TRUE_LOGE_RETURN(appIdParam->blob.size > HKS_MAX_PROCESS_NAME_LEN, HKS_ERROR_INVALID_ARGUMENT,
+        "invalid app id size: %" LOG_PUBLIC "u", appIdParam->blob.size)
+    
+    deriveInfoBlob->data = (uint8_t *)HksMalloc(appIdParam->blob.size);
+    HKS_IF_NULL_LOGE_RETURN(deriveInfoBlob->data, HKS_ERROR_MALLOC_FAIL, "malloc deriveInfo failed")
+    deriveInfoBlob->size = appIdParam->blob.size;
+
+    HKS_IF_TRUE_RETURN(memcpy_s(deriveInfoBlob->data, deriveInfoBlob->size,
+        appIdParam->blob.data, appIdParam->blob.size) == EOK, HKS_SUCCESS)
+
+    HKS_LOG_E("copy deriveInfoBlob failed");
+    HKS_FREE_BLOB(*deriveInfoBlob);
+    return HKS_ERROR_INSUFFICIENT_MEMORY;
+}
+
 static int32_t GetSalt(const struct HksParamSet *paramSet, const struct HksKeyBlobInfo *keyBlobInfo,
     struct HksBlob *salt)
 {
-    struct HksParam *appIdParam = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_PROCESS_NAME, &appIdParam);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get app id param failed!")
+    struct HksBlob deriveInfoBlob = { 0, NULL };
+    int32_t ret = HKS_SUCCESS;
+#ifdef L2_STANDARD
+    ret = GetGroupKeyBlob(paramSet, &deriveInfoBlob);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+#endif
+    ret = GetAppIdInfo(paramSet, &deriveInfoBlob);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get appid info failed")
+    
+    salt->data = (uint8_t *)HksMalloc(deriveInfoBlob.size + HKS_KEY_BLOB_DERIVE_SALT_SIZE);
+    do {
+        ret = HKS_ERROR_MALLOC_FAIL;
+        HKS_IF_NULL_LOGE_BREAK(salt->data, "malloc salt failed")
+        salt->size = deriveInfoBlob.size + HKS_KEY_BLOB_DERIVE_SALT_SIZE;
 
-    if (appIdParam->blob.size > HKS_MAX_PROCESS_NAME_LEN) {
-        HKS_LOG_E("invalid app id size: %" LOG_PUBLIC "u", appIdParam->blob.size);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+        ret = HKS_ERROR_INSUFFICIENT_MEMORY;
+        HKS_IF_NOT_EOK_LOGE_BREAK(
+            memcpy_s(salt->data, salt->size, deriveInfoBlob.data, deriveInfoBlob.size),
+                "memcpy deriveInfo failed")
+        HKS_IF_NOT_EOK_LOGE_BREAK(
+            memcpy_s(salt->data + deriveInfoBlob.size, salt->size - deriveInfoBlob.size,
+                keyBlobInfo->salt, HKS_KEY_BLOB_DERIVE_SALT_SIZE), "memcpy salt failed")
 
-    salt->size = appIdParam->blob.size + HKS_KEY_BLOB_DERIVE_SALT_SIZE;
-    salt->data = (uint8_t *)HksMalloc(salt->size);
-    HKS_IF_NULL_LOGE_RETURN(salt->data, HKS_ERROR_MALLOC_FAIL, "malloc failed")
+        HKS_FREE_BLOB(deriveInfoBlob);
+        return HKS_SUCCESS;
+    } while (0);
 
-    (void)memcpy_s(salt->data, salt->size, appIdParam->blob.data, appIdParam->blob.size);
-
-    (void)memcpy_s(salt->data + appIdParam->blob.size, salt->size - appIdParam->blob.size,
-        keyBlobInfo->salt, HKS_KEY_BLOB_DERIVE_SALT_SIZE);
+    HKS_FREE_BLOB(deriveInfoBlob);
+    HKS_FREE_BLOB(*salt);
     return ret;
 }
 

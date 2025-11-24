@@ -296,7 +296,30 @@ static int32_t AppendOwnerInfoForAcrossDevicesIfNeed(const struct HksProcessInfo
     return ret;
 }
 #endif
+#if defined(L2_STANDARD) && defined(HKS_SUPPORT_GET_BUNDLE_INFO)
+static int32_t AppendDeveloperId(const struct HksProcessInfo *processInfo, struct HksParamSet *outParamSet,
+    struct HksBlob *developerId)
+{
+    int32_t ret = HksCheckAssetAccessGroup(processInfo, outParamSet);
+    HKS_IF_TRUE_RETURN(ret == HKS_ERROR_PARAM_NOT_EXIST, HKS_SUCCESS)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "groupid is invalid")
 
+    do {
+        ret = HksGetDeveloperId(processInfo, developerId);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get developerId failed")
+
+        struct HksParam paramArr[] = {
+            { .tag = HKS_TAG_DEVELOPER_ID, .blob = *developerId },
+        };
+
+        ret = HksAddParams(outParamSet, paramArr, HKS_ARRAY_SIZE(paramArr));
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add developerInfo failed")
+        return HKS_SUCCESS;
+    } while (0);
+
+    return ret;
+}
+#endif
 int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *paramSet,
     const struct HksProcessInfo *processInfo, const struct HksOperation *operation, struct HksParamSet **outParamSet)
 {
@@ -304,6 +327,7 @@ int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *paramSet,
     (void)operation;
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob appInfo = { 0, NULL };
+    struct HksBlob developerId = { 0, NULL };
     do {
         if (paramSet != NULL) {
             ret = AppendToNewParamSet(paramSet, &newParamSet);
@@ -322,7 +346,7 @@ int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *paramSet,
         struct HksParam paramArr[] = {
             { .tag = HKS_TAG_PROCESS_NAME, .blob = processInfo->processName },
             { .tag = HKS_TAG_USER_ID, .uint32Param = processInfo->userIdInt },
-            { .tag = HKS_TAG_SCREEN_STATE, .boolParam = HksGetScreenState()},
+            { .tag = HKS_TAG_SCREEN_STATE, .boolParam = HksGetScreenState() },
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
             { .tag = HKS_TAG_ACCESS_TOKEN_ID, .uint64Param = processInfo->accessTokenId },
 #endif
@@ -339,16 +363,20 @@ int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *paramSet,
 #ifdef L2_STANDARD
         ret = AppendStorageLevelAndSpecificUserIdToParamSet(processInfo, operation, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add default strategy failed")
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+        ret = AppendDeveloperId(processInfo, newParamSet, &developerId);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append group key info failed, ret = %" LOG_PUBLIC "d", ret)
+#endif
 #endif
         ret = HksBuildParamSet(&newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build paramset failed")
 
         *outParamSet = newParamSet;
-        HKS_FREE_BLOB(appInfo);
-        return ret;
+        newParamSet = NULL;
     } while (0);
 
     HKS_FREE_BLOB(appInfo);
+    HKS_FREE_BLOB(developerId);
     HksFreeParamSet(&newParamSet);
     return ret;
 }

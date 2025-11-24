@@ -39,6 +39,7 @@
 #include "hks_template.h"
 #include "hks_type.h"
 #include "hks_util.h"
+#include "hks_client_service_adapter_common.h"
 
 #include "securec.h"
 
@@ -372,6 +373,21 @@ HKS_API_EXPORT int32_t HksImportWrappedKey(const struct HksBlob *keyAlias, const
     if (ret != HKS_SUCCESS) {
         return ret;
     }
+    do {
+        struct HksParam *unwrapItem = NULL;
+        ret = HksGetParam(paramSet, HKS_TAG_UNWRAP_ALGORITHM_SUITE, &unwrapItem);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Envelop Get Unwrap Tag Fail!!")
+        if (unwrapItem->int32Param == HKS_UNWRAP_SUITE_SM2_SM4_ECB_NOPADDING) {
+            struct HksParamSet *newParamSet = NULL;
+            ret = HksGetEnvelopParamSet(paramSet, &newParamSet);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Get EnvelopParamSet fail")
+
+            ret = HksClientImportWrappedKey(keyAlias, wrappingKeyAlias, newParamSet, wrappedKeyData);
+            HksFreeParamSet(&newParamSet);
+            HKS_IF_NOT_SUCC_LOGE(ret, "leave ImportWrappedKey, result = %" LOG_PUBLIC "d", ret);
+            return ret;
+        }
+    } while (0);
     ret = HksClientImportWrappedKey(keyAlias, wrappingKeyAlias, paramSet, wrappedKeyData);
     HKS_IF_NOT_SUCC_LOGE(ret, "leave ImportWrappedKey, result = %" LOG_PUBLIC "d", ret);
     return ret;
