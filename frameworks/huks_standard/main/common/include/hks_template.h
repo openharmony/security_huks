@@ -279,4 +279,9 @@ if (!(RESULT)) { \
     (EXCU_FUNC); \
 } })
 
+#define HKS_IF_TRUE_EXCU(BOOL_FUNC, EXCU_FUNC) \
+({ if (BOOL_FUNC) { \
+    (EXCU_FUNC); \
+} })
+
 #endif /* HKS_TEMPLATE_H */

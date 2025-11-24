@@ -89,8 +89,8 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
     AAFwk::Want want{};
     want.SetElementName(providerInfo.m_bundleName, providerInfo.m_abilityName);
     sptr<ExtensionConnection> connect(new (std::nothrow) ExtensionConnection());
-    connect->callBackFromPlugin(callback);
     HKS_IF_TRUE_LOGE_RETURN(connect == nullptr, HKS_ERROR_NULL_POINTER, "new ExtensionConnection failed");
+    connect->callBackFromPlugin(callback);
     if (!connect->IsConnected()) {
         HKS_LOG_I("First time connect the Extension Ability. "
             "m_bundleName: %" LOG_PUBLIC "s, m_abilityName: %" LOG_PUBLIC "s",
@@ -138,6 +138,8 @@ int32_t HksProviderLifeCycleManager::HapGetAllConnectInfoByProviderName(const st
 int32_t HksProviderLifeCycleManager::GetAllProviderInfosByProviderName(const std::string &providerName,
     std::vector<ProviderInfo> &providerInfos)
 {
+    HKS_LOG_I("GetAllProviderInfosByProviderName providerName: %" LOG_PUBLIC "s", providerName.c_str());
+    int32_t ret = HKS_ERROR_INVALID_ARGUMENT;
     m_providerMap.Iterate([&](const ProviderInfo &providerInfo,
         std::shared_ptr<HksExtAbilityConnectInfo> &connectionInfo) {
         if (providerName == "HksInnerNullProviderName") {
@@ -146,15 +148,17 @@ int32_t HksProviderLifeCycleManager::GetAllProviderInfosByProviderName(const std
             info.m_abilityName = providerInfo.m_abilityName;
             info.m_providerName = providerInfo.m_providerName;
             providerInfos.push_back(info);
+            ret = HKS_SUCCESS;
         } else if (providerInfo.m_providerName == providerName) {
             ProviderInfo info = providerInfo;
             info.m_bundleName = providerInfo.m_bundleName;
             info.m_abilityName = providerInfo.m_abilityName;
             info.m_providerName = providerInfo.m_providerName;
             providerInfos.push_back(info);
+            ret = HKS_SUCCESS;
         }
     });
-    return HKS_SUCCESS;
+    return ret;
 }
 
 int32_t HksProviderLifeCycleManager::HksHapGetConnectInfos(const HksProcessInfo &processInfo,
@@ -216,12 +220,10 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
         HKS_LOG_I("OnUnRegisterProvider refCount: %" LOG_PUBLIC "d", refCount);
         HKS_IF_TRUE_LOGE_RETURN(refCount > HKS_PROVIDER_CAN_REMOVE_REF_COUNT, HKS_ERROR_PROVIDER_IN_USE,
             "OnUnRegisterProvider failed, refCount is more than 2, maybe in use.")
-        
-        if (!isdeath) {
-            HKS_IF_TRUE_LOGE_RETURN(connectionInfo.second->m_connection == nullptr,
-                HKS_ERROR_NULL_POINTER, "connectionInfo is nullptr")
-            connectionInfo.second->m_connection->OnDisconnect(connectionInfo.second->m_connection);
-        }
+        HKS_IF_TRUE_LOGE_RETURN(connectionInfo.second->m_connection == nullptr,
+            HKS_ERROR_NULL_POINTER, "connectionInfo is nullptr")
+        HKS_IF_NOT_TRUE_EXCU(isdeath,
+            connectionInfo.second->m_connection->OnDisconnect(connectionInfo.second->m_connection));
         m_providerMap.Erase(connectionInfo.first);
         auto &stub = connectionInfo.second->m_connection;
         uint8_t waitIteration = WAIT_ITERATION;
