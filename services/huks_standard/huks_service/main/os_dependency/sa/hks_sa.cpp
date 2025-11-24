@@ -355,9 +355,8 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         ProcessRemoteRequest(code, data, reply);
         uint64_t leaveTime = 0;
         (void)HksElapsedRealTime(&leaveTime);
-        HKS_LOG_I("code:%" LOG_PUBLIC "d, cost %" LOG_PUBLIC PRIu64 " ms, sessionId = %"
-            LOG_PUBLIC "u, ret:%" LOG_PUBLIC "d",
-            code, leaveTime - enterTime, currentSessionId, reply.ReadInt32());
+        HKS_LOG_I("cost %" LOG_PUBLIC PRIu64 " ms, sessionId = %" LOG_PUBLIC "u, ret:%" LOG_PUBLIC "d",
+            leaveTime - enterTime, currentSessionId, reply.ReadInt32());
         retSys = NO_ERROR;
     }
 
