@@ -27,6 +27,28 @@
 #include "hks_type.h"
 
 namespace HuksNapiItem {
+napi_value NapiCreateError(napi_env env, int32_t errCode, const char *errMsg);
+#define NAPI_CALL_RETURN_ERR(env, ret)   \
+    if ((ret) != napi_ok)                \
+    {                                    \
+        GET_AND_THROW_LAST_ERROR((env)); \
+        return ret;                      \
+    }
+
+#define NAPI_THROW_BASE_RETURN(env, condition, ret, code, message)           \
+    if ((condition))                                                  \
+    {                                                                 \
+        HKS_LOG_E(message);                                           \
+        napi_throw((env), NapiCreateError((env), (code), (message))); \
+        return (ret);                                                 \
+    }
+
+#define NAPI_THROW(env, condition, code, message) \
+    NAPI_THROW_BASE_RETURN(env, condition, nullptr, code, message)
+
+#define NAPI_THROW_RETURN_ERR(env, condition, ret, code, message) \
+    NAPI_THROW_BASE_RETURN(env, condition, ret, code, message)
+
 struct HksSuccessReturnResult {
     bool isOnlyReturnBoolResult;
     bool boolReturned;
@@ -179,5 +201,9 @@ inline void HksNapiThrowGetUserIdFail(napi_env env)
 {
     HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "GetUserIdValue failed");
 }
+
+void HksReturnNapiArrExtParamsResult(napi_env env, napi_deferred deferred, int32_t errorCode,
+    const struct HksParamSet *paramSetOut);
+    
 }  // namespace HuksNapiItem
 #endif

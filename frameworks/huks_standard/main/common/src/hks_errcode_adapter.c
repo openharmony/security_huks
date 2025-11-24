@@ -736,7 +736,7 @@ static struct HksError g_errCodeTable[] = {
         .innerErrCode = HKS_ERROR_UKY_PROVIDER_MGR_REGESTER_REACH_MAX_NUM,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_EXCEED_LIMIT,
-            .errorMsg = "The provider manager register reach max num.",
+            .errorMsg = "the number of providers exceeds the limit.",
             .data = NULL
         }
     }, {
@@ -764,7 +764,7 @@ static struct HksError g_errCodeTable[] = {
         .innerErrCode = HKS_ERROR_PROVIDER_IN_USE,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_BUSY,
-            .errorMsg = "the provider is in using",
+            .errorMsg = "the provider or Ukey is busy",
             .data = NULL
         }
     }, {
@@ -778,14 +778,14 @@ static struct HksError g_errCodeTable[] = {
         .innerErrCode = HKS_ERROR_PIN_NO_AUTH,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_PIN_NO_AUTH,
-            .errorMsg = "The auth pin is not correct.",
+            .errorMsg = "the Ukey PIN not authenticated.",
             .data = NULL
         }
     }, {
         .innerErrCode = HUKS_ERR_CODE_PIN_LOCKED,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_PIN_LOCKED,
-            .errorMsg = "The auth pin is locked.",
+            .errorMsg = "the Ukey PIN is locked.",
             .data = NULL
         }
     }

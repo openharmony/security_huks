@@ -46,6 +46,7 @@ const std::vector<std::string> VALID_PROPERTYID = {
     "SKF_GetDevInfo",
     "SKF_EnumApplication",
     "SKF_EnumContainer",
+    "SKF_ExportPublicKey",
 };
 
 std::shared_ptr<HksRemoteHandleManager> HksRemoteHandleManager::GetInstanceWrapper()
