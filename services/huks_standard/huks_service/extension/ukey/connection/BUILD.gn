@@ -49,7 +49,6 @@ if (os_level == "standard") {
     }
 
     external_deps = [
-      "ability_base:ability_base_want",
       "ability_runtime:ability_connect_callback_stub",
       "ability_runtime:ability_manager",
       "c_utils:utils",
