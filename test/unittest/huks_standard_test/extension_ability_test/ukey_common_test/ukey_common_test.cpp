@@ -534,4 +534,126 @@ HWTEST_F(UkeyCommonTest, UkeyCommonTest012, TestSize.Level0)
     HKS_FREE(specialBlob.data);
 }
 
+HWTEST_F(UkeyCommonTest, UkeyCommonTest013, TestSize.Level0)
+{
+    std::string validStr = "test";
+    EXPECT_TRUE(CheckStringParamLenIsOk(validStr, 1, 10));
+    
+    std::string shortStr = "";
+    EXPECT_FALSE(CheckStringParamLenIsOk(shortStr, 1, 10));
+    
+    std::string longStr = "this_string_is_too_long";
+    EXPECT_FALSE(CheckStringParamLenIsOk(longStr, 1, 10));
+    
+    std::string minStr = "a";
+    EXPECT_TRUE(CheckStringParamLenIsOk(minStr, 1, 10));
+    
+    std::string maxStr = "1234567890";
+    EXPECT_TRUE(CheckStringParamLenIsOk(maxStr, 1, 10));
+    
+    std::string emptyStr;
+    HksBlob emptyBlob = StringToBlob(emptyStr);
+    EXPECT_EQ(emptyBlob.size, 0);
+    EXPECT_EQ(emptyBlob.data, nullptr);
+    
+    std::string normalStr = "Hello World";
+    HksBlob normalBlob = StringToBlob(normalStr);
+    EXPECT_EQ(normalBlob.size, normalStr.size());
+    EXPECT_NE(normalBlob.data, nullptr);
+    EXPECT_EQ(memcmp(normalBlob.data, normalStr.data(), normalStr.size()), 0);
+    HKS_FREE(normalBlob.data);
+}
+
+HWTEST_F(UkeyCommonTest, UkeyCommonTest014, TestSize.Level0)
+{
+    std::string emptyStr;
+    HksBlob emptyBlob = Base64StringToBlob(emptyStr);
+    EXPECT_EQ(emptyBlob.size, 0);
+    EXPECT_EQ(emptyBlob.data, nullptr);
+    
+    std::string invalidBase64 = "!!!InvalidBase64!!!";
+    HksBlob invalidBlob = Base64StringToBlob(invalidBase64);
+    EXPECT_EQ(invalidBlob.size, 0);
+    EXPECT_EQ(invalidBlob.data, nullptr);
+    
+    std::string validBase64 = "SGVsbG8=";
+    HksBlob validBlob = Base64StringToBlob(validBase64);
+    EXPECT_NE(validBlob.size, 0);
+    EXPECT_NE(validBlob.data, nullptr);
+    std::string decoded = BlobToString(validBlob);
+    EXPECT_EQ(decoded, "Hello");
+    HKS_FREE(validBlob.data);
+    
+    HksBlob nullBlob = {0, nullptr};
+    std::string result = BlobToBase64String(nullBlob);
+    EXPECT_TRUE(result.empty());
+    
+    HksBlob zeroBlob = {0, (uint8_t*)"dummy"};
+    result = BlobToBase64String(zeroBlob);
+    EXPECT_TRUE(result.empty());
+    
+    std::vector<uint8_t> testData = {0x48, 0x65, 0x6c, 0x6c, 0x6f};
+    HksBlob validBlob2 = {testData.size(), testData.data()};
+    result = BlobToBase64String(validBlob2);
+    EXPECT_EQ(result, "SGVsbG8=");
+}
+
+HWTEST_F(UkeyCommonTest, UkeyCommonTest015, TestSize.Level0)
+{
+    HksExtCertInfo emptyCert = {0};
+    std::string emptyOutput;
+    int32_t ret = CertInfoToString(emptyCert, emptyOutput);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_FALSE(emptyOutput.empty());
+    
+    auto jsonObj = CommJsonObject::Parse(emptyOutput);
+    EXPECT_FALSE(jsonObj.IsNull());
+    EXPECT_TRUE(jsonObj.HasKey("purpose"));
+    EXPECT_TRUE(jsonObj.HasKey("index"));
+    EXPECT_TRUE(jsonObj.HasKey("cert"));
+    
+    HksExtCertInfo validCert = {0};
+    validCert.purpose = 123;
+    validCert.index = StringToBlob("test_index");
+    validCert.cert = StringToBlob("test_cert_data");
+    
+    std::string validOutput;
+    ret = CertInfoToString(validCert, validOutput);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_FALSE(validOutput.empty());
+    
+    HKS_FREE(validCert.index.data);
+    HKS_FREE(validCert.cert.data);
+}
+
+HWTEST_F(UkeyCommonTest, UkeyCommonTest016, TestSize.Level0)
+{
+    HksExtCertInfoSet certSet = {0, nullptr};
+    
+    std::string emptyArrayStr;
+    int32_t ret = JsonArrayToCertInfoSet(emptyArrayStr, certSet);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
+    
+    std::string invalidJson = R"({"not": "an array"})";
+    ret = JsonArrayToCertInfoSet(invalidJson, certSet);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
+    
+    std::string emptyArray = "[]";
+    ret = JsonArrayToCertInfoSet(emptyArray, certSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_EQ(certSet.count, 0);
+    EXPECT_EQ(certSet.certs, nullptr);
+    
+    std::string incompleteArray = R"([
+        {"purpose": 1},
+        {"index": "test"}
+    ])";
+    ret = JsonArrayToCertInfoSet(incompleteArray, certSet);
+    EXPECT_NE(ret, HKS_SUCCESS);
+    
+    if (certSet.certs != nullptr) {
+        HKS_FREE(certSet.certs);
+    }
+}
+
 }
