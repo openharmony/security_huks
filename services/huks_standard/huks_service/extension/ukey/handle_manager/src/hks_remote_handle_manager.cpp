@@ -61,20 +61,15 @@ static int32_t WrapIndexWithProviderInfo(const ProviderInfo& providerInfo, const
     std::string& wrappedIndex)
 {
     CommJsonObject root = CommJsonObject::CreateObject();
-    if (root.IsNull()) {
-        HKS_LOG_E("Create JSON object failed");
-        return HKS_ERROR_JSON_SERIALIZE_FAILED;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(root.IsNull(), HKS_ERROR_JSON_SERIALIZE_FAILED, "Create JSON object failed")
     if (!root.SetValue(PROVIDER_NAME_KEY, providerInfo.m_providerName) ||
         !root.SetValue(ABILITY_NAME_KEY, providerInfo.m_abilityName) ||
         !root.SetValue(BUNDLE_NAME_KEY, providerInfo.m_bundleName)) {
         HKS_LOG_E("Set provider info to index failed");
         return HKS_ERROR_JSON_SERIALIZE_FAILED;
     }
-    if (!root.SetValue("index", originalIndex)) {
-        HKS_LOG_E("Set original index failed");
-        return HKS_ERROR_JSON_SERIALIZE_FAILED;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(!root.SetValue("index", originalIndex), HKS_ERROR_JSON_SERIALIZE_FAILED,
+        "Set original index failed")
     wrappedIndex = root.Serialize(false);
     return HKS_SUCCESS;
 }
@@ -147,33 +142,23 @@ int32_t HksRemoteHandleManager::ValidateProviderInfo(const std::string &newIndex
         HKS_LOG_E("Provider info not found for newIndex: %" LOG_PUBLIC "s", newIndex.c_str());
         return HKS_ERROR_REMOTE_HANDLE_NOT_FOUND;
     }
-    
-    if (!(cachedProviderInfo == providerInfo)) {
-        HKS_LOG_E("Provider info mismatch");
-        return HKS_ERROR_REMOTE_PROVIDER_MISMATCH;
-    }
-    
+    HKS_IF_TRUE_LOGE_RETURN(!(cachedProviderInfo == providerInfo), HKS_ERROR_REMOTE_PROVIDER_MISMATCH,
+        "Provider info mismatch")
     return HKS_SUCCESS;
 }
 
-OHOS::sptr<IHuksAccessExtBase> HksRemoteHandleManager::GetProviderProxy(const ProviderInfo &providerInfo, int32_t &ret)
+int32_t HksRemoteHandleManager::GetProviderProxy(const ProviderInfo &providerInfo,
+    OHOS::sptr<IHuksAccessExtBase> &proxy)
 {
     auto providerManager = HksProviderLifeCycleManager::GetInstanceWrapper();
-    if (providerManager == nullptr) {
-        HKS_LOG_E("Get provider manager instance failed");
-        ret = HKS_ERROR_NULL_POINTER;
-        return nullptr;
-    }
-
-    sptr<IHuksAccessExtBase> proxy;
-    ret = providerManager->GetExtensionProxy(providerInfo, proxy);
+    HKS_IF_TRUE_LOGE_RETURN(providerManager == nullptr, HKS_ERROR_NULL_POINTER,
+        "Get provider manager instance failed")
+    int32_t ret = providerManager->GetExtensionProxy(providerInfo, proxy);
     if (ret != HKS_SUCCESS || proxy == nullptr) {
         HKS_LOG_E("Get extension proxy failed for provider: %" LOG_PUBLIC "s", providerInfo.m_providerName.c_str());
-        return nullptr;
+        return HKS_ERROR_NOT_EXIST;
     }
-    
-    ret = HKS_SUCCESS;
-    return proxy;
+    return HKS_SUCCESS;
 }
 
 int32_t HksRemoteHandleManager::ValidateAndGetHandle(const std::string &newIndex,
@@ -181,12 +166,8 @@ int32_t HksRemoteHandleManager::ValidateAndGetHandle(const std::string &newIndex
 {
     int32_t ret = ValidateProviderInfo(newIndex, providerInfo);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Provider info validation failed: %" LOG_PUBLIC "d", ret)
-
-    if (!indexToHandle_.Find(newIndex, handle)) {
-        HKS_LOG_E("Remote handle not found for newIndex: %" LOG_PUBLIC "s", newIndex.c_str());
-        return HKS_ERROR_REMOTE_HANDLE_NOT_FOUND;
-    }
-    
+    HKS_IF_TRUE_LOGE_RETURN(!indexToHandle_.Find(newIndex, handle), HKS_ERROR_REMOTE_HANDLE_NOT_FOUND,
+        "Remote handle not found for newIndex: %" LOG_PUBLIC "s", newIndex.c_str())
     return HKS_SUCCESS;
 }
 
@@ -209,7 +190,8 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const std::string &index, con
     int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
         "Parse index and provider info failed: %" LOG_PUBLIC "d", ret)
-    auto proxy = GetProviderProxy(providerInfo, ret);
+    OHOS::sptr<IHuksAccessExtBase> proxy;
+    ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
     
     std::string handle;
@@ -229,9 +211,8 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const std::string &index, con
     HKS_IF_TRUE_LOGE_RETURN(IsProviderNumExceedLimit(providerInfo),
         HUKS_ERR_CODE_EXCEED_LIMIT, "Provider num exceed limit")
     int32_t num = 0;
-    if (providerInfoToNum_.Find(providerInfo, num)) {
-        providerInfoToNum_.EnsureInsert(providerInfo, num + 1);
-    }
+    (void)providerInfoToNum_.Find(providerInfo, num);
+    providerInfoToNum_.EnsureInsert(providerInfo, num + 1);
     return HKS_SUCCESS;
 }
 
@@ -243,8 +224,8 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    auto proxy = GetProviderProxy(providerInfo, ret);
+    OHOS::sptr<IHuksAccessExtBase> proxy;
+    ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
     auto ipccode = proxy->CloseRemoteHandle(handle, paramSet, ret);
@@ -276,26 +257,27 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
 int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t& retryCnt)
 {
+    auto uid = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
+    HKS_IF_TRUE_LOGE_RETURN(uid.first != HKS_SUCCESS, uid.first,
+        "Get uid tag failed. ret: %" LOG_PUBLIC "d", uid.first)
     ProviderInfo providerInfo;
     std::string newIndex;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    auto proxy = GetProviderProxy(providerInfo, ret);
+    OHOS::sptr<IHuksAccessExtBase> proxy;
+    ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
     
     auto ipccode = proxy->AuthUkeyPin(handle, paramSet, ret, authState, retryCnt);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     if (authState == HKS_SUCCESS) {
-        uidIndexToAuthState_.EnsureInsert(std::make_pair(processInfo.uidInt, index), HKS_SUCCESS);
+        uidIndexToAuthState_.EnsureInsert(std::make_pair(static_cast<uint32_t>(uid.second), index), HKS_SUCCESS);
     }
-    if (ret == HUKS_ERR_CODE_PIN_CODE_ERROR || ret == HUKS_ERR_CODE_PIN_LOCKED) {
-        HKS_IF_TRUE_LOGE(retryCnt > 0, "AuthUkeyPin failed: %" LOG_PUBLIC "d", ret)
-    } else {
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
+    HKS_IF_TRUE_LOGE_RETURN(ret == HUKS_ERR_CODE_PIN_CODE_ERROR || ret == HUKS_ERR_CODE_PIN_LOCKED, ret,
+            "AuthUkeyPin failed: %" LOG_PUBLIC "d", ret)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
             "Remote verify pin failed: %" LOG_PUBLIC "d", ret)
-    }
     return ret;
 }
 
@@ -307,8 +289,8 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    auto proxy = GetProviderProxy(providerInfo, ret);
+    OHOS::sptr<IHuksAccessExtBase> proxy;
+    ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
     auto ipccode = proxy->GetUkeyPinAuthState(handle, paramSet, state, ret);
@@ -327,8 +309,8 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const std::string &index, c
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    auto proxy = GetProviderProxy(providerInfo, ret);
+    OHOS::sptr<IHuksAccessExtBase> proxy;
+    ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
     auto ipccode = proxy->ClearUkeyPinAuthState(newIndex, paramSet, ret);
@@ -347,8 +329,8 @@ int32_t HksRemoteHandleManager::RemoteHandleSign(const std::string &index, const
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    auto proxy = GetProviderProxy(providerInfo, ret);
+    OHOS::sptr<IHuksAccessExtBase> proxy;
+    ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
     auto ipccode = proxy->Sign(handle, paramSet, inData, outData, ret);
@@ -367,8 +349,8 @@ int32_t HksRemoteHandleManager::RemoteHandleVerify(const std::string &index, con
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    auto proxy = GetProviderProxy(providerInfo, ret);
+    OHOS::sptr<IHuksAccessExtBase> proxy;
+    ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
     auto ipccode = proxy->Verify(handle, paramSet, plainText, signature, ret);
@@ -387,8 +369,8 @@ int32_t HksRemoteHandleManager::FindRemoteCertificate(const std::string &index,
     int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
         "Parse index and provider info failed: %" LOG_PUBLIC "d", ret)
-
-    auto proxy = GetProviderProxy(providerInfo, ret);
+    OHOS::sptr<IHuksAccessExtBase> proxy;
+    ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
     auto ipccode = proxy->ExportCertificate(newIndex, paramSet, cert, ret);
@@ -410,10 +392,8 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
     const std::string &providerName, const CppParamSet &paramSet, std::string &certVec)
 {
     auto providerLifeManager = HksProviderLifeCycleManager::GetInstanceWrapper();
-    if (providerLifeManager == nullptr) {
-        HKS_LOG_E("Get provider Life manager instance failed");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(providerLifeManager == nullptr, HKS_ERROR_NULL_POINTER,
+        "Get provider Life manager instance failed")
     std::vector<ProviderInfo> infos;
     int32_t ret = providerLifeManager->GetAllProviderInfosByProviderName(providerName, infos);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
@@ -423,9 +403,9 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
     HKS_IF_TRUE_LOGE_RETURN(combinedArray.IsNull(), HKS_ERROR_JSON_SERIALIZE_FAILED, "Create combined array failed")
     
     for (const auto &providerInfo : infos) {
-        int32_t ret = HKS_SUCCESS;
-        auto proxy = GetProviderProxy(providerInfo, ret);
-        HKS_IF_TRUE_LOGE_CONTINUE(proxy == nullptr || ret != HKS_SUCCESS,
+        OHOS::sptr<IHuksAccessExtBase> proxy;
+        ret = GetProviderProxy(providerInfo, proxy);
+        HKS_IF_TRUE_LOGE_CONTINUE(ret != HKS_SUCCESS || proxy == nullptr,
             "Get proxy for provider failed, skipping")
         std::string tmpCertVec = "";
         auto ipccode = proxy->ExportProviderCertificates(paramSet, tmpCertVec, ret);
@@ -455,8 +435,8 @@ int32_t HksRemoteHandleManager::GetRemoteProperty(const std::string &index, cons
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    auto proxy = GetProviderProxy(providerInfo, ret);
+    OHOS::sptr<IHuksAccessExtBase> proxy;
+    ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
     auto ipccode = proxy->GetProperty(handle, propertyId, paramSet, outParams, ret);
