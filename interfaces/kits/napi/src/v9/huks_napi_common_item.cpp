@@ -33,6 +33,20 @@ constexpr size_t ASYNCCALLBACKVOID_ARGC = 1;
 static int32_t g_pinRetryCount = 0; //ukey retry count
 }  // namespace
 
+napi_value NapiCreateError(napi_env env, int32_t errCode, const char *errMsg)
+{
+    napi_value code = nullptr;
+    NAPI_CALL(env, napi_create_int32(env, errCode, &code));
+
+    napi_value msg = nullptr;
+    NAPI_CALL(env, napi_create_string_utf8(env, errMsg, strlen(errMsg), &msg));
+
+    napi_value result = nullptr;
+    NAPI_CALL(env, napi_create_error(env, code, msg, &result));
+
+    return result;
+}
+
 napi_value ParseKeyAlias(napi_env env, napi_value object, HksBlob *&alias)
 {
     napi_valuetype valueType = napi_valuetype::napi_undefined;
@@ -371,6 +385,81 @@ static napi_value GenerateArrayBuffer(napi_env env, uint8_t *data, uint32_t size
     }
 
     return outBuffer;
+}
+
+napi_value HksExtGenerateArrayBuffer(const napi_env &env, uint8_t *data, uint32_t size)
+{
+    napi_value buffer{};
+    void *bufferPtr = nullptr;
+    NAPI_THROW(env, napi_create_arraybuffer(env, size * sizeof(uint8_t), &bufferPtr, &buffer) != napi_ok,
+        napi_generic_failure, "create arraybuffer failed");
+
+    napi_value outBuffer{};
+    NAPI_THROW(env, napi_create_typedarray(env, napi_uint8_array, size, buffer, 0, &outBuffer) != napi_ok,
+        napi_generic_failure, "create typedarray failed");
+
+    auto *outPutBytes = static_cast<uint8_t *>(bufferPtr);
+    for (uint32_t i = 0; i < size; ++i) {
+        outPutBytes[i] = data[i];
+    }
+    return outBuffer;
+}
+
+static napi_value HksExtGenerateHksParam(napi_env env, const HksParam &param)
+{
+    napi_value hksParam = nullptr;
+    NAPI_THROW(env, napi_create_object(env, &hksParam) != napi_ok, napi_generic_failure, "create object failed");
+
+    napi_value tag = nullptr;
+    NAPI_THROW(env, napi_create_uint32(env, param.tag, &tag) != napi_ok, napi_generic_failure, "create uint32 failed");
+    NAPI_THROW(env, napi_set_named_property(env, hksParam, HKS_PARAM_PROPERTY_TAG.c_str(), tag) != napi_ok,
+        napi_generic_failure, "set named property failed");
+
+    napi_value value = nullptr;
+    switch (param.tag & HKS_TAG_TYPE_MASK) {
+        case HKS_TAG_TYPE_INT:
+            NAPI_THROW(env, napi_create_int32(env, param.int32Param, &value), napi_generic_failure,
+                "create int32 failed");
+            break;
+        case HKS_TAG_TYPE_UINT:
+            NAPI_THROW(env, napi_create_uint32(env, param.uint32Param, &value) != napi_ok, napi_generic_failure,
+                "create uint32 failed");
+            break;
+        case HKS_TAG_TYPE_ULONG:
+            NAPI_THROW(env, napi_create_int64(env, param.uint64Param, &value) != napi_ok, napi_generic_failure,
+                "create int64 failed");
+            break;
+        case HKS_TAG_TYPE_BOOL:
+            NAPI_THROW(env, napi_get_boolean(env, param.boolParam, &value) != napi_ok, napi_generic_failure,
+                "get boolean failed");
+            break;
+        case HKS_TAG_TYPE_BYTES:
+            value = HksExtGenerateArrayBuffer(env, param.blob.data, param.blob.size);
+            break;
+        default:
+            value = GetNull(env);
+            break;
+    }
+    NAPI_THROW(env, napi_set_named_property(env, hksParam, HKS_PARAM_PROPERTY_VALUE.c_str(), value) != napi_ok,
+        napi_generic_failure, "set named property failed");
+
+    return hksParam;
+}
+
+static napi_value HksExtGenerateHksParamArray(napi_env env, const HksParamSet &paramSet)
+{
+    napi_value paramArray = nullptr;
+    NAPI_THROW(env, napi_create_array(env, &paramArray) != napi_ok,
+        napi_generic_failure, "create array failed");
+
+    for (uint32_t i = 0; i < paramSet.paramsCnt; i++) {
+        napi_value element = nullptr;
+        element = HksExtGenerateHksParam(env, paramSet.params[i]);
+        NAPI_THROW(env, napi_set_element(env, paramArray, i, element) != napi_ok,
+            napi_generic_failure, "set element failed");
+    }
+
+    return paramArray;
 }
 
 static napi_value GenerateHksParam(napi_env env, const HksParam &param)
@@ -1065,6 +1154,28 @@ void HksReturnListAliasesResult(napi_env env, napi_ref callback, napi_deferred d
         } else {
             PromiseResultFailure(env, deferred, errorCode);
         }
+    }
+}
+
+static void PromiseParamSetResultSuccess(napi_env env, napi_deferred deferred, const struct HksParamSet *paramSetOut)
+{
+    napi_value propertiesRet = nullptr;
+    if (paramSetOut != nullptr) {
+        propertiesRet = HksExtGenerateHksParamArray(env, *paramSetOut);
+        if (propertiesRet == nullptr) {
+            HKS_LOG_E("add paramSet failed");
+        }
+    }
+    napi_resolve_deferred(env, deferred, propertiesRet);
+}
+
+void HksReturnNapiArrExtParamsResult(napi_env env, napi_deferred deferred, int32_t errorCode,
+    const struct HksParamSet *paramSetOut)
+{
+    if (errorCode == HKS_SUCCESS) {
+        PromiseParamSetResultSuccess(env, deferred, paramSetOut);
+    } else {
+        PromiseResultFailure(env, deferred, errorCode);
     }
 }
 

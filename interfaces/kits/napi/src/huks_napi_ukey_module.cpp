@@ -75,6 +75,7 @@ static napi_value HuksExternalCryptoRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("unregisterProvider", HuksNapiUnregisterProvider),
         DECLARE_NAPI_FUNCTION("authUkeyPin", HuksNapiAuthUkeyPin),
         DECLARE_NAPI_FUNCTION("getUkeyPinAuthState", HuksNapiGetUkeyPinAuthState),
+        DECLARE_NAPI_FUNCTION("getProperty", HuksNapiGetProperty),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, std::size(propDesc), propDesc));
     return exports;

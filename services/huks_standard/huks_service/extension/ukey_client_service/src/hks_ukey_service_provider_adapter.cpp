@@ -228,7 +228,7 @@ int32_t HksIpcServiceOnGetRemotePropertyAdapter(const struct HksProcessInfo *pro
 
     ret = OHOS::Security::Huks::HksIpcServiceOnGetRemoteProperty(processInfo, cppResourceId,
         cppPropertyId, cppParamSet, cppOutParams);
-    HKS_IF_NOT_SUCC_LOGE(ret, "JsonArrayToCertInfoSet fail");
+    HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceOnGetRemoteProperty fail. ret = %" LOG_PUBLIC "d", ret);
     
     std::unique_ptr<uint8_t[]> outData;
     uint32_t outSize = 0;
