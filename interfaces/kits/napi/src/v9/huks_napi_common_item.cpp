@@ -109,7 +109,6 @@ napi_value GetUint8Array(napi_env env, napi_value object, HksBlob &arrayBlob)
         return nullptr;
     }
     if (length == 0) {
-        HKS_LOG_I("the created memory length just 1 Byte");
         // the created memory length just 1 Byte
         arrayBlob.data = static_cast<uint8_t *>(HksMalloc(1));
     } else {
