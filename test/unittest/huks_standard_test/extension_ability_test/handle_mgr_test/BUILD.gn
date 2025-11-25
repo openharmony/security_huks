@@ -65,4 +65,8 @@ if (os_level == "standard" && huks_security_level == "trusted_environment") {
     subsystem_name = "security"
     part_name = "huks"
   }
+} else {
+    group("handle_mgr_test") {
+    testonly = true
+  }
 }
