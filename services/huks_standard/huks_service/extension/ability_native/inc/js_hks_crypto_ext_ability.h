@@ -94,6 +94,7 @@ public:
 
     static JsHksCryptoExtAbility* Create(const std::unique_ptr<AbilityRuntime::Runtime> &runtime);
     void OnStart(const AAFwk::Want &want) override;
+    void OnDisconnect(const AAFwk::Want &want) override;
     sptr<IRemoteObject> OnConnect(const AAFwk::Want &want) override;
     int32_t OpenRemoteHandle(const std::string &index, const CppParamSet &params, std::string &handle,
         int32_t &errcode) override;
