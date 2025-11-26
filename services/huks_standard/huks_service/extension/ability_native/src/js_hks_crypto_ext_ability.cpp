@@ -1051,6 +1051,16 @@ void JsHksCryptoExtAbility::OnStart(const AAFwk::Want &want)
     CallObjectMethod("onCreate", argv, ARGC_ONE);
 }
 
+void JsHksCryptoExtAbility::OnDisconnect(const AAFwk::Want &want)
+{
+    Extension::OnDisconnect(want);
+    AbilityRuntime::HandleScope handleScope(jsRuntime_);
+    napi_env env = reinterpret_cast<napi_env>(&jsRuntime_.GetNativeEngine());
+    napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
+    napi_value argv[] = { napiWant };
+    CallObjectMethod("OnDisconnect", argv, ARGC_ONE);
+}
+
 sptr<IRemoteObject> JsHksCryptoExtAbility::OnConnect(const AAFwk::Want &want)
 {
     Extension::OnConnect(want);
