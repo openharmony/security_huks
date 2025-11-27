@@ -87,7 +87,8 @@ bool HksSessionManager::CheckParmSetPurposeAndCheckAuth(const HksProcessInfo &pr
         auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
         HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, false, "handleMgr is null");
         HKS_IF_TRUE_LOGE_RETURN(!handleMgr->CheckAuthStateIsOk(processInfo, index), false,
-            "ukey resource no auth")
+            "ukey resource no auth. processInfo.uidInt: %" LOG_PUBLIC "d, index: %" LOG_PUBLIC "s", processInfo.uidInt,
+            index.c_str())
     }
     return true;
 }
