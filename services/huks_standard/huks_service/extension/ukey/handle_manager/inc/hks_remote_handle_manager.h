@@ -68,9 +68,9 @@ public:
                 const CppParamSet& paramSet, CppParamSet& outParams);
 
     int32_t ClearRemoteHandleMap(const std::string &providerName, const std::string &abilityName);
+    void ClearAuthState(const HksProcessInfo &processInfo);
     static int32_t ParseIndexAndProviderInfo(const std::string &index,
                 ProviderInfo &providerInfo, std::string &newIndex);
-    void ClearAuthState(const HksProcessInfo &processInfo);
     int32_t ParseAndValidateIndex(const std::string &index, ProviderInfo &providerInfo,
                 std::string &newIndex, std::string &handle);
     int32_t GetProviderProxy(const ProviderInfo &providerInfo, OHOS::sptr<IHuksAccessExtBase> &proxy);

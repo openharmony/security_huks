@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (C) 2025-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,37 +15,31 @@ import("//base/security/huks/build/config.gni")
 import("//build/ohos.gni")
 
 if (os_level == "standard") {
-  ohos_shared_library("libhuks_external_crypto_ext_core") {
+  ohos_static_library("libhuks_ukey_app_observer_static") {
     subsystem_name = "security"
     part_name = "huks"
-
-    version_script = "libhuks_external_crypto_ext_core.map"
     configs = [
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]
 
     include_dirs = [
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger/inc",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager/inc",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc",
+      "./app_observer.h",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/session_manger/inc",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/app_observer",
-    ]
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger/inc",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager/inc"
+      ]
 
-    sources = [ "interface/plugin_interface.cpp" ]
+    sources = [
+      "./app_observer.cpp"
+    ]
 
     deps = [
-      "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
-      "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
-      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/app_observer:libhuks_ukey_app_observer_static",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection:libhuks_extension_connection_static",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger:libhuks_provider_life_cycle_manager_static",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager:libhuks_remote_handle_manager_static",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/session_manger:libhuks_session_manager_static",
+      "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
     ]
-
+    complete_static_lib = true
     cflags = []
 
     branch_protector_ret = "pac_ret"
@@ -58,13 +52,17 @@ if (os_level == "standard") {
       boundary_sanitize = true
       ubsan = true
     }
+
     external_deps = [
-      "ability_runtime:ability_connect_callback_stub",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
+      "ability_runtime:app_manager",
+      "ability_runtime:ability_connect_callback_stub",
+      "cJSON:cjson",
       "c_utils:utils",
       "hilog:libhilog",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
+      "samgr:samgr_proxy",
     ]
   }
 }
