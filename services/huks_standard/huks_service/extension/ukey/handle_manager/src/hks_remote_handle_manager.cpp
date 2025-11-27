@@ -245,7 +245,7 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
     }
     std::vector<std::pair<uint32_t, std::string>> keysToRemove;
     uidIndexToAuthState_.Iterate([&](std::pair<uint32_t, std::string> key, int32_t value) {
-        if (key.first == processInfo.uidInt && key.second == index) {
+        if (key.second == index) {
             keysToRemove.push_back(key);
         }
     });
@@ -272,6 +272,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     
     auto ipccode = proxy->AuthUkeyPin(handle, paramSet, ret, authState, retryCnt);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
+    HKS_LOG_I("Remote verify pin  authState %" LOG_PUBLIC "d", authState);
     if (authState == HKS_SUCCESS) {
         uidIndexToAuthState_.EnsureInsert(std::make_pair(static_cast<uint32_t>(uid.second), index), HKS_SUCCESS);
     }

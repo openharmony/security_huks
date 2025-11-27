@@ -86,6 +86,7 @@ bool HksSessionManager::CheckParmSetPurposeAndCheckAuth(const HksProcessInfo &pr
     if (purpose.second == HKS_KEY_PURPOSE_SIGN || purpose.second == HKS_KEY_PURPOSE_DECRYPT) {
         auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
         HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, false, "handleMgr is null");
+        HKS_LOG_I("CheckParmSetPurposeAndCheckAuth uid: %" LOG_PUBLIC "d", processInfo.uidInt);
         HKS_IF_TRUE_LOGE_RETURN(!handleMgr->CheckAuthStateIsOk(processInfo, index), false,
             "ukey resource no auth. processInfo.uidInt: %" LOG_PUBLIC "d, index: %" LOG_PUBLIC "s", processInfo.uidInt,
             index.c_str())
@@ -246,9 +247,9 @@ bool HksSessionManager::HksClearHandle(const HksProcessInfo &processInfo, const 
     std::vector<uint32_t> toRemove;
     do {
         auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
-        HKS_IF_TRUE_LOGE_RETURN(abilityName.second.size() >= MAX_ABILITY_NAME_LEN, false,
-            "the abilityName is too long. size: %" LOG_PUBLIC "zu", abilityName.second.size())
         if (abilityName.first == HKS_SUCCESS) {
+            HKS_IF_TRUE_LOGE_RETURN(abilityName.second.size() >= MAX_ABILITY_NAME_LEN, false,
+                "the abilityName is too long. size: %" LOG_PUBLIC "zu", abilityName.second.size())
             std::string abilityNameStr = std::string(abilityName.second.begin(), abilityName.second.end());
             HKS_LOG_I("HksClearHandle get abilityName: %" LOG_PUBLIC "s", abilityNameStr.c_str());
             toRemove = FindToRemoveHandle(processInfo.uidInt, abilityNameStr);
