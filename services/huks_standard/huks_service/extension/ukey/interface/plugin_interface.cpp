@@ -23,7 +23,16 @@
 #include <string>
 #include <vector>
 
+#include "app_observer.h"
+
 namespace OHOS::Security::Huks {
+
+static void RegisterObserverForProcess(const HksProcessInfo &processInfo, const CppParamSet &paramSet)
+{
+    int32_t ret = OHOS::Security::Huks::HksAppObserverManager::GetInstance().RegisterObserver(processInfo, paramSet);
+    HKS_IF_NOT_SUCC_LOGE(ret, "Failed to register observer for uid: %{public}u, ret=%{public}d",
+        processInfo.uidInt, ret);
+}
 
 __attribute__((visibility("default"))) int32_t HksExtPluginOnRegisterProvider(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet, std::function<void(bool)> callback)
@@ -105,6 +114,12 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnAuthUkeyPin(const H
     const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t &retryCnt)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    auto uid = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
+    if (uid.first == HKS_SUCCESS) {
+        HksProcessInfo processInfoTmp = {};
+        processInfoTmp.uidInt = uid.second;
+        RegisterObserverForProcess(processInfoTmp, paramSet);
+    }
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
     auto ret = handleMgr->RemoteVerifyPin(processInfo, index, paramSet, authState, retryCnt);
@@ -151,6 +166,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnInitSession(const H
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    RegisterObserverForProcess(processInfo, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null");
     ret = sessionMgr->ExtensionInitSession(processInfo, index, paramSet, handle);
@@ -164,6 +180,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUpdateSession(const
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    RegisterObserverForProcess(processInfo, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null");
     ret = sessionMgr->ExtensionUpdateSession(processInfo, handle, paramSet, inData, outData);
@@ -177,6 +194,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnFinishSession(const
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    RegisterObserverForProcess(processInfo, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null");
     ret = sessionMgr->ExtensionFinishSession(processInfo, handle, paramSet, inData, outData);
@@ -189,6 +207,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnAbortSession(const 
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    RegisterObserverForProcess(processInfo, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null");
     ret = sessionMgr->ExtensionAbortSession(processInfo, handle, paramSet);
