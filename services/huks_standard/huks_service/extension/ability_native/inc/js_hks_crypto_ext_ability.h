@@ -18,6 +18,7 @@
 
 #include "hks_cpp_paramset.h"
 #include "hks_crypto_ext_ability.h"
+#include "hks_error_code.h"
 #include "js_runtime.h"
 #include "want.h"
 
@@ -49,10 +50,10 @@ typedef struct HksCertInfo {
 } HksCertInfo;
 
 typedef struct CryptoResultParam {
-    int32_t hksErrorCode {};
-    int32_t errCode {};
-    int32_t authState {};
-    uint32_t retryCnt {};
+    int32_t hksErrorCode {HKS_ERROR_EXT_CALL_JS_TIME_OUT};
+    int32_t errCode {HKS_ERROR_EXT_JS_METHON_ERROR};
+    int32_t authState {0};
+    uint32_t retryCnt {0};
     std::string handle {};
     std::string index {};
     std::vector<HksCertInfo> certs {};
@@ -62,7 +63,7 @@ typedef struct CryptoResultParam {
     CryptoResultParamType paramType {};
     std::condition_variable callJsCon;
     std::atomic<bool> callJsExMethodDone {false};
-    std::mutex callJsMutex;
+    std::mutex callJsMutex{};
 } CryptoResultParam;
 
 struct CallJsParam {

@@ -788,6 +788,20 @@ static struct HksError g_errCodeTable[] = {
             .errorMsg = "the Ukey PIN is locked.",
             .data = NULL
         }
+    }, {
+        .innerErrCode = HKS_ERROR_EXT_JS_METHON_ERROR,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
+            .errorMsg = "an error occured in the dependent module.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_EXT_CALL_JS_TIME_OUT,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_BUSY,
+            .errorMsg = "call js methon time out.",
+            .data = NULL
+        }
     }
 };
 
