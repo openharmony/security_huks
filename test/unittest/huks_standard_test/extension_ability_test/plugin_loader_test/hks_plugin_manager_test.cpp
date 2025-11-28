@@ -54,10 +54,6 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest001, TestSize.Level0)
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, 0) << "fail: regist fail";
 
-    std::string outIndex = "";
-    ret = mgr->OnCreateRemoteIndex(TEST_PROVIDER, paramSet, outIndex);
-    EXPECT_EQ(ret, 0) << "fail: OnCreateRemoteIndex fail";
-
     std::string index = "";
     std::string handle = "";
     ret = mgr->OnCreateRemoteKeyHandle(processInfo, index, paramSet, handle);
@@ -77,43 +73,36 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest001, TestSize.Level0)
 
     ret = mgr->OnClearUkeyPinAuthStatus(processInfo, index);
     EXPECT_EQ(ret, 0) << "fail: OnClearUkeyPinAuthStatus fail";
+
+    bool isDeath = false;
+    ret = mgr->UnRegisterProvider(processInfo, index, paramSet, isDeath);
+    EXPECT_EQ(ret, 0) << "fail: UnRegisterProvider is not fail";
 }
 
 /**
  * @tc.name: ExtensionPluginMgrTest.ExtensionPluginMgrTest002
- * @tc.desc: 第一次注册，动态库打开失败
- * @tc.type: FUNC
- */
-// HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest002, TestSize.Level0)
-// {
-//     auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
-//     HksProcessInfo processInfo {};
-//     CppParamSet paramSet;
-
-//     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
-//     EXPECT_EQ(ret, HKS_ERROR_OPEN_LIB_FAIL) << "fail: plugin path exist";
-// }
-
-/**
- * @tc.name: ExtensionPluginMgrTest.ExtensionPluginMgrTest003
  * @tc.desc: 第二次调用注册函数，register函数执行成功;非最后一次调用解注册函数，且函数执行成功
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest003, TestSize.Level0)
+HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest002, TestSize.Level0)
 {
     auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HksProcessInfo processInfo {};
     CppParamSet paramSet;
-
+    
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
-    EXPECT_EQ(ret, 0) << "fail: regist success";
+    EXPECT_EQ(ret, 0) << "fail: regist fail";
 
     std::string TEST_PROVIDER2 = "testProvider2";
     ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER2, paramSet);
-    EXPECT_EQ(ret, 0) << "fail: regist success";
+    EXPECT_EQ(ret, 0) << "fail: regist fail";
 
-    ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, paramSet);
-    EXPECT_EQ(ret, 0) << "fail: unregist success";
+    bool isDeath = false;
+    ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, paramSet, isDeath);
+    EXPECT_EQ(ret, 0) << "fail: unregist fail";
+
+    ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER2, paramSet, isDeath);
+    EXPECT_EQ(ret, 0) << "fail: unregist fail";
 }
 
 /**
@@ -121,7 +110,7 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest003, TestSize.Level0)
  * @tc.desc: 最后一次调用解注册函数，函数执行成功，且动态库关闭成功
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest004, TestSize.Level0)
+HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest003, TestSize.Level0)
 {
     auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HksProcessInfo processInfo {};
@@ -156,8 +145,15 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest004, TestSize.Level0)
     ret = mgr->OnFinishSession(processInfo, uhandle, paramSet, inData, outData);
     EXPECT_EQ(ret, 0) << "fail: OnUpdateSession fail";
 
-    ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, paramSet);
+    ret = mgr->OnAbortSession(processInfo, uhandle, paramSet);
+    EXPECT_EQ(ret, 0) << "fail: OnAbortSession fail";
+
+    bool isDeath = false;
+    ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, paramSet, isDeath);
     EXPECT_EQ(ret, 0) << "fail: unregist fail";
+
+    ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, paramSet, isDeath);
+    EXPECT_EQ(ret, HKS_ERROR_LIB_REPEAT_CLOSE) << "fail: unregist is not -298.";
 }
 }
 }

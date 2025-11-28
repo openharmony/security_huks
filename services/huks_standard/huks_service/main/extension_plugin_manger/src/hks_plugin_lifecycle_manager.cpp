@@ -38,16 +38,11 @@ int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &in
 {
     int32_t ret;
     std::unique_lock<std::mutex> lock(soMutex);
-    int32_t preCount = m_refCount.fetch_add(1, std::memory_order_acq_rel);
-    if (preCount == NO_EXTENSION) {
+    if (m_refCount.load() == NO_EXTENSION) {
         auto pluginLoader = HuksPluginLoader::GetInstanceWrapper();
         HKS_IF_TRUE_LOGE_RETURN(pluginLoader == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get pluginLoader instance.")
         ret = pluginLoader->LoadPlugins(info, providerName, paramSet, m_pluginProviderMap);
-        if (ret != HKS_SUCCESS) {
-            m_refCount.fetch_sub(1, std::memory_order_acq_rel);
-            HKS_LOG_E("regist provider failed!");
-            return ret;
-        }
+        HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "regist provider failed!")
     }
 
     ret = OnRegistProvider(info, providerName, paramSet, [this, info, providerName, paramSet](bool deathFlag) {
@@ -55,11 +50,10 @@ int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &in
         isDeath = true;
         UnRegisterProvider(info, providerName, paramSet, isDeath);
     });
-    if (ret != HKS_SUCCESS) {
-        m_refCount.fetch_sub(1, std::memory_order_acq_rel);
-        HKS_LOG_E("regist provider method in plugin loader is fail");
-        return ret;
-    }
+
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "regist provider method in plugin loader is fail")
+    m_refCount.fetch_add(1, std::memory_order_acq_rel);
+
     return ret;
 }
 
@@ -91,11 +85,8 @@ int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &
         HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS, "close lib failed!, ret = %{public}d", ret)
     } while (0);
 
-    if (ret == HKS_SUCCESS) {
-        m_refCount.fetch_sub(1, std::memory_order_acq_rel);
-        HKS_LOG_I("unregist provider success!");
-        return HKS_SUCCESS;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "unregist provider fail")
+    m_refCount.fetch_sub(1, std::memory_order_acq_rel);
 
     return ret;
 }
