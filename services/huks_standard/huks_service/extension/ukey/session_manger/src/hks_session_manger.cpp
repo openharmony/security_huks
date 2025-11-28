@@ -74,7 +74,7 @@ bool HksSessionManager::CheckSingleCallerCanInitSession(const HksProcessInfo &pr
     m_handlers.Iterate([&](const uint32_t &handle, HandleInfo &handleInfo) {
         HKS_IF_TRUE_EXCU(processInfo.uidInt == handleInfo.m_uid, curHandleNum++);
     });
-    return curHandleNum <= MAX_SINGLE_CALLER_HANDLE_SIZE;
+    return curHandleNum < MAX_SINGLE_CALLER_HANDLE_SIZE;
 }
 
 bool HksSessionManager::CheckParmSetPurposeAndCheckAuth(const HksProcessInfo &processInfo, const std::string &index,

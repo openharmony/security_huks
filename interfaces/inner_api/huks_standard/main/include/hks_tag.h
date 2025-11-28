@@ -66,6 +66,11 @@ enum HuksKeyClassType {
     HKS_KEY_CLASS_EXTENSION = 1,
 };
 
+enum HuksExternalPinAuthState {
+    HKS_EXT_CRYPTO_PIN_NO_AUTH = 0,
+    HKS_EXT_CRYPTO_PIN_AUTH_SUCCEEDED = 1,
+    HKS_EXT_CRYPTO_PIN_LOCKED = 2
+};
 
 #define HKS_ASSIGN_ENUM_VALUE(x, y) x = y,
 

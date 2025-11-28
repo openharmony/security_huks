@@ -23,6 +23,7 @@
 #include "hks_log.h"
 #include "hks_param.h"
 #include "hks_type.h"
+#include "js_native_api_types.h"
 #include "securec.h"
 
 namespace HuksNapiItem {
@@ -874,6 +875,12 @@ static napi_value GenerateResult(napi_env env, const struct HksSuccessReturnResu
 
     if (resultData.isOnlyReturnBoolResult) {
         if (napi_get_boolean(env, resultData.boolReturned, &result) != napi_ok) {
+            return GetNull(env);
+        }
+        return result;
+    }
+    if (resultData.outStatus != -1) {
+        if (napi_create_int32(env, resultData.outStatus, &result) != napi_ok) {
             return GetNull(env);
         }
         return result;
