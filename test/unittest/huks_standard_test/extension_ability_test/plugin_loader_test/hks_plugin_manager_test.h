@@ -25,7 +25,6 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
-    
 class ExtensionPluginMgrTest : public testing::Test {
 protected:
     static void SetUpTestCase(void);
