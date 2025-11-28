@@ -1446,17 +1446,17 @@ int32_t HksCheckBlobParamIsEqual(const struct HksParamSet *paramSet, const struc
 {
     struct HksParam *param1 = NULL;
     int32_t ret = HksGetParam(paramSet, tag, &param1);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get param1 failed")
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     struct HksParam *param2 = NULL;
     ret = HksGetParam(keyBlobParamSet, tag, &param2);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get param2 failed")
 
-    HKS_IF_TRUE_LOGE_RETURN(param1->blob.size != param2->blob.size, HKS_ERROR_BAD_STATE,
+    HKS_IF_TRUE_LOGE_RETURN(param1->blob.size != param2->blob.size, HKS_ERROR_INVALID_ARGUMENT,
         "param1 size: %" LOG_PUBLIC "u != param2 size: %" LOG_PUBLIC "u", param1->blob.size, param2->blob.size)
 
     HKS_IF_TRUE_LOGE_RETURN(HksMemCmp(param1->blob.data, param2->blob.data, param1->blob.size) != 0,
-        HKS_ERROR_BAD_STATE, "compare tag %" LOG_PUBLIC "u failed", (uint32_t)tag)
+        HKS_ERROR_INVALID_ARGUMENT, "compare tag %" LOG_PUBLIC "u failed", (uint32_t)tag)
 
     return HKS_SUCCESS;
 }
