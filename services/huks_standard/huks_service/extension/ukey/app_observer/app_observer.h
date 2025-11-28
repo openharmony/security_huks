@@ -59,7 +59,7 @@ public:
     explicit HksAppObserver(const std::string &bundleName);
     ~HksAppObserver() override = default;
 
-    void OnProcessDied(const AppExecFwk::ProcessData &processData) override;
+    void OnAppStopped(const AppExecFwk::AppStateData &appStateData) override;
     void AddProcessContext(const HksProcessInfo &processInfo, const CppParamSet &paramSet);
     const std::string& GetBundleName() const { return targetBundleName_; }
 

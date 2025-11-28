@@ -62,18 +62,20 @@ CppParamSet HksAppObserver::BuildParamSet(const HksProcessContext &context)
     return CppParamSet({param});
 }
 
-void HksAppObserver::OnProcessDied(const AppExecFwk::ProcessData &processData)
+void HksAppObserver::OnAppStopped(const AppExecFwk::AppStateData &appStateData)
 {
-    if (processData.bundleName != targetBundleName_) {
+    HKS_LOG_I("OnAppStopped bundleName = %" LOG_PUBLIC "s, uid = %" LOG_PUBLIC "d, pid = %" LOG_PUBLIC "d",
+        appStateData.bundleName.c_str(), appStateData.uid, appStateData.pid);
+    if (appStateData.bundleName != targetBundleName_) {
         return;
     }
 
     std::lock_guard<std::mutex> lock(mutex_);
 
-    uint32_t diedUid = static_cast<uint32_t>(processData.uid);
+    uint32_t diedUid = static_cast<uint32_t>(appStateData.uid);
     auto it = uidToContextMap_.find(diedUid);
     if (it == uidToContextMap_.end()) {
-        HKS_LOG_I("OnProcessDied No context found for died uid=%{public}u, skip", diedUid);
+        HKS_LOG_I("OnAppStopped No context found for died uid=%{public}u, skip", diedUid);
         return;
     }
 
@@ -87,7 +89,7 @@ void HksAppObserver::OnProcessDied(const AppExecFwk::ProcessData &processData)
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_NULL_LOGE_RETURN_VOID(sessionMgr, "sessionMgr is null");
     auto retBool = sessionMgr->HksClearHandle(processInfo, paramSet);
-    HKS_IF_NOT_TRUE_LOGI(retBool, "OnProcessDied HksClearHandle failed for uid=%{public}u", diedUid);
+    HKS_IF_NOT_TRUE_LOGI(retBool, "OnAppStopped HksClearHandle failed for uid=%{public}u", diedUid);
 
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_NULL_LOGE_RETURN_VOID(handleMgr, "handleMgr is null");
