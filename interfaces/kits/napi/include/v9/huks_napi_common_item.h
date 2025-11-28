@@ -61,7 +61,7 @@ struct HksSuccessReturnResult {
     // ukey features
     struct HksBlob *index;
     uint32_t retryCount;
-    int32_t outStatus;
+    int32_t outStatus = -1;
 };
 
 struct HksSuccessListAliasesResult {

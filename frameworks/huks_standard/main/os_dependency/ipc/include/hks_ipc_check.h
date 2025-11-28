@@ -24,6 +24,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+int32_t HksCheckAuthStateIsValid(const int32_t state);
 
 int32_t HksCheckIpcBlobAndParamSet(const struct HksBlob *blob, const struct HksParamSet *paramSet, uint32_t maxSize);
 

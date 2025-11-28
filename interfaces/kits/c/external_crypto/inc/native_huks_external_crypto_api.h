@@ -131,7 +131,7 @@ struct OH_Huks_Result OH_Huks_CloseResource(
     const struct OH_Huks_Blob *resourceId, const OH_Huks_ExternalCryptoParamSet *paramSet);
 
 /**
- * @brief Get the pin auth state of the specified ukey resource id.
+ * @brief Get the pin auth state of the specified Ukey resource id.
  *
  * @param resourceId Indicates the resource id of the provider.
  * @param paramSet Indicates the pointer to the pin auth parameters.
@@ -139,16 +139,18 @@ struct OH_Huks_Result OH_Huks_CloseResource(
  * @return {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} 0 - If the operation is successful.
  *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_NOT_SUPPORTED_API} 801 - api is not supported
  *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_COMMUNICATION_FAIL} 12000005 - If Ipc commuication failed.
- *         {@link OH_Huks_ErrCode#HUKS_ERR_CODE_ITEM_NOT_EXIST} 12000011 - If not found the cached handle
- *     specified by index.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_CRYPTO_FAIL} 12000006 - If the Ukey driver operation failed.
+ *         {@link OH_Huks_ErrCode#HUKS_ERR_CODE_ITEM_NOT_EXIST} 12000011 - If not found the cached resource id.
  *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_INSUFFICIENT_MEMORY} 12000014 - If the memory is insufficient.
- *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 12000018 - If index or paramSet
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 12000018 - If resourceId or paramSet
  *     or authState is invalid.
- *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_EXTERNAL_ERROR} 12000020 - If the provider exec failed.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_EXTERNAL_ERROR} 12000020 - If the provider operation failed.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_BUSY} 12000024 - If the provider or Ukey is busy.
  * @since 22
  */
 struct OH_Huks_Result OH_Huks_GetUkeyPinAuthState(
-    const struct OH_Huks_Blob *resourceId, const OH_Huks_ExternalCryptoParamSet *paramSet, bool *authState);
+    const struct OH_Huks_Blob *resourceId, const OH_Huks_ExternalCryptoParamSet *paramSet,
+    OH_Huks_ExternalPinAuthState *authState);
 
 /**
  * @brief The general get operations of the external provider.

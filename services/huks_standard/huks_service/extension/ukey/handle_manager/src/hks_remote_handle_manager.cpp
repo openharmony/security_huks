@@ -297,11 +297,9 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
 
     auto ipccode = proxy->GetUkeyPinAuthState(handle, paramSet, state, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    if (ret == HUKS_ERR_CODE_PIN_LOCKED || ret == HKS_SUCCESS) {
-        return ret;
-    }
-    HKS_LOG_E("Remote verify pin status failed: %" LOG_PUBLIC "d", ret);
-    return HKS_ERROR_REMOTE_OPERATION_FAILED;
+    HKS_LOG_I("Get auth pin status state: %" LOG_PUBLIC "d", state);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED, "get pin auth status failed: %" "d", ret)
+    return HKS_SUCCESS;
 }
 
 int32_t HksRemoteHandleManager::RemoteClearPinStatus(const std::string &index, const CppParamSet &paramSet)

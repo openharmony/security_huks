@@ -69,8 +69,18 @@ struct OH_Huks_Result OH_Huks_AuthUkeyPin(const struct OH_Huks_Blob *resourceId,
     return ConvertApiResult(ret);
 }
 
-struct OH_Huks_Result OH_Huks_GetUkeyPinAuthState(const struct OH_Huks_Blob *resourceId,
-    const OH_Huks_ExternalCryptoParamSet *paramSetIn, bool *authState)
+static bool CheckAuthStateIsValid(const int32_t state)
+{
+    if (state == OH_HUKS_EXT_CRYPTO_PIN_NO_AUTH || state == OH_HUKS_EXT_CRYPTO_PIN_AUTH_SUCCEEDED ||
+        state == OH_HUKS_EXT_CRYPTO_PIN_LOCKED) {
+        return true;
+    }
+    return false;
+}
+
+struct OH_Huks_Result OH_Huks_GetUkeyPinAuthState(
+    const struct OH_Huks_Blob *resourceId, const OH_Huks_ExternalCryptoParamSet *paramSet,
+    OH_Huks_ExternalPinAuthState *authState)
 {
     if (authState == NULL) {
         return ConvertApiResult(HKS_ERROR_NULL_POINTER);
@@ -78,9 +88,12 @@ struct OH_Huks_Result OH_Huks_GetUkeyPinAuthState(const struct OH_Huks_Blob *res
     *authState = false;
     int32_t state = 0;
     int32_t ret = HksGetUkeyPinAuthState((const struct HksBlob *)resourceId,
-        (const struct HksParamSet *)paramSetIn, &state);
+        (const struct HksParamSet *)paramSet, &state);
+    if (!CheckAuthStateIsValid(state)) {
+        return ConvertApiResult(HKS_ERROR_EXT_RETURN_VALUE_INCRECT);
+    }
     if (ret == 0) {
-        *authState = (state == 0);
+        *authState = (OH_Huks_ExternalPinAuthState)state;
     }
     return ConvertApiResult(ret);
 }

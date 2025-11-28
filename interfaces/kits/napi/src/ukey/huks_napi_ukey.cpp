@@ -412,11 +412,10 @@ napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info)
         UkeyPinContext *napiContext = static_cast<UkeyPinContext *>(context);
         HksSuccessReturnResult resultData;
         SuccessReturnResultInit(resultData);
-        resultData.isOnlyReturnBoolResult = true;
-        resultData.boolReturned = (napiContext->result == HKS_SUCCESS && napiContext->outStatus == 0);
         if (napiContext->result == HKS_ERROR_INVALID_ARGUMENT) {
             napiContext->result = HKS_ERROR_NEW_INVALID_ARGUMENT;
         }
+        resultData.outStatus = napiContext->outStatus;
         HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
     };
     napi_value result = CreateAsyncWork(env, info, std::move(context), __func__);
