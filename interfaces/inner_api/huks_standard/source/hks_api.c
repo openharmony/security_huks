@@ -376,7 +376,7 @@ HKS_API_EXPORT int32_t HksImportWrappedKey(const struct HksBlob *keyAlias, const
     do {
         struct HksParam *unwrapItem = NULL;
         ret = HksGetParam(paramSet, HKS_TAG_UNWRAP_ALGORITHM_SUITE, &unwrapItem);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Envelop Get Unwrap Tag Fail!!")
+        HKS_IF_NOT_SUCC_BREAK(ret)
         if (unwrapItem->int32Param == HKS_UNWRAP_SUITE_SM2_SM4_ECB_NOPADDING) {
             struct HksParamSet *newParamSet = NULL;
             ret = HksGetEnvelopParamSet(paramSet, &newParamSet);

@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "hks_error_code.h"
 #define HUKS_DISABLE_LOG_AT_FILE_TO_REDUCE_ROM_SIZE
-
+#include "hks_error_code.h"
 #include "hks_keyblob.h"
 
 #include <stdatomic.h>
