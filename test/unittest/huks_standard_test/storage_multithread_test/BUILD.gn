@@ -74,6 +74,9 @@ ohos_unittest("huks_multithread_test") {
   ]
 
   if (os_level == "standard") {
-    external_deps += [ "googletest:gtest" ]
+    external_deps += [
+      "googletest:gtest",
+      "openssl:libcrypto_shared",
+    ]
   }
 }

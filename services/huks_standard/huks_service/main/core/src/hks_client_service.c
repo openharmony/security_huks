@@ -905,31 +905,31 @@ int32_t HksServiceKeyExist(const struct HksProcessInfo *processInfo, const struc
 
 #ifdef L2_STANDARD
     struct HksParamSet *newParamSet = NULL;
-    ret = AppendStorageLevelIfNotExistInner(processInfo, paramSet, &newParamSet);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append storage level failed")
-#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
-    ret = AppendGroupKeyInfo(processInfo, &newParamSet);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append group key info failed, ret = %" LOG_PUBLIC "d", ret)
-#endif
 #else
     const struct HksParamSet *newParamSet = paramSet;
 #endif
-
-    ret = HksManageStoreIsKeyBlobExist(processInfo, newParamSet, keyAlias, HKS_STORAGE_TYPE_KEY);
+    do {
+#ifdef L2_STANDARD
+        ret = AppendStorageLevelIfNotExistInner(processInfo, paramSet, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append storage level failed")
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+        ret = AppendGroupKeyInfo(processInfo, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append group key info failed, ret = %" LOG_PUBLIC "d", ret)
+#endif
+#endif
+        ret = HksManageStoreIsKeyBlobExist(processInfo, newParamSet, keyAlias, HKS_STORAGE_TYPE_KEY);
+#ifdef HKS_ENABLE_SMALL_TO_SERVICE
+        if (HksCheckNeedUpgradeForSmallToService(processInfo) == HKS_SUCCESS) {
+            if (ret == HKS_ERROR_NOT_EXIST) {
+                // if change key owner success, the key should exist; otherwise the key not exist
+                int32_t oldRet = HksChangeKeyOwnerForSmallToService(processInfo, NULL, keyAlias, HKS_STORAGE_TYPE_KEY);
+                ret = (oldRet == HKS_SUCCESS) ? HKS_SUCCESS : ret;
+            }
+        }
+#endif
+    } while (0);
 #ifdef L2_STANDARD
     HksFreeParamSet(&newParamSet);
-#endif
-
-#ifdef HKS_ENABLE_SMALL_TO_SERVICE
-    if (HksCheckNeedUpgradeForSmallToService(processInfo) == HKS_SUCCESS) {
-        if (ret == HKS_ERROR_NOT_EXIST) {
-            // if change key owner success, the key should exist; otherwise the key not exist
-            int32_t oldRet = HksChangeKeyOwnerForSmallToService(processInfo, NULL, keyAlias, HKS_STORAGE_TYPE_KEY);
-            ret = (oldRet == HKS_SUCCESS) ? HKS_SUCCESS : ret;
-        }
-    }
-#endif
-#ifdef L2_STANDARD
     struct HksParamSet *reportParamSet = NULL;
     (void)PreConstructCheckKeyExitedReportParamSet(keyAlias, paramSet, enterTime, &reportParamSet);
     (void)ConstructReportParamSet(__func__, processInfo, ret, &reportParamSet);
