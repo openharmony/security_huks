@@ -84,7 +84,6 @@ if (os_level == "standard") {
       "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
       "//base/security/huks/utils/list:libhuks_utils_list_static",
       "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
-      "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
     ]
 
     if (enable_hks_mock) {
@@ -149,6 +148,7 @@ if (os_level == "standard") {
       "hitrace:libhitracechain",
       "init:libbegetutil",
       "ipc:ipc_single",
+      "openssl:libcrypto_shared",
     ]
   }
 } else {

@@ -810,6 +810,17 @@ int32_t HksEnvelopImportWrapedKey(const struct HksBlob *keyAlias, const struct H
 }
 #else
 
+int32_t HksEnvelopImportWrapedKey(const struct HksBlob *keyAlias, const struct HksBlob *wrappingKey,
+    const struct HksBlob *wrappedKeyData, const struct HksParamSet *paramSet, struct HksBlob *keyOut)
+{
+    (void)keyAlias;
+    (void)paramSet;
+    (void)wrappingKey;
+    (void)wrappedKeyData;
+    (void)keyOut;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+}
+
 int32_t HksSmImportWrappedKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksBlob *wrappingKey, const struct HksBlob *wrappedKeyData, struct HksBlob *keyOut)
 {

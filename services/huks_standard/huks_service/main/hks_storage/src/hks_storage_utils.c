@@ -29,6 +29,9 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#ifdef L2_STANDARD
+#include <openssl/evp.h>
+#endif
 
 #include "hks_file_operator.h"
 #include "hks_log.h"
@@ -36,8 +39,6 @@
 #include "hks_template.h"
 #include "hks_param.h"
 #include "hks_common_check.h"
-#include "hks_crypto_hal.h"
-#include "hks_ability.h"
 #include "securec.h"
 
 #define HKS_ENCODE_OFFSET_LEN         6
@@ -506,9 +507,22 @@ static int32_t CheckUserPathExist(enum HksPathType pathType, const char *userIdP
 const uint8_t HEX_MAX_NUM = 9;
 const uint32_t HEX_INDEX_LEN = 2;
 const uint32_t HEX_BITS_LEN = 4;
+const uint32_t OPENSSL_SUCCESS = 1;
+
 static int32_t HexToChar(uint8_t hex)
 {
     return (hex > HEX_MAX_NUM) ? (hex - 0xA + 'a') : (hex + '0');
+}
+
+static int32_t GetDigest(const struct HksBlob *msg, struct HksBlob *hash)
+{
+    const EVP_MD *opensslAlg = EVP_sha256();
+    HKS_IF_NULL_LOGE_RETURN(opensslAlg, HKS_ERROR_CRYPTO_ENGINE_ERROR, "get sha256 alg fail")
+
+    int32_t ret = EVP_Digest(msg->data, msg->size, hash->data, &hash->size, opensslAlg, NULL);
+    HKS_IF_TRUE_LOGE_RETURN(ret != OPENSSL_SUCCESS, HKS_ERROR_CRYPTO_ENGINE_ERROR, "digest sha256 fail")
+
+    return HKS_SUCCESS;
 }
 
 int32_t GetHashValueToChar(const char *input, char output[HKS_DIGEST_SHA256_HEX_STRING_LEN + 1])
@@ -516,14 +530,12 @@ int32_t GetHashValueToChar(const char *input, char output[HKS_DIGEST_SHA256_HEX_
     HKS_IF_NULL_LOGE_RETURN(input, HKS_ERROR_NULL_POINTER, "input is null")
     HKS_IF_NULL_LOGE_RETURN(output, HKS_ERROR_NULL_POINTER, "output is null")
 
-    int32_t ret = HksCryptoAbilityInit();
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "init crypto ability failed, ret = %" LOG_PUBLIC "d", ret)
-
     uint8_t hash[HKS_DIGEST_SHA256_LEN] = {0};
     struct HksBlob inputBlob = { strlen(input), (uint8_t *)input };
     struct HksBlob outputBlob = { HKS_DIGEST_SHA256_LEN, hash };
-    ret = HksCryptoHalHash(HKS_DIGEST_SHA256, &inputBlob, &outputBlob);
-    HKS_IF_NOT_SUCC_LOGE(ret, "hash content failed")
+
+    int32_t ret = GetDigest(&inputBlob, &outputBlob);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get digest fail")
 
     for (uint32_t index = 0; index < outputBlob.size; ++index) {
         output[index * HEX_INDEX_LEN] = HexToChar((outputBlob.data[index] & 0xF0) >> HEX_BITS_LEN);
