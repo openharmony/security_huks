@@ -60,6 +60,18 @@ static napi_value CreateHuksExternalTag(napi_env env)
     return tag;
 }
 
+static napi_value CreateHuksExternalPinState(napi_env env)
+{
+    napi_value tag = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &tag));
+
+    AddInt32Property(env, tag, "HUKS_EXT_CRYPTO_PIN_NO_AUTH", HKS_EXT_CRYPTO_PIN_NO_AUTH);
+    AddInt32Property(env, tag, "HUKS_EXT_CRYPTO_PIN_AUTH_SUCCEEDED", HKS_EXT_CRYPTO_PIN_AUTH_SUCCEEDED);
+    AddInt32Property(env, tag, "HUKS_EXT_CRYPTO_PIN_LOCKED", HKS_EXT_CRYPTO_PIN_LOCKED);
+
+    return tag;
+}
+
 
 static napi_value HuksExternalCryptoRegister(napi_env env, napi_value exports)
 {
@@ -71,6 +83,7 @@ static napi_value HuksExternalCryptoRegister(napi_env env, napi_value exports)
 
         DECLARE_NAPI_PROPERTY("HuksExternalCryptoTagType", CreateHuksExternalTagType(env)),
         DECLARE_NAPI_PROPERTY("HuksExternalCryptoTag", CreateHuksExternalTag(env)),
+        DECLARE_NAPI_PROPERTY("HuksExternalPinAuthState", CreateHuksExternalPinState(env)),
         DECLARE_NAPI_FUNCTION("registerProvider", HuksNapiRegisterProvider),
         DECLARE_NAPI_FUNCTION("unregisterProvider", HuksNapiUnregisterProvider),
         DECLARE_NAPI_FUNCTION("authUkeyPin", HuksNapiAuthUkeyPin),
