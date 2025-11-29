@@ -16,6 +16,7 @@
 #include "hks_ipc_check.h"
 
 #include <stddef.h>
+#include <stdint.h>
 
 #include "hks_common_check.h"
 #include "hks_client_ipc_serialization.h"
@@ -27,6 +28,15 @@
 
 #define MIN_CERT_COUNT 3
 #define MAX_CERT_COUNT 4
+
+int32_t HksCheckAuthStateIsValid(const int32_t state)
+{
+    if (state == HKS_EXT_CRYPTO_PIN_NO_AUTH || state == HKS_EXT_CRYPTO_PIN_AUTH_SUCCEEDED ||
+        state == HKS_EXT_CRYPTO_PIN_LOCKED) {
+        return HKS_SUCCESS;
+    }
+    return HKS_ERROR_EXT_RETURN_VALUE_INCRECT;
+}
 
 int32_t HksCheckIpcBlobAndParamSet(const struct HksBlob *blob, const struct HksParamSet *paramSet, uint32_t maxSize)
 {

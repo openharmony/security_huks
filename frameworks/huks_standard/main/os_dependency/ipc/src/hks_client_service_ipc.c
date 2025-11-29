@@ -413,6 +413,9 @@ int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index,
         }
         HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(status, sizeof(int32_t), outBlob.data,
             sizeof(int32_t)), "memcpy_s status failed");
+
+        ret = HksCheckAuthStateIsValid(*status);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetUkeyPinAuthState: check auth state fail. ret = %" LOG_PUBLIC "d", ret);
     } while (0);
 
     HksFreeParamSet(&newParamSet);

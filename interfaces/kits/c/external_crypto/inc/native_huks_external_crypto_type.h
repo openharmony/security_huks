@@ -176,6 +176,34 @@ typedef enum OH_Huks_ExternalCryptoTag {
     OH_HUKS_EXT_CRYPTO_TAG_TIMEOUT = OH_HUKS_TAG_TYPE_UINT | 200006
 } OH_Huks_ExternalCryptoTag;
 
+/**
+ * @brief Enumerates the PIN auth states.
+ *
+ * @since 22
+ */
+typedef enum OH_Huks_ExternalPinAuthState {
+    /**
+     * @brief Ukey PIN is not authenticated.
+     *
+     * @since 22
+     */
+    OH_HUKS_EXT_CRYPTO_PIN_NO_AUTH = 0,
+
+    /**
+     * @brief Ukey PIN is authenticated.
+     *
+     * @since 22
+     */
+    OH_HUKS_EXT_CRYPTO_PIN_AUTH_SUCCEEDED = 1,
+
+    /**
+     * @brief Ukey PIN is locked.
+     *
+     * @since 22
+     */
+    OH_HUKS_EXT_CRYPTO_PIN_LOCKED = 2
+} OH_Huks_ExternalPinAuthState;
+
 #ifdef __cplusplus
 }
 #endif
