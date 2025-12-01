@@ -112,7 +112,7 @@ HWTEST_F(HksRemoteHandleManagerTest, CreateCloseRemoteHandleTest, TestSize.Level
 
     int32_t ret = manager->CloseRemoteHandle(processInfo, index, paramSet);
     EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST);
-    ret = manager->CreateRemoteHandle(index, paramSet);
+    ret = manager->CreateRemoteHandle(processInfo, index, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
     
     ret = manager->CloseRemoteHandle(processInfo, index, paramSet);
@@ -123,7 +123,7 @@ HWTEST_F(HksRemoteHandleManagerTest, CreateCloseRemoteHandleTest, TestSize.Level
     EXPECT_TRUE(root.SetValue("bundleName", std::string("com.teds.bundle")));
     EXPECT_TRUE(root.SetValue("index", std::string("testIndex3213")));
     std::string index2 = root.Serialize(false);
-    ret = manager->CreateRemoteHandle(index2, paramSet);
+    ret = manager->CreateRemoteHandle(processInfo, index2, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     root = CommJsonObject::CreateObject();
@@ -132,7 +132,7 @@ HWTEST_F(HksRemoteHandleManagerTest, CreateCloseRemoteHandleTest, TestSize.Level
     EXPECT_TRUE(root.SetValue("bundleName", std::string("com.teds.bundle")));
     EXPECT_TRUE(root.SetValue("index", std::string("testIndexsf123")));
     std::string index3 = root.Serialize(false);
-    ret = manager->CreateRemoteHandle(index3, paramSet);
+    ret = manager->CreateRemoteHandle(processInfo, index3, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     root = CommJsonObject::CreateObject();
@@ -141,7 +141,7 @@ HWTEST_F(HksRemoteHandleManagerTest, CreateCloseRemoteHandleTest, TestSize.Level
     EXPECT_TRUE(root.SetValue("bundleName", std::string("com.teds.bundle")));
     EXPECT_TRUE(root.SetValue("index", std::string("tes2424")));
     std::string index4 = root.Serialize(false);
-    ret = manager->CreateRemoteHandle(index4, paramSet);
+    ret = manager->CreateRemoteHandle(processInfo, index4, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
     int32_t authState = 0;
     uint32_t retryCnt = 0;
@@ -165,11 +165,11 @@ HWTEST_F(HksRemoteHandleManagerTest, CreateRemoteHandleWithInvalidIndex, TestSiz
     EXPECT_NE(manager, nullptr);
     HksProcessInfo processInfo = CreateTestProcessInfo();
     // Test with empty index
-    int32_t ret = manager->CreateRemoteHandle("", CreateTestParamSet(processInfo.uidInt));
+    int32_t ret = manager->CreateRemoteHandle(processInfo, "", CreateTestParamSet(processInfo.uidInt));
     EXPECT_NE(ret, HKS_SUCCESS);
 
     // Test with invalid JSON index
-    ret = manager->CreateRemoteHandle("invalid_json_string", CreateTestParamSet(processInfo.uidInt));
+    ret = manager->CreateRemoteHandle(processInfo, "invalid_json_string", CreateTestParamSet(processInfo.uidInt));
     EXPECT_NE(ret, HKS_SUCCESS);
 
     // Test with missing required fields
@@ -177,7 +177,7 @@ HWTEST_F(HksRemoteHandleManagerTest, CreateRemoteHandleWithInvalidIndex, TestSiz
     EXPECT_TRUE(root.SetValue("providerName", std::string("testProvider")));
     // Missing abilityName and bundleName
     std::string invalidIndex = root.Serialize(false);
-    ret = manager->CreateRemoteHandle(invalidIndex, CreateTestParamSet(processInfo.uidInt));
+    ret = manager->CreateRemoteHandle(processInfo, invalidIndex, CreateTestParamSet(processInfo.uidInt));
     EXPECT_NE(ret, HKS_SUCCESS);
 }
 
@@ -195,16 +195,16 @@ HWTEST_F(HksRemoteHandleManagerTest, SignVerifyTest, TestSize.Level0)
     HksProcessInfo processInfo = CreateTestProcessInfo();
     CppParamSet paramSet = CreateTestParamSet(processInfo.uidInt);
 
-    int32_t ret = manager->CreateRemoteHandle(index, paramSet);
+    int32_t ret = manager->CreateRemoteHandle(processInfo, index, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     std::vector<uint8_t> inData = {0x01, 0x02, 0x03, 0x04};
     std::vector<uint8_t> outData;
-    ret = manager->RemoteHandleSign(index, paramSet, inData, outData);
+    ret = manager->RemoteHandleSign(processInfo, index, paramSet, inData, outData);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     std::vector<uint8_t> signature = outData;
-    ret = manager->RemoteHandleVerify(index, paramSet, inData, signature);
+    ret = manager->RemoteHandleVerify(processInfo, index, paramSet, inData, signature);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     manager->CloseRemoteHandle(processInfo, index, paramSet);
@@ -226,7 +226,7 @@ HWTEST_F(HksRemoteHandleManagerTest, PinManagementTest, TestSize.Level0)
     HksProcessInfo processInfo = CreateTestProcessInfo();
     CppParamSet paramSet = CreateTestParamSet(processInfo.uidInt);
     // Create handle first
-    int32_t ret = manager->CreateRemoteHandle(index, paramSet);
+    int32_t ret = manager->CreateRemoteHandle(processInfo, index, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     // Test verify PIN
@@ -239,7 +239,7 @@ HWTEST_F(HksRemoteHandleManagerTest, PinManagementTest, TestSize.Level0)
     ret = manager->RemoteVerifyPinStatus(processInfo, index, paramSet, state);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    ret = manager->RemoteClearPinStatus(index, paramSet);
+    ret = manager->RemoteClearPinStatus(processInfo, index, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     bool authOk = manager->CheckAuthStateIsOk(processInfo, index);
@@ -296,16 +296,16 @@ HWTEST_F(HksRemoteHandleManagerTest, PropertyTest, TestSize.Level0)
     CppParamSet paramSet = CreateTestParamSet(processInfo.uidInt);
 
     // Create handle first
-    int32_t ret = manager->CreateRemoteHandle(index, paramSet);
+    int32_t ret = manager->CreateRemoteHandle(processInfo, index, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     // Test get property with valid property ID
     CppParamSet outParams;
-    ret = manager->GetRemoteProperty(index, "SKF_GetDevInfo", paramSet, outParams);
+    ret = manager->GetRemoteProperty(processInfo, index, "SKF_GetDevInfo", paramSet, outParams);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     // Test get property with invalid property ID
-    ret = manager->GetRemoteProperty(index, "INVALID_PROPERTY", paramSet, outParams);
+    ret = manager->GetRemoteProperty(processInfo, index, "INVALID_PROPERTY", paramSet, outParams);
     EXPECT_NE(ret, HKS_SUCCESS);
 
     // Cleanup
@@ -331,16 +331,16 @@ HWTEST_F(HksRemoteHandleManagerTest, ClearHandleMapTest, TestSize.Level0)
     HksProcessInfo processInfo = CreateTestProcessInfo();
     CppParamSet paramSet = CreateTestParamSet(processInfo.uidInt);
 
-    manager->CreateRemoteHandle(index1, paramSet);
-    manager->CreateRemoteHandle(index2, paramSet);
-    manager->CreateRemoteHandle(index3, paramSet);
+    manager->CreateRemoteHandle(processInfo, index1, paramSet);
+    manager->CreateRemoteHandle(processInfo, index2, paramSet);
+    manager->CreateRemoteHandle(processInfo, index3, paramSet);
 
     // Test clear by provider name
-    int32_t ret = manager->ClearRemoteHandleMap("provider1", "");
+    int32_t ret = manager->ClearRemoteHandleMap("provider1", "", processInfo.uidInt);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     // Test clear by provider name and ability name
-    ret = manager->ClearRemoteHandleMap("provider2", "ability1");
+    ret = manager->ClearRemoteHandleMap("provider2", "ability1", processInfo.uidInt);
     EXPECT_EQ(ret, HKS_SUCCESS);
 }
 
