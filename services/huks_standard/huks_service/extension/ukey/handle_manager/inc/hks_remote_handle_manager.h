@@ -38,50 +38,48 @@ public:
 
     static std::shared_ptr<HksRemoteHandleManager> GetInstanceWrapper();
     static void ReleaseInstance();
-    // handle管理
-    int32_t CreateRemoteHandle(const std::string &index, const CppParamSet &paramSet);
+    // handle manager
+    int32_t CreateRemoteHandle(const HksProcessInfo &processInfo, const std::string &index,
+        const CppParamSet &paramSet);
     int32_t CloseRemoteHandle(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet);
-
-    // ukey PIN码管理
+    // ukey PIN manager
     int32_t RemoteVerifyPin(const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet,
-                int32_t &authState, uint32_t &retryCnt);
+        int32_t &authState, uint32_t &retryCnt);
     int32_t RemoteVerifyPinStatus(const HksProcessInfo &processInfo,
-                const std::string &index, const CppParamSet &paramSet, int32_t &state);
-    int32_t RemoteClearPinStatus(const std::string &index, const CppParamSet &paramSet);
+        const std::string &index, const CppParamSet &paramSet, int32_t &state);
+    int32_t RemoteClearPinStatus(const HksProcessInfo &processInfo, const std::string &index,
+        const CppParamSet &paramSet);
     bool CheckAuthStateIsOk(const HksProcessInfo &processInfo, const std::string &index);
-    //证书查询
+    //certificate query
     int32_t FindRemoteCertificate(const std::string &index,
-                const CppParamSet &paramSet, std::string &certificatesOut);
+        const CppParamSet &paramSet, std::string &certificatesOut);
     int32_t FindRemoteAllCertificate(const HksProcessInfo &processInfo,
-                const std::string &providerName, const CppParamSet &paramSet, std::string &certificatesOut);
+        const std::string &providerName, const CppParamSet &paramSet, std::string &certificatesOut);
     int32_t MergeProviderCertificates(const ProviderInfo &providerInfo, const std::string &providerCertVec,
-                CommJsonObject &combinedArray);
+        CommJsonObject &combinedArray);
+    //sign and verify
+    int32_t RemoteHandleSign(const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet,
+        const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
+    int32_t RemoteHandleVerify(const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet,
+        const std::vector<uint8_t> &plainText, std::vector<uint8_t> &signature);
 
-    //签名验签
-    int32_t RemoteHandleSign(const std::string &index, const CppParamSet &paramSet,
-                const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
-    int32_t RemoteHandleVerify(const std::string &index, const CppParamSet &paramSet,
-                const std::vector<uint8_t> &plainText, std::vector<uint8_t> &signature);
+    int32_t GetRemoteProperty(const HksProcessInfo &processInfo, const std::string& index,
+        const std::string& propertyId, const CppParamSet& paramSet, CppParamSet& outParams);
 
-    int32_t GetRemoteProperty(const std::string& index, const std::string& propertyId,
-                const CppParamSet& paramSet, CppParamSet& outParams);
-
-    int32_t ClearRemoteHandleMap(const std::string &providerName, const std::string &abilityName);
-    void ClearAuthState(const HksProcessInfo &processInfo);
+    int32_t ClearRemoteHandleMap(const std::string &providerName, const std::string &abilityName,
+        const uint32_t uid);
     static int32_t ParseIndexAndProviderInfo(const std::string &index,
-                ProviderInfo &providerInfo, std::string &newIndex);
-    int32_t ParseAndValidateIndex(const std::string &index, ProviderInfo &providerInfo,
-                std::string &newIndex, std::string &handle);
+        ProviderInfo &providerInfo, std::string &newIndex);
+    void ClearAuthState(const HksProcessInfo &processInfo);
+    int32_t ParseAndValidateIndex(const std::string &index, const uint32_t uid, ProviderInfo &providerInfo,
+        std::string &handle);
     int32_t GetProviderProxy(const ProviderInfo &providerInfo, OHOS::sptr<IHuksAccessExtBase> &proxy);
 
 private:
-    int32_t ValidateProviderInfo(const std::string &newIndex, ProviderInfo &providerInfo);
-    int32_t ValidateAndGetHandle(const std::string &newIndex, ProviderInfo &providerInfo, std::string &handle);
     bool IsProviderNumExceedLimit(const ProviderInfo &providerInfo);
 
-    OHOS::SafeMap<std::string, std::string> indexToHandle_;
-    OHOS::SafeMap<std::string, ProviderInfo> newIndexToProviderInfo_;
+    OHOS::SafeMap<std::pair<uint32_t, std::string>, std::string> uidIndexToHandle_;
     OHOS::SafeMap<std::pair<uint32_t, std::string>, int32_t> uidIndexToAuthState_;
     OHOS::SafeMap<ProviderInfo, int32_t> providerInfoToNum_;
 };

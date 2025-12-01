@@ -108,17 +108,14 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
     auto bundleNameResult = root.GetValue(BUNDLE_NAME_KEY).ToString();
     HKS_IF_TRUE_LOGE_RETURN(providerNameResult.first != HKS_SUCCESS || abilityNameResult.first != HKS_SUCCESS ||
         bundleNameResult.first != HKS_SUCCESS, HKS_ERROR_JSON_TYPE_MISMATCH, "Get provider info fields failed")
-
     providerInfo.m_providerName = providerNameResult.second;
     providerInfo.m_abilityName = abilityNameResult.second;
     providerInfo.m_bundleName = bundleNameResult.second;
     HKS_IF_TRUE_LOGE_RETURN(providerInfo.m_providerName.empty() || providerInfo.m_abilityName.empty() ||
         providerInfo.m_bundleName.empty(), HKS_ERROR_JSON_INVALID_VALUE, "Provider info is incomplete")
-
     CommJsonObject newRoot = CommJsonObject::CreateObject();
     HKS_IF_TRUE_LOGE_RETURN(newRoot.IsNull(), HKS_ERROR_JSON_NOT_OBJECT,
         "Create new JSON object failed")
-
     auto keys = root.GetKeys();
     for (const auto &key : keys) {
         if (key == PROVIDER_NAME_KEY || key == ABILITY_NAME_KEY || key == BUNDLE_NAME_KEY) {
@@ -136,18 +133,6 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::ValidateProviderInfo(const std::string &newIndex, ProviderInfo &providerInfo)
-{
-    ProviderInfo cachedProviderInfo;
-    if (!newIndexToProviderInfo_.Find(newIndex, cachedProviderInfo)) {
-        HKS_LOG_E("Provider info not found for newIndex: %" LOG_PUBLIC "s", newIndex.c_str());
-        return HKS_ERROR_REMOTE_HANDLE_NOT_FOUND;
-    }
-    HKS_IF_TRUE_LOGE_RETURN(!(cachedProviderInfo == providerInfo), HKS_ERROR_REMOTE_PROVIDER_MISMATCH,
-        "Provider info mismatch")
-    return HKS_SUCCESS;
-}
-
 int32_t HksRemoteHandleManager::GetProviderProxy(const ProviderInfo &providerInfo,
     OHOS::sptr<IHuksAccessExtBase> &proxy)
 {
@@ -162,29 +147,20 @@ int32_t HksRemoteHandleManager::GetProviderProxy(const ProviderInfo &providerInf
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::ValidateAndGetHandle(const std::string &newIndex,
+int32_t HksRemoteHandleManager::ParseAndValidateIndex(const std::string &index, const uint32_t uid,
     ProviderInfo &providerInfo, std::string &handle)
 {
-    int32_t ret = ValidateProviderInfo(newIndex, providerInfo);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Provider info validation failed: %" LOG_PUBLIC "d", ret)
-    HKS_IF_TRUE_LOGE_RETURN(!indexToHandle_.Find(newIndex, handle), HKS_ERROR_REMOTE_HANDLE_NOT_FOUND,
-        "Remote handle not found for newIndex: %" LOG_PUBLIC "s", newIndex.c_str())
-    return HKS_SUCCESS;
-}
-
-int32_t HksRemoteHandleManager::ParseAndValidateIndex(const std::string &index, ProviderInfo &providerInfo,
-    std::string &newIndex, std::string &handle)
-{
+    std::string newIndex;
     int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
         "Parse index and provider info failed: %" LOG_PUBLIC "d", ret)
-    ret = ValidateAndGetHandle(newIndex, providerInfo, handle);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NOT_EXIST,
-        "Validate provider info and get handle failed: %" LOG_PUBLIC "d", ret)
+    HKS_IF_TRUE_LOGE_RETURN(!uidIndexToHandle_.Find({uid, index}, handle), HKS_ERROR_NOT_EXIST,
+        "Remote handle not found for uid: %" LOG_PUBLIC "u, index: %" LOG_PUBLIC "s", uid, index.c_str())
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::CreateRemoteHandle(const std::string &index, const CppParamSet &paramSet)
+int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet)
 {
     ProviderInfo providerInfo;
     std::string newIndex;
@@ -201,14 +177,9 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const std::string &index, con
     
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
             "Create remote handle failed: %" LOG_PUBLIC "d", ret)
-
-    HKS_IF_TRUE_LOGE_RETURN(!indexToHandle_.Insert(newIndex, handle),
+    HKS_LOG_I("uidIndexToHandle_ is %" LOG_PUBLIC "u,%" LOG_PUBLIC "s", processInfo.uidInt, index.c_str());
+    HKS_IF_TRUE_LOGE_RETURN(!uidIndexToHandle_.Insert({processInfo.uidInt, index}, handle),
         HKS_ERROR_CODE_KEY_ALREADY_EXIST, "Cache remote handle failed")
-    if (!newIndexToProviderInfo_.Insert(newIndex, providerInfo)) {
-        indexToHandle_.Erase(newIndex);
-        HKS_LOG_E("Cache provider info failed");
-        return HKS_ERROR_CODE_KEY_ALREADY_EXIST;
-    }
     HKS_IF_TRUE_LOGE_RETURN(IsProviderNumExceedLimit(providerInfo),
         HUKS_ERR_CODE_EXCEED_LIMIT, "Provider num exceed limit")
     int32_t num = 0;
@@ -223,7 +194,7 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
     ProviderInfo providerInfo;
     std::string newIndex;
     std::string handle;
-    int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
+    int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
@@ -233,8 +204,8 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
             "Close remote handle failed: %" LOG_PUBLIC "d", ret)
-    indexToHandle_.Erase(newIndex);
-    newIndexToProviderInfo_.Erase(newIndex);
+    HKS_LOG_I("uidIndexToHandle_ is %" LOG_PUBLIC "u,%" LOG_PUBLIC "s", processInfo.uidInt, index.c_str());
+    uidIndexToHandle_.Erase({processInfo.uidInt, index});
     int32_t num = 0;
     if (providerInfoToNum_.Find(providerInfo, num)) {
         if (num == 1) {
@@ -245,7 +216,7 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
     }
     std::vector<std::pair<uint32_t, std::string>> keysToRemove;
     uidIndexToAuthState_.Iterate([&](std::pair<uint32_t, std::string> key, int32_t value) {
-        if (key.second == index) {
+        if (key.first == processInfo.uidInt && key.second == index) {
             keysToRemove.push_back(key);
         }
     });
@@ -262,9 +233,8 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     HKS_IF_TRUE_LOGE_RETURN(uid.first != HKS_SUCCESS, uid.first,
         "Get uid tag failed. ret: %" LOG_PUBLIC "d", uid.first)
     ProviderInfo providerInfo;
-    std::string newIndex;
     std::string handle;
-    int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
+    int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
@@ -272,7 +242,6 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     
     auto ipccode = proxy->AuthUkeyPin(handle, paramSet, ret, authState, retryCnt);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    HKS_LOG_I("Remote verify pin  authState %" LOG_PUBLIC "d", authState);
     if (authState == HKS_SUCCESS) {
         uidIndexToAuthState_.EnsureInsert(std::make_pair(static_cast<uint32_t>(uid.second), index), HKS_SUCCESS);
     }
@@ -287,9 +256,8 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     const std::string &index, const CppParamSet &paramSet, int32_t &state)
 {
     ProviderInfo providerInfo;
-    std::string newIndex;
     std::string handle;
-    int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
+    int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
@@ -297,23 +265,25 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
 
     auto ipccode = proxy->GetUkeyPinAuthState(handle, paramSet, state, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    HKS_LOG_I("Get auth pin status state: %" LOG_PUBLIC "d", state);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED, "get pin auth status failed: %" "d", ret)
-    return HKS_SUCCESS;
+    if (ret == HUKS_ERR_CODE_PIN_LOCKED || ret == HKS_SUCCESS) {
+        return ret;
+    }
+    HKS_LOG_E("Remote verify pin status failed: %" LOG_PUBLIC "d", ret);
+    return HKS_ERROR_REMOTE_OPERATION_FAILED;
 }
 
-int32_t HksRemoteHandleManager::RemoteClearPinStatus(const std::string &index, const CppParamSet &paramSet)
+int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet)
 {
     ProviderInfo providerInfo;
-    std::string newIndex;
     std::string handle;
-    int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
+    int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
-    auto ipccode = proxy->ClearUkeyPinAuthState(newIndex, paramSet, ret);
+    auto ipccode = proxy->ClearUkeyPinAuthState(handle, paramSet, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
@@ -321,13 +291,12 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const std::string &index, c
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::RemoteHandleSign(const std::string &index, const CppParamSet &paramSet,
-    const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData)
+int32_t HksRemoteHandleManager::RemoteHandleSign(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData)
 {
     ProviderInfo providerInfo;
-    std::string newIndex;
     std::string handle;
-    int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
+    int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
@@ -341,13 +310,12 @@ int32_t HksRemoteHandleManager::RemoteHandleSign(const std::string &index, const
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::RemoteHandleVerify(const std::string &index, const CppParamSet &paramSet,
-    const std::vector<uint8_t> &plainText, std::vector<uint8_t> &signature)
+int32_t HksRemoteHandleManager::RemoteHandleVerify(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, const std::vector<uint8_t> &plainText, std::vector<uint8_t> &signature)
 {
     ProviderInfo providerInfo;
-    std::string newIndex;
     std::string handle;
-    int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
+    int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
@@ -423,17 +391,16 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::GetRemoteProperty(const std::string &index, const std::string &propertyId,
-    const CppParamSet &paramSet, CppParamSet &outParams)
+int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processInfo, const std::string &index,
+    const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams)
 {
     if (std::find(VALID_PROPERTYID.begin(), VALID_PROPERTYID.end(), propertyId) == VALID_PROPERTYID.end()) {
         HKS_LOG_E("Invalid propertyId");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     ProviderInfo providerInfo;
-    std::string newIndex;
     std::string handle;
-    int32_t ret = ParseAndValidateIndex(index, providerInfo, newIndex, handle);
+    int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
@@ -447,23 +414,27 @@ int32_t HksRemoteHandleManager::GetRemoteProperty(const std::string &index, cons
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::ClearRemoteHandleMap(const std::string &providerName, const std::string &abilityName)
+int32_t HksRemoteHandleManager::ClearRemoteHandleMap(const std::string &providerName, const std::string &abilityName,
+    const uint32_t uid)
 {
-    std::vector<std::string> indicesToRemove;
+    std::vector<std::pair<uint32_t, std::string>> indicesToRemove;
     std::vector<ProviderInfo> providersToRemove;
-    auto collectToRemoveFunc = [&](std::string key, ProviderInfo &value) {
-        if (value.m_providerName == providerName) {
-            if (abilityName.empty() || value.m_abilityName == abilityName) {
+    auto collectToRemoveFunc = [&](std::pair<uint32_t, std::string> key, std::string &value) {
+        std::string handle;
+        ProviderInfo providerInfo;
+        int32_t ret = ParseAndValidateIndex(key.second, key.first, providerInfo, handle);
+        HKS_IF_TRUE_LOGE(ret != HKS_SUCCESS, "ParseAndValidateIndex failed: %" LOG_PUBLIC "d", ret)
+        if (key.first == uid && providerInfo.m_providerName == providerName) {
+            if (abilityName.empty() || providerInfo.m_abilityName == abilityName) {
                 indicesToRemove.push_back(key);
-                providersToRemove.push_back(value);
+                providersToRemove.push_back(providerInfo);
             }
         }
     };
-    newIndexToProviderInfo_.Iterate(collectToRemoveFunc);
-    for (std::string index : indicesToRemove) {
-        indexToHandle_.Erase(index);
-        newIndexToProviderInfo_.Erase(index);
-    }
+    uidIndexToHandle_.Iterate(collectToRemoveFunc);
+    for (auto &key : indicesToRemove) {
+        uidIndexToHandle_.Erase(key);
+    };
     for (ProviderInfo providerInfo : providersToRemove) {
         providerInfoToNum_.Erase(providerInfo);
     }

@@ -103,6 +103,7 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
     HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NULL_POINTER, "connected, but getExtConnectProxy failed.");
 
     connectInfo = std::make_shared<HksExtAbilityConnectInfo>(want, connect);
+    providerInfo.m_uid = processInfo.uidInt;
     m_providerMap.Insert(providerInfo, connectInfo);
     HKS_LOG_I("OnRegisterProvider Success! providerName: %" LOG_PUBLIC "s", providerName.c_str());
     return ret;
@@ -180,7 +181,8 @@ int32_t HksProviderLifeCycleManager::HksHapGetConnectInfos(const HksProcessInfo 
             std::shared_ptr<HksExtAbilityConnectInfo> &connectionInfo) {
             if (providerInfo.m_bundleName == bundleName &&
                 providerInfo.m_abilityName == abilityNameStr &&
-                providerInfo.m_providerName == providerName) {
+                providerInfo.m_providerName == providerName &&
+                providerInfo.m_uid == processInfo.uidInt) {
                 connectionInfos.emplace_back(providerInfo, connectionInfo);
             }
         });
