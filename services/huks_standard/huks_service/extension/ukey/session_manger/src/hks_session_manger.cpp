@@ -107,8 +107,8 @@ int32_t HksSessionManager::ExtensionInitSession(const HksProcessInfo &processInf
     ProviderInfo providerInfo;
     std::string newIndex;
     std::string sIndexHandle;
-    int32_t ret = HksRemoteHandleManager::GetInstanceWrapper()->ParseAndValidateIndex(index, providerInfo, newIndex,
-        sIndexHandle);
+    int32_t ret = HksRemoteHandleManager::GetInstanceWrapper()->ParseAndValidateIndex(index, processInfo.uidInt,
+        providerInfo, sIndexHandle);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ParseAndValidateIndex failed: %" LOG_PUBLIC "d", ret)
 
     std::string sessionHandle;
