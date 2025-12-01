@@ -147,8 +147,8 @@ int32_t HksRemoteHandleManager::GetProviderProxy(const ProviderInfo &providerInf
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::ParseAndValidateIndex(const std::string &index, const uint32_t uid, ProviderInfo &providerInfo,
-    std::string &handle)
+int32_t HksRemoteHandleManager::ParseAndValidateIndex(const std::string &index, const uint32_t uid,
+    ProviderInfo &providerInfo, std::string &handle)
 {
     std::string newIndex;
     int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
@@ -159,7 +159,8 @@ int32_t HksRemoteHandleManager::ParseAndValidateIndex(const std::string &index, 
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet)
+int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet)
 {
     ProviderInfo providerInfo;
     std::string newIndex;
@@ -271,7 +272,8 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     return HKS_ERROR_REMOTE_OPERATION_FAILED;
 }
 
-int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet)
+int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet)
 {
     ProviderInfo providerInfo;
     std::string handle;
@@ -289,8 +291,8 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &proce
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::RemoteHandleSign(const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet,
-    const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData)
+int32_t HksRemoteHandleManager::RemoteHandleSign(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData)
 {
     ProviderInfo providerInfo;
     std::string handle;
@@ -308,8 +310,8 @@ int32_t HksRemoteHandleManager::RemoteHandleSign(const HksProcessInfo &processIn
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::RemoteHandleVerify(const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet,
-    const std::vector<uint8_t> &plainText, std::vector<uint8_t> &signature)
+int32_t HksRemoteHandleManager::RemoteHandleVerify(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, const std::vector<uint8_t> &plainText, std::vector<uint8_t> &signature)
 {
     ProviderInfo providerInfo;
     std::string handle;

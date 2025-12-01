@@ -64,8 +64,8 @@ public:
     int32_t RemoteHandleVerify(const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet,
                 const std::vector<uint8_t> &plainText, std::vector<uint8_t> &signature);
 
-    int32_t GetRemoteProperty(const HksProcessInfo &processInfo, const std::string& index, const std::string& propertyId,
-                const CppParamSet& paramSet, CppParamSet& outParams);
+    int32_t GetRemoteProperty(const HksProcessInfo &processInfo, const std::string& index,
+                const std::string& propertyId, const CppParamSet& paramSet, CppParamSet& outParams);
 
     int32_t ClearRemoteHandleMap(const std::string &providerName, const std::string &abilityName,
                 const uint32_t uid);
