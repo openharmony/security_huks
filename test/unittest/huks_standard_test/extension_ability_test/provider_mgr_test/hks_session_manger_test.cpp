@@ -152,7 +152,7 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest003, TestSize.Level0) {
     
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     EXPECT_NE(handleMgr, nullptr);
-    ret = handleMgr->CreateRemoteHandle(wrappedIndex, paramSet);
+    ret = handleMgr->CreateRemoteHandle(processInfo, wrappedIndex, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "CreateRemoteHandle failed";
 
     int32_t authState{-1};

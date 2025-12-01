@@ -56,9 +56,9 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(
     auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
     if (abilityName.first == HKS_SUCCESS) {
         std::string str(abilityName.second.begin(), abilityName.second.end());
-        ret = handleMgr->ClearRemoteHandleMap(providerName, str);
+        ret = handleMgr->ClearRemoteHandleMap(providerName, str, processInfo.uidInt);
     } else {
-        ret = handleMgr->ClearRemoteHandleMap(providerName, "");
+        ret = handleMgr->ClearRemoteHandleMap(providerName, "", processInfo.uidInt);
     }
     HKS_IF_TRUE_LOGE(ret != HKS_SUCCESS, "clear index map fail");
 
@@ -94,7 +94,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnOpemRemoteHandle(
     (void)handle;
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
-    auto ret = handleMgr->CreateRemoteHandle(index, paramSet);
+    auto ret = handleMgr->CreateRemoteHandle(processInfo, index, paramSet);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
@@ -224,7 +224,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnClearUkeyPinAuthSta
     CppParamSet paramSet = CppParamSet({uid});
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
-    ret = handleMgr->RemoteClearPinStatus(index, paramSet);
+    ret = handleMgr->RemoteClearPinStatus(processInfo, index, paramSet);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
@@ -237,7 +237,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnGetRemoteProperty(
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
-    ret = handleMgr->GetRemoteProperty(index, propertyId, paramSet, outParams);
+    ret = handleMgr->GetRemoteProperty(processInfo, index, propertyId, paramSet, outParams);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
