@@ -27,6 +27,22 @@
 
 namespace OHOS::Security::Huks {
 
+static bool CheckParamPurpose(const CppParamSet &paramSet) {
+    auto paramPurpose = paramSet.GetParam<HKS_TAG_PURPOSE>();
+    HKS_IF_NOT_TRUE_RETURN(paramPurpose.first == HUKS_SUCCESS, false);
+    uint32_t purpose = paramPurpose.second;
+    return purpose > 0 && (purpose & (purpose - 1)) == 0 && (purpose & ~0x1FF) == 0;
+}
+
+static bool CheckParamClass(const CppParamSet &paramSet)
+{
+    auto paramClass = paramSet.GetParam<HKS_TAG_KEY_CLASS>();
+    if (paramClass.first == HUKS_SUCCESS) {
+        return paramClass.second == HKS_KEY_CLASS_EXTENSION;
+    }
+    return false;
+}
+
 static void RegisterObserverForProcess(const HksProcessInfo &processInfo, const CppParamSet &paramSet)
 {
     int32_t ret = OHOS::Security::Huks::HksAppObserverManager::GetInstance().RegisterObserver(processInfo, paramSet);
@@ -166,6 +182,9 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnInitSession(const H
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    HKS_IF_NOT_TRUE_LOGE_RETURN(CheckParamClass(paramSet), HKS_ERROR_INVALID_ARGUMENT, "invalid class")
+    HKS_IF_NOT_TRUE_LOGE_RETURN(CheckParamPurpose(paramSet), HKS_ERROR_INVALID_PURPOSE,
+        "InitSession purpose check failed")
     RegisterObserverForProcess(processInfo, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null");
@@ -180,6 +199,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUpdateSession(const
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    HKS_IF_NOT_TRUE_LOGE_RETURN(CheckParamClass(paramSet), HKS_ERROR_INVALID_ARGUMENT, "invalid class")
     RegisterObserverForProcess(processInfo, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null");
@@ -194,6 +214,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnFinishSession(const
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    HKS_IF_NOT_TRUE_LOGE_RETURN(CheckParamClass(paramSet), HKS_ERROR_INVALID_ARGUMENT, "invalid class")
     RegisterObserverForProcess(processInfo, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null");
