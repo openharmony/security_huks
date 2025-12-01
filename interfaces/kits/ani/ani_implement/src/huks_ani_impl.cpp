@@ -394,7 +394,7 @@ static CertArray ConstructChainInput()
 static ani_object ConstructArrayString(ani_env *env, uint32_t sz, struct HksBlob *blobs)
 {
     ani_class arrayCls{};
-    std::string arrClassName = arkts::ani_signature::Builder::BuildClass({"escompat", "Array"}).Descriptor();
+    std::string arrClassName = arkts::ani_signature::Builder::BuildClass({"std", "core", "Array"}).Descriptor();
     auto status = env->FindClass(arrClassName.c_str(), &arrayCls);
     HKS_ANI_IF_NOT_SUCC_LOGE_RETURN(status, ani_object{}, "FindClass %" LOG_PUBLIC "s fail %" LOG_PUBLIC "u",
         arrClassName.c_str(), status);
