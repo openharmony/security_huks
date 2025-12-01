@@ -420,12 +420,12 @@ int32_t HksRemoteHandleManager::ClearRemoteHandleMap(const std::string &provider
     std::vector<std::pair<uint32_t, std::string>> indicesToRemove;
     std::vector<ProviderInfo> providersToRemove;
     auto collectToRemoveFunc = [&](std::pair<uint32_t, std::string> key, std::string &value) {
-        std::string newIndex;
+        std::string handle;
         ProviderInfo providerInfo;
-        int32_t ret = ParseAndValidateIndex(value, key.first, providerInfo, newIndex);
+        int32_t ret = ParseAndValidateIndex(key.second, key.first, providerInfo, handle);
         HKS_IF_TRUE_LOGE(ret != HKS_SUCCESS, "ParseAndValidateIndex failed: %" LOG_PUBLIC "d", ret)
-        if (key.first == uid && providerInfo.providerName == providerName) {
-            if (abilityName.empty() || providerInfo.abilityName == abilityName) {
+        if (key.first == uid && providerInfo.m_providerName == providerName) {
+            if (abilityName.empty() || providerInfo.m_abilityName == abilityName) {
                 indicesToRemove.push_back(key);
                 providersToRemove.push_back(providerInfo);
             }
@@ -435,7 +435,6 @@ int32_t HksRemoteHandleManager::ClearRemoteHandleMap(const std::string &provider
     for (auto &key : indicesToRemove) {
         uidIndexToHandle_.Erase(key);
     };
-    providerInfoToNum_.Iterate(collectToRemoveFunc);
     for (ProviderInfo providerInfo : providersToRemove) {
         providerInfoToNum_.Erase(providerInfo);
     }
