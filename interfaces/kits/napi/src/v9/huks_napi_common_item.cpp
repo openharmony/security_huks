@@ -1044,7 +1044,7 @@ void SuccessReturnResultInit(struct HksSuccessReturnResult &resultData)
     // ukey feature
     resultData.index = nullptr;
     resultData.retryCount = 0;
-    resultData.outStatus = 0;
+    resultData.outStatus = -1;
 }
 
 void SuccessListAliasesReturnResultInit(struct HksSuccessListAliasesResult &resultData)
