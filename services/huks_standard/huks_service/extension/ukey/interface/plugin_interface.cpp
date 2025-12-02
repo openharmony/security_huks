@@ -35,22 +35,6 @@ static bool CheckParamPurpose(const CppParamSet &paramSet)
     return purpose > 0 && (purpose & (purpose - 1)) == 0 && (purpose & ~0x1FF) == 0;
 }
 
-static int32_t AddUidToParamSet(const CppParamSet &paramSet, const HksProcessInfo &processInfo,
-    CppParamSet &outParamSet)
-{
-    auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
-    if (uidParam.first == HKS_SUCCESS) {
-        HKS_IF_NOT_TRUE_RETURN(uidParam.second == processInfo.uidInt, HKS_ERROR_INVALID_ARGUMENT);
-        return HKS_SUCCESS;
-    }
-    CppParamSet copyOne(paramSet);
-    std::vector<HksParam> params = {{.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = processInfo.uidInt}};
-    HKS_IF_TRUE_LOGE_RETURN(!copyOne.AddParams(params), HKS_ERROR_INVALID_ARGUMENT,
-        "AddUidToParamSet, AddParams fail");
-    outParamSet = copyOne;
-    return HKS_SUCCESS;
-}
-
 static void RegisterObserverForProcess(const HksProcessInfo &processInfo, const CppParamSet &paramSet)
 {
     int32_t ret = OHOS::Security::Huks::HksAppObserverManager::GetInstance().RegisterObserver(processInfo, paramSet);
@@ -115,13 +99,19 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnOpemRemoteHandle(
     const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet, std::string &handle)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
-    CppParamSet paramSetWithUid;
-    int32_t ret = AddUidToParamSet(paramSet, processInfo, paramSetWithUid);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "AddUidToParamSet fail");
+    CppParamSet paramSetWithUid(paramSet);
+    auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
+    if (uidParam.first == HKS_SUCCESS) {
+        HKS_IF_NOT_TRUE_RETURN(uidParam.second == processInfo.uidInt, HKS_ERROR_INVALID_ARGUMENT);
+    } else {
+        struct HksParam uid = {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = processInfo.uidInt};
+        HKS_IF_TRUE_LOGE_RETURN(!paramSetWithUid.AddParams({uid}), HKS_ERROR_INVALID_ARGUMENT,
+            "AddUidToParamset fail")
+    }
     (void)handle;
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
-    ret = handleMgr->CreateRemoteHandle(processInfo, index, paramSetWithUid);
+    auto ret = handleMgr->CreateRemoteHandle(processInfo, index, paramSetWithUid);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }

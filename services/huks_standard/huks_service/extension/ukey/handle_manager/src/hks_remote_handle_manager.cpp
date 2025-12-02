@@ -291,7 +291,6 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &proce
     
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
             "Remote clear pin status failed: %" "d", ret)
-    uidIndexToAuthState_.Erase({processInfo.uidInt, index});
     return HKS_SUCCESS;
 }
 
