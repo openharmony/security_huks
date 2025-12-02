@@ -236,7 +236,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
         "Get uid tag failed. ret: %" LOG_PUBLIC "d", uid.first)
     ProviderInfo providerInfo;
     std::string handle;
-    int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
+    int32_t ret = ParseAndValidateIndex(index, uid.second, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
@@ -257,9 +257,14 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
 int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, int32_t &state)
 {
+    auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
+    uint32_t uid = processInfo.uidInt;
+    if (uidParam.first == HKS_SUCCESS) {
+        uid = uid.second;
+    }
     ProviderInfo providerInfo;
     std::string handle;
-    int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
+    int32_t ret = ParseAndValidateIndex(index, uid, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
