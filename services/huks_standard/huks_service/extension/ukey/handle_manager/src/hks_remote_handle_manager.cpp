@@ -218,6 +218,8 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
     uidIndexToAuthState_.Iterate([&](std::pair<uint32_t, std::string> key, int32_t value) {
         if (key.first == processInfo.uidInt && key.second == index) {
             keysToRemove.push_back(key);
+            HKS_IF_NOT_SUCC_LOGE(RemoteClearPinStatus(processInfo, index, NULL),
+                "Remote clear pin status failed: %" LOG_PUBLIC "u", processInfo.uidInt)
         }
     });
     for (auto &key : keysToRemove) {
@@ -265,6 +267,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
 
     auto ipccode = proxy->GetUkeyPinAuthState(handle, paramSet, state, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
+    uidIndexToAuthState_.EnsureInsert({processInfo.uidInt, index}, state);
     if (ret == HUKS_ERR_CODE_PIN_LOCKED || ret == HKS_SUCCESS) {
         return ret;
     }
@@ -288,6 +291,7 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &proce
     
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
             "Remote clear pin status failed: %" "d", ret)
+    uidIndexToAuthState_.Erase({processInfo.uidInt, index});
     return HKS_SUCCESS;
 }
 
@@ -444,7 +448,8 @@ int32_t HksRemoteHandleManager::ClearRemoteHandleMap(const std::string &provider
 bool HksRemoteHandleManager::CheckAuthStateIsOk(const HksProcessInfo &processInfo, const std::string &index)
 {
     int32_t state = 0;
-    return uidIndexToAuthState_.Find(std::make_pair(processInfo.uidInt, index), state);
+    HKS_IF_NOT_TRUE_RETURN(uidIndexToAuthState_.Find(std::make_pair(processInfo.uidInt, index), state), false)
+    return state == 1;
 }
 
 void HksRemoteHandleManager::ClearAuthState(const HksProcessInfo &processInfo)
@@ -453,6 +458,8 @@ void HksRemoteHandleManager::ClearAuthState(const HksProcessInfo &processInfo)
     auto iterFunc = [&](std::pair<uint32_t, std::string> key, int32_t &value) {
         if (key.first == processInfo.uidInt) {
             keysToRemove.push_back(key);
+            HKS_IF_NOT_SUCC_LOGE(RemoteClearPinStatus(processInfo, key.second, NULL),
+                "Remote clear pin status failed: %" LOG_PUBLIC "u", processInfo.uidInt)
         }
     };
     uidIndexToAuthState_.Iterate(iterFunc);
