@@ -30,7 +30,7 @@ namespace OHOS::Security::Huks {
 static bool CheckParamPurpose(const CppParamSet &paramSet)
 {
     auto paramPurpose = paramSet.GetParam<HKS_TAG_PURPOSE>();
-    HKS_IF_NOT_TRUE_RETURN(paramPurpose.first == HUKS_SUCCESS, false);
+    HKS_IF_NOT_TRUE_RETURN(paramPurpose.first == HKS_SUCCESS, false);
     uint32_t purpose = paramPurpose.second;
     return purpose > 0 && (purpose & (purpose - 1)) == 0 && (purpose & ~0x1FF) == 0;
 }
@@ -44,7 +44,7 @@ static int32_t AddUidToParamSet(const CppParamSet &paramSet, const HksProcessInf
         return HKS_SUCCESS;
     }
     CppParamSet copyOne(paramSet);
-    HKS_IF_TRUE_LOGE_RETURN(copyOne.ptr_ == nullptr, HKS_ERROR_NULL_POINTER,
+    HKS_IF_TRUE_LOGE_RETURN(copyOne == nullptr, HKS_ERROR_NULL_POINTER,
         "AddUidToParamSet, copyOne.ptr_ is nullptr");
     std::vector<HksParam> params = {{.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = processInfo.uidInt}};
     HKS_IF_TRUE_LOGE_RETURN(!copyOne.AddParams(params), HKS_ERROR_INVALID_ARGUMENT,
@@ -123,7 +123,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnOpemRemoteHandle(
     (void)handle;
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
-    auto ret = handleMgr->CreateRemoteHandle(processInfo, index, paramSetWithUid);
+    ret = handleMgr->CreateRemoteHandle(processInfo, index, paramSetWithUid);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
@@ -219,7 +219,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUpdateSession(const
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnFinishSession(const HksProcessInfo &processInfo,+
+__attribute__((visibility("default"))) int32_t HksExtPluginOnFinishSession(const HksProcessInfo &processInfo,
     const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
     std::vector<uint8_t> &outData)
 {
