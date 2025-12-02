@@ -44,8 +44,6 @@ static int32_t AddUidToParamSet(const CppParamSet &paramSet, const HksProcessInf
         return HKS_SUCCESS;
     }
     CppParamSet copyOne(paramSet);
-    HKS_IF_TRUE_LOGE_RETURN(copyOne == nullptr, HKS_ERROR_NULL_POINTER,
-        "AddUidToParamSet, copyOne.ptr_ is nullptr");
     std::vector<HksParam> params = {{.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = processInfo.uidInt}};
     HKS_IF_TRUE_LOGE_RETURN(!copyOne.AddParams(params), HKS_ERROR_INVALID_ARGUMENT,
         "AddUidToParamSet, AddParams fail");
@@ -125,6 +123,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnOpemRemoteHandle(
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
     ret = handleMgr->CreateRemoteHandle(processInfo, index, paramSetWithUid);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
+    HKS_FREE(paramSetWithUid);
     return ret;
 }
 
