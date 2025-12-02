@@ -260,7 +260,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
     uint32_t uid = processInfo.uidInt;
     if (uidParam.first == HKS_SUCCESS) {
-        uid = uid.second;
+        uid = uidParam.second;
     }
     ProviderInfo providerInfo;
     std::string handle;
