@@ -27,20 +27,30 @@
 
 namespace OHOS::Security::Huks {
 
-static bool CheckParamPurpose(const CppParamSet &paramSet) {
+static bool CheckParamPurpose(const CppParamSet &paramSet)
+{
     auto paramPurpose = paramSet.GetParam<HKS_TAG_PURPOSE>();
     HKS_IF_NOT_TRUE_RETURN(paramPurpose.first == HUKS_SUCCESS, false);
     uint32_t purpose = paramPurpose.second;
     return purpose > 0 && (purpose & (purpose - 1)) == 0 && (purpose & ~0x1FF) == 0;
 }
 
-static bool CheckParamClass(const CppParamSet &paramSet)
+static int32_t AddUidToParamSet(const CppParamSet &paramSet, const HksProcessInfo &processInfo,
+    CppParamSet &outParamSet)
 {
-    auto paramClass = paramSet.GetParam<HKS_TAG_KEY_CLASS>();
-    if (paramClass.first == HUKS_SUCCESS) {
-        return paramClass.second == HKS_KEY_CLASS_EXTENSION;
+    auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
+    if (uidParam.first == HKS_SUCCESS) {
+        HKS_IF_NOT_TRUE_RETURN(uidParam.second == processInfo.uidInt, HKS_ERROR_INVALID_ARGUMENT);
+        return HKS_SUCCESS;
     }
-    return false;
+    CppParamSet copyOne(paramSet);
+    HKS_IF_TRUE_LOGE_RETURN(copyOne.ptr_ == nullptr, HKS_ERROR_NULL_POINTER,
+        "AddUidToParamSet, copyOne.ptr_ is nullptr");
+    std::vector<HksParam> params = {{.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = processInfo.uidInt}};
+    HKS_IF_TRUE_LOGE_RETURN(!copyOne.AddParams(params), HKS_ERROR_INVALID_ARGUMENT,
+        "AddUidToParamSet, AddParams fail");
+    outParamSet = copyOne;
+    return HKS_SUCCESS;
 }
 
 static void RegisterObserverForProcess(const HksProcessInfo &processInfo, const CppParamSet &paramSet)
@@ -107,10 +117,13 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnOpemRemoteHandle(
     const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet, std::string &handle)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    CppParamSet paramSetWithUid;
+    int32_t ret = AddUidToParamSet(paramSet, processInfo, paramSetWithUid);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "AddUidToParamSet fail");
     (void)handle;
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
-    auto ret = handleMgr->CreateRemoteHandle(processInfo, index, paramSet);
+    auto ret = handleMgr->CreateRemoteHandle(processInfo, index, paramSetWithUid);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
@@ -182,7 +195,6 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnInitSession(const H
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
-    HKS_IF_NOT_TRUE_LOGE_RETURN(CheckParamClass(paramSet), HKS_ERROR_INVALID_ARGUMENT, "invalid class")
     HKS_IF_NOT_TRUE_LOGE_RETURN(CheckParamPurpose(paramSet), HKS_ERROR_INVALID_PURPOSE,
         "InitSession purpose check failed")
     RegisterObserverForProcess(processInfo, paramSet);
@@ -199,7 +211,6 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUpdateSession(const
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
-    HKS_IF_NOT_TRUE_LOGE_RETURN(CheckParamClass(paramSet), HKS_ERROR_INVALID_ARGUMENT, "invalid class")
     RegisterObserverForProcess(processInfo, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null");
@@ -208,13 +219,12 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUpdateSession(const
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnFinishSession(const HksProcessInfo &processInfo,
+__attribute__((visibility("default"))) int32_t HksExtPluginOnFinishSession(const HksProcessInfo &processInfo,+
     const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
     std::vector<uint8_t> &outData)
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
-    HKS_IF_NOT_TRUE_LOGE_RETURN(CheckParamClass(paramSet), HKS_ERROR_INVALID_ARGUMENT, "invalid class")
     RegisterObserverForProcess(processInfo, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null");
