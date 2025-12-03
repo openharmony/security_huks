@@ -35,7 +35,7 @@ int32_t HksCheckIsUkeyOperation(const struct HksParamSet *paramSet, int32_t *out
     CppParamSet paramSetCpp(paramSet);
     auto abilityName = paramSetCpp.GetParam<HKS_TAG_KEY_CLASS>();
     if (abilityName.first == HKS_SUCCESS) {
-        if (abilityName.second != HKS_KEY_CLASS_EXTENSION || abilityName.second != HKS_KEY_CLASS_DEFAULT) {
+        if (abilityName.second != HKS_KEY_CLASS_EXTENSION && abilityName.second != HKS_KEY_CLASS_DEFAULT) {
             HKS_LOG_E("Invalid HKS_TAG_KEY_CLASS");
             *outRet = HKS_ERROR_INVALID_ARGUMENT;
             return HKS_ERROR_INVALID_ARGUMENT;
