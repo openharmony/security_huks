@@ -1572,7 +1572,7 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
 
     do {
 #ifdef L2_STANDARD
-        if (HksCheckIsUkeyOperation(paramSet, ret) == HKS_SUCCESS) {
+        if (HksCheckIsUkeyOperation(paramSet, &ret) == HKS_SUCCESS) {
             ret = HksServiceOnUkeyInitSession(processInfo, keyAlias, paramSet, handle);
             HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyInitSession failed, ret = %" LOG_PUBLIC "d", ret)
             break;
@@ -1672,7 +1672,7 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
 #endif
     do {
 #ifdef L2_STANDARD
-        if (HksCheckIsUkeyOperation(paramSet, ret) == HKS_SUCCESS) {
+        if (HksCheckIsUkeyOperation(paramSet, &ret) == HKS_SUCCESS) {
             common.ret = HksServiceOnUkeyUpdateSession(processInfo, handle, paramSet, inData, outData);
             HKS_IF_NOT_SUCC_LOGE(common.ret, "HksServiceOnUkeyUpdateSession failed, ret = %" LOG_PUBLIC "d", common.ret)
             break;
@@ -1774,7 +1774,7 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
             HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "init output data failed")
         }
 #ifdef L2_STANDARD
-        if (HksCheckIsUkeyOperation(paramSet, ret) == HKS_SUCCESS) {
+        if (HksCheckIsUkeyOperation(paramSet, &ret) == HKS_SUCCESS) {
             common.ret = HksServiceOnUkeyFinishSession(processInfo, handle, paramSet, inData, outData);
             HKS_IF_NOT_SUCC_LOGE(common.ret, "HksServiceOnUkeyFinishSession failed, ret = %" LOG_PUBLIC "d", common.ret)
             break;
@@ -1828,7 +1828,7 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
     int32_t ret;
     do {
 #ifdef L2_STANDARD
-        if (HksCheckIsUkeyOperation(paramSet, ret) == HKS_SUCCESS) {
+        if (HksCheckIsUkeyOperation(paramSet, &ret) == HKS_SUCCESS) {
             ret = HksServiceOnUkeyAbortSession(processInfo, handle, paramSet);
             HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyFinishSession failed, ret = %" LOG_PUBLIC "d", ret)
             break;
