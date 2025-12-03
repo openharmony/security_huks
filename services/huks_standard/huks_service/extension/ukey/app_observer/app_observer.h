@@ -80,6 +80,7 @@ public:
 
     int32_t RegisterObserver(const HksProcessInfo &processInfo, const CppParamSet &paramSet);
     void CleanupTriggeredObserver(const std::string &bundleName);
+    void UnregisterAllObservers();
 
 private:
     HksAppObserverManager() = default;
