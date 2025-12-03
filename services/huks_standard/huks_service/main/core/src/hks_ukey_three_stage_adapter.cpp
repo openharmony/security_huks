@@ -28,7 +28,7 @@
 
 constexpr uint32_t MAX_SESSION_INDEX_SIZE = 1024;
 
-int32_t HksCheckIsUkeyOperation(const struct HksParamSet *paramSet, int32_t &outRet)
+int32_t HksCheckIsUkeyOperation(const struct HksParamSet *paramSet, int32_t *outRet)
 {
     int32_t ret = HksCheckParamSetValidity(paramSet);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksCheckParamSetValidity fail. ret: %" LOG_PUBLIC "d", ret);
@@ -37,8 +37,8 @@ int32_t HksCheckIsUkeyOperation(const struct HksParamSet *paramSet, int32_t &out
     if (abilityName.first == HKS_SUCCESS) {
         if (abilityName.second != HKS_KEY_CLASS_EXTENSION || abilityName.second != HKS_KEY_CLASS_DEFAULT) {
             HKS_LOG_E("Invalid HKS_TAG_KEY_CLASS");
-            outRet = HKS_ERROR_INVALID_ARGUMENT;
-            return outRet;
+            *outRet = HKS_ERROR_INVALID_ARGUMENT;
+            return HKS_ERROR_INVALID_ARGUMENT;
         }
         if (abilityName.second == HKS_KEY_CLASS_EXTENSION){
             HKS_LOG_I("HksCheckIsUkeyOperation: is ukey operation");
