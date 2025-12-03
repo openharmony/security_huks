@@ -70,6 +70,7 @@ public:
         const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
     int32_t OnAbortSession(const HksProcessInfo &processInfo, const uint32_t &handle,
         const CppParamSet &paramSet);
+    int32_t OnUnregisterAllObservers();
     bool isDeath = false;
 
 private:
