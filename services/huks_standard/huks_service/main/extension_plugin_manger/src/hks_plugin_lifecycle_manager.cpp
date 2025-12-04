@@ -82,12 +82,14 @@ int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &
         }
 
         auto pluginLifeCycleMgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
-        if (pluginLifeCycleMgr != nullptr) {
-            int32_t ret = pluginLifeCycleMgr->OnUnregisterAllObservers();
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("Failed to unregister all observers, ret = %{public}d", ret);
-            }
+        if (pluginLifeCycleMgr == nullptr) {
+            ret = HKS_ERROR_NULL_POINTER;
+            HKS_LOG_E("Failed to get pluginLifeCycleMgr instance.");
+            break;
         }
+            
+        ret = pluginLifeCycleMgr->OnUnregisterAllObservers();
+        HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS, "Failed to unregister all observers, ret = %{public}d", ret)
 
         ret = pluginLoader->UnLoadPlugins(info, providerName, paramSet, m_pluginProviderMap);
         HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS, "close lib failed!, ret = %{public}d", ret)
@@ -335,7 +337,6 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnUnregisterAllObservers())
     
     int32_t ret = (*reinterpret_cast<OnUnregisterAllObserversFunc>(funcPtr))();
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "UnregisterAllObservers fail, ret = %{public}d", ret)
-    HKS_LOG_I("unregister all observers success");
     return HKS_SUCCESS;
 }
 }

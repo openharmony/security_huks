@@ -166,45 +166,45 @@ int32_t HksAppObserverManager::RegisterObserver(const HksProcessInfo &processInf
     return HKS_SUCCESS;
 }
 
-void HksAppObserverManager::UnregisterAllObservers()
+int32_t HksAppObserverManager::UnregisterAllObservers()
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    
-    if (observers_.empty()) {
-        HKS_LOG_I("UnregisterAllObservers: No observers to unregister");
-        return;
-    }
-
-    HKS_LOG_I("UnregisterAllObservers: Start unregistering %{public}zu observers", observers_.size());
-
+ 
+    HKS_IF_TRUE_LOGI_RETURN(observers_.empty(), HKS_SUCCESS, "UnregisterAllObservers: No observers to unregister");
+ 
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    HKS_IF_NULL_LOGE_RETURN_VOID(samgr, "UnregisterAllObservers: Get SystemAbilityManager failed");
-
+    HKS_IF_NULL_LOGE_RETURN(samgr, HKS_ERROR_NULL_POINTER, "UnregisterAllObservers: Get SystemAbilityManager failed");
+ 
     auto remote = samgr->GetSystemAbility(APP_MGR_SERVICE_ID);
-    HKS_IF_NULL_LOGE_RETURN_VOID(remote, "UnregisterAllObservers: Get APP_MGR_SERVICE failed");
-
+    HKS_IF_NULL_LOGE_RETURN(remote, HKS_ERROR_NULL_POINTER, "UnregisterAllObservers: Get APP_MGR_SERVICE failed");
+ 
     auto appMgr = iface_cast<AppExecFwk::IAppMgr>(remote);
-    HKS_IF_NULL_LOGE_RETURN_VOID(appMgr, "UnregisterAllObservers: Cast to IAppMgr failed");
-
-    // 遍历所有observers并解注册
+    HKS_IF_NULL_LOGE_RETURN(appMgr, HKS_ERROR_NULL_POINTER, "UnregisterAllObservers: Cast to IAppMgr failed");
+ 
+    int32_t finalRet = HKS_SUCCESS;
+    int32_t totalCount = observers_.size();
+    int32_t failedCount = 0;
+    int32_t successCount = 0;
+ 
     for (auto it = observers_.begin(); it != observers_.end(); ) {
         const std::string &bundleName = it->first;
         sptr<HksAppObserver> observer = it->second;
-        
         int32_t ret = appMgr->UnregisterApplicationStateObserver(observer);
-        if (ret != 0) {
-            HKS_LOG_E("UnregisterAllObservers: Failed for bundle %{public}s, ret=%{public}d", 
-                bundleName.c_str(), ret);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("UnregisterAllObservers: Failed for bundle %{public}s, ret=%{public}d", bundleName.c_str(), ret);
+            finalRet = HKS_ERROR_INTERNAL_ERROR;
+            failedCount++;
         } else {
-            HKS_LOG_I("UnregisterAllObservers: Successfully unregistered observer for bundle: %{public}s", 
+            HKS_LOG_I("UnregisterAllObservers: Successfully unregistered observer for bundle: %{public}s",
                 bundleName.c_str());
+            successCount++;
         }
-        
-        // 无论成功失败都从map中移除
         it = observers_.erase(it);
     }
-    
-    HKS_LOG_I("UnregisterAllObservers: Completed, all observers cleared");
+ 
+    HKS_LOG_I("UnregisterAllObservers: Completed, total=%{public}d, success=%{public}d,"
+        "failed=%{public}d, finalRet=%{public}d", totalCount, successCount, failedCount, finalRet);
+    return finalRet;
 }
 
 void HksAppObserverManager::CleanupTriggeredObserver(const std::string &bundleName)
