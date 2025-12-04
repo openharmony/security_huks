@@ -56,7 +56,7 @@ public:
     {
         if(handle == "HksSessionMgrTest003") {
             authState = 0;
-            errcode = 0;
+            errcode = 1;
             return 0;
         }
         return -1;
