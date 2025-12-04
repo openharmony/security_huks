@@ -169,26 +169,23 @@ int32_t HksAppObserverManager::RegisterObserver(const HksProcessInfo &processInf
 int32_t HksAppObserverManager::UnregisterAllObservers()
 {
     std::lock_guard<std::mutex> lock(mutex_);
- 
+
     HKS_IF_TRUE_LOGI_RETURN(observers_.empty(), HKS_SUCCESS, "UnregisterAllObservers: No observers to unregister");
- 
+
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     HKS_IF_NULL_LOGE_RETURN(samgr, HKS_ERROR_NULL_POINTER, "UnregisterAllObservers: Get SystemAbilityManager failed");
- 
+
     auto remote = samgr->GetSystemAbility(APP_MGR_SERVICE_ID);
     HKS_IF_NULL_LOGE_RETURN(remote, HKS_ERROR_NULL_POINTER, "UnregisterAllObservers: Get APP_MGR_SERVICE failed");
- 
+
     auto appMgr = iface_cast<AppExecFwk::IAppMgr>(remote);
     HKS_IF_NULL_LOGE_RETURN(appMgr, HKS_ERROR_NULL_POINTER, "UnregisterAllObservers: Cast to IAppMgr failed");
- 
+
     int32_t finalRet = HKS_SUCCESS;
     int32_t totalCount = observers_.size();
     int32_t failedCount = 0;
-    int32_t successCount = 0;
- 
-    for (auto it = observers_.begin(); it != observers_.end(); ) {
-        const std::string &bundleName = it->first;
-        sptr<HksAppObserver> observer = it->second;
+
+    for (const auto& [bundleName, observer] : observers_) {
         int32_t ret = appMgr->UnregisterApplicationStateObserver(observer);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("UnregisterAllObservers: Failed for bundle %{public}s, ret=%{public}d", bundleName.c_str(), ret);
@@ -197,13 +194,14 @@ int32_t HksAppObserverManager::UnregisterAllObservers()
         } else {
             HKS_LOG_I("UnregisterAllObservers: Successfully unregistered observer for bundle: %{public}s",
                 bundleName.c_str());
-            successCount++;
         }
-        it = observers_.erase(it);
     }
- 
+    observers_.clear();
+
+    int32_t successCount = totalCount - failedCount;
     HKS_LOG_I("UnregisterAllObservers: Completed, total=%{public}d, success=%{public}d,"
         "failed=%{public}d, finalRet=%{public}d", totalCount, successCount, failedCount, finalRet);
+    usleep(10 * 1000);
     return finalRet;
 }
 
