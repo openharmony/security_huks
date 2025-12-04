@@ -17,7 +17,6 @@
 #define HKS_APP_OBSERVER_H
 
 #include <atomic>
-#include <stdint.h>
 #include <string>
 #include <mutex>
 #include <map>
