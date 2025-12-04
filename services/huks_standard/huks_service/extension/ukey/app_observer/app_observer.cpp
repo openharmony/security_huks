@@ -27,6 +27,7 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
+#define DELAY_10MS_IN_US (10 * 1000)
 
 HksAppObserver::HksAppObserver(const std::string &bundleName)
     : targetBundleName_(bundleName)
@@ -201,7 +202,7 @@ int32_t HksAppObserverManager::UnregisterAllObservers()
     int32_t successCount = totalCount - failedCount;
     HKS_LOG_I("UnregisterAllObservers: Completed, total=%{public}d, success=%{public}d,"
         "failed=%{public}d, finalRet=%{public}d", totalCount, successCount, failedCount, finalRet);
-    usleep(10 * 1000);
+    usleep(DELAY_10MS_IN_US);
     return finalRet;
 }
 
