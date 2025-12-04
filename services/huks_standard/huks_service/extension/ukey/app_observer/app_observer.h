@@ -17,6 +17,7 @@
 #define HKS_APP_OBSERVER_H
 
 #include <atomic>
+#include <stdint.h>
 #include <string>
 #include <mutex>
 #include <map>
@@ -80,7 +81,7 @@ public:
 
     int32_t RegisterObserver(const HksProcessInfo &processInfo, const CppParamSet &paramSet);
     void CleanupTriggeredObserver(const std::string &bundleName);
-    void UnregisterAllObservers();
+    int32_t UnregisterAllObservers();
 
 private:
     HksAppObserverManager() = default;

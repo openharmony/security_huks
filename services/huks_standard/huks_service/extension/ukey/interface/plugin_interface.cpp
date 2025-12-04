@@ -246,8 +246,8 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnGetRemoteProperty(
 __attribute__((visibility("default"))) int32_t HksExtPluginOnUnregisterAllObservers()
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
-    HksAppObserverManager::GetInstance().UnregisterAllObservers();
-    HKS_LOG_I("leave %" LOG_PUBLIC "s", __FUNCTION__);
-    return HKS_SUCCESS;
+    int32_t ret = HksAppObserverManager::GetInstance().UnregisterAllObservers();
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
+    return ret;
 }
 }
