@@ -102,6 +102,12 @@ public:
                 HKS_FREE(it->data->common.function);
                 HKS_FREE(it->data->common.callerInfo.name);
                 HKS_FREE(it->data->common.result.errMsg);
+                if (IF_UKEY_EVENT(it->data->common.eventId)) {
+                    HKS_FREE(it->data->ukeyInfo.providerName);
+                    HKS_FREE(it->data->ukeyInfo.abilityName);
+                    HKS_FREE(it->data->ukeyInfo.resourceId);
+                    HKS_FREE(it->data->ukeyInfo.propertyId);
+                }
                 HKS_FREE(it->data);
             }
         }

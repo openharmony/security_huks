@@ -320,9 +320,9 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
 
 void FreeEventInfoSpecificPtr(struct HksEventInfo *eventInfo)
 {
-    HksFreeImpl(eventInfo->common.function);
-    HksFreeImpl(eventInfo->common.callerInfo.name);
-    HksFreeImpl(eventInfo->common.result.errMsg);
+    HKS_FREE(eventInfo->common.function);
+    HKS_FREE(eventInfo->common.callerInfo.name);
+    HKS_FREE(eventInfo->common.result.errMsg);
 }
 
 static bool CheckKeyInfo(const HksEventKeyInfo *keyInfo1, const HksEventKeyInfo *keyInfo2)
