@@ -20,6 +20,7 @@
 #include <string>
 #include <sys/stat.h>
 #include <unordered_map>
+#include "hks_error_code.h"
 #include "securec.h"
 
 #include "hks_error_msg.h"
@@ -35,6 +36,7 @@
 #include "hks_type_inner.h"
 #include "hks_util.h"
 #include "hks_ha_event_report.h"
+#include "hks_ukey_three_stage_adapter.h"
 
 static uint32_t g_threeStageEvent[] = {
     HKS_EVENT_CRYPTO,
@@ -475,6 +477,7 @@ static int32_t HksFreshAndReport(const char *funcName, const struct HksProcessIn
             { .tag = HKS_TAG_PARAM3_BUFFER, .blob = { sizeof(HksEventInfo), (uint8_t *)eventInfo } },
             { .tag = HKS_TAG_PARAM0_NULL, .blob = { errMsg.size, (uint8_t *)errMsg.data } },
             { .tag = HKS_TAG_TRACE_ID, .uint64Param = info->traceId },
+            { .tag = HKS_TAG_PARAM1_UINT32, .uint32Param = HksCheckIsUkeyOperation(paramSet, &ret) == HKS_SUCCESS }
         };
 
         ret = HksAddParams(reportParamSet, params, HKS_ARRAY_SIZE(params));

@@ -119,19 +119,19 @@ int32_t HksParamSetToEventInfoForDataSize(const struct HksParamSet *paramSetIn, 
 
         struct HksParam *paramToEventInfo = nullptr;
         if (HksGetParam(paramSetIn, HKS_TAG_COMPONENT_NAME, &paramToEventInfo) == HKS_SUCCESS) {
-            CopyParamBlobData(&eventInfo->dataSizeInfo.component, paramToEventInfo);
+            eventInfo->dataSizeInfo.component = reinterpret_cast<char *>(paramToEventInfo->blob.data);
         }
 
         if (HksGetParam(paramSetIn, HKS_TAG_PARTITION_NAME, &paramToEventInfo) == HKS_SUCCESS) {
-            CopyParamBlobData(&eventInfo->dataSizeInfo.partition, paramToEventInfo);
+            eventInfo->dataSizeInfo.partition = reinterpret_cast<char *>(paramToEventInfo->blob.data);
         }
 
         if (HksGetParam(paramSetIn, HKS_TAG_FILE_OF_FOLDER_PATH, &paramToEventInfo) == HKS_SUCCESS) {
-            CopyParamBlobData(&eventInfo->dataSizeInfo.foldPath, paramToEventInfo);
+            eventInfo->dataSizeInfo.foldPath = reinterpret_cast<char *>(paramToEventInfo->blob.data);
         }
 
         if (HksGetParam(paramSetIn, HKS_TAG_FILE_OF_FOLDER_SIZE, &paramToEventInfo) == HKS_SUCCESS) {
-            CopyParamBlobData(&eventInfo->dataSizeInfo.foldSize, paramToEventInfo);
+            eventInfo->dataSizeInfo.foldSize = reinterpret_cast<char *>(paramToEventInfo->blob.data);
         }
 
         if (HksGetParam(paramSetIn, HKS_TAG_REMAIN_PARTITION_SIZE, &paramToEventInfo) == HKS_SUCCESS) {
@@ -139,7 +139,7 @@ int32_t HksParamSetToEventInfoForDataSize(const struct HksParamSet *paramSetIn, 
         }
     } while (0);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("report ParamSetToEventInfo failed! ret = %" LOG_PUBLIC "d", ret);
+        HKS_LOG_E("report ParamSetToEventInfo failed! ret = %" LOG_PUBLIC "d", ret);
         FreeEventInfoSpecificPtr(eventInfo);
     }
     return ret;
@@ -170,22 +170,22 @@ int32_t HksEventInfoToMapForDataSize(const struct HksEventInfo *eventInfo,
     HKS_IF_NULL_LOGI_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "HksEventInfoToMapForDataSize evenInfo is null")
 
     const char *component = (eventInfo->dataSizeInfo.component != nullptr) ?
-        eventInfo->dataSizeInfo.component : "unknown";
+        eventInfo->dataSizeInfo.component : EVENT_PROPERTY_UNKNOWN;
     auto ret = reportData.insert_or_assign("componentName", std::string(component));
     HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert component failed!");
 
     const char *partition = (eventInfo->dataSizeInfo.partition != nullptr) ?
-        eventInfo->dataSizeInfo.partition : "unknown";
+        eventInfo->dataSizeInfo.partition : EVENT_PROPERTY_UNKNOWN;
     ret = reportData.insert_or_assign("partitionName", std::string(partition));
     HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert partition failed!");
 
     const char *foldPath = (eventInfo->dataSizeInfo.foldPath != nullptr) ?
-        eventInfo->dataSizeInfo.foldPath : "unknown";
+        eventInfo->dataSizeInfo.foldPath : EVENT_PROPERTY_UNKNOWN;
     ret = reportData.insert_or_assign("filepath", std::string(foldPath));
     HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert foldPath failed!");
 
     const char *foldSize = (eventInfo->dataSizeInfo.foldSize != nullptr) ?
-        eventInfo->dataSizeInfo.foldSize : "unknown";
+        eventInfo->dataSizeInfo.foldSize : EVENT_PROPERTY_UNKNOWN;
     ret = reportData.insert_or_assign("filesize", std::string(foldSize));
     HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert foldSize failed!");
 

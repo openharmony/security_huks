@@ -121,6 +121,7 @@ if (os_level == "standard") {
       "src/hks_report_three_stage.cpp",
       "src/hks_report_three_stage_build.cpp",
       "src/hks_report_three_stage_get.cpp",
+      "src/hks_report_ukey_event.cpp",
       "src/hks_ukey_three_stage_adapter.cpp",
     ]
 
