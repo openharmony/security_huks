@@ -74,7 +74,7 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
         HKS_ERROR_UKY_PROVIDER_MGR_REGESTER_REACH_MAX_NUM, "OnRegisterProvider failed, providerNum is too much.")
     ProviderInfo providerInfo{};
     int32_t ret = HksGetProviderInfo(processInfo, providerName, paramSet, providerInfo);
-    providerInfo.m_userid = processInfo.useridInt;
+    providerInfo.m_userid = processInfo.userIdInt;
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
         "Fail to get provider info. providerName: %" LOG_PUBLIC "s. ret: %" LOG_PUBLIC "d", providerName.c_str(), ret)
     HKS_LOG_I("bundleName: %" LOG_PUBLIC "s, abilityName: %" LOG_PUBLIC "s",
@@ -89,7 +89,7 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
         providerInfo.m_bundleName.c_str(), providerInfo.m_abilityName.c_str())
     AAFwk::Want want{};
     want.SetElementName(providerInfo.m_bundleName, providerInfo.m_abilityName);
-    sptr<ExtensionConnection> connect(new (std::nothrow) ExtensionConnection());
+    sptr<ExtensionConnection> connect(new (std::nothrow) ExtensionConnection(processInfo));
     HKS_IF_TRUE_LOGE_RETURN(connect == nullptr, HKS_ERROR_NULL_POINTER, "new ExtensionConnection failed");
     connect->callBackFromPlugin(callback);
     if (!connect->IsConnected()) {
