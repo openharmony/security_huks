@@ -17,6 +17,7 @@
 #include "hks_provider_life_cycle_manager.h"
 #include "hks_remote_handle_manager.h"
 #include "hks_session_manger.h"
+#include "hks_ukey_common.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -121,8 +122,8 @@ int32_t HksSessionManager::ExtensionInitSession(const HksProcessInfo &processInf
     auto ipcCode = proxy->InitSession(sIndexHandle, newParamSet, sessionHandle, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy InitSession ipcCode: %" LOG_PUBLIC "d",
         ipcCode)
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_REMOTE_OPERATION_FAILED,
-        "proxy InitSession get handle failed: %" LOG_PUBLIC "d", ret)
+    ret = ConvertExtensionToHksErrorCode(ret);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "proxy InitSession get handle failed: %" LOG_PUBLIC "d", ret)
 
     auto random = GenRandomUint32();
     HKS_IF_TRUE_LOGE_RETURN(random.first != HKS_SUCCESS, random.first,
@@ -154,8 +155,9 @@ int32_t HksSessionManager::ExtensionUpdateSession(const HksProcessInfo &processI
     auto ipcCode = proxy->UpdateSession(handleInfo.m_skfSessionHandle, newParamSet, inData, outData, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy UpdateSession ipcCode: %" LOG_PUBLIC "d",
         ipcCode)
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_REMOTE_OPERATION_FAILED,
-        "proxy UpdateSession failed: %" LOG_PUBLIC "d", ret)
+    ret = ConvertExtensionToHksErrorCode(ret);
+    ClearSessionMapByHandle(ret, handle);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "proxy UpdateSession failed: %" LOG_PUBLIC "d", ret)
 
     return HKS_SUCCESS;
 }
@@ -176,8 +178,9 @@ int32_t HksSessionManager::ExtensionFinishSession(const HksProcessInfo &processI
     auto ipcCode = proxy->FinishSession(handleInfo.m_skfSessionHandle, newParamSet, inData, outData, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy FinishSession ipcCode: %" LOG_PUBLIC "d",
         ipcCode)
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_REMOTE_OPERATION_FAILED,
-        "FinishSession failed: %" LOG_PUBLIC "d", ret)
+    ret = ConvertExtensionToHksErrorCode(ret);
+    ClearSessionMapByHandle(ret, handle);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "FinishSession failed: %" LOG_PUBLIC "d", ret)
     m_handlers.Erase(handle);
     return HKS_SUCCESS;
 }
@@ -199,8 +202,9 @@ int32_t HksSessionManager::ExtensionAbortSession(const HksProcessInfo &processIn
     auto ipcCode = proxy->CloseRemoteHandle(handleInfo.m_skfSessionHandle, newParamSet, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL,
         "proxy use CloseRemoteHandle to abort ipcCode: %" LOG_PUBLIC "d", ipcCode)
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_REMOTE_OPERATION_FAILED,
-        "abort closeRemoteHandle failed: %" LOG_PUBLIC "d", ret)
+    ret = ConvertExtensionToHksErrorCode(ret);
+    ClearSessionMapByHandle(ret, handle);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "abort closeRemoteHandle failed: %" LOG_PUBLIC "d", ret)
     m_handlers.Erase(handle);
     return HKS_SUCCESS;
 }
@@ -259,6 +263,14 @@ bool HksSessionManager::HksClearHandle(const HksProcessInfo &processInfo, const 
     } while (false);
     ClearSessionHandleMap(toRemove);
     return true;
+}
+
+void HksSessionManager::ClearSessionMapByHandle(int32_t ret, uint32_t handle)
+{
+    if (ret != HUKS_ERR_CODE_CRYPTO_FAIL && ret != HUKS_ERR_CODE_ITEM_NOT_EXIST) {
+        return;
+    }
+    m_handlers.Erase(handle);
 }
 
 bool CheckAndAppendProcessInfo(CppParamSet &paramSet, const HksProcessInfo &processInfo)

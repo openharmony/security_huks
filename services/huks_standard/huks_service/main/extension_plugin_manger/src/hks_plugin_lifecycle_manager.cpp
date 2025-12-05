@@ -49,7 +49,7 @@ int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &in
         (const HksProcessInfo &processInfo) {
         HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
         isDeath = true;
-        UnRegisterProvider(info, providerName, paramSet, isDeath);
+        UnRegisterProvider(processInfo, providerName, paramSet, isDeath);
     });
 
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "regist provider method in plugin loader is fail")
