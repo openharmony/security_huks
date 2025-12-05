@@ -117,6 +117,17 @@
             }
           },
           {
+            "name": "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukschipsetsdk",
+            "header": {
+              "header_files": [
+                "hks_api.h",
+                "hks_param.h",
+                "hks_type.h"
+              ],
+              "header_base": "//base/security/huks/interfaces/inner_api/huks_standard/main/include"
+            }
+          },
+          {
             "name": "//base/security/huks/interfaces/kits/cj:cj_huks_ffi"
           }
         ],
