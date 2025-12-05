@@ -49,9 +49,12 @@ public:
     std::string m_abilityName{};
     std::string m_bundleName{};
     uint32_t m_userid = 0;
-
+    ProviderInfo() = default;
     bool operator==(const ProviderInfo &other) const;
     bool operator<(const ProviderInfo &other) const;
+    ProviderInfo(const std::string& providerName, const std::string& abilityName, const std::string& bundleName,
+        uint32_t userid = 0) : m_providerName(providerName), m_abilityName(abilityName), m_bundleName(bundleName),
+        m_userid(userid) {}
 };
 
 class HksExtAbilityConnectInfo {
