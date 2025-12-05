@@ -173,9 +173,11 @@ int32_t HksProviderLifeCycleManager::HksHapGetConnectInfos(const HksProcessInfo 
         HKS_LOG_I("HksHapGetConnectInfos abilityName: %" LOG_PUBLIC "s", abilityNameStr.c_str());
         m_providerMap.Iterate([&](const ProviderInfo &providerInfo,
             std::shared_ptr<HksExtAbilityConnectInfo> &connectionInfo) {
-            ProviderInfo tmpInfo{bundleName, abilityNameStr, providerName, processInfo.userIdInt};
-            if (tmpInfo == providerInfo) {
-                connectionInfos.emplace_back(providerInfo, connectionInfo);
+            if (providerInfo.m_bundleName == bundleName &&	
+                providerInfo.m_abilityName == abilityNameStr &&	
+                providerInfo.m_providerName == providerName &&
+                providerInfo.m_userid == processInfo.userIdInt) {
+                connectionInfos.emplace_back(providerInfo, connectionInfo);	
             }
         });
         return HKS_SUCCESS;
