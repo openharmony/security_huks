@@ -518,5 +518,7 @@ void HksRemoteHandleManager::ClearMapByHandle(const int32_t &ret, const std::str
         uidIndexToAuthState_.Erase(key);
     }
 }
+
+}
 }
 }
