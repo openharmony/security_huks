@@ -49,6 +49,7 @@ int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &in
         (const HksProcessInfo &processInfo) {
         HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
         isDeath = true;
+        (void)info;
         UnRegisterProvider(processInfo, providerName, paramSet, isDeath);
     });
 
