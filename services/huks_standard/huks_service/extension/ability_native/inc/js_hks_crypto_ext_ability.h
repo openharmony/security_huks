@@ -70,7 +70,7 @@ struct CallJsParam {
     std::mutex CryptoOperateMutex;
     std::condition_variable CryptoOperateCondition;
     bool isReady = false;
-    int32_t errcode {};
+    int32_t errcode { HKS_ERROR_EXT_JS_METHON_ERROR };
     std::string funcName;
     AbilityRuntime::JsRuntime *jsRuntime;
     NativeReference *jsObj;

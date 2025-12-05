@@ -610,7 +610,6 @@ int32_t CallJsMethod(const std::string &funcName, AbilityRuntime::JsRuntime &jsR
         auto param = weakPtrParam.lock();
         if (param == nullptr || param->jsRuntime == nullptr) {
             LOGE("failed to get CallJsParam.");
-            param->errcode = HKS_ERROR_EXT_NULLPTR;
             return;
         }
 
