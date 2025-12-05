@@ -55,8 +55,8 @@ public:
         uint32_t& retryCnt)
     {
         if(handle == "HksSessionMgrTest003") {
-            authState = 0;
-            errcode = 1;
+            authState = 1;
+            errcode = 0;
             return 0;
         }
         return -1;
