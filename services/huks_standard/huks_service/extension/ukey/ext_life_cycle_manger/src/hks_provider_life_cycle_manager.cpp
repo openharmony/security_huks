@@ -145,18 +145,10 @@ int32_t HksProviderLifeCycleManager::GetAllProviderInfosByProviderName(const std
         std::shared_ptr<HksExtAbilityConnectInfo> &connectionInfo) {
         if (providerName == "HksInnerNullProviderName") {
             ProviderInfo info = providerInfo;
-            info.m_bundleName = providerInfo.m_bundleName;
-            info.m_abilityName = providerInfo.m_abilityName;
-            info.m_providerName = providerInfo.m_providerName;
-            info.m_userid = providerInfo.m_userid;
             providerInfos.push_back(info);
             ret = HKS_SUCCESS;
         } else if (providerInfo.m_providerName == providerName) {
             ProviderInfo info = providerInfo;
-            info.m_bundleName = providerInfo.m_bundleName;
-            info.m_abilityName = providerInfo.m_abilityName;
-            info.m_providerName = providerInfo.m_providerName;
-            info.m_userid = providerInfo.m_userid;
             providerInfos.push_back(info);
             ret = HKS_SUCCESS;
         }
@@ -181,10 +173,8 @@ int32_t HksProviderLifeCycleManager::HksHapGetConnectInfos(const HksProcessInfo 
         HKS_LOG_I("HksHapGetConnectInfos abilityName: %" LOG_PUBLIC "s", abilityNameStr.c_str());
         m_providerMap.Iterate([&](const ProviderInfo &providerInfo,
             std::shared_ptr<HksExtAbilityConnectInfo> &connectionInfo) {
-            if (providerInfo.m_bundleName == bundleName &&
-                providerInfo.m_abilityName == abilityNameStr &&
-                providerInfo.m_providerName == providerName &&
-                providerInfo.m_userid == processInfo.userIdInt) {
+            ProviderInfo tmpInfo{bundleName, abilityNameStr, providerName, processInfo.userIdInt};
+            if (tmpInfo == providerInfo) {
                 connectionInfos.emplace_back(providerInfo, connectionInfo);
             }
         });
