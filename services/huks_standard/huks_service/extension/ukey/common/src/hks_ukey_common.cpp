@@ -160,7 +160,8 @@ int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCert
     return HKS_SUCCESS;
 }
 
-int32_t ConvertExtensionToHksErrorCode(const int32_t extensionErrorCode) {
+int32_t ConvertExtensionToHksErrorCode(const int32_t extensionErrorCode)
+{
     auto it = errorMapping.find(extensionErrorCode);
     if (it != errorMapping.end()) {
         return it->second;
