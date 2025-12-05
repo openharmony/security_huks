@@ -89,7 +89,7 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest002, TestSize.Level0) {
     CppParamSet paramSet{params};
     std::string providerName = "HksSessionMgrTest002";
     auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
-        [providerMgr, processInfo, providerName, paramSet](bool deathFlag) {
+        [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
         HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
         providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true);
     });
@@ -134,7 +134,7 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest003, TestSize.Level0) {
     CppParamSet paramSet{params};
     std::string providerName = "HksSessionMgrTest003";
     auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
-        [providerMgr, processInfo, providerName, paramSet](bool deathFlag) {
+        [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
         HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
         providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true);
     });
@@ -147,6 +147,7 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest003, TestSize.Level0) {
     EXPECT_TRUE(root.SetValue("providerName", std::string("HksSessionMgrTest003")));
     EXPECT_TRUE(root.SetValue("abilityName", std::string("HiTaiCryptoAbility")));
     EXPECT_TRUE(root.SetValue("bundleName", std::string("com.huawei.extensionhap.test")));
+    EXPECT_TRUE(root.SetValue("userid", processInfo.userIdInt));
     EXPECT_TRUE(root.SetValue("index", std::string("HksSessionMgrTest003")));
     std::string wrappedIndex = root.Serialize(false);
     
@@ -155,7 +156,7 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest003, TestSize.Level0) {
     ret = handleMgr->CreateRemoteHandle(processInfo, wrappedIndex, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "CreateRemoteHandle failed";
 
-    int32_t authState{-1};
+    int32_t authState{1};
     uint32_t retryCount{0};
     ret = handleMgr->RemoteVerifyPin(processInfo, wrappedIndex, paramSet, authState, retryCount);
     EXPECT_EQ(ret, HKS_SUCCESS) << "RemoteVerifyPin failed";

@@ -38,6 +38,7 @@ namespace Huks {
 constexpr const char *PROVIDER_NAME_KEY = "providerName";
 constexpr const char *ABILITY_NAME_KEY = "abilityName";
 constexpr const char *BUNDLE_NAME_KEY = "bundleName";
+constexpr const char *USERID_KEY = "userid";
 constexpr const size_t MAX_INDEX_SIZE = 512;
 constexpr const int32_t MAX_PROVIDER_TOTAL_NUM = 100;
 constexpr const int32_t MAX_PROVIDER_NUM_PER_UID = 10;
@@ -65,7 +66,8 @@ static int32_t WrapIndexWithProviderInfo(const ProviderInfo& providerInfo, const
     HKS_IF_TRUE_LOGE_RETURN(root.IsNull(), HKS_ERROR_JSON_SERIALIZE_FAILED, "Create JSON object failed")
     if (!root.SetValue(PROVIDER_NAME_KEY, providerInfo.m_providerName) ||
         !root.SetValue(ABILITY_NAME_KEY, providerInfo.m_abilityName) ||
-        !root.SetValue(BUNDLE_NAME_KEY, providerInfo.m_bundleName)) {
+        !root.SetValue(BUNDLE_NAME_KEY, providerInfo.m_bundleName) ||
+        !root.SetValue(USERID_KEY, providerInfo.m_userid)) {
         HKS_LOG_E("Set provider info to index failed");
         return HKS_ERROR_JSON_SERIALIZE_FAILED;
     }
@@ -106,11 +108,14 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
     auto providerNameResult = root.GetValue(PROVIDER_NAME_KEY).ToString();
     auto abilityNameResult = root.GetValue(ABILITY_NAME_KEY).ToString();
     auto bundleNameResult = root.GetValue(BUNDLE_NAME_KEY).ToString();
+    auto useridResult = root.GetValue(USERID_KEY).ToNumber<int32_t>();
     HKS_IF_TRUE_LOGE_RETURN(providerNameResult.first != HKS_SUCCESS || abilityNameResult.first != HKS_SUCCESS ||
-        bundleNameResult.first != HKS_SUCCESS, HKS_ERROR_JSON_TYPE_MISMATCH, "Get provider info fields failed")
+        bundleNameResult.first != HKS_SUCCESS || useridResult.first != HKS_SUCCESS, HKS_ERROR_JSON_TYPE_MISMATCH,
+        "Get provider info fields failed")
     providerInfo.m_providerName = providerNameResult.second;
     providerInfo.m_abilityName = abilityNameResult.second;
     providerInfo.m_bundleName = bundleNameResult.second;
+    providerInfo.m_userid = useridResult.second;
     HKS_IF_TRUE_LOGE_RETURN(providerInfo.m_providerName.empty() || providerInfo.m_abilityName.empty() ||
         providerInfo.m_bundleName.empty(), HKS_ERROR_JSON_INVALID_VALUE, "Provider info is incomplete")
     CommJsonObject newRoot = CommJsonObject::CreateObject();
@@ -118,7 +123,7 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
         "Create new JSON object failed")
     auto keys = root.GetKeys();
     for (const auto &key : keys) {
-        if (key == PROVIDER_NAME_KEY || key == ABILITY_NAME_KEY || key == BUNDLE_NAME_KEY) {
+        if (key == PROVIDER_NAME_KEY || key == ABILITY_NAME_KEY || key == BUNDLE_NAME_KEY || key == USERID_KEY) {
             continue;
         }
         auto value = root.GetValue(key);
@@ -428,10 +433,10 @@ int32_t HksRemoteHandleManager::ClearRemoteHandleMap(const std::string &provider
     std::vector<std::pair<uint32_t, std::string>> indicesToRemove;
     std::vector<ProviderInfo> providersToRemove;
     auto collectToRemoveFunc = [&](std::pair<uint32_t, std::string> key, std::string &value) {
-        std::string handle;
+        std::string newIndex;
         ProviderInfo providerInfo;
-        int32_t ret = ParseAndValidateIndex(key.second, key.first, providerInfo, handle);
-        HKS_IF_TRUE_LOGE(ret != HKS_SUCCESS, "ParseAndValidateIndex failed: %" LOG_PUBLIC "d", ret)
+        int32_t ret = ParseIndexAndProviderInfo(key.second, providerInfo, newIndex);
+        HKS_IF_TRUE_LOGE(ret != HKS_SUCCESS, "ParseIndexAndProviderInfo failed: %" LOG_PUBLIC "d", ret)
         if (key.first == uid && providerInfo.m_providerName == providerName) {
             if (abilityName.empty() || providerInfo.m_abilityName == abilityName) {
                 indicesToRemove.push_back(key);

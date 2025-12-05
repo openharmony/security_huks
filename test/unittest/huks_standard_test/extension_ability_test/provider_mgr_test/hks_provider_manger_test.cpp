@@ -85,7 +85,7 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest002, TestSize.Level0) {
     CppParamSet paramSet{params};
     std::string providerName = "HksProviderMgrTest002";
     auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
-        [providerMgr, processInfo, providerName, paramSet](bool deathFlag) {
+        [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
         HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
         providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true);
     });
@@ -124,7 +124,7 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest003, TestSize.Level0) {
     CppParamSet paramSet{params};
     std::string providerName = "HksProviderMgrTest003";
     auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
-        [providerMgr, processInfo, providerName, paramSet](bool deathFlag) {
+        [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
         HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
         providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true);
     });
@@ -155,7 +155,7 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest004, TestSize.Level0) {
     CppParamSet paramSet{params};
     std::string providerName = "HksProviderMgrTest004";
     auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
-        [providerMgr, processInfo, providerName, paramSet](bool deathFlag) {
+        [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
         HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
         providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true);
     });
@@ -187,7 +187,7 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest005, TestSize.Level0) {
     CppParamSet paramSet{params};
     std::string providerName = "HksProviderMgrTest005";
     auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
-        [providerMgr, processInfo, providerName, paramSet](bool deathFlag) {
+        [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
         HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
         providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true);
     });
