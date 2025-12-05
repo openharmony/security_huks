@@ -56,7 +56,7 @@ public:
     {
         if(handle == "HksSessionMgrTest003") {
             authState = 0;
-            errcode = 0;
+            errcode = 1;
             return 0;
         }
         return -1;
@@ -185,7 +185,12 @@ void ExtensionConnection::OnRemoteDied(const wptr<IRemoteObject> &remote)
     return;
 }
 
-void ExtensionConnection::callBackFromPlugin(std::function<void(bool)> callback)
+ExtensionConnection::ExtensionConnection(const HksProcessInfo& processInfo)
+{
+    return;
+}
+
+void ExtensionConnection::callBackFromPlugin(std::function<void(HksProcessInfo)> callback)
 {
     return;
 }
