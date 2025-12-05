@@ -407,13 +407,18 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
 int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processInfo, const std::string &index,
     const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams)
 {
+    auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
+    uint32_t uid = processInfo.uidInt;
+    if (uidParam.first == HKS_SUCCESS) {
+        uid = uidParam.second;
+    }
     if (std::find(VALID_PROPERTYID.begin(), VALID_PROPERTYID.end(), propertyId) == VALID_PROPERTYID.end()) {
         HKS_LOG_E("Invalid propertyId");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     ProviderInfo providerInfo;
     std::string handle;
-    int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
+    int32_t ret = ParseAndValidateIndex(index, uid, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
