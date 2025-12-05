@@ -65,9 +65,48 @@ if (os_level == "standard") {
       updater_base_dir,
     ]
   }
+
+  ohos_shared_library("libhukschipsetsdk") {
+    branch_protector_ret = "pac_ret"
+
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+      cfi_cross_dso = true
+      boundary_sanitize = true
+      ubsan = true
+    }
+    subsystem_name = "security"
+    part_name = "huks"
+    innerapi_tags = [ "chipsetsdk" ]
+    version_script = "libhukschipsetsdk.map"
+    public_configs = [ ":huks_config" ]
+    configs = [
+      "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+    ]
+
+    defines = [ "HKS_CHIPSET_API" ]
+
+    include_dirs = [ "../source" ]
+    sources = [ "../source/hks_api.c" ]
+
+    deps = [ "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks" ]
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+    install_images = [
+      system_base_dir,
+      updater_base_dir,
+    ]
+  }
 }
 
 if (os_level == "small" || os_level == "mini") {
   group("libhukssdk") {
+  }
+
+  group("libhukschipsetsdk") {
   }
 }

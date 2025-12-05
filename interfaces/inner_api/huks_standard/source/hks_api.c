@@ -39,7 +39,10 @@
 #include "hks_template.h"
 #include "hks_type.h"
 #include "hks_util.h"
+
+#ifndef HKS_CHIPSET_API
 #include "hks_client_service_adapter_common.h"
+#endif
 
 #include "securec.h"
 
@@ -63,6 +66,192 @@
 #undef HKS_SUPPORT_API_GET_CERTIFICATE_CHAIN
 #endif
 
+HKS_API_EXPORT int32_t HksInitialize(void)
+{
+#ifndef _CUT_AUTHENTICATE_
+    HKS_LOG_D("enter initialize");
+    int32_t ret = HksClientInitialize();
+    HKS_LOG_D("leave initialize, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)HksCryptoAbilityInit();
+    return HKS_SUCCESS;
+#endif
+}
+
+static int32_t CheckifNeedOverrideKey(const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSetIn)
+{
+    struct HksParam *isKeyOverride = NULL;
+    int32_t ret = HksGetParam(paramSetIn, HKS_TAG_KEY_OVERRIDE, &isKeyOverride);
+    if (ret == HKS_SUCCESS && !isKeyOverride->boolParam) {
+        ret = HksClientKeyExist(keyAlias, paramSetIn);
+        if (ret == HKS_SUCCESS) {
+            return HKS_ERROR_CODE_KEY_ALREADY_EXIST;
+        } else if (ret != HKS_ERROR_NOT_EXIST) {
+            return ret;
+        }
+    }
+    return HKS_SUCCESS;
+}
+
+HKS_API_EXPORT int32_t HksGenerateKey(const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut)
+{
+#ifdef HKS_SUPPORT_API_GENERATE_KEY
+    HKS_LOG_D("enter GenerateKey");
+    struct HksParam *storageFlag = NULL;
+    int32_t ret = HksGetParam(paramSetIn, HKS_TAG_KEY_STORAGE_FLAG, &storageFlag);
+    if ((ret == HKS_SUCCESS) && (storageFlag->uint32Param == HKS_STORAGE_TEMP)) {
+        if ((paramSetIn == NULL) || (paramSetOut == NULL)) {
+            return HKS_ERROR_NULL_POINTER;
+        }
+        ret = HksLocalGenerateKey(paramSetIn, paramSetOut);
+        HKS_IF_NOT_SUCC_LOGE(ret, "leave generate temp key, result = %" LOG_PUBLIC "d", ret);
+        return ret;
+    }
+
+    if ((paramSetIn == NULL) || (keyAlias == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    ret = CheckifNeedOverrideKey(keyAlias, paramSetIn);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    ret = HksClientGenerateKey(keyAlias, paramSetIn, paramSetOut);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave GenerateKey, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)keyAlias;
+    (void)paramSetIn;
+    (void)paramSetOut;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+
+HKS_API_EXPORT int32_t HksKeyExist(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet)
+{
+#ifdef HKS_SUPPORT_API_KEY_EXIST
+    HKS_LOG_D("enter KeyExist");
+    HKS_IF_NULL_RETURN(keyAlias, HKS_ERROR_NULL_POINTER)
+    int32_t ret = HksClientKeyExist(keyAlias, paramSet);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave KeyExist, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)keyAlias;
+    (void)paramSet;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+
+HKS_API_EXPORT int32_t HksGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob *random)
+{
+#ifdef HKS_SUPPORT_API_GENERATE_RANDOM
+    HKS_LOG_D("enter GenerateRandom");
+    HKS_IF_NULL_RETURN(random, HKS_ERROR_NULL_POINTER)
+    int32_t ret = HksClientGenerateRandom(random, paramSet);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave GenerateRandom, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)paramSet;
+    (void)random;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+
+HKS_API_EXPORT int32_t HksEncrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *plainText, struct HksBlob *cipherText)
+{
+#ifdef HKS_SUPPORT_API_CIPHER
+    HKS_LOG_D("enter Encrypt");
+    if ((key == NULL) || (paramSet == NULL) || (plainText == NULL) || (cipherText == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    struct HksParam *isKeyAlias = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_KEY_ALIAS, &isKeyAlias);
+    if ((ret == HKS_SUCCESS) && (!isKeyAlias->boolParam)) {
+        ret = HksLocalEncrypt(key, paramSet, plainText, cipherText);
+        HKS_IF_NOT_SUCC_LOGE(ret, "leave encrypt with plain key, result = %" LOG_PUBLIC "d", ret);
+        return ret;
+    }
+#ifndef _CUT_AUTHENTICATE_
+    ret = HksClientEncrypt(key, paramSet, plainText, cipherText);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave Encrypt, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    return HKS_ERROR_NOT_SUPPORTED;
+#endif
+#else
+    (void)key;
+    (void)paramSet;
+    (void)plainText;
+    (void)cipherText;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+
+HKS_API_EXPORT int32_t HksDecrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *cipherText, struct HksBlob *plainText)
+{
+#ifdef HKS_SUPPORT_API_CIPHER
+    HKS_LOG_D("enter Decrypt");
+    if ((key == NULL) || (paramSet == NULL) || (cipherText == NULL) || (plainText == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    struct HksParam *isKeyAlias = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_KEY_ALIAS, &isKeyAlias);
+    if ((ret == HKS_SUCCESS) && (!isKeyAlias->boolParam)) {
+        ret = HksLocalDecrypt(key, paramSet, cipherText, plainText);
+        HKS_IF_NOT_SUCC_LOGE(ret, "leave decrypt with plain key, result = %" LOG_PUBLIC "d", ret);
+        return ret;
+    }
+#ifndef _CUT_AUTHENTICATE_
+    ret = HksClientDecrypt(key, paramSet, cipherText, plainText);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave Decrypt, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    return HKS_ERROR_NOT_SUPPORTED;
+#endif
+#else
+    (void)key;
+    (void)paramSet;
+    (void)plainText;
+    (void)cipherText;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+
+HKS_API_EXPORT int32_t HksInit(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    struct HksBlob *handle, struct HksBlob *token)
+{
+    HKS_LOG_D("enter Init");
+    if ((keyAlias == NULL) || (paramSet == NULL) || (handle == NULL)) { /* token can be null */
+        HKS_LOG_E("the pointer param entered is invalid");
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int32_t ret = HksClientInit(keyAlias, paramSet, handle, token);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave Init, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+}
+
+HKS_API_EXPORT int32_t HksFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
+    const struct HksBlob *inData, struct HksBlob *outData)
+{
+    HKS_LOG_D("enter Finish");
+    if ((handle == NULL) || (paramSet == NULL) || (inData == NULL) || (outData == NULL)) {
+        HKS_LOG_E("the pointer param entered is invalid");
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int32_t ret = HksClientFinish(handle, paramSet, inData, outData);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave Finish, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+}
+
+#ifndef HKS_CHIPSET_API
 HKS_API_EXPORT int32_t HksRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
 {
 #ifdef L2_STANDARD
@@ -263,19 +452,6 @@ HKS_API_EXPORT int32_t HksGetSdkVersion(struct HksBlob *sdkVersion)
     return HKS_SUCCESS;
 }
 
-HKS_API_EXPORT int32_t HksInitialize(void)
-{
-#ifndef _CUT_AUTHENTICATE_
-    HKS_LOG_D("enter initialize");
-    int32_t ret = HksClientInitialize();
-    HKS_LOG_D("leave initialize, result = %" LOG_PUBLIC "d", ret);
-    return ret;
-#else
-    (void)HksCryptoAbilityInit();
-    return HKS_SUCCESS;
-#endif
-}
-
 HKS_API_EXPORT int32_t HksRefreshKeyInfo(void)
 {
 #ifndef _CUT_AUTHENTICATE_
@@ -284,56 +460,6 @@ HKS_API_EXPORT int32_t HksRefreshKeyInfo(void)
     HKS_IF_NOT_SUCC_LOGE(ret, "leave refresh key info, result = %" LOG_PUBLIC "d", ret);
     return ret;
 #else
-    return HKS_ERROR_API_NOT_SUPPORTED;
-#endif
-}
-
-static int32_t CheckifNeedOverrideKey(const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSetIn)
-{
-    struct HksParam *isKeyOverride = NULL;
-    int32_t ret = HksGetParam(paramSetIn, HKS_TAG_KEY_OVERRIDE, &isKeyOverride);
-    if (ret == HKS_SUCCESS && !isKeyOverride->boolParam) {
-        ret = HksClientKeyExist(keyAlias, paramSetIn);
-        if (ret == HKS_SUCCESS) {
-            return HKS_ERROR_CODE_KEY_ALREADY_EXIST;
-        } else if (ret != HKS_ERROR_NOT_EXIST) {
-            return ret;
-        }
-    }
-    return HKS_SUCCESS;
-}
-
-HKS_API_EXPORT int32_t HksGenerateKey(const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut)
-{
-#ifdef HKS_SUPPORT_API_GENERATE_KEY
-    HKS_LOG_D("enter GenerateKey");
-    struct HksParam *storageFlag = NULL;
-    int32_t ret = HksGetParam(paramSetIn, HKS_TAG_KEY_STORAGE_FLAG, &storageFlag);
-    if ((ret == HKS_SUCCESS) && (storageFlag->uint32Param == HKS_STORAGE_TEMP)) {
-        if ((paramSetIn == NULL) || (paramSetOut == NULL)) {
-            return HKS_ERROR_NULL_POINTER;
-        }
-        ret = HksLocalGenerateKey(paramSetIn, paramSetOut);
-        HKS_IF_NOT_SUCC_LOGE(ret, "leave generate temp key, result = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
-
-    if ((paramSetIn == NULL) || (keyAlias == NULL)) {
-        return HKS_ERROR_NULL_POINTER;
-    }
-    ret = CheckifNeedOverrideKey(keyAlias, paramSetIn);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
-    ret = HksClientGenerateKey(keyAlias, paramSetIn, paramSetOut);
-    HKS_IF_NOT_SUCC_LOGE(ret, "leave GenerateKey, result = %" LOG_PUBLIC "d", ret);
-    return ret;
-#else
-    (void)keyAlias;
-    (void)paramSetIn;
-    (void)paramSetOut;
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
@@ -453,36 +579,6 @@ HKS_API_EXPORT int32_t HksGetKeyParamSet(const struct HksBlob *keyAlias,
 #endif
 }
 
-HKS_API_EXPORT int32_t HksKeyExist(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet)
-{
-#ifdef HKS_SUPPORT_API_KEY_EXIST
-    HKS_LOG_D("enter KeyExist");
-    HKS_IF_NULL_RETURN(keyAlias, HKS_ERROR_NULL_POINTER)
-    int32_t ret = HksClientKeyExist(keyAlias, paramSet);
-    HKS_IF_NOT_SUCC_LOGE(ret, "leave KeyExist, result = %" LOG_PUBLIC "d", ret);
-    return ret;
-#else
-    (void)keyAlias;
-    (void)paramSet;
-    return HKS_ERROR_API_NOT_SUPPORTED;
-#endif
-}
-
-HKS_API_EXPORT int32_t HksGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob *random)
-{
-#ifdef HKS_SUPPORT_API_GENERATE_RANDOM
-    HKS_LOG_D("enter GenerateRandom");
-    HKS_IF_NULL_RETURN(random, HKS_ERROR_NULL_POINTER)
-    int32_t ret = HksClientGenerateRandom(random, paramSet);
-    HKS_IF_NOT_SUCC_LOGE(ret, "leave GenerateRandom, result = %" LOG_PUBLIC "d", ret);
-    return ret;
-#else
-    (void)paramSet;
-    (void)random;
-    return HKS_ERROR_API_NOT_SUPPORTED;
-#endif
-}
-
 HKS_API_EXPORT int32_t HksSign(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, struct HksBlob *signature)
 {
@@ -534,70 +630,6 @@ HKS_API_EXPORT int32_t HksVerify(const struct HksBlob *key, const struct HksPara
     (void)paramSet;
     (void)srcData;
     (void)signature;
-    return HKS_ERROR_API_NOT_SUPPORTED;
-#endif
-}
-
-HKS_API_EXPORT int32_t HksEncrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    const struct HksBlob *plainText, struct HksBlob *cipherText)
-{
-#ifdef HKS_SUPPORT_API_CIPHER
-    HKS_LOG_D("enter Encrypt");
-    if ((key == NULL) || (paramSet == NULL) || (plainText == NULL) || (cipherText == NULL)) {
-        return HKS_ERROR_NULL_POINTER;
-    }
-
-    struct HksParam *isKeyAlias = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_KEY_ALIAS, &isKeyAlias);
-    if ((ret == HKS_SUCCESS) && (!isKeyAlias->boolParam)) {
-        ret = HksLocalEncrypt(key, paramSet, plainText, cipherText);
-        HKS_IF_NOT_SUCC_LOGE(ret, "leave encrypt with plain key, result = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
-#ifndef _CUT_AUTHENTICATE_
-    ret = HksClientEncrypt(key, paramSet, plainText, cipherText);
-    HKS_IF_NOT_SUCC_LOGE(ret, "leave Encrypt, result = %" LOG_PUBLIC "d", ret);
-    return ret;
-#else
-    return HKS_ERROR_NOT_SUPPORTED;
-#endif
-#else
-    (void)key;
-    (void)paramSet;
-    (void)plainText;
-    (void)cipherText;
-    return HKS_ERROR_API_NOT_SUPPORTED;
-#endif
-}
-
-HKS_API_EXPORT int32_t HksDecrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    const struct HksBlob *cipherText, struct HksBlob *plainText)
-{
-#ifdef HKS_SUPPORT_API_CIPHER
-    HKS_LOG_D("enter Decrypt");
-    if ((key == NULL) || (paramSet == NULL) || (cipherText == NULL) || (plainText == NULL)) {
-        return HKS_ERROR_NULL_POINTER;
-    }
-
-    struct HksParam *isKeyAlias = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_KEY_ALIAS, &isKeyAlias);
-    if ((ret == HKS_SUCCESS) && (!isKeyAlias->boolParam)) {
-        ret = HksLocalDecrypt(key, paramSet, cipherText, plainText);
-        HKS_IF_NOT_SUCC_LOGE(ret, "leave decrypt with plain key, result = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
-#ifndef _CUT_AUTHENTICATE_
-    ret = HksClientDecrypt(key, paramSet, cipherText, plainText);
-    HKS_IF_NOT_SUCC_LOGE(ret, "leave Decrypt, result = %" LOG_PUBLIC "d", ret);
-    return ret;
-#else
-    return HKS_ERROR_NOT_SUPPORTED;
-#endif
-#else
-    (void)key;
-    (void)paramSet;
-    (void)plainText;
-    (void)cipherText;
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
@@ -924,20 +956,6 @@ HKS_API_EXPORT int32_t HksValidateCertChain(const struct HksCertChain *certChain
 #endif
 }
 
-HKS_API_EXPORT int32_t HksInit(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    struct HksBlob *handle, struct HksBlob *token)
-{
-    HKS_LOG_D("enter Init");
-    if ((keyAlias == NULL) || (paramSet == NULL) || (handle == NULL)) { /* token can be null */
-        HKS_LOG_E("the pointer param entered is invalid");
-        return HKS_ERROR_NULL_POINTER;
-    }
-
-    int32_t ret = HksClientInit(keyAlias, paramSet, handle, token);
-    HKS_IF_NOT_SUCC_LOGE(ret, "leave Init, result = %" LOG_PUBLIC "d", ret);
-    return ret;
-}
-
 HKS_API_EXPORT int32_t HksUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData)
 {
@@ -949,20 +967,6 @@ HKS_API_EXPORT int32_t HksUpdate(const struct HksBlob *handle, const struct HksP
 
     int32_t ret = HksClientUpdate(handle, paramSet, inData, outData);
     HKS_IF_NOT_SUCC_LOGE(ret, "leave Update, result = %" LOG_PUBLIC "d", ret);
-    return ret;
-}
-
-HKS_API_EXPORT int32_t HksFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
-    const struct HksBlob *inData, struct HksBlob *outData)
-{
-    HKS_LOG_D("enter Finish");
-    if ((handle == NULL) || (paramSet == NULL) || (inData == NULL) || (outData == NULL)) {
-        HKS_LOG_E("the pointer param entered is invalid");
-        return HKS_ERROR_NULL_POINTER;
-    }
-
-    int32_t ret = HksClientFinish(handle, paramSet, inData, outData);
-    HKS_IF_NOT_SUCC_LOGE(ret, "leave Finish, result = %" LOG_PUBLIC "d", ret);
     return ret;
 }
 
@@ -1024,3 +1028,4 @@ HKS_API_EXPORT const char *HksGetErrorMsg(void)
 #endif
     return NULL;
 }
+#endif

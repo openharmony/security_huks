@@ -30,6 +30,84 @@
 extern "C" {
 #endif
 
+/**
+ * @brief HUKS initialize
+ * @return error code, see hks_type.h
+ */
+HKS_API_EXPORT int32_t HksInitialize(void);
+
+/**
+ * @brief Generate key
+ * @param keyAlias key alias
+ * @param paramSetIn required parameter set
+ * @param paramSetOut output parameter set
+ * @return error code, see hks_type.h
+ */
+HKS_API_EXPORT int32_t HksGenerateKey(const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut);
+
+/**
+ * @brief Check whether the key exists
+ * @param keyAlias key alias
+ * @param paramSetIn required parameter set
+ * @param paramSetOut output parameter set
+ * @return error code, see hks_type.h
+ */
+HKS_API_EXPORT int32_t HksKeyExist(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet);
+
+/**
+ * @brief Generate random
+ * @param paramSet required parameter set
+ * @param random output random
+ * @return error code, see hks_type.h
+ */
+HKS_API_EXPORT int32_t HksGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob *random);
+
+/**
+ * @brief Encrypt operation
+ * @param key required key to encrypt data
+ * @param paramSet required parameter set
+ * @param plainText the data needs to encrypt
+ * @param cipherText encrypted data
+ * @return error code, see hks_type.h
+ */
+HKS_API_EXPORT int32_t HksEncrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *plainText, struct HksBlob *cipherText);
+
+/**
+ * @brief Decrypt operation
+ * @param key required key to decrypt data
+ * @param paramSet required parameter set
+ * @param cipherText the data needs to decrypt
+ * @param plainText decrypted data
+ * @return error code, see hks_type.h
+ */
+HKS_API_EXPORT int32_t HksDecrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *cipherText, struct HksBlob *plainText);
+
+/**
+ * @brief Init operation
+ * @param keyAlias key alias
+ * @param paramSet required parameter set
+ * @param handle operation handle
+ * @param token token
+ * @return error code, see hks_type.h
+ */
+HKS_API_EXPORT int32_t HksInit(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    struct HksBlob *handle, struct HksBlob *token);
+
+/**
+ * @brief Finish operation
+ * @param handle operation handle
+ * @param paramSet required parameter set
+ * @param inData the data to update
+ * @param outData output data
+ * @return error code, see hks_type.h
+ */
+HKS_API_EXPORT int32_t HksFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
+    const struct HksBlob *inData, struct HksBlob *outData);
+
+#ifndef HKS_CHIPSET_API
 HKS_API_EXPORT int32_t HksRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
 HKS_API_EXPORT int32_t HksUnregisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
 
@@ -58,26 +136,10 @@ HKS_API_EXPORT int32_t HksGetRemoteProperty(const struct HksBlob *resourceId, co
 HKS_API_EXPORT int32_t HksGetSdkVersion(struct HksBlob *sdkVersion);
 
 /**
- * @brief HUKS initialize
- * @return error code, see hks_type.h
- */
-HKS_API_EXPORT int32_t HksInitialize(void);
-
-/**
  * @brief HUKS initialize fresh key info
  * @return error code, see hks_type.h
  */
 HKS_API_EXPORT int32_t HksRefreshKeyInfo(void);
-
-/**
- * @brief Generate key
- * @param keyAlias key alias
- * @param paramSetIn required parameter set
- * @param paramSetOut output parameter set
- * @return error code, see hks_type.h
- */
-HKS_API_EXPORT int32_t HksGenerateKey(const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut);
 
 /**
  * @brief Import key
@@ -129,23 +191,6 @@ HKS_API_EXPORT int32_t HksGetKeyParamSet(const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut);
 
 /**
- * @brief Check whether the key exists
- * @param keyAlias key alias
- * @param paramSetIn required parameter set
- * @param paramSetOut output parameter set
- * @return error code, see hks_type.h
- */
-HKS_API_EXPORT int32_t HksKeyExist(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet);
-
-/**
- * @brief Generate random
- * @param paramSet required parameter set
- * @param random output random
- * @return error code, see hks_type.h
- */
-HKS_API_EXPORT int32_t HksGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob *random);
-
-/**
  * @brief Sign operation
  * @param key required key to sign data
  * @param paramSet required parameter set
@@ -166,28 +211,6 @@ HKS_API_EXPORT int32_t HksSign(const struct HksBlob *key, const struct HksParamS
  */
 HKS_API_EXPORT int32_t HksVerify(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, const struct HksBlob *signature);
-
-/**
- * @brief Encrypt operation
- * @param key required key to encrypt data
- * @param paramSet required parameter set
- * @param plainText the data needs to encrypt
- * @param cipherText encrypted data
- * @return error code, see hks_type.h
- */
-HKS_API_EXPORT int32_t HksEncrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    const struct HksBlob *plainText, struct HksBlob *cipherText);
-
-/**
- * @brief Decrypt operation
- * @param key required key to decrypt data
- * @param paramSet required parameter set
- * @param cipherText the data needs to decrypt
- * @param plainText decrypted data
- * @return error code, see hks_type.h
- */
-HKS_API_EXPORT int32_t HksDecrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    const struct HksBlob *cipherText, struct HksBlob *plainText);
 
 /**
  * @brief Agree key
@@ -320,17 +343,6 @@ HKS_API_EXPORT int32_t HcmIsDeviceKeyExist(const struct HksParamSet *paramSet);
 HKS_API_EXPORT int32_t HksValidateCertChain(const struct HksCertChain *certChain, struct HksParamSet *paramSetOut);
 
 /**
- * @brief Init operation
- * @param keyAlias key alias
- * @param paramSet required parameter set
- * @param handle operation handle
- * @param token token
- * @return error code, see hks_type.h
- */
-HKS_API_EXPORT int32_t HksInit(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    struct HksBlob *handle, struct HksBlob *token);
-
-/**
  * @brief Update operation
  * @param handle operation handle
  * @param paramSet required parameter set
@@ -339,17 +351,6 @@ HKS_API_EXPORT int32_t HksInit(const struct HksBlob *keyAlias, const struct HksP
  * @return error code, see hks_type.h
  */
 HKS_API_EXPORT int32_t HksUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet,
-    const struct HksBlob *inData, struct HksBlob *outData);
-
-/**
- * @brief Finish operation
- * @param handle operation handle
- * @param paramSet required parameter set
- * @param inData the data to update
- * @param outData output data
- * @return error code, see hks_type.h
- */
-HKS_API_EXPORT int32_t HksFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData);
 
 /**
@@ -393,6 +394,7 @@ HKS_API_EXPORT int32_t HksChangeStorageLevel(const struct HksBlob *keyAlias, con
  * @return error huks message
  */
 HKS_API_EXPORT const char *HksGetErrorMsg(void);
+#endif
 
 #ifdef __cplusplus
 }
