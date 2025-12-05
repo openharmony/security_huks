@@ -137,13 +137,11 @@ void ExtensionConnection::OnRemoteDied(const wptr<IRemoteObject> &remote)
     }
 }
 
-void ExtensionConnection::callBackFromPlugin(std::function<void(HksProcessInfo)> callback) :
-    callBackPlugin(callback)
+void ExtensionConnection::callBackFromPlugin(std::function<void(HksProcessInfo)> callback) : callBackPlugin(callback)
 {
 }
 
-ExtensionConnection::ExtensionConnection(const HksProcessInfo &info) :
-    m_processInfo(info)
+ExtensionConnection::ExtensionConnection(const HksProcessInfo &info) : m_processInfo(info)
 {
 }
 

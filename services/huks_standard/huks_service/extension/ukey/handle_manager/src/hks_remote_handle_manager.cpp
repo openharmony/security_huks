@@ -501,7 +501,7 @@ bool HksRemoteHandleManager::IsProviderNumExceedLimit(const ProviderInfo &provid
     return totalNum >= MAX_PROVIDER_TOTAL_NUM - 1;
 }
 
-void HksRemoteHandleManager::ClearMapByHandle(const int32_t &ret,const std::string &handle)
+void HksRemoteHandleManager::ClearMapByHandle(const int32_t &ret, const std::string &handle)
 {
     if (ret != HUKS_ERR_CODE_CRYPTO_FAIL && ret != HUKS_ERR_CODE_ITEM_NOT_EXIST) {
         return;
