@@ -36,7 +36,9 @@
 #include "hks_type_inner.h"
 #include "hks_util.h"
 #include "hks_ha_event_report.h"
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
 #include "hks_ukey_three_stage_adapter.h"
+#endif
 
 static uint32_t g_threeStageEvent[] = {
     HKS_EVENT_CRYPTO,
@@ -477,7 +479,9 @@ static int32_t HksFreshAndReport(const char *funcName, const struct HksProcessIn
             { .tag = HKS_TAG_PARAM3_BUFFER, .blob = { sizeof(HksEventInfo), (uint8_t *)eventInfo } },
             { .tag = HKS_TAG_PARAM0_NULL, .blob = { errMsg.size, (uint8_t *)errMsg.data } },
             { .tag = HKS_TAG_TRACE_ID, .uint64Param = info->traceId },
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
             { .tag = HKS_TAG_PARAM1_UINT32, .uint32Param = HksCheckIsUkeyOperation(paramSet, &ret) == HKS_SUCCESS }
+#endif
         };
 
         ret = HksAddParams(reportParamSet, params, HKS_ARRAY_SIZE(params));

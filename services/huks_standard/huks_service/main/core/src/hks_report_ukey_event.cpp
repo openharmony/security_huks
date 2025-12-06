@@ -101,7 +101,7 @@ void HksEventInfoAddForRegProvider(struct HksEventInfo *dstEventInfo, const stru
 int32_t HksRegProviderEventInfoToMap(const struct HksEventInfo *eventInfo,
     std::unordered_map<std::string, std::string> &reportData)
 {
-    HKS_IF_NULL_LOGI_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "evenInfo is null")
+    HKS_IF_NULL_LOGI_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "eventInfo is null")
 
     const char *providerName = (eventInfo->ukeyInfo.providerName != nullptr) ?
         eventInfo->ukeyInfo.providerName : EVENT_PROPERTY_UNKNOWN;
@@ -177,7 +177,7 @@ void HksEventInfoAddForGetAuthPinState(struct HksEventInfo *dstEventInfo, const 
 int32_t HksGetAuthPinStateEventInfoToMap(const struct HksEventInfo *eventInfo,
     std::unordered_map<std::string, std::string> &reportData)
 {
-    HKS_IF_NULL_LOGI_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "evenInfo is null")
+    HKS_IF_NULL_LOGI_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "eventInfo is null")
 
     const char *resourceId = (eventInfo->ukeyInfo.resourceId != nullptr) ?
         eventInfo->ukeyInfo.resourceId : EVENT_PROPERTY_UNKNOWN;
@@ -258,7 +258,7 @@ void HksEventInfoAddForAuthPin(struct HksEventInfo *dstEventInfo, const struct H
 int32_t HksAuthPinEventInfoToMap(const struct HksEventInfo *eventInfo,
     std::unordered_map<std::string, std::string> &reportData)
 {
-    HKS_IF_NULL_LOGI_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "evenInfo is null")
+    HKS_IF_NULL_LOGI_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "eventInfo is null")
 
     const char *resourceId = (eventInfo->ukeyInfo.resourceId != nullptr) ?
         eventInfo->ukeyInfo.resourceId : EVENT_PROPERTY_UNKNOWN;
@@ -327,7 +327,7 @@ void HksEventInfoAddForRemoteHandle(struct HksEventInfo *dstEventInfo, const str
 int32_t HksRemoteHandleEventInfoToMap(const struct HksEventInfo *eventInfo,
     std::unordered_map<std::string, std::string> &reportData)
 {
-    HKS_IF_NULL_LOGI_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "evenInfo is null")
+    HKS_IF_NULL_LOGI_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "eventInfo is null")
 
     const char *resourceId = (eventInfo->ukeyInfo.resourceId != nullptr) ?
         eventInfo->ukeyInfo.resourceId : EVENT_PROPERTY_UNKNOWN;
@@ -404,7 +404,7 @@ void HksEventInfoAddForExportProviderCert(struct HksEventInfo *dstEventInfo, con
 int32_t HksExportProviderCertEventInfoToMap(const struct HksEventInfo *eventInfo,
     std::unordered_map<std::string, std::string> &reportData)
 {
-    HKS_IF_NULL_LOGI_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "evenInfo is null")
+    HKS_IF_NULL_LOGI_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "eventInfo is null")
 
     const char *providerName = (eventInfo->ukeyInfo.providerName != nullptr) ?
         eventInfo->ukeyInfo.providerName : EVENT_PROPERTY_UNKNOWN;
@@ -482,7 +482,7 @@ void HksEventInfoAddForExportCert(struct HksEventInfo *dstEventInfo, const struc
 int32_t HksExportCertEventInfoToMap(const struct HksEventInfo *eventInfo,
     std::unordered_map<std::string, std::string> &reportData)
 {
-    HKS_IF_NULL_LOGI_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "evenInfo is null")
+    HKS_IF_NULL_LOGI_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "eventInfo is null")
 
     const char *resourceId = (eventInfo->ukeyInfo.resourceId != nullptr) ?
         eventInfo->ukeyInfo.resourceId : EVENT_PROPERTY_UNKNOWN;
@@ -556,7 +556,7 @@ void HksEventInfoAddForGetProperty(struct HksEventInfo *dstEventInfo, const stru
 int32_t HksGetPropertyEventInfoToMap(const struct HksEventInfo *eventInfo,
     std::unordered_map<std::string, std::string> &reportData)
 {
-    HKS_IF_NULL_LOGI_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "evenInfo is null")
+    HKS_IF_NULL_LOGI_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "eventInfo is null")
 
     const char *resourceId = (eventInfo->ukeyInfo.resourceId != nullptr) ?
         eventInfo->ukeyInfo.resourceId : EVENT_PROPERTY_UNKNOWN;
@@ -566,7 +566,7 @@ int32_t HksGetPropertyEventInfoToMap(const struct HksEventInfo *eventInfo,
     const char *propertyId = (eventInfo->ukeyInfo.propertyId != nullptr) ?
         eventInfo->ukeyInfo.propertyId : EVENT_PROPERTY_UNKNOWN;
     ret = reportData.insert_or_assign("property_id", std::string(propertyId));
-    HKS_IF_NOT_TRUE_LOGI_RETURN(ret.second, HKS_ERROR_BUFFER_TOO_SMALL, "reportData insert purpose failed!");
+    HKS_IF_NOT_TRUE_LOGI_RETURN(ret.second, HKS_ERROR_BUFFER_TOO_SMALL, "reportData insert propertyId failed!");
 
     return HKS_SUCCESS;
 }
