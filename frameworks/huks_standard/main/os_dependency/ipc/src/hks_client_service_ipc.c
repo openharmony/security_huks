@@ -46,7 +46,9 @@
 #include <unistd.h>
 #endif
 
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
 static const char HKS_INNER_NULL_PROVIDER_NAME[] = "HksInnerNullProviderName";
+#endif
 
 int32_t HksClientInitialize(void)
 {
@@ -70,6 +72,35 @@ int32_t HksClientRefreshKeyInfo(void)
     return HKS_SUCCESS;
 }
 
+static int32_t BuildParamSetNotNull(const struct HksParamSet *paramSetIn, struct HksParamSet **paramSetOut)
+{
+    int32_t ret;
+    struct HksParamSet *tmpParamSet = NULL;
+    do {
+        if (paramSetIn != NULL) {
+            ret = HksCheckParamSet(paramSetIn, paramSetIn->paramSetSize);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check paramSet failed")
+        }
+
+        ret = HksInitParamSet(&tmpParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksInitParamSet failed")
+
+        if (paramSetIn != NULL) {
+            ret = HksAddParams(tmpParamSet, paramSetIn->params, paramSetIn->paramsCnt);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAddParams failed")
+        }
+        ret = HksBuildParamSet(&tmpParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksBuildParamSet failed")
+    } while (0);
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(&tmpParamSet);
+        return ret;
+    }
+    *paramSetOut = tmpParamSet;
+    return ret;
+}
+
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
 static int32_t BuildBlobNotNull(const struct HksBlob *blobIn, struct HksBlob *blobOut)
 {
     HKS_IF_NULL_LOGE_RETURN(blobOut, HKS_ERROR_NULL_POINTER, "blobOut null");
@@ -102,34 +133,6 @@ static int32_t BuildBlobNotNull(const struct HksBlob *blobIn, struct HksBlob *bl
     if (ret != HKS_SUCCESS) {
         HKS_FREE_BLOB(*blobOut);
     }
-    return ret;
-}
-
-static int32_t BuildParamSetNotNull(const struct HksParamSet *paramSetIn, struct HksParamSet **paramSetOut)
-{
-    int32_t ret;
-    struct HksParamSet *tmpParamSet = NULL;
-    do {
-        if (paramSetIn != NULL) {
-            ret = HksCheckParamSet(paramSetIn, paramSetIn->paramSetSize);
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check paramSet failed")
-        }
-
-        ret = HksInitParamSet(&tmpParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksInitParamSet failed")
-
-        if (paramSetIn != NULL) {
-            ret = HksAddParams(tmpParamSet, paramSetIn->params, paramSetIn->paramsCnt);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAddParams failed")
-        }
-        ret = HksBuildParamSet(&tmpParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksBuildParamSet failed")
-    } while (0);
-    if (ret != HKS_SUCCESS) {
-        HksFreeParamSet(&tmpParamSet);
-        return ret;
-    }
-    *paramSetOut = tmpParamSet;
     return ret;
 }
 
@@ -550,6 +553,7 @@ int32_t HksClientClearPinAuthState(const struct HksBlob *index)
     HKS_FREE_BLOB(inBlob);
     return ret;
 }
+#endif
 
 int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
     struct HksParamSet *paramSetOut)

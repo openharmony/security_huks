@@ -26,30 +26,27 @@ int32_t HksClientInitialize(void);
 
 int32_t HksClientRefreshKeyInfo(void);
 
-// 注册注销
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
 int32_t HksClientRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
 int32_t HksClientUnregisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
 
-// 证书管理
 int32_t HksClientExportProviderCertificates(const struct HksBlob *providerName,
     const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
 int32_t HksClientExportCertificate(const struct HksBlob *index,
     const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
 
-
-// PIN码认证
 int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, uint32_t *retryCount);
 int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
     int32_t *status);
 int32_t HksClientClearPinAuthState(const struct HksBlob *index);
 
-// 句柄管理
 int32_t HksClientOpenRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn);
 int32_t HksClientGetRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn);
 int32_t HksClientCloseRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn);
 
 int32_t HksClientGetRemoteProperty(const struct HksBlob *resourceId, const struct HksBlob *propertyId,
     const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut);
+#endif
 
 int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
     struct HksParamSet *paramSetOut);
