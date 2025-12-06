@@ -44,6 +44,68 @@ extern "C" {
     #define HKS_API_EXPORT __attribute__ ((visibility("default")))
 #endif
 
+/**
+ * @brief hks blob
+ */
+struct HksBlob {
+    uint32_t size;
+    uint8_t *data;
+};
+
+/**
+ * @brief hks param
+ */
+struct HksParam {
+    uint32_t tag;
+    union {
+        bool boolParam;
+        int32_t int32Param;
+        uint32_t uint32Param;
+        uint64_t uint64Param;
+        struct HksBlob blob;
+    };
+};
+
+/**
+ * @brief hks param set
+ */
+struct HksParamSet {
+    uint32_t paramSetSize;
+    uint32_t paramsCnt;
+    struct HksParam params[];
+};
+
+struct HksExtCertInfoSet {
+    uint32_t count;
+    struct HksExtCertInfo *certs;
+};
+
+/**
+ * @brief hks certificate chain
+ */
+struct HksCertChain {
+    struct HksBlob *certs;
+    uint32_t certsCount;
+};
+
+/**
+ * @brief hks key info
+ */
+struct HksKeyInfo {
+    struct HksBlob alias;
+    struct HksParamSet *paramSet;
+};
+
+
+/**
+ * @brief hks alias set
+ */
+struct HksKeyAliasSet {
+    uint32_t aliasesCnt;
+    struct HksBlob *aliases;
+};
+
+#ifndef HKS_CHIPSET_API
 /*
  * a.b.c.d => a * 1000 + b * 100 + c * 10 + d
  * a,b,c,d should in [0, 9]
@@ -98,46 +160,10 @@ extern "C" {
 #define HKS_EXT_MAX_RESOURCE_ID_LEN 1024
 #define HKS_EXT_MAX_PROPERTY_ID_LEN 100
 
-/**
- * @brief hks blob
- */
-struct HksBlob {
-    uint32_t size;
-    uint8_t *data;
-};
-
 struct HksExtCertInfo {
     int32_t purpose;
     struct HksBlob index;
     struct HksBlob cert;
-};
-
-struct HksExtCertInfoSet {
-    uint32_t count;
-    struct HksExtCertInfo *certs;
-};
-
-/**
- * @brief hks param
- */
-struct HksParam {
-    uint32_t tag;
-    union {
-        bool boolParam;
-        int32_t int32Param;
-        uint32_t uint32Param;
-        uint64_t uint64Param;
-        struct HksBlob blob;
-    };
-};
-
-/**
- * @brief hks param set
- */
-struct HksParamSet {
-    uint32_t paramSetSize;
-    uint32_t paramsCnt;
-    struct HksParam params[];
 };
 
 struct HksExtParam {
@@ -155,22 +181,6 @@ struct HksExtParamSet {
     uint32_t paramSetSize;
     uint32_t paramsCnt;
     struct HksExtParam params[];
-};
-
-/**
- * @brief hks certificate chain
- */
-struct HksCertChain {
-    struct HksBlob *certs;
-    uint32_t certsCount;
-};
-
-/**
- * @brief hks key info
- */
-struct HksKeyInfo {
-    struct HksBlob alias;
-    struct HksParamSet *paramSet;
 };
 
 /**
@@ -312,15 +322,6 @@ struct SecInfoWrap {
     struct EnrolledInfoWrap *enrolledInfo;
 };
 
-/**
- * @brief hks alias set
- */
-struct HksKeyAliasSet {
-    uint32_t aliasesCnt;
-    struct HksBlob *aliases;
-};
-
-
 #define HKS_DERIVE_DEFAULT_SALT_LEN 16
 #define HKS_HMAC_DIGEST_SHA512_LEN 64
 #define HKS_DEFAULT_RANDOM_LEN 16
@@ -408,6 +409,7 @@ static inline int32_t CheckBlob(const struct HksBlob *blob)
     }
     return HKS_SUCCESS;
 }
+#endif
 
 #ifdef __cplusplus
 }
