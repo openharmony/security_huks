@@ -20,7 +20,9 @@ group("unittest") {
     testonly = true
     deps = [
       "./unittest/huks_standard_test/crypto_engine_test:crypto_engine_unit_test",
-      "./unittest/huks_standard_test/extension_ability_test:extension_unit_test",
+      "./unittest/huks_standard_test/extension_ability_test/plugin_loader_test:extension_unit_test",
+      "./unittest/huks_standard_test/extension_ability_test/sdk_test:ukey_sdk_test",
+      "./unittest/huks_standard_test/extension_ability_test/ukey_common_test:ukey_common_test",
       "./unittest/huks_standard_test/extension_ability_test/extension_native_test:js_crypto_access_ext_ability_test",
       "./unittest/huks_standard_test/extension_ability_test/provider_mgr_test:provider_mgr_test",
       "./unittest/huks_standard_test/extension_ability_test/handle_mgr_test:handle_mgr_test",
