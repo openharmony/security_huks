@@ -49,7 +49,7 @@ int32_t HksServiceRegisterProvider(const struct HksProcessInfo *processInfo, con
     (void)processInfo;
     (void)name;
     (void)paramSetIn;
-    return HKS_ERROR_NOT_SUPPORTED;
+    return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
 
@@ -62,7 +62,7 @@ int32_t HksServiceUnregisterProvider(const struct HksProcessInfo *processInfo, c
     (void)processInfo;
     (void)name;
     (void)paramSetIn;
-    return HKS_ERROR_NOT_SUPPORTED;
+    return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
 
@@ -76,7 +76,7 @@ int32_t HksServiceExportProviderCertificates(const struct HksProcessInfo *proces
     (void)providerName;
     (void)paramSetIn;
     (void)certSet;
-    return HKS_ERROR_NOT_SUPPORTED;
+    return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
 
@@ -90,7 +90,7 @@ int32_t HksServiceExportCertificate(const struct HksProcessInfo *processInfo, co
     (void)index;
     (void)paramSetIn;
     (void)certSet;
-    return HKS_ERROR_NOT_SUPPORTED;
+    return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
 
@@ -105,7 +105,7 @@ int32_t HksServiceAuthUkeyPin(const struct HksProcessInfo *processInfo, const st
     (void)paramSetIn;
     (void)outStatus;
     (void)retryCount;
-    return HKS_ERROR_NOT_SUPPORTED;
+    return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
 
@@ -119,7 +119,7 @@ int32_t HksServiceOpenRemoteHandle(const struct HksProcessInfo *processInfo, con
     (void)processInfo;
     (void)index;
     (void)paramSetIn;
-    return HKS_ERROR_NOT_SUPPORTED;
+    return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
 
@@ -133,7 +133,7 @@ int32_t HksServiceGetUkeyPinAuthState(const struct HksProcessInfo *processInfo, 
     (void)index;
     (void)paramSetIn;
     (void)status;
-    return HKS_ERROR_NOT_SUPPORTED;
+    return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
 
@@ -146,7 +146,7 @@ int32_t HksServiceCloseRemoteHandle(const struct HksProcessInfo *processInfo, co
     (void)processInfo;
     (void)index;
     (void)paramSetIn;
-    return HKS_ERROR_NOT_SUPPORTED;
+    return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
 
@@ -157,7 +157,7 @@ int32_t HksServiceClearPinAuthState(const struct HksProcessInfo *processInfo, co
 #else
     (void)processInfo;
     (void)index;
-    return HKS_ERROR_NOT_SUPPORTED;
+    return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
 
@@ -172,6 +172,6 @@ int32_t HksServiceGetRemoteProperty(const struct HksProcessInfo *processInfo, co
     (void)propertyId;
     (void)paramSetIn;
     (void)propertySetOut;
-    return HKS_ERROR_NOT_SUPPORTED;
+    return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
