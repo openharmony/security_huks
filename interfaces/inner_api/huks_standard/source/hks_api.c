@@ -76,7 +76,7 @@ HKS_API_EXPORT int32_t HksRegisterProvider(const struct HksBlob *name, const str
 #else
     (void)name;
     (void)paramSetIn;
-    return 0;
+    return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
 
@@ -93,7 +93,7 @@ HKS_API_EXPORT int32_t HksUnregisterProvider(const struct HksBlob *name, const s
 #else
     (void)name;
     (void)paramSetIn;
-    return 0;
+    return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
 
@@ -112,7 +112,7 @@ HKS_API_EXPORT int32_t HksExportProviderCertificates(const struct HksBlob *provi
     (void)providerName;
     (void)paramSetIn;
     (void)certSet;
-    return 0;
+    return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
 
@@ -131,7 +131,7 @@ HKS_API_EXPORT int32_t HksExportCertificate(const struct HksBlob *resourceId,
     (void)resourceId;
     (void)paramSetIn;
     (void)certSet;
-    return 0;
+    return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
 
