@@ -105,4 +105,7 @@ declare_args() {
 
   # trusted list for change storage level
   huks_change_storage_level_config = "{ 0, 3333, 5520 }"
+
+  # whether enable huks ukey in PC
+  huks_enable_ukey_config = false
 }

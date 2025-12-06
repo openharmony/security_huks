@@ -30,9 +30,12 @@ group("huks_capi") {
   if (os_level == "standard") {
     # Include both original NDK library and the new external crypto library
     deps = [
-      "//base/security/huks/interfaces/kits/c:huks_external_crypto",
       "//base/security/huks/interfaces/kits/c:huks_ndk",
     ]
+
+    if (huks_enable_ukey_config == true) {
+      deps += [ "//base/security/huks/interfaces/kits/c:huks_external_crypto" ]
+    }
   }
 }
 
@@ -42,8 +45,11 @@ group("huks_napi") {
       # Include both original NAPI library and the new external crypto library
       deps = [
         "//base/security/huks/interfaces/kits/napi:huks",
-        "//base/security/huks/interfaces/kits/napi:huksexternalcrypto_napi",
       ]
+
+      if (huks_enable_ukey_config == true) {
+        deps += [ "//base/security/huks/interfaces/kits/napi:huksexternalcrypto_napi" ]
+      }
     }
   }
 }
@@ -67,7 +73,6 @@ group("huks_crypto_extension") {
   if (os_level == "standard") {
     deps = [
       "//base/security/huks/interfaces/js/crypto_extension_module:cryptoextensionability_napi",
-      "//base/security/huks/interfaces/kits/napi:huksexternalcrypto_napi",
       "//base/security/huks/services/huks_standard/huks_service/extension/ability_native:crypto_extension_ability_native",
       "//base/security/huks/services/huks_standard/huks_service/extension/module_loader:crypto_extension_module",
     ]
@@ -83,7 +88,7 @@ group("fwk_group") {
       "//base/security/huks:huks_napi",
       "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     ]
-    if (huks_security_level == "trusted_environment") {
+    if (huks_enable_ukey_config == true) {
       deps += [ "//base/security/huks:huks_crypto_extension" ]
     }
   } else if (os_level == "small") {
@@ -103,7 +108,7 @@ group("service_group") {
       "//base/security/huks/services/huks_standard:huks_service",
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/sa_profile:huks_sa_profile",
     ]
-    if (huks_security_level == "trusted_environment") {
+    if (huks_enable_ukey_config == true) {
       deps += [ "//base/security/huks/services/huks_standard/huks_service/extension/ukey:libhuks_external_crypto_ext_core" ]
     }
     if (huks_use_rkc_in_standard) {

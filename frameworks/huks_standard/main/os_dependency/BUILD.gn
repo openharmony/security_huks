@@ -20,6 +20,10 @@ config("huks_config") {
     "ipc/include",
     "sysinfo/include",
   ]
+
+  if (huks_enable_ukey_config == true) {
+    defines = [ "HKS_UKEY_EXTENSION_CRYPTO" ]
+  }
 }
 
 if (os_level == "standard") {

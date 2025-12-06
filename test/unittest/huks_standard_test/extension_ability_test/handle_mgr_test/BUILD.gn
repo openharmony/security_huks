@@ -3,7 +3,7 @@ import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 
-if (os_level == "standard" && huks_security_level == "trusted_environment") {
+if (huks_enable_ukey_config == true) {
   module_output_path = "huks/huks/extension_unittest"
   ohos_unittest("handle_mgr_test") {
     module_out_path = module_output_path

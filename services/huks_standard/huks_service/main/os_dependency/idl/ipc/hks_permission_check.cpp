@@ -59,6 +59,7 @@ int32_t SensitivePermissionCheck(const char *permission)
     return HKS_ERROR_NO_PERMISSION;
 }
 
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
 int32_t CheckUkeyAuthPinType(void)
 {
     auto accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
@@ -77,6 +78,27 @@ int32_t CheckUkeyAuthPinType(void)
     }
 }
 
+int32_t HksCheckUkeyPermission(const char *permission)
+{
+    OHOS::Security::AccessToken::AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
+    int result = OHOS::Security::AccessToken::AccessTokenKit::VerifyAccessToken(tokenId, permission);
+    if (result == OHOS::Security::AccessToken::PERMISSION_GRANTED) {
+        HKS_LOG_D("Check Ukey Permission success!");
+        return HKS_SUCCESS;
+    }
+
+    HKS_LOG_E("Check Ukey Permission failed!%" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", permission, result);
+    return HKS_ERROR_NO_PERMISSION;
+}
+
+int32_t CheckUkeyCertCaller(const struct HksProcessInfo *processInfo)
+{
+    HKS_IF_NULL_RETURN(processInfo, HKS_ERROR_INVALID_ARGUMENT);
+    HKS_IF_TRUE_LOGI_RETURN(processInfo->uidInt == CERT_UID_INT, HKS_SUCCESS, "CheckUkeyCertCaller success");
+    HKS_LOG_E("CheckUkeyCertCaller fail, caller is not asset.");
+    return HKS_ERROR_NO_PERMISSION;
+}
+#endif
 namespace {
 static int32_t CheckTokenType(void)
 {
@@ -146,27 +168,6 @@ int32_t HksCheckAcrossAccountsPermission(const struct HksParamSet *paramSet, int
         return HKS_ERROR_ACCESS_OTHER_USER_KEY;
     }
     return HKS_SUCCESS;
-}
-
-int32_t HksCheckUkeyPermission(const char *permission)
-{
-    OHOS::Security::AccessToken::AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
-    int result = OHOS::Security::AccessToken::AccessTokenKit::VerifyAccessToken(tokenId, permission);
-    if (result == OHOS::Security::AccessToken::PERMISSION_GRANTED) {
-        HKS_LOG_D("Check Ukey Permission success!");
-        return HKS_SUCCESS;
-    }
-
-    HKS_LOG_E("Check Ukey Permission failed!%" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", permission, result);
-    return HKS_ERROR_NO_PERMISSION;
-}
-
-int32_t CheckUkeyCertCaller(const struct HksProcessInfo *processInfo)
-{
-    HKS_IF_NULL_RETURN(processInfo, HKS_ERROR_INVALID_ARGUMENT);
-    HKS_IF_TRUE_LOGI_RETURN(processInfo->uidInt == CERT_UID_INT, HKS_SUCCESS, "CheckUkeyCertCaller success");
-    HKS_LOG_E("CheckUkeyCertCaller fail, caller is not asset.");
-    return HKS_ERROR_NO_PERMISSION;
 }
 #endif
 #else
