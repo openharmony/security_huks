@@ -75,6 +75,7 @@ public:
     int32_t ParseAndValidateIndex(const std::string &index, const uint32_t uid, ProviderInfo &providerInfo,
         std::string &handle);
     int32_t GetProviderProxy(const ProviderInfo &providerInfo, OHOS::sptr<IHuksAccessExtBase> &proxy);
+    void ClearMapByHandle(const int32_t &ret, const std::string &handle);
 
 private:
     bool IsProviderNumExceedLimit(const ProviderInfo &providerInfo);

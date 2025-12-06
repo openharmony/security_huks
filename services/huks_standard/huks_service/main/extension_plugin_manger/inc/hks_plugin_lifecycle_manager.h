@@ -44,7 +44,7 @@ public:
         const CppParamSet &paramSet, bool isdeath);
 
     int32_t OnRegistProvider(const HksProcessInfo &processInfo,
-        const std::string &providerName, const CppParamSet &paramSet, std::function<void(bool)> callback);
+        const std::string &providerName, const CppParamSet &paramSet, std::function<void(HksProcessInfo)> callback);
     int32_t OnUnRegistProvider(const HksProcessInfo &processInfo,
         const std::string &providerName, const CppParamSet &paramSet, bool isdeath);
     int32_t OnCreateRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,

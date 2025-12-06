@@ -204,7 +204,7 @@ void HksProviderLifeCycleManager::PrintRegisterProviders()
 }
 
 int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet, std::function<void(bool)> callback)
+    const std::string &providerName, const CppParamSet &paramSet, std::function<void(HksProcessInfo)> callback)
 {
     return HKS_SUCCESS;
 }

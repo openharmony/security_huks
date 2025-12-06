@@ -37,13 +37,13 @@ namespace OHOS::Security::Huks {
 bool ProviderInfo::operator==(const ProviderInfo &other) const
 {
     return m_bundleName == other.m_bundleName && m_providerName == other.m_providerName &&
-        m_abilityName == other.m_abilityName;
+        m_abilityName == other.m_abilityName && m_userid == other.m_userid;
 }
 
 bool ProviderInfo::operator<(const ProviderInfo &other) const
 {
-    return std::tie(m_bundleName, m_providerName, m_abilityName) <
-        std::tie(other.m_bundleName, other.m_providerName, other.m_abilityName);
+    return std::tie(m_bundleName, m_providerName, m_abilityName, m_userid) <
+        std::tie(other.m_bundleName, other.m_providerName, other.m_abilityName, other.m_userid);
 }
 
 std::shared_ptr<HksProviderLifeCycleManager> HksProviderLifeCycleManager::GetInstanceWrapper()
@@ -66,7 +66,7 @@ void HksProviderLifeCycleManager::PrintRegisterProviders()
 }
 
 int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet, std::function<void(bool)> callback)
+    const std::string &providerName, const CppParamSet &paramSet, std::function<void(HksProcessInfo)> callback)
 {
     HKS_LOG_I("OnRegisterProvider providerName: %" LOG_PUBLIC "s", providerName.c_str());
     HKS_IF_TRUE_RETURN(!CheckStringParamLenIsOk(providerName, 1, MAX_PROVIDER_NAME_LEN), HKS_ERROR_INVALID_ARGUMENT)
@@ -74,6 +74,7 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
         HKS_ERROR_UKY_PROVIDER_MGR_REGESTER_REACH_MAX_NUM, "OnRegisterProvider failed, providerNum is too much.")
     ProviderInfo providerInfo{};
     int32_t ret = HksGetProviderInfo(processInfo, providerName, paramSet, providerInfo);
+    providerInfo.m_userid = processInfo.userIdInt;
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
         "Fail to get provider info. providerName: %" LOG_PUBLIC "s. ret: %" LOG_PUBLIC "d", providerName.c_str(), ret)
     HKS_LOG_I("bundleName: %" LOG_PUBLIC "s, abilityName: %" LOG_PUBLIC "s",
@@ -88,7 +89,7 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
         providerInfo.m_bundleName.c_str(), providerInfo.m_abilityName.c_str())
     AAFwk::Want want{};
     want.SetElementName(providerInfo.m_bundleName, providerInfo.m_abilityName);
-    sptr<ExtensionConnection> connect(new (std::nothrow) ExtensionConnection());
+    sptr<ExtensionConnection> connect(new (std::nothrow) ExtensionConnection(processInfo));
     HKS_IF_TRUE_LOGE_RETURN(connect == nullptr, HKS_ERROR_NULL_POINTER, "new ExtensionConnection failed");
     connect->callBackFromPlugin(callback);
     if (!connect->IsConnected()) {
@@ -103,7 +104,6 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
     HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NULL_POINTER, "connected, but getExtConnectProxy failed.");
 
     connectInfo = std::make_shared<HksExtAbilityConnectInfo>(want, connect);
-    providerInfo.m_uid = processInfo.uidInt;
     m_providerMap.Insert(providerInfo, connectInfo);
     HKS_LOG_I("OnRegisterProvider Success! providerName: %" LOG_PUBLIC "s", providerName.c_str());
     return ret;
@@ -145,16 +145,10 @@ int32_t HksProviderLifeCycleManager::GetAllProviderInfosByProviderName(const std
         std::shared_ptr<HksExtAbilityConnectInfo> &connectionInfo) {
         if (providerName == "HksInnerNullProviderName") {
             ProviderInfo info = providerInfo;
-            info.m_bundleName = providerInfo.m_bundleName;
-            info.m_abilityName = providerInfo.m_abilityName;
-            info.m_providerName = providerInfo.m_providerName;
             providerInfos.push_back(info);
             ret = HKS_SUCCESS;
         } else if (providerInfo.m_providerName == providerName) {
             ProviderInfo info = providerInfo;
-            info.m_bundleName = providerInfo.m_bundleName;
-            info.m_abilityName = providerInfo.m_abilityName;
-            info.m_providerName = providerInfo.m_providerName;
             providerInfos.push_back(info);
             ret = HKS_SUCCESS;
         }
@@ -182,7 +176,7 @@ int32_t HksProviderLifeCycleManager::HksHapGetConnectInfos(const HksProcessInfo 
             if (providerInfo.m_bundleName == bundleName &&
                 providerInfo.m_abilityName == abilityNameStr &&
                 providerInfo.m_providerName == providerName &&
-                providerInfo.m_uid == processInfo.uidInt) {
+                providerInfo.m_userid == processInfo.userIdInt) {
                 connectionInfos.emplace_back(providerInfo, connectionInfo);
             }
         });

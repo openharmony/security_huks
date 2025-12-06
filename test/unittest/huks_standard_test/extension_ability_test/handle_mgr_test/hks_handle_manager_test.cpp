@@ -74,6 +74,7 @@ std::string HksRemoteHandleManagerTest::CreateTestIndex(const std::string& provi
     EXPECT_TRUE(root.SetValue("providerName", providerName));
     EXPECT_TRUE(root.SetValue("abilityName", abilityName));
     EXPECT_TRUE(root.SetValue("bundleName", bundleName));
+    EXPECT_TRUE(root.SetValue("userid", 100));
     EXPECT_TRUE(root.SetValue("index", originalIndex));
     return root.Serialize(false);
 }
@@ -121,6 +122,7 @@ HWTEST_F(HksRemoteHandleManagerTest, CreateCloseRemoteHandleTest, TestSize.Level
     EXPECT_TRUE(root.SetValue("providerName", std::string("testProvider")));
     EXPECT_TRUE(root.SetValue("abilityName", std::string("testAbility")));
     EXPECT_TRUE(root.SetValue("bundleName", std::string("com.teds.bundle")));
+    EXPECT_TRUE(root.SetValue("userid", 100));
     EXPECT_TRUE(root.SetValue("index", std::string("testIndex3213")));
     std::string index2 = root.Serialize(false);
     ret = manager->CreateRemoteHandle(processInfo, index2, paramSet);
@@ -130,6 +132,7 @@ HWTEST_F(HksRemoteHandleManagerTest, CreateCloseRemoteHandleTest, TestSize.Level
     EXPECT_TRUE(root.SetValue("providerName", std::string("testProvider")));
     EXPECT_TRUE(root.SetValue("abilityName", std::string("testAbility")));
     EXPECT_TRUE(root.SetValue("bundleName", std::string("com.teds.bundle")));
+    EXPECT_TRUE(root.SetValue("userid", 100));
     EXPECT_TRUE(root.SetValue("index", std::string("testIndexsf123")));
     std::string index3 = root.Serialize(false);
     ret = manager->CreateRemoteHandle(processInfo, index3, paramSet);
@@ -139,11 +142,12 @@ HWTEST_F(HksRemoteHandleManagerTest, CreateCloseRemoteHandleTest, TestSize.Level
     EXPECT_TRUE(root.SetValue("providerName", std::string("testProvider")));
     EXPECT_TRUE(root.SetValue("abilityName", std::string("testAbility")));
     EXPECT_TRUE(root.SetValue("bundleName", std::string("com.teds.bundle")));
+    EXPECT_TRUE(root.SetValue("userid", 100));
     EXPECT_TRUE(root.SetValue("index", std::string("tes2424")));
     std::string index4 = root.Serialize(false);
     ret = manager->CreateRemoteHandle(processInfo, index4, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
-    int32_t authState = 0;
+    int32_t authState = 1;
     uint32_t retryCnt = 0;
     ret = manager->RemoteVerifyPin(processInfo, index4, paramSet, authState, retryCnt);
     EXPECT_EQ(ret, HKS_SUCCESS);
@@ -230,12 +234,12 @@ HWTEST_F(HksRemoteHandleManagerTest, PinManagementTest, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     // Test verify PIN
-    int32_t authState = 0;
+    int32_t authState = 1;
     uint32_t retryCnt = 0;
     ret = manager->RemoteVerifyPin(processInfo, index, paramSet, authState, retryCnt);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    int32_t state = 0;
+    int32_t state = 1;
     ret = manager->RemoteVerifyPinStatus(processInfo, index, paramSet, state);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
