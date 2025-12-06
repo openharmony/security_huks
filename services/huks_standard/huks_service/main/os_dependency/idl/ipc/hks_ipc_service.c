@@ -333,7 +333,7 @@ void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t
     HksSendResponse(context, ret, NULL);
 
     struct UKeyInfo ukeyInfo = { .eventId = HKS_EVENT_UKEY_OPERATE_REMOTE_HANDLE,
-        .operation = HKS_UKEY_REPORT_CLOAE_HANDLE, .resourceId = resourceId };
+        .operation = HKS_UKEY_REPORT_CLOSE_HANDLE, .resourceId = resourceId };
     struct UKeyCommonInfo ukeyCommon = { .returnCode = ret, .startTime = startTime };
     ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, paramSet, &ukeyCommon);
 
