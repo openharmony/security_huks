@@ -123,6 +123,7 @@ static int32_t GetParamSetFromBuffer(struct HksParamSet **paramSet,
     return HKS_SUCCESS;
 }
 
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
 int32_t HksUKeyGeneralPack(const struct HksBlob *blob, const struct HksParamSet *paramSet, struct HksBlob *destData)
 {
     uint32_t offset = 0;
@@ -151,6 +152,7 @@ int32_t HksUkeyBlob2ParamSetPack(const struct HksBlob *blob1, const struct HksBl
     } while (0);
     return ret;
 }
+#endif
 
 int32_t HksGenerateKeyPack(struct HksBlob *destData, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, const struct HksBlob *keyOut)

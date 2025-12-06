@@ -110,6 +110,12 @@ config("soft_huks_config") {
 
 config("public_huks_config") {
   include_dirs = [ "../../../interfaces/inner_api/huks_standard/main/include" ]
+
+  defines = []
+
+  if (huks_enable_ukey_config == true) {
+    defines += [ "HKS_UKEY_EXTENSION_CRYPTO" ]
+  }
 }
 
 #begin: add

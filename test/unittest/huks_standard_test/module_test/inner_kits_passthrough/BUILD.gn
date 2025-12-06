@@ -197,8 +197,12 @@ ohos_static_library("libhukssdk_static") {
     "//base/security/huks/services/huks_standard/huks_engine/main/core_dependency:libhuks_core_hal_api_static",
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
     "//base/security/huks/utils/condition:libhuks_utils_condition_static",
-    "//base/security/huks/services/huks_standard/huks_service/extension/ukey_client_service:libhuks_service_ukey_standard_static"
   ]
+
+  if (huks_enable_ukey_config == true) {
+    deps += [ "//base/security/huks/services/huks_standard/huks_service/extension/ukey_client_service:libhuks_service_ukey_standard_static" ]
+  }
+
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "bounds_checking_function:libsec_shared",

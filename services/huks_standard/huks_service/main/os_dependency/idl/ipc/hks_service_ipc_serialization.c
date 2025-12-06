@@ -186,6 +186,7 @@ static int32_t MallocParamSetFromBuffer(const struct HksBlob *srcData, struct Hk
     return HKS_SUCCESS;
 }
 
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
 int32_t HksUKeyGeneralUnpack(const struct HksBlob *srcData, struct HksBlob *blob, struct HksParamSet **paramSet)
 {
     uint32_t offset = 0;
@@ -216,7 +217,7 @@ int32_t HksUkeyBlob2ParamSetUnpack(const struct HksBlob *srcData, struct HksBlob
     } while (0);
     return ret;
 }
-
+#endif
 
 int32_t HksGenerateKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
     struct HksParamSet **paramSetIn, struct HksBlob *keyOut)
