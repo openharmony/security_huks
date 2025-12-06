@@ -55,7 +55,7 @@ public:
         uint32_t& retryCnt)
     {
         if(handle == "HksSessionMgrTest003") {
-            authState = 0;
+            authState = 1;
             errcode = 0;
             return 0;
         }
@@ -185,7 +185,12 @@ void ExtensionConnection::OnRemoteDied(const wptr<IRemoteObject> &remote)
     return;
 }
 
-void ExtensionConnection::callBackFromPlugin(std::function<void(bool)> callback)
+ExtensionConnection::ExtensionConnection(const HksProcessInfo& processInfo)
+{
+    return;
+}
+
+void ExtensionConnection::callBackFromPlugin(std::function<void(HksProcessInfo)> callback)
 {
     return;
 }

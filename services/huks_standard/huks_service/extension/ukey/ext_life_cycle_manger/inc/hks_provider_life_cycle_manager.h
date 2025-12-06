@@ -48,7 +48,7 @@ public:
     std::string m_providerName{};
     std::string m_abilityName{};
     std::string m_bundleName{};
-    uint32_t m_uid = 0;
+    uint32_t m_userid = 0;
 
     bool operator==(const ProviderInfo &other) const;
     bool operator<(const ProviderInfo &other) const;
@@ -72,7 +72,7 @@ public:
     static std::shared_ptr<HksProviderLifeCycleManager> GetInstanceWrapper();
     static void ReleaseInstance();
     int32_t OnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName,
-        const CppParamSet &paramSet, std::function<void(bool)> callback);
+        const CppParamSet &paramSet, std::function<void(HksProcessInfo)> callback);
     int32_t OnUnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName,
         const CppParamSet &paramSet, bool isdeath);
     int32_t GetAllProviderInfosByProviderName(const std::string &providerName,

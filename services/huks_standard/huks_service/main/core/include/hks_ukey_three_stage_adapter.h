@@ -25,7 +25,7 @@
 extern "C" {
 #endif
 
-int32_t HksCheckIsUkeyOperation(const struct HksParamSet *paramSet);
+int32_t HksCheckIsUkeyOperation(const struct HksParamSet *paramSet, int32_t *outRet);
 
 int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *handle);

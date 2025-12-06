@@ -27,6 +27,14 @@
 
 namespace OHOS::Security::Huks {
 
+static bool CheckParamPurpose(const CppParamSet &paramSet)
+{
+    auto paramPurpose = paramSet.GetParam<HKS_TAG_PURPOSE>();
+    HKS_IF_NOT_TRUE_RETURN(paramPurpose.first == HKS_SUCCESS, false);
+    uint32_t purpose = paramPurpose.second;
+    return purpose > 0 && (purpose & (purpose - 1)) == 0 && (purpose & ~0x1FF) == 0;
+}
+
 static void RegisterObserverForProcess(const HksProcessInfo &processInfo, const CppParamSet &paramSet)
 {
     int32_t ret = OHOS::Security::Huks::HksAppObserverManager::GetInstance().RegisterObserver(processInfo, paramSet);
@@ -35,7 +43,7 @@ static void RegisterObserverForProcess(const HksProcessInfo &processInfo, const 
 }
 
 __attribute__((visibility("default"))) int32_t HksExtPluginOnRegisterProvider(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet, std::function<void(bool)> callback)
+    const std::string &providerName, const CppParamSet &paramSet, std::function<void(HksProcessInfo)> callback)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
@@ -91,10 +99,19 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnOpemRemoteHandle(
     const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet, std::string &handle)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    CppParamSet paramSetWithUid(paramSet);
+    auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
+    if (uidParam.first == HKS_SUCCESS) {
+        HKS_IF_NOT_TRUE_RETURN(uidParam.second == processInfo.uidInt, HKS_ERROR_INVALID_ARGUMENT);
+    } else {
+        struct HksParam uid = {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = processInfo.uidInt};
+        HKS_IF_TRUE_LOGE_RETURN(!paramSetWithUid.AddParams({uid}), HKS_ERROR_INVALID_ARGUMENT,
+            "AddUidToParamset fail")
+    }
     (void)handle;
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
-    auto ret = handleMgr->CreateRemoteHandle(processInfo, index, paramSet);
+    auto ret = handleMgr->CreateRemoteHandle(processInfo, index, paramSetWithUid);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
@@ -166,6 +183,8 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnInitSession(const H
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    HKS_IF_NOT_TRUE_LOGE_RETURN(CheckParamPurpose(paramSet), HKS_ERROR_INVALID_PURPOSE,
+        "InitSession purpose check failed")
     RegisterObserverForProcess(processInfo, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null");

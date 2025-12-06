@@ -45,10 +45,12 @@ int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &in
         HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "regist provider failed!")
     }
 
-    ret = OnRegistProvider(info, providerName, paramSet, [this, info, providerName, paramSet](bool deathFlag) {
+    ret = OnRegistProvider(info, providerName, paramSet, [this, info, providerName, paramSet]
+        (const HksProcessInfo &processInfo) {
         HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
         isDeath = true;
-        UnRegisterProvider(info, providerName, paramSet, isDeath);
+        (void)info;
+        UnRegisterProvider(processInfo, providerName, paramSet, isDeath);
     });
 
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "regist provider method in plugin loader is fail")
@@ -104,7 +106,7 @@ struct AutoRefCount {
 };
 
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnRegistProvider(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet, std::function<void(bool)> callback))
+    const std::string &providerName, const CppParamSet &paramSet, std::function<void(HksProcessInfo)> callback))
 {
     AutoRefCount refCnt(m_refCount);
     void *funcPtr = nullptr;

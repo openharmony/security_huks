@@ -24,6 +24,7 @@
 #include "ihuks_access_ext_base.h"
 #include "want.h"
 #include "functional"
+#include "hks_plugin_def.h"
 
 namespace OHOS {
 namespace Security {
@@ -31,6 +32,7 @@ namespace Huks {
 
 class ExtensionConnection : public OHOS::AAFwk::AbilityConnectionStub {
 public:
+    ExtensionConnection(const HksProcessInfo &info);
     int32_t OnConnection(const AAFwk::Want &want, sptr<ExtensionConnection> &connect);
     void OnAbilityConnectDone(const AppExecFwk::ElementName& element,
         const sptr<IRemoteObject>& remoteObject, int resultCode) override;
@@ -40,9 +42,9 @@ public:
     sptr<IHuksAccessExtBase> GetExtConnectProxy();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
     bool isDeathRemoted = false;
-    std::function<void(bool)> callBackPlugin;
-    void callBackFromPlugin(std::function<void(bool)> callback);
-
+    std::function<void(HksProcessInfo)> callBackPlugin;
+    void callBackFromPlugin(std::function<void(HksProcessInfo)> callback);
+    HksProcessInfo m_processInfo;
 private:
     std::condition_variable proxyConv_{};
     std::condition_variable disConnectConv_{};

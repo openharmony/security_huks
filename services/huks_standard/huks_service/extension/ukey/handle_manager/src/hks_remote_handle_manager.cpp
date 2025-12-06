@@ -38,6 +38,7 @@ namespace Huks {
 constexpr const char *PROVIDER_NAME_KEY = "providerName";
 constexpr const char *ABILITY_NAME_KEY = "abilityName";
 constexpr const char *BUNDLE_NAME_KEY = "bundleName";
+constexpr const char *USERID_KEY = "userid";
 constexpr const size_t MAX_INDEX_SIZE = 512;
 constexpr const int32_t MAX_PROVIDER_TOTAL_NUM = 100;
 constexpr const int32_t MAX_PROVIDER_NUM_PER_UID = 10;
@@ -65,7 +66,8 @@ static int32_t WrapIndexWithProviderInfo(const ProviderInfo& providerInfo, const
     HKS_IF_TRUE_LOGE_RETURN(root.IsNull(), HKS_ERROR_JSON_SERIALIZE_FAILED, "Create JSON object failed")
     if (!root.SetValue(PROVIDER_NAME_KEY, providerInfo.m_providerName) ||
         !root.SetValue(ABILITY_NAME_KEY, providerInfo.m_abilityName) ||
-        !root.SetValue(BUNDLE_NAME_KEY, providerInfo.m_bundleName)) {
+        !root.SetValue(BUNDLE_NAME_KEY, providerInfo.m_bundleName) ||
+        !root.SetValue(USERID_KEY, providerInfo.m_userid)) {
         HKS_LOG_E("Set provider info to index failed");
         return HKS_ERROR_JSON_SERIALIZE_FAILED;
     }
@@ -106,11 +108,14 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
     auto providerNameResult = root.GetValue(PROVIDER_NAME_KEY).ToString();
     auto abilityNameResult = root.GetValue(ABILITY_NAME_KEY).ToString();
     auto bundleNameResult = root.GetValue(BUNDLE_NAME_KEY).ToString();
+    auto useridResult = root.GetValue(USERID_KEY).ToNumber<int32_t>();
     HKS_IF_TRUE_LOGE_RETURN(providerNameResult.first != HKS_SUCCESS || abilityNameResult.first != HKS_SUCCESS ||
-        bundleNameResult.first != HKS_SUCCESS, HKS_ERROR_JSON_TYPE_MISMATCH, "Get provider info fields failed")
+        bundleNameResult.first != HKS_SUCCESS || useridResult.first != HKS_SUCCESS, HKS_ERROR_JSON_TYPE_MISMATCH,
+        "Get provider info fields failed")
     providerInfo.m_providerName = providerNameResult.second;
     providerInfo.m_abilityName = abilityNameResult.second;
     providerInfo.m_bundleName = bundleNameResult.second;
+    providerInfo.m_userid = useridResult.second;
     HKS_IF_TRUE_LOGE_RETURN(providerInfo.m_providerName.empty() || providerInfo.m_abilityName.empty() ||
         providerInfo.m_bundleName.empty(), HKS_ERROR_JSON_INVALID_VALUE, "Provider info is incomplete")
     CommJsonObject newRoot = CommJsonObject::CreateObject();
@@ -118,7 +123,7 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
         "Create new JSON object failed")
     auto keys = root.GetKeys();
     for (const auto &key : keys) {
-        if (key == PROVIDER_NAME_KEY || key == ABILITY_NAME_KEY || key == BUNDLE_NAME_KEY) {
+        if (key == PROVIDER_NAME_KEY || key == ABILITY_NAME_KEY || key == BUNDLE_NAME_KEY || key == USERID_KEY) {
             continue;
         }
         auto value = root.GetValue(key);
@@ -174,9 +179,9 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &process
     std::string handle;
     auto ipccode = proxy->OpenRemoteHandle(newIndex, paramSet, handle, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
-            "Create remote handle failed: %" LOG_PUBLIC "d", ret)
+    ret = ConvertExtensionToHksErrorCode(ret);
+    ClearMapByHandle(ret, handle);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Create remote handle failed: %" LOG_PUBLIC "d", ret)
     HKS_LOG_I("uidIndexToHandle_ is %" LOG_PUBLIC "u,%" LOG_PUBLIC "s", processInfo.uidInt, index.c_str());
     HKS_IF_TRUE_LOGE_RETURN(!uidIndexToHandle_.Insert({processInfo.uidInt, index}, handle),
         HKS_ERROR_CODE_KEY_ALREADY_EXIST, "Cache remote handle failed")
@@ -202,8 +207,9 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
 
     auto ipccode = proxy->CloseRemoteHandle(handle, paramSet, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
-            "Close remote handle failed: %" LOG_PUBLIC "d", ret)
+    ret = ConvertExtensionToHksErrorCode(ret);
+    ClearMapByHandle(ret, handle);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Close remote handle failed: %" LOG_PUBLIC "d", ret)
     HKS_LOG_I("uidIndexToHandle_ is %" LOG_PUBLIC "u,%" LOG_PUBLIC "s", processInfo.uidInt, index.c_str());
     uidIndexToHandle_.Erase({processInfo.uidInt, index});
     int32_t num = 0;
@@ -218,6 +224,8 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
     uidIndexToAuthState_.Iterate([&](std::pair<uint32_t, std::string> key, int32_t value) {
         if (key.first == processInfo.uidInt && key.second == index) {
             keysToRemove.push_back(key);
+            HKS_IF_NOT_SUCC_LOGE(RemoteClearPinStatus(processInfo, index, paramSet),
+                "Remote clear pin status failed: %" LOG_PUBLIC "u", processInfo.uidInt)
         }
     });
     for (auto &key : keysToRemove) {
@@ -234,7 +242,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
         "Get uid tag failed. ret: %" LOG_PUBLIC "d", uid.first)
     ProviderInfo providerInfo;
     std::string handle;
-    int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
+    int32_t ret = ParseAndValidateIndex(index, uid.second, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
@@ -242,8 +250,10 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     
     auto ipccode = proxy->AuthUkeyPin(handle, paramSet, ret, authState, retryCnt);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    if (authState == HKS_SUCCESS) {
-        uidIndexToAuthState_.EnsureInsert(std::make_pair(static_cast<uint32_t>(uid.second), index), HKS_SUCCESS);
+    ret = ConvertExtensionToHksErrorCode(ret);
+    ClearMapByHandle(ret, handle);
+    if (authState == 1) {
+        uidIndexToAuthState_.EnsureInsert(std::make_pair(static_cast<uint32_t>(uid.second), index), authState);
     }
     HKS_IF_TRUE_LOGE_RETURN(ret == HUKS_ERR_CODE_PIN_CODE_ERROR || ret == HUKS_ERR_CODE_PIN_LOCKED, ret,
             "AuthUkeyPin failed: %" LOG_PUBLIC "d", ret)
@@ -255,9 +265,14 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
 int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, int32_t &state)
 {
+    auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
+    uint32_t uid = processInfo.uidInt;
+    if (uidParam.first == HKS_SUCCESS) {
+        uid = uidParam.second;
+    }
     ProviderInfo providerInfo;
     std::string handle;
-    int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
+    int32_t ret = ParseAndValidateIndex(index, uid, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
@@ -265,6 +280,9 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
 
     auto ipccode = proxy->GetUkeyPinAuthState(handle, paramSet, state, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
+    ret = ConvertExtensionToHksErrorCode(ret);
+    ClearMapByHandle(ret, handle);
+    uidIndexToAuthState_.EnsureInsert({processInfo.uidInt, index}, state);
     if (ret == HUKS_ERR_CODE_PIN_LOCKED || ret == HKS_SUCCESS) {
         return ret;
     }
@@ -285,9 +303,8 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &proce
 
     auto ipccode = proxy->ClearUkeyPinAuthState(handle, paramSet, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
-            "Remote clear pin status failed: %" "d", ret)
+    ret = ConvertExtensionToHksErrorCode(ret);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote clear pin status failed: %" "d", ret)
     return HKS_SUCCESS;
 }
 
@@ -304,9 +321,9 @@ int32_t HksRemoteHandleManager::RemoteHandleSign(const HksProcessInfo &processIn
 
     auto ipccode = proxy->Sign(handle, paramSet, inData, outData, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
-            "Remote sign failed: %" LOG_PUBLIC "d", ret)
+    ret = ConvertExtensionToHksErrorCode(ret);
+    ClearMapByHandle(ret, handle);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote sign failed: %" LOG_PUBLIC "d", ret)
     return HKS_SUCCESS;
 }
 
@@ -323,9 +340,9 @@ int32_t HksRemoteHandleManager::RemoteHandleVerify(const HksProcessInfo &process
 
     auto ipccode = proxy->Verify(handle, paramSet, plainText, signature, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
-            "Remote verify failed: %" LOG_PUBLIC "d", ret)
+    ret = ConvertExtensionToHksErrorCode(ret);
+    ClearMapByHandle(ret, handle);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote verify failed: %" LOG_PUBLIC "d", ret)
     return HKS_SUCCESS;
 }
 
@@ -343,9 +360,8 @@ int32_t HksRemoteHandleManager::FindRemoteCertificate(const std::string &index,
 
     auto ipccode = proxy->ExportCertificate(newIndex, paramSet, cert, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
-            "Remote ExportCertificate failed: %" LOG_PUBLIC "d", ret)
+    ret = ConvertExtensionToHksErrorCode(ret);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote ExportCertificate failed: %" LOG_PUBLIC "d", ret)
     
     CommJsonObject combinedArray = CommJsonObject::CreateArray();
     HKS_IF_TRUE_LOGE_RETURN(combinedArray.IsNull(), HKS_ERROR_JSON_SERIALIZE_FAILED, "Create combined array failed")
@@ -394,13 +410,18 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
 int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processInfo, const std::string &index,
     const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams)
 {
+    auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
+    uint32_t uid = processInfo.uidInt;
+    if (uidParam.first == HKS_SUCCESS) {
+        uid = uidParam.second;
+    }
     if (std::find(VALID_PROPERTYID.begin(), VALID_PROPERTYID.end(), propertyId) == VALID_PROPERTYID.end()) {
         HKS_LOG_E("Invalid propertyId");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     ProviderInfo providerInfo;
     std::string handle;
-    int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
+    int32_t ret = ParseAndValidateIndex(index, uid, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
@@ -408,9 +429,9 @@ int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processI
 
     auto ipccode = proxy->GetProperty(handle, propertyId, paramSet, outParams, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
-            "Remote GetProperty failed: %" LOG_PUBLIC "d", ret)
+    ret = ConvertExtensionToHksErrorCode(ret);
+    ClearMapByHandle(ret, handle);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote GetProperty failed: %" LOG_PUBLIC "d", ret)
     return HKS_SUCCESS;
 }
 
@@ -420,10 +441,10 @@ int32_t HksRemoteHandleManager::ClearRemoteHandleMap(const std::string &provider
     std::vector<std::pair<uint32_t, std::string>> indicesToRemove;
     std::vector<ProviderInfo> providersToRemove;
     auto collectToRemoveFunc = [&](std::pair<uint32_t, std::string> key, std::string &value) {
-        std::string handle;
+        std::string newIndex;
         ProviderInfo providerInfo;
-        int32_t ret = ParseAndValidateIndex(key.second, key.first, providerInfo, handle);
-        HKS_IF_TRUE_LOGE(ret != HKS_SUCCESS, "ParseAndValidateIndex failed: %" LOG_PUBLIC "d", ret)
+        int32_t ret = ParseIndexAndProviderInfo(key.second, providerInfo, newIndex);
+        HKS_IF_TRUE_LOGE(ret != HKS_SUCCESS, "ParseIndexAndProviderInfo failed: %" LOG_PUBLIC "d", ret)
         if (key.first == uid && providerInfo.m_providerName == providerName) {
             if (abilityName.empty() || providerInfo.m_abilityName == abilityName) {
                 indicesToRemove.push_back(key);
@@ -444,15 +465,20 @@ int32_t HksRemoteHandleManager::ClearRemoteHandleMap(const std::string &provider
 bool HksRemoteHandleManager::CheckAuthStateIsOk(const HksProcessInfo &processInfo, const std::string &index)
 {
     int32_t state = 0;
-    return uidIndexToAuthState_.Find(std::make_pair(processInfo.uidInt, index), state);
+    HKS_IF_NOT_TRUE_RETURN(uidIndexToAuthState_.Find(std::make_pair(processInfo.uidInt, index), state), false)
+    return state == 1;
 }
 
 void HksRemoteHandleManager::ClearAuthState(const HksProcessInfo &processInfo)
 {
     std::vector<std::pair<uint32_t, std::string>> keysToRemove;
+    struct HksParam uid = {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = processInfo.uidInt};
+    CppParamSet paramSet = CppParamSet({uid});
     auto iterFunc = [&](std::pair<uint32_t, std::string> key, int32_t &value) {
         if (key.first == processInfo.uidInt) {
             keysToRemove.push_back(key);
+            HKS_IF_NOT_SUCC_LOGE(RemoteClearPinStatus(processInfo, key.second, paramSet),
+                "Remote clear pin status failed: %" LOG_PUBLIC "u", processInfo.uidInt)
         }
     };
     uidIndexToAuthState_.Iterate(iterFunc);
@@ -473,6 +499,24 @@ bool HksRemoteHandleManager::IsProviderNumExceedLimit(const ProviderInfo &provid
     };
     providerInfoToNum_.Iterate(iterFunc);
     return totalNum >= MAX_PROVIDER_TOTAL_NUM - 1;
+}
+
+void HksRemoteHandleManager::ClearMapByHandle(const int32_t &ret, const std::string &handle)
+{
+    if (ret != HUKS_ERR_CODE_CRYPTO_FAIL && ret != HUKS_ERR_CODE_ITEM_NOT_EXIST) {
+        return;
+    }
+    std::vector<std::pair<uint32_t, std::string>> keysToRemove;
+    auto iterFunc = [&](std::pair<uint32_t, std::string> key, std::string &value) {
+        if (value == handle) {
+            keysToRemove.push_back(key);
+        }
+    };
+    uidIndexToHandle_.Iterate(iterFunc);
+    for (auto &key : keysToRemove) {
+        uidIndexToHandle_.Erase(key);
+        uidIndexToAuthState_.Erase(key);
+    }
 }
 
 }
