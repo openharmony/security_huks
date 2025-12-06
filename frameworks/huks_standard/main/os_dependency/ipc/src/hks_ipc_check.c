@@ -29,6 +29,7 @@
 #define MIN_CERT_COUNT 3
 #define MAX_CERT_COUNT 4
 
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
 int32_t HksCheckAuthStateIsValid(const int32_t state)
 {
     if (state == HKS_EXT_CRYPTO_PIN_NO_AUTH || state == HKS_EXT_CRYPTO_PIN_AUTH_SUCCEEDED ||
@@ -86,6 +87,7 @@ int32_t HksCheckIpcBlob(const struct HksBlob *blob, uint32_t maxSize)
     }
     return HKS_SUCCESS;
 }
+#endif
 
 int32_t HksCheckIpcGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn)
 {

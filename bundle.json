@@ -52,7 +52,8 @@
         "huks_enable_skip_upgrade_key_storage_secure_level",
         "huks_sa_skip_upgrade_config",
         "huks_hap_skip_upgrade_config",
-        "huks_enable_hdi_in_standard"
+        "huks_enable_hdi_in_standard",
+        "huks_enable_ukey_config"
       ],
       "adapted_system_type": [
           "standard",

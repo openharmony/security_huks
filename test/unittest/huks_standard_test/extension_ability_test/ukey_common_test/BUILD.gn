@@ -1,0 +1,65 @@
+import("//base/security/huks/build/config.gni")
+import("//base/security/huks/huks.gni")
+import("//build/ohos.gni")
+import("//build/test.gni")
+
+config("json_config") {
+  cflags_cc = [ "-fexceptions" ]
+}
+
+if (huks_enable_ukey_config == true) {
+  module_output_path = "huks/huks/extension_unittest"
+  ohos_unittest("ukey_common_test") {
+    module_out_path = module_output_path
+
+    include_dirs = [
+      ".",
+      "include",
+      "//base/security/huks/frameworks/huks_standard/main/common/include",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common/inc",
+      "//base/security/huks/test/unittest/huks_common_test/include",
+    ]
+
+    sources = [
+      "./ukey_common_test.cpp",
+    ]
+
+    configs = [
+      "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+    ]
+
+    deps = [
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
+    ]
+
+    external_deps = [
+      "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest",
+      "hilog:libhilog",
+    ]
+
+    cflags = [
+      "-Wall",
+      "-Werror",
+    ]
+
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+      cfi_cross_dso = true
+      boundary_sanitize = true
+      ubsan = true
+    }
+
+    subsystem_name = "security"
+    part_name = "huks"
+  }
+} else {
+  # Provide a stub target so upper-level unconditional dependency does not break build.
+  group("ukey_common_test") {
+    testonly = true
+  }
+}

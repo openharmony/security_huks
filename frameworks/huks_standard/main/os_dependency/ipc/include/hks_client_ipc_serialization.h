@@ -31,10 +31,12 @@ extern "C" {
 
 int32_t CopyUint32ToBuffer(uint32_t value, const struct HksBlob *destBlob, uint32_t *destOffset);
 
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
 int32_t HksUKeyGeneralPack(const struct HksBlob *blob, const struct HksParamSet *paramSet, struct HksBlob *destData);
 
 int32_t HksUkeyBlob2ParamSetPack(const struct HksBlob *oldKeyAlias, const struct HksBlob *newKeyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *destData);
+#endif
 
 int32_t HksGenerateKeyPack(struct HksBlob *destData, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, const struct HksBlob *keyOut);

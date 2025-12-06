@@ -22,6 +22,10 @@ config("huks_config") {
     "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/include",
     "//base/security/huks/services/huks_standard/huks_service/main/plugin_proxy/include",
   ]
+  
+  if (huks_enable_ukey_config == true) {
+    defines = [ "HKS_UKEY_EXTENSION_CRYPTO" ]
+  }
 }
 
 if (os_level == "standard") {
@@ -79,12 +83,15 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_util_standard_static",
-      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
       "//base/security/huks/services/huks_standard/huks_service/main/ha:libhuks_service_ha_static",
       "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
       "//base/security/huks/utils/list:libhuks_utils_list_static",
       "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
     ]
+
+    if (huks_enable_ukey_config == true) {
+      deps += [ "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static" ]
+    }
 
     if (enable_hks_mock) {
       deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_mock:libhuks_service_systemapi_mock_static" ]
@@ -124,6 +131,10 @@ if (os_level == "standard") {
       "src/hks_report_ukey_event.cpp",
       "src/hks_ukey_three_stage_adapter.cpp",
     ]
+
+    if (huks_enable_ukey_config == true) {
+      sources += [ "src/hks_ukey_three_stage_adapter.cpp" ]
+    }
 
     deps += [
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",

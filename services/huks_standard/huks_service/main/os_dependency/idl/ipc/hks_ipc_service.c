@@ -68,7 +68,7 @@ static enum HksTag g_idList[] = {
 
 void HksIpcServiceRegisterProvider(const struct HksBlob *srcData, const uint8_t *context)
 {
-#ifdef L2_STANDARD
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
     struct HksBlob name = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
@@ -106,7 +106,7 @@ void HksIpcServiceRegisterProvider(const struct HksBlob *srcData, const uint8_t 
 
 void HksIpcServiceUnregisterProvider(const struct HksBlob *srcData, const uint8_t *context)
 {
-#ifdef L2_STANDARD
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
     struct HksBlob name = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
@@ -144,7 +144,7 @@ void HksIpcServiceUnregisterProvider(const struct HksBlob *srcData, const uint8_
 
 void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *context)
 {
-#ifdef L2_STANDARD
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
     struct HksBlob index = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
@@ -198,7 +198,7 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
 
 void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8_t *context)
 {
-#ifdef L2_STANDARD
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
     struct HksBlob index = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
@@ -241,7 +241,7 @@ void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8
 
 void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t *context)
 {
-#ifdef L2_STANDARD
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
     int32_t ret;
     struct HksBlob index = { 0, NULL };
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
@@ -269,7 +269,7 @@ void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t
 
 void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t *context)
 {
-#ifdef L2_STANDARD
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
     struct HksBlob resourceId = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksBlob remoteHandleOut = { 0, NULL };
@@ -309,7 +309,7 @@ void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t 
 
 void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t *context)
 {
-#ifdef L2_STANDARD
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
     struct HksBlob resourceId = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
@@ -347,7 +347,7 @@ void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t
 
 void HksIpcServiceExportProviderCertificates(const struct HksBlob *srcData, const uint8_t *context)
 {
-#ifdef L2_STANDARD
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
     struct HksBlob providerName = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksExtCertInfoSet certInfoSet = {0, NULL};
@@ -391,7 +391,7 @@ void HksIpcServiceExportProviderCertificates(const struct HksBlob *srcData, cons
 
 void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t *context)
 {
-#ifdef L2_STANDARD
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
     struct HksBlob index = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksExtCertInfoSet certInfoSet = {0, NULL};
@@ -435,7 +435,7 @@ void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t
 
 void HksIpcServiceGetRemoteProperty(const struct HksBlob *srcData, const uint8_t *context, const uint8_t *remoteObject)
 {
-#ifdef L2_STANDARD
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
     int32_t ret;
     struct HksBlob resourceId = { 0, NULL };
     struct HksBlob propertyId = { 0, NULL };
