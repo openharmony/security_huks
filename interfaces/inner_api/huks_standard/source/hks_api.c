@@ -254,7 +254,7 @@ HKS_API_EXPORT int32_t HksFinish(const struct HksBlob *handle, const struct HksP
 #ifndef HKS_CHIPSET_API
 HKS_API_EXPORT int32_t HksRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
 {
-#ifdef L2_STANDARD
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
     HKS_LOG_D("enter RegisterProvider");
     if ((paramSetIn == NULL) || (name == NULL)) {
         return HKS_ERROR_NULL_POINTER;
@@ -271,7 +271,7 @@ HKS_API_EXPORT int32_t HksRegisterProvider(const struct HksBlob *name, const str
 
 HKS_API_EXPORT int32_t HksUnregisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
 {
-#ifdef L2_STANDARD
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
     HKS_LOG_D("enter UnregisterProvider");
     if (name == NULL) {
         return HKS_ERROR_NULL_POINTER;
@@ -289,7 +289,7 @@ HKS_API_EXPORT int32_t HksUnregisterProvider(const struct HksBlob *name, const s
 HKS_API_EXPORT int32_t HksExportProviderCertificates(const struct HksBlob *providerName,
     const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
 {
-#ifdef L2_STANDARD
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
     HKS_LOG_D("enter HksExportProviderCertificates");
     if (paramSetIn == NULL) {
         return HKS_ERROR_NULL_POINTER;
@@ -308,7 +308,7 @@ HKS_API_EXPORT int32_t HksExportProviderCertificates(const struct HksBlob *provi
 HKS_API_EXPORT int32_t HksExportCertificate(const struct HksBlob *resourceId,
     const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
 {
-#ifdef L2_STANDARD
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
     HKS_LOG_D("enter HksExportCertificate");
     if ((paramSetIn == NULL) || (resourceId == NULL)) {
         return HKS_ERROR_NULL_POINTER;
@@ -327,7 +327,7 @@ HKS_API_EXPORT int32_t HksExportCertificate(const struct HksBlob *resourceId,
 HKS_API_EXPORT int32_t HksAuthUkeyPin(const struct HksBlob *resourceId,
     const struct HksParamSet *paramSetIn, uint32_t *retryCount)
 {
-#ifdef L2_STANDARD
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
     HKS_LOG_D("enter AuthUkeyPin");
     if ((resourceId == NULL) || (paramSetIn == NULL) || (retryCount == NULL)) {
         return HKS_ERROR_NULL_POINTER;
@@ -346,7 +346,7 @@ HKS_API_EXPORT int32_t HksAuthUkeyPin(const struct HksBlob *resourceId,
 HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *resourceId,
     const struct HksParamSet *paramSetIn, int32_t *status)
 {
-#ifdef L2_STANDARD
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
     HKS_LOG_D("enter GetUkeyPinAuthState");
     if ((resourceId == NULL) || (paramSetIn == NULL) || (status == NULL)) {
         return HKS_ERROR_NULL_POINTER;
@@ -365,7 +365,7 @@ HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *resourceId,
 HKS_API_EXPORT int32_t HksOpenRemoteHandle(const struct HksBlob *resourceId,
     const struct HksParamSet *paramSetIn)
 {
-#ifdef L2_STANDARD
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
     HKS_LOG_D("enter OpenRemoteHandle");
     if ((resourceId == NULL) || (paramSetIn == NULL)) {
         return HKS_ERROR_NULL_POINTER;
@@ -383,7 +383,7 @@ HKS_API_EXPORT int32_t HksOpenRemoteHandle(const struct HksBlob *resourceId,
 HKS_API_EXPORT int32_t HksCloseRemoteHandle(const struct HksBlob *resourceId,
     const struct HksParamSet *paramSetIn)
 {
-#ifdef L2_STANDARD
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
     HKS_LOG_D("enter CloseRemoteHandle");
     if ((resourceId == NULL) || (paramSetIn == NULL)) {
         return HKS_ERROR_NULL_POINTER;
@@ -399,7 +399,7 @@ HKS_API_EXPORT int32_t HksCloseRemoteHandle(const struct HksBlob *resourceId,
 }
 HKS_API_EXPORT int32_t HksClearUkeyPinAuthState(const struct HksBlob *resourceId)
 {
-#ifdef L2_STANDARD
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
     HKS_LOG_D("enter ClearUkeyPinAuthState");
     if (resourceId == NULL) {
         return HKS_ERROR_NULL_POINTER;
@@ -416,7 +416,7 @@ HKS_API_EXPORT int32_t HksClearUkeyPinAuthState(const struct HksBlob *resourceId
 HKS_API_EXPORT int32_t HksGetRemoteProperty(const struct HksBlob *resourceId, const struct HksBlob *propertyId,
     const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut)
 {
-#ifdef L2_STANDARD
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
     HKS_LOG_D("enter GetRemoteProperty");
     if ((resourceId == NULL) || (propertyId == NULL) || (paramSetIn == NULL)) {
         return HKS_ERROR_NULL_POINTER;

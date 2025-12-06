@@ -17,6 +17,12 @@ import("//build/ohos.gni")
 
 config("huks_config") {
   include_dirs = [ "ipc" ]
+  
+  defines = []
+
+  if (huks_enable_ukey_config == true) {
+    defines += [ "HKS_UKEY_EXTENSION_CRYPTO" ]
+  }
 }
 
 config("idl_export_core_includes") {
@@ -60,12 +66,13 @@ if (os_level == "standard") {
 
     deps = [
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
-
-      # "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
       "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/at_wrapper:libhuks_at_systemapi_wrap_static",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey_client_service:libhuks_service_ukey_standard_static"
     ]
+
+    if (huks_enable_ukey_config == true) {
+      deps += [ "//base/security/huks/services/huks_standard/huks_service/extension/ukey_client_service:libhuks_service_ukey_standard_static" ]
+    }
 
     if (enable_bundle_framework) {
       deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms:libhuks_bms_systemapi_wrap_static" ]
