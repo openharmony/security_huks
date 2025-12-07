@@ -69,6 +69,10 @@ static int32_t ThreeStageBuildCommonInfo(const struct HksParamSet *paramSet, str
         eventInfo->common.traceId = param->uint64Param;
     }
 
+    if (HksGetParam(paramSet, HKS_TAG_PARAM1_UINT32, &param) == HKS_SUCCESS) {
+        eventInfo->common.operation = param->uint32Param;
+    }
+
     eventInfo->common.count = 1;
     return HKS_SUCCESS;
 }
@@ -79,11 +83,11 @@ void HksFreeEventInfo(HksEventInfo **eventInfo)
     HKS_FREE((*eventInfo)->common.function);
     HKS_FREE((*eventInfo)->common.callerInfo.name);
     HKS_FREE((*eventInfo)->common.result.errMsg);
-    if ((*eventInfo)->common.eventId == HKS_EVENT_DATA_SIZE_STATISTICS) {
-        HKS_FREE((*eventInfo)->dataSizeInfo.component);
-        HKS_FREE((*eventInfo)->dataSizeInfo.partition);
-        HKS_FREE((*eventInfo)->dataSizeInfo.foldPath);
-        HKS_FREE((*eventInfo)->dataSizeInfo.foldSize);
+    if (IF_UKEY_EVENT((*eventInfo)->common.eventId)) {
+        HKS_FREE((*eventInfo)->ukeyInfo.providerName);
+        HKS_FREE((*eventInfo)->ukeyInfo.abilityName);
+        HKS_FREE((*eventInfo)->ukeyInfo.resourceId);
+        HKS_FREE((*eventInfo)->ukeyInfo.propertyId);
     }
 }
 
