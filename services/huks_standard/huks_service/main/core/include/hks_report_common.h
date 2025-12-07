@@ -38,6 +38,7 @@ extern "C" {
 #define HASH_SHA256_SIZE 256
 #define KEYALIAS_HASH_SHA256_SIZE 1
 #define KEY_HASH_SHA256_SIZE 2
+#define EVENT_PROPERTY_UNKNOWN "unknown"
 
 int32_t AddKeyHash(struct HksParamSet *paramSetOut, const struct HksBlob *keyIn);
 

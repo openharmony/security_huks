@@ -33,6 +33,7 @@
 #include "hks_report_list_aliases.h"
 #include "hks_report_data_size.h"
 #include "hks_report_three_stage_build.h"
+#include "hks_report_ukey_event.h"
 #include "hks_param.h"
 
 static HksEventProcMap g_eventProcMap[] = {
@@ -139,6 +140,62 @@ static HksEventProcMap g_eventProcMap[] = {
         HksEventInfoIsEqualForDataSize,
         HksEventInfoAddForDataSize,
         HksEventInfoToMapForDataSize
+    },
+    {
+        HKS_EVENT_UKEY_REGISTER_PROVIDER,
+        HksRegProviderParamSetToEventInfo,
+        HksRegProviderNeedReport,
+        HksRegProviderEventInfoEqual,
+        HksEventInfoAddForRegProvider,
+        HksRegProviderEventInfoToMap,
+    },
+    {
+        HKS_EVENT_UKEY_GET_AUTH_PIN_STATE,
+        HksGetAuthPinStateParamSetToEventInfo,
+        HksGetAuthPinStateNeedReport,
+        HksGetAuthPinStateEventInfoEqual,
+        HksEventInfoAddForGetAuthPinState,
+        HksGetAuthPinStateEventInfoToMap,
+    },
+    {
+        HKS_EVENT_UKEY_AUTH_PIN,
+        HksAuthPinParamSetToEventInfo,
+        HksAuthPinNeedReport,
+        HksAuthPinEventInfoEqual,
+        HksEventInfoAddForAuthPin,
+        HksAuthPinEventInfoToMap,
+    },
+    {
+        HKS_EVENT_UKEY_OPERATE_REMOTE_HANDLE,
+        HksRemoteHandleParamSetToEventInfo,
+        HksRemoteHandleNeedReport,
+        HksRemoteHandleEventInfoEqual,
+        HksEventInfoAddForRemoteHandle,
+        HksRemoteHandleEventInfoToMap,
+    },
+    {
+        HKS_EVENT_UKEY_EXPORT_PROVIDER_CERT,
+        HksExportProviderCertParamSetToEventInfo,
+        HksExportProviderCertNeedReport,
+        HksExportProviderCertEventInfoEqual,
+        HksEventInfoAddForExportProviderCert,
+        HksExportProviderCertEventInfoToMap,
+    },
+    {
+        HKS_EVENT_UKEY_EXPORT_CERT,
+        HksExportCertParamSetToEventInfo,
+        HksExportCertNeedReport,
+        HksExportCertEventInfoEqual,
+        HksEventInfoAddForExportCert,
+        HksExportCertEventInfoToMap,
+    },
+    {
+        HKS_EVENT_UKSY_GET_REMOTE_PROPERTY,
+        HksGetPropertyParamSetToEventInfo,
+        HksGetPropertyNeedReport,
+        HksGetPropertyEventInfoEqual,
+        HksEventInfoAddForGetProperty,
+        HksGetPropertyEventInfoToMap,
     }
 };
 
