@@ -35,22 +35,8 @@
 #include "hks_json_wrapper.h"
 #include <vector>
 
-#define RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam) \
-do { \
-    bool isPromise = false; \
-    auto status = napi_is_promise((env), (result), &isPromise); \
-    if (!isPromise) { \
-        LOGE("retParser is not promise, status:%d", status); \
-        (dataParam)->hksErrorCode = HKS_ERROR_EXT_IS_NOT_PROMISE; \
-        return false; \
-    } \
-    (dataParam)->hksErrorCode = CallPromise((env), (result), (dataParam)); \
-    return true; \
-} while (0)
-
-#define WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME) \
-do { \
-    const auto maxWaitTime = std::chrono::seconds((MAX_WAIT_TIME)); \
+#define WAIT_FOR_CALL_JS_METHOD(dataParam, waitTime) do { \
+    const auto maxWaitTime = std::chrono::seconds((waitTime)); \
     std::unique_lock<std::mutex> lock((dataParam)->callJsMutex); \
     if (!(dataParam)->callJsExMethodDone.load()) { \
         (dataParam)->callJsCon.wait_for( \
@@ -987,6 +973,19 @@ int32_t CallPromise(napi_env &env, napi_value funcResult,
     }
     return HKS_SUCCESS;
 }
+
+bool CheckAndCallPromise(napi_env env, napi_value result, std::shared_ptr<CryptoResultParam> dataParam)
+{
+    bool isPromise = false;
+    auto status = napi_is_promise(env, result, &isPromise);
+    if (!isPromise) {
+        LOGE("retParser is not promise, status:%d", status);
+        dataParam->hksErrorCode = HKS_ERROR_EXT_IS_NOT_PROMISE;
+        return false;
+    }
+    dataParam->hksErrorCode = CallPromise(env, result, dataParam);
+    return true;
+}
 } // namespace
 
 JsHksCryptoExtAbility *JsHksCryptoExtAbility::Create(const std::unique_ptr<AbilityRuntime::Runtime> &runtime)
@@ -1126,7 +1125,7 @@ int32_t JsHksCryptoExtAbility::OpenRemoteHandle(const std::string &index, const 
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::OPEN_REMOTE_HANDLE;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
-        RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam);
+        return CheckAndCallPromise(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
@@ -1153,7 +1152,7 @@ int32_t JsHksCryptoExtAbility::CloseRemoteHandle(const std::string &handle, cons
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::CLOSE_REMOTE_HANDLE;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
-        RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam);
+        return CheckAndCallPromise(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
@@ -1180,7 +1179,7 @@ int32_t JsHksCryptoExtAbility::AuthUkeyPin(const std::string &handle, const CppP
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::AUTH_UKEY_PIN;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
-        RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam);
+        return CheckAndCallPromise(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
@@ -1209,7 +1208,7 @@ int32_t JsHksCryptoExtAbility::GetUkeyPinAuthState(const std::string &handle, co
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::GET_UKEY_PIN_AUTH_STATE;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
-        RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam);
+        return CheckAndCallPromise(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
@@ -1237,7 +1236,7 @@ int32_t JsHksCryptoExtAbility::ExportCertificate(const std::string &index, const
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::EXPORT_CERTIFICATE;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
-        RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam);
+        return CheckAndCallPromise(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
@@ -1273,7 +1272,7 @@ int32_t JsHksCryptoExtAbility::ExportProviderCertificates(const CppParamSet &par
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::EXPORT_PROVIDER_CERTIFICATES;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
-        RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam);
+        return CheckAndCallPromise(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
@@ -1301,7 +1300,7 @@ int32_t JsHksCryptoExtAbility::InitSession(const std::string &index, const CppPa
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::INIT_SESSION;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
-        RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam);
+        return CheckAndCallPromise(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
@@ -1329,7 +1328,7 @@ int32_t JsHksCryptoExtAbility::UpdateSession(const std::string &handle, const Cp
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::UPDATE_SESSION;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
-        RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam);
+        return CheckAndCallPromise(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
@@ -1357,7 +1356,7 @@ int32_t JsHksCryptoExtAbility::FinishSession(const std::string &handle, const Cp
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::FINISH_SESSION;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
-        RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam);
+        return CheckAndCallPromise(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
@@ -1384,7 +1383,7 @@ int32_t JsHksCryptoExtAbility::GetProperty(const std::string &handle, const std:
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::GET_PROPERTY;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
-        RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam);
+        return CheckAndCallPromise(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
@@ -1411,7 +1410,7 @@ int32_t JsHksCryptoExtAbility::ClearUkeyPinAuthState(const std::string &handle, 
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     dataParam->paramType = CryptoResultParamType::CLEAR_UKEY_PIN_AUTH;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
-        RETURN_WITH_CHECK_AND_CALL_PROMISE(env, result, dataParam);
+        return CheckAndCallPromise(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
