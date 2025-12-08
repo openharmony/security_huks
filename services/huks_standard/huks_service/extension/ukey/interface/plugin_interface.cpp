@@ -134,7 +134,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnAuthUkeyPin(const H
     auto uid = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
     if (uid.first == HKS_SUCCESS) {
         HksProcessInfo processInfoTmp = {};
-        processInfoTmp.uidInt = uid.second;
+        processInfoTmp.uidInt = static_cast<uint32_t>(uid.second);
         RegisterObserverForProcess(processInfoTmp, paramSet);
     }
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
