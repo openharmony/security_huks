@@ -268,7 +268,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
     uint32_t uid = processInfo.uidInt;
     if (uidParam.first == HKS_SUCCESS) {
-        uid = uidParam.second;
+        uid = static_cast<uint32_t>(uidParam.second);
     }
     ProviderInfo providerInfo;
     std::string handle;
@@ -413,7 +413,7 @@ int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processI
     auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
     uint32_t uid = processInfo.uidInt;
     if (uidParam.first == HKS_SUCCESS) {
-        uid = uidParam.second;
+        uid = static_cast<uint32_t>(uidParam.second);
     }
     if (std::find(VALID_PROPERTYID.begin(), VALID_PROPERTYID.end(), propertyId) == VALID_PROPERTYID.end()) {
         HKS_LOG_E("Invalid propertyId");
