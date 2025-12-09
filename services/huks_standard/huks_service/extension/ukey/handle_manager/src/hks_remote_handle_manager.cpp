@@ -519,6 +519,21 @@ void HksRemoteHandleManager::ClearMapByHandle(const int32_t &ret, const std::str
     }
 }
 
+void HksRemoteHandleManager::ClearMapByUid(const uint32_t uid)
+{
+    std::vector<std::pair<uint32_t, std::string>> keysToRemove;
+    auto iterFunc = [&](std::pair<uint32_t, std::string> key, std::string &value) {
+        if (key.first == uid) {
+            keysToRemove.push_back(key);
+        }
+    };
+    uidIndexToHandle_.Iterate(iterFunc);
+    for (auto &key : keysToRemove) {
+        uidIndexToHandle_.Erase(key);
+        uidIndexToAuthState_.Erase(key);
+    }
+}
+
 }
 }
 }
