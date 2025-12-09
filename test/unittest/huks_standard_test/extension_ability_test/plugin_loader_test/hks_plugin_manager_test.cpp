@@ -49,7 +49,10 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest001, TestSize.Level0)
 {
     auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HksProcessInfo processInfo {};
-    CppParamSet paramSet;
+    std::vector<HksParam> g_genAesParams = {
+        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+    };
+    CppParamSet paramSet(g_genAesParams);
 
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, 0) << "fail: regist fail";
@@ -88,7 +91,10 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest002, TestSize.Level0)
 {
     auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HksProcessInfo processInfo {};
-    CppParamSet paramSet;
+    std::vector<HksParam> g_genAesParams = {
+        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+    };
+    CppParamSet paramSet(g_genAesParams);
     
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, 0) << "fail: regist fail";
@@ -114,13 +120,16 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest003, TestSize.Level0)
 {
     auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HksProcessInfo processInfo {};
-    CppParamSet paramSet;
+    std::vector<HksParam> g_genAesParams = {
+        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+    };
+    CppParamSet paramSet(g_genAesParams);
 
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, 0) << "fail: regist fail";
 
     std::string propertyId = "";
-    CppParamSet outParams;
+    CppParamSet outParams(g_genAesParams);
     const std::string index = "";
     ret = mgr->OnGetRemoteProperty(processInfo, index, propertyId, paramSet, outParams);
     EXPECT_EQ(ret, 0) << "fail: OnGetRemoteProperty fail";
