@@ -47,7 +47,11 @@ int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const s
         std::string methodString = GetMethodByEnum(static_cast<PluginMethodEnum>(i));
         if (methodString.empty()) {
             HKS_LOG_E("the entry %{public}s is not include", pluginSo.c_str());
-            dlclose(m_pluginHandle);
+
+            int32_t ret = dlclose(m_pluginHandle);
+            HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_DLCLOSE_FAIL,
+                "dlclose fail, error: %{public}s", dlerror())
+            
             m_pluginHandle = nullptr;
             pluginProviderMap.Clear();
             return HKS_ERROR_FIND_FUNC_MAP_FAIL;
@@ -82,7 +86,10 @@ int32_t HuksPluginLoader::UnLoadPlugins(const struct HksProcessInfo &info, const
     HKS_IF_TRUE_RETURN(m_pluginHandle == nullptr, HKS_SUCCESS)
 
     pluginProviderMap.Clear();
-    dlclose(m_pluginHandle);
+
+    int32_t ret = dlclose(m_pluginHandle);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_DLCLOSE_FAIL, "dlclose fail, error: %{public}s", dlerror())
+
     m_pluginHandle = nullptr;
     HKS_LOG_I("lib close success!");
     return HKS_SUCCESS;
@@ -106,7 +113,7 @@ HuksPluginLoader::HuksPluginLoader()
         "_ZN4OHOS8Security4Huks32HksExtPluginOnUnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetb");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_CREATE_REMOTE_KEY_HANDLE,
-        "_ZN4OHOS8Security4Huks30HksExtPluginOnOpemRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_string"
+        "_ZN4OHOS8Security4Huks30HksExtPluginOnOpenRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_CLOSE_REMOTE_KEY_HANDLE,
         "_ZN4OHOS8Security4Huks31HksExtPluginOnCloseRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_string"
