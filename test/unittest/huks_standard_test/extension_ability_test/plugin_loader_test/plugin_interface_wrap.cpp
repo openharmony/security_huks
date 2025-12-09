@@ -26,7 +26,7 @@ namespace Security {
 namespace Huks {
 ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnRegisterProvider(
     const HksProcessInfo &processInfo, const std::string &providerName,
-    const CppParamSet &paramSet, std::function<void(bool)> callback))
+    const CppParamSet &paramSet, std::function<void(HksProcessInfo)> callback))
 {
     return 0;
 }
@@ -44,7 +44,7 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnCre
     return 0;
 }
 
-ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnOpemRemoteHandle(
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnOpenRemoteHandle(
     const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet, std::string &handle))
 {
     return 0;
@@ -121,6 +121,11 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksGetUkeyRemoteP
     return 0;
 }
 
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnUnregisterAllObservers())
+{
+    return 0;
+}
+
 extern "C" void *__wrap_dlsym(void* handle, const char* symbol)
 {
     static const struct {
@@ -128,14 +133,14 @@ extern "C" void *__wrap_dlsym(void* handle, const char* symbol)
         void *fake;
     } kFakeSymbols[] = {
         {"_ZN4OHOS8Security4Huks30HksExtPluginOnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_string"
-        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetNS5_8functionIFvbEEE", 
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetNS5_8functionIFvS2_EEE", 
          (void*)Fake_HksExtPluginOnRegisterProvider},
         {"_ZN4OHOS8Security4Huks32HksExtPluginOnUnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetb",
          (void*)Fake_HksExtPluginOnUnRegisterProvider},
-         {"_ZN4OHOS8Security4Huks30HksExtPluginOnOpemRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_string"
+         {"_ZN4OHOS8Security4Huks30HksExtPluginOnOpenRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_",
-         (void*)Fake_HksExtPluginOnOpemRemoteHandle},
+         (void*)Fake_HksExtPluginOnOpenRemoteHandle},
          {"_ZN4OHOS8Security4Huks31HksExtPluginOnCloseRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet",
          (void*)Fake_HksExtPluginOnCloseRemoteHandle},
@@ -168,6 +173,8 @@ extern "C" void *__wrap_dlsym(void* handle, const char* symbol)
          (void*)Fake_HksExtPluginOnFinishSession},
          {"_ZN4OHOS8Security4Huks26HksExtPluginOnAbortSessionERK14HksProcessInfoRKjRK11CppParamSet",
          (void*)Fake_HksExtPluginOnAbortSession},
+         {"_ZN4OHOS8Security4Huks36HksExtPluginOnUnregisterAllObserversEv",
+         (void*)Fake_HksExtPluginOnUnregisterAllObservers},
     };
 
     for (auto &item : kFakeSymbols) {
