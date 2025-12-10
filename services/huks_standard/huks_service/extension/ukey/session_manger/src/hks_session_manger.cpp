@@ -223,7 +223,7 @@ int32_t HksSessionManager::HksGetHandleInfo(const HksProcessInfo &processInfo, c
 void HksSessionManager::ClearSessionHandleMap(std::vector<uint32_t> &toRemove)
 {
     HksProcessInfo processInfo = {};
-    std::vector<int> tmpVec;
+    std::vector<uint8_t> tmpVec;
     for (auto item: toRemove) {
         HandleInfo mInfo;
         HKS_IF_TRUE_CONTINUE(!m_handlers.Find(item, mInfo))
