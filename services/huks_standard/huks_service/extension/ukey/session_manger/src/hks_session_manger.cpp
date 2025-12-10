@@ -222,7 +222,15 @@ int32_t HksSessionManager::HksGetHandleInfo(const HksProcessInfo &processInfo, c
 
 void HksSessionManager::ClearSessionHandleMap(std::vector<uint32_t> &toRemove)
 {
+    HksProcessInfo processInfo = {};
+    std::vector<int> tmpVec;
     for (auto item: toRemove) {
+        HandleInfo mInfo;
+        HKS_IF_TRUE_CONTINUE(!m_handlers.Find(item, mInfo))
+        processInfo.uidInt = mInfo.m_uid;
+        struct HksParam uid = {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(processInfo.uidInt)};
+        CppParamSet paramSet = CppParamSet({uid});
+        ExtensionFinishSession(processInfo, mInfo.m_skfSessionHandle, paramSet, tmpVec, tmpVec);
         m_handlers.Erase(item);
     }
 }

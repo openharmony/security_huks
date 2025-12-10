@@ -304,7 +304,7 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &proce
     auto ipccode = proxy->ClearUkeyPinAuthState(handle, paramSet, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     ret = ConvertExtensionToHksErrorCode(ret);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote clear pin status failed: %" "d", ret)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote clear pin status failed")
     return HKS_SUCCESS;
 }
 
@@ -522,6 +522,10 @@ void HksRemoteHandleManager::ClearMapByHandle(const int32_t &ret, const std::str
 void HksRemoteHandleManager::ClearMapByUid(const uint32_t uid)
 {
     std::vector<std::pair<uint32_t, std::string>> keysToRemove;
+    struct HksParam uid = {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(uid)};
+    CppParamSet paramSet = CppParamSet({uid});
+    HksProcessInfo processInfo = {};
+    processInfo.uidInt = uid;
     auto iterFunc = [&](std::pair<uint32_t, std::string> key, std::string &value) {
         if (key.first == uid) {
             keysToRemove.push_back(key);
@@ -529,8 +533,8 @@ void HksRemoteHandleManager::ClearMapByUid(const uint32_t uid)
     };
     uidIndexToHandle_.Iterate(iterFunc);
     for (auto &key : keysToRemove) {
-        uidIndexToHandle_.Erase(key);
-        uidIndexToAuthState_.Erase(key);
+        HKS_IF_NOT_SUCC_LOGE(CloseRemoteHandle(processInfo,  key.second, paramSet),
+            "Remote close handle failed: %" LOG_PUBLIC "u", uid)
     }
 }
 
