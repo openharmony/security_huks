@@ -22,8 +22,8 @@
           "SystemCapability.Security.Huks.Extension",
           "SystemCapability.Security.Huks.Core",
           "SystemCapability.Security.Cipher",
-          "SystemCapability.Security.Huks.CryptoExtension"
-          ],
+          "SystemCapability.Security.Huks.CryptoExtension = false"
+      ],
       "features": [
         "huks_enabled",
         "huks_use_mbedtls",
