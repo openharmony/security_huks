@@ -86,7 +86,7 @@ int32_t HksSessionManager::CheckParmSetPurposeAndCheckAuth(const HksProcessInfo 
         "Get purpose tag failed. ret: %" LOG_PUBLIC "d", purpose.first)
     if (purpose.second == HKS_KEY_PURPOSE_SIGN || purpose.second == HKS_KEY_PURPOSE_DECRYPT) {
         auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
-        HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_NULL_POINTER, "handleMgr is null");
+        HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
         HKS_LOG_I("CheckParmSetPurposeAndCheckAuth uid: %" LOG_PUBLIC "d", processInfo.uidInt);
         return handleMgr->CheckAuthStateIsOk(processInfo, index);
     }
