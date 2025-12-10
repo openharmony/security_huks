@@ -522,8 +522,8 @@ void HksRemoteHandleManager::ClearMapByHandle(const int32_t &ret, const std::str
 void HksRemoteHandleManager::ClearMapByUid(const uint32_t uid)
 {
     std::vector<std::pair<uint32_t, std::string>> keysToRemove;
-    struct HksParam uid = {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(uid)};
-    CppParamSet paramSet = CppParamSet({uid});
+    struct HksParam uidParam = {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(uid)};
+    CppParamSet paramSet = CppParamSet({uidParam});
     HksProcessInfo processInfo = {};
     processInfo.uidInt = uid;
     auto iterFunc = [&](std::pair<uint32_t, std::string> key, std::string &value) {
