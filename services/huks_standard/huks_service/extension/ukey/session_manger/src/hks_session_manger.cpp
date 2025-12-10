@@ -232,7 +232,7 @@ void HksSessionManager::ClearSessionHandleMap(std::vector<uint32_t> &toRemove)
         (void)ExtensionFinishSession(processInfo, item, paramSet, tmpVec, tmpVec);
         m_handlers.Erase(item);
     }
-} 
+}
 
 std::vector<uint32_t> HksSessionManager::FindToRemoveHandle(uint32_t uid, std::string &abilityName)
 {
