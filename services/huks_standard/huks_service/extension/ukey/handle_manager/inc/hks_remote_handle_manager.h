@@ -50,7 +50,7 @@ public:
         const std::string &index, const CppParamSet &paramSet, int32_t &state);
     int32_t RemoteClearPinStatus(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet);
-    bool CheckAuthStateIsOk(const HksProcessInfo &processInfo, const std::string &index);
+    int32_t CheckAuthStateIsOk(const HksProcessInfo &processInfo, const std::string &index);
     //certificate query
     int32_t FindRemoteCertificate(const std::string &index,
         const CppParamSet &paramSet, std::string &certificatesOut);
