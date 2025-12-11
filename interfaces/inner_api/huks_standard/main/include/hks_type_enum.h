@@ -332,7 +332,7 @@ enum HksSendType {
 
 /**
  * @brief hks user auth type
- * @see `enum AuthType` in `drivers/interface/user_auth/v4_0/UserAuthTypes.idl`
+ * @see `enum AuthType` in `drivers/interface/user_auth/v4_1/UserAuthTypes.idl`
  */
 enum HksUserAuthType {
     HKS_USER_AUTH_TYPE_FINGERPRINT = 1 << 0,
