@@ -91,11 +91,10 @@ bool HksRegProviderEventInfoEqual([[maybe_unused]] const struct HksEventInfo *ev
     return false;
 }
 
-void HksEventInfoAddForRegProvider(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
+void HksEventInfoAddForRegProvider([[maybe_unused]] struct HksEventInfo *dstEventInfo,
+    [[maybe_unused]] const struct HksEventInfo *srcEventInfo)
 {
-    if (HksRegProviderEventInfoEqual(dstEventInfo, srcEventInfo)) {
-        dstEventInfo->common.count++;
-    }
+    return ;
 }
 
 int32_t HksRegProviderEventInfoToMap(const struct HksEventInfo *eventInfo,
@@ -612,8 +611,8 @@ int32_t ReportUKeyEvent(const struct UKeyInfo* ukeyInfo, const char *funcName, c
 
         (void)ConstructReportParamSet(funcName, processInfo, ukeyCommon->returnCode, &reportParamSet);
         HksEventReport(funcName, processInfo, paramSet, reportParamSet, ukeyCommon->returnCode);
+        ret = HKS_SUCCESS;
     } while (0);
     DeConstructReportParamSet(&reportParamSet);
-
-    return HKS_SUCCESS;
+    return ret;
 }
