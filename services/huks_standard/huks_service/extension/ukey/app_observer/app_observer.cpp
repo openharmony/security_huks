@@ -27,6 +27,7 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
+#define DELAY_10MS_IN_US (10 * 1000)
 
 HksAppObserver::HksAppObserver(const std::string &bundleName)
     : targetBundleName_(bundleName)
@@ -164,6 +165,45 @@ int32_t HksAppObserverManager::RegisterObserver(const HksProcessInfo &processInf
     HKS_LOG_I("RegisterObserver: New observer registered for bundle: %{public}s", bundleName.c_str());
 
     return HKS_SUCCESS;
+}
+
+int32_t HksAppObserverManager::UnregisterAllObservers()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    HKS_IF_TRUE_LOGI_RETURN(observers_.empty(), HKS_SUCCESS, "UnregisterAllObservers: No observers to unregister");
+
+    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    HKS_IF_NULL_LOGE_RETURN(samgr, HKS_ERROR_NULL_POINTER, "UnregisterAllObservers: Get SystemAbilityManager failed");
+
+    auto remote = samgr->GetSystemAbility(APP_MGR_SERVICE_ID);
+    HKS_IF_NULL_LOGE_RETURN(remote, HKS_ERROR_NULL_POINTER, "UnregisterAllObservers: Get APP_MGR_SERVICE failed");
+
+    auto appMgr = iface_cast<AppExecFwk::IAppMgr>(remote);
+    HKS_IF_NULL_LOGE_RETURN(appMgr, HKS_ERROR_NULL_POINTER, "UnregisterAllObservers: Cast to IAppMgr failed");
+
+    int32_t finalRet = HKS_SUCCESS;
+    int32_t totalCount = observers_.size();
+    int32_t failedCount = 0;
+
+    for (const auto& [bundleName, observer] : observers_) {
+        int32_t ret = appMgr->UnregisterApplicationStateObserver(observer);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("UnregisterAllObservers: Failed for bundle %{public}s, ret=%{public}d", bundleName.c_str(), ret);
+            finalRet = HKS_ERROR_INTERNAL_ERROR;
+            failedCount++;
+        } else {
+            HKS_LOG_I("UnregisterAllObservers: Successfully unregistered observer for bundle: %{public}s",
+                bundleName.c_str());
+        }
+    }
+    observers_.clear();
+
+    int32_t successCount = totalCount - failedCount;
+    HKS_LOG_I("UnregisterAllObservers: Completed, total=%{public}d, success=%{public}d,"
+        "failed=%{public}d, finalRet=%{public}d", totalCount, successCount, failedCount, finalRet);
+    usleep(DELAY_10MS_IN_US);
+    return finalRet;
 }
 
 void HksAppObserverManager::CleanupTriggeredObserver(const std::string &bundleName)

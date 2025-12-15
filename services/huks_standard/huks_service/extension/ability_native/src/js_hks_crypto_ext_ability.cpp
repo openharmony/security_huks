@@ -1381,6 +1381,9 @@ int32_t JsHksCryptoExtAbility::GetProperty(const std::string &handle, const std:
         return BuildPropertyData(env, propertyId, param, argv, argc);
     };
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
+    HksParamSet *defaultParamSet = nullptr;
+    (void)HksInitParamSet(&defaultParamSet);
+    dataParam->paramSet = CppParamSet(defaultParamSet, true);
     dataParam->paramType = CryptoResultParamType::GET_PROPERTY;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
         return CheckAndCallPromise(env, result, dataParam);

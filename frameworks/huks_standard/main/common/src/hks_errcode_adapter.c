@@ -830,6 +830,20 @@ static struct HksError g_errCodeTable[] = {
             .errorMsg = "an error occured in the dependent module.",
             .data = NULL
         }
+    }, {
+        .innerErrCode = HKS_ERROR_ABILITY_NAME_MISSING,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_MISSING_CRYPTO_ALG_ARGUMENT,
+            .errorMsg = "the ability name param is missing.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HUKS_ERR_CODE_BUSY,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_BUSY,
+            .errorMsg = "the provider or Ukey is busy.",
+            .data = NULL
+        }
     }
 };
 

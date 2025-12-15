@@ -147,6 +147,8 @@ HuksPluginLoader::HuksPluginLoader()
         "RKNSt3__h6vectorIhNSA_9allocatorIhEEEERSE_");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_ABORT_SESSION,
         "_ZN4OHOS8Security4Huks26HksExtPluginOnAbortSessionERK14HksProcessInfoRKjRK11CppParamSet");
+    m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_UNREGISTER_ALL_OBSERVERS,
+        "_ZN4OHOS8Security4Huks36HksExtPluginOnUnregisterAllObserversEv");
 }
 
 HuksPluginLoader::~HuksPluginLoader()
