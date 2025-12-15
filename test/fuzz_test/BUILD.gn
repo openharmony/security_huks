@@ -62,6 +62,7 @@ group("fuzztest") {
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksvalidatecertchain_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksverify_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hkswrapkey_fuzzer:fuzztest",
+        "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksukey_fuzzer:fuzztest",
       ]
     }
   }
