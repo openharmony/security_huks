@@ -257,8 +257,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     }
     HKS_IF_TRUE_LOGE_RETURN(ret == HUKS_ERR_CODE_PIN_CODE_ERROR || ret == HUKS_ERR_CODE_PIN_LOCKED, ret,
             "AuthUkeyPin failed: %" LOG_PUBLIC "d", ret)
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_REMOTE_OPERATION_FAILED,
-            "Remote verify pin failed: %" LOG_PUBLIC "d", ret)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote verify pin failed: %" LOG_PUBLIC "d", ret)
     return ret;
 }
 
@@ -287,7 +286,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
         return ret;
     }
     HKS_LOG_E("Remote verify pin status failed: %" LOG_PUBLIC "d", ret);
-    return HKS_ERROR_REMOTE_OPERATION_FAILED;
+    return ret;
 }
 
 int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &processInfo,
