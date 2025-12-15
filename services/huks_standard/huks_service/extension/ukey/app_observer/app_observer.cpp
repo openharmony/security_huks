@@ -95,7 +95,7 @@ void HksAppObserver::OnAppStopped(const AppExecFwk::AppStateData &appStateData)
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_NULL_LOGE_RETURN_VOID(handleMgr, "handleMgr is null");
     handleMgr->ClearAuthState(processInfo);
-
+    handleMgr->ClearMapByUid(processInfo.uidInt);
     uidToContextMap_.erase(it);
     if (uidToContextMap_.empty()) {
         HksAppObserverManager::GetInstance().CleanupTriggeredObserver(targetBundleName_);

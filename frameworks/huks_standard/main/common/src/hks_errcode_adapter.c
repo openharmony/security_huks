@@ -810,6 +810,27 @@ static struct HksError g_errCodeTable[] = {
             .data = NULL
         }
     }, {
+        .innerErrCode = HUKS_ERR_CODE_ITEM_NOT_EXIST,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_ITEM_NOT_EXIST,
+            .errorMsg = "The handle does not exist.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HUKS_ERR_CODE_CRYPTO_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_CRYPTO_FAIL,
+            .errorMsg = "The handle is unavailable.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
+            .errorMsg = "an error occured in the dependent module.",
+            .data = NULL
+        }
+    }, {
         .innerErrCode = HKS_ERROR_ABILITY_NAME_MISSING,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_MISSING_CRYPTO_ALG_ARGUMENT,

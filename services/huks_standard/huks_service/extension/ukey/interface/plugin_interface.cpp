@@ -97,6 +97,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnOpenRemoteHandle(
         HKS_IF_TRUE_LOGE_RETURN(!paramSetWithUid.AddParams({uid}), HKS_ERROR_INVALID_ARGUMENT,
             "AddUidToParamset fail")
     }
+    RegisterObserverForProcess(processInfo, paramSetWithUid);
     (void)handle;
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");

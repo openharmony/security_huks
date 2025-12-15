@@ -1574,9 +1574,9 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
         if (HksCheckIsUkeyOperation(paramSet, &ret) == HKS_SUCCESS) {
             ret = HksServiceOnUkeyInitSession(processInfo, keyAlias, paramSet, handle);
-            HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyInitSession failed, ret = %" LOG_PUBLIC "d", ret)
             break;
         }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", ret)
 #endif
         ret = HksCheckServiceInitParams(&processInfo->processName, keyAlias, paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check ServiceInit params failed, ret = %" LOG_PUBLIC "d", ret)
@@ -1674,9 +1674,9 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
         if (HksCheckIsUkeyOperation(paramSet, &common.ret) == HKS_SUCCESS) {
             common.ret = HksServiceOnUkeyUpdateSession(processInfo, handle, paramSet, inData, outData);
-            HKS_IF_NOT_SUCC_LOGE(common.ret, "HksServiceOnUkeyUpdateSession failed, ret = %" LOG_PUBLIC "d", common.ret)
             break;
         }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", common.ret)
 #endif
         common.operation = QueryOperationAndMarkInUse(processInfo, handle);
         common.ret = (common.operation == NULL ? HKS_ERROR_NOT_EXIST : HKS_SUCCESS);
@@ -1776,9 +1776,9 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
         if (HksCheckIsUkeyOperation(paramSet, &common.ret) == HKS_SUCCESS) {
             common.ret = HksServiceOnUkeyFinishSession(processInfo, handle, paramSet, inData, outData);
-            HKS_IF_NOT_SUCC_LOGE(common.ret, "HksServiceOnUkeyFinishSession failed, ret = %" LOG_PUBLIC "d", common.ret)
             break;
         }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", common.ret)
 #endif
         common.ret = AppendAndQueryInFinish(handle, processInfo, &common.operation);
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "AppendAndQueryInFinish fail, ret = %" LOG_PUBLIC "d", common.ret)
@@ -1830,9 +1830,9 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
         if (HksCheckIsUkeyOperation(paramSet, &ret) == HKS_SUCCESS) {
             ret = HksServiceOnUkeyAbortSession(processInfo, handle, paramSet);
-            HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyFinishSession failed, ret = %" LOG_PUBLIC "d", ret)
             break;
         }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", ret)
 #endif
         operation = QueryOperationAndMarkInUse(processInfo, handle);
         if (operation == NULL) {
