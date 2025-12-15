@@ -26,9 +26,9 @@
 
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
 #ifdef HKS_CORE_ENABLE_HDI_DRIVER
-#include "v4_0/user_auth_types.h"
+#include "v4_1/user_auth_types.h"
 
-using AuthType = OHOS::HDI::UserAuth::V4_0::AuthType;
+using AuthType = OHOS::HDI::UserAuth::V4_1::AuthType;
 
 static int32_t ConvertToHksAuthType(uint32_t authType, enum HksUserAuthType *hksAuthType)
 {

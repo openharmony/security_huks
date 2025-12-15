@@ -83,6 +83,16 @@ int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &
             break;
         }
 
+        auto pluginLifeCycleMgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+        if (pluginLifeCycleMgr == nullptr) {
+            ret = HKS_ERROR_NULL_POINTER;
+            HKS_LOG_E("Failed to get pluginLifeCycleMgr instance.");
+            break;
+        }
+            
+        ret = pluginLifeCycleMgr->OnUnregisterAllObservers();
+        HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS, "Failed to unregister all observers, ret = %{public}d", ret)
+
         ret = pluginLoader->UnLoadPlugins(info, providerName, paramSet, m_pluginProviderMap);
         HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS, "close lib failed!, ret = %{public}d", ret)
     } while (0);
@@ -316,6 +326,19 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnAbortSession(const HksProcessInfo &
     int32_t ret = (*reinterpret_cast<OnAbortSessionFunc>(funcPtr))(processInfo, handle, paramSet);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "AbortSession fail, ret = %" LOG_PUBLIC "d", ret)
     HKS_LOG_I("abort session success");
+    return HKS_SUCCESS;
+}
+
+ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnUnregisterAllObservers())
+{
+    AutoRefCount refCnt(m_refCount);
+    void *funcPtr = nullptr;
+    bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_UNREGISTER_ALL_OBSERVERS, funcPtr);
+    HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "UnregisterAllObservers method enum not found in plugin provider map.")
+    
+    int32_t ret = (*reinterpret_cast<OnUnregisterAllObserversFunc>(funcPtr))();
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "UnregisterAllObservers fail, ret = %{public}d", ret)
     return HKS_SUCCESS;
 }
 }
