@@ -78,21 +78,19 @@ bool HksSessionManager::CheckSingleCallerCanInitSession(const HksProcessInfo &pr
     return curHandleNum < MAX_SINGLE_CALLER_HANDLE_SIZE;
 }
 
-bool HksSessionManager::CheckParmSetPurposeAndCheckAuth(const HksProcessInfo &processInfo, const std::string &index,
+int32_t HksSessionManager::CheckParmSetPurposeAndCheckAuth(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet)
 {
     auto purpose = paramSet.GetParam<HKS_TAG_PURPOSE>();
-    HKS_IF_TRUE_LOGE_RETURN(purpose.first != HKS_SUCCESS, false,
+    HKS_IF_TRUE_LOGE_RETURN(purpose.first != HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
         "Get purpose tag failed. ret: %" LOG_PUBLIC "d", purpose.first)
     if (purpose.second == HKS_KEY_PURPOSE_SIGN || purpose.second == HKS_KEY_PURPOSE_DECRYPT) {
         auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
-        HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, false, "handleMgr is null");
+        HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
         HKS_LOG_I("CheckParmSetPurposeAndCheckAuth uid: %" LOG_PUBLIC "d", processInfo.uidInt);
-        HKS_IF_TRUE_LOGE_RETURN(!handleMgr->CheckAuthStateIsOk(processInfo, index), false,
-            "ukey resource no auth. processInfo.uidInt: %" LOG_PUBLIC "d, index: %" LOG_PUBLIC "s", processInfo.uidInt,
-            index.c_str())
+        return handleMgr->CheckAuthStateIsOk(processInfo, index);
     }
-    return true;
+    return HKS_SUCCESS;
 }
 
 constexpr int32_t MAX_HANDLE_SIZE = 96;
@@ -103,12 +101,12 @@ int32_t HksSessionManager::ExtensionInitSession(const HksProcessInfo &processInf
         "handle too many, please realse the old")
     HKS_IF_TRUE_LOGE_RETURN(m_handlers.Size() >= MAX_HANDLE_SIZE, HKS_ERROR_SESSION_REACHED_LIMIT,
         "The handle maximum quantity has been reached")
-    HKS_IF_TRUE_LOGE_RETURN(!CheckParmSetPurposeAndCheckAuth(processInfo, index, paramSet), HKS_ERROR_PIN_NO_AUTH,
-        "CheckParmSetPurposeAndCheckAuth failed")
+    int32_t ret = CheckParmSetPurposeAndCheckAuth(processInfo, index, paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CheckParmSetPurposeAndCheckAuth failed")
     ProviderInfo providerInfo;
     std::string newIndex;
     std::string sIndexHandle;
-    int32_t ret = HksRemoteHandleManager::GetInstanceWrapper()->ParseAndValidateIndex(index, processInfo.uidInt,
+    ret = HksRemoteHandleManager::GetInstanceWrapper()->ParseAndValidateIndex(index, processInfo.uidInt,
         providerInfo, sIndexHandle);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ParseAndValidateIndex failed: %" LOG_PUBLIC "d", ret)
 
@@ -199,7 +197,8 @@ int32_t HksSessionManager::ExtensionAbortSession(const HksProcessInfo &processIn
     CppParamSet newParamSet(paramSet);
     HKS_IF_TRUE_LOGE_RETURN(!CheckAndAppendProcessInfo(newParamSet, processInfo), HKS_ERROR_INVALID_ARGUMENT,
         "CheckAndAppendProcessInfo failed")
-    auto ipcCode = proxy->CloseRemoteHandle(handleInfo.m_skfSessionHandle, newParamSet, ret);
+    std::vector<uint8_t> tmpVec;
+    auto ipcCode = proxy->FinishSession(handleInfo.m_skfSessionHandle, newParamSet, tmpVec, tmpVec, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL,
         "proxy use CloseRemoteHandle to abort ipcCode: %" LOG_PUBLIC "d", ipcCode)
     ret = ConvertExtensionToHksErrorCode(ret);
@@ -222,7 +221,15 @@ int32_t HksSessionManager::HksGetHandleInfo(const HksProcessInfo &processInfo, c
 
 void HksSessionManager::ClearSessionHandleMap(std::vector<uint32_t> &toRemove)
 {
+    HksProcessInfo processInfo = {};
+    std::vector<uint8_t> tmpVec;
     for (auto item: toRemove) {
+        HandleInfo mInfo;
+        HKS_IF_TRUE_CONTINUE(!m_handlers.Find(item, mInfo))
+        processInfo.uidInt = mInfo.m_uid;
+        struct HksParam uid = {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(processInfo.uidInt)};
+        CppParamSet paramSet = CppParamSet({uid});
+        (void)ExtensionFinishSession(processInfo, item, paramSet, tmpVec, tmpVec);
         m_handlers.Erase(item);
     }
 }

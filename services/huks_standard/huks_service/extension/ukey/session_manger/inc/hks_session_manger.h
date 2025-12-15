@@ -57,7 +57,7 @@ public:
     bool HksClearHandle(const HksProcessInfo &processInfo, const CppParamSet &paramSet);
     void ClearSessionMapByHandle(int32_t ret, uint32_t handle);
 private:
-    bool CheckParmSetPurposeAndCheckAuth(const HksProcessInfo &processInfo, const std::string &index,
+    int32_t CheckParmSetPurposeAndCheckAuth(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet);
     std::vector<uint32_t> FindToRemoveHandle(uint32_t uid, std::string &abilityName);
     std::vector<uint32_t> FindToRemoveHandle(uint32_t uid);

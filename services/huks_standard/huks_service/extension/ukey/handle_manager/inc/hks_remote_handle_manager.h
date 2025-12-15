@@ -50,7 +50,7 @@ public:
         const std::string &index, const CppParamSet &paramSet, int32_t &state);
     int32_t RemoteClearPinStatus(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet);
-    bool CheckAuthStateIsOk(const HksProcessInfo &processInfo, const std::string &index);
+    int32_t CheckAuthStateIsOk(const HksProcessInfo &processInfo, const std::string &index);
     //certificate query
     int32_t FindRemoteCertificate(const std::string &index,
         const CppParamSet &paramSet, std::string &certificatesOut);
@@ -76,7 +76,8 @@ public:
         std::string &handle);
     int32_t GetProviderProxy(const ProviderInfo &providerInfo, OHOS::sptr<IHuksAccessExtBase> &proxy);
     void ClearMapByHandle(const int32_t &ret, const std::string &handle);
-
+    void ClearMapByUid(const uint32_t uid);
+    
 private:
     bool IsProviderNumExceedLimit(const ProviderInfo &providerInfo);
 

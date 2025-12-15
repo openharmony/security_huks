@@ -48,7 +48,7 @@ public:
     std::string m_providerName{};
     std::string m_abilityName{};
     std::string m_bundleName{};
-    uint32_t m_userid = 0;
+    int32_t m_userid = 0;
 
     bool operator==(const ProviderInfo &other) const;
     bool operator<(const ProviderInfo &other) const;
