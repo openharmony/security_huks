@@ -212,7 +212,7 @@ HWTEST_F(HksClientCheckTest, HksClientCheckTest008, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
     ret = HksBuildParamSet(&paramSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
-    ret = HksCheckAndGetUserAuthInfo(paramSet, nullptr, nullptr);
+    ret = HksCheckAndGetUserAuthInfo(paramSet, 1, nullptr, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
 }
 
@@ -232,7 +232,7 @@ HWTEST_F(HksClientCheckTest, HksClientCheckTest009, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
     ret = HksBuildParamSet(&paramSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
-    ret = HksCheckAndGetUserAuthInfo(paramSet, nullptr, nullptr);
+    ret = HksCheckAndGetUserAuthInfo(paramSet, 1, nullptr, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
 }
 

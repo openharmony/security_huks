@@ -32,6 +32,8 @@
 static const uint32_t CHANGE_STORAGE_LEVEL_CFG_LIST[] = HUKS_CHANGE_STORAGE_LEVEL_CONFIG;
 #endif
 
+#define ASSET_UID 6226
+
 #ifndef _CUT_AUTHENTICATE_
 static int32_t CheckProcessNameAndKeyAliasSize(uint32_t processNameSize, uint32_t keyAliasSize)
 {
@@ -172,7 +174,7 @@ static int32_t CheckAuthAccessLevel(const struct HksParamSet *paramSet)
     return HKS_SUCCESS;
 }
 
-static int32_t CheckUserAuthParamsValidity(const struct HksParamSet *paramSet, uint32_t userAuthType,
+static int32_t CheckUserAuthParamsValidity(const struct HksParamSet *paramSet, uint32_t uid, uint32_t userAuthType,
     uint32_t authAccessType, uint32_t challengeType)
 {
     int32_t ret = HksCheckUserAuthParams(userAuthType, authAccessType, challengeType);
@@ -182,8 +184,13 @@ static int32_t CheckUserAuthParamsValidity(const struct HksParamSet *paramSet, u
         struct HksParam *authTimeout = NULL;
         ret = HksGetParam(paramSet, HKS_TAG_AUTH_TIMEOUT, &authTimeout);
         if (ret == HKS_SUCCESS) {
-            HKS_IF_TRUE_LOGE_RETURN(authTimeout->uint32Param > MAX_AUTH_TIMEOUT_SECOND ||
-                authTimeout->uint32Param == 0, HKS_ERROR_INVALID_TIME_OUT, "invalid auth timeout param")
+            if (uid == ASSET_UID) {
+                HKS_IF_TRUE_LOGE_RETURN(authTimeout->uint32Param > ASSET_MAX_AUTH_TIMEOUT_SECOND ||
+                    authTimeout->uint32Param == 0, HKS_ERROR_INVALID_TIME_OUT, "invalid auth timeout param")
+            } else {
+                HKS_IF_TRUE_LOGE_RETURN(authTimeout->uint32Param > MAX_AUTH_TIMEOUT_SECOND ||
+                    authTimeout->uint32Param == 0, HKS_ERROR_INVALID_TIME_OUT, "invalid auth timeout param")
+            }
         }
     }
 
@@ -206,7 +213,7 @@ static int32_t CheckUserAuthParamsValidity(const struct HksParamSet *paramSet, u
 }
 #endif
 
-int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t *userAuthType,
+int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t uid, uint32_t *userAuthType,
     uint32_t *authAccessType)
 {
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
@@ -231,7 +238,7 @@ int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t 
     ret = HksGetParam(paramSet, HKS_TAG_CHALLENGE_TYPE, &challengeTypeParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_CHALLENGE_TYPE_FAILED, "get challenge type param failed")
 
-    ret = CheckUserAuthParamsValidity(paramSet, userAuthTypeParam->uint32Param, accessTypeParam->uint32Param,
+    ret = CheckUserAuthParamsValidity(paramSet, uid, userAuthTypeParam->uint32Param, accessTypeParam->uint32Param,
         challengeTypeParam->uint32Param);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check user auth params validity failed")
 
@@ -240,6 +247,7 @@ int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t 
     return HKS_SUCCESS;
 #else
     (void)paramSet;
+    (void)uid;
     (void)userAuthType;
     (void)authAccessType;
     return HKS_SUCCESS;
