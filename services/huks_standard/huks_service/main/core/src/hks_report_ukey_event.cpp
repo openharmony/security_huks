@@ -119,6 +119,7 @@ int32_t HksRegProviderEventInfoToMap(const struct HksEventInfo *eventInfo,
 static int32_t AddUKeyGetAuthPinStateParamSet(const struct UKeyInfo* ukeyInfo, const struct HksParamSet *paramSet,
     struct HksParamSet *reportParamSet)
 {
+    (void)paramSet;
     const struct HksParam params[] = {
         {
             .tag = HKS_TAG_PARAM0_UINT32,
@@ -274,6 +275,7 @@ int32_t HksAuthPinEventInfoToMap(const struct HksEventInfo *eventInfo,
 static int32_t AddUKeyRemoteHandleParamSet(const struct UKeyInfo* ukeyInfo, const struct HksParamSet *paramSet,
     struct HksParamSet *reportParamSet)
 {
+    (void)paramSet;
     const struct HksParam params[] = {
         {
             .tag = HKS_TAG_PARAM0_UINT32,
@@ -498,6 +500,7 @@ int32_t HksExportCertEventInfoToMap(const struct HksEventInfo *eventInfo,
 static int32_t AddUKeyGetPropertyParamSet(const struct UKeyInfo* ukeyInfo, const struct HksParamSet *paramSet,
     struct HksParamSet *reportParamSet)
 {
+    (void)paramSet;
     const struct HksParam params[] = {
         {
             .tag = HKS_TAG_PARAM0_UINT32,
