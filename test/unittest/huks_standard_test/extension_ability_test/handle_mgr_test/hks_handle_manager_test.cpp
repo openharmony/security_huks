@@ -246,8 +246,8 @@ HWTEST_F(HksRemoteHandleManagerTest, PinManagementTest, TestSize.Level0)
     ret = manager->RemoteClearPinStatus(processInfo, index, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    bool authOk = manager->CheckAuthStateIsOk(processInfo, index);
-    EXPECT_TRUE(authOk);
+    int32_t authOk = manager->CheckAuthStateIsOk(processInfo, index);
+    EXPECT_EQ(authOk, HKS_SUCCESS);
 
     manager->ClearAuthState(processInfo);
     manager->CloseRemoteHandle(processInfo, index, paramSet);
