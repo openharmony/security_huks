@@ -646,12 +646,12 @@ int32_t HksRemotePropertyUnpackFromService(const struct HksBlob *srcBlob, struct
     struct HksParamSet *paramSetView = NULL;
 
     if (returnResult != 0 && returnResult != HUKS_ERR_CODE_BUSY && returnResult != HKS_ERROR_FIND_FUNC_MAP_FAIL) {
-        ret = HKS_ERROR_REMOTE_OPERATION_FAILED;
+        returnResult = HKS_ERROR_REMOTE_OPERATION_FAILED;
         HKS_LOG_E("remote property get failed, returnResult=%" LOG_PUBLIC "d", returnResult);
     }
 
     if (offset == srcBlob->size) {
-        return ret;
+        return returnResult;
     }
 
     ret = GetParamSetFromBuffer(&paramSetView, srcBlob, &offset);
@@ -660,7 +660,7 @@ int32_t HksRemotePropertyUnpackFromService(const struct HksBlob *srcBlob, struct
     ret = HksGetParamSet(paramSetView, paramSetView->paramSetSize, propertySetOut);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksGetParamSet fail")
 
-    return ret;
+    return returnResult;
 }
 
 int32_t HksListAliasesPack(const struct HksParamSet *srcParamSet, struct HksBlob *destData)
