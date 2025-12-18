@@ -111,7 +111,7 @@ HuksPluginLoader::HuksPluginLoader()
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetNS5_8functionIFvS2_EEE");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_UN_REGISTER_PROVIDER,
         "_ZN4OHOS8Security4Huks32HksExtPluginOnUnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_string"
-        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetb");
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetbRi");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_CREATE_REMOTE_KEY_HANDLE,
         "_ZN4OHOS8Security4Huks30HksExtPluginOnOpenRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_");

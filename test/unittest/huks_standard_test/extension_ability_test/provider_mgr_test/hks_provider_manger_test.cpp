@@ -87,7 +87,8 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest002, TestSize.Level0) {
     auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
         [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
         HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
-        providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true);
+        int32_t deleteCount = 0;
+        providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
     });
     EXPECT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
 
@@ -99,7 +100,8 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest002, TestSize.Level0) {
     ret = providerMgr->GetExtensionProxy(providerInfo, proxy);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GetExtensionProxy failed";
 
-    ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, false);
+    int32_t deletecount = 0;
+    ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, false, deletecount);
     EXPECT_EQ(ret, HKS_SUCCESS) << "OnUnRegisterProvider failed";
 
     HKS_FREE_BLOB(processInfo.userId);
@@ -126,11 +128,13 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest003, TestSize.Level0) {
     auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
         [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
         HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
-        providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true);
+        int32_t deleteCount = 0;
+        providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
     });
     EXPECT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
 
-    ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, false);
+    int32_t deletecount = 0;
+    ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, false, deletecount);
     EXPECT_EQ(ret, HKS_SUCCESS) << "OnUnRegisterProvider failed";
 
     HKS_FREE_BLOB(processInfo.userId);
@@ -157,12 +161,14 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest004, TestSize.Level0) {
     auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
         [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
         HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
-        providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true);
+        int32_t deleteCount = 0;
+        providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
     });
     EXPECT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
 
     CppParamSet emptyParamSet{};
-    ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, emptyParamSet, false);
+    int32_t deletecount = 0;
+    ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, emptyParamSet, false, deletecount);
     EXPECT_EQ(ret, HKS_SUCCESS) << "OnUnRegisterProvider failed";
 
     HKS_FREE_BLOB(processInfo.userId);
@@ -189,7 +195,8 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest005, TestSize.Level0) {
     auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
         [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
         HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
-        providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true);
+        int32_t deleteCount = 0;
+        providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
     });
     EXPECT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
 
@@ -209,7 +216,8 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest005, TestSize.Level0) {
     EXPECT_EQ(providerInfos3.size(), 1);
 
     CppParamSet emptyParamSet{};
-    ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, emptyParamSet, false);
+    int32_t deletecount = 0;
+    ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, emptyParamSet, false, deletecount);
     EXPECT_EQ(ret, HKS_SUCCESS) << "OnUnRegisterProvider failed";
 
     HKS_FREE_BLOB(processInfo.userId);

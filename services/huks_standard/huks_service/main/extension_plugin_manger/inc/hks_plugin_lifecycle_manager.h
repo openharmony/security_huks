@@ -46,7 +46,7 @@ public:
     int32_t OnRegistProvider(const HksProcessInfo &processInfo,
         const std::string &providerName, const CppParamSet &paramSet, std::function<void(HksProcessInfo)> callback);
     int32_t OnUnRegistProvider(const HksProcessInfo &processInfo,
-        const std::string &providerName, const CppParamSet &paramSet, bool isdeath);
+        const std::string &providerName, const CppParamSet &paramSet, bool isdeath, int32_t &deleteCount);
     int32_t OnCreateRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet, std::string &handle);
     int32_t OnCloseRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
