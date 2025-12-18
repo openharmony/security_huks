@@ -7,74 +7,66 @@ config("json_config") {
   cflags_cc = [ "-fexceptions" ]
 }
 
-if (huks_enable_ukey_config == true) {
-  module_output_path = "huks/huks/extension_unittest"
-  ohos_unittest("ukey_sdk_test") {
-    module_out_path = module_output_path
+module_output_path = "huks/huks/extension_unittest"
+ohos_unittest("ukey_sdk_test") {
+  module_out_path = module_output_path
+  include_dirs = [
+    ".",
+    "include",
+    "//base/security/huks/frameworks/huks_standard/main/common/include",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
+    "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger/inc",
+    "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc",
+    "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger/inc",
+    "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common/inc",
+    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",
+    "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/include",
+    "//base/security/huks/test/unittest/huks_common_test/include",
+  ]
 
-    include_dirs = [
-      ".",
-      "include",
-      "//base/security/huks/frameworks/huks_standard/main/common/include",
-      "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger/inc",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc",
-      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger/inc",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common/inc",
-      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",
-      "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/include",
-      "//base/security/huks/test/unittest/huks_common_test/include",
-    ]
+  sources = [
+    "./hks_ukey_test.cpp",
+  ]
 
-    sources = [
-      "./hks_ukey_test.cpp",
-    ]
+  configs = [
+    "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+  ]
 
-    configs = [
-      "//base/security/huks/frameworks/config/build:l2_standard_common_config",
-    ]
+  deps = [
+    "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
+    "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
+    "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_util_standard_static",
+    "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
+    "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection:libhuks_extension_connection_static",
+    "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger:libhuks_provider_life_cycle_manager_static",
+    "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager:libhuks_remote_handle_manager_static",
+    "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
+    "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/inner_kits_passthrough:libhukssdk_static",
+  ]
 
-    deps = [
-      "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
-      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
-      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_util_standard_static",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection:libhuks_extension_connection_static",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger:libhuks_provider_life_cycle_manager_static",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager:libhuks_remote_handle_manager_static",
-      "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
-      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
-      "//base/security/huks/test/unittest/huks_standard_test/module_test/inner_kits_passthrough:libhukssdk_static",
-    ]
+  external_deps = [
+    "ability_runtime:ability_manager",
+    "c_utils:utils",
+    "googletest:gmock",
+    "googletest:gtest",
+    "hilog:libhilog",
+  ]
 
-    external_deps = [
-      "ability_runtime:ability_manager",
-      "c_utils:utils",
-      "googletest:gmock",
-      "googletest:gtest",
-      "hilog:libhilog",
-    ]
+  cflags = [
+    "-Wall",
+    "-Werror",
+  ]
 
-    cflags = [
-      "-Wall",
-      "-Werror",
-    ]
-
-    sanitize = {
-      integer_overflow = true
-      cfi = true
-      debug = false
-      cfi_cross_dso = true
-      boundary_sanitize = true
-      ubsan = true
-    }
-
-    subsystem_name = "security"
-    part_name = "huks"
+  sanitize = {
+    integer_overflow = true
+    cfi = true
+    debug = false
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    ubsan = true
   }
-} else {
-  # Provide a stub target so upper-level unconditional dependency does not break build.
-  group("ukey_sdk_test") {
-    testonly = true
-  }
+
+  subsystem_name = "security"
+  part_name = "huks"
 }

@@ -69,8 +69,9 @@ int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &
     }
 
     int32_t ret = HKS_SUCCESS;
+    int32_t deleteCount = 1;
     do {
-        ret = OnUnRegistProvider(info, providerName, paramSet, isdeath);
+        ret = OnUnRegistProvider(info, providerName, paramSet, isdeath, deleteCount);
         HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS, "unregist provider failed! ret = %{public}d", ret)
 
         HKS_IF_TRUE_LOGE_BREAK(m_refCount.load() != ONE_EXTENSION,
@@ -98,7 +99,7 @@ int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &
     } while (0);
 
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "unregist provider fail")
-    m_refCount.fetch_sub(1, std::memory_order_acq_rel);
+    m_refCount.fetch_sub(deleteCount, std::memory_order_acq_rel);
 
     return ret;
 }
@@ -131,7 +132,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnRegistProvider(const HksProcessInfo
 }
 
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnUnRegistProvider(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet, bool isdeath))
+    const std::string &providerName, const CppParamSet &paramSet, bool isdeath, int32_t &deleteCount))
 {
     AutoRefCount refCnt(m_refCount);
     void *funcPtr = nullptr;
@@ -139,7 +140,8 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnUnRegistProvider(const HksProcessIn
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
         "UnRegistProvider method enum not found in plugin provider map.")
     
-    int32_t ret = (*reinterpret_cast<OnUnRegisterProviderFunc>(funcPtr))(processInfo, providerName, paramSet, isdeath);
+    int32_t ret = (*reinterpret_cast<OnUnRegisterProviderFunc>(funcPtr))
+        (processInfo, providerName, paramSet, isdeath, deleteCount);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
         "UnRegistProvider fail, ret = %{public}d", ret)
     HKS_LOG_I("unregist provider success");

@@ -1382,7 +1382,11 @@ int32_t JsHksCryptoExtAbility::GetProperty(const std::string &handle, const std:
     };
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     HksParamSet *defaultParamSet = nullptr;
-    (void)HksInitParamSet(&defaultParamSet);
+    int32_t ret = HksInitParamSet(&defaultParamSet);
+    if (ret != HKS_SUCCESS) {
+        LOGE("init paramSet failed! ret:%d", ret);
+        return ret;
+    }
     dataParam->paramSet = CppParamSet(defaultParamSet, true);
     dataParam->paramType = CryptoResultParamType::GET_PROPERTY;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
@@ -1390,7 +1394,7 @@ int32_t JsHksCryptoExtAbility::GetProperty(const std::string &handle, const std:
     };
 
     dataParam->callJsExMethodDone.store(false);
-    auto ret = CallJsMethod("onGetProperty", jsRuntime_, jsObj_.get(), argParser, retParser);
+    ret = CallJsMethod("onGetProperty", jsRuntime_, jsObj_.get(), argParser, retParser);
     if (ret != ERR_OK) {
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
