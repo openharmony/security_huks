@@ -52,7 +52,7 @@ enum class PluginMethodEnum {
 using OnRegisterProviderFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &providerName,
     const CppParamSet &paramSet, std::function<void(HksProcessInfo)> callback);
 using OnUnRegisterProviderFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &providerName,
-    const CppParamSet &paramSet, bool isdeath);
+    const CppParamSet &paramSet, bool isdeath, int32_t &deleteCount);
 using OnCreateRemoteKeyHandleFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet, std::string &handle);
 using OnCloseRemoteKeyHandleFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,

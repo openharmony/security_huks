@@ -188,7 +188,7 @@ int32_t HksProviderLifeCycleManager::HksHapGetConnectInfos(const HksProcessInfo 
 constexpr int WAIT_TIME_MS = 5;
 constexpr int WAIT_ITERATION = 6;
 int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &processInfo,
-    const std::string &providerName, [[maybe_unused]] const CppParamSet &paramSet, bool isdeath)
+    const std::string &providerName, [[maybe_unused]] const CppParamSet &paramSet, bool isdeath, int32_t &deleteCount)
 {
     HKS_IF_TRUE_RETURN(!CheckStringParamLenIsOk(providerName, 1, MAX_PROVIDER_NAME_LEN), HKS_ERROR_INVALID_ARGUMENT)
     std::vector<std::pair<ProviderInfo, std::shared_ptr<HksExtAbilityConnectInfo>>> connectionInfos;
@@ -200,10 +200,12 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
     HKS_IF_TRUE_LOGE_RETURN(connectionInfos.empty(), HKS_ERROR_PROVIDER_NOT_FOUND,
         "OnUnRegisterProvider failed, unfound provider connections. providerName: %" LOG_PUBLIC "s",
             providerName.c_str())
+    int32_t deletecount = 0;
     for (auto &connectionInfo : connectionInfos) {
-        HKS_IF_TRUE_LOGE_RETURN(connectionInfo.second == nullptr, HKS_ERROR_NULL_POINTER, "connectionInfo is nullptr")
-        HKS_IF_TRUE_LOGE_RETURN(connectionInfo.second->m_connection == nullptr, HKS_ERROR_NULL_POINTER,
-            "m_connection is nullptr")
+        HKS_IF_TRUE_LOGE_CONTINUE(connectionInfo.second == nullptr,
+            "connectionInfo is nullptr, ret:%{public}d", HKS_ERROR_NULL_POINTER)
+        HKS_IF_TRUE_LOGE_CONTINUE(connectionInfo.second->m_connection == nullptr,
+            "m_connection is nullptr, ret: %{public}d", HKS_ERROR_NULL_POINTER)
         auto proxy = connectionInfo.second->m_connection->GetExtConnectProxy();
         if (proxy == nullptr) {
             HKS_LOG_E("OnUnRegisterProvider proxy is nullptr. providerName: %" LOG_PUBLIC "s", providerName.c_str());
@@ -214,13 +216,13 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
         HKS_LOG_I("OnUnRegisterProvider connection want abilityName: %" LOG_PUBLIC "s",
             connectionInfo.second->m_want.GetElement().GetAbilityName().c_str());
         HKS_LOG_I("OnUnRegisterProvider refCount: %" LOG_PUBLIC "d", refCount);
-        HKS_IF_TRUE_LOGE_RETURN(refCount > HKS_PROVIDER_CAN_REMOVE_REF_COUNT, HKS_ERROR_PROVIDER_IN_USE,
-            "OnUnRegisterProvider failed, refCount is more than 2, maybe in use.")
-        HKS_IF_TRUE_LOGE_RETURN(connectionInfo.second->m_connection == nullptr,
-            HKS_ERROR_NULL_POINTER, "connectionInfo is nullptr")
+        HKS_IF_TRUE_LOGE_CONTINUE(refCount > HKS_PROVIDER_CAN_REMOVE_REF_COUNT,
+            "OnUnRegisterProvider failed, refCount is more than 2, maybe in use, ret: %{public}d",
+            HKS_ERROR_PROVIDER_IN_USE)
         HKS_IF_NOT_TRUE_EXCU(isdeath,
             connectionInfo.second->m_connection->OnDisconnect(connectionInfo.second->m_connection));
         m_providerMap.Erase(connectionInfo.first);
+        deletecount++;
         auto &stub = connectionInfo.second->m_connection;
         uint8_t waitIteration = WAIT_ITERATION;
         HKS_LOG_I("stub refcount: %" LOG_PUBLIC "d", stub->GetSptrRefCount());
@@ -231,6 +233,7 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
             HKS_IF_TRUE_LOGE(waitIteration == 0, "waitIteration is 0, but stub refcount is not 1.")
         }
     }
+    deleteCount = deletecount;
     HKS_LOG_I("OnUnRegisterProvider Success! providerName: %" LOG_PUBLIC "s", providerName.c_str());
     return HKS_SUCCESS;
 }

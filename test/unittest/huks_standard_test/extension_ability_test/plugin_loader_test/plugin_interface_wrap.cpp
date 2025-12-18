@@ -32,7 +32,8 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnReg
 }
 
 ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnUnRegisterProvider(
-    const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet, bool isdeath))
+    const HksProcessInfo &processInfo, const std::string &providerName,
+    const CppParamSet &paramSet, bool isdeath, int32_t &deleteCount))
 {
     return 0;
 }
@@ -136,7 +137,7 @@ extern "C" void *__wrap_dlsym(void* handle, const char* symbol)
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetNS5_8functionIFvS2_EEE", 
          (void*)Fake_HksExtPluginOnRegisterProvider},
         {"_ZN4OHOS8Security4Huks32HksExtPluginOnUnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_string"
-        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetb",
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetbRi",
          (void*)Fake_HksExtPluginOnUnRegisterProvider},
          {"_ZN4OHOS8Security4Huks30HksExtPluginOnOpenRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_",
