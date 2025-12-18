@@ -248,7 +248,7 @@ int32_t HksProviderLifeCycleManager::HksHapGetConnectInfos(const HksProcessInfo 
 }
 
 int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &processInfo,
-    const std::string &providerName, [[maybe_unused]] const CppParamSet &paramSet, bool isdeath)
+    const std::string &providerName, [[maybe_unused]] const CppParamSet &paramSet, bool isdeath, int32_t &deleteCount)
 {
     return HKS_SUCCESS;
 }

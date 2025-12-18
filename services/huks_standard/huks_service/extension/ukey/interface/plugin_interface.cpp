@@ -55,7 +55,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnRegisterProvider(co
 }
 
 __attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet, bool isdeath)
+    const std::string &providerName, const CppParamSet &paramSet, bool isdeath, int32_t &deleteCount)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     int32_t ret = HKS_SUCCESS;
@@ -78,7 +78,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(
 
     auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(providerMgr == nullptr, HKS_ERROR_NULL_POINTER, "providerMgr is null");
-    ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, isdeath);
+    ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, isdeath, deleteCount);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     HKS_IF_TRUE_RETURN(ret != HKS_SUCCESS, ret)
     return ret;
