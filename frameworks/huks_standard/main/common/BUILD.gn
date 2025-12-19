@@ -40,13 +40,18 @@ if (os_level == "standard") {
       "src/hks_base_check.c",
       "src/hks_check_paramset.c",
       "src/hks_common_check.c",
-      "src/hks_cpp_paramset.cpp",
       "src/hks_crypto_adapter.c",
       "src/hks_error_msg.c",
-      "src/hks_json_wrapper.cpp",
       "src/hks_param.c",
       "src/hks_tags_type_manager.c",
     ]
+
+    if (huks_enable_ukey_config == true) {
+      sources += [
+        "src/hks_cpp_paramset.cpp",
+        "src/hks_json_wrapper.cpp",
+      ]
+    }
 
     complete_static_lib = true
 
