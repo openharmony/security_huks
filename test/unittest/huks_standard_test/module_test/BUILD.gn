@@ -201,11 +201,16 @@ ohos_unittest("huks_module_test") {
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_report_data_size_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_report_rename_key_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_storage_test.cpp",
-    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_report_ukey_event_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/sa/src/hks_bms_api_wrap_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/sa/src/huks_sa_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/systemapi_mock/src/useridm_mock_test.cpp",
   ]
+
+  if (huks_enable_ukey_config == true) {
+    sources += [
+      "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_report_ukey_event_test.cpp",
+    ]
+  }
 
   if (huks_security_level != "software") {
     sources += [ "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/sa/src/hks_dcm_callback_handler_test.cpp" ]

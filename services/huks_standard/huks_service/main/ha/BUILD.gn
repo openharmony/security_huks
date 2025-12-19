@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/huks/build/config.gni")
 import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 
@@ -21,6 +22,10 @@ config("libhuks_service_ha_config") {
     "${huks_base_path}interfaces/inner_api/huks_standard/main/include",
     "${huks_base_path}services/huks_standard/huks_service/main/plugin_proxy/include",
   ]
+
+  if (huks_enable_ukey_config == true) {
+    defines = [ "HKS_UKEY_EXTENSION_CRYPTO" ]
+  }
 }
 
 ohos_static_library("libhuks_service_ha_static") {

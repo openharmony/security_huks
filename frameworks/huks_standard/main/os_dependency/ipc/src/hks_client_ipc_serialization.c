@@ -548,6 +548,7 @@ int32_t HksParamsToParamSet(struct HksParam *params, uint32_t cnt, struct HksPar
     return ret;
 }
 
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
 static int32_t UnpackInt32FromBuffer(const struct HksBlob *srcBlob, uint32_t *offset, int32_t *out)
 {
     if ((*offset > srcBlob->size) || (srcBlob->size - *offset < sizeof(int32_t))) {
@@ -662,6 +663,7 @@ int32_t HksRemotePropertyUnpackFromService(const struct HksBlob *srcBlob, struct
 
     return returnResult;
 }
+#endif
 
 int32_t HksListAliasesPack(const struct HksParamSet *srcParamSet, struct HksBlob *destData)
 {
