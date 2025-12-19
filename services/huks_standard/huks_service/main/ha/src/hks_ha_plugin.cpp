@@ -133,14 +133,7 @@ static HksEventProcMap g_eventProcMap[] = {
         HksEventInfoAddForListAliases,
         HksEventInfoToMapForListAliases
     },
-    {
-        HKS_EVENT_DATA_SIZE_STATISTICS,
-        HksParamSetToEventInfoForDataSize,
-        HksEventInfoIsNeedReportForDataSize,
-        HksEventInfoIsEqualForDataSize,
-        HksEventInfoAddForDataSize,
-        HksEventInfoToMapForDataSize
-    },
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
     {
         HKS_EVENT_UKEY_REGISTER_PROVIDER,
         HksRegProviderParamSetToEventInfo,
@@ -196,6 +189,15 @@ static HksEventProcMap g_eventProcMap[] = {
         HksGetPropertyEventInfoEqual,
         HksEventInfoAddForGetProperty,
         HksGetPropertyEventInfoToMap,
+    },
+#endif
+    {
+        HKS_EVENT_DATA_SIZE_STATISTICS,
+        HksParamSetToEventInfoForDataSize,
+        HksEventInfoIsNeedReportForDataSize,
+        HksEventInfoIsEqualForDataSize,
+        HksEventInfoAddForDataSize,
+        HksEventInfoToMapForDataSize
     }
 };
 
