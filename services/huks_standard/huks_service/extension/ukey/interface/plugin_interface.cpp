@@ -115,7 +115,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnCloseRemoteHandle(
     auto ret = handleMgr->CloseRemoteHandle(processInfo, index, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null");
-    (void)sessionMgr->HksClearHandle(processInfo, paramSet);
+    (void)sessionMgr->HksClearHandle(processInfo, paramSet, index);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
