@@ -190,7 +190,7 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &process
     int32_t num = 0;
     (void)providerInfoToNum_.Find(providerInfo, num);
     providerInfoToNum_.EnsureInsert(providerInfo, num + 1);
-    uidIndexToAuthState_.EnsureInsert(std::make_pair(processInfo.uidInt, index), 1);
+    uidIndexToAuthState_.EnsureInsert(std::make_pair(processInfo.uidInt, index), 0);
     return HKS_SUCCESS;
 }
 
