@@ -285,7 +285,7 @@ napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
         NAPI_CALL_RETURN_ERR(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
         NAPI_THROW_RETURN_ERR(env, argc < HUKS_NAPI_ONE_ARG, napi_generic_failure,
-                              HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
+                              HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input.");
 
         napi_value result = ParseString(env, argv[0], asyncContext->name);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
