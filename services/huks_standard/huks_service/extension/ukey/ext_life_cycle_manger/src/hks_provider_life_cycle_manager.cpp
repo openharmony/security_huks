@@ -96,7 +96,7 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
         HKS_LOG_I("First time connect the Extension Ability. "
             "m_bundleName: %" LOG_PUBLIC "s, m_abilityName: %" LOG_PUBLIC "s",
             providerInfo.m_bundleName.c_str(), providerInfo.m_abilityName.c_str());
-        ret = connect->OnConnection(want, connect);
+        ret = connect->OnConnection(want, connect, processInfo.userIdInt);
         HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "Connect extAbility failed. ret: %" LOG_PUBLIC "d", ret)
     }
 
