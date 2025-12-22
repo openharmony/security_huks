@@ -19,17 +19,20 @@
 #include <openssl/bio.h>
 #include <openssl/crypto.h>
 #include <openssl/evp.h>
+#include <openssl/err.h>
 #include <openssl/obj_mac.h>
 #include <openssl/ossl_typ.h>
 #include <openssl/pem.h>
 #include <openssl/x509.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_template.h"
 #include "hks_type.h"
+#include "openssl/types.h"
 #include "securec.h"
 
 #define OPENSSL_SUCCESS 1
@@ -192,6 +195,17 @@ static int32_t VerifySignature(const struct HksCertInfo *cert, const struct HksC
     return (resOpenssl == OPENSSL_SUCCESS) ? HKS_SUCCESS : HKS_ERROR_VERIFICATION_FAILED;
 }
 
+static void PrintCertMgrError(const struct HksCertInfo *certs, X509_STORE_CTX *verifyCtx)
+{
+    if (certs != NULL && certs->length >= 1) {
+        ASN1_TIME *time = X509_get_notBefore(certs[1].x509);
+        HKS_IF_TRUE_LOGE(time != NULL, "device cert time: %" LOG_PUBLIC "s", time->data)
+    }
+    HKS_LOG_E("Openssl engine fail, error code = %" LOG_PUBLIC "d, error string = %" LOG_PUBLIC "s",
+        X509_STORE_CTX_get_error(verifyCtx),
+        X509_verify_cert_error_string(X509_STORE_CTX_get_error(verifyCtx)));
+}
+
 static int32_t VerifyCertChain(const struct HksCertInfo *certs, uint32_t certNum)
 {
     int32_t ret = HKS_ERROR_VERIFICATION_FAILED;
@@ -220,18 +234,19 @@ static int32_t VerifyCertChain(const struct HksCertInfo *certs, uint32_t certNum
 
     int32_t resOpenssl = X509_STORE_CTX_init(verifyCtx, store, certs[0].x509, skCerts); /* cert 0: add leaf cert */
     if (resOpenssl != OPENSSL_SUCCESS) {
-        HKS_LOG_E("init verify ctx failed");
+        HKS_LOG_E("init verify ctx failed. resOpenssl: %" LOG_PUBLIC "d", resOpenssl);
         goto EXIT;
     }
 
     resOpenssl = X509_verify_cert(verifyCtx);
     if (resOpenssl != OPENSSL_SUCCESS) {
-        HKS_LOG_E("verify cert failed");
+        HKS_LOG_E("verify cert failed. resOpenssl: %" LOG_PUBLIC "d", resOpenssl);
+        PrintCertMgrError(certs, verifyCtx);
         goto EXIT;
     }
 
     ret = VerifySignature(&certs[certNum - 1], &certs[certNum - 1]); /* root ca cert need to be verified by itself */
-    HKS_IF_NOT_SUCC_LOGE(ret, "verify root cert failed")
+    HKS_IF_NOT_SUCC_LOGE(ret, "verify root cert failed. ret: %" LOG_PUBLIC "d", ret)
 
 EXIT:
     if (skCerts != NULL) {
