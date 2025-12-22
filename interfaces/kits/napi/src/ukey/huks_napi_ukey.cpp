@@ -15,6 +15,7 @@
 
 #include "huks_napi_ukey.h"
 
+#include "hks_error_code.h"
 #include "securec.h"
 
 #include "hks_api.h"
@@ -291,12 +292,9 @@ napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get stringname");
 
         if (argc < HUKS_NAPI_TWO_ARGS) {
-            context->paramSetIn = static_cast<HksParamSet *>(HksMalloc(sizeof(HksParamSet)));
-            NAPI_THROW_RETURN_ERR(env, context->paramSetIn == nullptr, napi_generic_failure,
-                                  HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not allocate memory for paramSetIn");
-
-            (void)memset_s(context->paramSetIn, sizeof(HksParamSet), 0, sizeof(HksParamSet));
-            context->paramSetIn->paramSetSize = 0;
+            int32_t ret = HksInitParamSet(&context->paramSetIn);
+            NAPI_THROW_RETURN_ERR(env, ret != HKS_SUCCESS, napi_generic_failure,
+                HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "unregister call HksInitParamSet for paramSetIn faild.");
             return napi_ok;
         }
         result = ParseHksCryptoExternalParams(env, argv[1], context->paramSetIn);
@@ -391,11 +389,9 @@ napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info)
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get stringname");
         if (argc < HUKS_NAPI_TWO_ARGS) {
-            context->paramSetIn = static_cast<HksParamSet *>(HksMalloc(sizeof(HksParamSet)));
-            NAPI_THROW_RETURN_ERR(env, context->paramSetIn == nullptr, napi_generic_failure,
-                                  HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not allocate memory for paramSetIn");
-            (void)memset_s(context->paramSetIn, sizeof(HksParamSet), 0, sizeof(HksParamSet));
-            context->paramSetIn->paramSetSize = 0;
+            int32_t ret = HksInitParamSet(&context->paramSetIn);
+            NAPI_THROW_RETURN_ERR(env, ret != HKS_SUCCESS, napi_generic_failure,
+                HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "getUkeyPinAuthState call HksInitParamSet for paramSetIn faild.");
             return napi_ok;
         }
         result = ParseHksCryptoExternalParams(env, argv[1], context->paramSetIn);
@@ -445,11 +441,9 @@ napi_value HuksNapiGetProperty(napi_env env, napi_callback_info info)
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get propertyId");
         if (argc < HUKS_NAPI_THREE_ARGS) {
-            context->paramSetIn = static_cast<HksParamSet *>(HksMalloc(sizeof(HksParamSet)));
-            NAPI_THROW_RETURN_ERR(env, context->paramSetIn == nullptr, napi_generic_failure,
-                                  HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not allocate memory for paramSetIn");
-            (void)memset_s(context->paramSetIn, sizeof(HksParamSet), 0, sizeof(HksParamSet));
-            context->paramSetIn->paramSetSize = 0;
+            int32_t ret = HksInitParamSet(&context->paramSetIn);
+            NAPI_THROW_RETURN_ERR(env, ret != HKS_SUCCESS, napi_generic_failure,
+                HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "getProperty call HksInitParamSet for paramSetIn faild.");
             return napi_ok;
         }
         result = ParseHksCryptoExternalParams(env, argv[HUKS_NAPI_TWO_ARGS], context->paramSetIn);
