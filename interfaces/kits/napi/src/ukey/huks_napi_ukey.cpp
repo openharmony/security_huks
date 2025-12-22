@@ -289,7 +289,7 @@ napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
 
         napi_value result = ParseString(env, argv[0], asyncContext->name);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
-                              HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get stringname");
+                              HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get string type name");
 
         if (argc < HUKS_NAPI_TWO_ARGS) {
             int32_t ret = HksInitParamSet(&context->paramSetIn);
