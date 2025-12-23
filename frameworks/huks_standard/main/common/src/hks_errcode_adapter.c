@@ -768,13 +768,6 @@ static struct HksError g_errCodeTable[] = {
             .data = NULL
         }
     }, {
-        .innerErrCode = HKS_ERROR_FIND_FUNC_MAP_FAIL,
-        .hksResult = {
-            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
-            .errorMsg = "method not found in map.",
-            .data = NULL
-        }
-    }, {
         .innerErrCode = HKS_ERROR_PIN_NO_AUTH,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_PIN_NO_AUTH,
@@ -842,6 +835,34 @@ static struct HksError g_errCodeTable[] = {
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_BUSY,
             .errorMsg = "the provider or Ukey is busy.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_OPEN_LIB_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
+            .errorMsg = "an error occured in the dependent module.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_DLCLOSE_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
+            .errorMsg = "an error occured in the dependent module.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "method not found in map.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_GET_FUNC_POINTER_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
+            .errorMsg = "an error occured in the dependent module.",
             .data = NULL
         }
     }
