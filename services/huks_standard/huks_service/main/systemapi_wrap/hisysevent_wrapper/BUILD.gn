@@ -47,6 +47,7 @@ if (os_level == "standard") {
       "-Werror",
     ]
     external_deps = [
+      "bounds_checking_function:libsec_shared",
       "c_utils:utils",
       "hilog:libhilog",
       "hisysevent:libhisysevent",
