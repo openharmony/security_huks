@@ -57,6 +57,7 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
     ]
     external_deps = [
+      "bounds_checking_function:libsec_shared",
       "c_utils:utils",
       "hilog:libhilog",
       "openssl:libcrypto_shared",
