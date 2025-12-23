@@ -99,7 +99,9 @@ int32_t HksRemoteHandleManager::MergeProviderCertificates(const ProviderInfo &pr
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &index,
+int32_t HksRemoteHandleManager::
+
+ParseIndexAndProviderInfo(const std::string &index,
     ProviderInfo &providerInfo, std::string &newIndex)
 {
     CommJsonObject root = CommJsonObject::Parse(index);

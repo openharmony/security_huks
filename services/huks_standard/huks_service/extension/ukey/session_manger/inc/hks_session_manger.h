@@ -38,7 +38,7 @@ struct HandleInfo {
     std::string m_skfSessionHandle;
     ProviderInfo m_providerInfo;
     uint32_t m_uid;
-    std::string index;
+    std::string m_index;
 };
 
 class HksSessionManager : private OHOS::DelayedSingleton<HksSessionManager> {
