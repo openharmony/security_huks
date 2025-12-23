@@ -234,7 +234,7 @@ void HksSessionManager::ClearSessionHandleMap(std::vector<uint32_t> &toRemove)
     }
 }
 
-std::vector<uint32_t> HksSessionManager::FindToRemoveHandle(uint32_t uid, std::string &abilityName)
+std::vector<uint32_t> HksSessionManager::FindToRemoveHandle(const uint32_t &uid, const std::string &abilityName)
 {
     std::vector<uint32_t> toRemove;
     m_handlers.Iterate([&](const uint32_t &handle, HandleInfo &handleInfo) {
@@ -244,7 +244,7 @@ std::vector<uint32_t> HksSessionManager::FindToRemoveHandle(uint32_t uid, std::s
     return toRemove;
 }
 
-std::vector<uint32_t> HksSessionManager::FindToRemoveHandle(uint32_t uid)
+std::vector<uint32_t> HksSessionManager::FindToRemoveHandle(const uint32_t &uid)
 {
     std::vector<uint32_t> toRemove;
     m_handlers.Iterate([&](const uint32_t &handle, HandleInfo &handleInfo) {
@@ -253,7 +253,7 @@ std::vector<uint32_t> HksSessionManager::FindToRemoveHandle(uint32_t uid)
     return toRemove;
 }
 
-std::vector<uint32_t> HksSessionManager::FindToRemoveHandle(uint32_t uid, std::string &abilityName,
+std::vector<uint32_t> HksSessionManager::FindToRemoveHandle(const uint32_t &uid, const std::string &abilityName,
     const std::string &index)
 {
     std::vector<uint32_t> toRemove;
@@ -264,7 +264,7 @@ std::vector<uint32_t> HksSessionManager::FindToRemoveHandle(uint32_t uid, std::s
     return toRemove;
 }
 
-std::vector<uint32_t> HksSessionManager::FindToRemoveHandle(uint32_t uid, const std::string &index)
+std::vector<uint32_t> HksSessionManager::FindToRemoveHandle(const uint32_t &uid, const std::string &index)
 {
     std::vector<uint32_t> toRemove;
     m_handlers.Iterate([&](const uint32_t &handle, HandleInfo &handleInfo) {
