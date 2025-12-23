@@ -253,7 +253,7 @@ std::vector<uint32_t> HksSessionManager::FindToRemoveHandle(const uint32_t &uid)
     return toRemove;
 }
 
-std::vector<uint32_t> HksSessionManager::FindToRemoveHandle(const uint32_t &uid, const std::string &abilityName,
+std::vector<uint32_t> HksSessionManager::FindToRemoveByIndex(const uint32_t &uid, const std::string &abilityName,
     const std::string &index)
 {
     std::vector<uint32_t> toRemove;
@@ -284,7 +284,7 @@ bool HksSessionManager::HksClearHandle(const HksProcessInfo &processInfo, const 
                 "the abilityName is too long. size: %" LOG_PUBLIC "zu", abilityName.second.size())
             std::string abilityNameStr = std::string(abilityName.second.begin(), abilityName.second.end());
             HKS_LOG_I("HksClearHandle get abilityName: %" LOG_PUBLIC "s", abilityNameStr.c_str());
-            toRemove = FindToRemoveHandle(processInfo.uidInt, abilityNameStr, index);
+            toRemove = FindToRemoveByIndex(processInfo.uidInt, abilityNameStr, index);
             break;
         }
         toRemove = FindToRemoveHandle(processInfo.uidInt, index);
