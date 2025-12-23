@@ -63,9 +63,9 @@ private:
         const CppParamSet &paramSet);
     std::vector<uint32_t> FindToRemoveHandle(const uint32_t &uid, const std::string &abilityName);
     std::vector<uint32_t> FindToRemoveHandle(const uint32_t &uid);
-    std::vector<uint32_t> FindToRemoveByIndex(const uint32_t &uid, const std::string &abilityName,
+    std::vector<uint32_t> FindToRemoveHandle(const uint32_t &uid, const std::string &abilityName,
         const std::string &index);
-    std::vector<uint32_t> FindToRemoveHandle(const uint32_t &uid, const std::string &index);
+    std::vector<uint32_t> FindToRemoveByIndex(const uint32_t &uid, const std::string &index);
     int32_t HksGetHandleInfo(const HksProcessInfo &processInfo, const uint32_t &handle, HandleInfo &infos);
     bool CheckSingleCallerCanInitSession(const HksProcessInfo &processInfo);
     std::pair<int32_t, uint32_t> GenRandomUint32();
