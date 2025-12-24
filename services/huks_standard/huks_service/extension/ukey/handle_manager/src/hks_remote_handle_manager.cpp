@@ -190,6 +190,7 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &process
     int32_t num = 0;
     (void)providerInfoToNum_.Find(providerInfo, num);
     providerInfoToNum_.EnsureInsert(providerInfo, num + 1);
+    uidIndexToAuthState_.EnsureInsert(std::make_pair(processInfo.uidInt, index), 0);
     return HKS_SUCCESS;
 }
 
@@ -252,12 +253,10 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     ret = ConvertExtensionToHksErrorCode(ret);
     ClearMapByHandle(ret, handle);
-    if (authState == 1) {
-        uidIndexToAuthState_.EnsureInsert(std::make_pair(static_cast<uint32_t>(uid.second), index), authState);
-    }
     HKS_IF_TRUE_LOGE_RETURN(ret == HUKS_ERR_CODE_PIN_CODE_ERROR || ret == HUKS_ERR_CODE_PIN_LOCKED, ret,
             "AuthUkeyPin failed: %" LOG_PUBLIC "d", ret)
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote verify pin failed: %" LOG_PUBLIC "d", ret)
+    uidIndexToAuthState_.EnsureInsert(std::make_pair(static_cast<uint32_t>(uid.second), index), 1);
     return ret;
 }
 
