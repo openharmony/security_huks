@@ -23,19 +23,6 @@
 
 namespace OHOS::Security::Huks {
 
-static std::map<int32_t, int32_t> errorMapping = {
-    {EXTENSION_SUCCESS, HKS_SUCCESS},
-    {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
-    {EXTENSION_ERRCODE_UKEY_NOT_EXIST, HUKS_ERR_CODE_CRYPTO_FAIL},
-    {EXTENSION_ERRCODE_UKEY_FAIL, HUKS_ERR_CODE_CRYPTO_FAIL},
-    {EXTENSION_ERRCODE_PIN_NOT_AUTH, HKS_ERROR_PIN_NO_AUTH},
-    {EXTENSION_ERRCODE_HANDLE_NOT_EXIST, HUKS_ERR_CODE_ITEM_NOT_EXIST},
-    {EXTENSION_ERRCODE_HANDLE_FAIL, HUKS_ERR_CODE_CRYPTO_FAIL},
-    {EXTENSION_ERRCODE_PIN_CODE_ERROR, HUKS_ERR_CODE_PIN_CODE_ERROR},
-    {EXTENSION_ERRCODE_PIN_LOCKED, HUKS_ERR_CODE_PIN_LOCKED},
-    {HKS_ERROR_EXT_JS_METHON_ERROR, HUKS_ERR_CODE_BUSY}
-};
-
 bool CheckStringParamLenIsOk(const std::string &str, uint32_t min, uint32_t max)
 {
     if (str.size() < min || str.size() > max) {
@@ -161,11 +148,11 @@ int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCert
     return HKS_SUCCESS;
 }
 
-int32_t ConvertExtensionToHksErrorCode(const int32_t extensionErrorCode)
+int32_t ConvertExtensionToHksErrorCode(const int32_t extensionErrorCode, const std::map<int32_t, int32_t> &errorMapping)
 {
-    auto it = errorMapping.find(extensionErrorCode);
-    if (it != errorMapping.end()) {
-        return it->second;
+    auto iter = errorMapping.find(extensionErrorCode);
+    if (iter != errorMapping.end()) {
+        return iter->second;
     } else {
         return HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR;
     }
