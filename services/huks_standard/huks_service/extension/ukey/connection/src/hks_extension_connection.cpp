@@ -24,7 +24,6 @@ namespace Security {
 namespace Huks {
 
 constexpr int WAIT_TIME = 3;
-constexpr int32_t DEFAULT_USER_ID = 100;
 
 void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementName &element,
     const sptr<IRemoteObject> &remoteObject, int resultCode)
@@ -40,9 +39,9 @@ void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementNa
     proxyConv_.notify_all();
 }
 
-int32_t ExtensionConnection::OnConnection(const AAFwk::Want &want, sptr<ExtensionConnection> &connect)
+int32_t ExtensionConnection::OnConnection(const AAFwk::Want &want, sptr<ExtensionConnection> &connect, int32_t userid)
 {
-    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, connect, DEFAULT_USER_ID);
+    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, connect, userid);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_REMOTE_OPERATION_FAILED,
         "fail to connect ability by ability manager service. ext error = %" LOG_PUBLIC "d", ret)
 

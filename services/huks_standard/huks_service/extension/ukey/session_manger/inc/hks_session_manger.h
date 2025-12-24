@@ -38,6 +38,7 @@ struct HandleInfo {
     std::string m_skfSessionHandle;
     ProviderInfo m_providerInfo;
     uint32_t m_uid;
+    std::string m_index;
 };
 
 class HksSessionManager : private OHOS::DelayedSingleton<HksSessionManager> {
@@ -55,12 +56,16 @@ public:
     int32_t ExtensionAbortSession(const HksProcessInfo &processInfo,
         const uint32_t &handle, const CppParamSet &paramSet);
     bool HksClearHandle(const HksProcessInfo &processInfo, const CppParamSet &paramSet);
+    bool HksClearHandle(const HksProcessInfo &processInfo, const CppParamSet &paramSet, const std::string &index);
     void ClearSessionMapByHandle(int32_t ret, uint32_t handle);
 private:
     int32_t CheckParmSetPurposeAndCheckAuth(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet);
-    std::vector<uint32_t> FindToRemoveHandle(uint32_t uid, std::string &abilityName);
-    std::vector<uint32_t> FindToRemoveHandle(uint32_t uid);
+    std::vector<uint32_t> FindToRemoveHandle(const uint32_t &uid, const std::string &abilityName);
+    std::vector<uint32_t> FindToRemoveHandle(const uint32_t &uid);
+    std::vector<uint32_t> FindToRemoveHandle(const uint32_t &uid, const std::string &abilityName,
+        const std::string &index);
+    std::vector<uint32_t> FindToRemoveByIndex(const uint32_t &uid, const std::string &index);
     int32_t HksGetHandleInfo(const HksProcessInfo &processInfo, const uint32_t &handle, HandleInfo &infos);
     bool CheckSingleCallerCanInitSession(const HksProcessInfo &processInfo);
     std::pair<int32_t, uint32_t> GenRandomUint32();

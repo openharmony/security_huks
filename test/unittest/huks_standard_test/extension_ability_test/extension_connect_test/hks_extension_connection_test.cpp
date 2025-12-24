@@ -76,7 +76,7 @@ HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest002, TestSize.Level0) {
  */
 HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest003, TestSize.Level0) {
     AAFwk::Want want;
-    int32_t ret = extensionConn->OnConnection(want);
+    int32_t ret = extensionConn->OnConnection(want, 100);
 
     EXPECT_EQ(ret, HKS_ERROR_CONNECT_TIME_OUT) << "ret is not time out";
     EXPECT_EQ(extensionConn->IsConnected(), false) << "IsConnected is true";

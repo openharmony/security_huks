@@ -33,7 +33,7 @@ namespace Huks {
 class ExtensionConnection : public OHOS::AAFwk::AbilityConnectionStub {
 public:
     ExtensionConnection(const HksProcessInfo &info);
-    int32_t OnConnection(const AAFwk::Want &want, sptr<ExtensionConnection> &connect);
+    int32_t OnConnection(const AAFwk::Want &want, sptr<ExtensionConnection> &connect, int32_t userid);
     void OnAbilityConnectDone(const AppExecFwk::ElementName& element,
         const sptr<IRemoteObject>& remoteObject, int resultCode) override;
     void OnDisconnect(sptr<ExtensionConnection> &connect);
