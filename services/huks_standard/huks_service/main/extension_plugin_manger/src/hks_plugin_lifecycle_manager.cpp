@@ -16,6 +16,7 @@
 #include "hks_plugin_lifecycle_manager.h"
 #include "hks_plugin_loader.h"
 #include "hks_cfi.h"
+#include <thread>
 
 #define NO_EXTENSION 0
 #define ONE_EXTENSION 1
@@ -33,6 +34,7 @@ void HuksPluginLifeCycleMgr::ReleaseInstance()
     HuksPluginLifeCycleMgr::DestroyInstance();
 }
 
+constexpr int WAIT_CALlBACK = 20;
 int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &info,
     const std::string &providerName, const CppParamSet &paramSet)
 {
@@ -45,12 +47,14 @@ int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &in
         HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "regist provider failed!")
     }
 
-    ret = OnRegistProvider(info, providerName, paramSet, [this, info, providerName, paramSet]
-        (const HksProcessInfo &processInfo) {
-        HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
-        isDeath = true;
-        (void)info;
-        UnRegisterProvider(processInfo, providerName, paramSet, isDeath);
+    ret = OnRegistProvider(info, providerName, paramSet, [plugin = GetInstanceWrapper(), providerName, paramSet]
+        (const HksProcessInfo &processInfo) mutable {
+            std::thread([plugin, providerName_ = providerName, paramSet_ = paramSet, processInfo]() mutable {
+                std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long long>(WAIT_CALlBACK)));
+                HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
+                plugin->isDeath = true;
+                plugin->UnRegisterProvider(processInfo, providerName_, paramSet_, plugin->isDeath);
+            }).detach();
     });
 
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "regist provider method in plugin loader is fail")
