@@ -46,7 +46,8 @@ namespace Huks {
     std::string BlobToString(const HksBlob &strBlob);
     int32_t CertInfoToString(const struct HksExtCertInfo& certInfo, std::string& jsonStr);
     int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCertInfoSet& certSet);
-    int32_t ConvertExtensionToHksErrorCode(const int32_t extensionErrorCode);
+    int32_t ConvertExtensionToHksErrorCode(const int32_t extensionErrorCode,
+        const std::map<int32_t, int32_t> &errorMapping);
 }
 }
 }
