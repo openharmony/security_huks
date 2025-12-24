@@ -210,6 +210,7 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
         if (proxy == nullptr) {
             HKS_LOG_E("OnUnRegisterProvider proxy is nullptr. providerName: %" LOG_PUBLIC "s", providerName.c_str());
             m_providerMap.Erase(connectionInfo.first);
+            deletecount++;
             continue;
         }
         int32_t refCount = proxy->GetSptrRefCount();
