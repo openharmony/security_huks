@@ -138,12 +138,13 @@ int32_t HksProviderLifeCycleManager::HapGetAllConnectInfoByProviderName(const st
 }
 
 int32_t HksProviderLifeCycleManager::GetAllProviderInfosByProviderName(const std::string &providerName,
-    std::vector<ProviderInfo> &providerInfos)
+    const int32_t &userid, std::vector<ProviderInfo> &providerInfos)
 {
     HKS_LOG_I("GetAllProviderInfosByProviderName providerName: %" LOG_PUBLIC "s", providerName.c_str());
     int32_t ret = HKS_ERROR_INVALID_ARGUMENT;
     m_providerMap.Iterate([&](const ProviderInfo &providerInfo,
         std::shared_ptr<HksExtAbilityConnectInfo> &connectionInfo) {
+        HKS_IF_TRUE_CONTINUE(providerInfo.m_userid != userid)
         if (providerName == "HksInnerNullProviderName") {
             ProviderInfo info = providerInfo;
             providerInfos.push_back(info);

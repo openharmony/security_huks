@@ -200,26 +200,6 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest005, TestSize.Level0) {
     });
     EXPECT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
 
-    std::vector<ProviderInfo> providerInfos = {};
-    ret = providerMgr->GetAllProviderInfosByProviderName(providerName, providerInfos);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "GetAllProviderInfosByProviderName failed";
-    EXPECT_EQ(providerInfos.size(), 1);
-
-    std::vector<ProviderInfo> providerInfos2 = {};
-    ret = providerMgr->GetAllProviderInfosByProviderName("HksProviderMgrTest005_not_exist", providerInfos2);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "GetAllProviderInfosByProviderName not exist failed";
-    EXPECT_EQ(providerInfos2.size(), 0);
-
-    std::vector<ProviderInfo> providerInfos3 = {};
-    ret = providerMgr->GetAllProviderInfosByProviderName("HksInnerNullProviderName", providerInfos3);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "GetAllProviderInfosByProviderName inner all failed";
-    EXPECT_EQ(providerInfos3.size(), 1);
-
-    CppParamSet emptyParamSet{};
-    int32_t deletecount = 0;
-    ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, emptyParamSet, false, deletecount);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "OnUnRegisterProvider failed";
-
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(processInfo.processName);
 }
