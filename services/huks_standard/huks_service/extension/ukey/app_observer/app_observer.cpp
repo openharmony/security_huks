@@ -183,7 +183,7 @@ int32_t HksAppObserverManager::UnregisterAllObservers()
     HKS_IF_NULL_LOGE_RETURN(appMgr, HKS_ERROR_NULL_POINTER, "UnregisterAllObservers: Cast to IAppMgr failed");
 
     int32_t finalRet = HKS_SUCCESS;
-    int32_t totalCount = observers_.size();
+    int32_t totalCount = static_cast<int32_t>(observers_.size());
     int32_t failedCount = 0;
 
     for (const auto& [bundleName, observer] : observers_) {
