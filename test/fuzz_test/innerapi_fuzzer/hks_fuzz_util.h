@@ -19,6 +19,8 @@
 #include <vector>
 #include <cstdio>
 
+#include <fuzzer/FuzzedDataProvider.h>
+
 // import WrapParamSet
 #include "base/security/huks/test/unittest/huks_standard_test/three_stage_test/include/hks_chipset_platform_test.h"
 
@@ -35,6 +37,10 @@ inline ReadType ReadData(uint8_t *&data, size_t &size, uint32_t readSize)
 }
 
 [[maybe_unused]] WrapParamSet ConstructHksParamSetFromFuzz(uint8_t *&data, size_t &size);
+
+[[maybe_unused]] WrapParamSet ConstructParamSetFromFdp(FuzzedDataProvider &fdp);
+
+[[maybe_unused]] WrapParamSet ConstructGenKeyParamSetFromFdp(FuzzedDataProvider &fdp);
 }}}
 
 #endif // HKS_FUZZ_UTIL_H
