@@ -537,8 +537,8 @@ int32_t HksGetPropertyParamSetToEventInfo(const struct HksParamSet *paramSetIn, 
 
 bool HksGetPropertyNeedReport(const struct HksEventInfo *eventInfo)
 {
-    return ((eventInfo != nullptr) && (eventInfo->common.result.code != HKS_SUCCESS)) ||
-        eventInfo->common.statInfo.totalCost > UKEY_TIMEOUT;
+    return (eventInfo != nullptr) && ((eventInfo->common.result.code != HKS_SUCCESS) ||
+        eventInfo->common.statInfo.totalCost > UKEY_TIMEOUT);
 }
 
 bool HksGetPropertyEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
