@@ -144,15 +144,16 @@ int32_t HksProviderLifeCycleManager::GetAllProviderInfosByProviderName(const std
     int32_t ret = HKS_ERROR_INVALID_ARGUMENT;
     m_providerMap.Iterate([&](const ProviderInfo &providerInfo,
         std::shared_ptr<HksExtAbilityConnectInfo> &connectionInfo) {
-        HKS_IF_TRUE_CONTINUE(providerInfo.m_userid != userid)
-        if (providerName == "HksInnerNullProviderName") {
-            ProviderInfo info = providerInfo;
-            providerInfos.push_back(info);
-            ret = HKS_SUCCESS;
-        } else if (providerInfo.m_providerName == providerName) {
-            ProviderInfo info = providerInfo;
-            providerInfos.push_back(info);
-            ret = HKS_SUCCESS;
+        if (providerInfo.m_userid == userid) {
+            if (providerName == "HksInnerNullProviderName") {
+                ProviderInfo info = providerInfo;
+                providerInfos.push_back(info);
+                ret = HKS_SUCCESS;
+            } else if (providerInfo.m_providerName == providerName) {
+                ProviderInfo info = providerInfo;
+                providerInfos.push_back(info);
+                ret = HKS_SUCCESS;
+            }
         }
     });
     return ret;
