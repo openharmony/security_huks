@@ -224,7 +224,7 @@ int32_t HksProviderLifeCycleManager::HapGetAllConnectInfoByProviderName(const st
 }
 
 int32_t HksProviderLifeCycleManager::GetAllProviderInfosByProviderName(const std::string &providerName,
-    std::vector<ProviderInfo> &providerInfos)
+    const int32_t &userid, std::vector<ProviderInfo> &providerInfos)
 {
     ProviderInfo provider1;
     provider1.m_bundleName = "com.example.crypto.provider1";
