@@ -201,7 +201,7 @@ int32_t HksSessionManager::ExtensionAbortSession(const HksProcessInfo &processIn
     auto ipcCode = proxy->FinishSession(handleInfo.m_skfSessionHandle, newParamSet, tmpVec, tmpVec, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL,
         "proxy use CloseRemoteHandle to abort ipcCode: %" LOG_PUBLIC "d", ipcCode)
-    ret = ConvertExtensionToHksErrorCode(ret, g_finishSessionErrCodeMapping);
+    ret = ConvertExtensionToHksErrorCode(ret, g_abortSessionErrCodeMapping);
     ClearSessionMapByHandle(ret, handle);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "abort closeRemoteHandle failed: %" LOG_PUBLIC "d", ret)
     m_handlers.Erase(handle);
