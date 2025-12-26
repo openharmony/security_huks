@@ -595,6 +595,10 @@ static int32_t UnpackExtCertInfoFromBuffer(const struct HksBlob *srcBlob, uint32
         return ret;
     }
     ret = UnpackBlobFromBuffer(srcBlob, offset, &certInfo->cert);
+    if (ret != HKS_SUCCESS) {
+        HKS_FREE(certInfo->index.data);
+        certInfo->index.data = NULL;
+    }
     return ret;
 }
 
@@ -624,7 +628,7 @@ int32_t HksCertificatesUnpackFromService(const struct HksBlob *srcBlob, struct H
         ret = UnpackExtCertInfoFromBuffer(srcBlob, &offset, &certs[i]);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("unpack cert info fail i=%" LOG_PUBLIC "u, ret=%d", i, ret);
-            struct HksExtCertInfoSet tmp = { i, certs };
+            struct HksExtCertInfoSet tmp = { i + 1, certs };
             HksFreeExtCertSet(&tmp);
             return ret;
         }
