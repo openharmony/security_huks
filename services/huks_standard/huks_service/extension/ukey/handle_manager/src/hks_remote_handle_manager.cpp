@@ -377,7 +377,7 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
     HKS_IF_TRUE_LOGE_RETURN(providerLifeManager == nullptr, HKS_ERROR_NULL_POINTER,
         "Get provider Life manager instance failed")
     std::vector<ProviderInfo> infos;
-    int32_t ret = providerLifeManager->GetAllProviderInfosByProviderName(providerName, processInfo.userId, infos);
+    int32_t ret = providerLifeManager->GetAllProviderInfosByProviderName(providerName, processInfo.userIdInt, infos);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
             "GetAllProviderInfosByProviderName failed: %" LOG_PUBLIC "d", ret)
     
