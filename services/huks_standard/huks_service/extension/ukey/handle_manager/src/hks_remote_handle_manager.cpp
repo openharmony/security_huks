@@ -270,7 +270,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
         uid = static_cast<uint32_t>(uidParam.second);
     } else {
         std::vector<HksParam> params = {
-            { .tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = uidParam.second}
+            { .tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(uid)}
         };
         newParamSet.AddParams(params);
     }
