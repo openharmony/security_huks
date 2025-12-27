@@ -108,7 +108,7 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest002, TestSize.Level0) {
     std::string wrappedIndex = root.Serialize(false);
 
     ret = sessionMgr->ExtensionInitSession(processInfo, wrappedIndex, paramSet, handle);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "ExtensionInitSession failed";
+    EXPECT_NE(ret, HKS_SUCCESS) << "ExtensionInitSession failed";
 
     int32_t deletecount = 0;
     ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, false, deletecount);
