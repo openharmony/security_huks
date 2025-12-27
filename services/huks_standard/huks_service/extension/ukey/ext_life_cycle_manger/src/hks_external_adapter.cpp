@@ -50,7 +50,7 @@ int32_t HksGetFrontUserId(int32_t &outId)
 {
     std::vector<int> ids;
     int ret = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
-    HKS_IF_TRUE_LOGE_RETURN(ret != ERR_OK || ids.empty(), HKS_FAILURE,
+    HKS_IF_TRUE_LOGE_RETURN(ret != OHOS::ERR_OK || ids.empty(), HKS_FAILURE,
         "QueryActiveOsAccountIds Failed!! ret = %" LOG_PUBLIC "d", ret)
     HKS_LOG_I("QueryActiveOsAccountIds success: FrontUserId= %" LOG_PUBLIC "d", ids[0]);
     outId = ids[0];
