@@ -434,7 +434,7 @@ int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processI
 }
 
 int32_t HksRemoteHandleManager::ClearRemoteHandleMap(const std::string &providerName, const std::string &abilityName,
-    const uint32_t uid)
+    const int32_t userid)
 {
     std::vector<std::pair<uint32_t, std::string>> indicesToRemove;
     std::vector<ProviderInfo> providersToRemove;
@@ -443,7 +443,7 @@ int32_t HksRemoteHandleManager::ClearRemoteHandleMap(const std::string &provider
         ProviderInfo providerInfo;
         int32_t ret = ParseIndexAndProviderInfo(key.second, providerInfo, newIndex);
         HKS_IF_TRUE_LOGE(ret != HKS_SUCCESS, "ParseIndexAndProviderInfo failed: %" LOG_PUBLIC "d", ret)
-        if (key.first == uid && providerInfo.m_providerName == providerName) {
+        if (providerInfo.m_userid == userid && providerInfo.m_providerName == providerName) {
             if (abilityName.empty() || providerInfo.m_abilityName == abilityName) {
                 indicesToRemove.push_back(key);
                 providersToRemove.push_back(providerInfo);

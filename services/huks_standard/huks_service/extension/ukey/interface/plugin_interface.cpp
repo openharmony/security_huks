@@ -65,9 +65,9 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(
     auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
     if (abilityName.first == HKS_SUCCESS) {
         std::string str(abilityName.second.begin(), abilityName.second.end());
-        ret = handleMgr->ClearRemoteHandleMap(providerName, str, processInfo.uidInt);
+        ret = handleMgr->ClearRemoteHandleMap(providerName, str, processInfo.userIdInt);
     } else {
-        ret = handleMgr->ClearRemoteHandleMap(providerName, "", processInfo.uidInt);
+        ret = handleMgr->ClearRemoteHandleMap(providerName, "", processInfo.userIdInt);
     }
     HKS_IF_TRUE_LOGE(ret != HKS_SUCCESS, "clear index map fail");
 

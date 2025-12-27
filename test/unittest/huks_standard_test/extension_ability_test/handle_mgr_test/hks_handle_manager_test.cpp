@@ -340,11 +340,11 @@ HWTEST_F(HksRemoteHandleManagerTest, ClearHandleMapTest, TestSize.Level0)
     manager->CreateRemoteHandle(processInfo, index3, paramSet);
 
     // Test clear by provider name
-    int32_t ret = manager->ClearRemoteHandleMap("provider1", "", processInfo.uidInt);
+    int32_t ret = manager->ClearRemoteHandleMap("provider1", "", processInfo.userIdInt);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     // Test clear by provider name and ability name
-    ret = manager->ClearRemoteHandleMap("provider2", "ability1", processInfo.uidInt);
+    ret = manager->ClearRemoteHandleMap("provider2", "ability1", processInfo.userIdInt);
     EXPECT_EQ(ret, HKS_SUCCESS);
 }
 

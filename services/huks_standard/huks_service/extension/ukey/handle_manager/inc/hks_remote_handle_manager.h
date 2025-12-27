@@ -139,7 +139,7 @@ public:
         const std::string& propertyId, const CppParamSet& paramSet, CppParamSet& outParams);
 
     int32_t ClearRemoteHandleMap(const std::string &providerName, const std::string &abilityName,
-        const uint32_t uid);
+        const int32_t userid);
     static int32_t ParseIndexAndProviderInfo(const std::string &index,
         ProviderInfo &providerInfo, std::string &newIndex);
     void ClearAuthState(const HksProcessInfo &processInfo);
