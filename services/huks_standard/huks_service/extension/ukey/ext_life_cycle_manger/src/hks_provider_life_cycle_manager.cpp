@@ -147,7 +147,7 @@ int32_t HksProviderLifeCycleManager::GetAllProviderInfosByProviderName(const std
     ret = HKS_ERROR_INVALID_ARGUMENT;
     m_providerMap.Iterate([&](const ProviderInfo &providerInfo,
         std::shared_ptr<HksExtAbilityConnectInfo> &connectionInfo) {
-        if (providerInfo.m_userid == userid) {
+        if (providerInfo.m_userid == frontUserId) {
             if (providerName == "HksInnerNullProviderName") {
                 ProviderInfo info = providerInfo;
                 providerInfos.push_back(info);
