@@ -54,6 +54,5 @@ int32_t HksGetFrontUserId(int32_t &outId)
         "QueryActiveOsAccountIds Failed!! ret = %" LOG_PUBLIC "d", ret)
     HKS_LOG_I("QueryActiveOsAccountIds success: FrontUserId= %" LOG_PUBLIC "d", ids[0]);
     outId = ids[0];
-    HKS_LOG_I("QueryActiveOsAccountIds, no os account part, set FrontUserId= -1");
     return HKS_SUCCESS;
 }
