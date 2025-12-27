@@ -265,8 +265,14 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
 {
     auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
     uint32_t uid = processInfo.uidInt;
+    CppParamSet newParamSet(paramSet);
     if (uidParam.first == HKS_SUCCESS) {
         uid = static_cast<uint32_t>(uidParam.second);
+    } else {
+        std::vector<HksParam> params = {
+            { .tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = runtimeUid}
+        };
+        newParamSet.AddParams(params);
     }
     ProviderInfo providerInfo;
     std::string handle;
@@ -276,7 +282,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
-    auto ipccode = proxy->GetUkeyPinAuthState(handle, paramSet, state, ret);
+    auto ipccode = proxy->GetUkeyPinAuthState(handle, newParamSet, state, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     ret = ConvertExtensionToHksErrorCode(ret, g_getPinAuthStateErrCodeMapping);
     ClearMapByHandle(ret, handle);
