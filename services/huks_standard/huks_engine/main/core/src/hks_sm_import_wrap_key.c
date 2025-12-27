@@ -633,9 +633,11 @@ static int32_t HksGetCipherFromEnvelop(const struct HksBlob *wrappingKey, const 
 
     struct HksBlob plainImportKey = {0, NULL};
     struct HksBlob encImportKey = {0, NULL};
-    HksGetBlobFromWrappedData(wrappedKeyData, blobIndex++, HKS_IMPORT_ENVELOP_TOTAL_BLOBS, &encImportKey);
+    ret = HksGetBlobFromWrappedData(wrappedKeyData, blobIndex++, HKS_IMPORT_ENVELOP_TOTAL_BLOBS, &encImportKey);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Envelop Get enc-importKey Fail!")
-
+    if (importKeySize != encImportKey.size) {
+        return HKS_ERROR_INVALID_KEY_SIZE;
+    }
     struct HksParamSet *decryptParamSet = NULL;
     struct HksBlob rawKey = {0, NULL};
     struct HksUsageSpec *cipherSM2Usage = NULL;
