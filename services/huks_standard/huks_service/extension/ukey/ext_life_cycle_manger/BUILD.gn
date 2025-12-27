@@ -63,6 +63,7 @@ if (os_level == "standard") {
       "hilog:libhilog",
       "ipc:ipc_single",
       "samgr:samgr_proxy",
+      "os_account:os_account_innerkits"
     ]
   }
 }
