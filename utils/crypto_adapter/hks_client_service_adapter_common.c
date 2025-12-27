@@ -31,6 +31,9 @@
 #include "hks_template.h"
 #include "securec.h"
 
+#define HUKS_ENVELOP_LEN_SIZE 16
+#define HUKS_BITE_TO_BYTE 8
+
 int32_t CopyToInnerKey(const struct HksBlob *key, struct HksBlob *outKey)
 {
     if ((key->size == 0) || (key->size > MAX_KEY_SIZE)) {
@@ -184,10 +187,23 @@ static int32_t GetAndTransPK(const struct HksParamSet *paramSet, struct HksBlob 
     return ret;
 }
 
+int32_t HksCheckEnvelopKeySize(const struct HksParamSet *paramSet)
+{
+    struct HksParam *unwrapItem = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_SIZE, &unwrapItem);
+    HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_CHECK_GET_KEY_SIZE_FAIL)
+    uint32_t keySize = unwrapItem->uint32Param / HUKS_BITE_TO_BYTE;
+    bool isSatify = (keySize % HUKS_ENVELOP_LEN_SIZE == 0);
+    HKS_IF_NOT_TRUE_RETURN(isSatify, HKS_ERROR_INVALID_KEY_SIZE)
+    return HKS_SUCCESS;
+}
+
 int32_t HksGetEnvelopParamSet(const struct HksParamSet *paramSet, struct HksParamSet **newParamSet)
 {
+    int32_t ret = HksCheckEnvelopKeySize(paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Check key size failed!")
+
     struct HksBlob innerFormatPK = {0, NULL};
-    int32_t ret = HKS_SUCCESS;
     struct HksParamSet *tempParamSet = NULL;
     do {
         ret = HksInitParamSet(&tempParamSet);
