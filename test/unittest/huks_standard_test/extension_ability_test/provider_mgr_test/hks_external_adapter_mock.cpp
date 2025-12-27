@@ -32,3 +32,9 @@ int32_t HksGetBundleNameFromUid(uint32_t uid, std::string &bundleName)
     bundleName = "com.huawei.extensionhap.test";
     return HKS_SUCCESS;
 }
+
+int32_t HksGetFrontUserId(int32_t &outId)
+{
+    outId = 100;
+    return HKS_SUCCESS;
+}
