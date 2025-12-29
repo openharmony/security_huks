@@ -21,11 +21,13 @@
 #include <pthread.h>
 #include <sched.h>
 #include <securec.h>
+#include <stdatomic.h>
 #include <stdio.h>
 
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_pthread_util.h"
 #include "hks_template.h"
 #include "huks_access.h"
 #include "securec.h"
@@ -42,7 +44,7 @@
 #define S_TO_MS 1000
 
 static struct DoubleList g_operationList = { &g_operationList, &g_operationList };
-static uint32_t g_operationCount = 0;
+static volatile atomic_uint_least32_t g_operationCount = 0;
 static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
 
 static void DeleteKeyNode(uint64_t operationHandle)
@@ -182,7 +184,8 @@ static int32_t DeleteForTokenIdIfExceedLimit(uint32_t tokenId)
 
 static int32_t AddOperation(struct HksOperation *operation)
 {
-    pthread_mutex_lock(&g_lock);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HKS_LOCK_OR_FAIL(g_lock), HKS_ERROR_PTHREAD_MUTEX_LOCK_FAIL,
+        "lock in AddOperation fail");
 
     int32_t ret = HKS_ERROR_SESSION_REACHED_LIMIT;
     do {
@@ -203,7 +206,7 @@ static int32_t AddOperation(struct HksOperation *operation)
         AddNodeAtDoubleListTail(&g_operationList, &operation->listHead);
         ++g_operationCount;
     } while (false);
-    pthread_mutex_unlock(&g_lock);
+    HKS_UNLOCK_OR_FAIL(g_lock);
     return ret;
 }
 
@@ -333,54 +336,58 @@ static bool IsSameUserId(const struct HksProcessInfo *processInfo, const struct 
 struct HksOperation *QueryOperationAndMarkInUse(const struct HksProcessInfo *processInfo,
     const struct HksBlob *operationHandle)
 {
-    uint64_t handle;
+    uint64_t handle = 0;
     int32_t ret = ConstructOperationHandle(operationHandle, &handle);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, NULL, "construct handle failed when query operation")
 
     struct HksOperation *operation = NULL;
-    pthread_mutex_lock(&g_lock);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HKS_LOCK_OR_FAIL(g_lock), NULL, "lock in QueryOperationAndMarkInUse fail");
     HKS_DLIST_ITER(operation, &g_operationList) {
         if ((operation != NULL) && (operation->handle == handle) && IsSameProcessName(processInfo, operation) &&
             IsSameUserId(processInfo, operation)) {
             if (operation->isInUse) {
-                HKS_LOG_E("operation is in use!");
-                pthread_mutex_unlock(&g_lock);
+                HKS_LOG_E("operation is in progress and cannot be used in parallel!");
+                HKS_UNLOCK_OR_FAIL(g_lock);
                 return NULL;
             }
             operation->isInUse = true;
-            pthread_mutex_unlock(&g_lock);
+            HKS_UNLOCK_OR_FAIL(g_lock);
             return operation;
         }
     }
-    pthread_mutex_unlock(&g_lock);
-
+    HKS_UNLOCK_OR_FAIL(g_lock);
     return NULL;
 }
 
 struct HksOperation *QueryOperationByPidAndMarkInUse(int32_t pid)
 {
     struct HksOperation *operation = NULL;
-    pthread_mutex_lock(&g_lock);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HKS_LOCK_OR_FAIL(g_lock), NULL, "lock in QueryOperationByPidAndMarkInUse fail");
     HKS_DLIST_ITER(operation, &g_operationList) {
         if ((operation != NULL) && (operation->pid == pid)) {
             if (operation->isInUse) {
-                pthread_mutex_unlock(&g_lock);
-                HKS_LOG_E("this operation is in use, cannot delete!");
+                HKS_UNLOCK_OR_FAIL(g_lock);
+                HKS_LOG_E("The operation is currently in progress and cannot be deleted or used in parallel!");
                 return NULL;
             }
             operation->isInUse = true;
-            pthread_mutex_unlock(&g_lock);
+            HKS_UNLOCK_OR_FAIL(g_lock);
             return operation;
         }
     }
-    pthread_mutex_unlock(&g_lock);
+    HKS_UNLOCK_OR_FAIL(g_lock);
     return NULL;
 }
 
 void MarkOperationUnUse(struct HksOperation *operation)
 {
     HKS_IF_NULL_RETURN_VOID(operation)
+    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(HKS_LOCK_OR_FAIL(g_lock), "lock in MarkOperationUnUse fail");
+    if (!operation->isInUse) {
+        HKS_LOG_E("ERROR! unexpected scene! operation->isInUse is false!");
+    }
     operation->isInUse = false;
+    HKS_UNLOCK_OR_FAIL(g_lock);
 }
 
 void DeleteOperation(const struct HksBlob *operationHandle)
@@ -390,18 +397,18 @@ void DeleteOperation(const struct HksBlob *operationHandle)
     HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(ret, "construct handle failed when delete operation")
 
     struct HksOperation *operation = NULL;
-    pthread_mutex_lock(&g_lock);
+    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(HKS_LOCK_OR_FAIL(g_lock), "lock in DeleteOperation fail");
     HKS_DLIST_ITER(operation, &g_operationList) {
         if (operation != NULL && operation->handle == handle) {
             HKS_IF_TRUE_LOGI_BREAK(operation->isInUse, "operation is in use, do not delete")
             FreeOperation(&operation);
             --g_operationCount;
             HKS_LOG_D("delete operation count:%" LOG_PUBLIC "u", g_operationCount);
-            pthread_mutex_unlock(&g_lock);
+            HKS_UNLOCK_OR_FAIL(g_lock);
             return;
         }
     }
-    pthread_mutex_unlock(&g_lock);
+    HKS_UNLOCK_OR_FAIL(g_lock);
 }
 
 static void DeleteSession(const struct HksProcessInfo *processInfo, struct HksOperation *operation)
@@ -421,11 +428,11 @@ void DeleteSessionByProcessInfo(const struct HksProcessInfo *processInfo)
 {
     struct HksOperation *operation = NULL;
 
-    pthread_mutex_lock(&g_lock);
+    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(HKS_LOCK_OR_FAIL(g_lock), "lock in DeleteSessionByProcessInfo fail");
     HKS_DLIST_SAFT_ITER(operation, &g_operationList) {
         if (operation != NULL) {
             DeleteSession(processInfo, operation);
         }
     }
-    pthread_mutex_unlock(&g_lock);
+    HKS_UNLOCK_OR_FAIL(g_lock);
 }
