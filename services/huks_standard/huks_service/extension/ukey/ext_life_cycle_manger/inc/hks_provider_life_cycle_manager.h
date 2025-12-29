@@ -75,7 +75,7 @@ public:
         const CppParamSet &paramSet, std::function<void(HksProcessInfo)> callback);
     int32_t OnUnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName,
         const CppParamSet &paramSet, bool isdeath, int32_t &deleteCount);
-    int32_t GetAllProviderInfosByProviderName(const std::string &providerName,
+    int32_t GetAllProviderInfosByProviderName(const std::string &providerName, const int32_t &userid,
         std::vector<ProviderInfo> &providerInfos);
     int32_t GetExtensionProxy(const ProviderInfo &providerInfo, sptr<IHuksAccessExtBase> &proxy);
 private:
