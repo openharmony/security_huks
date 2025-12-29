@@ -973,7 +973,7 @@ struct OH_Huks_ParamSet *sm2GenerateKeyParamSet = NULL;
         OH_Huks_Blob importKeyBlob = {0, importKey};
         ConcatBlob(&cipherSm4Data, &aesBlob, &importKeyBlob);
         ohResult = OH_Huks_ImportWrappedKeyItem(&aesAliasBlob, &gSm2KeyAlias, dsaParamSet, &importKeyBlob);
-        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT);
+        EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_MISSING_CRYPTO_ALG_ARGUMENT);
     } while (0);
     OH_Huks_FreeParamSet(&sm2EnKeyParmSet);
     OH_Huks_FreeParamSet(&sm2GenerateKeyParamSet);
