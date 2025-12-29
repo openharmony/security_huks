@@ -54,6 +54,7 @@ struct HksOperation *QueryOperationByPidAndMarkInUse(int32_t pid);
 
 void MarkOperationUnUse(struct HksOperation *operation);
 
+// An operation that is currently in use cannot be deleted. Please mark it as unused first.
 void DeleteOperation(const struct HksBlob *operationHandle);
 
 void DeleteSessionByProcessInfo(const struct HksProcessInfo *processInfo);
