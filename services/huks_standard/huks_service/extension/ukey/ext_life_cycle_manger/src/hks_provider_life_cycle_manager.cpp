@@ -138,20 +138,25 @@ int32_t HksProviderLifeCycleManager::HapGetAllConnectInfoByProviderName(const st
 }
 
 int32_t HksProviderLifeCycleManager::GetAllProviderInfosByProviderName(const std::string &providerName,
-    std::vector<ProviderInfo> &providerInfos)
+    const int32_t &userid, std::vector<ProviderInfo> &providerInfos)
 {
     HKS_LOG_I("GetAllProviderInfosByProviderName providerName: %" LOG_PUBLIC "s", providerName.c_str());
-    int32_t ret = HKS_ERROR_INVALID_ARGUMENT;
+    int32_t frontUserId;
+    int32_t ret = HksGetFrontUserId(frontUserId);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get front user id failed")
+    ret = HKS_ERROR_INVALID_ARGUMENT;
     m_providerMap.Iterate([&](const ProviderInfo &providerInfo,
         std::shared_ptr<HksExtAbilityConnectInfo> &connectionInfo) {
-        if (providerName == "HksInnerNullProviderName") {
-            ProviderInfo info = providerInfo;
-            providerInfos.push_back(info);
-            ret = HKS_SUCCESS;
-        } else if (providerInfo.m_providerName == providerName) {
-            ProviderInfo info = providerInfo;
-            providerInfos.push_back(info);
-            ret = HKS_SUCCESS;
+        if (providerInfo.m_userid == frontUserId) {
+            if (providerName == "HksInnerNullProviderName") {
+                ProviderInfo info = providerInfo;
+                providerInfos.push_back(info);
+                ret = HKS_SUCCESS;
+            } else if (providerInfo.m_providerName == providerName) {
+                ProviderInfo info = providerInfo;
+                providerInfos.push_back(info);
+                ret = HKS_SUCCESS;
+            }
         }
     });
     return ret;

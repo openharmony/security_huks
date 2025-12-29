@@ -265,8 +265,14 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
 {
     auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
     uint32_t uid = processInfo.uidInt;
+    CppParamSet newParamSet(paramSet);
     if (uidParam.first == HKS_SUCCESS) {
         uid = static_cast<uint32_t>(uidParam.second);
+    } else {
+        std::vector<HksParam> params = {
+            { .tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(uid)}
+        };
+        newParamSet.AddParams(params);
     }
     ProviderInfo providerInfo;
     std::string handle;
@@ -276,7 +282,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
-    auto ipccode = proxy->GetUkeyPinAuthState(handle, paramSet, state, ret);
+    auto ipccode = proxy->GetUkeyPinAuthState(handle, newParamSet, state, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     ret = ConvertExtensionToHksErrorCode(ret, g_getPinAuthStateErrCodeMapping);
     ClearMapByHandle(ret, handle);
@@ -377,7 +383,7 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
     HKS_IF_TRUE_LOGE_RETURN(providerLifeManager == nullptr, HKS_ERROR_NULL_POINTER,
         "Get provider Life manager instance failed")
     std::vector<ProviderInfo> infos;
-    int32_t ret = providerLifeManager->GetAllProviderInfosByProviderName(providerName, infos);
+    int32_t ret = providerLifeManager->GetAllProviderInfosByProviderName(providerName, processInfo.userIdInt, infos);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
             "GetAllProviderInfosByProviderName failed: %" LOG_PUBLIC "d", ret)
     
@@ -434,7 +440,7 @@ int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processI
 }
 
 int32_t HksRemoteHandleManager::ClearRemoteHandleMap(const std::string &providerName, const std::string &abilityName,
-    const uint32_t uid)
+    const int32_t userid)
 {
     std::vector<std::pair<uint32_t, std::string>> indicesToRemove;
     std::vector<ProviderInfo> providersToRemove;
@@ -443,7 +449,7 @@ int32_t HksRemoteHandleManager::ClearRemoteHandleMap(const std::string &provider
         ProviderInfo providerInfo;
         int32_t ret = ParseIndexAndProviderInfo(key.second, providerInfo, newIndex);
         HKS_IF_TRUE_LOGE(ret != HKS_SUCCESS, "ParseIndexAndProviderInfo failed: %" LOG_PUBLIC "d", ret)
-        if (key.first == uid && providerInfo.m_providerName == providerName) {
+        if (providerInfo.m_userid == userid && providerInfo.m_providerName == providerName) {
             if (abilityName.empty() || providerInfo.m_abilityName == abilityName) {
                 indicesToRemove.push_back(key);
                 providersToRemove.push_back(providerInfo);
