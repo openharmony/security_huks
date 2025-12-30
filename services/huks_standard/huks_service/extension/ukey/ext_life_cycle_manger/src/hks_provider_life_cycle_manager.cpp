@@ -189,7 +189,7 @@ int32_t HksProviderLifeCycleManager::HksHapGetConnectInfos(const HksProcessInfo 
         });
         return HKS_SUCCESS;
     }
-    return HapGetAllConnectInfoByProviderName(bundleName, providerName, connectionInfos);
+    return HapGetAllConnectInfoByProviderName(bundleName, providerName, processInfo.userIdInt, connectionInfos);
 }
 
 constexpr int WAIT_TIME_MS = 5;
