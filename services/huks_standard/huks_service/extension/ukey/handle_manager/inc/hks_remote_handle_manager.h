@@ -162,7 +162,7 @@ public:
         const CppParamSet &paramSet);
     int32_t CheckAuthStateIsOk(const HksProcessInfo &processInfo, const std::string &index);
     //certificate query
-    int32_t FindRemoteCertificate(const std::string &index,
+    int32_t FindRemoteCertificate(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet, std::string &certificatesOut);
     int32_t FindRemoteAllCertificate(const HksProcessInfo &processInfo,
         const std::string &providerName, const CppParamSet &paramSet, std::string &certificatesOut);
