@@ -31,6 +31,7 @@
 #include "hks_provider_life_cycle_manager.h"
 #include "hks_template.h"
 #include "hks_ukey_common.h"
+#include "hks_external_adapter.h"
 namespace OHOS {
 namespace Security {
 namespace Huks {
@@ -359,9 +360,12 @@ int32_t HksRemoteHandleManager::FindRemoteCertificate(const HksProcessInfo &proc
     ProviderInfo providerInfo = {"", "", ""};
     std::string newIndex;
     int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
-    providerInfo.m_userid = processInfo.userIdInt;
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
         "Parse index and provider info failed: %" LOG_PUBLIC "d", ret)
+    int32_t frontUserId;
+    ret = HksGetFrontUserId(frontUserId);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get front user id failed")
+    providerInfo.m_userid = frontUserId;
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
