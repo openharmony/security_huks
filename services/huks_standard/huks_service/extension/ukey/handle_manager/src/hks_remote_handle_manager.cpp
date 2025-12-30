@@ -66,8 +66,7 @@ static int32_t WrapIndexWithProviderInfo(const ProviderInfo& providerInfo, const
     HKS_IF_TRUE_LOGE_RETURN(root.IsNull(), HKS_ERROR_JSON_SERIALIZE_FAILED, "Create JSON object failed")
     if (!root.SetValue(PROVIDER_NAME_KEY, providerInfo.m_providerName) ||
         !root.SetValue(ABILITY_NAME_KEY, providerInfo.m_abilityName) ||
-        !root.SetValue(BUNDLE_NAME_KEY, providerInfo.m_bundleName) ||
-        !root.SetValue(USERID_KEY, providerInfo.m_userid)) {
+        !root.SetValue(BUNDLE_NAME_KEY, providerInfo.m_bundleName)) {
         HKS_LOG_E("Set provider info to index failed");
         return HKS_ERROR_JSON_SERIALIZE_FAILED;
     }
@@ -108,14 +107,11 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
     auto providerNameResult = root.GetValue(PROVIDER_NAME_KEY).ToString();
     auto abilityNameResult = root.GetValue(ABILITY_NAME_KEY).ToString();
     auto bundleNameResult = root.GetValue(BUNDLE_NAME_KEY).ToString();
-    auto useridResult = root.GetValue(USERID_KEY).ToNumber<int32_t>();
     HKS_IF_TRUE_LOGE_RETURN(providerNameResult.first != HKS_SUCCESS || abilityNameResult.first != HKS_SUCCESS ||
-        bundleNameResult.first != HKS_SUCCESS || useridResult.first != HKS_SUCCESS, HKS_ERROR_JSON_TYPE_MISMATCH,
-        "Get provider info fields failed")
+        bundleNameResult.first != HKS_SUCCESS, HKS_ERROR_JSON_TYPE_MISMATCH, "Get provider info fields failed")
     providerInfo.m_providerName = providerNameResult.second;
     providerInfo.m_abilityName = abilityNameResult.second;
     providerInfo.m_bundleName = bundleNameResult.second;
-    providerInfo.m_userid = useridResult.second;
     HKS_IF_TRUE_LOGE_RETURN(providerInfo.m_providerName.empty() || providerInfo.m_abilityName.empty() ||
         providerInfo.m_bundleName.empty(), HKS_ERROR_JSON_INVALID_VALUE, "Provider info is incomplete")
     CommJsonObject newRoot = CommJsonObject::CreateObject();
@@ -170,6 +166,7 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &process
     ProviderInfo providerInfo;
     std::string newIndex;
     int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
+    providerInfo.m_userid = processInfo.userIdInt;
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
         "Parse index and provider info failed: %" LOG_PUBLIC "d", ret)
     OHOS::sptr<IHuksAccessExtBase> proxy;
@@ -201,6 +198,7 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
     std::string newIndex;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
+    providerInfo.m_userid = processInfo.userIdInt;
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
@@ -244,6 +242,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     ProviderInfo providerInfo;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, uid.second, providerInfo, handle);
+    providerInfo.m_userid = processInfo.userIdInt;
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
@@ -277,6 +276,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     ProviderInfo providerInfo;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, uid, providerInfo, handle);
+    providerInfo.m_userid = processInfo.userIdInt;
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
@@ -300,6 +300,7 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &proce
     ProviderInfo providerInfo;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
+    providerInfo.m_userid = processInfo.userIdInt;
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
@@ -318,6 +319,7 @@ int32_t HksRemoteHandleManager::RemoteHandleSign(const HksProcessInfo &processIn
     ProviderInfo providerInfo;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
+    providerInfo.m_userid = processInfo.userIdInt;
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
@@ -337,6 +339,7 @@ int32_t HksRemoteHandleManager::RemoteHandleVerify(const HksProcessInfo &process
     ProviderInfo providerInfo;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
+    providerInfo.m_userid = processInfo.userIdInt;
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
@@ -350,12 +353,13 @@ int32_t HksRemoteHandleManager::RemoteHandleVerify(const HksProcessInfo &process
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::FindRemoteCertificate(const std::string &index,
+int32_t HksRemoteHandleManager::FindRemoteCertificate(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet, std::string &cert)
 {
     ProviderInfo providerInfo = {"", "", ""};
     std::string newIndex;
     int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
+    providerInfo.m_userid = processInfo.userIdInt;
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
         "Parse index and provider info failed: %" LOG_PUBLIC "d", ret)
     OHOS::sptr<IHuksAccessExtBase> proxy;
@@ -426,6 +430,7 @@ int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processI
     ProviderInfo providerInfo;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, uid, providerInfo, handle);
+    providerInfo.m_userid = processInfo.userIdInt;
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
