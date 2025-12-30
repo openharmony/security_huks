@@ -217,7 +217,7 @@ int32_t HksProviderLifeCycleManager::GetExtensionProxy(const ProviderInfo &provi
 }
 
 int32_t HksProviderLifeCycleManager::HapGetAllConnectInfoByProviderName(const std::string &bundleName,
-    const std::string &providerName,
+    const std::string &providerName, const int32_t userid,
     std::vector<std::pair<ProviderInfo, std::shared_ptr<HksExtAbilityConnectInfo>>> &providerInfos)
 {
     return HKS_SUCCESS;
