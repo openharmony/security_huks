@@ -25,7 +25,6 @@
 #include "bundle_info.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
-#include "os_account_manager.h"
 
 int32_t HksGetBundleNameFromUid(uint32_t uid, std::string &bundleName)
 {
@@ -43,16 +42,5 @@ int32_t HksGetBundleNameFromUid(uint32_t uid, std::string &bundleName)
     auto bundleRet = bundleMgrProxy->GetBundleNameForUid(static_cast<int32_t>(uid), bundleName);
     HKS_IF_TRUE_LOGE_RETURN(!bundleRet, HKS_ERROR_BAD_STATE,
         "GetBundleNameForUid failed. external ret: %" LOG_PUBLIC "d", bundleRet)
-    return HKS_SUCCESS;
-}
-
-int32_t HksGetFrontUserId(int32_t &outId)
-{
-    std::vector<int> ids;
-    int ret = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
-    HKS_IF_TRUE_LOGE_RETURN(ret != OHOS::ERR_OK || ids.empty(), HKS_FAILURE,
-        "QueryActiveOsAccountIds Failed!! ret = %" LOG_PUBLIC "d", ret)
-    HKS_LOG_I("QueryActiveOsAccountIds success: FrontUserId= %" LOG_PUBLIC "d", ids[0]);
-    outId = ids[0];
     return HKS_SUCCESS;
 }
