@@ -71,6 +71,10 @@
 #include "hks_ukey_three_stage_adapter.h"
 #endif
 
+#ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
+#include "hks_upgrade_lock.h"
+#endif
+
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
 #include "hks_get_process_info.h"
 
@@ -1468,7 +1472,13 @@ static int32_t DcmGenerateCertChainInAttestKey(const struct HksParamSet *paramSe
     int32_t ret = HKS_SUCCESS;
 #ifndef HKS_UNTRUSTED_RUNNING_ENV
     HKS_IF_NOT_TRUE_LOGI_RETURN(HksAttestIsAnonymous(paramSet), HKS_SUCCESS, "non anonymous attest key.")
+#ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
+    HksUpgradeOrRequestUnlockRead();
+#endif
     ret = DcmGenerateCertChain(certChain, remoteObject);
+#ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
+    HksUpgradeOrRequestLockRead();
+#endif
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "DcmGenerateCertChain fail, ret = %" LOG_PUBLIC "d.", ret)
 
     (void)memset_s(certChain->data, certChainCapacity, 0, certChainCapacity);
