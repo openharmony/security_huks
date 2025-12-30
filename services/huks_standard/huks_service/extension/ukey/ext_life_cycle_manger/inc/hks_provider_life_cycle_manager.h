@@ -81,6 +81,7 @@ public:
 private:
     void PrintRegisterProviders();
     int32_t HapGetAllConnectInfoByProviderName(const std::string &bundleName, const std::string &providerName,
+        const int32_t userid,
         std::vector<std::pair<ProviderInfo, std::shared_ptr<HksExtAbilityConnectInfo>>> &providerInfos);
     int32_t HksHapGetConnectInfos(const HksProcessInfo &processInfo, const std::string &providerName,
         const CppParamSet &paramSet,
