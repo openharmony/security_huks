@@ -387,7 +387,7 @@ static int32_t GetParamsForUpdateAndFinish(const struct HksBlob *handle, uint64_
         HKS_LOG_E("memcpy handle value fail");
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
-    *keyNode = HksQueryKeyNode(*sessionId);
+    *keyNode = HksQueryKeyNodeAndMarkInUse(*sessionId);
     HKS_IF_NULL_LOGE_RETURN(*keyNode, HKS_ERROR_BAD_STATE, "HksCoreUpdate query keynode failed")
 
     return HKS_SUCCESS;
@@ -462,37 +462,29 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
     ret = GetParamsForUpdateAndFinish(handle, &sessionId, &keyNode);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetParamsForCoreUpdate failed")
 
-    ret = CheckIfNeedIsDevicePasswordSet(keyNode->keyBlobParamSet);
-    if (ret != HKS_SUCCESS) {
-        HksDeleteKeyNode(sessionId);
-        HKS_LOG_E("check device password status failed");
-        return ret;
-    }
+    do {
+        ret = CheckIfNeedIsDevicePasswordSet(keyNode->keyBlobParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check device password status failed %" LOG_PUBLIC "d", ret)
 
-    ret = HksCoreSecureAccessVerifyParams(keyNode, paramSet);
-    if (ret != HKS_SUCCESS) {
-        HksDeleteKeyNode(sessionId);
-        HKS_LOG_E("HksCoreUpdate secure access verify failed");
-        return ret;
-    }
+        ret = HksCoreSecureAccessVerifyParams(keyNode, paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCoreUpdate secure access verify failed %" LOG_PUBLIC "d", ret)
 
-    ret = HksBatchCheck(keyNode);
-    if (ret == HKS_SUCCESS) {
-        HKS_LOG_I("HksBatchCheck success");
-        ret = HksBatchUpdate(keyNode, paramSet, inData, outData);
-        if (ret != HKS_SUCCESS) {
-            HksDeleteKeyNode(sessionId);
+        ret = HksBatchCheck(keyNode);
+        if (ret == HKS_SUCCESS) {
+            HKS_LOG_I("HksBatchCheck success");
+            ret = HksBatchUpdate(keyNode, paramSet, inData, outData);
+            HKS_IF_NOT_SUCC_BREAK(ret)
+            HksMarkKeyNodeUnuse(keyNode);
+            return ret;
         }
+        HKS_IF_TRUE_EXCU(ret == HKS_ERROR_PARAM_NOT_EXIST,
+            ret = HksCoreUpdateProcess(keyNode, paramSet, inData, outData));
+        HKS_IF_NOT_SUCC_BREAK(ret)
+        HksMarkKeyNodeUnuse(keyNode);
         return ret;
-    }
-
-    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
-        ret = HksCoreUpdateProcess(keyNode, paramSet, inData, outData);
-    }
-
-    if (ret != HKS_SUCCESS) {
-        HksDeleteKeyNode(keyNode->handle);
-    }
+    } while (false);
+    HksMarkKeyNodeUnuse(keyNode);
+    HksDeleteKeyNode(sessionId);
     return ret;
 }
 
@@ -511,30 +503,21 @@ int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *pa
 
     int32_t ret = GetParamsForUpdateAndFinish(handle, &sessionId, &keyNode);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetParamsForCoreUpdate failed")
+    do {
+        ret = CheckIfNeedIsDevicePasswordSet(keyNode->keyBlobParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check device password status failed %" LOG_PUBLIC "d", ret)
 
-    ret = CheckIfNeedIsDevicePasswordSet(keyNode->keyBlobParamSet);
-    if (ret != HKS_SUCCESS) {
-        HksDeleteKeyNode(sessionId);
-        HKS_LOG_E("check device password status failed");
-        return ret;
-    }
+        ret = HksBatchCheck(keyNode);
+        HKS_IF_TRUE_BREAK(ret != HKS_ERROR_PARAM_NOT_EXIST)
 
-    ret = HksBatchCheck(keyNode);
-    if (ret != HKS_ERROR_PARAM_NOT_EXIST) {
-        HksDeleteKeyNode(sessionId);
-        return ret;
-    }
+        ret = HksCoreSecureAccessVerifyParams(keyNode, paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCoreFinish secure access verify failed %" LOG_PUBLIC "d", ret)
 
-    ret = HksCoreSecureAccessVerifyParams(keyNode, paramSet);
-    if (ret != HKS_SUCCESS) {
-        HksDeleteKeyNode(sessionId);
-        HKS_LOG_E("HksCoreFinish secure access verify failed");
-        return ret;
-    }
-
-    ret = HksCoreFinishProcess(keyNode, paramSet, inData, outData);
+        ret = HksCoreFinishProcess(keyNode, paramSet, inData, outData);
+        HKS_LOG_D("HksCoreFinish in Core end");
+    } while (false);
+    HksMarkKeyNodeUnuse(keyNode);
     HksDeleteKeyNode(sessionId);
-    HKS_LOG_D("HksCoreFinish in Core end");
     return ret;
 }
 
@@ -558,33 +541,31 @@ int32_t HksCoreAbort(const struct HksBlob *handle, const struct HksParamSet *par
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
-    struct HuksKeyNode *keyNode = HksQueryKeyNode(sessionId);
+    struct HuksKeyNode *keyNode = HksQueryKeyNodeAndMarkInUse(sessionId);
     HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_SUCCESS, "abort get key node failed")
 
-    ret = GetPurposeAndAlgorithm(keyNode->runtimeParamSet, &pur, &alg);
-    if (ret != HKS_SUCCESS) {
-        HksDeleteKeyNode(sessionId);
-        return ret;
-    }
+    do {
+        ret = GetPurposeAndAlgorithm(keyNode->runtimeParamSet, &pur, &alg);
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
-    uint32_t i;
-    uint32_t size = HKS_ARRAY_SIZE(g_hksCoreAbortHandler);
-    for (i = 0; i < size; i++) {
-        if (g_hksCoreAbortHandler[i].pur == pur) {
-            ret = g_hksCoreAbortHandler[i].handler(keyNode, paramSet, alg);
+        uint32_t i;
+        uint32_t size = HKS_ARRAY_SIZE(g_hksCoreAbortHandler);
+        for (i = 0; i < size; i++) {
+            if (g_hksCoreAbortHandler[i].pur == pur) {
+                ret = g_hksCoreAbortHandler[i].handler(keyNode, paramSet, alg);
+                break;
+            }
+        }
+        if (i == size) {
+            HKS_LOG_E("don't found purpose, pur : %" LOG_PUBLIC "d", pur);
+            ret = HKS_ERROR_INVALID_ARGUMENT;
             break;
         }
-    }
 
-    if (i == size) {
-        HksDeleteKeyNode(sessionId);
-        HKS_LOG_E("don't found purpose, pur : %" LOG_PUBLIC "d", pur);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
+        HKS_LOG_D("HksCoreAbort in Core end");
+    } while (false);
+    HksMarkKeyNodeUnuse(keyNode);
     HksDeleteKeyNode(sessionId);
-    HKS_LOG_D("HksCoreAbort in Core end");
-
     return ret;
 }
 
