@@ -167,9 +167,12 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &process
     ProviderInfo providerInfo;
     std::string newIndex;
     int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
-    providerInfo.m_userid = processInfo.userIdInt;
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
         "Parse index and provider info failed: %" LOG_PUBLIC "d", ret)
+    int32_t frontUserId;
+    ret = HksGetFrontUserId(frontUserId);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get front user id failed")
+    providerInfo.m_userid = frontUserId;
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -199,8 +202,11 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
     std::string newIndex;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
-    providerInfo.m_userid = processInfo.userIdInt;
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    int32_t frontUserId;
+    ret = HksGetFrontUserId(frontUserId);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get front user id failed")
+    providerInfo.m_userid = frontUserId;
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -243,8 +249,11 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     ProviderInfo providerInfo;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, uid.second, providerInfo, handle);
-    providerInfo.m_userid = processInfo.userIdInt;
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    int32_t frontUserId;
+    ret = HksGetFrontUserId(frontUserId);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get front user id failed")
+    providerInfo.m_userid = frontUserId;
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -277,8 +286,11 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     ProviderInfo providerInfo;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, uid, providerInfo, handle);
-    providerInfo.m_userid = processInfo.userIdInt;
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    int32_t frontUserId;
+    ret = HksGetFrontUserId(frontUserId);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get front user id failed")
+    providerInfo.m_userid = frontUserId;
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -301,8 +313,11 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &proce
     ProviderInfo providerInfo;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
-    providerInfo.m_userid = processInfo.userIdInt;
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    int32_t frontUserId;
+    ret = HksGetFrontUserId(frontUserId);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get front user id failed")
+    providerInfo.m_userid = frontUserId;
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -320,8 +335,11 @@ int32_t HksRemoteHandleManager::RemoteHandleSign(const HksProcessInfo &processIn
     ProviderInfo providerInfo;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
-    providerInfo.m_userid = processInfo.userIdInt;
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    int32_t frontUserId;
+    ret = HksGetFrontUserId(frontUserId);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get front user id failed")
+    providerInfo.m_userid = frontUserId;
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -340,8 +358,11 @@ int32_t HksRemoteHandleManager::RemoteHandleVerify(const HksProcessInfo &process
     ProviderInfo providerInfo;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
-    providerInfo.m_userid = processInfo.userIdInt;
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    int32_t frontUserId;
+    ret = HksGetFrontUserId(frontUserId);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get front user id failed")
+    providerInfo.m_userid = frontUserId;
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -434,8 +455,11 @@ int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processI
     ProviderInfo providerInfo;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, uid, providerInfo, handle);
-    providerInfo.m_userid = processInfo.userIdInt;
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    int32_t frontUserId;
+    ret = HksGetFrontUserId(frontUserId);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get front user id failed")
+    providerInfo.m_userid = frontUserId;
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
