@@ -24,6 +24,8 @@
 
 namespace OHOS::Security::Huks {
 
+constexpr const uint32_t USERID_FACTOR = 200000;
+    
 bool CheckStringParamLenIsOk(const std::string &str, uint32_t min, uint32_t max)
 {
     if (str.size() < min || str.size() > max) {
@@ -172,7 +174,7 @@ int32_t HksGetFrontUserId(int32_t &outId)
 
 int32_t HksGetUserIdFromUid(const uint32_t &uid, int32_t &userid)
 {
-    userid = static_cast<int32_t>(uid / 200000);
+    userid = static_cast<int32_t>(uid / USERID_FACTOR);
     return HKS_SUCCESS;
 }
 
