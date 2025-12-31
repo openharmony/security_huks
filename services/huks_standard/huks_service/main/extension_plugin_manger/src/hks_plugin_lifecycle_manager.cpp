@@ -110,12 +110,15 @@ int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &
 
 struct AutoRefCount {
     std::atomic<int32_t> &m_refCount;
-    explicit AutoRefCount(std::atomic<int32_t> &refCount) : m_refCount(refCount)
+    std::mutex &soMutex;
+    explicit AutoRefCount(std::atomic<int32_t> &refCount, std::mutex &mutexIn) : m_refCount(refCount), soMutex(mutexIn)
     {
+        std::unique_lock<std::mutex> lock(soMutex);
         m_refCount.fetch_add(1, std::memory_order_acq_rel);
     }
     ~AutoRefCount()
     {
+        std::unique_lock<std::mutex> lock(soMutex);
         m_refCount.fetch_sub(1, std::memory_order_acq_rel);
     }
 };
@@ -123,7 +126,6 @@ struct AutoRefCount {
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnRegistProvider(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet, std::function<void(HksProcessInfo)> callback))
 {
-    AutoRefCount refCnt(m_refCount);
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_REGISTER_PROVIDER, funcPtr);
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -138,7 +140,6 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnRegistProvider(const HksProcessInfo
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnUnRegistProvider(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet, bool isdeath, int32_t &deleteCount))
 {
-    AutoRefCount refCnt(m_refCount);
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_UN_REGISTER_PROVIDER, funcPtr);
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -155,7 +156,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnUnRegistProvider(const HksProcessIn
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnCreateRemoteKeyHandle(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, std::string &handle))
 {
-    AutoRefCount refCnt(m_refCount);
+    AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_CREATE_REMOTE_KEY_HANDLE, funcPtr);
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -170,7 +171,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnCreateRemoteKeyHandle(const HksProc
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnCloseRemoteKeyHandle(
     const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet))
 {
-    AutoRefCount refCnt(m_refCount);
+    AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_CLOSE_REMOTE_KEY_HANDLE, funcPtr);
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -185,7 +186,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnCloseRemoteKeyHandle(
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnAuthUkeyPin(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t &retryCnt))
 {
-    AutoRefCount refCnt(m_refCount);
+    AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_AUTH_UKEY_PIN, funcPtr);
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -200,7 +201,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnAuthUkeyPin(const HksProcessInfo &p
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnGetVerifyPinStatus(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, int32_t &state))
 {
-    AutoRefCount refCnt(m_refCount);
+    AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_GET_VERIFY_PIN_STATUS, funcPtr);
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -215,7 +216,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnGetVerifyPinStatus(const HksProcess
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnClearUkeyPinAuthStatus(const HksProcessInfo &processInfo,
     const std::string &index))
 {
-    AutoRefCount refCnt(m_refCount);
+    AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_CLEAR_PIN_STATUS, funcPtr);
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -231,7 +232,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnGetRemoteProperty(
     const HksProcessInfo &processInfo, const std::string &index,
     const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams))
 {
-    AutoRefCount refCnt(m_refCount);
+    AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_GET_REMOTE_PROPERTY, funcPtr);
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -247,7 +248,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnGetRemoteProperty(
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnExportCertificate(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, std::string &certsJson))
 {
-    AutoRefCount refCnt(m_refCount);
+    AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_LIST_INDEX_CERTIFICATE, funcPtr);
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -262,7 +263,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnExportCertificate(const HksProcessI
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnExportProviderAllCertificates(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr))
 {
-    AutoRefCount refCnt(m_refCount);
+    AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_LIST_PROVIDER_ALL_CERTIFICATE, funcPtr);
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -278,7 +279,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnExportProviderAllCertificates(const
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnInitSession(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet, uint32_t &handle))
 {
-    AutoRefCount refCnt(m_refCount);
+    AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_INIT_SESSION, funcPtr);
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -293,7 +294,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnInitSession(const HksProcessInfo &p
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnUpdateSession(const HksProcessInfo &processInfo, const uint32_t &handle,
     const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData))
 {
-    AutoRefCount refCnt(m_refCount);
+    AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_UPDATE_SESSION, funcPtr);
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -308,7 +309,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnUpdateSession(const HksProcessInfo 
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnFinishSession(const HksProcessInfo &processInfo, const uint32_t &handle,
     const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData))
 {
-    AutoRefCount refCnt(m_refCount);
+    AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_FINISH_SESSION, funcPtr);
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -323,7 +324,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnFinishSession(const HksProcessInfo 
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnAbortSession(const HksProcessInfo &processInfo, const uint32_t &handle,
     const CppParamSet &paramSet))
 {
-    AutoRefCount refCnt(m_refCount);
+    AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_ABORT_SESSION, funcPtr);
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
@@ -337,7 +338,6 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnAbortSession(const HksProcessInfo &
 
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnUnregisterAllObservers())
 {
-    AutoRefCount refCnt(m_refCount);
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_UNREGISTER_ALL_OBSERVERS, funcPtr);
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
