@@ -170,4 +170,10 @@ int32_t HksGetFrontUserId(int32_t &outId)
     return HKS_SUCCESS;
 }
 
+int32_t HksGetUserIdFromUid(const uint32_t &uid, int32_t &userid)
+{
+    userid = static_cast<int32_t>(uid / 200000);
+    return HKS_SUCCESS;
+}
+
 }
