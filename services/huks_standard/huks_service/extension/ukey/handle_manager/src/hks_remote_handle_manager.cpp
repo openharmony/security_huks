@@ -299,7 +299,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     ret = ConvertExtensionToHksErrorCode(ret, g_getPinAuthStateErrCodeMapping);
     ClearMapByHandle(ret, handle);
-    uidIndexToAuthState_.EnsureInsert({processInfo.uidInt, index}, state);
+    uidIndexToAuthState_.EnsureInsert({uid, index}, state);
     if (ret == HUKS_ERR_CODE_PIN_LOCKED || ret == HKS_SUCCESS) {
         return ret;
     }
