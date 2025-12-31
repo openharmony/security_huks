@@ -49,7 +49,7 @@ namespace Huks {
     int32_t ConvertExtensionToHksErrorCode(const int32_t extensionErrorCode,
         const std::map<int32_t, int32_t> &errorMapping);
     int32_t HksGetFrontUserId(int32_t &outId);
-    int32_t HksGetUserIdFromUid(const uint32_t &uid, int32_t &userid);
+    int32_t HksGetUserIdFromUid(const uint32_t &uid);
 }
 }
 }
