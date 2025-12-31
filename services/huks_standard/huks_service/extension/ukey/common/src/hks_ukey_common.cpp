@@ -163,7 +163,7 @@ int32_t ConvertExtensionToHksErrorCode(const int32_t extensionErrorCode, const s
 
 int32_t HksGetFrontUserId(int32_t &outId)
 {
-    std::vector<int> ids;
+    std::vector<int> ids{};
     int ret = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
     HKS_IF_TRUE_LOGE_RETURN(ret != OHOS::ERR_OK || ids.empty(), HKS_FAILURE,
         "QueryActiveOsAccountIds Failed!! ret = %" LOG_PUBLIC "d", ret)
@@ -172,10 +172,9 @@ int32_t HksGetFrontUserId(int32_t &outId)
     return HKS_SUCCESS;
 }
 
-int32_t HksGetUserIdFromUid(const uint32_t &uid, int32_t &userid)
+int32_t HksGetUserIdFromUid(const uint32_t &uid)
 {
-    userid = static_cast<int32_t>(uid / USERID_FACTOR);
-    return HKS_SUCCESS;
+    return static_cast<int32_t>(uid / USERID_FACTOR);
 }
 
 }
