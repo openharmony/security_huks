@@ -30,11 +30,11 @@ void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementNa
 {
     HKS_IF_TRUE_RETURN_VOID(remoteObject == nullptr)
 
+    std::lock_guard<std::mutex> lock(proxyMutex_);
     extConnectProxy = iface_cast<HuksAccessExtBaseProxy>(remoteObject);
     HKS_IF_TRUE_LOGE_RETURN_VOID(extConnectProxy == nullptr, "iface_cast fail in OnAbilityConnectDone")
 
     AddExtDeathRecipient(extConnectProxy->AsObject());
-    std::lock_guard<std::mutex> lock(proxyMutex_);
     isConnected_.store(true);
     proxyConv_.notify_all();
 }
@@ -84,17 +84,18 @@ void ExtensionConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName&
 
 sptr<IHuksAccessExtBase> ExtensionConnection::GetExtConnectProxy()
 {
+    std::lock_guard<std::mutex> lock(proxyMutex_);
     return extConnectProxy;
 }
 
 bool ExtensionConnection::IsConnected()
 {
+    std::lock_guard<std::mutex> lock(proxyMutex_);
     return isConnected_.load();
 }
 
 void ExtensionConnection::AddExtDeathRecipient(const wptr<IRemoteObject>& token)
 {
-    std::unique_lock<std::mutex> lock(deathRecipientMutex_);
     if (token != nullptr && callerDeathRecipient_ != nullptr) {
         token->RemoveDeathRecipient(callerDeathRecipient_);
     }
@@ -111,7 +112,6 @@ void ExtensionConnection::AddExtDeathRecipient(const wptr<IRemoteObject>& token)
 
 void ExtensionConnection::RemoveExtDeathRecipient(const wptr<IRemoteObject>& token)
 {
-    std::unique_lock<std::mutex> lock(deathRecipientMutex_);
     if (token != nullptr && callerDeathRecipient_ != nullptr) {
         token->RemoveDeathRecipient(callerDeathRecipient_);
     }
