@@ -50,7 +50,6 @@ private:
     std::condition_variable disConnectConv_{};
     std::mutex proxyMutex_{};
     std::atomic<bool> isConnected_ = {false};
-    std::mutex deathRecipientMutex_{};
     sptr<IRemoteObject::DeathRecipient> callerDeathRecipient_{nullptr};
     sptr<IHuksAccessExtBase> extConnectProxy{};
     void AddExtDeathRecipient(const wptr<IRemoteObject>& token);
