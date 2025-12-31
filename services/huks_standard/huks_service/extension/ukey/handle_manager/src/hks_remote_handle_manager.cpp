@@ -169,7 +169,7 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &process
     int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
         "Parse index and provider info failed: %" LOG_PUBLIC "d", ret)
-    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.userIdInt);
+    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -200,7 +200,7 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
-    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.userIdInt);
+    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -304,7 +304,7 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &proce
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
-    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.userIdInt);
+    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -323,7 +323,7 @@ int32_t HksRemoteHandleManager::RemoteHandleSign(const HksProcessInfo &processIn
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
-    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.userIdInt);
+    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -343,7 +343,7 @@ int32_t HksRemoteHandleManager::RemoteHandleVerify(const HksProcessInfo &process
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
-    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.userIdInt);
+    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -401,7 +401,7 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
     HKS_IF_TRUE_LOGE_RETURN(combinedArray.IsNull(), HKS_ERROR_JSON_SERIALIZE_FAILED, "Create combined array failed")
     uint32_t failNum = 0;
     for (const auto &providerInfo : infos) {
-        HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, ++failNum)
+        HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, ++failNum);
         OHOS::sptr<IHuksAccessExtBase> proxy;
         ret = GetProviderProxy(providerInfo, proxy);
         HKS_IF_TRUE_LOGE_CONTINUE(ret != HKS_SUCCESS || proxy == nullptr,
@@ -415,7 +415,7 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
         ret = MergeProviderCertificates(providerInfo, tmpCertVec, combinedArray);
         HKS_IF_TRUE_LOGE_CONTINUE(ret != HKS_SUCCESS, "Merge certificates for provider failed")
     }
-    HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, ++failNum)
+    HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, ++failNum);
     HKS_IF_TRUE_LOGE_RETURN(failNum == infos.size(), HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
         "get cert from all provider failed")
     certVec = combinedArray.Serialize(false);
