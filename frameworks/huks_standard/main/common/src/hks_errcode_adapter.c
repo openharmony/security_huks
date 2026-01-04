@@ -740,13 +740,6 @@ static struct HksError g_errCodeTable[] = {
             .data = NULL
         }
     }, {
-        .innerErrCode = HKS_ERROR_LIB_REPEAT_CLOSE,
-        .hksResult = {
-            .errorCode = HUKS_ERR_CODE_ITEM_NOT_EXIST,
-            .errorMsg = "the provider is not found.",
-            .data = NULL
-        }
-    }, {
         .innerErrCode = HKS_ERROR_PROVIDER_ABILITY_NAME_NOT_EXIST,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_MISSING_CRYPTO_ALG_ARGUMENT,
@@ -841,14 +834,14 @@ static struct HksError g_errCodeTable[] = {
         .innerErrCode = HKS_ERROR_OPEN_LIB_FAIL,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
-            .errorMsg = "an error occured in the dependent module.",
+            .errorMsg = "close the dynamic library fail.",
             .data = NULL
         }
     }, {
         .innerErrCode = HKS_ERROR_DLCLOSE_FAIL,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
-            .errorMsg = "an error occured in the dependent module.",
+            .errorMsg = "open the dynamic library fail.",
             .data = NULL
         }
     }, {
@@ -862,7 +855,14 @@ static struct HksError g_errCodeTable[] = {
         .innerErrCode = HKS_ERROR_GET_FUNC_POINTER_FAIL,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
-            .errorMsg = "an error occured in the dependent module.",
+            .errorMsg = "func pointer not found in dynamic library.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_LIB_REPEAT_CLOSE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "the dynamic library has closed.",
             .data = NULL
         }
     }
