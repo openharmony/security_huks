@@ -34,7 +34,6 @@
 #include "hks_external_adapter.h"
 #include "accesstoken_kit.h"
 #include "tokenid_kit.h"
-#include "ipc_skeleton.h"
 namespace OHOS {
 namespace Security {
 namespace Huks {
@@ -275,7 +274,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     const std::string &index, const CppParamSet &paramSet, int32_t &state)
 {
     auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
-    if (!OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(IPCSkeleton::GetCallingFullTokenID())) {
+    if (!OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(processInfo.uidInt)) {
         HKS_IF_TRUE_LOGE_RETURN(uidParam.first == HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
             "Non-system app are not allowed to take uid")
     }
@@ -442,7 +441,7 @@ int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processI
     const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams)
 {
     auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
-    if (!OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(IPCSkeleton::GetCallingFullTokenID())) {
+    if (!OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(processInfo.uidInt)) {
         HKS_IF_TRUE_LOGE_RETURN(uidParam.first == HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
             "Non-system app are not allowed to take uid")
         HKS_IF_TRUE_LOGE_RETURN(propertyId == "SKF_ExportPublicKey", HKS_ERROR_INVALID_ARGUMENT,
