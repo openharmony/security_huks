@@ -52,8 +52,7 @@ int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &in
             std::thread([plugin, providerName_ = providerName, paramSet_ = paramSet, processInfo]() mutable {
                 std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long long>(WAIT_CALlBACK)));
                 HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
-                plugin->isDeath = true;
-                plugin->UnRegisterProvider(processInfo, providerName_, paramSet_, plugin->isDeath);
+                plugin->UnRegisterProvider(processInfo, providerName_, paramSet_, true);
             }).detach();
     });
 

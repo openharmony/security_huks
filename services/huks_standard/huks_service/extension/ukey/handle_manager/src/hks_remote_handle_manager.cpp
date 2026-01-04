@@ -31,6 +31,7 @@
 #include "hks_provider_life_cycle_manager.h"
 #include "hks_template.h"
 #include "hks_ukey_common.h"
+#include "hks_external_adapter.h"
 namespace OHOS {
 namespace Security {
 namespace Huks {
@@ -66,8 +67,7 @@ static int32_t WrapIndexWithProviderInfo(const ProviderInfo& providerInfo, const
     HKS_IF_TRUE_LOGE_RETURN(root.IsNull(), HKS_ERROR_JSON_SERIALIZE_FAILED, "Create JSON object failed")
     if (!root.SetValue(PROVIDER_NAME_KEY, providerInfo.m_providerName) ||
         !root.SetValue(ABILITY_NAME_KEY, providerInfo.m_abilityName) ||
-        !root.SetValue(BUNDLE_NAME_KEY, providerInfo.m_bundleName) ||
-        !root.SetValue(USERID_KEY, providerInfo.m_userid)) {
+        !root.SetValue(BUNDLE_NAME_KEY, providerInfo.m_bundleName)) {
         HKS_LOG_E("Set provider info to index failed");
         return HKS_ERROR_JSON_SERIALIZE_FAILED;
     }
@@ -108,14 +108,11 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
     auto providerNameResult = root.GetValue(PROVIDER_NAME_KEY).ToString();
     auto abilityNameResult = root.GetValue(ABILITY_NAME_KEY).ToString();
     auto bundleNameResult = root.GetValue(BUNDLE_NAME_KEY).ToString();
-    auto useridResult = root.GetValue(USERID_KEY).ToNumber<int32_t>();
     HKS_IF_TRUE_LOGE_RETURN(providerNameResult.first != HKS_SUCCESS || abilityNameResult.first != HKS_SUCCESS ||
-        bundleNameResult.first != HKS_SUCCESS || useridResult.first != HKS_SUCCESS, HKS_ERROR_JSON_TYPE_MISMATCH,
-        "Get provider info fields failed")
+        bundleNameResult.first != HKS_SUCCESS, HKS_ERROR_JSON_TYPE_MISMATCH, "Get provider info fields failed")
     providerInfo.m_providerName = providerNameResult.second;
     providerInfo.m_abilityName = abilityNameResult.second;
     providerInfo.m_bundleName = bundleNameResult.second;
-    providerInfo.m_userid = useridResult.second;
     HKS_IF_TRUE_LOGE_RETURN(providerInfo.m_providerName.empty() || providerInfo.m_abilityName.empty() ||
         providerInfo.m_bundleName.empty(), HKS_ERROR_JSON_INVALID_VALUE, "Provider info is incomplete")
     CommJsonObject newRoot = CommJsonObject::CreateObject();
@@ -172,6 +169,7 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &process
     int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
         "Parse index and provider info failed: %" LOG_PUBLIC "d", ret)
+    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -202,6 +200,7 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -245,6 +244,8 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, uid.second, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    int32_t userId = HksGetUserIdFromUid(uid.second);
+    providerInfo.m_userid = userId;
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -278,6 +279,8 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, uid, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    int32_t userId = HksGetUserIdFromUid(uid);
+    providerInfo.m_userid = userId;
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -286,7 +289,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     ret = ConvertExtensionToHksErrorCode(ret, g_getPinAuthStateErrCodeMapping);
     ClearMapByHandle(ret, handle);
-    uidIndexToAuthState_.EnsureInsert({processInfo.uidInt, index}, state);
+    uidIndexToAuthState_.EnsureInsert({uid, index}, state);
     if (ret == HUKS_ERR_CODE_PIN_LOCKED || ret == HKS_SUCCESS) {
         return ret;
     }
@@ -301,6 +304,7 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &proce
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -319,6 +323,7 @@ int32_t HksRemoteHandleManager::RemoteHandleSign(const HksProcessInfo &processIn
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -338,6 +343,7 @@ int32_t HksRemoteHandleManager::RemoteHandleVerify(const HksProcessInfo &process
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -350,7 +356,7 @@ int32_t HksRemoteHandleManager::RemoteHandleVerify(const HksProcessInfo &process
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::FindRemoteCertificate(const std::string &index,
+int32_t HksRemoteHandleManager::FindRemoteCertificate(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet, std::string &cert)
 {
     ProviderInfo providerInfo = {"", "", ""};
@@ -358,6 +364,10 @@ int32_t HksRemoteHandleManager::FindRemoteCertificate(const std::string &index,
     int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
         "Parse index and provider info failed: %" LOG_PUBLIC "d", ret)
+    int32_t frontUserId;
+    ret = HksGetFrontUserId(frontUserId);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get front user id failed")
+    providerInfo.m_userid = frontUserId;
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -389,8 +399,9 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
     
     CommJsonObject combinedArray = CommJsonObject::CreateArray();
     HKS_IF_TRUE_LOGE_RETURN(combinedArray.IsNull(), HKS_ERROR_JSON_SERIALIZE_FAILED, "Create combined array failed")
-    
+    uint32_t failNum = 0;
     for (const auto &providerInfo : infos) {
+        HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, ++failNum);
         OHOS::sptr<IHuksAccessExtBase> proxy;
         ret = GetProviderProxy(providerInfo, proxy);
         HKS_IF_TRUE_LOGE_CONTINUE(ret != HKS_SUCCESS || proxy == nullptr,
@@ -404,7 +415,9 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
         ret = MergeProviderCertificates(providerInfo, tmpCertVec, combinedArray);
         HKS_IF_TRUE_LOGE_CONTINUE(ret != HKS_SUCCESS, "Merge certificates for provider failed")
     }
-    
+    HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, ++failNum);
+    HKS_IF_TRUE_LOGE_RETURN(failNum == infos.size(), HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
+        "get cert from all provider failed")
     certVec = combinedArray.Serialize(false);
     HKS_IF_TRUE_LOGE_RETURN(certVec.empty(), HKS_ERROR_JSON_SERIALIZE_FAILED, "Serialize certificate array failed")
     
@@ -427,6 +440,8 @@ int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processI
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, uid, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    int32_t userId = HksGetUserIdFromUid(uid);
+    providerInfo.m_userid = userId;
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
