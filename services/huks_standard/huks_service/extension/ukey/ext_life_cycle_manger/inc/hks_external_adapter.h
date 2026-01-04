@@ -21,6 +21,4 @@
 
 int32_t HksGetBundleNameFromUid(uint32_t uid, std::string &bundleName);
 
-int32_t HksGetFrontUserId(int32_t &outId);
-
 #endif

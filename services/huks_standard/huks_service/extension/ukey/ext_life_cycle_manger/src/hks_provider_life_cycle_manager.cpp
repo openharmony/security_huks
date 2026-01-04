@@ -125,12 +125,13 @@ int32_t HksProviderLifeCycleManager::GetExtensionProxy(const ProviderInfo &provi
 }
 
 int32_t HksProviderLifeCycleManager::HapGetAllConnectInfoByProviderName(const std::string &bundleName,
-    const std::string &providerName,
+    const std::string &providerName, const int32_t userid,
     std::vector<std::pair<ProviderInfo, std::shared_ptr<HksExtAbilityConnectInfo>>> &providerInfos)
 {
     m_providerMap.Iterate([&](const ProviderInfo &providerInfo,
         std::shared_ptr<HksExtAbilityConnectInfo> &connectionInfo) {
-        if (providerInfo.m_bundleName == bundleName && providerInfo.m_providerName == providerName) {
+        if (providerInfo.m_bundleName == bundleName && providerInfo.m_providerName == providerName &&
+            providerInfo.m_userid == userid) {
             providerInfos.emplace_back(providerInfo, connectionInfo);
         }
     });
@@ -188,7 +189,7 @@ int32_t HksProviderLifeCycleManager::HksHapGetConnectInfos(const HksProcessInfo 
         });
         return HKS_SUCCESS;
     }
-    return HapGetAllConnectInfoByProviderName(bundleName, providerName, connectionInfos);
+    return HapGetAllConnectInfoByProviderName(bundleName, providerName, processInfo.userIdInt, connectionInfos);
 }
 
 constexpr int WAIT_TIME_MS = 5;

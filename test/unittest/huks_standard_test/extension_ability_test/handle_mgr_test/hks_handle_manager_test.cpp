@@ -271,7 +271,7 @@ HWTEST_F(HksRemoteHandleManagerTest, CertificateTest, TestSize.Level0)
 
     // Test find certificate
     std::string certificates;
-    int32_t ret = manager->FindRemoteCertificate(index, paramSet, certificates);
+    int32_t ret = manager->FindRemoteCertificate(processInfo, index, paramSet, certificates);
     EXPECT_EQ(ret, HKS_SUCCESS);
     EXPECT_FALSE(certificates.empty());
 
