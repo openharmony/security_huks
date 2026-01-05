@@ -254,6 +254,30 @@ std::vector<uint32_t> HksSessionManager::FindToRemoveHandle(const uint32_t &uid)
     return toRemove;
 }
 
+std::vector<uint32_t> HksSessionManager::FindToRemoveHandle(const std::string &providerName, const int32_t &userId,
+    const std::string &abilityName)
+{
+    std::vector<uint32_t> toRemove;
+    m_handlers.Iterate([&](const uint32_t &handle, HandleInfo &handleInfo) {
+        HKS_IF_TRUE_EXCU(providerName == handleInfo.m_providerInfo.m_providerName &&
+            userId == HksGetUserIdFromUid(handleInfo.m_uid) &&
+            handleInfo.m_providerInfo.m_abilityName == abilityName,
+            toRemove.emplace_back(handle));
+    });
+    return toRemove;
+}
+
+std::vector<uint32_t> HksSessionManager::FindToRemoveHandle(const std::string &providerName, const int32_t &userId)
+{
+    std::vector<uint32_t> toRemove;
+    m_handlers.Iterate([&](const uint32_t &handle, HandleInfo &handleInfo) {
+        HKS_IF_TRUE_EXCU(providerName == handleInfo.m_providerInfo.m_providerName &&
+            userId == HksGetUserIdFromUid(handleInfo.m_uid),
+            toRemove.emplace_back(handle));
+    });
+    return toRemove;
+}
+
 std::vector<uint32_t> HksSessionManager::FindToRemoveHandle(const uint32_t &uid, const std::string &abilityName,
     const std::string &index)
 {
@@ -308,6 +332,26 @@ bool HksSessionManager::HksClearHandle(const HksProcessInfo &processInfo, const 
             break;
         }
         toRemove = FindToRemoveHandle(processInfo.uidInt);
+    } while (false);
+    ClearSessionHandleMap(toRemove);
+    return true;
+}
+
+bool HksSessionManager::HksClearHandle(const HksProcessInfo &processInfo, const std::string &providerName,
+    const CppParamSet &paramSet)
+{
+    std::vector<uint32_t> toRemove;
+    do {
+        auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
+        if (abilityName.first == HKS_SUCCESS) {
+            HKS_IF_TRUE_LOGE_RETURN(abilityName.second.size() >= MAX_ABILITY_NAME_LEN, false,
+                "the abilityName is too long. size: %" LOG_PUBLIC "zu", abilityName.second.size())
+            std::string abilityNameStr = std::string(abilityName.second.begin(), abilityName.second.end());
+            HKS_LOG_I("HksClearHandle get abilityName: %" LOG_PUBLIC "s", abilityNameStr.c_str());
+            toRemove = FindToRemoveHandle(providerName, processInfo.userIdInt, abilityNameStr);
+            break;
+        }
+        toRemove = FindToRemoveHandle(providerName, processInfo.userIdInt);
     } while (false);
     ClearSessionHandleMap(toRemove);
     return true;

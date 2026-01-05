@@ -464,7 +464,7 @@ int32_t HksRemoteHandleManager::ClearRemoteHandleMap(const std::string &provider
         ProviderInfo providerInfo;
         int32_t ret = ParseIndexAndProviderInfo(key.second, providerInfo, newIndex);
         HKS_IF_TRUE_LOGE(ret != HKS_SUCCESS, "ParseIndexAndProviderInfo failed: %" LOG_PUBLIC "d", ret)
-        if (providerInfo.m_userid == userid && providerInfo.m_providerName == providerName) {
+        if (userid == HksGetUserIdFromUid(key.first) && providerInfo.m_providerName == providerName) {
             if (abilityName.empty() || providerInfo.m_abilityName == abilityName) {
                 indicesToRemove.push_back(key);
                 providersToRemove.push_back(providerInfo);
