@@ -32,6 +32,9 @@
 #include "hks_template.h"
 #include "hks_ukey_common.h"
 #include "hks_external_adapter.h"
+#include "accesstoken_kit.h"
+#include "tokenid_kit.h"
+#include "ipc_skeleton.h"
 namespace OHOS {
 namespace Security {
 namespace Huks {
@@ -199,11 +202,12 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
     std::string newIndex;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
+    HKS_IF_TRUE_RETURN(ret == HKS_ERROR_NOT_EXIST, HKS_SUCCESS)
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
-    HKS_IF_NULL_RETURN(proxy, ret)
+    HKS_IF_NULL_RETURN(proxy, HKS_SUCCESS)
 
     auto ipccode = proxy->CloseRemoteHandle(handle, paramSet, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
@@ -238,8 +242,11 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t& retryCnt)
 {
     auto uid = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
-    HKS_IF_TRUE_LOGE_RETURN(uid.first != HKS_SUCCESS, uid.first,
+    HKS_IF_TRUE_LOGE_RETURN(uid.first != HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
         "Get uid tag failed. ret: %" LOG_PUBLIC "d", uid.first)
+    auto pin = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UKEY_PIN>();
+    HKS_IF_TRUE_LOGE_RETURN(pin.first != HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
+        "Get pin failed. ret: %" LOG_PUBLIC "d", pin.first)
     ProviderInfo providerInfo;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, uid.second, providerInfo, handle);
@@ -254,8 +261,11 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     ret = ConvertExtensionToHksErrorCode(ret, g_authPinErrCodeMapping);
     ClearMapByHandle(ret, handle);
-    HKS_IF_TRUE_LOGE_RETURN(ret == HUKS_ERR_CODE_PIN_CODE_ERROR || ret == HUKS_ERR_CODE_PIN_LOCKED, ret,
-            "AuthUkeyPin failed: %" LOG_PUBLIC "d", ret)
+    if (ret == HUKS_ERR_CODE_PIN_CODE_ERROR || ret == HUKS_ERR_CODE_PIN_LOCKED) {
+        uidIndexToAuthState_.EnsureInsert(std::make_pair(static_cast<uint32_t>(uid.second), index), 0);
+        HKS_LOG_E("AuthUkeyPin failed: %" LOG_PUBLIC "d", ret);
+        return ret;
+    }
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote verify pin failed: %" LOG_PUBLIC "d", ret)
     uidIndexToAuthState_.EnsureInsert(std::make_pair(static_cast<uint32_t>(uid.second), index), 1);
     return ret;
@@ -265,6 +275,10 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     const std::string &index, const CppParamSet &paramSet, int32_t &state)
 {
     auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
+    if (!OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(IPCSkeleton::GetCallingFullTokenID())) {
+        HKS_IF_TRUE_LOGE_RETURN(uidParam.first == HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
+            "Non-system app are not allowed to take uid")
+    }
     uint32_t uid = processInfo.uidInt;
     CppParamSet newParamSet(paramSet);
     if (uidParam.first == HKS_SUCCESS) {
@@ -428,6 +442,12 @@ int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processI
     const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams)
 {
     auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
+    if (!OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(IPCSkeleton::GetCallingFullTokenID())) {
+        HKS_IF_TRUE_LOGE_RETURN(uidParam.first == HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
+            "Non-system app are not allowed to take uid")
+        HKS_IF_TRUE_LOGE_RETURN(propertyId == "SKF_ExportPublicKey", HKS_ERROR_INVALID_ARGUMENT,
+            "Non-system app are not allowed to use SKF_ExportPublicKey")
+    }
     uint32_t uid = processInfo.uidInt;
     if (uidParam.first == HKS_SUCCESS) {
         uid = static_cast<uint32_t>(uidParam.second);
