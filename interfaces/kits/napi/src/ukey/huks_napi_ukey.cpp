@@ -247,7 +247,7 @@ napi_value HuksNapiRegisterProvider(napi_env env, napi_callback_info info)
 
         result = ParseHksCryptoExternalParams(env, argv[1], context->paramSetIn);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
-                              HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get paramSet");
+                              HUKS_ERR_CODE_INVALID_ARGUMENT, "could not get paramSet");
 
         return napi_ok;
     };
@@ -299,7 +299,7 @@ napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
         }
         result = ParseHksCryptoExternalParams(env, argv[1], context->paramSetIn);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
-                              HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get paramSet.");
+                              HUKS_ERR_CODE_INVALID_ARGUMENT, "could not get paramSet.");
 
         return napi_ok;
     };
@@ -344,7 +344,7 @@ napi_value HuksNapiAuthUkeyPin(napi_env env, napi_callback_info info)
 
         result = ParseHksCryptoExternalParams(env, argv[1], context->paramSetIn);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
-                              HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get paramSet");
+                              HUKS_ERR_CODE_INVALID_ARGUMENT, "could not get paramSet");
 
         return napi_ok;
     };
@@ -396,7 +396,7 @@ napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info)
         }
         result = ParseHksCryptoExternalParams(env, argv[1], context->paramSetIn);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
-                              HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get paramSet");
+                              HUKS_ERR_CODE_INVALID_ARGUMENT, "could not get paramSet");
         return napi_ok;
     };
     context->execute = [](napi_env env, void *data) {
@@ -448,7 +448,7 @@ napi_value HuksNapiGetProperty(napi_env env, napi_callback_info info)
         }
         result = ParseHksCryptoExternalParams(env, argv[HUKS_NAPI_TWO_ARGS], context->paramSetIn);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
-                              HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get paramSet");
+                              HUKS_ERR_CODE_INVALID_ARGUMENT, "could not get paramSet");
         return napi_ok;
     };
     context->execute = [](napi_env env, void *data) {
