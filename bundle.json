@@ -105,7 +105,7 @@
             "//base/security/huks:service_group"
           ]
         },
-        "inner_api": [
+        "inner_kits": [
           {
             "name": "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
             "header": {
