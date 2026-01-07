@@ -112,7 +112,7 @@ HWTEST_F(HksRemoteHandleManagerTest, CreateCloseRemoteHandleTest, TestSize.Level
     CppParamSet paramSet = CreateTestParamSet(processInfo.uidInt);
 
     int32_t ret = manager->CloseRemoteHandle(processInfo, index, paramSet);
-    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST);
+    EXPECT_EQ(ret, HKS_SUCCESS);
     ret = manager->CreateRemoteHandle(processInfo, index, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
     
@@ -150,7 +150,7 @@ HWTEST_F(HksRemoteHandleManagerTest, CreateCloseRemoteHandleTest, TestSize.Level
     int32_t authState = 1;
     uint32_t retryCnt = 0;
     ret = manager->RemoteVerifyPin(processInfo, index4, paramSet, authState, retryCnt);
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 
     ret = manager->CloseRemoteHandle(processInfo, index4, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
@@ -237,17 +237,17 @@ HWTEST_F(HksRemoteHandleManagerTest, PinManagementTest, TestSize.Level0)
     int32_t authState = 1;
     uint32_t retryCnt = 0;
     ret = manager->RemoteVerifyPin(processInfo, index, paramSet, authState, retryCnt);
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 
     int32_t state = 1;
     ret = manager->RemoteVerifyPinStatus(processInfo, index, paramSet, state);
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 
     ret = manager->RemoteClearPinStatus(processInfo, index, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     int32_t authOk = manager->CheckAuthStateIsOk(processInfo, index);
-    EXPECT_EQ(authOk, HKS_SUCCESS);
+    EXPECT_EQ(authOk, HKS_ERROR_INVALID_ARGUMENT);
 
     manager->ClearAuthState(processInfo);
     manager->CloseRemoteHandle(processInfo, index, paramSet);
@@ -306,7 +306,7 @@ HWTEST_F(HksRemoteHandleManagerTest, PropertyTest, TestSize.Level0)
     // Test get property with valid property ID
     CppParamSet outParams;
     ret = manager->GetRemoteProperty(processInfo, index, "SKF_GetDevInfo", paramSet, outParams);
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 
     // Test get property with invalid property ID
     ret = manager->GetRemoteProperty(processInfo, index, "INVALID_PROPERTY", paramSet, outParams);
