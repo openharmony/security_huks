@@ -55,6 +55,12 @@ static napi_value ExportKeyAsUserParseParams(napi_env env, napi_callback_info in
         return nullptr;
     }
 
+    if (!HksCheckIsAllowAsUserApi(context->paramSet)) {
+        HksNapiThrowFeatureNotSupport(env);
+        HKS_LOG_E("As user api not support");
+        return nullptr;
+    }
+
     return GetInt32(env, 0);
 }
 

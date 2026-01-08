@@ -204,6 +204,12 @@ inline void HksNapiThrowGetUserIdFail(napi_env env)
 
 void HksReturnNapiArrExtParamsResult(napi_env env, napi_deferred deferred, int32_t errorCode,
     const struct HksParamSet *paramSetOut);
-    
+
+bool HksCheckIsAllowAsUserApi(struct HksParamSet *paramSet);
+
+inline void HksNapiThrowFeatureNotSupport(napi_env env)
+{
+    HksNapiThrow(env, HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED, "The feature is not support.");
+}
 }  // namespace HuksNapiItem
 #endif
