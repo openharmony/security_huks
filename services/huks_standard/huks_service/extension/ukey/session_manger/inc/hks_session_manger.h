@@ -56,8 +56,7 @@ public:
     int32_t ExtensionAbortSession(const HksProcessInfo &processInfo,
         const uint32_t &handle, const CppParamSet &paramSet);
     bool HksClearHandle(const HksProcessInfo &processInfo, const CppParamSet &paramSet);
-    bool HksClearHandle(const HksProcessInfo &processInfo, const std::string &providerName,
-        const CppParamSet &paramSet);
+    void HksClearHandle(const HksProcessInfo &processInfo, const ProviderInfo &providerInfo);
     bool HksClearHandle(const HksProcessInfo &processInfo, const CppParamSet &paramSet, const std::string &index);
     void ClearSessionMapByHandle(int32_t ret, uint32_t handle);
 private:
@@ -65,9 +64,6 @@ private:
         const CppParamSet &paramSet);
     std::vector<uint32_t> FindToRemoveHandle(const uint32_t &uid, const std::string &abilityName);
     std::vector<uint32_t> FindToRemoveHandle(const uint32_t &uid);
-    std::vector<uint32_t> FindToRemoveHandle(const std::string &providerName, const int32_t &userId,
-        const std::string &abilityName);
-    std::vector<uint32_t> FindToRemoveHandle(const std::string &providerName, const int32_t &userId);
     std::vector<uint32_t> FindToRemoveHandle(const uint32_t &uid, const std::string &abilityName,
         const std::string &index);
     std::vector<uint32_t> FindToRemoveByIndex(const uint32_t &uid, const std::string &index);

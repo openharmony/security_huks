@@ -215,6 +215,9 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
     ClearMapByHandle(ret, handle);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Close remote handle failed: %" LOG_PUBLIC "d", ret)
     HKS_LOG_I("uidIndexToHandle_ is %" LOG_PUBLIC "u,%" LOG_PUBLIC "s", processInfo.uidInt, index.c_str());
+    HKS_IF_NOT_SUCC_LOGE(RemoteClearPinStatus(processInfo, index, paramSet),
+        "Remote clear pin status failed: %" LOG_PUBLIC "u", processInfo.uidInt)
+    uidIndexToAuthState_.Erase({processInfo.uidInt, index});
     uidIndexToHandle_.Erase({processInfo.uidInt, index});
     int32_t num = 0;
     if (providerInfoToNum_.Find(providerInfo, num)) {
@@ -223,17 +226,6 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
         } else {
             providerInfoToNum_.EnsureInsert(providerInfo, num - 1);
         }
-    }
-    std::vector<std::pair<uint32_t, std::string>> keysToRemove;
-    uidIndexToAuthState_.Iterate([&](std::pair<uint32_t, std::string> key, int32_t value) {
-        if (key.first == processInfo.uidInt && key.second == index) {
-            keysToRemove.push_back(key);
-            HKS_IF_NOT_SUCC_LOGE(RemoteClearPinStatus(processInfo, index, paramSet),
-                "Remote clear pin status failed: %" LOG_PUBLIC "u", processInfo.uidInt)
-        }
-    });
-    for (auto &key : keysToRemove) {
-        uidIndexToAuthState_.Erase(key);
     }
     return HKS_SUCCESS;
 }
@@ -474,29 +466,30 @@ int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processI
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::ClearRemoteHandleMap(const std::string &providerName, const std::string &abilityName,
-    const int32_t userid)
+int32_t HksRemoteHandleManager::ClearUidIndexMap(const ProviderInfo &providerInfo, const int32_t &userid)
 {
     std::vector<std::pair<uint32_t, std::string>> indicesToRemove;
     std::vector<ProviderInfo> providersToRemove;
     auto collectToRemoveFunc = [&](std::pair<uint32_t, std::string> key, std::string &value) {
         std::string newIndex;
-        ProviderInfo providerInfo;
-        int32_t ret = ParseIndexAndProviderInfo(key.second, providerInfo, newIndex);
+        ProviderInfo tmpInfo;
+        int32_t ret = ParseIndexAndProviderInfo(key.second, tmpInfo, newIndex);
         HKS_IF_TRUE_LOGE(ret != HKS_SUCCESS, "ParseIndexAndProviderInfo failed: %" LOG_PUBLIC "d", ret)
-        if (userid == HksGetUserIdFromUid(key.first) && providerInfo.m_providerName == providerName) {
-            if (abilityName.empty() || providerInfo.m_abilityName == abilityName) {
+        if (userid == HksGetUserIdFromUid(key.first) && tmpInfo.m_providerName == providerInfo.m_providerName &&
+            tmpInfo.m_bundleName == providerInfo.m_bundleName) {
+            if (tmpInfo.m_abilityName.empty() || tmpInfo.m_abilityName == providerInfo.m_abilityName) {
                 indicesToRemove.push_back(key);
-                providersToRemove.push_back(providerInfo);
+                providersToRemove.push_back(tmpInfo);
             }
         }
     };
     uidIndexToHandle_.Iterate(collectToRemoveFunc);
     for (auto &key : indicesToRemove) {
         uidIndexToHandle_.Erase(key);
+        uidIndexToAuthState_.Erase(key);
     };
-    for (ProviderInfo providerInfo : providersToRemove) {
-        providerInfoToNum_.Erase(providerInfo);
+    for (ProviderInfo tmpInfo : providersToRemove) {
+        providerInfoToNum_.Erase(tmpInfo);
     }
     return HKS_SUCCESS;
 }
