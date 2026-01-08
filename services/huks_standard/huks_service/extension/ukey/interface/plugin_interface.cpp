@@ -73,7 +73,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(
 
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_NULL_LOGE_RETURN(sessionMgr, HKS_ERROR_NULL_POINTER, "sessionMgr is null")
-    auto retBool = sessionMgr->HksClearHandle(processInfo, paramSet);
+    auto retBool = sessionMgr->HksClearHandle(processInfo, providerName, paramSet);
     HKS_IF_TRUE_LOGE(!retBool, "clear handle map fail");
 
     auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
