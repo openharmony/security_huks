@@ -53,6 +53,13 @@ static napi_value HasKeyItemAsUserParseParams(napi_env env, napi_callback_info i
         HKS_LOG_E("isKeyExist parse params failed");
         return nullptr;
     }
+
+    if (!HksCheckIsAllowAsUserApi(context->paramSet)) {
+        HksNapiThrowFeatureNotSupport(env);
+        HKS_LOG_E("As user api not support");
+        return nullptr;
+    }
+
     return GetInt32(env, 0);
 }
 
