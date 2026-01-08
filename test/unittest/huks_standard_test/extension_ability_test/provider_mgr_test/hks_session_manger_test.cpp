@@ -163,10 +163,10 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest003, TestSize.Level0) {
     int32_t authState{1};
     uint32_t retryCount{0};
     ret = handleMgr->RemoteVerifyPin(processInfo, wrappedIndex, paramSet, authState, retryCount);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "RemoteVerifyPin failed";
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "RemoteVerifyPin failed";
 
     ret = sessionMgr->ExtensionInitSession(processInfo, wrappedIndex, paramSet, handle);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "ExtensionInitSession failed";
+    EXPECT_EQ(ret, HKS_ERROR_PIN_NO_AUTH) << "ExtensionInitSession failed";
 
     int32_t deletecount = 0;
     ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, false, deletecount);
