@@ -117,6 +117,9 @@ struct OH_Huks_Result OH_Huks_GetProperty(const struct OH_Huks_Blob *resourceId,
 
 static struct OH_Huks_Result ConvertExtParamResult(int32_t ret)
 {
+    if (ret == HKS_ERROR_INVALID_ARGUMENT) {
+        ret = HKS_ERROR_NEW_INVALID_ARGUMENT;
+    }
     struct HksResult result = HksConvertErrCode(ret);
     return *((struct OH_Huks_Result *)(&result));
 }
