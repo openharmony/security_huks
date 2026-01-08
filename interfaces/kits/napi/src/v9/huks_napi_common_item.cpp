@@ -20,9 +20,12 @@
 #include <sstream>
 
 #include "hks_errcode_adapter.h"
+#include "hks_error_code.h"
 #include "hks_log.h"
 #include "hks_param.h"
+#include "hks_tag.h"
 #include "hks_type.h"
+#include "hks_type_enum.h"
 #include "js_native_api_types.h"
 #include "securec.h"
 
@@ -1184,6 +1187,23 @@ void HksReturnNapiArrExtParamsResult(napi_env env, napi_deferred deferred, int32
     } else {
         PromiseResultFailure(env, deferred, errorCode);
     }
+}
+
+bool HksCheckIsAllowAsUserApi(struct HksParamSet *paramSet)
+{
+    struct HksParam *param = nullptr;
+    if (HksGetParam(paramSet, HKS_TAG_KEY_ACCESS_GROUP, &param) == HKS_SUCCESS) {
+        HKS_LOG_E("group key not allow as user api");
+        return false;
+    }
+
+    if (HksGetParam(paramSet, HKS_TAG_KEY_CLASS, &param) == HKS_SUCCESS &&
+        param->uint32Param == HKS_KEY_CLASS_EXTENSION) {
+        HKS_LOG_E("ukey not allow as user api");
+        return false;
+    }
+
+    return true;
 }
 
 }  // namespace HuksNapiItem

@@ -70,6 +70,12 @@ static napi_value ImportWrappedKeyAsUserParseParams(napi_env env, napi_callback_
         return nullptr;
     }
 
+    if (!HksCheckIsAllowAsUserApi(context->paramSet)) {
+        HksNapiThrowFeatureNotSupport(env);
+        HKS_LOG_E("As user api not support");
+        return nullptr;
+    }
+
     return GetInt32(env, 0);
 }
 
