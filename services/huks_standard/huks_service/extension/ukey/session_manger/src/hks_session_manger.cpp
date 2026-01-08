@@ -317,7 +317,7 @@ void HksSessionManager::HksClearHandle(const HksProcessInfo &processInfo, const 
 {
     std::vector<uint32_t> toRemove;
     m_handlers.Iterate([&](const uint32_t &handle, HandleInfo &info) {
-        if(providerInfo.m_providerName == info.m_providerInfo.m_providerName &&
+        if (providerInfo.m_providerName == info.m_providerInfo.m_providerName &&
             processInfo.userIdInt == HksGetUserIdFromUid(info.m_uid) &&
             providerInfo.m_bundleName == info.m_providerInfo.m_bundleName &&
             (providerInfo.m_abilityName.empty() || info.m_providerInfo.m_abilityName == providerInfo.m_abilityName)) {
