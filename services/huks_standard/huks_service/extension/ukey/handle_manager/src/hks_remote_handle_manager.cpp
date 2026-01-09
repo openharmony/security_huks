@@ -525,14 +525,14 @@ bool HksRemoteHandleManager::IsProviderNumExceedLimit(const ProviderInfo &provid
 {
     int32_t num = 0;
     if (providerInfoToNum_.Find(providerInfo, num)) {
-        return num >= MAX_PROVIDER_NUM_PER_UID - 1;
+        return num >= MAX_PROVIDER_NUM_PER_UID;
     }
     int32_t totalNum = 0;
     auto iterFunc = [&](ProviderInfo key, int32_t value) {
         totalNum += value;
     };
     providerInfoToNum_.Iterate(iterFunc);
-    return totalNum >= MAX_PROVIDER_TOTAL_NUM - 1;
+    return totalNum >= MAX_PROVIDER_TOTAL_NUM;
 }
 
 void HksRemoteHandleManager::ClearMapByHandle(const int32_t &ret, const std::string &handle)

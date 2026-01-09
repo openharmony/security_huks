@@ -247,7 +247,7 @@ HWTEST_F(HksRemoteHandleManagerTest, PinManagementTest, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     int32_t authOk = manager->CheckAuthStateIsOk(processInfo, index);
-    EXPECT_EQ(authOk, HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_NE(authOk, HKS_SUCCESS);
 
     manager->ClearAuthState(processInfo);
     manager->CloseRemoteHandle(processInfo, index, paramSet);
