@@ -56,6 +56,7 @@ static int32_t GetProviderInfo(const HksProcessInfo &processInfo, const std::str
                 "the abilityName is too long. size: %" LOG_PUBLIC "zu", abilityName.second.size())
         providerInfo.m_abilityName = std::string(abilityName.second.begin(), abilityName.second.end());
     }
+    providerInfo.m_userid = processInfo.userIdInt;
     return HKS_SUCCESS;
 }
 
@@ -82,12 +83,12 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(
     ret = GetProviderInfo(processInfo, providerName, paramSet, providerInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
         "GetProviderInfo failed. ret: %" LOG_PUBLIC "d", ret)
-    ret = handleMgr->ClearUidIndexMap(providerInfo, processInfo.userIdInt);
+    ret = handleMgr->ClearUidIndexMap(providerInfo);
     HKS_IF_TRUE_LOGE(ret != HKS_SUCCESS, "clear index map fail");
 
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_NULL_LOGE_RETURN(sessionMgr, HKS_ERROR_NULL_POINTER, "sessionMgr is null")
-    sessionMgr->HksClearHandle(processInfo, providerInfo);
+    sessionMgr->HksClearHandle(providerInfo);
 
     auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(providerMgr == nullptr, HKS_ERROR_NULL_POINTER, "providerMgr is null");
