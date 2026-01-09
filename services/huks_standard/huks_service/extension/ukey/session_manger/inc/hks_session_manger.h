@@ -56,7 +56,7 @@ public:
     int32_t ExtensionAbortSession(const HksProcessInfo &processInfo,
         const uint32_t &handle, const CppParamSet &paramSet);
     bool HksClearHandle(const HksProcessInfo &processInfo, const CppParamSet &paramSet);
-    void HksClearHandle(const HksProcessInfo &processInfo, const ProviderInfo &providerInfo);
+    void HksClearHandle(const ProviderInfo &providerInfo);
     bool HksClearHandle(const HksProcessInfo &processInfo, const CppParamSet &paramSet, const std::string &index);
     void ClearSessionMapByHandle(int32_t ret, uint32_t handle);
 private:
