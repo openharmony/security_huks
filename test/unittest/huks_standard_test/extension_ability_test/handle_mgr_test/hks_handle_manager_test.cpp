@@ -341,12 +341,12 @@ HWTEST_F(HksRemoteHandleManagerTest, ClearHandleMapTest, TestSize.Level0)
 
  // Test clear by provider name
     ProviderInfo providerInfo1{"provider1", "", "bundle1", 100};
-    int32_t ret = manager->ClearUidIndexMap(providerInfo1, processInfo.userIdInt);
+    int32_t ret = manager->ClearUidIndexMap(providerInfo1);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     // Test clear by provider name and ability name
     ProviderInfo providerInfo2{"provider2", "", "bundle2", 100};
-    ret = manager->ClearUidIndexMap(providerInfo2, processInfo.userIdInt);
+    ret = manager->ClearUidIndexMap(providerInfo2);
     EXPECT_EQ(ret, HKS_SUCCESS);
 }
 

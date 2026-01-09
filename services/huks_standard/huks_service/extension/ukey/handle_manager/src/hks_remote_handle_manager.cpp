@@ -45,7 +45,6 @@ constexpr const char *BUNDLE_NAME_KEY = "bundleName";
 constexpr const char *USERID_KEY = "userid";
 constexpr const size_t MAX_INDEX_SIZE = 512;
 constexpr const int32_t MAX_PROVIDER_TOTAL_NUM = 100;
-constexpr const int32_t MAX_PROVIDER_NUM_PER_UID = 10;
 const std::vector<std::string> VALID_PROPERTYID = {
     "SKF_EnumDev",
     "SKF_GetDevInfo",
@@ -190,7 +189,7 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &process
     (void)providerInfoToNum_.Find(providerInfo, num);
     providerInfoToNum_.EnsureInsert(providerInfo, num + 1);
     if (!uidIndexToHandle_.Insert({processInfo.uidInt, index}, handle)) {
-        providerInfoToNum_.EnsureInsert(providerInfo, num - 1);
+        providerInfoToNum_.EnsureInsert(providerInfo, num);
         return HKS_ERROR_CODE_KEY_ALREADY_EXIST;
     }
     uidIndexToAuthState_.EnsureInsert(std::make_pair(processInfo.uidInt, index), 0);
@@ -529,14 +528,9 @@ bool HksRemoteHandleManager::IsProviderNumExceedLimit(const ProviderInfo &provid
 {
     int32_t num = 0;
     if (providerInfoToNum_.Find(providerInfo, num)) {
-        return num >= MAX_PROVIDER_NUM_PER_UID;
+        return num >= MAX_PROVIDER_TOTAL_NUM;
     }
-    int32_t totalNum = 0;
-    auto iterFunc = [&](ProviderInfo key, int32_t value) {
-        totalNum += value;
-    };
-    providerInfoToNum_.Iterate(iterFunc);
-    return totalNum >= MAX_PROVIDER_TOTAL_NUM;
+    return false;
 }
 
 void HksRemoteHandleManager::ClearMapByHandle(const int32_t &ret, const std::string &handle)
@@ -552,6 +546,11 @@ void HksRemoteHandleManager::ClearMapByHandle(const int32_t &ret, const std::str
     };
     uidIndexToHandle_.Iterate(iterFunc);
     for (auto &key : keysToRemove) {
+        std::string newIndex;
+        ProviderInfo tmpInfo{};
+        (void)ParseIndexAndProviderInfo(key.second, tmpInfo, newIndex);
+        tmpInfo.m_userid = HksGetUserIdFromUid(key.first);
+        providerInfoToNum_.Erase(tmpInfo);
         uidIndexToHandle_.Erase(key);
         uidIndexToAuthState_.Erase(key);
     }
