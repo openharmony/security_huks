@@ -187,7 +187,7 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &process
     HKS_IF_TRUE_LOGE_RETURN(!uidIndexToHandle_.Insert({processInfo.uidInt, index}, handle),
         HKS_ERROR_CODE_KEY_ALREADY_EXIST, "Cache remote handle failed")
     HKS_IF_TRUE_LOGE_RETURN(IsProviderNumExceedLimit(providerInfo),
-        HUKS_ERR_CODE_EXCEED_LIMIT, "Provider num exceed limit")
+        HKS_ERROR_HANDLE_REACH_MAX_NUM, "Provider num exceed limit")
     int32_t num = 0;
     (void)providerInfoToNum_.Find(providerInfo, num);
     providerInfoToNum_.EnsureInsert(providerInfo, num + 1);
