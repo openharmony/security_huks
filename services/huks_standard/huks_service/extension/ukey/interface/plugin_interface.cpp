@@ -56,7 +56,6 @@ static int32_t GetProviderInfo(const HksProcessInfo &processInfo, const std::str
                 "the abilityName is too long. size: %" LOG_PUBLIC "zu", abilityName.second.size())
         providerInfo.m_abilityName = std::string(abilityName.second.begin(), abilityName.second.end());
     }
-    providerInfo.m_abilityName = std::string(abilityName.second.begin(), abilityName.second.end());
     return HKS_SUCCESS;
 }
 

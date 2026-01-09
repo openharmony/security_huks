@@ -477,7 +477,7 @@ int32_t HksRemoteHandleManager::ClearUidIndexMap(const ProviderInfo &providerInf
         HKS_IF_TRUE_LOGE(ret != HKS_SUCCESS, "ParseIndexAndProviderInfo failed: %" LOG_PUBLIC "d", ret)
         if (userid == HksGetUserIdFromUid(key.first) && tmpInfo.m_providerName == providerInfo.m_providerName &&
             tmpInfo.m_bundleName == providerInfo.m_bundleName) {
-            if (tmpInfo.m_abilityName.empty() || tmpInfo.m_abilityName == providerInfo.m_abilityName) {
+            if (providerInfo.m_abilityName.empty() || tmpInfo.m_abilityName == providerInfo.m_abilityName) {
                 indicesToRemove.push_back(key);
                 providersToRemove.push_back(tmpInfo);
             }
