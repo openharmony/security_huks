@@ -183,7 +183,7 @@ public:
     int32_t GetRemoteProperty(const HksProcessInfo &processInfo, const std::string& index,
         const std::string& propertyId, const CppParamSet& paramSet, CppParamSet& outParams);
 
-    int32_t ClearUidIndexMap(const ProviderInfo &providerInfo, const int32_t &userid);
+    int32_t ClearUidIndexMap(const ProviderInfo &providerInfo);
     static int32_t ParseIndexAndProviderInfo(const std::string &index,
         ProviderInfo &providerInfo, std::string &newIndex);
     void ClearAuthState(const HksProcessInfo &processInfo);

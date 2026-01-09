@@ -184,13 +184,15 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &process
     ClearMapByHandle(ret, handle);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Create remote handle failed: %" LOG_PUBLIC "d", ret)
     HKS_LOG_I("uidIndexToHandle_ is %" LOG_PUBLIC "u,%" LOG_PUBLIC "s", processInfo.uidInt, index.c_str());
-    HKS_IF_TRUE_LOGE_RETURN(!uidIndexToHandle_.Insert({processInfo.uidInt, index}, handle),
-        HKS_ERROR_CODE_KEY_ALREADY_EXIST, "Cache remote handle failed")
     HKS_IF_TRUE_LOGE_RETURN(IsProviderNumExceedLimit(providerInfo),
         HKS_ERROR_HANDLE_REACH_MAX_NUM, "Provider num exceed limit")
     int32_t num = 0;
     (void)providerInfoToNum_.Find(providerInfo, num);
     providerInfoToNum_.EnsureInsert(providerInfo, num + 1);
+    if (!uidIndexToHandle_.Insert({processInfo.uidInt, index}, handle)) {
+        providerInfoToNum_.EnsureInsert(providerInfo, num - 1);
+        return HKS_ERROR_CODE_KEY_ALREADY_EXIST;
+    }
     uidIndexToAuthState_.EnsureInsert(std::make_pair(processInfo.uidInt, index), 0);
     return HKS_SUCCESS;
 }
@@ -466,7 +468,7 @@ int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processI
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::ClearUidIndexMap(const ProviderInfo &providerInfo, const int32_t &userid)
+int32_t HksRemoteHandleManager::ClearUidIndexMap(const ProviderInfo &providerInfo)
 {
     std::vector<std::pair<uint32_t, std::string>> indicesToRemove;
     std::vector<ProviderInfo> providersToRemove;
@@ -475,10 +477,12 @@ int32_t HksRemoteHandleManager::ClearUidIndexMap(const ProviderInfo &providerInf
         ProviderInfo tmpInfo{};
         int32_t ret = ParseIndexAndProviderInfo(key.second, tmpInfo, newIndex);
         HKS_IF_TRUE_LOGE(ret != HKS_SUCCESS, "ParseIndexAndProviderInfo failed: %" LOG_PUBLIC "d", ret)
-        if (userid == HksGetUserIdFromUid(key.first) && tmpInfo.m_providerName == providerInfo.m_providerName &&
+        if (providerInfo.m_userid == HksGetUserIdFromUid(key.first) &&
+            tmpInfo.m_providerName == providerInfo.m_providerName &&
             tmpInfo.m_bundleName == providerInfo.m_bundleName) {
             if (providerInfo.m_abilityName.empty() || tmpInfo.m_abilityName == providerInfo.m_abilityName) {
                 indicesToRemove.push_back(key);
+                tmpInfo.m_userid = providerInfo.m_userid;
                 providersToRemove.push_back(tmpInfo);
             }
         }

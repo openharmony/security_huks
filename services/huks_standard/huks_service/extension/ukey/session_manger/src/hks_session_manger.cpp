@@ -313,12 +313,12 @@ bool HksSessionManager::HksClearHandle(const HksProcessInfo &processInfo, const 
     return true;
 }
 
-void HksSessionManager::HksClearHandle(const HksProcessInfo &processInfo, const ProviderInfo &providerInfo)
+void HksSessionManager::HksClearHandle(const ProviderInfo &providerInfo)
 {
     std::vector<uint32_t> toRemove;
     m_handlers.Iterate([&](const uint32_t &handle, HandleInfo &info) {
         if (providerInfo.m_providerName == info.m_providerInfo.m_providerName &&
-            processInfo.userIdInt == HksGetUserIdFromUid(info.m_uid) &&
+            providerInfo.m_userid == HksGetUserIdFromUid(info.m_uid) &&
             providerInfo.m_bundleName == info.m_providerInfo.m_bundleName &&
             (providerInfo.m_abilityName.empty() || info.m_providerInfo.m_abilityName == providerInfo.m_abilityName)) {
             toRemove.emplace_back(handle);
