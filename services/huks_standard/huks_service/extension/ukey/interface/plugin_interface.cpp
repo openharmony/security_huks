@@ -15,6 +15,7 @@
 
 #include "hks_error_code.h"
 #include "hks_log.h"
+#include "hks_external_adapter.h"
 #include "hks_provider_life_cycle_manager.h"
 #include "hks_remote_handle_manager.h"
 #include "hks_session_manger.h"
@@ -43,6 +44,22 @@ static void RegisterObserverForProcess(const HksProcessInfo &processInfo, const 
         processInfo.uidInt, ret);
 }
 
+static int32_t GetProviderInfo(const HksProcessInfo &processInfo, const std::string &providerName,
+    const CppParamSet &paramSet, ProviderInfo &providerInfo)
+{
+    int32_t ret = HksGetBundleNameFromUid(processInfo.uidInt, providerInfo.m_bundleName);
+    HKS_IF_TRUE_RETURN(ret != HKS_SUCCESS, ret)
+    providerInfo.m_providerName = providerName;
+    auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
+    if (abilityName.first == HKS_SUCCESS) {
+        HKS_IF_TRUE_LOGE_RETURN(abilityName.second.size() >= MAX_ABILITY_NAME_LEN, HKS_ERROR_INVALID_ARGUMENT,
+                "the abilityName is too long. size: %" LOG_PUBLIC "zu", abilityName.second.size())
+        providerInfo.m_abilityName = std::string(abilityName.second.begin(), abilityName.second.end());
+    }
+    providerInfo.m_userid = processInfo.userIdInt;
+    return HKS_SUCCESS;
+}
+
 __attribute__((visibility("default"))) int32_t HksExtPluginOnRegisterProvider(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet, std::function<void(HksProcessInfo)> callback)
 {
@@ -61,20 +78,17 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(
     int32_t ret = HKS_SUCCESS;
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
-    handleMgr->ClearAuthState(processInfo);
     auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
-    if (abilityName.first == HKS_SUCCESS) {
-        std::string str(abilityName.second.begin(), abilityName.second.end());
-        ret = handleMgr->ClearRemoteHandleMap(providerName, str, processInfo.userIdInt);
-    } else {
-        ret = handleMgr->ClearRemoteHandleMap(providerName, "", processInfo.userIdInt);
-    }
+    ProviderInfo providerInfo;
+    ret = GetProviderInfo(processInfo, providerName, paramSet, providerInfo);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "GetProviderInfo failed. ret: %" LOG_PUBLIC "d", ret)
+    ret = handleMgr->ClearUidIndexMap(providerInfo);
     HKS_IF_TRUE_LOGE(ret != HKS_SUCCESS, "clear index map fail");
 
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_NULL_LOGE_RETURN(sessionMgr, HKS_ERROR_NULL_POINTER, "sessionMgr is null")
-    auto retBool = sessionMgr->HksClearHandle(processInfo, providerName, paramSet);
-    HKS_IF_TRUE_LOGE(!retBool, "clear handle map fail");
+    sessionMgr->HksClearHandle(providerInfo);
 
     auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(providerMgr == nullptr, HKS_ERROR_NULL_POINTER, "providerMgr is null");
