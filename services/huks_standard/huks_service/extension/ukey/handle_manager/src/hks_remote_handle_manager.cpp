@@ -45,7 +45,6 @@ constexpr const char *BUNDLE_NAME_KEY = "bundleName";
 constexpr const char *USERID_KEY = "userid";
 constexpr const size_t MAX_INDEX_SIZE = 512;
 constexpr const int32_t MAX_PROVIDER_TOTAL_NUM = 100;
-constexpr const int32_t MAX_PROVIDER_NUM_PER_UID = 10;
 const std::vector<std::string> VALID_PROPERTYID = {
     "SKF_EnumDev",
     "SKF_GetDevInfo",
@@ -184,13 +183,15 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &process
     ClearMapByHandle(ret, handle);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Create remote handle failed: %" LOG_PUBLIC "d", ret)
     HKS_LOG_I("uidIndexToHandle_ is %" LOG_PUBLIC "u,%" LOG_PUBLIC "s", processInfo.uidInt, index.c_str());
-    HKS_IF_TRUE_LOGE_RETURN(!uidIndexToHandle_.Insert({processInfo.uidInt, index}, handle),
-        HKS_ERROR_CODE_KEY_ALREADY_EXIST, "Cache remote handle failed")
     HKS_IF_TRUE_LOGE_RETURN(IsProviderNumExceedLimit(providerInfo),
-        HUKS_ERR_CODE_EXCEED_LIMIT, "Provider num exceed limit")
+        HKS_ERROR_HANDLE_REACH_MAX_NUM, "Provider num exceed limit")
     int32_t num = 0;
     (void)providerInfoToNum_.Find(providerInfo, num);
     providerInfoToNum_.EnsureInsert(providerInfo, num + 1);
+    if (!uidIndexToHandle_.Insert({processInfo.uidInt, index}, handle)) {
+        providerInfoToNum_.EnsureInsert(providerInfo, num);
+        return HKS_ERROR_CODE_KEY_ALREADY_EXIST;
+    }
     uidIndexToAuthState_.EnsureInsert(std::make_pair(processInfo.uidInt, index), 0);
     return HKS_SUCCESS;
 }
@@ -215,6 +216,9 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
     ClearMapByHandle(ret, handle);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Close remote handle failed: %" LOG_PUBLIC "d", ret)
     HKS_LOG_I("uidIndexToHandle_ is %" LOG_PUBLIC "u,%" LOG_PUBLIC "s", processInfo.uidInt, index.c_str());
+    HKS_IF_NOT_SUCC_LOGE(RemoteClearPinStatus(processInfo, index, paramSet),
+        "Remote clear pin status failed: %" LOG_PUBLIC "u", processInfo.uidInt)
+    uidIndexToAuthState_.Erase({processInfo.uidInt, index});
     uidIndexToHandle_.Erase({processInfo.uidInt, index});
     int32_t num = 0;
     if (providerInfoToNum_.Find(providerInfo, num)) {
@@ -223,17 +227,6 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
         } else {
             providerInfoToNum_.EnsureInsert(providerInfo, num - 1);
         }
-    }
-    std::vector<std::pair<uint32_t, std::string>> keysToRemove;
-    uidIndexToAuthState_.Iterate([&](std::pair<uint32_t, std::string> key, int32_t value) {
-        if (key.first == processInfo.uidInt && key.second == index) {
-            keysToRemove.push_back(key);
-            HKS_IF_NOT_SUCC_LOGE(RemoteClearPinStatus(processInfo, index, paramSet),
-                "Remote clear pin status failed: %" LOG_PUBLIC "u", processInfo.uidInt)
-        }
-    });
-    for (auto &key : keysToRemove) {
-        uidIndexToAuthState_.Erase(key);
     }
     return HKS_SUCCESS;
 }
@@ -474,29 +467,32 @@ int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processI
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::ClearRemoteHandleMap(const std::string &providerName, const std::string &abilityName,
-    const int32_t userid)
+int32_t HksRemoteHandleManager::ClearUidIndexMap(const ProviderInfo &providerInfo)
 {
     std::vector<std::pair<uint32_t, std::string>> indicesToRemove;
     std::vector<ProviderInfo> providersToRemove;
     auto collectToRemoveFunc = [&](std::pair<uint32_t, std::string> key, std::string &value) {
         std::string newIndex;
-        ProviderInfo providerInfo;
-        int32_t ret = ParseIndexAndProviderInfo(key.second, providerInfo, newIndex);
+        ProviderInfo tmpInfo{};
+        int32_t ret = ParseIndexAndProviderInfo(key.second, tmpInfo, newIndex);
         HKS_IF_TRUE_LOGE(ret != HKS_SUCCESS, "ParseIndexAndProviderInfo failed: %" LOG_PUBLIC "d", ret)
-        if (userid == HksGetUserIdFromUid(key.first) && providerInfo.m_providerName == providerName) {
-            if (abilityName.empty() || providerInfo.m_abilityName == abilityName) {
+        if (providerInfo.m_userid == HksGetUserIdFromUid(key.first) &&
+            tmpInfo.m_providerName == providerInfo.m_providerName &&
+            tmpInfo.m_bundleName == providerInfo.m_bundleName) {
+            if (providerInfo.m_abilityName.empty() || tmpInfo.m_abilityName == providerInfo.m_abilityName) {
                 indicesToRemove.push_back(key);
-                providersToRemove.push_back(providerInfo);
+                tmpInfo.m_userid = providerInfo.m_userid;
+                providersToRemove.push_back(tmpInfo);
             }
         }
     };
     uidIndexToHandle_.Iterate(collectToRemoveFunc);
     for (auto &key : indicesToRemove) {
         uidIndexToHandle_.Erase(key);
+        uidIndexToAuthState_.Erase(key);
     };
-    for (ProviderInfo providerInfo : providersToRemove) {
-        providerInfoToNum_.Erase(providerInfo);
+    for (ProviderInfo tmpInfo : providersToRemove) {
+        providerInfoToNum_.Erase(tmpInfo);
     }
     return HKS_SUCCESS;
 }
@@ -532,14 +528,9 @@ bool HksRemoteHandleManager::IsProviderNumExceedLimit(const ProviderInfo &provid
 {
     int32_t num = 0;
     if (providerInfoToNum_.Find(providerInfo, num)) {
-        return num >= MAX_PROVIDER_NUM_PER_UID - 1;
+        return num >= MAX_PROVIDER_TOTAL_NUM;
     }
-    int32_t totalNum = 0;
-    auto iterFunc = [&](ProviderInfo key, int32_t value) {
-        totalNum += value;
-    };
-    providerInfoToNum_.Iterate(iterFunc);
-    return totalNum >= MAX_PROVIDER_TOTAL_NUM - 1;
+    return false;
 }
 
 void HksRemoteHandleManager::ClearMapByHandle(const int32_t &ret, const std::string &handle)
@@ -555,6 +546,11 @@ void HksRemoteHandleManager::ClearMapByHandle(const int32_t &ret, const std::str
     };
     uidIndexToHandle_.Iterate(iterFunc);
     for (auto &key : keysToRemove) {
+        std::string newIndex;
+        ProviderInfo tmpInfo{};
+        (void)ParseIndexAndProviderInfo(key.second, tmpInfo, newIndex);
+        tmpInfo.m_userid = HksGetUserIdFromUid(key.first);
+        providerInfoToNum_.Erase(tmpInfo);
         uidIndexToHandle_.Erase(key);
         uidIndexToAuthState_.Erase(key);
     }

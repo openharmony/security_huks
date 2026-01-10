@@ -865,6 +865,13 @@ static struct HksError g_errCodeTable[] = {
             .errorMsg = "the dynamic library has closed.",
             .data = NULL
         }
+    }, {
+        .innerErrCode = HKS_ERROR_HANDLE_REACH_MAX_NUM,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXCEED_LIMIT,
+            .errorMsg = "the number of resource exceeds the limit.",
+            .data = NULL
+        }
     }
 };
 
