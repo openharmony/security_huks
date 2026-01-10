@@ -92,7 +92,7 @@ static void AddParam(uint32_t tagType, uint32_t tag, FuzzedDataProvider &fdp, Wr
             uint32_t size = fdp.ConsumeIntegralInRange<uint32_t>(0, fdp.remaining_bytes() / 2);
             std::vector<uint8_t> data = fdp.ConsumeBytes<uint8_t>(size);
             blobStorage.push_back(std::move(data));
-            param.blob = { size, blobStorage.back().data() };
+            param.blob = { blobStorage.back().size(), blobStorage.back().data() };
 
             (void)HksAddParams(ps.s, &param, 1);
             break;
@@ -290,7 +290,7 @@ static void AddKeyParams(FuzzedDataProvider &fdp, WrapParamSet &ps, std::vector<
         uint32_t groupSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 64);
         std::vector<uint8_t> groupData = fdp.ConsumeBytes<uint8_t>(groupSize);
         blobStorage.push_back(std::move(groupData));
-        HksBlob blob = { groupSize, blobStorage.back().data() };
+        HksBlob blob = { blobStorage.back().size(), blobStorage.back().data() };
 
         struct HksParam param = {
             .tag = HKS_TAG_KEY_ACCESS_GROUP,
