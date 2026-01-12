@@ -20,6 +20,9 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_report_three_stage.h"
+#include "hks_report_three_stage_build.h"
+#include "hks_cpp_paramset.h"
 
 using namespace testing::ext;
 namespace Unittest::HksReportCommonTest {
@@ -317,5 +320,79 @@ HWTEST_F(HksReportCommonTest, HksReportCommonTest008, TestSize.Level0)
     int32_t ret = AddTimeCost(nullptr, startTime);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 }
+
+/**
+ * @tc.name: HksReportCommonTest.HksReportCommonTest009
+ * @tc.desc: test BuildCommonInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksReportCommonTest, HksReportCommonTest009, TestSize.Level0)
+{
+    char testInfo[] = "this is a test";
+    struct HksEventInfo eventInfo{};
+    struct timespec timeSpec{};
+    std::vector<HksParam> params1{
+        { .tag = HKS_TAG_PARAM3_BUFFER, .blob = { sizeof(HksEventInfo), (uint8_t *)&eventInfo } },
+        { .tag = HKS_TAG_PARAM0_BUFFER, .blob = { strlen(testInfo) + 1, (uint8_t *)testInfo } },
+        { .tag = HKS_TAG_PARAM1_BUFFER, .blob = { sizeof(struct timespec), (uint8_t *)&timeSpec } },
+        { .tag = HKS_TAG_PARAM2_BUFFER, .blob = { strlen(testInfo) + 1, (uint8_t *)testInfo } },
+        { .tag = HKS_TAG_PARAM0_NULL,   .blob = { strlen(testInfo) + 1, (uint8_t *)testInfo } },
+        { .tag = HKS_TAG_TRACE_ID,      .blob = { strlen(testInfo) + 1, (uint8_t *)testInfo } },
+        { .tag = HKS_TAG_PARAM1_UINT32, .uint32Param = 0 }
+    };
+    CppParamSet cppParamSet1(params1);
+    EXPECT_NE(cppParamSet1.GetParamSet(), nullptr);
+    int32_t ret = BuildCommonInfo(cppParamSet1.GetParamSet(), &eventInfo);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    std::vector<HksParam> params2{ { .tag = HKS_TAG_PARAM0_UINT32, .uint32Param = 0 } };
+    CppParamSet cppParamSet2(params2);
+    EXPECT_NE(cppParamSet2.GetParamSet(), nullptr);
+    ret = BuildCommonInfo(cppParamSet2.GetParamSet(), &eventInfo);
+    EXPECT_EQ(ret, HKS_FAILURE);
+
+    std::vector<HksParam> params3{ 
+        { .tag = HKS_TAG_PARAM3_BUFFER, .blob = { sizeof(HksEventInfo), (uint8_t *)&eventInfo } } 
+    };
+    CppParamSet cppParamSet3(params3);
+    EXPECT_NE(cppParamSet3.GetParamSet(), nullptr);
+    ret = BuildCommonInfo(cppParamSet3.GetParamSet(), &eventInfo);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksReportCommonTest.HksReportCommonTest010
+ * @tc.desc: test HksFreeEventInfo && AddEventInfoCommon
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksReportCommonTest, HksReportCommonTest010, TestSize.Level0)
+{
+    std::vector<HksParam> params{ { .tag = HKS_TAG_PARAM0_UINT32, .uint32Param = 0 } };
+    CppParamSet cppParamSet(params);
+    EXPECT_NE(cppParamSet.GetParamSet(), nullptr);
+
+    struct HksEventInfo eventInfo{ .common.eventId = HKS_EVENT_DATA_SIZE_STATISTICS };
+    int32_t ret = BuildCommonInfo(cppParamSet.GetParamSet(), &eventInfo);
+    EXPECT_EQ(ret, HKS_FAILURE);
+    
+    eventInfo.common.eventId = HKS_EVENT_UKEY_REGISTER_PROVIDER;
+    ret = BuildCommonInfo(cppParamSet.GetParamSet(), &eventInfo);
+    EXPECT_EQ(ret, HKS_FAILURE);
+
+    eventInfo.common.eventId = HKS_EVENT_UKEY_END + 1;
+    ret = BuildCommonInfo(cppParamSet.GetParamSet(), &eventInfo);
+    EXPECT_EQ(ret, HKS_FAILURE);
+
+    struct HksEventInfo eventInfo1{ .common.statInfo.dataLen = UINT32_MAX, .common.statInfo.totalCost = UINT32_MAX };
+    struct HksEventInfo eventInfo2{ .common.statInfo.dataLen = UINT32_MAX, .common.statInfo.totalCost = UINT32_MAX };
+    AddEventInfoCommon(&eventInfo1, &eventInfo2);
+
+    eventInfo1.common.statInfo.dataLen = 1;
+    eventInfo1.common.statInfo.totalCost = 1;
+    eventInfo2.common.statInfo.dataLen = 1;
+    eventInfo2.common.statInfo.totalCost = 1;
+    AddEventInfoCommon(&eventInfo1, &eventInfo2);
+}
+
 }
  

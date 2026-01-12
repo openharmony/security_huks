@@ -35,10 +35,10 @@ int32_t PreConstructListAliasesReportParamSet(const struct HksParamSet *paramSet
 
     do {
         ret = AddTimeCost(*paramSetOut, startTime);
-        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "PreAddCommonInfo add time cost to paramSetOut failed!")
+        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "PreAddCommonInfo add time cost to paramSetOut failed!")
 
         ret = HksAddParams(*paramSetOut, paramSetIn->params, paramSetIn->paramsCnt);
-        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "PreAddCommonInfo add paramSetIn params to paramSetOut failed!")
+        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "PreAddCommonInfo add paramSetIn params to paramSetOut failed!")
 
         struct HksParam params[] = {
             {
@@ -52,11 +52,12 @@ int32_t PreConstructListAliasesReportParamSet(const struct HksParamSet *paramSet
         };
         ret = HksAddParams(*paramSetOut, params, HKS_ARRAY_SIZE(params));
         HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "add in params failed!")
+
+        return HKS_SUCCESS;
     } while (0);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("PreConstructListAliasesReportParamSet failed");
-        HksFreeParamSet(paramSetOut);
-    }
+
+    HKS_LOG_E("PreConstructListAliasesReportParamSet failed");
+    HksFreeParamSet(paramSetOut);
     return ret;
 }
 
@@ -71,11 +72,12 @@ int32_t HksParamSetToEventInfoForListAliases(const struct HksParamSet *paramSetI
 
         ret = GetEventKeyInfo(paramSetIn, &(eventInfo->keyInfo));
         HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "report GetEventKeyInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+
+        return HKS_SUCCESS;
     } while (0);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("report ParamSetToEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
-        FreeEventInfoSpecificPtr(eventInfo);
-    }
+
+    HKS_LOG_E("report ParamSetToEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+    FreeEventInfoSpecificPtr(eventInfo);
     return ret;
 }
 
