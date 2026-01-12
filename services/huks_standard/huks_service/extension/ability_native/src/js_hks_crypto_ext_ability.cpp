@@ -1068,13 +1068,14 @@ sptr<IRemoteObject> JsHksCryptoExtAbility::OnConnect(const AAFwk::Want &want)
         LOGE("No memory allocated for HksCryptoExtStubImpl");
         return nullptr;
     }
-
     AbilityRuntime::HandleScope handleScope(jsRuntime_);
     napi_env env = reinterpret_cast<napi_env>(&jsRuntime_.GetNativeEngine());
     napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
     napi_value argv[] = { napiWant };
-    CallObjectMethod("onConnect", argv, ARGC_ONE);
-
+    napi_value result = CallObjectMethod("onConnect", argv, ARGC_ONE);
+    if (result == nullptr) {
+        return nullptr;
+    }
     return remoteObject->AsObject();
 }
 
