@@ -101,17 +101,17 @@ int32_t PreConstructDataSizeReportParamSet(int userId, struct HksParamSet **repo
 
         ret = HksBuildParamSet(reportParamSet);
         HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "build paramset failed");
+
+        return HKS_SUCCESS;
     } while (0);
-    if (ret != HKS_SUCCESS) {
-        HksFreeParamSet(reportParamSet);
-    }
+
+    HksFreeParamSet(reportParamSet);
     return ret;
 }
 
 int32_t HksParamSetToEventInfoForDataSize(const struct HksParamSet *paramSetIn, struct HksEventInfo* eventInfo)
 {
-    HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
-        "HksParamSetToEventInfoForRename params is null")
+    HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER, "params is null")
     int32_t ret = HKS_SUCCESS;
     do {
         ret = GetCommonEventInfo(paramSetIn, eventInfo);
@@ -137,11 +137,12 @@ int32_t HksParamSetToEventInfoForDataSize(const struct HksParamSet *paramSetIn, 
         if (HksGetParam(paramSetIn, HKS_TAG_REMAIN_PARTITION_SIZE, &paramToEventInfo) == HKS_SUCCESS) {
             eventInfo->dataSizeInfo.partitionRemain = paramToEventInfo->uint64Param;
         }
+
+        return HKS_SUCCESS;
     } while (0);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("report ParamSetToEventInfo failed! ret = %" LOG_PUBLIC "d", ret);
-        FreeEventInfoSpecificPtr(eventInfo);
-    }
+
+    HKS_LOG_E("report failed! ret = %" LOG_PUBLIC "d", ret);
+    FreeEventInfoSpecificPtr(eventInfo);
     return ret;
 }
 

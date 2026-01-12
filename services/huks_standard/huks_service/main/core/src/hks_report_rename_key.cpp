@@ -53,11 +53,12 @@ int32_t PreConstructRenameReportParamSet(const struct HksBlob *keyAlias, const s
         };
         ret = HksAddParams(*paramSetOut, params, HKS_ARRAY_SIZE(params));
         HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "add in params failed!")
+
+        return HKS_SUCCESS;
     } while (0);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("PreConstructRenameReportParamSet failed");
-        HksFreeParamSet(paramSetOut);
-    }
+
+    HKS_LOG_E("PreConstructRenameReportParamSet failed");
+    HksFreeParamSet(paramSetOut);
     return ret;
 }
 
@@ -81,11 +82,12 @@ int32_t HksParamSetToEventInfoForRename(const struct HksParamSet *paramSetIn, st
         if (HksGetParam(paramSetIn, HKS_TAG_IS_COPY_NEW_KEY, &paramToEventInfo) == HKS_SUCCESS) {
             eventInfo->renameInfo.isCopy = static_cast<uint32_t>(paramToEventInfo->boolParam);
         }
+
+        return HKS_SUCCESS;
     } while (0);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("report ParamSetToEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
-        FreeEventInfoSpecificPtr(eventInfo);
-    }
+
+    HKS_LOG_E("report ParamSetToEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+    FreeEventInfoSpecificPtr(eventInfo);
     return ret;
 }
 

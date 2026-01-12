@@ -14,7 +14,9 @@
  */
 
 #include "hks_report_data_size.h"
+#include "hks_cpp_paramset.h"
 #include <gtest/gtest.h>
+#include <string.h>
 
 using namespace testing::ext;
 namespace Unittest::HksReportDataSizeTest {
@@ -45,6 +47,12 @@ void HksReportDataSizeTest::TearDown()
 {
 }
 
+constexpr static char COMPONENT_NAME1[] = "HUKS";
+constexpr static char PARTITION_NAME1[] = "/data";
+constexpr static char FOLDER_PATH1[] = "huks_folder_path_test";
+constexpr static char FOLDER_SIZE1[] = "huks_folder_size_test";
+constexpr static uint64_t DEVICE_VALID_SIZE = 1024;
+
 /**
  * @tc.name: HksReportDataSizeTest.HksReportDataSizeTest001
  * @tc.desc: tdd
@@ -57,17 +65,32 @@ HWTEST_F(HksReportDataSizeTest, HksReportDataSizeTest001, TestSize.Level0)
     HksEventInfoAddForDataSize(dstEventInfo, srcEventInfo);
     EXPECT_EQ(dstEventInfo, nullptr);
     EXPECT_EQ(srcEventInfo, nullptr);
-}
 
-/**
- * @tc.name: HksReportDataSizeTest.HksReportDataSizeTest002
- * @tc.desc: tdd
- * @tc.type: FUNC
- */
-HWTEST_F(HksReportDataSizeTest, HksReportDataSizeTest002, TestSize.Level0)
-{
+    struct HksEventInfo eventInfo{};
+    std::vector<HksParam> params1{
+        { .tag = HKS_TAG_REMAIN_PARTITION_SIZE, .uint64Param = DEVICE_VALID_SIZE },
+        { .tag = HKS_TAG_COMPONENT_NAME, .blob = { strlen(COMPONENT_NAME1) + 1, (uint8_t *)COMPONENT_NAME1 } },
+        { .tag = HKS_TAG_PARTITION_NAME, .blob = { strlen(PARTITION_NAME1) + 1, (uint8_t *)PARTITION_NAME1 } },
+        { .tag = HKS_TAG_FILE_OF_FOLDER_PATH, .blob = { strlen(FOLDER_PATH1) + 1, (uint8_t *)FOLDER_PATH1 } },
+        { .tag = HKS_TAG_FILE_OF_FOLDER_SIZE, .blob = { strlen(FOLDER_SIZE1) + 1, (uint8_t *)FOLDER_SIZE1 }}
+    };
+    CppParamSet cppParamSet1(params1);
+    EXPECT_NE(cppParamSet1.GetParamSet(), nullptr);
+    int32_t ret = HksParamSetToEventInfoForDataSize(cppParamSet1.GetParamSet(), &eventInfo);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    std::vector<HksParam> params2{ { .tag = HKS_TAG_PARAM0_UINT32, .uint32Param = 0 } };
+    CppParamSet cppParamSet2(params2);
+    EXPECT_NE(cppParamSet2.GetParamSet(), nullptr);
+    ret = HksParamSetToEventInfoForDataSize(cppParamSet2.GetParamSet(), &eventInfo);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    std::unordered_map<std::string, std::string> reportData{};
+    ret = HksEventInfoToMapForDataSize(&eventInfo, reportData);
+
     int userId = 0;
     ReportDataSizeEvent(userId);
     EXPECT_EQ(userId, 0);
 }
+
 }

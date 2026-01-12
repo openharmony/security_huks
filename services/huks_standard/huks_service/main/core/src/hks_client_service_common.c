@@ -71,11 +71,12 @@ int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet, struct HksP
         ret = HksBuildParamSet(&newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build append info failed")
         *outParamSet = newParamSet;
+
+        return HKS_SUCCESS;
     } while (0);
-    if (ret != HKS_SUCCESS) {
-        HksFreeParamSet(&newParamSet);
-        *outParamSet = NULL;
-    }
+
+    HksFreeParamSet(&newParamSet);
+    *outParamSet = NULL;
     return ret;
 }
 
