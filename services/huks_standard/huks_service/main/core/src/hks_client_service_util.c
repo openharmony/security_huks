@@ -465,11 +465,12 @@ static int32_t BuildUserAuthParamSet(const struct HksParamSet *paramSet, struct 
         ret = HksBuildParamSet(&newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build append info failed")
         *outParamSet = newParamSet;
+
+        return HKS_SUCCESS;
     } while (0);
-    if (ret != HKS_SUCCESS) {
-        HksFreeParamSet(&newParamSet);
-        *outParamSet = NULL;
-    }
+
+    HksFreeParamSet(&newParamSet);
+    *outParamSet = NULL;
     return ret;
 }
 
@@ -592,12 +593,10 @@ int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo
         }
         struct HksParamSet *newInfoParamSet = NULL;
         ret = AppendProcessInfoAndDefaultStrategy(userAuthParamSet, processInfo, NULL, &newInfoParamSet);
-        if (ret != HKS_SUCCESS) {
-            HksFreeParamSet(&userAuthParamSet);
-            HKS_LOG_E("append process info and default strategy failed, ret = %" LOG_PUBLIC "d", ret);
-            return ret;
-        }
         HksFreeParamSet(&userAuthParamSet);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+            "append process info and default strategy failed, ret = %" LOG_PUBLIC "d", ret)
+        
         *outParamSet = newInfoParamSet;
         return HKS_SUCCESS;
     }

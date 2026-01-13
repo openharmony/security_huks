@@ -53,11 +53,12 @@ int32_t PreConstructImportKeyReportParamSet(const struct HksBlob *keyAlias, cons
         };
         ret = HksAddParams(*paramSetOut, params, HKS_ARRAY_SIZE(params));
         HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "add in params failed!")
+
+        return HKS_SUCCESS;
     } while (0);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("PreConstructImportKeyReportParamSet failed");
-        HksFreeParamSet(paramSetOut);
-    }
+
+    HKS_LOG_E("PreConstructImportKeyReportParamSet failed");
+    HksFreeParamSet(paramSetOut);
     return ret;
 }
 
@@ -81,11 +82,12 @@ int32_t HksParamSetToEventInfoForImport(const struct HksParamSet *paramSetIn, st
         if (HksGetParam(paramSetIn, HKS_TAG_UNWRAP_ALGORITHM_SUITE, &paramToEventInfo) == HKS_SUCCESS) {
             eventInfo->importInfo.algSuit = paramToEventInfo->uint32Param;
         }
+
+        return HKS_SUCCESS;
     } while (0);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("report ParamSetToEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
-        FreeEventInfoSpecificPtr(eventInfo);
-    }
+
+    HKS_LOG_E("report ParamSetToEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+    FreeEventInfoSpecificPtr(eventInfo);
     return ret;
 }
 

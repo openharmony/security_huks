@@ -57,11 +57,12 @@ int32_t PreConstructGenKeyReportParamSet(const struct HksBlob *keyAlias, const s
         };
         ret = HksAddParams(*paramSetOut, params, HKS_ARRAY_SIZE(params));
         HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "add in params failed!")
+
+        return HKS_SUCCESS;
     } while (0);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("PreConstructGenKeyReportParamSet failed");
-        HksFreeParamSet(paramSetOut);
-    }
+
+    HKS_LOG_E("PreConstructGenKeyReportParamSet failed");
+    HksFreeParamSet(paramSetOut);
     return ret;
 }
 
@@ -88,11 +89,12 @@ int32_t HksParamSetToEventInfoForKeyGen(const struct HksParamSet *paramSetIn, st
         if (HksGetParam(paramSetIn, HKS_TAG_AGREE_PUBLIC_KEY_IS_KEY_ALIAS, &paramToEventInfo) == HKS_SUCCESS) {
             eventInfo->generateInfo.pubKeyIsAlias = static_cast<uint32_t>(paramToEventInfo->boolParam);
         }
+
+        return HKS_SUCCESS;
     } while (0);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("report ParamSetToEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
-        FreeEventInfoSpecificPtr(eventInfo);
-    }
+
+    HKS_LOG_E("report ParamSetToEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+    FreeEventInfoSpecificPtr(eventInfo);
     return ret;
 }
 
