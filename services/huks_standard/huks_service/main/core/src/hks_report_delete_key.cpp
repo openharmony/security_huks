@@ -50,11 +50,12 @@ int32_t PreConstructDeleteKeyReportParamSet(const struct HksBlob *keyAlias, cons
         };
         ret = HksAddParams(*paramSetOut, params, HKS_ARRAY_SIZE(params));
         HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "add in params failed!")
+
+        return HKS_SUCCESS;
     } while (0);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("PreConstructDeleteKeyReportParamSet failed");
-        HksFreeParamSet(paramSetOut);
-    }
+
+    HKS_LOG_E("PreConstructDeleteKeyReportParamSet failed");
+    HksFreeParamSet(paramSetOut);
     return ret;
 }
 
@@ -69,12 +70,12 @@ int32_t HksParamSetToEventInfoForDelete(const struct HksParamSet *paramSetIn, st
 
         ret = GetEventKeyInfo(paramSetIn, &(eventInfo->keyInfo));
         HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "report GetEventKeyInfo failed!  ret = %" LOG_PUBLIC "d", ret);
-    } while (0);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("report ParamSetToEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
-        FreeEventInfoSpecificPtr(eventInfo);
-    }
 
+        return HKS_SUCCESS;
+    } while (0);
+
+    HKS_LOG_E("report ParamSetToEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+    FreeEventInfoSpecificPtr(eventInfo);
     return ret;
 }
 
