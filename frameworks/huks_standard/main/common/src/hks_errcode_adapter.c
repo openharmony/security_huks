@@ -834,14 +834,14 @@ static struct HksError g_errCodeTable[] = {
         .innerErrCode = HKS_ERROR_OPEN_LIB_FAIL,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
-            .errorMsg = "close the dynamic library fail.",
+            .errorMsg = "open the dynamic library fail.",
             .data = NULL
         }
     }, {
         .innerErrCode = HKS_ERROR_DLCLOSE_FAIL,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
-            .errorMsg = "open the dynamic library fail.",
+            .errorMsg = "close the dynamic library fail.",
             .data = NULL
         }
     }, {
