@@ -1046,7 +1046,7 @@ void JsHksCryptoExtAbility::OnStart(const AAFwk::Want &want)
     napi_env env = reinterpret_cast<napi_env>(&jsRuntime_.GetNativeEngine());
     napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
     napi_value argv[] = { napiWant };
-    CallObjectMethod("onCreate", argv, ARGC_ONE);
+    CallObjectMethod("onCreate", argv, ARGC_ONE); // Don't enforce this function
 }
 
 void JsHksCryptoExtAbility::OnDisconnect(const AAFwk::Want &want)
@@ -1056,7 +1056,7 @@ void JsHksCryptoExtAbility::OnDisconnect(const AAFwk::Want &want)
     napi_env env = reinterpret_cast<napi_env>(&jsRuntime_.GetNativeEngine());
     napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
     napi_value argv[] = { napiWant };
-    CallObjectMethod("onDisconnect", argv, ARGC_ONE);
+    CallObjectMethod("onDisconnect", argv, ARGC_ONE); // Don't enforce this function
 }
 
 sptr<IRemoteObject> JsHksCryptoExtAbility::OnConnect(const AAFwk::Want &want)
@@ -1072,10 +1072,7 @@ sptr<IRemoteObject> JsHksCryptoExtAbility::OnConnect(const AAFwk::Want &want)
     napi_env env = reinterpret_cast<napi_env>(&jsRuntime_.GetNativeEngine());
     napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
     napi_value argv[] = { napiWant };
-    napi_value result = CallObjectMethod("onConnect", argv, ARGC_ONE);
-    if (result == nullptr) {
-        return nullptr;
-    }
+    CallObjectMethod("onConnect", argv, ARGC_ONE); // Don't enforce this function
     return remoteObject->AsObject();
 }
 
