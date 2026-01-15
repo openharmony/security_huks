@@ -306,6 +306,18 @@ static std::string GetTimeoutMonitorMarkTag(uint32_t code, uint32_t callingUid)
     return markTag;
 }
 
+static int32_t ReportCostTime(uint64_t enterTime, uint64_t leaveTime, uint32_t sessionId, int32_t reply)
+{
+    if (leaveTime >= enterTime) {
+        HKS_LOG_I("cost %" LOG_PUBLIC PRIu64 " ms, sessionId = %" LOG_PUBLIC "u, ret:%" LOG_PUBLIC "d",
+            leaveTime - enterTime, sessionId, reply);
+    } else {
+        HKS_LOG_E("time error. diff: %" LOG_PUBLIC PRIu64 " ms, sessionId = %" LOG_PUBLIC "u, ret:%" LOG_PUBLIC "d",
+            enterTime - leaveTime, sessionId, reply);
+    }
+    return NO_ERROR;
+}
+
 int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     HksInitMemPolicy();
@@ -355,9 +367,7 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         ProcessRemoteRequest(code, data, reply);
         uint64_t leaveTime = 0;
         (void)HksElapsedRealTime(&leaveTime);
-        HKS_LOG_I("cost %" LOG_PUBLIC PRIu64 " ms, sessionId = %" LOG_PUBLIC "u, ret:%" LOG_PUBLIC "d",
-            leaveTime - enterTime, currentSessionId, reply.ReadInt32());
-        retSys = NO_ERROR;
+        retSys = ReportCostTime(enterTime, leaveTime, currentSessionId, reply.ReadInt32());
     }
 
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
