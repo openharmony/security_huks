@@ -36,7 +36,7 @@
 #include "hks_report_ukey_event.h"
 #include "hks_param.h"
 
-static HksEventProcMap g_eventProcMap[] = {
+static const HksEventProcMap g_defaultEventProcs[] = {
     {
         HKS_EVENT_CRYPTO,
         HksParamSetToEventInfoCrypto,
@@ -202,7 +202,9 @@ static HksEventProcMap g_eventProcMap[] = {
 };
 
 HksHaPlugin::HksHaPlugin() : queue(), stopFlag(false)
-{}
+{
+    InitDefaultEventProcs();
+}
 
 HksHaPlugin::~HksHaPlugin()
 {
@@ -216,6 +218,8 @@ void HksHaPlugin::Destroy()
     StopWorkerThread();
 
     eventCacheList.RemoveFront(eventCacheList.GetSize());
+
+    ClearAllEventProcs();
 }
 
 void HksHaPlugin::StartWorkerThread()
@@ -233,11 +237,127 @@ bool HksHaPlugin::Enqueue(uint32_t eventId, struct HksParamSet *paramSet)
     return queue.Enqueue(eventId, paramSet);
 }
 
+void HksHaPlugin::InitDefaultEventProcs()
+{
+    std::lock_guard<std::mutex> autoLock(eventProcMutex);
+    size_t count = sizeof(g_defaultEventProcs) / sizeof(g_defaultEventProcs[0]);
+
+    for (size_t i = 0; i < count; ++i) {
+        eventProcList.push_back(g_defaultEventProcs[i]);
+    }
+    HKS_LOG_I("InitDefaultEventProcs: Register default event processors, count=%zu", count);
+}
+
+bool HksHaPlugin::IsValidEventProcMap(const struct HksEventProcMap *procMap) const
+{
+    if (procMap == nullptr) {
+        HKS_LOG_E("IsValidEventProcMap: procMap is null");
+        return false;
+    }
+
+    if (procMap->eventInfoCreate == nullptr || procMap->needReport == nullptr || procMap->eventInfoEqual == nullptr ||
+        procMap->eventInfoAdd == nullptr || procMap->eventInfoToMap == nullptr) {
+        HKS_LOG_E("IsValidEventProcMap: Invalid function pointers in procMap for eventId %" LOG_PUBLIC "u",
+            procMap->eventId);
+        return false;
+    }
+
+    return true;
+}
+
+int32_t HksHaPlugin::RegisterEventProc(const struct HksEventProcMap *procMap)
+{
+    HKS_IF_NOT_TRUE_RETURN(IsValidEventProcMap(procMap), HKS_ERROR_NULL_POINTER);
+
+    std::lock_guard<std::mutex> lock(eventProcMutex);
+
+    auto it = std::find_if(eventProcList.begin(), eventProcList.end(),
+        [procMap](const struct HksEventProcMap &item) {
+            return item.eventId == procMap->eventId;
+        });
+
+    if (it != eventProcList.end()) {
+        HKS_LOG_I("RegisterEventProc: EventId %{public}u already registered. Auto override.", procMap->eventId);
+        *it = *procMap;
+        return HKS_SUCCESS;
+    }
+
+    eventProcList.push_back(*procMap);
+    HKS_LOG_I("RegisterEventProc: Successfully registered event processor for eventId %{public}u", procMap->eventId);
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksHaPlugin::RegisterEventProcs(const struct HksEventProcMap *procMaps, uint32_t count)
+{
+    if(procMaps == nullptr || count == 0) {
+        HKS_LOG_E("RegisterEventProcs: Invalid input parameters");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    uint32_t successCount = 0;
+    int32_t lastError = HKS_SUCCESS;
+
+    for (uint32_t i = 0; i < count; ++i) {
+        int32_t ret = RegisterEventProc(&procMaps[i]);
+        if (ret == HKS_SUCCESS) {
+            ++successCount;
+        } else {
+            lastError = ret;
+            HKS_LOG_E("RegisterEventProcs: Failed to register event processor for eventId %u, ret = %d",
+                procMaps[i].eventId, ret);
+        }
+    }
+    HKS_LOG_I("RegisterEventProcs: Successfully registered %{public}u out of %{public}u event processors",
+        successCount, count);
+
+    return (successCount == count) ? HKS_SUCCESS : lastError;
+}
+
+int32_t HksHaPlugin::UnregisterEventProc(uint32_t eventId)
+{
+    std::lock_guard<std::mutex> lock(eventProcMutex);
+
+    auto it = std::find_if(eventProcList.begin(), eventProcList.end(),
+        [eventId](const HksEventProcMap &item) {
+            return item.eventId == eventId;
+        });
+
+    if (it != eventProcList.end()) {
+        eventProcList.erase(it);
+        HKS_LOG_I("UnregisterEventProc: Successfully unregistered event processor for eventId %u", eventId);
+        return HKS_SUCCESS;
+    }
+
+    HKS_LOG_W("UnregisterEventProc: EventId %u not found in registered event processors", eventId);
+    return HKS_ERROR_NOT_EXIST;
+}
+
+void HksHaPlugin::ClearAllEventProcs()
+{
+    std::lock_guard<std::mutex> lock(eventProcMutex);
+    eventProcList.clear();
+    HKS_LOG_I("ClearAllEventProcs: Cleared all registered event processors");
+}
+
+uint32_t HksHaPlugin::GetEventProcCount() const
+{
+    std::lock_guard<std::mutex> lock(eventProcMutex);
+    return static_cast<uint32_t>(eventProcList.size());
+}
+
 HksEventProcMap *HksHaPlugin::HksEventProcFind(uint32_t eventId)
 {
-    for (uint32_t i = 0; i < HKS_ARRAY_SIZE(g_eventProcMap); ++i) {
-        HKS_IF_TRUE_RETURN(g_eventProcMap[i].eventId == eventId, &g_eventProcMap[i])
+    std::lock_guard<std::mutex> lock(eventProcMutex);
+
+    auto it = std::find_if(eventProcList.begin(), eventProcList.end(),
+        [eventId](const struct HksEventProcMap &item) {
+            return item.eventId == eventId;
+        });
+    if (it != eventProcList.end()) {
+        return &(*it);
     }
+
     return nullptr;
 }
 
@@ -403,4 +523,36 @@ int32_t HksHaPluginInit(void)
 void HksHaPluginDestroy()
 {
     HksHaPlugin::GetInstance().Destroy();
+}
+
+// 供HksBasicInterface调用
+int32_t HksRegisterEventProcWrapper(const struct HksEventProcMap *procMap)
+{
+    HKS_IF_NULL_LOGE_RETURN(procMap, HKS_ERROR_NULL_POINTER, "HksRegisterEventProcWrapper: procMap is null");
+    return HksHaPlugin::GetInstance().RegisterEventProc(procMap);
+}
+
+int32_t HksRegisterEventProcs(const struct HksEventProcMap *procMaps, uint32_t count)
+{
+    if (procMaps == nullptr || count == 0) {
+        HKS_LOG_E("HksRegisterEventProcs: Invalid input parameters");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    return HksHaPlugin::GetInstance().RegisterEventProcs(procMaps, count);
+}
+
+int32_t HksUnregisterEventProcWrapper(uint32_t eventId)
+{
+    return HksHaPlugin::GetInstance().UnregisterEventProc(eventId);
+}
+
+int32_t HksEnqueueEventWrapper(uint32_t eventId, struct HksParamSet *paramSet)
+{
+    HKS_IF_NULL_LOGE_RETURN(paramSet, HKS_ERROR_NULL_POINTER, "HksEnqueueEventWrapper: paramSet is null");
+
+    bool enqueueSuccess = HksHaPlugin::GetInstance().Enqueue(eventId, paramSet);
+    HKS_IF_NOT_TRUE_LOGE_RETURN(enqueueSuccess, HKS_ERROR_BAD_STATE,
+        "HksEnqueueEventWrapper: Failed to enqueue eventId %u", eventId);
+
+    return HKS_SUCCESS;
 }
