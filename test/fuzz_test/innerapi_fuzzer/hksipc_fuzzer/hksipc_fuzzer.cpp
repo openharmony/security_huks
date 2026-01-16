@@ -28,6 +28,7 @@
 #include "hks_service_ipc_serialization.h"
 #include "hks_type.h"
 #include "hks_type_inner.h"
+#include "base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/hks_sa_interface.h"
 
 #include "hks_fuzz_util.h"
 
@@ -244,6 +245,26 @@ static void HksIpcSerializationTest011()
 
     GetBlobFromBuffer(&blob, &srcBlob, &index);
 }
+
+static void HksIpcServiceTest000()
+{
+    MessageParcel data{};
+    MessageParcel reply{};
+    MessageOption option{};
+
+    data.WriteInterfaceToken(HksExtStub::GetDescriptor());
+
+    data.WriteUint32(HKS_SUCCESS);
+
+    uint8_t testData[] = {0x11, 0x22, 0x33, 0x44};
+    uint32_t dataSize = sizeof(testData);
+    data.WriteUint32(dataSize);
+    data.WriteBuffer(testData, dataSize);
+
+    HksExtStub stub;
+    (void)stub.OnRemoteRequest(HKS_MSG_EXT_GET_REMOTE_PROPERTY_REPLY, data, reply, option);
+}
+
 
 static void HksIpcServiceTest001()
 {
@@ -968,6 +989,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::Security::Hks::HksIpcSerializationTest009();
     OHOS::Security::Hks::HksIpcSerializationTest010();
     OHOS::Security::Hks::HksIpcSerializationTest011();
+    OHOS::Security::Hks::HksIpcServiceTest000();
     OHOS::Security::Hks::HksIpcServiceTest001();
     OHOS::Security::Hks::HksIpcServiceTest002();
     OHOS::Security::Hks::HksIpcServiceTest003();
