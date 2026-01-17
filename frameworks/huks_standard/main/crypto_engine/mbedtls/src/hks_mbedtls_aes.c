@@ -560,12 +560,14 @@ static int32_t AesCbcCryptFinal(void **cryptoCtx, const uint8_t padding,
 static int32_t AesEncryptGcm(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *cipherText, struct HksBlob *tagAead)
 {
-    mbedtls_gcm_context ctx;
-    mbedtls_gcm_init(&ctx);
+    mbedtls_gcm_context *ctx = (mbedtls_gcm_context *)HksMalloc(sizeof(mbedtls_gcm_context));
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_MALLOC_FAIL, "Encrypt gcmCtx malloc fail")
+    (void)memset_s(ctx, sizeof(mbedtls_gcm_context), 0, sizeof(mbedtls_gcm_context));
+    mbedtls_gcm_init(ctx);
 
     int32_t ret;
     do {
-        ret = mbedtls_gcm_setkey(&ctx, MBEDTLS_CIPHER_ID_AES, key->data, key->size * HKS_BITS_PER_BYTE);
+        ret = mbedtls_gcm_setkey(ctx, MBEDTLS_CIPHER_ID_AES, key->data, key->size * HKS_BITS_PER_BYTE);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls aes gcm set key failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
@@ -573,7 +575,7 @@ static int32_t AesEncryptGcm(const struct HksBlob *key, const struct HksUsageSpe
         }
 
         const struct HksAeadParam *aeadParam = (struct HksAeadParam *)(usageSpec->algParam);
-        ret = mbedtls_gcm_crypt_and_tag(&ctx,
+        ret = mbedtls_gcm_crypt_and_tag(ctx,
             MBEDTLS_GCM_ENCRYPT,
             message->size,
             aeadParam->nonce.data,
@@ -594,7 +596,8 @@ static int32_t AesEncryptGcm(const struct HksBlob *key, const struct HksUsageSpe
         cipherText->size = message->size;
     } while (0);
 
-    mbedtls_gcm_free(&ctx);
+    mbedtls_gcm_free(ctx);
+    HKS_FREE(ctx);
     return ret;
 }
 
@@ -737,13 +740,14 @@ static int32_t AesEncryptGcmFinal(void **cryptoCtx, const struct HksBlob *messag
 static int32_t AesDecryptGcm(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *cipherText)
 {
-    mbedtls_gcm_context ctx;
-    (void)memset_s(&ctx, sizeof(mbedtls_gcm_context), 0, sizeof(mbedtls_gcm_context));
-    mbedtls_gcm_init(&ctx);
+    mbedtls_gcm_context *ctx = (mbedtls_gcm_context *)HksMalloc(sizeof(mbedtls_gcm_context));
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_MALLOC_FAIL, "Decrypt gcmCtx malloc fail")
+    (void)memset_s(ctx, sizeof(mbedtls_gcm_context), 0, sizeof(mbedtls_gcm_context));
+    mbedtls_gcm_init(ctx);
 
     int32_t ret;
     do {
-        ret = mbedtls_gcm_setkey(&ctx, MBEDTLS_CIPHER_ID_AES, key->data, key->size * HKS_BITS_PER_BYTE);
+        ret = mbedtls_gcm_setkey(ctx, MBEDTLS_CIPHER_ID_AES, key->data, key->size * HKS_BITS_PER_BYTE);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls aes gcm set key failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
@@ -751,7 +755,7 @@ static int32_t AesDecryptGcm(const struct HksBlob *key, const struct HksUsageSpe
         }
 
         const struct HksAeadParam *aeadParam = (struct HksAeadParam *)(usageSpec->algParam);
-        ret = mbedtls_gcm_auth_decrypt(&ctx,
+        ret = mbedtls_gcm_auth_decrypt(ctx,
             message->size,
             aeadParam->nonce.data,
             aeadParam->nonce.size,
@@ -770,7 +774,8 @@ static int32_t AesDecryptGcm(const struct HksBlob *key, const struct HksUsageSpe
         cipherText->size = message->size;
     } while (0);
 
-    mbedtls_gcm_free(&ctx);
+    mbedtls_gcm_free(ctx);
+    HKS_FREE(ctx);
     return ret;
 }
 
