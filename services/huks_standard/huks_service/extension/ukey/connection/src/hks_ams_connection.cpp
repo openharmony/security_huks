@@ -15,6 +15,8 @@
 
 #include "hks_ams_connection.h"
 #include "ability_manager_client.h"
+#include "hks_template.h"
+#include "huks_access_ext_base_proxy.h"
 
 namespace OHOS {
 namespace Security {
