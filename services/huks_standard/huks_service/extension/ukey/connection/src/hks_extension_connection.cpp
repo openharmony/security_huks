@@ -62,14 +62,13 @@ void ExtensionConnection::OnDisconnect(sptr<ExtensionConnection> &connect)
         RemoveExtDeathRecipient(extConnectProxy->AsObject());
     }
 
-    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->DisconnectAbility(connect);
+    AMSDisconnectAbility(connect);
     if (!disConnectConv_.wait_for(lock, std::chrono::seconds(WAIT_TIME), [connect] {
         HKS_IF_TRUE_LOGE(connect->extConnectProxy == nullptr, "proxy is null, not need to wait!")
         return connect->extConnectProxy == nullptr;
     })) {
         HKS_LOG_E("wait disconnected timeout or, not need to wait");
     };
-    HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS, "disconnect ability fail, ret = %{public}d", ret)
     extConnectProxy = nullptr;
     isConnected_.store(false);
 }
