@@ -79,12 +79,19 @@ public:
     MOCK_METHOD(int32_t, GetObjectRefCount, (), (override));
     MOCK_METHOD(int, SendRequest, (uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option),
         (override));
+    MOCK_METHOD(bool, IsProxyObject, (), (const, override));
     MOCK_METHOD(bool, AddDeathRecipient, (const sptr<DeathRecipient> &recipient), (override));
     MOCK_METHOD(bool, RemoveDeathRecipient, (const sptr<DeathRecipient> &recipient), (override));
     MOCK_METHOD(int, Dump, (int fd, const std::vector<std::u16string> &args), (override));
+    MockIRemoteObject() : IRemoteObject(u"mock_IRemoteObject") {}
 };
 
 class ExtensionConnectionTest : public testing::Test {
+public:
+    void SimulateAbilityConnectResponse();
+
+    void SimulateAbilityDisconnectResponse();
+
 protected:
     static void SetUpTestCase(void);
 
@@ -94,9 +101,9 @@ protected:
 
     void TearDown() override;
     
-    sptr<ExtensionConnection> extensionConn;
-    sptr<MockIRemoteObject> mockRemoteObject = new MockIRemoteObject();
-    sptr<MockIHuksAccessExtBase> mockProxy = new MockIHuksAccessExtBase();
+    sptr<ExtensionConnection> connection_;
+    AAFwk::Want want_;
+    int32_t userId_;
 };
 
 }

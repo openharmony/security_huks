@@ -14,12 +14,16 @@ if (huks_enable_ukey_config == true) {
 
     include_dirs = [
       ".",
-      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger/inc",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc",
+      "//base/security/huks/test/unittest/huks_common_test/hks_mock_common",
+      "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger/inc",
     ]
 
     sources = [
-      "./plugin_interface_wrap.cpp",
-      "./hks_plugin_manager_test.cpp",
+      "./hks_extension_connection_test.cpp",
+      "./hks_ams_connection_mock.cpp",
+      "//base/security/huks/test/unittest/huks_common_test/hks_mock_common/hks_mock_common.cpp",
     ]
 
     configs = [
@@ -27,22 +31,23 @@ if (huks_enable_ukey_config == true) {
     ]
 
     deps = [
-      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
-      "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection:libhuks_extension_connection_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger:libhuks_provider_life_cycle_manager_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
     ]
+
     external_deps = [
+      "ability_base:want",
+      "ability_runtime:ability_connect_callback_stub",
+      "access_token:libaccesstoken_sdk",
+      "access_token:libnativetoken_shared",
+      "access_token:libtokensetproc_shared",
+      "os_account:os_account_innerkits",
       "c_utils:utils",
       "googletest:gmock",
       "googletest:gtest",
       "hilog:libhilog",
     ]
-
-    cflags = [
-      "-Wall",
-      "-Werror",
-    ]
-
-    ldflags = [ "-Wl,--wrap=dlsym" ]
 
     sanitize = {
       integer_overflow = true
