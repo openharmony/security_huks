@@ -1028,6 +1028,14 @@ void JsHksCryptoExtAbility::Init(const std::shared_ptr<AbilityRuntime::AbilityLo
     AbilityRuntime::HandleScope handleScope(jsRuntime_);
     jsObj_ = jsRuntime_.LoadModule(moduleName, srcPath, abilityInfo_->hapPath,
         abilityInfo_->compileMode == AbilityRuntime::CompileMode::ES_MODULE);
+    
+    napi_env env = reinterpret_cast<napi_env>(&jsRuntime_.GetNativeEngine());
+    napi_value exception = nullptr;
+    napi_status status = napi_get_and_clear_last_exception(env, &exception);
+    if (status == napi_ok && exception != nullptr) {
+        LOGE("Clear Error in jsRuntime_.");
+    }
+    
     if (jsObj_ == nullptr) {
         LOGE("Failed to get jsObj_");
         return;
@@ -1073,6 +1081,10 @@ sptr<IRemoteObject> JsHksCryptoExtAbility::OnConnect(const AAFwk::Want &want)
     napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
     napi_value argv[] = { napiWant };
     CallObjectMethod("onConnect", argv, ARGC_ONE); // Don't enforce this function
+    if (!jsObj_) {
+        LOGE("CallObjectMethod jsObj Not found HksCryptoExtAbility.js in OnConnect.");
+        return nullptr;
+    }
     return remoteObject->AsObject();
 }
 
