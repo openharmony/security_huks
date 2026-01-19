@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,8 @@
  */
 
 #include "hks_extension_connection_test.h"
+#include "hks_mock_common.h"
+#include <thread>
 
 using namespace testing::ext;
 using ::testing::_;
@@ -29,100 +31,84 @@ void ExtensionConnectionTest::TearDownTestCase(void) {
 }
 
 void ExtensionConnectionTest::SetUp() {
-    sptr<ExtensionConnection> extensionConn(new (std::nothrow) ExtensionConnection());
-    ASSERT_NE(extensionConn, nullptr);
+    HksProcessInfo processInfo{};
+    HksGetProcessInfoForIPC(&processInfo);
+    connection_ = new ExtensionConnection(processInfo);
+    want_.SetElementName("com.hmos.hukstest.ukey", "TestCryptoAbility");
+    userId_ = 100;
 }
 
 void ExtensionConnectionTest::TearDown() {
-    extensionConn = nullptr;
+    connection_ = nullptr;
+}
+
+constexpr int WAIT_TIME = 10;
+void SimulateAbilityConnectResponse() {
+    std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long long>(WAIT_TIME)));
+    sptr<MockIRemoteObject> mockIRemoteObject = new MockIRemoteObject();
+    EXPECT_CALL(*mockRemoteObject, SendRequest(_, _, _, _)).WillRepeatedly(Return(0));
+    AppExecFwk::ElementName element;
+    connection_->OnAbilityConnectDone(element, mockIRemoteObject, 0);
+}
+
+void SimulateAbilityDisconnectResponse() {
+    std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long long>(WAIT_TIME)));
+    AppExecFwk::ElementName element;
+    connection_->OnAbilityDisconnectDone(element, 0);
 }
 
 /**
  * @tc.name: ExtensionConnectionTest.ExtensionConnectionTest001
- * @tc.desc: connect success.
+ * @tc.desc: connect success and disconnect time out.
  * @tc.type: FUNC
  */
 HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest001, TestSize.Level0) {
-    EXPECT_CALL(*mockProxy, AsObject()).WillRepeatedly(testing::Return(mockRemoteObject));
-    EXPECT_CALL(*mockRemoteObject, AddDeathRecipient(_)).Times(1);
+    std::thread connectThread(&ExtensionConnectionTest::SimulateAbilityConnectResponse, this);
+    int32_t result = connection_->OnConnection(want_, connection_, userId_);
+    if (connectThread.joinable()) {
+        connectThread.join();
+    }
+    EXPECT_EQ(result, HKS_SUCCESS);
+    EXPECT_TRUE(connection_->IsConnected());
 
-    AppExecFwk::ElementName element;
-    int resultCode = 0;
-    extensionConn->OnAbilityConnectDone(element, mockRemoteObject, resultCode);
-
-    EXPECT_EQ(extensionConn->IsConnected(), true) << "IsConnected is false";
-    EXPECT_NE(extensionConn->GetExtConnectProxy(), nullptr) << "extConnectProxy is nullptr";
-    EXPECT_EQ(extensionConn->GetExtConnectProxy(), sptr<IHuksAccessExtBase>(mockProxy)) << "proxy is not mockProxy";
+    std::thread disConnectThread(&ExtensionConnectionTest::SimulateAbilityDisconnectResponse, this);
+    connection_->DisConnect(connection_);
+    if (disConnectThread.joinable()) {
+        disConnectThread.join();
+    }
+    EXPECT_FALSE(connection_->IsConnected());
 }
 
 /**
  * @tc.name: ExtensionConnectionTest.ExtensionConnectionTest002
- * @tc.desc: connect fail.
+ * @tc.desc: connect time out.
  * @tc.type: FUNC
  */
 HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest002, TestSize.Level0) {
-    AppExecFwk::ElementName element;
-    int resultCode = 0;
-    extensionConn->OnAbilityConnectDone(element, nullptr, resultCode);
-
-    EXPECT_EQ(extensionConn->IsConnected(), true) << "IsConnected is true";
-    EXPECT_EQ(extensionConn->GetExtConnectProxy(), nullptr) << "extConnectProxy is not nullptr";
+    int32_t result = connection_->OnConnection(want_, connection_, userId_);
+    EXPECT_EQ(ret, HKS_ERROR_REMOTE_OPERATION_FAILED) << "ret is not HKS_ERROR_REMOTE_OPERATION_FAILED.";
+    EXPECT_FALSE(connection_->IsConnected());
 }
 
 /**
  * @tc.name: ExtensionConnectionTest.ExtensionConnectionTest003
- * @tc.desc: connect time out.
+ * @tc.desc: OnRemotedDied.
  * @tc.type: FUNC
  */
 HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest003, TestSize.Level0) {
-    AAFwk::Want want;
-    int32_t ret = extensionConn->OnConnection(want, 100);
+    std::thread connectThread(&ExtensionConnectionTest::SimulateAbilityConnectResponse, this);
+    int32_t result = connection_->OnConnection(want_, connection_, userId_);
+    if (connectThread.joinable()) {
+        connectThread.join();
+    }
+    EXPECT_EQ(result, HKS_SUCCESS);
+    EXPECT_TRUE(connection_->IsConnected());
 
-    EXPECT_EQ(ret, HKS_ERROR_CONNECT_TIME_OUT) << "ret is not time out";
-    EXPECT_EQ(extensionConn->IsConnected(), false) << "IsConnected is true";
-    EXPECT_EQ(extensionConn->GetExtConnectProxy(), nullptr) << "extConnectProxy is not nullptr";
-}
-
-/**
- * @tc.name: ExtensionConnectionTest.ExtensionConnectionTest004
- * @tc.desc: connect and disconnect.
- * @tc.type: FUNC
- */
-HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest004, TestSize.Level0) {
-    EXPECT_CALL(*mockProxy, AsObject()).WillRepeatedly(testing::Return(mockRemoteObject));
-    EXPECT_CALL(*mockRemoteObject, AddDeathRecipient(_)).Times(1);
-
-    AppExecFwk::ElementName element;
-    extensionConn->OnAbilityConnectDone(element, mockRemoteObject, 0);
-
-    EXPECT_EQ(extensionConn->IsConnected(), true) << "connection fail";
-
-    AppExecFwk::ElementName disconnectElement;
-    int disconnectResultCode = 0;
-    extensionConn->OnAbilityDisconnectDone(disconnectElement, disconnectResultCode);
-
-    EXPECT_EQ(extensionConn->IsConnected(), false) << "disconnect fail";
-    EXPECT_EQ(extensionConn->GetExtConnectProxy(), nullptr) << "extConnectProxy is not nullptr";
-}
-
-/**
- * @tc.name: ExtensionConnectionTest.ExtensionConnectionTest005
- * @tc.desc: death recipient callback.
- * @tc.type: FUNC
- */
-HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest005, TestSize.Level0) {
-    EXPECT_CALL(*mockProxy, AsObject()).WillRepeatedly(testing::Return(mockRemoteObject));
-    EXPECT_CALL(*mockRemoteObject, AddDeathRecipient(_)).Times(1);
-
-    AppExecFwk::ElementName element;
-    extensionConn->OnAbilityConnectDone(element, mockProxy->AsObject(), 0);
-    EXPECT_EQ(extensionConn->IsConnected(), true) << "IsConnected is false";
-
-    wptr<IRemoteObject> remote(mockRemoteObject);
-    extensionConn->OnRemoteDied(remote);
-
-    EXPECT_EQ(extensionConn->IsConnected(), false) << "IsConnected is true";
-    EXPECT_EQ(extensionConn->GetExtConnectProxy(), nullptr) << "extConnectProxy is not nullptr";
+    std::function<void(HksProcessInfo)> callBackPlugin = [](HksProcessInfo info) {};
+    connection_->callBackFromPlugin(callBackPlugin);
+    wptr<MockIRemoteObject> mockIRemoteObject = new MockIRemoteObject();
+    connection_->OnRemoteDied(mockIRemoteObject);
+    EXPECT_FALSE(connection_->IsConnected());
 }
 
 }
