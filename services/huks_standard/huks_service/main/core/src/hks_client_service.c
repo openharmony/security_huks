@@ -339,7 +339,7 @@ static int32_t DksAppendKeyAliasAndNewParamSet(struct HksParamSet *paramSet, con
 static int32_t GetKeyAndNewParamSet(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *key, struct HksParamSet **outParamSet)
 {
-    int32_t ret = AppendProcessInfoAndDefaultStrategy(paramSet, processInfo, NULL, outParamSet);
+    int32_t ret = AppendProcessInfoAndDefault(paramSet, processInfo, NULL, outParamSet, true);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
         "append process info and default strategy failed, ret = %" LOG_PUBLIC "d", ret)
 
@@ -1063,7 +1063,7 @@ static int32_t GetAndImportKeystoreKey(const struct HksImportWrappedInnerArgs *a
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
         "HksPluginImportWrappedKey failed, ret = %" LOG_PUBLIC "d", ret)
     do {
-        ret = AppendProcessInfoAndDefaultStrategy(args->paramSet, args->processInfo, NULL, newParamSet);
+        ret = AppendProcessInfoAndDefault(args->paramSet, args->processInfo, NULL, newParamSet, true);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append new info failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = CheckKeyCondition(args->processInfo, args->keyAlias, *newParamSet);
@@ -1703,7 +1703,7 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
         common.ret = CheckBatchOperation(common.operation, handle);
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "CheckBatchOperation fail, ret = %" LOG_PUBLIC "d", common.ret)
 
-        common.ret = AppendProcessInfoAndDefaultStrategy(paramSet, processInfo, common.operation, &common.newParamSet);
+        common.ret = AppendProcessInfoAndDefault(paramSet, processInfo, common.operation, &common.newParamSet, false);
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "append process info failed, ret = %" LOG_PUBLIC "d", common.ret)
 
         common.ret = HksCheckAcrossAccountsPermission(common.newParamSet, processInfo->userIdInt);
@@ -1793,7 +1793,7 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
         common.ret = AppendAndQueryInFinish(handle, processInfo, &common.operation);
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "AppendAndQueryInFinish fail, ret = %" LOG_PUBLIC "d", common.ret)
 
-        common.ret = AppendProcessInfoAndDefaultStrategy(paramSet, processInfo, common.operation, &common.newParamSet);
+        common.ret = AppendProcessInfoAndDefault(paramSet, processInfo, common.operation, &common.newParamSet, true);
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "append process info failed, ret = %" LOG_PUBLIC "d", common.ret)
 
         common.ret = HksCheckAcrossAccountsPermission(common.newParamSet, processInfo->userIdInt);
@@ -1851,7 +1851,7 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
             break;
         }
 
-        ret = AppendProcessInfoAndDefaultStrategy(paramSet, processInfo, operation, &newParamSet);
+        ret = AppendProcessInfoAndDefault(paramSet, processInfo, operation, &newParamSet, false);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append process info failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCheckAcrossAccountsPermission(newParamSet, processInfo->userIdInt);
@@ -1946,7 +1946,7 @@ int32_t HksServiceGenerateRandom(const struct HksProcessInfo *processInfo, struc
         ret = HksCheckGenerateRandomParams(&processInfo->processName, random);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check generate random params failed, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = AppendProcessInfoAndDefaultStrategy(NULL, processInfo, NULL, &newParamSet);
+        ret = AppendProcessInfoAndDefault(NULL, processInfo, NULL, &newParamSet, false);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append process info failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HuksAccessGenerateRandom(newParamSet, random);

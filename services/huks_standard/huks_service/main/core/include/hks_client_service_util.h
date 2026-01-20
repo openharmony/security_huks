@@ -48,8 +48,8 @@ int32_t AppendStorageLevelIfNotExistInner(const struct HksProcessInfo *processIn
 
 bool CheckProcessNameTagExist(const struct HksParamSet *paramSet);
 
-int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *paramSet,
-    const struct HksProcessInfo *processInfo, const struct HksOperation *operation, struct HksParamSet **outParamSet);
+int32_t AppendProcessInfoAndDefault(const struct HksParamSet *paramSet, const struct HksProcessInfo *processInfo,
+    const struct HksOperation *operation, struct HksParamSet **outParamSet, bool checkGroup);
 
 // callback
 int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo,
