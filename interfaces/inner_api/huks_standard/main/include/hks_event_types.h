@@ -25,8 +25,10 @@
 
 
 #ifdef __cplusplus
+#ifdef L2_STANDARD
 
 #include <unordered_map>
+
 #include <stdint.h>
 #include "hks_type.h"
 
@@ -64,6 +66,7 @@ int32_t HksUnregisterEventProcWrapper(uint32_t eventId);
 int32_t HksEnqueueEventWrapper(uint32_t eventId, struct HksParamSet *paramSet);
 }
 
+#endif // L2_STANDARD
 #endif // __cplusplus
 
 #endif // HKS_EVENT_TYPES_H
