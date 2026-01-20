@@ -32,7 +32,8 @@ int32_t AMSConnectAbility(const AAFwk::Want &want, sptr<ExtensionConnection> &co
 void AMSDisconnectAbility(sptr<ExtensionConnection> &connect)
 {
     int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->DisconnectAbility(connect);
-    HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS, "disconnect ability by Ability Manager Service fail, ret = %{public}d", ret)
+    HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS,
+        "disconnect ability by Ability Manager Service fail, ret = %{public}d", ret)
     return;
 }
 
