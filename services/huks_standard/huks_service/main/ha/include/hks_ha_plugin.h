@@ -168,10 +168,9 @@ int32_t HksHaPluginInit(void);
 
 void HksHaPluginDestroy(HksHaPlugin *plugin);
 
-// 供HksBasicInterface调用
-int32_t HksRegisterEventProcWrapper(const struct HksEventProcMap *procMap);
+int32_t HksRegisterEventProcWrapper(const void *procMap);
 
-int32_t HksRegisterEventProcs(const struct HksEventProcMap *procMaps, uint32_t count);
+int32_t HksRegisterEventProcs(const void *procMaps, uint32_t count);
 
 int32_t HksUnregisterEventProcWrapper(uint32_t eventId);
 
