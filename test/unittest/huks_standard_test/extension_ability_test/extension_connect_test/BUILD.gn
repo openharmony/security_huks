@@ -22,7 +22,7 @@ if (huks_enable_ukey_config == true) {
 
     sources = [
       "./hks_extension_connection_test.cpp",
-      "./hks_ams_connection_mock.cpp",
+      "./hks_ability_manager_service_connection_mock.cpp",
       "//base/security/huks/test/unittest/huks_common_test/hks_mock_common/hks_mock_common.cpp",
     ]
 

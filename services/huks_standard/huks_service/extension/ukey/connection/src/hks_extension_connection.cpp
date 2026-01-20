@@ -14,7 +14,7 @@
  */
 
 #include "hks_extension_connection.h"
-#include "hks_ams_connection.h"
+#include "hks_ability_manager_service_connection.h"
 #include "ability_manager_client.h"
 #include "hks_log.h"
 #include "hks_template.h"

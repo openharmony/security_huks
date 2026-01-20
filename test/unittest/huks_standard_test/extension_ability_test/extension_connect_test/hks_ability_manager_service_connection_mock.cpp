@@ -13,32 +13,26 @@
  * limitations under the License.
  */
 
-#include "hks_ams_connection.h"
-#include "ability_manager_client.h"
-#include "hks_template.h"
-#include "huks_access_ext_base_proxy.h"
+#include "hks_ability_manager_service_connection.h"
+#include "hks_extension_connection.h"
 
 namespace OHOS {
 namespace Security {
 namespace Huks {
 int32_t AMSConnectAbility(const AAFwk::Want &want, sptr<ExtensionConnection> &connect, int32_t userid)
 {
-    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, connect, userid);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_REMOTE_OPERATION_FAILED,
-        "fail to connect ability by ability manager service. ext error = %" LOG_PUBLIC "d", ret)
     return HKS_SUCCESS;
 }
 
 void AMSDisconnectAbility(sptr<ExtensionConnection> &connect)
 {
-    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->DisconnectAbility(connect);
-    HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS, "disconnect ability by AMS fail, ret = %{public}d", ret)
     return;
 }
 
 sptr<IHuksAccessExtBase> ChangeIRemoteObjectToIHuksAccessExtBase(const sptr<IRemoteObject>& remoteObject)
 {
-    return iface_cast<HuksAccessExtBaseProxy>(remoteObject);
+    sptr<IHuksAccessExtBase> extConnectProxy = new MockIHuksAccessExtBase();
+    return extConnectProxy;
 }
 
 }
