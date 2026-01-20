@@ -49,6 +49,10 @@ ohos_unittest("huks_mock_test") {
     "//base/security/huks/test/unittest/huks_standard_test/module_test/mock/common/src/huks_core_hal_mock.c",
   ]
 
+  deps = [
+    "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+  ]
+
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
