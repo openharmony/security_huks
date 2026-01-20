@@ -320,11 +320,12 @@ static int32_t AppendDeveloperId(const struct HksProcessInfo *processInfo, struc
     return ret;
 }
 #endif
-int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *paramSet,
-    const struct HksProcessInfo *processInfo, const struct HksOperation *operation, struct HksParamSet **outParamSet)
+int32_t AppendProcessInfoAndDefault(const struct HksParamSet *paramSet, const struct HksProcessInfo *processInfo,
+    const struct HksOperation *operation, struct HksParamSet **outParamSet, bool checkGroup)
 {
     int32_t ret;
     (void)operation;
+    (void)checkGroup;
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob appInfo = { 0, NULL };
     struct HksBlob developerId = { 0, NULL };
@@ -338,10 +339,8 @@ int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *paramSet,
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append client service tag failed")
 
         // process name only can be inserted by service
-        if (CheckProcessNameTagExist(newParamSet)) {
-            ret = HKS_ERROR_INVALID_ARGUMENT;
-            break;
-        }
+        ret = HKS_ERROR_INVALID_ARGUMENT;
+        HKS_IF_TRUE_BREAK(CheckProcessNameTagExist(newParamSet))
 
         struct HksParam paramArr[] = {
             { .tag = HKS_TAG_PROCESS_NAME, .blob = processInfo->processName },
@@ -364,8 +363,10 @@ int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *paramSet,
         ret = AppendStorageLevelAndSpecificUserIdToParamSet(processInfo, operation, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add default strategy failed")
 #ifdef HKS_SUPPORT_GET_BUNDLE_INFO
-        ret = AppendDeveloperId(processInfo, newParamSet, &developerId);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append group key info failed, ret = %" LOG_PUBLIC "d", ret)
+        if (checkGroup) { // only check access group id if needed
+            ret = AppendDeveloperId(processInfo, newParamSet, &developerId);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append group key info failed, ret = %" LOG_PUBLIC "d", ret)
+        }
 #endif
 #endif
         ret = HksBuildParamSet(&newParamSet);
@@ -384,7 +385,7 @@ int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *paramSet,
 int32_t AppendNewInfoForUseKeyInService(const struct HksParamSet *paramSet,
     const struct HksProcessInfo *processInfo, struct HksParamSet **outParamSet)
 {
-    return AppendProcessInfoAndDefaultStrategy(paramSet, processInfo, NULL, outParamSet);
+    return AppendProcessInfoAndDefault(paramSet, processInfo, NULL, outParamSet, true);
 }
 
 #ifndef _CUT_AUTHENTICATE_
@@ -553,7 +554,7 @@ int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo
     int32_t ret = HksCheckAndGetUserAuthInfo(paramSet, processInfo->uidInt, &userAuthType, &authAccessType);
     if (ret == HKS_ERROR_NOT_SUPPORTED) {
         struct HksParamSet *newParamSet = NULL;
-        ret = AppendProcessInfoAndDefaultStrategy(paramSet, processInfo, NULL, &newParamSet);
+        ret = AppendProcessInfoAndDefault(paramSet, processInfo, NULL, &newParamSet, true);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
             "append process info and default strategy failed, ret = %" LOG_PUBLIC "d", ret)
         *outParamSet = newParamSet;
@@ -592,7 +593,7 @@ int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CheckIfUserIamSupportCurType or AppendUserAuthInfo fail")
         }
         struct HksParamSet *newInfoParamSet = NULL;
-        ret = AppendProcessInfoAndDefaultStrategy(userAuthParamSet, processInfo, NULL, &newInfoParamSet);
+        ret = AppendProcessInfoAndDefault(userAuthParamSet, processInfo, NULL, &newInfoParamSet, true);
         HksFreeParamSet(&userAuthParamSet);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
             "append process info and default strategy failed, ret = %" LOG_PUBLIC "d", ret)
@@ -606,7 +607,7 @@ int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo
 int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
 {
-    return AppendProcessInfoAndDefaultStrategy(paramSet, processInfo, NULL, outParamSet);
+    return AppendProcessInfoAndDefault(paramSet, processInfo, NULL, outParamSet, true);
 }
 #endif /* HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL */
 #endif /* _CUT_AUTHENTICATE_ */
