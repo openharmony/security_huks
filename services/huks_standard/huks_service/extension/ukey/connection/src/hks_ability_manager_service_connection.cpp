@@ -21,7 +21,7 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
-int32_t AMSConnectAbility(const AAFwk::Want &want, sptr<ExtensionConnection> &connect, int32_t userid)
+int32_t AMSConnectAbility(const AAFwk::Want &want, const sptr<ExtensionConnection> &connect, int32_t userid)
 {
     int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, connect, userid);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_REMOTE_OPERATION_FAILED,
@@ -29,15 +29,15 @@ int32_t AMSConnectAbility(const AAFwk::Want &want, sptr<ExtensionConnection> &co
     return HKS_SUCCESS;
 }
 
-void AMSDisconnectAbility(sptr<ExtensionConnection> &connect)
+void AMSDisconnectAbility(const sptr<ExtensionConnection> &connect)
 {
     int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->DisconnectAbility(connect);
     HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS,
-        "disconnect ability by Ability Manager Service fail, ret = %{public}d", ret)
+        "disconnect ability by Ability Manager Service fail, ret = %" LOG_PUBLIC "d", ret)
     return;
 }
 
-sptr<IHuksAccessExtBase> ChangeIRemoteObjectToIHuksAccessExtBase(const sptr<IRemoteObject>& remoteObject)
+sptr<IHuksAccessExtBase> CastToHuksAccessExtBaseProxy(const sptr<IRemoteObject>& remoteObject)
 {
     return iface_cast<HuksAccessExtBaseProxy>(remoteObject);
 }
