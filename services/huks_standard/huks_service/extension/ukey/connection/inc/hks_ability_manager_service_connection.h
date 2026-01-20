@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HKS_AMS_CONNECTION_H
-#define HKS_AMS_CONNECTION_H
+#ifndef HKS_ABILITY_MANAGER_SERVICE_CONNECTION_H
+#define HKS_ABILITY_MANAGER_SERVICE_CONNECTION_H
 
 #include "hks_extension_connection.h"
 #include "want.h"
