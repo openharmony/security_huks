@@ -31,6 +31,7 @@
 #include "hks_base_check.h"
 #include "hks_common_check.h"
 #include "hks_crypto_hal.h"
+#include "hks_error_code.h"
 #include "hks_log.h"
 #include "hks_param.h"
 #include "hks_template.h"
@@ -1459,4 +1460,32 @@ int32_t HksCheckBlobParamIsEqual(const struct HksParamSet *paramSet, const struc
         HKS_ERROR_INVALID_ARGUMENT, "compare tag %" LOG_PUBLIC "u failed", (uint32_t)tag)
 
     return HKS_SUCCESS;
+}
+
+static const uint32_t TA_NOT_SUPPORT_TAG[] = {
+    HKS_TAG_KEY_CLASS
+};
+
+int32_t HandleKeyClassTag(const struct HksParamSet *paramSetIn, struct HksParamSet **paramSetOut)
+{
+    struct HksParam *keyClassParam = NULL;
+    int32_t ret = HksGetParam(paramSetIn, HKS_TAG_KEY_CLASS, &keyClassParam);
+    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+        return HksGetParamSet(paramSetIn, paramSetIn->paramSetSize, paramSetOut);
+    }
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    const uint32_t keyClassType = keyClassParam->uint32Param;
+    switch (keyClassType) {
+        case HKS_KEY_CLASS_DEFAULT:
+            return HksDeleteTagsFromParamSet(TA_NOT_SUPPORT_TAG,
+                HKS_ARRAY_SIZE(TA_NOT_SUPPORT_TAG), paramSetIn, paramSetOut);
+        case HKS_KEY_CLASS_EXTENSION:
+            HKS_LOG_E("keyClass == EXTENSION, but feature ta disabled");
+            return HKS_ERROR_NOT_SUPPORTED;
+        default:
+            HKS_LOG_E("keyClass = %" LOG_PUBLIC "u invalid", keyClassType);
+            return HKS_ERROR_INVALID_ARGUMENT;
+    }
 }
