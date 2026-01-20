@@ -525,20 +525,21 @@ void HksHaPluginDestroy()
     HksHaPlugin::GetInstance().Destroy();
 }
 
-// 供HksBasicInterface调用
-int32_t HksRegisterEventProcWrapper(const struct HksEventProcMap *procMap)
+int32_t HksRegisterEventProcWrapper(const void *procMap)
 {
     HKS_IF_NULL_LOGE_RETURN(procMap, HKS_ERROR_NULL_POINTER, "HksRegisterEventProcWrapper: procMap is null");
-    return HksHaPlugin::GetInstance().RegisterEventProc(procMap);
+    const HksEventProcMap *eventProcMap = static_cast<const HksEventProcMap *>(procMap);
+    return HksHaPlugin::GetInstance().RegisterEventProc(eventProcMap);
 }
 
-int32_t HksRegisterEventProcs(const struct HksEventProcMap *procMaps, uint32_t count)
+int32_t HksRegisterEventProcs(const void *procMaps, uint32_t count)
 {
     if (procMaps == nullptr || count == 0) {
         HKS_LOG_E("HksRegisterEventProcs: Invalid input parameters");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    return HksHaPlugin::GetInstance().RegisterEventProcs(procMaps, count);
+    const HksEventProcMap *eventProcMaps = static_cast<const HksEventProcMap *>(procMaps);
+    return HksHaPlugin::GetInstance().RegisterEventProcs(eventProcMaps, count);
 }
 
 int32_t HksUnregisterEventProcWrapper(uint32_t eventId)

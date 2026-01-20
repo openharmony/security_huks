@@ -28,8 +28,8 @@
 
 #include <unordered_map>
 #include <stdint.h>
+#include "hks_type.h"
 
-struct HksParamSet;
 struct HksEventInfo;
 
 
@@ -55,9 +55,9 @@ struct HksEventProcMap {
 
 extern "C" {
 
-int32_t HksRegisterEventProcWrapper(const struct HksEventProcMap *ProcMap);
+int32_t HksRegisterEventProcWrapper(const void *ProcMap);
 
-int32_t HksRegisterEventProcs(const struct HksEventProcMap *procMaps, uint32_t count);
+int32_t HksRegisterEventProcs(const void *procMaps, uint32_t count);
 
 int32_t HksUnregisterEventProcWrapper(uint32_t eventId);
 

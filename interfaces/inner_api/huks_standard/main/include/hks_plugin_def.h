@@ -83,12 +83,10 @@ struct HksBasicInterface {
         const struct HksProcessInfo *processInfo, struct HksParamSet **outParamSet);
     int32_t (*appendStorageParamsForQuery)(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
 
-    #ifdef __cplusplus
-    int32_t (*hksRegisterEventProc)(const struct HksEventProcMap *procMap);
-    int32_t (*hksRegisterEventProcs)(const struct HksEventProcMap *procMaps, uint32_t count);
+    int32_t (*hksRegisterEventProc)(const void *procMap);
+    int32_t (*hksRegisterEventProcs)(const void *procMaps, uint32_t count);
     int32_t (*hksUnregisterEventProc)(uint32_t eventId);
     int32_t (*hksEnqueueEvent)(uint32_t eventId, struct HksParamSet *paramSet);
-    #endif
 };
 
 /**
