@@ -15,9 +15,9 @@
 
 /**
  * @file hks_event_types.h
- * 
+ *
  * @brief Declares Huks event types.
- * 
+ *
  * @since 22
  */
 #ifndef HKS_EVENT_TYPES_H

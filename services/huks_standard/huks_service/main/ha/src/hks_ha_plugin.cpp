@@ -275,7 +275,6 @@ int32_t HksHaPlugin::RegisterEventProc(const struct HksEventProcMap *procMap)
         [procMap](const struct HksEventProcMap &item) {
             return item.eventId == procMap->eventId;
         });
-
     if (it != eventProcList.end()) {
         HKS_LOG_I("RegisterEventProc: EventId %{public}u already registered. Auto override.", procMap->eventId);
         *it = *procMap;
@@ -290,7 +289,7 @@ int32_t HksHaPlugin::RegisterEventProc(const struct HksEventProcMap *procMap)
 
 int32_t HksHaPlugin::RegisterEventProcs(const struct HksEventProcMap *procMaps, uint32_t count)
 {
-    if(procMaps == nullptr || count == 0) {
+    if (procMaps == nullptr || count == 0) {
         HKS_LOG_E("RegisterEventProcs: Invalid input parameters");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -322,7 +321,6 @@ int32_t HksHaPlugin::UnregisterEventProc(uint32_t eventId)
         [eventId](const HksEventProcMap &item) {
             return item.eventId == eventId;
         });
-
     if (it != eventProcList.end()) {
         eventProcList.erase(it);
         HKS_LOG_I("UnregisterEventProc: Successfully unregistered event processor for eventId %u", eventId);
