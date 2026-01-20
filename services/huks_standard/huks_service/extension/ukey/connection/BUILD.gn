@@ -19,14 +19,16 @@ if (os_level == "standard") {
     subsystem_name = "security"
     part_name = "huks"
 
-    # version_script = "libhuks_external_crypto_ext_core.map"
     configs = [
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]
 
     include_dirs = [ "inc" ]
 
-    sources = [ "src/hks_extension_connection.cpp" ]
+    sources = [
+      "src/hks_extension_connection.cpp",
+      "src/hks_ability_manager_service_connection.cpp",
+    ]
 
     deps = [
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",

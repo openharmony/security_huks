@@ -14,6 +14,7 @@
  */
 
 #include "hks_extension_connection.h"
+#include "hks_ability_manager_service_connection.h"
 #include "ability_manager_client.h"
 #include "hks_log.h"
 #include "hks_template.h"
@@ -31,7 +32,7 @@ void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementNa
     HKS_IF_TRUE_RETURN_VOID(remoteObject == nullptr)
 
     std::lock_guard<std::mutex> lock(proxyMutex_);
-    extConnectProxy = iface_cast<HuksAccessExtBaseProxy>(remoteObject);
+    extConnectProxy = CastToHuksAccessExtBaseProxy(remoteObject);
     HKS_IF_TRUE_LOGE_RETURN_VOID(extConnectProxy == nullptr, "iface_cast fail in OnAbilityConnectDone")
 
     AddExtDeathRecipient(extConnectProxy->AsObject());
@@ -41,10 +42,9 @@ void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementNa
 
 int32_t ExtensionConnection::OnConnection(const AAFwk::Want &want, sptr<ExtensionConnection> &connect, int32_t userid)
 {
-    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, connect, userid);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_REMOTE_OPERATION_FAILED,
-        "fail to connect ability by ability manager service. ext error = %" LOG_PUBLIC "d", ret)
-
+    int32_t ret = AMSConnectAbility(want, connect, userid);
+    HKS_IF_TRUE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_REMOTE_OPERATION_FAILED)
+    
     std::unique_lock<std::mutex> lock(proxyMutex_);
     if (!proxyConv_.wait_for(lock, std::chrono::seconds(WAIT_TIME), [this] {
         return extConnectProxy != nullptr;
@@ -62,14 +62,13 @@ void ExtensionConnection::OnDisconnect(sptr<ExtensionConnection> &connect)
         RemoveExtDeathRecipient(extConnectProxy->AsObject());
     }
 
-    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->DisconnectAbility(connect);
+    AMSDisconnectAbility(connect);
     if (!disConnectConv_.wait_for(lock, std::chrono::seconds(WAIT_TIME), [connect] {
         HKS_IF_TRUE_LOGE(connect->extConnectProxy == nullptr, "proxy is null, not need to wait!")
         return connect->extConnectProxy == nullptr;
     })) {
         HKS_LOG_E("wait disconnected timeout or, not need to wait");
     };
-    HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS, "disconnect ability fail, ret = %{public}d", ret)
     extConnectProxy = nullptr;
     isConnected_.store(false);
 }
