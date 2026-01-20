@@ -22,11 +22,11 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
-int32_t AMSConnectAbility(const AAFwk::Want &want, sptr<ExtensionConnection> &connect, int32_t userid);
+int32_t AMSConnectAbility(const AAFwk::Want &want, const sptr<ExtensionConnection> &connect, int32_t userid);
 
-void AMSDisconnectAbility(sptr<ExtensionConnection> &connect);
+void AMSDisconnectAbility(const sptr<ExtensionConnection> &connect);
 
-sptr<IHuksAccessExtBase> ChangeIRemoteObjectToIHuksAccessExtBase(const sptr<IRemoteObject>& remoteObject);
+sptr<IHuksAccessExtBase> CastToHuksAccessExtBaseProxy(const sptr<IRemoteObject>& remoteObject);
 }
 }
 }

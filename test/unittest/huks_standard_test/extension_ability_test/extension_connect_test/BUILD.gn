@@ -4,7 +4,7 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 
 config("json_config") {
-  cflags_cc = [ "-fexceptions" ]
+  use_exception = true
 }
 
 if (huks_enable_ukey_config == true) {
