@@ -14,9 +14,9 @@
  */
 
 #include "hks_api.h"
-#include "hks_apply_permission_test_common.h"
 #include "hks_derive_main_key_test_common.h"
 #include "hks_three_stage_test_common.h"
+#include "hks_mock_common.h"
 
 #include <gtest/gtest.h>
 
@@ -32,13 +32,17 @@ public:
 
     void TearDown();
 };
-
+static uint64_t g_shellTokenId = 0;
 void HksDeriveMainKeyPart1Test::SetUpTestCase(void)
 {
+    g_shellTokenId = GetSelfTokenID();
+    HksMockCommon::SetTestEvironment(g_shellTokenId);
 }
 
 void HksDeriveMainKeyPart1Test::TearDownTestCase(void)
 {
+    SetSelfTokenID(g_shellTokenId);
+    HksMockCommon::ResetTestEvironment();
 }
 
 void HksDeriveMainKeyPart1Test::SetUp()
@@ -103,14 +107,13 @@ HWTEST_F(HksDeriveMainKeyPart1Test, HksDeriveMainKeyPart1Test001, TestSize.Level
  */
 HWTEST_F(HksDeriveMainKeyPart1Test, HksDeriveMainKeyPart1Test002, TestSize.Level0)
 {
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksDeriveMainKeyPart1Test002";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams002, sizeof(g_genParams002) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&genParamSet, g_genParams002, sizeof(g_genParams002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
@@ -153,14 +156,13 @@ HWTEST_F(HksDeriveMainKeyPart1Test, HksDeriveMainKeyPart1Test002, TestSize.Level
  */
 HWTEST_F(HksDeriveMainKeyPart1Test, HksDeriveMainKeyPart1Test003, TestSize.Level0)
 {
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksDeriveMainKeyPart1Test003";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksImportKey(&keyAlias, genParamSet, &keyImported);
@@ -302,15 +304,14 @@ void HksDhAgreeFreeBlob(struct HksBlob *blob1, struct HksBlob *blob2, struct Hks
  */
 HWTEST_F(HksDeriveMainKeyPart1Test, HksDeriveMainKeyPart1Test004, TestSize.Level0)
 {
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     struct HksParamSet *genParamSet = nullptr;
     struct HksParamSet *initParamSet01 = nullptr;
     struct HksParamSet *finishParamSet01 = nullptr;
     struct HksParamSet *initParamSet02 = nullptr;
     struct HksParamSet *finishParamSet02 = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams010, sizeof(g_genParams010) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&genParamSet, g_genParams010, sizeof(g_genParams010) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     ret = InitParamSet(&initParamSet01, g_agreeParams01Init004, sizeof(g_agreeParams01Init004) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)01 failed.";
@@ -430,11 +431,10 @@ int32_t HksHmacDeriveTestNormalCase(const struct HksBlob keyAlias, const struct 
  */
 HWTEST_F(HksDeriveMainKeyPart1Test, HksDeriveMainKeyPart1Test005, TestSize.Level0)
 {
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     struct HksBlob keyAlias = { strlen("HksDeriveMainKeyPart1Test005"), (uint8_t *)"HksDeriveMainKeyPart1Test005" };
-    ret = HKS_FAILURE;
+    int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;

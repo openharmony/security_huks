@@ -37,6 +37,18 @@ using namespace Security::AccessToken;
 
 namespace {
 
+class RecoverToken {
+    public:
+        RecoverToken() {
+            selfToken_ = GetSelfTokenID();
+        }
+        ~RecoverToken() {
+            SetSelfTokenID(selfToken_);
+        }
+    private:
+        uint64_t selfToken_;
+}
+
 PermissionDef g_infoManagerTestPermDef = {
     .permissionName = "ohos.permission.ATTEST_KEY",
     .bundleName = "huks_permission_test",
@@ -476,6 +488,7 @@ static int32_t ValidateCertChainTest2(struct HksCertChain *certChain)
  */
 HWTEST_F(HksDeviceSecTest, HksDeviceSecTest001, TestSize.Level0)
 {
+    RecoverToken mock{};
     uint64_t tokenId;
     const char **acls = new const char *[1];
     acls[0] = "ohos.permission.ACCESS_IDS"; // system_core
@@ -521,6 +534,7 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest001, TestSize.Level0)
  */
 HWTEST_F(HksDeviceSecTest, HksDeviceSecTest002, TestSize.Level0)
 {
+    RecoverToken mock{};
     AccessTokenIDEx tokenIdEx = {0};
     tokenIdEx = AccessTokenKit::AllocHapToken(g_infoManagerTestInfoParms, g_infoManagerTestPolicyPrams);
     AccessTokenID tokenId = tokenIdEx.tokenIdExStruct.tokenID;
@@ -550,6 +564,7 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest002, TestSize.Level0)
  */
 HWTEST_F(HksDeviceSecTest, HksDeviceSecTest003, TestSize.Level0)
 {
+    RecoverToken mock{};
     uint64_t tokenId;
     const char **acls = new const char *[1];
     acls[0] = "ohos.permission.ATTEST_KEY"; // system_basic
@@ -596,6 +611,7 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest003, TestSize.Level0)
  */
 HWTEST_F(HksDeviceSecTest, HksDeviceSecTest004, TestSize.Level0)
 {
+    RecoverToken mock{};
     AccessTokenIDEx tokenIdEx = {0};
     tokenIdEx = AccessTokenKit::AllocHapToken(g_infoManagerTestInfoParmsNoPer, g_infoManagerTestPolicyPramsNoPer);
     AccessTokenID tokenId = tokenIdEx.tokenIdExStruct.tokenID;
@@ -622,6 +638,7 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest004, TestSize.Level0)
  */
 HWTEST_F(HksDeviceSecTest, HksDeviceSecTest005, TestSize.Level0)
 {
+    RecoverToken mock{};
     uint64_t tokenId;
     const char **acls = new const char *[1];
     const char **permsTest = new const char *[1];
@@ -663,6 +680,7 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest005, TestSize.Level0)
  */
 HWTEST_F(HksDeviceSecTest, HksDeviceSecTest006, TestSize.Level0)
 {
+    RecoverToken mock{};
     uint64_t tokenId;
     const char **acls = new const char *[1];
     const char **permsTest = new const char *[1];
@@ -707,6 +725,7 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest006, TestSize.Level0)
  */
 HWTEST_F(HksDeviceSecTest, HksDeviceSecTest007, TestSize.Level0)
 {
+    RecoverToken mock{};
     uint64_t tokenId;
     const char **acls = new const char *[1];
     const char **permsTest = new const char *[1];
@@ -751,6 +770,7 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest007, TestSize.Level0)
  */
 HWTEST_F(HksDeviceSecTest, HksDeviceSecTest008, TestSize.Level0)
 {
+    RecoverToken mock{};
     uint64_t tokenId;
     const char **acls = new const char *[1];
     const char **permsTest = new const char *[1];
@@ -795,6 +815,7 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest008, TestSize.Level0)
  */
 HWTEST_F(HksDeviceSecTest, HksDeviceSecTest009, TestSize.Level0)
 {
+    RecoverToken mock{};
     uint64_t tokenId;
     const char **acls = new const char *[1];
     acls[0] = "ohos.permission.ATTEST_KEY";
@@ -841,6 +862,7 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest009, TestSize.Level0)
  */
 HWTEST_F(HksDeviceSecTest, HksDeviceSecTest010, TestSize.Level0)
 {
+    RecoverToken mock{};
     uint64_t tokenId;
     const char **acls = new const char *[1];
     acls[0] = "ohos.permission.ATTEST_KEY";

@@ -19,7 +19,6 @@
 #include "file_ex.h"
 #endif
 #include "securec.h"
-#include "hks_apply_permission_test_common.h"
 #include "hks_attest_key_test_common.h"
 #include "hks_test_adapt_for_de.h"
 #include "native_huks_api.h"
@@ -31,7 +30,7 @@
 #include "hks_param.h"
 #include "hks_service_ipc_serialization.h"
 #include "hks_type.h"
-
+#include "hks_mock_common.h"
 
 using namespace testing::ext;
 namespace Unittest::AttestKey {
@@ -617,13 +616,17 @@ public:
 
     void TearDown();
 };
-
+static uint64_t g_shellTokenId = 0;
 void HksAttestKeyNonIdsTest::SetUpTestCase(void)
 {
+    g_shellTokenId = GetSelfTokenID();
+    HksMockCommon::SetTestEvironment(g_shellTokenId);
 }
 
 void HksAttestKeyNonIdsTest::TearDownTestCase(void)
 {
+    SetSelfTokenID(g_shellTokenId);
+    HksMockCommon::ResetTestEvironment();
 }
 
 void HksAttestKeyNonIdsTest::SetUp()
@@ -693,21 +696,17 @@ static void ValidateCertChain(struct HksParamSet *paramSet, struct HksParamSet *
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest001, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAttestKeyNonIdsTest001");
-    int32_t ret = SetIdsTokenForAttestKeyPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     struct HksParamSet *paramSet = nullptr;
     HksCertChain *certChain = nullptr;
-    ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
+    int32_t ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
     ASSERT_EQ(ret, HKS_SUCCESS);
     GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
     const struct HksTestCertChain certParam = { true, true, true, g_size };
     (void)ConstructDataToCertChain(&certChain, &certParam);
     ret = HksAttestKeyForDe(&g_keyAlias, paramSet, certChain);
     ASSERT_EQ(ret, HKS_SUCCESS);
-
-    ret = SetIdsTokenWithoutPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
 }
 
 /**
@@ -914,6 +913,8 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest008, TestSize.Level0)
  */
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest009, TestSize.Level0)
 {
+    HksMockNativeToken mock("asset_service");
+    HKS_LOG_E("=====");
     struct HksParamSet *paramSet = nullptr;
     HksCertChain *certChain = nullptr;
     HKS_LOG_I("enter HksAttestKeyNonIdsTest009");
@@ -937,6 +938,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest009, TestSize.Level0)
  */
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest010, TestSize.Level0)
 {
+    HksMockNativeToken mock("asset_service");
     struct HksParamSet *paramSet = nullptr;
     HksCertChain *certChain = nullptr;
     HKS_LOG_I("enter HksAttestKeyNonIdsTest010");
@@ -960,6 +962,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest010, TestSize.Level0)
  */
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest011, TestSize.Level0)
 {
+    HksMockNativeToken mock("asset_service");
     struct HksParamSet *paramSet = nullptr;
     HksCertChain *certChain = nullptr;
     HKS_LOG_I("enter HksAttestKeyNonIdsTest011");
@@ -994,6 +997,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest011, TestSize.Level0)
  */
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest012, TestSize.Level0)
 {
+    HksMockNativeToken mock("asset_service");
     struct HksParamSet *paramSet = nullptr;
     HksCertChain *certChain = nullptr;
     HKS_LOG_I("enter HksAttestKeyNonIdsTest012");
@@ -1034,6 +1038,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest012, TestSize.Level0)
  */
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest013, TestSize.Level0)
 {
+    HksMockNativeToken mock("asset_service");
     struct HksParamSet *paramSet = nullptr;
     HksCertChain *certChain = nullptr;
     HKS_LOG_I("enter HksAttestKeyNonIdsTest013");
@@ -1108,6 +1113,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest014, TestSize.Level0)
  */
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest015, TestSize.Level0)
 {
+    HksMockNativeToken mock("asset_service");
     struct HksParamSet *paramSet = nullptr;
     HksCertChain *certChain = nullptr;
     HKS_LOG_I("enter HksAttestKeyNonIdsTest015");
@@ -1140,6 +1146,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest015, TestSize.Level0)
  */
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest016, TestSize.Level0)
 {
+    HksMockNativeToken mock("asset_service");
     struct HksParamSet *paramSet = nullptr;
     HksCertChain *certChain = nullptr;
     HKS_LOG_I("enter HksAttestKeyNonIdsTest016");
@@ -1213,6 +1220,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest017, TestSize.Level0)
  */
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest018, TestSize.Level0)
 {
+    HksMockNativeToken mock("asset_service");
     struct HksParamSet *paramSet = nullptr;
     HksCertChain *certChain = nullptr;
     HKS_LOG_I("enter HksAttestKeyNonIdsTest018");
@@ -1245,6 +1253,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest018, TestSize.Level0)
  */
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest019, TestSize.Level0)
 {
+    HksMockNativeToken mock("asset_service");
     struct HksParamSet *paramSet = nullptr;
     HksCertChain *certChain = nullptr;
     HKS_LOG_I("enter HksAttestKeyNonIdsTest019");
@@ -1284,6 +1293,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest019, TestSize.Level0)
  */
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest020, TestSize.Level0)
 {
+    HksMockNativeToken mock("asset_service");
     struct HksParamSet *paramSet = nullptr;
     HksCertChain *certChain = nullptr;
     HKS_LOG_I("enter HksAttestKeyNonIdsTest020");
@@ -1320,6 +1330,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest020, TestSize.Level0)
  */
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest021, TestSize.Level0)
 {
+    HksMockNativeToken mock("asset_service");
     struct HksParamSet *paramSet = nullptr;
     HksCertChain *certChain = nullptr;
     HKS_LOG_I("enter HksAttestKeyNonIdsTest021");
@@ -1361,6 +1372,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest021, TestSize.Level0)
  */
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest022, TestSize.Level0)
 {
+    HksMockNativeToken mock("asset_service");
     struct HksParamSet *paramSet = nullptr;
     HksCertChain *certChain = nullptr;
     HKS_LOG_I("enter HksAttestKeyNonIdsTest022");
@@ -1402,6 +1414,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest022, TestSize.Level0)
  */
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest023, TestSize.Level0)
 {
+    HksMockNativeToken mock("asset_service");
     struct HksParamSet *paramSet = nullptr;
     HksCertChain *certChain = nullptr;
     HKS_LOG_I("enter HksAttestKeyNonIdsTest023");
@@ -1444,6 +1457,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest023, TestSize.Level0)
  */
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest024, TestSize.Level0)
 {
+    HksMockNativeToken mock("asset_service");
     struct HksParamSet *paramSet = nullptr;
     HksCertChain *certChain = nullptr;
     HKS_LOG_I("enter HksAttestKeyNonIdsTest024");
@@ -1486,6 +1500,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest024, TestSize.Level0)
  */
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest025, TestSize.Level0)
 {
+    HksMockNativeToken mock("asset_service");
     struct HksParamSet *paramSet = nullptr;
     HksCertChain *certChain = nullptr;
     HKS_LOG_I("enter HksAttestKeyNonIdsTest025");
@@ -1524,6 +1539,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest025, TestSize.Level0)
 #ifndef HKS_UNTRUSTED_RUNNING_ENV
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest026, TestSize.Level0)
 {
+    HksMockNativeToken mock("asset_service");
     HKS_LOG_E("enter HksAttestKeyNonIdsTest026");
 
     int32_t ret = HKS_ERROR_BAD_STATE;
@@ -1553,6 +1569,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest026, TestSize.Level0)
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest027, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAttestKeyNonIdsTest027");
+    HksMockNativeToken mock("asset_service");
     struct HksParamSet *paramSetOut = nullptr;
     ASSERT_EQ(HksInitParamSet(&paramSetOut), HKS_SUCCESS);
     paramSetOut->paramSetSize = sizeof(struct HksParamSet); /* paramSetOut size invalid */

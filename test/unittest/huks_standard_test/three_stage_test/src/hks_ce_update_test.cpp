@@ -25,6 +25,7 @@
 
 #include <gtest/gtest.h>
 #include <vector>
+#include "hks_mock_common.h"
 
 #ifdef L2_STANDARD
 #include "file_ex.h"
@@ -42,13 +43,17 @@ public:
 
     void TearDown();
 };
-
+static uint64_t g_shellTokenId = 0;
 void HksCeUpdateTest::SetUpTestCase(void)
 {
+    g_shellTokenId = GetSelfTokenID();
+    HksMockCommon::SetTestEvironment(g_shellTokenId);
 }
 
 void HksCeUpdateTest::TearDownTestCase(void)
 {
+    SetSelfTokenID(g_shellTokenId);
+    HksMockCommon::ResetTestEvironment();
 }
 
 void HksCeUpdateTest::SetUp()
@@ -276,36 +281,6 @@ static const struct HksParam g_exportParams[] = {
     { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
 };
 
-#ifdef HKS_INTERACT_ABILITY
-static int32_t SetIdsToken()
-{
-    uint64_t tokenId;
-    const char *acls[] = {
-        "ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS",
-    };
-    const char *perms[] = {
-        "ohos.permission.PLACE_CALL", // system_basic
-        "ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS",
-    };
-    NativeTokenInfoParams infoInstance = {
-        .dcapsNum = 0,
-        .permsNum = 2,
-        .dcaps = nullptr,
-        .perms = perms,
-        .aplStr = "system_basic",
-    };
-    infoInstance.acls = acls;
-    infoInstance.aclsNum = 1;
-    infoInstance.processName = "test_movece";
-    tokenId = GetAccessTokenId(&infoInstance);
-    int32_t ret = SetSelfTokenID(tokenId);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("SetSelfTokenID fail, ret is %" LOG_PUBLIC "x!", ret);
-    }
-    return ret;
-}
-#endif
-
 static int32_t BuildParamSet(const struct HksParam *param, const std::vector<HksParam> &tagParam,
     uint32_t paramCnt, struct HksParamSet **paramSetOut)
 {
@@ -423,8 +398,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest001, TestSize.Level0)
 
     int32_t ret;
 #ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
-    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 #endif
 
     struct HksParamSet *paramSet = nullptr;
@@ -462,8 +436,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest002, TestSize.Level0)
 
     int32_t ret;
 #ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
-    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 #endif
 
     struct HksParamSet *paramSet = nullptr;
@@ -501,8 +474,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest003, TestSize.Level0)
 
     int32_t ret;
 #ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
-    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 #endif
 
     struct HksParamSet *encryptParamSet = nullptr;
@@ -540,8 +512,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest004, TestSize.Level0)
 
     int32_t ret;
 #ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
-    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 #endif
 
     struct HksParamSet *encryptParamSet = nullptr;
@@ -577,8 +548,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest005, TestSize.Level0)
 
     int32_t ret;
 #ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
-    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 #endif
 
     struct HksParamSet *encryptParamSet = nullptr;
@@ -631,8 +601,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest006, TestSize.Level0)
 
     int32_t ret;
 #ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
-    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 #endif
 
     struct HksParamSet *encryptParamSet = nullptr;
@@ -680,8 +649,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest007, TestSize.Level0)
 
     int32_t ret;
 #ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
-    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 #endif
 
     struct HksParamSet *infoListParamSet = nullptr;
@@ -713,8 +681,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest008, TestSize.Level0)
 
     int32_t ret;
 #ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
-    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 #endif
 
     struct HksParamSet *paramSet = nullptr;
@@ -741,8 +708,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest009, TestSize.Level0)
 
     int32_t ret;
 #ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
-    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 #endif
 
     struct HksParamSet *exportParamSet = nullptr;
@@ -765,8 +731,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest010, TestSize.Level0)
 
     int32_t ret;
 #ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
-    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 #endif
 
     struct HksParamSet *exportParamSet = nullptr;
@@ -789,8 +754,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest011, TestSize.Level0)
 
     int32_t ret;
 #ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
-    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 #endif
 
     struct HksParamSet *paramSetIn = nullptr;
@@ -837,8 +801,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest012, TestSize.Level0)
 
     int32_t ret;
 #ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
-    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 #endif
 
     struct HksParamSet *paramSetIn = nullptr;
@@ -875,8 +838,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest013, TestSize.Level0)
 
     int32_t ret;
 #ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
-    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 #endif
 
     struct HksParamSet *paramSet = nullptr;
@@ -908,8 +870,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest014, TestSize.Level0)
 
     int32_t ret;
 #ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
-    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 #endif
 
     struct HksParamSet *paramSet = nullptr;
