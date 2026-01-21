@@ -53,12 +53,17 @@ static void GetOsAccountIdFromUid(int uid, int &osAccountId)
 }
 #endif // HAS_OS_ACCOUNT_PART
 
-static void GetProcessInfo(int userId, int uid, struct HksProcessInfo *processInfo)
+static int32_t GetProcessInfo(int userId, int uid, struct HksProcessInfo *processInfo)
 {
     uint32_t userSize = userId != 0 ? sizeof(userId) : strlen(USER_ID_ROOT);
     uint8_t *userData = static_cast<uint8_t *>(HksMalloc(userSize));
-    HKS_IF_NULL_LOGE_RETURN_VOID(userData, "user id malloc failed.")
-    (void)memcpy_s(userData, userSize, userId == 0 ? USER_ID_ROOT : reinterpret_cast<const char *>(&userId), userSize);
+    HKS_IF_NULL_LOGE_RETURN(userData, HKS_ERROR_MALLOC_FAIL, "user id malloc failed.")
+    if (memcpy_s(userData, userSize, userId == 0 ? USER_ID_ROOT :
+        reinterpret_cast<const char *>(&userId), userSize) != EOK) {
+        HKS_LOG_E("memcpy userData failed, userData size = %" LOG_PUBLIC "u", userSize);
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+
+    }
     processInfo->userId.size = userSize;
     processInfo->userId.data = userData;
     processInfo->userIdInt = userId;
@@ -69,11 +74,15 @@ static void GetProcessInfo(int userId, int uid, struct HksProcessInfo *processIn
         HKS_LOG_E("uid malloc failed.");
         HKS_FREE(userData);
         processInfo->userId.data = nullptr;
-        return;
+        return HKS_ERROR_MALLOC_FAIL;
     }
-    (void)memcpy_s(uidData, uidSize, &uid, uidSize);
+    if (memcpy_s(uidData, uidSize, &uid, uidSize) != EOK) {
+        HKS_LOG_E("memcpy uidData failed, uidData size = %" LOG_PUBLIC "u", uidSize);
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
     processInfo->processName.size = uidSize;
     processInfo->processName.data = uidData;
+    return HKS_SUCCESS;
 }
 
 static void GetUserId(int userId, struct HksBlob *userIdBlob)
@@ -149,7 +158,8 @@ void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData
 #endif // HAS_OS_ACCOUNT_PART
         HKS_LOG_I("HksService package removed: uid is %" LOG_PUBLIC "d userId is %" LOG_PUBLIC "d", uid, userId);
 
-        GetProcessInfo(userId, uid, &processInfo);
+        int32_t ret = GetProcessInfo(userId, uid, &processInfo);
+        HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS, "GetProcessInfo failed.")
         HksServiceDeleteProcessInfo(&processInfo);
 #ifdef L2_STANDARD
         HksServiceDeleteGroupKey(&processInfo, want);
