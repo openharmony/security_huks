@@ -55,32 +55,34 @@ static void GetOsAccountIdFromUid(int uid, int &osAccountId)
 
 static int32_t GetProcessInfo(int userId, int uid, struct HksProcessInfo *processInfo)
 {
+    HKSBlob tempUserId = {0};
+    HKSBlob tempProcessName = {0};
+
     uint32_t userSize = userId != 0 ? sizeof(userId) : strlen(USER_ID_ROOT);
-    uint8_t *userData = static_cast<uint8_t *>(HksMalloc(userSize));
-    HKS_IF_NULL_LOGE_RETURN(userData, HKS_ERROR_MALLOC_FAIL, "user id malloc failed.")
-    if (memcpy_s(userData, userSize, userId == 0 ? USER_ID_ROOT :
-        reinterpret_cast<const char *>(&userId), userSize) != EOK) {
-        HKS_LOG_E("memcpy userData failed, userData size = %" LOG_PUBLIC "u", userSize);
+    tempUserId.size = userSize;
+    tempUserId.data = static_cast<uint8_t *>(HksMalloc(userSize));
+    HKS_IF_NULL_LOGE_RETURN(tempUserId.data, HKS_ERROR_MALLOC_FAIL, "userId malloc failed.")
+    if (memcpy_s(tempUserId.data, userSize, userId == 0 ? USER_ID_ROOT :
+        reinterpret_cast<const char*>(&userId), userSize) != EOK) {
+        HKS_FREE(tempUserId.data);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
-    processInfo->userId.size = userSize;
-    processInfo->userId.data = userData;
-    processInfo->userIdInt = userId;
 
     uint32_t uidSize = sizeof(uid);
-    uint8_t *uidData = static_cast<uint8_t *>(HksMalloc(uidSize));
-    if (uidData == nullptr) {
-        HKS_LOG_E("uid malloc failed.");
-        HKS_FREE(userData);
-        processInfo->userId.data = nullptr;
+    tempProcessName.size = uidSize;
+    tempProcessName.data = static_cast<uint8_t *>(HksMalloc(uidSize));
+    if (tempProcessName.data == nullptr) {
+        HKS_FREE(tempUserId.data);
         return HKS_ERROR_MALLOC_FAIL;
     }
-    if (memcpy_s(uidData, uidSize, &uid, uidSize) != EOK) {
-        HKS_LOG_E("memcpy uidData failed, uidData size = %" LOG_PUBLIC "u", uidSize);
+    
+    if (memcpy_s(tempProcessName.data, uidSize, &uid, uidSize) != EOK) {
+        HKS_FREE(tempUserId.data);
+        HKS_FREE(tempProcessName.data);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
-    processInfo->processName.size = uidSize;
-    processInfo->processName.data = uidData;
+    processInfo->userId = tempUserId;
+    processInfo->processName = tempProcessName;
     return HKS_SUCCESS;
 }
 
