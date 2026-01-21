@@ -22,6 +22,17 @@
 #include "hks_type.h"
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_report_generate_key.h"
+#include "hks_report_import_key.h"
+#include "hks_report_delete_key.h"
+#include "hks_report_check_key_exited.h"
+#include "hks_report_rename_key.h"
+#include "hks_report_three_stage.h"
+#include "hks_report_list_aliases.h"
+#include "hks_report_data_size.h"
+#include "hks_report_three_stage_build.h"
+#include "hks_report_ukey_event.h"
+#include "hks_param.h"
 #include <memory>
 #include <vector>
 #include <mutex>
@@ -120,19 +131,177 @@ public:
 
     int32_t RegisterEventProcs(const struct HksEventProcMap *procMaps, uint32_t count);
 
-    int32_t UnregisterEventProc(uint32_t eventId);
-
-    void ClearAllEventProcs();
-    
-    uint32_t GetEventProcCount() const;
-
 private:
     HksEventQueue queue;
     std::thread workerThread;
     std::atomic<bool> stopFlag;
     HksEventCacheList eventCacheList;
 
-    std::vector<HksEventProcMap> eventProcList;
+    std::vector<HksEventProcMap> eventProcList = {
+        {
+            HKS_EVENT_CRYPTO,
+            HksParamSetToEventInfoCrypto,
+            HksEventInfoNeedReportCrypto,
+            HksEventInfoIsEqualCrypto,
+            HksEventInfoAddCrypto,
+            HksEventInfoToMapCrypto,
+        },
+        {
+            HKS_EVENT_SIGN_VERIFY,
+            HksParamSetToEventInfoCrypto,
+            HksEventInfoNeedReportCrypto,
+            HksEventInfoIsEqualCrypto,
+            HksEventInfoAddCrypto,
+            HksEventInfoToMapCrypto,
+        },
+        {
+            HKS_EVENT_DERIVE,
+            HksParamSetToEventInfoAgreeDerive,
+            HksEventInfoNeedReportAgreeDerive,
+            HksEventInfoIsEqualAgreeDerive,
+            HksEventInfoAddAgreeDerive,
+            HksEventInfoToMapAgreeDerive,
+        },
+        {
+            HKS_EVENT_AGREE,
+            HksParamSetToEventInfoAgreeDerive,
+            HksEventInfoNeedReportAgreeDerive,
+            HksEventInfoIsEqualAgreeDerive,
+            HksEventInfoAddAgreeDerive,
+            HksEventInfoToMapAgreeDerive,
+        },
+        {
+            HKS_EVENT_MAC,
+            HksParamSetToEventInfoMac,
+            HksEventInfoNeedReportMac,
+            HksEventInfoIsEqualMac,
+            HksEventInfoAddMac,
+            HksEventInfoToMapMac,
+        },
+        {
+            HKS_EVENT_ATTEST,
+            HksParamSetToEventInfoAttest,
+            HksEventInfoNeedReportAttest,
+            HksEventInfoIsEqualAttest,
+            HksEventInfoAddAttest,
+            HksEventInfoToMapAttest,
+        },
+        {
+            HKS_EVENT_GENERATE_KEY,
+            HksParamSetToEventInfoForKeyGen,
+            HksEventInfoIsNeedReportForKeyGen,
+            HksEventInfoIsEqualForKeyGen,
+            HksEventInfoAddForKeyGen,
+            HksEventInfoToMapForKeyGen
+        },
+        {
+            HKS_EVENT_IMPORT_KEY,
+            HksParamSetToEventInfoForImport,
+            HksEventInfoIsNeedReportForImport,
+            HksEventInfoIsEqualForImport,
+            HksEventInfoAddForImport,
+            HksEventInfoToMapForImport,
+        },
+        {
+            HKS_EVENT_DELETE_KEY,
+            HksParamSetToEventInfoForDelete,
+            HksEventInfoIsNeedReportForDelete,
+            HksEventInfoIsEqualForDelete,
+            HksEventInfoAddForDelete,
+            HksEventInfoToMapForDelete
+        },
+        {
+            HKS_EVENT_CHECK_KEY_EXISTED,
+            HksParamSetToEventInfoForCheckKeyExited,
+            HksEventInfoIsNeedReportForCheckKeyExited,
+            HksEventInfoIsEqualForCheckKeyExited,
+            HksEventInfoAddForCheckKeyExited,
+            HksEventInfoToMapForCheckKeyExited
+        },
+        {
+            HKS_EVENT_RENAME_KEY,
+            HksParamSetToEventInfoForRename,
+            HksEventInfoIsNeedReportForRename,
+            HksEventInfoIsEqualForRename,
+            HksEventInfoAddForRename,
+            HksEventInfoToMapForRename
+        },
+        {
+            HKS_EVENT_LIST_ALIASES,
+            HksParamSetToEventInfoForListAliases,
+            HksEventInfoIsNeedReportForListAliases,
+            HksEventInfoIsEqualForListAliases,
+            HksEventInfoAddForListAliases,
+            HksEventInfoToMapForListAliases
+        },
+    #ifdef HKS_UKEY_EXTENSION_CRYPTO
+        {
+            HKS_EVENT_UKEY_REGISTER_PROVIDER,
+            HksRegProviderParamSetToEventInfo,
+            HksRegProviderNeedReport,
+            HksRegProviderEventInfoEqual,
+            HksEventInfoAddForRegProvider,
+            HksRegProviderEventInfoToMap,
+        },
+        {
+            HKS_EVENT_UKEY_GET_AUTH_PIN_STATE,
+            HksGetAuthPinStateParamSetToEventInfo,
+            HksGetAuthPinStateNeedReport,
+            HksGetAuthPinStateEventInfoEqual,
+            HksEventInfoAddForGetAuthPinState,
+            HksGetAuthPinStateEventInfoToMap,
+        },
+        {
+            HKS_EVENT_UKEY_AUTH_PIN,
+            HksAuthPinParamSetToEventInfo,
+            HksAuthPinNeedReport,
+            HksAuthPinEventInfoEqual,
+            HksEventInfoAddForAuthPin,
+            HksAuthPinEventInfoToMap,
+        },
+        {
+            HKS_EVENT_UKEY_OPERATE_REMOTE_HANDLE,
+            HksRemoteHandleParamSetToEventInfo,
+            HksRemoteHandleNeedReport,
+            HksRemoteHandleEventInfoEqual,
+            HksEventInfoAddForRemoteHandle,
+            HksRemoteHandleEventInfoToMap,
+        },
+        {
+            HKS_EVENT_UKEY_EXPORT_PROVIDER_CERT,
+            HksExportProviderCertParamSetToEventInfo,
+            HksExportProviderCertNeedReport,
+            HksExportProviderCertEventInfoEqual,
+            HksEventInfoAddForExportProviderCert,
+            HksExportProviderCertEventInfoToMap,
+        },
+        {
+            HKS_EVENT_UKEY_EXPORT_CERT,
+            HksExportCertParamSetToEventInfo,
+            HksExportCertNeedReport,
+            HksExportCertEventInfoEqual,
+            HksEventInfoAddForExportCert,
+            HksExportCertEventInfoToMap,
+        },
+        {
+            HKS_EVENT_UKSY_GET_REMOTE_PROPERTY,
+            HksGetPropertyParamSetToEventInfo,
+            HksGetPropertyNeedReport,
+            HksGetPropertyEventInfoEqual,
+            HksEventInfoAddForGetProperty,
+            HksGetPropertyEventInfoToMap,
+        },
+    #endif
+        {
+            HKS_EVENT_DATA_SIZE_STATISTICS,
+            HksParamSetToEventInfoForDataSize,
+            HksEventInfoIsNeedReportForDataSize,
+            HksEventInfoIsEqualForDataSize,
+            HksEventInfoAddForDataSize,
+            HksEventInfoToMapForDataSize
+        }
+    };
+
     mutable std::mutex eventProcMutex;
 
     void WorkerThread();
@@ -155,8 +324,6 @@ private:
 
     void HandlerReport(HksEventQueueItem &item);
 
-    void InitDefaultEventProcs();
-
     bool IsValidEventProcMap(const struct HksEventProcMap *procMap) const;
 };
 
@@ -171,8 +338,6 @@ void HksHaPluginDestroy(HksHaPlugin *plugin);
 int32_t HksRegisterEventProcWrapper(const void *procMap);
 
 int32_t HksRegisterEventProcs(const void *procMaps, uint32_t count);
-
-int32_t HksUnregisterEventProcWrapper(uint32_t eventId);
 
 int32_t HksEnqueueEventWrapper(uint32_t eventId, struct HksParamSet *paramSet);
 

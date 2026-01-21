@@ -50,7 +50,6 @@ static struct HksBasicInterface g_interfaceInst = {
 
     .hksRegisterEventProc = HksRegisterEventProcWrapper,
     .hksRegisterEventProcs = HksRegisterEventProcs,
-    .hksUnregisterEventProc = HksUnregisterEventProcWrapper,
     .hksEnqueueEvent = HksEnqueueEventWrapper,
 };
 

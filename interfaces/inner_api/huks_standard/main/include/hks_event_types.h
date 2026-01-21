@@ -56,12 +56,9 @@ struct HksEventProcMap {
 };
 
 extern "C" {
-
 int32_t HksRegisterEventProcWrapper(const void *ProcMap);
 
 int32_t HksRegisterEventProcs(const void *procMaps, uint32_t count);
-
-int32_t HksUnregisterEventProcWrapper(uint32_t eventId);
 
 int32_t HksEnqueueEventWrapper(uint32_t eventId, struct HksParamSet *paramSet);
 }

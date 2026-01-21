@@ -24,187 +24,8 @@
 #include "hks_plugin_adapter.h"
 #include "hks_plugin_def.h"
 #include "hks_template.h"
-#include "hks_report_generate_key.h"
-#include "hks_report_import_key.h"
-#include "hks_report_delete_key.h"
-#include "hks_report_check_key_exited.h"
-#include "hks_report_rename_key.h"
-#include "hks_report_three_stage.h"
-#include "hks_report_list_aliases.h"
-#include "hks_report_data_size.h"
-#include "hks_report_three_stage_build.h"
-#include "hks_report_ukey_event.h"
-#include "hks_param.h"
 
-static const HksEventProcMap g_defaultEventProcs[] = {
-    {
-        HKS_EVENT_CRYPTO,
-        HksParamSetToEventInfoCrypto,
-        HksEventInfoNeedReportCrypto,
-        HksEventInfoIsEqualCrypto,
-        HksEventInfoAddCrypto,
-        HksEventInfoToMapCrypto,
-    },
-    {
-        HKS_EVENT_SIGN_VERIFY,
-        HksParamSetToEventInfoCrypto,
-        HksEventInfoNeedReportCrypto,
-        HksEventInfoIsEqualCrypto,
-        HksEventInfoAddCrypto,
-        HksEventInfoToMapCrypto,
-    },
-    {
-        HKS_EVENT_DERIVE,
-        HksParamSetToEventInfoAgreeDerive,
-        HksEventInfoNeedReportAgreeDerive,
-        HksEventInfoIsEqualAgreeDerive,
-        HksEventInfoAddAgreeDerive,
-        HksEventInfoToMapAgreeDerive,
-    },
-    {
-        HKS_EVENT_AGREE,
-        HksParamSetToEventInfoAgreeDerive,
-        HksEventInfoNeedReportAgreeDerive,
-        HksEventInfoIsEqualAgreeDerive,
-        HksEventInfoAddAgreeDerive,
-        HksEventInfoToMapAgreeDerive,
-    },
-    {
-        HKS_EVENT_MAC,
-        HksParamSetToEventInfoMac,
-        HksEventInfoNeedReportMac,
-        HksEventInfoIsEqualMac,
-        HksEventInfoAddMac,
-        HksEventInfoToMapMac,
-    },
-    {
-        HKS_EVENT_ATTEST,
-        HksParamSetToEventInfoAttest,
-        HksEventInfoNeedReportAttest,
-        HksEventInfoIsEqualAttest,
-        HksEventInfoAddAttest,
-        HksEventInfoToMapAttest,
-    },
-    {
-        HKS_EVENT_GENERATE_KEY,
-        HksParamSetToEventInfoForKeyGen,
-        HksEventInfoIsNeedReportForKeyGen,
-        HksEventInfoIsEqualForKeyGen,
-        HksEventInfoAddForKeyGen,
-        HksEventInfoToMapForKeyGen
-    },
-    {
-        HKS_EVENT_IMPORT_KEY,
-        HksParamSetToEventInfoForImport,
-        HksEventInfoIsNeedReportForImport,
-        HksEventInfoIsEqualForImport,
-        HksEventInfoAddForImport,
-        HksEventInfoToMapForImport,
-    },
-    {
-        HKS_EVENT_DELETE_KEY,
-        HksParamSetToEventInfoForDelete,
-        HksEventInfoIsNeedReportForDelete,
-        HksEventInfoIsEqualForDelete,
-        HksEventInfoAddForDelete,
-        HksEventInfoToMapForDelete
-    },
-    {
-        HKS_EVENT_CHECK_KEY_EXISTED,
-        HksParamSetToEventInfoForCheckKeyExited,
-        HksEventInfoIsNeedReportForCheckKeyExited,
-        HksEventInfoIsEqualForCheckKeyExited,
-        HksEventInfoAddForCheckKeyExited,
-        HksEventInfoToMapForCheckKeyExited
-    },
-    {
-        HKS_EVENT_RENAME_KEY,
-        HksParamSetToEventInfoForRename,
-        HksEventInfoIsNeedReportForRename,
-        HksEventInfoIsEqualForRename,
-        HksEventInfoAddForRename,
-        HksEventInfoToMapForRename
-    },
-    {
-        HKS_EVENT_LIST_ALIASES,
-        HksParamSetToEventInfoForListAliases,
-        HksEventInfoIsNeedReportForListAliases,
-        HksEventInfoIsEqualForListAliases,
-        HksEventInfoAddForListAliases,
-        HksEventInfoToMapForListAliases
-    },
-#ifdef HKS_UKEY_EXTENSION_CRYPTO
-    {
-        HKS_EVENT_UKEY_REGISTER_PROVIDER,
-        HksRegProviderParamSetToEventInfo,
-        HksRegProviderNeedReport,
-        HksRegProviderEventInfoEqual,
-        HksEventInfoAddForRegProvider,
-        HksRegProviderEventInfoToMap,
-    },
-    {
-        HKS_EVENT_UKEY_GET_AUTH_PIN_STATE,
-        HksGetAuthPinStateParamSetToEventInfo,
-        HksGetAuthPinStateNeedReport,
-        HksGetAuthPinStateEventInfoEqual,
-        HksEventInfoAddForGetAuthPinState,
-        HksGetAuthPinStateEventInfoToMap,
-    },
-    {
-        HKS_EVENT_UKEY_AUTH_PIN,
-        HksAuthPinParamSetToEventInfo,
-        HksAuthPinNeedReport,
-        HksAuthPinEventInfoEqual,
-        HksEventInfoAddForAuthPin,
-        HksAuthPinEventInfoToMap,
-    },
-    {
-        HKS_EVENT_UKEY_OPERATE_REMOTE_HANDLE,
-        HksRemoteHandleParamSetToEventInfo,
-        HksRemoteHandleNeedReport,
-        HksRemoteHandleEventInfoEqual,
-        HksEventInfoAddForRemoteHandle,
-        HksRemoteHandleEventInfoToMap,
-    },
-    {
-        HKS_EVENT_UKEY_EXPORT_PROVIDER_CERT,
-        HksExportProviderCertParamSetToEventInfo,
-        HksExportProviderCertNeedReport,
-        HksExportProviderCertEventInfoEqual,
-        HksEventInfoAddForExportProviderCert,
-        HksExportProviderCertEventInfoToMap,
-    },
-    {
-        HKS_EVENT_UKEY_EXPORT_CERT,
-        HksExportCertParamSetToEventInfo,
-        HksExportCertNeedReport,
-        HksExportCertEventInfoEqual,
-        HksEventInfoAddForExportCert,
-        HksExportCertEventInfoToMap,
-    },
-    {
-        HKS_EVENT_UKSY_GET_REMOTE_PROPERTY,
-        HksGetPropertyParamSetToEventInfo,
-        HksGetPropertyNeedReport,
-        HksGetPropertyEventInfoEqual,
-        HksEventInfoAddForGetProperty,
-        HksGetPropertyEventInfoToMap,
-    },
-#endif
-    {
-        HKS_EVENT_DATA_SIZE_STATISTICS,
-        HksParamSetToEventInfoForDataSize,
-        HksEventInfoIsNeedReportForDataSize,
-        HksEventInfoIsEqualForDataSize,
-        HksEventInfoAddForDataSize,
-        HksEventInfoToMapForDataSize
-    }
-};
-
-HksHaPlugin::HksHaPlugin() : queue(), stopFlag(false)
-{
-    InitDefaultEventProcs();
-}
+HksHaPlugin::HksHaPlugin() : queue(), stopFlag(false) {}
 
 HksHaPlugin::~HksHaPlugin()
 {
@@ -218,8 +39,6 @@ void HksHaPlugin::Destroy()
     StopWorkerThread();
 
     eventCacheList.RemoveFront(eventCacheList.GetSize());
-
-    ClearAllEventProcs();
 }
 
 void HksHaPlugin::StartWorkerThread()
@@ -235,17 +54,6 @@ void HksHaPlugin::StopWorkerThread()
 bool HksHaPlugin::Enqueue(uint32_t eventId, struct HksParamSet *paramSet)
 {
     return queue.Enqueue(eventId, paramSet);
-}
-
-void HksHaPlugin::InitDefaultEventProcs()
-{
-    std::lock_guard<std::mutex> autoLock(eventProcMutex);
-    size_t count = sizeof(g_defaultEventProcs) / sizeof(g_defaultEventProcs[0]);
-
-    for (size_t i = 0; i < count; ++i) {
-        eventProcList.push_back(g_defaultEventProcs[i]);
-    }
-    HKS_LOG_I("InitDefaultEventProcs: Register default event processors, count=%zu", count);
 }
 
 bool HksHaPlugin::IsValidEventProcMap(const struct HksEventProcMap *procMap) const
@@ -276,13 +84,14 @@ int32_t HksHaPlugin::RegisterEventProc(const struct HksEventProcMap *procMap)
             return item.eventId == procMap->eventId;
         });
     if (it != eventProcList.end()) {
-        HKS_LOG_I("RegisterEventProc: EventId %{public}u already registered. Auto override.", procMap->eventId);
+        HKS_LOG_I("RegisterEventProc: EventId %" LOG_PUBLIC "u already registered. Auto override.", procMap->eventId);
         *it = *procMap;
         return HKS_SUCCESS;
     }
 
     eventProcList.push_back(*procMap);
-    HKS_LOG_I("RegisterEventProc: Successfully registered event processor for eventId %{public}u", procMap->eventId);
+    HKS_LOG_I("RegisterEventProc: Successfully registered event processor for eventId %" LOG_PUBLIC "u",
+        procMap->eventId);
 
     return HKS_SUCCESS;
 }
@@ -303,45 +112,14 @@ int32_t HksHaPlugin::RegisterEventProcs(const struct HksEventProcMap *procMaps, 
             ++successCount;
         } else {
             lastError = ret;
-            HKS_LOG_E("RegisterEventProcs: Failed to register event processor for eventId %u, ret = %d",
-                procMaps[i].eventId, ret);
+            HKS_LOG_E("RegisterEventProcs: Failed to register event processor for eventId %" LOG_PUBLIC "u,"
+                "ret = %" LOG_PUBLIC "d", procMaps[i].eventId, ret);
         }
     }
-    HKS_LOG_I("RegisterEventProcs: Successfully registered %{public}u out of %{public}u event processors",
+    HKS_LOG_I("RegisterEventProcs: Successfully registered %" LOG_PUBLIC "u out of %" LOG_PUBLIC "u event processors",
         successCount, count);
 
     return (successCount == count) ? HKS_SUCCESS : lastError;
-}
-
-int32_t HksHaPlugin::UnregisterEventProc(uint32_t eventId)
-{
-    std::lock_guard<std::mutex> lock(eventProcMutex);
-
-    auto it = std::find_if(eventProcList.begin(), eventProcList.end(),
-        [eventId](const HksEventProcMap &item) {
-            return item.eventId == eventId;
-        });
-    if (it != eventProcList.end()) {
-        eventProcList.erase(it);
-        HKS_LOG_I("UnregisterEventProc: Successfully unregistered event processor for eventId %u", eventId);
-        return HKS_SUCCESS;
-    }
-
-    HKS_LOG_W("UnregisterEventProc: EventId %u not found in registered event processors", eventId);
-    return HKS_ERROR_NOT_EXIST;
-}
-
-void HksHaPlugin::ClearAllEventProcs()
-{
-    std::lock_guard<std::mutex> lock(eventProcMutex);
-    eventProcList.clear();
-    HKS_LOG_I("ClearAllEventProcs: Cleared all registered event processors");
-}
-
-uint32_t HksHaPlugin::GetEventProcCount() const
-{
-    std::lock_guard<std::mutex> lock(eventProcMutex);
-    return static_cast<uint32_t>(eventProcList.size());
 }
 
 HksEventProcMap *HksHaPlugin::HksEventProcFind(uint32_t eventId)
@@ -540,18 +318,13 @@ int32_t HksRegisterEventProcs(const void *procMaps, uint32_t count)
     return HksHaPlugin::GetInstance().RegisterEventProcs(eventProcMaps, count);
 }
 
-int32_t HksUnregisterEventProcWrapper(uint32_t eventId)
-{
-    return HksHaPlugin::GetInstance().UnregisterEventProc(eventId);
-}
-
 int32_t HksEnqueueEventWrapper(uint32_t eventId, struct HksParamSet *paramSet)
 {
     HKS_IF_NULL_LOGE_RETURN(paramSet, HKS_ERROR_NULL_POINTER, "HksEnqueueEventWrapper: paramSet is null");
 
     bool enqueueSuccess = HksHaPlugin::GetInstance().Enqueue(eventId, paramSet);
     HKS_IF_NOT_TRUE_LOGE_RETURN(enqueueSuccess, HKS_ERROR_BAD_STATE,
-        "HksEnqueueEventWrapper: Failed to enqueue eventId %u", eventId);
+        "HksEnqueueEventWrapper: Failed to enqueue eventId %" LOG_PUBLIC "u", eventId);
 
     return HKS_SUCCESS;
 }
