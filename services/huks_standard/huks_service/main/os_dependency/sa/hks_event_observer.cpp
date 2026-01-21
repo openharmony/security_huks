@@ -62,7 +62,6 @@ static int32_t GetProcessInfo(int userId, int uid, struct HksProcessInfo *proces
         reinterpret_cast<const char *>(&userId), userSize) != EOK) {
         HKS_LOG_E("memcpy userData failed, userData size = %" LOG_PUBLIC "u", userSize);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
-
     }
     processInfo->userId.size = userSize;
     processInfo->userId.data = userData;
