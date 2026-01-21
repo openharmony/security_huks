@@ -85,7 +85,6 @@ struct HksBasicInterface {
 
     int32_t (*hksRegisterEventProc)(const void *procMap);
     int32_t (*hksRegisterEventProcs)(const void *procMaps, uint32_t count);
-    int32_t (*hksUnregisterEventProc)(uint32_t eventId);
     int32_t (*hksEnqueueEvent)(uint32_t eventId, struct HksParamSet *paramSet);
 };
 
