@@ -55,8 +55,8 @@ static void GetOsAccountIdFromUid(int uid, int &osAccountId)
 
 static int32_t GetProcessInfo(int userId, int uid, struct HksProcessInfo *processInfo)
 {
-    HKSBlob tempUserId = {0};
-    HKSBlob tempProcessName = {0};
+    HksBlob tempUserId = {0};
+    HksBlob tempProcessName = {0};
     int32_t ret = HKS_SUCCESS;
 
     uint32_t userSize = userId != 0 ? sizeof(userId) : strlen(USER_ID_ROOT);
@@ -80,7 +80,7 @@ static int32_t GetProcessInfo(int userId, int uid, struct HksProcessInfo *proces
 
         return HKS_SUCCESS;
     } while (0);
-    
+
     HKS_FREE(tempUserId.data);
     HKS_FREE(tempProcessName.data);
     return ret;
