@@ -57,33 +57,33 @@ static int32_t GetProcessInfo(int userId, int uid, struct HksProcessInfo *proces
 {
     HKSBlob tempUserId = {0};
     HKSBlob tempProcessName = {0};
+    int32_t ret = HKS_SUCCESS;
 
     uint32_t userSize = userId != 0 ? sizeof(userId) : strlen(USER_ID_ROOT);
     tempUserId.size = userSize;
     tempUserId.data = static_cast<uint8_t *>(HksMalloc(userSize));
     HKS_IF_NULL_LOGE_RETURN(tempUserId.data, HKS_ERROR_MALLOC_FAIL, "userId malloc failed.")
-    if (memcpy_s(tempUserId.data, userSize, userId == 0 ? USER_ID_ROOT :
-        reinterpret_cast<const char*>(&userId), userSize) != EOK) {
-        HKS_FREE(tempUserId.data);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
 
     uint32_t uidSize = sizeof(uid);
     tempProcessName.size = uidSize;
     tempProcessName.data = static_cast<uint8_t *>(HksMalloc(uidSize));
-    if (tempProcessName.data == nullptr) {
-        HKS_FREE(tempUserId.data);
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(tempProcessName.data, HKS_ERROR_MALLOC_FAIL, "uid malloc failed.")
+    do {
+        ret = HKS_ERROR_INSUFFICIENT_MEMORY;
+        HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(tempUserId.data, userSize, userId == 0 ? USER_ID_ROOT :
+            reinterpret_cast<const char*>(&userId), userSize), "memcpy userId failed.")
+        
+        HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(tempProcessName.data, uidSize, &uid, uidSize), "memcpy userId failed.")
+
+        processInfo->userId = tempUserId;
+        processInfo->processName = tempProcessName;
+
+        return HKS_SUCCESS;
+    } while (0);
     
-    if (memcpy_s(tempProcessName.data, uidSize, &uid, uidSize) != EOK) {
-        HKS_FREE(tempUserId.data);
-        HKS_FREE(tempProcessName.data);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
-    processInfo->userId = tempUserId;
-    processInfo->processName = tempProcessName;
-    return HKS_SUCCESS;
+    HKS_FREE(tempUserId.data);
+    HKS_FREE(tempProcessName.data);
+    return ret;
 }
 
 static void GetUserId(int userId, struct HksBlob *userIdBlob)
