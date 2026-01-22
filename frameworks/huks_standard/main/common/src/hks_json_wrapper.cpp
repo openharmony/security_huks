@@ -122,7 +122,7 @@ std::pair<int32_t, std::string> CommJsonObject::ToString() const
         return {HKS_ERROR_NULL_JSON, ""};
     }
     if (!IsString()) {
-        HKS_LOG_E("JSON value of '%s' is not a string", parentKeyName_.c_str());
+        HKS_LOG_E("JSON value of %" LOG_PUBLIC "s is not a string", parentKeyName_.c_str());
         return {HKS_ERROR_JSON_NOT_STRING, ""};
     }
     return {HKS_SUCCESS, mJson_->valuestring};
@@ -138,7 +138,7 @@ std::pair<int32_t, double> CommJsonObject::ToDouble() const
         return {HKS_ERROR_NULL_JSON, HUGE_VAL};
     }
     if (!IsNumber()) {
-        HKS_LOG_E("JSON value of '%s' is not a number", parentKeyName_.c_str());
+        HKS_LOG_E("JSON value of %" LOG_PUBLIC "s is not a number", parentKeyName_.c_str());
         return {HKS_ERROR_JSON_NOT_NUMBER, HUGE_VAL};
     }
     return {HKS_SUCCESS, mJson_->valuedouble};
@@ -154,7 +154,7 @@ std::pair<int32_t, bool> CommJsonObject::ToBool() const
         return {HKS_ERROR_NULL_JSON, false};
     }
     if (!IsBool()) {
-        HKS_LOG_E("JSON value of '%s' is not a boolean", parentKeyName_.c_str());
+        HKS_LOG_E("JSON value of %" LOG_PUBLIC "s is not a boolean", parentKeyName_.c_str());
         return {HKS_ERROR_JSON_NOT_BOOL, false};
     }
     return {HKS_SUCCESS, cJSON_IsTrue(mJson_.get())};
