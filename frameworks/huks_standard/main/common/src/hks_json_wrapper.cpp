@@ -154,7 +154,7 @@ std::pair<int32_t, bool> CommJsonObject::ToBool() const
         return {HKS_ERROR_NULL_JSON, false};
     }
     if (!IsBool()) {
-        HKS_LOG_E("JSON value of '%s' is not a number", parentKeyName_.c_str());
+        HKS_LOG_E("JSON value of '%s' is not a boolean", parentKeyName_.c_str());
         return {HKS_ERROR_JSON_NOT_BOOL, false};
     }
     return {HKS_SUCCESS, cJSON_IsTrue(mJson_.get())};
