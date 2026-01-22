@@ -34,7 +34,7 @@
 #include "hks_mem.h"
 #include "hks_template.h"
 #include "hks_cfi.h"
-
+#include "hks_check_paramset.h"
 // new veison must in order, Higher versions cannot use interfaces from lower versions
 enum HdiVersion {
     INVALID = 0,
@@ -152,7 +152,11 @@ ENABLE_CFI(int32_t HuksAccessGenerateKey(const struct HksBlob *keyAlias, const s
     const struct HksBlob *keyIn, struct HksBlob *keyOut))
 {
     int32_t ret = HDF_FAILURE;
-    HDI_CONVERTER_FUNC_GENERATEKEY(keyAlias, paramSetIn, keyIn, keyOut, ret, HdiProxyGenerateKey)
+    struct HksParamSet *paramSetInNew = NULL;
+    ret = HandleKeyClassTag(paramSetIn, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    HDI_CONVERTER_FUNC_GENERATEKEY(keyAlias, paramSetInNew, keyIn, keyOut, ret, HdiProxyGenerateKey)
+    HksFreeParamSet(&paramSetInNew);
     return ret;
 }
 
@@ -173,7 +177,11 @@ ENABLE_CFI(int32_t HuksAccessImportKey(const struct HksBlob *keyAlias, const str
     const struct HksParamSet *paramSet, struct HksBlob *keyOut))
 {
     int32_t ret = HDF_FAILURE;
-    HDI_CONVERTER_FUNC_IMPORTKEY(keyAlias, key, paramSet, keyOut, ret, HdiProxyImportKey)
+    struct HksParamSet *paramSetInNew = NULL;
+    ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    HDI_CONVERTER_FUNC_IMPORTKEY(keyAlias, key, paramSetInNew, keyOut, ret, HdiProxyImportKey)
+    HksFreeParamSet(&paramSetInNew);
     return ret;
 }
 
@@ -195,8 +203,12 @@ ENABLE_CFI(int32_t HuksAccessImportWrappedKey(const struct HksBlob *wrappingKeyA
     const struct HksBlob *wrappedKeyData, const struct HksParamSet *paramSet, struct HksBlob *keyOut))
 {
     int32_t ret = HDF_FAILURE;
-    HDI_CONVERTER_FUNC_IMPORTWRAPPEDKEY(wrappingKeyAlias, key, wrappedKeyData, paramSet, keyOut, ret,
+    struct HksParamSet *paramSetInNew = NULL;
+    ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    HDI_CONVERTER_FUNC_IMPORTWRAPPEDKEY(wrappingKeyAlias, key, wrappedKeyData, paramSetInNew, keyOut, ret,
         HdiProxyImportWrappedKey)
+    HksFreeParamSet(&paramSetInNew);
     return ret;
 }
 
@@ -217,7 +229,11 @@ ENABLE_CFI(int32_t HuksAccessExportPublicKey(const struct HksBlob *key, const st
     struct HksBlob *keyOut))
 {
     int32_t ret = HDF_FAILURE;
-    HDI_CONVERTER_FUNC_EXPORTPUBLICKEY(key, paramSet, keyOut, ret, HdiProxyExportPublicKey)
+    struct HksParamSet *paramSetInNew = NULL;
+    ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    HDI_CONVERTER_FUNC_EXPORTPUBLICKEY(key, paramSetInNew, keyOut, ret, HdiProxyExportPublicKey)
+    HksFreeParamSet(&paramSetInNew);
     return ret;
 }
 
@@ -238,7 +254,11 @@ ENABLE_CFI(int32_t HuksAccessInit(const struct  HksBlob *key, const struct HksPa
     struct HksBlob *handle, struct HksBlob *token))
 {
     int32_t ret = HDF_FAILURE;
-    HDI_CONVERTER_FUNC_INIT(key, paramSet, handle, token, ret, HdiProxyInit)
+    struct HksParamSet *paramSetInNew = NULL;
+    ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    HDI_CONVERTER_FUNC_INIT(key, paramSetInNew, handle, token, ret, HdiProxyInit)
+    HksFreeParamSet(&paramSetInNew);
     return ret;
 }
 
@@ -259,7 +279,11 @@ ENABLE_CFI(int32_t HuksAccessUpdate(const struct HksBlob *handle, const struct H
     const struct HksBlob *inData, struct HksBlob *outData))
 {
     int32_t ret = HDF_FAILURE;
-    HDI_CONVERTER_FUNC_UPDATE(handle, paramSet, inData, outData, ret, HdiProxyUpdate)
+    struct HksParamSet *paramSetInNew = NULL;
+    ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    HDI_CONVERTER_FUNC_UPDATE(handle, paramSetInNew, inData, outData, ret, HdiProxyUpdate)
+    HksFreeParamSet(&paramSetInNew);
     return ret;
 }
 
@@ -280,7 +304,11 @@ ENABLE_CFI(int32_t HuksAccessFinish(const struct HksBlob *handle, const struct H
     const struct HksBlob *inData, struct HksBlob *outData))
 {
     int32_t ret = HDF_FAILURE;
-    HDI_CONVERTER_FUNC_FINISH(handle, paramSet, inData, outData, ret, HdiProxyFinish);
+    struct HksParamSet *paramSetInNew = NULL;
+    ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    HDI_CONVERTER_FUNC_FINISH(handle, paramSetInNew, inData, outData, ret, HdiProxyFinish);
+    HksFreeParamSet(&paramSetInNew);
     return ret;
 }
 
@@ -299,7 +327,11 @@ static int32_t HdiProxyAbort(const struct HuksBlob *handle, const struct HuksPar
 ENABLE_CFI(int32_t HuksAccessAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet))
 {
     int32_t ret = HDF_FAILURE;
-    HDI_CONVERTER_FUNC_ABORT(handle, paramSet, ret, HdiProxyAbort);
+    struct HksParamSet *paramSetInNew = NULL;
+    ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    HDI_CONVERTER_FUNC_ABORT(handle, paramSetInNew, ret, HdiProxyAbort);
+    HksFreeParamSet(&paramSetInNew);
     return ret;
 }
 
@@ -319,7 +351,11 @@ static int32_t HdiProxyCheckKeyValidity(const struct HuksParamSet* paramSet, con
 ENABLE_CFI(int32_t HuksAccessGetKeyProperties(const struct HksParamSet *paramSet, const struct HksBlob *key))
 {
     int32_t ret = HDF_FAILURE;
-    HDI_CONVERTER_FUNC_CHECKKEYVALIDITY(paramSet, key, ret, HdiProxyCheckKeyValidity)
+    struct HksParamSet *paramSetInNew = NULL;
+    ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    HDI_CONVERTER_FUNC_CHECKKEYVALIDITY(paramSetInNew, key, ret, HdiProxyCheckKeyValidity)
+    HksFreeParamSet(&paramSetInNew);
     return ret;
 }
 
@@ -351,7 +387,11 @@ ENABLE_CFI(int32_t HuksAccessSign(const struct HksBlob *key, const struct HksPar
     const struct HksBlob *srcData, struct HksBlob *signature))
 {
     int32_t ret = HDF_FAILURE;
-    HDI_CONVERTER_FUNC_SIGN(key, paramSet, srcData, signature, ret, HdiProxySign)
+    struct HksParamSet *paramSetInNew = NULL;
+    ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    HDI_CONVERTER_FUNC_SIGN(key, paramSetInNew, srcData, signature, ret, HdiProxySign)
+    HksFreeParamSet(&paramSetInNew);
     return ret;
 }
 
@@ -372,7 +412,11 @@ ENABLE_CFI(int32_t HuksAccessVerify(const struct HksBlob *key, const struct HksP
     const struct HksBlob *srcData, const struct HksBlob *signature))
 {
     int32_t ret = HDF_FAILURE;
-    HDI_CONVERTER_FUNC_VERIFY(key, paramSet, srcData, signature, ret, HdiProxyVerify)
+    struct HksParamSet *paramSetInNew = NULL;
+    ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    HDI_CONVERTER_FUNC_VERIFY(key, paramSetInNew, srcData, signature, ret, HdiProxyVerify)
+    HksFreeParamSet(&paramSetInNew);
     return ret;
 }
 
@@ -393,7 +437,11 @@ ENABLE_CFI(int32_t HuksAccessEncrypt(const struct HksBlob *key, const struct Hks
     const struct HksBlob *plainText, struct HksBlob *cipherText))
 {
     int32_t ret = HDF_FAILURE;
-    HDI_CONVERTER_FUNC_ENCRYPT(key, paramSet, plainText, cipherText, ret, HdiProxyEncrypt)
+    struct HksParamSet *paramSetInNew = NULL;
+    ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    HDI_CONVERTER_FUNC_ENCRYPT(key, paramSetInNew, plainText, cipherText, ret, HdiProxyEncrypt)
+    HksFreeParamSet(&paramSetInNew);
     return ret;
 }
 
@@ -414,7 +462,11 @@ ENABLE_CFI(int32_t HuksAccessDecrypt(const struct HksBlob *key, const struct Hks
     const struct HksBlob *cipherText, struct HksBlob *plainText))
 {
     int32_t ret = HDF_FAILURE;
-    HDI_CONVERTER_FUNC_DECRYPT(key, paramSet, cipherText, plainText, ret, HdiProxyDecrypt)
+    struct HksParamSet *paramSetInNew = NULL;
+    ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    HDI_CONVERTER_FUNC_DECRYPT(key, paramSetInNew, cipherText, plainText, ret, HdiProxyDecrypt)
+    HksFreeParamSet(&paramSetInNew);
     return ret;
 }
 
@@ -435,7 +487,11 @@ ENABLE_CFI(int32_t HuksAccessAgreeKey(const struct HksParamSet *paramSet, const 
     const struct HksBlob *peerPublicKey, struct HksBlob *agreedKey))
 {
     int32_t ret = HDF_FAILURE;
-    HDI_CONVERTER_FUNC_AGREEKEY(paramSet, privateKey, peerPublicKey, agreedKey, ret, HdiProxyAgreeKey)
+    struct HksParamSet *paramSetInNew = NULL;
+    ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    HDI_CONVERTER_FUNC_AGREEKEY(paramSetInNew, privateKey, peerPublicKey, agreedKey, ret, HdiProxyAgreeKey)
+    HksFreeParamSet(&paramSetInNew);
     return ret;
 }
 
@@ -456,7 +512,11 @@ ENABLE_CFI(int32_t HuksAccessDeriveKey(const struct HksParamSet *paramSet, const
     struct HksBlob *derivedKey))
 {
     int32_t ret = HDF_FAILURE;
-    HDI_CONVERTER_FUNC_DERIVEKEY(paramSet, kdfKey, derivedKey, ret, HdiProxyDeriveKey)
+    struct HksParamSet *paramSetInNew = NULL;
+    ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    HDI_CONVERTER_FUNC_DERIVEKEY(paramSetInNew, kdfKey, derivedKey, ret, HdiProxyDeriveKey)
+    HksFreeParamSet(&paramSetInNew);
     return ret;
 }
 
@@ -477,7 +537,11 @@ ENABLE_CFI(int32_t HuksAccessMac(const struct HksBlob *key, const struct HksPara
     const struct HksBlob *srcData, struct HksBlob *mac))
 {
     int32_t ret = HDF_FAILURE;
-    HDI_CONVERTER_FUNC_MAC(key, paramSet, srcData, mac, ret, HdiProxyMac)
+    struct HksParamSet *paramSetInNew = NULL;
+    ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    HDI_CONVERTER_FUNC_MAC(key, paramSetInNew, srcData, mac, ret, HdiProxyMac)
+    HksFreeParamSet(&paramSetInNew);
     return ret;
 }
 
@@ -538,7 +602,11 @@ ENABLE_CFI(int32_t HuksAccessUpgradeKey(const struct HksBlob *oldKey, const stru
     struct HksBlob *newKey))
 {
     int32_t ret = HDF_FAILURE;
-    HDI_CONVERTER_FUNC_UPGRADEKEY(oldKey, paramSet, newKey, ret, HdiProxyUpgradeKey)
+    struct HksParamSet *paramSetInNew = NULL;
+    ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    HDI_CONVERTER_FUNC_UPGRADEKEY(oldKey, paramSetInNew, newKey, ret, HdiProxyUpgradeKey)
+    HksFreeParamSet(&paramSetInNew);
     return ret;
 }
 #endif
@@ -561,7 +629,11 @@ ENABLE_CFI(int32_t HuksAccessAttestKey(const struct HksBlob *key, const struct H
     struct HksBlob *certChain))
 {
     int32_t ret = HDF_FAILURE;
-    HDI_CONVERTER_FUNC_ATTESTKEY(key, paramSet, certChain, ret, HdiProxyAttestKey)
+    struct HksParamSet *paramSetInNew = NULL;
+    ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    HDI_CONVERTER_FUNC_ATTESTKEY(key, paramSetInNew, certChain, ret, HdiProxyAttestKey)
+    HksFreeParamSet(&paramSetInNew);
     return ret;
 }
 #endif
