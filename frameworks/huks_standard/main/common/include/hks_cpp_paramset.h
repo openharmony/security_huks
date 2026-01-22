@@ -85,14 +85,6 @@ public:
         }
     }
 
-    static HksBlob VectorToBlob(const std::vector<uint8_t> &vec)
-    {
-        return {
-            .size = vec.size(),
-            .data = const_cast<uint8_t*>(vec.data())
-        };
-    }
-
     bool Marshalling(OHOS::Parcel &parcel) const override;
 
     static CppParamSet *Unmarshalling(OHOS::Parcel &parcel);
