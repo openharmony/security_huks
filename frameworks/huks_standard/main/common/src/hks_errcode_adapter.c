@@ -729,7 +729,7 @@ static struct HksError g_errCodeTable[] = {
         .innerErrCode = HKS_ERROR_REMOTE_OPERATION_FAILED,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
-            .errorMsg = "an error occured in the dependent module.",
+            .errorMsg = "an error occurred in the dependent module.",
             .data = NULL
         }
     }, {
@@ -775,10 +775,10 @@ static struct HksError g_errCodeTable[] = {
             .data = NULL
         }
     }, {
-        .innerErrCode = HKS_ERROR_EXT_JS_METHON_ERROR,
+        .innerErrCode = HKS_ERROR_EXT_JS_METHOD_ERROR,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
-            .errorMsg = "an error occured in the dependent module.",
+            .errorMsg = "an error occurred in the dependent module.",
             .data = NULL
         }
     }, {
@@ -813,7 +813,7 @@ static struct HksError g_errCodeTable[] = {
         .innerErrCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
-            .errorMsg = "an error occured in the dependent module.",
+            .errorMsg = "an error occurred in the dependent module.",
             .data = NULL
         }
     }, {

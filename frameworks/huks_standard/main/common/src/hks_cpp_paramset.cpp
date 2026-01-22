@@ -180,7 +180,7 @@ CppParamSet &CppParamSet::operator=(CppParamSet &&inCppPs) noexcept
 
 bool CppParamSet::Marshalling(OHOS::Parcel &parcel) const
 {
-    HKS_LOG_E("CppParamSet Marshalling");
+    HKS_LOG_I("CppParamSet Marshalling");
     if (ptr_ == nullptr) {
         HKS_LOG_E("CppParamSet Marshalling nullptr");
         return false;
@@ -238,6 +238,6 @@ CppParamSet *CppParamSet::Unmarshalling(OHOS::Parcel &parcel)
     }
 
     cppParamSet->ptr_ = paramSet;
-    HKS_LOG_E("CppParamSet UnMarshalling success");
+    HKS_LOG_I("CppParamSet UnMarshalling success");
     return cppParamSet;
 }
