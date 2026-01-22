@@ -51,7 +51,7 @@ typedef struct HksCertInfo {
 
 typedef struct CryptoResultParam {
     int32_t hksErrorCode {HKS_ERROR_EXT_CALL_JS_TIME_OUT};
-    int32_t errCode {HKS_ERROR_EXT_JS_METHON_ERROR};
+    int32_t errCode {HKS_ERROR_EXT_JS_METHOD_ERROR};
     int32_t authState {0};
     uint32_t retryCnt {0};
     std::string handle {};
@@ -70,7 +70,7 @@ struct CallJsParam {
     std::mutex CryptoOperateMutex;
     std::condition_variable CryptoOperateCondition;
     bool isReady = false;
-    int32_t errcode { HKS_ERROR_EXT_JS_METHON_ERROR };
+    int32_t errcode { HKS_ERROR_EXT_JS_METHOD_ERROR };
     std::string funcName;
     AbilityRuntime::JsRuntime *jsRuntime;
     NativeReference *jsObj;
