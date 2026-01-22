@@ -59,21 +59,23 @@ static int32_t GetProcessInfo(int userId, int uid, struct HksProcessInfo *proces
     HksBlob tempProcessName = {0};
     int32_t ret = HKS_SUCCESS;
 
-    uint32_t userSize = userId != 0 ? sizeof(userId) : strlen(USER_ID_ROOT);
-    tempUserId.size = userSize;
-    tempUserId.data = static_cast<uint8_t *>(HksMalloc(userSize));
-    HKS_IF_NULL_LOGE_RETURN(tempUserId.data, HKS_ERROR_MALLOC_FAIL, "userId malloc failed.")
-
-    uint32_t uidSize = sizeof(uid);
-    tempProcessName.size = uidSize;
-    tempProcessName.data = static_cast<uint8_t *>(HksMalloc(uidSize));
-    HKS_IF_NULL_LOGE_RETURN(tempProcessName.data, HKS_ERROR_MALLOC_FAIL, "uid malloc failed.")
     do {
+        ret = HKS_ERROR_MALLOC_FAIL;
+        uint32_t userSize = userId != 0 ? sizeof(userId) : strlen(USER_ID_ROOT);
+        tempUserId.size = userSize;
+        tempUserId.data = static_cast<uint8_t *>(HksMalloc(userSize));
+        HKS_IF_NULL_LOGE_BREAK(tempUserId.data, "userId malloc failed.")
+
+        uint32_t uidSize = sizeof(uid);
+        tempProcessName.size = uidSize;
+        tempProcessName.data = static_cast<uint8_t *>(HksMalloc(uidSize));
+        HKS_IF_NULL_LOGE_BREAK(tempProcessName.data, "uid malloc failed.")
+
         ret = HKS_ERROR_INSUFFICIENT_MEMORY;
         HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(tempUserId.data, userSize, userId == 0 ? USER_ID_ROOT :
             reinterpret_cast<const char*>(&userId), userSize), "memcpy userId failed.")
         
-        HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(tempProcessName.data, uidSize, &uid, uidSize), "memcpy userId failed.")
+        HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(tempProcessName.data, uidSize, &uid, uidSize), "memcpy uid failed.")
 
         processInfo->userId = tempUserId;
         processInfo->processName = tempProcessName;
