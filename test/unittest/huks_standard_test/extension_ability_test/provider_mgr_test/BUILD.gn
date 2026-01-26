@@ -23,9 +23,9 @@ if (huks_enable_ukey_config == true) {
       "./hks_extension_connection_mock.cpp",
       "./hks_external_adapter_mock.cpp",
       "./hks_provider_manger_test.cpp",
-      "./hks_session_manger_test.cpp",
+      "./hks_session_manager_test.cpp",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger/src/hks_provider_life_cycle_manager.cpp",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/session_manger/src/hks_session_manger.cpp",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/session_manger/src/hks_session_manager.cpp",
     ]
 
     configs = [

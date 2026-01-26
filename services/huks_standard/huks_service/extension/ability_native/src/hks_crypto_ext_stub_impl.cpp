@@ -86,20 +86,6 @@ ErrCode HksCryptoExtStubImpl::Sign(
     return ERR_OK;
 }
 
-ErrCode HksCryptoExtStubImpl::Verify(
-    const std::string& handle,
-    const CppParamSet& params,
-    const std::vector<uint8_t>& plainText,
-    const std::vector<uint8_t>& signature,
-    int32_t& errcode)
-{
-    if (extension_ == nullptr) {
-        LOGE("extension is nullptr");
-        return HKS_ERROR_EXT_NULLPTR;
-    }
-    return ERR_OK;
-}
-
 ErrCode HksCryptoExtStubImpl::ExportCertificate(
     const std::string& index,
     const CppParamSet& params,
@@ -178,18 +164,6 @@ ErrCode HksCryptoExtStubImpl::GetProperty(
         return HKS_ERROR_EXT_NULLPTR;
     }
     return extension_->GetProperty(handle, propertyId, params, outParams, errcode);
-}
-
-ErrCode HksCryptoExtStubImpl::GetResourceId(
-    const CppParamSet& params,
-    std::string& resourceId,
-    int32_t& errcode)
-{
-    if (extension_ == nullptr) {
-        LOGE("extension is nullptr");
-        return HKS_ERROR_EXT_NULLPTR;
-    }
-    return ERR_OK;
 }
 
 ErrCode HksCryptoExtStubImpl::ClearUkeyPinAuthState(

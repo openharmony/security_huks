@@ -95,7 +95,7 @@ napi_value GenerateArrayBuffer(const napi_env &env, uint8_t *data, uint32_t size
     napi_value outBuffer;
     status = napi_create_typedarray(env, napi_uint8_array, size, buffer, 0, &outBuffer);
     if (status != napi_ok) {
-        LOGE("napi_create_arraybuffer failed, status:%d", status);
+        LOGE("napi_create_typedarray failed, status:%d", status);
         return nullptr;
     }
     uint8_t *outPut_bytes = (uint8_t *)bufferPtr;
@@ -236,8 +236,7 @@ bool MakeJsNativeVectorInData(const napi_env &env, const std::vector<uint8_t> &i
     return true;
 }
 
-bool BuildHandleInfoParam(const napi_env &env, const HandleInfoParam &param,
-    napi_value *argv, size_t &argc)
+bool BuildHandleInfoParam(const napi_env &env, const HandleInfoParam &param, napi_value *argv, size_t &argc)
 {
     napi_value nativeHandle = nullptr;
     auto status = napi_create_string_utf8(env, param.handle.c_str(), param.handle.length(), &nativeHandle);
@@ -264,8 +263,7 @@ bool BuildHandleInfoParam(const napi_env &env, const HandleInfoParam &param,
     return true;
 }
 
-bool BuildIndexInfoParam(const napi_env &env, const IndexInfoParam &param,
-    napi_value *argv, size_t &argc)
+bool BuildIndexInfoParam(const napi_env &env, const IndexInfoParam &param, napi_value *argv, size_t &argc)
 {
     napi_value nativeIndex = nullptr;
     auto status = napi_create_string_utf8(env, param.index.c_str(), param.index.length(), &nativeIndex);
@@ -292,8 +290,7 @@ bool BuildIndexInfoParam(const napi_env &env, const IndexInfoParam &param,
     return true;
 }
 
-bool BuildIndexInfoParamWithHuksOption(const napi_env &env, const IndexInfoParam &param,
-    napi_value *argv, size_t &argc)
+bool BuildIndexInfoParamWithHuksOption(const napi_env &env, const IndexInfoParam &param, napi_value *argv, size_t &argc)
 {
     napi_value nativeIndex = nullptr;
     auto status = napi_create_string_utf8(env, param.index.c_str(), param.index.length(), &nativeIndex);
@@ -488,6 +485,11 @@ napi_status GetUint8ArrayValue(napi_env env, napi_value value, HksBlob &result)
         return status;
     }
 
+    if (type != napi_uint8_array) {
+        LOGE("TypeArray is not napi_uint8_array.");
+        return status;
+    }
+
     result.size = static_cast<uint32_t>(byte_length);
     result.data = uint8Data;
     return napi_ok;
@@ -497,7 +499,7 @@ int32_t GetHksCertInfoValue(napi_env env, napi_value value, HksCertInfo &certInf
 {
     napi_value napiPurpose = nullptr;
     auto status = napi_get_named_property(env, value, "purpose", &napiPurpose);
-    if (status != napi_ok) {
+    if (status != napi_ok || napiPurpose == nullptr) {
         LOGE("napi_get_named_property failed, status %d", status);
         return status;
     }
@@ -509,7 +511,7 @@ int32_t GetHksCertInfoValue(napi_env env, napi_value value, HksCertInfo &certInf
 
     napi_value napiIndex = nullptr;
     status = napi_get_named_property(env, value, "resourceId", &napiIndex);
-    if (status != napi_ok) {
+    if (status != napi_ok || napiIndex == nullptr) {
         LOGE("napi_get_named_property failed, status %d", status);
         return status;
     }
@@ -521,7 +523,7 @@ int32_t GetHksCertInfoValue(napi_env env, napi_value value, HksCertInfo &certInf
     
     napi_value napiCerts = nullptr;
     status = napi_get_named_property(env, value, "cert", &napiCerts);
-    if (status != napi_ok) {
+    if (status != napi_ok || napiCerts == nullptr) {
         LOGE("napi_get_named_property failed, status %d", status);
         return status;
     }
@@ -537,7 +539,7 @@ napi_status GetHksParamsfromValue(napi_env env, napi_value value, HksParam &para
 {
     napi_value napiTag = nullptr;
     auto status = napi_get_named_property(env, value, "tag", &napiTag);
-    if (status != napi_ok) {
+    if (status != napi_ok || napiTag == nullptr) {
         LOGE("tag get failed, status %d", status);
         return status;
     }
@@ -549,7 +551,7 @@ napi_status GetHksParamsfromValue(napi_env env, napi_value value, HksParam &para
 
     napi_value napiValue = nullptr;
     status = napi_get_named_property(env, value, "value", &napiValue);
-    if (status != napi_ok) {
+    if (status != napi_ok || napiValue == nullptr) {
         LOGE("napi_get_named_property failed, status %d", status);
         return status;
     }
@@ -622,59 +624,56 @@ int32_t CallJsMethod(const std::string &funcName, AbilityRuntime::JsRuntime &jsR
     return param->errcode;
 }
 
-void GetOpenRemoteHandleParams(const napi_env &env, const napi_value &funcResult,
-    CryptoResultParam &resultParams)
+void GetOpenRemoteHandleParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
     napi_value napiHandle = nullptr;
     auto status = napi_get_named_property(env, funcResult, "handle", &napiHandle);
-    if (status != napi_ok) {
-        LOGE("GetOpenRemoteHandleParams::napi_get_named_property failed, status:%d", status);
+    if (status == napi_ok && napiHandle != nullptr) {
+        auto result = GetStringValue(env, napiHandle, resultParams.handle);
+        if (result != HKS_SUCCESS) {
+            LOGE("GetOpenRemoteHandleParams::Convert js napiHandle fail.result:%d", result);
+        }
+        return;
     }
-    auto result = GetStringValue(env, napiHandle, resultParams.handle);
-    if (result != HKS_SUCCESS) {
-        LOGE("GetOpenRemoteHandleParams::Convert js napiHandle fail.result:%d", result);
-    }
+    LOGE("GetOpenRemoteHandleParams::napi_get_named_property failed, status:%d", status);
 }
 
-void GetAuthUkeyPinParams(const napi_env &env, const napi_value &funcResult,
-    CryptoResultParam &resultParams)
+void GetAuthUkeyPinParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
     napi_value napiAuthState = nullptr;
     auto status = napi_get_named_property(env, funcResult, "authState", &napiAuthState);
-    if (status != napi_ok) {
+    if (status == napi_ok && napiAuthState != nullptr) {
+        status = napi_get_value_int32(env, napiAuthState, &resultParams.authState);
+        if (status != napi_ok) {
+            LOGE("Convert js value authState failed, status:%d", status);
+        }
+    } else {
         LOGE("napi_get_named_property failed, status:%d", status);
     }
-
-    status = napi_get_value_int32(env, napiAuthState, &resultParams.authState);
-    if (status != napi_ok) {
-        LOGE("Convert js value authState failed, status:%d", status);
-    }
-
     napi_value napiRetryCnt = nullptr;
     status = napi_get_named_property(env, funcResult, "retryCount", &napiRetryCnt);
-    if (status != napi_ok) {
-        LOGE("napi_get_named_property failed, status:%d", status);
+    if (status == napi_ok && napiRetryCnt != nullptr) {
+        status = napi_get_value_uint32(env, napiRetryCnt, &resultParams.retryCnt);
+        if (status != napi_ok) {
+            LOGE("Convert js value retryCnt failed.status:%d", status);
+        }
+        return;
     }
-
-    status = napi_get_value_uint32(env, napiRetryCnt, &resultParams.retryCnt);
-    if (status != napi_ok) {
-        LOGE("Convert js value retryCnt failed.status:%d", status);
-    }
+    LOGE("napi_get_named_property failed, status:%d", status);
 }
 
-void GetUkeyPinAuthStateParams(const napi_env &env, const napi_value &funcResult,
-    CryptoResultParam &resultParams)
+void GetUkeyPinAuthStateParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
     napi_value napiAuthState = nullptr;
     auto status = napi_get_named_property(env, funcResult, "authState", &napiAuthState);
-    if (status != napi_ok) {
-        LOGE("napi_get_named_property.status:%d", status);
+    if (status == napi_ok && napiAuthState != nullptr) {
+        status = napi_get_value_int32(env, napiAuthState, &resultParams.authState);
+        if (status != napi_ok) {
+            LOGE("napi_get_value_int32 failed.status:%d", status);
+        }
+        return;
     }
-
-    status = napi_get_value_int32(env, napiAuthState, &resultParams.authState);
-    if (status != napi_ok) {
-        LOGE("napi_get_value_int32 failed.status:%d", status);
-    }
+    LOGE("napi_get_named_property failed, status:%d", status);
 }
 
 void HksCertInfoToString(std::vector<HksCertInfo> &certInfoVec, std::string &jsonStr)
@@ -724,8 +723,7 @@ void HksCertInfoToString(std::vector<HksCertInfo> &certInfoVec, std::string &jso
     return ;
 }
 
-void GetExportCertificateParams(const napi_env &env, const napi_value &funcResult,
-    CryptoResultParam &resultParams)
+void GetExportCertificateParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
     napi_value nativeArray = nullptr;
     auto status = napi_create_array(env, &nativeArray);
@@ -765,8 +763,7 @@ void GetExportCertificateParams(const napi_env &env, const napi_value &funcResul
     return;
 }
 
-void GetSessionParams(const napi_env &env, const napi_value &funcResult,
-    CryptoResultParam &resultParams)
+void GetSessionParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
     napi_value napiOutData = nullptr;
     auto status = napi_create_array(env, &napiOutData);
@@ -808,8 +805,7 @@ void GetSessionParams(const napi_env &env, const napi_value &funcResult,
     }
 }
 
-void GetGetPropertyParams(const napi_env &env, const napi_value &funcResult,
-    CryptoResultParam &resultParams)
+void GetGetPropertyParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
     napi_value nativeArray = nullptr;
     auto status = napi_create_array(env, &nativeArray);
@@ -818,7 +814,7 @@ void GetGetPropertyParams(const napi_env &env, const napi_value &funcResult,
         return;
     }
     status = napi_get_named_property(env, funcResult, "property", &nativeArray);
-    if (nativeArray == nullptr) {
+    if (nativeArray == nullptr || status != napi_ok) {
         LOGE("Convert js array object fail.status:%d", status);
         return;
     }
@@ -851,8 +847,7 @@ void GetGetPropertyParams(const napi_env &env, const napi_value &funcResult,
     return;
 }
 
-int32_t ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
-    CryptoResultParam &resultParams)
+int32_t ConvertFunctionResult(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
     if (funcResult == nullptr) {
         LOGE("The funcResult is error.");
@@ -861,8 +856,8 @@ int32_t ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
  
     napi_value napiCode = nullptr;
     auto status = napi_get_named_property(env, funcResult, "resultCode", &napiCode);
-    if (status != napi_ok) {
-        LOGE("napi_get_named_property failed,status:%d", status);
+    if (status != napi_ok || napiCode == nullptr) {
+        LOGE("napi_get_named_property failed, status:%d", status);
         return HKS_ERROR_EXT_GET_NAME_PROPERTY_FAILED;
     }
     status = napi_get_value_int32(env, napiCode, &resultParams.errCode);
@@ -932,12 +927,11 @@ napi_value PromiseCallback(napi_env env, napi_callback_info info)
     return nullptr;
 }
  
-int32_t CallPromise(napi_env &env, napi_value funcResult,
-    std::shared_ptr<CryptoResultParam> dataParam)
+int32_t CallPromise(napi_env &env, napi_value funcResult, std::shared_ptr<CryptoResultParam> dataParam)
 {
     napi_value promiseThen = nullptr;
     auto status = napi_get_named_property(env, funcResult, "then", &promiseThen);
-    if (status != napi_ok) {
+    if (status != napi_ok || promiseThen == nullptr) {
         LOGE("get then from promiseValue failed, status:%d", status);
         return HKS_ERROR_EXT_SET_NAME_PROPERTY_FAILED;
     }
@@ -1107,7 +1101,7 @@ napi_value JsHksCryptoExtAbility::CallObjectMethod(const char *name, napi_value 
 
     napi_value method = nullptr;
     auto status = napi_get_named_property(env, value, name, &method);
-    if (method == nullptr) {
+    if (method == nullptr || status != napi_ok) {
         LOGE("Failed to get '%s' from HksCryptoExtAbility object, status:%d", name, status);
         return nullptr;
     }

@@ -202,15 +202,6 @@ HWTEST_F(HksRemoteHandleManagerTest, SignVerifyTest, TestSize.Level0)
     int32_t ret = manager->CreateRemoteHandle(processInfo, index, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    std::vector<uint8_t> inData = {0x01, 0x02, 0x03, 0x04};
-    std::vector<uint8_t> outData;
-    ret = manager->RemoteHandleSign(processInfo, index, paramSet, inData, outData);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-
-    std::vector<uint8_t> signature = outData;
-    ret = manager->RemoteHandleVerify(processInfo, index, paramSet, inData, signature);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-
     manager->CloseRemoteHandle(processInfo, index, paramSet);
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(processInfo.processName);

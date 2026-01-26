@@ -18,7 +18,7 @@
 #include "hks_external_adapter.h"
 #include "hks_provider_life_cycle_manager.h"
 #include "hks_remote_handle_manager.h"
-#include "hks_session_manger.h"
+#include "hks_session_manager.h"
 #include "hks_cpp_paramset.h"
 #include "hks_template.h"
 #include "app_observer.h"
@@ -53,7 +53,7 @@ static int32_t GetProviderInfo(const HksProcessInfo &processInfo, const std::str
     auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
     if (abilityName.first == HKS_SUCCESS) {
         HKS_IF_TRUE_LOGE_RETURN(abilityName.second.size() >= MAX_ABILITY_NAME_LEN, HKS_ERROR_INVALID_ARGUMENT,
-                "the abilityName is too long. size: %" LOG_PUBLIC "zu", abilityName.second.size())
+            "the abilityName is too long. size: %" LOG_PUBLIC "zu", abilityName.second.size())
         providerInfo.m_abilityName = std::string(abilityName.second.begin(), abilityName.second.end());
     }
     providerInfo.m_userid = processInfo.userIdInt;
@@ -81,8 +81,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(
     auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
     ProviderInfo providerInfo;
     ret = GetProviderInfo(processInfo, providerName, paramSet, providerInfo);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
-        "GetProviderInfo failed. ret: %" LOG_PUBLIC "d", ret)
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetProviderInfo failed. ret: %" LOG_PUBLIC "d", ret)
     ret = handleMgr->ClearUidIndexMap(providerInfo);
     HKS_IF_TRUE_LOGE(ret != HKS_SUCCESS, "clear index map fail");
 
@@ -94,7 +93,6 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(
     HKS_IF_TRUE_LOGE_RETURN(providerMgr == nullptr, HKS_ERROR_NULL_POINTER, "providerMgr is null");
     ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, isdeath, deleteCount);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
-    HKS_IF_TRUE_RETURN(ret != HKS_SUCCESS, ret)
     return ret;
 }
 
@@ -105,8 +103,9 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnOpenRemoteHandle(
     CppParamSet paramSetWithUid(paramSet);
     auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
     if (uidParam.first == HKS_SUCCESS) {
-        HKS_IF_NOT_TRUE_RETURN(uidParam.second == static_cast<int32_t>(processInfo.uidInt), HKS_ERROR_INVALID_ARGUMENT);
+        HKS_IF_NOT_TRUE_RETURN(uidParam.second == static_cast<int32_t>(processInfo.uidInt), HKS_ERROR_INVALID_ARGUMENT)
     } else {
+        // 未完全初始化
         struct HksParam uid = {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(processInfo.uidInt)};
         HKS_IF_TRUE_LOGE_RETURN(!paramSetWithUid.AddParams({uid}), HKS_ERROR_INVALID_ARGUMENT,
             "AddUidToParamset fail")
@@ -114,7 +113,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnOpenRemoteHandle(
     RegisterObserverForProcess(processInfo, paramSetWithUid);
     (void)handle;
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
+    HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
     auto ret = handleMgr->CreateRemoteHandle(processInfo, index, paramSetWithUid);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
@@ -125,10 +124,10 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnCloseRemoteHandle(
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
+    HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
     auto ret = handleMgr->CloseRemoteHandle(processInfo, index, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null");
+    HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null")
     (void)sessionMgr->HksClearHandle(processInfo, paramSet, index);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
@@ -145,7 +144,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnAuthUkeyPin(const H
         RegisterObserverForProcess(processInfoTmp, paramSet);
     }
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
+    HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
     auto ret = handleMgr->RemoteVerifyPin(processInfo, index, paramSet, authState, retryCnt);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
@@ -156,7 +155,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnGetUkeyPinAuthState
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
+    HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
     auto ret = handleMgr->RemoteVerifyPinStatus(processInfo, index, paramSet, state);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
@@ -167,7 +166,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnExportCerticate(
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
+    HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
     auto ret = handleMgr->FindRemoteCertificate(processInfo, index, paramSet, certsJson);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
@@ -179,7 +178,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnExportProviderCerti
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
+    HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
     auto ret = handleMgr->FindRemoteAllCertificate(processInfo, providerName, paramSet, certsJsonArr);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
@@ -194,7 +193,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnInitSession(const H
         "InitSession purpose check failed")
     RegisterObserverForProcess(processInfo, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null");
+    HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null")
     ret = sessionMgr->ExtensionInitSession(processInfo, index, paramSet, handle);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
@@ -208,7 +207,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUpdateSession(const
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     RegisterObserverForProcess(processInfo, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null");
+    HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null")
     ret = sessionMgr->ExtensionUpdateSession(processInfo, handle, paramSet, inData, outData);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
@@ -222,7 +221,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnFinishSession(const
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     RegisterObserverForProcess(processInfo, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null");
+    HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null")
     ret = sessionMgr->ExtensionFinishSession(processInfo, handle, paramSet, inData, outData);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
@@ -235,7 +234,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnAbortSession(const 
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     RegisterObserverForProcess(processInfo, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null");
+    HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null")
     ret = sessionMgr->ExtensionAbortSession(processInfo, handle, paramSet);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
@@ -249,7 +248,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnClearUkeyPinAuthSta
     struct HksParam uid = {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = processInfo.uidInt};
     CppParamSet paramSet = CppParamSet({uid});
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
+    HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
     ret = handleMgr->RemoteClearPinStatus(processInfo, index, paramSet);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
@@ -262,7 +261,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnGetRemoteProperty(
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
+    HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
     ret = handleMgr->GetRemoteProperty(processInfo, index, propertyId, paramSet, outParams);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;

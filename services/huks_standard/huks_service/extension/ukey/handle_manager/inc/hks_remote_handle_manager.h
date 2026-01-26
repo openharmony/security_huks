@@ -174,11 +174,6 @@ public:
         const std::string &providerName, const CppParamSet &paramSet, std::string &certificatesOut);
     int32_t MergeProviderCertificates(const ProviderInfo &providerInfo, const std::string &providerCertVec,
         CommJsonObject &combinedArray);
-    //sign and verify
-    int32_t RemoteHandleSign(const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet,
-        const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
-    int32_t RemoteHandleVerify(const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet,
-        const std::vector<uint8_t> &plainText, std::vector<uint8_t> &signature);
 
     int32_t GetRemoteProperty(const HksProcessInfo &processInfo, const std::string& index,
         const std::string& propertyId, const CppParamSet& paramSet, CppParamSet& outParams);

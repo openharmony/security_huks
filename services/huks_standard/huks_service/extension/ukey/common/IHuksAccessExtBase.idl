@@ -19,14 +19,11 @@ interface OHOS.Security.Huks.IHuksAccessExtBase {
     [ipccode 2] void CloseRemoteHandle([in] String handle, [in] CppParamSet params, [out] int errcode);
     [ipccode 3] void AuthUkeyPin([in] String handle, [in] CppParamSet params, [out] int errcode, [out] int authState, [out] unsigned int retryCnt);
     [ipccode 4] void GetUkeyPinAuthState([in] String handle, [in] CppParamSet params, [out] int state, [out] int errcode);
-    [ipccode 5] void Sign([in] String handle, [in] CppParamSet params, [in] unsigned char[] inData, [out] unsigned char[] outData, [out] int errcode);
-    [ipccode 6] void Verify([in] String handle, [in] CppParamSet params, [in] unsigned char[] plainText, [in] unsigned char[] signature, [out] int errcode);
-    [ipccode 7] void ExportCertificate([in] String index, [in] CppParamSet params, [out] String certJsonArr, [out] int errcode);
-    [ipccode 8] void ExportProviderCertificates([in] CppParamSet params, [out] String certJsonArr, [out] int errcode);
-    [ipccode 9] void InitSession([in] String index, [in] CppParamSet params, [out] String handle, [out] int errcode);
-    [ipccode 10] void UpdateSession([in] String handle, [in] CppParamSet params, [in] unsigned char[] inData, [out] unsigned char[] outData, [out] int errcode);
-    [ipccode 11] void FinishSession([in] String handle, [in] CppParamSet params, [in] unsigned char[] inData, [out] unsigned char[] outData, [out] int errcode);
-    [ipccode 12] void GetProperty([in] String handle, [in] String propertyId, [in] CppParamSet params, [out] CppParamSet outParams, [out] int errcode);
-    [ipccode 13] void GetResourceId([in] CppParamSet params, [out] String resourceId, [out] int errcode);
-    [ipccode 14] void ClearUkeyPinAuthState([in] String handle, [in] CppParamSet params, [out] int errcode);
+    [ipccode 5] void ExportCertificate([in] String index, [in] CppParamSet params, [out] String certJsonArr, [out] int errcode);
+    [ipccode 6] void ExportProviderCertificates([in] CppParamSet params, [out] String certJsonArr, [out] int errcode);
+    [ipccode 7] void InitSession([in] String index, [in] CppParamSet params, [out] String handle, [out] int errcode);
+    [ipccode 8] void UpdateSession([in] String handle, [in] CppParamSet params, [in] unsigned char[] inData, [out] unsigned char[] outData, [out] int errcode);
+    [ipccode 9] void FinishSession([in] String handle, [in] CppParamSet params, [in] unsigned char[] inData, [out] unsigned char[] outData, [out] int errcode);
+    [ipccode 10] void GetProperty([in] String handle, [in] String propertyId, [in] CppParamSet params, [out] CppParamSet outParams, [out] int errcode);
+    [ipccode 11] void ClearUkeyPinAuthState([in] String handle, [in] CppParamSet params, [out] int errcode);
 }

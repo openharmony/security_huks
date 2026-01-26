@@ -67,7 +67,7 @@ void ExtensionConnection::OnDisconnect(sptr<ExtensionConnection> &connect)
         HKS_IF_TRUE_LOGE(connect->extConnectProxy == nullptr, "proxy is null, not need to wait!")
         return connect->extConnectProxy == nullptr;
     })) {
-        HKS_LOG_E("wait disconnected timeout or, not need to wait");
+        HKS_LOG_E("wait disconnected timeout, or not need to wait");
     };
     extConnectProxy = nullptr;
     isConnected_.store(false);
@@ -100,8 +100,9 @@ void ExtensionConnection::AddExtDeathRecipient(const wptr<IRemoteObject>& token)
     }
 
     if (callerDeathRecipient_ == nullptr) {
+        shared_ptr<ExtensionConnection> thisPtr = shared_from_this();
         callerDeathRecipient_ = new ExtensionDeathRecipient(std::bind(&ExtensionConnection::OnRemoteDied,
-            this, std::placeholders::_1));
+            thisPtr.get(), std::placeholders::_1));
     }
 
     if (token != nullptr) {
