@@ -41,12 +41,6 @@ public:
     MOCK_METHOD(ErrCode, GetUkeyPinAuthState,
         (const std::string &handle, const CppParamSet &params, int &state, int &errcode), (override));
 
-    MOCK_METHOD(ErrCode, Sign,
-        (const std::string &handle, const CppParamSet &params, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData, int &errcode), (override));
-
-    MOCK_METHOD(ErrCode, Verify,
-        (const std::string &handle, const CppParamSet &params, const std::vector<uint8_t> &plainText, const std::vector<uint8_t> &signature, int &errcode), (override));
-
     MOCK_METHOD(ErrCode, ExportCertificate,
         (const std::string &index, const CppParamSet &params, std::string &certJsonArr, int &errcode), (override));
 
@@ -64,9 +58,6 @@ public:
 
     MOCK_METHOD(ErrCode, GetProperty,
         (const std::string &handle, const std::string &propertyId, const CppParamSet &params, CppParamSet &outParams, int &errcode), (override));
-
-    MOCK_METHOD(ErrCode, GetResourceId,
-        (const CppParamSet &params, std::string &resourceId, int &errcode), (override));
 
     MOCK_METHOD(ErrCode, ClearUkeyPinAuthState,
         (const std::string &handle, const CppParamSet &params, int &errcode), (override));

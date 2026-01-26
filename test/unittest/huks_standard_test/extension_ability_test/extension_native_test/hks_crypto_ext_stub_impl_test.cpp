@@ -101,36 +101,6 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0004, testing
 {
     std::shared_ptr<HksCryptoExtAbility> extension = std::make_shared<HksCryptoExtAbility>();
     HksCryptoExtStubImpl hksCryptoExtStubImpl(extension);
-    CppParamSet params;
-    std::string handle;
-    int32_t errcode;
-    const std::vector<uint8_t> inData;
-    std::vector<uint8_t> outData;
-    EXPECT_EQ(hksCryptoExtStubImpl.Sign(handle, params, inData, outData, errcode), ERR_OK);
-    HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
-    EXPECT_EQ(hksCryptoExtStubImplNullptr.Sign(handle, params, inData, outData, errcode), HKS_ERROR_EXT_NULLPTR);
-}
-
-HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0005, testing::ext::TestSize.Level0)
-{
-    std::shared_ptr<HksCryptoExtAbility> extension = std::make_shared<HksCryptoExtAbility>();
-    HksCryptoExtStubImpl hksCryptoExtStubImpl(extension);
-    CppParamSet params;
-    std::string handle;
-    int32_t errcode;
-    std::vector<uint8_t> plainText;
-    std::vector<uint8_t> signature;
-    EXPECT_EQ(hksCryptoExtStubImpl.Verify(
-        handle, params, plainText, signature, errcode), ERR_OK);
-    HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
-    EXPECT_EQ(hksCryptoExtStubImplNullptr.Verify(
-        handle, params, plainText, signature, errcode), HKS_ERROR_EXT_NULLPTR);
-}
-
-HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0006, testing::ext::TestSize.Level0)
-{
-    std::shared_ptr<HksCryptoExtAbility> extension = std::make_shared<HksCryptoExtAbility>();
-    HksCryptoExtStubImpl hksCryptoExtStubImpl(extension);
     std::string index;
     CppParamSet params;
     std::string certJsonArr;
@@ -141,7 +111,7 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0006, testing
     EXPECT_EQ(hksCryptoExtStubImplNullptr.ExportCertificate(index, params, certJsonArr, errcode), HKS_ERROR_EXT_NULLPTR);
 }
 
-HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0007, testing::ext::TestSize.Level0)
+HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0005, testing::ext::TestSize.Level0)
 {
     std::shared_ptr<HksCryptoExtAbility> extension = std::make_shared<HksCryptoExtAbility>();
     HksCryptoExtStubImpl hksCryptoExtStubImpl(extension);
@@ -155,7 +125,7 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0007, testing
         params, certJsonArr, errcode), HKS_ERROR_EXT_NULLPTR);
 }
 
-HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0008, testing::ext::TestSize.Level0)
+HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0006, testing::ext::TestSize.Level0)
 {
     std::shared_ptr<HksCryptoExtAbility> extension = std::make_shared<HksCryptoExtAbility>();
     HksCryptoExtStubImpl hksCryptoExtStubImpl(extension);
@@ -168,7 +138,7 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0008, testing
     EXPECT_EQ(hksCryptoExtStubImplNullptr.InitSession(index, params, handle, errcode), HKS_ERROR_EXT_NULLPTR);
 }
 
-HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0009, testing::ext::TestSize.Level0)
+HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0007, testing::ext::TestSize.Level0)
 {
     std::shared_ptr<HksCryptoExtAbility> extension = std::make_shared<HksCryptoExtAbility>();
     HksCryptoExtStubImpl hksCryptoExtStubImpl(extension);
@@ -184,7 +154,7 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0009, testing
         handle, params, inData, outData, errcode), HKS_ERROR_EXT_NULLPTR);
 }
 
-HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0010, testing::ext::TestSize.Level0)
+HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0008, testing::ext::TestSize.Level0)
 {
     std::shared_ptr<HksCryptoExtAbility> extension = std::make_shared<HksCryptoExtAbility>();
     HksCryptoExtStubImpl hksCryptoExtStubImpl(extension);
@@ -200,7 +170,7 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0010, testing
         handle, params, inData, outData, errcode), HKS_ERROR_EXT_NULLPTR);
 }
 
-HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0011, testing::ext::TestSize.Level0)
+HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0009, testing::ext::TestSize.Level0)
 {
     std::shared_ptr<HksCryptoExtAbility> extension = std::make_shared<HksCryptoExtAbility>();
     HksCryptoExtStubImpl hksCryptoExtStubImpl(extension);
@@ -216,21 +186,7 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0011, testing
         handle, propertyId, params, outParams, errcode), HKS_ERROR_EXT_NULLPTR);
 }
 
-HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0012, testing::ext::TestSize.Level0)
-{
-    std::shared_ptr<HksCryptoExtAbility> extension = std::make_shared<HksCryptoExtAbility>();
-    HksCryptoExtStubImpl hksCryptoExtStubImpl(extension);
-    CppParamSet params;
-    std::string resourceId;
-    int32_t errcode;
-    EXPECT_EQ(hksCryptoExtStubImpl.GetResourceId(
-        params, resourceId, errcode), ERR_OK);
-    HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
-    EXPECT_EQ(hksCryptoExtStubImplNullptr.GetResourceId(
-        params, resourceId, errcode), HKS_ERROR_EXT_NULLPTR);
-}
-
-HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0013, testing::ext::TestSize.Level0)
+HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0010, testing::ext::TestSize.Level0)
 {
     std::shared_ptr<HksCryptoExtAbility> extension = std::make_shared<HksCryptoExtAbility>();
     HksCryptoExtStubImpl hksCryptoExtStubImpl(extension);

@@ -72,20 +72,6 @@ ErrCode HksCryptoExtStubImpl::GetUkeyPinAuthState(
     return extension_->GetUkeyPinAuthState(handle, params, state, errcode);
 }
 
-ErrCode HksCryptoExtStubImpl::Sign(
-    const std::string& handle,
-    const CppParamSet& params,
-    const std::vector<uint8_t>& inData,
-    std::vector<uint8_t>& outData,
-    int32_t& errcode)
-{
-    if (extension_ == nullptr) {
-        LOGE("extension is nullptr");
-        return HKS_ERROR_EXT_NULLPTR;
-    }
-    return ERR_OK;
-}
-
 ErrCode HksCryptoExtStubImpl::ExportCertificate(
     const std::string& index,
     const CppParamSet& params,
