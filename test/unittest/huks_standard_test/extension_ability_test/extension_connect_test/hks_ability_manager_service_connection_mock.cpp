@@ -14,7 +14,7 @@
  */
 
 #include "hks_ability_manager_service_connection.h"
-#include "hks_extension_connection.h"
+#include "hks_extension_connection_test.h"
 
 namespace OHOS {
 namespace Security {
