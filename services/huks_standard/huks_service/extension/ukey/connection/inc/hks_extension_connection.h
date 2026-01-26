@@ -30,7 +30,8 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 
-class ExtensionConnection : public OHOS::AAFwk::AbilityConnectionStub {
+class ExtensionConnection : public OHOS::AAFwk::AbilityConnectionStub,
+    std::enable_shared_from_this<ExtensionConnection> {
 public:
     ExtensionConnection(const HksProcessInfo &info);
     int32_t OnConnection(const AAFwk::Want &want, sptr<ExtensionConnection> &connect, int32_t userid);

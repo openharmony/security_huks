@@ -162,8 +162,7 @@ void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData
         HKS_LOG_I("HksService package removed: uid is %" LOG_PUBLIC "d userId is %" LOG_PUBLIC "d", uid, userId);
 
         int32_t ret = GetProcessInfo(userId, uid, &processInfo);
-        HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS, "GetProcessInfo failed.")
-        HksServiceDeleteProcessInfo(&processInfo);
+        HKS_IF_TRUE_EXCU(ret == HKS_SUCCESS, HksServiceDeleteProcessInfo(&processInfo))
 #ifdef L2_STANDARD
         HksServiceDeleteGroupKey(&processInfo, want);
 #endif

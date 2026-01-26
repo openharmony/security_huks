@@ -55,9 +55,9 @@ int32_t HksIpcServiceOnGetRemoteProperty(const HksProcessInfo *processInfo, cons
     const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams);
 int32_t HksIpcServiceOnListProviders(std::vector<uint8_t> &providersOut);
 int32_t HksIpcServiceOnExportCertificate(const struct HksProcessInfo *processInfo, const std::string &index,
-    const CppParamSet &paramSet, std::string &cetificatesOut);
+    const CppParamSet &paramSet, std::string &certificatesOut);
 int32_t HksIpcServiceOnExportProviderAllCertificates(const struct HksProcessInfo *processInfo, const std::string &index,
-    const CppParamSet &paramSet, std::string &cetificatesOut);
+    const CppParamSet &paramSet, std::string &certificatesOut);
 
 }
 }
