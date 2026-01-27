@@ -476,6 +476,10 @@ napi_status GetUint8ArrayValue(napi_env env, napi_value value, HksBlob &result)
         LOGE("napi_get_typedarray_info failed %d", int32_t(status));
         return status;
     }
+    if (type != napi_uint8_array) {
+        LOGE("TypeArray is not napi_uint8_array.");
+        return napi_invalid_arg;
+    }
 
     uint8_t *uint8Data = nullptr;
     size_t byte_length = 0;
@@ -484,12 +488,6 @@ napi_status GetUint8ArrayValue(napi_env env, napi_value value, HksBlob &result)
         LOGE("napi_get_typedarray_info %d", int32_t(status));
         return status;
     }
-
-    if (type != napi_uint8_array) {
-        LOGE("TypeArray is not napi_uint8_array.");
-        return status;
-    }
-
     result.size = static_cast<uint32_t>(byte_length);
     result.data = uint8Data;
     return napi_ok;
@@ -499,9 +497,13 @@ int32_t GetHksCertInfoValue(napi_env env, napi_value value, HksCertInfo &certInf
 {
     napi_value napiPurpose = nullptr;
     auto status = napi_get_named_property(env, value, "purpose", &napiPurpose);
-    if (status != napi_ok || napiPurpose == nullptr) {
+    if (status != napi_ok) {
         LOGE("napi_get_named_property failed, status %d", status);
         return status;
+    }
+    if (napiPurpose == nullptr) {
+        LOGE("napi_get_named_property get napiPurpose is nullptr.");
+        return napi_invalid_arg;
     }
     status = napi_get_value_int32(env, napiPurpose, &certInfo.purpose);
     if (status != napi_ok) {
@@ -511,9 +513,13 @@ int32_t GetHksCertInfoValue(napi_env env, napi_value value, HksCertInfo &certInf
 
     napi_value napiIndex = nullptr;
     status = napi_get_named_property(env, value, "resourceId", &napiIndex);
-    if (status != napi_ok || napiIndex == nullptr) {
+    if (status != napi_ok) {
         LOGE("napi_get_named_property failed, status %d", status);
         return status;
+    }
+    if (napiIndex == nullptr) {
+        LOGE("napi_get_named_property get napiIndex is nullptr.");
+        return napi_invalid_arg;
     }
     auto result = GetStringValue(env, napiIndex, certInfo.index);
     if (result != HKS_SUCCESS) {
@@ -523,9 +529,13 @@ int32_t GetHksCertInfoValue(napi_env env, napi_value value, HksCertInfo &certInf
     
     napi_value napiCerts = nullptr;
     status = napi_get_named_property(env, value, "cert", &napiCerts);
-    if (status != napi_ok || napiCerts == nullptr) {
+    if (status != napi_ok) {
         LOGE("napi_get_named_property failed, status %d", status);
         return status;
+    }
+    if (napiCerts == nullptr) {
+        LOGE("napi_get_named_property get napiCerts is nullptr.");
+        return napi_invalid_arg;
     }
     status = GetUint8ArrayValue(env, napiCerts, certInfo.certsArray);
     if (status != napi_ok) {
@@ -539,9 +549,13 @@ napi_status GetHksParamsfromValue(napi_env env, napi_value value, HksParam &para
 {
     napi_value napiTag = nullptr;
     auto status = napi_get_named_property(env, value, "tag", &napiTag);
-    if (status != napi_ok || napiTag == nullptr) {
+    if (status != napi_ok) {
         LOGE("tag get failed, status %d", status);
         return status;
+    }
+    if (napiTag == nullptr) {
+        LOGE("napi_get_named_property get napiTag is nullptr.");
+        return napi_invalid_arg;
     }
     status = napi_get_value_uint32(env, napiTag, &param.tag);
     if (status != napi_ok) {
@@ -551,9 +565,13 @@ napi_status GetHksParamsfromValue(napi_env env, napi_value value, HksParam &para
 
     napi_value napiValue = nullptr;
     status = napi_get_named_property(env, value, "value", &napiValue);
-    if (status != napi_ok || napiValue == nullptr) {
+    if (status != napi_ok) {
         LOGE("napi_get_named_property failed, status %d", status);
         return status;
+    }
+    if (napiValue == nullptr) {
+        LOGE("napi_get_named_property get napiValue is nullptr.");
+        return napi_invalid_arg;
     }
     bool lossLess = true;
     switch (param.tag & HKS_TAG_TYPE_MASK) {

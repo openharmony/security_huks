@@ -18,7 +18,7 @@
 #include "hks_external_adapter.h"
 #include "hks_provider_life_cycle_manager.h"
 #include "hks_remote_handle_manager.h"
-#include "hks_session_manager.h"
+#include "hks_ukey_session_manager.h"
 #include "hks_cpp_paramset.h"
 #include "hks_template.h"
 #include "app_observer.h"

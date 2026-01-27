@@ -102,7 +102,7 @@ void ExtensionConnection::AddExtDeathRecipient(const wptr<IRemoteObject>& token)
     if (callerDeathRecipient_ == nullptr) {
         std::shared_ptr<ExtensionConnection> thisPtr = shared_from_this();
         callerDeathRecipient_ = new ExtensionDeathRecipient(std::bind(&ExtensionConnection::OnRemoteDied,
-            thisPtr.get(), std::placeholders::_1));
+            thisPtr, std::placeholders::_1));
     }
 
     if (token != nullptr) {
