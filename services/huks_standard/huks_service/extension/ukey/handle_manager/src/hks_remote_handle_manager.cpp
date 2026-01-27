@@ -142,8 +142,7 @@ int32_t HksRemoteHandleManager::GetProviderProxy(const ProviderInfo &providerInf
     OHOS::sptr<IHuksAccessExtBase> &proxy)
 {
     auto providerManager = HksProviderLifeCycleManager::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(providerManager == nullptr, HKS_ERROR_NULL_POINTER,
-        "Get provider manager instance failed")        
+    HKS_IF_TRUE_LOGE_RETURN(providerManager == nullptr, HKS_ERROR_NULL_POINTER, "Get provider manager instance failed")  
     int32_t ret = providerManager->GetExtensionProxy(providerInfo, proxy);
     if (ret != HKS_SUCCESS || proxy == nullptr) {
         HKS_LOG_E("Get extension proxy failed for provider: %" LOG_PUBLIC "s", providerInfo.m_providerName.c_str());
