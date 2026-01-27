@@ -105,7 +105,6 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnOpenRemoteHandle(
     if (uidParam.first == HKS_SUCCESS) {
         HKS_IF_NOT_TRUE_RETURN(uidParam.second == static_cast<int32_t>(processInfo.uidInt), HKS_ERROR_INVALID_ARGUMENT)
     } else {
-        // 未完全初始化
         struct HksParam uid = {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(processInfo.uidInt)};
         HKS_IF_TRUE_LOGE_RETURN(!paramSetWithUid.AddParams({uid}), HKS_ERROR_INVALID_ARGUMENT,
             "AddUidToParamset fail")
