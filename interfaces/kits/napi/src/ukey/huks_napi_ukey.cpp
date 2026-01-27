@@ -229,7 +229,7 @@ static napi_value CreateAsyncWork(napi_env env, napi_callback_info info, std::un
 
 napi_value HuksNapiRegisterProvider(napi_env env, napi_callback_info info)
 {
-    auto context = std::make_unique<ProviderRegContext>();	 
+    auto context = std::make_unique<ProviderRegContext>();
     NAPI_THROW(env, context == nullptr, HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not create context");
     
     context->parse = [](napi_env env, napi_callback_info info, AsyncContext *context) -> napi_status {
