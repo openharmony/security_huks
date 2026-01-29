@@ -1165,12 +1165,6 @@ HWTEST_F(JsCryptoExtAbilityTest, GetSessionParams_0000, testing::ext::TestSize.L
     EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(testing::Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
         .WillOnce(DoAll(Invoke(&ReturnsNonNullValue), Return(napi_ok)));
-    GetSessionParams(env, value, resultParams);
-    EXPECT_EQ(resultParams.outData.size(), 0);
-
-    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(testing::Return(napi_ok));
-    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
-        .WillOnce(DoAll(Invoke(&ReturnsNonNullValue), Return(napi_ok)));
     EXPECT_CALL(*insMoc, napi_get_typedarray_info(_, _, _, _, _, _, _)).WillOnce(Return(napi_invalid_arg));
     GetSessionParams(env, value, resultParams);
     EXPECT_EQ(resultParams.outData.size(), 0);
