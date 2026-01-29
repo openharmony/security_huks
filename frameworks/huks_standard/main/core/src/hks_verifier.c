@@ -197,7 +197,7 @@ static int32_t VerifySignature(const struct HksCertInfo *cert, const struct HksC
 
 static void PrintCertMgrError(const struct HksCertInfo *certs, X509_STORE_CTX *verifyCtx)
 {
-    if (certs != NULL && certs->length >= 1) {
+    if (certs != NULL && certs->length > 1) {
         ASN1_TIME *time = X509_get_notBefore(certs[1].x509);
         HKS_IF_TRUE_LOGE(time != NULL, "device cert time: %" LOG_PUBLIC "s", time->data)
     }
