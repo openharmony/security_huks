@@ -434,10 +434,10 @@ static int32_t ConbineIntoKeyPair(const struct HksBlob *privateKey,
     (void)memcpy_s(buffer + offset, size, &keyPairStruct, sizeof(keyPairStruct));
     offset += sizeof(keyPairStruct);
 
-    (void)memcpy_s(buffer  + offset, size - offset, publicKey->data, publicKey->size);
+    (void)memcpy_s(buffer + offset, size - offset, publicKey->data, publicKey->size);
     offset += publicKey->size;
 
-    (void)memcpy_s(buffer  + offset, size - offset, privateKey->data, privateKey->size) ;
+    (void)memcpy_s(buffer + offset, size - offset, privateKey->data, privateKey->size) ;
 
     keyPair->data = buffer;
     keyPair->size = size;

@@ -14,22 +14,22 @@
  */
 
 #include "hks_ability_manager_service_connection.h"
-#include "hks_extension_connection.h"
+#include "hks_extension_connection_test.h"
 
 namespace OHOS {
 namespace Security {
 namespace Huks {
-int32_t AMSConnectAbility(const AAFwk::Want &want, sptr<ExtensionConnection> &connect, int32_t userid)
+int32_t AMSConnectAbility(const AAFwk::Want &want, const sptr<ExtensionConnection> &connect, int32_t userid)
 {
     return HKS_SUCCESS;
 }
 
-void AMSDisconnectAbility(sptr<ExtensionConnection> &connect)
+void AMSDisconnectAbility(const sptr<ExtensionConnection> &connect)
 {
     return;
 }
 
-sptr<IHuksAccessExtBase> ChangeIRemoteObjectToIHuksAccessExtBase(const sptr<IRemoteObject>& remoteObject)
+sptr<IHuksAccessExtBase> CastToHuksAccessExtBaseProxy(const sptr<IRemoteObject>& remoteObject)
 {
     sptr<IHuksAccessExtBase> extConnectProxy = new MockIHuksAccessExtBase();
     return extConnectProxy;

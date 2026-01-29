@@ -56,20 +56,6 @@ public:
         int32_t& state,
         int32_t& errcode) override;
 
-    ErrCode Sign(
-        const std::string& handle,
-        const CppParamSet& params,
-        const std::vector<uint8_t>& inData,
-        std::vector<uint8_t>& outData,
-        int32_t& errcode) override;
-
-    ErrCode Verify(
-        const std::string& handle,
-        const CppParamSet& params,
-        const std::vector<uint8_t>& plainText,
-        const std::vector<uint8_t>& signature,
-        int32_t& errcode) override;
-
     ErrCode ExportCertificate(
         const std::string& index,
         const CppParamSet& params,
@@ -106,11 +92,6 @@ public:
         const std::string& propertyId,
         const CppParamSet& params,
         CppParamSet& outParams,
-        int32_t& errcode) override;
-    
-    ErrCode GetResourceId(
-        const CppParamSet& params,
-        std::string& resourceId,
         int32_t& errcode) override;
     
     ErrCode ClearUkeyPinAuthState(

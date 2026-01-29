@@ -53,27 +53,39 @@ static void GetOsAccountIdFromUid(int uid, int &osAccountId)
 }
 #endif // HAS_OS_ACCOUNT_PART
 
-static void GetProcessInfo(int userId, int uid, struct HksProcessInfo *processInfo)
+static int32_t GetProcessInfo(int userId, int uid, struct HksProcessInfo *processInfo)
 {
-    uint32_t userSize = userId != 0 ? sizeof(userId) : strlen(USER_ID_ROOT);
-    uint8_t *userData = static_cast<uint8_t *>(HksMalloc(userSize));
-    HKS_IF_NULL_LOGE_RETURN_VOID(userData, "user id malloc failed.")
-    (void)memcpy_s(userData, userSize, userId == 0 ? USER_ID_ROOT : reinterpret_cast<const char *>(&userId), userSize);
-    processInfo->userId.size = userSize;
-    processInfo->userId.data = userData;
-    processInfo->userIdInt = userId;
+    HksBlob tempUserId = {0};
+    HksBlob tempProcessName = {0};
+    int32_t ret = HKS_SUCCESS;
 
-    uint32_t uidSize = sizeof(uid);
-    uint8_t *uidData = static_cast<uint8_t *>(HksMalloc(uidSize));
-    if (uidData == nullptr) {
-        HKS_LOG_E("uid malloc failed.");
-        HKS_FREE(userData);
-        processInfo->userId.data = nullptr;
-        return;
-    }
-    (void)memcpy_s(uidData, uidSize, &uid, uidSize);
-    processInfo->processName.size = uidSize;
-    processInfo->processName.data = uidData;
+    do {
+        ret = HKS_ERROR_MALLOC_FAIL;
+        uint32_t userSize = userId != 0 ? sizeof(userId) : strlen(USER_ID_ROOT);
+        tempUserId.size = userSize;
+        tempUserId.data = static_cast<uint8_t *>(HksMalloc(userSize));
+        HKS_IF_NULL_LOGE_BREAK(tempUserId.data, "userId malloc failed.")
+
+        uint32_t uidSize = sizeof(uid);
+        tempProcessName.size = uidSize;
+        tempProcessName.data = static_cast<uint8_t *>(HksMalloc(uidSize));
+        HKS_IF_NULL_LOGE_BREAK(tempProcessName.data, "uid malloc failed.")
+
+        ret = HKS_ERROR_INSUFFICIENT_MEMORY;
+        HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(tempUserId.data, userSize, userId == 0 ? USER_ID_ROOT :
+            reinterpret_cast<const char*>(&userId), userSize), "memcpy userId failed.")
+        
+        HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(tempProcessName.data, uidSize, &uid, uidSize), "memcpy uid failed.")
+
+        processInfo->userId = tempUserId;
+        processInfo->processName = tempProcessName;
+
+        return HKS_SUCCESS;
+    } while (0);
+
+    HKS_FREE(tempUserId.data);
+    HKS_FREE(tempProcessName.data);
+    return ret;
 }
 
 static void GetUserId(int userId, struct HksBlob *userIdBlob)
@@ -149,8 +161,8 @@ void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData
 #endif // HAS_OS_ACCOUNT_PART
         HKS_LOG_I("HksService package removed: uid is %" LOG_PUBLIC "d userId is %" LOG_PUBLIC "d", uid, userId);
 
-        GetProcessInfo(userId, uid, &processInfo);
-        HksServiceDeleteProcessInfo(&processInfo);
+        int32_t ret = GetProcessInfo(userId, uid, &processInfo);
+        HKS_IF_TRUE_EXCU(ret == HKS_SUCCESS, HksServiceDeleteProcessInfo(&processInfo));
 #ifdef L2_STANDARD
         HksServiceDeleteGroupKey(&processInfo, want);
 #endif

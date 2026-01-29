@@ -71,17 +71,8 @@ int32_t HksIpcCreateRemKeyHandleAdapter(const struct HksProcessInfo *processInfo
     std::string remoteHandle;
     ret = OHOS::Security::Huks::HksIpcServiceOnCreateRemoteKeyHandle(processInfo, cppresourceId,
         cppParamSet, remoteHandle);
-
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnCreateRemoteKeyHandle fail")
-
-    uint32_t copyLen = static_cast<uint32_t>(remoteHandle.size());
-    if (copyLen > static_cast<uint32_t>(MAX_OUT_BLOB_SIZE)) {
-        HKS_LOG_E("remoteHandle size is too large");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
-    remoteHandleOut->size = copyLen;
-    memcpy_s(remoteHandleOut->data, remoteHandleOut->size, remoteHandle.data(), copyLen);
-
+    (void)remoteHandleOut;
     return ret;
 }
 

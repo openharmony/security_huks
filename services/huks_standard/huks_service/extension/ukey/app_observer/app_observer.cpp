@@ -17,7 +17,7 @@
 #include "hks_error_code.h"
 #include "hks_log.h"
 #include "hks_remote_handle_manager.h"
-#include "hks_session_manger.h"
+#include "hks_ukey_session_manager.h"
 #include "hks_template.h"
 #include "system_ability_definition.h"
 #include "iservice_registry.h"

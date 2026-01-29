@@ -67,7 +67,7 @@ void ExtensionConnection::OnDisconnect(sptr<ExtensionConnection> &connect)
         HKS_IF_TRUE_LOGE(connect->extConnectProxy == nullptr, "proxy is null, not need to wait!")
         return connect->extConnectProxy == nullptr;
     })) {
-        HKS_LOG_E("wait disconnected timeout or, not need to wait");
+        HKS_LOG_E("wait disconnected timeout, or not need to wait");
     };
     extConnectProxy = nullptr;
     isConnected_.store(false);

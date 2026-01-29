@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HKS_SESSION_MANAGER_H
-#define HKS_SESSION_MANAGER_H
+#ifndef HKS_UKEY_SESSION_MANAGER_H
+#define HKS_UKEY_SESSION_MANAGER_H
 
 #include "hks_cpp_paramset.h"
 #include "hks_plugin_def.h"
