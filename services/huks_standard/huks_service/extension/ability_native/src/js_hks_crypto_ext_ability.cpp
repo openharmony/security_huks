@@ -34,6 +34,7 @@
 #include "log_utils.h"
 #include "hks_json_wrapper.h"
 #include <vector>
+#include "hks_template.h"
 
 #define WAIT_FOR_CALL_JS_METHOD(dataParam, waitTime) do { \
     const auto maxWaitTime = std::chrono::seconds((waitTime)); \
@@ -553,26 +554,19 @@ napi_status GetHksParamsfromValue(napi_env env, napi_value value, HksParam &para
         LOGE("tag get failed, status %d", status);
         return status;
     }
-    if (napiTag == nullptr) {
-        LOGE("napi_get_named_property get napiTag is nullptr.");
-        return napi_invalid_arg;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(napiTag == nullptr, napi_invalid_arg, "napi_get_named_property get napiTag is nullptr.")
     status = napi_get_value_uint32(env, napiTag, &param.tag);
     if (status != napi_ok) {
         LOGE("tag get failed, status %d", status);
         return status;
     }
-
     napi_value napiValue = nullptr;
     status = napi_get_named_property(env, value, "value", &napiValue);
     if (status != napi_ok) {
         LOGE("napi_get_named_property failed, status %d", status);
         return status;
     }
-    if (napiValue == nullptr) {
-        LOGE("napi_get_named_property get napiValue is nullptr.");
-        return napi_invalid_arg;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(napiValue == nullptr, napi_invalid_arg, "napi_get_named_property get napiValue is nullptr.")
     bool lossLess = true;
     switch (param.tag & HKS_TAG_TYPE_MASK) {
         case HKS_TAG_TYPE_INT:
