@@ -43,15 +43,15 @@ void ExtensionConnectionTest::TearDown() {
 }
 
 constexpr int WAIT_TIME = 10;
-void SimulateAbilityConnectResponse() {
+void ExtensionConnectionTest::SimulateAbilityConnectResponse() {
     std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long long>(WAIT_TIME)));
     sptr<MockIRemoteObject> mockIRemoteObject = new MockIRemoteObject();
-    EXPECT_CALL(*mockRemoteObject, SendRequest(_, _, _, _)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mockIRemoteObject, SendRequest(_, _, _, _)).WillRepeatedly(Return(0));
     AppExecFwk::ElementName element;
     connection_->OnAbilityConnectDone(element, mockIRemoteObject, 0);
 }
 
-void SimulateAbilityDisconnectResponse() {
+void ExtensionConnectionTest::SimulateAbilityDisconnectResponse() {
     std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long long>(WAIT_TIME)));
     AppExecFwk::ElementName element;
     connection_->OnAbilityDisconnectDone(element, 0);
@@ -72,7 +72,7 @@ HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest001, TestSize.Level0) {
     EXPECT_TRUE(connection_->IsConnected());
 
     std::thread disConnectThread(&ExtensionConnectionTest::SimulateAbilityDisconnectResponse, this);
-    connection_->DisConnect(connection_);
+    connection_->OnDisconnect(connection_);
     if (disConnectThread.joinable()) {
         disConnectThread.join();
     }
@@ -86,7 +86,7 @@ HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest001, TestSize.Level0) {
  */
 HWTEST_F(ExtensionConnectionTest, ExtensionConnectionTest002, TestSize.Level0) {
     int32_t result = connection_->OnConnection(want_, connection_, userId_);
-    EXPECT_EQ(ret, HKS_ERROR_REMOTE_OPERATION_FAILED) << "ret is not HKS_ERROR_REMOTE_OPERATION_FAILED.";
+    EXPECT_EQ(result, HKS_ERROR_REMOTE_OPERATION_FAILED) << "result is not HKS_ERROR_REMOTE_OPERATION_FAILED.";
     EXPECT_FALSE(connection_->IsConnected());
 }
 

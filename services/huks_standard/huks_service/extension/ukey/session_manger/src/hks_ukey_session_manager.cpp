@@ -16,7 +16,7 @@
 #include "hks_error_code.h"
 #include "hks_provider_life_cycle_manager.h"
 #include "hks_remote_handle_manager.h"
-#include "hks_session_manger.h"
+#include "hks_ukey_session_manager.h"
 #include "hks_ukey_common.h"
 
 #include <algorithm>

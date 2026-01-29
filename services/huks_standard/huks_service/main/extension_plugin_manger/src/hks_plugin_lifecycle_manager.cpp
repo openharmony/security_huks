@@ -235,11 +235,11 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnGetRemoteProperty(
     void *funcPtr = nullptr;
     bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_GET_REMOTE_PROPERTY, funcPtr);
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
-        "ClearPinStatus method enum not found in plugin provider map.")
+        "GetRemoteProperty method enum not found in plugin provider map.")
     
     int32_t ret = (*reinterpret_cast<OnGetRemotePropertyFunc>(funcPtr))(processInfo, index,
         propertyId, paramSet, outParams);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ClearPinStatus fail, ret = %{public}d", ret)
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetRemoteProperty fail, ret = %{public}d", ret)
     HKS_LOG_I("get remote property success");
     return HKS_SUCCESS;
 }

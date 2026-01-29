@@ -62,6 +62,7 @@ void HksRemoteHandleManager::ReleaseInstance()
 {
     HksRemoteHandleManager::DestroyInstance();
 }
+
 static int32_t WrapIndexWithProviderInfo(const ProviderInfo& providerInfo, const std::string& originalIndex,
     std::string& wrappedIndex)
 {
@@ -141,8 +142,7 @@ int32_t HksRemoteHandleManager::GetProviderProxy(const ProviderInfo &providerInf
     OHOS::sptr<IHuksAccessExtBase> &proxy)
 {
     auto providerManager = HksProviderLifeCycleManager::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(providerManager == nullptr, HKS_ERROR_NULL_POINTER,
-        "Get provider manager instance failed")
+    HKS_IF_TRUE_LOGE_RETURN(providerManager == nullptr, HKS_ERROR_NULL_POINTER, "Get provider manager instance failed")
     int32_t ret = providerManager->GetExtensionProxy(providerInfo, proxy);
     if (ret != HKS_SUCCESS || proxy == nullptr) {
         HKS_LOG_E("Get extension proxy failed for provider: %" LOG_PUBLIC "s", providerInfo.m_providerName.c_str());
@@ -323,46 +323,6 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &proce
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::RemoteHandleSign(const HksProcessInfo &processInfo, const std::string &index,
-    const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData)
-{
-    ProviderInfo providerInfo;
-    std::string handle;
-    int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
-    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
-    OHOS::sptr<IHuksAccessExtBase> proxy;
-    ret = GetProviderProxy(providerInfo, proxy);
-    HKS_IF_NULL_RETURN(proxy, ret)
-
-    auto ipccode = proxy->Sign(handle, paramSet, inData, outData, ret);
-    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    ret = ConvertExtensionToHksErrorCode(ret, g_commonErrCodeMapping);
-    ClearMapByHandle(ret, handle);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote sign failed: %" LOG_PUBLIC "d", ret)
-    return HKS_SUCCESS;
-}
-
-int32_t HksRemoteHandleManager::RemoteHandleVerify(const HksProcessInfo &processInfo, const std::string &index,
-    const CppParamSet &paramSet, const std::vector<uint8_t> &plainText, std::vector<uint8_t> &signature)
-{
-    ProviderInfo providerInfo;
-    std::string handle;
-    int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
-    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
-    OHOS::sptr<IHuksAccessExtBase> proxy;
-    ret = GetProviderProxy(providerInfo, proxy);
-    HKS_IF_NULL_RETURN(proxy, ret)
-
-    auto ipccode = proxy->Verify(handle, paramSet, plainText, signature, ret);
-    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    ret = ConvertExtensionToHksErrorCode(ret, g_commonErrCodeMapping);
-    ClearMapByHandle(ret, handle);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote verify failed: %" LOG_PUBLIC "d", ret)
-    return HKS_SUCCESS;
-}
-
 int32_t HksRemoteHandleManager::FindRemoteCertificate(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet, std::string &cert)
 {
@@ -401,8 +361,7 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
         "Get provider Life manager instance failed")
     std::vector<ProviderInfo> infos;
     int32_t ret = providerLifeManager->GetAllProviderInfosByProviderName(providerName, processInfo.userIdInt, infos);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
-            "GetAllProviderInfosByProviderName failed: %" LOG_PUBLIC "d", ret)
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetAllProviderInfosByProviderName failed: %" LOG_PUBLIC "d", ret)
     
     CommJsonObject combinedArray = CommJsonObject::CreateArray();
     HKS_IF_TRUE_LOGE_RETURN(combinedArray.IsNull(), HKS_ERROR_JSON_SERIALIZE_FAILED, "Create combined array failed")

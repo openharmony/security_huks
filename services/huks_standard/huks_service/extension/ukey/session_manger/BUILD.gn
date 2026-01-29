@@ -29,7 +29,7 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager/inc",
     ]
 
-    sources = [ "src/hks_session_manger.cpp" ]
+    sources = [ "src/hks_ukey_session_manager.cpp" ]
 
     deps = [
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
