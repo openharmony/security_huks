@@ -857,7 +857,8 @@ HWTEST_F(JsCryptoExtAbilityTest, GetHksParamsfromValue_0000, testing::ext::TestS
     EXPECT_EQ(GetHksParamsfromValue(env, value, param), napi_invalid_arg);
     
     EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
-        .WillOnce(DoAll(Invoke(&ReturnsNonNullValue), Return(napi_ok)));
+        .WillOnce(DoAll(Invoke(&ReturnsNonNullValue), Return(napi_ok)))
+        .WillOnce(Return(napi_invalid_arg));
     EXPECT_CALL(*insMoc, napi_get_value_uint32(_, _, _)).WillOnce(testing::Return(napi_ok));
     EXPECT_EQ(GetHksParamsfromValue(env, value, param), napi_invalid_arg);
 
@@ -992,7 +993,7 @@ HWTEST_F(JsCryptoExtAbilityTest, GetOpenRemoteHandleParams_0000, testing::ext::T
         .WillOnce(DoAll(Invoke(&ReturnsNonNullValue), Return(napi_ok)));
     EXPECT_CALL(*insMoc, napi_get_value_string_utf8(_, _, _, _, _)).WillOnce(testing::Return(napi_invalid_arg));
     GetOpenRemoteHandleParams(env, value, resultParams);
-    EXPECT_NE(resultParams.handle, "");
+    EXPECT_EQ(resultParams.handle, "");
 }
 
 HWTEST_F(JsCryptoExtAbilityTest, GetAuthUkeyPinParams_0000, testing::ext::TestSize.Level0)
@@ -1018,7 +1019,7 @@ HWTEST_F(JsCryptoExtAbilityTest, GetAuthUkeyPinParams_0000, testing::ext::TestSi
     EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(num), Return(napi_ok)));
     EXPECT_CALL(*insMoc, napi_get_value_uint32(_, _, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(num), Return(napi_ok)));
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(retryCnt), Return(napi_ok)));
     GetAuthUkeyPinParams(env, value, resultParams);
     EXPECT_EQ(resultParams.authState, 1);
     EXPECT_EQ(resultParams.retryCnt, 1);
@@ -1081,7 +1082,6 @@ HWTEST_F(JsCryptoExtAbilityTest, GetExportCertificateParams_0000, testing::ext::
 {
     CryptoResultParam resultParams;
     napi_value value = nullptr;
-    napi_value rslt = 0;
     EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(testing::Return(napi_invalid_arg));
     GetExportCertificateParams(env, value, resultParams);
     EXPECT_EQ(resultParams.certs.size(), 0);
@@ -1220,7 +1220,6 @@ HWTEST_F(JsCryptoExtAbilityTest, GetGetPropertyParams_0000, testing::ext::TestSi
 {
     CryptoResultParam resultParams;
     napi_value value = nullptr;
-    napi_value rslt = 0;
 
     EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(testing::Return(napi_invalid_arg));
     GetGetPropertyParams(env, value, resultParams);
