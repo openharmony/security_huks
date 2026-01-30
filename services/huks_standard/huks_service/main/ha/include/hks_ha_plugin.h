@@ -132,10 +132,10 @@ public:
     int32_t RegisterEventProcs(const struct HksEventProcMap *procMaps, uint32_t count);
 
 private:
-    HksEventQueue queue;
-    std::thread workerThread;
-    std::atomic<bool> stopFlag;
-    HksEventCacheList eventCacheList;
+    HksEventQueue queue{};
+    std::thread workerThread{};
+    std::atomic<bool> stopFlag{};
+    HksEventCacheList eventCacheList{};
 
     std::vector<HksEventProcMap> eventProcList = {
         {
@@ -302,7 +302,7 @@ private:
         }
     };
 
-    mutable std::mutex eventProcMutex;
+    mutable std::mutex eventProcMutex{};
 
     void WorkerThread();
 

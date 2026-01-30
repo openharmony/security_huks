@@ -80,10 +80,7 @@ int32_t HksHaPlugin::RegisterEventProc(const struct HksEventProcMap *procMap)
         [procMap](const struct HksEventProcMap &item) {
             return item.eventId == procMap->eventId;
         });
-    if (it != eventProcList.end()) {
-        *it = *procMap;
-        return HKS_SUCCESS;
-    }
+    HKS_IF_TRUE_RETURN(it != eventProcList.end(), HKS_SUCCESS)
 
     eventProcList.push_back(*procMap);
 
@@ -123,7 +120,7 @@ HksEventProcMap *HksHaPlugin::HksEventProcFind(uint32_t eventId)
             return item.eventId == eventId;
         });
     if (it != eventProcList.end()) {
-        return &(*it);
+        return &(*it); // eventProcList无删除操作，因此此处返回指针是安全的
     }
 
     return nullptr;
