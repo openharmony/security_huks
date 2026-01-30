@@ -58,10 +58,7 @@ bool HksHaPlugin::Enqueue(uint32_t eventId, struct HksParamSet *paramSet)
 
 bool HksHaPlugin::IsValidEventProcMap(const struct HksEventProcMap *procMap) const
 {
-    if (procMap == nullptr) {
-        HKS_LOG_E("IsValidEventProcMap: procMap is null");
-        return false;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(procMap == nullptr, false, "IsValidEventProcMap: procMap is null")
 
     if (procMap->eventInfoCreate == nullptr || procMap->needReport == nullptr || procMap->eventInfoEqual == nullptr ||
         procMap->eventInfoAdd == nullptr || procMap->eventInfoToMap == nullptr) {
@@ -84,24 +81,19 @@ int32_t HksHaPlugin::RegisterEventProc(const struct HksEventProcMap *procMap)
             return item.eventId == procMap->eventId;
         });
     if (it != eventProcList.end()) {
-        HKS_LOG_I("RegisterEventProc: EventId %" LOG_PUBLIC "u already registered. Auto override.", procMap->eventId);
         *it = *procMap;
         return HKS_SUCCESS;
     }
 
     eventProcList.push_back(*procMap);
-    HKS_LOG_I("RegisterEventProc: Successfully registered event processor for eventId %" LOG_PUBLIC "u",
-        procMap->eventId);
 
     return HKS_SUCCESS;
 }
 
 int32_t HksHaPlugin::RegisterEventProcs(const struct HksEventProcMap *procMaps, uint32_t count)
 {
-    if (procMaps == nullptr || count == 0) {
-        HKS_LOG_E("RegisterEventProcs: Invalid input parameters");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_TRUE_LOGE_RETURN((procMaps == nullptr || count == 0), HKS_ERROR_INVALID_ARGUMENT,
+        "RegisterEventProcs: Invalid input parameters")
 
     uint32_t successCount = 0;
     int32_t lastError = HKS_SUCCESS;
