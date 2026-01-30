@@ -23,7 +23,6 @@
 #ifndef HKS_EVENT_TYPES_H
 #define HKS_EVENT_TYPES_H
 
-
 #ifdef __cplusplus
 #ifdef L2_STANDARD
 
@@ -33,7 +32,6 @@
 #include "hks_type.h"
 
 struct HksEventInfo;
-
 
 typedef int32_t (*HksParamSetToEventInfo)(const struct HksParamSet *paramSet, struct HksEventInfo *eventInfo);
 
