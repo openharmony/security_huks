@@ -20,6 +20,7 @@
 #include "hks_cfi.h"
 #include "hks_client_service_util.h"
 #include "hks_error_code.h"
+#include "hks_ha_plugin.h"
 #include "hks_log.h"
 #include "hks_mutex.h"
 #include "hks_response.h"
@@ -46,6 +47,10 @@ static struct HksBasicInterface g_interfaceInst = {
     .appendStorageParamsForGen = AppendNewInfoForGenKeyInService,
     .appendStorageParamsForUse = AppendNewInfoForUseKeyInService,
     .appendStorageParamsForQuery = AppendStorageLevelIfNotExist,
+
+    .hksRegisterEventProc = HksRegisterEventProcWrapper,
+    .hksRegisterEventProcs = HksRegisterEventProcs,
+    .hksEnqueueEvent = HksEnqueueEventWrapper,
 };
 
 static void HksDestoryPluginProxy(void)
