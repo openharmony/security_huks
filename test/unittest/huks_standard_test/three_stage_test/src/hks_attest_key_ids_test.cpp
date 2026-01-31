@@ -24,6 +24,7 @@
 #include "hks_attest_key_test_common.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
+#include "hks_mock_common.h"
 
 using namespace testing::ext;
 
@@ -45,13 +46,17 @@ public:
 
     void TearDown();
 };
-
+static uint64_t g_shellTokenId = 0;
 void HksAttestKeyIdsTest::SetUpTestCase(void)
 {
+    g_shellTokenId = GetSelfTokenID();
+    HksMockCommon::SetTestEvironment(g_shellTokenId);
 }
 
 void HksAttestKeyIdsTest::TearDownTestCase(void)
 {
+    SetSelfTokenID(g_shellTokenId);
+    HksMockCommon::ResetTestEvironment();
 }
 
 void HksAttestKeyIdsTest::SetUp()
@@ -60,32 +65,6 @@ void HksAttestKeyIdsTest::SetUp()
 
 void HksAttestKeyIdsTest::TearDown()
 {
-}
-
-static int32_t SetIdsToken()
-{
-    uint64_t tokenId;
-    const char **acls = new const char *[1];
-    acls[0] = "ohos.permission.ACCESS_IDS"; // system_core
-    const char **perms = new const char *[2];
-    perms[0] = "ohos.permission.PLACE_CALL"; // system_basic
-    perms[1] = "ohos.permission.ACCESS_IDS"; // system_core
-    NativeTokenInfoParams infoInstance = {
-        .dcapsNum = 0,
-        .permsNum = 2,
-        .dcaps = nullptr,
-        .perms = perms,
-        .aplStr = "system_basic",
-    };
-    infoInstance.acls = acls;
-    infoInstance.aclsNum = 1;
-    infoInstance.processName = "test_attest";
-    tokenId = GetAccessTokenId(&infoInstance);
-    int32_t ret = SetSelfTokenID(tokenId);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("SetSelfTokenID fail, ret is %" LOG_PUBLIC "x!", ret);
-    }
-    return ret;
 }
 
 static const struct HksBlob g_keyAlias = { sizeof(ALIAS), (uint8_t *)ALIAS };
@@ -139,10 +118,9 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest001, TestSize.Level0)
  */
 HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest002, TestSize.Level0)
 {
-    int32_t ret = SetIdsToken();
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("SetSelfTokenID fail, ret is %" LOG_PUBLIC "x!", ret);
-    }
+    HksMockNativeToken mock("device_manager");
+    int32_t ret = HKS_SUCCESS;
+
     ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
     ASSERT_TRUE(ret == HKS_SUCCESS);
@@ -177,10 +155,9 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest002, TestSize.Level0)
  */
 HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest003, TestSize.Level0)
 {
-    int32_t ret = SetIdsToken();
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("SetSelfTokenID fail, ret is %" LOG_PUBLIC "x!", ret);
-    }
+    HksMockNativeToken mock("device_manager");
+    int32_t ret = HKS_SUCCESS;
+
     ASSERT_TRUE(ret == HKS_SUCCESS);
     struct HksParamSet *paramSet = NULL;
     GenerateParamSet(&paramSet, g_idsParams, sizeof(g_idsParams) / sizeof(g_idsParams[0]));
@@ -208,10 +185,9 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest003, TestSize.Level0)
  */
 HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest004, TestSize.Level0)
 {
-    int32_t ret = SetIdsToken();
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("SetSelfTokenID fail, ret is %" LOG_PUBLIC "x!", ret);
-    }
+    HksMockNativeToken mock("device_manager");
+    int32_t ret = HKS_SUCCESS;
+
     ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
     ASSERT_TRUE(ret == HKS_SUCCESS);
@@ -239,10 +215,9 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest004, TestSize.Level0)
  */
 HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest005, TestSize.Level0)
 {
-    int32_t ret = SetIdsToken();
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("SetSelfTokenID fail, ret is %" LOG_PUBLIC "x!", ret);
-    }
+    HksMockNativeToken mock("device_manager");
+    int32_t ret = HKS_SUCCESS;
+
     ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
     ASSERT_TRUE(ret == HKS_SUCCESS);
@@ -273,10 +248,9 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest005, TestSize.Level0)
  */
 HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest006, TestSize.Level0)
 {
-    int32_t ret = SetIdsToken();
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("SetSelfTokenID fail, ret is %" LOG_PUBLIC "x!", ret);
-    }
+    HksMockNativeToken mock("device_manager");
+    int32_t ret = HKS_SUCCESS;
+    
     ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PKCS1_V1_5);
     ASSERT_TRUE(ret == HKS_SUCCESS);

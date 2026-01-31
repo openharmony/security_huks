@@ -14,8 +14,8 @@
  */
 
 #include "hks_api.h"
-#include "hks_apply_permission_test_common.h"
 #include "hks_three_stage_test_common.h"
+#include "hks_mock_common.h"
 
 #include <gtest/gtest.h>
 
@@ -31,13 +31,17 @@ public:
 
     void TearDown();
 };
-
+static uint64_t g_shellTokenId = 0;
 void HksMultipleUsersTest::SetUpTestCase(void)
 {
+    g_shellTokenId = GetSelfTokenID();
+    HksMockCommon::SetTestEvironment(g_shellTokenId);
 }
 
 void HksMultipleUsersTest::TearDownTestCase(void)
 {
+    SetSelfTokenID(g_shellTokenId);
+    HksMockCommon::ResetTestEvironment();
 }
 
 void HksMultipleUsersTest::SetUp()
@@ -200,14 +204,13 @@ int32_t HksAesCipherTestDecrypt(const struct HksBlob *keyAlias, const struct Hks
  */
 HWTEST_F(HksMultipleUsersTest, HksMultipleUsersTest001, TestSize.Level0)
 {
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksMultipleUsersTest001";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams001, sizeof(g_genParams001) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&genParamSet, g_genParams001, sizeof(g_genParams001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
@@ -250,14 +253,13 @@ HWTEST_F(HksMultipleUsersTest, HksMultipleUsersTest001, TestSize.Level0)
  */
 HWTEST_F(HksMultipleUsersTest, HksMultipleUsersTest002, TestSize.Level0)
 {
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksMultipleUsersTest002";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams002, sizeof(g_genParams002) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&genParamSet, g_genParams002, sizeof(g_genParams002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
