@@ -142,7 +142,7 @@ int32_t HksParamSetToEventInfoForDataSize(const struct HksParamSet *paramSetIn, 
     } while (0);
 
     HKS_LOG_E("report failed! ret = %" LOG_PUBLIC "d", ret);
-    FreeEventInfoSpecificPtr(eventInfo);
+    FreeCommonEventInfo(eventInfo);
     return ret;
 }
 
