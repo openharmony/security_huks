@@ -138,10 +138,6 @@ static struct HksParam g_decryptParams003[] = {
     { .tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = 100 },
 };
 
-#ifdef HKS_INTERACT_ABILITY
-int32_t SetIdsToken();
-#endif
-
 int32_t HksAesCipherTestEncrypt(const struct HksBlob *keyAlias, const struct HksParamSet *encryptParamSet,
     const struct HksBlob *inData, struct HksBlob *cipherText);
 
