@@ -318,7 +318,7 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
     return HKS_SUCCESS;
 }
 
-void FreeEventInfoSpecificPtr(struct HksEventInfo *eventInfo)
+void FreeCommonEventInfo(struct HksEventInfo *eventInfo)
 {
     HKS_FREE(eventInfo->common.function);
     HKS_FREE(eventInfo->common.callerInfo.name);
