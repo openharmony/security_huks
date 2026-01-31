@@ -29,6 +29,10 @@
 #include "hks_type.h"
 
 #ifdef __cplusplus
+#include "hks_event_types.h"
+#endif
+
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -78,6 +82,10 @@ struct HksBasicInterface {
     int32_t (*appendStorageParamsForUse)(const struct HksParamSet *paramSet,
         const struct HksProcessInfo *processInfo, struct HksParamSet **outParamSet);
     int32_t (*appendStorageParamsForQuery)(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
+
+    int32_t (*hksRegisterEventProc)(const void *procMap);
+    int32_t (*hksRegisterEventProcs)(const void *procMaps, uint32_t count);
+    int32_t (*hksEnqueueEvent)(uint32_t eventId, struct HksParamSet *paramSet);
 };
 
 /**

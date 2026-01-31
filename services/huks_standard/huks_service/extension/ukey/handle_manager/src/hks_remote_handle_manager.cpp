@@ -382,7 +382,7 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
         HKS_IF_TRUE_LOGE_CONTINUE(ret != HKS_SUCCESS, "Merge certificates for provider failed")
     }
     HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, ++failNum);
-    HKS_IF_TRUE_LOGE_RETURN(failNum == infos.size(), HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
+    HKS_IF_TRUE_LOGE_RETURN(failNum == static_cast<uint32_t>(infos.size()), HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
         "get cert from all provider failed")
     certVec = combinedArray.Serialize(false);
     HKS_IF_TRUE_LOGE_RETURN(certVec.empty(), HKS_ERROR_JSON_SERIALIZE_FAILED, "Serialize certificate array failed")
