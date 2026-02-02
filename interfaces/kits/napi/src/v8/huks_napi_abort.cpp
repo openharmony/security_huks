@@ -102,15 +102,20 @@ static napi_value AbortAsyncWork(napi_env env, AbortAsyncContext &context)
     napi_value resourceName;
     napi_create_string_latin1(env, "AbortAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
 
-    napi_create_async_work(
-        env,
-        nullptr,
-        resourceName,
+    napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
+            if (data == nullptr) {
+                fprintf(stderr, "the received data is nullptr.\n");
+                return;
+            }
             AbortAsyncContext napiContext = static_cast<AbortAsyncContext>(data);
             napiContext->result = HksAbort(napiContext->handle, napiContext->paramSet);
         },
         [](napi_env env, napi_status status, void *data) {
+            if (data == nullptr) {
+                fprintf(stderr, "the received data is nullptr.\n");
+                return;
+            }
             AbortAsyncContext napiContext = static_cast<AbortAsyncContext>(data);
             napi_value result = AbortWriteResult(env, napiContext);
             if (napiContext->callback == nullptr) {
@@ -119,9 +124,7 @@ static napi_value AbortAsyncWork(napi_env env, AbortAsyncContext &context)
                 CallAsyncCallback(env, napiContext->callback, napiContext->result, result);
             }
             DeleteAbortAsyncContext(env, napiContext);
-        },
-        static_cast<void *>(context),
-        &context->asyncWork);
+        }, static_cast<void *>(context), &context->asyncWork);
 
     napi_status status = napi_queue_async_work(env, context->asyncWork);
     if (status != napi_ok) {

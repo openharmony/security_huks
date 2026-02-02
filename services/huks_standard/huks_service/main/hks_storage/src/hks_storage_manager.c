@@ -268,7 +268,7 @@ static int32_t GetAssetAccessGroupPath(const struct HksParamSet *paramSet, struc
 
     outMaterial->assetAccessGroup = (char *)HksMalloc(blobSize + 1);
     HKS_IF_NULL_LOGE_RETURN(outMaterial->assetAccessGroup, HKS_ERROR_MALLOC_FAIL, "malloc access group failed")
-    (void)memcpy_s(outMaterial->assetAccessGroup, blobSize, accessGroupParam->blob.data, blobSize);
+    (void)memcpy_s(outMaterial->assetAccessGroup, blobSize + 1, accessGroupParam->blob.data, blobSize + 1);
     outMaterial->assetAccessGroup[blobSize] = '\0';
 
     return HKS_SUCCESS;

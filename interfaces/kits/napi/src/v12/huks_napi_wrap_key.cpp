@@ -114,18 +114,16 @@ static napi_value WrapKeyAsyncWork(napi_env env, WrapKeyAsyncContext &context)
     if (context->callback == nullptr) {
         NAPI_CALL(env, napi_create_promise(env, &context->deferred, &promise));
     }
-
     napi_value resourceName = nullptr;
     napi_status napiStatus = napi_create_string_latin1(env, "WrapKeyAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
     if (napiStatus != napi_ok) {
         return nullptr;
     }
-
-    napi_create_async_work(
-        env,
-        nullptr,
-        resourceName,
-        [](napi_env env, void *data) {
+    napi_create_async_work(env, nullptr, resourceName, [](napi_env env, void *data) {
+            if (data == nullptr) {
+                fprintf(stderr, "the received data is nullptr.\n");
+                return;
+            }
             WrapKeyAsyncContext napiContext = static_cast<WrapKeyAsyncContext>(data);
             int32_t ret = PrepareWrapKeyContextBuffer(napiContext);
             if (ret == HKS_SUCCESS) {
@@ -140,6 +138,10 @@ static napi_value WrapKeyAsyncWork(napi_env env, WrapKeyAsyncContext &context)
             }
         },
         [](napi_env env, napi_status status, void *data) {
+            if (data == nullptr) {
+                fprintf(stderr, "the received data is nullptr.\n");
+                return;
+            }
             WrapKeyAsyncContext napiContext = static_cast<WrapKeyAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);
@@ -147,17 +149,13 @@ static napi_value WrapKeyAsyncWork(napi_env env, WrapKeyAsyncContext &context)
             HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result,
                 resultData);
             DeleteWrapKeyAsyncContext(env, napiContext);
-        },
-        static_cast<void *>(context),
-        &context->asyncWork);
-
+        }, static_cast<void *>(context), &context->asyncWork);
     napi_status status = napi_queue_async_work(env, context->asyncWork);
     if (status != napi_ok) {
         DeleteWrapKeyAsyncContext(env, context);
         HKS_LOG_E("could not queue async work");
         return nullptr;
     }
-
     return promise;
 }
 

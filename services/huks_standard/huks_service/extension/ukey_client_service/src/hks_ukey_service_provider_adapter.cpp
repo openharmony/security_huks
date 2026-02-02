@@ -167,11 +167,11 @@ static int32_t RemotePropertyPack(const CppParamSet &cppParamSet,
     const HksParamSet *hksParamSet = cppParamSet.GetParamSet();
 
     do {
-        uint32_t resultSize = ALIGN_SIZE(sizeof(returnResult));
+        uint32_t resultSize = ALIGN_SIZE(sizeof(returnResult)); 
         uint32_t paramSetSize = 0;
         uint32_t totalSize = resultSize;
 
-        if (hksParamSet != nullptr) {
+        if (hksParamSet != nullptr && hksParamSet->paramSetSize < UINT32_MAX - 3) {
             paramSetSize = ALIGN_SIZE(hksParamSet->paramSetSize);
             totalSize += paramSetSize;
         }

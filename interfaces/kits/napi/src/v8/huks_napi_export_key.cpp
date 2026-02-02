@@ -123,16 +123,14 @@ static napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext &contex
     if (context->callback == nullptr) {
         NAPI_CALL(env, napi_create_promise(env, &context->deferred, &promise));
     }
-
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "exportKeyAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
-
-    napi_create_async_work(
-        env,
-        nullptr,
-        resourceName,
-        [](napi_env env, void *data) {
+    napi_create_async_work(env, nullptr, resourceName, [](napi_env env, void *data) {
             (void)env;
+            if (data == nullptr) {
+                fprintf(stderr, "the received data is nullptr.\n");
+                return;
+            }
             ExportKeyAsyncContext napiContext = static_cast<ExportKeyAsyncContext>(data);
             int32_t ret = PrePareExportKeyContextBuffer(napiContext);
             if (ret == HKS_SUCCESS) {
@@ -143,6 +141,10 @@ static napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext &contex
             }
         },
         [](napi_env env, napi_status status, void *data) {
+            if (data == nullptr) {
+                fprintf(stderr, "the received data is nullptr.\n");
+                return;
+            }
             ExportKeyAsyncContext napiContext = static_cast<ExportKeyAsyncContext>(data);
             napi_value result = ExportKeyWriteResult(env, napiContext);
             if (napiContext->callback == nullptr) {
@@ -151,10 +153,7 @@ static napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext &contex
                 CallAsyncCallback(env, napiContext->callback, napiContext->result, result);
             }
             DeleteExportKeyAsyncContext(env, napiContext);
-        },
-        static_cast<void *>(context),
-        &context->asyncWork);
-
+        }, static_cast<void *>(context), &context->asyncWork);
     napi_status status = napi_queue_async_work(env, context->asyncWork);
     if (status != napi_ok) {
         GET_AND_THROW_LAST_ERROR((env));
@@ -162,7 +161,6 @@ static napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext &contex
         HKS_LOG_E("could not queue async work");
         return nullptr;
     }
-
     if (context->callback == nullptr) {
         return promise;
     } else {

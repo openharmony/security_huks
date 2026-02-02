@@ -86,16 +86,21 @@ napi_value IsKeyExistAsyncWork(napi_env env, IsKeyExistAsyncContext &context)
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "isKeyExistAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
 
-    napi_create_async_work(
-        env,
-        nullptr,
-        resourceName,
+    napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
+            if (data == nullptr) {
+                fprintf(stderr, "the received data is nullptr.\n");
+                return;
+            }
             IsKeyExistAsyncContext napiContext = static_cast<IsKeyExistAsyncContext>(data);
 
             napiContext->result = HksKeyExist(napiContext->keyAlias, napiContext->paramSet);
         },
         [](napi_env env, napi_status status, void *data) {
+            if (data == nullptr) {
+                fprintf(stderr, "the received data is nullptr.\n");
+                return;
+            }
             IsKeyExistAsyncContext napiContext = static_cast<IsKeyExistAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);
@@ -103,9 +108,7 @@ napi_value IsKeyExistAsyncWork(napi_env env, IsKeyExistAsyncContext &context)
             resultData.boolReturned = (napiContext->result == HKS_SUCCESS);
             HksReturnKeyExistResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
             DeleteIsKeyExistAsyncContext(env, napiContext);
-        },
-        static_cast<void *>(context),
-        &context->asyncWork);
+        }, static_cast<void *>(context), &context->asyncWork);
 
     napi_status status = napi_queue_async_work(env, context->asyncWork);
     if (status != napi_ok) {

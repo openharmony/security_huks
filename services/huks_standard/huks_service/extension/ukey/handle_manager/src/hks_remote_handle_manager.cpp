@@ -113,14 +113,13 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
     auto bundleNameResult = root.GetValue(BUNDLE_NAME_KEY).ToString();
     HKS_IF_TRUE_LOGE_RETURN(providerNameResult.first != HKS_SUCCESS || abilityNameResult.first != HKS_SUCCESS ||
         bundleNameResult.first != HKS_SUCCESS, HKS_ERROR_JSON_TYPE_MISMATCH, "Get provider info fields failed")
+    HKS_IF_TRUE_LOGE_RETURN(providerNameResult.second.empty() || abilityNameResult.second.empty() ||
+        bundleNameResult.second.empty(), HKS_ERROR_JSON_INVALID_VALUE, "Provider info is incomplete")
     providerInfo.m_providerName = providerNameResult.second;
     providerInfo.m_abilityName = abilityNameResult.second;
     providerInfo.m_bundleName = bundleNameResult.second;
-    HKS_IF_TRUE_LOGE_RETURN(providerInfo.m_providerName.empty() || providerInfo.m_abilityName.empty() ||
-        providerInfo.m_bundleName.empty(), HKS_ERROR_JSON_INVALID_VALUE, "Provider info is incomplete")
     CommJsonObject newRoot = CommJsonObject::CreateObject();
-    HKS_IF_TRUE_LOGE_RETURN(newRoot.IsNull(), HKS_ERROR_JSON_NOT_OBJECT,
-        "Create new JSON object failed")
+    HKS_IF_TRUE_LOGE_RETURN(newRoot.IsNull(), HKS_ERROR_JSON_NOT_OBJECT, "Create new JSON object failed")
     auto keys = root.GetKeys();
     for (const auto &key : keys) {
         if (key == PROVIDER_NAME_KEY || key == ABILITY_NAME_KEY || key == BUNDLE_NAME_KEY || key == USERID_KEY) {
@@ -200,7 +199,6 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
     const CppParamSet &paramSet)
 {
     ProviderInfo providerInfo;
-    std::string newIndex;
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
     HKS_IF_TRUE_RETURN(ret == HKS_ERROR_NOT_EXIST, HKS_SUCCESS)

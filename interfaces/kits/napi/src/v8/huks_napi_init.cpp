@@ -142,16 +142,15 @@ static napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr &context)
     if (context->callback == nullptr) {
         NAPI_CALL(env, napi_create_promise(env, &context->deferred, &promise));
     }
-
     napi_value resourceName;
     napi_create_string_latin1(env, "InitAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
-
-    napi_create_async_work(
-        env,
-        nullptr,
-        resourceName,
+    napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
             (void)env;
+            if (data == nullptr) {
+                fprintf(stderr, "the received data is nullptr.\n");
+                return;
+            }
             InitAsyncCtxPtr napiContext = static_cast<InitAsyncCtxPtr>(data);
             int32_t ret = InitOutParams(napiContext);
             if (ret != HKS_SUCCESS) {
@@ -162,6 +161,10 @@ static napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr &context)
                 napiContext->paramSet, napiContext->handle, napiContext->token);
         },
         [](napi_env env, napi_status status, void *data) {
+            if (data == nullptr) {
+                fprintf(stderr, "the received data is nullptr.\n");
+                return;
+            }
             InitAsyncCtxPtr napiContext = static_cast<InitAsyncCtxPtr>(data);
             napi_value result = InitWriteResult(env, napiContext);
             if (napiContext->callback == nullptr) {
@@ -170,10 +173,7 @@ static napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr &context)
                 CallAsyncCallback(env, napiContext->callback, napiContext->result, result);
             }
             DeleteInitAsyncContext(env, napiContext);
-        },
-        static_cast<void *>(context),
-        &context->asyncWork);
-
+        }, static_cast<void *>(context), &context->asyncWork);
     napi_status status = napi_queue_async_work(env, context->asyncWork);
     if (status != napi_ok) {
         GET_AND_THROW_LAST_ERROR((env));
@@ -181,7 +181,6 @@ static napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr &context)
         HKS_LOG_E("could not queue async work");
         return nullptr;
     }
-
     if (context->callback == nullptr) {
         return promise;
     }

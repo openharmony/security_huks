@@ -269,11 +269,12 @@ napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext &context)
     napi_value resourceName;
     napi_create_string_latin1(env, "UpdateAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
 
-    napi_create_async_work(
-        env,
-        nullptr,
-        resourceName,
+    napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
+            if (data == nullptr) {
+                fprintf(stderr, "the received data is nullptr.\n");
+                return;
+            }
             UpdateAsyncContext napiContext = static_cast<UpdateAsyncContext>(data);
             if (napiContext->isUpdate) {
                 napiContext->result = HksUpdate(napiContext->handle,
@@ -284,16 +285,17 @@ napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext &context)
             }
         },
         [](napi_env env, napi_status status, void *data) {
+            if (data == nullptr) {
+                fprintf(stderr, "the received data is nullptr.\n");
+                return;
+            }
             UpdateAsyncContext napiContext = static_cast<UpdateAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);
             resultData.outData = napiContext->outData;
             HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
             DeleteUpdateAsyncContext(env, napiContext);
-        },
-        static_cast<void *>(context),
-        &context->asyncWork);
-
+        }, static_cast<void *>(context), &context->asyncWork);
     napi_status status = napi_queue_async_work(env, context->asyncWork);
     if (status != napi_ok) {
         DeleteUpdateAsyncContext(env, context);

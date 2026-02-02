@@ -115,17 +115,22 @@ static napi_value ImportKeyAsyncWork(napi_env env, ImportKeyAsyncContext &contex
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "importKeyAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
 
-    napi_create_async_work(
-        env,
-        nullptr,
-        resourceName,
+    napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
+            if (data == nullptr) {
+                fprintf(stderr, "the received data is nullptr.\n");
+                return;
+            }
             ImportKeyAsyncContext napiContext = static_cast<ImportKeyAsyncContext>(data);
 
             napiContext->result = HksImportKey(napiContext->keyAlias,
                 napiContext->paramSet, napiContext->key);
         },
         [](napi_env env, napi_status status, void *data) {
+            if (data == nullptr) {
+                fprintf(stderr, "the received data is nullptr.\n");
+                return;
+            }
             ImportKeyAsyncContext napiContext = static_cast<ImportKeyAsyncContext>(data);
             napi_value result = ImportKeyWriteResult(env, napiContext);
             if (napiContext->callback == nullptr) {
@@ -134,9 +139,7 @@ static napi_value ImportKeyAsyncWork(napi_env env, ImportKeyAsyncContext &contex
                 CallAsyncCallback(env, napiContext->callback, napiContext->result, result);
             }
             DeleteImportKeyAsyncContext(env, napiContext);
-        },
-        static_cast<void *>(context),
-        &context->asyncWork);
+        }, static_cast<void *>(context), &context->asyncWork);
 
     napi_status status = napi_queue_async_work(env, context->asyncWork);
     if (status != napi_ok) {
