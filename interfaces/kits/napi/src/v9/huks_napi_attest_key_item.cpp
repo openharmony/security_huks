@@ -136,10 +136,10 @@ napi_value AttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext &context)
     if (context->callback == nullptr) {
         NAPI_CALL(env, napi_create_promise(env, &context->deferred, &promise));
     }
-    napi_value resourceName = nullptr
+    napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "attestKeyAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
     napi_create_async_work(env, nullptr, resourceName, [](napi_env env, void *data) {
-            HKS_IF_NULL_LOGE_RETRUN_VOID(data, "the received data is nullptr.")
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             AttestKeyAsyncContext napiContext = static_cast<AttestKeyAsyncContext>(data);
             napiContext->certChain = static_cast<struct HksCertChain *>(HksMalloc(sizeof(struct HksCertChain)));
             if (napiContext->certChain != nullptr) {

@@ -23,6 +23,7 @@
 #include "hks_param.h"
 #include "hks_type.h"
 #include "huks_napi_common_item.h"
+#include "hks_template.h"
 
 namespace HuksNapiItem {
 constexpr int HUKS_NAPI_IMPORT_KEY_MIN_ARGS = 2;
