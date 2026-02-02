@@ -113,17 +113,22 @@ napi_value ImportWrappedKeyAsyncWork(napi_env env, ImportWrappedKeyAsyncContext 
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "ImportWrappedKeyAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
 
-    napi_create_async_work(
-        env,
-        nullptr,
-        resourceName,
+    napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
+            if (data == nullptr) {
+                fprintf(stderr, "the received data is nullptr.\n");
+                return;
+            }
             ImportWrappedKeyAsyncContext napiContext = static_cast<ImportWrappedKeyAsyncContext>(data);
 
             napiContext->result = HksImportWrappedKey(napiContext->keyAlias, napiContext->wrappingKeyAlias,
                 napiContext->paramSet, napiContext->wrappedData);
         },
         [](napi_env env, napi_status status, void *data) {
+            if (data == nullptr) {
+                fprintf(stderr, "the received data is nullptr.\n");
+                return;
+            }
             ImportWrappedKeyAsyncContext napiContext = static_cast<ImportWrappedKeyAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);

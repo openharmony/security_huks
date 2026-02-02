@@ -132,29 +132,22 @@ static int32_t InitCertChain(struct HksCertChain *certChain, uint32_t *certChain
 
 napi_value AttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext &context)
 {
-    napi_value promise = nullptr;
+    napi_value promise = nullptr, resourceName = nullptr;
     if (context->callback == nullptr) {
         NAPI_CALL(env, napi_create_promise(env, &context->deferred, &promise));
     }
-
-    napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "attestKeyAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
-
-    napi_create_async_work(
-        env,
-        nullptr,
-        resourceName,
-        [](napi_env env, void *data) {
+    napi_create_async_work(env, nullptr, resourceName, [](napi_env env, void *data) {
+            if (data == nullptr) {
+                fprintf(stderr, "the received data is nullptr.\n");
+                return;
+            }
             AttestKeyAsyncContext napiContext = static_cast<AttestKeyAsyncContext>(data);
-
             napiContext->certChain = static_cast<struct HksCertChain *>(HksMalloc(sizeof(struct HksCertChain)));
             if (napiContext->certChain != nullptr) {
                 napiContext->result = InitCertChain(napiContext->certChain, &napiContext->certChainCapacity);
-                if (napiContext->result != HKS_SUCCESS) {
-                    return;
-                }
+                if (napiContext->result != HKS_SUCCESS) { return;}
             }
-
             if (napiContext->isAnon) {
                 napiContext->result = HksAnonAttestKey(
                     napiContext->keyAlias, napiContext->paramSet, napiContext->certChain);
@@ -164,23 +157,23 @@ napi_value AttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext &context)
             }
         },
         [](napi_env env, napi_status status, void *data) {
+            if (data == nullptr) {
+                fprintf(stderr, "the received data is nullptr.\n");
+                return;
+            }
             AttestKeyAsyncContext napiContext = static_cast<AttestKeyAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);
             resultData.certChain = napiContext->certChain;
             HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
             DeleteAttestKeyAsyncContext(env, napiContext);
-        },
-        static_cast<void *>(context),
-        &context->asyncWork);
-
+        }, static_cast<void *>(context), &context->asyncWork);
     napi_status status = napi_queue_async_work(env, context->asyncWork);
     if (status != napi_ok) {
         DeleteAttestKeyAsyncContext(env, context);
         HKS_LOG_E("could not queue async work");
         return nullptr;
     }
-
     if (context->callback == nullptr) {
         return promise;
     } else {

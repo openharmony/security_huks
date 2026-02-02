@@ -106,15 +106,20 @@ static napi_value ListAliasesAsyncWork(napi_env env, ListAliasesAsyncContext &co
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "listAliasesAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
 
-    napi_create_async_work(
-        env,
-        nullptr,
-        resourceName,
+    napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
+            if (data == nullptr) {
+                fprintf(stderr, "the received data is nullptr.\n");
+                return;
+            }
             ListAliasesAsyncContext napiContext = static_cast<ListAliasesAsyncContext>(data);
             napiContext->result = HksListAliases(napiContext->paramSet, &(napiContext->outSet));
         },
         [](napi_env env, napi_status status, void *data) {
+            if (data == nullptr) {
+                fprintf(stderr, "the received data is nullptr.\n");
+                return;
+            }
             ListAliasesAsyncContext napiContext = static_cast<ListAliasesAsyncContext>(data);
             HksSuccessListAliasesResult resultData;
             SuccessListAliasesReturnResultInit(resultData);
@@ -125,14 +130,12 @@ static napi_value ListAliasesAsyncWork(napi_env env, ListAliasesAsyncContext &co
         },
         static_cast<void *>(context),
         &context->asyncWork);
-
     napi_status status = napi_queue_async_work(env, context->asyncWork);
     if (status != napi_ok) {
         DeleteListAliasesAsyncContext(env, context);
         HKS_LOG_E("could not queue async work");
         return nullptr;
     }
-
     return promise;
 }
 

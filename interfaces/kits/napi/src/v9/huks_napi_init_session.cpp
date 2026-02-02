@@ -125,12 +125,13 @@ napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr &context)
     napi_value resourceName;
     napi_create_string_latin1(env, "InitAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
 
-    napi_create_async_work(
-        env,
-        nullptr,
-        resourceName,
+    napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
             (void)env;
+            if (data == nullptr) {
+                fprintf(stderr, "the received data is nullptr.\n");
+                return;
+            }
             InitAsyncCtxPtr napiContext = static_cast<InitAsyncCtxPtr>(data);
             int32_t ret = InitOutParams(napiContext);
             if (ret != HKS_SUCCESS) {
@@ -141,6 +142,10 @@ napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr &context)
                 napiContext->handle, napiContext->token);
         },
         [](napi_env env, napi_status status, void *data) {
+            if (data == nullptr) {
+                fprintf(stderr, "the received data is nullptr.\n");
+                return;
+            }
             InitAsyncCtxPtr napiContext = static_cast<InitAsyncCtxPtr>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);
@@ -148,17 +153,13 @@ napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr &context)
             resultData.challenge = napiContext->token;
             HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
             DeleteInitAsyncContext(env, napiContext);
-        },
-        static_cast<void *>(context),
-        &context->asyncWork);
-
+        }, static_cast<void *>(context), &context->asyncWork);
     napi_status status = napi_queue_async_work(env, context->asyncWork);
     if (status != napi_ok) {
         DeleteInitAsyncContext(env, context);
         HKS_LOG_E("could not queue async work");
         return nullptr;
     }
-
     if (context->callback == nullptr) {
         return promise;
     }
