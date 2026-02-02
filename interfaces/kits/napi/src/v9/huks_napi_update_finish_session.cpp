@@ -271,10 +271,7 @@ napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext &context)
 
     napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             UpdateAsyncContext napiContext = static_cast<UpdateAsyncContext>(data);
             if (napiContext->isUpdate) {
                 napiContext->result = HksUpdate(napiContext->handle,
@@ -285,10 +282,7 @@ napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext &context)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             UpdateAsyncContext napiContext = static_cast<UpdateAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);

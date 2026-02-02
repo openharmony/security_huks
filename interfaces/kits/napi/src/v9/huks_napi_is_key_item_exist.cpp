@@ -99,19 +99,13 @@ static napi_value IsKeyExistAsyncWork(napi_env env, IsKeyExistAsyncContext &cont
 
     napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             IsKeyExistAsyncContext napiContext = static_cast<IsKeyExistAsyncContext>(data);
 
             napiContext->result = HksKeyExist(napiContext->keyAlias, napiContext->paramSet);
         },
         [](napi_env env, napi_status status, void *data) {
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             IsKeyExistAsyncContext napiContext = static_cast<IsKeyExistAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);

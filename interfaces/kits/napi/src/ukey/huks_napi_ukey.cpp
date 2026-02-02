@@ -196,10 +196,7 @@ static napi_value CreateAsyncWork(napi_env env, napi_callback_info info, std::un
 
     status = napi_create_async_work(env, nullptr, resourceName, context->execute,
         [](napi_env env, napi_status status, void *data) {
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             AsyncContext *napiContext = static_cast<AsyncContext *>(data);
             napiContext->resolve(env, napiContext);
             delete napiContext;

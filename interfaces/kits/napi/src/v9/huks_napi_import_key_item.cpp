@@ -100,19 +100,13 @@ napi_value ImportKeyAsyncWork(napi_env env, ImportKeyAsyncContext &context)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             ImportKeyAsyncContext napiContext = static_cast<ImportKeyAsyncContext>(data);
 
             napiContext->result = HksImportKey(napiContext->keyAlias, napiContext->paramSet, napiContext->key);
         },
         [](napi_env env, napi_status status, void *data) {
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             ImportKeyAsyncContext napiContext = static_cast<ImportKeyAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);
