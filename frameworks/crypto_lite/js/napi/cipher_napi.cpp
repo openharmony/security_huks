@@ -21,6 +21,7 @@
 #include "cipher.h"
 #include "cipher_log.h"
 #include "securec.h"
+#include "hks_template.h"
 
 namespace OHOS::Ace::Napi {
 namespace {

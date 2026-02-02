@@ -26,6 +26,7 @@
 #include "hks_type.h"
 #include "huks_napi_common_item.h"
 #include <cstdint>
+#include "hks_template.h"
 
 namespace HuksNapiItem {
 namespace {
