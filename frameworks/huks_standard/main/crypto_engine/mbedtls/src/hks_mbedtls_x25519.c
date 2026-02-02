@@ -156,7 +156,7 @@ static int32_t X25519CheckKeySize(const struct HksBlob *key, const struct KeyMat
 }
 
 static int32_t X25519CheckKeyMaterialSize(const struct HksBlob *priKey, const struct HksBlob *pubKey,
-    struct HksBlob *sharedKey)
+    const struct HksBlob *sharedKey)
 {
     const struct KeyMaterial25519 *priKm = (struct KeyMaterial25519 *)(priKey->data);
     const struct KeyMaterial25519 *pubKm = (struct KeyMaterial25519 *)(pubKey->data);
