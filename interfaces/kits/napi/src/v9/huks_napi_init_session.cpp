@@ -128,10 +128,7 @@ napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr &context)
     napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
             (void)env;
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             InitAsyncCtxPtr napiContext = static_cast<InitAsyncCtxPtr>(data);
             int32_t ret = InitOutParams(napiContext);
             if (ret != HKS_SUCCESS) {
@@ -142,10 +139,7 @@ napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr &context)
                 napiContext->handle, napiContext->token);
         },
         [](napi_env env, napi_status status, void *data) {
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             InitAsyncCtxPtr napiContext = static_cast<InitAsyncCtxPtr>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);

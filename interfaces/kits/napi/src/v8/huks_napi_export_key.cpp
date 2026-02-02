@@ -127,10 +127,7 @@ static napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext &contex
     napi_create_string_latin1(env, "exportKeyAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
     napi_create_async_work(env, nullptr, resourceName, [](napi_env env, void *data) {
             (void)env;
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             ExportKeyAsyncContext napiContext = static_cast<ExportKeyAsyncContext>(data);
             int32_t ret = PrePareExportKeyContextBuffer(napiContext);
             if (ret == HKS_SUCCESS) {
@@ -141,10 +138,7 @@ static napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext &contex
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             ExportKeyAsyncContext napiContext = static_cast<ExportKeyAsyncContext>(data);
             napi_value result = ExportKeyWriteResult(env, napiContext);
             if (napiContext->callback == nullptr) {

@@ -108,18 +108,12 @@ static napi_value ListAliasesAsyncWork(napi_env env, ListAliasesAsyncContext &co
 
     napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             ListAliasesAsyncContext napiContext = static_cast<ListAliasesAsyncContext>(data);
             napiContext->result = HksListAliases(napiContext->paramSet, &(napiContext->outSet));
         },
         [](napi_env env, napi_status status, void *data) {
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             ListAliasesAsyncContext napiContext = static_cast<ListAliasesAsyncContext>(data);
             HksSuccessListAliasesResult resultData;
             SuccessListAliasesReturnResultInit(resultData);

@@ -120,10 +120,7 @@ static napi_value WrapKeyAsyncWork(napi_env env, WrapKeyAsyncContext &context)
         return nullptr;
     }
     napi_create_async_work(env, nullptr, resourceName, [](napi_env env, void *data) {
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             WrapKeyAsyncContext napiContext = static_cast<WrapKeyAsyncContext>(data);
             int32_t ret = PrepareWrapKeyContextBuffer(napiContext);
             if (ret == HKS_SUCCESS) {
@@ -138,10 +135,7 @@ static napi_value WrapKeyAsyncWork(napi_env env, WrapKeyAsyncContext &context)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             WrapKeyAsyncContext napiContext = static_cast<WrapKeyAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);

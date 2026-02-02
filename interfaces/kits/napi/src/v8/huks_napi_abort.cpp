@@ -104,18 +104,12 @@ static napi_value AbortAsyncWork(napi_env env, AbortAsyncContext &context)
 
     napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             AbortAsyncContext napiContext = static_cast<AbortAsyncContext>(data);
             napiContext->result = HksAbort(napiContext->handle, napiContext->paramSet);
         },
         [](napi_env env, napi_status status, void *data) {
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             AbortAsyncContext napiContext = static_cast<AbortAsyncContext>(data);
             napi_value result = AbortWriteResult(env, napiContext);
             if (napiContext->callback == nullptr) {

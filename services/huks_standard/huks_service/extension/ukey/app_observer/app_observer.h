@@ -67,8 +67,6 @@ private:
     CppParamSet BuildParamSet(const HksProcessContext &context);
 
     const std::string targetBundleName_;
-    
-    const uint32_t targetUid_;
 
     mutable std::mutex mutex_;
     std::map<uint32_t, HksProcessContext> uidToContextMap_;

@@ -106,19 +106,13 @@ static napi_value GenerateKeyAsyncWork(napi_env env, GenerateKeyAsyncContext &co
     napi_create_string_latin1(env, "generateKeyAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
     napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             GenerateKeyAsyncContext napiContext = static_cast<GenerateKeyAsyncContext>(data);
             napiContext->result = HksGenerateKey(napiContext->keyAlias,
                 napiContext->paramSetIn, napiContext->paramSetOut);
         },
         [](napi_env env, napi_status status, void *data) {
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             GenerateKeyAsyncContext napiContext = static_cast<GenerateKeyAsyncContext>(data);
             napi_value result = GenerateKeyWriteResult(env, napiContext);
             if (napiContext->callback == nullptr) {

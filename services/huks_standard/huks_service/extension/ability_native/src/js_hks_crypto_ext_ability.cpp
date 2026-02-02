@@ -649,7 +649,7 @@ void GetOpenRemoteHandleParams(const napi_env &env, const napi_value &funcResult
 {
     napi_value napiHandle = nullptr;
     auto status = napi_get_named_property(env, funcResult, "handle", &napiHandle);
-    if (status != napi_ok || napiHandle === nullptr) {
+    if (status != napi_ok || napiHandle == nullptr) {
         LOGE("GetOpenRemoteHandleParams::napi_get_named_property failed, status:%d", status);
         return;
     }

@@ -115,20 +115,14 @@ napi_value ImportWrappedKeyAsyncWork(napi_env env, ImportWrappedKeyAsyncContext 
 
     napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             ImportWrappedKeyAsyncContext napiContext = static_cast<ImportWrappedKeyAsyncContext>(data);
 
             napiContext->result = HksImportWrappedKey(napiContext->keyAlias, napiContext->wrappingKeyAlias,
                 napiContext->paramSet, napiContext->wrappedData);
         },
         [](napi_env env, napi_status status, void *data) {
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             ImportWrappedKeyAsyncContext napiContext = static_cast<ImportWrappedKeyAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);

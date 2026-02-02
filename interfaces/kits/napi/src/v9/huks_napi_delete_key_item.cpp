@@ -91,19 +91,13 @@ napi_value DeleteKeyAsyncWork(napi_env env, DeleteKeyAsyncContext &context)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             DeleteKeyAsyncContext napiContext = static_cast<DeleteKeyAsyncContext>(data);
 
             napiContext->result = HksDeleteKey(napiContext->keyAlias, napiContext->paramSet);
         },
         [](napi_env env, napi_status status, void *data) {
-            if (data == nullptr) {
-                fprintf(stderr, "the received data is nullptr.\n");
-                return;
-            }
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             DeleteKeyAsyncContext napiContext = static_cast<DeleteKeyAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);
