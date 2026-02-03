@@ -20,6 +20,7 @@
 #include <unordered_map>
 
 #include "hks_event_info.h"
+#include "hks_report_common.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
@@ -80,9 +81,7 @@ static int32_t ThreeStageBuildCommonInfo(const struct HksParamSet *paramSet, str
 void HksFreeEventInfo(HksEventInfo **eventInfo)
 {
     HKS_IF_TRUE_LOGI_RETURN_VOID(eventInfo == nullptr || (*eventInfo) == nullptr, "eventInfo is nullptr");
-    HKS_FREE((*eventInfo)->common.function);
-    HKS_FREE((*eventInfo)->common.callerInfo.name);
-    HKS_FREE((*eventInfo)->common.result.errMsg);
+    FreeCommonEventInfo(*eventInfo);
     if (IF_UKEY_EVENT((*eventInfo)->common.eventId)) {
         HKS_FREE((*eventInfo)->ukeyInfo.providerName);
         HKS_FREE((*eventInfo)->ukeyInfo.abilityName);

@@ -15,6 +15,7 @@
 
 #include "hks_report_ukey_event.h"
 
+#include <memory>
 #include <string>
 #include "hks_error_code.h"
 #include "hks_event_info.h"
@@ -65,6 +66,8 @@ int32_t HksRegProviderParamSetToEventInfo(const struct HksParamSet *paramSetIn, 
 {
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksRegProviderParamSetToEventInfo params is null")
+
+    std::unique_ptr<HksEventInfo, decltype(&FreeCommonEventInfo)> tmpEventInfo(eventInfo, FreeCommonEventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
@@ -77,6 +80,7 @@ int32_t HksRegProviderParamSetToEventInfo(const struct HksParamSet *paramSetIn, 
         CopyParamBlobData(&eventInfo->ukeyInfo.abilityName, paramToEventInfo);
     }
 
+    (void)tmpEventInfo.release();
     return HKS_SUCCESS;
 }
 
@@ -140,6 +144,8 @@ int32_t HksGetAuthPinStateParamSetToEventInfo(const struct HksParamSet *paramSet
 {
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksGetAuthPinStateParamSetToEventInfo params is null")
+    
+    std::unique_ptr<HksEventInfo, decltype(&FreeCommonEventInfo)> tmpEventInfo(eventInfo, FreeCommonEventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
@@ -152,6 +158,7 @@ int32_t HksGetAuthPinStateParamSetToEventInfo(const struct HksParamSet *paramSet
         eventInfo->ukeyInfo.state = paramToEventInfo->int32Param;
     }
 
+    (void)tmpEventInfo.release();
     return HKS_SUCCESS;
 }
 
@@ -163,7 +170,9 @@ bool HksGetAuthPinStateNeedReport(const struct HksEventInfo *eventInfo)
 bool HksGetAuthPinStateEventInfoEqual(const struct HksEventInfo *eventInfo1,
     const struct HksEventInfo *eventInfo2)
 {
+    HKS_IF_TRUE_RETURN(eventInfo1 == nullptr || eventInfo2 == nullptr, false)
     HKS_IF_TRUE_RETURN(eventInfo1->common.eventId != eventInfo2->common.eventId, false);
+    HKS_IF_TRUE_RETURN(eventInfo1->ukeyInfo.resourceId == nullptr || eventInfo2->ukeyInfo.resourceId == nullptr, false)
     return strcmp(eventInfo1->ukeyInfo.resourceId, eventInfo2->ukeyInfo.resourceId) == 0;
 }
 
@@ -222,6 +231,8 @@ int32_t HksAuthPinParamSetToEventInfo(const struct HksParamSet *paramSetIn, stru
 {
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksAuthPinParamSetToEventInfo params is null")
+
+    std::unique_ptr<HksEventInfo, decltype(&FreeCommonEventInfo)> tmpEventInfo(eventInfo, FreeCommonEventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
@@ -234,6 +245,7 @@ int32_t HksAuthPinParamSetToEventInfo(const struct HksParamSet *paramSetIn, stru
         eventInfo->ukeyInfo.callAuthUid = paramToEventInfo->int32Param;
     }
 
+    (void)tmpEventInfo.release();
     return HKS_SUCCESS;
 }
 
@@ -244,7 +256,9 @@ bool HksAuthPinNeedReport(const struct HksEventInfo *eventInfo)
 
 bool HksAuthPinEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
 {
-    HKS_IF_TRUE_RETURN(eventInfo1->common.eventId != eventInfo2->common.eventId, false);
+    HKS_IF_TRUE_RETURN(eventInfo1 == nullptr || eventInfo2 == nullptr, false)
+    HKS_IF_TRUE_RETURN(eventInfo1->common.eventId != eventInfo2->common.eventId, false)
+    HKS_IF_TRUE_RETURN(eventInfo1->ukeyInfo.resourceId == nullptr || eventInfo2->ukeyInfo.resourceId == nullptr, false)
     return strcmp(eventInfo1->ukeyInfo.resourceId, eventInfo2->ukeyInfo.resourceId) == 0;
 }
 
@@ -295,6 +309,8 @@ int32_t HksRemoteHandleParamSetToEventInfo(const struct HksParamSet *paramSetIn,
 {
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksRemoteHandleParamSetToEventInfo params is null")
+
+    std::unique_ptr<HksEventInfo, decltype(&FreeCommonEventInfo)> tmpEventInfo(eventInfo, FreeCommonEventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
@@ -303,6 +319,7 @@ int32_t HksRemoteHandleParamSetToEventInfo(const struct HksParamSet *paramSetIn,
         CopyParamBlobData(&eventInfo->ukeyInfo.resourceId, paramToEventInfo);
     }
 
+    (void)tmpEventInfo.release();
     return HKS_SUCCESS;
 }
 
@@ -313,8 +330,10 @@ bool HksRemoteHandleNeedReport(const struct HksEventInfo *eventInfo)
 
 bool HksRemoteHandleEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
 {
-    HKS_IF_TRUE_RETURN(eventInfo1->common.eventId != eventInfo2->common.eventId, false);
+    HKS_IF_TRUE_RETURN(eventInfo1 == nullptr || eventInfo2 == nullptr, false)
+    HKS_IF_TRUE_RETURN(eventInfo1->common.eventId != eventInfo2->common.eventId, false)
     HKS_IF_TRUE_RETURN(eventInfo1->common.operation != eventInfo2->common.operation, false)
+    HKS_IF_TRUE_RETURN(eventInfo1->ukeyInfo.resourceId == nullptr || eventInfo2->ukeyInfo.resourceId == nullptr, false)
     return strcmp(eventInfo1->ukeyInfo.resourceId, eventInfo2->ukeyInfo.resourceId) == 0;
 }
 
@@ -371,6 +390,8 @@ int32_t HksExportProviderCertParamSetToEventInfo(const struct HksParamSet *param
 {
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksExportProviderCertParamSetToEventInfo params is null")
+    
+    std::unique_ptr<HksEventInfo, decltype(&FreeCommonEventInfo)> tmpEventInfo(eventInfo, FreeCommonEventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
@@ -379,6 +400,7 @@ int32_t HksExportProviderCertParamSetToEventInfo(const struct HksParamSet *param
         CopyParamBlobData(&eventInfo->ukeyInfo.providerName, paramToEventInfo);
     }
 
+    (void)tmpEventInfo.release();
     return HKS_SUCCESS;
 }
 
@@ -390,8 +412,11 @@ bool HksExportProviderCertNeedReport(const struct HksEventInfo *eventInfo)
 bool HksExportProviderCertEventInfoEqual(const struct HksEventInfo *eventInfo1,
     const struct HksEventInfo *eventInfo2)
 {
-    HKS_IF_TRUE_RETURN(eventInfo1->common.eventId != eventInfo2->common.eventId, false);
+    HKS_IF_TRUE_RETURN(eventInfo1 == nullptr || eventInfo2 == nullptr, false)
+    HKS_IF_TRUE_RETURN(eventInfo1->common.eventId != eventInfo2->common.eventId, false)
     HKS_IF_TRUE_RETURN(eventInfo1->ukeyInfo.purpose != eventInfo2->ukeyInfo.purpose, false)
+    HKS_IF_TRUE_RETURN(eventInfo1->ukeyInfo.providerName == nullptr || eventInfo2->ukeyInfo.providerName == nullptr,
+        false)
     return strcmp(eventInfo1->ukeyInfo.providerName, eventInfo2->ukeyInfo.providerName) == 0;
 }
 
@@ -450,6 +475,8 @@ int32_t HksExportCertParamSetToEventInfo(const struct HksParamSet *paramSetIn, s
 {
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksExportCertParamSetToEventInfo params is null")
+
+    std::unique_ptr<HksEventInfo, decltype(&FreeCommonEventInfo)> tmpEventInfo(eventInfo, FreeCommonEventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
@@ -458,6 +485,7 @@ int32_t HksExportCertParamSetToEventInfo(const struct HksParamSet *paramSetIn, s
         CopyParamBlobData(&eventInfo->ukeyInfo.resourceId, paramToEventInfo);
     }
 
+    (void)tmpEventInfo.release();
     return HKS_SUCCESS;
 }
 
@@ -468,8 +496,10 @@ bool HksExportCertNeedReport(const struct HksEventInfo *eventInfo)
 
 bool HksExportCertEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
 {
-    HKS_IF_TRUE_RETURN(eventInfo1->common.eventId != eventInfo2->common.eventId, false);
+    HKS_IF_TRUE_RETURN(eventInfo1 == nullptr || eventInfo2 == nullptr, false)
+    HKS_IF_TRUE_RETURN(eventInfo1->common.eventId != eventInfo2->common.eventId, false)
     HKS_IF_TRUE_RETURN(eventInfo1->ukeyInfo.purpose != eventInfo2->ukeyInfo.purpose, false)
+    HKS_IF_TRUE_RETURN(eventInfo1->ukeyInfo.resourceId == nullptr || eventInfo2->ukeyInfo.resourceId == nullptr, false)
     return strcmp(eventInfo1->ukeyInfo.resourceId, eventInfo2->ukeyInfo.resourceId) == 0;
 }
 
@@ -520,6 +550,8 @@ int32_t HksGetPropertyParamSetToEventInfo(const struct HksParamSet *paramSetIn, 
 {
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksGetPropertyParamSetToEventInfo params is null")
+
+    std::unique_ptr<HksEventInfo, decltype(&FreeCommonEventInfo)> tmpEventInfo(eventInfo, FreeCommonEventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
@@ -532,6 +564,7 @@ int32_t HksGetPropertyParamSetToEventInfo(const struct HksParamSet *paramSetIn, 
         CopyParamBlobData(&eventInfo->ukeyInfo.propertyId, paramToEventInfo);
     }
 
+    (void)tmpEventInfo.release();
     return HKS_SUCCESS;
 }
 
@@ -543,7 +576,10 @@ bool HksGetPropertyNeedReport(const struct HksEventInfo *eventInfo)
 
 bool HksGetPropertyEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
 {
-    HKS_IF_TRUE_RETURN(eventInfo1->common.eventId != eventInfo2->common.eventId, false);
+    HKS_IF_TRUE_RETURN(eventInfo1 == nullptr || eventInfo2 == nullptr, false)
+    HKS_IF_TRUE_RETURN(eventInfo1->common.eventId != eventInfo2->common.eventId, false)
+    HKS_IF_TRUE_RETURN(eventInfo1->ukeyInfo.resourceId == nullptr || eventInfo2->ukeyInfo.resourceId == nullptr, false)
+    HKS_IF_TRUE_RETURN(eventInfo1->ukeyInfo.propertyId == nullptr || eventInfo2->ukeyInfo.propertyId == nullptr, false)
     return strcmp(eventInfo1->ukeyInfo.resourceId, eventInfo2->ukeyInfo.resourceId) == 0 &&
         strcmp(eventInfo1->ukeyInfo.propertyId, eventInfo2->ukeyInfo.propertyId) == 0;
 }
