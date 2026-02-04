@@ -144,7 +144,9 @@ napi_value AttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext &context)
             napiContext->certChain = static_cast<struct HksCertChain *>(HksMalloc(sizeof(struct HksCertChain)));
             if (napiContext->certChain != nullptr) {
                 napiContext->result = InitCertChain(napiContext->certChain, &napiContext->certChainCapacity);
-                if (napiContext->result != HKS_SUCCESS) { return;}
+                if (napiContext->result != HKS_SUCCESS) {
+                    return;
+                }
             }
             if (napiContext->isAnon) {
                 napiContext->result = HksAnonAttestKey(

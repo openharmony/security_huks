@@ -86,6 +86,11 @@ int32_t BlobToBase64String(const HksBlob &strBlob, std::string &outStr)
 
 napi_value GenerateArrayBuffer(const napi_env &env, uint8_t *data, uint32_t size)
 {
+    if (data == nullptr) {
+        LOGE("Invalid input: data is null but size is %u", size);
+        return nullptr;
+    }
+
     napi_value buffer;
     void *bufferPtr = nullptr;
     auto status = napi_create_arraybuffer(env, size * sizeof(uint8_t), &bufferPtr, &buffer);
@@ -100,10 +105,6 @@ napi_value GenerateArrayBuffer(const napi_env &env, uint8_t *data, uint32_t size
         return nullptr;
     }
     uint8_t *outPut_bytes = (uint8_t *)bufferPtr;
-    if (data == nullptr) {
-        LOGE("data is nullptr.");
-        return nullptr;
-    }
     for (uint32_t i = 0; i < size; ++i) {
         outPut_bytes[i] = data[i];
     }

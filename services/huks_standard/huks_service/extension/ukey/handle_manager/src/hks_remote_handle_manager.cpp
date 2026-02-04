@@ -165,7 +165,7 @@ int32_t HksRemoteHandleManager::ParseAndValidateIndex(const std::string &index, 
 int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet)
 {
-    ProviderInfo providerInfo;
+    ProviderInfo providerInfo{};
     std::string newIndex;
     int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
@@ -198,7 +198,7 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &process
 int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet)
 {
-    ProviderInfo providerInfo;
+    ProviderInfo providerInfo{};
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
     HKS_IF_TRUE_RETURN(ret == HKS_ERROR_NOT_EXIST, HKS_SUCCESS)
@@ -238,7 +238,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     auto pin = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UKEY_PIN>();
     HKS_IF_TRUE_LOGE_RETURN(pin.first != HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
         "Get pin failed. ret: %" LOG_PUBLIC "d", pin.first)
-    ProviderInfo providerInfo;
+    ProviderInfo providerInfo{};
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, uid.second, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
@@ -280,7 +280,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
         };
         newParamSet.AddParams(params);
     }
-    ProviderInfo providerInfo;
+    ProviderInfo providerInfo{};
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, uid, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
@@ -305,7 +305,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
 int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet)
 {
-    ProviderInfo providerInfo;
+    ProviderInfo providerInfo{};
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
@@ -406,7 +406,7 @@ int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processI
         HKS_LOG_E("Invalid propertyId");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    ProviderInfo providerInfo;
+    ProviderInfo providerInfo{};
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, uid, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)

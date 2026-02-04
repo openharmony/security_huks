@@ -32,7 +32,6 @@ ohos_shared_library("cipher_napi") {
   ]
   deps = [
     "//base/security/huks/frameworks/crypto_lite/cipher:cipher_shared",
-    "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
   ]
 
   external_deps = [
