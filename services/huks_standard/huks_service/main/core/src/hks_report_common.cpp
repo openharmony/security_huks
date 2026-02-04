@@ -318,7 +318,7 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
     return HKS_SUCCESS;
 }
 
-void FreeEventInfoSpecificPtr(struct HksEventInfo *eventInfo)
+void FreeCommonEventInfo(struct HksEventInfo *eventInfo)
 {
     HKS_FREE(eventInfo->common.function);
     HKS_FREE(eventInfo->common.callerInfo.name);
@@ -523,9 +523,10 @@ std::pair<std::unordered_map<std::string, std::string>::iterator, bool> EventInf
 void CopyParamBlobData(char **dst, const struct HksParam *param)
 {
     HKS_IF_TRUE_RETURN_VOID(dst == nullptr || param == nullptr);
-    *dst = static_cast<char *>(HksMalloc(param->blob.size));
+    *dst = static_cast<char *>(HksMalloc(param->blob.size + 1));
     if (*dst != nullptr) {
-        (void)memset_s(*dst, param->blob.size, 0, param->blob.size);
-        (void)memcpy_s(*dst, param->blob.size, param->blob.data, param->blob.size);
+        (void)memset_s(*dst, param->blob.size + 1, 0, param->blob.size + 1);
+        (void)memcpy_s(*dst, param->blob.size + 1, param->blob.data, param->blob.size);
+        (*dst)[param->blob.size] = '\0';
     }
 }
