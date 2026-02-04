@@ -26,7 +26,7 @@ typedef enum {
 extern "C" {
 #endif
 
-void LogPrint(CryptogLevel level, const char *funName, const char *fmt, ...) __attribute__((format, printf, 3, 4));
+void LogPrint(CryptogLevel level, const char *funName, const char *fmt, ...) __attribute__((format(printf, 3, 4)));
 
 #ifdef __cplusplus
 }
