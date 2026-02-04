@@ -75,7 +75,7 @@ int32_t HksParamSetToEventInfoForDelete(const struct HksParamSet *paramSetIn, st
     } while (0);
 
     HKS_LOG_E("report ParamSetToEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
-    FreeEventInfoSpecificPtr(eventInfo);
+    FreeCommonEventInfo(eventInfo);
     return ret;
 }
 
