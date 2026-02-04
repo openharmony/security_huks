@@ -171,7 +171,7 @@ static int32_t RemotePropertyPack(const CppParamSet &cppParamSet,
         uint32_t paramSetSize = 0;
         uint32_t totalSize = resultSize;
 
-        if (hksParamSet != nullptr && hksParamSet->paramSetSize < UINT32_MAX - 3) {
+        if (hksParamSet != nullptr) {
             paramSetSize = ALIGN_SIZE(hksParamSet->paramSetSize);
             totalSize += paramSetSize;
         }

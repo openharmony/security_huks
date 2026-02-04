@@ -577,14 +577,20 @@ static napi_value JSCipherRsa(napi_env env, napi_callback_info info)
     napi_create_string_utf8(env, "JSCipherRsa", NAPI_AUTO_LENGTH, &resource);
     napi_create_async_work(env, nullptr, resource,
         [](napi_env env, void *data) {
-            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
+            if (data == nullptr) {
+                CIPHER_LOG_E("the received data is nullptr.");
+                return;
+            }
             RsaAsyncContext *asyncContext = (RsaAsyncContext *)data;
             if (asyncContext->ret == ERROR_SUCCESS) {
                 asyncContext->ret = RsaExcute(asyncContext);
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
+            if (data == nullptr) {
+                CIPHER_LOG_E("the received data is nullptr.");
+                return;
+            }
             RsaAsyncContext *asyncContext = (RsaAsyncContext *)data;
             if (asyncContext->ret != ERROR_SUCCESS) {
                 SetFail(env, asyncContext->callback);
@@ -598,9 +604,7 @@ static napi_value JSCipherRsa(napi_env env, napi_callback_info info)
             napi_delete_async_work(env, asyncContext->commonNapi->work);
             DeleteRsaAsyncContext(env, asyncContext);
             delete asyncContext;
-        },
-        reinterpret_cast<void *>(rsaAsyncContext),
-        &rsaAsyncContext->commonNapi->work);
+        }, reinterpret_cast<void *>(rsaAsyncContext), &rsaAsyncContext->commonNapi->work);
         napi_queue_async_work(env, rsaAsyncContext->commonNapi->work);
         return nullptr;
 }
@@ -623,13 +627,19 @@ static napi_value JSCipherAes(napi_env env, napi_callback_info info)
     napi_create_string_utf8(env, "JSCipherAes", NAPI_AUTO_LENGTH, &resource);
     napi_create_async_work(env, nullptr, resource,
         [](napi_env env, void *data) {
-            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
+            if (data == nullptr) {
+                CIPHER_LOG_E("the received data is nullptr.");
+                return;
+            }
             AesAsyncContext *asyncContext = (AesAsyncContext *)data;
             if (asyncContext->ret == ERROR_SUCCESS) {
                 asyncContext->ret = AesExcute(asyncContext);
             }
         },[](napi_env env, napi_status status, void *data) {
-            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
+            if (data == nullptr) {
+                CIPHER_LOG_E("the received data is nullptr.");
+                return;
+            }
             AesAsyncContext *asyncContext = (AesAsyncContext *)data;
             if (asyncContext->ret != ERROR_SUCCESS) {
                 SetFail(env, asyncContext->callback);
