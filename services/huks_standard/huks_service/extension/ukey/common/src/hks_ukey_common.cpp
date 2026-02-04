@@ -140,7 +140,7 @@ int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCert
         auto element = jsonArray.GetElement(i);
         auto purposeObj = element.GetValue("purpose").ToNumber<int32_t>();
         auto indexObj = element.GetValue("index").ToString();
-        auto certObj = element.GetValue("cert").ToString();   
+        auto certObj = element.GetValue("cert").ToString();
         if (purposeObj.first != HKS_SUCCESS || indexObj.first != HKS_SUCCESS || certObj.first != HKS_SUCCESS) {
             HKS_LOG_E("element invalid value");
             HKS_FREE(certSet.certs);
