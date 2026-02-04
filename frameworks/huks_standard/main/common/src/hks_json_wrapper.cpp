@@ -463,7 +463,7 @@ std::pair<int32_t, std::string> U8Vec2Base64Str(const std::vector<uint8_t> &srcB
 
     const char *base64Table = Base64Table.c_str();
     size_t strLen = srcBuffer.size();
-    HKS_IF_TRUE_LOGE_RETURN(strLen > UINT32_MAX || (strLen + NUM2) / NUM3 > UINT32_MAX / NUM4),
+    HKS_IF_TRUE_LOGE_RETURN(strLen > UINT32_MAX || (strLen + NUM2) / NUM3 > UINT32_MAX / NUM4,
         std::make_pair(HKS_ERROR_INVALID_ARGUMENT, ""), "U8Vec2Base64Str: Input too large.")
     uint32_t outputLength = ((strLen + NUM2) / NUM3) * NUM4;
     base64Str.resize(outputLength);
