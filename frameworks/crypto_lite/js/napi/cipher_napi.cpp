@@ -634,7 +634,7 @@ static napi_value JSCipherAes(napi_env env, napi_callback_info info)
             if (asyncContext->ret == ERROR_SUCCESS) {
                 asyncContext->ret = AesExcute(asyncContext);
             }
-        },[](napi_env env, napi_status status, void *data) {
+        }, [](napi_env env, napi_status status, void *data) {
             if (data == nullptr) {
                 CIPHER_LOG_E("the received data is nullptr.");
                 return;
