@@ -26,8 +26,6 @@ ohos_shared_library("cipher_napi") {
 
   include_dirs = [
     "//base/security/huks/frameworks/crypto_lite/cipher/include",
-    "//base/security/huks/frameworks/huks_standard/main/common/include",
-    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     "log",
   ]
   deps = [
