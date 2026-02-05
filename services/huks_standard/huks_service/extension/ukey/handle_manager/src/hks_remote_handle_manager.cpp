@@ -97,7 +97,7 @@ int32_t HksRemoteHandleManager::MergeProviderCertificates(const ProviderInfo &pr
         if (WrapIndexWithProviderInfo(providerInfo, indexResult.second, wrappedIndex) == HKS_SUCCESS) {
             HKS_IF_TRUE_CONTINUE(!certObj.SetValue("index", wrappedIndex))
         }
-        HKS_IF_TRUE_CONTINUE(!combinedArray.AppendElement(certObj))
+        HKS_IF_TRUE_LOGE(!combinedArray.AppendElement(certObj), "append certObj to combinedArray fail.")
     }
     return HKS_SUCCESS;
 }
