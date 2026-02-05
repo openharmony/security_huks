@@ -565,7 +565,6 @@ static napi_value JSCipherRsa(napi_env env, napi_callback_info info)
     void *data = nullptr;
     napi_get_cb_info(env, info, &argc, argv, nullptr, &data);
     auto rsaAsyncContext = new RsaAsyncContext();
-
     rsaAsyncContext->ret = GetRsaInput(env, argv[0], rsaAsyncContext);
     if (rsaAsyncContext->ret != ERROR_SUCCESS) {
         DeleteRsaAsyncContext(env, rsaAsyncContext);
@@ -573,19 +572,24 @@ static napi_value JSCipherRsa(napi_env env, napi_callback_info info)
         CIPHER_LOG_E("Failed to get rsa input.");
         return nullptr;
     }
-
     napi_value resource = nullptr;
     napi_create_string_utf8(env, "JSCipherRsa", NAPI_AUTO_LENGTH, &resource);
-    napi_create_async_work(
-        env, nullptr, resource,
+    napi_create_async_work(env, nullptr, resource,
         [](napi_env env, void *data) {
+            if (data == nullptr) {
+                CIPHER_LOG_E("the received data is nullptr.");
+                return;
+            }
             RsaAsyncContext *asyncContext = (RsaAsyncContext *)data;
             if (asyncContext->ret == ERROR_SUCCESS) {
                 asyncContext->ret = RsaExcute(asyncContext);
             }
         },
-
         [](napi_env env, napi_status status, void *data) {
+            if (data == nullptr) {
+                CIPHER_LOG_E("the received data is nullptr.");
+                return;
+            }
             RsaAsyncContext *asyncContext = (RsaAsyncContext *)data;
             if (asyncContext->ret != ERROR_SUCCESS) {
                 SetFail(env, asyncContext->callback);
@@ -599,9 +603,7 @@ static napi_value JSCipherRsa(napi_env env, napi_callback_info info)
             napi_delete_async_work(env, asyncContext->commonNapi->work);
             DeleteRsaAsyncContext(env, asyncContext);
             delete asyncContext;
-        },
-        reinterpret_cast<void *>(rsaAsyncContext),
-        &rsaAsyncContext->commonNapi->work);
+        }, reinterpret_cast<void *>(rsaAsyncContext), &rsaAsyncContext->commonNapi->work);
         napi_queue_async_work(env, rsaAsyncContext->commonNapi->work);
         return nullptr;
 }
@@ -613,7 +615,6 @@ static napi_value JSCipherAes(napi_env env, napi_callback_info info)
     void *data = nullptr;
     napi_get_cb_info(env, info, &argc, argv, nullptr, &data);
     auto aesAsyncContext = new AesAsyncContext();
-
     aesAsyncContext->ret = GetAesInput(env, argv[0], aesAsyncContext);
     if (aesAsyncContext->ret != ERROR_SUCCESS) {
         DeleteAesAsyncContext(env, aesAsyncContext);
@@ -621,19 +622,23 @@ static napi_value JSCipherAes(napi_env env, napi_callback_info info)
         CIPHER_LOG_E("Failed to get aes input.");
         return nullptr;
     }
-
     napi_value resource = nullptr;
     napi_create_string_utf8(env, "JSCipherAes", NAPI_AUTO_LENGTH, &resource);
-    napi_create_async_work(
-        env, nullptr, resource,
+    napi_create_async_work(env, nullptr, resource,
         [](napi_env env, void *data) {
+            if (data == nullptr) {
+                CIPHER_LOG_E("the received data is nullptr.");
+                return;
+            }
             AesAsyncContext *asyncContext = (AesAsyncContext *)data;
             if (asyncContext->ret == ERROR_SUCCESS) {
                 asyncContext->ret = AesExcute(asyncContext);
             }
-        },
-
-        [](napi_env env, napi_status status, void *data) {
+        }, [](napi_env env, napi_status status, void *data) {
+            if (data == nullptr) {
+                CIPHER_LOG_E("the received data is nullptr.");
+                return;
+            }
             AesAsyncContext *asyncContext = (AesAsyncContext *)data;
             if (asyncContext->ret != ERROR_SUCCESS) {
                 SetFail(env, asyncContext->callback);
@@ -648,13 +653,10 @@ static napi_value JSCipherAes(napi_env env, napi_callback_info info)
             napi_delete_async_work(env, asyncContext->commonNapi->work);
             DeleteAesAsyncContext(env, asyncContext);
             delete asyncContext;
-        },
-        reinterpret_cast<void *>(aesAsyncContext),
-        &aesAsyncContext->commonNapi->work);
-        napi_queue_async_work(env, aesAsyncContext->commonNapi->work);
-        return nullptr;
+        }, reinterpret_cast<void *>(aesAsyncContext), &aesAsyncContext->commonNapi->work);
+    napi_queue_async_work(env, aesAsyncContext->commonNapi->work);
+    return nullptr;
 }
-
 
 static napi_value CipherExport(napi_env env, napi_value exports)
 {

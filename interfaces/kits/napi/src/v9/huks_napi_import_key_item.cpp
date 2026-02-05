@@ -23,6 +23,7 @@
 #include "hks_param.h"
 #include "hks_type.h"
 #include "huks_napi_common_item.h"
+#include "hks_template.h"
 
 namespace HuksNapiItem {
 constexpr int HUKS_NAPI_IMPORT_KEY_MIN_ARGS = 2;
@@ -100,11 +101,13 @@ napi_value ImportKeyAsyncWork(napi_env env, ImportKeyAsyncContext &context)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             ImportKeyAsyncContext napiContext = static_cast<ImportKeyAsyncContext>(data);
 
             napiContext->result = HksImportKey(napiContext->keyAlias, napiContext->paramSet, napiContext->key);
         },
         [](napi_env env, napi_status status, void *data) {
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             ImportKeyAsyncContext napiContext = static_cast<ImportKeyAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);

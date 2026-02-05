@@ -23,6 +23,7 @@
 #include "hks_param.h"
 #include "hks_type.h"
 #include "huks_napi_common.h"
+#include "hks_template.h"
 
 namespace HuksNapi {
 namespace {
@@ -102,16 +103,14 @@ static napi_value DeleteKeyAsyncWork(napi_env env, DeleteKeyAsyncContext &contex
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "deleteKeyAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
 
-    napi_create_async_work(
-        env,
-        nullptr,
-        resourceName,
+    napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             DeleteKeyAsyncContext napiContext = static_cast<DeleteKeyAsyncContext>(data);
-
             napiContext->result = HksDeleteKey(napiContext->keyAlias, napiContext->paramSet);
         },
         [](napi_env env, napi_status status, void *data) {
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             DeleteKeyAsyncContext napiContext = static_cast<DeleteKeyAsyncContext>(data);
             napi_value result = DeleteKeyWriteResult(env, napiContext);
             if (napiContext->callback == nullptr) {
@@ -120,9 +119,7 @@ static napi_value DeleteKeyAsyncWork(napi_env env, DeleteKeyAsyncContext &contex
                 CallAsyncCallback(env, napiContext->callback, napiContext->result, result);
             }
             DeleteDeleteKeyAsyncContext(env, napiContext);
-        },
-        static_cast<void *>(context),
-        &context->asyncWork);
+        }, static_cast<void *>(context), &context->asyncWork);
 
     napi_status status = napi_queue_async_work(env, context->asyncWork);
     if (status != napi_ok) {

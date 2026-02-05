@@ -24,6 +24,7 @@
 #include "hks_param.h"
 #include "hks_type.h"
 #include "huks_napi_common_item.h"
+#include "hks_template.h"
 
 namespace HuksNapiItem {
 namespace {
@@ -190,17 +191,13 @@ static napi_value CreateAsyncWork(napi_env env, napi_callback_info info, std::un
         status = napi_create_promise(env, &context->deferred, &promise);
         NAPI_THROW(env, status != napi_ok, HKS_ERROR_BAD_STATE, "could not create promise");
     }
-
     napi_value resourceName = nullptr;
     status = napi_create_string_utf8(env, resource, NAPI_AUTO_LENGTH, &resourceName);
     NAPI_THROW(env, status != napi_ok, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get string");
 
-    status = napi_create_async_work(
-        env,
-        nullptr,
-        resourceName,
-        context->execute,
+    status = napi_create_async_work(env, nullptr, resourceName, context->execute,
         [](napi_env env, napi_status status, void *data) {
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             AsyncContext *napiContext = static_cast<AsyncContext *>(data);
             napiContext->resolve(env, napiContext);
             delete napiContext;
@@ -208,7 +205,6 @@ static napi_value CreateAsyncWork(napi_env env, napi_callback_info info, std::un
         static_cast<void *>(context.get()),
         &context->asyncWork);
     NAPI_THROW(env, status != napi_ok, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not create async work");
-
     context->env = env;
     status = napi_queue_async_work(env, context->asyncWork);
     NAPI_THROW(env, status != napi_ok, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not queue async work");
@@ -217,7 +213,6 @@ static napi_value CreateAsyncWork(napi_env env, napi_callback_info info, std::un
         HKS_LOG_E("could not queue async work");
         return nullptr;
     }
-
     if (context->callback == nullptr) {
         context.release();
         return promise;
@@ -229,7 +224,7 @@ static napi_value CreateAsyncWork(napi_env env, napi_callback_info info, std::un
 
 napi_value HuksNapiRegisterProvider(napi_env env, napi_callback_info info)
 {
-    auto context = std::make_unique<ProviderRegContext>();
+    std::unique_ptr<ProviderRegContext> context(new (std::nothrow) ProviderRegContext());
     NAPI_THROW(env, context == nullptr, HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not create context");
     context->parse = [](napi_env env, napi_callback_info info, AsyncContext *context) -> napi_status {
         ProviderRegContext *asyncContext = reinterpret_cast<ProviderRegContext *>(context);
