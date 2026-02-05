@@ -23,6 +23,7 @@
 #include "hks_param.h"
 #include "hks_type.h"
 #include "huks_napi_common_item.h"
+#include "hks_template.h"
 
 namespace HuksNapiItem {
 constexpr int HUKS_NAPI_EXPORT_KEY_MIN_ARGS = 2;
@@ -105,12 +106,10 @@ napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext &context)
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "exportKeyAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
 
-    napi_create_async_work(
-        env,
-        nullptr,
-        resourceName,
+    napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
             (void)env;
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             ExportKeyAsyncContext napiContext = static_cast<ExportKeyAsyncContext>(data);
             int32_t ret = PrePareExportKeyContextBuffer(napiContext);
             if (ret == HKS_SUCCESS) {
@@ -121,23 +120,20 @@ napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext &context)
             }
         },
         [](napi_env env, napi_status status, void *data) {
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             ExportKeyAsyncContext napiContext = static_cast<ExportKeyAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);
             resultData.outData = napiContext->key;
             HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
             DeleteExportKeyAsyncContext(env, napiContext);
-        },
-        static_cast<void *>(context),
-        &context->asyncWork);
-
+        }, static_cast<void *>(context), &context->asyncWork);
     napi_status status = napi_queue_async_work(env, context->asyncWork);
     if (status != napi_ok) {
         DeleteExportKeyAsyncContext(env, context);
         HKS_LOG_E("could not queue async work");
         return nullptr;
     }
-
     if (context->callback == nullptr) {
         return promise;
     } else {

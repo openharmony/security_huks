@@ -113,14 +113,13 @@ int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &ind
     auto bundleNameResult = root.GetValue(BUNDLE_NAME_KEY).ToString();
     HKS_IF_TRUE_LOGE_RETURN(providerNameResult.first != HKS_SUCCESS || abilityNameResult.first != HKS_SUCCESS ||
         bundleNameResult.first != HKS_SUCCESS, HKS_ERROR_JSON_TYPE_MISMATCH, "Get provider info fields failed")
+    HKS_IF_TRUE_LOGE_RETURN(providerNameResult.second.empty() || abilityNameResult.second.empty() ||
+        bundleNameResult.second.empty(), HKS_ERROR_JSON_INVALID_VALUE, "Provider info is incomplete")
     providerInfo.m_providerName = providerNameResult.second;
     providerInfo.m_abilityName = abilityNameResult.second;
     providerInfo.m_bundleName = bundleNameResult.second;
-    HKS_IF_TRUE_LOGE_RETURN(providerInfo.m_providerName.empty() || providerInfo.m_abilityName.empty() ||
-        providerInfo.m_bundleName.empty(), HKS_ERROR_JSON_INVALID_VALUE, "Provider info is incomplete")
     CommJsonObject newRoot = CommJsonObject::CreateObject();
-    HKS_IF_TRUE_LOGE_RETURN(newRoot.IsNull(), HKS_ERROR_JSON_NOT_OBJECT,
-        "Create new JSON object failed")
+    HKS_IF_TRUE_LOGE_RETURN(newRoot.IsNull(), HKS_ERROR_JSON_NOT_OBJECT, "Create new JSON object failed")
     auto keys = root.GetKeys();
     for (const auto &key : keys) {
         if (key == PROVIDER_NAME_KEY || key == ABILITY_NAME_KEY || key == BUNDLE_NAME_KEY || key == USERID_KEY) {
@@ -166,7 +165,7 @@ int32_t HksRemoteHandleManager::ParseAndValidateIndex(const std::string &index, 
 int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet)
 {
-    ProviderInfo providerInfo;
+    ProviderInfo providerInfo{};
     std::string newIndex;
     int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
@@ -199,8 +198,7 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &process
 int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet)
 {
-    ProviderInfo providerInfo;
-    std::string newIndex;
+    ProviderInfo providerInfo{};
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
     HKS_IF_TRUE_RETURN(ret == HKS_ERROR_NOT_EXIST, HKS_SUCCESS)
@@ -240,7 +238,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     auto pin = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UKEY_PIN>();
     HKS_IF_TRUE_LOGE_RETURN(pin.first != HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
         "Get pin failed. ret: %" LOG_PUBLIC "d", pin.first)
-    ProviderInfo providerInfo;
+    ProviderInfo providerInfo{};
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, uid.second, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
@@ -282,7 +280,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
         };
         newParamSet.AddParams(params);
     }
-    ProviderInfo providerInfo;
+    ProviderInfo providerInfo{};
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, uid, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
@@ -307,7 +305,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
 int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet)
 {
-    ProviderInfo providerInfo;
+    ProviderInfo providerInfo{};
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
@@ -408,7 +406,7 @@ int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processI
         HKS_LOG_E("Invalid propertyId");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    ProviderInfo providerInfo;
+    ProviderInfo providerInfo{};
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, uid, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)

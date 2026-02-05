@@ -25,6 +25,7 @@
 #include "hks_param.h"
 #include "hks_type.h"
 #include "huks_napi_common.h"
+#include "hks_template.h"
 
 namespace HuksNapi {
 namespace {
@@ -353,17 +354,12 @@ static napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext &contex
     if (context->callback == nullptr) {
         NAPI_CALL(env, napi_create_promise(env, &context->deferred, &promise));
     }
-
     napi_value resourceName;
     napi_create_string_latin1(env, "UpdateAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
-
-    napi_create_async_work(
-        env,
-        nullptr,
-        resourceName,
+    napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             UpdateAsyncContext napiContext = static_cast<UpdateAsyncContext>(data);
-
             if (napiContext->isUpdate) {
                 napiContext->result = HksUpdate(napiContext->handle,
                     napiContext->paramSet, napiContext->inData, napiContext->outData);
@@ -373,6 +369,7 @@ static napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext &contex
             }
         },
         [](napi_env env, napi_status status, void *data) {
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             UpdateAsyncContext napiContext = static_cast<UpdateAsyncContext>(data);
             napi_value result = UpdateWriteResult(env, napiContext);
             if (napiContext->callback == nullptr) {
@@ -381,10 +378,7 @@ static napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext &contex
                 CallAsyncCallback(env, napiContext->callback, napiContext->result, result);
             }
             DeleteUpdateAsyncContext(env, napiContext);
-        },
-        static_cast<void *>(context),
-        &context->asyncWork);
-
+        }, static_cast<void *>(context), &context->asyncWork);
     napi_status status = napi_queue_async_work(env, context->asyncWork);
     if (status != napi_ok) {
         GET_AND_THROW_LAST_ERROR((env));
@@ -392,7 +386,6 @@ static napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext &contex
         HKS_LOG_E("could not queue async work");
         return nullptr;
     }
-
     if (context->callback == nullptr) {
         return promise;
     } else {

@@ -462,12 +462,15 @@ std::pair<int32_t, std::string> U8Vec2Base64Str(const std::vector<uint8_t> &srcB
     }
 
     const char *base64Table = Base64Table.c_str();
-    uint32_t strLen = srcBuffer.size();
+    size_t strLen = srcBuffer.size();
+    HKS_IF_TRUE_LOGE_RETURN(strLen > UINT32_MAX || (strLen + NUM2) / NUM3 > UINT32_MAX / NUM4,
+        std::make_pair(HKS_ERROR_INVALID_ARGUMENT, ""), "U8Vec2Base64Str: Input too large.")
     uint32_t outputLength = ((strLen + NUM2) / NUM3) * NUM4;
     base64Str.resize(outputLength);
     
     uint32_t strPos = 0;
-    for (uint32_t i = 0; i < strLen; i += NUM3) {
+    uint32_t i = 0;
+    for (; i < strLen; i += NUM3) {
         uint8_t byte1 = srcBuffer[i];
         uint8_t byte2 = (i + 1 < strLen) ? srcBuffer[i + 1] : 0;
         uint8_t byte3 = (i + NUM2 < strLen) ? srcBuffer[i + NUM2] : 0;
@@ -476,13 +479,13 @@ std::pair<int32_t, std::string> U8Vec2Base64Str(const std::vector<uint8_t> &srcB
         base64Str[strPos++] = base64Table[((byte1 & MASK_2BIT) << OFFSET_4BIT) | ((byte2 >> OFFSET_4BIT) & MASK_4BIT)];
         base64Str[strPos++] = base64Table[((byte2 & MASK_4BIT) << OFFSET_2BIT) | ((byte3 >> OFFSET_6BIT) & MASK_2BIT)];
         base64Str[strPos++] = base64Table[(byte3 & MASK_6BIT)];
+    }
 
-        if (i + 1 >= strLen) {
-            base64Str[strPos - PADDING_MAX_NUM] = '=';
-            base64Str[strPos - 1] = '=';
-        } else if (i + PADDING_MAX_NUM >= strLen) {
-            base64Str[strPos - 1] = '=';
-        }
+    if (i - NUM3 + 1 >= strLen) {
+        base64Str[strPos - PADDING_MAX_NUM] = '=';
+        base64Str[strPos - 1] = '=';
+    } else if (i - NUM3 + PADDING_MAX_NUM >= strLen) {
+        base64Str[strPos - 1] = '=';
     }
     
     return {HKS_SUCCESS, base64Str};

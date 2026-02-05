@@ -85,12 +85,6 @@ int32_t HksIpcServiceOnGetRemoteProperty(const HksProcessInfo *processInfo, cons
     int32_t ret = pluginManager->OnGetRemoteProperty(*processInfo, index, propertyId, paramSet, outParams);
     return ret;
 }
-    
-int32_t HksIpcServiceOnListProviders(std::vector<uint8_t> &providersOut)
-{
-    HKS_LOG_E("no impl for HksIpcServiceOnListProviders");
-    return 0;
-}
 
 int32_t HksIpcServiceOnExportCertificate(const struct HksProcessInfo *processInfo, const std::string &index,
     const CppParamSet &paramSet, std::string &certificatesOut)
@@ -106,13 +100,6 @@ int32_t HksIpcServiceOnExportProviderAllCertificates(const struct HksProcessInfo
     auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
     return pluginManager->OnExportProviderAllCertificates(*processInfo, index, paramSet, certificatesOut);
-}
-
-int32_t HksIpcServiceOnFindRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string &index,
-    CppParamSet &paramSet, std::string &remoteHandleOut)
-{
-    HKS_LOG_E("no impl for HksIpcServiceOnFindRemoteKeyHandle");
-    return 0;
 }
 
 }

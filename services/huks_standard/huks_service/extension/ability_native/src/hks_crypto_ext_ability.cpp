@@ -35,7 +35,7 @@ void HksCryptoExtAbility::SetCreator(const CreatorFunc &creator)
 HksCryptoExtAbility* HksCryptoExtAbility::Create(const std::unique_ptr<AbilityRuntime::Runtime> &runtime)
 {
     if (runtime == nullptr) {
-        return new HksCryptoExtAbility();
+        return new (std::nothrow) HksCryptoExtAbility();
     }
 
     if (creator_) {
@@ -46,7 +46,7 @@ HksCryptoExtAbility* HksCryptoExtAbility::Create(const std::unique_ptr<AbilityRu
         case AbilityRuntime::Runtime::Language::JS:
             return JsHksCryptoExtAbility::Create(runtime);
         default:
-            return new HksCryptoExtAbility();
+            return new (std::nothrow) HksCryptoExtAbility();
     }
 }
 
