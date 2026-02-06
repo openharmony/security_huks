@@ -123,7 +123,7 @@ int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCert
     int32_t arraySize = jsonArray.ArraySize();
     HKS_IF_TRUE_LOGI_RETURN(arraySize == 0, HKS_SUCCESS, "Notify, CertInfoSet count size is 0")
 
-    std::vector<HksExtCertInfo> tempCertSet;
+    std::vector<HksExtCertInfo> tempCertSet{};
     for (int32_t i = 0; i < arraySize; i++) {
         auto element = jsonArray.GetElement(i);
         auto purposeObj = element.GetValue("purpose").ToNumber<int32_t>();
@@ -132,11 +132,11 @@ int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCert
         HKS_IF_TRUE_LOGE_CONTINUE(purposeObj.first != HKS_SUCCESS || indexObj.first != HKS_SUCCESS ||
             certObj.first != HKS_SUCCESS, "get cert fail!")
 
-        HksExtCertInfo tempCert;
-        (void)memset_s(&tempCert, sizeof(HksExtCertInfo), 0, sizeof(HksExtCertInfo));
-        tempCert.purpose = purposeObj.second;
-        tempCert.index = StringToBlob(indexObj.second);
-        tempCert.cert = Base64StringToBlob(certObj.second);
+        HksExtCertInfo tempCert = {
+            .purpose = purposeObj.second,
+            .index = StringToBlob(indexObj.second),
+            .cert = Base64StringToBlob(certObj.second),
+        };
         if (tempCert.index.size == 0 || tempCert.index.data == nullptr ||
             tempCert.cert.size == 0 || tempCert.cert.data == nullptr) {
             HKS_LOG_E("StringToBlob or Base64StringToBlob fail.");
@@ -150,8 +150,14 @@ int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCert
     HKS_IF_TRUE_LOGE_RETURN(tempCertSet.empty(), HKS_SUCCESS, "No valid certificates found")
     certSet.count = static_cast<uint32_t>(tempCertSet.size());
     certSet.certs = (HksExtCertInfo *)HksMalloc(tempCertSet.size() * sizeof(HksExtCertInfo));
-    HKS_IF_NULL_LOGE_RETURN(certSet.certs, HKS_ERROR_MALLOC_FAIL,
-        "Malloc for cert set failed, size: %" LOG_PUBLIC "d", certSet.count)
+    if (certSet.certs == nullptr) {
+        HKS_LOG_E("Malloc for cert set failed, size: %" LOG_PUBLIC "d", certSet.count);
+        for (uint32_t i = 0; i < certSet.count; i++) {
+            HKS_FREE_BLOB(tempCert[i].index);
+            HKS_FREE_BLOB(tempCert[i].cert);
+        }
+        return HKS_ERROR_MALLOC_FAIL;
+    }
     for (uint32_t i = 0; i < certSet.count; i++) {
         certSet.certs[i] = tempCertSet[i];
         tempCertSet[i].index.data = nullptr;
