@@ -155,7 +155,8 @@ static int32_t X25519CheckKeySize(const struct HksBlob *key, const struct KeyMat
     return HKS_SUCCESS;
 }
 
-static int32_t X25519CheckKeyMaterialSize(const struct HksBlob *priKey, const struct HksBlob *pubKey)
+static int32_t X25519CheckKeyMaterialSize(const struct HksBlob *priKey, const struct HksBlob *pubKey,
+    const struct HksBlob *sharedKey)
 {
     const struct KeyMaterial25519 *priKm = (struct KeyMaterial25519 *)(priKey->data);
     const struct KeyMaterial25519 *pubKm = (struct KeyMaterial25519 *)(pubKey->data);
@@ -168,6 +169,9 @@ static int32_t X25519CheckKeyMaterialSize(const struct HksBlob *priKey, const st
 
     ret = X25519CheckKeySize(priKey, priKm, false);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    HKS_IF_TRUE_LOGE_RETURN(sharedKey->size < HKS_X25519_KEY_BYTES, HKS_ERROR_INVALID_ARGUMENT,
+        "sharedKey->size is too small, size is %" LOG_PUBLIC "u", sharedKey->size)
 
     return X25519CheckKeySize(pubKey, pubKm, true);
 }
@@ -317,7 +321,7 @@ int32_t HksMbedtlsX25519KeyAgreement(const struct HksBlob *nativeKey,
     const struct HksBlob *pubKey, const struct HksKeySpec *spec, struct HksBlob *sharedKey)
 {
     (void)spec;
-    int32_t ret = X25519CheckKeyMaterialSize(nativeKey, pubKey);
+    int32_t ret = X25519CheckKeyMaterialSize(nativeKey, pubKey, sharedKey);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_ecdh_context ctx;
@@ -798,7 +802,7 @@ int32_t HksMbedtlsEd25519KeyAgreement(const struct HksBlob *nativeKey,
     const struct HksBlob *pubKey, const struct HksKeySpec *spec, struct HksBlob *sharedKey)
 {
     (void)spec;
-    int32_t ret = X25519CheckKeyMaterialSize(nativeKey, pubKey);
+    int32_t ret = X25519CheckKeyMaterialSize(nativeKey, pubKey, sharedKey);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     struct HksEd25519ToX25519Blob key;
