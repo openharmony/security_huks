@@ -113,7 +113,6 @@ int32_t CertInfoToString(const struct HksExtCertInfo& certInfo, std::string& jso
     return HKS_SUCCESS;
 }
 
-
 int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCertInfoSet& certSet)
 {
     HKS_IF_TRUE_LOGE_RETURN(certJsonArr.empty(), HKS_ERROR_INVALID_ARGUMENT,
@@ -124,33 +123,46 @@ int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCert
     int32_t arraySize = jsonArray.ArraySize();
     HKS_IF_TRUE_LOGI_RETURN(arraySize == 0, HKS_SUCCESS, "Notify, CertInfoSet count size is 0")
 
-    certSet.count = static_cast<uint32_t>(arraySize);
-    certSet.certs = (HksExtCertInfo *)HksMalloc(arraySize * sizeof(HksExtCertInfo));
-    HKS_IF_NULL_LOGE_RETURN(certSet.certs, HKS_ERROR_MALLOC_FAIL,
-        "Malloc for cert set failed, size: %" LOG_PUBLIC "d", arraySize)
-    int32_t ret = memset_s(certSet.certs, arraySize * sizeof(HksExtCertInfo), 0,
-        arraySize * sizeof(HksExtCertInfo));
-    if (ret != EOK) {
-        HKS_FREE(certSet.certs);
-        certSet.certs = nullptr;
-        HKS_LOG_E("memset_s for cert set failed, ret: %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    std::vector<HksExtCertInfo> tempCertSet{};
     for (int32_t i = 0; i < arraySize; i++) {
         auto element = jsonArray.GetElement(i);
         auto purposeObj = element.GetValue("purpose").ToNumber<int32_t>();
         auto indexObj = element.GetValue("index").ToString();
         auto certObj = element.GetValue("cert").ToString();
-        if (purposeObj.first != HKS_SUCCESS || indexObj.first != HKS_SUCCESS || certObj.first != HKS_SUCCESS) {
-            HKS_LOG_E("element invalid value");
-            HKS_FREE(certSet.certs);
-            return HKS_ERROR_JSON_INVALID_VALUE;
+        HKS_IF_TRUE_LOGE_CONTINUE(purposeObj.first != HKS_SUCCESS || indexObj.first != HKS_SUCCESS ||
+            certObj.first != HKS_SUCCESS, "get cert fail!")
+
+        HksExtCertInfo tempCert = {
+            .purpose = purposeObj.second,
+            .index = StringToBlob(indexObj.second),
+            .cert = Base64StringToBlob(certObj.second),
+        };
+        if (tempCert.index.size == 0 || tempCert.index.data == nullptr ||
+            tempCert.cert.size == 0 || tempCert.cert.data == nullptr) {
+            HKS_LOG_E("StringToBlob or Base64StringToBlob fail.");
+            HKS_FREE_BLOB(tempCert.index);
+            HKS_FREE_BLOB(tempCert.cert);
+            continue;
         }
-        certSet.certs[i].purpose = purposeObj.second;
-        certSet.certs[i].index = StringToBlob(indexObj.second);
-        certSet.certs[i].cert = Base64StringToBlob(certObj.second);
+        tempCertSet.push_back(tempCert);
     }
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Parse cert info failed: %" LOG_PUBLIC "d", ret)
+
+    HKS_IF_TRUE_LOGE_RETURN(tempCertSet.empty(), HKS_SUCCESS, "No valid certificates found")
+    certSet.count = static_cast<uint32_t>(tempCertSet.size());
+    certSet.certs = (HksExtCertInfo *)HksMalloc(tempCertSet.size() * sizeof(HksExtCertInfo));
+    if (certSet.certs == nullptr) {
+        HKS_LOG_E("Malloc for cert set failed, size: %" LOG_PUBLIC "d", certSet.count);
+        for (uint32_t i = 0; i < certSet.count; i++) {
+            HKS_FREE_BLOB(tempCertSet[i].index);
+            HKS_FREE_BLOB(tempCertSet[i].cert);
+        }
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    for (uint32_t i = 0; i < certSet.count; i++) {
+        certSet.certs[i] = tempCertSet[i];
+        tempCertSet[i].index.data = nullptr;
+        tempCertSet[i].cert.data = nullptr;
+    }
     return HKS_SUCCESS;
 }
 
