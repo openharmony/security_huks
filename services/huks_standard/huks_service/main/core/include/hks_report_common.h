@@ -40,6 +40,8 @@ extern "C" {
 #define KEY_HASH_SHA256_SIZE 2
 #define EVENT_PROPERTY_UNKNOWN "unknown"
 
+int32_t AddGroupKey(struct HksParamSet *paramSetOut, const struct HksParamSet *paramSetIn);
+
 int32_t AddKeyHash(struct HksParamSet *paramSetOut, const struct HksBlob *keyIn);
 
 int32_t AddKeyAliasHash(struct HksParamSet *paramSetOut, const struct HksBlob *keyAlias, enum HksInnerTag paramTag);
@@ -90,7 +92,7 @@ std::pair<std::unordered_map<std::string, std::string>::iterator, bool> EventInf
 std::pair<std::unordered_map<std::string, std::string>::iterator, bool> EventInfoToMapKeyAccessInfo(
     const struct HksEventKeyAccessInfo *eventKeyAccessInfo, std::unordered_map<std::string, std::string> &reportData);
 
-void CopyParamBlobData(char **dst, const struct HksParam *param);
+int32_t CopyParamBlobData(char **dst, const struct HksParam *param);
 
 #endif
 
