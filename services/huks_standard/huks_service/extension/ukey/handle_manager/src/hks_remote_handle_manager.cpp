@@ -91,13 +91,14 @@ int32_t HksRemoteHandleManager::MergeProviderCertificates(const ProviderInfo &pr
         auto indexValue = certObj.GetValue("index");
         certObj.RemoveKey("index");
         auto indexResult = indexValue.ToString();
-        HKS_IF_TRUE_CONTINUE(indexResult.first != HKS_SUCCESS || indexResult.second.empty() ||
-            indexResult.second.size() > MAX_INDEX_SIZE)
+        HKS_IF_TRUE_LOGE_CONTINUE(indexResult.first != HKS_SUCCESS || indexResult.second.empty() ||
+            indexResult.second.size() > MAX_INDEX_SIZE,
+            "Failed to convert indexValue to string, error code: %" LOG_PUBLIC "d", indexResult.first)
         std::string wrappedIndex;
         if (WrapIndexWithProviderInfo(providerInfo, indexResult.second, wrappedIndex) == HKS_SUCCESS) {
             HKS_IF_TRUE_CONTINUE(!certObj.SetValue("index", wrappedIndex))
         }
-        HKS_IF_TRUE_CONTINUE(!combinedArray.AppendElement(certObj))
+        HKS_IF_TRUE_LOGE(!combinedArray.AppendElement(certObj), "append certObj to combinedArray fail.")
     }
     return HKS_SUCCESS;
 }
