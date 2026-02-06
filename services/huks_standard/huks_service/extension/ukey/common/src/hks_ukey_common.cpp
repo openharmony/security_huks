@@ -153,8 +153,8 @@ int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCert
     if (certSet.certs == nullptr) {
         HKS_LOG_E("Malloc for cert set failed, size: %" LOG_PUBLIC "d", certSet.count);
         for (uint32_t i = 0; i < certSet.count; i++) {
-            HKS_FREE_BLOB(tempCert[i].index);
-            HKS_FREE_BLOB(tempCert[i].cert);
+            HKS_FREE_BLOB(tempCertSet[i].index);
+            HKS_FREE_BLOB(tempCertSet[i].cert);
         }
         return HKS_ERROR_MALLOC_FAIL;
     }
