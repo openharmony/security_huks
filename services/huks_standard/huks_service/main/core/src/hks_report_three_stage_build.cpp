@@ -19,6 +19,7 @@
 #include <ctime>
 #include <unordered_map>
 
+#include "hks_error_code.h"
 #include "hks_event_info.h"
 #include "hks_report_common.h"
 #include "hks_log.h"
@@ -42,10 +43,10 @@ static int32_t ThreeStageBuildCommonInfo(const struct HksParamSet *paramSet, str
         return HKS_FAILURE;
     }
 
+    int32_t ret = HKS_FAILURE;
     if (HksGetParam(paramSet, HKS_TAG_PARAM0_BUFFER, &param) == HKS_SUCCESS) {
-        eventInfo->common.function = static_cast<char *>(HksMalloc(param->blob.size));
-        HKS_IF_NULL_LOGI_RETURN(eventInfo->common.function, HKS_ERROR_MALLOC_FAIL, "malloc funcname fail")
-        (void)memcpy_s(eventInfo->common.function, param->blob.size, param->blob.data, param->blob.size);
+        ret = CopyParamBlobData(&eventInfo->common.function, param);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy funcname failed")
     }
 
     if (HksGetParam(paramSet, HKS_TAG_PARAM1_BUFFER, &param) == HKS_SUCCESS) {
@@ -55,15 +56,23 @@ static int32_t ThreeStageBuildCommonInfo(const struct HksParamSet *paramSet, str
     }
 
     if (HksGetParam(paramSet, HKS_TAG_PARAM2_BUFFER, &param) == HKS_SUCCESS) {
-        eventInfo->common.callerInfo.name = static_cast<char *>(HksMalloc(param->blob.size));
-        HKS_IF_NULL_LOGI_RETURN(eventInfo->common.callerInfo.name, HKS_ERROR_MALLOC_FAIL, "malloc processname fail")
-        (void)memcpy_s(eventInfo->common.callerInfo.name, param->blob.size, param->blob.data, param->blob.size);
+        ret = CopyParamBlobData(&eventInfo->common.callerInfo.name, param);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy caller name failed")
     }
 
     if (HksGetParam(paramSet, HKS_TAG_PARAM0_NULL, &param) == HKS_SUCCESS) {
-        eventInfo->common.result.errMsg = static_cast<char *>(HksMalloc(param->blob.size));
-        HKS_IF_NULL_LOGI_RETURN(eventInfo->common.result.errMsg, HKS_ERROR_MALLOC_FAIL, "malloc error msg fail")
-        (void)memcpy_s((char *)eventInfo->common.result.errMsg, param->blob.size, param->blob.data, param->blob.size);
+        ret = CopyParamBlobData(&eventInfo->common.result.errMsg, param);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy errMsg failed")
+    }
+
+    if (HksGetParam(paramSet, HKS_TAG_PARAM1_NULL, &param) == HKS_SUCCESS) {
+        ret = CopyParamBlobData(&eventInfo->common.accessGroup, param);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy accessGroup failed")
+    }
+
+    if (HksGetParam(paramSet, HKS_TAG_PARAM2_NULL, &param) == HKS_SUCCESS) {
+        ret = CopyParamBlobData(&eventInfo->common.developerId, param);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy developerId failed")
     }
 
     if (HksGetParam(paramSet, HKS_TAG_TRACE_ID, &param) == HKS_SUCCESS) {
@@ -96,7 +105,7 @@ int32_t BuildCommonInfo(const struct HksParamSet *paramSet, struct HksEventInfo 
         "paramset or eventInfo is null")
     int32_t ret = ThreeStageBuildCommonInfo(paramSet, eventInfo);
     if (ret != HKS_SUCCESS) {
-        HksFreeEventInfo(&eventInfo);
+        FreeCommonEventInfo(eventInfo);
     }
     return ret;
 }

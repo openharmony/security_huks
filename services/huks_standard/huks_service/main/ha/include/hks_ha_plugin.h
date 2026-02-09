@@ -33,6 +33,7 @@
 #include "hks_report_three_stage_build.h"
 #include "hks_report_ukey_event.h"
 #include "hks_param.h"
+#include "hks_report_common.h"
 #include <memory>
 #include <vector>
 #include <mutex>
@@ -91,9 +92,7 @@ public:
         auto it = cacheList.begin();
         for (uint32_t i = 0; i < count && it != cacheList.end(); ++i, ++it) {
             if (it->data != nullptr) {
-                HKS_FREE(it->data->common.function);
-                HKS_FREE(it->data->common.callerInfo.name);
-                HKS_FREE(it->data->common.result.errMsg);
+                FreeCommonEventInfo(it->data);
                 if (IF_UKEY_EVENT(it->data->common.eventId)) {
                     HKS_FREE(it->data->ukeyInfo.providerName);
                     HKS_FREE(it->data->ukeyInfo.abilityName);
