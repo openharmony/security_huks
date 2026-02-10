@@ -2,7 +2,6 @@
 #include <thread>
 #include <chrono>
 
-#include "hks_error_code.h"
 #include "hks_log.h"
 #include "hks_json_wrapper.h"
 #include "hks_util.h"
@@ -657,78 +656,4 @@ HWTEST_F(UkeyCommonTest, UkeyCommonTest016, TestSize.Level0)
     }
 }
 
-// 辅助函数：生成嵌套 JSON
-std::string HksJsonGenerateNested(size_t depth, char type = '{') {
-    std::string result;
-    char open = type;
-    char close = (type == '{') ? '}' : ']';
-    for (size_t i = 0; i < depth; ++i) result += open;
-    for (size_t i = 0; i < depth; ++i) result += close;
-    return result;
-}
-HWTEST_F(UkeyCommonTest, UkeyCommonTest017, TestSize.Level0)
-{
-    std::string oversized(JSON_MAX_SIZE + 1, 'a');
-    auto jsonObj = CommJsonObject::Parse(oversized);
-    EXPECT_TRUE(jsonObj.IsNull());
-
-    EXPECT_TRUE(CheckJsonStringIsValid(""));
-    std::string validJson = R"({"key": "value"})";
-    auto validJsonObj = CommJsonObject::Parse(validJson);
-    EXPECT_EQ(validJsonObj["key"].ToString().first, HKS_SUCCESS);
-    EXPECT_EQ(validJsonObj["key"].ToString().second, "value");
-}
-
-HWTEST_F(UkeyCommonTest, UkeyCommonTest018, TestSize.Level0)
-{
-    std::string validJson = R"({"key":"val\"ue"})";
-    auto validJsonObj = CommJsonObject::Parse(validJson);
-    EXPECT_EQ(validJsonObj["key"].ToString().first, HKS_SUCCESS);
-    EXPECT_EQ(validJsonObj["key"].ToString().second, "val\"ue");
-
-    validJson = "{\"key\":\"val\\\\ue\"}";
-    validJsonObj = CommJsonObject::Parse(validJson);
-    EXPECT_EQ(validJsonObj["key"].ToString().first, HKS_SUCCESS);
-    EXPECT_EQ(validJsonObj["key"].ToString().second, "val\\ue");
-}
-
-HWTEST_F(UkeyCommonTest, UkeyCommonTest019, TestSize.Level0)
-{
-    const char* complex = R"({
-        "name": "test",
-        "data": {
-            "arr": [1, 2, {"nested": "obj"}],
-            "empty": {},
-            "escaped": "quote\"back\\slash"
-        },
-        "nums": [1, 2, 3]
-    })";
-    auto validJsonObj = CommJsonObject::Parse(complex);
-    EXPECT_EQ(validJsonObj["name"].ToString().first, HKS_SUCCESS);
-    EXPECT_EQ(validJsonObj["name"].ToString().second, "test");
-    EXPECT_EQ(validJsonObj["data"]["arr"][0].ToNumber<int32_t>().first, HKS_SUCCESS);
-    EXPECT_EQ(validJsonObj["data"]["arr"][0].ToNumber<int32_t>().second, 1);
-    EXPECT_EQ(validJsonObj["data"]["arr"][1].ToNumber<int32_t>().first, HKS_SUCCESS);
-    EXPECT_EQ(validJsonObj["data"]["arr"][1].ToNumber<int32_t>().second, 2);
-    EXPECT_EQ(validJsonObj["data"]["arr"][2]["nested"].ToString().first, HKS_SUCCESS);
-    EXPECT_EQ(validJsonObj["data"]["arr"][2]["nested"].ToString().second, "obj");
-    EXPECT_EQ(validJsonObj["data"]["empty"].IsObject(), true);
-    EXPECT_EQ(validJsonObj["data"]["empty"].IsArray(), false);
-    EXPECT_EQ(validJsonObj["data"]["empty"].IsString(), false);
-    EXPECT_EQ(validJsonObj["data"]["empty"].IsNumber(), false);
-    EXPECT_EQ(validJsonObj["data"]["empty"].IsNull(), false);
-    EXPECT_EQ(validJsonObj["data"]["escaped"].ToString().first, HKS_SUCCESS);
-    EXPECT_EQ(validJsonObj["data"]["escaped"].ToString().second, "quote\"back\\slash"); 
-}
-
-HWTEST_F(UkeyCommonTest, UkeyCommonTest020, TestSize.Level0)
-{
-    std::string valid = HksJsonGenerateNested(JSON_MAX_NESTING_DEPTH);
-    auto validJsonObj = CommJsonObject::Parse(valid);
-    EXPECT_TRUE(validJsonObj.IsNull());
-
-    std::string invalid = HksJsonGenerateNested(JSON_MAX_NESTING_DEPTH + 1);
-    auto invalidJsonObj = CommJsonObject::Parse(invalid);
-    EXPECT_TRUE(invalidJsonObj.IsNull());
-}
 }

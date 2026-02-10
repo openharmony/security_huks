@@ -29,54 +29,6 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 
-bool CheckJsonStringIsValid(const std::string &jsonString)
-{
-    HKS_IF_TRUE_LOGE_RETURN(jsonString.size() > static_cast<size_t>(JSON_MAX_SIZE), false,
-        "JSON oversize: %" LOG_PUBLIC "zu", jsonString.size())
-    int32_t objCount = 0;
-    int32_t arrCount = 0;
-    bool inString = false;
-    bool escape = false;
-    std::vector<char> bracketStack;
-    bracketStack.reserve(JSON_MAX_NESTING_DEPTH);
-    for (size_t i = 0; i < jsonString.size(); ++i) {
-        HKS_IF_TRUE_EXCU_CONTINUE(escape, escape = false)
-        HKS_IF_TRUE_EXCU_CONTINUE(jsonString[i] == '\\', escape = true)
-        HKS_IF_TRUE_EXCU_CONTINUE(jsonString[i] == '"', inString = !inString)
-        HKS_IF_TRUE_CONTINUE(inString)
-        switch (jsonString[i]) {
-            case '{':
-            case '[': {
-                HKS_IF_TRUE_LOGE_RETURN(bracketStack.size() >= static_cast<size_t>(JSON_MAX_NESTING_DEPTH), false,
-                    "Nesting depth exceeded.")
-                HKS_IF_TRUE_LOGE_RETURN(jsonString[i] == '{' && ++objCount > JSON_MAX_OBJECT_COUNT, false,
-                    "Too many objects: %" LOG_PUBLIC "d", objCount)
-                HKS_IF_TRUE_LOGE_RETURN(jsonString[i] == '[' && ++arrCount > JSON_MAX_OBJECT_COUNT, false,
-                    "Too many arrays: %" LOG_PUBLIC "d", arrCount)
-                bracketStack.push_back(jsonString[i]);
-                break;
-            }
-            case '}':
-            case ']': {
-                HKS_IF_TRUE_LOGE_RETURN(bracketStack.empty(), false,
-                    "Unexpected closing bracket: '%" LOG_PUBLIC "c' at position %zu", jsonString[i], i)
-                char expectedOpen = (jsonString[i] == '}') ? '{' : '[';
-                char actualOpen = bracketStack.back();
-                HKS_IF_TRUE_LOGE_RETURN(actualOpen != expectedOpen, false,
-                    "Mismatched bracket types: expected '%" LOG_PUBLIC "c but found '%" LOG_PUBLIC "c' at position %zu",
-                    expectedOpen, actualOpen, i)
-                bracketStack.pop_back();
-                break;
-            }
-            default:
-                continue;
-        }
-    }
-    HKS_IF_TRUE_LOGE_RETURN(!bracketStack.empty(), false, "Unclosed brackets. %" LOG_PUBLIC "zu", bracketStack.size())
-    HKS_IF_TRUE_LOGE_RETURN(inString, false, "Unclosed string.")
-    return true;
-}
-
 CommJsonObject::CommJsonObject() : mJson_(nullptr, [](cJSON *) {}) {}
 
 CommJsonObject::CommJsonObject(cJSON *json, int32_t err, std::string parentKeyName, bool takeOwnership)
@@ -345,10 +297,6 @@ std::string CommJsonObject::Serialize(bool formatted) const
 
 CommJsonObject CommJsonObject::Parse(const std::string &jsonString)
 {
-    auto checkRet = CheckJsonStringIsValid(jsonString);
-    if (!checkRet) {
-        return CreateNull(HKS_ERROR_JSON_PARSE_ERROR, "json string is invalid");
-    }
     cJSON *json = cJSON_Parse(jsonString.c_str());
     if (json == nullptr) {
         const char *errorPtr = cJSON_GetErrorPtr();
