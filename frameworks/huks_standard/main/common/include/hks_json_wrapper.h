@@ -23,7 +23,9 @@
 #include <functional>
 
 #include "hks_error_code.h"
-
+const int32_t JSON_MAX_SIZE = 1024 * 1024;
+const int32_t JSON_MAX_NESTING_DEPTH = 50;
+const int32_t JSON_MAX_OBJECT_COUNT = 1000;
 struct cJSON;
 namespace OHOS {
 namespace Security {
@@ -147,6 +149,8 @@ constexpr uint8_t NUM2 = 2;
 constexpr uint8_t NUM3 = 3;
 constexpr uint8_t NUM4 = 4;
 const std::string Base64Table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+bool CheckJsonStringIsValid(const std::string &jsonString);
 }
 }
 }
