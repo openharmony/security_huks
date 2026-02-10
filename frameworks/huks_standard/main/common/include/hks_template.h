@@ -139,12 +139,6 @@ if (BOOL_FUNC) { \
     continue; \
 }
 
-#define HKS_IF_TRUE_EXCU_CONTINUE(BOOL_FUNC, EXCU_FUNC) \
-if (BOOL_FUNC) { \
-    (EXCU_FUNC); \
-    continue; \
-}
-
 #define HKS_IF_TRUE_RETURN_VOID(BOOL_FUNC) \
 if ((BOOL_FUNC)) { \
     return; \
