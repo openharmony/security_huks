@@ -2,6 +2,7 @@
 #include <thread>
 #include <chrono>
 
+#include "hks_error_code.h"
 #include "hks_log.h"
 #include "hks_json_wrapper.h"
 #include "hks_util.h"
@@ -656,4 +657,404 @@ HWTEST_F(UkeyCommonTest, UkeyCommonTest016, TestSize.Level0)
     }
 }
 
+// 辅助函数：生成嵌套 JSON
+std::string HksJsonGenerateNested(size_t depth, char type = '{') {
+    std::string result;
+    char open = type;
+    char close = (type == '{') ? '}' : ']';
+    for (size_t i = 0; i < depth; ++i) result += open;
+    for (size_t i = 0; i < depth; ++i) result += close;
+    return result;
+}
+HWTEST_F(UkeyCommonTest, UkeyCommonTest017, TestSize.Level0)
+{
+    std::string oversized(JSON_MAX_SIZE + 1, 'a');
+    auto jsonObj = CommJsonObject::Parse(oversized);
+    EXPECT_TRUE(jsonObj.IsNull());
+
+    EXPECT_TRUE(CheckJsonStructureConstraints(""));
+    std::string validJson = R"({"key": "value"})";
+    auto validJsonObj = CommJsonObject::Parse(validJson);
+    EXPECT_EQ(validJsonObj["key"].ToString().first, HKS_SUCCESS);
+    EXPECT_EQ(validJsonObj["key"].ToString().second, "value");
+}
+
+HWTEST_F(UkeyCommonTest, UkeyCommonTest018, TestSize.Level0)
+{
+    std::string validJson = R"({"key":"val\"ue"})";
+    auto validJsonObj = CommJsonObject::Parse(validJson);
+    EXPECT_EQ(validJsonObj["key"].ToString().first, HKS_SUCCESS);
+    EXPECT_EQ(validJsonObj["key"].ToString().second, "val\"ue");
+
+    validJson = R"({"key":"val\\ue"})";
+    validJsonObj = CommJsonObject::Parse(validJson);
+    EXPECT_EQ(validJsonObj["key"].ToString().first, HKS_SUCCESS);
+    EXPECT_EQ(validJsonObj["key"].ToString().second, "val\\ue");
+}
+
+HWTEST_F(UkeyCommonTest, UkeyCommonTest019, TestSize.Level0)
+{
+    const char* complex = R"({
+        "name": "test",
+        "data": {
+            "arr": [1, 2, {"nested": "obj"}],
+            "empty": {},
+            "escaped": "quote\"back\\slash"
+        },
+        "nums": [1, 2, 3]
+    })";
+    auto validJsonObj = CommJsonObject::Parse(complex);
+    EXPECT_EQ(validJsonObj["name"].ToString().first, HKS_SUCCESS);
+    EXPECT_EQ(validJsonObj["name"].ToString().second, "test");
+    EXPECT_EQ(validJsonObj["data"]["arr"][0].ToNumber<int32_t>().first, HKS_SUCCESS);
+    EXPECT_EQ(validJsonObj["data"]["arr"][0].ToNumber<int32_t>().second, 1);
+    EXPECT_EQ(validJsonObj["data"]["arr"][1].ToNumber<int32_t>().first, HKS_SUCCESS);
+    EXPECT_EQ(validJsonObj["data"]["arr"][1].ToNumber<int32_t>().second, 2);
+    EXPECT_EQ(validJsonObj["data"]["arr"][2]["nested"].ToString().first, HKS_SUCCESS);
+    EXPECT_EQ(validJsonObj["data"]["arr"][2]["nested"].ToString().second, "obj");
+    EXPECT_EQ(validJsonObj["data"]["empty"].IsObject(), true);
+    EXPECT_EQ(validJsonObj["data"]["empty"].IsArray(), false);
+    EXPECT_EQ(validJsonObj["data"]["empty"].IsString(), false);
+    EXPECT_EQ(validJsonObj["data"]["empty"].IsNumber(), false);
+    EXPECT_EQ(validJsonObj["data"]["empty"].IsNull(), false);
+    EXPECT_EQ(validJsonObj["data"]["escaped"].ToString().first, HKS_SUCCESS);
+    EXPECT_EQ(validJsonObj["data"]["escaped"].ToString().second, "quote\"back\\slash"); 
+}
+
+HWTEST_F(UkeyCommonTest, UkeyCommonTest020, TestSize.Level0)
+{
+    std::string valid = HksJsonGenerateNested(JSON_MAX_NESTING_DEPTH);
+    auto validJsonObj = CommJsonObject::Parse(valid);
+    EXPECT_TRUE(validJsonObj.IsNull());
+
+    std::string invalid = HksJsonGenerateNested(JSON_MAX_NESTING_DEPTH + 1);
+    auto invalidJsonObj = CommJsonObject::Parse(invalid);
+    EXPECT_TRUE(invalidJsonObj.IsNull());
+}
+
+/* *
+ * @tc.name: UkeyCommonTest.UkeyCommonTest023
+ * @tc.desc: Test CheckJsonStructureConstraints with basic valid JSON
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyCommonTest, UkeyCommonTest023, TestSize.Level0)
+{
+    EXPECT_TRUE(CheckJsonStructureConstraints(""));
+    EXPECT_TRUE(CheckJsonStructureConstraints(R"({"key":"value"})"));
+    EXPECT_TRUE(CheckJsonStructureConstraints(R"([1,2,3])"));
+    EXPECT_TRUE(CheckJsonStructureConstraints(R"({"a":{"b":{"c":1}}})"));
+    EXPECT_TRUE(CheckJsonStructureConstraints(R"([[[1]]])"));
+    EXPECT_TRUE(CheckJsonStructureConstraints(R"({})"));
+    EXPECT_TRUE(CheckJsonStructureConstraints(R"([])"));
+}
+
+/* *
+ * @tc.name: UkeyCommonTest.UkeyCommonTest024
+ * @tc.desc: Test CheckJsonStructureConstraints with size limits
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyCommonTest, UkeyCommonTest024, TestSize.Level0)
+{
+    std::string maxSizeJson(JSON_MAX_SIZE + 1, 'a');
+    EXPECT_FALSE(CheckJsonStructureConstraints(maxSizeJson));
+
+    std::string validSizeJson = R"({"key":")" + std::string(JSON_MAX_SIZE - 50, 'a') + R"("})";
+    EXPECT_TRUE(CheckJsonStructureConstraints(validSizeJson));
+    
+    std::string validJson = R"({"key":")" + std::string(JSON_MAX_SIZE - 100, 'a') + R"("})";
+    EXPECT_TRUE(CheckJsonStructureConstraints(validJson));
+}
+
+/* *
+ * @tc.name: UkeyCommonTest.UkeyCommonTest025
+ * @tc.desc: Test CheckJsonStructureConstraints with object count limits
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyCommonTest, UkeyCommonTest025, TestSize.Level0)
+{
+    std::string manyObjects;
+    for (int i = 0; i < JSON_MAX_OBJECT_COUNT; ++i) {
+        manyObjects += R"({"k":1},)";
+    }
+    manyObjects.pop_back();
+    manyObjects = "[" + manyObjects + "]";
+    EXPECT_TRUE(CheckJsonStructureConstraints(manyObjects));
+
+    std::string tooManyObjects;
+    for (int i = 0; i < JSON_MAX_OBJECT_COUNT + 1; ++i) {
+        tooManyObjects += R"({"k":1},)";
+    }
+    tooManyObjects.pop_back();
+    tooManyObjects = "[" + tooManyObjects + "]";
+    EXPECT_FALSE(CheckJsonStructureConstraints(tooManyObjects));
+}
+
+/* *
+ * @tc.name: UkeyCommonTest.UkeyCommonTest026
+ * @tc.desc: Test CheckJsonStructureConstraints with array count limits
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyCommonTest, UkeyCommonTest026, TestSize.Level0)
+{
+    std::string manyArrays = "[";
+    for (int i = 0; i < JSON_MAX_OBJECT_COUNT - 1; ++i) {
+        if (i > 0) manyArrays += ",";
+        manyArrays += "[]";
+    }
+    manyArrays += "]";
+    EXPECT_TRUE(CheckJsonStructureConstraints(manyArrays));
+
+    std::string tooManyArrays = "[";
+    for (int i = 0; i < JSON_MAX_OBJECT_COUNT + 1; ++i) {
+        if (i > 0) tooManyArrays += ",";
+        tooManyArrays += "[]";
+    }
+    tooManyArrays += "]";
+    EXPECT_FALSE(CheckJsonStructureConstraints(tooManyArrays));
+}
+
+/* *
+ * @tc.name: UkeyCommonTest.UkeyCommonTest027
+ * @tc.desc: Test CheckJsonStructureConstraints with nesting depth limits
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyCommonTest, UkeyCommonTest027, TestSize.Level0)
+{
+    std::string maxNesting = R"({"k":)";
+    for (int i = 0; i < JSON_MAX_NESTING_DEPTH - 2; ++i) {
+        maxNesting += R"({"k":)";
+    }
+    maxNesting += "1";
+    for (int i = 0; i < JSON_MAX_NESTING_DEPTH - 2; ++i) {
+        maxNesting += "}";
+    }
+    maxNesting += "}";
+    EXPECT_TRUE(CheckJsonStructureConstraints(maxNesting));
+}
+
+/* *
+ * @tc.name: UkeyCommonTest.UkeyCommonTest028
+ * @tc.desc: Test CheckJsonStructureConstraints with bracket matching
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyCommonTest, UkeyCommonTest028, TestSize.Level0)
+{
+    EXPECT_FALSE(CheckJsonStructureConstraints(R"({)}"));
+    EXPECT_FALSE(CheckJsonStructureConstraints(R"({[)"));
+    EXPECT_FALSE(CheckJsonStructureConstraints(R"({))"));
+    EXPECT_FALSE(CheckJsonStructureConstraints(R"([)"));
+    EXPECT_FALSE(CheckJsonStructureConstraints(R"(])"));
+}
+
+/* *
+ * @tc.name: UkeyCommonTest.UkeyCommonTest030
+ * @tc.desc: Test CommJsonObject::Parse with size and nesting depth limits
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyCommonTest, UkeyCommonTest030, TestSize.Level0)
+{
+    std::string oversized(JSON_MAX_SIZE + 1, 'a');
+    auto oversizedObj = CommJsonObject::Parse(oversized);
+    EXPECT_TRUE(oversizedObj.IsNull());
+
+    std::string maxNesting = R"({"k":)";
+    for (int i = 0; i < JSON_MAX_NESTING_DEPTH - 2; ++i) {
+        maxNesting += R"({"k":)";
+    }
+    maxNesting += "1";
+    for (int i = 0; i < JSON_MAX_NESTING_DEPTH - 2; ++i) {
+        maxNesting += "}";
+    }
+    maxNesting += "}";
+    auto maxNestingObj = CommJsonObject::Parse(maxNesting);
+    EXPECT_FALSE(maxNestingObj.IsNull());
+
+    std::string tooDeep = R"({"k":)";
+    for (int i = 0; i < JSON_MAX_NESTING_DEPTH; ++i) {
+        tooDeep += R"({"k":)";
+    }
+    tooDeep += "1";
+    for (int i = 0; i < JSON_MAX_NESTING_DEPTH; ++i) {
+        tooDeep += "}";
+    }
+    tooDeep += "}";
+    auto tooDeepObj = CommJsonObject::Parse(tooDeep);
+    EXPECT_TRUE(tooDeepObj.IsNull());
+}
+
+/* *
+ * @tc.name: UkeyCommonTest.UkeyCommonTest031
+ * @tc.desc: Test CommJsonObject::Parse with basic object and array
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyCommonTest, UkeyCommonTest031, TestSize.Level0)
+{
+    std::string validObject = R"({"name":"test","age":30})";
+    auto obj = CommJsonObject::Parse(validObject);
+    EXPECT_FALSE(obj.IsNull());
+    EXPECT_TRUE(obj.IsObject());
+    EXPECT_EQ(obj["name"].ToString().first, HKS_SUCCESS);
+    EXPECT_EQ(obj["name"].ToString().second, "test");
+    EXPECT_EQ(obj["age"].ToNumber<int32_t>().first, HKS_SUCCESS);
+    EXPECT_EQ(obj["age"].ToNumber<int32_t>().second, 30);
+
+    std::string validArray = R"([1,2,3,"hello"])";
+    auto arr = CommJsonObject::Parse(validArray);
+    EXPECT_FALSE(arr.IsNull());
+    EXPECT_TRUE(arr.IsArray());
+    EXPECT_EQ(arr.ArraySize(), 4);
+    EXPECT_EQ(arr[0].ToNumber<int32_t>().second, 1);
+    EXPECT_EQ(arr[1].ToNumber<int32_t>().second, 2);
+    EXPECT_EQ(arr[2].ToNumber<int32_t>().second, 3);
+    EXPECT_EQ(arr[3].ToString().second, "hello");
+}
+
+/* *
+ * @tc.name: UkeyCommonTest.UkeyCommonTest032
+ * @tc.desc: Test CommJsonObject::Parse with invalid JSON and empty structures
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyCommonTest, UkeyCommonTest032, TestSize.Level0)
+{
+    std::string invalidJson = R"({invalid})";
+    auto invalid = CommJsonObject::Parse(invalidJson);
+    EXPECT_TRUE(invalid.IsNull());
+
+    std::string emptyObject = R"({})";
+    auto emptyObj = CommJsonObject::Parse(emptyObject);
+    EXPECT_FALSE(emptyObj.IsNull());
+    EXPECT_TRUE(emptyObj.IsObject());
+    EXPECT_EQ(emptyObj.GetKeys().size(), 0);
+
+    std::string emptyArray = R"([])";
+    auto emptyArr = CommJsonObject::Parse(emptyArray);
+    EXPECT_FALSE(emptyArr.IsNull());
+    EXPECT_TRUE(emptyArr.IsArray());
+    EXPECT_EQ(emptyArr.ArraySize(), 0);
+}
+
+/* *
+ * @tc.name: UkeyCommonTest.UkeyCommonTest033
+ * @tc.desc: Test CommJsonObject::Parse with escape characters
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyCommonTest, UkeyCommonTest033, TestSize.Level0)
+{
+    std::string withEscape = R"({"msg":"hello\"world","path":"C:\\path"})";
+    auto escaped = CommJsonObject::Parse(withEscape);
+    EXPECT_FALSE(escaped.IsNull());
+    EXPECT_EQ(escaped["msg"].ToString().second, "hello\"world");
+    EXPECT_EQ(escaped["path"].ToString().second, "C:\\path");
+}
+
+/* *
+ * @tc.name: UkeyCommonTest.UkeyCommonTest034
+ * @tc.desc: Test CommJsonObject::Parse with nested and mixed structures
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyCommonTest, UkeyCommonTest034, TestSize.Level0)
+{
+    std::string nested = R"({"outer":{"inner":{"deep":42}}})";
+    auto nestedObj = CommJsonObject::Parse(nested);
+    EXPECT_FALSE(nestedObj.IsNull());
+    EXPECT_EQ(nestedObj["outer"]["inner"]["deep"].ToNumber<int32_t>().second, 42);
+
+    std::string mixed = R"({"name":"test","values":[1,2,3],"nested":{"key":"value"}})";
+    auto mixedObj = CommJsonObject::Parse(mixed);
+    EXPECT_FALSE(mixedObj.IsNull());
+    EXPECT_EQ(mixedObj["name"].ToString().second, "test");
+    EXPECT_EQ(mixedObj["values"].ArraySize(), 3);
+    EXPECT_EQ(mixedObj["nested"]["key"].ToString().second, "value");
+}
+
+/* *
+ * @tc.name: UkeyCommonTest.UkeyCommonTest035
+ * @tc.desc: Test CommJsonObject::Parse with size and nesting depth limits
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyCommonTest, UkeyCommonTest035, TestSize.Level0)
+{
+    std::string oversized(JSON_MAX_SIZE + 1, 'a');
+    auto oversizedObj = CommJsonObject::Parse(oversized);
+    EXPECT_TRUE(oversizedObj.IsNull());
+
+    std::string maxNesting;
+    for (int i = 0; i < JSON_MAX_NESTING_DEPTH - 1; ++i) {
+        maxNesting += "{\"k\":";
+    }
+    maxNesting += "1";
+    for (int i = 0; i < JSON_MAX_NESTING_DEPTH - 1; ++i) {
+        maxNesting += "}";
+    }
+    auto maxNestingObj = CommJsonObject::Parse(maxNesting);
+    EXPECT_FALSE(maxNestingObj.IsNull());
+
+    std::string tooDeep;
+    for (int i = 0; i < JSON_MAX_NESTING_DEPTH + 1; ++i) {
+        tooDeep += "{\"k\":";
+    }
+    tooDeep += "1";
+    for (int i = 0; i < JSON_MAX_NESTING_DEPTH + 1; ++i) {
+        tooDeep += "}";
+    }
+    auto tooDeepObj = CommJsonObject::Parse(tooDeep);
+    EXPECT_TRUE(tooDeepObj.IsNull());
+}
+
+/* *
+ * @tc.name: UkeyCommonTest.UkeyCommonTest036
+ * @tc.desc: Test CommJsonObject::Parse with special value types (null, bool)
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyCommonTest, UkeyCommonTest036, TestSize.Level0)
+{
+    std::string withNull = R"({"key":null,"num":0,"bool":false})";
+    auto withNullObj = CommJsonObject::Parse(withNull);
+    EXPECT_FALSE(withNullObj.IsNull());
+    EXPECT_TRUE(withNullObj["key"].IsNull());
+    EXPECT_EQ(withNullObj["num"].ToNumber<int32_t>().second, 0);
+    EXPECT_EQ(withNullObj["bool"].ToBool().second, false);
+
+    std::string withBoolean = R"({"flag1":true,"flag2":false})";
+    auto boolObj = CommJsonObject::Parse(withBoolean);
+    EXPECT_FALSE(boolObj.IsNull());
+    EXPECT_EQ(boolObj["flag1"].ToBool().second, true);
+    EXPECT_EQ(boolObj["flag2"].ToBool().second, false);
+}
+
+/* *
+ * @tc.name: UkeyCommonTest.UkeyCommonTest037
+ * @tc.desc: Test CommJsonObject::Parse with numbers and special characters
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyCommonTest, UkeyCommonTest037, TestSize.Level0)
+{
+    std::string withNumbers = R"({"int":42,"double":3.14,"negative":-100})";
+    auto numObj = CommJsonObject::Parse(withNumbers);
+    EXPECT_FALSE(numObj.IsNull());
+    EXPECT_EQ(numObj["int"].ToNumber<int32_t>().second, 42);
+    EXPECT_EQ(numObj["double"].ToDouble().second, 3.14);
+    EXPECT_EQ(numObj["negative"].ToNumber<int32_t>().second, -100);
+
+    std::string complexArray = R"([1,{"nested":2},[3,4],"string"])";
+    auto complexArr = CommJsonObject::Parse(complexArray);
+    EXPECT_FALSE(complexArr.IsNull());
+    EXPECT_EQ(complexArr.ArraySize(), 4);
+    EXPECT_EQ(complexArr[0].ToNumber<int32_t>().second, 1);
+    EXPECT_EQ(complexArr[1]["nested"].ToNumber<int32_t>().second, 2);
+    EXPECT_EQ(complexArr[2][0].ToNumber<int32_t>().second, 3);
+    EXPECT_EQ(complexArr[3].ToString().second, "string");
+
+    std::string withEmptyString = R"({"key":"","space":" "})";
+    auto emptyStrObj = CommJsonObject::Parse(withEmptyString);
+    EXPECT_FALSE(emptyStrObj.IsNull());
+    EXPECT_EQ(emptyStrObj["key"].ToString().second, "");
+    EXPECT_EQ(emptyStrObj["space"].ToString().second, " ");
+
+    std::string withSpecialChars = R"({"key":"line1\nline2","tab":"val\tue"})";
+    auto specialObj = CommJsonObject::Parse(withSpecialChars);
+    EXPECT_FALSE(specialObj.IsNull());
+    EXPECT_TRUE(specialObj["key"].ToString().second.find('\n') != std::string::npos);
+    EXPECT_TRUE(specialObj["tab"].ToString().second.find('\t') != std::string::npos);
+}
 }
