@@ -92,7 +92,7 @@ int32_t PreConstructDataSizeReportParamSet(int userId, struct HksParamSet **repo
         std::to_string(OHOS::GetFolderSize(el2Path)) + ", " +
         std::to_string(OHOS::GetFolderSize(el4Path)) + "]";
     std::string foldPath = "[\"" + el1Path + "\", \"" + el2Path + "\", \"" + el4Path + "\"]";
-    std::unique_ptr<struct HksParamSet *, decltype(&HksFreeParamSet)> dataSizeParamSet(reportParamSet, HksFreeParamSet);
+    std::unique_ptr<struct HksParamSet *, DeleteParamSet> dataSizeParamSet(reportParamSet);
     ret = AddTimeCost(*reportParamSet, startTime);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add time cost to reportParamSet failed!")
 
@@ -110,7 +110,7 @@ int32_t HksParamSetToEventInfoForDataSize(const struct HksParamSet *paramSetIn, 
 {
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER, "params is null")
 
-    std::unique_ptr<struct HksEventInfo, decltype(&FreeCommonEventInfo)> commEventInfo(eventInfo, FreeCommonEventInfo);
+    std::unique_ptr<struct HksEventInfo, DeleteEventCommonInfo> commEventInfo(eventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
