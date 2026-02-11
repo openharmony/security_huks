@@ -29,6 +29,9 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 constexpr int32_t INVALID_ARRAY_SIZE = -1;
+constexpr int32_t JSON_MAX_SIZE = 1024 * 1024;
+constexpr int32_t JSON_MAX_NESTING_DEPTH = 50;
+constexpr int32_t JSON_MAX_OBJECT_COUNT = 1000;
 using Var = std::variant<bool, uint8_t, int32_t, uint32_t, int64_t, double, std::string>;
 
 class CommJsonObject {
@@ -147,6 +150,25 @@ constexpr uint8_t NUM2 = 2;
 constexpr uint8_t NUM3 = 3;
 constexpr uint8_t NUM4 = 4;
 const std::string Base64Table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+/**
+ * @brief Check JSON structure constraints before parsing.
+ *
+ * This function performs a lightweight pre-check to validate JSON structure constraints
+ * without full syntax parsing. It is designed to quickly reject inputs that would
+ * cause issues during parsing, such as:
+ * - Excessive size (> 1MB)
+ * - Excessive nesting depth (> 50)
+ * - Excessive object/array count (> 1000)
+ * - Mismatched brackets or unclosed strings
+ *
+ * Note: This does NOT perform full JSON syntax validation. Complete syntax
+ * validation is performed by cJSON_Parse in Parse function.
+ *
+ * @param jsonString The JSON string to check
+ * @return true if all structure constraints are satisfied, false otherwise
+ */
+bool CheckJsonStructureConstraints(const std::string &jsonString);
 }
 }
 }
