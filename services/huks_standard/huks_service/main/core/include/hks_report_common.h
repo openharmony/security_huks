@@ -23,6 +23,10 @@
 #include "hks_type_inner.h"
 #include "hks_event_info.h"
 #include "hks_type_enum.h"
+#include "hks_param.h"
+#ifdef __cplusplus
+#include "hks_report_three_stage_build.h"
+#endif
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -39,6 +43,8 @@ extern "C" {
 #define KEYALIAS_HASH_SHA256_SIZE 1
 #define KEY_HASH_SHA256_SIZE 2
 #define EVENT_PROPERTY_UNKNOWN "unknown"
+
+int32_t AddGroupKey(struct HksParamSet *paramSetOut, const struct HksParamSet *paramSetIn);
 
 int32_t AddKeyHash(struct HksParamSet *paramSetOut, const struct HksBlob *keyIn);
 
@@ -66,6 +72,27 @@ bool CheckEventCommonAndKey(const struct HksEventInfo *info1, const struct HksEv
 
 #ifdef __cplusplus
 
+struct DeleteParamSet {
+    void operator()(struct HksParamSet **paramSet)
+    {
+        HksFreeParamSet(paramSet);
+    }
+};
+
+struct DeleteEventCommonInfo {
+    void operator()(struct HksEventInfo *eventInfo)
+    {
+        FreeCommonEventInfo(eventInfo);
+    }
+};
+
+struct DeleteEventInfo {
+    void operator()(struct HksEventInfo **eventInfo)
+    {
+        HksFreeEventInfo(eventInfo);
+    }
+};
+
 static inline uint32_t HksGetHash(const struct HksBlob *blob)
 {
     if (CheckBlob(blob) != HKS_SUCCESS) {
@@ -90,7 +117,7 @@ std::pair<std::unordered_map<std::string, std::string>::iterator, bool> EventInf
 std::pair<std::unordered_map<std::string, std::string>::iterator, bool> EventInfoToMapKeyAccessInfo(
     const struct HksEventKeyAccessInfo *eventKeyAccessInfo, std::unordered_map<std::string, std::string> &reportData);
 
-void CopyParamBlobData(char **dst, const struct HksParam *param);
+int32_t CopyParamBlobData(char **dst, const struct HksParam *param);
 
 #endif
 

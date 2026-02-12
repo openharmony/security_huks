@@ -67,20 +67,22 @@ int32_t HksRegProviderParamSetToEventInfo(const struct HksParamSet *paramSetIn, 
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksRegProviderParamSetToEventInfo params is null")
 
-    std::unique_ptr<HksEventInfo, decltype(&FreeCommonEventInfo)> tmpEventInfo(eventInfo, FreeCommonEventInfo);
+    std::unique_ptr<struct HksEventInfo *, DeleteEventInfo> commEventInfo(&eventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
     struct HksParam *paramToEventInfo = nullptr;
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM4_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
-        CopyParamBlobData(&eventInfo->ukeyInfo.providerName, paramToEventInfo);
+        ret = CopyParamBlobData(&eventInfo->ukeyInfo.providerName, paramToEventInfo);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy providerName failed")
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM5_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
-        CopyParamBlobData(&eventInfo->ukeyInfo.abilityName, paramToEventInfo);
+        ret = CopyParamBlobData(&eventInfo->ukeyInfo.abilityName, paramToEventInfo);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy abilityName failed")
     }
 
-    (void)tmpEventInfo.release();
+    (void)commEventInfo.release();
     return HKS_SUCCESS;
 }
 
@@ -145,20 +147,21 @@ int32_t HksGetAuthPinStateParamSetToEventInfo(const struct HksParamSet *paramSet
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksGetAuthPinStateParamSetToEventInfo params is null")
     
-    std::unique_ptr<HksEventInfo, decltype(&FreeCommonEventInfo)> tmpEventInfo(eventInfo, FreeCommonEventInfo);
+    std::unique_ptr<struct HksEventInfo *, DeleteEventInfo> commEventInfo(&eventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
     struct HksParam *paramToEventInfo = nullptr;
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM4_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
-        CopyParamBlobData(&eventInfo->ukeyInfo.resourceId, paramToEventInfo);
+        ret = CopyParamBlobData(&eventInfo->ukeyInfo.resourceId, paramToEventInfo);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy resourceId failed")
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM0_INT32, &paramToEventInfo) == HKS_SUCCESS) {
         eventInfo->ukeyInfo.state = paramToEventInfo->int32Param;
     }
 
-    (void)tmpEventInfo.release();
+    (void)commEventInfo.release();
     return HKS_SUCCESS;
 }
 
@@ -232,20 +235,21 @@ int32_t HksAuthPinParamSetToEventInfo(const struct HksParamSet *paramSetIn, stru
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksAuthPinParamSetToEventInfo params is null")
 
-    std::unique_ptr<HksEventInfo, decltype(&FreeCommonEventInfo)> tmpEventInfo(eventInfo, FreeCommonEventInfo);
+    std::unique_ptr<struct HksEventInfo *, DeleteEventInfo> commEventInfo(&eventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
     struct HksParam *paramToEventInfo = nullptr;
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM4_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
-        CopyParamBlobData(&eventInfo->ukeyInfo.resourceId, paramToEventInfo);
+        ret = CopyParamBlobData(&eventInfo->ukeyInfo.resourceId, paramToEventInfo);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy resourceId failed")
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM0_INT32, &paramToEventInfo) == HKS_SUCCESS) {
         eventInfo->ukeyInfo.callAuthUid = paramToEventInfo->int32Param;
     }
 
-    (void)tmpEventInfo.release();
+    (void)commEventInfo.release();
     return HKS_SUCCESS;
 }
 
@@ -310,16 +314,17 @@ int32_t HksRemoteHandleParamSetToEventInfo(const struct HksParamSet *paramSetIn,
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksRemoteHandleParamSetToEventInfo params is null")
 
-    std::unique_ptr<HksEventInfo, decltype(&FreeCommonEventInfo)> tmpEventInfo(eventInfo, FreeCommonEventInfo);
+    std::unique_ptr<struct HksEventInfo *, DeleteEventInfo> commEventInfo(&eventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
     struct HksParam *paramToEventInfo = nullptr;
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM4_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
-        CopyParamBlobData(&eventInfo->ukeyInfo.resourceId, paramToEventInfo);
+        ret = CopyParamBlobData(&eventInfo->ukeyInfo.resourceId, paramToEventInfo);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy resourceId failed")
     }
 
-    (void)tmpEventInfo.release();
+    (void)commEventInfo.release();
     return HKS_SUCCESS;
 }
 
@@ -391,16 +396,17 @@ int32_t HksExportProviderCertParamSetToEventInfo(const struct HksParamSet *param
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksExportProviderCertParamSetToEventInfo params is null")
     
-    std::unique_ptr<HksEventInfo, decltype(&FreeCommonEventInfo)> tmpEventInfo(eventInfo, FreeCommonEventInfo);
+    std::unique_ptr<struct HksEventInfo *, DeleteEventInfo> commEventInfo(&eventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
     struct HksParam *paramToEventInfo = nullptr;
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM4_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
-        CopyParamBlobData(&eventInfo->ukeyInfo.providerName, paramToEventInfo);
+        ret = CopyParamBlobData(&eventInfo->ukeyInfo.providerName, paramToEventInfo);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy providerName failed")
     }
 
-    (void)tmpEventInfo.release();
+    (void)commEventInfo.release();
     return HKS_SUCCESS;
 }
 
@@ -476,16 +482,17 @@ int32_t HksExportCertParamSetToEventInfo(const struct HksParamSet *paramSetIn, s
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksExportCertParamSetToEventInfo params is null")
 
-    std::unique_ptr<HksEventInfo, decltype(&FreeCommonEventInfo)> tmpEventInfo(eventInfo, FreeCommonEventInfo);
+    std::unique_ptr<struct HksEventInfo *, DeleteEventInfo> commEventInfo(&eventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
     struct HksParam *paramToEventInfo = nullptr;
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM4_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
-        CopyParamBlobData(&eventInfo->ukeyInfo.resourceId, paramToEventInfo);
+        ret = CopyParamBlobData(&eventInfo->ukeyInfo.resourceId, paramToEventInfo);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy resourceId failed")
     }
 
-    (void)tmpEventInfo.release();
+    (void)commEventInfo.release();
     return HKS_SUCCESS;
 }
 
@@ -551,20 +558,22 @@ int32_t HksGetPropertyParamSetToEventInfo(const struct HksParamSet *paramSetIn, 
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksGetPropertyParamSetToEventInfo params is null")
 
-    std::unique_ptr<HksEventInfo, decltype(&FreeCommonEventInfo)> tmpEventInfo(eventInfo, FreeCommonEventInfo);
+    std::unique_ptr<struct HksEventInfo *, DeleteEventInfo> commEventInfo(&eventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
     struct HksParam *paramToEventInfo = nullptr;
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM4_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
-        CopyParamBlobData(&eventInfo->ukeyInfo.resourceId, paramToEventInfo);
+        ret = CopyParamBlobData(&eventInfo->ukeyInfo.resourceId, paramToEventInfo);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy resourceId failed")
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM5_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
-        CopyParamBlobData(&eventInfo->ukeyInfo.propertyId, paramToEventInfo);
+        ret = CopyParamBlobData(&eventInfo->ukeyInfo.propertyId, paramToEventInfo);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy propertyId failed")
     }
 
-    (void)tmpEventInfo.release();
+    (void)commEventInfo.release();
     return HKS_SUCCESS;
 }
 
@@ -637,21 +646,19 @@ int32_t ReportUKeyEvent(const struct UKeyInfo* ukeyInfo, const char *funcName, c
         return HKS_FAILURE;
     }
     struct HksParamSet *reportParamSet = nullptr;
-    int32_t ret = HKS_FAILURE;
-    do {
-        ret = HksInitParamSet(&reportParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init report paramset fail")
+    std::unique_ptr<struct HksParamSet *, DeleteParamSet> commonEventInfo(&reportParamSet);
 
-        ret = UKEY_ADD_PARAM_FUNC[GetUKeyReportIndex(ukeyInfo->eventId)](ukeyInfo, paramSet, reportParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add param set failed")
+    int32_t ret = HksInitParamSet(&reportParamSet);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "init report paramset fail")
 
-        ret = AddTimeCost(reportParamSet, ukeyCommon->startTime);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add time failed")
+    ret = UKEY_ADD_PARAM_FUNC[GetUKeyReportIndex(ukeyInfo->eventId)](ukeyInfo, paramSet, reportParamSet);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add param set failed")
 
-        (void)ConstructReportParamSet(funcName, processInfo, ukeyCommon->returnCode, &reportParamSet);
-        HksEventReport(funcName, processInfo, paramSet, reportParamSet, ukeyCommon->returnCode);
-        ret = HKS_SUCCESS;
-    } while (0);
-    DeConstructReportParamSet(&reportParamSet);
-    return ret;
+    ret = AddTimeCost(reportParamSet, ukeyCommon->startTime);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add time failed")
+
+    (void)ConstructReportParamSet(funcName, processInfo, ukeyCommon->returnCode, &reportParamSet);
+    HksEventReport(funcName, processInfo, paramSet, reportParamSet, ukeyCommon->returnCode);
+    
+    return HKS_SUCCESS;
 }
