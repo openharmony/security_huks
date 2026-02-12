@@ -54,7 +54,7 @@ using OnRegisterProviderFunc = int32_t (*)(const HksProcessInfo &processInfo, co
 using OnUnRegisterProviderFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &providerName,
     const CppParamSet &paramSet, bool isdeath, int32_t &deleteCount);
 using OnCreateRemoteKeyHandleFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
-    const CppParamSet &paramSet, std::string &handle);
+    const CppParamSet &paramSet);
 using OnCloseRemoteKeyHandleFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet);
 using OnAuthUkeyPinFunc = int32_t (*)(const HksProcessInfo &processInfo,

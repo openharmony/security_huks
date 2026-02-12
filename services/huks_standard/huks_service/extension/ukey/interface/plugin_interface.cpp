@@ -97,7 +97,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(
 }
 
 __attribute__((visibility("default"))) int32_t HksExtPluginOnOpenRemoteHandle(
-    const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet, std::string &handle)
+    const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     CppParamSet paramSetWithUid(paramSet);
@@ -110,7 +110,6 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnOpenRemoteHandle(
             "AddUidToParamset fail")
     }
     RegisterObserverForProcess(processInfo, paramSetWithUid);
-    (void)handle;
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
     auto ret = handleMgr->CreateRemoteHandle(processInfo, index, paramSetWithUid);
