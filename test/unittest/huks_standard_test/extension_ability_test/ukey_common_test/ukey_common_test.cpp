@@ -455,12 +455,12 @@ HWTEST_F(UkeyCommonTest, UkeyCommonTest010, TestSize.Level0)
         {
             "purpose": 1,
             "index": "index1",
-            "cert": "cert1"
+            "cert": "SGVsbG8g=V29ybGQ===="
         },
         {
             "purpose": 2,
             "index": "index2",
-            "cert": "cert2"
+            "cert": "SGVsbG8gV29ybGQ====="
         }
     ])";
     ret = JsonArrayToCertInfoSet(validArray, certSet);

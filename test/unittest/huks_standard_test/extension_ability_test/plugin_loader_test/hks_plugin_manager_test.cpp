@@ -58,8 +58,7 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest001, TestSize.Level0)
     EXPECT_EQ(ret, 0) << "fail: regist fail";
 
     std::string index = "";
-    std::string handle = "";
-    ret = mgr->OnCreateRemoteKeyHandle(processInfo, index, paramSet, handle);
+    ret = mgr->OnCreateRemoteKeyHandle(processInfo, index, paramSet);
     EXPECT_EQ(ret, 0) << "fail: OnCreateRemoteKeyHandle fail";
 
     ret = mgr->OnCloseRemoteKeyHandle(processInfo, index, paramSet);
