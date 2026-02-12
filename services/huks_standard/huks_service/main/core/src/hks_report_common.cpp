@@ -285,7 +285,7 @@ int32_t ConstructReportParamSet(const char *funcName, const struct HksProcessInf
             .blob = { .size = callerName.size() + 1, .data = (uint8_t *)callerName.c_str() },
         }
     };
-    std::unique_ptr<struct HksParamSet *, decltype(&HksFreeParamSet)> commonParamSet(reportParamSet, HksFreeParamSet);
+    std::unique_ptr<struct HksParamSet *, DeleteParamSet> commonParamSet(reportParamSet);
     ret = HksAddParams(*reportParamSet, params, HKS_ARRAY_SIZE(params));
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add params to reportParamSet failed")
 

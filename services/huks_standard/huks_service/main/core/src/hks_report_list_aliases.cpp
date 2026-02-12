@@ -33,7 +33,7 @@ int32_t PreConstructListAliasesReportParamSet(const struct HksParamSet *paramSet
     int32_t ret = HksInitParamSet(paramSetOut);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "PreConstructListAliasesReportParamSet InitParamSet failed")
 
-    std::unique_ptr<struct HksParamSet *, decltype(&HksFreeParamSet)> listAliasParamSet(paramSetOut, HksFreeParamSet);
+    std::unique_ptr<struct HksParamSet *, DeleteParamSet> listAliasParamSet(paramSetOut);
     ret = AddTimeCost(*paramSetOut, startTime);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add time cost to paramSetOut failed!")
 
@@ -62,7 +62,7 @@ int32_t HksParamSetToEventInfoForListAliases(const struct HksParamSet *paramSetI
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksParamSetToEventInfoForListAliases params is null")
 
-    std::unique_ptr<struct HksEventInfo, decltype(&FreeCommonEventInfo)> commEventInfo(eventInfo, FreeCommonEventInfo);
+    std::unique_ptr<struct HksEventInfo, DeleteEventCommonInfo> commEventInfo(eventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 

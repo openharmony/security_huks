@@ -23,6 +23,10 @@
 #include "hks_type_inner.h"
 #include "hks_event_info.h"
 #include "hks_type_enum.h"
+#include "hks_param.h"
+#ifdef __cplusplus
+#include "hks_report_three_stage_build.h"
+#endif
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -67,6 +71,27 @@ bool CheckEventCommonAndKey(const struct HksEventInfo *info1, const struct HksEv
 #endif
 
 #ifdef __cplusplus
+
+struct DeleteParamSet {
+    void operator()(struct HksParamSet **paramSet)
+    {
+        HksFreeParamSet(paramSet);
+    }
+};
+
+struct DeleteEventCommonInfo {
+    void operator()(struct HksEventInfo *eventInfo)
+    {
+        FreeCommonEventInfo(eventInfo);
+    }
+};
+
+struct DeleteEventInfo {
+    void operator()(struct HksEventInfo **eventInfo)
+    {
+        HksFreeEventInfo(eventInfo);
+    }
+};
 
 static inline uint32_t HksGetHash(const struct HksBlob *blob)
 {
