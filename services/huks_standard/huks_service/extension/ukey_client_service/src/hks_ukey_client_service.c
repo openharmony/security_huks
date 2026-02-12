@@ -113,8 +113,7 @@ int32_t HksServiceOpenRemoteHandle(const struct HksProcessInfo *processInfo, con
     const struct HksParamSet *paramSetIn)
 {
 #ifdef L2_STANDARD
-    struct HksBlob remoteHandle = {0, NULL};
-    return HksIpcCreateRemKeyHandleAdapter(processInfo, index, paramSetIn, &remoteHandle);
+    return HksIpcCreateRemKeyHandleAdapter(processInfo, index, paramSetIn);
 #else
     (void)processInfo;
     (void)index;

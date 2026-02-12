@@ -38,15 +38,8 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnUnR
     return 0;
 }
 
-ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnCreateRemoteIndex(
-    const HksProcessInfo &processInfo, const std::string &providerName,
-    const CppParamSet &paramSet, std::string &index))
-{
-    return 0;
-}
-
 ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnOpenRemoteHandle(
-    const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet, std::string &handle))
+    const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet))
 {
     return 0;
 }
@@ -140,7 +133,7 @@ extern "C" void *__wrap_dlsym(void* handle, const char* symbol)
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetbRi",
          (void*)Fake_HksExtPluginOnUnRegisterProvider},
          {"_ZN4OHOS8Security4Huks30HksExtPluginOnOpenRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_string"
-        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_",
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet",
          (void*)Fake_HksExtPluginOnOpenRemoteHandle},
          {"_ZN4OHOS8Security4Huks31HksExtPluginOnCloseRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet",

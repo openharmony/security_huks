@@ -60,7 +60,7 @@ int32_t HksIpcProviderUnregAdapter(const struct HksProcessInfo *processInfo, con
 }
 
 int32_t HksIpcCreateRemKeyHandleAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
-    const struct HksParamSet *paramSet, struct HksBlob *remoteHandleOut)
+    const struct HksParamSet *paramSet)
 {
     int32_t ret = HksIpcCheckBlob(resourceId, 1, HKS_EXT_MAX_RESOURCE_ID_LEN);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcCreateRemKeyHandleAdapter invalid resourceId blob")
@@ -69,10 +69,8 @@ int32_t HksIpcCreateRemKeyHandleAdapter(const struct HksProcessInfo *processInfo
     CppParamSet cppParamSet(paramSet);
 
     std::string remoteHandle;
-    ret = OHOS::Security::Huks::HksIpcServiceOnCreateRemoteKeyHandle(processInfo, cppresourceId,
-        cppParamSet, remoteHandle);
+    ret = OHOS::Security::Huks::HksIpcServiceOnCreateRemoteKeyHandle(processInfo, cppresourceId, cppParamSet);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnCreateRemoteKeyHandle fail")
-    (void)remoteHandleOut;
     return ret;
 }
 

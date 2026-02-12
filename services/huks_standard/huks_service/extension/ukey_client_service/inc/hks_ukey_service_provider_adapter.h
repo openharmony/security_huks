@@ -29,7 +29,7 @@ int32_t HksIpcProviderUnregAdapter(const struct HksProcessInfo *processInfo,  co
     const struct HksParamSet *paramSet);
 
 int32_t HksIpcCreateRemKeyHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *resourceId,
-    const struct HksParamSet *paramSet, struct HksBlob *remoteHandleOut);
+    const struct HksParamSet *paramSet);
 
 int32_t HksIpcCloseRemKeyHandleAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *resourceId,
     const struct HksParamSet *paramSet);
