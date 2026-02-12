@@ -272,7 +272,6 @@ void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t 
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
     struct HksBlob resourceId = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
-    struct HksBlob remoteHandleOut = { 0, NULL };
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     int32_t ret;
     uint64_t startTime = 0;
@@ -287,7 +286,7 @@ void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t 
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksIpcCreateRemKeyHandleAdapter(&processInfo, &resourceId, paramSet, &remoteHandleOut);
+        ret = HksIpcCreateRemKeyHandleAdapter(&processInfo, &resourceId, paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcCreateRemKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
@@ -297,8 +296,7 @@ void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t 
         .operation = HKS_UKEY_REPORT_OPEN_HANDLE, .resourceId = resourceId };
     struct UKeyCommonInfo ukeyCommon = { .returnCode = ret, .startTime = startTime };
     ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, paramSet, &ukeyCommon);
-
-    HKS_FREE_BLOB(remoteHandleOut);
+    
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
 #else

@@ -39,7 +39,7 @@ int32_t HksIpcServiceProviderRegister(const struct HksProcessInfo *processInfo,
 int32_t HksIpcServiceProviderUnRegister(const struct HksProcessInfo *processInfo,
     std::string &name, CppParamSet &paramSet);
 int32_t HksIpcServiceOnCreateRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string &index,
-    CppParamSet &paramSet, std::string &remoteHandleOut);
+    CppParamSet &paramSet);
 int32_t HksIpcServiceOnCloseRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string &index,
     CppParamSet &paramSet);
 int32_t HksIpcServiceOnCreateRemoteIndex(const std::string &providerName,

@@ -43,7 +43,7 @@ public:
     int32_t UnRegisterProvider(const struct HksProcessInfo &info, const std::string &AbilityName,
         const CppParamSet &paramSet, bool isdeath);
     int32_t OnCreateRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
-        const CppParamSet &paramSet, std::string &handle);
+        const CppParamSet &paramSet);
     int32_t OnCloseRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet);
     int32_t OnAuthUkeyPin(const HksProcessInfo &processInfo,

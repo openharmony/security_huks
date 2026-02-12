@@ -147,7 +147,7 @@ int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCert
         tempCertSet.push_back(tempCert);
     }
 
-    HKS_IF_TRUE_LOGE_RETURN(tempCertSet.empty(), HKS_SUCCESS, "No valid certificates found")
+    HKS_IF_TRUE_LOGE_RETURN(tempCertSet.empty(), HKS_ERROR_INVALID_ARGUMENT, "No valid certificates found")
     certSet.count = static_cast<uint32_t>(tempCertSet.size());
     certSet.certs = (HksExtCertInfo *)HksMalloc(tempCertSet.size() * sizeof(HksExtCertInfo));
     if (certSet.certs == nullptr) {
