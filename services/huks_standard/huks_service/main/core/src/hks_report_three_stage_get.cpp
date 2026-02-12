@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <ctime>
+#include <memory>
 #include <string>
 #include <sys/stat.h>
 #include <unordered_map>
@@ -484,6 +485,9 @@ static int32_t HksFreshAndReport(const char *funcName, const struct HksProcessIn
 #endif
         };
 
+        ret = AddGroupKey(reportParamSet, paramSet);
+        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "add group info fail")
+
         ret = HksAddParams(reportParamSet, params, HKS_ARRAY_SIZE(params));
         HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "add params fail")
 
@@ -605,7 +609,7 @@ int32_t HksServiceInitReport(const char *funcName, const struct HksProcessInfo *
         MarkOperationUnUse(operation);
         return ret;
     }
-    HksFreshAndReport(funcName, processInfo, paramSet, info, eventInfo);
+    (void)HksFreshAndReport(funcName, processInfo, paramSet, info, eventInfo);
     return HKS_SUCCESS;
 }
 

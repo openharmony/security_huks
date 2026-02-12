@@ -34,61 +34,53 @@ int32_t PreConstructRenameReportParamSet(const struct HksBlob *keyAlias, const s
     int32_t ret = HksInitParamSet(paramSetOut);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "PreConstructRenameReportParamSet InitParamSet failed")
 
-    do {
-        ret = PreAddCommonInfo(*paramSetOut, keyAlias, paramSetIn, startTime);
-        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "pre add common info to params failed!")
+    std::unique_ptr<struct HksParamSet *, DeleteParamSet> renameParamSet(paramSetOut);
+    ret = PreAddCommonInfo(*paramSetOut, keyAlias, paramSetIn, startTime);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "pre add common info to params failed!")
 
-        ret = AddKeyAliasHash(*paramSetOut, dstKeyAlias, HKS_TAG_PARAM6_UINT32);
-        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "pre add key dest alias hash to params failed!")
+    ret = AddKeyAliasHash(*paramSetOut, dstKeyAlias, HKS_TAG_PARAM6_UINT32);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "pre add key dest alias hash to params failed!")
 
-        struct HksParam params[] = {
-            {
-                .tag = HKS_TAG_PARAM1_UINT32,
-                .uint32Param = HKS_EVENT_RENAME_KEY
-            },
-            {
-                .tag = HKS_TAG_PARAM0_UINT32,
-                .uint32Param = HKS_EVENT_RENAME_KEY
-            },
-        };
-        ret = HksAddParams(*paramSetOut, params, HKS_ARRAY_SIZE(params));
-        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "add in params failed!")
+    struct HksParam params[] = {
+        {
+            .tag = HKS_TAG_PARAM1_UINT32,
+            .uint32Param = HKS_EVENT_RENAME_KEY
+        },
+        {
+            .tag = HKS_TAG_PARAM0_UINT32,
+            .uint32Param = HKS_EVENT_RENAME_KEY
+        },
+    };
+    ret = HksAddParams(*paramSetOut, params, HKS_ARRAY_SIZE(params));
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add in params failed!")
 
-        return HKS_SUCCESS;
-    } while (0);
-
-    HKS_LOG_E("PreConstructRenameReportParamSet failed");
-    HksFreeParamSet(paramSetOut);
-    return ret;
+    (void)renameParamSet.release();
+    return HKS_SUCCESS;
 }
 
 int32_t HksParamSetToEventInfoForRename(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
 {
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksParamSetToEventInfoForRename params is null")
-    int32_t ret = HKS_SUCCESS;
-    do {
-        ret = GetCommonEventInfo(paramSetIn, eventInfo);
-        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
-        ret = GetEventKeyInfo(paramSetIn, &(eventInfo->renameInfo.keyInfo));
-        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "report GetEventKeyInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+    std::unique_ptr<struct HksEventInfo, DeleteEventCommonInfo> commEventInfo(eventInfo);
+    int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
-        struct HksParam *paramToEventInfo = nullptr;
-        if (HksGetParam(paramSetIn, HKS_TAG_PARAM6_UINT32, &paramToEventInfo) == HKS_SUCCESS) {
-            eventInfo->renameInfo.dstAliasHash = paramToEventInfo->uint32Param;
-        }
+    ret = GetEventKeyInfo(paramSetIn, &(eventInfo->renameInfo.keyInfo));
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetEventKeyInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
-        if (HksGetParam(paramSetIn, HKS_TAG_IS_COPY_NEW_KEY, &paramToEventInfo) == HKS_SUCCESS) {
-            eventInfo->renameInfo.isCopy = static_cast<uint32_t>(paramToEventInfo->boolParam);
-        }
+    struct HksParam *paramToEventInfo = nullptr;
+    if (HksGetParam(paramSetIn, HKS_TAG_PARAM6_UINT32, &paramToEventInfo) == HKS_SUCCESS) {
+        eventInfo->renameInfo.dstAliasHash = paramToEventInfo->uint32Param;
+    }
 
-        return HKS_SUCCESS;
-    } while (0);
+    if (HksGetParam(paramSetIn, HKS_TAG_IS_COPY_NEW_KEY, &paramToEventInfo) == HKS_SUCCESS) {
+        eventInfo->renameInfo.isCopy = static_cast<uint32_t>(paramToEventInfo->boolParam);
+    }
 
-    HKS_LOG_E("report ParamSetToEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
-    FreeCommonEventInfo(eventInfo);
-    return ret;
+    (void)commEventInfo.release();
+    return HKS_SUCCESS;
 }
 
 bool HksEventInfoIsNeedReportForRename(const struct HksEventInfo *eventInfo)

@@ -26,7 +26,7 @@
 #include "hks_type_enum.h"
 #include "hks_type_inner.h"
 #include "hks_report_common.h"
-
+#include "hks_report_three_stage_build.h"
 
 int32_t PreConstructCheckKeyExitedReportParamSet(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
     uint64_t startTime, struct HksParamSet **paramSetOut)
@@ -36,49 +36,41 @@ int32_t PreConstructCheckKeyExitedReportParamSet(const struct HksBlob *keyAlias,
     int32_t ret = HksInitParamSet(paramSetOut);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "ConstructGenKeyReportParamSet InitParamSet failed")
 
-    do {
-        ret = PreAddCommonInfo(*paramSetOut, keyAlias, paramSetIn, startTime);
-        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "pre add common info to params failed!")
+    std::unique_ptr<struct HksParamSet *, DeleteParamSet> keyExistParamSet(paramSetOut);
+    ret = PreAddCommonInfo(*paramSetOut, keyAlias, paramSetIn, startTime);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "pre add common info to params failed!")
 
-        struct HksParam params[] = {
-            {
-                .tag = HKS_TAG_PARAM1_UINT32,
-                .uint32Param = HKS_EVENT_CHECK_KEY_EXISTED
-            },
-            {
-                .tag = HKS_TAG_PARAM0_UINT32,
-                .uint32Param = HKS_EVENT_CHECK_KEY_EXISTED
-            },
-        };
-        ret = HksAddParams(*paramSetOut, params, HKS_ARRAY_SIZE(params));
-        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "add in params failed!")
+    struct HksParam params[] = {
+        {
+            .tag = HKS_TAG_PARAM1_UINT32,
+            .uint32Param = HKS_EVENT_CHECK_KEY_EXISTED
+        },
+        {
+            .tag = HKS_TAG_PARAM0_UINT32,
+            .uint32Param = HKS_EVENT_CHECK_KEY_EXISTED
+        },
+    };
+    ret = HksAddParams(*paramSetOut, params, HKS_ARRAY_SIZE(params));
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add in params failed!")
 
-        return HKS_SUCCESS;
-    } while (0);
-
-    HKS_LOG_E("PreConstructCheckKeyExitedReportParamSet failed");
-    HksFreeParamSet(paramSetOut);
-    return ret;
+    (void)keyExistParamSet.release();
+    return HKS_SUCCESS;
 }
 
 int32_t HksParamSetToEventInfoForCheckKeyExited(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
 {
     HKS_IF_NOT_TRUE_LOGI_RETURN(paramSetIn != nullptr && eventInfo != nullptr, HKS_ERROR_NULL_POINTER,
         "HksParamSetToEventInfoForCheckKeyExited params is null")
-    int32_t ret = HKS_SUCCESS;
-    do {
-        ret = GetCommonEventInfo(paramSetIn, eventInfo);
-        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
-        ret = GetEventKeyInfo(paramSetIn, &(eventInfo->keyInfo));
-        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "report GetEventKeyInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+    std::unique_ptr<struct HksEventInfo, DeleteEventCommonInfo> commEventInfo(eventInfo);
+    int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
-        return HKS_SUCCESS;
-    } while (0);
+    ret = GetEventKeyInfo(paramSetIn, &(eventInfo->keyInfo));
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetEventKeyInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
-    HKS_LOG_E("report ParamSetToEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
-    FreeCommonEventInfo(eventInfo);
-    return ret;
+    (void)commEventInfo.release();
+    return HKS_SUCCESS;
 }
 
 bool HksEventInfoIsNeedReportForCheckKeyExited(const struct HksEventInfo *eventInfo)
