@@ -134,6 +134,8 @@ typedef struct HksEventCommonInfo {
     uint32_t operation;
     uint32_t count;
     char *function;
+    char *accessGroup;
+    char *developerId;
 } HksEventCommonInfo;
 
 typedef struct HksEventCryptoInfo {

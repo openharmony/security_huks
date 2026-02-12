@@ -841,7 +841,7 @@ int32_t HksServiceDecrypt(const struct HksProcessInfo *processInfo, const struct
     } while (0);
 #ifdef L2_STANDARD
     HksOneStageReportInfo info = {ret, startTime, traceId.traceId.chainId, __func__, HKS_ONE_STAGE_CRYPTO};
-    HksOneStageEventReport(keyAlias, &keyFromFile, paramSet, processInfo, &info);
+    (void)HksOneStageEventReport(keyAlias, &keyFromFile, paramSet, processInfo, &info);
 #endif
     HksHitraceEnd(&traceId);
     HKS_FREE_BLOB(keyFromFile);

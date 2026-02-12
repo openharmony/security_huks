@@ -34,49 +34,40 @@ int32_t PreConstructDeleteKeyReportParamSet(const struct HksBlob *keyAlias, cons
     int32_t ret = HksInitParamSet(paramSetOut);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "ConstructGenKeyReportParamSet InitParamSet failed")
 
-    do {
-        ret = PreAddCommonInfo(*paramSetOut, keyAlias, paramSetIn, startTime);
-        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "pre add common info to params failed!")
+    std::unique_ptr<struct HksParamSet *, DeleteParamSet> deleteParamSet(paramSetOut);
+    ret = PreAddCommonInfo(*paramSetOut, keyAlias, paramSetIn, startTime);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "pre add common info to params failed!")
 
-        struct HksParam params[] = {
-            {
-                .tag = HKS_TAG_PARAM1_UINT32,
-                .uint32Param = HKS_EVENT_DELETE_KEY
-            },
-            {
-                .tag = HKS_TAG_PARAM0_UINT32,
-                .uint32Param = HKS_EVENT_DELETE_KEY
-            },
-        };
-        ret = HksAddParams(*paramSetOut, params, HKS_ARRAY_SIZE(params));
-        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "add in params failed!")
+    struct HksParam params[] = {
+        {
+            .tag = HKS_TAG_PARAM1_UINT32,
+            .uint32Param = HKS_EVENT_DELETE_KEY
+        },
+        {
+            .tag = HKS_TAG_PARAM0_UINT32,
+            .uint32Param = HKS_EVENT_DELETE_KEY
+        },
+    };
+    ret = HksAddParams(*paramSetOut, params, HKS_ARRAY_SIZE(params));
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add in params failed!")
 
-        return HKS_SUCCESS;
-    } while (0);
-
-    HKS_LOG_E("PreConstructDeleteKeyReportParamSet failed");
-    HksFreeParamSet(paramSetOut);
-    return ret;
+    (void)deleteParamSet.release();
+    return HKS_SUCCESS;
 }
 
 int32_t HksParamSetToEventInfoForDelete(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
 {
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksParamSetToEventInfoForDelete params is null")
-    int32_t ret = HKS_SUCCESS;
-    do {
-        ret = GetCommonEventInfo(paramSetIn, eventInfo);
-        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+    std::unique_ptr<struct HksEventInfo, DeleteEventCommonInfo> commEventInfo(eventInfo);
+    int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
-        ret = GetEventKeyInfo(paramSetIn, &(eventInfo->keyInfo));
-        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "report GetEventKeyInfo failed!  ret = %" LOG_PUBLIC "d", ret);
+    ret = GetEventKeyInfo(paramSetIn, &(eventInfo->keyInfo));
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetEventKeyInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
-        return HKS_SUCCESS;
-    } while (0);
-
-    HKS_LOG_E("report ParamSetToEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
-    FreeCommonEventInfo(eventInfo);
-    return ret;
+    (void)commEventInfo.release();
+    return HKS_SUCCESS;
 }
 
 bool HksEventInfoIsNeedReportForDelete(const struct HksEventInfo *eventInfo)

@@ -21,6 +21,7 @@
 #include <string>
 #include <sys/stat.h>
 #include "hilog/log_c.h"
+#include "hks_error_code.h"
 #include "hks_event_info.h"
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -46,6 +47,9 @@ HKS_TAG_PARAM3_BUFFER -> result
 HKS_TAG_PARAM3_UINT32 -> timeCost
 HKS_TAG_PARAM0_NULL -> errorMsg
 
+HKS_TAG_PARAM1_NULL -> accessGroup
+HKS_TAG_PARAM2_NULL -> developerId
+
 HKS_TAG_PARAM4_UINT32 -> keyAliasHash
 HKS_TAG_PARAM5_UINT32 -> keyHash
 HKS_TAG_PARAM6_UINT32 -> renameDstKeyAliasHash
@@ -54,6 +58,33 @@ HKS_TAG_PARAM6_UINT32 -> renameDstKeyAliasHash
 void DeConstructReportParamSet(struct HksParamSet **paramSet)
 {
     HksFreeParamSet(paramSet);
+}
+
+int32_t AddGroupKey(struct HksParamSet *paramSetOut, const struct HksParamSet *paramSetIn)
+{
+    struct HksParam *accessGroupParam{ nullptr };
+    struct HksParam *developerIdParam{ nullptr };
+    int32_t ret = HksGetParam(paramSetIn, HKS_TAG_KEY_ACCESS_GROUP, &accessGroupParam);
+    HKS_IF_TRUE_RETURN(ret == HKS_ERROR_PARAM_NOT_EXIST, HKS_SUCCESS)
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "get access group failed")
+
+    ret = HksGetParam(paramSetIn, HKS_TAG_DEVELOPER_ID, &developerIdParam);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "get developer id failed")
+
+    struct HksParam params[] = {
+        {
+            .tag = HKS_TAG_PARAM1_NULL,
+            .blob = accessGroupParam->blob
+        }, {
+            .tag = HKS_TAG_PARAM2_NULL,
+            .blob = developerIdParam->blob
+        }
+    };
+
+    ret = HksAddParams(paramSetOut, params, HKS_ARRAY_SIZE(params));
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Add group key info failed")
+
+    return ret;
 }
 
 int32_t AddKeyHash(struct HksParamSet *paramSetOut, const struct HksBlob *keyIn)
@@ -123,13 +154,16 @@ int32_t PreAddCommonInfo(struct HksParamSet *paramSetOut, const struct HksBlob *
     HKS_IF_NULL_LOGI_RETURN(paramSetIn, HKS_ERROR_NULL_POINTER, "paramSetIn is null ptr")
 
     int32_t ret = AddTimeCost(paramSetOut, startTime);
-    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "PreAddCommonInfo add time cost to paramSetOut failed!")
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add time cost to paramSetOut failed!")
 
     ret = AddKeyAliasHash(paramSetOut, keyAlias, HKS_TAG_PARAM4_UINT32);
-    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "PreAddCommonInfo add kayAlias hash to paramSetOut failed!")
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add kayAlias hash to paramSetOut failed!")
+
+    ret = AddGroupKey(paramSetOut, paramSetIn);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add group params to paramSetOut failed!")
 
     ret = HksAddParams(paramSetOut, paramSetIn->params, paramSetIn->paramsCnt);
-    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "PreAddCommonInfo add paramSetIn params to paramSetOut failed!")
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add paramSetIn params to paramSetOut failed!")
 
     return ret;
 }
@@ -226,43 +260,72 @@ int32_t ConstructReportParamSet(const char *funcName, const struct HksProcessInf
     int32_t ret = AddCommonInfo(funcName, processInfo, *reportParamSet);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "ConstructReportParamSet add common info failed!")
 
-    do {
-        struct HksEventResultInfo resultInfo = {
-            .code = errorCode,
-            .module = 0,
-            .stage = 0,
-            .errMsg = nullptr
-        };
-        struct timespec time;
-        (void)timespec_get(&time, TIME_UTC);
-        std::string callerName = "Invalid caller name";
-        ret = ReportGetCallerName(callerName);
-        HKS_IF_NOT_SUCC_LOGI(ret, "ReportGetCallerName failed")
-        struct HksParam params[] = {
-            {
-                .tag = HKS_TAG_PARAM1_BUFFER,
-                .blob = { .size = sizeof(time), .data = (uint8_t *)&time },
-            },
-            {
-                .tag = HKS_TAG_PARAM3_BUFFER,
-                .blob = { .size = sizeof(resultInfo), .data = (uint8_t *)&resultInfo },
-            },
-            {
-                .tag = HKS_TAG_PARAM2_BUFFER,
-                .blob = { .size = callerName.size() + 1, .data = (uint8_t *)callerName.c_str() },
-            }
-        };
-        ret = HksAddParams(*reportParamSet, params, HKS_ARRAY_SIZE(params));
-        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "add params to reportParamSet failed")
+    struct HksEventResultInfo resultInfo = {
+        .code = errorCode,
+        .module = 0,
+        .stage = 0,
+        .errMsg = nullptr
+    };
+    struct timespec time;
+    (void)timespec_get(&time, TIME_UTC);
+    std::string callerName = "Invalid caller name";
+    ret = ReportGetCallerName(callerName);
+    HKS_IF_NOT_SUCC_LOGI(ret, "ReportGetCallerName failed")
+    struct HksParam params[] = {
+        {
+            .tag = HKS_TAG_PARAM1_BUFFER,
+            .blob = { .size = sizeof(time), .data = (uint8_t *)&time },
+        },
+        {
+            .tag = HKS_TAG_PARAM3_BUFFER,
+            .blob = { .size = sizeof(resultInfo), .data = (uint8_t *)&resultInfo },
+        },
+        {
+            .tag = HKS_TAG_PARAM2_BUFFER,
+            .blob = { .size = callerName.size() + 1, .data = (uint8_t *)callerName.c_str() },
+        }
+    };
+    std::unique_ptr<struct HksParamSet *, DeleteParamSet> commonParamSet(reportParamSet);
+    ret = HksAddParams(*reportParamSet, params, HKS_ARRAY_SIZE(params));
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add params to reportParamSet failed")
 
-        ret = HksBuildParamSet(reportParamSet);
-        HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "Buil reportParamSet failed")
-    } while (0);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("ConstructReportParamSet failed");
-        HksFreeParamSet(reportParamSet);
+    ret = HksBuildParamSet(reportParamSet);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Buil reportParamSet failed")
+
+    (void)commonParamSet.release();
+    return HKS_SUCCESS;
+}
+
+static int32_t GetCommonEventBuffer(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
+{
+    int32_t ret = HKS_FAILURE;
+    struct HksParam *paramToEventInfo = nullptr;
+    if (HksGetParam(paramSetIn, HKS_TAG_PARAM0_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
+        ret = CopyParamBlobData(&eventInfo->common.function, paramToEventInfo);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy function failed")
     }
-    return ret;
+
+    if (HksGetParam(paramSetIn, HKS_TAG_PARAM2_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
+        ret = CopyParamBlobData(&eventInfo->common.callerInfo.name, paramToEventInfo);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy caller name failed")
+    }
+
+    if (HksGetParam(paramSetIn, HKS_TAG_PARAM0_NULL, &paramToEventInfo) == HKS_SUCCESS) {
+        ret = CopyParamBlobData(&eventInfo->common.result.errMsg, paramToEventInfo);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy errMsg failed")
+    }
+
+    if (HksGetParam(paramSetIn, HKS_TAG_PARAM1_NULL, &paramToEventInfo) == HKS_SUCCESS) {
+        ret = CopyParamBlobData(&eventInfo->common.accessGroup, paramToEventInfo);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy accessGroup failed")
+    }
+
+    if (HksGetParam(paramSetIn, HKS_TAG_PARAM2_NULL, &paramToEventInfo) == HKS_SUCCESS) {
+        ret = CopyParamBlobData(&eventInfo->common.developerId, paramToEventInfo);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy developerId failed")
+    }
+
+    return HKS_SUCCESS;
 }
 
 int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
@@ -273,10 +336,6 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
     struct HksParam *paramToEventInfo = nullptr;
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM0_UINT32, &paramToEventInfo) == HKS_SUCCESS) {
         eventInfo->common.eventId = paramToEventInfo->uint32Param;
-    }
-
-    if (HksGetParam(paramSetIn, HKS_TAG_PARAM0_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
-        CopyParamBlobData(&eventInfo->common.function, paramToEventInfo);
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM1_UINT32, &paramToEventInfo) == HKS_SUCCESS) {
@@ -290,10 +349,6 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
         }
     }
 
-    if (HksGetParam(paramSetIn, HKS_TAG_PARAM2_BUFFER, &paramToEventInfo) == HKS_SUCCESS) {
-        CopyParamBlobData(&eventInfo->common.callerInfo.name, paramToEventInfo);
-    }
-
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM2_UINT32, &paramToEventInfo) == HKS_SUCCESS) {
         eventInfo->common.callerInfo.uid = paramToEventInfo->uint32Param;
     }
@@ -304,10 +359,6 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
         }
     }
 
-    if (HksGetParam(paramSetIn, HKS_TAG_PARAM0_NULL, &paramToEventInfo) == HKS_SUCCESS) {
-        CopyParamBlobData(&eventInfo->common.result.errMsg, paramToEventInfo);
-    }
-
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM3_UINT32, &paramToEventInfo) == HKS_SUCCESS) {
         eventInfo->common.statInfo.totalCost = paramToEventInfo->uint32Param;
     }
@@ -315,7 +366,8 @@ int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEvent
     if (HksGetParam(paramSetIn, HKS_TAG_TRACE_ID, &paramToEventInfo) == HKS_SUCCESS) {
         eventInfo->common.traceId = paramToEventInfo->uint64Param;
     }
-    return HKS_SUCCESS;
+
+    return GetCommonEventBuffer(paramSetIn, eventInfo);
 }
 
 void FreeCommonEventInfo(struct HksEventInfo *eventInfo)
@@ -323,6 +375,8 @@ void FreeCommonEventInfo(struct HksEventInfo *eventInfo)
     HKS_FREE(eventInfo->common.function);
     HKS_FREE(eventInfo->common.callerInfo.name);
     HKS_FREE(eventInfo->common.result.errMsg);
+    HKS_FREE(eventInfo->common.accessGroup);
+    HKS_FREE(eventInfo->common.developerId);
 }
 
 static bool CheckKeyInfo(const HksEventKeyInfo *keyInfo1, const HksEventKeyInfo *keyInfo2)
@@ -520,13 +574,19 @@ std::pair<std::unordered_map<std::string, std::string>::iterator, bool> EventInf
     return ret;
 }
 
-void CopyParamBlobData(char **dst, const struct HksParam *param)
+int32_t CopyParamBlobData(char **dst, const struct HksParam *param)
 {
-    HKS_IF_TRUE_RETURN_VOID(dst == nullptr || param == nullptr);
+    HKS_IF_TRUE_LOGI_RETURN(dst == nullptr || param == nullptr, HKS_ERROR_NULL_POINTER, "has null pointer")
+    HKS_IF_TRUE_LOGI_RETURN(GetTagType((enum HksTag)(param->tag)) != HKS_TAG_TYPE_BYTES, HKS_ERROR_INVALID_ARGUMENT,
+        "param type is not buffer")
+    HKS_IF_TRUE_LOGI_RETURN(CheckBlob(&(param->blob)) != HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
+        "param blob is invalid")
     *dst = static_cast<char *>(HksMalloc(param->blob.size + 1));
     if (*dst != nullptr) {
         (void)memset_s(*dst, param->blob.size + 1, 0, param->blob.size + 1);
         (void)memcpy_s(*dst, param->blob.size + 1, param->blob.data, param->blob.size);
         (*dst)[param->blob.size] = '\0';
+        return HKS_SUCCESS;
     }
+    return HKS_ERROR_MALLOC_FAIL;
 }
