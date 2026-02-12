@@ -67,7 +67,7 @@ int32_t HksRegProviderParamSetToEventInfo(const struct HksParamSet *paramSetIn, 
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksRegProviderParamSetToEventInfo params is null")
 
-    std::unique_ptr<struct HksEventInfo *, decltype(&HksFreeEventInfo)> commEventInfo(&eventInfo, HksFreeEventInfo);
+    std::unique_ptr<struct HksEventInfo *, DeleteEventInfo> commEventInfo(&eventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
@@ -147,7 +147,7 @@ int32_t HksGetAuthPinStateParamSetToEventInfo(const struct HksParamSet *paramSet
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksGetAuthPinStateParamSetToEventInfo params is null")
     
-    std::unique_ptr<struct HksEventInfo *, decltype(&HksFreeEventInfo)> commEventInfo(&eventInfo, HksFreeEventInfo);
+    std::unique_ptr<struct HksEventInfo *, DeleteEventInfo> commEventInfo(&eventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
@@ -235,7 +235,7 @@ int32_t HksAuthPinParamSetToEventInfo(const struct HksParamSet *paramSetIn, stru
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksAuthPinParamSetToEventInfo params is null")
 
-    std::unique_ptr<struct HksEventInfo *, decltype(&HksFreeEventInfo)> commEventInfo(&eventInfo, HksFreeEventInfo);
+    std::unique_ptr<struct HksEventInfo *, DeleteEventInfo> commEventInfo(&eventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
@@ -314,7 +314,7 @@ int32_t HksRemoteHandleParamSetToEventInfo(const struct HksParamSet *paramSetIn,
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksRemoteHandleParamSetToEventInfo params is null")
 
-    std::unique_ptr<struct HksEventInfo *, decltype(&HksFreeEventInfo)> commEventInfo(&eventInfo, HksFreeEventInfo);
+    std::unique_ptr<struct HksEventInfo *, DeleteEventInfo> commEventInfo(&eventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
@@ -396,7 +396,7 @@ int32_t HksExportProviderCertParamSetToEventInfo(const struct HksParamSet *param
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksExportProviderCertParamSetToEventInfo params is null")
     
-    std::unique_ptr<struct HksEventInfo *, decltype(&HksFreeEventInfo)> commEventInfo(&eventInfo, HksFreeEventInfo);
+    std::unique_ptr<struct HksEventInfo *, DeleteEventInfo> commEventInfo(&eventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
@@ -482,7 +482,7 @@ int32_t HksExportCertParamSetToEventInfo(const struct HksParamSet *paramSetIn, s
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksExportCertParamSetToEventInfo params is null")
 
-    std::unique_ptr<struct HksEventInfo *, decltype(&HksFreeEventInfo)> commEventInfo(&eventInfo, HksFreeEventInfo);
+    std::unique_ptr<struct HksEventInfo *, DeleteEventInfo> commEventInfo(&eventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
@@ -558,7 +558,7 @@ int32_t HksGetPropertyParamSetToEventInfo(const struct HksParamSet *paramSetIn, 
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksGetPropertyParamSetToEventInfo params is null")
 
-    std::unique_ptr<struct HksEventInfo *, decltype(&HksFreeEventInfo)> commEventInfo(&eventInfo, HksFreeEventInfo);
+    std::unique_ptr<struct HksEventInfo *, DeleteEventInfo> commEventInfo(&eventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
@@ -646,8 +646,7 @@ int32_t ReportUKeyEvent(const struct UKeyInfo* ukeyInfo, const char *funcName, c
         return HKS_FAILURE;
     }
     struct HksParamSet *reportParamSet = nullptr;
-    std::unique_ptr<struct HksParamSet *, decltype(&DeConstructReportParamSet)> commonEventInfo(&reportParamSet,
-        DeConstructReportParamSet);
+    std::unique_ptr<struct HksParamSet *, DeleteParamSet> commonEventInfo(&reportParamSet);
 
     int32_t ret = HksInitParamSet(&reportParamSet);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "init report paramset fail")

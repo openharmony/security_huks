@@ -34,7 +34,7 @@ int32_t PreConstructDeleteKeyReportParamSet(const struct HksBlob *keyAlias, cons
     int32_t ret = HksInitParamSet(paramSetOut);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "ConstructGenKeyReportParamSet InitParamSet failed")
 
-    std::unique_ptr<struct HksParamSet *, decltype(&HksFreeParamSet)> deleteParamSet(paramSetOut, HksFreeParamSet);
+    std::unique_ptr<struct HksParamSet *, DeleteParamSet> deleteParamSet(paramSetOut);
     ret = PreAddCommonInfo(*paramSetOut, keyAlias, paramSetIn, startTime);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "pre add common info to params failed!")
 
@@ -59,7 +59,7 @@ int32_t HksParamSetToEventInfoForDelete(const struct HksParamSet *paramSetIn, st
 {
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "HksParamSetToEventInfoForDelete params is null")
-    std::unique_ptr<struct HksEventInfo, decltype(&FreeCommonEventInfo)> commEventInfo(eventInfo, FreeCommonEventInfo);
+    std::unique_ptr<struct HksEventInfo, DeleteEventCommonInfo> commEventInfo(eventInfo);
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
