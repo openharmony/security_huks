@@ -114,7 +114,7 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
     (void)memcpy_s(name, sizeof(callingUid), &callingUid, sizeof(callingUid));
     processInfo->processName.size = sizeof(callingUid);
     processInfo->processName.data = name;
-    processInfo->uidInt = callingUid;
+    processInfo->uidInt = static_cast<uint32_t>(callingUid);
 
     int userId = HksGetOsAccountIdFromUid(callingUid);
     uint32_t size;
