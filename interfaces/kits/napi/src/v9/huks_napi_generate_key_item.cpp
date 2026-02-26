@@ -23,6 +23,7 @@
 #include "hks_param.h"
 #include "hks_type.h"
 #include "huks_napi_common_item.h"
+#include "hks_template.h"
 
 namespace HuksNapiItem {
 constexpr int HUKS_NAPI_GENERATE_KEY_MIN_ARGS = 2;
@@ -87,17 +88,16 @@ napi_value GenerateKeyAsyncWork(napi_env env, GenerateKeyAsyncContext &context)
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "generateKeyAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
 
-    napi_create_async_work(
-        env,
-        nullptr,
-        resourceName,
+    napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             GenerateKeyAsyncContext napiContext = static_cast<GenerateKeyAsyncContext>(data);
 
             napiContext->result = HksGenerateKey(napiContext->keyAlias,
                 napiContext->paramSetIn, napiContext->paramSetOut);
         },
         [](napi_env env, napi_status status, void *data) {
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             GenerateKeyAsyncContext napiContext = static_cast<GenerateKeyAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);

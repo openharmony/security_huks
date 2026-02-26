@@ -140,6 +140,8 @@ int32_t HksAppObserverManager::RegisterObserver(const HksProcessInfo &processInf
 
     auto it = observers_.find(bundleName);
     if (it != observers_.end()) {
+        HKS_IF_NULL_LOGE_RETURN(it->second, HKS_ERROR_NULL_POINTER,
+            "Observer for bundleName %" LOG_PUBLIC "s is nullptr", bundleName.c_str())
         it->second->AddProcessContext(processInfo, paramSet);
         return HKS_SUCCESS;
     }

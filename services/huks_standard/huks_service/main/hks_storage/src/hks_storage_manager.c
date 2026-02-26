@@ -268,7 +268,7 @@ static int32_t GetAssetAccessGroupPath(const struct HksParamSet *paramSet, struc
 
     outMaterial->assetAccessGroup = (char *)HksMalloc(blobSize + 1);
     HKS_IF_NULL_LOGE_RETURN(outMaterial->assetAccessGroup, HKS_ERROR_MALLOC_FAIL, "malloc access group failed")
-    (void)memcpy_s(outMaterial->assetAccessGroup, blobSize, accessGroupParam->blob.data, blobSize);
+    (void)memcpy_s(outMaterial->assetAccessGroup, blobSize + 1, accessGroupParam->blob.data, blobSize);
     outMaterial->assetAccessGroup[blobSize] = '\0';
 
     return HKS_SUCCESS;
@@ -286,7 +286,7 @@ static int32_t GetDeveloperIdPath(const struct HksParamSet *paramSet,  struct Hk
 
     outMaterial->developerId = (char *)HksMalloc(blobSize + 1);
     HKS_IF_NULL_LOGE_RETURN(outMaterial->developerId, HKS_ERROR_MALLOC_FAIL, "malloc developerId failed")
-    (void)memcpy_s(outMaterial->developerId, blobSize, developerParam->blob.data, blobSize);
+    (void)memcpy_s(outMaterial->developerId, blobSize + 1, developerParam->blob.data, blobSize);
     outMaterial->developerId[blobSize] = '\0';
 
     return HKS_SUCCESS;

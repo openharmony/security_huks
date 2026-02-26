@@ -28,7 +28,9 @@ ohos_shared_library("cipher_napi") {
     "//base/security/huks/frameworks/crypto_lite/cipher/include",
     "log",
   ]
-  deps = [ "//base/security/huks/frameworks/crypto_lite/cipher:cipher_shared" ]
+  deps = [
+    "//base/security/huks/frameworks/crypto_lite/cipher:cipher_shared",
+  ]
 
   external_deps = [
     "bounds_checking_function:libsec_shared",

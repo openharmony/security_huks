@@ -86,6 +86,11 @@ int32_t BlobToBase64String(const HksBlob &strBlob, std::string &outStr)
 
 napi_value GenerateArrayBuffer(const napi_env &env, uint8_t *data, uint32_t size)
 {
+    if (data == nullptr) {
+        LOGE("Invalid input: data is null but size is %u", size);
+        return nullptr;
+    }
+
     napi_value buffer;
     void *bufferPtr = nullptr;
     auto status = napi_create_arraybuffer(env, size * sizeof(uint8_t), &bufferPtr, &buffer);
@@ -456,12 +461,13 @@ int32_t GetStringValue(napi_env env, napi_value value, std::string &result)
         return HKS_ERROR_EXT_EXCEED_MAX_SIZE;
     }
     result.reserve(tempSize + 1);
-    result.resize(tempSize);
+    result.resize(tempSize + 1);
     status = napi_get_value_string_utf8(env, value, result.data(), tempSize + 1, &tempSize);
     if (status != napi_ok) {
         LOGE("get_value_string_utf8 failed, status:%d", status);
         return HKS_ERROR_EXT_GET_VALUE_FAILED;
     }
+    result.pop_back();
     return HKS_SUCCESS;
 }
 
@@ -488,6 +494,10 @@ napi_status GetUint8ArrayValue(napi_env env, napi_value value, HksBlob &result)
     if (status != napi_ok) {
         LOGE("napi_get_typedarray_info %d", int32_t(status));
         return status;
+    }
+    if (byte_length > UINT32_MAX) {
+        LOGE("byte_length is out of uint32_t.");
+        return napi_invalid_arg;
     }
     result.size = static_cast<uint32_t>(byte_length);
     result.data = uint8Data;
@@ -640,14 +650,14 @@ void GetOpenRemoteHandleParams(const napi_env &env, const napi_value &funcResult
 {
     napi_value napiHandle = nullptr;
     auto status = napi_get_named_property(env, funcResult, "handle", &napiHandle);
-    if (status == napi_ok && napiHandle != nullptr) {
-        auto result = GetStringValue(env, napiHandle, resultParams.handle);
-        if (result != HKS_SUCCESS) {
-            LOGE("GetOpenRemoteHandleParams::Convert js napiHandle fail.result:%d", result);
-        }
+    if (status != napi_ok || napiHandle == nullptr) {
+        LOGE("GetOpenRemoteHandleParams::napi_get_named_property failed, status:%d", status);
         return;
     }
-    LOGE("GetOpenRemoteHandleParams::napi_get_named_property failed, status:%d", status);
+    auto result = GetStringValue(env, napiHandle, resultParams.handle);
+    if (result != HKS_SUCCESS) {
+        LOGE("GetOpenRemoteHandleParams::Convert js napiHandle fail.result:%d", result);
+    }
 }
 
 void GetAuthUkeyPinParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
@@ -664,28 +674,28 @@ void GetAuthUkeyPinParams(const napi_env &env, const napi_value &funcResult, Cry
     }
     napi_value napiRetryCnt = nullptr;
     status = napi_get_named_property(env, funcResult, "retryCount", &napiRetryCnt);
-    if (status == napi_ok && napiRetryCnt != nullptr) {
-        status = napi_get_value_uint32(env, napiRetryCnt, &resultParams.retryCnt);
-        if (status != napi_ok) {
-            LOGE("Convert js value retryCnt failed.status:%d", status);
-        }
+    if (status != napi_ok || napiRetryCnt == nullptr) {
+        LOGE("napi_get_named_property failed, status:%d", status);
         return;
     }
-    LOGE("napi_get_named_property failed, status:%d", status);
+    status = napi_get_value_uint32(env, napiRetryCnt, &resultParams.retryCnt);
+    if (status != napi_ok) {
+        LOGE("Convert js value retryCnt failed.status:%d", status);
+    }
 }
 
 void GetUkeyPinAuthStateParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
     napi_value napiAuthState = nullptr;
     auto status = napi_get_named_property(env, funcResult, "authState", &napiAuthState);
-    if (status == napi_ok && napiAuthState != nullptr) {
-        status = napi_get_value_int32(env, napiAuthState, &resultParams.authState);
-        if (status != napi_ok) {
-            LOGE("napi_get_value_int32 failed.status:%d", status);
-        }
+    if (status != napi_ok || napiAuthState == nullptr) {
+        LOGE("napi_get_named_property failed, status:%d", status);
         return;
     }
-    LOGE("napi_get_named_property failed, status:%d", status);
+    status = napi_get_value_int32(env, napiAuthState, &resultParams.authState);
+    if (status != napi_ok) {
+        LOGE("napi_get_value_int32 failed.status:%d", status);
+    }
 }
 
 void HksCertInfoToString(std::vector<HksCertInfo> &certInfoVec, std::string &jsonStr)
@@ -996,7 +1006,7 @@ bool CheckAndCallPromise(napi_env env, napi_value result, std::shared_ptr<Crypto
 
 JsHksCryptoExtAbility *JsHksCryptoExtAbility::Create(const std::unique_ptr<AbilityRuntime::Runtime> &runtime)
 {
-    return new JsHksCryptoExtAbility(static_cast<AbilityRuntime::JsRuntime &>(*runtime));
+    return new (std::nothrow) JsHksCryptoExtAbility(static_cast<AbilityRuntime::JsRuntime &>(*runtime));
 }
 
 JsHksCryptoExtAbility::JsHksCryptoExtAbility(AbilityRuntime::JsRuntime &jsRuntime) : jsRuntime_(jsRuntime) {}

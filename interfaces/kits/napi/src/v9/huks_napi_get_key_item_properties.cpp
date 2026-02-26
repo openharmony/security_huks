@@ -23,6 +23,7 @@
 #include "hks_param.h"
 #include "hks_type.h"
 #include "huks_napi_common_item.h"
+#include "hks_template.h"
 
 namespace HuksNapiItem {
 constexpr int HUKS_NAPI_GET_KEY_PROPERTIES_MIN_ARGS = 2;
@@ -87,44 +88,35 @@ napi_value GetKeyPropertiesAsyncWork(napi_env env, GetKeyPropertiesAsyncContext 
     if (context->callback == nullptr) {
         NAPI_CALL(env, napi_create_promise(env, &context->deferred, &promise));
     }
-
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getKeyPropertiesAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
-
-    napi_create_async_work(
-        env,
-        nullptr,
-        resourceName,
+    napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             GetKeyPropertiesAsyncContext napiContext = static_cast<GetKeyPropertiesAsyncContext>(data);
-
             napiContext->paramSetOut = static_cast<struct HksParamSet *>(HksMalloc(HKS_DEFAULT_OUTPARAMSET_SIZE));
             if (napiContext->paramSetOut != nullptr) {
                 napiContext->paramSetOut->paramSetSize = HKS_DEFAULT_OUTPARAMSET_SIZE;
                 napiContext->paramSetOut->paramsCnt = 0;
             }
-
             napiContext->result = HksGetKeyParamSet(napiContext->keyAlias,
                 napiContext->paramSetIn, napiContext->paramSetOut);
         },
         [](napi_env env, napi_status status, void *data) {
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             GetKeyPropertiesAsyncContext napiContext = static_cast<GetKeyPropertiesAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);
             resultData.paramSet = napiContext->paramSetOut;
             HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
             DeleteGetKeyPropertiesAsyncContext(env, napiContext);
-        },
-        static_cast<void *>(context),
-        &context->asyncWork);
-
+        }, static_cast<void *>(context), &context->asyncWork);
     napi_status status = napi_queue_async_work(env, context->asyncWork);
     if (status != napi_ok) {
         DeleteGetKeyPropertiesAsyncContext(env, context);
         HKS_LOG_E("could not queue async work");
         return nullptr;
     }
-
     if (context->callback == nullptr) {
         return promise;
     } else {
