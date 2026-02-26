@@ -488,7 +488,7 @@ void HksService::OnAddSystemAbility(int32_t systemAbilityId, [[maybe_unused]] co
 #endif
 }
 
-void HksService::OnRemoveSystemAbility(int32_t systemAbilityId, [[maybe_unused]] const std::string& deviceId)
+void HksService::OnRemoveSystemAbility(int32_t systemAbilityId, [[maybe_unused]] const std::string &deviceId)
 {
     HKS_LOG_I("systemAbilityId is %" LOG_PUBLIC "d!", systemAbilityId);
 }
