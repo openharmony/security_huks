@@ -40,8 +40,6 @@ int32_t HksIpcServiceProviderUnRegister(const struct HksProcessInfo *processInfo
     std::string &name, CppParamSet &paramSet);
 int32_t HksIpcServiceOnCreateRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string &index,
     CppParamSet &paramSet, std::string &remoteHandleOut);
-int32_t HksIpcServiceOnFindRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string &index,
-    CppParamSet &paramSet, std::string &remoteHandleOut);
 int32_t HksIpcServiceOnCloseRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string &index,
     CppParamSet &paramSet);
 int32_t HksIpcServiceOnCreateRemoteIndex(const std::string &providerName,
@@ -53,7 +51,6 @@ int32_t HksIpcServiceOnGetVerifyPinStatus(const struct HksProcessInfo *processIn
 int32_t HksIpcServiceOnClearUkeyPinAuthStatus(const struct HksProcessInfo *processInfo, const std::string &index);
 int32_t HksIpcServiceOnGetRemoteProperty(const HksProcessInfo *processInfo, const std::string &index,
     const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams);
-int32_t HksIpcServiceOnListProviders(std::vector<uint8_t> &providersOut);
 int32_t HksIpcServiceOnExportCertificate(const struct HksProcessInfo *processInfo, const std::string &index,
     const CppParamSet &paramSet, std::string &certificatesOut);
 int32_t HksIpcServiceOnExportProviderAllCertificates(const struct HksProcessInfo *processInfo, const std::string &index,

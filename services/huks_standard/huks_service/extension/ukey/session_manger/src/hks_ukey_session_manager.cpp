@@ -129,8 +129,6 @@ int32_t HksSessionManager::ExtensionInitSession(const HksProcessInfo &processInf
         "GenRandomUint32 failed. ret: %" LOG_PUBLIC "d", random.first)
 
     handle = random.second;
-    HKS_LOG_I("ExtensionInitSession return sessionHandle: %" LOG_PUBLIC "s", sessionHandle.c_str());
-    HKS_LOG_I("ExtensionInitSession out handle: %" LOG_PUBLIC "u", handle);
     HandleInfo handleInfo{sessionHandle, providerInfo, processInfo.uidInt, index};
     m_handlers.Insert(handle, handleInfo);
     return HKS_SUCCESS;

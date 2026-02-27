@@ -164,10 +164,10 @@ static int32_t GetAndTransPK(const struct HksParamSet *paramSet, struct HksBlob 
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &unwrapItem);
     if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
         ret = HksAddParams(paramSetOut, paramSet->params, paramSet->paramsCnt);
-        HKS_IF_NOT_SUCC_LOGE(ret, "add param fail")
+        HKS_IF_NOT_SUCC_LOGE(ret, "add param failed")
         return ret;
     }
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add param fail")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get param failed")
 
     ret = GetHksPubKeyInnerFormat(paramSet, &unwrapItem->blob, innerKey);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Envelop Pubkey to Inner Fail!!")

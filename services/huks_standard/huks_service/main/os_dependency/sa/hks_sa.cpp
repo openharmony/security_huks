@@ -254,7 +254,8 @@ static int32_t ProcessAttestOrNormalMessage(
         if (remoteObject != HKS_NULL_POINTER) {
             int32_t callingPid = IPCSkeleton::GetCallingPid();
             int32_t callingUid = IPCSkeleton::GetCallingUid();
-            remoteObject->AddDeathRecipient(new OHOS::Security::Hks::HksDeathRecipient(callingPid, callingUid));
+            remoteObject->AddDeathRecipient(
+                new (std::nothrow) OHOS::Security::Hks::HksDeathRecipient(callingPid, callingUid));
             HKS_LOG_I("Add bundleDead for pid: %" LOG_PUBLIC "d, uid: %" LOG_PUBLIC "d", callingPid, callingUid);
         }
     } else if (code == HKS_MSG_EXT_GET_REMOTE_PROPERTY) {
@@ -487,7 +488,7 @@ void HksService::OnAddSystemAbility(int32_t systemAbilityId, [[maybe_unused]] co
 #endif
 }
 
-void HksService::OnRemoveSystemAbility(int32_t systemAbilityId, [[maybe_unused]] const std::string& deviceId)
+void HksService::OnRemoveSystemAbility(int32_t systemAbilityId, [[maybe_unused]] const std::string &deviceId)
 {
     HKS_LOG_I("systemAbilityId is %" LOG_PUBLIC "d!", systemAbilityId);
 }

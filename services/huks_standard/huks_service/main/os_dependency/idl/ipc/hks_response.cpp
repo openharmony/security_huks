@@ -106,13 +106,15 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
     }
 
     auto callingUid = IPCSkeleton::GetCallingUid();
+    HKS_IF_TRUE_LOGE_RETURN(callingUid < 0, HKS_ERROR_INVALID_ARGUMENT,
+        "Invalid calling UID %" LOG_PUBLIC "d. HUKS service requires non-negative UID.", callingUid)
     uint8_t *name = static_cast<uint8_t *>(HksMalloc(sizeof(callingUid)));
     HKS_IF_NULL_LOGE_RETURN(name, HKS_ERROR_MALLOC_FAIL, "GetProcessName malloc failed.")
 
     (void)memcpy_s(name, sizeof(callingUid), &callingUid, sizeof(callingUid));
     processInfo->processName.size = sizeof(callingUid);
     processInfo->processName.data = name;
-    processInfo->uidInt = callingUid;
+    processInfo->uidInt = static_cast<uint32_t>(callingUid);
 
     int userId = HksGetOsAccountIdFromUid(callingUid);
     uint32_t size;

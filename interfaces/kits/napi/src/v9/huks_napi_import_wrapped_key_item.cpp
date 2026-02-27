@@ -23,6 +23,7 @@
 #include "hks_param.h"
 #include "hks_type.h"
 #include "huks_napi_common_item.h"
+#include "hks_template.h"
 
 namespace HuksNapiItem {
 constexpr int HUKS_NAPI_IMPORT_WRAPPED_KEY_MIN_ARGS = 3;
@@ -113,17 +114,16 @@ napi_value ImportWrappedKeyAsyncWork(napi_env env, ImportWrappedKeyAsyncContext 
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "ImportWrappedKeyAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
 
-    napi_create_async_work(
-        env,
-        nullptr,
-        resourceName,
+    napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             ImportWrappedKeyAsyncContext napiContext = static_cast<ImportWrappedKeyAsyncContext>(data);
 
             napiContext->result = HksImportWrappedKey(napiContext->keyAlias, napiContext->wrappingKeyAlias,
                 napiContext->paramSet, napiContext->wrappedData);
         },
         [](napi_env env, napi_status status, void *data) {
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             ImportWrappedKeyAsyncContext napiContext = static_cast<ImportWrappedKeyAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);

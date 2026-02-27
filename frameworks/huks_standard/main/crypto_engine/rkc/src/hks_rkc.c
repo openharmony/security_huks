@@ -403,7 +403,7 @@ static int32_t RkcLoadKsf(void)
     struct HksKsfDataRkcWithVer *validKsfDataRkcWithVer =
         (struct HksKsfDataRkcWithVer *)HksMalloc(sizeof(struct HksKsfDataRkcWithVer));
     struct HksKsfDataMkWithVer *validKsfDataMkWithVer =
-        (struct HksKsfDataMkWithVer *)HksMalloc(sizeof(struct HksKsfDataRkcWithVer));
+        (struct HksKsfDataMkWithVer *)HksMalloc(sizeof(struct HksKsfDataMkWithVer));
     do {
         if (validKsfDataRkcWithVer == NULL || validKsfDataMkWithVer == NULL) {
             ret = HKS_ERROR_MALLOC_FAIL;
