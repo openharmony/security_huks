@@ -44,7 +44,7 @@ ohos_unittest("huks_storage_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
-    "openssl:libcrypto_shared",
+    "openssl:libcrypto_shared"
   ]
 
   subsystem_name = "security"
