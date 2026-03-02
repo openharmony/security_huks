@@ -657,7 +657,7 @@ int32_t ReportUKeyEvent(const struct UKeyInfo* ukeyInfo, const char *funcName, c
     ret = AddTimeCost(reportParamSet, ukeyCommon->startTime);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add time failed")
 
-    (void)ConstructReportParamSet(funcName, processInfo, ukeyCommon->returnCode, &reportParamSet);
+    (void)ConstructReportParamSet(funcName, processInfo, nullptr, ukeyCommon->returnCode, &reportParamSet);
     HksEventReport(funcName, processInfo, paramSet, reportParamSet, ukeyCommon->returnCode);
     
     return HKS_SUCCESS;

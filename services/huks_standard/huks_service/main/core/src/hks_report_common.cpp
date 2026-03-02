@@ -62,6 +62,7 @@ void DeConstructReportParamSet(struct HksParamSet **paramSet)
 
 int32_t AddGroupKey(struct HksParamSet *paramSetOut, const struct HksParamSet *paramSetIn)
 {
+    HKS_IF_NULL_RETURN(paramSetIn, HKS_SUCCESS)
     struct HksParam *accessGroupParam{ nullptr };
     struct HksParam *developerIdParam{ nullptr };
     int32_t ret = HksGetParam(paramSetIn, HKS_TAG_KEY_ACCESS_GROUP, &accessGroupParam);
@@ -159,9 +160,6 @@ int32_t PreAddCommonInfo(struct HksParamSet *paramSetOut, const struct HksBlob *
     ret = AddKeyAliasHash(paramSetOut, keyAlias, HKS_TAG_PARAM4_UINT32);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add kayAlias hash to paramSetOut failed!")
 
-    ret = AddGroupKey(paramSetOut, paramSetIn);
-    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add group params to paramSetOut failed!")
-
     ret = HksAddParams(paramSetOut, paramSetIn->params, paramSetIn->paramsCnt);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add paramSetIn params to paramSetOut failed!")
 
@@ -253,12 +251,15 @@ int32_t ReportGetCallerName(std::string &callerName)
 }
 
 int32_t ConstructReportParamSet(const char *funcName, const struct HksProcessInfo *processInfo,
-    int32_t errorCode, struct HksParamSet **reportParamSet)
+    const struct HksParamSet *paramSetIn, int32_t errorCode, struct HksParamSet **reportParamSet)
 {
     HKS_IF_TRUE_LOGI_RETURN(funcName == nullptr || processInfo == nullptr || reportParamSet == nullptr ||
-        *reportParamSet == nullptr, HKS_ERROR_NULL_POINTER, "ConstructReportParamSet params is null")
+        *reportParamSet == nullptr, HKS_ERROR_NULL_POINTER, "params is null")
     int32_t ret = AddCommonInfo(funcName, processInfo, *reportParamSet);
-    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "ConstructReportParamSet add common info failed!")
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add common info failed!")
+
+    ret = AddGroupKey(*reportParamSet, paramSetIn);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add group info failed!")
 
     struct HksEventResultInfo resultInfo = {
         .code = errorCode,
