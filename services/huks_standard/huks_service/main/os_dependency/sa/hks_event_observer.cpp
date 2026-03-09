@@ -79,6 +79,7 @@ static int32_t GetProcessInfo(int userId, int uid, struct HksProcessInfo *proces
 
         processInfo->userId = tempUserId;
         processInfo->processName = tempProcessName;
+        processInfo->userIdInt = userId;
 
         return HKS_SUCCESS;
     } while (0);
