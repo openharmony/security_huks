@@ -121,7 +121,6 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest002, TestSize.Level0)
     HksMockNativeToken mock("device_manager");
     int32_t ret = HKS_SUCCESS;
 
-    ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     struct HksParamSet *paramSet = NULL;
@@ -158,7 +157,6 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest003, TestSize.Level0)
     HksMockNativeToken mock("device_manager");
     int32_t ret = HKS_SUCCESS;
 
-    ASSERT_TRUE(ret == HKS_SUCCESS);
     struct HksParamSet *paramSet = NULL;
     GenerateParamSet(&paramSet, g_idsParams, sizeof(g_idsParams) / sizeof(g_idsParams[0]));
     ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
@@ -188,7 +186,6 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest004, TestSize.Level0)
     HksMockNativeToken mock("device_manager");
     int32_t ret = HKS_SUCCESS;
 
-    ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     HksCertChain *certChain = NULL;
@@ -218,7 +215,6 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest005, TestSize.Level0)
     HksMockNativeToken mock("device_manager");
     int32_t ret = HKS_SUCCESS;
 
-    ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
     ASSERT_TRUE(ret == HKS_SUCCESS);
 
@@ -251,7 +247,6 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest006, TestSize.Level0)
     HksMockNativeToken mock("device_manager");
     int32_t ret = HKS_SUCCESS;
     
-    ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PKCS1_V1_5);
     ASSERT_TRUE(ret == HKS_SUCCESS);
 

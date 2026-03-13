@@ -56,7 +56,7 @@ int32_t PreAddCommonInfo(struct HksParamSet *paramSetOut, const struct HksBlob *
     const struct HksParamSet *paramSetIn, uint64_t startTime);
 
 int32_t ConstructReportParamSet(const char *funcName, const struct HksProcessInfo *processInfo,
-    int32_t errorCode, struct HksParamSet **reportParamSet);
+    const struct HksParamSet *paramSetIn, int32_t errorCode, struct HksParamSet **reportParamSet);
 
 void DeConstructReportParamSet(struct HksParamSet **paramSet);
 
