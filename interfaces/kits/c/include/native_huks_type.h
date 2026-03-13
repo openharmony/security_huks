@@ -20,7 +20,7 @@
  * @brief Defines the macros, enumerated values, data structures,
  *    and error codes used by OpenHarmony Universal KeyStore (HUKS) APIs.
  *
- * @syscap SystemCapability.Security.Huks
+ * @syscap SystemCapability.Security.Huks.Core
  * @since 9
  * @version 1.0
  */
