@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,11 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "hksdoublelist_fuzzer.h"
+#include "hksgetremoteproperty_fuzzer.h"
 
 #include <securec.h>
 
-#include "base/security/huks/utils/list/hks_double_list.h"
 #include "hks_api.h"
 #include "hks_mem.h"
 #include "hks_param.h"
@@ -24,35 +23,31 @@
 
 #include "hks_fuzz_util.h"
 
-constexpr int TEST_NUM = 2;
+constexpr int BLOB_NUM = 2;
 
 namespace OHOS {
 namespace Security {
 namespace Hks {
 
-int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+int DoSomethingInterestingWithHksGetRemoteProperty(uint8_t *data, size_t size)
 {
-    if (data == nullptr || size < (TEST_NUM * sizeof(struct DoubleList))) {
+    if (data == nullptr || size < (BLOB_NUM * sizeof(uint32_t))) {
         return -1;
     }
 
-    struct DoubleList *doubleList1st = ReadData<struct DoubleList *>(data, size, sizeof(struct DoubleList));
-    struct DoubleList *doubleList2nd = ReadData<struct DoubleList *>(data, size, sizeof(struct DoubleList));
-    if (doubleList1st == nullptr || doubleList2nd == nullptr) {
-        return -1;
-    }
-
-    InitializeDoubleList(doubleList1st);
-    AddNodeAfterDoubleListHead(doubleList1st, doubleList2nd);
-    AddNodeAtDoubleListTail(doubleList1st, doubleList2nd);
-    RemoveDoubleListNode(doubleList1st);
-
+    struct HksBlob resourceId = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
+    struct HksBlob propertyId = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
+    WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
+    HksParamSet *psOut = nullptr;
+    [[maybe_unused]] int ret = HksGetRemoteProperty(&resourceId, &propertyId, ps.s, &psOut);
     return 0;
 }
+
 }}}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     std::vector<uint8_t> v(data, data + size);
-    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
+    (void)OHOS::Security::Hks::DoSomethingInterestingWithHksGetRemoteProperty(v.data(), v.size());
+    return 0;
 }
