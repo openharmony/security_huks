@@ -14,6 +14,6 @@
  */
 
 #ifndef FUZZ_PROJECT_NAME
-#define FUZZ_PROJECT_NAME "hksdoublelist_fuzzer"
+#define FUZZ_PROJECT_NAME "hksclearukeypinauthstate_fuzzer"
 
 #endif

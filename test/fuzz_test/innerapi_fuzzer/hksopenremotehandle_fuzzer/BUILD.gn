@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -10,20 +10,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import("//base/security/huks/build/config.gni")
 import("//base/security/huks/huks.gni")
 import("//build/config/features.gni")
 import("//build/test.gni")
 
 ##############################fuzztest##########################################
-ohos_fuzztest("HksDoubleListFuzzTest") {
+ohos_fuzztest("HksOpenRemoteHandleFuzzTest") {
   module_out_path = fuzz_module_out_path
   fuzz_config_file =
-      "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksdoublelist_fuzzer"
-
+      "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksopenremotehandle_fuzzer"
+  if (huks_enable_ukey_config == true) {
+    defines = [ "HKS_UKEY_EXTENSION_CRYPTO" ]
+  }
   include_dirs = [
     ".",
     "..",
-    "//base/security/huks/utils/list",
+    "//base/security/huks/frameworks/huks_standard/main/common/include/",
   ]
   cflags = [
     "-g",
@@ -31,7 +34,7 @@ ohos_fuzztest("HksDoubleListFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "hksdoublelist_fuzzer.cpp" ]
+  sources = [ "hksopenremotehandle_fuzzer.cpp" ]
 
   deps = [
     "..:hks_fuzz_util",
@@ -47,7 +50,7 @@ group("fuzztest") {
   deps = []
   deps += [
     # deps file
-    ":HksVerifyFuzzTest",
+    ":HksOpenRemoteHandleFuzzTest",
   ]
 }
 ###############################################################################
