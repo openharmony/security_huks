@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,10 +16,10 @@ import("//build/config/features.gni")
 import("//build/test.gni")
 
 ##############################fuzztest##########################################
-ohos_fuzztest("HksUkeyFuzzTest") {
+ohos_fuzztest("HksOpenRemoteHandleFuzzTest") {
   module_out_path = fuzz_module_out_path
   fuzz_config_file =
-      "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksukey_fuzzer"
+      "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksopenremotehandle_fuzzer"
   if (huks_enable_ukey_config == true) {
     defines = [ "HKS_UKEY_EXTENSION_CRYPTO" ]
   }
@@ -34,7 +34,7 @@ ohos_fuzztest("HksUkeyFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "hksukey_fuzzer.cpp" ]
+  sources = [ "hksopenremotehandle_fuzzer.cpp" ]
 
   deps = [
     "..:hks_fuzz_util",
@@ -50,7 +50,7 @@ group("fuzztest") {
   deps = []
   deps += [
     # deps file
-    ":HksUkeyFuzzTest",
+    ":HksOpenRemoteHandleFuzzTest",
   ]
 }
 ###############################################################################
