@@ -99,6 +99,8 @@ napi_value HuksNapiOpenResource(napi_env env, napi_callback_info info);
 
 napi_value HuksNapiCloseResource(napi_env env, napi_callback_info info);
 
+napi_value HuksNapiClearUkeyPinAuthState(napi_env env, napi_callback_info info);
+
 napi_value ParseString(napi_env env, napi_value object, std::vector<uint8_t> &alias);
 
 } // namespace HuksNapiItem
