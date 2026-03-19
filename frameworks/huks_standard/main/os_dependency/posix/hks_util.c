@@ -37,3 +37,15 @@ int32_t HksElapsedRealTime(uint64_t *timestampMs)
     *timestampMs = (uint64_t)(curTime.tv_sec * S_TO_MS + curTime.tv_nsec / MS_TO_NS);
     return ret;
 }
+
+int32_t HksGetCurTime(uint64_t *timeStampSe)
+{
+    struct timespec curTime;
+    int32_t ret = clock_gettime(CLOCK_REALTIME, &curTime);
+    if (ret != 0) {
+        return ret;
+    }
+
+    *timeStampSe = (uint64_t)(curTime.tv_sec);
+    return ret;
+}
