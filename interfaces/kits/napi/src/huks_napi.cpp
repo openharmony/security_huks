@@ -53,6 +53,7 @@
 #include "huks_napi_update_finish.h"
 #include "huks_napi_update_finish_session.h"
 #include "huks_napi_wrap_key.h"
+#include "huks_napi_anon_Attest_Key_Item_Offline.h"
 // UKey functions moved to separate shared library huksexternalcrypto_napi
 
 namespace HuksNapi {
@@ -763,6 +764,8 @@ napi_property_descriptor NAPI_FUNC_DESC[] = {
     DECLARE_NAPI_FUNCTION("attestKeyItemAsUser", HuksNapiAttestKeyItemAsUser),
     DECLARE_NAPI_FUNCTION("anonAttestKeyItem", HuksNapiAnonAttestKeyItem),
     DECLARE_NAPI_FUNCTION("anonAttestKeyItemAsUser", HuksNapiAnonAttestKeyItemAsUser),
+    DECLARE_NAPI_FUNCTION("anonAttestKeyItemOffline", HuksNapiAnonAttestKeyItemOffline),
+    DECLARE_NAPI_FUNCTION("anonAttestKeyItemOfflineAsUser", HuksNapiAnonAttestKeyItemOfflineAsUser),
     DECLARE_NAPI_FUNCTION("initSession", HuksNapiInitSession),
     DECLARE_NAPI_FUNCTION("initSessionAsUser", HuksNapiInitSessionAsUser),
     DECLARE_NAPI_FUNCTION("updateSession", HuksNapiUpdateSession),

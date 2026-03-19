@@ -96,7 +96,7 @@ static napi_value AttestKeyParseParams(napi_env env, napi_callback_info info, At
     return GetInt32(env, 0);
 }
 
-static int32_t InitCertChain(struct HksCertChain *certChain, uint32_t *certChainCapacity)
+int32_t InitCertChain(struct HksCertChain *certChain, uint32_t *certChainCapacity)
 {
     certChain->certsCount = HKS_CERT_COUNT;
     certChain->certs = static_cast<struct HksBlob *>(HksMalloc(certChain->certsCount * sizeof(struct HksBlob)));

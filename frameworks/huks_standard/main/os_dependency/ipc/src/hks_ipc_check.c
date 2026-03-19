@@ -298,7 +298,7 @@ int32_t HksCheckIpcCertificateChain(const struct HksBlob *keyAlias, const struct
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     HKS_IF_NOT_SUCC_RETURN(HksCheckParamSet(paramSet, paramSet->paramSetSize), HKS_ERROR_INVALID_ARGUMENT)
-    if ((keyAlias->size > MAX_PROCESS_SIZE) ||
+    if ((keyAlias->data == NULL) || (keyAlias->size > MAX_PROCESS_SIZE) ||
         ((sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) +
         ALIGN_SIZE(paramSet->paramSetSize)) > MAX_PROCESS_SIZE)) {
         return HKS_ERROR_INVALID_ARGUMENT;

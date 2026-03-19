@@ -803,6 +803,50 @@ static int32_t ConstructNewAttestParamSet(const struct HksParamSet *paramSet, en
     HksFreeParamSet(newParamSet);
     return ret;
 }
+
+static int32_t ConstructOfflineAnonAttestParamSet(const struct HksParamSet *paramSet,
+    struct HksParamSet **newParamSet)
+{
+    int32_t ret = HksCheckParamSet(paramSet, paramSet->paramSetSize);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check paramSet fail");
+    
+    ret = HksInitParamSet(newParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "init paramSet fail");
+    
+    do {
+        ret = HksAddParams(*newParamSet, paramSet->params, paramSet->paramsCnt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy params fail");
+        
+        struct HksParam *param = NULL;
+        ret = HksGetParam(paramSet, HKS_TAG_ANONYMOUS_ATTESTATION_MODE, &param);
+        if (ret == HKS_SUCCESS) {
+            if (param->uint32Param != HKS_ANONYMOUS_ATTEST_OFFLINE) {
+                HKS_LOG_E("invalid anonymous attestation mode");
+                ret = HKS_ERROR_NEW_INVALID_ARGUMENT;
+                break;
+            }
+            
+            struct HksParam baseParams[] = {
+                {.tag = HKS_TAG_ATTESTATION_MODE, .uint32Param = HKS_ATTESTATION_MODE_ANONYMOUS},
+                {.tag = HKS_TAG_ATTESTATION_BASE64, .boolParam = true}};
+            ret = HksAddParams(*newParamSet, baseParams, sizeof(baseParams)/sizeof(struct HksParam));
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add base params fail");
+        } else {
+            struct HksParam offlineParams[] = {
+                {.tag = HKS_TAG_ATTESTATION_MODE, .uint32Param = HKS_ATTESTATION_MODE_ANONYMOUS},
+                {.tag = HKS_TAG_ATTESTATION_BASE64, .boolParam = true},
+                {.tag = HKS_TAG_ANONYMOUS_ATTESTATION_MODE, .uint32Param = HKS_ANONYMOUS_ATTEST_OFFLINE}};
+            ret = HksAddParams(*newParamSet, offlineParams, sizeof(offlineParams)/sizeof(struct HksParam));
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add offline params fail");
+        }
+        
+        ret = HksBuildParamSet(newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build paramSet fail");
+        return HKS_SUCCESS;
+    } while (false);
+    HksFreeParamSet(newParamSet);
+    return ret;
+}
 #endif
 
 HKS_API_EXPORT int32_t HksAttestKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
@@ -850,6 +894,33 @@ HKS_API_EXPORT int32_t HksAnonAttestKey(const struct HksBlob *keyAlias, const st
     ret = HksClientAttestKey(keyAlias, newParamSet, certChain, true);
     HksFreeParamSet(&newParamSet);
     HKS_IF_NOT_SUCC_LOGE(ret, "leave AnonAttestKey, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)keyAlias;
+    (void)paramSet;
+    (void)certChain;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+
+HKS_API_EXPORT int32_t HksAnonAttestKeyOffline(const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksCertChain *certChain)
+{
+#ifdef HKS_SUPPORT_API_ATTEST_KEY
+    HKS_LOG_D("enter AnonAttestKeyOffline");
+    if ((keyAlias == NULL) || (paramSet == NULL) || (certChain == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    struct HksParamSet *newParamSet = NULL;
+    int32_t ret = ConstructOfflineAnonAttestParamSet(paramSet, &newParamSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet for anon attest key offline fail");
+        return ret;
+    }
+
+    ret = HksClientAttestKey(keyAlias, newParamSet, certChain, true);
+    HksFreeParamSet(&newParamSet);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave AnonAttestKeyOffline, result = %" LOG_PUBLIC "d", ret);
     return ret;
 #else
     (void)keyAlias;

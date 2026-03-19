@@ -407,6 +407,14 @@ enum HksAttestationMode {
 };
 
 /**
+ * @brief hks anonattestation type
+ */
+enum HksAnonAttestationMode {
+    HKS_ANONYMOUS_ATTEST_ONLNE = 0,
+    HKS_ANONYMOUS_ATTEST_OFFLINE = 1
+};
+
+/**
  * @brief hks attestation cert type
  */
 enum HksAttestationCertType {

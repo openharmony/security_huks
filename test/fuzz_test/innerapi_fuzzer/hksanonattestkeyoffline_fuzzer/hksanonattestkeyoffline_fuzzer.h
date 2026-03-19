@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/licenses-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,27 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FUZZ_PROJECT_NAME
+#define FUZZ_PROJECT_NAME "hksanonattestkeyoffline_fuzzer"
 
-#ifndef HKS_UTIL_H
-#define HKS_UTIL_H
-
-#include <stdint.h>
-#include <stdlib.h>
-
-// The unit of time is seconds
-#define DEFAULT_BATCH_TIME_OUT 60
-#define MAX_BATCH_TIME_OUT 600
-
-#ifdef __cplusplus
-extern "C" {
 #endif
-
-int32_t HksElapsedRealTime(uint64_t *timestampMs);
-
-int32_t HksGetCurTime(uint64_t *timeStampSe);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif // HKS_UTIL_H
