@@ -74,6 +74,7 @@
     HksClearUkeyPinAuthState;
     HksExportProviderCertificates;
     HksExportCertificate;
+    HksImportCertificate;
     HksFreeExtCertSet;
     HksGetRemoteProperty;
   local: *;

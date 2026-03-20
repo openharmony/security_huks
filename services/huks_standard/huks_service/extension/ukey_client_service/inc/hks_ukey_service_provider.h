@@ -44,6 +44,8 @@ int32_t HksIpcServiceOnCloseRemoteKeyHandle(const struct HksProcessInfo *process
     CppParamSet &paramSet);
 int32_t HksIpcServiceOnCreateRemoteIndex(const std::string &providerName,
     const CppParamSet& paramSet, std::string &outIndex);
+int32_t HksIpcServiceOnGenerateUkeyKey(const struct HksProcessInfo *processInfo,
+    const std::string &keyAlias, const std::string &resourceId, CppParamSet &paramSet);
 int32_t HksIpcServiceOnAuthUkeyPin(const struct HksProcessInfo *processInfo, const std::string &index,
     CppParamSet &pinData, int32_t &authState, uint32_t &retryCnt);
 int32_t HksIpcServiceOnGetVerifyPinStatus(const struct HksProcessInfo *processInfo, const std::string &index,
@@ -55,6 +57,8 @@ int32_t HksIpcServiceOnExportCertificate(const struct HksProcessInfo *processInf
     const CppParamSet &paramSet, std::string &certificatesOut);
 int32_t HksIpcServiceOnExportProviderAllCertificates(const struct HksProcessInfo *processInfo, const std::string &index,
     const CppParamSet &paramSet, std::string &certificatesOut);
+int32_t HksIpcServiceOnImportCertificate(const struct HksProcessInfo *processInfo, const std::string &index,
+    const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet);
 
 }
 }

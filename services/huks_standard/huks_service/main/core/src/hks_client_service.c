@@ -608,8 +608,44 @@ static int32_t AppendGroupKeyInfo(const struct HksProcessInfo *processInfo, stru
     return ret;
 }
 #endif
-int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSetIn, struct HksBlob *keyOut)
+
+static int32_t GenerateKeyLocalProcess(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSetIn, struct HksParamSet **newParamSet, struct HksBlob *output)
+{
+    int32_t ret;
+    struct HksBlob keyIn = { 0, NULL };
+    do {
+        ret = HksCheckGenAndImportKeyParams(&processInfo->processName, keyAlias, paramSetIn, output);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check generate key params failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = AppendNewInfoForGenKeyInService(processInfo, paramSetIn, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append processName tag failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = CheckKeyCondition(processInfo, keyAlias, *newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check key condition failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = GetKeyIn(processInfo, *newParamSet, &keyIn);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get keyIn failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HuksAccessGenerateKey(keyAlias, *newParamSet, &keyIn, output);
+        IfNotSuccAppendHdiErrorInfo(ret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "access level generate key failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksManageStoreKeyBlob(processInfo, *newParamSet, keyAlias, output, HKS_STORAGE_TYPE_KEY);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret);
+        }
+    } while (0);
+
+    if (keyIn.data != NULL) {
+        (void)memset_s(keyIn.data, keyIn.size, 0, keyIn.size);
+    }
+    HKS_FREE(keyIn.data);
+    return ret;
+}
+
+int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn, struct HksBlob *keyOut)
 {
     struct HksParamSet *newParamSet = NULL;
     uint64_t enterTime = 0;
@@ -622,47 +658,35 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
     traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
 
-    struct HksBlob output = { MAX_KEY_SIZE, keyOutBuffer };
-    struct HksBlob keyIn = { 0, NULL };
+    struct HksBlob output = {MAX_KEY_SIZE, keyOutBuffer};
     int32_t ret;
     do {
-        /* if user don't pass the key out buffer, we will use a tmp key out buffer */
         if ((keyOut != NULL) && (keyOut->data != NULL) && (keyOut->size != 0)) {
             output = *keyOut;
         }
 
-        ret = HksCheckGenAndImportKeyParams(&processInfo->processName, keyAlias, paramSetIn, &output);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check generate key params failed, ret = %" LOG_PUBLIC "d", ret)
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+        if (HksCheckIsUkeyOperation(paramSetIn, &ret) == HKS_SUCCESS) {
+            ret = HksServiceOnUkeyGenerateKey(processInfo, keyAlias, paramSetIn);
+            break;
+        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", ret)
+#endif
 
-        ret = AppendNewInfoForGenKeyInService(processInfo, paramSetIn, &newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append processName tag failed, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = CheckKeyCondition(processInfo, keyAlias, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check key condition failed, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = GetKeyIn(processInfo, newParamSet, &keyIn);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get keyIn failed, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = HuksAccessGenerateKey(keyAlias, newParamSet, &keyIn, &output);
-        IfNotSuccAppendHdiErrorInfo(ret);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "access level generate key failed, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = HksManageStoreKeyBlob(processInfo, newParamSet, keyAlias, &output, HKS_STORAGE_TYPE_KEY);
-        HKS_IF_NOT_SUCC_LOGE(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
+        ret = GenerateKeyLocalProcess(processInfo, keyAlias, paramSetIn, &newParamSet, &output);
+        HKS_IF_NOT_SUCC_BREAK(ret)
     } while (0);
+
 #ifdef L2_STANDARD
     struct HksParamSet *reportParamSet = NULL;
-    struct InfoPair infoPair = { .startTime = enterTime, .traceId = traceId.traceId.chainId };
+    struct InfoPair infoPair = {.startTime = enterTime, .traceId = traceId.traceId.chainId};
     (void)PreConstructGenKeyReportParamSet(keyAlias, paramSetIn, infoPair, &output, &reportParamSet);
     (void)ConstructReportParamSet(__func__, processInfo, newParamSet, ret, &reportParamSet);
     HksEventReport(__func__, processInfo, paramSetIn, reportParamSet, ret);
     DeConstructReportParamSet(&reportParamSet);
 #endif
+
     HKS_FREE(keyOutBuffer);
-    if (keyIn.data != NULL) {
-        (void)memset_s(keyIn.data, keyIn.size, 0, keyIn.size);
-    }
-    HKS_FREE(keyIn.data);
     HksFreeParamSet(&newParamSet);
     HksHitraceEnd(&traceId);
     return ret;

@@ -50,6 +50,8 @@ public:
     virtual int ExportCertificate(const std::string &index, const CppParamSet &params, std::string &certJsonArr,
         int32_t &errcode);
     virtual int ExportProviderCertificates(const CppParamSet &params, std::string &certJsonArr, int32_t &errcode);
+    virtual int ImportCertificate(const std::string &index, const std::string &certJsonStr, const CppParamSet &params,
+        int32_t &errcode);
     virtual int InitSession(const std::string &index, const CppParamSet &params, std::string &handle, int32_t &errcode);
     virtual int UpdateSession(const std::string &handle, const CppParamSet &params, const std::vector<uint8_t> &inData,
         std::vector<uint8_t> &outData, int32_t &errcode);
@@ -62,6 +64,7 @@ public:
         const CppParamSet& params, const std::vector<uint8_t>& wrappedData, int32_t& errcode);
     virtual int ExportPublicKey(const std::string& index, const CppParamSet& params,
         std::vector<uint8_t>& outData, int32_t& errcode);
+    virtual int GenerateKey(const std::string &handle, const CppParamSet &params, int32_t &errcode);
 private:
     static CreatorFunc creator_;
 };

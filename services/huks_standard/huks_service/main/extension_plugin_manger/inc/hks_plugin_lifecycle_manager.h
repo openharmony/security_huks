@@ -57,6 +57,10 @@ public:
         const std::string &index, const CppParamSet &paramSet, std::string &certsJson);
     int32_t OnExportProviderAllCertificates(const HksProcessInfo &processInfo,
         const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr);
+    int32_t OnImportCertificate(const HksProcessInfo &processInfo, const std::string &index,
+        const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet);
+    int32_t OnGenerateKey(const HksProcessInfo &processInfo,
+        const std::string &resourceId, const CppParamSet &paramSet);
     int32_t OnInitSession (const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet, uint32_t &handle);
     int32_t OnUpdateSession (const HksProcessInfo &processInfo, const uint32_t &handle,

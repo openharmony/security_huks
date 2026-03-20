@@ -67,10 +67,21 @@ public:
         std::string& certJsonArr,
         int32_t& errcode) override;
 
+    ErrCode ImportCertificate(
+        const std::string& index,
+        const std::string& certJsonStr,
+        const CppParamSet& params,
+        int32_t& errcode) override;
+
     ErrCode InitSession(
         const std::string& index,
         const CppParamSet& params,
         std::string& handle,
+        int32_t& errcode) override;
+
+    ErrCode GenerateKey(
+        const std::string& index,
+        const CppParamSet& params,
         int32_t& errcode) override;
 
     ErrCode UpdateSession(

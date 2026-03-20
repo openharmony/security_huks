@@ -35,6 +35,8 @@
 #include "hks_json_wrapper.h"
 #include <vector>
 #include "hks_template.h"
+#include "hks_ukey_common.h"
+#include "hks_mem.h"
 
 #define WAIT_FOR_CALL_JS_METHOD(dataParam, waitTime) do { \
     const auto maxWaitTime = std::chrono::seconds((waitTime)); \
@@ -208,6 +210,56 @@ napi_value GenerateHksParamArray(const napi_env env, const HksParamSet &paramSet
     }
 
     return paramArray;
+}
+
+static int32_t ParseCertJsonStrToJsObject(const napi_env &env, const std::string &certJsonStr,
+    napi_value &certObj)
+{
+    auto json = CommJsonObject::Parse(certJsonStr);
+    HKS_IF_TRUE_LOGE_RETURN(!json.IsObject(), HKS_ERROR_JSON_PARSE_FAILED,
+        "certJsonStr parse failed")
+
+    auto purpose = json.GetValue("purpose").ToNumber<int32_t>();
+    auto index = json.GetValue("index").ToString();
+    auto certBase64 = json.GetValue("cert").ToString();
+    HKS_IF_TRUE_LOGE_RETURN(purpose.first != HKS_SUCCESS || index.first != HKS_SUCCESS,
+        HKS_ERROR_JSON_PARSE_FAILED, "parse cert fields failed")
+
+    // Convert to HksExtCertInfo then to JS object
+    using namespace OHOS::Security::Huks;
+    HksBlob indexBlob = StringToBlob(index.second);
+    HksBlob certBlob = Base64StringToBlob(certBase64.second);
+    HKS_IF_TRUE_LOGE_RETURN(indexBlob.data == nullptr || certBlob.data == nullptr,
+        HKS_ERROR_MALLOC_FAIL, "StringToBlob or Base64StringToBlob failed")
+
+    napi_value jsObj = nullptr;
+    napi_create_object(env, &jsObj);
+    HKS_IF_TRUE_LOGE_RETURN(jsObj == nullptr, HKS_ERROR_EXT_CREATE_VALUE_FAILED,
+        "napi_create_object failed")
+
+    napi_value val = nullptr;
+    napi_create_int32(env, purpose.second, &val);
+    napi_set_named_property(env, jsObj, "purpose", val);
+
+    napi_create_string_utf8(env, reinterpret_cast<char*>(indexBlob.data),
+        indexBlob.size, &val);
+    napi_set_named_property(env, jsObj, "resourceId", val);
+
+    void* data = nullptr;
+    napi_value buffer = nullptr;
+    napi_status status = napi_create_arraybuffer(env, certBlob.size, &data, &buffer);
+    if (status != napi_ok || data == nullptr) {
+        HKS_IF_TRUE_LOGE_RETURN(true, HKS_ERROR_MALLOC_FAIL, "napi_create_arraybuffer failed");
+    }
+    memcpy_s(data, certBlob.size, certBlob.data, certBlob.size);
+    napi_value certArray = nullptr;
+    napi_create_typedarray(env, napi_uint8_array, certBlob.size, buffer, 0, &certArray);
+    napi_set_named_property(env, jsObj, "cert", certArray);
+
+    certObj = jsObj;
+    HKS_FREE_BLOB(indexBlob);
+    HKS_FREE_BLOB(certBlob);
+    return HKS_SUCCESS;
 }
 
 bool MakeJsNativeCppParamSet(const napi_env &env, const CppParamSet &CppParamSet, napi_value nativeCppParamSet)
@@ -954,6 +1006,9 @@ int32_t ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
         case CryptoResultParamType::EXPORT_PROVIDER_CERTIFICATES:
             GetExportCertificateParams(env, funcResult, resultParams);
             break;
+        case CryptoResultParamType::IMPORT_CERTIFICATE:
+            // 导入证书只需要返回错误码，不需要额外参数处理
+            break;
         case CryptoResultParamType::UPDATE_SESSION:
         case CryptoResultParamType::FINISH_SESSION:
             GetSessionParams(env, funcResult, resultParams);
@@ -968,6 +1023,7 @@ int32_t ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
             break;
         case CryptoResultParamType::CLOSE_REMOTE_HANDLE:
         case CryptoResultParamType::CLEAR_UKEY_PIN_AUTH:
+        case CryptoResultParamType::GENERATE_KEY:
         default:
             break;
     }
@@ -1368,6 +1424,58 @@ int32_t JsHksCryptoExtAbility::ExportProviderCertificates(const CppParamSet &par
     return dataParam->hksErrorCode;
 }
 
+int32_t JsHksCryptoExtAbility::ImportCertificate(const std::string &index, const std::string &certJsonStr,
+    const CppParamSet &params, int32_t &errcode)
+{
+    // 根据JS接口定义：onImportCertificate(resourceId, certInfo, params)
+    // 需要传递3个独立参数
+    auto argParser = [index, certJsonStr, params](napi_env &env, napi_value *argv, size_t &argc) -> bool {
+        // 第1个参数：resourceId (string)
+        napi_value nativeIndex = nullptr;
+        auto status = napi_create_string_utf8(env, index.c_str(), index.length(), &nativeIndex);
+        HKS_IF_TRUE_LOGE_RETURN(status != napi_ok || nativeIndex == nullptr, false,
+            "create string utf8 for index failed, status:%d", status)
+        argv[ARGC_ZERO] = nativeIndex;
+
+        // 第2个参数：certInfo (HuksCryptoExtensionCertInfo)
+        // certJsonStr 是JSON字符串（from Handle Manager），需要解析并转换为JS对象
+        napi_value certObj = nullptr;
+        auto ret = ParseCertJsonStrToJsObject(env, certJsonStr, certObj);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "ParseCertJsonStrToJsObject failed, ret:%d", ret)
+        argv[ARGC_ONE] = certObj;
+
+        // 第3个参数：params (optional HuksExternalCryptoParam[])
+        napi_value nativeCppParamSet = nullptr;
+        if (params.GetParamSet()) {
+            nativeCppParamSet = GenerateHksParamArray(env, *params.GetParamSet());
+            HKS_IF_NULL_LOGE_RETURN(nativeCppParamSet, false, "GenerateHksParamArray failed")
+        } else {
+            // 如果params为空，创建undefined
+            status = napi_get_undefined(env, &nativeCppParamSet);
+            HKS_IF_TRUE_LOGE_RETURN(status != napi_ok, false, "get undefined failed")
+        }
+        argv[ARGC_TWO] = nativeCppParamSet;
+
+        argc = ARGC_THREE;
+        return true;
+    };
+
+    std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
+    dataParam->paramType = CryptoResultParamType::IMPORT_CERTIFICATE;
+    auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
+        return CheckAndCallPromise(env, result, dataParam);
+    };
+
+    dataParam->callJsExMethodDone.store(false);
+    auto ret = CallJsMethod("onImportCertificate", jsRuntime_, jsObj_.get(), argParser, retParser);
+    if (ret != ERR_OK) {
+        LOGE("CallJsMethod error, code:%d", ret);
+        return ret;
+    }
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
+    return dataParam->hksErrorCode;
+}
+
 int32_t JsHksCryptoExtAbility::InitSession(const std::string &index, const CppParamSet &params, std::string &handle,
     int32_t &errcode)
 {
@@ -1393,6 +1501,33 @@ int32_t JsHksCryptoExtAbility::InitSession(const std::string &index, const CppPa
     }
     WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     handle = std::move(dataParam->handle);
+    return dataParam->hksErrorCode;
+}
+
+int32_t JsHksCryptoExtAbility::GenerateKey(const std::string &handle,
+    const CppParamSet &params, int32_t &errcode)
+{
+    auto argParser = [handle, params](napi_env &env, napi_value *argv, size_t &argc) -> bool {
+        struct IndexInfoParam param = {
+            handle,
+            params,
+        };
+        return BuildIndexInfoParam(env, param, argv, argc);
+    };
+
+    std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
+    dataParam->paramType = CryptoResultParamType::GENERATE_KEY;
+    auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
+        return CheckAndCallPromise(env, result, dataParam);
+    };
+
+    dataParam->callJsExMethodDone.store(false);
+    auto ret = CallJsMethod("onGenerateKeyItem", jsRuntime_, jsObj_.get(), argParser, retParser);
+    if (ret != ERR_OK) {
+        LOGE("CallJsMethod error, code:%d", ret);
+        return ret;
+    }
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     return dataParam->hksErrorCode;
 }
 

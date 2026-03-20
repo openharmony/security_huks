@@ -275,6 +275,22 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnExportProviderAllCertificates(const
     return HKS_SUCCESS;
 }
 
+ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnImportCertificate(const HksProcessInfo &processInfo,
+    const std::string &index, const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet))
+{
+    AutoRefCount refCnt(m_refCount, soMutex);
+    void *funcPtr = nullptr;
+    bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_IMPORT_CERTIFICATE, funcPtr);
+    HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "ImportCertificate method enum not found in plugin provider map.")
+    
+    int32_t ret = (*reinterpret_cast<OnImportCertificateFunc>(funcPtr))
+        (processInfo, index, certInfo, paramSet);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ImportCertificate fail, ret = %{public}d", ret)
+    HKS_LOG_I("import certificate success");
+    return HKS_SUCCESS;
+}
+
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnInitSession(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet, uint32_t &handle))
 {
@@ -317,6 +333,21 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnFinishSession(const HksProcessInfo 
     int32_t ret = (*reinterpret_cast<OnFinishSessionFunc>(funcPtr))(processInfo, handle, paramSet, inData, outData);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "FinishSession fail, ret = %{public}d", ret)
     HKS_LOG_I("finish session success");
+    return HKS_SUCCESS;
+}
+
+ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnGenerateKey(const HksProcessInfo &processInfo,
+    const std::string &resourceId, const CppParamSet &paramSet))
+{
+    AutoRefCount refCnt(m_refCount, soMutex);
+    void *funcPtr = nullptr;
+    bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_GENERATE_KEY, funcPtr);
+    HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "GenerateKey method enum not found in plugin provider map.")
+
+    int32_t ret = (*reinterpret_cast<OnGenerateKeyFunc>(funcPtr))(processInfo, resourceId, paramSet);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GenerateKey fail, ret = %{public}d", ret)
+    HKS_LOG_I("generate key success");
     return HKS_SUCCESS;
 }
 

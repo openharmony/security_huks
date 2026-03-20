@@ -59,6 +59,22 @@ int32_t HksIpcProviderUnregAdapter(const struct HksProcessInfo *processInfo, con
     return OHOS::Security::Huks::HksIpcServiceProviderUnRegister(processInfo, cppresourceId, cppParamSet);
 }
 
+int32_t HksIpcGenerateUkeyKeyAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksBlob *resourceId, const struct HksParamSet *paramSet)
+{
+    int32_t ret = HksIpcCheckBlob(keyAlias, 1, HKS_MAX_KEY_ALIAS_LEN);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcGenerateUkeyKeyAdapter invalid keyAlias blob")
+
+    ret = HksIpcCheckBlob(resourceId, 1, HKS_EXT_MAX_RESOURCE_ID_LEN);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcGenerateUkeyKeyAdapter invalid resourceId blob")
+
+    std::string cppKeyAlias(reinterpret_cast<const char*>(keyAlias->data), keyAlias->size);
+    std::string cppResourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
+    CppParamSet cppParamSet(paramSet);
+
+    return OHOS::Security::Huks::HksIpcServiceOnGenerateUkeyKey(processInfo, cppKeyAlias, cppResourceId, cppParamSet);
+}
+
 int32_t HksIpcCreateRemKeyHandleAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
     const struct HksParamSet *paramSet)
 {
@@ -122,6 +138,28 @@ int32_t HksIpcExportCertAdapter(const struct HksProcessInfo *processInfo, const 
     ret = OHOS::Security::Huks::JsonArrayToCertInfoSet(certificates, *certInfoSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "JsonArrayToCertInfoSet fail")
 
+    return ret;
+}
+
+int32_t HksIpcImportCertAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
+    const struct HksExtCertInfo *certInfo, const struct HksParamSet *paramSet)
+{
+    int32_t ret = HksIpcCheckBlob(resourceId, 1, HKS_EXT_MAX_RESOURCE_ID_LEN);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcImportCertAdapter invalid resourceId blob")
+    
+    // 检查certInfo
+    if (certInfo == nullptr || certInfo->index.data == nullptr || certInfo->cert.data == nullptr) {
+        HKS_LOG_E("HksIpcImportCertAdapter invalid certInfo");
+        return HKS_ERROR_NULL_POINTER;
+    }
+    
+    std::string cppresourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
+    CppParamSet cppParamSet(paramSet);
+    
+    // 调用实际的导入证书服务函数
+    ret = OHOS::Security::Huks::HksIpcServiceOnImportCertificate(processInfo, cppresourceId, *certInfo, cppParamSet);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnImportCertificate fail")
+    
     return ret;
 }
 
