@@ -97,6 +97,19 @@ ErrCode HksCryptoExtStubImpl::ExportProviderCertificates(
     return extension_->ExportProviderCertificates(params, certJsonArr, errcode);
 }
 
+ErrCode HksCryptoExtStubImpl::ImportCertificate(
+    const std::string& index,
+    const std::string& certJsonStr,
+    const CppParamSet& params,
+    int32_t& errcode)
+{
+    if (extension_ == nullptr) {
+        LOGE("extension is nullptr");
+        return HKS_ERROR_EXT_NULLPTR;
+    }
+    return extension_->ImportCertificate(index, certJsonStr, params, errcode);
+}
+
 ErrCode HksCryptoExtStubImpl::InitSession(
     const std::string& index,
     const CppParamSet& params,
@@ -108,6 +121,18 @@ ErrCode HksCryptoExtStubImpl::InitSession(
         return HKS_ERROR_EXT_NULLPTR;
     }
     return extension_->InitSession(index, params, handle, errcode);
+}
+
+ErrCode HksCryptoExtStubImpl::GenerateKey(
+    const std::string& index,
+    const CppParamSet& params,
+    int32_t& errcode)
+{
+    if (extension_ == nullptr) {
+        LOGE("extension is nullptr");
+        return HKS_ERROR_EXT_NULLPTR;
+    }
+    return extension_->GenerateKey(index, params, errcode);
 }
 
 ErrCode HksCryptoExtStubImpl::UpdateSession(

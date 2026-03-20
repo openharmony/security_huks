@@ -35,6 +35,7 @@
 #include "accesstoken_kit.h"
 #include "tokenid_kit.h"
 #include "ipc_skeleton.h"
+#include "hks_json_wrapper.h"
 namespace OHOS {
 namespace Security {
 namespace Huks {
@@ -389,6 +390,36 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
     return HKS_SUCCESS;
 }
 
+int32_t HksRemoteHandleManager::ImportRemoteCertificate(const HksProcessInfo &processInfo, const std::string &index,
+    const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet)
+{
+    ProviderInfo providerInfo = {"", "", ""};
+    std::string newIndex;
+    int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
+        "Parse index and provider info failed: %" LOG_PUBLIC "d", ret)
+    int32_t frontUserId;
+    ret = HksGetFrontUserId(frontUserId);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get front user id failed")
+    providerInfo.m_userid = frontUserId;
+    OHOS::sptr<IHuksAccessExtBase> proxy;
+    ret = GetProviderProxy(providerInfo, proxy);
+    HKS_IF_NULL_RETURN(proxy, ret)
+
+    // 将HksExtCertInfo转换为JSON字符串，参考导出证书接口的实现方式
+    std::string certJsonStr;
+    ret = CertInfoToString(certInfo, certJsonStr);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Convert certInfo to json string failed: %" LOG_PUBLIC "d", ret)
+
+    // 调用proxy的ImportCertificate方法，传递JSON字符串
+    auto ipccode = proxy->ImportCertificate(newIndex, certJsonStr, paramSet, ret);
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
+    ret = ConvertExtensionToHksErrorCode(ret, g_importCertErrCodeMapping);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote ImportCertificate failed: %" LOG_PUBLIC "d", ret)
+
+    return HKS_SUCCESS;
+}
+
 int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processInfo, const std::string &index,
     const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams)
 {
@@ -471,6 +502,28 @@ int32_t HksRemoteHandleManager::RemoteExportPublicKey(const HksProcessInfo &proc
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ExportPublicKey failed, ret = %" LOG_PUBLIC "d", ret)
 
     return ret;
+}
+
+int32_t HksRemoteHandleManager::ExtensionGenerateKey(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet)
+{
+    HKS_LOG_I("enter HksRemoteHandleManager::GenerateKey");
+    ProviderInfo providerInfo{};
+    std::string handle;
+    int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    int32_t userId = HksGetUserIdFromUid(processInfo.uidInt);
+    providerInfo.m_userid = userId;
+
+    OHOS::sptr<IHuksAccessExtBase> proxy;
+    ret = GetProviderProxy(providerInfo, proxy);
+    HKS_IF_NULL_RETURN(proxy, ret)
+
+    auto ipccode = proxy->GenerateKey(handle, paramSet, ret);
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL,
+        "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
+    HKS_LOG_I("leave HksRemoteHandleManager::GenerateKey, ret = %" LOG_PUBLIC "d", ret);
+    return HKS_SUCCESS;
 }
 
 int32_t HksRemoteHandleManager::ClearUidIndexMap(const ProviderInfo &providerInfo)

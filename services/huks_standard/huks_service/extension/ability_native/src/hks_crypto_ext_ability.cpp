@@ -99,6 +99,20 @@ int32_t HksCryptoExtAbility::ExportProviderCertificates(const CppParamSet &param
     return HKS_ERROR_EXT_UNDEFINED_OPERATION;
 }
 
+int32_t HksCryptoExtAbility::ImportCertificate(const std::string &index, const std::string &certJsonStr,
+    const CppParamSet &params, int32_t &errcode)
+{
+    LOGE("HksCryptoExtAbility::ImportCertificate Undefined operation");
+    return HKS_ERROR_EXT_UNDEFINED_OPERATION;
+}
+
+int32_t HksCryptoExtAbility::GenerateKey(const std::string &handle,
+    const CppParamSet &params, int32_t &errcode)
+{
+    LOGE("HksCryptoExtAbility::GenerateKey Undefined operation");
+    return HKS_ERROR_EXT_UNDEFINED_OPERATION;
+}
+
 int32_t HksCryptoExtAbility::InitSession(const std::string &index, const CppParamSet &params, std::string &handle,
     int32_t &errcode)
 {

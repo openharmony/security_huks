@@ -43,6 +43,19 @@ int32_t CopyUint32ToBuffer(uint32_t value, const struct HksBlob *destBlob, uint3
     return HKS_SUCCESS;
 }
 
+int32_t CopyInt32ToBuffer(int32_t value, const struct HksBlob *destBlob, uint32_t *destOffset)
+{
+    if ((*destOffset > destBlob->size) || ((destBlob->size - *destOffset) < sizeof(value))) {
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
+
+    HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, &value,
+        sizeof(value)), HKS_ERROR_INSUFFICIENT_MEMORY, "copy destBlob data failed!")
+    *destOffset += sizeof(value);
+
+    return HKS_SUCCESS;
+}
+
 static int32_t CopyBlobToBuffer(const struct HksBlob *blob, const struct HksBlob *destBlob, uint32_t *destOffset)
 {
     if ((*destOffset > destBlob->size) ||
@@ -150,6 +163,38 @@ int32_t HksUkeyBlob2ParamSetPack(const struct HksBlob *blob1, const struct HksBl
         ret = CopyParamSetToBuffer(paramSet, destData, &offset);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy paramSet failed");
     } while (0);
+    return ret;
+}
+
+int32_t HksUKeyGeneralPackWithCertInfo(const struct HksBlob *blob, const struct HksExtCertInfo *certInfo,
+    const struct HksParamSet *paramSet, struct HksBlob *destData)
+{
+    uint32_t offset = 0;
+    int32_t ret;
+    
+    do {
+        // 1. 复制resourceId blob
+        ret = CopyBlobToBuffer(blob, destData, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy blob failed");
+        
+        // 2. 复制证书信息
+        // 2.1 复制purpose (int32_t)
+        ret = CopyInt32ToBuffer(certInfo->purpose, destData, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy purpose failed");
+        
+        // 2.2 复制index blob
+        ret = CopyBlobToBuffer(&certInfo->index, destData, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy index blob failed");
+        
+        // 2.3 复制cert blob
+        ret = CopyBlobToBuffer(&certInfo->cert, destData, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy cert blob failed");
+        
+        // 3. 复制参数集
+        ret = CopyParamSetToBuffer(paramSet, destData, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy paramSet failed");
+    } while (0);
+    
     return ret;
 }
 #endif

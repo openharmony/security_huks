@@ -28,4 +28,6 @@ interface OHOS.Security.Huks.IHuksAccessExtBase {
     [ipccode 11] void ClearUkeyPinAuthState([in] String handle, [in] CppParamSet params, [out] int errcode);
     [ipccode 12] void ImportWrappedKey([in] String newIndex, [in] String newWrappingKeyIndex, [in] CppParamSet params, [in] unsigned char[]wrappedData, [out] int errcode);
     [ipccode 13] void ExportPublicKey([in] String newIndex, [in] CppParamSet params, [out] unsigned char[] wrappedData, [out] int errcode);
+    [ipccode 14] void GenerateKey([in] String handle, [in] CppParamSet params, [out] int errcode);
+    [ipccode 15] void ImportCertificate([in] String index, [in] String certJsonStr, [in] CppParamSet params, [out] int errcode);
 }

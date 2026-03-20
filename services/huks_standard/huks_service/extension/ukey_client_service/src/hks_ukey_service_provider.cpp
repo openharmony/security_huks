@@ -65,7 +65,6 @@ int32_t HksIpcServiceOnGetVerifyPinStatus(const struct HksProcessInfo *processIn
 {
     auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
-
     return pluginManager->OnGetVerifyPinStatus(*processInfo, index, paramSet, state);
 }
 
@@ -92,6 +91,22 @@ int32_t HksIpcServiceOnExportCertificate(const struct HksProcessInfo *processInf
     auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
     return pluginManager->OnExportCertificate(*processInfo, index, paramSet, certificatesOut);
+}
+
+int32_t HksIpcServiceOnImportCertificate(const struct HksProcessInfo *processInfo, const std::string &index,
+    const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet)
+{
+    auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
+    return pluginManager->OnImportCertificate(*processInfo, index, certInfo, paramSet);
+}
+
+int32_t HksIpcServiceOnGenerateUkeyKey(const struct HksProcessInfo *processInfo,
+    const std::string &resourceId, const CppParamSet &paramSet)
+{
+    auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
+    return pluginManager->OnGenerateKey(*processInfo, resourceId, paramSet);
 }
 
 int32_t HksIpcServiceOnExportProviderAllCertificates(const struct HksProcessInfo *processInfo, const std::string &index,

@@ -169,6 +169,27 @@ static int32_t HksAllocInBlobWithTwoBlobs(struct HksBlob *inBlob,
     return HKS_SUCCESS;
 }
 
+static int32_t HksAllocInBlobWithCertInfo(struct HksBlob *inBlob,
+    const struct HksBlob *blob,
+    const struct HksExtCertInfo *certInfo,
+    const struct HksParamSet *paramSet)
+{
+    if (inBlob == NULL || blob == NULL || certInfo == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    uint32_t size = sizeof(blob->size) + ALIGN_SIZE(blob->size);
+    size += sizeof(int32_t);
+    size += sizeof(certInfo->index.size) + ALIGN_SIZE(certInfo->index.size);
+    size += sizeof(certInfo->cert.size) + ALIGN_SIZE(certInfo->cert.size);
+    if (paramSet != NULL) {
+        size += ALIGN_SIZE(paramSet->paramSetSize);
+    }
+    inBlob->data = (uint8_t *)HksMalloc(size);
+    HKS_IF_NULL_LOGE_RETURN(inBlob->data, HKS_ERROR_MALLOC_FAIL, "malloc inBlob fail");
+    inBlob->size = size;
+    return HKS_SUCCESS;
+}
+
 int32_t HksClientRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn)
 {
     int32_t ret;
@@ -312,6 +333,57 @@ int32_t HksClientExportCertificate(const struct HksBlob *index,
 
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksClientExportCertificate fail, ret=%" LOG_PUBLIC "d", ret);
+    }
+
+    HksFreeParamSet(&newParamSet);
+    HKS_FREE_BLOB(inBlob);
+    HKS_FREE_BLOB(outBlob);
+    return ret;
+}
+
+int32_t HksClientImportCertificate(const struct HksBlob *resourceId,
+    const struct HksExtCertInfo *certInfo, const struct HksParamSet *paramSetIn)
+{
+    if ((paramSetIn == NULL) || (resourceId == NULL) || (certInfo == NULL)) {
+        HKS_LOG_E("HksClientImportCertificate invalid param");
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int32_t ret;
+    struct HksBlob inBlob  = { 0, NULL };
+    struct HksBlob outBlob = { 0, NULL };
+    struct HksParamSet *newParamSet = NULL;
+
+    outBlob.size = MAX_OUT_BLOB_SIZE;
+    outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
+    HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
+
+    do {
+        ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "BuildParamSetNotNull fail, ret=%" LOG_PUBLIC "d", ret);
+
+        ret = HksCheckIpcBlobAndParamSet(resourceId, newParamSet, HKS_EXT_MAX_RESOURCE_ID_LEN);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Check blob+paramSet fail");
+
+        if ((certInfo->index.size == 0) || (certInfo->index.data == NULL) ||
+            (certInfo->cert.size == 0) || (certInfo->cert.data == NULL)) {
+            ret = HKS_ERROR_INVALID_ARGUMENT;
+            HKS_LOG_E("certInfo invalid");
+            break;
+        }
+
+        ret = HksAllocInBlobWithCertInfo(&inBlob, resourceId, certInfo, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAllocInBlob fail");
+
+        ret = HksUKeyGeneralPackWithCertInfo(resourceId, certInfo, newParamSet, &inBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Pack with certInfo fail");
+
+        ret = HksSendRequest(HKS_MSG_EXT_IMPORT_CERTIFICATE, &inBlob, &outBlob, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "SendRequest fail, ret=%" LOG_PUBLIC "d", ret);
+    } while (0);
+
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksClientImportCertificate fail, ret=%" LOG_PUBLIC "d", ret);
     }
 
     HksFreeParamSet(&newParamSet);

@@ -49,6 +49,28 @@ int32_t HksCheckIsUkeyOperation(const struct HksParamSet *paramSet, int32_t *out
     return HKS_ERROR_INVALID_ARGUMENT;
 }
 
+int32_t HksServiceOnUkeyGenerateKey(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *resourceId, const struct HksParamSet *paramSet)
+{
+    int32_t ret = HksCheckBlob2(&processInfo->processName, resourceId);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "Hks check processName or resourceId fail. ret: %" LOG_PUBLIC "d", ret)
+
+    HKS_IF_TRUE_LOGE_RETURN(resourceId->size > MAX_SESSION_INDEX_SIZE, HKS_ERROR_INVALID_ARGUMENT,
+        "resourceId size too large. size: %" LOG_PUBLIC "d. maxSize: %" LOG_PUBLIC "d",
+        resourceId->size, MAX_SESSION_INDEX_SIZE)
+    std::string cppResourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
+    CppParamSet cppParamSet(paramSet);
+
+    auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
+
+    ret = pluginManager->OnGenerateKey(*processInfo, cppResourceId, cppParamSet);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnGenerateKey fail. ret: %" LOG_PUBLIC "d", ret)
+
+    return ret;
+}
+
 int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *inParamSet, struct HksBlob *handle)
 {
