@@ -262,6 +262,10 @@ napi_value ParseParams(napi_env env, napi_value object, std::vector<HksParam> &p
     bool hasNextElement = false;
     napi_value result = nullptr;
     size_t index = 0;
+    HksParam oldAadParam = { .tag = HKS_TAG_ASSOCIATED_DATA, .blob = {0} };
+    HksParam newAadParam = { .tag = HKS_TAG_ASSOCIATED_DATA, .blob = {0} };
+    bool hasOldAad = false;
+    bool hasNewAad = false;
     while ((napi_has_element(env, object, index, &hasNextElement) == napi_ok) && hasNextElement) {
         napi_value element = nullptr;
         NAPI_CALL(env, napi_get_element(env, object, index, &element));
@@ -273,10 +277,29 @@ napi_value ParseParams(napi_env env, napi_value object, std::vector<HksParam> &p
             HKS_LOG_E("get param failed when parse input params.");
             return nullptr;
         }
-
-        params.push_back(param);
         index++;
+
+        if (param.tag == HKS_TAG_ASSOCIATED_DATA) {
+            oldAadParam.blob.size = param.blob.size;
+            oldAadParam.blob.data = param.blob.data;
+            hasOldAad = true;
+            continue;
+        } else if (param.tag == HKS_TAG_AAD) {
+            newAadParam.blob.size = param.blob.size;
+            newAadParam.blob.data = param.blob.data;
+            hasNewAad = true;
+            continue;
+        }
+        params.push_back(param);
     }
+
+    // new aad param will be used if two aad params exist
+    if (hasNewAad) {
+        params.push_back(newAadParam);
+    } else if (hasOldAad) {
+        params.push_back(oldAadParam);
+    }
+
     return GetInt32(env, 0);
 }
 
