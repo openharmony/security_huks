@@ -68,6 +68,13 @@ struct IndexInfoParam {
     CppParamSet params {};
 };
 
+struct ImportWrappedKeyParam {
+    std::string index {};
+    std::string wrappingKeyIndex {};
+    CppParamSet params {};
+    std::vector<uint8_t> wrappedData {};
+};
+
 int32_t BlobToBase64String(const HksBlob &strBlob, std::string &outStr)
 {
     if (strBlob.size == 0 || strBlob.data == nullptr) {
@@ -1446,6 +1453,34 @@ int32_t JsHksCryptoExtAbility::ClearUkeyPinAuthState(const std::string &handle, 
 
     dataParam->callJsExMethodDone.store(false);
     auto ret = CallJsMethod("onClearUkeyPinAuthState", jsRuntime_, jsObj_.get(), argParser, retParser);
+    if (ret != ERR_OK) {
+        LOGE("CallJsMethod error, code:%d", ret);
+        return ret;
+    }
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
+    return dataParam->hksErrorCode;
+}
+
+int32_t JsHksCryptoExtAbility::ImportWrappedKey(const std::string &index, const std::string &wrappingKeyIndex,
+    const CppParamSet &params, const std::vector<uint8_t> &wrappedData, int32_t &errcode)
+{
+    auto argParser = [index, wrappingKeyIndex, params, wrappedData](napi_env &env, napi_value *argv, size_t &argc) -> bool {
+        struct ImportWrappedKeyParam param = {
+            index,
+            wrappingKeyIndex,
+            params,
+            wrappedData,
+        };
+        return BuildImportWrappedKeyParam(env, param, argv, argc);
+    };
+    std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
+    dataParam->paramType = CryptoResultParamType::IMPORT_WRAPPED_KEY;
+    auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
+        return CheckAndCallPromise(env, result, dataParam);
+    };
+
+    dataParam->callJsExMethodDone.store(false);
+    auto ret = CallJsMethod("onImportWrappedKey", jsRuntime_, jsObj_.get(), argParser, retParser);
     if (ret != ERR_OK) {
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;

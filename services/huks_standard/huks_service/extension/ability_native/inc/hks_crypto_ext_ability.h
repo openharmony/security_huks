@@ -58,6 +58,8 @@ public:
     virtual int GetProperty(const std::string& handle, const std::string& propertyId, const CppParamSet& params,
         CppParamSet& outParams, int32_t& errcode);
     virtual int ClearUkeyPinAuthState(const std::string& handle, const CppParamSet& params, int32_t& errcode);
+    virtual int ImportWrappedKey(const std::string& index, const std::string& wrappingKeyIndex,
+        const CppParamSet& params, const std::vector<uint8_t>& wrappedData, int32_t& errcode);
 private:
     static CreatorFunc creator_;
 };

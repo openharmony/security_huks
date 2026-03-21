@@ -40,7 +40,8 @@ typedef enum {
     UPDATE_SESSION,
     FINISH_SESSION,
     GET_PROPERTY,
-    CLEAR_UKEY_PIN_AUTH
+    CLEAR_UKEY_PIN_AUTH,
+    IMPORT_WRAPPED_KEY
 } CryptoResultParamType;
 
 typedef struct HksCertInfo {
@@ -117,6 +118,8 @@ public:
     int32_t GetProperty(const std::string &handle, const std::string &propertyId, const CppParamSet &params,
         CppParamSet &outParams, int32_t &errcode) override;
     int32_t ClearUkeyPinAuthState(const std::string &handle, const CppParamSet &params, int32_t &errcode) override;
+    int32_t ImportWrappedKey(const std::string &index, const std::string &wrappingKeyIndex,
+        const CppParamSet &params, const std::vector<uint8_t> &wrappedData, int32_t &errcode) override;
 
 private:
     template <typename T>

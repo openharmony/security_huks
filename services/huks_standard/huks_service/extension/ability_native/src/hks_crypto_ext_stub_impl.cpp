@@ -164,6 +164,20 @@ ErrCode HksCryptoExtStubImpl::ClearUkeyPinAuthState(
     return extension_->ClearUkeyPinAuthState(handle, params, errcode);
 }
 
+ErrCode HksCryptoExtStubImpl::ImportWrappedKey(
+    const std::string& index,
+    const std::string& wrappingKeyIndex,
+    const CppParamSet& params,
+    const std::vector<uint8_t>& wrappedData,
+    int32_t& errcode)
+{
+    if (extension_ == nullptr) {
+        LOGE("extension is nullptr");
+        return HKS_ERROR_EXT_NULLPTR;
+    }
+    return extension_->ImportWrappedKey(index, wrappingKeyIndex, params, wrappedData, errcode);
+}
+
 } // namespace Huks
 } // namespace Security
 } // namespace OHOS

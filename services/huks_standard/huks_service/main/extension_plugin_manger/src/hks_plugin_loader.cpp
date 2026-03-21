@@ -149,6 +149,12 @@ HuksPluginLoader::HuksPluginLoader()
         "_ZN4OHOS8Security4Huks26HksExtPluginOnAbortSessionERK14HksProcessInfoRKjRK11CppParamSet");
     m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_UNREGISTER_ALL_OBSERVERS,
         "_ZN4OHOS8Security4Huks36HksExtPluginOnUnregisterAllObserversEv");
+    m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_EXPORT_PUBLIC_KEY,
+        "_ZN4OHOS8Security4Huks29HksExtPluginOnExportPublicKeyERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRNSt3__h6vectorIhNSA_9allocatorIhEEE");
+    m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_IMPORT_WRAPPED_KEY,
+        "_ZN4OHOS8Security4Huks29HksExtPluginOnImportWrappedKeyERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEESD_RK11CppParamSetRKNSt3__h6vectorIhNSA_9allocatorIhEEE");
 }
 
 HuksPluginLoader::~HuksPluginLoader()

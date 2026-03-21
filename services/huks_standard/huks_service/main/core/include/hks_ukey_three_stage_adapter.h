@@ -39,6 +39,9 @@ int32_t HksServiceOnUkeyFinishSession(const struct HksProcessInfo *processInfo, 
 int32_t HksServiceOnUkeyAbortSession(const struct HksProcessInfo *processInfo, const struct HksBlob *handle,
     const struct HksParamSet *paramSet);
 
+int32_t HksServiceOnUkeyImportWrappedKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksBlob *wrappingKeyAlias, const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData);
+
 #ifdef __cplusplus
 }
 #endif

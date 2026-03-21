@@ -425,6 +425,37 @@ int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processI
     return HKS_SUCCESS;
 }
 
+int32_t HksRemoteHandleManager::RemoteImportWrappedKey(const HksProcessInfo &processInfo, const std::string &index,
+    const std::string &wrappingKeyIndex, const CppParamSet &paramSet, const std::vector<uint8_t> &wrappedData)
+{
+    std::string newIndex;
+    ProviderInfo providerInfo{};
+    int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ParseIndexAndProviderInfo failed, ret = %" LOG_PUBLIC "d", ret)
+
+    std::string newWrappingKeyIndex;
+    ProviderInfo wrappingKeyProviderInfo;
+    ret = ParseIndexAndProviderInfo(wrappingKeyIndex, wrappingKeyProviderInfo, newWrappingKeyIndex);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ParseIndexAndProviderInfo for wrapping key failed, ret = %" LOG_PUBLIC "d", ret)
+    
+    auto ipccode = proxy->ExportCertificate(newIndex, paramSet, cert, ret);
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
+    ret = ConvertExtensionToHksErrorCode(ret, g_exportCertErrCodeMapping);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote ExportCertificate failed: %" LOG_PUBLIC "d", ret)
+
+
+    OHOS::sptr<IHuksAccessExtBase> proxy;
+    ret = GetProviderProxy(providerInfo, proxy);
+    HKS_IF_NULL_RETURN(proxy, ret)
+
+    auto ipccode = proxy->ImportWrappedKey(newIndex, newWrappingKeyIndex, paramSet, wrappedData);
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
+    ret = ConvertExtensionToHksErrorCode(ret, g_importWrappedKeyErrCodeMapping);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote ImportWrappedKey failed: %" LOG_PUBLIC "d", ret)
+
+    return ret;
+}
+
 int32_t HksRemoteHandleManager::ClearUidIndexMap(const ProviderInfo &providerInfo)
 {
     std::vector<std::pair<uint32_t, std::string>> indicesToRemove;

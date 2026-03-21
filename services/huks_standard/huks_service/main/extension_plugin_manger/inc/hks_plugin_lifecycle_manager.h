@@ -65,6 +65,8 @@ public:
         const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
     int32_t OnAbortSession(const HksProcessInfo &processInfo, const uint32_t &handle,
         const CppParamSet &paramSet);
+    int32_t OnImportWrappedKey(const HksProcessInfo &processInfo, const std::string &index,
+        const std::string &wrappingKeyIndex, const CppParamSet &paramSet, const std::vector<uint8_t> &wrappedData);
 
 private:
     std::atomic<int32_t> m_refCount{0};
