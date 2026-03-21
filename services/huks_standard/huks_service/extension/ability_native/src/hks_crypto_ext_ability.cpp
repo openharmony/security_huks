@@ -134,6 +134,13 @@ int32_t HksCryptoExtAbility::ClearUkeyPinAuthState(const std::string &handle,
     return HKS_ERROR_EXT_UNDEFINED_OPERATION;
 }
 
+int32_t HksCryptoExtAbility::ImportWrappedKey(const std::string &index, const std::string &wrappingKeyIndex,
+    const CppParamSet &params, const std::vector<uint8_t> &wrappedData, int32_t &errcode)
+{
+    LOGE("HksCryptoExtAbility::ImportWrappedKey Undefined operation");
+    return HKS_ERROR_EXT_UNDEFINED_OPERATION;
+}
+
 } // namespace HUKS
 } // namespace Security
 } // namespace OHOS

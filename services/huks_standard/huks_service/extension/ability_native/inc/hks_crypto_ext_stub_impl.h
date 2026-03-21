@@ -98,6 +98,13 @@ public:
         const std::string& handle,
         const CppParamSet& params,
         int32_t& errcode) override;
+
+    ErrCode ImportWrappedKey(
+        const std::string& index,
+        const std::string& wrappingKeyIndex,
+        const CppParamSet& params,
+        const std::vector<uint8_t>& wrappedData,
+        int32_t& errcode) override;
 private:
     std::shared_ptr<HksCryptoExtAbility> extension_;
 };

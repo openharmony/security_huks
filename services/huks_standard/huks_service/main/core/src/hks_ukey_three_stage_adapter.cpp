@@ -177,3 +177,23 @@ int32_t HksServiceOnUkeyAbortSession(const struct HksProcessInfo *processInfo, c
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnAbortSession fail. ret = %" LOG_PUBLIC "d", ret)
     return ret;
 }
+
+int32_t HksServiceOnUkeyImportWrappedKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksBlob *wrappingKeyAlias, const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData)
+{
+    std::string cppIndex(reinterpret_cast<const char*>(keyAlias->data), keyAlias->size);
+    std::string cppWrappingKeyIndex(reinterpret_cast<const char*>(wrappingKeyAlias->data), wrappingKeyAlias->size);
+    CppParamSet cppParamSet(paramSet);
+    std::vector<uint8_t> wrappedData;
+    if (wrappedKeyData != nullptr && wrappedKeyData->data != nullptr && wrappedKeyData->size != 0) {
+        wrappedData.assign(wrappedKeyData->data, wrappedKeyData->data + wrappedKeyData->size);
+    }
+
+    auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
+
+    ret = pluginManager->OnImportWrappedKey(*processInfo, cppIndex, cppWrappingKeyIndex, cppParamSet, wrappedData);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnImportWrappedKey fail. ret: %" LOG_PUBLIC "d", ret)
+    
+    return ret;
+}

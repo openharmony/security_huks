@@ -1127,6 +1127,15 @@ int32_t HksServiceImportWrappedKey(const struct HksProcessInfo *processInfo, con
             wrappingKeyAlias, paramSet, wrappedKeyData);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check import params failed, ret = %" LOG_PUBLIC "d", ret)
 
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+        if (HksCheckIsUkeyOperation(paramSet, &ret) == HKS_SUCCESS) {
+            ret = HksServiceOnUkeyImportWrappedKey(processInfo, keyAlias, wrappingKeyAlias, paramSet, wrappedKeyData);
+            HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyImportWrappedKey fail, ret = %" LOG_PUBLIC "d", ret)
+            break;
+        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", ret)
+#endif
+
         struct HksImportWrappedInnerArgs constArgs = { .processInfo = processInfo, .keyAlias = keyAlias,
             .wrappingKeyAlias = wrappingKeyAlias, .paramSet = paramSet, .wrappedKeyData = wrappedKeyData };
         ret = GetAndImportWrappedKey(&constArgs, &newParamSet, &keyOut);

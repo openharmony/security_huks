@@ -272,4 +272,17 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUnregisterAllObserv
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
+
+__attribute__((visibility("default"))) int32_t HksExtPluginOnImportWrappedKey(
+    const HksProcessInfo &processInfo, const std::string &index, const std::string &wrappingKeyIndex,
+    const CppParamSet &paramSet, const std::vector<uint8_t> &wrappedData)
+{
+    HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
+    auto ret = handleMgr->RemoteImportWrappedKey(processInfo, index, wrappingKeyIndex, paramSet, wrappedData);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
+    return ret;
+}
+
 }

@@ -346,6 +346,24 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnUnregisterAllObservers())
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "UnregisterAllObservers fail, ret = %{public}d", ret)
     return HKS_SUCCESS;
 }
+
+ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnImportWrappedKey(const HksProcessInfo &processInfo,
+    const std::string &index, const std::string &wrappingKeyIndex, const CppParamSet &paramSet,
+    const std::vector<uint8_t> &wrappedData))
+{
+    AutoRefCount refCnt(m_refCount, soMutex);
+    void *funcPtr = nullptr;
+    bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_IMPORT_WRAPPED_KEY, funcPtr);
+    HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "ImportWrappedKey method enum not found in plugin provider map.")
+    
+    int32_t ret = (*reinterpret_cast<OnImportWrappedKeyFunc>(funcPtr))
+        (processInfo, index, wrappingKeyIndex, paramSet, wrappedData);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ImportWrappedKey fail, ret = %" LOG_PUBLIC "d", ret)
+    HKS_LOG_I("import wrapped key success");
+    return HKS_SUCCESS;
+}
+
 }
 }
 }
