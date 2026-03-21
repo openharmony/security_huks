@@ -118,21 +118,24 @@ int32_t HksFillAeadParam(
     int32_t ret = HksGetParam(paramSet, HKS_TAG_NONCE, &nonceParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksFillAeadParam get nonce param failed!")
 
-    struct HksParam emptyAadParam = {
-        .tag = HKS_TAG_ASSOCIATED_DATA,
-        .blob = {
-            .size = 0,
-            .data = NULL
-        }
-    };
+    struct HksParam emptyAadParam = { .tag = HKS_TAG_ASSOCIATED_DATA, .blob = { .size = 0, .data = NULL } };
     struct HksParam *aadParam = NULL;
-    ret = HksGetParam(paramSet, HKS_TAG_ASSOCIATED_DATA, &aadParam);
+    bool hasMiniAad = false;
+    ret = HksGetParam(paramSet, HKS_TAG_AAD, &aadParam);
     if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
-        HKS_LOG_W("HksFillAeadParam no input aad, do not use aad");
-        aadParam = &emptyAadParam;
+        ret = HksGetParam(paramSet, HKS_TAG_ASSOCIATED_DATA, &aadParam);
+        if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+            HKS_LOG_W("HksFillAeadParam no input aad, do not use aad");
+            aadParam = &emptyAadParam;
+        } else if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksFillAeadParam get aad param failed!");
+            return ret;
+        }
     } else if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksFillAeadParam get aad param failed!");
         return ret;
+    } else {
+        hasMiniAad = true;
     }
 
     uint32_t aeadTagLen = HKS_AE_TAG_LEN;
@@ -141,10 +144,7 @@ int32_t HksFillAeadParam(
 
     struct HksParam tagParam;
     if (!isEncrypt) {
-        if (inputText->size <= aeadTagLen) {
-            HKS_LOG_E("too small inputText size");
-            return HKS_ERROR_INVALID_ARGUMENT;
-        }
+        HKS_IF_TRUE_LOGE_RETURN(inputText->size <= aeadTagLen, HKS_ERROR_INVALID_ARGUMENT, "too small inputText size")
         inputText->size -= aeadTagLen;
 
         tagParam.blob.size = aeadTagLen;
@@ -162,6 +162,7 @@ int32_t HksFillAeadParam(
 
     aeadParam->nonce = nonceParam->blob;
     aeadParam->aad = aadParam->blob;
+    aeadParam->hasMiniAad = hasMiniAad;
     aeadParam->payloadLen = 0;
     usageSpec->algParam = aeadParam;
     return HKS_SUCCESS;

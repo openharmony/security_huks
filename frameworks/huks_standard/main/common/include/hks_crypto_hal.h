@@ -57,6 +57,7 @@ struct HksAeadParam {
         uint32_t tagLenEnc;
     };
     uint32_t payloadLen;
+    bool hasMiniAad; /* true if HKS_TAG_AAD, false if HKS_TAG_ASSOCIATED_DATA */
 };
 
 struct HksCipherParam {

@@ -181,6 +181,7 @@ static void AddHuksTagPart1(JSIValue tag)
     AddInt32PropertyInLite(tag, "HUKS_TAG_BLOCK_MODE", HKS_TAG_BLOCK_MODE);
     AddInt32PropertyInLite(tag, "HUKS_TAG_KEY_TYPE", HKS_TAG_KEY_TYPE);
     AddInt32PropertyInLite(tag, "HUKS_TAG_ASSOCIATED_DATA", HKS_TAG_ASSOCIATED_DATA);
+    AddInt32PropertyInLite(tag, "HUKS_TAG_AAD", HKS_TAG_AAD);
     AddInt32PropertyInLite(tag, "HUKS_TAG_NONCE", HKS_TAG_NONCE);
     AddInt32PropertyInLite(tag, "HUKS_TAG_IV", HKS_TAG_IV);
 
