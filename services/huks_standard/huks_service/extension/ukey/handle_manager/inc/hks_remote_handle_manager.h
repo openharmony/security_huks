@@ -148,8 +148,19 @@ const std::map<int32_t, int32_t> g_getPropertyErrCodeMapping = {
     {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
 };
 
-//TODO：确认错误码准确性
 const std::map<int32_t, int32_t> g_importWrappedKeyErrCodeMapping = {
+    {EXTENSION_SUCCESS, HKS_SUCCESS},
+    {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
+    {EXTENSION_ERRCODE_UKEY_NOT_EXIST, HUKS_ERR_CODE_CRYPTO_FAIL},
+    {EXTENSION_ERRCODE_UKEY_FAIL, HUKS_ERR_CODE_CRYPTO_FAIL},
+    {EXTENSION_ERRCODE_HANDLE_NOT_EXIST, HUKS_ERR_CODE_ITEM_NOT_EXIST},
+    {EXTENSION_ERRCODE_HANDLE_FAIL, HUKS_ERR_CODE_ITEM_NOT_EXIST},
+    {EXTENSION_ERRCODE_PIN_NOT_AUTH, HKS_ERROR_PIN_NO_AUTH},
+    {EXTENSION_ERRCODE_PIN_LOCKED, HUKS_ERR_CODE_PIN_LOCKED},
+    {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
+};
+
+const std::map<int32_t, int32_t> g_exportPublicKeyErrCodeMapping = {
     {EXTENSION_SUCCESS, HKS_SUCCESS},
     {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
     {EXTENSION_ERRCODE_UKEY_NOT_EXIST, HUKS_ERR_CODE_CRYPTO_FAIL},
@@ -190,6 +201,8 @@ public:
 
     int32_t GetRemoteProperty(const HksProcessInfo &processInfo, const std::string& index,
         const std::string& propertyId, const CppParamSet& paramSet, CppParamSet& outParams);
+    int32_t RemoteExportPublicKey(const HksProcessInfo &processInfo, const std::string &index,
+        const CppParamSet &paramSet, std::vector<uint8_t> &outData);
 
     int32_t RemoteImportWrappedKey(const HksProcessInfo &processInfo, const std::string &index,
         const std::string &wrappingKeyIndex, const CppParamSet &paramSet, const std::vector<uint8_t> &wrappedData);

@@ -105,6 +105,12 @@ public:
         const CppParamSet& params,
         const std::vector<uint8_t>& wrappedData,
         int32_t& errcode) override;
+
+    ErrCode ExportPublicKey(
+        const std::string& index,
+        const CppParamSet& params,
+        std::vector<uint8_t>& outData,
+        int32_t& errcode) override;
 private:
     std::shared_ptr<HksCryptoExtAbility> extension_;
 };

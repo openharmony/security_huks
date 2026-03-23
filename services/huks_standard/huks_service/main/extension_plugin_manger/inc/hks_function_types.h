@@ -46,8 +46,8 @@ enum class PluginMethodEnum {
 
     FUNC_ON_UNREGISTER_ALL_OBSERVERS,
 
-    FUNC_ON_EXPORT_PUBLIC_KEY,
     FUNC_ON_IMPORT_WRAPPED_KEY,
+    FUNC_ON_EXPORT_PUBLIC_KEY,
 
     COUNT = 17,
 };
@@ -80,7 +80,6 @@ using OnFinishSessionFunc = int32_t (*)(const HksProcessInfo &processInfo, const
 using OnAbortSessionFunc = int32_t (*)(const HksProcessInfo &processInfo, const uint32_t &handle,
     const CppParamSet &paramSet);
 using OnUnregisterAllObserversFunc = int32_t (*)();
-
 using OnExportPublicKeyFunc = int32_t (*)(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, std::vector<uint8_t> &outData);
 using OnImportWrappedKeyFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,

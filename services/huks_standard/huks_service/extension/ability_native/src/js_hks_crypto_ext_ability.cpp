@@ -1533,6 +1533,35 @@ int32_t JsHksCryptoExtAbility::ImportWrappedKey(const std::string &index, const 
     return dataParam->hksErrorCode;
 }
 
+int32_t JsHksCryptoExtAbility::ExportPublicKey(const std::string &index, const CppParamSet &params,
+    std::vector<uint8_t> &outData, int32_t &errcode)
+{
+    auto argParser = [index, params](napi_env &env, napi_value *argv, size_t &argc) -> bool {
+        struct IndexInfoParam param = {
+            index,
+            params,
+        };
+        return BuildIndexInfoParam(env, param, argv, argc);
+    };
+    std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
+    dataParam->paramType = CryptoResultParamType::EXPORT_PUBLIC_KEY;
+    auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
+        return CheckAndCallPromise(env, result, dataParam);
+    };
+
+    dataParam->callJsExMethodDone.store(false);
+    auto ret = CallJsMethod("onExportPublicKey", jsRuntime_, jsObj_.get(), argParser, retParser);
+    if (ret != ERR_OK) {
+        LOGE("CallJsMethod error, code:%d", ret);
+        return ret;
+    }
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
+    if (dataParam->hksErrorCode == HKS_SUCCESS) {
+        outData = dataParam->outData;
+    }
+    return dataParam->hksErrorCode;
+}
+
 PromiseCallbackInfo::PromiseCallbackInfo(std::shared_ptr<CryptoResultParam> cryptoResultParam)
     : cryptoResultParam_(cryptoResultParam)
 {}

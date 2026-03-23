@@ -67,6 +67,8 @@ public:
         const CppParamSet &paramSet);
     int32_t OnImportWrappedKey(const HksProcessInfo &processInfo, const std::string &index,
         const std::string &wrappingKeyIndex, const CppParamSet &paramSet, const std::vector<uint8_t> &wrappedData);
+    int32_t OnExportPublicKey(const HksProcessInfo &processInfo, const std::string &index,
+        const CppParamSet &paramSet, std::vector<uint8_t> &outData);
 
 private:
     std::atomic<int32_t> m_refCount{0};
