@@ -631,6 +631,18 @@ static int32_t AesEncryptGcmInit(void **cryptoCtx, const struct HksUsageSpec *us
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
+#ifndef USE_HISI_MBED
+    if (aeadParam->hasMiniAad) {
+        ret = mbedtls_gcm_update_ad(gcmCtx, aeadParam->aad.data, aeadParam->aad.size);
+        if (ret != HKS_MBEDTLS_SUCCESS) {
+            HKS_LOG_E("Mbedtls aes gcm update ad failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
+            mbedtls_gcm_free(gcmCtx);
+            HKS_FREE(gcmCtx);
+            return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+        }
+    }
+#endif
+
     struct HksMbedtlsAesCtx *outCtx = (struct HksMbedtlsAesCtx *)HksMalloc(sizeof(struct HksMbedtlsAesCtx));
     if (outCtx == NULL) {
         HKS_LOG_E("initialize outCtx fail");
@@ -808,6 +820,18 @@ static int32_t AesDecryptGcmInit(void **cryptoCtx, const struct HksBlob *key, co
         HKS_FREE(gcmCtx);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
+
+#ifndef USE_HISI_MBED
+    if (aeadParam->hasMiniAad) {
+        ret = mbedtls_gcm_update_ad(gcmCtx, aeadParam->aad.data, aeadParam->aad.size);
+        if (ret != HKS_MBEDTLS_SUCCESS) {
+            HKS_LOG_E("Mbedtls aes gcm update ad failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
+            mbedtls_gcm_free(gcmCtx);
+            HKS_FREE(gcmCtx);
+            return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+        }
+    }
+#endif
 
     struct HksMbedtlsAesCtx *outCtx = (struct HksMbedtlsAesCtx *)HksMalloc(sizeof(struct HksMbedtlsAesCtx));
     if (outCtx == NULL) {
