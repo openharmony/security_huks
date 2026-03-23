@@ -34,6 +34,7 @@ static uint32_t g_validTags[] = {
     HKS_TAG_BLOCK_MODE,
     HKS_TAG_KEY_TYPE,
     HKS_TAG_ASSOCIATED_DATA,
+    HKS_TAG_AAD,
     HKS_TAG_NONCE,
     HKS_TAG_IV,
 
