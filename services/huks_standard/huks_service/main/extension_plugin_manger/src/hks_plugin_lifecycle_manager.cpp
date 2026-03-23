@@ -364,6 +364,21 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnImportWrappedKey(const HksProcessIn
     return HKS_SUCCESS;
 }
 
+ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnExportPublicKey(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, std::vector<uint8_t> &outData))
+{
+    AutoRefCount refCnt(m_refCount, soMutex);
+    void *funcPtr = nullptr;
+    bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_EXPORT_PUBLIC_KEY, funcPtr);
+    HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "ExportPublicKey method enum not found in plugin provider map.")
+    
+    int32_t ret = (*reinterpret_cast<OnExportPublicKeyFunc>(funcPtr))(processInfo, index, paramSet, outData);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ExportPublicKey fail, ret = %" LOG_PUBLIC "d", ret)
+    HKS_LOG_I("export public key success");
+    return HKS_SUCCESS;
+}
+
 }
 }
 }

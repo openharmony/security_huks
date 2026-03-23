@@ -141,6 +141,13 @@ int32_t HksCryptoExtAbility::ImportWrappedKey(const std::string &index, const st
     return HKS_ERROR_EXT_UNDEFINED_OPERATION;
 }
 
+int32_t HksCryptoExtAbility::ExportPublicKey(const std::string &index, const CppParamSet &params,
+    std::vector<uint8_t> &outData, int32_t &errcode)
+{
+    LOGE("HksCryptoExtAbility::ExportPublicKey Undefined operation");
+    return HKS_ERROR_EXT_UNDEFINED_OPERATION;
+}
+
 } // namespace HUKS
 } // namespace Security
 } // namespace OHOS

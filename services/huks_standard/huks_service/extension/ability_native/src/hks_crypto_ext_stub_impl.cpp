@@ -169,13 +169,26 @@ ErrCode HksCryptoExtStubImpl::ImportWrappedKey(
     const std::string& wrappingKeyIndex,
     const CppParamSet& params,
     const std::vector<uint8_t>& wrappedData,
-    int32_t& errcode)
+     int32_t& errcode)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
         return HKS_ERROR_EXT_NULLPTR;
     }
     return extension_->ImportWrappedKey(index, wrappingKeyIndex, params, wrappedData, errcode);
+}
+
+ErrCode HksCryptoExtStubImpl::ExportPublicKey(
+    const std::string& index,
+    const CppParamSet& params,
+    std::vector<uint8_t>& outData,
+    int32_t& errcode)
+{
+    if (extension_ == nullptr) {
+        LOGE("extension is nullptr");
+        return HKS_ERROR_EXT_NULLPTR;
+    }
+    return extension_->ExportPublicKey(index, params, outData, errcode);
 }
 
 } // namespace Huks

@@ -60,6 +60,8 @@ public:
     virtual int ClearUkeyPinAuthState(const std::string& handle, const CppParamSet& params, int32_t& errcode);
     virtual int ImportWrappedKey(const std::string& index, const std::string& wrappingKeyIndex,
         const CppParamSet& params, const std::vector<uint8_t>& wrappedData, int32_t& errcode);
+    virtual int ExportPublicKey(const std::string& index, const CppParamSet& params,
+        std::vector<uint8_t>& outData, int32_t& errcode);
 private:
     static CreatorFunc creator_;
 };
