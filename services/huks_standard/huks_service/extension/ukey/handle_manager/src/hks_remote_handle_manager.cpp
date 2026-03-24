@@ -437,18 +437,12 @@ int32_t HksRemoteHandleManager::RemoteImportWrappedKey(const HksProcessInfo &pro
     ProviderInfo wrappingKeyProviderInfo;
     ret = ParseIndexAndProviderInfo(wrappingKeyIndex, wrappingKeyProviderInfo, newWrappingKeyIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ParseIndexAndProviderInfo for wrapping key failed, ret = %" LOG_PUBLIC "d", ret)
-    
-    auto ipccode = proxy->ExportCertificate(newIndex, paramSet, cert, ret);
-    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    ret = ConvertExtensionToHksErrorCode(ret, g_exportCertErrCodeMapping);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote ExportCertificate failed: %" LOG_PUBLIC "d", ret)
-
 
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
-    auto ipccode = proxy->ImportWrappedKey(newIndex, newWrappingKeyIndex, paramSet, wrappedData);
+    auto ipccode = proxy->ImportWrappedKey(newIndex, newWrappingKeyIndex, paramSet, wrappedData, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     ret = ConvertExtensionToHksErrorCode(ret, g_importWrappedKeyErrCodeMapping);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote ImportWrappedKey failed: %" LOG_PUBLIC "d", ret)

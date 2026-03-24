@@ -249,6 +249,50 @@ bool MakeJsNativeVectorInData(const napi_env &env, const std::vector<uint8_t> &i
     return true;
 }
 
+bool BuildImportWrappedKeyParam(const napi_env &env, const ImportWrappedKeyParam &param,
+    napi_value *argv, size_t &argc)
+{
+    napi_value nativeIndex = nullptr;
+    auto status = napi_create_string_utf8(env, param.index.c_str(), param.index.length(), &nativeIndex);
+    if (status != napi_ok) {
+        LOGE("create string utf8 failed, status:%d", status);
+        return false;
+    };
+
+    napi_value nativeWrappingKeyIndex = nullptr;
+    status = napi_create_string_utf8(env, param.wrappingKeyIndex.c_str(), param.wrappingKeyIndex.length(), &nativeWrappingKeyIndex);
+    if (status != napi_ok) {
+        LOGE("create string utf8 failed, status:%d", status);
+        return false;
+    };
+
+    napi_value nativeCppParamSet = nullptr;
+    if (param.params.GetParamSet()) {
+        status = napi_create_object(env, &nativeCppParamSet);
+        if (nativeCppParamSet == nullptr) {
+            LOGE("Create js NativeValue object failed, status:%d", status);
+            return false;
+        }
+        nativeCppParamSet = GenerateHksParamArray(env, *param.params.GetParamSet());
+        if (nativeCppParamSet == nullptr) {
+            return false;
+        }
+    }
+
+    napi_value nativeWrappedData = nullptr;
+    if (!MakeJsNativeVectorInData(env, param.wrappedData, nativeWrappedData)) {
+        LOGE("Make js NativeValue vector failed");
+        return false;
+    }
+
+    argv[ARGC_ZERO] = nativeIndex;
+    argv[ARGC_ONE] = nativeWrappingKeyIndex;
+    argv[ARGC_TWO] = nativeCppParamSet;
+    argv[ARGC_THREE] = nativeWrappedData;
+    argc = ARGC_THREE;
+    return true;
+}
+
 bool BuildHandleInfoParam(const napi_env &env, const HandleInfoParam &param, napi_value *argv, size_t &argc)
 {
     napi_value nativeHandle = nullptr;
