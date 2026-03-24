@@ -41,7 +41,8 @@ typedef enum {
     FINISH_SESSION,
     GET_PROPERTY,
     CLEAR_UKEY_PIN_AUTH,
-    IMPORT_WRAPPED_KEY
+    IMPORT_WRAPPED_KEY,
+    EXPORT_PUBLIC_KEY
 } CryptoResultParamType;
 
 typedef struct HksCertInfo {

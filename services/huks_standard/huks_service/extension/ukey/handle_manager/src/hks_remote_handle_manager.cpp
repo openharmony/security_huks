@@ -450,6 +450,27 @@ int32_t HksRemoteHandleManager::RemoteImportWrappedKey(const HksProcessInfo &pro
     return ret;
 }
 
+int32_t HksRemoteHandleManager::RemoteExportPublicKey(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, std::vector<uint8_t> &outData)
+{
+    std::string newIndex;
+    ProviderInfo providerInfo;
+    int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ParseIndexAndProviderInfo failed, ret = %" LOG_PUBLIC "d", ret)
+
+    OHOS::sptr<IHuksAccessExtBase> proxy;
+    ret = GetProviderProxy(providerInfo, proxy);
+    HKS_IF_NULL_RETURN(proxy, ret)
+
+    auto ipccode = proxy->ExportPublicKey(newIndex, paramSet, outData, ret);
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK,
+        HKS_ERROR_IPC_MSG_FAIL, "ExportPublicKey failed, ret = %" LOG_PUBLIC "d", ipccode)
+    ret = ConvertExtensionToHksErrorCode(ret, g_exportPublicKeyErrCodeMapping);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ExportPublicKey failed, ret = %" LOG_PUBLIC "d", ret)
+
+    return ret;
+}
+
 int32_t HksRemoteHandleManager::ClearUidIndexMap(const ProviderInfo &providerInfo)
 {
     std::vector<std::pair<uint32_t, std::string>> indicesToRemove;
