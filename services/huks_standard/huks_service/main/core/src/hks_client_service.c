@@ -1163,6 +1163,15 @@ int32_t HksServiceExportPublicKey(const struct HksProcessInfo *processInfo, cons
         ret = HksCheckExportPublicKeyParams(&processInfo->processName, keyAlias, key);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check export public key params failed, ret = %" LOG_PUBLIC "d", ret)
 
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+        if (HksCheckIsUkeyOperation(paramSet, &ret) == HKS_SUCCESS) {
+            ret = HksServiceOnUkeyExportPublicKey(processInfo, keyAlias, paramSet, key);
+            HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyExportPublicKey fail, ret = %" LOG_PUBLIC "d", ret)
+            break;
+        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", ret)
+#endif
+
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE(ret, "export public: get main key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
 
