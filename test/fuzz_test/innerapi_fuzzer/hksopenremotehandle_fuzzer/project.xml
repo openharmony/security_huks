@@ -14,7 +14,7 @@
      limitations under the License.
  -->
 <fuzz_config>
-  <fuzztesttest>
+  <fuzztest>
     <!-- maximum length of a test input -->
     <max_len>1000</max_len>
     <!-- maximum total time in seconds to run the fuzzer -->
