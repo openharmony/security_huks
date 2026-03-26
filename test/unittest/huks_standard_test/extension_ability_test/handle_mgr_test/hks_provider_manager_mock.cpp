@@ -189,6 +189,17 @@ ErrCode ExportProviderCertificates(
         const CppParamSet& params,
         std::vector<uint8_t>& outData,
         int32_t& errcode) { return HKS_SUCCESS; };
+    
+    ErrCode ImportCertificate(
+        const std::string& index,
+        const std::string& certJsonStr,
+        const CppParamSet& params,
+        int32_t& errcode) { return HKS_SUCCESS; };
+
+    ErrCode GenerateKey(
+        const std::string& index,
+        const CppParamSet& params,
+        int32_t& errcode) { return HKS_SUCCESS; };
 };
 
 bool ProviderInfo::operator==(const ProviderInfo &other) const

@@ -171,10 +171,10 @@ static void RegisterOtherMethodMaps(OHOS::SafeMap<PluginMethodEnum, std::string>
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet");
     map.Insert(PluginMethodEnum::FUNC_ON_UNREGISTER_ALL_OBSERVERS,
         "_ZN4OHOS8Security4Huks36HksExtPluginOnUnregisterAllObserversEv");
-    m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_EXPORT_PUBLIC_KEY,
+    map.Insert(PluginMethodEnum::FUNC_ON_EXPORT_PUBLIC_KEY,
         "_ZN4OHOS8Security4Huks29HksExtPluginOnExportPublicKeyERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRNS5_6vectorIhNS9_IhEEEE");
-    m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_IMPORT_WRAPPED_KEY,
+    map.Insert(PluginMethodEnum::FUNC_ON_IMPORT_WRAPPED_KEY,
         "_ZN4OHOS8Security4Huks30HksExtPluginOnImportWrappedKeyERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEESD_RK11CppParamSetRKNS5_6vectorIhNS9_IhEEEE");
 }

@@ -150,6 +150,17 @@ public:
         const CppParamSet& params,
         std::vector<uint8_t>& outData,
         int32_t& errcode) { return -1; };
+    
+    ErrCode ImportCertificate(
+        const std::string& index,
+        const std::string& certJsonStr,
+        const CppParamSet& params,
+        int32_t& errcode) { return -1; };
+
+    ErrCode GenerateKey(
+        const std::string& index,
+        const CppParamSet& params,
+        int32_t& errcode) { return -1; };
 };
 
 void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementName &element,
