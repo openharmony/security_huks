@@ -228,56 +228,6 @@ int32_t HksIpcServiceOnGetRemotePropertyAdapter(const struct HksProcessInfo *pro
     return HKS_SUCCESS;
 }
 
-int32_t HksServiceOnUkeyImportWrappedKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    const struct HksBlob *wrappingKeyAlias, const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData)
-{
-    std::string cppIndex(reinterpret_cast<const char*>(keyAlias->data), keyAlias->size);
-    std::string cppWrappingKeyIndex(reinterpret_cast<const char*>(wrappingKeyAlias->data), wrappingKeyAlias->size);
-    CppParamSet cppParamSet(paramSet);
-    std::vector<uint8_t> wrappedData;
-    if (wrappedKeyData != nullptr && wrappedKeyData->data != nullptr && wrappedKeyData->size != 0) {
-        wrappedData.assign(wrappedKeyData->data, wrappedKeyData->data + wrappedKeyData->size);
-    }
-
-    auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
-
-    int32_t ret = pluginManager->OnImportWrappedKey(*processInfo, cppIndex, cppWrappingKeyIndex, cppParamSet, wrappedData);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnImportWrappedKey fail. ret: %" LOG_PUBLIC "d", ret)
-    
-    return ret;
-}
-
-int32_t HksServiceOnUkeyExportPublicKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSet, struct HksBlob *key)
-{
-    std::string cppIndex(reinterpret_cast<const char*>(keyAlias->data), keyAlias->size);
-    CppParamSet cppParamSet(paramSet);
-    std::vector<uint8_t> outdata;
-
-    auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
-    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
-
-    int32_t ret = pluginManager->OnExportPublicKey(*processInfo, cppIndex, cppParamSet, outdata);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnExportPublicKey fail. ret: %" LOG_PUBLIC "d", ret)
-
-    HKS_IF_TRUE_LOGI_RETURN(key == nullptr, ret, "key is nullptr. ret: %" LOG_PUBLIC "d", ret);
-    HKS_IF_TRUE_LOGI_RETURN(key->size == 0, ret, "key size is 0. ret: %" LOG_PUBLIC "d", ret);
-    HKS_IF_TRUE_LOGI_RETURN(key->data == nullptr, ret, "key data is nullptr. ret: %" LOG_PUBLIC "d", ret);
-    if (key->size < static_cast<uint32_t>(outdata.size())) {
-        HKS_LOG_E("exportPublicKey key size too small. size: %" LOG_PUBLIC "u. needSize: %" LOG_PUBLIC "zu",
-        key->size, outdata.size());
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
-    ret = memcpy_s(key->data, key->size, outdata.data(), outdata.size());
-    if (ret != EOK) {
-        HKS_LOG_E("memcpy in HksServiceOnUkeyExportPublicKey fail. ret:: %" LOG_PUBLIC "d", ret);
-        return HKS_ERROR_COPY_FAIL;
-    }
-    key->size = static_cast<uint32_t>(outdata.size());
-    return ret;
-}
-
 #ifdef __cplusplus
 }
 #endif
