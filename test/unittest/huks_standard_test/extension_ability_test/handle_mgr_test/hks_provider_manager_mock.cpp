@@ -176,6 +176,19 @@ ErrCode ExportProviderCertificates(
         const std::string& handle,
         const CppParamSet& params,
         int32_t& errcode) { return HKS_SUCCESS; };
+
+    ErrCode ImportWrappedKey(
+        const std::string& index,
+        const std::string& wrappingKeyIndex,
+        const CppParamSet& params,
+        const std::vector<uint8_t>& wrappedData,
+        int32_t& errcode) { return HKS_SUCCESS; };
+
+    ErrCode ExportPublicKey(
+        const std::string& index,
+        const CppParamSet& params,
+        std::vector<uint8_t>& outData,
+        int32_t& errcode) { return HKS_SUCCESS; };
 };
 
 bool ProviderInfo::operator==(const ProviderInfo &other) const
