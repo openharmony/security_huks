@@ -432,6 +432,7 @@ int32_t HksRemoteHandleManager::RemoteImportWrappedKey(const HksProcessInfo &pro
     ProviderInfo providerInfo{};
     int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ParseIndexAndProviderInfo failed, ret = %" LOG_PUBLIC "d", ret)
+    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
 
     std::string newWrappingKeyIndex;
     ProviderInfo wrappingKeyProviderInfo;
@@ -457,6 +458,7 @@ int32_t HksRemoteHandleManager::RemoteExportPublicKey(const HksProcessInfo &proc
     ProviderInfo providerInfo;
     int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ParseIndexAndProviderInfo failed, ret = %" LOG_PUBLIC "d", ret)
+    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
 
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);

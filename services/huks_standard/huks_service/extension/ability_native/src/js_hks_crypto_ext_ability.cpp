@@ -961,6 +961,11 @@ int32_t ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
         case CryptoResultParamType::GET_PROPERTY:
             GetGetPropertyParams(env, funcResult, resultParams);
             break;
+        case CryptoResultParamType::IMPORT_WRAPPED_KEY:
+            GetSessionParams(env, funcResult, resultParams);
+            break;
+        case CryptoResultParamType::EXPORT_PUBLIC_KEY:
+            break;
         case CryptoResultParamType::CLOSE_REMOTE_HANDLE:
         case CryptoResultParamType::CLEAR_UKEY_PIN_AUTH:
         default:
@@ -1524,12 +1529,41 @@ int32_t JsHksCryptoExtAbility::ImportWrappedKey(const std::string &index, const 
     };
 
     dataParam->callJsExMethodDone.store(false);
-    auto ret = CallJsMethod("onImportWrappedKey", jsRuntime_, jsObj_.get(), argParser, retParser);
+    auto ret = CallJsMethod("onImportWrappedKeyItem", jsRuntime_, jsObj_.get(), argParser, retParser);
     if (ret != ERR_OK) {
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
     WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
+    return dataParam->hksErrorCode;
+}
+
+int32_t JsHksCryptoExtAbility::ExportPublicKey(const std::string &index, const CppParamSet &params,
+    std::vector<uint8_t> &outData, int32_t &errcode)
+{
+    auto argParser = [index, params](napi_env &env, napi_value *argv, size_t &argc) -> bool {
+        struct IndexInfoParam param = {
+            index,
+            params,
+        };
+        return BuildIndexInfoParam(env, param, argv, argc);
+    };
+    std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
+    dataParam->paramType = CryptoResultParamType::EXPORT_PUBLIC_KEY;
+    auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
+        return CheckAndCallPromise(env, result, dataParam);
+    };
+
+    dataParam->callJsExMethodDone.store(false);
+    auto ret = CallJsMethod("onExportKeyItem", jsRuntime_, jsObj_.get(), argParser, retParser);
+    if (ret != ERR_OK) {
+        LOGE("CallJsMethod error, code:%d", ret);
+        return ret;
+    }
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
+    if (dataParam->hksErrorCode == HKS_SUCCESS) {
+        outData = dataParam->outData;
+    }
     return dataParam->hksErrorCode;
 }
 
