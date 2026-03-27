@@ -1462,9 +1462,11 @@ static int32_t AddAppInfoAndModelToParamSet(const struct HksProcessInfo *process
     return ret;
 }
 
-static int32_t DcmGenerateCertChainInAttestKey(const struct HksParamSet *paramSet, const uint8_t *remoteObject,
-    struct HksBlob *certChain, uint32_t certChainCapacity)
+static int32_t DcmGenerateCertChainInAttestKey(
+    const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+    const uint8_t *remoteObject, struct HksBlob *certChain, uint32_t certChainCapacity)
 {
+    (void)processInfo;
     (void)paramSet;
     (void)remoteObject;
     (void)certChain;
@@ -1475,7 +1477,13 @@ static int32_t DcmGenerateCertChainInAttestKey(const struct HksParamSet *paramSe
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
     HksUpgradeOrRequestUnlockRead();
 #endif
-    ret = DcmGenerateCertChain(certChain, remoteObject);
+    struct HksParam *anonyModeParam = NULL;
+    ret = HksGetParam(paramSet, HKS_TAG_ANONYMOUS_ATTESTATION_MODE, &anonyModeParam);
+    if (ret == HKS_SUCCESS && anonyModeParam->uint32Param == HKS_ANONYMOUS_ATTEST_OFFLINE) {
+        ret = DcmLocalGenerateCertChain(processInfo, certChain, remoteObject);
+    } else {
+        ret = DcmGenerateCertChain(certChain, remoteObject);
+    }
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
     HksUpgradeOrRequestLockRead();
 #endif
@@ -1543,7 +1551,7 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
         }
 #endif
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAttestKey fail, ret = %" LOG_PUBLIC "d.", ret)
-        ret = DcmGenerateCertChainInAttestKey(paramSet, remoteObject, certChain, certChainCapacity);
+        ret = DcmGenerateCertChainInAttestKey(processInfo, paramSet, remoteObject, certChain, certChainCapacity);
     } while (0);
 #ifdef L2_STANDARD
     HksOneStageReportInfo info = {ret, startTime, traceId.traceId.chainId, __func__, HKS_ONE_STAGE_ATTEST};

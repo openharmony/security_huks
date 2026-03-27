@@ -1229,4 +1229,64 @@ bool HksCheckIsAllowAsUserApi(struct HksParamSet *paramSet)
     return true;
 }
 
+napi_value ParseHuksParams(napi_env env, napi_value object, const std::vector<HksParam> &addParams,
+    HksParamSet *&paramSet)
+{
+    if (paramSet != nullptr) {
+        HKS_LOG_E("param input invalid");
+        return nullptr;
+    }
+
+    napi_valuetype valueType = napi_valuetype::napi_undefined;
+    napi_typeof(env, object, &valueType);
+
+    if (valueType != napi_valuetype::napi_object) {
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "the type of param is not object");
+        HKS_LOG_E("param not object");
+        return nullptr;
+    }
+
+    std::vector<HksParam> params{};
+    HksParamSet *outParamSet = nullptr;
+    do {
+        if (HksInitParamSet(&outParamSet) != HKS_SUCCESS) {
+            napi_throw_error(env, NULL, "native error");
+            HKS_LOG_E("paramset init failed");
+            break;
+        }
+
+        if (ParseParams(env, object, params) == nullptr) {
+            HKS_LOG_E("parse params failed");
+            break;
+        }
+
+        if (!params.empty()) {
+            if (HksAddParams(outParamSet, params.data(), params.size()) != HKS_SUCCESS) {
+                HKS_LOG_E("add params failed");
+                break;
+            }
+        }
+
+        if (!addParams.empty()) {
+            if (HksAddParams(outParamSet, addParams.data(), addParams.size()) != HKS_SUCCESS) {
+                HKS_LOG_E("add params failed");
+                break;
+            }
+        }
+
+        if (HksBuildParamSet(&outParamSet) != HKS_SUCCESS) {
+            HKS_LOG_E("HksBuildParamSet failed");
+            break;
+        }
+
+        FreeParsedParams(params);
+        paramSet = outParamSet;
+        return GetInt32(env, 0);
+    } while (0);
+
+    HksFreeParamSet(&outParamSet);
+    FreeParsedParams(params);
+    return nullptr;
+}
+
 }  // namespace HuksNapiItem

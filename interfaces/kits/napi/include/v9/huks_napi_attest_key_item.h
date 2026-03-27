@@ -37,6 +37,8 @@ using AttestKeyAsyncContext = AttestKeyAsyncContextT *;
 
 AttestKeyAsyncContext CreateAttestKeyAsyncContext(bool isAnon);
 
+int32_t InitCertChain(struct HksCertChain *certChain, uint32_t *certChainCapacity);
+
 void DeleteAttestKeyAsyncContext(napi_env env, AttestKeyAsyncContext &context);
 
 napi_value AttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext &context);
