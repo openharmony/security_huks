@@ -183,6 +183,9 @@ napi_value CreateJsError(napi_env env, int32_t errCode, const char *errorMsg);
 
 void SetRetryCount(int32_t retryCount);
 
+napi_value ParseHuksParams(napi_env env, napi_value object, const std::vector<HksParam> &addParams,
+    HksParamSet *&paramSet);
+
 inline void HksNapiThrow(napi_env env, int32_t errCode, const char *errorMsg)
 {
     napi_throw(env, CreateJsError(env, errCode, errorMsg));

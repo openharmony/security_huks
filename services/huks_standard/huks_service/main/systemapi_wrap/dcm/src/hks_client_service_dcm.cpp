@@ -25,18 +25,21 @@
 
 #include <cinttypes>
 #include <securec.h>
-
+#include "hks_util.h"
 #include "hks_cfi.h"
 #include "hks_dcm_callback_handler.h"
 #include "hks_log.h"
 #include "hks_template.h"
 #include "hks_type.h"
+#include "hks_plugin_def.h"
+
+#define HKS_DCM_VALID_TIME_SECONDS 3600
 
 ENABLE_CFI(int32_t DcmGenerateCertChain(struct HksBlob *cert, const uint8_t *remoteObject))
 {
-    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(cert), HKS_ERROR_INVALID_ARGUMENT, "invalid in cert");
-    AttestFunction fun = HksOpenDcmFunction();
-    HKS_IF_NULL_LOGE_RETURN(fun, HKS_ERROR_UNKNOWN_ERROR, "HksOpenDcmFunction failed");
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(cert), HKS_ERROR_NEW_INVALID_ARGUMENT, "invalid in cert");
+    AttestFunction fun = HksGetDcmFunction<AttestFunction>("DcmAnonymousAttestKey");
+    HKS_IF_NULL_LOGE_RETURN(fun, HKS_ERROR_UNKNOWN_ERROR, "HksGetDcmFunction failed");
     int ret = HKS_ERROR_UNKNOWN_ERROR;
     do {
         DcmAnonymousRequest request = {
@@ -60,6 +63,46 @@ ENABLE_CFI(int32_t DcmGenerateCertChain(struct HksBlob *cert, const uint8_t *rem
             break;
         }
         ret = HksDcmCallbackHandlerSetRequestIdWithoutLock(remoteObject, request.requestId);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDcmCallbackHandlerSetRequestIdWithoutLock failed %" LOG_PUBLIC "d", ret)
+        return HKS_SUCCESS;
+    } while (false);
+    return ret;
+}
+
+ENABLE_CFI(int32_t DcmLocalGenerateCertChain(const struct HksProcessInfo *processInfo, struct HksBlob *cert,
+    const uint8_t *remoteObject))
+{
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(cert), HKS_ERROR_INVALID_ARGUMENT, "invalid in cert");
+    LocalAttestFunction fun = HksGetDcmFunction<LocalAttestFunction>("DcmLocalApplyAnonymousAttestKey");
+    HKS_IF_NULL_LOGE_RETURN(fun, HKS_ERROR_UNKNOWN_ERROR, "HksGetDcmFunction DcmLocalApplyAnonymousAttestKey failed");
+
+    uint64_t timestapSe = 0;
+    int32_t ret = HksGetCurTime(&timestapSe);
+    DcmApplyAnonymousRequest request = {
+        .callingUid = processInfo->uidInt,
+        .curUTCTime = timestapSe,
+        .tokenID = processInfo->accessTokenId,
+        .remainValidatePeriod = HKS_DCM_VALID_TIME_SECONDS,
+        .requestId = 0,
+    };
+    do {
+        // We got a requestId after invoking DcmAnonymousAttestKey function,
+        // and the implementation of DcmAnonymousAttestKey will invoke our HksDcmCallback in a new thread.
+        // To avoid that the new thread will call HksDcmCallback before
+        // HksDcmCallbackHandlerSetRequestIdWithoutLock, we bind the getting requestId operation and setting
+        // requestId openration with one lock guard.
+        std::lock_guard<std::mutex> lockGuard(HksDcmOfflineCallbackHandlerGetMapMutex());
+        ret = fun(&request, (DcmBlob *)cert, [](DcmAnonymousResponse *response) {
+            HksDcmOfflineCallback(response);
+        });
+        HKS_LOG_I("got requestId %" LOG_PUBLIC PRIu64, request.requestId);
+        if (ret != DCM_SUCCESS) {
+            HKS_LOG_E("DcmAnonymousAttestKey failed %" LOG_PUBLIC "d", ret);
+            ret = HUKS_ERR_CODE_EXTERNAL_ERROR;
+            // We will not add callback instance into map and ignore callback in case of error.
+            break;
+        }
+        ret = HksDcmOfflineCallbackHandlerSetRequestIdWithoutLock(remoteObject, request.requestId);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDcmCallbackHandlerSetRequestIdWithoutLock failed %" LOG_PUBLIC "d", ret)
         return HKS_SUCCESS;
     } while (false);

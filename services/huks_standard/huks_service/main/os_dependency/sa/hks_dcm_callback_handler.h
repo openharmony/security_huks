@@ -22,7 +22,10 @@
 #endif
 
 typedef enum {
-    DCM_SUCCESS = 0
+    DCM_SUCCESS = 0,
+    DCM_ERROR_NETWORK_UNAVALIABLE = 20023,
+    DCM_ERROR_SERVICE_TIME_OUT = 20024,
+    DCM_ERROR_INVALID_PRIVACY_KEY = 30010
 } DcmErrorCode;
 
 struct DcmBlob {
@@ -47,8 +50,18 @@ typedef struct {
     DcmCertChain *certChain;
 } DcmAnonymousResponse;
 
+typedef struct {
+    uint32_t callingUid;
+    uint32_t curUTCTime;
+    uint32_t tokenID;
+    uint32_t remainValidatePeriod;
+    uint64_t requestId;
+} DcmApplyAnonymousRequest;
+
 typedef void (*DcmCallback)(DcmAnonymousResponse *response);
 typedef int32_t (*AttestFunction)(DcmAnonymousRequest *requset, DcmCallback callback);
+typedef int32_t (*LocalAttestFunction)(DcmApplyAnonymousRequest *request, DcmBlob *localKeyAttest,
+    DcmCallback callback);
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,18 +69,23 @@ extern "C" {
 
 void HksDcmCallback(DcmAnonymousResponse *response);
 
+void HksDcmOfflineCallback(DcmAnonymousResponse *response);
+
 int32_t HksDcmCallbackHandlerSetRequestIdWithoutLock(const uint8_t *remoteObject, uint64_t requestId);
 
-AttestFunction HksOpenDcmFunction(void);
+int32_t HksDcmOfflineCallbackHandlerSetRequestIdWithoutLock(const uint8_t *remoteObject, uint64_t requestId);
 
 void HksCloseDcmFunction(void);
 
 #ifdef __cplusplus
 } // extern "C"
-#endif
 
-#ifdef __cplusplus
 std::mutex &HksDcmCallbackHandlerGetMapMutex(void);
+
+std::mutex &HksDcmOfflineCallbackHandlerGetMapMutex(void);
+
+template<typename T>
+T HksGetDcmFunction(const char* functionName);
 #endif
 
 #endif // HKS_DCM_CALLBACK_HANDLER_H

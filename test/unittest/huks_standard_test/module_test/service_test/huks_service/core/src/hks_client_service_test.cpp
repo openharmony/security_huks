@@ -25,6 +25,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_plugin_def.h"
 #include "hks_session_manager.h"
 #include "hks_type_inner.h"
 
@@ -982,7 +983,8 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest018, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
 
     uint8_t remoteObject[] = {1, 2, 3, 4, 5};
-    ret = DcmGenerateCertChainInAttestKey(newParamSet, remoteObject, certChain, 0);
+    struct HksProcessInfo processInfo{};
+    ret = DcmGenerateCertChainInAttestKey(&processInfo, newParamSet, remoteObject, certChain, 0);
     ASSERT_EQ(ret, HKS_SUCCESS);
     ret = AccessAttestKey(certChain, newParamSet, certChain);
     ASSERT_NE(ret, HKS_SUCCESS);

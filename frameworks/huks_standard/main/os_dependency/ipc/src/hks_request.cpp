@@ -109,7 +109,8 @@ static int32_t HksSendAnonAttestRequestAndWaitAsyncReply(MessageParcel &data, co
     auto [errCode, packedCerts, packedSize] = hksCallback->WaitForAsyncReply(timeout);
     if (errCode != HKS_SUCCESS || packedCerts == nullptr || packedSize == 0) {
         HKS_LOG_E("errCode %" LOG_PUBLIC "u fail or packedCerts empty or size %" LOG_PUBLIC "u 0", errCode, packedSize);
-        return HUKS_ERR_CODE_EXTERNAL_ERROR;
+        HKS_IF_TRUE_LOGE_RETURN(errCode == HKS_SUCCESS, HUKS_ERR_CODE_EXTERNAL_ERROR, "external fail")
+        return errCode;
     }
 
     if (outBlob->size < packedSize) {

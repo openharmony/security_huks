@@ -24,6 +24,7 @@ group("fuzztest") {
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksabort_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksagreekey_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksanonattestkey_fuzzer:fuzztest",
+        "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksanonattestkeyoffline_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksattestkey_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksauthukeypin_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksbnexpmod_fuzzer:fuzztest",
