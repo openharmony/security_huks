@@ -522,6 +522,8 @@ int32_t HksRemoteHandleManager::ExtensionGenerateKey(const HksProcessInfo &proce
     auto ipccode = proxy->GenerateKey(handle, paramSet, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL,
         "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
+    ret = ConvertExtensionToHksErrorCode(ret, g_generateKeyErrCodeMapping);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ExtensionGenerateKey failed, ret = %" LOG_PUBLIC "d", ret)
     HKS_LOG_I("leave HksRemoteHandleManager::GenerateKey, ret = %" LOG_PUBLIC "d", ret);
     return HKS_SUCCESS;
 }

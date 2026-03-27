@@ -59,22 +59,6 @@ int32_t HksIpcProviderUnregAdapter(const struct HksProcessInfo *processInfo, con
     return OHOS::Security::Huks::HksIpcServiceProviderUnRegister(processInfo, cppresourceId, cppParamSet);
 }
 
-int32_t HksIpcGenerateUkeyKeyAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    const struct HksBlob *resourceId, const struct HksParamSet *paramSet)
-{
-    int32_t ret = HksIpcCheckBlob(keyAlias, 1, HKS_MAX_KEY_ALIAS_LEN);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcGenerateUkeyKeyAdapter invalid keyAlias blob")
-
-    ret = HksIpcCheckBlob(resourceId, 1, HKS_EXT_MAX_RESOURCE_ID_LEN);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcGenerateUkeyKeyAdapter invalid resourceId blob")
-
-    std::string cppKeyAlias(reinterpret_cast<const char*>(keyAlias->data), keyAlias->size);
-    std::string cppResourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
-    CppParamSet cppParamSet(paramSet);
-
-    return OHOS::Security::Huks::HksIpcServiceOnGenerateUkeyKey(processInfo, cppKeyAlias, cppResourceId, cppParamSet);
-}
-
 int32_t HksIpcCreateRemKeyHandleAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
     const struct HksParamSet *paramSet)
 {

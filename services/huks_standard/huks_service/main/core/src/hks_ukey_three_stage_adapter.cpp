@@ -129,7 +129,7 @@ int32_t HksServiceOnUkeyUpdateSession(const struct HksProcessInfo *processInfo, 
 
     HKS_IF_TRUE_LOGI_RETURN(outData->size == 0, ret, "outData size is 0. ret: %" LOG_PUBLIC "d", ret);
     HKS_IF_TRUE_LOGI_RETURN(outData->data == nullptr, ret, "outData data is nullptr. ret: %" LOG_PUBLIC "d", ret);
-    if (outData->size < static_cast<uint32_t>(outdata.size())) {
+    if (outData->size < outdata.size()) {
         HKS_LOG_E("updateSession outData size too small. size: %" LOG_PUBLIC "u. needSize: %" LOG_PUBLIC "zu",
         outData->size, outdata.size());
         return HKS_ERROR_INSUFFICIENT_MEMORY;
@@ -168,7 +168,7 @@ int32_t HksServiceOnUkeyFinishSession(const struct HksProcessInfo *processInfo, 
 
     HKS_IF_TRUE_LOGI_RETURN(outData->size == 0, ret, "outData size is 0. ret: %" LOG_PUBLIC "d", ret);
     HKS_IF_TRUE_LOGI_RETURN(outData->data == nullptr, ret, "outData data is nullptr. ret: %" LOG_PUBLIC "d", ret);
-    if (outData->size < static_cast<uint32_t>(outdata.size())) {
+    if (outData->size < outdata.size()) {
         HKS_LOG_E("finishSession outData size too small. size: %" LOG_PUBLIC "u. needSize: %" LOG_PUBLIC "zu",
         outData->size, outdata.size());
         return HKS_ERROR_INSUFFICIENT_MEMORY;
@@ -233,9 +233,7 @@ int32_t HksServiceOnUkeyExportPublicKey(const struct HksProcessInfo *processInfo
     int32_t ret = pluginManager->OnExportPublicKey(*processInfo, cppIndex, cppParamSet, outdata);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnExportPublicKey fail. ret: %" LOG_PUBLIC "d", ret)
 
-    HKS_IF_TRUE_LOGI_RETURN(key->size == 0, ret, "key size is 0. ret: %" LOG_PUBLIC "d", ret);
-    HKS_IF_TRUE_LOGI_RETURN(key->data == nullptr, ret, "key data is nullptr. ret: %" LOG_PUBLIC "d", ret);
-    if (key->size < static_cast<uint32_t>(outdata.size())) {
+    if (key->size < outdata.size()) {
         HKS_LOG_E("exportPublicKey key size too small. size: %" LOG_PUBLIC "u. needSize: %" LOG_PUBLIC "zu",
         key->size, outdata.size());
         return HKS_ERROR_INSUFFICIENT_MEMORY;
