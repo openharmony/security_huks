@@ -35,8 +35,8 @@ public:
     MOCK_METHOD(ErrCode, CloseRemoteHandle,
         (const std::string &handle, const CppParamSet &params, int &errcode), (override));
 
-    MOCK_METHOD(ErrCode, AuthUkeyPin,
-        (const std::string &handle, const CppParamSet &params, int &errcode, int &authState, unsigned int &retryCnt), (override));
+    MOCK_METHOD(ErrCode, AuthUkeyPin, (const std::string &handle, const CppParamSet &params,
+        int &errcode, int &authState, unsigned int &retryCnt), (override));
 
     MOCK_METHOD(ErrCode, GetUkeyPinAuthState,
         (const std::string &handle, const CppParamSet &params, int &state, int &errcode), (override));
@@ -50,29 +50,29 @@ public:
     MOCK_METHOD(ErrCode, InitSession,
         (const std::string &index, const CppParamSet &params, std::string &handle, int &errcode), (override));
 
-    MOCK_METHOD(ErrCode, UpdateSession,
-        (const std::string &handle, const CppParamSet &params, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData, int &errcode), (override));
+    MOCK_METHOD(ErrCode, UpdateSession, (const std::string &handle, const CppParamSet &params,
+        const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData, int &errcode), (override));
 
-    MOCK_METHOD(ErrCode, FinishSession,
-        (const std::string &handle, const CppParamSet &params, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData, int &errcode), (override));
+    MOCK_METHOD(ErrCode, FinishSession, (const std::string &handle, const CppParamSet &params,
+        const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData, int &errcode), (override));
 
-    MOCK_METHOD(ErrCode, GetProperty,
-        (const std::string &handle, const std::string &propertyId, const CppParamSet &params, CppParamSet &outParams, int &errcode), (override));
+    MOCK_METHOD(ErrCode, GetProperty, (const std::string &handle, const std::string &propertyId,
+        const CppParamSet &params, CppParamSet &outParams, int &errcode), (override));
 
     MOCK_METHOD(ErrCode, ClearUkeyPinAuthState,
         (const std::string &handle, const CppParamSet &params, int &errcode), (override));
     
     MOCK_METHOD(ErrCode, ExportPublicKey, (const std::string& index, const CppParamSet& params,
-            std::vector<uint8_t>& outData, int32_t& errcode), (override));
+            std::vector<uint8_t>& outData, int errcode), (override));
 
     MOCK_METHOD(ErrCode, ImportWrappedKey, (const std::string& index, const std::string& wrappingKeyIndex,
-        const CppParamSet& params, const std::vector<uint8_t>& wrappedData, int32_t& errcode), (override));
+        const CppParamSet& params, const std::vector<uint8_t>& wrappedData, int errcode), (override));
     
     MOCK_METHOD(ErrCode, ImportCertificate, (const std::string& index, const std::string& certJsonStr,
-        const CppParamSet& params, int32_t& errcode), (override));
+        const CppParamSet& params, int errcode), (override));
 
     MOCK_METHOD(ErrCode, GenerateKey,
-        (const std::string& index, const CppParamSet& params, int32_t& errcode), (override));
+        (const std::string& index, const CppParamSet& params, int errcode), (override));
 
     MOCK_METHOD(sptr<IRemoteObject>, AsObject, (), (override));
 };
