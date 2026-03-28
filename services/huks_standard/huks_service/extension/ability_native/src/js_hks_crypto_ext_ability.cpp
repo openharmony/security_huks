@@ -312,7 +312,8 @@ bool BuildImportWrappedKeyParam(const napi_env &env, const ImportWrappedKeyParam
     };
 
     napi_value nativeWrappingKeyIndex = nullptr;
-    status = napi_create_string_utf8(env, param.wrappingKeyIndex.c_str(), param.wrappingKeyIndex.length(), &nativeWrappingKeyIndex);
+    status = napi_create_string_utf8(env, param.wrappingKeyIndex.c_str(),
+        param.wrappingKeyIndex.length(), &nativeWrappingKeyIndex);
     if (status != napi_ok) {
         LOGE("create string utf8 failed, status:%d", status);
         return false;
@@ -978,7 +979,6 @@ int32_t ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
         LOGE("The funcResult is error.");
         return HKS_ERROR_EXT_NULLPTR;
     }
- 
     napi_value napiCode = nullptr;
     auto status = napi_get_named_property(env, funcResult, "resultCode", &napiCode);
     if (status != napi_ok || napiCode == nullptr) {
@@ -990,7 +990,6 @@ int32_t ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
         LOGE("Convert js value napiCode failed.status:%d", status);
         return HKS_ERROR_EXT_GET_VALUE_FAILED;
     }
-
     switch (resultParams.paramType) {
         case CryptoResultParamType::OPEN_REMOTE_HANDLE:
         case CryptoResultParamType::INIT_SESSION:
@@ -1006,24 +1005,20 @@ int32_t ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
         case CryptoResultParamType::EXPORT_PROVIDER_CERTIFICATES:
             GetExportCertificateParams(env, funcResult, resultParams);
             break;
-        case CryptoResultParamType::IMPORT_CERTIFICATE:
-            // 导入证书只需要返回错误码，不需要额外参数处理
-            break;
         case CryptoResultParamType::UPDATE_SESSION:
         case CryptoResultParamType::FINISH_SESSION:
+        case CryptoResultParamType::EXPORT_PUBLIC_KEY:
             GetSessionParams(env, funcResult, resultParams);
             break;
         case CryptoResultParamType::GET_PROPERTY:
             GetGetPropertyParams(env, funcResult, resultParams);
             break;
         case CryptoResultParamType::IMPORT_WRAPPED_KEY:
-            GetSessionParams(env, funcResult, resultParams);
-            break;
-        case CryptoResultParamType::EXPORT_PUBLIC_KEY:
-            break;
         case CryptoResultParamType::CLOSE_REMOTE_HANDLE:
         case CryptoResultParamType::CLEAR_UKEY_PIN_AUTH:
         case CryptoResultParamType::GENERATE_KEY:
+        case CryptoResultParamType::IMPORT_CERTIFICATE:
+            break;
         default:
             break;
     }
@@ -1648,7 +1643,8 @@ int32_t JsHksCryptoExtAbility::ClearUkeyPinAuthState(const std::string &handle, 
 int32_t JsHksCryptoExtAbility::ImportWrappedKey(const std::string &index, const std::string &wrappingKeyIndex,
     const CppParamSet &params, const std::vector<uint8_t> &wrappedData, int32_t &errcode)
 {
-    auto argParser = [index, wrappingKeyIndex, params, wrappedData](napi_env &env, napi_value *argv, size_t &argc) -> bool {
+    auto argParser = [index, wrappingKeyIndex, params, wrappedData]
+        (napi_env &env, napi_value *argv, size_t &argc) -> bool {
         struct ImportWrappedKeyParam param = {
             index,
             wrappingKeyIndex,

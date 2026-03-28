@@ -63,16 +63,16 @@ public:
         (const std::string &handle, const CppParamSet &params, int &errcode), (override));
     
     MOCK_METHOD(ErrCode, ExportPublicKey, (const std::string& index, const CppParamSet& params,
-            std::vector<uint8_t>& outData, int errcode), (override));
+            std::vector<uint8_t>& outData, int &errcode), (override));
 
     MOCK_METHOD(ErrCode, ImportWrappedKey, (const std::string& index, const std::string& wrappingKeyIndex,
-        const CppParamSet& params, const std::vector<uint8_t>& wrappedData, int errcode), (override));
+        const CppParamSet& params, const std::vector<uint8_t>& wrappedData, int &errcode), (override));
     
     MOCK_METHOD(ErrCode, ImportCertificate, (const std::string& index, const std::string& certJsonStr,
-        const CppParamSet& params, int errcode), (override));
+        const CppParamSet& params, int &errcode), (override));
 
     MOCK_METHOD(ErrCode, GenerateKey,
-        (const std::string& index, const CppParamSet& params, int errcode), (override));
+        (const std::string& index, const CppParamSet& params, int &errcode), (override));
 
     MOCK_METHOD(sptr<IRemoteObject>, AsObject, (), (override));
 };

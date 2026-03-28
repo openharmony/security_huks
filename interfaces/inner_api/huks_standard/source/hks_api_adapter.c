@@ -91,6 +91,10 @@ int32_t HksExportPublicKeyAdapter(const struct HksBlob *keyAlias,
     struct HksBlob publicKey = { MAX_KEY_SIZE, buffer };
 
     int32_t ret = HksClientExportPublicKey(keyAlias, paramSet, &publicKey);
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    HKS_FREE_BLOB(publicKey);
+    return ret;
+#endif
     if (ret == HKS_SUCCESS) {
         struct HksBlob x509Key = { 0, NULL };
         ret = TranslateToX509PublicKey(&publicKey, &x509Key);
