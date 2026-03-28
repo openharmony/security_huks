@@ -105,7 +105,7 @@ ENABLE_CFI(int32_t DcmLocalGenerateCertChain(const struct HksProcessInfo *proces
         ret = HksDcmOfflineCallbackHandlerSetRequestIdWithoutLock(remoteObject, request.requestId);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDcmCallbackHandlerSetRequestIdWithoutLock failed %" LOG_PUBLIC "d", ret)
         return HKS_SUCCESS;
-    } while (false);
+    } while (0);
     return ret;
 }
 
