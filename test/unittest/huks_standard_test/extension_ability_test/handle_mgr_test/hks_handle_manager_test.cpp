@@ -557,6 +557,89 @@ HWTEST_F(HksRemoteHandleManagerTest, GenerateKeyWithInvalidIndexTest, TestSize.L
     HKS_FREE_BLOB(processInfo.processName);
 }
 
+/**
+* @tc.name: HksRemoteHandleManagerTest.ImportRemoteCertificateTest
+* @tc.desc: Test ImportRemoteCertificate function
+* @tc.type: FUNC
+*/
+HWTEST_F(HksRemoteHandleManagerTest, ImportRemoteCertificateTest, TestSize.Level0)
+{
+    auto manager = HksRemoteHandleManager::GetInstanceWrapper();
+    EXPECT_NE(manager, nullptr);
+
+    std::string index = CreateTestIndex();
+    HksProcessInfo processInfo = CreateTestProcessInfo();
+    CppParamSet paramSet = CreateTestParamSet(processInfo.uidInt);
+
+    // Create handle first
+    int32_t ret = manager->CreateRemoteHandle(processInfo, index, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    // Prepare certificate info
+    HksExtCertInfo certInfo = {};
+    certInfo.purpose = 1; // Example purpose
+    
+    // Create index blob
+    std::string certIndex = "test_cert_index";
+    certInfo.index = StringToBlob(certIndex);
+    
+    // Create certificate data blob
+    std::string certData = "-----BEGIN CERTIFICATE-----\nMII...\n-----END CERTIFICATE-----";
+    certInfo.cert = StringToBlob(certData);
+
+    // Test import certificate
+    ret = manager->ImportRemoteCertificate(processInfo, index, certInfo, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    
+    HKS_FREE_BLOB(certInfo.index.data);
+    HKS_FREE_BLOB(certInfo.cert.data);
+
+    // Cleanup
+    manager->CloseRemoteHandle(processInfo, index, paramSet);
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
+}
+
+/**
+* @tc.name: HksRemoteHandleManagerTest.ImportRemoteCertificateWithInvalidParamsTest
+* @tc.desc: Test ImportRemoteCertificate function with invalid parameters
+* @tc.type: FUNC
+*/
+HWTEST_F(HksRemoteHandleManagerTest, ImportRemoteCertificateWithInvalidParamsTest, TestSize.Level0)
+{
+    auto manager = HksRemoteHandleManager::GetInstanceWrapper();
+    EXPECT_NE(manager, nullptr);
+
+    HksProcessInfo processInfo = CreateTestProcessInfo();
+    CppParamSet paramSet = CreateTestParamSet(processInfo.uidInt);
+
+    // Test with empty index
+    HksExtCertInfo certInfo = {};
+    certInfo.purpose = 1;
+    
+    int32_t ret = manager->ImportRemoteCertificate(processInfo, "", certInfo, paramSet);
+    EXPECT_NE(ret, HKS_SUCCESS);
+
+    // Test with invalid JSON index
+    ret = manager->ImportRemoteCertificate(processInfo, "invalid_json", certInfo, paramSet);
+    EXPECT_NE(ret, HKS_SUCCESS);
+
+    // Test with index that has no handle
+    std::string noHandleIndex = CreateTestIndex("noHandleProvider", "noHandleAbility", "nobundle", "noHandleIndex");
+    ret = manager->ImportRemoteCertificate(processInfo, noHandleIndex, certInfo, paramSet);
+    EXPECT_NE(ret, HKS_SUCCESS);
+
+    HksExtCertInfo emptyCertInfo = {};
+    emptyCertInfo.purpose = 1;
+    
+    std::string validIndex = CreateTestIndex();
+    ret = manager->ImportRemoteCertificate(processInfo, validIndex, emptyCertInfo, paramSet);
+    EXPECT_NE(ret, HKS_SUCCESS);
+    
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
+}
+
 } // namespace Huks
 } // namespace Security
 } // namespace OHOS
