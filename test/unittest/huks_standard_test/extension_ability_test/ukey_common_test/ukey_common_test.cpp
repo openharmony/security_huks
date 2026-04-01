@@ -455,7 +455,7 @@ HWTEST_F(UkeyCommonTest, UkeyCommonTest010, TestSize.Level0)
         {
             "purpose": 1,
             "index": "index1",
-            "cert": "SGVsbG8g=V29ybGQ===="
+            "cert": "SGVsbG8gV29ybGQ===="
         },
         {
             "purpose": 2,
