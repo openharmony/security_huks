@@ -203,6 +203,16 @@ int32_t HksServiceOnUkeyAbortSession(const struct HksProcessInfo *processInfo, c
 int32_t HksServiceOnUkeyImportWrappedKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksBlob *wrappingKeyAlias, const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData)
 {
+    int32_t ret = HksCheckBlob3(&processInfo->processName, keyAlias, wrappingKeyAlias);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "Hks check processName or keyAlias or wrappingKeyAlias fail. ret: %" LOG_PUBLIC "d", ret)
+
+    HKS_IF_TRUE_LOGE_RETURN(keyAlias->size > MAX_SESSION_INDEX_SIZE, HKS_ERROR_INVALID_ARGUMENT,
+        "keyAlias size too large. size: %" LOG_PUBLIC "d. maxSize: %" LOG_PUBLIC "d",
+        keyAlias->size, MAX_SESSION_INDEX_SIZE)
+    HKS_IF_TRUE_LOGE_RETURN(wrappingKeyAlias->size > MAX_SESSION_INDEX_SIZE, HKS_ERROR_INVALID_ARGUMENT,
+        "wrappingKeyAlias size too large. size: %" LOG_PUBLIC "d. maxSize: %" LOG_PUBLIC "d",
+        wrappingKeyAlias->size, MAX_SESSION_INDEX_SIZE)
     std::string cppIndex(reinterpret_cast<const char*>(keyAlias->data), keyAlias->size);
     std::string cppWrappingKeyIndex(reinterpret_cast<const char*>(wrappingKeyAlias->data), wrappingKeyAlias->size);
     CppParamSet cppParamSet(paramSet);
@@ -224,6 +234,14 @@ int32_t HksServiceOnUkeyImportWrappedKey(const struct HksProcessInfo *processInf
 int32_t HksServiceOnUkeyExportPublicKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *key)
 {
+    int32_t ret = HksCheckBlob2(&processInfo->processName, keyAlias);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "Hks check processName or keyAlias fail. ret: %" LOG_PUBLIC "d", ret)
+
+    HKS_IF_TRUE_LOGE_RETURN(keyAlias->size > MAX_SESSION_INDEX_SIZE, HKS_ERROR_INVALID_ARGUMENT,
+        "keyAlias size too large. size: %" LOG_PUBLIC "d. maxSize: %" LOG_PUBLIC "d",
+        keyAlias->size, MAX_SESSION_INDEX_SIZE)
+
     std::string cppIndex(reinterpret_cast<const char*>(keyAlias->data), keyAlias->size);
     CppParamSet cppParamSet(paramSet);
     std::vector<uint8_t> outdata;
