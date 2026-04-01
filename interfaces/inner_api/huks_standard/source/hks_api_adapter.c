@@ -92,11 +92,12 @@ int32_t HksExportPublicKeyAdapter(const struct HksBlob *keyAlias,
 
     int32_t ret = HksClientExportPublicKey(keyAlias, paramSet, &publicKey);
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksClientExportPublicKey in Ukey fail. ret = %" LOG_PUBLIC "d", ret)
     if (memcpy_s(key->data, key->size, publicKey.data, publicKey.size) != EOK) {
-        HKS_LOG_E("memcpy in HksExportPublicKeyAdapter fail. ret:: %" LOG_PUBLIC "d", ret);
+        HKS_LOG_E("memcpy in HksExportPublicKeyAdapter fail. ret: %" LOG_PUBLIC "d", ret);
         return HKS_ERROR_COPY_FAIL;
     }
-    key-size = publicKey.size;
+    key->size = publicKey.size;
     HKS_FREE_BLOB(publicKey);
     return ret;
 #endif

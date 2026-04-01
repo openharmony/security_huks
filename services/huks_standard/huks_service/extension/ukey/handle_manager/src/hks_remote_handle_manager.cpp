@@ -320,6 +320,7 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &proce
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     ret = ConvertExtensionToHksErrorCode(ret, g_commonErrCodeMapping);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote clear pin status failed")
+    uidIndexToAuthState_.Erase(processInfo.uidInt, index);
     return HKS_SUCCESS;
 }
 
@@ -461,7 +462,7 @@ int32_t HksRemoteHandleManager::RemoteImportWrappedKey(const HksProcessInfo &pro
 {
     std::string newIndex;
     ProviderInfo providerInfo{};
-    int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
+    int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, newIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ParseIndexAndProviderInfo failed, ret = %" LOG_PUBLIC "d", ret)
     providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
 
@@ -488,7 +489,7 @@ int32_t HksRemoteHandleManager::RemoteExportPublicKey(const HksProcessInfo &proc
 {
     std::string newIndex;
     ProviderInfo providerInfo;
-    int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
+    int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, newIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ParseIndexAndProviderInfo failed, ret = %" LOG_PUBLIC "d", ret)
     providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
 
