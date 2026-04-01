@@ -42,6 +42,7 @@ protected:
                                const std::string& bundleName = "com.test.bundle",
                                const std::string& originalIndex = "testIndex123");
     CppParamSet CreateTestParamSet(int32_t uid);
+    CppParamSet CreateTestParamSet();
     HksProcessInfo CreateTestProcessInfo();
 };
 
@@ -86,6 +87,16 @@ CppParamSet HksRemoteHandleManagerTest::CreateTestParamSet(int32_t uid)
         {.tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048},
         {.tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN},
         {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = uid}
+    };
+    return CppParamSet(params);
+}
+
+CppParamSet HksRemoteHandleManagerTest::CreateTestParamSet()
+{
+    std::vector<HksParam> params = {
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA},
+        {.tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048},
+        {.tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN},
     };
     return CppParamSet(params);
 }
@@ -247,6 +258,32 @@ HWTEST_F(HksRemoteHandleManagerTest, PinManagementTest, TestSize.Level0)
 }
 
 /**
+ * @tc.name: HksRemoteHandleManagerTest.ClearPinStateTest
+ * @tc.desc: Test PIN management operations
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksRemoteHandleManagerTest, PinManagementTest, TestSize.Level0)
+{
+    auto manager = HksRemoteHandleManager::GetInstanceWrapper();
+    EXPECT_NE(manager, nullptr);
+
+    std::string index = CreateTestIndex();
+    HksProcessInfo processInfo = CreateTestProcessInfo();
+    CppParamSet paramSet = CreateTestParamSet();
+    int32_t ret = manager->CreateRemoteHandle(processInfo, index, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    int32_t state = 1;
+    ret = manager->RemoteVerifyPinStatus(processInfo, index, paramSet, state);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    manager->ClearAuthState(processInfo);
+    manager->CloseRemoteHandle(processInfo, index, paramSet);
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
+}
+
+/**
  * @tc.name: HksRemoteHandleManagerTest.CertificateTest
  * @tc.desc: Test certificate operations
  * @tc.type: FUNC
@@ -339,6 +376,185 @@ HWTEST_F(HksRemoteHandleManagerTest, ClearHandleMapTest, TestSize.Level0)
     ProviderInfo providerInfo2{"provider2", "", "bundle2", 100};
     ret = manager->ClearUidIndexMap(providerInfo2);
     EXPECT_EQ(ret, HKS_SUCCESS);
+}
+
+/**
+* @tc.name: HksRemoteHandleManagerTest.ImportWrappedKeyTest
+* @tc.desc: Test import wrapped key operation
+* @tc.type: FUNC
+*/
+HWTEST_F(HksRemoteHandleManagerTest, ImportWrappedKeyTest, TestSize.Level0)
+{
+    auto manager = HksRemoteHandleManager::GetInstanceWrapper();
+    EXPECT_NE(manager, nullptr);
+
+    std::string index = CreateTestIndex();
+    std::string wrappingKeyIndex = CreateTestIndex("wrapProvider", "wrapAbility", "wrap.bundle", "wrapIndex");
+    HksProcessInfo processInfo = CreateTestProcessInfo();
+    CppParamSet paramSet = CreateTestParamSet(processInfo.uidInt);
+
+    // Create handle first
+    int32_t ret = manager->CreateRemoteHandle(processInfo, index, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    // Test import wrapped key with valid data
+    std::vector<uint8_t> wrappedData = {0x01, 0x02, 0x03, 0x04};
+    ret = manager->RemoteImportWrappedKey(processInfo, index, wrappingKeyIndex, paramSet, wrappedData);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    // Cleanup
+    manager->CloseRemoteHandle(processInfo, index, paramSet);
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
+}
+
+/**
+* @tc.name: HksRemoteHandleManagerTest.ImportWrappedKeyWithInvalidIndexTest
+* @tc.desc: Test import wrapped key with invalid index
+* @tc.type: FUNC
+*/
+HWTEST_F(HksRemoteHandleManagerTest, ImportWrappedKeyWithInvalidIndexTest, TestSize.Level0)
+{
+    auto manager = HksRemoteHandleManager::GetInstanceWrapper();
+    EXPECT_NE(manager, nullptr);
+
+    HksProcessInfo processInfo = CreateTestProcessInfo();
+    CppParamSet paramSet = CreateTestParamSet(processInfo.uidInt);
+
+    // Test with empty index
+    std::string wrappingKeyIndex = CreateTestIndex();
+    std::vector<uint8_t> wrappedData = {0x01, 0x02};
+    int32_t ret = manager->RemoteImportWrappedKey(processInfo, "", wrappingKeyIndex, paramSet, wrappedData);
+    EXPECT_NE(ret, HKS_SUCCESS);
+
+    // Test with invalid JSON index
+    ret = manager->RemoteImportWrappedKey(processInfo, "invalid_json", wrappingKeyIndex, paramSet, wrappedData);
+    EXPECT_NE(ret, HKS_SUCCESS);
+
+    // Test with empty wrapping key index
+    ret = manager->RemoteImportWrappedKey(processInfo, CreateTestIndex(), "", paramSet, wrappedData);
+    EXPECT_NE(ret, HKS_SUCCESS);
+
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
+}
+
+/**
+* @tc.name: HksRemoteHandleManagerTest.ExportPublicKeyTest
+* @tc.desc: Test export public key operation
+* @tc.type: FUNC
+*/
+HWTEST_F(HksRemoteHandleManagerTest, ExportPublicKeyTest, TestSize.Level0)
+{
+    auto manager = HksRemoteHandleManager::GetInstanceWrapper();
+    EXPECT_NE(manager, nullptr);
+
+    std::string index = CreateTestIndex();
+    HksProcessInfo processInfo = CreateTestProcessInfo();
+    CppParamSet paramSet = CreateTestParamSet(processInfo.uidInt);
+
+    // Create handle first
+    int32_t ret = manager->CreateRemoteHandle(processInfo, index, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    // Test export public key
+    std::vector<uint8_t> outData;
+    ret = manager->RemoteExportPublicKey(processInfo, index, paramSet, outData);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    // Cleanup
+    manager->CloseRemoteHandle(processInfo, index, paramSet);
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
+}
+
+/**
+* @tc.name: HksRemoteHandleManagerTest.ExportPublicKeyWithInvalidIndexTest
+* @tc.desc: Test export public key with invalid index
+* @tc.type: FUNC
+*/
+HWTEST_F(HksRemoteHandleManagerTest, ExportPublicKeyWithInvalidIndexTest, TestSize.Level0)
+{
+    auto manager = HksRemoteHandleManager::GetInstanceWrapper();
+    EXPECT_NE(manager, nullptr);
+
+    HksProcessInfo processInfo = CreateTestProcessInfo();
+    CppParamSet paramSet = CreateTestParamSet(processInfo.uidInt);
+    std::vector<uint8_t> outData;
+
+    // Test with empty index
+    int32_t ret = manager->RemoteExportPublicKey(processInfo, "", paramSet, outData);
+    EXPECT_NE(ret, HKS_SUCCESS);
+
+    // Test with invalid JSON index
+    ret = manager->RemoteExportPublicKey(processInfo, "invalid_json_string", paramSet, outData);
+    EXPECT_NE(ret, HKS_SUCCESS);
+
+    // Test with index that has no handle
+    std::string noHandleIndex = CreateTestIndex("noHandleProvider", "noHandleAbility", "nobundle", "noHandleIndex");
+    ret = manager->RemoteExportPublicKey(processInfo, noHandleIndex, paramSet, outData);
+    EXPECT_NE(ret, HKS_SUCCESS);
+
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
+}
+
+/**
+* @tc.name: HksRemoteHandleManagerTest.GenerateKeyTest
+* @tc.desc: Test generate key operation
+* @tc.type: FUNC
+*/
+HWTEST_F(HksRemoteHandleManagerTest, GenerateKeyTest, TestSize.Level0)
+{
+    auto manager = HksRemoteHandleManager::GetInstanceWrapper();
+    EXPECT_NE(manager, nullptr);
+
+    std::string index = CreateTestIndex();
+    HksProcessInfo processInfo = CreateTestProcessInfo();
+    CppParamSet paramSet = CreateTestParamSet(processInfo.uidInt);
+
+    // Create handle first
+    int32_t ret = manager->CreateRemoteHandle(processInfo, index, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    // Test generate key
+    ret = manager->ExtensionGenerateKey(processInfo, index, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    // Cleanup
+    manager->CloseRemoteHandle(processInfo, index, paramSet);
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
+}
+
+/**
+* @tc.name: HksRemoteHandleManagerTest.GenerateKeyWithInvalidIndexTest
+* @tc.desc: Test generate key with invalid index
+* @tc.type: FUNC
+*/
+HWTEST_F(HksRemoteHandleManagerTest, GenerateKeyWithInvalidIndexTest, TestSize.Level0)
+{
+    auto manager = HksRemoteHandleManager::GetInstanceWrapper();
+    EXPECT_NE(manager, nullptr);
+
+    HksProcessInfo processInfo = CreateTestProcessInfo();
+    CppParamSet paramSet = CreateTestParamSet(processInfo.uidInt);
+
+    // Test with empty index
+    int32_t ret = manager->ExtensionGenerateKey(processInfo, "", paramSet);
+    EXPECT_NE(ret, HKS_SUCCESS);
+
+    // Test with invalid JSON index
+    ret = manager->ExtensionGenerateKey(processInfo, "invalid_json_string", paramSet);
+    EXPECT_NE(ret, HKS_SUCCESS);
+
+    // Test with index that has no handle
+    std::string noHandleIndex = CreateTestIndex("noHandleProvider", "noHandleAbility", "nobundle", "noHandleIndex");
+    ret = manager->ExtensionGenerateKey(processInfo, noHandleIndex, paramSet);
+    EXPECT_NE(ret, HKS_SUCCESS);
+
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
 }
 
 } // namespace Huks

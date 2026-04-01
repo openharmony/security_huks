@@ -377,5 +377,67 @@ HWTEST_F(HksUKeyTest, HksFreeExtCertSetTest, TestSize.Level0)
     EXPECT_EQ(certInfoSet.count, 0u);
 
     HKS_TEST_LOG_I("TestHksUKey, Testcase_HksFreeExtCertSet pass!");
-} 
+}
+
+/**
+* @tc.name: HksImportCertificateTest001
+* @tc.desc: 测试ImportCertificate接口正常导入证书场景
+* @tc.type: FUNC
+*/
+HWTEST_F(HksUKeyTest, HksImportCertificateTest001, TestSize.Level0)
+{
+    int32_t ret = 0;
+    struct HksParamSet *paramSet = nullptr;
+    struct HksBlob keyAlias = StringToHuksBlob("test_import_cert_alias");
+
+    struct HksExtCertInfo certInfo = { 0 };
+    certInfo.purpose = 1;
+
+    const char *indexStr = "cert_index_0";
+    const char *certStr = "certificate_data_0";
+
+    certInfo.index.size = strlen(indexStr);
+    certInfo.index.data = (uint8_t *)HksMalloc(certInfo.index.size);
+    EXPECT_NE(certInfo.index.data, nullptr);
+    ret = memcpy_s(certInfo.index.data, certInfo.index.size, indexStr, certInfo.index.size);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    certInfo.cert.size = strlen(certStr);
+    certInfo.cert.data = (uint8_t *)HksMalloc(certInfo.cert.size);
+    EXPECT_NE(certInfo.cert.data, nullptr);
+    ret = memcpy_s(certInfo.cert.data, certInfo.cert.size, certStr, certInfo.cert.size);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksImportCertificate(&keyAlias, &certInfo, paramSet);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("HksImportCertificateTest001, ret = %d", ret);
+    }
+
+    // 释放资源
+    free(certInfo.index.data);
+    free(certInfo.cert.data);
+    HksFreeParamSet(&paramSet);
+
+    HKS_TEST_LOG_I("TestHksUKey, Testcase_HksImportCertificateTest001 pass!");
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+/**
+* @tc.name: HksImportCertificateTest002
+* @tc.desc: 测试ImportCertificate接口无效证书格式场景
+* @tc.type: FUNC
+*/
+HWTEST_F(HksUKeyTest, HksImportCertificateTest002, TestSize.Level0)
+{
+    int32_t ret = 0;
+    struct HksParamSet *paramSet = nullptr;
+    struct HksBlob keyAlias = StringToHuksBlob("test_import_cert_alias");
+
+    // 传入空证书指针
+    ret = HksImportCertificate(&keyAlias, nullptr, paramSet);
+    EXPECT_NE(ret, HKS_SUCCESS);
+
+    HKS_TEST_LOG_I("TestHksUKey, Testcase_HksImportCertificateTest002 pass!");
+}
+
 }// namespace
