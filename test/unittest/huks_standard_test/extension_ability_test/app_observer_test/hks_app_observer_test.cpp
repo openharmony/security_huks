@@ -18,17 +18,18 @@
 #include "../../../../../services/huks_standard/huks_service/extension/ukey/app_observer/app_observer.cpp"
 #include "../../../../../services/huks_standard/huks_service/extension/ukey/interface/plugin_interface.cpp"
 
+using namespace testing::ext;
+
+namespace OHOS {
+namespace Security {
+namespace Huks {
+
 extern void ResetHandleManagerMockFlags();
 extern void ResetSessionManagerMockFlags();
 extern bool g_hksClearHandleCalled;
 extern bool g_clearAuthStateCalled;
 extern bool g_clearMapByUidCalled;
 extern uint32_t g_clearMapByUidArg;
-using namespace testing::ext;
-
-namespace OHOS {
-namespace Security {
-namespace Huks {
 
 static uint64_t g_shellTokenId = 0;
 

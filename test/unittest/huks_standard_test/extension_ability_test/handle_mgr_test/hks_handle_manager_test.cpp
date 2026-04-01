@@ -42,6 +42,7 @@ protected:
                                const std::string& bundleName = "com.test.bundle",
                                const std::string& originalIndex = "testIndex123");
     CppParamSet CreateTestParamSet(int32_t uid);
+    CppParamSet CreateTestParamSet(int32_t uid, std::string pinStr);
     CppParamSet CreateTestParamSet();
     HksProcessInfo CreateTestProcessInfo();
 };
@@ -98,7 +99,7 @@ CppParamSet HksRemoteHandleManagerTest::CreateTestParamSet(int32_t uid, std::str
         {.tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048},
         {.tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN},
         {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = uid},
-        {.tag = HKS_EXT_CRYPTO_TAG_UKEY_PIN, .blob = {.size = pinStr.size(), .data = (uint8_t*)pinStr.c_str()}
+        {.tag = HKS_EXT_CRYPTO_TAG_UKEY_PIN, .blob = {.size = pinStr.size(), .data = (uint8_t*)pinStr.c_str()}}
     };
     return CppParamSet(params);
 }
@@ -603,8 +604,8 @@ HWTEST_F(HksRemoteHandleManagerTest, ImportRemoteCertificateTest, TestSize.Level
     ret = manager->ImportRemoteCertificate(processInfo, index, certInfo, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
     
-    HKS_FREE_BLOB(certInfo.index.data);
-    HKS_FREE_BLOB(certInfo.cert.data);
+    HKS_FREE_BLOB(certInfo.index);
+    HKS_FREE_BLOB(certInfo.cert);
 
     // Cleanup
     manager->CloseRemoteHandle(processInfo, index, paramSet);
