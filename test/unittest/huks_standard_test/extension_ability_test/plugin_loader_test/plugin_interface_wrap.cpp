@@ -63,13 +63,13 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnGet
     return 0;
 }
 
-ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnExportCerticate(
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnExportCertificate(
     const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet, std::string &certsJson))
 {
     return 0;
 }
 
-ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnExportProviderCerticates(
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnExportProviderCertificates(
     const HksProcessInfo &processInfo, const std::string &providerName,
     const CppParamSet &paramSet, std::string &certsJsonArr))
 {
@@ -102,13 +102,13 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnAbo
     return 0;
 }
 
-ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksClearUkeyPinAuthState(
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnClearUkeyPinAuthState(
     const HksProcessInfo &processInfo, const std::string &index))
 {
     return 0;
 }
 
-ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksGetUkeyRemoteProperty(
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnGetRemoteProperty(
     const HksProcessInfo &processInfo, const std::string &index, const std::string &propertyId,
     const CppParamSet &paramSet, CppParamSet &outParams))
 {
@@ -116,6 +116,33 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksGetUkeyRemoteP
 }
 
 ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnUnregisterAllObservers())
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnImportCertificate(
+    const HksProcessInfo &processInfo, const std::string &index,
+    const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnGenerateKey(
+    const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnImportWrappedKey(
+    const HksProcessInfo &processInfo, const std::string &index, const std::string &wrappingKeyIndex,
+    const CppParamSet &paramSet, const std::vector<uint8_t> &wrappedData))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnExportPublicKey(
+    const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet, 
+    std::vector<uint8_t> &outData))
 {
     return 0;
 }
@@ -146,16 +173,16 @@ extern "C" void *__wrap_dlsym(void* handle, const char* symbol)
          (void*)Fake_HksExtPluginOnGetUkeyPinAuthState},
          {"_ZN4OHOS8Security4Huks35HksExtPluginOnClearUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEE",
-         (void*)Fake_HksClearUkeyPinAuthState},
+         (void*)Fake_HksExtPluginOnClearUkeyPinAuthState},
          {"_ZN4OHOS8Security4Huks31HksExtPluginOnGetRemotePropertyERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEESD_RK11CppParamSetRSE_",
-         (void*)Fake_HksGetUkeyRemoteProperty},
+         (void*)Fake_HksExtPluginOnGetRemoteProperty},
          {"_ZN4OHOS8Security4Huks29HksExtPluginOnExportCerticateERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_",
-         (void*)Fake_HksExtPluginOnExportCerticate},
+         (void*)Fake_HksExtPluginOnExportCertificate},
          {"_ZN4OHOS8Security4Huks38HksExtPluginOnExportProviderCerticatesERK14HksProcessInfo"
         "RKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_",
-         (void*)Fake_HksExtPluginOnExportProviderCerticates},
+         (void*)Fake_HksExtPluginOnExportProviderCertificates},
          {"_ZN4OHOS8Security4Huks25HksExtPluginOnInitSessionERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRj",
          (void*)Fake_HksExtPluginOnInitSession},
@@ -167,6 +194,18 @@ extern "C" void *__wrap_dlsym(void* handle, const char* symbol)
          (void*)Fake_HksExtPluginOnFinishSession},
          {"_ZN4OHOS8Security4Huks26HksExtPluginOnAbortSessionERK14HksProcessInfoRKjRK11CppParamSet",
          (void*)Fake_HksExtPluginOnAbortSession},
+         {"_ZN4OHOS8Security4Huks31HksExtPluginOnImportCertificateERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK14HksExtCertInfoRK11CppParamSet",
+         (void*)Fake_HksExtPluginOnImportCertificate},
+         {"_ZN4OHOS8Security4Huks25HksExtPluginOnGenerateKeyERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet",
+         (void*)Fake_HksExtPluginOnGenerateKey},
+         {"_ZN4OHOS8Security4Huks30HksExtPluginOnImportWrappedKeyERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEESD_RK11CppParamSetRKNS5_6vectorIhNS9_IhEEEE",
+         (void*)Fake_HksExtPluginOnImportWrappedKey},
+         {"_ZN4OHOS8Security4Huks29HksExtPluginOnExportPublicKeyERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRNS5_6vectorIhNS9_IhEEEE",
+         (void*)Fake_HksExtPluginOnExportPublicKey},
          {"_ZN4OHOS8Security4Huks36HksExtPluginOnUnregisterAllObserversEv",
          (void*)Fake_HksExtPluginOnUnregisterAllObservers},
     };
