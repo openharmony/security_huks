@@ -325,7 +325,7 @@ HWTEST_F(HksRemoteHandleManagerTest, PropertyTest, TestSize.Level0)
 
     std::string index = CreateTestIndex();
     HksProcessInfo processInfo = CreateTestProcessInfo();
-    CppParamSet paramSet = CreateTestParamSet(processInfo.uidInt);
+    CppParamSet paramSet = CreateTestParamSet();
 
     // Create handle first
     int32_t ret = manager->CreateRemoteHandle(processInfo, index, paramSet);
@@ -636,6 +636,70 @@ HWTEST_F(HksRemoteHandleManagerTest, ImportRemoteCertificateWithInvalidParamsTes
     ret = manager->ImportRemoteCertificate(processInfo, validIndex, emptyCertInfo, paramSet);
     EXPECT_NE(ret, HKS_SUCCESS);
     
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
+}
+
+/**
+* @tc.name: HksRemoteHandleManagerTest.ClearMapByHandleTest
+* @tc.desc: Test ClearMapByHandle function
+* @tc.type: FUNC
+*/
+HWTEST_F(HksRemoteHandleManagerTest, ClearMapByHandleTest, TestSize.Level0)
+{
+    auto manager = HksRemoteHandleManager::GetInstanceWrapper();
+    EXPECT_NE(manager, nullptr);
+
+    std::string index = CreateTestIndex("provider1", "ability1", "bundle1", "index1");
+    HksProcessInfo processInfo = CreateTestProcessInfo();
+    CppParamSet paramSet = CreateTestParamSet(processInfo.uidInt);
+
+    int32_t ret = manager->CreateRemoteHandle(processInfo, index, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    manager->ClearMapByHandle(HUKS_ERR_CODE_CRYPTO_FAIL, "non_exist_handle");
+    manager->CloseRemoteHandle(processInfo, index, paramSet);
+
+    ret = manager->CreateRemoteHandle(processInfo, index, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    manager->ClearMapByHandle(HUKS_ERR_CODE_ITEM_NOT_EXIST, "non_exist_handle");
+    manager->CloseRemoteHandle(processInfo, index, paramSet);
+
+    ret = manager->CreateRemoteHandle(processInfo, index, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    manager->ClearMapByHandle(HKS_SUCCESS, "non_exist_handle");
+    manager->CloseRemoteHandle(processInfo, index, paramSet);
+
+    manager->ClearMapByHandle(HUKS_ERR_CODE_CRYPTO_FAIL, "");
+
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
+}
+
+/**
+* @tc.name: HksRemoteHandleManagerTest.ClearMapByUidTest
+* @tc.desc: Test ClearMapByUid function
+* @tc.type: FUNC
+*/
+HWTEST_F(HksRemoteHandleManagerTest, ClearMapByUidTest, TestSize.Level0)
+{
+    auto manager = HksRemoteHandleManager::GetInstanceWrapper();
+    EXPECT_NE(manager, nullptr);
+
+    std::string index1 = CreateTestIndex("providerA", "ability1", "bundleA", "index1");
+    std::string index2 = CreateTestIndex("providerA", "ability2", "bundleA", "index2");
+    HksProcessInfo processInfo = CreateTestProcessInfo();
+    CppParamSet paramSet = CreateTestParamSet(processInfo.uidInt);
+
+    int32_t ret1 = manager->CreateRemoteHandle(processInfo, index1, paramSet);
+    EXPECT_EQ(ret1, HKS_SUCCESS);
+    int32_t ret2 = manager->CreateRemoteHandle(processInfo, index2, paramSet);
+    EXPECT_EQ(ret2, HKS_SUCCESS);
+
+    manager->ClearMapByUid(999999);
+    manager->ClearMapByUid(0);
+    manager->ClearMapByUid(processInfo.uidInt);
+
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(processInfo.processName);
 }
