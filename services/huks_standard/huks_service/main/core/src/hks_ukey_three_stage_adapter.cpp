@@ -224,7 +224,7 @@ int32_t HksServiceOnUkeyImportWrappedKey(const struct HksProcessInfo *processInf
     auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
 
-    int32_t ret = pluginManager->OnImportWrappedKey(*processInfo, cppIndex, cppWrappingKeyIndex,
+    ret = pluginManager->OnImportWrappedKey(*processInfo, cppIndex, cppWrappingKeyIndex,
         cppParamSet, wrappedData);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnImportWrappedKey fail. ret: %" LOG_PUBLIC "d", ret)
     
@@ -249,7 +249,7 @@ int32_t HksServiceOnUkeyExportPublicKey(const struct HksProcessInfo *processInfo
     auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
 
-    int32_t ret = pluginManager->OnExportPublicKey(*processInfo, cppIndex, cppParamSet, outdata);
+    ret = pluginManager->OnExportPublicKey(*processInfo, cppIndex, cppParamSet, outdata);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnExportPublicKey fail. ret: %" LOG_PUBLIC "d", ret)
 
     if (key->size < outdata.size()) {
