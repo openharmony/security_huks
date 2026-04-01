@@ -320,7 +320,7 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &proce
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     ret = ConvertExtensionToHksErrorCode(ret, g_commonErrCodeMapping);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote clear pin status failed")
-    uidIndexToAuthState_.Erase(processInfo.uidInt, index);
+    uidIndexToAuthState_.Erase({processInfo.uidInt, index});
     return HKS_SUCCESS;
 }
 

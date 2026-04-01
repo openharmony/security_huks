@@ -609,41 +609,6 @@ static int32_t AppendGroupKeyInfo(const struct HksProcessInfo *processInfo, stru
 }
 #endif
 
-static int32_t GenerateKeyLocalProcess(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSetIn, struct HksParamSet **newParamSet, struct HksBlob *output)
-{
-    int32_t ret;
-    struct HksBlob keyIn = { 0, NULL };
-    do {
-        ret = HksCheckGenAndImportKeyParams(&processInfo->processName, keyAlias, paramSetIn, output);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check generate key params failed, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = AppendNewInfoForGenKeyInService(processInfo, paramSetIn, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append processName tag failed, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = CheckKeyCondition(processInfo, keyAlias, *newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check key condition failed, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = GetKeyIn(processInfo, *newParamSet, &keyIn);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get keyIn failed, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = HuksAccessGenerateKey(keyAlias, *newParamSet, &keyIn, output);
-        IfNotSuccAppendHdiErrorInfo(ret);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "access level generate key failed, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = HksManageStoreKeyBlob(processInfo, *newParamSet, keyAlias, output, HKS_STORAGE_TYPE_KEY);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret);
-        }
-    } while (0);
-
-    if (keyIn.data != NULL) {
-        (void)memset_s(keyIn.data, keyIn.size, 0, keyIn.size);
-    }
-    HKS_FREE(keyIn.data);
-    return ret;
-}
-
 int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, struct HksBlob *keyOut)
 {
@@ -667,7 +632,7 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
             output = *keyOut;
         }
 
-        if (HksCheckIsUkeyOperation(paramSet, &ret) == HKS_SUCCESS) {
+        if (HksCheckIsUkeyOperation(paramSetIn, &ret) == HKS_SUCCESS) {
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
             ret = HksServiceOnUkeyGenerateKey(processInfo, keyAlias, paramSetIn);
             HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyGenerateKey failed, ret = %" LOG_PUBLIC "d", ret)
