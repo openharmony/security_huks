@@ -108,11 +108,11 @@ static CppParamSet CreateSignParamSet()
 static std::string CreateTestIndex()
 {
     CommJsonObject root = CommJsonObject::CreateObject();
-    root.SetValue("providerName", std::string("testProvider"));
-    root.SetValue("abilityName", std::string("testAbility"));
-    root.SetValue("bundleName", std::string("com.test.bundle"));
-    root.SetValue("userid", 100);
-    root.SetValue("index", std::string("testIndex"));
+    EXPECT_TRUE(root.SetValue("providerName", std::string("testProvider")));
+    EXPECT_TRUE(root.SetValue("abilityName", std::string("testAbility")));
+    EXPECT_TRUE(root.SetValue("bundleName", std::string("com.test.bundle")));
+    EXPECT_TRUE(root.SetValue("userid", 100));
+    EXPECT_TRUE(root.SetValue("index", std::string("testIndex")));
     return root.Serialize(false);
 }
 

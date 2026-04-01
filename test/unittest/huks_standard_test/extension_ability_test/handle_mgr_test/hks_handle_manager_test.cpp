@@ -91,6 +91,18 @@ CppParamSet HksRemoteHandleManagerTest::CreateTestParamSet(int32_t uid)
     return CppParamSet(params);
 }
 
+CppParamSet HksRemoteHandleManagerTest::CreateTestParamSet(int32_t uid, std::string pinStr)
+{
+    std::vector<HksParam> params = {
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA},
+        {.tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048},
+        {.tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN},
+        {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = uid},
+        {.tag = HKS_EXT_CRYPTO_TAG_UKEY_PIN, .blob = {.size = pinStr.size(), .data = (uint8_t*)pinStr.c_str()}
+    };
+    return CppParamSet(params);
+}
+
 CppParamSet HksRemoteHandleManagerTest::CreateTestParamSet()
 {
     std::vector<HksParam> params = {
@@ -230,7 +242,7 @@ HWTEST_F(HksRemoteHandleManagerTest, PinManagementTest, TestSize.Level0)
 
     std::string index = CreateTestIndex();
     HksProcessInfo processInfo = CreateTestProcessInfo();
-    CppParamSet paramSet = CreateTestParamSet(processInfo.uidInt);
+    CppParamSet paramSet = CreateTestParamSet(processInfo.uidInt, "123456");
     // Create handle first
     int32_t ret = manager->CreateRemoteHandle(processInfo, index, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
