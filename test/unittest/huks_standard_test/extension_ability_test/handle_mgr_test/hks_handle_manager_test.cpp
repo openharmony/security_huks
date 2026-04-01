@@ -262,7 +262,7 @@ HWTEST_F(HksRemoteHandleManagerTest, PinManagementTest, TestSize.Level0)
  * @tc.desc: Test PIN management operations
  * @tc.type: FUNC
  */
-HWTEST_F(HksRemoteHandleManagerTest, PinManagementTest, TestSize.Level0)
+HWTEST_F(HksRemoteHandleManagerTest, ClearPinStateTest, TestSize.Level0)
 {
     auto manager = HksRemoteHandleManager::GetInstanceWrapper();
     EXPECT_NE(manager, nullptr);
