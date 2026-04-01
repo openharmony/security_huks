@@ -572,18 +572,18 @@ int32_t HksRemoteHandleManager::CheckAuthStateIsOk(const HksProcessInfo &process
 void HksRemoteHandleManager::ClearAuthState(const HksProcessInfo &processInfo)
 {
     std::vector<std::pair<uint32_t, std::string>> keysToRemove;
-    struct HksParam uid = {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = processInfo.uidInt};
-    CppParamSet paramSet = CppParamSet({uid});
     auto iterFunc = [&](std::pair<uint32_t, std::string> key, int32_t &value) {
         if (key.first == processInfo.uidInt) {
             keysToRemove.push_back(key);
-            HKS_IF_NOT_SUCC_LOGE(RemoteClearPinStatus(processInfo, key.second, paramSet),
-                "Remote clear pin status failed: %" LOG_PUBLIC "u", processInfo.uidInt)
         }
     };
     uidIndexToAuthState_.Iterate(iterFunc);
+    struct HksParam uid = {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = processInfo.uidInt};
+    CppParamSet paramSet = CppParamSet({uid});
+    
     for (auto &key : keysToRemove) {
-        uidIndexToAuthState_.Erase(key);
+        HKS_IF_NOT_SUCC_LOGE(RemoteClearPinStatus(processInfo, key.second, paramSet),
+            "Remote clear pin status failed: %" LOG_PUBLIC "u", processInfo.uidInt)
     }
 }
 
