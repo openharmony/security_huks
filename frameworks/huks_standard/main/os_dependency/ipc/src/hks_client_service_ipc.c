@@ -354,10 +354,6 @@ int32_t HksClientImportCertificate(const struct HksBlob *resourceId,
     struct HksBlob outBlob = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
 
-    outBlob.size = MAX_OUT_BLOB_SIZE;
-    outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
-    HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
-
     do {
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "BuildParamSetNotNull fail, ret=%" LOG_PUBLIC "d", ret);
