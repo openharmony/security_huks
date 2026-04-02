@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,7 +99,7 @@ int32_t HksCryptoExtAbility::ExportProviderCertificates(const CppParamSet &param
     return HKS_ERROR_EXT_UNDEFINED_OPERATION;
 }
 
-int32_t HksCryptoExtAbility::ImportCertificate(const std::string &index, const std::string &certJsonStr,
+int32_t HksCryptoExtAbility::ImportCertificate(const std::string &index, const HksExtCertInfoIdl& certInfo,
     const CppParamSet &params, int32_t &errcode)
 {
     LOGE("HksCryptoExtAbility::ImportCertificate Undefined operation");

@@ -29,6 +29,7 @@
 #include "ihuks_access_ext_base.h"
 #include "hks_json_wrapper.h"
 #include "hks_ukey_common.h"
+#include "hks_ext_cert_info.h"
 namespace OHOS {
 namespace Security {
 namespace Huks {

@@ -81,6 +81,25 @@ static int32_t WrapIndexWithProviderInfo(const ProviderInfo& providerInfo, const
     return HKS_SUCCESS;
 }
 
+static void ConvertCertInfoToIdl(const struct HksExtCertInfo &certInfo, HksExtCertInfoIdl &idlOut)
+{
+    idlOut.purpose = certInfo.purpose;
+    
+    // 转换 index
+    if (certInfo.index.data != nullptr && certInfo.index.size > 0) {
+        idlOut.index.assign(certInfo.index.data, certInfo.index.data + certInfo.index.size);
+    } else {
+        idlOut.index.clear();
+    }
+    
+    // 转换 cert
+    if (certInfo.cert.data != nullptr && certInfo.cert.size > 0) {
+        idlOut.cert.assign(certInfo.cert.data, certInfo.cert.data + certInfo.cert.size);
+    } else {
+        idlOut.cert.clear();
+    }
+}
+
 int32_t HksRemoteHandleManager::MergeProviderCertificates(const ProviderInfo &providerInfo,
     const std::string &providerCertVec, CommJsonObject &combinedArray)
 {
@@ -403,18 +422,17 @@ int32_t HksRemoteHandleManager::ImportRemoteCertificate(const HksProcessInfo &pr
     ret = HksGetFrontUserId(frontUserId);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get front user id failed")
     providerInfo.m_userid = frontUserId;
+    
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
-    // 将HksExtCertInfo转换为JSON字符串，参考导出证书接口的实现方式
-    std::string certJsonStr;
-    ret = CertInfoToString(certInfo, certJsonStr);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Convert certInfo to json string failed: %" LOG_PUBLIC "d", ret)
+    HksExtCertInfoIdl certInfoIdl;
+    ConvertCertInfoToIdl(certInfo, certInfoIdl);
 
-    // 调用proxy的ImportCertificate方法，传递JSON字符串
-    auto ipccode = proxy->ImportCertificate(newIndex, certJsonStr, paramSet, ret);
+    auto ipccode = proxy->ImportCertificate(newIndex, certInfoIdl, paramSet, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
+    
     ret = ConvertExtensionToHksErrorCode(ret, g_importCertErrCodeMapping);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote ImportCertificate failed: %" LOG_PUBLIC "d", ret)
 

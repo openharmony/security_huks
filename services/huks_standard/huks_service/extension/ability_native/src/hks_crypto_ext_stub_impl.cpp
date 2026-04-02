@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,7 +99,7 @@ ErrCode HksCryptoExtStubImpl::ExportProviderCertificates(
 
 ErrCode HksCryptoExtStubImpl::ImportCertificate(
     const std::string& index,
-    const std::string& certJsonStr,
+    const HksExtCertInfoIdl& certInfo,
     const CppParamSet& params,
     int32_t& errcode)
 {
@@ -107,7 +107,7 @@ ErrCode HksCryptoExtStubImpl::ImportCertificate(
         LOGE("extension is nullptr");
         return HKS_ERROR_EXT_NULLPTR;
     }
-    return extension_->ImportCertificate(index, certJsonStr, params, errcode);
+    return extension_->ImportCertificate(index, certInfo, params, errcode);
 }
 
 ErrCode HksCryptoExtStubImpl::InitSession(
