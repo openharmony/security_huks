@@ -316,19 +316,9 @@ bool BuildImportWrappedKeyParam(const napi_env &env, const ImportWrappedKeyParam
 
     napi_value nativeCppParamSet = nullptr;
     if (param.params.GetParamSet()) {
-        status = napi_create_object(env, &nativeCppParamSet);
-        if (status != napi_ok || nativeCppParamSet == nullptr) {
-            LOGE("Create js NativeValue object failed, status:%d", status);
-            return false;
-        }
         nativeCppParamSet = GenerateHksParamArray(env, *param.params.GetParamSet());
         if (nativeCppParamSet == nullptr) {
-            return false;
-        }
-
-        status = napi_set_property(env, nativeCppParamSet, "tag", nativeCppParamSet);
-        if (status != napi_ok) {
-            LOGE("Set tag to nativeCppParamSet failed, status:%d", status);
+            LOGE("GenerateHksParamArray failed");
             return false;
         }
     }
@@ -336,12 +326,6 @@ bool BuildImportWrappedKeyParam(const napi_env &env, const ImportWrappedKeyParam
     napi_value nativeWrappedData = nullptr;
     if (!MakeJsNativeVectorInData(env, param.wrappedData, nativeWrappedData)) {
         LOGE("Make js NativeValue vector failed");
-        return false;
-    }
-
-    status = napi_set_property(env, nativeCppParamSet, "value", nativeCppParamSet);
-    if (status != napi_ok) {
-        LOGE("Set value to nativeCppParamSet failed, status:%d", status);
         return false;
     }
 
