@@ -15,19 +15,6 @@
 #include "hks_ext_cert_info.h"
 namespace OHOS::Security::Huks {
 
-// ==================== ProviderInfo ====================
-bool ProviderInfo::operator==(const ProviderInfo &other) const
-{
-    return m_bundleName == other.m_bundleName && m_providerName == other.m_providerName &&
-        m_abilityName == other.m_abilityName;
-}
-
-bool ProviderInfo::operator<(const ProviderInfo &other) const
-{
-    return std::tie(m_bundleName, m_providerName, m_abilityName) <
-        std::tie(other.m_bundleName, other.m_providerName, other.m_abilityName);
-}
-
 // ==================== HksCryptoExtStubImpl ====================
 class HksCryptoExtStubImpl : public HuksAccessExtBaseStub {
 public:
