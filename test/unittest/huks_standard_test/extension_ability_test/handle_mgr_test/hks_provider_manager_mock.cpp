@@ -203,18 +203,6 @@ ErrCode ExportProviderCertificates(
         int32_t& errcode) { return HKS_SUCCESS; };
 };
 
-bool ProviderInfo::operator==(const ProviderInfo &other) const
-{
-    return m_bundleName == other.m_bundleName && m_providerName == other.m_providerName &&
-        m_abilityName == other.m_abilityName;
-}
-
-bool ProviderInfo::operator<(const ProviderInfo &other) const
-{
-    return std::tie(m_bundleName, m_providerName, m_abilityName) <
-        std::tie(other.m_bundleName, other.m_providerName, other.m_abilityName);
-}
-
 std::shared_ptr<HksProviderLifeCycleManager> HksProviderLifeCycleManager::GetInstanceWrapper()
 {
     return HksProviderLifeCycleManager::GetInstance();
