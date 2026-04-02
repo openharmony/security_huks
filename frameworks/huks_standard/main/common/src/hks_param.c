@@ -190,7 +190,7 @@ static bool IsValidTag(uint32_t tag)
     return false;
 }
 
-HKS_API_EXPORT int32_t HksCheckMutiSetTag(const struct HksParamSet *paramSet)
+HKS_API_EXPORT int32_t HksCheckMultiSetTag(const struct HksParamSet *paramSet)
 {
     for (uint32_t i = 0; i < paramSet->paramsCnt; ++i) {
         uint32_t curTag = paramSet->params[i].tag;

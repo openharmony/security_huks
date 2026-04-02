@@ -222,26 +222,37 @@ static int32_t ConvertCertInfoIdlToJsObject(const napi_env &env, const HksExtCer
 
     // 设置 purpose
     napi_value purposeVal = nullptr;
-    napi_create_int32(env, certInfo.purpose, &purposeVal);
-    napi_set_named_property(env, certObj, "purpose", purposeVal);
+    napi_status status = napi_create_int32(env, certInfo.purpose, &purposeVal);
+    HKS_IF_TRUE_LOGE_RETURN(status != napi_ok || purposeVal == nullptr,
+        HKS_ERROR_EXT_CREATE_VALUE_FAILED, "napi_create_int32 failed");
+    status = napi_set_named_property(env, certObj, "purpose", purposeVal);
+    HKS_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_CREATE_VALUE_FAILED,
+        "napi_set_named_property purpose failed");
 
     // 设置 resourceId：将 index vector<uint8_t> 视为 UTF-8 字符串
     std::string indexStr(reinterpret_cast<const char*>(certInfo.index.data()), certInfo.index.size());
     napi_value resourceIdVal = nullptr;
-    napi_create_string_utf8(env, indexStr.c_str(), indexStr.size(), &resourceIdVal);
-    napi_set_named_property(env, certObj, "resourceId", resourceIdVal);
+    status = napi_create_string_utf8(env, indexStr.c_str(), indexStr.size(), &resourceIdVal);
+    HKS_IF_TRUE_LOGE_RETURN(status != napi_ok || resourceIdVal == nullptr,
+        HKS_ERROR_EXT_CREATE_VALUE_FAILED, "napi_create_string_utf8 failed");
+    status = napi_set_named_property(env, certObj, "resourceId", resourceIdVal);
+    HKS_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_CREATE_VALUE_FAILED,
+        "napi_set_named_property resourceId failed");
 
     // 设置 cert：Uint8Array
     void* data = nullptr;
     napi_value buffer = nullptr;
-    napi_status status = napi_create_arraybuffer(env, certInfo.cert.size(), &data, &buffer);
-    if (status != napi_ok || data == nullptr) {
-        HKS_IF_TRUE_LOGE_RETURN(true, HKS_ERROR_MALLOC_FAIL, "napi_create_arraybuffer failed");
-    }
+    status = napi_create_arraybuffer(env, certInfo.cert.size(), &data, &buffer);
+    HKS_IF_TRUE_LOGE_RETURN(status != napi_ok || data == nullptr, HKS_ERROR_MALLOC_FAIL,
+        "napi_create_arraybuffer failed");
     (void)memcpy_s(data, certInfo.cert.size(), certInfo.cert.data(), certInfo.cert.size());
     napi_value certArray = nullptr;
-    napi_create_typedarray(env, napi_uint8_array, certInfo.cert.size(), buffer, 0, &certArray);
-    napi_set_named_property(env, certObj, "cert", certArray);
+    status = napi_create_typedarray(env, napi_uint8_array, certInfo.cert.size(), buffer, 0, &certArray);
+    HKS_IF_TRUE_LOGE_RETURN(status != napi_ok || certArray == nullptr,
+        HKS_ERROR_EXT_CREATE_VALUE_FAILED, "napi_create_typedarray failed");
+    status = napi_set_named_property(env, certObj, "cert", certArray);
+    HKS_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_CREATE_VALUE_FAILED,
+        "napi_set_named_property cert failed");
 
     return HKS_SUCCESS;
 }
@@ -306,7 +317,7 @@ bool BuildImportWrappedKeyParam(const napi_env &env, const ImportWrappedKeyParam
     napi_value nativeCppParamSet = nullptr;
     if (param.params.GetParamSet()) {
         status = napi_create_object(env, &nativeCppParamSet);
-        if (nativeCppParamSet == nullptr) {
+        if (status != napi_ok || nativeCppParamSet == nullptr) {
             LOGE("Create js NativeValue object failed, status:%d", status);
             return false;
         }

@@ -634,8 +634,8 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
 
         if (HksCheckIsUkeyOperation(paramSetIn, &ret) == HKS_SUCCESS) {
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
-            ret = HksCheckMutiSetTag(paramSet);
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckMutiSetTag failed, ret = %" LOG_PUBLIC "d", ret)
+            ret = HksCheckMultiSetTag(paramSet);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckMultiSetTag failed, ret = %" LOG_PUBLIC "d", ret)
             ret = HksServiceOnUkeyGenerateKey(processInfo, keyAlias, paramSetIn);
             HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyGenerateKey failed, ret = %" LOG_PUBLIC "d", ret)
             return ret;
@@ -1138,8 +1138,8 @@ int32_t HksServiceImportWrappedKey(const struct HksProcessInfo *processInfo, con
     do {
         if (HksCheckIsUkeyOperation(paramSet, &ret) == HKS_SUCCESS) {
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
-            ret = HksCheckMutiSetTag(paramSet);
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckMutiSetTag failed, ret = %" LOG_PUBLIC "d", ret)
+            ret = HksCheckMultiSetTag(paramSet);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckMultiSetTag failed, ret = %" LOG_PUBLIC "d", ret)
             ret = HksServiceOnUkeyImportWrappedKey(processInfo, keyAlias, wrappingKeyAlias, paramSet, wrappedKeyData);
             HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyImportWrappedKey failed, ret = %" LOG_PUBLIC "d", ret)
             return ret;
@@ -1178,8 +1178,8 @@ int32_t HksServiceExportPublicKey(const struct HksProcessInfo *processInfo, cons
     do {
         if (HksCheckIsUkeyOperation(paramSet, &ret) == HKS_SUCCESS) {
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
-            ret = HksCheckMutiSetTag(paramSet);
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckMutiSetTag failed, ret = %" LOG_PUBLIC "d", ret)
+            ret = HksCheckMultiSetTag(paramSet);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckMultiSetTag failed, ret = %" LOG_PUBLIC "d", ret)
             ret = HksServiceOnUkeyExportPublicKey(processInfo, keyAlias, paramSet, key);
             HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyImportWrappedKey failed, ret = %" LOG_PUBLIC "d", ret)
             return ret;
