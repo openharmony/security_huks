@@ -18,6 +18,7 @@
 #include "hks_template.h"
 #include "huks_access_ext_base_stub.h"
 #include "iremote_object.h"
+#include "hks_ext_cert_info.h"
 
 namespace OHOS {
 namespace Security {
@@ -153,7 +154,7 @@ public:
     
     ErrCode ImportCertificate(
         const std::string& index,
-        const std::string& certJsonStr,
+        const HksExtCertInfoIdl& certInfo,
         const CppParamSet& params,
         int32_t& errcode) { return -1; };
 

@@ -22,6 +22,7 @@
 #include <gtest/gtest.h>
 #include "ihuks_access_ext_base.h"
 #include "hks_plugin_def.h"
+#include "hks_ext_cert_info.h"
 
 namespace OHOS {
 namespace Security {
@@ -68,7 +69,7 @@ public:
     MOCK_METHOD(ErrCode, ImportWrappedKey, (const std::string& index, const std::string& wrappingKeyIndex,
         const CppParamSet& params, const std::vector<uint8_t>& wrappedData, int &errcode), (override));
     
-    MOCK_METHOD(ErrCode, ImportCertificate, (const std::string& index, const std::string& certJsonStr,
+    MOCK_METHOD(ErrCode, ImportCertificate, (const std::string& index, const HksExtCertInfoIdl& certInfo,
         const CppParamSet& params, int &errcode), (override));
 
     MOCK_METHOD(ErrCode, GenerateKey,
