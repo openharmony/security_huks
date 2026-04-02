@@ -40,10 +40,6 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 
-constexpr const char *PROVIDER_NAME_KEY = "providerName";
-constexpr const char *ABILITY_NAME_KEY = "abilityName";
-constexpr const char *BUNDLE_NAME_KEY = "bundleName";
-constexpr const char *USERID_KEY = "userid";
 constexpr const size_t MAX_INDEX_SIZE = 512;
 constexpr const int32_t MAX_PROVIDER_TOTAL_NUM = 100;
 const std::vector<std::string> VALID_PROPERTYID = {
@@ -120,41 +116,6 @@ int32_t HksRemoteHandleManager::MergeProviderCertificates(const ProviderInfo &pr
         }
         HKS_IF_TRUE_LOGE(!combinedArray.AppendElement(certObj), "append certObj to combinedArray fail.")
     }
-    return HKS_SUCCESS;
-}
-
-int32_t HksRemoteHandleManager::ParseIndexAndProviderInfo(const std::string &index,
-    ProviderInfo &providerInfo, std::string &newIndex)
-{
-    CommJsonObject root = CommJsonObject::Parse(index);
-    HKS_IF_TRUE_LOGE_RETURN(root.IsNull(), HKS_ERROR_JSON_PARSE_FAILED,
-        "Parse index failed, invalid JSON format")
-    auto providerNameResult = root.GetValue(PROVIDER_NAME_KEY).ToString();
-    auto abilityNameResult = root.GetValue(ABILITY_NAME_KEY).ToString();
-    auto bundleNameResult = root.GetValue(BUNDLE_NAME_KEY).ToString();
-    HKS_IF_TRUE_LOGE_RETURN(providerNameResult.first != HKS_SUCCESS || abilityNameResult.first != HKS_SUCCESS ||
-        bundleNameResult.first != HKS_SUCCESS, HKS_ERROR_JSON_TYPE_MISMATCH, "Get provider info fields failed")
-    HKS_IF_TRUE_LOGE_RETURN(providerNameResult.second.empty() || abilityNameResult.second.empty() ||
-        bundleNameResult.second.empty(), HKS_ERROR_JSON_INVALID_VALUE, "Provider info is incomplete")
-    providerInfo.m_providerName = providerNameResult.second;
-    providerInfo.m_abilityName = abilityNameResult.second;
-    providerInfo.m_bundleName = bundleNameResult.second;
-    CommJsonObject newRoot = CommJsonObject::CreateObject();
-    HKS_IF_TRUE_LOGE_RETURN(newRoot.IsNull(), HKS_ERROR_JSON_NOT_OBJECT, "Create new JSON object failed")
-    auto keys = root.GetKeys();
-    for (const auto &key : keys) {
-        if (key == PROVIDER_NAME_KEY || key == ABILITY_NAME_KEY || key == BUNDLE_NAME_KEY || key == USERID_KEY) {
-            continue;
-        }
-        auto value = root.GetValue(key);
-        if (!value.IsNull() && !newRoot.SetValue(key, value)) {
-            HKS_LOG_E("Copy field %s failed", key.c_str());
-            return HKS_ERROR_JSON_INVALID_VALUE;
-        }
-    }
-    newIndex = newRoot.Serialize(false);
-    HKS_IF_TRUE_LOGE_RETURN(newIndex.empty(), HKS_ERROR_JSON_SERIALIZE_FAILED,
-        "New index is empty")
     return HKS_SUCCESS;
 }
 
