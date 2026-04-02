@@ -190,20 +190,6 @@ static bool IsValidTag(uint32_t tag)
     return false;
 }
 
-HKS_API_EXPORT int32_t HksCheckMultiSetTag(const struct HksParamSet *paramSet)
-{
-    for (uint32_t i = 0; i < paramSet->paramsCnt; ++i) {
-        uint32_t curTag = paramSet->params[i].tag;
-        for (uint32_t j = i + 1; j < paramSet->paramsCnt; ++j) {
-            if (curTag == paramSet->params[j].tag) {
-                HKS_LOG_E("paramSet contains multi-tags! 0x%" LOG_PUBLIC "x", curTag);
-                return HKS_ERROR_INVALID_ARGUMENT;
-            }
-        }
-    }
-    return HKS_SUCCESS;
-}
-
 HKS_API_EXPORT int32_t HksCheckParamSetTag(const struct HksParamSet *paramSet)
 {
     HKS_IF_NULL_RETURN(paramSet, HKS_ERROR_NULL_POINTER)

@@ -94,6 +94,22 @@
 #include "hks_config_parser.h"
 #endif
 
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+static int32_t HksCheckMutiSetTag(const struct HksParamSet *paramSet)
+{
+    for (uint32_t i = 0; i < paramSet->paramsCnt; ++i) {
+        uint32_t curTag = paramSet->params[i].tag;
+        for (uint32_t j = i + 1; j < paramSet->paramsCnt; ++j) {
+            if (curTag == paramSet->params[j].tag) {
+                HKS_LOG_E("paramSet contains multi-tags! 0x%" LOG_PUBLIC "x", curTag);
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+        }
+    }
+    return HKS_SUCCESS;
+}
+#endif
+
 static void IfNotSuccAppendHdiErrorInfo(int32_t hdiRet)
 {
     (void)hdiRet;
