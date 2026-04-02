@@ -24,6 +24,7 @@
 #include <string>
 #include <tuple>
 #include "hks_json_wrapper.h"
+#include "hks_ext_cert_info.h"
 namespace OHOS::Security::Huks {
 
 class HksCryptoExtStubImpl : public HuksAccessExtBaseStub {
@@ -192,7 +193,7 @@ ErrCode ExportProviderCertificates(
     
     ErrCode ImportCertificate(
         const std::string& index,
-        const std::string& certJsonStr,
+        const HksExtCertInfoIdl& certInfo,
         const CppParamSet& params,
         int32_t& errcode) { return HKS_SUCCESS; };
 
