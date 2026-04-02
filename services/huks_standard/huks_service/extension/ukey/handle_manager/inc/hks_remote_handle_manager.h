@@ -240,8 +240,6 @@ public:
         const CppParamSet &paramSet);
 
     int32_t ClearUidIndexMap(const ProviderInfo &providerInfo);
-    static int32_t ParseIndexAndProviderInfo(const std::string &index,
-        ProviderInfo &providerInfo, std::string &newIndex);
     void ClearAuthState(const HksProcessInfo &processInfo);
     int32_t ParseAndValidateIndex(const std::string &index, const uint32_t uid, ProviderInfo &providerInfo,
         std::string &handle);
