@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -112,7 +112,7 @@ public:
         std::string &certJsonArr, int32_t &errcode) override;
     int32_t ExportProviderCertificates(const CppParamSet &params, std::string &certJsonArr,
         int32_t &errcode) override;
-    int32_t ImportCertificate(const std::string &index, const std::string &certJsonStr, const CppParamSet &params,
+    int32_t ImportCertificate(const std::string &index, const HksExtCertInfoIdl& certInfo, const CppParamSet &params,
         int32_t &errcode) override;
     int32_t InitSession(const std::string &index, const CppParamSet &params, std::string &handle,
         int32_t &errcode) override;

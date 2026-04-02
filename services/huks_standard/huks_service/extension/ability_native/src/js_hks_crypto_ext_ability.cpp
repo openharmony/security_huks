@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -212,53 +212,36 @@ napi_value GenerateHksParamArray(const napi_env env, const HksParamSet &paramSet
     return paramArray;
 }
 
-static int32_t ParseCertJsonStrToJsObject(const napi_env &env, const std::string &certJsonStr,
+static int32_t ConvertCertInfoIdlToJsObject(const napi_env &env, const HksExtCertInfoIdl &certInfo,
     napi_value &certObj)
 {
-    auto json = CommJsonObject::Parse(certJsonStr);
-    HKS_IF_TRUE_LOGE_RETURN(!json.IsObject(), HKS_ERROR_JSON_PARSE_FAILED,
-        "certJsonStr parse failed")
+    napi_create_object(env, &certObj);
+    HKS_IF_TRUE_LOGE_RETURN(certObj == nullptr, HKS_ERROR_EXT_CREATE_VALUE_FAILED,
+        "napi_create_object failed");
 
-    auto purpose = json.GetValue("purpose").ToNumber<int32_t>();
-    auto index = json.GetValue("index").ToString();
-    auto certBase64 = json.GetValue("cert").ToString();
-    HKS_IF_TRUE_LOGE_RETURN(purpose.first != HKS_SUCCESS || index.first != HKS_SUCCESS,
-        HKS_ERROR_JSON_PARSE_FAILED, "parse cert fields failed")
+    // 设置 purpose
+    napi_value purposeVal = nullptr;
+    napi_create_int32(env, certInfo.purpose, &purposeVal);
+    napi_set_named_property(env, certObj, "purpose", purposeVal);
 
-    // Convert to HksExtCertInfo then to JS object
-    using namespace OHOS::Security::Huks;
-    HksBlob indexBlob = StringToBlob(index.second);
-    HksBlob certBlob = Base64StringToBlob(certBase64.second);
-    HKS_IF_TRUE_LOGE_RETURN(indexBlob.data == nullptr || certBlob.data == nullptr,
-        HKS_ERROR_MALLOC_FAIL, "StringToBlob or Base64StringToBlob failed")
+    // 设置 resourceId：将 index vector<uint8_t> 视为 UTF-8 字符串
+    std::string indexStr(reinterpret_cast<const char*>(certInfo.index.data()), certInfo.index.size());
+    napi_value resourceIdVal = nullptr;
+    napi_create_string_utf8(env, indexStr.c_str(), indexStr.size(), &resourceIdVal);
+    napi_set_named_property(env, certObj, "resourceId", resourceIdVal);
 
-    napi_value jsObj = nullptr;
-    napi_create_object(env, &jsObj);
-    HKS_IF_TRUE_LOGE_RETURN(jsObj == nullptr, HKS_ERROR_EXT_CREATE_VALUE_FAILED,
-        "napi_create_object failed")
-
-    napi_value val = nullptr;
-    napi_create_int32(env, purpose.second, &val);
-    napi_set_named_property(env, jsObj, "purpose", val);
-
-    napi_create_string_utf8(env, reinterpret_cast<char*>(indexBlob.data),
-        indexBlob.size, &val);
-    napi_set_named_property(env, jsObj, "resourceId", val);
-
+    // 设置 cert：Uint8Array
     void* data = nullptr;
     napi_value buffer = nullptr;
-    napi_status status = napi_create_arraybuffer(env, certBlob.size, &data, &buffer);
+    napi_status status = napi_create_arraybuffer(env, certInfo.cert.size(), &data, &buffer);
     if (status != napi_ok || data == nullptr) {
         HKS_IF_TRUE_LOGE_RETURN(true, HKS_ERROR_MALLOC_FAIL, "napi_create_arraybuffer failed");
     }
-    memcpy_s(data, certBlob.size, certBlob.data, certBlob.size);
+    (void)memcpy_s(data, certInfo.cert.size(), certInfo.cert.data(), certInfo.cert.size());
     napi_value certArray = nullptr;
-    napi_create_typedarray(env, napi_uint8_array, certBlob.size, buffer, 0, &certArray);
-    napi_set_named_property(env, jsObj, "cert", certArray);
+    napi_create_typedarray(env, napi_uint8_array, certInfo.cert.size(), buffer, 0, &certArray);
+    napi_set_named_property(env, certObj, "cert", certArray);
 
-    certObj = jsObj;
-    HKS_FREE_BLOB(indexBlob);
-    HKS_FREE_BLOB(certBlob);
     return HKS_SUCCESS;
 }
 
@@ -1419,12 +1402,10 @@ int32_t JsHksCryptoExtAbility::ExportProviderCertificates(const CppParamSet &par
     return dataParam->hksErrorCode;
 }
 
-int32_t JsHksCryptoExtAbility::ImportCertificate(const std::string &index, const std::string &certJsonStr,
+int32_t JsHksCryptoExtAbility::ImportCertificate(const std::string &index, const HksExtCertInfoIdl &certInfo,
     const CppParamSet &params, int32_t &errcode)
 {
-    // 根据JS接口定义：onImportCertificate(resourceId, certInfo, params)
-    // 需要传递3个独立参数
-    auto argParser = [index, certJsonStr, params](napi_env &env, napi_value *argv, size_t &argc) -> bool {
+    auto argParser = [index, &certInfo, params](napi_env &env, napi_value *argv, size_t &argc) -> bool {
         // 第1个参数：resourceId (string)
         napi_value nativeIndex = nullptr;
         auto status = napi_create_string_utf8(env, index.c_str(), index.length(), &nativeIndex);
@@ -1433,10 +1414,9 @@ int32_t JsHksCryptoExtAbility::ImportCertificate(const std::string &index, const
         argv[ARGC_ZERO] = nativeIndex;
 
         // 第2个参数：certInfo (HuksCryptoExtensionCertInfo)
-        // certJsonStr 是JSON字符串（from Handle Manager），需要解析并转换为JS对象
         napi_value certObj = nullptr;
-        auto ret = ParseCertJsonStrToJsObject(env, certJsonStr, certObj);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "ParseCertJsonStrToJsObject failed, ret:%d", ret)
+        auto ret = ConvertCertInfoIdlToJsObject(env, certInfo, certObj);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "ConvertCertInfoIdlToJsObject failed, ret:%d", ret)
         argv[ARGC_ONE] = certObj;
 
         // 第3个参数：params (optional HuksExternalCryptoParam[])
@@ -1445,7 +1425,6 @@ int32_t JsHksCryptoExtAbility::ImportCertificate(const std::string &index, const
             nativeCppParamSet = GenerateHksParamArray(env, *params.GetParamSet());
             HKS_IF_NULL_LOGE_RETURN(nativeCppParamSet, false, "GenerateHksParamArray failed")
         } else {
-            // 如果params为空，创建undefined
             status = napi_get_undefined(env, &nativeCppParamSet);
             HKS_IF_TRUE_LOGE_RETURN(status != napi_ok, false, "get undefined failed")
         }
