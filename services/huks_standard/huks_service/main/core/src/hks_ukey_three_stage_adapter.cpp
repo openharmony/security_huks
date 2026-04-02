@@ -234,9 +234,9 @@ int32_t HksServiceOnUkeyImportWrappedKey(const struct HksProcessInfo *processInf
 int32_t HksServiceOnUkeyExportPublicKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *key)
 {
-    int32_t ret = HksCheckBlob2(&processInfo->processName, keyAlias);
+    int32_t ret = HksCheckBlob3(&processInfo->processName, keyAlias, key);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
-        "Hks check processName or keyAlias fail. ret: %" LOG_PUBLIC "d", ret)
+        "Hks check processName or keyAlias or key fail. ret: %" LOG_PUBLIC "d", ret)
 
     HKS_IF_TRUE_LOGE_RETURN(keyAlias->size > MAX_SESSION_INDEX_SIZE, HKS_ERROR_INVALID_ARGUMENT,
         "keyAlias size too large. size: %" LOG_PUBLIC "d. maxSize: %" LOG_PUBLIC "d",
