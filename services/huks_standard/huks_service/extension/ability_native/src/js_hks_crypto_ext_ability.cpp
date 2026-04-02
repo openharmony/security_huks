@@ -56,6 +56,7 @@ constexpr size_t ARGC_ZERO = 0;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
+constexpr size_t ARGC_FOUR = 4;
 constexpr size_t MAX_ARG_COUNT = 5;
 constexpr size_t MAX_CERT_SIZE = 5 * 8196;
 constexpr int32_t MAX_WAIT_TIME = 3;
@@ -313,6 +314,12 @@ bool BuildImportWrappedKeyParam(const napi_env &env, const ImportWrappedKeyParam
         if (nativeCppParamSet == nullptr) {
             return false;
         }
+
+        status = napi_set_property(env, nativeCppParamSet, "tag", nativeCppParamSet);
+        if (status != napi_ok) {
+            LOGE("Set tag to nativeCppParamSet failed, status:%d", status);
+            return false;
+        }
     }
 
     napi_value nativeWrappedData = nullptr;
@@ -321,11 +328,17 @@ bool BuildImportWrappedKeyParam(const napi_env &env, const ImportWrappedKeyParam
         return false;
     }
 
+    status = napi_set_property(env, nativeCppParamSet, "value", nativeCppParamSet);
+    if (status != napi_ok) {
+        LOGE("Set value to nativeCppParamSet failed, status:%d", status);
+        return false;
+    }
+
     argv[ARGC_ZERO] = nativeIndex;
     argv[ARGC_ONE] = nativeWrappingKeyIndex;
     argv[ARGC_TWO] = nativeCppParamSet;
     argv[ARGC_THREE] = nativeWrappedData;
-    argc = ARGC_THREE;
+    argc = ARGC_FOUR;
     return true;
 }
 
