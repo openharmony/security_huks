@@ -659,7 +659,6 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
 #ifdef L2_STANDARD
     traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
-
     struct HksBlob output = { MAX_KEY_SIZE, keyOutBuffer };
     struct HksBlob keyIn = { 0, NULL };
     int32_t ret;
@@ -678,7 +677,6 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
 #endif
             return HUKS_ERR_CODE_NOT_SUPPORTED_API;
         }
-
         ret = HksCheckGenAndImportKeyParams(&processInfo->processName, keyAlias, paramSetIn, &output);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check generate key params failed, ret = %" LOG_PUBLIC "d", ret)
 
