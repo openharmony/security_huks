@@ -631,14 +631,14 @@ static int32_t GenerateKeyOperation(const struct HksProcessInfo *processInfo, co
     int32_t ret;
 
     ret = CheckKeyCondition(processInfo, keyAlias, newParamSet);
-    HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check key condition failed, ret = %" LOG_PUBLIC "d", ret)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check key condition failed, ret = %" LOG_PUBLIC "d", ret)
 
     ret = GetKeyIn(processInfo, newParamSet, &keyIn);
-    HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get keyIn failed, ret = %" LOG_PUBLIC "d", ret)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyIn failed, ret = %" LOG_PUBLIC "d", ret)
 
     ret = HuksAccessGenerateKey(keyAlias, newParamSet, &keyIn, &output);
     IfNotSuccAppendHdiErrorInfo(ret);
-    HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "access level generate key failed, ret = %" LOG_PUBLIC "d", ret)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "access level generate key failed, ret = %" LOG_PUBLIC "d", ret)
 
     ret = HksManageStoreKeyBlob(processInfo, newParamSet, keyAlias, &output, HKS_STORAGE_TYPE_KEY);
     HKS_IF_NOT_SUCC_LOGE(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
