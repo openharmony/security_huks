@@ -216,13 +216,13 @@ napi_value GenerateHksParamArray(const napi_env env, const HksParamSet &paramSet
 static int32_t ConvertCertInfoIdlToJsObject(const napi_env &env, const HksExtCertInfoIdl &certInfo,
     napi_value &certObj)
 {
-    napi_create_object(env, &certObj);
-    HKS_IF_TRUE_LOGE_RETURN(certObj == nullptr, HKS_ERROR_EXT_CREATE_VALUE_FAILED,
+    napi_status status = napi_create_object(env, &certObj);
+    HKS_IF_TRUE_LOGE_RETURN(status != napi_ok || certObj == nullptr, HKS_ERROR_EXT_CREATE_VALUE_FAILED,
         "napi_create_object failed");
 
     // 设置 purpose
     napi_value purposeVal = nullptr;
-    napi_status status = napi_create_int32(env, certInfo.purpose, &purposeVal);
+    status = napi_create_int32(env, certInfo.purpose, &purposeVal);
     HKS_IF_TRUE_LOGE_RETURN(status != napi_ok || purposeVal == nullptr,
         HKS_ERROR_EXT_CREATE_VALUE_FAILED, "napi_create_int32 failed");
     status = napi_set_named_property(env, certObj, "purpose", purposeVal);
