@@ -95,7 +95,7 @@
 #endif
 
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
-static int32_t HksCheckMutiSetTag(const struct HksParamSet *paramSet)
+static int32_t HksCheckMultiSetTag(const struct HksParamSet *paramSet)
 {
     for (uint32_t i = 0; i < paramSet->paramsCnt; ++i) {
         uint32_t curTag = paramSet->params[i].tag;
@@ -650,7 +650,7 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
 
         if (HksCheckIsUkeyOperation(paramSetIn, &ret) == HKS_SUCCESS) {
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
-            ret = HksCheckMultiSetTag(paramSet);
+            ret = HksCheckMultiSetTag(paramSetIn);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckMultiSetTag failed, ret = %" LOG_PUBLIC "d", ret)
             ret = HksServiceOnUkeyGenerateKey(processInfo, keyAlias, paramSetIn);
             HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyGenerateKey failed, ret = %" LOG_PUBLIC "d", ret)

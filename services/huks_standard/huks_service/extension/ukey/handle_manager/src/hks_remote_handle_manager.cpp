@@ -447,9 +447,9 @@ int32_t HksRemoteHandleManager::RemoteImportWrappedKey(const HksProcessInfo &pro
 
     std::string newWrappingKeyIndex;
     ProviderInfo wrappingKeyProviderInfo;
-    ret = ParseIndexAndProviderInfo(wrappingKeyIndex, wrappingKeyProviderInfo, newWrappingKeyIndex);
+    ret = ParseAndValidateIndex(wrappingKeyIndex, processInfo.uidInt, providerInfo, newWrappingKeyIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
-        "ParseIndexAndProviderInfo for wrapping key failed, ret = %" LOG_PUBLIC "d", ret)
+        "ParseAndValidateIndex for wrapping key failed, ret = %" LOG_PUBLIC "d", ret)
 
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
