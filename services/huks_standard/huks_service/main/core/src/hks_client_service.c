@@ -646,6 +646,19 @@ static int32_t GenerateKeyOperation(const struct HksProcessInfo *processInfo, co
     return ret;
 }
 
+static int32_t GenerateKeyUkeyOperation(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSetIn)
+{
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    int32_t ret = HksCheckMultiSetTag(paramSetIn);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckMultiSetTag failed, ret = %" LOG_PUBLIC "d", ret)
+    ret = HksServiceOnUkeyGenerateKey(processInfo, keyAlias, paramSetIn);
+    HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyGenerateKey failed, ret = %" LOG_PUBLIC "d", ret)
+    return ret;
+#endif
+    return HUKS_ERR_CODE_NOT_SUPPORTED_API;
+}
+
 int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, struct HksBlob *keyOut)
 {
@@ -668,14 +681,7 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
             output = *keyOut;
         }
         if (HksCheckIsUkeyOperation(paramSetIn, &ret) == HKS_SUCCESS) {
-#ifdef HKS_UKEY_EXTENSION_CRYPTO
-            ret = HksCheckMultiSetTag(paramSetIn);
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckMultiSetTag failed, ret = %" LOG_PUBLIC "d", ret)
-            ret = HksServiceOnUkeyGenerateKey(processInfo, keyAlias, paramSetIn);
-            HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyGenerateKey failed, ret = %" LOG_PUBLIC "d", ret)
-            return ret;
-#endif
-            return HUKS_ERR_CODE_NOT_SUPPORTED_API;
+            return HksServiceGenerateKey(processInfo, paramSetIn, keyAlias);
         }
         ret = HksCheckGenAndImportKeyParams(&processInfo->processName, keyAlias, paramSetIn, &output);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check generate key params failed, ret = %" LOG_PUBLIC "d", ret)
