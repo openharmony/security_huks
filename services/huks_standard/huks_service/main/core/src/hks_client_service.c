@@ -51,6 +51,7 @@
 #include "hks_template.h"
 #include "huks_access.h"
 #include "hks_util.h"
+#include "hks_ukey_check.h"
 
 #include "hks_upgrade_key_accesser.h"
 #include "hks_upgrade_helper.h"

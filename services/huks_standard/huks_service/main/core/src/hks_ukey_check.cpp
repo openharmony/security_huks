@@ -24,8 +24,7 @@
 #include <string>
 #include <vector>
 #include "hks_template.h"
-
-constexpr uint32_t MAX_SESSION_INDEX_SIZE = 1024;
+#include "hks_common_check.h"
 
 int32_t HksCheckIsUkeyOperation(const struct HksParamSet *paramSet, int32_t *outRet)
 {
