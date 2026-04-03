@@ -681,7 +681,7 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
             output = *keyOut;
         }
         if (HksCheckIsUkeyOperation(paramSetIn, &ret) == HKS_SUCCESS) {
-            return GenerateKeyUkeyOperation(processInfo, paramSetIn, keyAlias);
+            return GenerateKeyUkeyOperation(processInfo, keyAlias, paramSetIn);
         }
         ret = HksCheckGenAndImportKeyParams(&processInfo->processName, keyAlias, paramSetIn, &output);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check generate key params failed, ret = %" LOG_PUBLIC "d", ret)
