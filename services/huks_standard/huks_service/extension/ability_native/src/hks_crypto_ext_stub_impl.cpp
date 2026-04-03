@@ -194,7 +194,7 @@ ErrCode HksCryptoExtStubImpl::ImportWrappedKey(
     const std::string& wrappingKeyIndex,
     const CppParamSet& params,
     const std::vector<uint8_t>& wrappedData,
-     int32_t& errcode)
+    int32_t& errcode)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");

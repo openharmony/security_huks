@@ -245,7 +245,10 @@ static int32_t ConvertCertInfoIdlToJsObject(const napi_env &env, const HksExtCer
     status = napi_create_arraybuffer(env, certInfo.cert.size(), &data, &buffer);
     HKS_IF_TRUE_LOGE_RETURN(status != napi_ok || data == nullptr, HKS_ERROR_MALLOC_FAIL,
         "napi_create_arraybuffer failed");
-    (void)memcpy_s(data, certInfo.cert.size(), certInfo.cert.data(), certInfo.cert.size());
+    if (memcpy_s(data, certInfo.cert.size(), certInfo.cert.data(), certInfo.cert.size()) != EOK) {
+        HKS_LOG_E("memcpy_s failed in ConvertCertInfoIdlToJsObject");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
     napi_value certArray = nullptr;
     status = napi_create_typedarray(env, napi_uint8_array, certInfo.cert.size(), buffer, 0, &certArray);
     HKS_IF_TRUE_LOGE_RETURN(status != napi_ok || certArray == nullptr,
