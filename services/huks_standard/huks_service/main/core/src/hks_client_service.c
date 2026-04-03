@@ -625,6 +625,27 @@ static int32_t AppendGroupKeyInfo(const struct HksProcessInfo *processInfo, stru
 }
 #endif
 
+static int32_t GenerateKeyOperation(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    struct HksParamSet *newParamSet, struct HksBlob keyIn, struct HksBlob output)
+{
+    int32_t ret;
+
+    ret = CheckKeyCondition(processInfo, keyAlias, newParamSet);
+    HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check key condition failed, ret = %" LOG_PUBLIC "d", ret)
+
+    ret = GetKeyIn(processInfo, newParamSet, &keyIn);
+    HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get keyIn failed, ret = %" LOG_PUBLIC "d", ret)
+
+    ret = HuksAccessGenerateKey(keyAlias, newParamSet, &keyIn, &output);
+    IfNotSuccAppendHdiErrorInfo(ret);
+    HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "access level generate key failed, ret = %" LOG_PUBLIC "d", ret)
+
+    ret = HksManageStoreKeyBlob(processInfo, newParamSet, keyAlias, &output, HKS_STORAGE_TYPE_KEY);
+    HKS_IF_NOT_SUCC_LOGE(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
+
+    return ret;
+}
+
 int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, struct HksBlob *keyOut)
 {
@@ -647,7 +668,6 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
         if ((keyOut != NULL) && (keyOut->data != NULL) && (keyOut->size != 0)) {
             output = *keyOut;
         }
-
         if (HksCheckIsUkeyOperation(paramSetIn, &ret) == HKS_SUCCESS) {
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
             ret = HksCheckMultiSetTag(paramSetIn);
@@ -656,7 +676,6 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
             HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyGenerateKey failed, ret = %" LOG_PUBLIC "d", ret)
             return ret;
 #endif
-            HKS_LOG_E("HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", ret);
             return HUKS_ERR_CODE_NOT_SUPPORTED_API;
         }
 
@@ -666,18 +685,8 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
         ret = AppendNewInfoForGenKeyInService(processInfo, paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append processName tag failed, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = CheckKeyCondition(processInfo, keyAlias, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check key condition failed, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = GetKeyIn(processInfo, newParamSet, &keyIn);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get keyIn failed, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = HuksAccessGenerateKey(keyAlias, newParamSet, &keyIn, &output);
-        IfNotSuccAppendHdiErrorInfo(ret);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "access level generate key failed, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = HksManageStoreKeyBlob(processInfo, newParamSet, keyAlias, &output, HKS_STORAGE_TYPE_KEY);
-        HKS_IF_NOT_SUCC_LOGE(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
+        ret = GenerateKeyOperation(processInfo, keyAlias, newParamSet, &keyIn, &output);
+        HKS_IF_NOT_SUCC_LOGE(ret, "GenerateKeyOperation failed, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 #ifdef L2_STANDARD
     struct HksParamSet *reportParamSet = NULL;
