@@ -1206,7 +1206,7 @@ int32_t HksServiceExportPublicKey(const struct HksProcessInfo *processInfo, cons
             ret = HksCheckMultiSetTag(paramSet);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckMultiSetTag failed, ret = %" LOG_PUBLIC "d", ret)
             ret = HksServiceOnUkeyExportPublicKey(processInfo, keyAlias, paramSet, key);
-            HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyImportWrappedKey failed, ret = %" LOG_PUBLIC "d", ret)
+            HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyExportPublicKey failed, ret = %" LOG_PUBLIC "d", ret)
             return ret;
 #endif
             HKS_LOG_E("HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", ret);
