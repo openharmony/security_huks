@@ -30,6 +30,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_tag.h"
 #include "hks_template.h"
 #include "securec.h"
 
@@ -92,14 +93,20 @@ int32_t HksExportPublicKeyAdapter(const struct HksBlob *keyAlias,
 
     int32_t ret = HksClientExportPublicKey(keyAlias, paramSet, &publicKey);
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksClientExportPublicKey in Ukey fail. ret = %" LOG_PUBLIC "d", ret)
-    if ((CheckBlob(key) != HKS_SUCCESS) || (memcpy_s(key->data, key->size, publicKey.data, publicKey.size) != EOK)) {
+    struct HksParam *keyClassParam = NULL;
+    int32_t checkRet = HksGetParam(paramSet, HKS_TAG_KEY_CLASS, &keyClassParam);
+    bool isUkeyOperation = (checkRet == HKS_SUCCESS && keyClassParam != NULL &&
+        keyClassParam->uint32Param == HKS_KEY_CLASS_EXTENSION);
+    if (isUkeyOperation) {
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksClientExportPublicKey in Ukey fail. ret = %" LOG_PUBLIC "d", ret)
+        if ((CheckBlob(key) != HKS_SUCCESS) || (memcpy_s(key->data, key->size, publicKey.data, publicKey.size) != EOK)) {
+            HKS_FREE_BLOB(publicKey);
+            return HKS_ERROR_COPY_FAIL;
+        }
+        key->size = publicKey.size;
         HKS_FREE_BLOB(publicKey);
-        return HKS_ERROR_COPY_FAIL;
+        return ret;
     }
-    key->size = publicKey.size;
-    HKS_FREE_BLOB(publicKey);
-    return ret;
 #endif
     if (ret == HKS_SUCCESS) {
         struct HksBlob x509Key = { 0, NULL };
