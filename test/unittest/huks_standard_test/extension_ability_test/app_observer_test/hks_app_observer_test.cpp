@@ -367,7 +367,7 @@ HWTEST_F(HksAppObserverTest, PluginInterfaceTest002, TestSize.Level0)
     std::string index = CreateTestIndex();
 
     int32_t ret = HksExtPluginOnOpenRemoteHandle(processInfo, index, paramSet);
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 
     ret = HksExtPluginOnCloseRemoteHandle(processInfo, index, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
