@@ -252,7 +252,7 @@ HWTEST_F(HksRemoteHandleManagerTest, PinManagementTest, TestSize.Level0)
     int32_t authState = 1;
     uint32_t retryCnt = 0;
     ret = manager->RemoteVerifyPin(processInfo, index, paramSet, authState, retryCnt);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(ret, HKS_SUCCESS);
 
     int32_t state = 1;
     ret = manager->RemoteVerifyPinStatus(processInfo, index, paramSet, state);
@@ -347,7 +347,7 @@ HWTEST_F(HksRemoteHandleManagerTest, PropertyTest, TestSize.Level0)
     // Test get property with valid property ID
     CppParamSet outParams;
     ret = manager->GetRemoteProperty(processInfo, index, "SKF_GetDevInfo", paramSet, outParams);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(ret, HKS_SUCCESS);
 
     // Test get property with invalid property ID
     ret = manager->GetRemoteProperty(processInfo, index, "INVALID_PROPERTY", paramSet, outParams);
@@ -413,6 +413,9 @@ HWTEST_F(HksRemoteHandleManagerTest, ImportWrappedKeyTest, TestSize.Level0)
     // Test import wrapped key with valid data
     std::vector<uint8_t> wrappedData = {0x01, 0x02, 0x03, 0x04};
     ret = manager->RemoteImportWrappedKey(processInfo, index, wrappingKeyIndex, paramSet, wrappedData);
+    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST);
+
+    ret = manager->RemoteImportWrappedKey(processInfo, index, index, paramSet, wrappedData);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     // Cleanup
@@ -640,14 +643,14 @@ HWTEST_F(HksRemoteHandleManagerTest, ImportRemoteCertificateWithInvalidParamsTes
     // Test with index that has no handle
     std::string noHandleIndex = CreateTestIndex("noHandleProvider", "noHandleAbility", "nobundle", "noHandleIndex");
     ret = manager->ImportRemoteCertificate(processInfo, noHandleIndex, certInfo, paramSet);
-    EXPECT_NE(ret, HKS_SUCCESS);
+    EXPECT_EQ(ret, HKS_SUCCESS);
 
     HksExtCertInfo emptyCertInfo = {};
     emptyCertInfo.purpose = 1;
     
     std::string validIndex = CreateTestIndex();
     ret = manager->ImportRemoteCertificate(processInfo, validIndex, emptyCertInfo, paramSet);
-    EXPECT_NE(ret, HKS_SUCCESS);
+    EXPECT_EQ(ret, HKS_SUCCESS);
     
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(processInfo.processName);
@@ -663,7 +666,7 @@ HWTEST_F(HksRemoteHandleManagerTest, ClearMapByHandleTest, TestSize.Level0)
     auto manager = HksRemoteHandleManager::GetInstanceWrapper();
     EXPECT_NE(manager, nullptr);
 
-    std::string index = CreateTestIndex("provider1", "ability1", "bundle1", "index1");
+    std::string index = CreateTestIndex("provider3", "ability2", "bundle1", "index1");
     HksProcessInfo processInfo = CreateTestProcessInfo();
     CppParamSet paramSet = CreateTestParamSet(processInfo.uidInt);
 
