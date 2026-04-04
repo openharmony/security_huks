@@ -455,12 +455,12 @@ HWTEST_F(UkeyCommonTest, UkeyCommonTest010, TestSize.Level0)
         {
             "purpose": 1,
             "index": "index1",
-            "cert": "SGVsbG8g=V29ybGQ===="
+            "cert": "SGVsbG8gV29ybGQ="
         },
         {
             "purpose": 2,
             "index": "index2",
-            "cert": "SGVsbG8gV29ybGQ====="
+            "cert": "SGVsbG8gV29ybGQ="
         }
     ])";
     ret = JsonArrayToCertInfoSet(validArray, certSet);
@@ -478,9 +478,9 @@ HWTEST_F(UkeyCommonTest, UkeyCommonTest010, TestSize.Level0)
     std::string cert2 = BlobToString(certSet.certs[1].cert);
     
     EXPECT_EQ(index1, "index1");
-    EXPECT_EQ(cert1, "");
+    EXPECT_EQ(cert1, "Hello World");
     EXPECT_EQ(index2, "index2");
-    EXPECT_EQ(cert2, "");
+    EXPECT_EQ(cert2, "Hello World");
 }
 
 /* *

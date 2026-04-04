@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "extension_base.h"
 #include "want.h"
 #include "hks_cpp_paramset.h"
+#include "hks_ext_cert_info.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -50,6 +51,8 @@ public:
     virtual int ExportCertificate(const std::string &index, const CppParamSet &params, std::string &certJsonArr,
         int32_t &errcode);
     virtual int ExportProviderCertificates(const CppParamSet &params, std::string &certJsonArr, int32_t &errcode);
+    virtual int ImportCertificate(const std::string &index, const HksExtCertInfoIdl& certInfo,
+        const CppParamSet &params, int32_t &errcode);
     virtual int InitSession(const std::string &index, const CppParamSet &params, std::string &handle, int32_t &errcode);
     virtual int UpdateSession(const std::string &handle, const CppParamSet &params, const std::vector<uint8_t> &inData,
         std::vector<uint8_t> &outData, int32_t &errcode);
@@ -58,6 +61,11 @@ public:
     virtual int GetProperty(const std::string& handle, const std::string& propertyId, const CppParamSet& params,
         CppParamSet& outParams, int32_t& errcode);
     virtual int ClearUkeyPinAuthState(const std::string& handle, const CppParamSet& params, int32_t& errcode);
+    virtual int ImportWrappedKey(const std::string& index, const std::string& wrappingKeyIndex,
+        const CppParamSet& params, const std::vector<uint8_t>& wrappedData, int32_t& errcode);
+    virtual int ExportPublicKey(const std::string& index, const CppParamSet& params,
+        std::vector<uint8_t>& outData, int32_t& errcode);
+    virtual int GenerateKey(const std::string &handle, const CppParamSet &params, int32_t &errcode);
 private:
     static CreatorFunc creator_;
 };

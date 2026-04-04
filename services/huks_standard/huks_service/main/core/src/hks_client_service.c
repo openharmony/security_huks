@@ -51,6 +51,7 @@
 #include "hks_template.h"
 #include "huks_access.h"
 #include "hks_util.h"
+#include "hks_ukey_check.h"
 
 #include "hks_upgrade_key_accesser.h"
 #include "hks_upgrade_helper.h"
@@ -92,6 +93,22 @@
 #endif
 #ifdef HUKS_ENABLE_SKIP_UPGRADE_KEY_STORAGE_SECURE_LEVEL
 #include "hks_config_parser.h"
+#endif
+
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+static int32_t HksCheckMultiSetTag(const struct HksParamSet *paramSet)
+{
+    for (uint32_t i = 0; i < paramSet->paramsCnt; ++i) {
+        uint32_t curTag = paramSet->params[i].tag;
+        for (uint32_t j = i + 1; j < paramSet->paramsCnt; ++j) {
+            if (curTag == paramSet->params[j].tag) {
+                HKS_LOG_E("paramSet contains multi-tags! 0x%" LOG_PUBLIC "x", curTag);
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+        }
+    }
+    return HKS_SUCCESS;
+}
 #endif
 
 static void IfNotSuccAppendHdiErrorInfo(int32_t hdiRet)
@@ -608,12 +625,58 @@ static int32_t AppendGroupKeyInfo(const struct HksProcessInfo *processInfo, stru
     return ret;
 }
 #endif
+
+static int32_t GenerateKeyOperation(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    struct HksParamSet *newParamSet, struct HksBlob *keyIn, struct HksBlob *output)
+{
+    int32_t ret;
+
+    ret = CheckKeyCondition(processInfo, keyAlias, newParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check key condition failed, ret = %" LOG_PUBLIC "d", ret)
+
+    ret = GetKeyIn(processInfo, newParamSet, keyIn);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyIn failed, ret = %" LOG_PUBLIC "d", ret)
+
+    ret = HuksAccessGenerateKey(keyAlias, newParamSet, keyIn, output);
+    IfNotSuccAppendHdiErrorInfo(ret);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "access level generate key failed, ret = %" LOG_PUBLIC "d", ret)
+
+    ret = HksManageStoreKeyBlob(processInfo, newParamSet, keyAlias, output, HKS_STORAGE_TYPE_KEY);
+    HKS_IF_NOT_SUCC_LOGE(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
+
+    return ret;
+}
+
+#ifdef L2_STANDARD
+static int32_t GenerateKeyUkeyOperation(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSetIn)
+{
+    (void)processInfo;
+    (void)keyAlias;
+    (void)paramSetIn;
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    int32_t ret = HksCheckMultiSetTag(paramSetIn);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckMultiSetTag failed, ret = %" LOG_PUBLIC "d", ret)
+    ret = HksServiceOnUkeyGenerateKey(processInfo, keyAlias, paramSetIn);
+    HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyGenerateKey failed, ret = %" LOG_PUBLIC "d", ret)
+    return ret;
+#endif
+    return HUKS_ERR_CODE_NOT_SUPPORTED_API;
+}
+#endif
+
 int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, struct HksBlob *keyOut)
 {
     struct HksParamSet *newParamSet = NULL;
     uint64_t enterTime = 0;
+    int32_t ret;
     (void)HksElapsedRealTime(&enterTime);
+#ifdef L2_STANDARD
+    if (HksCheckIsUkeyOperation(paramSetIn, &ret) == HKS_SUCCESS) {
+        return GenerateKeyUkeyOperation(processInfo, keyAlias, paramSetIn);
+    }
+#endif
     uint8_t *keyOutBuffer = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
     HKS_IF_NULL_RETURN(keyOutBuffer, HKS_ERROR_MALLOC_FAIL)
     struct HksHitraceId traceId = {0};
@@ -621,34 +684,21 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
 #ifdef L2_STANDARD
     traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
-
     struct HksBlob output = { MAX_KEY_SIZE, keyOutBuffer };
     struct HksBlob keyIn = { 0, NULL };
-    int32_t ret;
     do {
         /* if user don't pass the key out buffer, we will use a tmp key out buffer */
         if ((keyOut != NULL) && (keyOut->data != NULL) && (keyOut->size != 0)) {
             output = *keyOut;
         }
-
         ret = HksCheckGenAndImportKeyParams(&processInfo->processName, keyAlias, paramSetIn, &output);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check generate key params failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = AppendNewInfoForGenKeyInService(processInfo, paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append processName tag failed, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = CheckKeyCondition(processInfo, keyAlias, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check key condition failed, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = GetKeyIn(processInfo, newParamSet, &keyIn);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get keyIn failed, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = HuksAccessGenerateKey(keyAlias, newParamSet, &keyIn, &output);
-        IfNotSuccAppendHdiErrorInfo(ret);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "access level generate key failed, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = HksManageStoreKeyBlob(processInfo, newParamSet, keyAlias, &output, HKS_STORAGE_TYPE_KEY);
-        HKS_IF_NOT_SUCC_LOGE(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
+        ret = GenerateKeyOperation(processInfo, keyAlias, newParamSet, &keyIn, &output);
+        HKS_IF_NOT_SUCC_LOGE(ret, "GenerateKeyOperation failed, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 #ifdef L2_STANDARD
     struct HksParamSet *reportParamSet = NULL;
@@ -1123,6 +1173,21 @@ int32_t HksServiceImportWrappedKey(const struct HksProcessInfo *processInfo, con
     struct HksBlob keyOut = { MAX_KEY_SIZE, (uint8_t *)HksMalloc(MAX_KEY_SIZE) };
     HKS_IF_NULL_LOGE_RETURN(keyOut.data, HKS_ERROR_MALLOC_FAIL, "malloc keyout fail")
     do {
+#ifdef L2_STANDARD
+        if (HksCheckIsUkeyOperation(paramSet, &ret) == HKS_SUCCESS) {
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+            ret = HksCheckMultiSetTag(paramSet);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckMultiSetTag failed, ret = %" LOG_PUBLIC "d", ret)
+            ret = HksServiceOnUkeyImportWrappedKey(processInfo, keyAlias, wrappingKeyAlias, paramSet, wrappedKeyData);
+            HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyImportWrappedKey failed, ret = %" LOG_PUBLIC "d", ret)
+            break;
+#endif
+            HKS_LOG_E("HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", ret);
+            ret = HUKS_ERR_CODE_NOT_SUPPORTED_API;
+            break;
+        }
+#endif
+
         ret = HksCheckImportWrappedKeyParams(&processInfo->processName, keyAlias,
             wrappingKeyAlias, paramSet, wrappedKeyData);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check import params failed, ret = %" LOG_PUBLIC "d", ret)
@@ -1151,6 +1216,21 @@ int32_t HksServiceExportPublicKey(const struct HksProcessInfo *processInfo, cons
     struct HksBlob keyFromFile = { 0, NULL };
 
     do {
+#ifdef L2_STANDARD
+        if (HksCheckIsUkeyOperation(paramSet, &ret) == HKS_SUCCESS) {
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+            ret = HksCheckMultiSetTag(paramSet);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckMultiSetTag failed, ret = %" LOG_PUBLIC "d", ret)
+            ret = HksServiceOnUkeyExportPublicKey(processInfo, keyAlias, paramSet, key);
+            HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyExportPublicKey failed, ret = %" LOG_PUBLIC "d", ret)
+            break;
+#endif
+            HKS_LOG_E("HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", ret);
+            ret = HUKS_ERR_CODE_NOT_SUPPORTED_API;
+            break;
+        }
+#endif
+
         ret = HksCheckExportPublicKeyParams(&processInfo->processName, keyAlias, key);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check export public key params failed, ret = %" LOG_PUBLIC "d", ret)
 

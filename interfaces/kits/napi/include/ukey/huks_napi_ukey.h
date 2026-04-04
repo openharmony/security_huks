@@ -78,6 +78,13 @@ public:
     std::vector<uint8_t> propertyId{};
 };
 
+class ResourceContext : public AsyncContext {
+public:
+    std::vector<uint8_t> resourceId{};
+    bool isOpen = false;
+    int32_t (*hksOperation)(const std::vector<uint8_t>&, struct HksParamSet*, bool) = nullptr;
+};
+
 napi_value HuksNapiRegisterProvider(napi_env env, napi_callback_info info);
 
 napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info);
@@ -87,6 +94,12 @@ napi_value HuksNapiAuthUkeyPin(napi_env env, napi_callback_info info);
 napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info);
 
 napi_value HuksNapiGetProperty(napi_env env, napi_callback_info info);
+
+napi_value HuksNapiOpenResource(napi_env env, napi_callback_info info);
+
+napi_value HuksNapiCloseResource(napi_env env, napi_callback_info info);
+
+napi_value HuksNapiClearUkeyPinAuthState(napi_env env, napi_callback_info info);
 
 napi_value ParseString(napi_env env, napi_value object, std::vector<uint8_t> &alias);
 

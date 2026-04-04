@@ -77,7 +77,7 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest001, TestSize.Level0)
     EXPECT_EQ(ret, 0) << "fail: OnClearUkeyPinAuthStatus fail";
 
     bool isDeath = false;
-    ret = mgr->UnRegisterProvider(processInfo, index, paramSet, isDeath);
+    ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, paramSet, isDeath);
     EXPECT_EQ(ret, 0) << "fail: UnRegisterProvider is not fail";
 }
 

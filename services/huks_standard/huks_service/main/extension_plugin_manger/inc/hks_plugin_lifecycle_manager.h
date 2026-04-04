@@ -57,6 +57,10 @@ public:
         const std::string &index, const CppParamSet &paramSet, std::string &certsJson);
     int32_t OnExportProviderAllCertificates(const HksProcessInfo &processInfo,
         const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr);
+    int32_t OnImportCertificate(const HksProcessInfo &processInfo, const std::string &index,
+        const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet);
+    int32_t OnGenerateKey(const HksProcessInfo &processInfo,
+        const std::string &resourceId, const CppParamSet &paramSet);
     int32_t OnInitSession (const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet, uint32_t &handle);
     int32_t OnUpdateSession (const HksProcessInfo &processInfo, const uint32_t &handle,
@@ -65,6 +69,10 @@ public:
         const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
     int32_t OnAbortSession(const HksProcessInfo &processInfo, const uint32_t &handle,
         const CppParamSet &paramSet);
+    int32_t OnImportWrappedKey(const HksProcessInfo &processInfo, const std::string &index,
+        const std::string &wrappingKeyIndex, const CppParamSet &paramSet, const std::vector<uint8_t> &wrappedData);
+    int32_t OnExportPublicKey(const HksProcessInfo &processInfo, const std::string &index,
+        const CppParamSet &paramSet, std::vector<uint8_t> &outData);
 
 private:
     std::atomic<int32_t> m_refCount{0};

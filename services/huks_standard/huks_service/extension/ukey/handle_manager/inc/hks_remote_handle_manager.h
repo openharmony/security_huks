@@ -29,6 +29,7 @@
 #include "ihuks_access_ext_base.h"
 #include "hks_json_wrapper.h"
 #include "hks_ukey_common.h"
+#include "hks_ext_cert_info.h"
 namespace OHOS {
 namespace Security {
 namespace Huks {
@@ -43,6 +44,15 @@ const std::map<int32_t, int32_t> g_commonErrCodeMapping = {
     {EXTENSION_ERRCODE_HANDLE_FAIL, HUKS_ERR_CODE_ITEM_NOT_EXIST},
     {EXTENSION_ERRCODE_PIN_CODE_ERROR, HUKS_ERR_CODE_PIN_CODE_ERROR},
     {EXTENSION_ERRCODE_PIN_LOCKED, HUKS_ERR_CODE_PIN_LOCKED},
+    {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
+};
+
+const std::map<int32_t, int32_t> g_clearPinStateErrCodeMapping = {
+    {EXTENSION_SUCCESS, HKS_SUCCESS},
+    {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
+    {EXTENSION_ERRCODE_UKEY_FAIL, HUKS_ERR_CODE_CRYPTO_FAIL},
+    {EXTENSION_ERRCODE_HANDLE_NOT_EXIST, HKS_SUCCESS},
+    {EXTENSION_ERRCODE_HANDLE_FAIL, HKS_SUCCESS},
     {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
 };
 
@@ -148,6 +158,46 @@ const std::map<int32_t, int32_t> g_getPropertyErrCodeMapping = {
     {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
 };
 
+const std::map<int32_t, int32_t> g_importWrappedKeyErrCodeMapping = {
+    {EXTENSION_SUCCESS, HKS_SUCCESS},
+    {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
+    {EXTENSION_ERRCODE_UKEY_NOT_EXIST, HUKS_ERR_CODE_CRYPTO_FAIL},
+    {EXTENSION_ERRCODE_UKEY_FAIL, HUKS_ERR_CODE_CRYPTO_FAIL},
+    {EXTENSION_ERRCODE_HANDLE_NOT_EXIST, HUKS_ERR_CODE_ITEM_NOT_EXIST},
+    {EXTENSION_ERRCODE_HANDLE_FAIL, HUKS_ERR_CODE_ITEM_NOT_EXIST},
+    {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
+};
+
+const std::map<int32_t, int32_t> g_exportPublicKeyErrCodeMapping = {
+    {EXTENSION_SUCCESS, HKS_SUCCESS},
+    {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
+    {EXTENSION_ERRCODE_UKEY_NOT_EXIST, HUKS_ERR_CODE_CRYPTO_FAIL},
+    {EXTENSION_ERRCODE_UKEY_FAIL, HUKS_ERR_CODE_CRYPTO_FAIL},
+    {EXTENSION_ERRCODE_HANDLE_NOT_EXIST, HUKS_ERR_CODE_ITEM_NOT_EXIST},
+    {EXTENSION_ERRCODE_HANDLE_FAIL, HUKS_ERR_CODE_ITEM_NOT_EXIST},
+    {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
+};
+
+const std::map<int32_t, int32_t> g_generateKeyErrCodeMapping = {
+    {EXTENSION_SUCCESS, HKS_SUCCESS},
+    {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
+    {EXTENSION_ERRCODE_UKEY_NOT_EXIST, HUKS_ERR_CODE_CRYPTO_FAIL},
+    {EXTENSION_ERRCODE_UKEY_FAIL, HUKS_ERR_CODE_CRYPTO_FAIL},
+    {EXTENSION_ERRCODE_HANDLE_NOT_EXIST, HUKS_ERR_CODE_ITEM_NOT_EXIST},
+    {EXTENSION_ERRCODE_HANDLE_FAIL, HUKS_ERR_CODE_ITEM_NOT_EXIST},
+    {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
+};
+
+const std::map<int32_t, int32_t> g_importCertErrCodeMapping = {
+    {EXTENSION_SUCCESS, HKS_SUCCESS},
+    {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
+    {EXTENSION_ERRCODE_UKEY_NOT_EXIST, HUKS_ERR_CODE_CRYPTO_FAIL},
+    {EXTENSION_ERRCODE_UKEY_FAIL, HUKS_ERR_CODE_CRYPTO_FAIL},
+    {EXTENSION_ERRCODE_HANDLE_NOT_EXIST, HUKS_ERR_CODE_ITEM_NOT_EXIST},
+    {EXTENSION_ERRCODE_HANDLE_FAIL, HUKS_ERR_CODE_ITEM_NOT_EXIST},
+    {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
+};
+
 class HksRemoteHandleManager : private OHOS::DelayedSingleton<HksRemoteHandleManager>,
     std::enable_shared_from_this<HksRemoteHandleManager> {
 public:
@@ -172,15 +222,24 @@ public:
         const CppParamSet &paramSet, std::string &certificatesOut);
     int32_t FindRemoteAllCertificate(const HksProcessInfo &processInfo,
         const std::string &providerName, const CppParamSet &paramSet, std::string &certificatesOut);
+    //certificate import
+    int32_t ImportRemoteCertificate(const HksProcessInfo &processInfo, const std::string &index,
+        const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet);
     int32_t MergeProviderCertificates(const ProviderInfo &providerInfo, const std::string &providerCertVec,
         CommJsonObject &combinedArray);
 
     int32_t GetRemoteProperty(const HksProcessInfo &processInfo, const std::string& index,
         const std::string& propertyId, const CppParamSet& paramSet, CppParamSet& outParams);
+    int32_t RemoteExportPublicKey(const HksProcessInfo &processInfo, const std::string &index,
+        const CppParamSet &paramSet, std::vector<uint8_t> &outData);
+
+    int32_t RemoteImportWrappedKey(const HksProcessInfo &processInfo, const std::string &index,
+        const std::string &wrappingKeyIndex, const CppParamSet &paramSet, const std::vector<uint8_t> &wrappedData);
+
+    int32_t ExtensionGenerateKey(const HksProcessInfo &processInfo, const std::string &index,
+        const CppParamSet &paramSet);
 
     int32_t ClearUidIndexMap(const ProviderInfo &providerInfo);
-    static int32_t ParseIndexAndProviderInfo(const std::string &index,
-        ProviderInfo &providerInfo, std::string &newIndex);
     void ClearAuthState(const HksProcessInfo &processInfo);
     int32_t ParseAndValidateIndex(const std::string &index, const uint32_t uid, ProviderInfo &providerInfo,
         std::string &handle);

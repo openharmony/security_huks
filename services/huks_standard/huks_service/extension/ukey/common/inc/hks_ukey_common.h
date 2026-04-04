@@ -26,6 +26,21 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 
+    class ProviderInfo {
+    public:
+        std::string m_providerName{};
+        std::string m_abilityName{};
+        std::string m_bundleName{};
+        int32_t m_userid = 0;
+
+        bool operator==(const ProviderInfo &other) const;
+        bool operator<(const ProviderInfo &other) const;
+    };
+    constexpr const char *PROVIDER_NAME_KEY = "providerName";
+    constexpr const char *ABILITY_NAME_KEY = "abilityName";
+    constexpr const char *BUNDLE_NAME_KEY = "bundleName";
+    constexpr const char *USERID_KEY = "userid";
+
     enum ExtensionErrCode {
         EXTENSION_SUCCESS = 0,
         EXTENSION_ERRCODE_OPERATION_FAIL = 34800000,
@@ -50,6 +65,8 @@ namespace Huks {
         const std::map<int32_t, int32_t> &errorMapping);
     int32_t HksGetFrontUserId(int32_t &outId);
     int32_t HksGetUserIdFromUid(const uint32_t &uid);
+    // 解析ResourceID json
+    int32_t ParseIndexAndProviderInfo(const std::string &index, ProviderInfo &providerInfo, std::string &newIndex);
 }
 }
 }

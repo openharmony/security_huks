@@ -24,6 +24,7 @@
 #include <string>
 #include <tuple>
 #include "hks_json_wrapper.h"
+#include "hks_ext_cert_info.h"
 namespace OHOS::Security::Huks {
 
 class HksCryptoExtStubImpl : public HuksAccessExtBaseStub {
@@ -176,19 +177,31 @@ ErrCode ExportProviderCertificates(
         const std::string& handle,
         const CppParamSet& params,
         int32_t& errcode) { return HKS_SUCCESS; };
+
+    ErrCode ImportWrappedKey(
+        const std::string& index,
+        const std::string& wrappingKeyIndex,
+        const CppParamSet& params,
+        const std::vector<uint8_t>& wrappedData,
+        int32_t& errcode) { return HKS_SUCCESS; };
+
+    ErrCode ExportPublicKey(
+        const std::string& index,
+        const CppParamSet& params,
+        std::vector<uint8_t>& outData,
+        int32_t& errcode) { return HKS_SUCCESS; };
+    
+    ErrCode ImportCertificate(
+        const std::string& index,
+        const HksExtCertInfoIdl& certInfo,
+        const CppParamSet& params,
+        int32_t& errcode) { return HKS_SUCCESS; };
+
+    ErrCode GenerateKey(
+        const std::string& index,
+        const CppParamSet& params,
+        int32_t& errcode) { return HKS_SUCCESS; };
 };
-
-bool ProviderInfo::operator==(const ProviderInfo &other) const
-{
-    return m_bundleName == other.m_bundleName && m_providerName == other.m_providerName &&
-        m_abilityName == other.m_abilityName;
-}
-
-bool ProviderInfo::operator<(const ProviderInfo &other) const
-{
-    return std::tie(m_bundleName, m_providerName, m_abilityName) <
-        std::tie(other.m_bundleName, other.m_providerName, other.m_abilityName);
-}
 
 std::shared_ptr<HksProviderLifeCycleManager> HksProviderLifeCycleManager::GetInstanceWrapper()
 {

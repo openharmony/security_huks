@@ -30,8 +30,10 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_tag.h"
 #include "hks_template.h"
 #include "securec.h"
+#include "hks_ukey_check.h"
 
 #ifdef _CUT_AUTHENTICATE_
 #undef HKS_SUPPORT_API_IMPORT
@@ -91,6 +93,22 @@ int32_t HksExportPublicKeyAdapter(const struct HksBlob *keyAlias,
     struct HksBlob publicKey = { MAX_KEY_SIZE, buffer };
 
     int32_t ret = HksClientExportPublicKey(keyAlias, paramSet, &publicKey);
+#ifdef L2_STANDARD
+    int32_t isUkeyTag;
+    if (HksCheckIsUkeyOperation(paramSet, &isUkeyTag) == HKS_SUCCESS) {
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksClientExportPublicKey in Ukey fail. ret = %" LOG_PUBLIC "d", ret)
+        if ((CheckBlob(key) != HKS_SUCCESS) ||
+            (memcpy_s(key->data, key->size, publicKey.data, publicKey.size) != EOK)) {
+            HKS_FREE_BLOB(publicKey);
+            return HKS_ERROR_COPY_FAIL;
+        }
+        key->size = publicKey.size;
+        HKS_FREE_BLOB(publicKey);
+        return ret;
+#endif
+    }
+#endif
     if (ret == HKS_SUCCESS) {
         struct HksBlob x509Key = { 0, NULL };
         ret = TranslateToX509PublicKey(&publicKey, &x509Key);

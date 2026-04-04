@@ -18,6 +18,7 @@
 #include "hks_template.h"
 #include "huks_access_ext_base_stub.h"
 #include "iremote_object.h"
+#include "hks_ext_cert_info.h"
 
 namespace OHOS {
 namespace Security {
@@ -135,6 +136,30 @@ public:
     
     ErrCode ClearUkeyPinAuthState(
         const std::string& handle,
+        const CppParamSet& params,
+        int32_t& errcode) { return -1; };
+    
+    ErrCode ImportWrappedKey(
+        const std::string& index,
+        const std::string& wrappingKeyIndex,
+        const CppParamSet& params,
+        const std::vector<uint8_t>& wrappedData,
+        int32_t& errcode) { return -1; };
+
+    ErrCode ExportPublicKey(
+        const std::string& index,
+        const CppParamSet& params,
+        std::vector<uint8_t>& outData,
+        int32_t& errcode) { return -1; };
+    
+    ErrCode ImportCertificate(
+        const std::string& index,
+        const HksExtCertInfoIdl& certInfo,
+        const CppParamSet& params,
+        int32_t& errcode) { return -1; };
+
+    ErrCode GenerateKey(
+        const std::string& index,
         const CppParamSet& params,
         int32_t& errcode) { return -1; };
 };

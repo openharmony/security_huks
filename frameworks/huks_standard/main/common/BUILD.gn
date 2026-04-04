@@ -45,6 +45,7 @@ if (os_level == "standard") {
       "src/hks_param.c",
       "src/hks_tags_type_manager.c",
       "src/hks_cpp_paramset.cpp",
+      "src/hks_ukey_check.cpp",
     ]
 
     if (huks_enable_ukey_config == true) {

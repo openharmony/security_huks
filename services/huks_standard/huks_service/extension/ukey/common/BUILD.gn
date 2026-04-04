@@ -17,6 +17,8 @@ import("//build/ohos.gni")
 
 idl_gen_interface("IHuks_Access_Ext_Base") {
   src_idl = rebase_path("IHuksAccessExtBase.idl")
+  sources_common = [ "HksExtCertInfo.idl" ]
+  inputs = [ "HksExtCertInfo.idl" ]
 }
 
 config("IHuks_Access_Ext_Base_config") {

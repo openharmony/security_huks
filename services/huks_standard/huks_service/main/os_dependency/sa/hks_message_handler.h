@@ -60,6 +60,7 @@ const struct HksIpcEntryPoint HKS_IPC_MESSAGE_HANDLER[] = {
     { HKS_MSG_EXT_CLOSE_REMOTE_HANDLE, HksIpcServiceCloseRemoteHandle },
     { HKS_MSG_EXT_EXPORT_PROVIDER_CERTIFICATES, HksIpcServiceExportProviderCertificates },
     { HKS_MSG_EXT_EXPORT_CERTIFICATE, HksIpcServiceExportCertificate },
+    { HKS_MSG_EXT_IMPORT_CERTIFICATE, HksIpcServiceImportCertificate },
 
 };
 

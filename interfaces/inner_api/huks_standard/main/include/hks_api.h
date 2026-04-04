@@ -115,6 +115,8 @@ HKS_API_EXPORT int32_t HksExportProviderCertificates(const struct HksBlob *provi
     const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
 HKS_API_EXPORT int32_t HksExportCertificate(const struct HksBlob *resourceId,
     const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
+HKS_API_EXPORT int32_t HksImportCertificate(const struct HksBlob *resourceId,
+    const struct HksExtCertInfo *certInfo, const struct HksParamSet *paramSetIn);
 HKS_API_EXPORT int32_t HksOpenRemoteHandle(const struct HksBlob *resourceId,
     const struct HksParamSet *paramSetIn);
 HKS_API_EXPORT int32_t HksCloseRemoteHandle(const struct HksBlob *resourceId,

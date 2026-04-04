@@ -34,6 +34,8 @@ int32_t HksClientExportProviderCertificates(const struct HksBlob *providerName,
     const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
 int32_t HksClientExportCertificate(const struct HksBlob *index,
     const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
+int32_t HksClientImportCertificate(const struct HksBlob *resourceId,
+    const struct HksExtCertInfo *certInfo, const struct HksParamSet *paramSetIn);
 
 int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, uint32_t *retryCount);
 int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn,

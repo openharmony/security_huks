@@ -18,7 +18,6 @@
 #include "bundle_mgr_client.h"
 #include "bundle_mgr_interface.h"
 #include "bundle_info.h"
-#include "hks_ukey_common.h"
 #include "hks_external_adapter.h"
 #include "hks_error_code.h"
 #include "hks_log.h"
@@ -33,18 +32,6 @@
 #include <chrono>
 #include <thread>
 namespace OHOS::Security::Huks {
-
-bool ProviderInfo::operator==(const ProviderInfo &other) const
-{
-    return m_bundleName == other.m_bundleName && m_providerName == other.m_providerName &&
-        m_abilityName == other.m_abilityName && m_userid == other.m_userid;
-}
-
-bool ProviderInfo::operator<(const ProviderInfo &other) const
-{
-    return std::tie(m_bundleName, m_providerName, m_abilityName, m_userid) <
-        std::tie(other.m_bundleName, other.m_providerName, other.m_abilityName, other.m_userid);
-}
 
 std::shared_ptr<HksProviderLifeCycleManager> HksProviderLifeCycleManager::GetInstanceWrapper()
 {
