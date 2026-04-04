@@ -95,6 +95,8 @@ int32_t HksExportPublicKeyAdapter(const struct HksBlob *keyAlias,
     int32_t ret = HksClientExportPublicKey(keyAlias, paramSet, &publicKey);
 
     int32_t isUkeyTag;
+
+#ifdef L2_STANDARD
     if (HksCheckIsUkeyOperation(paramSet, &isUkeyTag) == HKS_SUCCESS) {
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksClientExportPublicKey in Ukey fail. ret = %" LOG_PUBLIC "d", ret)
@@ -108,6 +110,7 @@ int32_t HksExportPublicKeyAdapter(const struct HksBlob *keyAlias,
         return ret;
 #endif
     }
+#endif
     if (ret == HKS_SUCCESS) {
         struct HksBlob x509Key = { 0, NULL };
         ret = TranslateToX509PublicKey(&publicKey, &x509Key);

@@ -670,9 +670,11 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
     uint64_t enterTime = 0;
     int32_t ret;
     (void)HksElapsedRealTime(&enterTime);
+#ifdef L2_STANDARD
     if (HksCheckIsUkeyOperation(paramSetIn, &ret) == HKS_SUCCESS) {
         return GenerateKeyUkeyOperation(processInfo, keyAlias, paramSetIn);
     }
+#endif
     uint8_t *keyOutBuffer = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
     HKS_IF_NULL_RETURN(keyOutBuffer, HKS_ERROR_MALLOC_FAIL)
     struct HksHitraceId traceId = {0};
@@ -1169,6 +1171,7 @@ int32_t HksServiceImportWrappedKey(const struct HksProcessInfo *processInfo, con
     struct HksBlob keyOut = { MAX_KEY_SIZE, (uint8_t *)HksMalloc(MAX_KEY_SIZE) };
     HKS_IF_NULL_LOGE_RETURN(keyOut.data, HKS_ERROR_MALLOC_FAIL, "malloc keyout fail")
     do {
+#ifdef L2_STANDARD
         if (HksCheckIsUkeyOperation(paramSet, &ret) == HKS_SUCCESS) {
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
             ret = HksCheckMultiSetTag(paramSet);
@@ -1181,6 +1184,7 @@ int32_t HksServiceImportWrappedKey(const struct HksProcessInfo *processInfo, con
             ret = HUKS_ERR_CODE_NOT_SUPPORTED_API;
             break;
         }
+#endif
 
         ret = HksCheckImportWrappedKeyParams(&processInfo->processName, keyAlias,
             wrappingKeyAlias, paramSet, wrappedKeyData);
@@ -1210,6 +1214,7 @@ int32_t HksServiceExportPublicKey(const struct HksProcessInfo *processInfo, cons
     struct HksBlob keyFromFile = { 0, NULL };
 
     do {
+#ifdef L2_STANDARD
         if (HksCheckIsUkeyOperation(paramSet, &ret) == HKS_SUCCESS) {
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
             ret = HksCheckMultiSetTag(paramSet);
@@ -1222,6 +1227,7 @@ int32_t HksServiceExportPublicKey(const struct HksProcessInfo *processInfo, cons
             ret = HUKS_ERR_CODE_NOT_SUPPORTED_API;
             break;
         }
+#endif
 
         ret = HksCheckExportPublicKeyParams(&processInfo->processName, keyAlias, key);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check export public key params failed, ret = %" LOG_PUBLIC "d", ret)
