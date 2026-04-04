@@ -54,7 +54,6 @@ if (os_level == "standard") {
       "src/hks_client_service_common.c",
       "src/hks_client_service_util.c",
       "src/hks_session_manager.c",
-      "src/hks_ukey_check.cpp",
     ]
 
     defines = [ "HKS_ENABLE_CLEAN_FILE" ]
