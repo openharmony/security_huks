@@ -647,6 +647,7 @@ static int32_t GenerateKeyOperation(const struct HksProcessInfo *processInfo, co
     return ret;
 }
 
+#ifdef L2_STANDARD
 static int32_t GenerateKeyUkeyOperation(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn)
 {
@@ -662,6 +663,7 @@ static int32_t GenerateKeyUkeyOperation(const struct HksProcessInfo *processInfo
 #endif
     return HUKS_ERR_CODE_NOT_SUPPORTED_API;
 }
+#endif
 
 int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, struct HksBlob *keyOut)
