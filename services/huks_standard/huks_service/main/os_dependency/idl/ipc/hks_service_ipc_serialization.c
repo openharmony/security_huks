@@ -187,6 +187,20 @@ static int32_t MallocParamSetFromBuffer(const struct HksBlob *srcData, struct Hk
 }
 
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
+static int32_t GetInt32FromBuffer(int32_t *value, const struct HksBlob *srcBlob, uint32_t *srcOffset)
+{
+    HKS_IF_TRUE_RETURN((*srcOffset > srcBlob->size) || (srcBlob->size - *srcOffset < sizeof(int32_t)),
+        HKS_ERROR_BUFFER_TOO_SMALL)
+
+    if (memcpy_s(value, sizeof(*value), srcBlob->data + *srcOffset, sizeof(int32_t)) != EOK) {
+        HKS_LOG_E("copy value failed!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+
+    *srcOffset += sizeof(int32_t);
+    return HKS_SUCCESS;
+}
+
 int32_t HksUKeyGeneralUnpack(const struct HksBlob *srcData, struct HksBlob *blob, struct HksParamSet **paramSet)
 {
     uint32_t offset = 0;
@@ -216,6 +230,40 @@ int32_t HksUkeyBlob2ParamSetUnpack(const struct HksBlob *srcData, struct HksBlob
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get paramSet failed!");
     } while (0);
     return ret;
+}
+
+int32_t HksUKeyGeneralUnpackWithCertInfo(const struct HksBlob *srcData,
+    struct HksBlob *resourceId,
+    struct HksExtCertInfo *certInfo,
+    struct HksParamSet **paramSet)
+{
+    if (srcData == NULL || resourceId == NULL || certInfo == NULL || paramSet == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    uint32_t offset = 0;
+    int32_t ret;
+
+    ret = GetBlobFromBuffer(resourceId, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get resourceId failed");
+
+    ret = GetInt32FromBuffer(&certInfo->purpose, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get purpose failed");
+
+    ret = GetBlobFromBuffer(&certInfo->index, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get index blob failed");
+
+    ret = GetBlobFromBuffer(&certInfo->cert, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get cert blob failed");
+
+    if (offset < srcData->size) {
+        ret = GetParamSetFromBuffer(paramSet, srcData, &offset);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get paramSet failed");
+    } else {
+        *paramSet = NULL;
+    }
+
+    return HKS_SUCCESS;
 }
 #endif
 

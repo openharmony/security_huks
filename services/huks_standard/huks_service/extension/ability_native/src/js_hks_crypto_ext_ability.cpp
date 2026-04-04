@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,8 @@
 #include "hks_json_wrapper.h"
 #include <vector>
 #include "hks_template.h"
+#include "hks_ukey_common.h"
+#include "hks_mem.h"
 
 #define WAIT_FOR_CALL_JS_METHOD(dataParam, waitTime) do { \
     const auto maxWaitTime = std::chrono::seconds((waitTime)); \
@@ -54,6 +56,7 @@ constexpr size_t ARGC_ZERO = 0;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
+constexpr size_t ARGC_FOUR = 4;
 constexpr size_t MAX_ARG_COUNT = 5;
 constexpr size_t MAX_CERT_SIZE = 5 * 8196;
 constexpr int32_t MAX_WAIT_TIME = 3;
@@ -66,6 +69,13 @@ struct HandleInfoParam {
 struct IndexInfoParam {
     std::string index {};
     CppParamSet params {};
+};
+
+struct ImportWrappedKeyParam {
+    std::string index {};
+    std::string wrappingKeyIndex {};
+    CppParamSet params {};
+    std::vector<uint8_t> wrappedData {};
 };
 
 int32_t BlobToBase64String(const HksBlob &strBlob, std::string &outStr)
@@ -203,6 +213,53 @@ napi_value GenerateHksParamArray(const napi_env env, const HksParamSet &paramSet
     return paramArray;
 }
 
+static int32_t ConvertCertInfoIdlToJsObject(const napi_env &env, const HksExtCertInfoIdl &certInfo,
+    napi_value &certObj)
+{
+    napi_status status = napi_create_object(env, &certObj);
+    HKS_IF_TRUE_LOGE_RETURN(status != napi_ok || certObj == nullptr, HKS_ERROR_EXT_CREATE_VALUE_FAILED,
+        "napi_create_object failed");
+
+    // 设置 purpose
+    napi_value purposeVal = nullptr;
+    status = napi_create_int32(env, certInfo.purpose, &purposeVal);
+    HKS_IF_TRUE_LOGE_RETURN(status != napi_ok || purposeVal == nullptr,
+        HKS_ERROR_EXT_CREATE_VALUE_FAILED, "napi_create_int32 failed");
+    status = napi_set_named_property(env, certObj, "purpose", purposeVal);
+    HKS_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_CREATE_VALUE_FAILED,
+        "napi_set_named_property purpose failed");
+
+    // 设置 resourceId：将 index vector<uint8_t> 视为 UTF-8 字符串
+    std::string indexStr(reinterpret_cast<const char*>(certInfo.index.data()), certInfo.index.size());
+    napi_value resourceIdVal = nullptr;
+    status = napi_create_string_utf8(env, indexStr.c_str(), indexStr.size(), &resourceIdVal);
+    HKS_IF_TRUE_LOGE_RETURN(status != napi_ok || resourceIdVal == nullptr,
+        HKS_ERROR_EXT_CREATE_VALUE_FAILED, "napi_create_string_utf8 failed");
+    status = napi_set_named_property(env, certObj, "resourceId", resourceIdVal);
+    HKS_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_CREATE_VALUE_FAILED,
+        "napi_set_named_property resourceId failed");
+
+    // 设置 cert：Uint8Array
+    void* data = nullptr;
+    napi_value buffer = nullptr;
+    status = napi_create_arraybuffer(env, certInfo.cert.size(), &data, &buffer);
+    HKS_IF_TRUE_LOGE_RETURN(status != napi_ok || data == nullptr, HKS_ERROR_MALLOC_FAIL,
+        "napi_create_arraybuffer failed");
+    if (memcpy_s(data, certInfo.cert.size(), certInfo.cert.data(), certInfo.cert.size()) != EOK) {
+        HKS_LOG_E("memcpy_s failed in ConvertCertInfoIdlToJsObject");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    napi_value certArray = nullptr;
+    status = napi_create_typedarray(env, napi_uint8_array, certInfo.cert.size(), buffer, 0, &certArray);
+    HKS_IF_TRUE_LOGE_RETURN(status != napi_ok || certArray == nullptr,
+        HKS_ERROR_EXT_CREATE_VALUE_FAILED, "napi_create_typedarray failed");
+    status = napi_set_named_property(env, certObj, "cert", certArray);
+    HKS_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_CREATE_VALUE_FAILED,
+        "napi_set_named_property cert failed");
+
+    return HKS_SUCCESS;
+}
+
 bool MakeJsNativeCppParamSet(const napi_env &env, const CppParamSet &CppParamSet, napi_value nativeCppParamSet)
 {
     napi_value napiHksParam = GenerateHksParamArray(env, *CppParamSet.GetParamSet());
@@ -239,6 +296,47 @@ bool MakeJsNativeVectorInData(const napi_env &env, const std::vector<uint8_t> &i
         inData_bytes[i] = inData[i];
     }
 
+    return true;
+}
+
+bool BuildImportWrappedKeyParam(const napi_env &env, const ImportWrappedKeyParam &param,
+    napi_value *argv, size_t &argc)
+{
+    napi_value nativeIndex = nullptr;
+    auto status = napi_create_string_utf8(env, param.index.c_str(), param.index.length(), &nativeIndex);
+    if (status != napi_ok) {
+        LOGE("create string utf8 failed, status:%d", status);
+        return false;
+    };
+
+    napi_value nativeWrappingKeyIndex = nullptr;
+    status = napi_create_string_utf8(env, param.wrappingKeyIndex.c_str(),
+        param.wrappingKeyIndex.length(), &nativeWrappingKeyIndex);
+    if (status != napi_ok) {
+        LOGE("create string utf8 failed, status:%d", status);
+        return false;
+    };
+
+    napi_value nativeCppParamSet = nullptr;
+    if (param.params.GetParamSet()) {
+        nativeCppParamSet = GenerateHksParamArray(env, *param.params.GetParamSet());
+        if (nativeCppParamSet == nullptr) {
+            LOGE("GenerateHksParamArray failed");
+            return false;
+        }
+    }
+
+    napi_value nativeWrappedData = nullptr;
+    if (!MakeJsNativeVectorInData(env, param.wrappedData, nativeWrappedData)) {
+        LOGE("Make js NativeValue vector failed");
+        return false;
+    }
+
+    argv[ARGC_ZERO] = nativeIndex;
+    argv[ARGC_ONE] = nativeWrappingKeyIndex;
+    argv[ARGC_TWO] = nativeCppParamSet;
+    argv[ARGC_THREE] = nativeWrappedData;
+    argc = ARGC_FOUR;
     return true;
 }
 
@@ -875,7 +973,6 @@ int32_t ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
         LOGE("The funcResult is error.");
         return HKS_ERROR_EXT_NULLPTR;
     }
- 
     napi_value napiCode = nullptr;
     auto status = napi_get_named_property(env, funcResult, "resultCode", &napiCode);
     if (status != napi_ok || napiCode == nullptr) {
@@ -887,7 +984,6 @@ int32_t ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
         LOGE("Convert js value napiCode failed.status:%d", status);
         return HKS_ERROR_EXT_GET_VALUE_FAILED;
     }
-
     switch (resultParams.paramType) {
         case CryptoResultParamType::OPEN_REMOTE_HANDLE:
         case CryptoResultParamType::INIT_SESSION:
@@ -905,13 +1001,18 @@ int32_t ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
             break;
         case CryptoResultParamType::UPDATE_SESSION:
         case CryptoResultParamType::FINISH_SESSION:
+        case CryptoResultParamType::EXPORT_PUBLIC_KEY:
             GetSessionParams(env, funcResult, resultParams);
             break;
         case CryptoResultParamType::GET_PROPERTY:
             GetGetPropertyParams(env, funcResult, resultParams);
             break;
+        case CryptoResultParamType::IMPORT_WRAPPED_KEY:
         case CryptoResultParamType::CLOSE_REMOTE_HANDLE:
         case CryptoResultParamType::CLEAR_UKEY_PIN_AUTH:
+        case CryptoResultParamType::GENERATE_KEY:
+        case CryptoResultParamType::IMPORT_CERTIFICATE:
+            break;
         default:
             break;
     }
@@ -1312,6 +1413,54 @@ int32_t JsHksCryptoExtAbility::ExportProviderCertificates(const CppParamSet &par
     return dataParam->hksErrorCode;
 }
 
+int32_t JsHksCryptoExtAbility::ImportCertificate(const std::string &index, const HksExtCertInfoIdl &certInfo,
+    const CppParamSet &params, int32_t &errcode)
+{
+    auto argParser = [index, &certInfo, params](napi_env &env, napi_value *argv, size_t &argc) -> bool {
+        // 第1个参数：resourceId (string)
+        napi_value nativeIndex = nullptr;
+        auto status = napi_create_string_utf8(env, index.c_str(), index.length(), &nativeIndex);
+        HKS_IF_TRUE_LOGE_RETURN(status != napi_ok || nativeIndex == nullptr, false,
+            "create string utf8 for index failed, status:%d", status)
+        argv[ARGC_ZERO] = nativeIndex;
+
+        // 第2个参数：certInfo (HuksCryptoExtensionCertInfo)
+        napi_value certObj = nullptr;
+        auto ret = ConvertCertInfoIdlToJsObject(env, certInfo, certObj);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "ConvertCertInfoIdlToJsObject failed, ret:%d", ret)
+        argv[ARGC_ONE] = certObj;
+
+        // 第3个参数：params (optional HuksExternalCryptoParam[])
+        napi_value nativeCppParamSet = nullptr;
+        if (params.GetParamSet()) {
+            nativeCppParamSet = GenerateHksParamArray(env, *params.GetParamSet());
+            HKS_IF_NULL_LOGE_RETURN(nativeCppParamSet, false, "GenerateHksParamArray failed")
+        } else {
+            status = napi_get_undefined(env, &nativeCppParamSet);
+            HKS_IF_TRUE_LOGE_RETURN(status != napi_ok, false, "get undefined failed")
+        }
+        argv[ARGC_TWO] = nativeCppParamSet;
+
+        argc = ARGC_THREE;
+        return true;
+    };
+
+    std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
+    dataParam->paramType = CryptoResultParamType::IMPORT_CERTIFICATE;
+    auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
+        return CheckAndCallPromise(env, result, dataParam);
+    };
+
+    dataParam->callJsExMethodDone.store(false);
+    auto ret = CallJsMethod("onImportCertificate", jsRuntime_, jsObj_.get(), argParser, retParser);
+    if (ret != ERR_OK) {
+        LOGE("CallJsMethod error, code:%d", ret);
+        return ret;
+    }
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
+    return dataParam->hksErrorCode;
+}
+
 int32_t JsHksCryptoExtAbility::InitSession(const std::string &index, const CppParamSet &params, std::string &handle,
     int32_t &errcode)
 {
@@ -1337,6 +1486,33 @@ int32_t JsHksCryptoExtAbility::InitSession(const std::string &index, const CppPa
     }
     WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     handle = std::move(dataParam->handle);
+    return dataParam->hksErrorCode;
+}
+
+int32_t JsHksCryptoExtAbility::GenerateKey(const std::string &handle,
+    const CppParamSet &params, int32_t &errcode)
+{
+    auto argParser = [handle, params](napi_env &env, napi_value *argv, size_t &argc) -> bool {
+        struct IndexInfoParam param = {
+            handle,
+            params,
+        };
+        return BuildIndexInfoParam(env, param, argv, argc);
+    };
+
+    std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
+    dataParam->paramType = CryptoResultParamType::GENERATE_KEY;
+    auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
+        return CheckAndCallPromise(env, result, dataParam);
+    };
+
+    dataParam->callJsExMethodDone.store(false);
+    auto ret = CallJsMethod("onGenerateKeyItem", jsRuntime_, jsObj_.get(), argParser, retParser);
+    if (ret != ERR_OK) {
+        LOGE("CallJsMethod error, code:%d", ret);
+        return ret;
+    }
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     return dataParam->hksErrorCode;
 }
 
@@ -1451,6 +1627,64 @@ int32_t JsHksCryptoExtAbility::ClearUkeyPinAuthState(const std::string &handle, 
         return ret;
     }
     WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
+    return dataParam->hksErrorCode;
+}
+
+int32_t JsHksCryptoExtAbility::ImportWrappedKey(const std::string &index, const std::string &wrappingKeyIndex,
+    const CppParamSet &params, const std::vector<uint8_t> &wrappedData, int32_t &errcode)
+{
+    auto argParser = [index, wrappingKeyIndex, params, wrappedData]
+        (napi_env &env, napi_value *argv, size_t &argc) -> bool {
+        struct ImportWrappedKeyParam param = {
+            index,
+            wrappingKeyIndex,
+            params,
+            wrappedData,
+        };
+        return BuildImportWrappedKeyParam(env, param, argv, argc);
+    };
+    std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
+    dataParam->paramType = CryptoResultParamType::IMPORT_WRAPPED_KEY;
+    auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
+        return CheckAndCallPromise(env, result, dataParam);
+    };
+
+    dataParam->callJsExMethodDone.store(false);
+    auto ret = CallJsMethod("onImportWrappedKeyItem", jsRuntime_, jsObj_.get(), argParser, retParser);
+    if (ret != ERR_OK) {
+        LOGE("CallJsMethod error, code:%d", ret);
+        return ret;
+    }
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
+    return dataParam->hksErrorCode;
+}
+
+int32_t JsHksCryptoExtAbility::ExportPublicKey(const std::string &index, const CppParamSet &params,
+    std::vector<uint8_t> &outData, int32_t &errcode)
+{
+    auto argParser = [index, params](napi_env &env, napi_value *argv, size_t &argc) -> bool {
+        struct IndexInfoParam param = {
+            index,
+            params,
+        };
+        return BuildIndexInfoParam(env, param, argv, argc);
+    };
+    std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
+    dataParam->paramType = CryptoResultParamType::EXPORT_PUBLIC_KEY;
+    auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
+        return CheckAndCallPromise(env, result, dataParam);
+    };
+
+    dataParam->callJsExMethodDone.store(false);
+    auto ret = CallJsMethod("onExportKeyItem", jsRuntime_, jsObj_.get(), argParser, retParser);
+    if (ret != ERR_OK) {
+        LOGE("CallJsMethod error, code:%d", ret);
+        return ret;
+    }
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
+    if (dataParam->hksErrorCode == HKS_SUCCESS) {
+        outData = dataParam->outData;
+    }
     return dataParam->hksErrorCode;
 }
 

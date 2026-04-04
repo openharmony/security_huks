@@ -104,51 +104,88 @@ std::string HuksPluginLoader::GetMethodByEnum(PluginMethodEnum methodEnum)
     return "";
 }
 
-HuksPluginLoader::HuksPluginLoader()
+static void RegisterAuthMethodMaps(OHOS::SafeMap<PluginMethodEnum, std::string> &map)
 {
-    m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_REGISTER_PROVIDER,
-        "_ZN4OHOS8Security4Huks30HksExtPluginOnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_string"
-        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetNS5_8functionIFvS2_EEE");
-    m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_UN_REGISTER_PROVIDER,
-        "_ZN4OHOS8Security4Huks32HksExtPluginOnUnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_string"
-        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetbRi");
-    m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_CREATE_REMOTE_KEY_HANDLE,
-        "_ZN4OHOS8Security4Huks30HksExtPluginOnOpenRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_string"
-        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet");
-    m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_CLOSE_REMOTE_KEY_HANDLE,
-        "_ZN4OHOS8Security4Huks31HksExtPluginOnCloseRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_string"
-        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet");
-    m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_AUTH_UKEY_PIN,
+    map.Insert(PluginMethodEnum::FUNC_ON_AUTH_UKEY_PIN,
         "_ZN4OHOS8Security4Huks25HksExtPluginOnAuthUkeyPinERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRiRj");
-    m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_GET_VERIFY_PIN_STATUS,
+    map.Insert(PluginMethodEnum::FUNC_ON_GET_VERIFY_PIN_STATUS,
         "_ZN4OHOS8Security4Huks33HksExtPluginOnGetUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRi");
-    m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_CLEAR_PIN_STATUS,
+    map.Insert(PluginMethodEnum::FUNC_ON_CLEAR_PIN_STATUS,
         "_ZN4OHOS8Security4Huks35HksExtPluginOnClearUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEE");
-    m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_GET_REMOTE_PROPERTY,
-        "_ZN4OHOS8Security4Huks31HksExtPluginOnGetRemotePropertyERK14HksProcessInfoRKNSt3__h12basic_string"
-        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEESD_RK11CppParamSetRSE_");
-    m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_LIST_INDEX_CERTIFICATE,
+}
+
+static void RegisterCertificateMethodMaps(OHOS::SafeMap<PluginMethodEnum, std::string> &map)
+{
+    map.Insert(PluginMethodEnum::FUNC_ON_LIST_INDEX_CERTIFICATE,
         "_ZN4OHOS8Security4Huks29HksExtPluginOnExportCerticateERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_");
-    m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_LIST_PROVIDER_ALL_CERTIFICATE,
+    map.Insert(PluginMethodEnum::FUNC_ON_LIST_PROVIDER_ALL_CERTIFICATE,
         "_ZN4OHOS8Security4Huks38HksExtPluginOnExportProviderCerticatesERK14HksProcessInfo"
         "RKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_");
-    m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_INIT_SESSION,
+    map.Insert(PluginMethodEnum::FUNC_ON_IMPORT_CERTIFICATE,
+        "_ZN4OHOS8Security4Huks31HksExtPluginOnImportCertificateERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK14HksExtCertInfoRK11CppParamSet");
+}
+
+static void RegisterRemoteHandleMethodMaps(OHOS::SafeMap<PluginMethodEnum, std::string> &map)
+{
+    map.Insert(PluginMethodEnum::FUNC_ON_CREATE_REMOTE_KEY_HANDLE,
+        "_ZN4OHOS8Security4Huks30HksExtPluginOnOpenRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet");
+    map.Insert(PluginMethodEnum::FUNC_ON_CLOSE_REMOTE_KEY_HANDLE,
+        "_ZN4OHOS8Security4Huks31HksExtPluginOnCloseRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet");
+    map.Insert(PluginMethodEnum::FUNC_ON_GET_REMOTE_PROPERTY,
+        "_ZN4OHOS8Security4Huks31HksExtPluginOnGetRemotePropertyERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEESD_RK11CppParamSetRSE_");
+}
+
+static void RegisterSessionMethodMaps(OHOS::SafeMap<PluginMethodEnum, std::string> &map)
+{
+    map.Insert(PluginMethodEnum::FUNC_ON_INIT_SESSION,
         "_ZN4OHOS8Security4Huks25HksExtPluginOnInitSessionERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRj");
-    m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_UPDATE_SESSION,
+    map.Insert(PluginMethodEnum::FUNC_ON_UPDATE_SESSION,
         "_ZN4OHOS8Security4Huks27HksExtPluginOnUpdateSessionERK14HksProcessInfoRKjRK11CppParamSet"
         "RKNSt3__h6vectorIhNSA_9allocatorIhEEEERSE_");
-    m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_FINISH_SESSION,
+    map.Insert(PluginMethodEnum::FUNC_ON_FINISH_SESSION,
         "_ZN4OHOS8Security4Huks27HksExtPluginOnFinishSessionERK14HksProcessInfoRKjRK11CppParamSet"
         "RKNSt3__h6vectorIhNSA_9allocatorIhEEEERSE_");
-    m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_ABORT_SESSION,
+    map.Insert(PluginMethodEnum::FUNC_ON_ABORT_SESSION,
         "_ZN4OHOS8Security4Huks26HksExtPluginOnAbortSessionERK14HksProcessInfoRKjRK11CppParamSet");
-    m_pluginMethodNameMap.Insert(PluginMethodEnum::FUNC_ON_UNREGISTER_ALL_OBSERVERS,
+}
+
+static void RegisterOtherMethodMaps(OHOS::SafeMap<PluginMethodEnum, std::string> &map)
+{
+    map.Insert(PluginMethodEnum::FUNC_ON_REGISTER_PROVIDER,
+        "_ZN4OHOS8Security4Huks30HksExtPluginOnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetNS5_8functionIFvS2_EEE");
+    map.Insert(PluginMethodEnum::FUNC_ON_UN_REGISTER_PROVIDER,
+        "_ZN4OHOS8Security4Huks32HksExtPluginOnUnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetbRi");
+    map.Insert(PluginMethodEnum::FUNC_ON_GENERATE_KEY,
+        "_ZN4OHOS8Security4Huks25HksExtPluginOnGenerateKeyERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet");
+    map.Insert(PluginMethodEnum::FUNC_ON_UNREGISTER_ALL_OBSERVERS,
         "_ZN4OHOS8Security4Huks36HksExtPluginOnUnregisterAllObserversEv");
+    map.Insert(PluginMethodEnum::FUNC_ON_EXPORT_PUBLIC_KEY,
+        "_ZN4OHOS8Security4Huks29HksExtPluginOnExportPublicKeyERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRNS5_6vectorIhNS9_IhEEEE");
+    map.Insert(PluginMethodEnum::FUNC_ON_IMPORT_WRAPPED_KEY,
+        "_ZN4OHOS8Security4Huks30HksExtPluginOnImportWrappedKeyERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEESD_RK11CppParamSetRKNS5_6vectorIhNS9_IhEEEE");
+}
+
+HuksPluginLoader::HuksPluginLoader()
+{
+    RegisterOtherMethodMaps(m_pluginMethodNameMap);
+    RegisterAuthMethodMaps(m_pluginMethodNameMap);
+    RegisterCertificateMethodMaps(m_pluginMethodNameMap);
+    RegisterRemoteHandleMethodMaps(m_pluginMethodNameMap);
+    RegisterSessionMethodMaps(m_pluginMethodNameMap);
 }
 
 HuksPluginLoader::~HuksPluginLoader()

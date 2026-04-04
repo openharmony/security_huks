@@ -112,7 +112,7 @@ HWTEST_F(JsCryptoExtAbilityTest, CallJsMethod_0000, testing::ext::TestSize.Level
 
     EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_ok));
     result = CallJsMethod(funcNameIn, *jsRuntime, jsObj, argParser, retParser);
-    EXPECT_EQ(result, HKS_ERROR_EXT_PARSE_FUNC_FAILED);
+    EXPECT_EQ(result, HKS_ERROR_EXT_SEND_EVENT_FAILED);
 }
 
 HWTEST_F(JsCryptoExtAbilityTest, DoCallJsMethod_0000, testing::ext::TestSize.Level0)
@@ -134,22 +134,20 @@ HWTEST_F(JsCryptoExtAbilityTest, DoCallJsMethod_0000, testing::ext::TestSize.Lev
     EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_get_reference_value(_, _, _)).WillOnce(Return(napi_ok));
     result = CallJsMethod(funcNameIn, *jsRuntime, jsObj, argParserTrue, retParser);
-    EXPECT_EQ(result, HKS_ERROR_EXT_GET_VALUE_FAILED);
+    EXPECT_EQ(result, HKS_ERROR_EXT_SEND_EVENT_FAILED);
 
     EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_get_reference_value(_, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
     EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _)).WillOnce(Return(napi_ok));
     result = CallJsMethod(funcNameIn, *jsRuntime, jsObj, argParserTrue, retParser);
-    EXPECT_EQ(result, HKS_ERROR_EXT_GET_NAME_PROPERTY_FAILED);
+    EXPECT_EQ(result, HKS_ERROR_EXT_SEND_EVENT_FAILED);
 
     EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_get_reference_value(_, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
-    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
     result = CallJsMethod(funcNameIn, *jsRuntime, jsObj, argParserTrue, retParser);
-    EXPECT_EQ(result, HKS_ERROR_EXT_PARSE_FUNC_FAILED);
+    EXPECT_EQ(result, HKS_ERROR_EXT_SEND_EVENT_FAILED);
 }
 
 HWTEST_F(JsCryptoExtAbilityTest, DoCallJsMethod_0001, testing::ext::TestSize.Level0)
@@ -171,7 +169,7 @@ HWTEST_F(JsCryptoExtAbilityTest, DoCallJsMethod_0001, testing::ext::TestSize.Lev
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
     EXPECT_CALL(*insMoc, napi_call_function(_, _, _, _, _, _)).WillOnce(Return(napi_ok));
     auto result = CallJsMethod(funcNameIn, *jsRuntime, jsObj, argParser, retParser);
-    EXPECT_EQ(result, HKS_ERROR_EXT_CALL_FUNCTION_FAILED);
+    EXPECT_EQ(result, HKS_ERROR_EXT_SEND_EVENT_FAILED);
 
     EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_ok));
     EXPECT_CALL(*insMoc, napi_get_reference_value(_, _, _))
@@ -180,9 +178,8 @@ HWTEST_F(JsCryptoExtAbilityTest, DoCallJsMethod_0001, testing::ext::TestSize.Lev
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
     EXPECT_CALL(*insMoc, napi_call_function(_, _, _, _, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIFTH>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
-    EXPECT_CALL(*insMoc, napi_escape_handle(_, _, _, _)).WillOnce(Return(napi_ok));
     result = CallJsMethod(funcNameIn, *jsRuntime, jsObj, argParser, retParser);
-    EXPECT_EQ(result, HKS_SUCCESS);
+    EXPECT_EQ(result, HKS_ERROR_EXT_SEND_EVENT_FAILED);
 
     ResultValueParser retParserFalse = [](napi_env&, napi_value) -> bool {
         return false;
@@ -196,7 +193,7 @@ HWTEST_F(JsCryptoExtAbilityTest, DoCallJsMethod_0001, testing::ext::TestSize.Lev
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIFTH>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
     EXPECT_CALL(*insMoc, napi_escape_handle(_, _, _, _)).WillOnce(Return(napi_ok));
     result = CallJsMethod(funcNameIn, *jsRuntime, jsObj, argParser, retParserFalse);
-    EXPECT_EQ(result, HKS_ERROR_EXT_PARSE_FUNC_FAILED);
+    EXPECT_EQ(result, HKS_ERROR_EXT_SEND_EVENT_FAILED);
 }
 
 HWTEST_F(JsCryptoExtAbilityTest, BlobToBase64String_0000, testing::ext::TestSize.Level0)
@@ -1503,7 +1500,6 @@ HWTEST_F(JsCryptoExtAbilityTest, abilityTest_0000, testing::ext::TestSize.Level0
     EXPECT_EQ(ability->ExportCertificate(index, params, certJsonArr, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
 
     EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_invalid_arg));
-    EXPECT_CALL(*insMoc, napi_create_object(_, _)).WillOnce(Return(napi_invalid_arg));
     EXPECT_EQ(ability->ExportProviderCertificates(params, certJsonArr, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
 }
 

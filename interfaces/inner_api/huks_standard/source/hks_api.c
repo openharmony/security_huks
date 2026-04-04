@@ -324,6 +324,25 @@ HKS_API_EXPORT int32_t HksExportCertificate(const struct HksBlob *resourceId,
 #endif
 }
 
+HKS_API_EXPORT int32_t HksImportCertificate(const struct HksBlob *resourceId,
+    const struct HksExtCertInfo *certInfo, const struct HksParamSet *paramSetIn)
+{
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    HKS_LOG_D("enter HksImportCertificate");
+    if ((paramSetIn == NULL) || (resourceId == NULL) || (certInfo == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientImportCertificate(resourceId, certInfo, paramSetIn);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave HksImportCertificate, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)resourceId;
+    (void)certInfo;
+    (void)paramSetIn;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+
 HKS_API_EXPORT int32_t HksAuthUkeyPin(const struct HksBlob *resourceId,
     const struct HksParamSet *paramSetIn, uint32_t *retryCount)
 {

@@ -275,6 +275,22 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnExportProviderAllCertificates(const
     return HKS_SUCCESS;
 }
 
+ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnImportCertificate(const HksProcessInfo &processInfo,
+    const std::string &index, const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet))
+{
+    AutoRefCount refCnt(m_refCount, soMutex);
+    void *funcPtr = nullptr;
+    bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_IMPORT_CERTIFICATE, funcPtr);
+    HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "ImportCertificate method enum not found in plugin provider map.")
+    
+    int32_t ret = (*reinterpret_cast<OnImportCertificateFunc>(funcPtr))
+        (processInfo, index, certInfo, paramSet);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ImportCertificate fail, ret = %{public}d", ret)
+    HKS_LOG_I("import certificate success");
+    return HKS_SUCCESS;
+}
+
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnInitSession(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet, uint32_t &handle))
 {
@@ -320,6 +336,21 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnFinishSession(const HksProcessInfo 
     return HKS_SUCCESS;
 }
 
+ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnGenerateKey(const HksProcessInfo &processInfo,
+    const std::string &resourceId, const CppParamSet &paramSet))
+{
+    AutoRefCount refCnt(m_refCount, soMutex);
+    void *funcPtr = nullptr;
+    bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_GENERATE_KEY, funcPtr);
+    HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "GenerateKey method enum not found in plugin provider map.")
+
+    int32_t ret = (*reinterpret_cast<OnGenerateKeyFunc>(funcPtr))(processInfo, resourceId, paramSet);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GenerateKey fail, ret = %{public}d", ret)
+    HKS_LOG_I("generate key success");
+    return HKS_SUCCESS;
+}
+
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnAbortSession(const HksProcessInfo &processInfo, const uint32_t &handle,
     const CppParamSet &paramSet))
 {
@@ -346,6 +377,39 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnUnregisterAllObservers())
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "UnregisterAllObservers fail, ret = %{public}d", ret)
     return HKS_SUCCESS;
 }
+
+ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnImportWrappedKey(const HksProcessInfo &processInfo,
+    const std::string &index, const std::string &wrappingKeyIndex, const CppParamSet &paramSet,
+    const std::vector<uint8_t> &wrappedData))
+{
+    AutoRefCount refCnt(m_refCount, soMutex);
+    void *funcPtr = nullptr;
+    bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_IMPORT_WRAPPED_KEY, funcPtr);
+    HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "ImportWrappedKey method enum not found in plugin provider map.")
+    
+    int32_t ret = (*reinterpret_cast<OnImportWrappedKeyFunc>(funcPtr))
+        (processInfo, index, wrappingKeyIndex, paramSet, wrappedData);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ImportWrappedKey fail, ret = %" LOG_PUBLIC "d", ret)
+    HKS_LOG_I("import wrapped key success");
+    return HKS_SUCCESS;
+}
+
+ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnExportPublicKey(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, std::vector<uint8_t> &outData))
+{
+    AutoRefCount refCnt(m_refCount, soMutex);
+    void *funcPtr = nullptr;
+    bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_EXPORT_PUBLIC_KEY, funcPtr);
+    HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "ExportPublicKey method enum not found in plugin provider map.")
+    
+    int32_t ret = (*reinterpret_cast<OnExportPublicKeyFunc>(funcPtr))(processInfo, index, paramSet, outData);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ExportPublicKey fail, ret = %" LOG_PUBLIC "d", ret)
+    HKS_LOG_I("export public key success");
+    return HKS_SUCCESS;
+}
+
 }
 }
 }

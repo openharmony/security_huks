@@ -35,6 +35,7 @@
 #include "want.h"
 #include "hks_extension_connection.h"
 #include "ihuks_access_ext_base.h"
+#include "hks_ukey_common.h"
 
 namespace OHOS {
 namespace Security {
@@ -43,16 +44,6 @@ namespace Huks {
 constexpr int32_t HKS_MAX_PROVIDER_NUM = 10;
 constexpr int32_t MAX_ABILITY_NAME_LEN = 128;
 constexpr int32_t MAX_PROVIDER_NAME_LEN = 128;
-class ProviderInfo {
-public:
-    std::string m_providerName{};
-    std::string m_abilityName{};
-    std::string m_bundleName{};
-    int32_t m_userid = 0;
-
-    bool operator==(const ProviderInfo &other) const;
-    bool operator<(const ProviderInfo &other) const;
-};
 
 class HksExtAbilityConnectInfo {
 public:

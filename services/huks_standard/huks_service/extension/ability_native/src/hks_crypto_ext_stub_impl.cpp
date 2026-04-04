@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,6 +97,19 @@ ErrCode HksCryptoExtStubImpl::ExportProviderCertificates(
     return extension_->ExportProviderCertificates(params, certJsonArr, errcode);
 }
 
+ErrCode HksCryptoExtStubImpl::ImportCertificate(
+    const std::string& index,
+    const HksExtCertInfoIdl& certInfo,
+    const CppParamSet& params,
+    int32_t& errcode)
+{
+    if (extension_ == nullptr) {
+        LOGE("extension is nullptr");
+        return HKS_ERROR_EXT_NULLPTR;
+    }
+    return extension_->ImportCertificate(index, certInfo, params, errcode);
+}
+
 ErrCode HksCryptoExtStubImpl::InitSession(
     const std::string& index,
     const CppParamSet& params,
@@ -108,6 +121,18 @@ ErrCode HksCryptoExtStubImpl::InitSession(
         return HKS_ERROR_EXT_NULLPTR;
     }
     return extension_->InitSession(index, params, handle, errcode);
+}
+
+ErrCode HksCryptoExtStubImpl::GenerateKey(
+    const std::string& index,
+    const CppParamSet& params,
+    int32_t& errcode)
+{
+    if (extension_ == nullptr) {
+        LOGE("extension is nullptr");
+        return HKS_ERROR_EXT_NULLPTR;
+    }
+    return extension_->GenerateKey(index, params, errcode);
 }
 
 ErrCode HksCryptoExtStubImpl::UpdateSession(
@@ -162,6 +187,33 @@ ErrCode HksCryptoExtStubImpl::ClearUkeyPinAuthState(
         return HKS_ERROR_EXT_NULLPTR;
     }
     return extension_->ClearUkeyPinAuthState(handle, params, errcode);
+}
+
+ErrCode HksCryptoExtStubImpl::ImportWrappedKey(
+    const std::string& index,
+    const std::string& wrappingKeyIndex,
+    const CppParamSet& params,
+    const std::vector<uint8_t>& wrappedData,
+    int32_t& errcode)
+{
+    if (extension_ == nullptr) {
+        LOGE("extension is nullptr");
+        return HKS_ERROR_EXT_NULLPTR;
+    }
+    return extension_->ImportWrappedKey(index, wrappingKeyIndex, params, wrappedData, errcode);
+}
+
+ErrCode HksCryptoExtStubImpl::ExportPublicKey(
+    const std::string& index,
+    const CppParamSet& params,
+    std::vector<uint8_t>& outData,
+    int32_t& errcode)
+{
+    if (extension_ == nullptr) {
+        LOGE("extension is nullptr");
+        return HKS_ERROR_EXT_NULLPTR;
+    }
+    return extension_->ExportPublicKey(index, params, outData, errcode);
 }
 
 } // namespace Huks

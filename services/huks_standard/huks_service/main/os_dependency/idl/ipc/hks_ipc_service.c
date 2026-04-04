@@ -431,6 +431,39 @@ void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t
 #endif
 }
 
+void HksIpcServiceImportCertificate(const struct HksBlob *srcData, const uint8_t *context)
+{
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    struct HksBlob index = { 0, NULL };
+    struct HksExtCertInfo certInfo = {0};
+    struct HksParamSet *paramSet = NULL;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    int32_t ret;
+    uint64_t startTime = 0;
+    (void)HksElapsedRealTime(&startTime);
+    do {
+        ret = HksUKeyGeneralUnpackWithCertInfo(srcData, &index, &certInfo, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceImportCertificateUnpack Ipc fail")
+        
+        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+        
+        ret = CheckUkeyCertCaller(&processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckUkeyCertCaller fail, ret = %" LOG_PUBLIC "d", ret)
+        
+        ret = HksIpcImportCertAdapter(&processInfo, &index, &certInfo, paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcImportCertAdapter fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+    
+    HksSendResponse(context, ret, NULL);
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+#endif
+}
+
 void HksIpcServiceGetRemoteProperty(const struct HksBlob *srcData, const uint8_t *context, const uint8_t *remoteObject)
 {
 #ifdef HKS_UKEY_EXTENSION_CRYPTO

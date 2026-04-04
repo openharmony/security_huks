@@ -28,25 +28,26 @@ namespace Huks {
 enum class PluginMethodEnum {
     FUNC_ON_REGISTER_PROVIDER,
     FUNC_ON_UN_REGISTER_PROVIDER,
-
     FUNC_ON_CREATE_REMOTE_KEY_HANDLE,
     FUNC_ON_CLOSE_REMOTE_KEY_HANDLE,
     FUNC_ON_AUTH_UKEY_PIN,
     FUNC_ON_GET_VERIFY_PIN_STATUS,
-
     FUNC_ON_CLEAR_PIN_STATUS,
     FUNC_ON_GET_REMOTE_PROPERTY,
-
     FUNC_ON_LIST_INDEX_CERTIFICATE,
     FUNC_ON_LIST_PROVIDER_ALL_CERTIFICATE,
+
+    FUNC_ON_IMPORT_CERTIFICATE,
+    FUNC_ON_GENERATE_KEY,
     FUNC_ON_INIT_SESSION,
     FUNC_ON_UPDATE_SESSION,
     FUNC_ON_FINISH_SESSION,
     FUNC_ON_ABORT_SESSION,
-
     FUNC_ON_UNREGISTER_ALL_OBSERVERS,
+    FUNC_ON_IMPORT_WRAPPED_KEY,
+    FUNC_ON_EXPORT_PUBLIC_KEY,
 
-    COUNT = 15,
+    COUNT = 19,
 };
 
 using OnRegisterProviderFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &providerName,
@@ -68,6 +69,10 @@ using OnListIndexCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo
     const std::string &index, const CppParamSet &paramSet, std::string &certsJson);
 using OnListProviderAllCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr);
+using OnImportCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo,
+    const std::string &index, const HksExtCertInfo &certInfo, const CppParamSet &paramSet);
+using OnGenerateKeyFunc = int32_t (*)(const HksProcessInfo &processInfo,
+    const std::string &resourceId, const CppParamSet &paramSet);
 using OnInitSessionFunc = int32_t (*)(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, uint32_t &handle);
 using OnUpdateSessionFunc = int32_t (*)(const HksProcessInfo &processInfo, const uint32_t &handle,
@@ -77,6 +82,10 @@ using OnFinishSessionFunc = int32_t (*)(const HksProcessInfo &processInfo, const
 using OnAbortSessionFunc = int32_t (*)(const HksProcessInfo &processInfo, const uint32_t &handle,
     const CppParamSet &paramSet);
 using OnUnregisterAllObserversFunc = int32_t (*)();
+using OnExportPublicKeyFunc = int32_t (*)(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, std::vector<uint8_t> &outData);
+using OnImportWrappedKeyFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
+    const std::string &wrappingKeyIndex, const CppParamSet &paramSet, const std::vector<uint8_t> &wrappedData);
 }
 }
 }

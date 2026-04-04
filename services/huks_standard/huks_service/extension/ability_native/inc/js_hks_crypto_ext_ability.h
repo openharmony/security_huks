@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,11 +36,15 @@ typedef enum {
     GET_UKEY_PIN_AUTH_STATE,
     EXPORT_CERTIFICATE,
     EXPORT_PROVIDER_CERTIFICATES,
+    IMPORT_CERTIFICATE,
     INIT_SESSION,
     UPDATE_SESSION,
     FINISH_SESSION,
     GET_PROPERTY,
-    CLEAR_UKEY_PIN_AUTH
+    CLEAR_UKEY_PIN_AUTH,
+    IMPORT_WRAPPED_KEY,
+    EXPORT_PUBLIC_KEY,
+    GENERATE_KEY
 } CryptoResultParamType;
 
 typedef struct HksCertInfo {
@@ -108,8 +112,11 @@ public:
         std::string &certJsonArr, int32_t &errcode) override;
     int32_t ExportProviderCertificates(const CppParamSet &params, std::string &certJsonArr,
         int32_t &errcode) override;
+    int32_t ImportCertificate(const std::string &index, const HksExtCertInfoIdl& certInfo, const CppParamSet &params,
+        int32_t &errcode) override;
     int32_t InitSession(const std::string &index, const CppParamSet &params, std::string &handle,
         int32_t &errcode) override;
+    int32_t GenerateKey(const std::string &handle, const CppParamSet &params, int32_t &errcode) override;
     int32_t UpdateSession(const std::string &handle, const CppParamSet &params, const std::vector<uint8_t> &inData,
         std::vector<uint8_t> &outData, int32_t &errcode) override;
     int32_t FinishSession(const std::string &handle, const CppParamSet &params, const std::vector<uint8_t> &inData,
@@ -117,6 +124,10 @@ public:
     int32_t GetProperty(const std::string &handle, const std::string &propertyId, const CppParamSet &params,
         CppParamSet &outParams, int32_t &errcode) override;
     int32_t ClearUkeyPinAuthState(const std::string &handle, const CppParamSet &params, int32_t &errcode) override;
+    int32_t ImportWrappedKey(const std::string &index, const std::string &wrappingKeyIndex,
+        const CppParamSet &params, const std::vector<uint8_t> &wrappedData, int32_t &errcode) override;
+    int32_t ExportPublicKey(const std::string &index, const CppParamSet &params,
+        std::vector<uint8_t> &outData, int32_t &errcode) override;
 
 private:
     template <typename T>

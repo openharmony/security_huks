@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,6 +99,20 @@ int32_t HksCryptoExtAbility::ExportProviderCertificates(const CppParamSet &param
     return HKS_ERROR_EXT_UNDEFINED_OPERATION;
 }
 
+int32_t HksCryptoExtAbility::ImportCertificate(const std::string &index, const HksExtCertInfoIdl& certInfo,
+    const CppParamSet &params, int32_t &errcode)
+{
+    LOGE("HksCryptoExtAbility::ImportCertificate Undefined operation");
+    return HKS_ERROR_EXT_UNDEFINED_OPERATION;
+}
+
+int32_t HksCryptoExtAbility::GenerateKey(const std::string &handle,
+    const CppParamSet &params, int32_t &errcode)
+{
+    LOGE("HksCryptoExtAbility::GenerateKey Undefined operation");
+    return HKS_ERROR_EXT_UNDEFINED_OPERATION;
+}
+
 int32_t HksCryptoExtAbility::InitSession(const std::string &index, const CppParamSet &params, std::string &handle,
     int32_t &errcode)
 {
@@ -131,6 +145,20 @@ int32_t HksCryptoExtAbility::ClearUkeyPinAuthState(const std::string &handle,
     const CppParamSet &params, int32_t &errcode)
 {
     LOGE("HksCryptoExtAbility::ClearUkeyPinAuthState Undefined operation");
+    return HKS_ERROR_EXT_UNDEFINED_OPERATION;
+}
+
+int32_t HksCryptoExtAbility::ImportWrappedKey(const std::string &index, const std::string &wrappingKeyIndex,
+    const CppParamSet &params, const std::vector<uint8_t> &wrappedData, int32_t &errcode)
+{
+    LOGE("HksCryptoExtAbility::ImportWrappedKey Undefined operation");
+    return HKS_ERROR_EXT_UNDEFINED_OPERATION;
+}
+
+int32_t HksCryptoExtAbility::ExportPublicKey(const std::string &index, const CppParamSet &params,
+    std::vector<uint8_t> &outData, int32_t &errcode)
+{
+    LOGE("HksCryptoExtAbility::ExportPublicKey Undefined operation");
     return HKS_ERROR_EXT_UNDEFINED_OPERATION;
 }
 

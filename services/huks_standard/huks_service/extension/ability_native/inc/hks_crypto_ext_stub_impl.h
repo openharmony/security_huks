@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "hks_cpp_paramset.h"
 #include "huks_access_ext_base_stub.h"
 #include "hks_crypto_ext_ability.h"
+#include "hks_ext_cert_info.h"
 
 namespace OHOS {
 namespace Security {
@@ -67,10 +68,21 @@ public:
         std::string& certJsonArr,
         int32_t& errcode) override;
 
+    ErrCode ImportCertificate(
+        const std::string& index,
+        const HksExtCertInfoIdl& certInfo,
+        const CppParamSet& params,
+        int32_t& errcode) override;
+
     ErrCode InitSession(
         const std::string& index,
         const CppParamSet& params,
         std::string& handle,
+        int32_t& errcode) override;
+
+    ErrCode GenerateKey(
+        const std::string& index,
+        const CppParamSet& params,
         int32_t& errcode) override;
 
     ErrCode UpdateSession(
@@ -97,6 +109,19 @@ public:
     ErrCode ClearUkeyPinAuthState(
         const std::string& handle,
         const CppParamSet& params,
+        int32_t& errcode) override;
+
+    ErrCode ImportWrappedKey(
+        const std::string& index,
+        const std::string& wrappingKeyIndex,
+        const CppParamSet& params,
+        const std::vector<uint8_t>& wrappedData,
+        int32_t& errcode) override;
+
+    ErrCode ExportPublicKey(
+        const std::string& index,
+        const CppParamSet& params,
+        std::vector<uint8_t>& outData,
         int32_t& errcode) override;
 private:
     std::shared_ptr<HksCryptoExtAbility> extension_;

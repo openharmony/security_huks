@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 sequenceable HksCppParamset..CppParamSet;
+import HksExtCertInfo;
+
 interface OHOS.Security.Huks.IHuksAccessExtBase {
 
     [ipccode 1] void OpenRemoteHandle([in] String index, [in] CppParamSet params, [out] String handle, [out] int errcode);
@@ -26,4 +28,8 @@ interface OHOS.Security.Huks.IHuksAccessExtBase {
     [ipccode 9] void FinishSession([in] String handle, [in] CppParamSet params, [in] unsigned char[] inData, [out] unsigned char[] outData, [out] int errcode);
     [ipccode 10] void GetProperty([in] String handle, [in] String propertyId, [in] CppParamSet params, [out] CppParamSet outParams, [out] int errcode);
     [ipccode 11] void ClearUkeyPinAuthState([in] String handle, [in] CppParamSet params, [out] int errcode);
+    [ipccode 12] void ImportWrappedKey([in] String newIndex, [in] String newWrappingKeyIndex, [in] CppParamSet params, [in] unsigned char[]wrappedData, [out] int errcode);
+    [ipccode 13] void ExportPublicKey([in] String newIndex, [in] CppParamSet params, [out] unsigned char[] wrappedData, [out] int errcode);
+    [ipccode 14] void GenerateKey([in] String handle, [in] CppParamSet params, [out] int errcode);
+    [ipccode 15] void ImportCertificate([in] String index, [in] HksExtCertInfoIdl certInfo, [in] CppParamSet params, [out] int errcode);
 }

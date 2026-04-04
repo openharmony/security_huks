@@ -125,6 +125,28 @@ int32_t HksIpcExportCertAdapter(const struct HksProcessInfo *processInfo, const 
     return ret;
 }
 
+int32_t HksIpcImportCertAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
+    const struct HksExtCertInfo *certInfo, const struct HksParamSet *paramSet)
+{
+    int32_t ret = HksIpcCheckBlob(resourceId, 1, HKS_EXT_MAX_RESOURCE_ID_LEN);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcImportCertAdapter invalid resourceId blob")
+    
+    // 检查certInfo
+    if (certInfo == nullptr || certInfo->index.data == nullptr || certInfo->cert.data == nullptr) {
+        HKS_LOG_E("HksIpcImportCertAdapter invalid certInfo");
+        return HKS_ERROR_NULL_POINTER;
+    }
+    
+    std::string cppresourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
+    CppParamSet cppParamSet(paramSet);
+    
+    // 调用实际的导入证书服务函数
+    ret = OHOS::Security::Huks::HksIpcServiceOnImportCertificate(processInfo, cppresourceId, *certInfo, cppParamSet);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnImportCertificate fail")
+    
+    return ret;
+}
+
 int32_t HksIpcAuthUkeyPinAdapter(const struct HksProcessInfo *processInfo,
     const struct HksBlob *resourceId, const struct HksParamSet *paramSet, int32_t *outStatus, uint32_t *retryCount)
 {
