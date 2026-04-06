@@ -14,6 +14,7 @@
  */
 
 #include "hks_ukey_service_provider.h"
+#include <cstdint>
 
 namespace OHOS {
 namespace Security {
@@ -34,6 +35,14 @@ int32_t HksIpcServiceProviderUnRegister(const struct HksProcessInfo *processInfo
     HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
     bool isDeath = false;
     return pluginManager->UnRegisterProvider(*processInfo, name, paramSet, isDeath);
+}
+
+int32_t HksIpcServiceQueryAbility(const struct HksProcessInfo *processInfo, std::string &resourceId,
+    CppAbilityInfo &abilityInfo)
+{
+    auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
+    return pluginManager->OnQueryAbility(*processInfo, resourceId, abilityInfo);
 }
 
 int32_t HksIpcServiceOnCreateRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string &index,

@@ -16,10 +16,12 @@
 #ifndef HKS_FUNCTION_TYPES_H
 #define HKS_FUNCTION_TYPES_H
 
+#include <cstdint>
 #include <map>
 #include <string>
 #include "hks_plugin_def.h"
 #include "hks_cpp_paramset.h"
+#include "hks_cpp_abilityinfo.h"
 
 namespace OHOS {
 namespace Security {
@@ -46,8 +48,9 @@ enum class PluginMethodEnum {
     FUNC_ON_UNREGISTER_ALL_OBSERVERS,
     FUNC_ON_IMPORT_WRAPPED_KEY,
     FUNC_ON_EXPORT_PUBLIC_KEY,
+    FUNC_ON_QUERY_ABILITY,
 
-    COUNT = 19,
+    COUNT = 20,
 };
 
 using OnRegisterProviderFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &providerName,
@@ -86,6 +89,8 @@ using OnExportPublicKeyFunc = int32_t (*)(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, std::vector<uint8_t> &outData);
 using OnImportWrappedKeyFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
     const std::string &wrappingKeyIndex, const CppParamSet &paramSet, const std::vector<uint8_t> &wrappedData);
+using OnQueryAbilityFunc = int32_t (*)(const struct HksProcessInfo &processInfo, std::string &resourceId,
+    CppAbilityInfo &abilityInfo);
 }
 }
 }
