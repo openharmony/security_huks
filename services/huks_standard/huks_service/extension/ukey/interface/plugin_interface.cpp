@@ -22,6 +22,7 @@
 #include "hks_cpp_paramset.h"
 #include "hks_template.h"
 #include "app_observer.h"
+#include "hks_ukey_common.h"
 #include <string>
 #include <vector>
 
@@ -67,6 +68,17 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnRegisterProvider(co
     auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(providerMgr == nullptr, HKS_ERROR_NULL_POINTER, "providerMgr is null");
     auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet, callback);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
+    return ret;
+}
+
+__attribute__((visibility("default"))) int32_t HksExtPluginOnQueryAbilityInfo(const struct HksProcessInfo &processInfo,
+    std::string &resourceId, CppAbilityInfo &abilityInfo)
+{
+    HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(providerMgr == nullptr, HKS_ERROR_NULL_POINTER, "providerMgr is null");
+    auto ret = providerMgr->OnQueryAbility(processInfo, resourceId, abilityInfo);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }

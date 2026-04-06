@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,16 +15,13 @@ import("//build/config/features.gni")
 import("//build/test.gni")
 
 ##############################fuzztest##########################################
-ohos_fuzztest("HksClientIpcSerializationFuzzTest") {
+ohos_fuzztest("HksQueryAbilityInfoFuzzTest") {
   module_out_path = fuzz_module_out_path
-  fuzz_config_file = "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksclientipcserialization_fuzzer"
+  fuzz_config_file = "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksqueryabilityinfo_fuzzer"
 
   include_dirs = [
     ".",
-    "..",
     "//base/security/huks/frameworks/huks_standard/main/common/include/",
-    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",
-    "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/include",
   ]
   cflags = [
     "-g",
@@ -32,14 +29,9 @@ ohos_fuzztest("HksClientIpcSerializationFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [
-    "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_client_ipc_serialization.c",
-    "hksclientipcserialization_fuzzer.cpp",
-    "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ipc_serialization.c",
-  ]
+  sources = [ "hksqueryabilityinfo_fuzzer.cpp" ]
 
   deps = [
-    "..:hks_fuzz_util",
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
   ]
@@ -52,7 +44,7 @@ group("fuzztest") {
   deps = []
   deps += [
     # deps file
-    ":HksClientIpcSerializationFuzzTest",
+    ":HksQueryAbilityInfoFuzzTest",
   ]
 }
 ###############################################################################

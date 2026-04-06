@@ -21,6 +21,7 @@
 #include "hks_mem.h"
 #include "securec.h"
 #include "os_account_manager.h"
+#include <cstdint>
 
 namespace OHOS::Security::Huks {
 
@@ -236,6 +237,67 @@ int32_t ParseIndexAndProviderInfo(const std::string &index,
     newIndex = newRoot.Serialize(false);
     HKS_IF_TRUE_LOGE_RETURN(newIndex.empty(), HKS_ERROR_JSON_SERIALIZE_FAILED,
         "New index is empty")
+    return HKS_SUCCESS;
+}
+
+int32_t GetProviderInfoAndIndex(const std::string &index,
+    ProviderInfo &providerInfo, std::string &newIndex)
+{
+    CommJsonObject root = CommJsonObject::Parse(index);
+    HKS_IF_TRUE_LOGE_RETURN(root.IsNull(), HKS_ERROR_JSON_PARSE_FAILED,
+        "Parse index failed, invalid JSON format")
+    auto providerNameResult = root.GetValue(PROVIDER_NAME_KEY).ToString();
+    auto abilityNameResult = root.GetValue(ABILITY_NAME_KEY).ToString();
+    auto bundleNameResult = root.GetValue(BUNDLE_NAME_KEY).ToString();
+    auto indexResult = root.GetValue(INDEX_NAME_KEY).ToString();
+    HKS_IF_TRUE_LOGE_RETURN(providerNameResult.first != HKS_SUCCESS || abilityNameResult.first != HKS_SUCCESS ||
+        bundleNameResult.first != HKS_SUCCESS || indexResult.first != HKS_SUCCESS,
+        HKS_ERROR_JSON_TYPE_MISMATCH, "Get provider info fields failed")
+    HKS_IF_TRUE_LOGE_RETURN(providerNameResult.second.empty() || abilityNameResult.second.empty() ||
+        bundleNameResult.second.empty(), HKS_ERROR_JSON_INVALID_VALUE, "Provider info is incomplete")
+    providerInfo.m_providerName = providerNameResult.second;
+    providerInfo.m_abilityName = abilityNameResult.second;
+    providerInfo.m_bundleName = bundleNameResult.second;
+    newIndex = indexResult.second;
+
+    return HKS_SUCCESS;
+}
+
+int32_t ParseAbilityInfoArrayFromJson(const std::string &jsonStr, std::vector<AbilityInfo> &abilityInfoArray)
+{
+    abilityInfoArray.clear();
+    HKS_IF_TRUE_LOGE_RETURN(jsonStr.empty(), HKS_ERROR_INVALID_ARGUMENT,
+        "Input json string is empty")
+
+    auto jsonArray = CommJsonObject::Parse(jsonStr);
+    HKS_IF_TRUE_LOGE_RETURN(jsonArray.IsNull(), HKS_ERROR_INVALID_ARGUMENT,
+        "Parse json object failed")
+    HKS_IF_TRUE_LOGE_RETURN(!jsonArray.IsArray(), HKS_ERROR_INVALID_ARGUMENT,
+        "Input json is not an array")
+
+    int32_t arraySize = jsonArray.ArraySize();
+    HKS_IF_TRUE_LOGE_RETURN((arraySize == 0 || arraySize > HKS_MAX_PROVIDER_NUM),
+        HKS_ERROR_INVALID_ARGUMENT, "ability arr too long or is empty:%" LOG_PUBLIC "d", arraySize)
+    
+    for (int32_t i = 0; i < arraySize; i++) {
+        auto element = jsonArray.GetElement(i);
+
+        auto abilityNameObj = element.GetValue(ABILITY_NAME_KEY).ToString();
+        HKS_IF_TRUE_LOGE_RETURN(abilityNameObj.first != HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
+            "Get abilityName from json element failed at index: %" LOG_PUBLIC "d", i)
+        HKS_IF_TRUE_LOGE_RETURN(abilityNameObj.second.empty() || abilityNameObj.second.size() > MAX_ABILITY_NAME_LEN,
+            HKS_ERROR_INVALID_ARGUMENT, "abilityName is empty at index: %" LOG_PUBLIC "d", i)
+
+        auto indexObj = element.GetValue(INDEX_NAME_KEY).ToString();
+        HKS_IF_TRUE_LOGE_RETURN(indexObj.first != HKS_SUCCESS || indexObj.second.size() > MAX_INDEX_LEN,
+            HKS_ERROR_INVALID_ARGUMENT, "Get abilityName from json element failed at index: %" LOG_PUBLIC "d", i)
+
+        AbilityInfo abilityInfo{};
+        abilityInfo.abilityName = std::string(abilityNameObj.second);
+        abilityInfo.index = std::string(indexObj.second);
+        abilityInfoArray.push_back(abilityInfo);
+    }
+    
     return HKS_SUCCESS;
 }
 

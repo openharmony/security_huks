@@ -110,6 +110,7 @@ HKS_API_EXPORT int32_t HksFinish(const struct HksBlob *handle, const struct HksP
 #ifndef HKS_CHIPSET_API
 HKS_API_EXPORT int32_t HksRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
 HKS_API_EXPORT int32_t HksUnregisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
+HKS_API_EXPORT int32_t HksQueryAbilityInfo(struct HksBlob *resourceId, struct HksAbilityInfo *abilityInfo);
 
 HKS_API_EXPORT int32_t HksExportProviderCertificates(const struct HksBlob *providerName,
     const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);

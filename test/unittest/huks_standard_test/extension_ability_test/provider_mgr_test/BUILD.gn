@@ -41,6 +41,7 @@ if (huks_enable_ukey_config == true) {
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager:libhuks_remote_handle_manager_static",
     ]
     external_deps = [
+      "cJSON:cjson",
       "ability_base:want",
       "ability_runtime:ability_connect_callback_stub",
       "access_token:libaccesstoken_sdk",

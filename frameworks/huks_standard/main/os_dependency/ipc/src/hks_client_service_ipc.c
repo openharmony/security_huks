@@ -29,6 +29,7 @@
 #include "hks_common_check.h"
 #include "hks_check_paramset.h"
 #include "hks_ipc_check.h"
+#include "hks_ipc_serialization.h"
 #include "hks_client_ipc_serialization.h"
 #include "hks_ipc_slice.h"
 #include "hks_log.h"
@@ -242,6 +243,43 @@ int32_t HksClientUnregisterProvider(const struct HksBlob *name, const struct Hks
     } while (0);
 
     HksFreeParamSet(&newParamSet);
+    HKS_FREE_BLOB(inBlob);
+    return ret;
+}
+
+int32_t HksClientQueryAbilityInfo(struct HksBlob *resourceId, struct HksAbilityInfo *abilityInfo)
+{
+    int32_t ret = 0;
+    struct HksBlob inBlob = { 0, NULL };
+    struct HksBlob outBlob = { 0, NULL };
+    outBlob.size = HKS_MAX_QUERY_RESULT;
+    outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
+    HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
+
+    struct HksBlob outResourceId = { 0, NULL };
+    struct HksAbilityInfo unpackAbility;
+
+    do {
+        ret = HksCheckBlob3(resourceId, &abilityInfo->bundleName, &abilityInfo->abilityName);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Invalid input data, check blobl3 fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksAllocInBlobWithThreeBlobs(&inBlob, resourceId, &abilityInfo->bundleName, &abilityInfo->abilityName);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
+
+        ret = HksBlob3Pack(resourceId, &abilityInfo->bundleName, &abilityInfo->abilityName, &inBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksQueryAbilityInfo pack fail")
+
+        ret = HksSendRequest(HKS_MSG_EXT_QUERY_ABILITY_INFO, &inBlob, &outBlob, NULL);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
+
+        (void)memset_s(resourceId->data, resourceId->size, 0, resourceId->size);
+        HksBlob3Unpack(&outBlob, &outResourceId, &unpackAbility.bundleName, &unpackAbility.abilityName);
+
+        ret = HksQueryAbilityCopyResult(&outResourceId, &unpackAbility, resourceId, abilityInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksQueryAbilityCopyResult fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HKS_FREE_BLOB(outBlob);
     HKS_FREE_BLOB(inBlob);
     return ret;
 }

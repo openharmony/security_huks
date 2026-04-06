@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "hks_function_types.h"
 #include "hks_plugin_lifecycle_manager.h"
 #include "hks_plugin_loader.h"
 #include <vector>
@@ -177,6 +178,9 @@ static void RegisterOtherMethodMaps(OHOS::SafeMap<PluginMethodEnum, std::string>
     map.Insert(PluginMethodEnum::FUNC_ON_IMPORT_WRAPPED_KEY,
         "_ZN4OHOS8Security4Huks30HksExtPluginOnImportWrappedKeyERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEESD_RK11CppParamSetRKNS5_6vectorIhNS9_IhEEEE");
+    map.Insert(PluginMethodEnum::FUNC_ON_QUERY_ABILITY,
+        "_ZN4OHOS8Security4Huks30HksExtPluginOnQueryAbilityInfoERK14HksProcessInfoRNSt3__h12basic_stringIcNS5_11"
+        "char_traitsIcEENS5_9allocatorIcEEEER14CppAbilityInfo");
 }
 
 HuksPluginLoader::HuksPluginLoader()

@@ -64,6 +64,7 @@ enum HksIpcInterfaceCode {
     HKS_MSG_EXT_IMPORT_CERTIFICATE,
     HKS_MSG_EXT_GET_REMOTE_PROPERTY,
     HKS_MSG_EXT_GET_REMOTE_PROPERTY_REPLY,
+    HKS_MSG_EXT_QUERY_ABILITY_INFO,
     /* new cmd type must be added before HKS_MSG_MAX */
     HKS_MSG_MAX,
 };

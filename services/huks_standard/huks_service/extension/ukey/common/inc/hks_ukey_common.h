@@ -25,7 +25,6 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
-
     class ProviderInfo {
     public:
         std::string m_providerName{};
@@ -39,7 +38,14 @@ namespace Huks {
     constexpr const char *PROVIDER_NAME_KEY = "providerName";
     constexpr const char *ABILITY_NAME_KEY = "abilityName";
     constexpr const char *BUNDLE_NAME_KEY = "bundleName";
+    constexpr const char *INDEX_NAME_KEY = "index";
+    constexpr const char *INDEX_KEY_NAME_KEY = "key";
     constexpr const char *USERID_KEY = "userid";
+
+    constexpr int32_t HKS_MAX_PROVIDER_NUM = 10;
+    constexpr int32_t MAX_ABILITY_NAME_LEN = 128;
+    constexpr int32_t MAX_PROVIDER_NAME_LEN = 128;
+    constexpr int32_t MAX_INDEX_LEN = 512;
 
     enum ExtensionErrCode {
         EXTENSION_SUCCESS = 0,
@@ -65,8 +71,15 @@ namespace Huks {
         const std::map<int32_t, int32_t> &errorMapping);
     int32_t HksGetFrontUserId(int32_t &outId);
     int32_t HksGetUserIdFromUid(const uint32_t &uid);
+
+    struct AbilityInfo {
+        std::string abilityName{};
+        std::string index{};
+    };
+    int32_t ParseAbilityInfoArrayFromJson(const std::string &jsonStr, std::vector<AbilityInfo> &abilityInfoArray);
     // 解析ResourceID json
     int32_t ParseIndexAndProviderInfo(const std::string &index, ProviderInfo &providerInfo, std::string &newIndex);
+    int32_t GetProviderInfoAndIndex(const std::string &index, ProviderInfo &providerInfo, std::string &newIndex);
 }
 }
 }

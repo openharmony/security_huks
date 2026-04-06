@@ -21,6 +21,7 @@
 #include "hks_service_ipc_serialization.h"
 #include "hks_permission_check.h"
 #include "hks_template.h"
+#include "hks_cpp_abilityinfo.h"
 #include "hks_response.h"
 #include "hks_mem.h"
 #include "hks_cpp_paramset.h"
@@ -57,6 +58,8 @@ int32_t HksIpcServiceOnExportCertificate(const struct HksProcessInfo *processInf
     const CppParamSet &paramSet, std::string &certificatesOut);
 int32_t HksIpcServiceOnExportProviderAllCertificates(const struct HksProcessInfo *processInfo, const std::string &index,
     const CppParamSet &paramSet, std::string &certificatesOut);
+int32_t HksIpcServiceQueryAbility(const struct HksProcessInfo *processInfo, std::string &resourceId,
+    CppAbilityInfo &abilityInfo);
 int32_t HksIpcServiceOnImportCertificate(const struct HksProcessInfo *processInfo, const std::string &index,
     const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet);
 
