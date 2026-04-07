@@ -647,6 +647,7 @@ static int32_t GenerateKeyOperation(const struct HksProcessInfo *processInfo, co
     return ret;
 }
 
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
 static int32_t GenerateKeyUkeyOperation(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn)
 {
@@ -656,6 +657,7 @@ static int32_t GenerateKeyUkeyOperation(const struct HksProcessInfo *processInfo
     HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyGenerateKey failed, ret = %" LOG_PUBLIC "d", ret)
     return ret;
 }
+#endif
 
 int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, struct HksBlob *keyOut)
