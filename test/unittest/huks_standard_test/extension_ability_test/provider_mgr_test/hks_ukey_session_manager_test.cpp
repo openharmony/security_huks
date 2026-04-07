@@ -949,7 +949,7 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest028, TestSize.Level0) {
 
     std::vector<HksParam> pinParams = {
         {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(processInfo.uidInt)},
-        {.tag = HKS_EXT_CRYPTO_TAG_UKEY_PIN, .blob = {0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x00, 0x00}},
+        {.tag = HKS_EXT_CRYPTO_TAG_UKEY_PIN, .blob = StringToBlob("123456")},
     };
     CppParamSet pinParamSet(pinParams);
     int32_t authState{0};

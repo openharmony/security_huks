@@ -163,6 +163,268 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest003, TestSize.Level0)
     ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, paramSet, isDeath);
     EXPECT_EQ(ret, HKS_ERROR_LIB_REPEAT_CLOSE) << "fail: unregist is not -298.";
 }
+
+/**
+ * @tc.name: ExtensionPluginMgrTest.ExtensionPluginMgrTest004
+ * @tc.desc: 覆盖OnGenerateKey, OnImportWrappedKey, OnExportPublicKey, OnImportCertificate成功路径
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest004, TestSize.Level0)
+{
+    auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HksProcessInfo processInfo {};
+    std::vector<HksParam> tmpParams = {
+        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+    };
+    CppParamSet paramSet(tmpParams);
+
+    int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
+    EXPECT_EQ(ret, 0) << "fail: regist fail";
+
+    const std::string index = "testIndex";
+
+    // OnGenerateKey
+    ret = mgr->OnGenerateKey(processInfo, index, paramSet);
+    EXPECT_EQ(ret, 0) << "fail: OnGenerateKey fail";
+
+    // OnExportPublicKey
+    std::vector<uint8_t> outData;
+    ret = mgr->OnExportPublicKey(processInfo, index, paramSet, outData);
+    EXPECT_EQ(ret, 0) << "fail: OnExportPublicKey fail";
+
+    // OnImportWrappedKey
+    const std::string wrappingKeyIndex = "wrappingKey";
+    std::vector<uint8_t> wrappedData = {0x01, 0x02, 0x03};
+    ret = mgr->OnImportWrappedKey(processInfo, index, wrappingKeyIndex, paramSet, wrappedData);
+    EXPECT_EQ(ret, 0) << "fail: OnImportWrappedKey fail";
+
+    // OnImportCertificate
+    struct HksExtCertInfo certInfo {};
+    uint8_t indexBuf[] = "certIndex";
+    uint8_t certBuf[] = "certData";
+    certInfo.purpose = 1;
+    certInfo.index.size = sizeof(indexBuf);
+    certInfo.index.data = indexBuf;
+    certInfo.cert.size = sizeof(certBuf);
+    certInfo.cert.data = certBuf;
+    ret = mgr->OnImportCertificate(processInfo, index, certInfo, paramSet);
+    EXPECT_EQ(ret, 0) << "fail: OnImportCertificate fail";
+
+    bool isDeath = false;
+    ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, paramSet, isDeath);
+    EXPECT_EQ(ret, 0) << "fail: unregist fail";
+}
+
+/**
+ * @tc.name: ExtensionPluginMgrTest.ExtensionPluginMgrTest005
+ * @tc.desc: 未注册时调用On方法，m_pluginProviderMap.Find失败，返回HKS_ERROR_FIND_FUNC_MAP_FAIL
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest005, TestSize.Level0)
+{
+    auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HksProcessInfo processInfo {};
+    std::vector<HksParam> tmpParams = {
+        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+    };
+    CppParamSet paramSet(tmpParams);
+    const std::string index = "testIndex";
+
+    // 不调用RegisterProvider，m_pluginProviderMap为空，Find应失败
+    int ret = mgr->OnCreateRemoteKeyHandle(processInfo, index, paramSet);
+    EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
+
+    ret = mgr->OnCloseRemoteKeyHandle(processInfo, index, paramSet);
+    EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
+
+    int32_t authState = 0;
+    uint32_t retryCnt = 0;
+    ret = mgr->OnAuthUkeyPin(processInfo, index, paramSet, authState, retryCnt);
+    EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
+
+    int32_t state = 0;
+    ret = mgr->OnGetVerifyPinStatus(processInfo, index, paramSet, state);
+    EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
+
+    ret = mgr->OnClearUkeyPinAuthStatus(processInfo, index);
+    EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
+
+    CppParamSet outParams(tmpParams);
+    ret = mgr->OnGetRemoteProperty(processInfo, index, "propId", paramSet, outParams);
+    EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
+}
+
+/**
+ * @tc.name: ExtensionPluginMgrTest.ExtensionPluginMgrTest006
+ * @tc.desc: 未注册时调用session/key相关On方法，Find失败
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest006, TestSize.Level0)
+{
+    auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HksProcessInfo processInfo {};
+    std::vector<HksParam> tmpParams = {
+        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+    };
+    CppParamSet paramSet(tmpParams);
+    const std::string index = "testIndex";
+
+    std::string certsJson;
+    int ret = mgr->OnExportCertificate(processInfo, index, paramSet, certsJson);
+    EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
+
+    std::string certsJsonArr;
+    ret = mgr->OnExportProviderAllCertificates(processInfo, TEST_PROVIDER, paramSet, certsJsonArr);
+    EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
+
+    ret = mgr->OnGenerateKey(processInfo, index, paramSet);
+    EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
+
+    struct HksExtCertInfo certInfo {};
+    ret = mgr->OnImportCertificate(processInfo, index, certInfo, paramSet);
+    EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
+
+    uint32_t handle = 0;
+    ret = mgr->OnInitSession(processInfo, index, paramSet, handle);
+    EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
+
+    std::vector<uint8_t> inData, outData;
+    ret = mgr->OnUpdateSession(processInfo, handle, paramSet, inData, outData);
+    EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
+
+    ret = mgr->OnFinishSession(processInfo, handle, paramSet, inData, outData);
+    EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
+
+    ret = mgr->OnAbortSession(processInfo, handle, paramSet);
+    EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
+
+    ret = mgr->OnImportWrappedKey(processInfo, index, "wrapKey", paramSet, inData);
+    EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
+
+    ret = mgr->OnExportPublicKey(processInfo, index, paramSet, outData);
+    EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
+}
+
+/**
+ * @tc.name: ExtensionPluginMgrTest.ExtensionPluginMgrTest007
+ * @tc.desc: GetInstanceWrapper / ReleaseInstance 正常获取和释放实例
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest007, TestSize.Level0)
+{
+    auto loader = HuksPluginLoader::GetInstanceWrapper();
+    EXPECT_NE(loader, nullptr) << "fail: loader should not be null";
+
+    auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    EXPECT_NE(mgr, nullptr) << "fail: mgr should not be null";
+
+    // 多次获取应为同一实例
+    auto loader2 = HuksPluginLoader::GetInstanceWrapper();
+    EXPECT_EQ(loader, loader2) << "fail: should be same instance";
+
+    auto mgr2 = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    EXPECT_EQ(mgr, mgr2) << "fail: should be same instance";
+
+    HuksPluginLoader::ReleaseInstance();
+    HuksPluginLifeCycleMgr::ReleaseInstance();
+}
+
+/**
+ * @tc.name: ExtensionPluginMgrTest.ExtensionPluginMgrTest008
+ * @tc.desc: UnRegisterProvider当refCount=0时返回HKS_ERROR_LIB_REPEAT_CLOSE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest008, TestSize.Level0)
+{
+    auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HksProcessInfo processInfo {};
+    std::vector<HksParam> tmpParams = {
+        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+    };
+    CppParamSet paramSet(tmpParams);
+
+    // 未注册就调用UnRegister，refCount为0
+    bool isDeath = false;
+    int ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, paramSet, isDeath);
+    EXPECT_EQ(ret, HKS_ERROR_LIB_REPEAT_CLOSE) << "fail: should return LIB_REPEAT_CLOSE";
+}
+
+/**
+ * @tc.name: ExtensionPluginMgrTest.ExtensionPluginMgrTest009
+ * @tc.desc: 注册三个provider，逐个解注册，最后一次解注册关闭动态库
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest009, TestSize.Level0)
+{
+    auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HksProcessInfo processInfo {};
+    std::vector<HksParam> tmpParams = {
+        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+    };
+    CppParamSet paramSet(tmpParams);
+
+    int ret = mgr->RegisterProvider(processInfo, "providerA", paramSet);
+    EXPECT_EQ(ret, 0) << "fail: regist providerA fail";
+
+    ret = mgr->RegisterProvider(processInfo, "providerB", paramSet);
+    EXPECT_EQ(ret, 0) << "fail: regist providerB fail";
+
+    ret = mgr->RegisterProvider(processInfo, "providerC", paramSet);
+    EXPECT_EQ(ret, 0) << "fail: regist providerC fail";
+
+    // 注册后可以正常调用On方法
+    const std::string index = "idx";
+    ret = mgr->OnCreateRemoteKeyHandle(processInfo, index, paramSet);
+    EXPECT_EQ(ret, 0) << "fail: OnCreateRemoteKeyHandle fail";
+
+    // 解注册第一个，refCount从3到2，不应关闭动态库
+    bool isDeath = false;
+    ret = mgr->UnRegisterProvider(processInfo, "providerA", paramSet, isDeath);
+    EXPECT_EQ(ret, 0) << "fail: unregist providerA fail";
+
+    // 解注册第二个，refCount从2到1，不应关闭动态库
+    ret = mgr->UnRegisterProvider(processInfo, "providerB", paramSet, isDeath);
+    EXPECT_EQ(ret, 0) << "fail: unregist providerB fail";
+
+    // 解注册第三个，refCount从1到0，应关闭动态库
+    ret = mgr->UnRegisterProvider(processInfo, "providerC", paramSet, isDeath);
+    EXPECT_EQ(ret, 0) << "fail: unregist providerC fail";
+
+    // 再次解注册应返回HKS_ERROR_LIB_REPEAT_CLOSE
+    ret = mgr->UnRegisterProvider(processInfo, "providerC", paramSet, isDeath);
+    EXPECT_EQ(ret, HKS_ERROR_LIB_REPEAT_CLOSE) << "fail: should return LIB_REPEAT_CLOSE";
+}
+
+/**
+ * @tc.name: ExtensionPluginMgrTest.ExtensionPluginMgrTest010
+ * @tc.desc: LoadPlugins时如果m_pluginHandle已不为空，直接返回HKS_SUCCESS（不重复加载）
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest010, TestSize.Level0)
+{
+    auto loader = HuksPluginLoader::GetInstanceWrapper();
+    HksProcessInfo processInfo {};
+    std::vector<HksParam> tmpParams = {
+        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+    };
+    CppParamSet paramSet(tmpParams);
+
+    // 第一次RegisterProvider会LoadPlugins
+    auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
+    EXPECT_EQ(ret, 0) << "fail: first regist fail";
+
+    // 第二次RegisterProvider，m_pluginHandle != nullptr，LoadPlugins直接返回HKS_SUCCESS
+    ret = mgr->RegisterProvider(processInfo, "provider2", paramSet);
+    EXPECT_EQ(ret, 0) << "fail: second regist fail";
+
+    // 清理
+    bool isDeath = false;
+    ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, paramSet, isDeath);
+    EXPECT_EQ(ret, 0) << "fail: unregist fail";
+    ret = mgr->UnRegisterProvider(processInfo, "provider2", paramSet, isDeath);
+    EXPECT_EQ(ret, 0) << "fail: unregist fail";
+}
 }
 }
 }
