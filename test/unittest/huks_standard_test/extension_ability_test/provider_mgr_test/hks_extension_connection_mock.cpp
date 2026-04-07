@@ -35,8 +35,13 @@ public:
         std::string& handle,
         int32_t& errcode)
     {
-        if(index == R"({"index":"HksSessionMgrTest003"})") {
+        if (index.find("HksSessionMgrTest003") != std::string::npos) {
             handle = "HksSessionMgrTest003";
+            errcode = 0;
+            return 0;
+        }
+        if (index.find("SessionMgrFullTest") != std::string::npos) {
+            handle = "SessionMgrFullTest";
             errcode = 0;
             return 0;
         }
@@ -46,7 +51,14 @@ public:
     ErrCode CloseRemoteHandle(
         const std::string& handle,
         const CppParamSet& params,
-        int32_t& errcode) { return -1; };
+        int32_t& errcode)
+    {
+        if (handle == "HksSessionMgrTest003" || handle == "SessionMgrFullTest") {
+            errcode = 0;
+            return 0;
+        }
+        return -1;
+    };
 
     ErrCode AuthUkeyPin(
         const std::string& handle,
@@ -100,8 +112,8 @@ public:
         std::string& handle,
         int32_t& errcode)
     {
-        if(index == "HksSessionMgrTest003") {
-            handle = "HksSessionMgrTest003";
+        if (index == "HksSessionMgrTest003" || index == "SessionMgrFullTest") {
+            handle = index;
             errcode = 0;
             return 0;
         }
@@ -113,14 +125,28 @@ public:
         const CppParamSet& params,
         const std::vector<uint8_t>& inData,
         std::vector<uint8_t>& outData,
-        int32_t& errcode) { return -1; };
+        int32_t& errcode)
+    {
+        if (handle == "HksSessionMgrTest003" || handle == "SessionMgrFullTest") {
+            errcode = 0;
+            return 0;
+        }
+        return -1;
+    };
 
     ErrCode FinishSession(
         const std::string& handle,
         const CppParamSet& params,
         const std::vector<uint8_t>& inData,
         std::vector<uint8_t>& outData,
-        int32_t& errcode) { return -1; };
+        int32_t& errcode)
+    {
+        if (handle == "HksSessionMgrTest003" || handle == "SessionMgrFullTest") {
+            errcode = 0;
+            return 0;
+        }
+        return -1;
+    };
 
     ErrCode GetProperty(
         const std::string& handle,
@@ -137,7 +163,14 @@ public:
     ErrCode ClearUkeyPinAuthState(
         const std::string& handle,
         const CppParamSet& params,
-        int32_t& errcode) { return -1; };
+        int32_t& errcode)
+    {
+        if (handle == "HksSessionMgrTest003" || handle == "SessionMgrFullTest") {
+            errcode = 0;
+            return 0;
+        }
+        return -1;
+    };
     
     ErrCode ImportWrappedKey(
         const std::string& index,

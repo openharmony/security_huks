@@ -27,11 +27,17 @@
 #include "hks_log.h"
 #include "token_setproc.h"
 #include "hks_json_wrapper.h"
+#include "hks_provider_life_cycle_manager.h"
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Security {
 namespace Huks {
+
+static const std::string TEST_BUNDLE_NAME = "com.huawei.extensionhap.test";
+static const std::string TEST_ABILITY_NAME = "HiTaiCryptoAbility";
+static const std::string TEST_PROVIDER_NAME = "SessionMgrFullTest";
+
 static uint64_t g_shellTokenId = 0;
 class HksSessionMgrTest : public testing::Test {
 public:
@@ -59,9 +65,105 @@ void HksSessionMgrTest::SetUp()
 void HksSessionMgrTest::TearDown() {
 }
 
+/*
+ * Helper: build a wrapped index JSON string for the given providerName.
+ */
+static std::string BuildWrappedIndex(const std::string &providerName, const HksProcessInfo &processInfo)
+{
+    CommJsonObject root = CommJsonObject::CreateObject();
+    root.SetValue("providerName", providerName);
+    root.SetValue("abilityName", std::string(TEST_ABILITY_NAME));
+    root.SetValue("bundleName", std::string(TEST_BUNDLE_NAME));
+    root.SetValue("userid", processInfo.userIdInt);
+    root.SetValue("index", providerName);
+    return root.Serialize(false);
+}
+
+/*
+ * Helper: perform full setup (mock token, register provider, create remote handle,
+ * init session).  On success the session handle is written into outHandle and
+ * HKS_SUCCESS is returned.  The caller MUST call CleanupFullTest afterwards.
+ */
+static int32_t SetupFullTest(HksProcessInfo &processInfo, std::string &wrappedIndex,
+    uint32_t &outHandle, std::shared_ptr<HksMockHapToken> &mockToken)
+{
+    std::vector<std::string> reqPerm;
+    reqPerm.emplace_back("ohos.permission.CRYPTO_EXTENSION_REGISTER");
+    mockToken = std::make_shared<HksMockHapToken>(TEST_BUNDLE_NAME, reqPerm, true);
+
+    HksGetProcessInfoForIPC(&processInfo);
+
+    CppParamSet regParamSet({
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob(TEST_ABILITY_NAME)},
+        {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(processInfo.uidInt)},
+    });
+
+    auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
+    int32_t ret = providerMgr->OnRegisterProvider(processInfo, TEST_PROVIDER_NAME, regParamSet,
+        [](HksProcessInfo) {});
+    if (ret != HKS_SUCCESS) {
+        HKS_FREE_BLOB(processInfo.userId);
+        HKS_FREE_BLOB(processInfo.processName);
+        return ret;
+    }
+
+    wrappedIndex = BuildWrappedIndex(TEST_PROVIDER_NAME, processInfo);
+
+    auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
+    ret = handleMgr->CreateRemoteHandle(processInfo, wrappedIndex, regParamSet);
+    if (ret != HKS_SUCCESS) {
+        int32_t deleteCount = 0;
+        providerMgr->OnUnRegisterProvider(processInfo, TEST_PROVIDER_NAME, regParamSet, false, deleteCount);
+        HKS_FREE_BLOB(processInfo.userId);
+        HKS_FREE_BLOB(processInfo.processName);
+        return ret;
+    }
+
+    CppParamSet initPs({
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob(TEST_ABILITY_NAME)},
+        {.tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT},
+        {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(processInfo.uidInt)},
+    });
+
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    ret = sessionMgr->ExtensionInitSession(processInfo, wrappedIndex, initPs, outHandle);
+    if (ret != HKS_SUCCESS) {
+        handleMgr->CloseRemoteHandle(processInfo, wrappedIndex, regParamSet);
+        int32_t deleteCount = 0;
+        providerMgr->OnUnRegisterProvider(processInfo, TEST_PROVIDER_NAME, regParamSet, false, deleteCount);
+        HKS_FREE_BLOB(processInfo.userId);
+        HKS_FREE_BLOB(processInfo.processName);
+        return ret;
+    }
+    return HKS_SUCCESS;
+}
+
+/*
+ * Helper: tear down resources created by SetupFullTest.
+ */
+static void CleanupFullTest(HksProcessInfo &processInfo, const std::string &wrappedIndex)
+{
+    CppParamSet regParamSet({
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob(TEST_ABILITY_NAME)},
+    });
+    auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
+    (void)handleMgr->CloseRemoteHandle(processInfo, wrappedIndex, regParamSet);
+
+    auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
+    int32_t deleteCount = 0;
+    (void)providerMgr->OnUnRegisterProvider(processInfo, TEST_PROVIDER_NAME, regParamSet, false, deleteCount);
+
+    HksSessionManager::ReleaseInstance();
+
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
+}
+
+// ========== Existing tests (001-003) ==========
+
 /**
 * @tc.name: HksSessionMgrTest.HksSessionMgrTest001
-* @tc.desc: connect success.
+* @tc.desc: GetInstanceWrapper / ReleaseInstance.
 * @tc.type: FUNC
 */
 HWTEST_F(HksSessionMgrTest, HksSessionMgrTest001, TestSize.Level0) {
@@ -173,6 +275,713 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest003, TestSize.Level0) {
     EXPECT_EQ(ret, HKS_SUCCESS) << "OnUnRegisterProvider failed";
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(processInfo.processName);
+}
+
+// ========== New tests ==========
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest004
+* @tc.desc: ExtensionUpdateSession - handle not exist.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest004, TestSize.Level0) {
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    ASSERT_NE(sessionMgr, nullptr);
+
+    HksProcessInfo processInfo{};
+    processInfo.uidInt = 99999;
+    CppParamSet paramSet({});
+    std::vector<uint8_t> inData, outData;
+    uint32_t handle = 12345;
+
+    int32_t ret = sessionMgr->ExtensionUpdateSession(processInfo, handle, paramSet, inData, outData);
+    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST);
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest005
+* @tc.desc: ExtensionFinishSession - handle not exist.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest005, TestSize.Level0) {
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    ASSERT_NE(sessionMgr, nullptr);
+
+    HksProcessInfo processInfo{};
+    processInfo.uidInt = 99999;
+    CppParamSet paramSet({});
+    std::vector<uint8_t> inData, outData;
+    uint32_t handle = 12345;
+
+    int32_t ret = sessionMgr->ExtensionFinishSession(processInfo, handle, paramSet, inData, outData);
+    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST);
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest006
+* @tc.desc: ExtensionAbortSession - handle not exist.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest006, TestSize.Level0) {
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    ASSERT_NE(sessionMgr, nullptr);
+
+    HksProcessInfo processInfo{};
+    processInfo.uidInt = 99999;
+    CppParamSet paramSet({});
+    uint32_t handle = 12345;
+
+    int32_t ret = sessionMgr->ExtensionAbortSession(processInfo, handle, paramSet);
+    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST);
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest007
+* @tc.desc: ExtensionInitSession success with ENCRYPT purpose (no auth check needed).
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest007, TestSize.Level0) {
+    HksProcessInfo processInfo{};
+    std::string wrappedIndex;
+    uint32_t outHandle = 0;
+    std::shared_ptr<HksMockHapToken> mockToken;
+
+    int32_t ret = SetupFullTest(processInfo, wrappedIndex, outHandle, mockToken);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "SetupFullTest failed";
+    EXPECT_NE(outHandle, 0u) << "session handle should not be zero";
+
+    CleanupFullTest(processInfo, wrappedIndex);
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest008
+* @tc.desc: ExtensionUpdateSession success.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest008, TestSize.Level0) {
+    HksProcessInfo processInfo{};
+    std::string wrappedIndex;
+    uint32_t outHandle = 0;
+    std::shared_ptr<HksMockHapToken> mockToken;
+
+    int32_t ret = SetupFullTest(processInfo, wrappedIndex, outHandle, mockToken);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "SetupFullTest failed";
+
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    ASSERT_NE(sessionMgr, nullptr);
+
+    CppParamSet updatePs({
+        {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(processInfo.uidInt)},
+    });
+    std::vector<uint8_t> inData = {0x01, 0x02, 0x03};
+    std::vector<uint8_t> outData;
+
+    ret = sessionMgr->ExtensionUpdateSession(processInfo, outHandle, updatePs, inData, outData);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "ExtensionUpdateSession failed";
+
+    CleanupFullTest(processInfo, wrappedIndex);
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest009
+* @tc.desc: ExtensionFinishSession success.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest009, TestSize.Level0) {
+    HksProcessInfo processInfo{};
+    std::string wrappedIndex;
+    uint32_t outHandle = 0;
+    std::shared_ptr<HksMockHapToken> mockToken;
+
+    int32_t ret = SetupFullTest(processInfo, wrappedIndex, outHandle, mockToken);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "SetupFullTest failed";
+
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    ASSERT_NE(sessionMgr, nullptr);
+
+    CppParamSet finishPs({
+        {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(processInfo.uidInt)},
+    });
+    std::vector<uint8_t> inData, outData;
+
+    ret = sessionMgr->ExtensionFinishSession(processInfo, outHandle, finishPs, inData, outData);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "ExtensionFinishSession failed";
+
+    CleanupFullTest(processInfo, wrappedIndex);
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest010
+* @tc.desc: ExtensionAbortSession success.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest010, TestSize.Level0) {
+    HksProcessInfo processInfo{};
+    std::string wrappedIndex;
+    uint32_t outHandle = 0;
+    std::shared_ptr<HksMockHapToken> mockToken;
+
+    int32_t ret = SetupFullTest(processInfo, wrappedIndex, outHandle, mockToken);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "SetupFullTest failed";
+
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    ASSERT_NE(sessionMgr, nullptr);
+
+    CppParamSet abortPs({
+        {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(processInfo.uidInt)},
+    });
+
+    ret = sessionMgr->ExtensionAbortSession(processInfo, outHandle, abortPs);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "ExtensionAbortSession failed";
+
+    CleanupFullTest(processInfo, wrappedIndex);
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest011
+* @tc.desc: ExtensionUpdateSession - uid mismatch (handle exists but uid differs).
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest011, TestSize.Level0) {
+    HksProcessInfo processInfo{};
+    std::string wrappedIndex;
+    uint32_t outHandle = 0;
+    std::shared_ptr<HksMockHapToken> mockToken;
+
+    int32_t ret = SetupFullTest(processInfo, wrappedIndex, outHandle, mockToken);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "SetupFullTest failed";
+
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    ASSERT_NE(sessionMgr, nullptr);
+
+    HksProcessInfo otherInfo{};
+    otherInfo.uidInt = processInfo.uidInt + 10000;  // different uid
+    CppParamSet updatePs({});
+    std::vector<uint8_t> inData, outData;
+
+    ret = sessionMgr->ExtensionUpdateSession(otherInfo, outHandle, updatePs, inData, outData);
+    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "uid mismatch should return NOT_EXIST";
+
+    CleanupFullTest(processInfo, wrappedIndex);
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest012
+* @tc.desc: CheckAndAppendProcessInfo - no UID tag in paramSet.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest012, TestSize.Level0) {
+    HksProcessInfo processInfo{};
+    processInfo.uidInt = 12345;
+
+    CppParamSet paramSet({{.tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT}});
+
+    bool result = CheckAndAppendProcessInfo(paramSet, processInfo);
+    EXPECT_TRUE(result) << "should succeed when UID tag is absent";
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest013
+* @tc.desc: CheckAndAppendProcessInfo - UID tag matches runtime uid.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest013, TestSize.Level0) {
+    HksProcessInfo processInfo{};
+    processInfo.uidInt = 12345;
+
+    CppParamSet paramSet({
+        {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = 12345},
+    });
+
+    bool result = CheckAndAppendProcessInfo(paramSet, processInfo);
+    EXPECT_TRUE(result) << "should succeed when UID matches";
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest014
+* @tc.desc: CheckAndAppendProcessInfo - UID tag mismatch.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest014, TestSize.Level0) {
+    HksProcessInfo processInfo{};
+    processInfo.uidInt = 12345;
+
+    CppParamSet paramSet({
+        {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = 99999},
+    });
+
+    bool result = CheckAndAppendProcessInfo(paramSet, processInfo);
+    EXPECT_FALSE(result) << "should fail when UID does not match";
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest015
+* @tc.desc: ClearSessionMapByHandle - CRYPTO_FAIL erases handle.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest015, TestSize.Level0) {
+    HksProcessInfo processInfo{};
+    std::string wrappedIndex;
+    uint32_t outHandle = 0;
+    std::shared_ptr<HksMockHapToken> mockToken;
+
+    int32_t ret = SetupFullTest(processInfo, wrappedIndex, outHandle, mockToken);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "SetupFullTest failed";
+
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    ASSERT_NE(sessionMgr, nullptr);
+
+    // ClearSessionMapByHandle with CRYPTO_FAIL should erase the handle
+    sessionMgr->ClearSessionMapByHandle(HUKS_ERR_CODE_CRYPTO_FAIL, outHandle);
+
+    // Verify the handle is gone by calling FinishSession (should fail at HksGetHandleInfo)
+    CppParamSet finishPs({});
+    std::vector<uint8_t> inData, outData;
+    ret = sessionMgr->ExtensionFinishSession(processInfo, outHandle, finishPs, inData, outData);
+    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "handle should have been erased";
+
+    CleanupFullTest(processInfo, wrappedIndex);
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest016
+* @tc.desc: ClearSessionMapByHandle - ITEM_NOT_EXIST erases handle.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest016, TestSize.Level0) {
+    HksProcessInfo processInfo{};
+    std::string wrappedIndex;
+    uint32_t outHandle = 0;
+    std::shared_ptr<HksMockHapToken> mockToken;
+
+    int32_t ret = SetupFullTest(processInfo, wrappedIndex, outHandle, mockToken);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "SetupFullTest failed";
+
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    ASSERT_NE(sessionMgr, nullptr);
+
+    sessionMgr->ClearSessionMapByHandle(HUKS_ERR_CODE_ITEM_NOT_EXIST, outHandle);
+
+    CppParamSet finishPs({});
+    std::vector<uint8_t> inData, outData;
+    ret = sessionMgr->ExtensionFinishSession(processInfo, outHandle, finishPs, inData, outData);
+    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "handle should have been erased";
+
+    CleanupFullTest(processInfo, wrappedIndex);
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest017
+* @tc.desc: ClearSessionMapByHandle - other error code does NOT erase handle.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest017, TestSize.Level0) {
+    HksProcessInfo processInfo{};
+    std::string wrappedIndex;
+    uint32_t outHandle = 0;
+    std::shared_ptr<HksMockHapToken> mockToken;
+
+    int32_t ret = SetupFullTest(processInfo, wrappedIndex, outHandle, mockToken);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "SetupFullTest failed";
+
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    ASSERT_NE(sessionMgr, nullptr);
+
+    // HKS_SUCCESS should NOT erase the handle
+    sessionMgr->ClearSessionMapByHandle(HKS_SUCCESS, outHandle);
+
+    // Verify handle still exists via AbortSession (should succeed at HksGetHandleInfo)
+    CppParamSet abortPs({
+        {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(processInfo.uidInt)},
+    });
+    ret = sessionMgr->ExtensionAbortSession(processInfo, outHandle, abortPs);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "handle should still exist and abort should succeed";
+
+    CleanupFullTest(processInfo, wrappedIndex);
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest018
+* @tc.desc: HksClearHandle(processInfo, paramSet) - clear all handles by uid.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest018, TestSize.Level0) {
+    HksProcessInfo processInfo{};
+    std::string wrappedIndex;
+    uint32_t outHandle = 0;
+    std::shared_ptr<HksMockHapToken> mockToken;
+
+    int32_t ret = SetupFullTest(processInfo, wrappedIndex, outHandle, mockToken);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "SetupFullTest failed";
+
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    ASSERT_NE(sessionMgr, nullptr);
+
+    // HksClearHandle without abilityName - clears all handles for this uid
+    CppParamSet clearPs({});
+    bool result = sessionMgr->HksClearHandle(processInfo, clearPs);
+    EXPECT_TRUE(result) << "HksClearHandle should return true";
+
+    // Verify handle is gone
+    CppParamSet finishPs({});
+    std::vector<uint8_t> inData, outData;
+    ret = sessionMgr->ExtensionFinishSession(processInfo, outHandle, finishPs, inData, outData);
+    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "handle should have been cleared";
+
+    CleanupFullTest(processInfo, wrappedIndex);
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest019
+* @tc.desc: HksClearHandle(processInfo, paramSet) - clear with abilityName.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest019, TestSize.Level0) {
+    HksProcessInfo processInfo{};
+    std::string wrappedIndex;
+    uint32_t outHandle = 0;
+    std::shared_ptr<HksMockHapToken> mockToken;
+
+    int32_t ret = SetupFullTest(processInfo, wrappedIndex, outHandle, mockToken);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "SetupFullTest failed";
+
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    ASSERT_NE(sessionMgr, nullptr);
+
+    // HksClearHandle with abilityName
+    CppParamSet clearPs({
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob(TEST_ABILITY_NAME)},
+    });
+    bool result = sessionMgr->HksClearHandle(processInfo, clearPs);
+    EXPECT_TRUE(result) << "HksClearHandle should return true";
+
+    // Verify handle is gone
+    CppParamSet finishPs({});
+    std::vector<uint8_t> inData, outData;
+    ret = sessionMgr->ExtensionFinishSession(processInfo, outHandle, finishPs, inData, outData);
+    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "handle should have been cleared";
+
+    CleanupFullTest(processInfo, wrappedIndex);
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest020
+* @tc.desc: HksClearHandle(processInfo, paramSet) - abilityName too long returns false.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest020, TestSize.Level0) {
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    ASSERT_NE(sessionMgr, nullptr);
+
+    HksProcessInfo processInfo{};
+    processInfo.uidInt = 12345;
+
+    std::string longName(128, 'A');  // exactly MAX_ABILITY_NAME_LEN (128)
+    CppParamSet clearPs({
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob(longName)},
+    });
+
+    bool result = sessionMgr->HksClearHandle(processInfo, clearPs);
+    EXPECT_FALSE(result) << "should return false when abilityName is too long";
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest021
+* @tc.desc: HksClearHandle(providerInfo) - clear by provider info.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest021, TestSize.Level0) {
+    HksProcessInfo processInfo{};
+    std::string wrappedIndex;
+    uint32_t outHandle = 0;
+    std::shared_ptr<HksMockHapToken> mockToken;
+
+    int32_t ret = SetupFullTest(processInfo, wrappedIndex, outHandle, mockToken);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "SetupFullTest failed";
+
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    ASSERT_NE(sessionMgr, nullptr);
+
+    // Build matching ProviderInfo
+    ProviderInfo providerInfo{};
+    providerInfo.m_providerName = TEST_PROVIDER_NAME;
+    providerInfo.m_abilityName = TEST_ABILITY_NAME;
+    providerInfo.m_bundleName = TEST_BUNDLE_NAME;
+    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
+
+    sessionMgr->HksClearHandle(providerInfo);
+
+    // Verify handle is gone
+    CppParamSet finishPs({});
+    std::vector<uint8_t> inData, outData;
+    ret = sessionMgr->ExtensionFinishSession(processInfo, outHandle, finishPs, inData, outData);
+    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "handle should have been cleared by providerInfo";
+
+    CleanupFullTest(processInfo, wrappedIndex);
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest022
+* @tc.desc: HksClearHandle(processInfo, paramSet, index) - clear by index with abilityName.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest022, TestSize.Level0) {
+    HksProcessInfo processInfo{};
+    std::string wrappedIndex;
+    uint32_t outHandle = 0;
+    std::shared_ptr<HksMockHapToken> mockToken;
+
+    int32_t ret = SetupFullTest(processInfo, wrappedIndex, outHandle, mockToken);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "SetupFullTest failed";
+
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    ASSERT_NE(sessionMgr, nullptr);
+
+    // The index stored in HandleInfo is the original wrappedIndex.
+    // Use abilityName + index to clear.
+    CppParamSet clearPs({
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob(TEST_ABILITY_NAME)},
+    });
+    bool result = sessionMgr->HksClearHandle(processInfo, clearPs, wrappedIndex);
+    EXPECT_TRUE(result) << "HksClearHandle with index should return true";
+
+    // Verify handle is gone
+    CppParamSet finishPs({});
+    std::vector<uint8_t> inData, outData;
+    ret = sessionMgr->ExtensionFinishSession(processInfo, outHandle, finishPs, inData, outData);
+    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "handle should have been cleared";
+
+    CleanupFullTest(processInfo, wrappedIndex);
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest023
+* @tc.desc: HksClearHandle(processInfo, paramSet, index) - clear by index without abilityName.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest023, TestSize.Level0) {
+    HksProcessInfo processInfo{};
+    std::string wrappedIndex;
+    uint32_t outHandle = 0;
+    std::shared_ptr<HksMockHapToken> mockToken;
+
+    int32_t ret = SetupFullTest(processInfo, wrappedIndex, outHandle, mockToken);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "SetupFullTest failed";
+
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    ASSERT_NE(sessionMgr, nullptr);
+
+    // No abilityName - uses FindToRemoveByIndex(uid, index)
+    CppParamSet clearPs({});
+    bool result = sessionMgr->HksClearHandle(processInfo, clearPs, wrappedIndex);
+    EXPECT_TRUE(result) << "HksClearHandle with index (no abilityName) should return true";
+
+    // Verify handle is gone
+    CppParamSet finishPs({});
+    std::vector<uint8_t> inData, outData;
+    ret = sessionMgr->ExtensionFinishSession(processInfo, outHandle, finishPs, inData, outData);
+    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "handle should have been cleared";
+
+    CleanupFullTest(processInfo, wrappedIndex);
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest024
+* @tc.desc: HksClearHandle(processInfo, paramSet, index) - abilityName too long returns false.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest024, TestSize.Level0) {
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    ASSERT_NE(sessionMgr, nullptr);
+
+    HksProcessInfo processInfo{};
+    processInfo.uidInt = 12345;
+
+    std::string longName(128, 'B');
+    CppParamSet clearPs({
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob(longName)},
+    });
+    bool result = sessionMgr->HksClearHandle(processInfo, clearPs, "some_index");
+    EXPECT_FALSE(result) << "should return false when abilityName is too long";
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest025
+* @tc.desc: ExtensionInitSession - missing purpose tag returns error.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest025, TestSize.Level0) {
+    HksProcessInfo processInfo{};
+    std::string wrappedIndex;
+    uint32_t outHandle = 0;
+    std::shared_ptr<HksMockHapToken> mockToken;
+
+    std::vector<std::string> reqPerm;
+    reqPerm.emplace_back("ohos.permission.CRYPTO_EXTENSION_REGISTER");
+    mockToken = std::make_shared<HksMockHapToken>(TEST_BUNDLE_NAME, reqPerm, true);
+
+    HksGetProcessInfoForIPC(&processInfo);
+
+    CppParamSet regParamSet({
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob(TEST_ABILITY_NAME)},
+        {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(processInfo.uidInt)},
+    });
+
+    auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
+    int32_t ret = providerMgr->OnRegisterProvider(processInfo, TEST_PROVIDER_NAME, regParamSet,
+        [](HksProcessInfo) {});
+    ASSERT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
+
+    wrappedIndex = BuildWrappedIndex(TEST_PROVIDER_NAME, processInfo);
+
+    auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
+    ret = handleMgr->CreateRemoteHandle(processInfo, wrappedIndex, regParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "CreateRemoteHandle failed";
+
+    // ParamSet without HKS_TAG_PURPOSE
+    CppParamSet noPurposePs({
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob(TEST_ABILITY_NAME)},
+        {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(processInfo.uidInt)},
+    });
+
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    ASSERT_NE(sessionMgr, nullptr);
+
+    ret = sessionMgr->ExtensionInitSession(processInfo, wrappedIndex, noPurposePs, outHandle);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "missing purpose tag should fail";
+
+    CleanupFullTest(processInfo, wrappedIndex);
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest026
+* @tc.desc: HksClearHandle(providerInfo) - non-matching provider info clears nothing.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest026, TestSize.Level0) {
+    HksProcessInfo processInfo{};
+    std::string wrappedIndex;
+    uint32_t outHandle = 0;
+    std::shared_ptr<HksMockHapToken> mockToken;
+
+    int32_t ret = SetupFullTest(processInfo, wrappedIndex, outHandle, mockToken);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "SetupFullTest failed";
+
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    ASSERT_NE(sessionMgr, nullptr);
+
+    // Build non-matching ProviderInfo
+    ProviderInfo providerInfo{};
+    providerInfo.m_providerName = "NonExistentProvider";
+    providerInfo.m_abilityName = "NonExistentAbility";
+    providerInfo.m_bundleName = "non.existent.bundle";
+    providerInfo.m_userid = 0;
+
+    sessionMgr->HksClearHandle(providerInfo);
+
+    // Verify handle still exists
+    CppParamSet abortPs({
+        {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(processInfo.uidInt)},
+    });
+    ret = sessionMgr->ExtensionAbortSession(processInfo, outHandle, abortPs);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "handle should still exist after non-matching clear";
+
+    CleanupFullTest(processInfo, wrappedIndex);
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest027
+* @tc.desc: HksClearHandle(providerInfo) - empty abilityName matches all abilities.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest027, TestSize.Level0) {
+    HksProcessInfo processInfo{};
+    std::string wrappedIndex;
+    uint32_t outHandle = 0;
+    std::shared_ptr<HksMockHapToken> mockToken;
+
+    int32_t ret = SetupFullTest(processInfo, wrappedIndex, outHandle, mockToken);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "SetupFullTest failed";
+
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    ASSERT_NE(sessionMgr, nullptr);
+
+    // ProviderInfo with empty abilityName should match any abilityName
+    ProviderInfo providerInfo{};
+    providerInfo.m_providerName = TEST_PROVIDER_NAME;
+    providerInfo.m_abilityName = "";  // empty
+    providerInfo.m_bundleName = TEST_BUNDLE_NAME;
+    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
+
+    sessionMgr->HksClearHandle(providerInfo);
+
+    // Verify handle is gone
+    CppParamSet finishPs({});
+    std::vector<uint8_t> inData, outData;
+    ret = sessionMgr->ExtensionFinishSession(processInfo, outHandle, finishPs, inData, outData);
+    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "handle should have been cleared with empty abilityName";
+
+    CleanupFullTest(processInfo, wrappedIndex);
+}
+
+/**
+* @tc.name: HksSessionMgrTest.HksSessionMgrTest028
+* @tc.desc: ExtensionInitSession with purpose=SIGN, auth state OK.
+* @tc.type: FUNC
+*/
+HWTEST_F(HksSessionMgrTest, HksSessionMgrTest028, TestSize.Level0) {
+    HksProcessInfo processInfo{};
+    std::string wrappedIndex;
+    uint32_t outHandle = 0;
+    std::shared_ptr<HksMockHapToken> mockToken;
+
+    std::vector<std::string> reqPerm;
+    reqPerm.emplace_back("ohos.permission.CRYPTO_EXTENSION_REGISTER");
+    mockToken = std::make_shared<HksMockHapToken>(TEST_BUNDLE_NAME, reqPerm, true);
+
+    HksGetProcessInfoForIPC(&processInfo);
+
+    CppParamSet regParamSet({
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob(TEST_ABILITY_NAME)},
+        {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(processInfo.uidInt)},
+    });
+
+    auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
+    int32_t ret = providerMgr->OnRegisterProvider(processInfo, TEST_PROVIDER_NAME, regParamSet,
+        [](HksProcessInfo) {});
+    ASSERT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
+
+    wrappedIndex = BuildWrappedIndex(TEST_PROVIDER_NAME, processInfo);
+
+    auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
+    ret = handleMgr->CreateRemoteHandle(processInfo, wrappedIndex, regParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "CreateRemoteHandle failed";
+
+    // Verify PIN to set auth state = 1
+    CppParamSet pinParamSet({
+        {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(processInfo.uidInt)},
+        {.tag = HKS_EXT_CRYPTO_TAG_UKEY_PIN, .blob = {0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x00, 0x00}},
+    });
+    int32_t authState{0};
+    uint32_t retryCount{0};
+    ret = handleMgr->RemoteVerifyPin(processInfo, wrappedIndex, pinParamSet, authState, retryCount);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "RemoteVerifyPin should succeed";
+
+    // InitSession with SIGN purpose and auth state OK
+    CppParamSet signPs({
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob(TEST_ABILITY_NAME)},
+        {.tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN},
+        {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(processInfo.uidInt)},
+    });
+
+    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+    ASSERT_NE(sessionMgr, nullptr);
+
+    ret = sessionMgr->ExtensionInitSession(processInfo, wrappedIndex, signPs, outHandle);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "ExtensionInitSession with SIGN and auth OK should succeed";
+    EXPECT_NE(outHandle, 0u) << "session handle should not be zero";
+
+    CleanupFullTest(processInfo, wrappedIndex);
 }
 }
 }
