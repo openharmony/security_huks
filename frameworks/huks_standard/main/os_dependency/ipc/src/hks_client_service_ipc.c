@@ -358,15 +358,8 @@ int32_t HksClientImportCertificate(const struct HksBlob *resourceId,
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "BuildParamSetNotNull fail, ret=%" LOG_PUBLIC "d", ret);
 
-        ret = HksCheckIpcBlobAndParamSet(resourceId, newParamSet, HKS_EXT_MAX_RESOURCE_ID_LEN);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Check blob+paramSet fail");
-
-        if ((certInfo->index.size == 0) || (certInfo->index.data == NULL) ||
-            (certInfo->cert.size == 0) || (certInfo->cert.data == NULL)) {
-            ret = HKS_ERROR_INVALID_ARGUMENT;
-            HKS_LOG_E("certInfo invalid");
-            break;
-        }
+        ret = HksCheckIpcBlobAndCertInfo(resourceId, certInfo, newParamSet, HKS_EXT_MAX_RESOURCE_ID_LEN);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Check resourceId+certInfo+paramSet fail");
 
         ret = HksAllocInBlobWithCertInfo(&inBlob, resourceId, certInfo, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAllocInBlob fail");

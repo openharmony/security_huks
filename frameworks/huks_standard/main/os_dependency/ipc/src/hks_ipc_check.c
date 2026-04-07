@@ -87,6 +87,40 @@ int32_t HksCheckIpcBlob(const struct HksBlob *blob, uint32_t maxSize)
     }
     return HKS_SUCCESS;
 }
+
+int32_t HksCheckIpcBlobAndCertInfo(const struct HksBlob *blob, const struct HksExtCertInfo *certInfo,
+    const struct HksParamSet *paramSet, uint32_t blobMaxSize)
+{
+    if (blob == NULL || certInfo == NULL || paramSet == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksCheckBlobAndParamSet(blob, paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check blob or paramSet failed")
+    if ((certInfo->index.size == 0) || (certInfo->index.data == NULL) ||
+        (certInfo->cert.size == 0) || (certInfo->cert.data == NULL)) {
+        HKS_LOG_E("certInfo index or cert invalid");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    if (blob->size > blobMaxSize) {
+        HKS_LOG_E("blob size exceeds max, size: %" LOG_PUBLIC "u, max: %" LOG_PUBLIC "u",
+            blob->size, blobMaxSize);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    if (ALIGN_SIZE(blob->size) > MAX_PROCESS_SIZE ||
+        ALIGN_SIZE(certInfo->index.size) > MAX_PROCESS_SIZE ||
+        ALIGN_SIZE(certInfo->cert.size) > MAX_PROCESS_SIZE) {
+        HKS_LOG_E("single field size exceeds MAX_PROCESS_SIZE");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    uint32_t remaining = MAX_PROCESS_SIZE - sizeof(blob->size) - ALIGN_SIZE(blob->size) -
+        sizeof(int32_t) - sizeof(certInfo->index.size) - ALIGN_SIZE(certInfo->index.size) -
+        sizeof(certInfo->cert.size) - ALIGN_SIZE(certInfo->cert.size);
+    if (remaining < ALIGN_SIZE(paramSet->paramSetSize)) {
+        HKS_LOG_E("ipc blob + certInfo + paramSet total size exceeds MAX_PROCESS_SIZE");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    return HKS_SUCCESS;
+}
 #endif
 
 int32_t HksCheckIpcGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn)

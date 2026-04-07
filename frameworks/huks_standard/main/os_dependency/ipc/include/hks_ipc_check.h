@@ -34,6 +34,9 @@ int32_t HksCheckIpcTwoBlobsParamSet(const struct HksBlob *blob1, const struct Hk
     const struct HksParamSet *paramSet, uint32_t maxSize1, uint32_t maxSize2);
 
 int32_t HksCheckIpcBlob(const struct HksBlob *blob, uint32_t maxSize);
+
+int32_t HksCheckIpcBlobAndCertInfo(const struct HksBlob *blob, const struct HksExtCertInfo *certInfo,
+    const struct HksParamSet *paramSet, uint32_t blobMaxSize);
 #endif
 
 int32_t HksCheckIpcGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn);
