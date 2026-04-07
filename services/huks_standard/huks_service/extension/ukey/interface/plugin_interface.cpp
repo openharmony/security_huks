@@ -15,7 +15,7 @@
 
 #include "hks_error_code.h"
 #include "hks_log.h"
-#include "hks_external_adapter.h"
+#include "hks_ukey_system_adapter.h"
 #include "hks_provider_life_cycle_manager.h"
 #include "hks_remote_handle_manager.h"
 #include "hks_ukey_session_manager.h"

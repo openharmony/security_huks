@@ -15,16 +15,15 @@
 #include "app_observer.h"
 #include "hks_error_code.h"
 #include "hks_log.h"
-#include "hks_external_adapter.h"
 #include "hks_remote_handle_manager.h"
 #include "hks_ukey_session_manager.h"
 #include "hks_cpp_paramset.h"
 #include "hks_mem.h"
 #include "hks_plugin_def.h"
 #include "hks_ukey_common.h"
+#include "hks_ukey_system_adapter.h"
 #include "hks_mock_common.h"
 #include "hks_type.h"
-#include "hks_error_code.h"
 #include "gtest/gtest.h"
 #include <string>
 #include <vector>

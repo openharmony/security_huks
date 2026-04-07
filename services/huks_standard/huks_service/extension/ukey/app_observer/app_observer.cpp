@@ -19,10 +19,10 @@
 #include "hks_remote_handle_manager.h"
 #include "hks_ukey_session_manager.h"
 #include "hks_template.h"
+#include "hks_ukey_system_adapter.h"
 #include "system_ability_definition.h"
 #include "iservice_registry.h"
 #include "app_mgr_interface.h"
-#include "bundle_mgr_interface.h"
 
 namespace OHOS {
 namespace Security {
@@ -110,20 +110,7 @@ HksAppObserverManager& HksAppObserverManager::GetInstance()
 
 int32_t HksAppObserverManager::GetBundleNameByUid(uint32_t uid, std::string &bundleName)
 {
-    sptr<ISystemAbilityManager> saMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    HKS_IF_NULL_LOGE_RETURN(saMgr, HKS_ERROR_NULL_POINTER, "GetBundleNameByUid GetSystemAbilityManager failed");
-
-    sptr<IRemoteObject> remoteObj = saMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    HKS_IF_NULL_LOGE_RETURN(remoteObj, HKS_ERROR_NULL_POINTER, "[GetBundleNameByUid] GetSystemAbility bms failed");
-
-    auto bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(remoteObj);
-    HKS_IF_NULL_LOGE_RETURN(bundleMgrProxy, HKS_ERROR_NULL_POINTER, "GetBundleNameByUid iface_cast IBundleMgr failed");
-
-    bool bundleRet = bundleMgrProxy->GetBundleNameForUid(static_cast<int32_t>(uid), bundleName);
-    HKS_IF_NOT_TRUE_LOGE_RETURN(bundleRet, HKS_FAILURE,
-        "GetBundleNameByUid GetBundleNameForUid failed for uid: %{public}u", uid);
-
-    return HKS_SUCCESS;
+    return HksGetBundleNameFromUid(uid, bundleName);
 }
 
 int32_t HksAppObserverManager::RegisterObserver(const HksProcessInfo &processInfo, const CppParamSet &paramSet)

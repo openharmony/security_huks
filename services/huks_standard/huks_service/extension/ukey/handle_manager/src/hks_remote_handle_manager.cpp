@@ -31,7 +31,7 @@
 #include "hks_provider_life_cycle_manager.h"
 #include "hks_template.h"
 #include "hks_ukey_common.h"
-#include "hks_external_adapter.h"
+#include "hks_ukey_system_adapter.h"
 #include "accesstoken_kit.h"
 #include "tokenid_kit.h"
 #include "ipc_skeleton.h"
