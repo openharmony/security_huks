@@ -21,7 +21,7 @@ if (huks_enable_ukey_config == true) {
     sources = [
       "../../../huks_common_test/hks_mock_common/hks_mock_common.cpp",
       "./hks_extension_connection_mock.cpp",
-      "./hks_external_adapter_mock.cpp",
+      "./hks_ukey_system_adapter_mock.cpp",
       "./hks_provider_manger_test.cpp",
       "./hks_ukey_session_manager_test.cpp",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger/src/hks_provider_life_cycle_manager.cpp",

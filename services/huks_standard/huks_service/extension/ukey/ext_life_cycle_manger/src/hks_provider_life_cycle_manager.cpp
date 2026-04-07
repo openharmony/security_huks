@@ -18,7 +18,7 @@
 #include "bundle_mgr_client.h"
 #include "bundle_mgr_interface.h"
 #include "bundle_info.h"
-#include "hks_external_adapter.h"
+#include "hks_ukey_system_adapter.h"
 #include "hks_error_code.h"
 #include "hks_log.h"
 #include "hks_template.h"
