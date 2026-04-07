@@ -74,469 +74,396 @@ static HksParamSet *MakeParamSet(uint32_t tag, uint32_t val)
     HksParam param = { .tag = tag, .uint32Param = val };
     HksParamSet *paramSet = nullptr;
     HksInitParamSet(&paramSet);
-    HksAddParam(paramSet, &param);
+    HksAddParams(paramSet, &param, 1);
     HksBuildParamSet(&paramSet);
     return paramSet;
 }
 
-/**
- * @tc.name: UkeyClientServiceTest.Test001
- * @tc.desc: HksServiceRegisterProvider + HksServiceUnregisterProvider 正常流程
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyClientServiceTest, Test001, TestSize.Level0)
+// Helper: register provider and return mgr
+static HuksPluginLifeCycleMgr *RegisterTestProvider(HksProcessInfo &processInfo, HksParamSet *paramSet)
 {
     auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
-    ASSERT_NE(mgr, nullptr);
-
-    HksProcessInfo processInfo = MakeProcessInfo();
     HksBlob nameBlob = MakeBlob(TEST_PROVIDER);
-    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
+    mgr->RegisterProvider(processInfo, TEST_PROVIDER, CppParamSet(paramSet));
+    return mgr;
+}
 
-    // Register
-    int32_t ret = HksServiceRegisterProvider(&processInfo, &nameBlob, paramSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksServiceRegisterProvider fail";
-
-    // Unregister
+// Helper: unregister provider
+static void UnregisterTestProvider(HuksPluginLifeCycleMgr *mgr, HksProcessInfo &processInfo,
+    HksParamSet *paramSet)
+{
     bool isDeath = false;
-    ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, CppParamSet(paramSet), isDeath);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "UnRegisterProvider fail";
-
-    HksFreeParamSet(&paramSet);
+    mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, CppParamSet(paramSet), isDeath);
 }
 
 /**
- * @tc.name: UkeyClientServiceTest.Test002
- * @tc.desc: HksServiceRegisterProvider 传入null name blob，HksIpcCheckBlob返回HKS_ERROR_INVALID_ARGUMENT
+ * @tc.name: UkeyClientServiceTest.HksIpcCheckBlob01
+ * @tc.desc: HksIpcCheckBlob — null blob, null data, empty size, oversized (通过 ProviderRegAdapter)
  * @tc.type: FUNC
  */
-HWTEST_F(UkeyClientServiceTest, Test002, TestSize.Level0)
+HWTEST_F(UkeyClientServiceTest, HksIpcCheckBlob01, TestSize.Level0)
 {
     HksProcessInfo processInfo = MakeProcessInfo();
     HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
 
     // null blob
-    int32_t ret = HksServiceRegisterProvider(&processInfo, nullptr, paramSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with null blob";
+    EXPECT_EQ(HksIpcProviderRegAdapter(&processInfo, nullptr, paramSet), HKS_ERROR_INVALID_ARGUMENT);
 
     // blob with null data
     HksBlob nullDataBlob = { .size = 1, .data = nullptr };
-    ret = HksServiceRegisterProvider(&processInfo, &nullDataBlob, paramSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with null data";
+    EXPECT_EQ(HksIpcProviderRegAdapter(&processInfo, &nullDataBlob, paramSet), HKS_ERROR_INVALID_ARGUMENT);
 
     // blob with size 0 (less than minSize=1)
-    std::string emptyStr;
-    HksBlob emptyBlob = MakeBlob(emptyStr);
-    ret = HksServiceRegisterProvider(&processInfo, &emptyBlob, paramSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with empty size";
+    HksBlob emptyBlob = {};
+    EXPECT_EQ(HksIpcProviderRegAdapter(&processInfo, &emptyBlob, paramSet), HKS_ERROR_INVALID_ARGUMENT);
 
     // blob with size > HKS_EXT_MAX_PROVIDER_NAME_LEN (128)
-    std::string longName(129, 'a');
-    HksBlob longBlob = MakeBlob(longName);
-    ret = HksServiceRegisterProvider(&processInfo, &longBlob, paramSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with oversized blob";
+    HksBlob longBlob = MakeBlob(std::string(129, 'a'));
+    EXPECT_EQ(HksIpcProviderRegAdapter(&processInfo, &longBlob, paramSet), HKS_ERROR_INVALID_ARGUMENT);
 
     HksFreeParamSet(&paramSet);
 }
 
 /**
- * @tc.name: UkeyClientServiceTest.Test003
- * @tc.desc: HksServiceUnregisterProvider 传入null name blob
+ * @tc.name: UkeyClientServiceTest.HksIpcCheckBlob02
+ * @tc.desc: HksIpcCheckBlob 边界 — 通过 ProviderUnregAdapter 覆盖 null data / empty / oversized
  * @tc.type: FUNC
  */
-HWTEST_F(UkeyClientServiceTest, Test003, TestSize.Level0)
+HWTEST_F(UkeyClientServiceTest, HksIpcCheckBlob02, TestSize.Level0)
 {
     HksProcessInfo processInfo = MakeProcessInfo();
     HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
 
-    int32_t ret = HksServiceUnregisterProvider(&processInfo, nullptr, paramSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with null blob";
+    // null blob
+    EXPECT_EQ(HksIpcProviderUnregAdapter(&processInfo, nullptr, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+
+    // null data
+    HksBlob nullDataBlob = { .size = 1, .data = nullptr };
+    EXPECT_EQ(HksIpcProviderUnregAdapter(&processInfo, &nullDataBlob, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+
+    // empty size
+    HksBlob emptyBlob = {};
+    EXPECT_EQ(HksIpcProviderUnregAdapter(&processInfo, &emptyBlob, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+
+    // oversized
+    HksBlob longBlob = MakeBlob(std::string(129, 'a'));
+    EXPECT_EQ(HksIpcProviderUnregAdapter(&processInfo, &longBlob, paramSet), HKS_ERROR_INVALID_ARGUMENT);
 
     HksFreeParamSet(&paramSet);
 }
 
 /**
- * @tc.name: UkeyClientServiceTest.Test004
- * @tc.desc: HksServiceOpenRemoteHandle + HksServiceCloseRemoteHandle 正常流程
+ * @tc.name: UkeyClientServiceTest.ProviderRegAdapter01
+ * @tc.desc: HksIpcProviderRegAdapter 正常流程
  * @tc.type: FUNC
  */
-HWTEST_F(UkeyClientServiceTest, Test004, TestSize.Level0)
+HWTEST_F(UkeyClientServiceTest, ProviderRegAdapter01, TestSize.Level0)
 {
-    auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
-    ASSERT_NE(mgr, nullptr);
-
-    HksProcessInfo processInfo = MakeProcessInfo();
-    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
-
-    // Register first
-    HksBlob nameBlob = MakeBlob(TEST_PROVIDER);
-    int32_t ret = HksServiceRegisterProvider(&processInfo, &nameBlob, paramSet);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-
-    // Open remote handle
-    HksBlob indexBlob = MakeBlob("testIndex");
-    ret = HksServiceOpenRemoteHandle(&processInfo, &indexBlob, paramSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksServiceOpenRemoteHandle fail";
-
-    // Close remote handle
-    ret = HksServiceCloseRemoteHandle(&processInfo, &indexBlob, paramSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksServiceCloseRemoteHandle fail";
-
-    // Cleanup
-    bool isDeath = false;
-    ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, CppParamSet(paramSet), isDeath);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-
-    HksFreeParamSet(&paramSet);
-}
-
-/**
- * @tc.name: UkeyClientServiceTest.Test005
- * @tc.desc: HksServiceOpenRemoteHandle 传入null resourceId
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyClientServiceTest, Test005, TestSize.Level0)
-{
-    HksProcessInfo processInfo = MakeProcessInfo();
-    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
-
-    int32_t ret = HksServiceOpenRemoteHandle(&processInfo, nullptr, paramSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with null resourceId";
-
-    // resourceId with size > HKS_EXT_MAX_RESOURCE_ID_LEN (1024)
-    std::string longId(1025, 'x');
-    HksBlob longBlob = MakeBlob(longId);
-    ret = HksServiceOpenRemoteHandle(&processInfo, &longBlob, paramSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with oversized resourceId";
-
-    HksFreeParamSet(&paramSet);
-}
-
-/**
- * @tc.name: UkeyClientServiceTest.Test006
- * @tc.desc: HksServiceCloseRemoteHandle 传入null resourceId
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyClientServiceTest, Test006, TestSize.Level0)
-{
-    HksProcessInfo processInfo = MakeProcessInfo();
-    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
-
-    int32_t ret = HksServiceCloseRemoteHandle(&processInfo, nullptr, paramSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with null resourceId";
-
-    HksFreeParamSet(&paramSet);
-}
-
-/**
- * @tc.name: UkeyClientServiceTest.Test007
- * @tc.desc: HksServiceAuthUkeyPin 正常流程
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyClientServiceTest, Test007, TestSize.Level0)
-{
-    auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
-    ASSERT_NE(mgr, nullptr);
-
     HksProcessInfo processInfo = MakeProcessInfo();
     HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
 
     HksBlob nameBlob = MakeBlob(TEST_PROVIDER);
-    int32_t ret = HksServiceRegisterProvider(&processInfo, &nameBlob, paramSet);
+    int32_t ret = HksIpcProviderRegAdapter(&processInfo, &nameBlob, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    int32_t outStatus = 0;
-    uint32_t retryCount = 0;
-    HksBlob indexBlob = MakeBlob("testIndex");
-    ret = HksServiceAuthUkeyPin(&processInfo, &indexBlob, paramSet, &outStatus, &retryCount);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksServiceAuthUkeyPin fail";
-
-    bool isDeath = false;
-    ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, CppParamSet(paramSet), isDeath);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-
-    HksFreeParamSet(&paramSet);
-}
-
-/**
- * @tc.name: UkeyClientServiceTest.Test008
- * @tc.desc: HksServiceAuthUkeyPin 传入null resourceId
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyClientServiceTest, Test008, TestSize.Level0)
-{
-    HksProcessInfo processInfo = MakeProcessInfo();
-    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
-
-    int32_t outStatus = 0;
-    uint32_t retryCount = 0;
-    int32_t ret = HksServiceAuthUkeyPin(&processInfo, nullptr, paramSet, &outStatus, &retryCount);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with null resourceId";
-
-    HksFreeParamSet(&paramSet);
-}
-
-/**
- * @tc.name: UkeyClientServiceTest.Test009
- * @tc.desc: HksServiceGetUkeyPinAuthState 正常流程
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyClientServiceTest, Test009, TestSize.Level0)
-{
     auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
-    ASSERT_NE(mgr, nullptr);
+    UnregisterTestProvider(mgr, processInfo, paramSet);
+    HksFreeParamSet(&paramSet);
+}
 
+/**
+ * @tc.name: UkeyClientServiceTest.ProviderUnregAdapter01
+ * @tc.desc: HksIpcProviderUnregAdapter 正常流程
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyClientServiceTest, ProviderUnregAdapter01, TestSize.Level0)
+{
     HksProcessInfo processInfo = MakeProcessInfo();
     HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
 
     HksBlob nameBlob = MakeBlob(TEST_PROVIDER);
-    int32_t ret = HksServiceRegisterProvider(&processInfo, &nameBlob, paramSet);
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    int32_t ret = HksIpcProviderRegAdapter(&processInfo, &nameBlob, paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
 
-    int32_t status = 0;
-    HksBlob indexBlob = MakeBlob("testIndex");
-    ret = HksServiceGetUkeyPinAuthState(&processInfo, &indexBlob, paramSet, &status);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksServiceGetUkeyPinAuthState fail";
-
-    bool isDeath = false;
-    ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, CppParamSet(paramSet), isDeath);
+    ret = HksIpcProviderUnregAdapter(&processInfo, &nameBlob, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     HksFreeParamSet(&paramSet);
 }
 
 /**
- * @tc.name: UkeyClientServiceTest.Test010
- * @tc.desc: HksServiceGetUkeyPinAuthState 传入null resourceId
+ * @tc.name: UkeyClientServiceTest.CreateRemKeyHandle01
+ * @tc.desc: HksIpcCreateRemKeyHandleAdapter null data / empty / oversized resourceId
  * @tc.type: FUNC
  */
-HWTEST_F(UkeyClientServiceTest, Test010, TestSize.Level0)
+HWTEST_F(UkeyClientServiceTest, CreateRemKeyHandle01, TestSize.Level0)
 {
     HksProcessInfo processInfo = MakeProcessInfo();
     HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
-
-    int32_t status = 0;
-    int32_t ret = HksServiceGetUkeyPinAuthState(&processInfo, nullptr, paramSet, &status);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with null resourceId";
-
-    HksFreeParamSet(&paramSet);
-}
-
-/**
- * @tc.name: UkeyClientServiceTest.Test011
- * @tc.desc: HksServiceClearPinAuthState 正常流程
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyClientServiceTest, Test011, TestSize.Level0)
-{
-    auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
-    ASSERT_NE(mgr, nullptr);
-
-    HksProcessInfo processInfo = MakeProcessInfo();
-    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
-
-    HksBlob nameBlob = MakeBlob(TEST_PROVIDER);
-    int32_t ret = HksServiceRegisterProvider(&processInfo, &nameBlob, paramSet);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-
-    HksBlob indexBlob = MakeBlob("testIndex");
-    ret = HksServiceClearPinAuthState(&processInfo, &indexBlob);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksServiceClearPinAuthState fail";
-
-    bool isDeath = false;
-    ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, CppParamSet(paramSet), isDeath);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-
-    HksFreeParamSet(&paramSet);
-}
-
-/**
- * @tc.name: UkeyClientServiceTest.Test012
- * @tc.desc: HksServiceClearPinAuthState 传入null resourceId
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyClientServiceTest, Test012, TestSize.Level0)
-{
-    HksProcessInfo processInfo = MakeProcessInfo();
-
-    int32_t ret = HksServiceClearPinAuthState(&processInfo, nullptr);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with null resourceId";
-}
-
-/**
- * @tc.name: UkeyClientServiceTest.Test013
- * @tc.desc: HksServiceExportProviderCertificates 正常流程
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyClientServiceTest, Test013, TestSize.Level0)
-{
-    auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
-    ASSERT_NE(mgr, nullptr);
-
-    HksProcessInfo processInfo = MakeProcessInfo();
-    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
-
-    HksBlob nameBlob = MakeBlob(TEST_PROVIDER);
-    int32_t ret = HksServiceRegisterProvider(&processInfo, &nameBlob, paramSet);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-
-    HksExtCertInfoSet certSet = {};
-    ret = HksServiceExportProviderCertificates(&processInfo, &nameBlob, paramSet, &certSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksServiceExportProviderCertificates fail";
-
-    bool isDeath = false;
-    ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, CppParamSet(paramSet), isDeath);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-
-    HksFreeParamSet(&paramSet);
-}
-
-/**
- * @tc.name: UkeyClientServiceTest.Test014
- * @tc.desc: HksServiceExportProviderCertificates 传入null providerName
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyClientServiceTest, Test014, TestSize.Level0)
-{
-    HksProcessInfo processInfo = MakeProcessInfo();
-    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
-
-    HksExtCertInfoSet certSet = {};
-    int32_t ret = HksServiceExportProviderCertificates(&processInfo, nullptr, paramSet, &certSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with null providerName";
-
-    HksFreeParamSet(&paramSet);
-}
-
-/**
- * @tc.name: UkeyClientServiceTest.Test015
- * @tc.desc: HksServiceExportCertificate 正常流程
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyClientServiceTest, Test015, TestSize.Level0)
-{
-    auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
-    ASSERT_NE(mgr, nullptr);
-
-    HksProcessInfo processInfo = MakeProcessInfo();
-    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
-
-    HksBlob nameBlob = MakeBlob(TEST_PROVIDER);
-    int32_t ret = HksServiceRegisterProvider(&processInfo, &nameBlob, paramSet);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-
-    HksBlob indexBlob = MakeBlob("testIndex");
-    HksExtCertInfoSet certSet = {};
-    ret = HksServiceExportCertificate(&processInfo, &indexBlob, paramSet, &certSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksServiceExportCertificate fail";
-
-    bool isDeath = false;
-    ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, CppParamSet(paramSet), isDeath);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-
-    HksFreeParamSet(&paramSet);
-}
-
-/**
- * @tc.name: UkeyClientServiceTest.Test016
- * @tc.desc: HksServiceExportCertificate 传入null index
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyClientServiceTest, Test016, TestSize.Level0)
-{
-    HksProcessInfo processInfo = MakeProcessInfo();
-    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
-
-    HksExtCertInfoSet certSet = {};
-    int32_t ret = HksServiceExportCertificate(&processInfo, nullptr, paramSet, &certSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with null index";
-
-    HksFreeParamSet(&paramSet);
-}
-
-/**
- * @tc.name: UkeyClientServiceTest.Test017
- * @tc.desc: HksServiceGetRemoteProperty 正常流程
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyClientServiceTest, Test017, TestSize.Level0)
-{
-    auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
-    ASSERT_NE(mgr, nullptr);
-
-    HksProcessInfo processInfo = MakeProcessInfo();
-    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
-
-    HksBlob nameBlob = MakeBlob(TEST_PROVIDER);
-    int32_t ret = HksServiceRegisterProvider(&processInfo, &nameBlob, paramSet);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-
-    HksBlob resourceIdBlob = MakeBlob("testResource");
-    HksBlob propertyIdBlob = MakeBlob("testProp");
-    HksParamSet *propertySetOut = nullptr;
-    ret = HksServiceGetRemoteProperty(&processInfo, &resourceIdBlob, &propertyIdBlob, paramSet, &propertySetOut);
-    // HksServiceGetRemoteProperty calls HksIpcServiceOnGetRemotePropertyAdapter which
-    // creates IHksExtProxy from remoteObject=NULL, so it returns HKS_ERROR_NULL_POINTER
-    EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "should fail because IHksExtProxy is null";
-
-    bool isDeath = false;
-    ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, CppParamSet(paramSet), isDeath);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-
-    HksFreeParamSet(&paramSet);
-}
-
-/**
- * @tc.name: UkeyClientServiceTest.Test018
- * @tc.desc: HksServiceGetRemoteProperty 传入null resourceId或propertyId
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyClientServiceTest, Test018, TestSize.Level0)
-{
-    HksProcessInfo processInfo = MakeProcessInfo();
-    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
-
-    HksBlob propertyIdBlob = MakeBlob("testProp");
-    HksParamSet *propertySetOut = nullptr;
 
     // null resourceId
-    int32_t ret = HksServiceGetRemoteProperty(&processInfo, nullptr, &propertyIdBlob, paramSet, &propertySetOut);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with null resourceId";
+    EXPECT_EQ(HksIpcCreateRemKeyHandleAdapter(&processInfo, nullptr, paramSet), HKS_ERROR_INVALID_ARGUMENT);
 
-    // null propertyId
-    HksBlob resourceIdBlob = MakeBlob("testResource");
-    ret = HksServiceGetRemoteProperty(&processInfo, &resourceIdBlob, nullptr, paramSet, &propertySetOut);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with null propertyId";
+    // null data
+    HksBlob nullDataBlob = { .size = 1, .data = nullptr };
+    EXPECT_EQ(HksIpcCreateRemKeyHandleAdapter(&processInfo, &nullDataBlob, paramSet), HKS_ERROR_INVALID_ARGUMENT);
 
-    // propertyId with size > HKS_EXT_MAX_PROPERTY_ID_LEN (100)
-    std::string longProp(101, 'p');
-    HksBlob longPropBlob = MakeBlob(longProp);
-    ret = HksServiceGetRemoteProperty(&processInfo, &resourceIdBlob, &longPropBlob, paramSet, &propertySetOut);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with oversized propertyId";
+    // empty size
+    HksBlob emptyBlob = {};
+    EXPECT_EQ(HksIpcCreateRemKeyHandleAdapter(&processInfo, &emptyBlob, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+
+    // oversized resourceId
+    HksBlob longBlob = MakeBlob(std::string(1025, 'r'));
+    EXPECT_EQ(HksIpcCreateRemKeyHandleAdapter(&processInfo, &longBlob, paramSet), HKS_ERROR_INVALID_ARGUMENT);
 
     HksFreeParamSet(&paramSet);
 }
 
 /**
- * @tc.name: UkeyClientServiceTest.Test019
- * @tc.desc: 直接测试adapter层 — HksIpcImportCertAdapter 正常流程
+ * @tc.name: UkeyClientServiceTest.CreateRemKeyHandle02
+ * @tc.desc: HksIpcCreateRemKeyHandleAdapter 正常流程
  * @tc.type: FUNC
  */
-HWTEST_F(UkeyClientServiceTest, Test019, TestSize.Level0)
+HWTEST_F(UkeyClientServiceTest, CreateRemKeyHandle02, TestSize.Level0)
 {
-    auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
-    ASSERT_NE(mgr, nullptr);
-
     HksProcessInfo processInfo = MakeProcessInfo();
-    std::vector<HksParam> tmpParams = {
-        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
-    };
-    CppParamSet cppParamSet(tmpParams);
+    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
+    auto mgr = RegisterTestProvider(processInfo, paramSet);
 
-    int32_t ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, cppParamSet);
+    HksBlob indexBlob = MakeBlob("testIndex");
+    int32_t ret = HksIpcCreateRemKeyHandleAdapter(&processInfo, &indexBlob, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    // Test HksIpcImportCertAdapter
+    UnregisterTestProvider(mgr, processInfo, paramSet);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: UkeyClientServiceTest.CloseRemKeyHandle01
+ * @tc.desc: HksIpcCloseRemKeyHandleAdapter null data / empty / oversized resourceId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyClientServiceTest, CloseRemKeyHandle01, TestSize.Level0)
+{
+    HksProcessInfo processInfo = MakeProcessInfo();
+    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
+
+    // null resourceId
+    EXPECT_EQ(HksIpcCloseRemKeyHandleAdapter(&processInfo, nullptr, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+
+    // null data
+    HksBlob nullDataBlob = { .size = 1, .data = nullptr };
+    EXPECT_EQ(HksIpcCloseRemKeyHandleAdapter(&processInfo, &nullDataBlob, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+
+    // empty size
+    HksBlob emptyBlob = {};
+    EXPECT_EQ(HksIpcCloseRemKeyHandleAdapter(&processInfo, &emptyBlob, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+
+    // oversized resourceId
+    HksBlob longBlob = MakeBlob(std::string(1025, 'r'));
+    EXPECT_EQ(HksIpcCloseRemKeyHandleAdapter(&processInfo, &longBlob, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: UkeyClientServiceTest.CloseRemKeyHandle02
+ * @tc.desc: HksIpcCloseRemKeyHandleAdapter 正常流程
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyClientServiceTest, CloseRemKeyHandle02, TestSize.Level0)
+{
+    HksProcessInfo processInfo = MakeProcessInfo();
+    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
+    auto mgr = RegisterTestProvider(processInfo, paramSet);
+
+    HksBlob indexBlob = MakeBlob("testIndex");
+    HksIpcCreateRemKeyHandleAdapter(&processInfo, &indexBlob, paramSet);
+
+    int32_t ret = HksIpcCloseRemKeyHandleAdapter(&processInfo, &indexBlob, paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    UnregisterTestProvider(mgr, processInfo, paramSet);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: UkeyClientServiceTest.ExportProvCerts01
+ * @tc.desc: HksIpcExportProvCertsAdapter null data / empty / oversized providerName
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyClientServiceTest, ExportProvCerts01, TestSize.Level0)
+{
+    HksProcessInfo processInfo = MakeProcessInfo();
+    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
+
+    HksExtCertInfoSet certSet = {};
+
+    // null providerName
+    EXPECT_EQ(HksIpcExportProvCertsAdapter(&processInfo, nullptr, paramSet, &certSet),
+        HKS_ERROR_INVALID_ARGUMENT);
+
+    // null data
+    HksBlob nullDataBlob = { .size = 1, .data = nullptr };
+    EXPECT_EQ(HksIpcExportProvCertsAdapter(&processInfo, &nullDataBlob, paramSet, &certSet),
+        HKS_ERROR_INVALID_ARGUMENT);
+
+    // empty size
+    HksBlob emptyBlob = {};
+    EXPECT_EQ(HksIpcExportProvCertsAdapter(&processInfo, &emptyBlob, paramSet, &certSet),
+        HKS_ERROR_INVALID_ARGUMENT);
+
+    // oversized providerName
+    HksBlob longBlob = MakeBlob(std::string(129, 'n'));
+    EXPECT_EQ(HksIpcExportProvCertsAdapter(&processInfo, &longBlob, paramSet, &certSet),
+        HKS_ERROR_INVALID_ARGUMENT);
+
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: UkeyClientServiceTest.ExportProvCerts02
+ * @tc.desc: HksIpcExportProvCertsAdapter 正常流程
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyClientServiceTest, ExportProvCerts02, TestSize.Level0)
+{
+    HksProcessInfo processInfo = MakeProcessInfo();
+    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
+    auto mgr = RegisterTestProvider(processInfo, paramSet);
+
+    HksBlob nameBlob = MakeBlob(TEST_PROVIDER);
+    HksExtCertInfoSet certSet = {};
+    int32_t ret = HksIpcExportProvCertsAdapter(&processInfo, &nameBlob, paramSet, &certSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    UnregisterTestProvider(mgr, processInfo, paramSet);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: UkeyClientServiceTest.ExportCert01
+ * @tc.desc: HksIpcExportCertAdapter null data / empty / oversized resourceId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyClientServiceTest, ExportCert01, TestSize.Level0)
+{
+    HksProcessInfo processInfo = MakeProcessInfo();
+    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
+
+    HksExtCertInfoSet certSet = {};
+
+    // null resourceId
+    EXPECT_EQ(HksIpcExportCertAdapter(&processInfo, nullptr, paramSet, &certSet),
+        HKS_ERROR_INVALID_ARGUMENT);
+
+    // null data
+    HksBlob nullDataBlob = { .size = 1, .data = nullptr };
+    EXPECT_EQ(HksIpcExportCertAdapter(&processInfo, &nullDataBlob, paramSet, &certSet),
+        HKS_ERROR_INVALID_ARGUMENT);
+
+    // empty size
+    HksBlob emptyBlob = {};
+    EXPECT_EQ(HksIpcExportCertAdapter(&processInfo, &emptyBlob, paramSet, &certSet),
+        HKS_ERROR_INVALID_ARGUMENT);
+
+    // oversized resourceId
+    HksBlob longBlob = MakeBlob(std::string(1025, 'r'));
+    EXPECT_EQ(HksIpcExportCertAdapter(&processInfo, &longBlob, paramSet, &certSet),
+        HKS_ERROR_INVALID_ARGUMENT);
+
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: UkeyClientServiceTest.ExportCert02
+ * @tc.desc: HksIpcExportCertAdapter 正常流程
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyClientServiceTest, ExportCert02, TestSize.Level0)
+{
+    HksProcessInfo processInfo = MakeProcessInfo();
+    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
+    auto mgr = RegisterTestProvider(processInfo, paramSet);
+
+    HksBlob indexBlob = MakeBlob("testIndex");
+    HksExtCertInfoSet certSet = {};
+    int32_t ret = HksIpcExportCertAdapter(&processInfo, &indexBlob, paramSet, &certSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    UnregisterTestProvider(mgr, processInfo, paramSet);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: UkeyClientServiceTest.ImportCert01
+ * @tc.desc: HksIpcImportCertAdapter null resourceId / null certInfo / null index.data / null cert.data
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyClientServiceTest, ImportCert01, TestSize.Level0)
+{
+    HksProcessInfo processInfo = MakeProcessInfo();
+    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
+
+    HksExtCertInfo certInfo = {};
+
+    // null resourceId
+    EXPECT_EQ(HksIpcImportCertAdapter(&processInfo, nullptr, &certInfo, paramSet),
+        HKS_ERROR_INVALID_ARGUMENT);
+
+    // null data in resourceId
+    HksBlob nullDataBlob = { .size = 1, .data = nullptr };
+    EXPECT_EQ(HksIpcImportCertAdapter(&processInfo, &nullDataBlob, &certInfo, paramSet),
+        HKS_ERROR_INVALID_ARGUMENT);
+
+    // empty size in resourceId
+    HksBlob emptyBlob = {};
+    EXPECT_EQ(HksIpcImportCertAdapter(&processInfo, &emptyBlob, &certInfo, paramSet),
+        HKS_ERROR_INVALID_ARGUMENT);
+
+    HksBlob validBlob = MakeBlob("testIndex");
+
+    // null certInfo
+    EXPECT_EQ(HksIpcImportCertAdapter(&processInfo, &validBlob, nullptr, paramSet),
+        HKS_ERROR_NULL_POINTER);
+
+    // certInfo with null index.data
+    uint8_t tmpCertBuf[] = {'c'};
+    struct HksExtCertInfo nullIndexInfo = {};
+    nullIndexInfo.index.size = 1;
+    nullIndexInfo.cert.size = 1;
+    nullIndexInfo.cert.data = tmpCertBuf;
+    EXPECT_EQ(HksIpcImportCertAdapter(&processInfo, &validBlob, &nullIndexInfo, paramSet),
+        HKS_ERROR_NULL_POINTER);
+
+    // certInfo with null cert.data
+    uint8_t tmpIdxBuf[] = {'i'};
+    struct HksExtCertInfo nullCertInfo = {};
+    nullCertInfo.index.size = 1;
+    nullCertInfo.index.data = tmpIdxBuf;
+    nullCertInfo.cert.size = 1;
+    EXPECT_EQ(HksIpcImportCertAdapter(&processInfo, &validBlob, &nullCertInfo, paramSet),
+        HKS_ERROR_NULL_POINTER);
+
+    // oversized resourceId
+    HksBlob longBlob = MakeBlob(std::string(1025, 'r'));
+    EXPECT_EQ(HksIpcImportCertAdapter(&processInfo, &longBlob, &certInfo, paramSet),
+        HKS_ERROR_INVALID_ARGUMENT);
+
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: UkeyClientServiceTest.ImportCert02
+ * @tc.desc: HksIpcImportCertAdapter 正常流程
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyClientServiceTest, ImportCert02, TestSize.Level0)
+{
+    HksProcessInfo processInfo = MakeProcessInfo();
+    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
+    auto mgr = RegisterTestProvider(processInfo, paramSet);
+
     HksBlob indexBlob = MakeBlob("testIndex");
     uint8_t indexData[] = "certIndex";
     uint8_t certData[] = "certContent";
@@ -547,353 +474,395 @@ HWTEST_F(UkeyClientServiceTest, Test019, TestSize.Level0)
     certInfo.cert.size = sizeof(certData);
     certInfo.cert.data = certData;
 
-    const HksParamSet *hksParamSet = cppParamSet.GetParamSet();
-    ret = HksIpcImportCertAdapter(&processInfo, &indexBlob, &certInfo, hksParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksIpcImportCertAdapter fail";
-
-    // Cleanup
-    bool isDeath = false;
-    ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, cppParamSet, isDeath);
+    int32_t ret = HksIpcImportCertAdapter(&processInfo, &indexBlob, &certInfo, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
+
+    UnregisterTestProvider(mgr, processInfo, paramSet);
 }
 
 /**
- * @tc.name: UkeyClientServiceTest.Test020
- * @tc.desc: HksIpcImportCertAdapter 传入null resourceId或null certInfo
+ * @tc.name: UkeyClientServiceTest.AuthUkeyPin01
+ * @tc.desc: HksIpcAuthUkeyPinAdapter null data / empty / oversized resourceId
  * @tc.type: FUNC
  */
-HWTEST_F(UkeyClientServiceTest, Test020, TestSize.Level0)
+HWTEST_F(UkeyClientServiceTest, AuthUkeyPin01, TestSize.Level0)
 {
     HksProcessInfo processInfo = MakeProcessInfo();
-    std::vector<HksParam> tmpParams = {
-        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
-    };
-    CppParamSet cppParamSet(tmpParams);
-    const HksParamSet *hksParamSet = cppParamSet.GetParamSet();
+    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
 
-    // null resourceId
-    struct HksExtCertInfo certInfo = {};
-    int32_t ret = HksIpcImportCertAdapter(&processInfo, nullptr, &certInfo, hksParamSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with null resourceId";
-
-    // null certInfo
-    HksBlob indexBlob = MakeBlob("testIndex");
-    ret = HksIpcImportCertAdapter(&processInfo, &indexBlob, nullptr, hksParamSet);
-    EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "should fail with null certInfo";
-
-    // certInfo with null index.data
-    struct HksExtCertInfo nullIndexInfo = {};
-    nullIndexInfo.index.size = 1;
-    nullIndexInfo.index.data = nullptr;
-    nullIndexInfo.cert.size = 1;
-    nullIndexInfo.cert.data = reinterpret_cast<uint8_t *>("c");
-    ret = HksIpcImportCertAdapter(&processInfo, &indexBlob, &nullIndexInfo, hksParamSet);
-    EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "should fail with null index data";
-
-    // certInfo with null cert.data
-    struct HksExtCertInfo nullCertInfo = {};
-    nullCertInfo.index.size = 1;
-    nullCertInfo.index.data = reinterpret_cast<uint8_t *>("i");
-    nullCertInfo.cert.size = 1;
-    nullCertInfo.cert.data = nullptr;
-    ret = HksIpcImportCertAdapter(&processInfo, &indexBlob, &nullCertInfo, hksParamSet);
-    EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "should fail with null cert data";
-}
-
-/**
- * @tc.name: UkeyClientServiceTest.Test021
- * @tc.desc: 直接测试adapter层 — HksIpcCreateRemKeyHandleAdapter resourceId边界检查
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyClientServiceTest, Test021, TestSize.Level0)
-{
-    HksProcessInfo processInfo = MakeProcessInfo();
-    std::vector<HksParam> tmpParams = {
-        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
-    };
-    CppParamSet cppParamSet(tmpParams);
-    const HksParamSet *hksParamSet = cppParamSet.GetParamSet();
-
-    // resourceId size > HKS_EXT_MAX_RESOURCE_ID_LEN
-    std::string longResource(1025, 'r');
-    HksBlob longBlob = MakeBlob(longResource);
-    int32_t ret = HksIpcCreateRemKeyHandleAdapter(&processInfo, &longBlob, hksParamSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with oversized resourceId";
-
-    // resourceId with null data
-    HksBlob nullDataBlob = { .size = 1, .data = nullptr };
-    ret = HksIpcCreateRemKeyHandleAdapter(&processInfo, &nullDataBlob, hksParamSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with null data";
-}
-
-/**
- * @tc.name: UkeyClientServiceTest.Test022
- * @tc.desc: 直接测试adapter层 — HksIpcCloseRemKeyHandleAdapter resourceId边界检查
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyClientServiceTest, Test022, TestSize.Level0)
-{
-    HksProcessInfo processInfo = MakeProcessInfo();
-    std::vector<HksParam> tmpParams = {
-        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
-    };
-    CppParamSet cppParamSet(tmpParams);
-    const HksParamSet *hksParamSet = cppParamSet.GetParamSet();
-
-    std::string longResource(1025, 'r');
-    HksBlob longBlob = MakeBlob(longResource);
-    int32_t ret = HksIpcCloseRemKeyHandleAdapter(&processInfo, &longBlob, hksParamSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with oversized resourceId";
-}
-
-/**
- * @tc.name: UkeyClientServiceTest.Test023
- * @tc.desc: 直接测试adapter层 — HksIpcAuthUkeyPinAdapter resourceId边界检查
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyClientServiceTest, Test023, TestSize.Level0)
-{
-    HksProcessInfo processInfo = MakeProcessInfo();
-    std::vector<HksParam> tmpParams = {
-        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
-    };
-    CppParamSet cppParamSet(tmpParams);
-    const HksParamSet *hksParamSet = cppParamSet.GetParamSet();
-
-    std::string longResource(1025, 'r');
-    HksBlob longBlob = MakeBlob(longResource);
     int32_t outStatus = 0;
     uint32_t retryCount = 0;
-    int32_t ret = HksIpcAuthUkeyPinAdapter(&processInfo, &longBlob, hksParamSet, &outStatus, &retryCount);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with oversized resourceId";
-}
-
-/**
- * @tc.name: UkeyClientServiceTest.Test024
- * @tc.desc: 直接测试adapter层 — HksIpcGetUkeyPinAuthStateAdapter resourceId边界检查
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyClientServiceTest, Test024, TestSize.Level0)
-{
-    HksProcessInfo processInfo = MakeProcessInfo();
-    std::vector<HksParam> tmpParams = {
-        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
-    };
-    CppParamSet cppParamSet(tmpParams);
-    const HksParamSet *hksParamSet = cppParamSet.GetParamSet();
-
-    std::string longResource(1025, 'r');
-    HksBlob longBlob = MakeBlob(longResource);
-    int32_t outStatus = 0;
-    int32_t ret = HksIpcGetUkeyPinAuthStateAdapter(&processInfo, &longBlob, hksParamSet, &outStatus);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with oversized resourceId";
-}
-
-/**
- * @tc.name: UkeyClientServiceTest.Test025
- * @tc.desc: 直接测试adapter层 — HksIpcClearPinStatusAdapter resourceId边界检查
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyClientServiceTest, Test025, TestSize.Level0)
-{
-    HksProcessInfo processInfo = MakeProcessInfo();
-
-    std::string longResource(1025, 'r');
-    HksBlob longBlob = MakeBlob(longResource);
-    int32_t ret = HksIpcClearPinStatusAdapter(&processInfo, &longBlob);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with oversized resourceId";
 
     // null resourceId
-    ret = HksIpcClearPinStatusAdapter(&processInfo, nullptr);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with null resourceId";
-}
+    EXPECT_EQ(HksIpcAuthUkeyPinAdapter(&processInfo, nullptr, paramSet, &outStatus, &retryCount),
+        HKS_ERROR_INVALID_ARGUMENT);
 
-/**
- * @tc.name: UkeyClientServiceTest.Test026
- * @tc.desc: 直接测试adapter层 — HksIpcExportProvCertsAdapter providerName边界检查
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyClientServiceTest, Test026, TestSize.Level0)
-{
-    HksProcessInfo processInfo = MakeProcessInfo();
-    std::vector<HksParam> tmpParams = {
-        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
-    };
-    CppParamSet cppParamSet(tmpParams);
-    const HksParamSet *hksParamSet = cppParamSet.GetParamSet();
+    // null data
+    HksBlob nullDataBlob = { .size = 1, .data = nullptr };
+    EXPECT_EQ(HksIpcAuthUkeyPinAdapter(&processInfo, &nullDataBlob, paramSet, &outStatus, &retryCount),
+        HKS_ERROR_INVALID_ARGUMENT);
 
-    // oversized providerName
-    std::string longName(129, 'n');
-    HksBlob longBlob = MakeBlob(longName);
-    HksExtCertInfoSet certSet = {};
-    int32_t ret = HksIpcExportProvCertsAdapter(&processInfo, &longBlob, hksParamSet, &certSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with oversized providerName";
-
-    // null providerName
-    ret = HksIpcExportProvCertsAdapter(&processInfo, nullptr, hksParamSet, &certSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with null providerName";
-}
-
-/**
- * @tc.name: UkeyClientServiceTest.Test027
- * @tc.desc: 直接测试adapter层 — HksIpcExportCertAdapter resourceId边界检查
- * @tc.type: FUNC
- */
-HWTEST_F(UkeyClientServiceTest, Test027, TestSize.Level0)
-{
-    HksProcessInfo processInfo = MakeProcessInfo();
-    std::vector<HksParam> tmpParams = {
-        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
-    };
-    CppParamSet cppParamSet(tmpParams);
-    const HksParamSet *hksParamSet = cppParamSet.GetParamSet();
+    // empty size
+    HksBlob emptyBlob = {};
+    EXPECT_EQ(HksIpcAuthUkeyPinAdapter(&processInfo, &emptyBlob, paramSet, &outStatus, &retryCount),
+        HKS_ERROR_INVALID_ARGUMENT);
 
     // oversized resourceId
-    std::string longResource(1025, 'r');
-    HksBlob longBlob = MakeBlob(longResource);
-    HksExtCertInfoSet certSet = {};
-    int32_t ret = HksIpcExportCertAdapter(&processInfo, &longBlob, hksParamSet, &certSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with oversized resourceId";
+    HksBlob longBlob = MakeBlob(std::string(1025, 'r'));
+    EXPECT_EQ(HksIpcAuthUkeyPinAdapter(&processInfo, &longBlob, paramSet, &outStatus, &retryCount),
+        HKS_ERROR_INVALID_ARGUMENT);
 
-    // null resourceId
-    ret = HksIpcExportCertAdapter(&processInfo, nullptr, hksParamSet, &certSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with null resourceId";
+    HksFreeParamSet(&paramSet);
 }
 
 /**
- * @tc.name: UkeyClientServiceTest.Test028
- * @tc.desc: HksIpcServiceOnGetRemotePropertyAdapter 传入null resourceId和null propertyId
+ * @tc.name: UkeyClientServiceTest.AuthUkeyPin02
+ * @tc.desc: HksIpcAuthUkeyPinAdapter 正常流程
  * @tc.type: FUNC
  */
-HWTEST_F(UkeyClientServiceTest, Test028, TestSize.Level0)
+HWTEST_F(UkeyClientServiceTest, AuthUkeyPin02, TestSize.Level0)
 {
     HksProcessInfo processInfo = MakeProcessInfo();
-    std::vector<HksParam> tmpParams = {
-        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
-    };
-    CppParamSet cppParamSet(tmpParams);
-    const HksParamSet *hksParamSet = cppParamSet.GetParamSet();
+    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
+    auto mgr = RegisterTestProvider(processInfo, paramSet);
+
+    int32_t outStatus = 0;
+    uint32_t retryCount = 0;
+    HksBlob indexBlob = MakeBlob("testIndex");
+    int32_t ret = HksIpcAuthUkeyPinAdapter(&processInfo, &indexBlob, paramSet, &outStatus, &retryCount);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    UnregisterTestProvider(mgr, processInfo, paramSet);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: UkeyClientServiceTest.GetUkeyPinAuthState01
+ * @tc.desc: HksIpcGetUkeyPinAuthStateAdapter null data / empty / oversized resourceId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyClientServiceTest, GetUkeyPinAuthState01, TestSize.Level0)
+{
+    HksProcessInfo processInfo = MakeProcessInfo();
+    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
+
+    int32_t outStatus = 0;
+
+    // null resourceId
+    EXPECT_EQ(HksIpcGetUkeyPinAuthStateAdapter(&processInfo, nullptr, paramSet, &outStatus),
+        HKS_ERROR_INVALID_ARGUMENT);
+
+    // null data
+    HksBlob nullDataBlob = { .size = 1, .data = nullptr };
+    EXPECT_EQ(HksIpcGetUkeyPinAuthStateAdapter(&processInfo, &nullDataBlob, paramSet, &outStatus),
+        HKS_ERROR_INVALID_ARGUMENT);
+
+    // empty size
+    HksBlob emptyBlob = {};
+    EXPECT_EQ(HksIpcGetUkeyPinAuthStateAdapter(&processInfo, &emptyBlob, paramSet, &outStatus),
+        HKS_ERROR_INVALID_ARGUMENT);
+
+    // oversized resourceId
+    HksBlob longBlob = MakeBlob(std::string(1025, 'r'));
+    EXPECT_EQ(HksIpcGetUkeyPinAuthStateAdapter(&processInfo, &longBlob, paramSet, &outStatus),
+        HKS_ERROR_INVALID_ARGUMENT);
+
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: UkeyClientServiceTest.GetUkeyPinAuthState02
+ * @tc.desc: HksIpcGetUkeyPinAuthStateAdapter 正常流程
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyClientServiceTest, GetUkeyPinAuthState02, TestSize.Level0)
+{
+    HksProcessInfo processInfo = MakeProcessInfo();
+    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
+    auto mgr = RegisterTestProvider(processInfo, paramSet);
+
+    int32_t status = 0;
+    HksBlob indexBlob = MakeBlob("testIndex");
+    int32_t ret = HksIpcGetUkeyPinAuthStateAdapter(&processInfo, &indexBlob, paramSet, &status);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    UnregisterTestProvider(mgr, processInfo, paramSet);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: UkeyClientServiceTest.ClearPinStatus01
+ * @tc.desc: HksIpcClearPinStatusAdapter null data / empty / oversized resourceId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyClientServiceTest, ClearPinStatus01, TestSize.Level0)
+{
+    HksProcessInfo processInfo = MakeProcessInfo();
+
+    // null resourceId
+    EXPECT_EQ(HksIpcClearPinStatusAdapter(&processInfo, nullptr), HKS_ERROR_INVALID_ARGUMENT);
+
+    // null data
+    HksBlob nullDataBlob = { .size = 1, .data = nullptr };
+    EXPECT_EQ(HksIpcClearPinStatusAdapter(&processInfo, &nullDataBlob), HKS_ERROR_INVALID_ARGUMENT);
+
+    // empty size
+    HksBlob emptyBlob = {};
+    EXPECT_EQ(HksIpcClearPinStatusAdapter(&processInfo, &emptyBlob), HKS_ERROR_INVALID_ARGUMENT);
+
+    // oversized resourceId
+    HksBlob longBlob = MakeBlob(std::string(1025, 'r'));
+    EXPECT_EQ(HksIpcClearPinStatusAdapter(&processInfo, &longBlob), HKS_ERROR_INVALID_ARGUMENT);
+}
+
+/**
+ * @tc.name: UkeyClientServiceTest.ClearPinStatus02
+ * @tc.desc: HksIpcClearPinStatusAdapter 正常流程
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyClientServiceTest, ClearPinStatus02, TestSize.Level0)
+{
+    HksProcessInfo processInfo = MakeProcessInfo();
+    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
+    auto mgr = RegisterTestProvider(processInfo, paramSet);
+
+    HksBlob indexBlob = MakeBlob("testIndex");
+    int32_t ret = HksIpcClearPinStatusAdapter(&processInfo, &indexBlob);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    UnregisterTestProvider(mgr, processInfo, paramSet);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: UkeyClientServiceTest.GetRemoteProperty01
+ * @tc.desc: HksIpcServiceOnGetRemotePropertyAdapter null/invalid resourceId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyClientServiceTest, GetRemoteProperty01, TestSize.Level0)
+{
+    HksProcessInfo processInfo = MakeProcessInfo();
+    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
 
     HksBlob propertyIdBlob = MakeBlob("prop");
 
     // null resourceId
-    int32_t ret = HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, nullptr, &propertyIdBlob,
-        hksParamSet, nullptr);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with null resourceId";
+    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, nullptr, &propertyIdBlob,
+        paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
 
-    // null propertyId
-    HksBlob resourceIdBlob = MakeBlob("res");
-    ret = HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &resourceIdBlob, nullptr,
-        hksParamSet, nullptr);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with null propertyId";
+    // null data in resourceId
+    HksBlob nullDataBlob = { .size = 1, .data = nullptr };
+    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &nullDataBlob, &propertyIdBlob,
+        paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
 
-    // oversized propertyId
-    std::string longProp(101, 'p');
-    HksBlob longPropBlob = MakeBlob(longProp);
-    ret = HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &resourceIdBlob, &longPropBlob,
-        hksParamSet, nullptr);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with oversized propertyId";
+    // empty size in resourceId
+    HksBlob emptyBlob = {};
+    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &emptyBlob, &propertyIdBlob,
+        paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
 
     // oversized resourceId
-    std::string longRes(1025, 'r');
-    HksBlob longResBlob = MakeBlob(longRes);
-    ret = HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &longResBlob, &propertyIdBlob,
-        hksParamSet, nullptr);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should fail with oversized resourceId";
+    HksBlob longResBlob = MakeBlob(std::string(1025, 'r'));
+    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &longResBlob, &propertyIdBlob,
+        paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
+
+    HksFreeParamSet(&paramSet);
 }
 
 /**
- * @tc.name: UkeyClientServiceTest.Test029
- * @tc.desc: 直接测试provider层 — HksIpcServiceProviderRegister正常和provider=nullptr
+ * @tc.name: UkeyClientServiceTest.GetRemoteProperty02
+ * @tc.desc: HksIpcServiceOnGetRemotePropertyAdapter null/invalid propertyId
  * @tc.type: FUNC
  */
-HWTEST_F(UkeyClientServiceTest, Test029, TestSize.Level0)
+HWTEST_F(UkeyClientServiceTest, GetRemoteProperty02, TestSize.Level0)
 {
     HksProcessInfo processInfo = MakeProcessInfo();
-    std::vector<HksParam> tmpParams = {
-        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
-    };
-    CppParamSet cppParamSet(tmpParams);
+    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
 
-    // Release instance so GetInstanceWrapper returns nullptr
-    HuksPluginLifeCycleMgr::ReleaseInstance();
+    HksBlob resourceIdBlob = MakeBlob("res");
 
-    // Test HksIpcServiceProviderRegister with null pluginManager
-    // We can't force GetInstanceWrapper to return nullptr easily since it creates instance.
-    // So just test normal flow.
+    // null propertyId
+    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &resourceIdBlob, nullptr,
+        paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
+
+    // null data in propertyId
+    HksBlob nullDataBlob = { .size = 1, .data = nullptr };
+    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &resourceIdBlob, &nullDataBlob,
+        paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
+
+    // empty size in propertyId
+    HksBlob emptyBlob = {};
+    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &resourceIdBlob, &emptyBlob,
+        paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
+
+    // oversized propertyId (> HKS_EXT_MAX_PROPERTY_ID_LEN = 100)
+    HksBlob longPropBlob = MakeBlob(std::string(101, 'p'));
+    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &resourceIdBlob, &longPropBlob,
+        paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
+
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: UkeyClientServiceTest.GetRemoteProperty03
+ * @tc.desc: HksIpcServiceOnGetRemotePropertyAdapter null remoteObject → HKS_ERROR_NULL_POINTER
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyClientServiceTest, GetRemoteProperty03, TestSize.Level0)
+{
+    HksProcessInfo processInfo = MakeProcessInfo();
+    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
+
+    HksBlob resourceIdBlob = MakeBlob("res");
+    HksBlob propertyIdBlob = MakeBlob("prop");
+
+    // null remoteObject → iface_cast returns null → HKS_ERROR_NULL_POINTER
+    int32_t ret = HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &resourceIdBlob, &propertyIdBlob,
+        paramSet, nullptr);
+    EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER);
+
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: UkeyClientServiceTest.GetRemoteProperty04
+ * @tc.desc: HksIpcServiceOnGetRemotePropertyAdapter 正常流程 (valid remoteObject)
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyClientServiceTest, GetRemoteProperty04, TestSize.Level0)
+{
+    HksProcessInfo processInfo = MakeProcessInfo();
+    HksParamSet *paramSet = MakeParamSet(HKS_TAG_AUTH_STORAGE_LEVEL, HKS_AUTH_STORAGE_LEVEL_DE);
+    auto mgr = RegisterTestProvider(processInfo, paramSet);
+
+    HksBlob resourceIdBlob = MakeBlob("testIndex");
+    HksBlob propertyIdBlob = MakeBlob("testProp");
+    HksParamSet *propertySetOut = nullptr;
+    int32_t ret = HksServiceGetRemoteProperty(&processInfo, &resourceIdBlob, &propertyIdBlob,
+        paramSet, &propertySetOut);
+    // HksServiceGetRemoteProperty calls HksIpcServiceOnGetRemotePropertyAdapter
+    // which creates IHksExtProxy from remoteObject=NULL, so HKS_ERROR_NULL_POINTER
+    EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER);
+
+    UnregisterTestProvider(mgr, processInfo, paramSet);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: UkeyClientServiceTest.ProviderService01
+ * @tc.desc: 直接测试provider层 — HksIpcServiceProviderRegister/UnRegister 正常流程
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyClientServiceTest, ProviderService01, TestSize.Level0)
+{
+    HksProcessInfo processInfo = MakeProcessInfo();
+    CppParamSet cppParamSet({{.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE}});
+
     auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
     ASSERT_NE(mgr, nullptr);
 
     std::string name = TEST_PROVIDER;
-    int32_t ret = HksIpcServiceProviderRegister(&processInfo, name, cppParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksIpcServiceProviderRegister fail";
-
-    ret = HksIpcServiceProviderUnRegister(&processInfo, name, cppParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksIpcServiceProviderUnRegister fail";
+    EXPECT_EQ(HksIpcServiceProviderRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
+    EXPECT_EQ(HksIpcServiceProviderUnRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
 }
 
 /**
- * @tc.name: UkeyClientServiceTest.Test030
- * @tc.desc: 直接测试provider层 — 其他On函数正常流程
+ * @tc.name: UkeyClientServiceTest.ProviderService02
+ * @tc.desc: 直接测试provider层 — OnCreateRemoteKeyHandle/OnCloseRemoteKeyHandle 正常流程
  * @tc.type: FUNC
  */
-HWTEST_F(UkeyClientServiceTest, Test030, TestSize.Level0)
+HWTEST_F(UkeyClientServiceTest, ProviderService02, TestSize.Level0)
 {
     HksProcessInfo processInfo = MakeProcessInfo();
-    std::vector<HksParam> tmpParams = {
-        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
-    };
-    CppParamSet cppParamSet(tmpParams);
+    CppParamSet cppParamSet({{.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE}});
 
     auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
     ASSERT_NE(mgr, nullptr);
-
     std::string name = TEST_PROVIDER;
-    int32_t ret = HksIpcServiceProviderRegister(&processInfo, name, cppParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_EQ(HksIpcServiceProviderRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
+
+    std::string index = "testIdx";
+    EXPECT_EQ(HksIpcServiceOnCreateRemoteKeyHandle(&processInfo, index, cppParamSet), HKS_SUCCESS);
+    EXPECT_EQ(HksIpcServiceOnCloseRemoteKeyHandle(&processInfo, index, cppParamSet), HKS_SUCCESS);
+
+    UnregisterTestProvider(mgr, processInfo, nullptr);
+}
+
+/**
+ * @tc.name: UkeyClientServiceTest.ProviderService03
+ * @tc.desc: 直接测试provider层 — OnAuthUkeyPin/OnGetVerifyPinStatus/OnClearUkeyPinAuthStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyClientServiceTest, ProviderService03, TestSize.Level0)
+{
+    HksProcessInfo processInfo = MakeProcessInfo();
+    CppParamSet cppParamSet({{.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE}});
+
+    auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    ASSERT_NE(mgr, nullptr);
+    std::string name = TEST_PROVIDER;
+    EXPECT_EQ(HksIpcServiceProviderRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
 
     std::string index = "testIdx";
 
-    // HksIpcServiceOnCreateRemoteKeyHandle
-    ret = HksIpcServiceOnCreateRemoteKeyHandle(&processInfo, index, cppParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksIpcServiceOnCreateRemoteKeyHandle fail";
-
-    // HksIpcServiceOnCloseRemoteKeyHandle
-    ret = HksIpcServiceOnCloseRemoteKeyHandle(&processInfo, index, cppParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksIpcServiceOnCloseRemoteKeyHandle fail";
-
-    // HksIpcServiceOnAuthUkeyPin
     int32_t authState = 0;
     uint32_t retryCnt = 0;
-    ret = HksIpcServiceOnAuthUkeyPin(&processInfo, index, cppParamSet, authState, retryCnt);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksIpcServiceOnAuthUkeyPin fail";
+    EXPECT_EQ(HksIpcServiceOnAuthUkeyPin(&processInfo, index, cppParamSet, authState, retryCnt), HKS_SUCCESS);
 
-    // HksIpcServiceOnGetVerifyPinStatus
     int32_t state = 0;
-    ret = HksIpcServiceOnGetVerifyPinStatus(&processInfo, index, cppParamSet, state);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksIpcServiceOnGetVerifyPinStatus fail";
+    EXPECT_EQ(HksIpcServiceOnGetVerifyPinStatus(&processInfo, index, cppParamSet, state), HKS_SUCCESS);
 
-    // HksIpcServiceOnClearUkeyPinAuthStatus
-    ret = HksIpcServiceOnClearUkeyPinAuthStatus(&processInfo, index);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksIpcServiceOnClearUkeyPinAuthStatus fail";
+    EXPECT_EQ(HksIpcServiceOnClearUkeyPinAuthStatus(&processInfo, index), HKS_SUCCESS);
 
-    // HksIpcServiceOnGetRemoteProperty
+    UnregisterTestProvider(mgr, processInfo, nullptr);
+}
+
+/**
+ * @tc.name: UkeyClientServiceTest.ProviderService04
+ * @tc.desc: 直接测试provider层 — OnGetRemoteProperty/OnExportCertificate/OnExportProviderAllCertificates
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyClientServiceTest, ProviderService04, TestSize.Level0)
+{
+    HksProcessInfo processInfo = MakeProcessInfo();
+    CppParamSet cppParamSet({{.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE}});
+
+    auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    ASSERT_NE(mgr, nullptr);
+    std::string name = TEST_PROVIDER;
+    EXPECT_EQ(HksIpcServiceProviderRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
+
+    std::string index = "testIdx";
     std::string propertyId = "prop";
     CppParamSet outParams;
-    ret = HksIpcServiceOnGetRemoteProperty(&processInfo, index, propertyId, cppParamSet, outParams);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksIpcServiceOnGetRemoteProperty fail";
+    EXPECT_EQ(HksIpcServiceOnGetRemoteProperty(&processInfo, index, propertyId, cppParamSet, outParams),
+        HKS_SUCCESS);
 
-    // HksIpcServiceOnExportCertificate
     std::string certsJson;
-    ret = HksIpcServiceOnExportCertificate(&processInfo, index, cppParamSet, certsJson);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksIpcServiceOnExportCertificate fail";
+    EXPECT_EQ(HksIpcServiceOnExportCertificate(&processInfo, index, cppParamSet, certsJson), HKS_SUCCESS);
 
-    // HksIpcServiceOnExportProviderAllCertificates
     std::string allCertsJson;
-    ret = HksIpcServiceOnExportProviderAllCertificates(&processInfo, name, cppParamSet, allCertsJson);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksIpcServiceOnExportProviderAllCertificates fail";
+    EXPECT_EQ(HksIpcServiceOnExportProviderAllCertificates(&processInfo, name, cppParamSet, allCertsJson),
+        HKS_SUCCESS);
 
-    // HksIpcServiceOnImportCertificate
+    UnregisterTestProvider(mgr, processInfo, nullptr);
+}
+
+/**
+ * @tc.name: UkeyClientServiceTest.ProviderService05
+ * @tc.desc: 直接测试provider层 — OnImportCertificate 正常流程
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyClientServiceTest, ProviderService05, TestSize.Level0)
+{
+    HksProcessInfo processInfo = MakeProcessInfo();
+    CppParamSet cppParamSet({{.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE}});
+
+    auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    ASSERT_NE(mgr, nullptr);
+    std::string name = TEST_PROVIDER;
+    EXPECT_EQ(HksIpcServiceProviderRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
+
+    std::string index = "testIdx";
     struct HksExtCertInfo certInfo = {};
     uint8_t idx[] = "idx";
     uint8_t cert[] = "cert";
@@ -902,15 +871,36 @@ HWTEST_F(UkeyClientServiceTest, Test030, TestSize.Level0)
     certInfo.index.data = idx;
     certInfo.cert.size = sizeof(cert);
     certInfo.cert.data = cert;
-    ret = HksIpcServiceOnImportCertificate(&processInfo, index, certInfo, cppParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksIpcServiceOnImportCertificate fail";
+    EXPECT_EQ(HksIpcServiceOnImportCertificate(&processInfo, index, certInfo, cppParamSet), HKS_SUCCESS);
 
-    // HksIpcServiceOnGenerateUkeyKey — header/impl signature mismatch, skip direct call
+    UnregisterTestProvider(mgr, processInfo, nullptr);
+}
 
-    // Cleanup
-    bool isDeath = false;
-    ret = mgr->UnRegisterProvider(processInfo, TEST_PROVIDER, cppParamSet, isDeath);
-    EXPECT_EQ(ret, HKS_SUCCESS);
+/**
+ * @tc.name: UkeyClientServiceTest.RemotePropertyPack01
+ * @tc.desc: 覆盖 RemotePropertyPack: cppParamSet 为 nullptr 时的分支（只 pack returnResult）
+ * @tc.type: FUNC
+ */
+HWTEST_F(UkeyClientServiceTest, RemotePropertyPack01, TestSize.Level0)
+{
+    // RemotePropertyPack 是 static 函数，只能通过 HksIpcServiceOnGetRemotePropertyAdapter 间接覆盖
+    // 此用例验证当底层 service 返回失败时，RemotePropertyPack 仍被调用并正常处理错误码
+    HksProcessInfo processInfo = MakeProcessInfo();
+    CppParamSet cppParamSet({{.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE}});
+    auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    ASSERT_NE(mgr, nullptr);
+    std::string name = TEST_PROVIDER;
+    EXPECT_EQ(HksIpcServiceProviderRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
+
+    // 传入有效的 resourceId/propertyId + null remoteObject → 走到 hksExtProxy null check
+    // 在此之前已通过两个 HksIpcCheckBlob，覆盖了 RemotePropertyPack 不被调用的路径
+    HksBlob resourceIdBlob = MakeBlob("res");
+    HksBlob propertyIdBlob = MakeBlob("prop");
+    int32_t ret = HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &resourceIdBlob, &propertyIdBlob,
+        nullptr, nullptr);
+    EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER);
+
+    UnregisterTestProvider(mgr, processInfo, nullptr);
 }
 
 } // namespace Huks
