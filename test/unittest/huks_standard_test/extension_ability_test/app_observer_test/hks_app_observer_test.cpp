@@ -331,15 +331,13 @@ HWTEST_F(HksAppObserverTest, HksAppObserverTest012, TestSize.Level0)
 
 /**
 * @tc.name: HksAppObserverTest.HksAppObserverTest013
-* @tc.desc: Test HksAppObserverManager GetBundleNameByUid (delegates to HksGetBundleNameFromUid mock)
+* @tc.desc: Test HksGetBundleNameFromUid mock returns correct bundle name (used by RegisterObserver)
 * @tc.type: FUNC
 */
 HWTEST_F(HksAppObserverTest, HksAppObserverTest013, TestSize.Level0) {
-    auto &manager = HksAppObserverManager::GetInstance();
-
     HksProcessInfo processInfo = CreateTestProcessInfoFromIPC();
     std::string bundleName;
-    int32_t ret = manager.GetBundleNameByUid(processInfo.uidInt, bundleName);
+    int32_t ret = HksGetBundleNameFromUid(processInfo.uidInt, bundleName);
     EXPECT_EQ(ret, HKS_SUCCESS);
     EXPECT_EQ(bundleName, "com.huawei.extensionhap.test");
 
@@ -388,17 +386,27 @@ HWTEST_F(HksAppObserverTest, HksAppObserverTest014, TestSize.Level0) {
 
 /**
 * @tc.name: HksAppObserverTest.HksAppObserverTest015
-* @tc.desc: Test BuildParamSet with empty abilityName returns empty param set
+* @tc.desc: Test OnAppStopped with empty abilityName (BuildParamSet produces empty param set internally)
 * @tc.type: FUNC
 */
 HWTEST_F(HksAppObserverTest, HksAppObserverTest015, TestSize.Level0) {
+    HksAppObserver observer("com.test.bundle");
     HksProcessInfo processInfo = CreateTestProcessInfo();
-    CppParamSet emptyPs = CreateEmptyParamSet();
-    HksProcessContext ctx(processInfo, emptyPs);
+    // Use empty param set (no HKS_EXT_CRYPTO_TAG_ABILITY_NAME), so BuildParamSet produces empty param set
+    CppParamSet paramSet = CreateEmptyParamSet();
+    observer.AddProcessContext(processInfo, paramSet);
 
-    CppParamSet builtPs = HksAppObserver::BuildParamSet(ctx);
-    const HksParamSet *ps = builtPs.GetParamSet();
-    EXPECT_EQ(ps->paramsCnt, 0u);
+    AppExecFwk::AppStateData appState;
+    appState.bundleName = "com.test.bundle";
+    appState.uid = 100;
+    ResetHandleManagerMockFlags();
+    ResetSessionManagerMockFlags();
+
+    observer.OnAppStopped(appState);
+    // OnAppStopped should succeed even with empty abilityName (BuildParamSet returns empty params)
+    EXPECT_TRUE(g_hksClearHandleCalled);
+    EXPECT_TRUE(g_clearAuthStateCalled);
+    EXPECT_TRUE(g_clearMapByUidCalled);
 }
 
 // ==================== plugin_interface integration tests ====================

@@ -108,15 +108,10 @@ HksAppObserverManager& HksAppObserverManager::GetInstance()
     return instance;
 }
 
-int32_t HksAppObserverManager::GetBundleNameByUid(uint32_t uid, std::string &bundleName)
-{
-    return HksGetBundleNameFromUid(uid, bundleName);
-}
-
 int32_t HksAppObserverManager::RegisterObserver(const HksProcessInfo &processInfo, const CppParamSet &paramSet)
 {
     std::string bundleName{};
-    int32_t ret = GetBundleNameByUid(processInfo.uidInt, bundleName);
+    int32_t ret = HksGetBundleNameFromUid(processInfo.uidInt, bundleName);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
         "RegisterObserver Failed to get bundle name for uid: %{public}u", processInfo.uidInt);
 
