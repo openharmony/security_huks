@@ -307,3 +307,11 @@ napi_status napi_is_callable(napi_env env, napi_value value, bool* result)
     }
     return OHOS::Security::Huks::Assistant::ins_->napi_is_callable(env, value, result);
 }
+
+napi_status napi_is_promise(napi_env env, napi_value value, bool* result)
+{
+    if (OHOS::Security::Huks::Assistant::ins_ == nullptr) {
+        return napi_invalid_arg;
+    }
+    return OHOS::Security::Huks::Assistant::ins_->napi_is_promise(env, value, result);
+}

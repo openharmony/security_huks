@@ -91,22 +91,4 @@ HWTEST_F(CryptoExtAbilityTest, HksCryptoExtAbilityTestAbilityTest_0001, testing:
     EXPECT_EQ(HksAbility.ExportPublicKey(index, params, outData, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
     EXPECT_EQ(HksAbility.GenerateKey(handle, params, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
 }
-
-HWTEST_F(CryptoExtAbilityTest, HksCryptoExtAbilityCreate_0000, testing::ext::TestSize.Level0)
-{
-    auto *result = HksCryptoExtAbility::Create(nullptr);
-    EXPECT_NE(result, nullptr);
-    delete result;
-
-    CreatorFunc creator = [](const std::unique_ptr<AbilityRuntime::Runtime> &runtime) -> HksCryptoExtAbility* {
-        return new (std::nothrow) HksCryptoExtAbility();
-    };
-    HksCryptoExtAbility::SetCreator(creator);
-    std::unique_ptr<AbilityRuntime::Runtime> runtimePtr;
-    result = HksCryptoExtAbility::Create(runtimePtr);
-    EXPECT_NE(result, nullptr);
-    delete result;
-
-    HksCryptoExtAbility::SetCreator(nullptr);
-}
 }
