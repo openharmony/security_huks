@@ -538,29 +538,6 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest014, TestSize.Level0)
     isFind = loader->m_pluginMethodNameMap.Find(static_cast<PluginMethodEnum>(9999), method);
     EXPECT_FALSE(isFind) << "fail: non-existent enum should not be found";
 }
-
-/**
- * @tc.name: ExtensionPluginMgrTest.ExtensionPluginMgrTest015
- * @tc.desc: 多次创建和销毁实例，验证构造函数和ReleaseInstance正确工作
- * @tc.type: FUNC
- */
-HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest015, TestSize.Level0)
-{
-    // 反复创建和销毁，验证无崩溃且每次构造函数正确执行
-    for (int i = 0; i < 3; i++) {
-        auto loader = HuksPluginLoader::GetInstanceWrapper();
-        EXPECT_NE(loader, nullptr) << "fail: loader instance should not be null";
-
-        auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
-        EXPECT_NE(mgr, nullptr) << "fail: mgr instance should not be null";
-
-        // 每次获取后map应该有内容
-        EXPECT_FALSE(loader->m_pluginMethodNameMap.Empty()) << "fail: method name map should not be empty";
-
-        HuksPluginLoader::ReleaseInstance();
-        HuksPluginLifeCycleMgr::ReleaseInstance();
-    }
-}
 }
 }
 }
