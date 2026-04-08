@@ -49,6 +49,7 @@ if (huks_enable_ukey_config == true) {
       "googletest:gtest",
       "hilog:libhilog",
       "ipc:ipc_single",
+      "os_account:os_account_innerkits",
     ]
 
     sanitize = {

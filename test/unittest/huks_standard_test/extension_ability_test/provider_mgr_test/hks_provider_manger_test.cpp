@@ -203,6 +203,177 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest005, TestSize.Level0) {
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(processInfo.processName);
 }
+
+/**
+* @tc.name: HksProviderMgrTest.HksProviderMgrTest006
+* @tc.desc: GetAllProviderInfosByProviderName - find by providerName matching frontUserId
+* @tc.type: FUNC
+*/
+HWTEST_F(HksProviderMgrTest, HksProviderMgrTest006, TestSize.Level0) {
+    auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
+    EXPECT_NE(providerMgr, nullptr) << "providerMgr is null";
+
+    std::string bundleName = "com.huawei.extensionhap.test";
+    std::vector<std::string> reqPerm;
+    reqPerm.emplace_back("ohos.permission.CRYPTO_EXTENSION_REGISTER");
+    auto mockProccess = std::make_shared<HksMockHapToken>(bundleName, reqPerm, true);
+
+    HksProcessInfo processInfo{};
+    HksGetProcessInfoForIPC(&processInfo);
+    std::vector<HksParam> params = {
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob("HiTaiCryptoAbility")},
+    };
+    CppParamSet paramSet{params};
+    std::string providerName = "HksProviderMgrTest006";
+    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
+        [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
+        HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
+        int32_t deleteCount = 0;
+        providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
+    });
+    ASSERT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
+
+    int32_t frontUserId = 100;
+    std::vector<ProviderInfo> providerInfos;
+    ret = providerMgr->GetAllProviderInfosByProviderName(providerName, frontUserId, providerInfos);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GetAllProviderInfosByProviderName failed";
+    EXPECT_EQ(providerInfos.size(), 1u);
+    EXPECT_EQ(providerInfos[0].m_providerName, providerName);
+
+    int32_t deletecount = 0;
+    ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, false, deletecount);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "OnUnRegisterProvider failed";
+
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
+}
+
+/**
+* @tc.name: HksProviderMgrTest.HksProviderMgrTest007
+* @tc.desc: GetAllProviderInfosByProviderName - no match for providerName returns INVALID_ARGUMENT
+* @tc.type: FUNC
+*/
+HWTEST_F(HksProviderMgrTest, HksProviderMgrTest007, TestSize.Level0) {
+    auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
+    EXPECT_NE(providerMgr, nullptr) << "providerMgr is null";
+
+    std::string bundleName = "com.huawei.extensionhap.test";
+    std::vector<std::string> reqPerm;
+    reqPerm.emplace_back("ohos.permission.CRYPTO_EXTENSION_REGISTER");
+    auto mockProccess = std::make_shared<HksMockHapToken>(bundleName, reqPerm, true);
+
+    HksProcessInfo processInfo{};
+    HksGetProcessInfoForIPC(&processInfo);
+    std::vector<HksParam> params = {
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob("HiTaiCryptoAbility")},
+    };
+    CppParamSet paramSet{params};
+    std::string providerName = "HksProviderMgrTest007";
+    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
+        [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
+        int32_t deleteCount = 0;
+        providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
+    });
+    ASSERT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
+
+    int32_t frontUserId = 100;
+    std::vector<ProviderInfo> providerInfos;
+    ret = providerMgr->GetAllProviderInfosByProviderName("NonExistentProvider", frontUserId, providerInfos);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should return INVALID_ARGUMENT for non-existent provider";
+    EXPECT_TRUE(providerInfos.empty());
+
+    int32_t deletecount = 0;
+    ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, false, deletecount);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "OnUnRegisterProvider failed";
+
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
+}
+
+/**
+* @tc.name: HksProviderMgrTest.HksProviderMgrTest008
+* @tc.desc: GetAllProviderInfosByProviderName - "HksInnerNullProviderName" matches all providers
+* @tc.type: FUNC
+*/
+HWTEST_F(HksProviderMgrTest, HksProviderMgrTest008, TestSize.Level0) {
+    auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
+    EXPECT_NE(providerMgr, nullptr) << "providerMgr is null";
+
+    std::string bundleName = "com.huawei.extensionhap.test";
+    std::vector<std::string> reqPerm;
+    reqPerm.emplace_back("ohos.permission.CRYPTO_EXTENSION_REGISTER");
+    auto mockProccess = std::make_shared<HksMockHapToken>(bundleName, reqPerm, true);
+
+    HksProcessInfo processInfo{};
+    HksGetProcessInfoForIPC(&processInfo);
+    std::vector<HksParam> params = {
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob("HiTaiCryptoAbility")},
+    };
+    CppParamSet paramSet{params};
+    std::string providerName = "HksProviderMgrTest008";
+    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
+        [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
+        int32_t deleteCount = 0;
+        providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
+    });
+    ASSERT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
+
+    int32_t frontUserId = 100;
+    std::vector<ProviderInfo> providerInfos;
+    ret = providerMgr->GetAllProviderInfosByProviderName("HksInnerNullProviderName", frontUserId, providerInfos);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksInnerNullProviderName should match all providers";
+    EXPECT_FALSE(providerInfos.empty());
+
+    int32_t deletecount = 0;
+    ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, false, deletecount);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "OnUnRegisterProvider failed";
+
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
+}
+
+/**
+* @tc.name: HksProviderMgrTest.HksProviderMgrTest009
+* @tc.desc: GetAllProviderInfosByProviderName - userid mismatch returns INVALID_ARGUMENT
+* @tc.type: FUNC
+*/
+HWTEST_F(HksProviderMgrTest, HksProviderMgrTest009, TestSize.Level0) {
+    auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
+    EXPECT_NE(providerMgr, nullptr) << "providerMgr is null";
+
+    std::string bundleName = "com.huawei.extensionhap.test";
+    std::vector<std::string> reqPerm;
+    reqPerm.emplace_back("ohos.permission.CRYPTO_EXTENSION_REGISTER");
+    auto mockProccess = std::make_shared<HksMockHapToken>(bundleName, reqPerm, true);
+
+    HksProcessInfo processInfo{};
+    HksGetProcessInfoForIPC(&processInfo);
+    std::vector<HksParam> params = {
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob("HiTaiCryptoAbility")},
+    };
+    CppParamSet paramSet{params};
+    std::string providerName = "HksProviderMgrTest009";
+    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
+        [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
+        int32_t deleteCount = 0;
+        providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
+    });
+    ASSERT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
+
+    // frontUserId from mock is 100, query with a different userid
+    int32_t wrongUserId = 99999;
+    std::vector<ProviderInfo> providerInfos;
+    ret = providerMgr->GetAllProviderInfosByProviderName(providerName, wrongUserId, providerInfos);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "wrong userid should return INVALID_ARGUMENT";
+    EXPECT_TRUE(providerInfos.empty());
+
+    int32_t deletecount = 0;
+    ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, false, deletecount);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "OnUnRegisterProvider failed";
+
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
+}
 }
 }
 }
