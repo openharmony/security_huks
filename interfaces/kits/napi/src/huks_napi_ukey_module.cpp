@@ -57,6 +57,8 @@ static napi_value CreateHuksExternalTag(napi_env env)
     AddInt32Property(env, tag, "HUKS_EXT_CRYPTO_TAG_PURPOSE", HKS_EXT_CRYPTO_TAG_PURPOSE);
     AddInt32Property(env, tag, "HUKS_EXT_CRYPTO_TAG_TIMEOUT", HKS_EXT_CRYPTO_TAG_TIMEOUT);
     AddInt32Property(env, tag, "HUKS_EXT_CRYPTO_TAG_ABILITY_INFO", HKS_EXT_CRYPTO_TAG_ABILITY_INFO);
+    AddInt32Property(env, tag, "HUKS_EXT_CRYPTO_TAG_RESOURCE_INFO", HKS_EXT_CRYPTO_TAG_RESOURCE_INFO);
+    AddInt32Property(env, tag, "HUKS_EXT_CRYPTO_TAG_BUNDLE_NAME", HKS_EXT_CRYPTO_TAG_BUNDLE_NAME);
 
     return tag;
 }
@@ -93,6 +95,7 @@ static napi_value HuksExternalCryptoRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("openResource", HuksNapiOpenResource),
         DECLARE_NAPI_FUNCTION("closeResource", HuksNapiCloseResource),
         DECLARE_NAPI_FUNCTION("clearUkeyPinAuthState", HuksNapiClearUkeyPinAuthState),
+        DECLARE_NAPI_FUNCTION("getResourceId", HuksNapiGetResourceId),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, std::size(propDesc), propDesc));
     return exports;

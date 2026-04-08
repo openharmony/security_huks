@@ -425,6 +425,21 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnExportPublicKey(const HksProcessInf
     return HKS_SUCCESS;
 }
 
+ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnGetResourceId(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet, std::string &resourceId))
+{
+    AutoRefCount refCnt(m_refCount, soMutex);
+    void *funcPtr = nullptr;
+    bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_GET_RESOURCE_ID, funcPtr);
+    HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "GetResourceId method enum not found in plugin provider map.")
+    
+    int32_t ret = (*reinterpret_cast<OnGetResourceIdFunc>(funcPtr))(processInfo, providerName, paramSet, resourceId);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetResourceId fail, ret = %" LOG_PUBLIC "d", ret)
+    HKS_LOG_I("get resource id success");
+    return HKS_SUCCESS;
+}
+
 }
 }
 }

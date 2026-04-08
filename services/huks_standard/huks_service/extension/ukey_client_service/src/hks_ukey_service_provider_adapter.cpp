@@ -288,6 +288,32 @@ int32_t HksIpcServiceOnGetRemotePropertyAdapter(const struct HksProcessInfo *pro
     return HKS_SUCCESS;
 }
 
+int32_t HksIpcServiceOnGetResourceIdAdapter(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *providerName, const struct HksParamSet *paramSet, struct HksBlob *resourceId)
+{
+    int32_t ret = HksIpcCheckBlob(providerName, 1, HKS_EXT_MAX_PROVIDER_NAME_LEN);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnGetResourceIdarezAdapter invalid providerName blob")
+
+    std::string cppProviderName(reinterpret_cast<const char*>(providerName->data), providerName->size);
+    CppParamSet cppParamSet(paramSet);
+
+    std::string cppResourceId;
+    ret = OHOS::Security::Huks::HksIpcServiceOnGetResourceId(processInfo, cppProviderName, cppParamSet, cppResourceId);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksIpcServiceOnGetResourceId fail. ret = %" LOG_PUBLIC "d", ret);
+
+    if (cppResourceId.size() > HKS_EXT_MAX_RESOURCE_ID_LEN) {
+        return HKS_ERROR_INSUFFICIENT_DATA;
+    }
+    
+    resourceId->size = static_cast<uint32_t>(cppResourceId.size());
+    resourceId->data = (uint8_t *)HksMalloc(resourceId->size);
+    HKS_IF_NULL_RETURN(resourceId->data, HKS_ERROR_MALLOC_FAIL)
+    
+    (void)memcpy_s(resourceId->data, resourceId->size, cppResourceId.c_str(), cppResourceId.size());
+    
+    return HKS_SUCCESS;
+}
+
 #ifdef __cplusplus
 }
 #endif

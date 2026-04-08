@@ -470,6 +470,25 @@ HKS_API_EXPORT int32_t HksGetRemoteProperty(const struct HksBlob *resourceId, co
 #endif
 }
 
+HKS_API_EXPORT int32_t HksGetResourceId(const struct HksBlob *providerName, const struct HksParamSet *paramSetIn,
+    struct HksBlob *resourceId)
+{
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    HKS_LOG_D("enter GetResourceId");
+    if ((providerName == NULL) || (paramSetIn == NULL) || (resourceId == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientGetResourceId(providerName, paramSetIn, resourceId);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave GetResourceId, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)providerName;
+    (void)paramSetIn;
+    (void)resourceId;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
+
 HKS_API_EXPORT int32_t HksGetSdkVersion(struct HksBlob *sdkVersion)
 {
     if ((sdkVersion == NULL) || (sdkVersion->data == NULL)) {

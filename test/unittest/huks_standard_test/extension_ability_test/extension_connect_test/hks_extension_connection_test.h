@@ -75,6 +75,9 @@ public:
     MOCK_METHOD(ErrCode, GenerateKey,
         (const std::string& index, const CppParamSet& params, int &errcode), (override));
 
+    MOCK_METHOD(ErrCode, GetResourceId,
+        (const CppParamSet &params, std::string &resourceId, int &errcode), (override));
+
     MOCK_METHOD(sptr<IRemoteObject>, AsObject, (), (override));
 };
 

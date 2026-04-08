@@ -44,7 +44,8 @@ typedef enum {
     CLEAR_UKEY_PIN_AUTH,
     IMPORT_WRAPPED_KEY,
     EXPORT_PUBLIC_KEY,
-    GENERATE_KEY
+    GENERATE_KEY,
+    GET_RESOURCE_ID
 } CryptoResultParamType;
 
 typedef struct HksCertInfo {
@@ -128,7 +129,7 @@ public:
         const CppParamSet &params, const std::vector<uint8_t> &wrappedData, int32_t &errcode) override;
     int32_t ExportPublicKey(const std::string &index, const CppParamSet &params,
         std::vector<uint8_t> &outData, int32_t &errcode) override;
-
+    int32_t GetResourceId(const CppParamSet &params, std::string &resourceId, int32_t &errcode) override;
 private:
     template <typename T>
     struct Value {

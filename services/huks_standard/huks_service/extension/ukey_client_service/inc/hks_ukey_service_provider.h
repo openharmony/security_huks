@@ -62,7 +62,8 @@ int32_t HksIpcServiceQueryAbility(const struct HksProcessInfo *processInfo, std:
     CppAbilityInfo &abilityInfo);
 int32_t HksIpcServiceOnImportCertificate(const struct HksProcessInfo *processInfo, const std::string &index,
     const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet);
-
+int32_t HksIpcServiceOnGetResourceId(const struct HksProcessInfo *processInfo, const std::string &providerName,
+    const CppParamSet &paramSet, std::string &resourceId);
 }
 }
 }

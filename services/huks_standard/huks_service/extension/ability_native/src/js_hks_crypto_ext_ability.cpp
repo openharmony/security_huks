@@ -461,6 +461,26 @@ bool BuildHandleWithInData(const napi_env &env, const HandleInfoParam &param, co
     return true;
 }
 
+bool BuildParam(const napi_env &env, const CppParamSet &param, napi_value *argv, size_t &argc)
+{
+    napi_value nativeCppParamSet = nullptr;
+    if (param.GetParamSet()) {
+        auto status = napi_create_object(env, &nativeCppParamSet);
+        if (nativeCppParamSet == nullptr) {
+            LOGE("Create js NativeValue object failed, status:%d", status);
+            return false;
+        }
+        nativeCppParamSet = GenerateHksParamArray(env, *param.GetParamSet());
+        if (nativeCppParamSet == nullptr) {
+            return false;
+        }
+    }
+
+    argv[ARGC_ZERO] = nativeCppParamSet;
+    argc = ARGC_ONE;
+    return true;
+}
+
 bool BuildPropertyData(const napi_env &env, const std::string &propertyId, const HandleInfoParam &param,
     napi_value *argv, size_t &argc)
 {
@@ -987,6 +1007,7 @@ int32_t ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
     switch (resultParams.paramType) {
         case CryptoResultParamType::OPEN_REMOTE_HANDLE:
         case CryptoResultParamType::INIT_SESSION:
+        case CryptoResultParamType::GET_RESOURCE_ID:
             GetOpenRemoteHandleParams(env, funcResult, resultParams);
             break;
         case CryptoResultParamType::AUTH_UKEY_PIN:
@@ -1684,6 +1705,30 @@ int32_t JsHksCryptoExtAbility::ExportPublicKey(const std::string &index, const C
     WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     if (dataParam->hksErrorCode == HKS_SUCCESS) {
         outData = dataParam->outData;
+    }
+    return dataParam->hksErrorCode;
+}
+
+int32_t JsHksCryptoExtAbility::GetResourceId(const CppParamSet &params, std::string &resourceId, int32_t &errcode)
+{
+    auto argParser = [params](napi_env &env, napi_value *argv, size_t &argc) -> bool {
+        return BuildParam(env, params, argv, argc);
+    };
+    std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
+    dataParam->paramType = CryptoResultParamType::GET_RESOURCE_ID;
+    auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
+        return CheckAndCallPromise(env, result, dataParam);
+    };
+
+    dataParam->callJsExMethodDone.store(false);
+    auto ret = CallJsMethod("onGetResourceId", jsRuntime_, jsObj_.get(), argParser, retParser);
+    if (ret != ERR_OK) {
+        LOGE("CallJsMethod error, code:%d", ret);
+        return ret;
+    }
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
+    if (dataParam->hksErrorCode == HKS_SUCCESS) {
+        resourceId = dataParam->handle;
     }
     return dataParam->hksErrorCode;
 }
