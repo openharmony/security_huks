@@ -38,6 +38,7 @@ if (huks_enable_ukey_config == true) {
       "js_hks_crypto_ext_ability_test.cpp",
       "hks_crypto_ext_ability_test.cpp",
       "hks_crypto_ext_stub_impl_test.cpp",
+      "log_utils_test.cpp",
       "mock/js_native_api_mock.cpp",
       "//base/security/huks/services/huks_standard/huks_service/extension/ability_native/src/log_utils.c",
     ]
