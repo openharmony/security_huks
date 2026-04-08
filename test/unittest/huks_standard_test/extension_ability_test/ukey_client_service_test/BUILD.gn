@@ -10,17 +10,23 @@ if (huks_enable_ukey_config == true) {
 
     include_dirs = [
       ".",
-      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger/inc",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey_client_service/inc",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common/inc",
+      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger/inc",
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",
+      "//base/security/huks/services/huks_standard/huks_service/main/core/include",
       "//base/security/huks/frameworks/huks_standard/main/common/include",
+      "//base/security/huks/test/unittest/huks_common_test/hks_mock_common",
       "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     ]
 
     sources = [
-      "../plugin_loader_test/plugin_interface_wrap.cpp",
+      "../../../huks_common_test/hks_mock_common/hks_mock_common.cpp",
+      "../provider_mgr_test/hks_ukey_system_adapter_mock.cpp",
+      "./hks_plugin_lifecycle_manager_mock.cpp",
       "./hks_ukey_client_service_test.cpp",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey_client_service/src/hks_ukey_service_provider_adapter.cpp",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey_client_service/src/hks_ukey_service_provider.cpp",
     ]
 
     configs = [
@@ -28,25 +34,22 @@ if (huks_enable_ukey_config == true) {
     ]
 
     deps = [
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey_client_service:libhuks_service_ukey_standard_static",
-      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
-      "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
-      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl:libhuks_service_idl_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_util_standard_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
     ]
-
     external_deps = [
+      "access_token:libaccesstoken_sdk",
+      "access_token:libnativetoken_shared",
+      "access_token:libtokenid_sdk",
+      "access_token:libtokensetproc_shared",
+      "bounds_checking_function:libsec_shared",
       "c_utils:utils",
       "googletest:gmock",
       "googletest:gtest",
       "hilog:libhilog",
+      "ipc:ipc_single",
     ]
-
-    cflags = [
-      "-Wall",
-      "-Werror",
-    ]
-
-    ldflags = [ "-Wl,--wrap=dlsym" ]
 
     sanitize = {
       integer_overflow = true
@@ -61,8 +64,7 @@ if (huks_enable_ukey_config == true) {
     part_name = "huks"
   }
 } else {
-  # Provide a stub target so upper-level unconditional dependency does not break build.
-  group("ukey_client_service_test") {
+    group("ukey_client_service_test") {
     testonly = true
   }
 }

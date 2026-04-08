@@ -425,6 +425,142 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest010, TestSize.Level0)
     ret = mgr->UnRegisterProvider(processInfo, "provider2", paramSet, isDeath);
     EXPECT_EQ(ret, 0) << "fail: unregist fail";
 }
+
+/**
+ * @tc.name: ExtensionPluginMgrTest.ExtensionPluginMgrTest011
+ * @tc.desc: UnLoadPlugins当m_pluginHandle为nullptr时，直接返回HKS_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest011, TestSize.Level0)
+{
+    auto loader = HuksPluginLoader::GetInstanceWrapper();
+    HksProcessInfo processInfo {};
+    std::vector<HksParam> tmpParams = {
+        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+    };
+    CppParamSet paramSet(tmpParams);
+    OHOS::SafeMap<PluginMethodEnum, void*> pluginProviderMap;
+
+    // 新实例的m_pluginHandle为nullptr，UnLoadPlugins应直接返回HKS_SUCCESS
+    int ret = loader->UnLoadPlugins(processInfo, TEST_PROVIDER, paramSet, pluginProviderMap);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "fail: UnLoadPlugins should return SUCCESS when handle is null";
+}
+
+/**
+ * @tc.name: ExtensionPluginMgrTest.ExtensionPluginMgrTest012
+ * @tc.desc: 清空m_pluginMethodNameMap后调用LoadPlugins，GetMethodByEnum返回空，LoadPlugins返回失败
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest012, TestSize.Level0)
+{
+    // 创建loader实例（构造函数会填充m_pluginMethodNameMap）
+    auto loader = HuksPluginLoader::GetInstanceWrapper();
+    // 清空map，使GetMethodByEnum对所有enum都返回空字符串
+    loader->m_pluginMethodNameMap.Clear();
+
+    HksProcessInfo processInfo {};
+    std::vector<HksParam> tmpParams = {
+        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+    };
+    CppParamSet paramSet(tmpParams);
+    OHOS::SafeMap<PluginMethodEnum, void*> pluginProviderMap;
+
+    // LoadPlugins会在循环中调用GetMethodByEnum，因map为空返回""，触发失败路径
+    int ret = loader->LoadPlugins(processInfo, TEST_PROVIDER, paramSet, pluginProviderMap);
+    EXPECT_NE(ret, HKS_SUCCESS) << "fail: LoadPlugins should fail when method name map is empty";
+}
+
+/**
+ * @tc.name: ExtensionPluginMgrTest.ExtensionPluginMgrTest013
+ * @tc.desc: 清空m_pluginMethodNameMap后调用RegisterProvider，LoadPlugins失败导致RegisterProvider返回错误
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest013, TestSize.Level0)
+{
+    auto loader = HuksPluginLoader::GetInstanceWrapper();
+    // 清空map使LoadPlugins失败
+    loader->m_pluginMethodNameMap.Clear();
+
+    HksProcessInfo processInfo {};
+    std::vector<HksParam> tmpParams = {
+        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+    };
+    CppParamSet paramSet(tmpParams);
+
+    auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
+    EXPECT_NE(ret, HKS_SUCCESS) << "fail: RegisterProvider should fail when LoadPlugins fails";
+}
+
+/**
+ * @tc.name: ExtensionPluginMgrTest.ExtensionPluginMgrTest014
+ * @tc.desc: 验证构造函数注册的map内容正确
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest014, TestSize.Level0)
+{
+    auto loader = HuksPluginLoader::GetInstanceWrapper();
+
+    // 验证所有关键enum都已注册
+    std::string method = "";
+    bool isFind = loader->m_pluginMethodNameMap.Find(PluginMethodEnum::FUNC_ON_REGISTER_PROVIDER, method);
+    EXPECT_TRUE(isFind) << "fail: FUNC_ON_REGISTER_PROVIDER should be registered";
+    EXPECT_FALSE(method.empty()) << "fail: method string should not be empty";
+
+    isFind = loader->m_pluginMethodNameMap.Find(PluginMethodEnum::FUNC_ON_CREATE_REMOTE_KEY_HANDLE, method);
+    EXPECT_TRUE(isFind) << "fail: FUNC_ON_CREATE_REMOTE_KEY_HANDLE should be registered";
+
+    isFind = loader->m_pluginMethodNameMap.Find(PluginMethodEnum::FUNC_ON_AUTH_UKEY_PIN, method);
+    EXPECT_TRUE(isFind) << "fail: FUNC_ON_AUTH_UKEY_PIN should be registered";
+
+    isFind = loader->m_pluginMethodNameMap.Find(PluginMethodEnum::FUNC_ON_INIT_SESSION, method);
+    EXPECT_TRUE(isFind) << "fail: FUNC_ON_INIT_SESSION should be registered";
+
+    isFind = loader->m_pluginMethodNameMap.Find(PluginMethodEnum::FUNC_ON_GENERATE_KEY, method);
+    EXPECT_TRUE(isFind) << "fail: FUNC_ON_GENERATE_KEY should be registered";
+
+    isFind = loader->m_pluginMethodNameMap.Find(PluginMethodEnum::FUNC_ON_IMPORT_WRAPPED_KEY, method);
+    EXPECT_TRUE(isFind) << "fail: FUNC_ON_IMPORT_WRAPPED_KEY should be registered";
+
+    isFind = loader->m_pluginMethodNameMap.Find(PluginMethodEnum::FUNC_ON_EXPORT_PUBLIC_KEY, method);
+    EXPECT_TRUE(isFind) << "fail: FUNC_ON_EXPORT_PUBLIC_KEY should be registered";
+
+    isFind = loader->m_pluginMethodNameMap.Find(PluginMethodEnum::FUNC_ON_IMPORT_CERTIFICATE, method);
+    EXPECT_TRUE(isFind) << "fail: FUNC_ON_IMPORT_CERTIFICATE should be registered";
+
+    isFind = loader->m_pluginMethodNameMap.Find(PluginMethodEnum::FUNC_ON_UNREGISTER_ALL_OBSERVERS, method);
+    EXPECT_TRUE(isFind) << "fail: FUNC_ON_UNREGISTER_ALL_OBSERVERS should be registered";
+
+    isFind = loader->m_pluginMethodNameMap.Find(PluginMethodEnum::FUNC_ON_ABORT_SESSION, method);
+    EXPECT_TRUE(isFind) << "fail: FUNC_ON_ABORT_SESSION should be registered";
+
+    // 验证不存在的enum返回false
+    isFind = loader->m_pluginMethodNameMap.Find(static_cast<PluginMethodEnum>(9999), method);
+    EXPECT_FALSE(isFind) << "fail: non-existent enum should not be found";
+}
+
+/**
+ * @tc.name: ExtensionPluginMgrTest.ExtensionPluginMgrTest015
+ * @tc.desc: 多次创建和销毁实例，验证构造函数和ReleaseInstance正确工作
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest015, TestSize.Level0)
+{
+    // 反复创建和销毁，验证无崩溃且每次构造函数正确执行
+    for (int i = 0; i < 3; i++) {
+        auto loader = HuksPluginLoader::GetInstanceWrapper();
+        EXPECT_NE(loader, nullptr) << "fail: loader instance should not be null";
+
+        auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+        EXPECT_NE(mgr, nullptr) << "fail: mgr instance should not be null";
+
+        // 每次获取后map应该有内容
+        EXPECT_FALSE(loader->m_pluginMethodNameMap.Empty()) << "fail: method name map should not be empty";
+
+        HuksPluginLoader::ReleaseInstance();
+        HuksPluginLifeCycleMgr::ReleaseInstance();
+    }
+}
 }
 }
 }
