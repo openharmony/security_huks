@@ -174,3 +174,17 @@ int32_t HksServiceGetRemoteProperty(const struct HksProcessInfo *processInfo, co
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
+
+int32_t HksServiceGetResourceId(const struct HksProcessInfo *processInfo, const struct HksBlob *providerName,
+    const struct HksParamSet *paramSetIn, struct HksBlob *resourceId)
+{
+#ifdef L2_STANDARD
+    return HksIpcServiceOnGetResourceIdAdapter(processInfo, providerName, paramSetIn, resourceId);
+#else
+    (void)processInfo;
+    (void)providerName;
+    (void)paramSetIn;
+    (void)resourceId;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}

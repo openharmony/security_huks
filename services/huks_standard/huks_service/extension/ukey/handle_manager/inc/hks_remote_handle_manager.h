@@ -47,6 +47,11 @@ const std::map<int32_t, int32_t> g_commonErrCodeMapping = {
     {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
 };
 
+const std::map<int32_t, int32_t> g_getResourceIdErrCodeMapping = {
+    {EXTENSION_SUCCESS, HKS_SUCCESS},
+    {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR}
+};
+
 const std::map<int32_t, int32_t> g_clearPinStateErrCodeMapping = {
     {EXTENSION_SUCCESS, HKS_SUCCESS},
     {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
@@ -232,12 +237,13 @@ public:
         const std::string& propertyId, const CppParamSet& paramSet, CppParamSet& outParams);
     int32_t RemoteExportPublicKey(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet, std::vector<uint8_t> &outData);
-
     int32_t RemoteImportWrappedKey(const HksProcessInfo &processInfo, const std::string &index,
         const std::string &wrappingKeyIndex, const CppParamSet &paramSet, const std::vector<uint8_t> &wrappedData);
-
     int32_t ExtensionGenerateKey(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet);
+    
+    int32_t GetResourceId(const HksProcessInfo &processInfo, const std::string &providerName,
+        const CppParamSet &paramSet, std::string &resourceId);
 
     int32_t ClearUidIndexMap(const ProviderInfo &providerInfo);
     void ClearAuthState(const HksProcessInfo &processInfo);

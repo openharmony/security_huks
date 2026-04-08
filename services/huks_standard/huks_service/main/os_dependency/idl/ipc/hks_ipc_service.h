@@ -49,6 +49,8 @@ void HksIpcServiceImportCertificate(const struct HksBlob *srcData, const uint8_t
 
 void HksIpcServiceGetRemoteProperty(const struct HksBlob *srcData, const uint8_t *context, const uint8_t *remoteObject);
 
+void HksIpcServiceGetResourceId(const struct HksBlob *srcData, const uint8_t *context);
+
 void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *context);
 
 void HksIpcServiceImportKey(const struct HksBlob *srcData, const uint8_t *context);

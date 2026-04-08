@@ -75,6 +75,8 @@ public:
     int32_t OnExportPublicKey(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet, std::vector<uint8_t> &outData);
     int32_t OnQueryAbility(const HksProcessInfo &processInfo, std::string &resourceId, CppAbilityInfo &abilityInfo);
+    int32_t OnGetResourceId(const HksProcessInfo &processInfo, const std::string &providerName,
+        const CppParamSet &paramSet, std::string &resourceId);
 
 private:
     std::atomic<int32_t> m_refCount{0};

@@ -489,7 +489,6 @@ int32_t HksRemoteHandleManager::RemoteExportPublicKey(const HksProcessInfo &proc
 int32_t HksRemoteHandleManager::ExtensionGenerateKey(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet)
 {
-    HKS_LOG_I("enter HksRemoteHandleManager::GenerateKey");
     ProviderInfo providerInfo{};
     std::string handle;
     int32_t ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
@@ -507,6 +506,59 @@ int32_t HksRemoteHandleManager::ExtensionGenerateKey(const HksProcessInfo &proce
     ret = ConvertExtensionToHksErrorCode(ret, g_generateKeyErrCodeMapping);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ExtensionGenerateKey failed, ret = %" LOG_PUBLIC "d", ret)
     HKS_LOG_I("leave HksRemoteHandleManager::GenerateKey, ret = %" LOG_PUBLIC "d", ret);
+    return HKS_SUCCESS;
+}
+
+int32_t HksRemoteHandleManager::GetResourceId(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet, std::string &resourceId)
+{
+    ProviderInfo providerInfo{};
+
+    HKS_IF_TRUE_RETURN(!CheckStringParamLenIsOk(providerName, 1, MAX_PROVIDER_NAME_LEN), HKS_ERROR_INVALID_ARGUMENT)
+
+    auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
+    HKS_IF_NOT_SUCC_LOGE_RETURN(abilityName.first, HKS_ERROR_ABILITY_NAME_MISSING, "AbilityName not passed.")
+    HKS_IF_TRUE_LOGE_RETURN(abilityName.second.size() >= MAX_ABILITY_NAME_LEN, HKS_ERROR_INVALID_ARGUMENT,
+        "the abilityName is too long. size: %" LOG_PUBLIC "zu", abilityName.second.size())
+
+    auto bundleName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_BUNDLE_NAME>();
+    HKS_IF_NOT_SUCC_LOGE_RETURN(bundleName.first, HKS_ERROR_BUNDLE_NAME_MISSING, "BundleName not passed.")
+    HKS_IF_TRUE_LOGE_RETURN(
+        bundleName.second.size() > MAX_BUNDLE_NAME_LEN || bundleName.second.size() < MIN_BUNDLE_NAME_LEN,
+        HKS_ERROR_INVALID_ARGUMENT, "the bundleName is too long. size: %" LOG_PUBLIC "zu", bundleName.second.size())
+
+    auto resourceInfo = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_RESOURCE_INFO>();
+    HKS_IF_NOT_SUCC_LOGE_RETURN(resourceInfo.first, HKS_ERROR_RESOURCE_INFO_MISSING, "ResourceInfo not passed.")
+    HKS_IF_TRUE_LOGE_RETURN(resourceInfo.second.size() < 1, HKS_ERROR_INVALID_ARGUMENT,
+        "the resourceInfo is too short. size: %" LOG_PUBLIC "zu", resourceInfo.second.size())
+
+    int32_t userId = HksGetUserIdFromUid(processInfo.uidInt);
+    providerInfo.m_userid = userId;
+    providerInfo.m_abilityName = std::string(abilityName.second.begin(), abilityName.second.end());
+    providerInfo.m_bundleName = std::string(bundleName.second.begin(), bundleName.second.end());
+    providerInfo.m_providerName = providerName;
+
+    OHOS::sptr<IHuksAccessExtBase> proxy;
+    int32_t ret = GetProviderProxy(providerInfo, proxy);
+    HKS_IF_NULL_RETURN(proxy, ret)
+
+    uint32_t uid = processInfo.uidInt;
+    CppParamSet newParamSet(paramSet);
+    std::vector<HksParam> params = {
+        { .tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(uid) }
+    };
+
+    newParamSet.AddParams(params);
+
+    std::string resourceResult;
+    auto ipccode = proxy->GetResourceId(newParamSet, resourceResult, ret);
+    HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
+    
+    ret = ConvertExtensionToHksErrorCode(ret, g_commonErrCodeMapping);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetResourceId failed, ret = %" LOG_PUBLIC "d", ret)
+    
+    resourceId = resourceResult;
+    HKS_LOG_I("leave HksRemoteHandleManager::GetResourceId, ret = %" LOG_PUBLIC "d", ret);
     return HKS_SUCCESS;
 }
 

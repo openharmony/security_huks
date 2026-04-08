@@ -32,4 +32,5 @@ interface OHOS.Security.Huks.IHuksAccessExtBase {
     [ipccode 13] void ExportPublicKey([in] String newIndex, [in] CppParamSet params, [out] unsigned char[] wrappedData, [out] int errcode);
     [ipccode 14] void GenerateKey([in] String handle, [in] CppParamSet params, [out] int errcode);
     [ipccode 15] void ImportCertificate([in] String index, [in] HksExtCertInfoIdl certInfo, [in] CppParamSet params, [out] int errcode);
+    [ipccode 16] void GetResourceId([in] CppParamSet params, [out] String resourceId, [out] int errcode);
 }

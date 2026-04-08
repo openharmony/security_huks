@@ -181,6 +181,9 @@ static void RegisterOtherMethodMaps(OHOS::SafeMap<PluginMethodEnum, std::string>
     map.Insert(PluginMethodEnum::FUNC_ON_QUERY_ABILITY,
         "_ZN4OHOS8Security4Huks30HksExtPluginOnQueryAbilityInfoERK14HksProcessInfoRNSt3__h12basic_stringIcNS5_11"
         "char_traitsIcEENS5_9allocatorIcEEEER14CppAbilityInfo");
+    map.Insert(PluginMethodEnum::FUNC_ON_GET_RESOURCE_ID,
+        "_ZN4OHOS8Security4Huks27HksExtPluginOnGetResourceIdERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_");
 }
 
 HuksPluginLoader::HuksPluginLoader()

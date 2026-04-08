@@ -872,6 +872,20 @@ static struct HksError g_errCodeTable[] = {
             .errorMsg = "the number of resource exceeds the limit.",
             .data = NULL
         }
+    }, {
+        .innerErrCode = HKS_ERROR_BUNDLE_NAME_MISSING,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_MISSING_CRYPTO_ALG_ARGUMENT,
+            .errorMsg = "the bundle name param is missing.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_RESOURCE_INFO_MISSING,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_MISSING_CRYPTO_ALG_ARGUMENT,
+            .errorMsg = "the resource info param is missing.",
+            .data = NULL
+        }
     }
 };
 

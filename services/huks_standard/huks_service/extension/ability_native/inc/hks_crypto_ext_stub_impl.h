@@ -123,6 +123,11 @@ public:
         const CppParamSet& params,
         std::vector<uint8_t>& outData,
         int32_t& errcode) override;
+
+    ErrCode GetResourceId(
+        const CppParamSet &params,
+        std::string &resourceId,
+        int32_t &errcode) override;
 private:
     std::shared_ptr<HksCryptoExtAbility> extension_;
 };

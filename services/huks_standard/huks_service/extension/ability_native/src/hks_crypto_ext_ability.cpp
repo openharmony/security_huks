@@ -162,6 +162,12 @@ int32_t HksCryptoExtAbility::ExportPublicKey(const std::string &index, const Cpp
     return HKS_ERROR_EXT_UNDEFINED_OPERATION;
 }
 
+int32_t HksCryptoExtAbility::GetResourceId(const CppParamSet &params, std::string &resourceId, int32_t &errcode)
+{
+    LOGE("HksCryptoExtAbility::GetResourceId Undefined operation");
+    return HKS_ERROR_EXT_UNDEFINED_OPERATION;
+}
+
 } // namespace HUKS
 } // namespace Security
 } // namespace OHOS

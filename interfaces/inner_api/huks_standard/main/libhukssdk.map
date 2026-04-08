@@ -79,5 +79,6 @@
     HksFreeExtCertSet;
     HksGetRemoteProperty;
     HksQueryAbilityInfo;
+    HksGetResourceId;
   local: *;
 };

@@ -50,6 +50,8 @@ int32_t HksClientCloseRemoteHandle(const struct HksBlob *resourceId, const struc
 
 int32_t HksClientGetRemoteProperty(const struct HksBlob *resourceId, const struct HksBlob *propertyId,
     const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut);
+int32_t HksClientGetResourceId(const struct HksBlob *providerName, const struct HksParamSet *paramSetIn,
+    struct HksBlob *resourceId);
 #endif
 
 int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
