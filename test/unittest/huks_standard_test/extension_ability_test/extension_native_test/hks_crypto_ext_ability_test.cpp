@@ -23,6 +23,7 @@
 #include "hks_type.h"
 #include "hks_type_enum.h"
 #include "hks_crypto_ext_stub_impl.h"
+#include "hks_ext_cert_info.h"
 #include "native_reference_mock.h"
 
 namespace OHOS::Security::Huks {
@@ -69,5 +70,25 @@ HWTEST_F(CryptoExtAbilityTest, HksCryptoExtAbilityTestAbilityTest_0000, testing:
     EXPECT_EQ(HksAbility.FinishSession(handle, params, inData, outData, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
     EXPECT_EQ(HksAbility.GetProperty(handle, propertyId, params, outParams, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
     EXPECT_EQ(HksAbility.ClearUkeyPinAuthState(handle, params, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+}
+
+HWTEST_F(CryptoExtAbilityTest, HksCryptoExtAbilityTestAbilityTest_0001, testing::ext::TestSize.Level0)
+{
+    HksCryptoExtAbility HksAbility;
+    std::string index;
+    std::string wrappingKeyIndex;
+    CppParamSet params;
+    std::string handle;
+    std::string certJsonArr;
+    int32_t errcode;
+    std::vector<uint8_t> inData;
+    std::vector<uint8_t> outData;
+    HksExtCertInfoIdl certInfo;
+
+    EXPECT_EQ(HksAbility.ImportCertificate(index, certInfo, params, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.ImportWrappedKey(index, wrappingKeyIndex, params, inData, errcode),
+        HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.ExportPublicKey(index, params, outData, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.GenerateKey(handle, params, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
 }
 }

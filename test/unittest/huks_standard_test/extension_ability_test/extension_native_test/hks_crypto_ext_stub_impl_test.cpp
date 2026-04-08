@@ -24,6 +24,7 @@
 #include "hks_type.h"
 #include "hks_type_enum.h"
 #include "hks_crypto_ext_stub_impl.h"
+#include "hks_ext_cert_info.h"
 #include "native_reference_mock.h"
 
 namespace OHOS::Security::Huks {
@@ -196,5 +197,63 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0010, testing
     EXPECT_EQ(hksCryptoExtStubImpl.ClearUkeyPinAuthState(handle, params, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
     HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
     EXPECT_EQ(hksCryptoExtStubImplNullptr.ClearUkeyPinAuthState(handle, params, errcode), HKS_ERROR_EXT_NULLPTR);
+}
+
+HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0011, testing::ext::TestSize.Level0)
+{
+    std::shared_ptr<HksCryptoExtAbility> extension = std::make_shared<HksCryptoExtAbility>();
+    HksCryptoExtStubImpl hksCryptoExtStubImpl(extension);
+    std::string index;
+    CppParamSet params;
+    int32_t errcode;
+    HksExtCertInfoIdl certInfo;
+    EXPECT_EQ(hksCryptoExtStubImpl.ImportCertificate(
+        index, certInfo, params, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
+    EXPECT_EQ(hksCryptoExtStubImplNullptr.ImportCertificate(
+        index, certInfo, params, errcode), HKS_ERROR_EXT_NULLPTR);
+}
+
+HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0012, testing::ext::TestSize.Level0)
+{
+    std::shared_ptr<HksCryptoExtAbility> extension = std::make_shared<HksCryptoExtAbility>();
+    HksCryptoExtStubImpl hksCryptoExtStubImpl(extension);
+    std::string index;
+    CppParamSet params;
+    int32_t errcode;
+    EXPECT_EQ(hksCryptoExtStubImpl.GenerateKey(index, params, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
+    EXPECT_EQ(hksCryptoExtStubImplNullptr.GenerateKey(index, params, errcode), HKS_ERROR_EXT_NULLPTR);
+}
+
+HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0013, testing::ext::TestSize.Level0)
+{
+    std::shared_ptr<HksCryptoExtAbility> extension = std::make_shared<HksCryptoExtAbility>();
+    HksCryptoExtStubImpl hksCryptoExtStubImpl(extension);
+    std::string index;
+    std::string wrappingKeyIndex;
+    CppParamSet params;
+    std::vector<uint8_t> wrappedData;
+    int32_t errcode;
+    EXPECT_EQ(hksCryptoExtStubImpl.ImportWrappedKey(
+        index, wrappingKeyIndex, params, wrappedData, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
+    EXPECT_EQ(hksCryptoExtStubImplNullptr.ImportWrappedKey(
+        index, wrappingKeyIndex, params, wrappedData, errcode), HKS_ERROR_EXT_NULLPTR);
+}
+
+HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0014, testing::ext::TestSize.Level0)
+{
+    std::shared_ptr<HksCryptoExtAbility> extension = std::make_shared<HksCryptoExtAbility>();
+    HksCryptoExtStubImpl hksCryptoExtStubImpl(extension);
+    std::string index;
+    CppParamSet params;
+    std::vector<uint8_t> outData;
+    int32_t errcode;
+    EXPECT_EQ(hksCryptoExtStubImpl.ExportPublicKey(
+        index, params, outData, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
+    EXPECT_EQ(hksCryptoExtStubImplNullptr.ExportPublicKey(
+        index, params, outData, errcode), HKS_ERROR_EXT_NULLPTR);
 }
 }
