@@ -70,7 +70,6 @@ static void InitTestEnv(HksProcessInfo &processInfo, HksParamSet *&paramSet)
 static void FreeTestEnv(HksProcessInfo &processInfo, HksParamSet *&paramSet)
 {
     HksFreeParamSet(&paramSet);
-    HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(processInfo.processName);
 }
 
