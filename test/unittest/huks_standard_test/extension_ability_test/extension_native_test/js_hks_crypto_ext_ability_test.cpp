@@ -22,6 +22,8 @@
 #include "hks_cpp_paramset.h"
 #include "hks_type.h"
 #include "hks_type_enum.h"
+#include "hks_crypto_ext_ability.h"
+#include "hks_ext_cert_info.h"
 #include "js_hks_crypto_ext_ability.h"
 #include "native_reference_mock.h"
 #include "../../../../../services/huks_standard/huks_service/extension/ability_native/src/js_hks_crypto_ext_ability.cpp"
@@ -1532,6 +1534,330 @@ HWTEST_F(JsCryptoExtAbilityTest, abilityTest_0001, testing::ext::TestSize.Level0
     EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_invalid_arg));
     EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
     EXPECT_EQ(ability->ClearUkeyPinAuthState(handle, params, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, ImportCertificate_0000, testing::ext::TestSize.Level0)
+{
+    EXPECT_NE(ability, nullptr);
+    std::string index;
+    HksExtCertInfoIdl certInfo;
+    CppParamSet params;
+    int32_t errcode;
+    // napi_send_event executes cb() synchronously, so argParser will call napi_create_string_utf8
+    EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(ability->ImportCertificate(index, certInfo, params, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, ImportCertificate_0001, testing::ext::TestSize.Level0)
+{
+    EXPECT_NE(ability, nullptr);
+    std::string index = "testIdx";
+    HksExtCertInfoIdl certInfo;
+    certInfo.purpose = 1;
+    certInfo.index = { 'a', 'b', 'c' };
+    certInfo.cert = { 0x30, 0x82 };
+    CppParamSet params;
+    int32_t errcode;
+    napi_value rslt = nullptr;
+
+    // argParser will call napi_create_string_utf8, napi_create_object, napi_create_int32,
+    // napi_set_named_property, napi_create_arraybuffer, napi_create_typedarray
+    EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    // argParser fails, DoCallJsMethod returns HKS_ERROR_EXT_PARSE_FUNC_FAILED
+    EXPECT_EQ(ability->ImportCertificate(index, certInfo, params, errcode), HKS_ERROR_EXT_PARSE_FUNC_FAILED);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, ImportCertificate_0002, testing::ext::TestSize.Level0)
+{
+    EXPECT_NE(ability, nullptr);
+    std::string index = "testIdx";
+    HksExtCertInfoIdl certInfo;
+    certInfo.purpose = 1;
+    certInfo.index = { 'a', 'b', 'c' };
+    certInfo.cert = { 0x30, 0x82 };
+    CppParamSet params;
+    int32_t errcode;
+    napi_value rslt = nullptr;
+
+    // Full argParser path: napi_create_string_utf8 ok, napi_create_object ok
+    // then ConvertCertInfoIdlToJsObject: napi_create_int32 ok, napi_set_named_property ok for purpose,
+    // napi_create_string_utf8 ok for resourceId, napi_set_named_property ok,
+    // napi_create_arraybuffer ok, napi_create_typedarray ok, napi_set_named_property ok
+    // Then napi_get_undefined ok for params (no params)
+    // DoCallJsMethod: napi_get_reference_value -> value stays nullptr -> HKS_ERROR_EXT_GET_VALUE_FAILED
+    EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FOUR>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FOUR>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_object(_, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_int32(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_set_named_property(_, _, _, _))
+        .WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_arraybuffer(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)),
+            SetArgPointee<ARG_INDEX_THREE>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_typedarray(_, _, _, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIVE>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_get_undefined(_, _)).WillOnce(Return(napi_ok));
+    // DoCallJsMethod: argParser succeeds, but jsObj_ is nullptr -> value stays nullptr
+    EXPECT_EQ(ability->ImportCertificate(index, certInfo, params, errcode), HKS_ERROR_EXT_GET_VALUE_FAILED);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, ImportCertificate_0003, testing::ext::TestSize.Level0)
+{
+    EXPECT_NE(ability, nullptr);
+    std::string index = "testIdx";
+    HksExtCertInfoIdl certInfo;
+    certInfo.purpose = 1;
+    certInfo.index = { 'a', 'b', 'c' };
+    certInfo.cert = { 0x30, 0x82 };
+    std::vector<HksParam> paramsVec;
+    struct HksParam tmpParams = { .tag = HKS_TAG_TYPE_INT, .blob = { .size = 0, .data = nullptr } };
+    paramsVec.emplace_back(tmpParams);
+    CppParamSet params(paramsVec);
+    int32_t errcode;
+    napi_value rslt = nullptr;
+
+    // Test with valid params: argParser calls GenerateHksParamArray for non-null params
+    EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FOUR>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FOUR>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_object(_, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_int32(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_set_named_property(_, _, _, _))
+        .WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_arraybuffer(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)),
+            SetArgPointee<ARG_INDEX_THREE>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_typedarray(_, _, _, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIVE>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    // GenerateHksParamArray for non-null params
+    EXPECT_CALL(*insMoc, napi_create_array(_, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_uint32(_, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_set_element(_, _, _, _)).WillOnce(Return(napi_ok));
+    // DoCallJsMethod: jsObj_ is nullptr -> HKS_ERROR_EXT_GET_VALUE_FAILED
+    EXPECT_EQ(ability->ImportCertificate(index, certInfo, params, errcode), HKS_ERROR_EXT_GET_VALUE_FAILED);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, GenerateKey_0000, testing::ext::TestSize.Level0)
+{
+    EXPECT_NE(ability, nullptr);
+    std::string handle = "testHandle";
+    CppParamSet params;
+    int32_t errcode;
+    EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(ability->GenerateKey(handle, params, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, ExportPublicKey_0000, testing::ext::TestSize.Level0)
+{
+    EXPECT_NE(ability, nullptr);
+    std::string index = "testIdx";
+    CppParamSet params;
+    std::vector<uint8_t> outData;
+    int32_t errcode;
+    EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(ability->ExportPublicKey(index, params, outData, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, ImportWrappedKey_0000, testing::ext::TestSize.Level0)
+{
+    EXPECT_NE(ability, nullptr);
+    std::string index;
+    std::string wrappingKeyIndex;
+    CppParamSet params;
+    std::vector<uint8_t> wrappedData = { 0x01, 0x02 };
+    int32_t errcode;
+    EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(ability->ImportWrappedKey(index, wrappingKeyIndex, params, wrappedData, errcode),
+        HKS_ERROR_EXT_SEND_EVENT_FAILED);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, ImportWrappedKey_0001, testing::ext::TestSize.Level0)
+{
+    EXPECT_NE(ability, nullptr);
+    std::string index = "testIdx";
+    std::string wrappingKeyIndex = "wrapKey";
+    CppParamSet params;
+    std::vector<uint8_t> wrappedData = { 0x01, 0x02, 0x03 };
+    int32_t errcode;
+    napi_value rslt = nullptr;
+
+    // argParser calls: napi_create_string_utf8 (index), napi_create_string_utf8 (wrappingKeyIndex),
+    // MakeJsNativeVectorInData: napi_create_arraybuffer, napi_create_typedarray
+    EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FOUR>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FOUR>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_arraybuffer(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)),
+            SetArgPointee<ARG_INDEX_THREE>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_typedarray(_, _, _, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIVE>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    // DoCallJsMethod: jsObj_ is nullptr -> HKS_ERROR_EXT_GET_VALUE_FAILED
+    EXPECT_EQ(ability->ImportWrappedKey(index, wrappingKeyIndex, params, wrappedData, errcode),
+        HKS_ERROR_EXT_GET_VALUE_FAILED);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, ExportProviderCertificates_0000, testing::ext::TestSize.Level0)
+{
+    EXPECT_NE(ability, nullptr);
+    CppParamSet params;
+    std::string certJsonArr;
+    int32_t errcode;
+    EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_create_object(_, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(ability->ExportProviderCertificates(params, certJsonArr, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, ExportCertificate_0000, testing::ext::TestSize.Level0)
+{
+    EXPECT_NE(ability, nullptr);
+    std::string index;
+    CppParamSet params;
+    std::string certJsonArr;
+    int32_t errcode;
+    napi_value rslt = nullptr;
+    // ExportCertificate argParser calls BuildIndexInfoParam -> napi_create_string_utf8
+    // With empty params, only napi_create_string_utf8 is called
+    EXPECT_CALL(*insMoc, napi_send_event(_, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FOUR>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    // DoCallJsMethod: jsObj_ is nullptr -> HKS_ERROR_EXT_GET_VALUE_FAILED
+    EXPECT_EQ(ability->ExportCertificate(index, params, certJsonArr, errcode), HKS_ERROR_EXT_GET_VALUE_FAILED);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, ConvertCertInfoIdlToJsObject_0000, testing::ext::TestSize.Level0)
+{
+    HksExtCertInfoIdl certInfo;
+    certInfo.purpose = 1;
+    certInfo.index = { 'i', 'd', 'x' };
+    certInfo.cert = { 0x30, 0x82, 0x01 };
+    napi_value certObj = nullptr;
+
+    // napi_create_object fails
+    EXPECT_CALL(*insMoc, napi_create_object(_, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(ConvertCertInfoIdlToJsObject(env, certInfo, certObj), HKS_ERROR_EXT_CREATE_VALUE_FAILED);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, ConvertCertInfoIdlToJsObject_0001, testing::ext::TestSize.Level0)
+{
+    HksExtCertInfoIdl certInfo;
+    certInfo.purpose = 1;
+    certInfo.index = { 'i', 'd', 'x' };
+    certInfo.cert = { 0x30, 0x82, 0x01 };
+    napi_value rslt = nullptr;
+    napi_value certObj = nullptr;
+
+    // napi_create_object ok, napi_create_int32 fails
+    EXPECT_CALL(*insMoc, napi_create_object(_, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_int32(_, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(ConvertCertInfoIdlToJsObject(env, certInfo, certObj), HKS_ERROR_EXT_CREATE_VALUE_FAILED);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, ConvertCertInfoIdlToJsObject_0002, testing::ext::TestSize.Level0)
+{
+    HksExtCertInfoIdl certInfo;
+    certInfo.purpose = 1;
+    certInfo.index = { 'i', 'd', 'x' };
+    certInfo.cert = { 0x30, 0x82, 0x01 };
+    napi_value rslt = nullptr;
+    napi_value certObj = nullptr;
+
+    // purpose ok, napi_create_string_utf8 fails for resourceId
+    EXPECT_CALL(*insMoc, napi_create_object(_, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_int32(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_set_named_property(_, _, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(ConvertCertInfoIdlToJsObject(env, certInfo, certObj), HKS_ERROR_EXT_CREATE_VALUE_FAILED);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, ConvertCertInfoIdlToJsObject_0003, testing::ext::TestSize.Level0)
+{
+    HksExtCertInfoIdl certInfo;
+    certInfo.purpose = 1;
+    certInfo.index = { 'i', 'd', 'x' };
+    certInfo.cert = { 0x30, 0x82, 0x01 };
+    napi_value rslt = nullptr;
+    napi_value certObj = nullptr;
+
+    // resourceId ok, napi_create_arraybuffer fails
+    EXPECT_CALL(*insMoc, napi_create_object(_, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_int32(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_set_named_property(_, _, _, _))
+        .WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THREE>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_arraybuffer(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(ConvertCertInfoIdlToJsObject(env, certInfo, certObj), HKS_ERROR_MALLOC_FAIL);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, ConvertCertInfoIdlToJsObject_0004, testing::ext::TestSize.Level0)
+{
+    HksExtCertInfoIdl certInfo;
+    certInfo.purpose = 1;
+    certInfo.index = { 'i', 'd', 'x' };
+    certInfo.cert = { 0x30, 0x82, 0x01 };
+    napi_value rslt = nullptr;
+    napi_value certObj = nullptr;
+
+    // napi_create_arraybuffer ok, napi_create_typedarray fails
+    EXPECT_CALL(*insMoc, napi_create_object(_, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_int32(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_set_named_property(_, _, _, _))
+        .WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THREE>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_arraybuffer(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)),
+            SetArgPointee<ARG_INDEX_THREE>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_typedarray(_, _, _, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_EQ(ConvertCertInfoIdlToJsObject(env, certInfo, certObj), HKS_ERROR_EXT_CREATE_VALUE_FAILED);
+}
+
+HWTEST_F(JsCryptoExtAbilityTest, ConvertCertInfoIdlToJsObject_0005, testing::ext::TestSize.Level0)
+{
+    HksExtCertInfoIdl certInfo;
+    certInfo.purpose = 1;
+    certInfo.index = { 'i', 'd', 'x' };
+    certInfo.cert = { 0x30, 0x82, 0x01 };
+    napi_value rslt = nullptr;
+    napi_value certObj = nullptr;
+
+    // All ok path
+    EXPECT_CALL(*insMoc, napi_create_object(_, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_int32(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_set_named_property(_, _, _, _))
+        .WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FOUR>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_arraybuffer(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)),
+            SetArgPointee<ARG_INDEX_THREE>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_typedarray(_, _, _, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIFTH>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_EQ(ConvertCertInfoIdlToJsObject(env, certInfo, certObj), HKS_SUCCESS);
+    EXPECT_NE(certObj, nullptr);
 }
 
 }

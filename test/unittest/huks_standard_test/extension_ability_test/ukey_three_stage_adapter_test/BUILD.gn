@@ -31,6 +31,7 @@ if (huks_enable_ukey_config == true) {
     deps = [
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_util_standard_static",
+      "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
     ]
     external_deps = [
       "bounds_checking_function:libsec_shared",
@@ -38,6 +39,11 @@ if (huks_enable_ukey_config == true) {
       "googletest:gmock",
       "googletest:gtest",
       "hilog:libhilog",
+      "access_token:libaccesstoken_sdk",
+      "access_token:libnativetoken_shared",
+      "access_token:libtokenid_sdk",
+      "access_token:libtokensetproc_shared",
+      "os_account:os_account_innerkits",
     ]
 
     sanitize = {
