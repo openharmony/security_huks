@@ -29,6 +29,7 @@ group("unittest") {
       "./unittest/huks_standard_test/extension_ability_test/provider_mgr_test:provider_mgr_test",
       "./unittest/huks_standard_test/extension_ability_test/handle_mgr_test:handle_mgr_test",
       "./unittest/huks_standard_test/extension_ability_test/app_observer_test:app_observer_test",
+      "./unittest/huks_standard_test/extension_ability_test/ukey_three_stage_adapter_test:ukey_three_stage_adapter_test",
       "./unittest/huks_standard_test/interface_inner_test/alg_module_test:huks_mt_test",
       "./unittest/huks_standard_test/interface_inner_test/sdk_test:hukssdk_test",
       "./unittest/huks_standard_test/module_test:huks_module_test",
