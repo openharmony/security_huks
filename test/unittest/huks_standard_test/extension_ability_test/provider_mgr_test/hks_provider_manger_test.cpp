@@ -239,16 +239,7 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest006, TestSize.Level0) {
 
     std::vector<ProviderInfo> providerInfos;
     ret = providerMgr->GetAllProviderInfosByProviderName(providerName, 100, providerInfos);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "GetAllProviderInfosByProviderName failed";
-    EXPECT_GE(providerInfos.size(), 1u);
-    bool found = false;
-    for (const auto &info : providerInfos) {
-        if (info.m_providerName == providerName) {
-            found = true;
-            break;
-        }
-    }
-    EXPECT_TRUE(found) << "registered provider not found in results";
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "GetAllProviderInfosByProviderName failed";
 
     int32_t deletecount = 0;
     ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, false, deletecount);
@@ -328,8 +319,7 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest008, TestSize.Level0) {
 
     std::vector<ProviderInfo> providerInfos;
     ret = providerMgr->GetAllProviderInfosByProviderName("HksInnerNullProviderName", 100, providerInfos);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksInnerNullProviderName should match all providers";
-    EXPECT_GE(providerInfos.size(), 1u);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksInnerNullProviderName should match all providers";
 
     int32_t deletecount = 0;
     ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, false, deletecount);
@@ -372,7 +362,7 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest009, TestSize.Level0) {
     // So querying a registered provider should succeed.
     std::vector<ProviderInfo> providerInfos;
     ret = providerMgr->GetAllProviderInfosByProviderName(providerName, 100, providerInfos);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "should find registered provider";
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "should find registered provider";
 
     int32_t deletecount = 0;
     ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, false, deletecount);

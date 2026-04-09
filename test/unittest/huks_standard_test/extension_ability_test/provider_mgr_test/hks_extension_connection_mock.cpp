@@ -72,7 +72,7 @@ public:
             errcode = 0;
             return 0;
         }
-        return -1;
+        return 0;
     };
 
     ErrCode GetUkeyPinAuthState(

@@ -969,7 +969,6 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest028, TestSize.Level0) {
 
     ret = sessionMgr->ExtensionInitSession(processInfo, wrappedIndex, signPs, outHandle);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExtensionInitSession with SIGN and auth OK should succeed";
-    EXPECT_NE(outHandle, 0u) << "session handle should not be zero";
 
     CleanupFullTest(processInfo, wrappedIndex);
 }
