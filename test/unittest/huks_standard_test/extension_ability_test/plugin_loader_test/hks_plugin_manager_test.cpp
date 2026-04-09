@@ -16,6 +16,8 @@
 #include "hks_plugin_manager_test.h"
 #include "hks_function_types.h"
 #include <unordered_map>
+#include <chrono>
+#include <thread>
 
 using namespace testing::ext;
 
@@ -36,6 +38,10 @@ void ExtensionPluginMgrTest::SetUp() {
 }
 
 void ExtensionPluginMgrTest::TearDown() {
+    // RegisterProvider creates a detached thread (sleeps 20ms then calls UnRegisterProvider).
+    // We must wait for all detached threads to finish before destroying the singleton,
+    // otherwise use-after-free occurs.
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     HuksPluginLoader::ReleaseInstance();
     HuksPluginLifeCycleMgr::ReleaseInstance();
 }
