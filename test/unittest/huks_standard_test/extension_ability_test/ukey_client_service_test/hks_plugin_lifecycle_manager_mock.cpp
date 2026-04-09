@@ -102,12 +102,14 @@ int32_t HuksPluginLifeCycleMgr::OnGetRemoteProperty(const HksProcessInfo &proces
 int32_t HuksPluginLifeCycleMgr::OnExportCertificate(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, std::string &certsJson)
 {
+    certsJson = "[{\"purpose\":1,\"index\":\"idx\",\"cert\":\"MIIB\"}]";
     return HKS_SUCCESS;
 }
 
 int32_t HuksPluginLifeCycleMgr::OnExportProviderAllCertificates(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr)
 {
+    certsJsonArr = "[{\"purpose\":1,\"index\":\"idx\",\"cert\":\"MIIB\"}]";
     return HKS_SUCCESS;
 }
 
