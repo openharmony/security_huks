@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-int32_t CopyToInnerKey(const struct HksBlob *key, struct HksBlob *outKey);
+int32_t CopyToInnerKey(const struct HksBlob *key, uint32_t alg, struct HksBlob *outKey);
 
 int32_t GetHksPubKeyInnerFormat(const struct HksParamSet *paramSet, const struct HksBlob *key, struct HksBlob *outKey);
 

@@ -581,6 +581,26 @@ void HksIpcServiceGetResourceId(const struct HksBlob *srcData, const uint8_t *co
 #endif
 }
 
+static int32_t HksAllocateMemForKey(const struct HksParamSet *paramSet, struct HksBlob *key)
+{
+    uint32_t alg = 0;
+    struct HksParam *algParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
+    if (ret == HKS_SUCCESS) {
+        alg = algParam->uint32Param;
+    }
+
+    uint32_t size = (alg == HKS_ALG_ML_DSA) ? ML_DSA_MAX_KEY_SIZE : MAX_KEY_SIZE;
+    key->data = (uint8_t *)HksMalloc(size);
+    if (key->data == NULL) {
+        HKS_LOG_E("malloc fail.");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+
+    key->size = size;
+    return HKS_SUCCESS;
+}
+
 void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob keyAlias = { 0, NULL };
@@ -596,13 +616,8 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
 
         if (keyOut.data == NULL) {
             isNoneResponse = true;
-            keyOut.data = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
-            if (keyOut.data == NULL) {
-                HKS_LOG_E("malloc fail.");
-                ret = HKS_ERROR_MALLOC_FAIL;
-                break;
-            }
-            keyOut.size = MAX_KEY_SIZE;
+            ret = HksAllocateMemForKey(inParamSet, &keyOut);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAllocateMemForKey fail, ret = %" LOG_PUBLIC "d", ret)
         }
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);

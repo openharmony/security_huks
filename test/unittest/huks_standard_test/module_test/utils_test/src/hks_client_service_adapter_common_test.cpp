@@ -67,11 +67,11 @@ HWTEST_F(HksClientServiceAdapterCommonTest, HksClientServiceAdapterCommonTest001
         .size = 0,
         .data = nullptr,
     };
-    int32_t ret = CopyToInnerKey(&key, nullptr);
+    int32_t ret = CopyToInnerKey(&key, HKS_ALG_AES, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksClientServiceAdapterCommonTest001 failed, ret = " << ret;
 
     key.size = MAX_KEY_SIZE + 1;
-    ret = CopyToInnerKey(&key, nullptr);
+    ret = CopyToInnerKey(&key, HKS_ALG_AES, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksClientServiceAdapterCommonTest001 failed, ret = " << ret;
 }
 

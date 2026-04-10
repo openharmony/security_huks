@@ -1038,9 +1038,9 @@ int32_t HksServiceImportKey(const struct HksProcessInfo *processInfo, const stru
 {
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
-    uint8_t *keyOutBuffer = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
+    uint8_t *keyOutBuffer = (uint8_t *)HksMalloc(ML_DSA_MAX_KEY_SIZE);
     HKS_IF_NULL_LOGE_RETURN(keyOutBuffer, HKS_ERROR_MALLOC_FAIL, "malloc keyOutBuffer failed.")
-    struct HksBlob keyOut = { MAX_KEY_SIZE, keyOutBuffer };
+    struct HksBlob keyOut = { ML_DSA_MAX_KEY_SIZE, keyOutBuffer };
 #ifdef L2_STANDARD
     struct HksParamSet *reportParamSet = NULL;
     uint64_t enterTime = 0;
