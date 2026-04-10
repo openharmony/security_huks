@@ -81,6 +81,8 @@ enum HksKeyAlg {
     HKS_ALG_DES = 160,
     HKS_ALG_3DES = 161,
     HKS_ALG_CMAC = 162,
+
+    HKS_ALG_ML_DSA = 201,
 #endif
 };
 
@@ -175,6 +177,10 @@ enum HksKeySize {
     HKS_DES_KEY_SIZE_64 = 64,
     HKS_3DES_KEY_SIZE_128 = 128,
     HKS_3DES_KEY_SIZE_192 = 192,
+
+    HKS_ML_DSA_KEY_PARAM_SET_44 = 44,
+    HKS_ML_DSA_KEY_PARAM_SET_65 = 65,
+    HKS_ML_DSA_KEY_PARAM_SET_87 = 87,
 #endif
 };
 

@@ -695,14 +695,14 @@ static int32_t GetRsaPrivateOrPairInnerFormat(uint32_t keyType, const struct Hks
         return AppendRsaPublicExponent(key, outKey);
     }
 
-    return CopyToInnerKey(key, outKey);
+    return CopyToInnerKey(key, HKS_ALG_RSA, outKey);
 }
 
 static int32_t GetCurve25519PrivateOrPairInnerFormat(uint8_t alg, uint32_t keyType,
     const struct HksBlob *key, struct HksBlob *outKey)
 {
     if (keyType == HKS_KEY_TYPE_KEY_PAIR) {
-        return CopyToInnerKey(key, outKey);
+        return CopyToInnerKey(key, alg, outKey);
     }
 
     if (key->size != HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)) {
@@ -748,7 +748,7 @@ static int32_t GetPrivateOrPairInnerFormat(uint32_t keyType, const struct HksBlo
         case HKS_ALG_SM3:
         case HKS_ALG_SM4:
         case HKS_ALG_AES:
-            return CopyToInnerKey(key, outKey);
+            return CopyToInnerKey(key, algParam->uint32Param, outKey);
         case HKS_ALG_ED25519:
         case HKS_ALG_X25519:
             return GetCurve25519PrivateOrPairInnerFormat(algParam->uint32Param, keyType, key, outKey);
@@ -768,7 +768,13 @@ int32_t HksCoreImportKey(const struct HksBlob *keyAlias, const struct HksBlob *k
         (importKeyTypeParam->uint32Param == HKS_KEY_TYPE_KEY_PAIR))) {
         ret = GetPrivateOrPairInnerFormat(importKeyTypeParam->uint32Param, key, paramSet, &innerKey);
     } else {
-        ret = CopyToInnerKey(key, &innerKey);
+        uint32_t alg = 0;
+        struct HksParam *algParam = NULL;
+        ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
+        if (ret == HKS_SUCCESS) {
+            alg = algParam->uint32Param;
+        }
+        ret = CopyToInnerKey(key, alg, &innerKey);
     }
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "translate key to inner format failed, ret = %" LOG_PUBLIC "d", ret)
 
