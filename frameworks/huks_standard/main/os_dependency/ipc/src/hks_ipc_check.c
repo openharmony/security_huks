@@ -68,8 +68,8 @@ int32_t HksCheckIpcTwoBlobsParamSet(const struct HksBlob *blob1, const struct Hk
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    if ((MAX_PROCESS_SIZE - sizeof(blob1->size) - ALIGN_SIZE(blob1->size) -
-        sizeof(blob2->size) - ALIGN_SIZE(blob2->size) < ALIGN_SIZE(paramSet->paramSetSize))) {
+    if ((sizeof(blob1->size) + ALIGN_SIZE(blob1->size) +
+        sizeof(blob2->size) + ALIGN_SIZE(blob2->size) + ALIGN_SIZE(paramSet->paramSetSize)) > MAX_PROCESS_SIZE) {
         HKS_LOG_E("ipc blob and paramSet check size failed");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -112,10 +112,10 @@ int32_t HksCheckIpcBlobAndCertInfo(const struct HksBlob *blob, const struct HksE
         HKS_LOG_E("single field size exceeds MAX_PROCESS_SIZE");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    uint32_t remaining = MAX_PROCESS_SIZE - sizeof(blob->size) - ALIGN_SIZE(blob->size) -
-        sizeof(int32_t) - sizeof(certInfo->index.size) - ALIGN_SIZE(certInfo->index.size) -
-        sizeof(certInfo->cert.size) - ALIGN_SIZE(certInfo->cert.size);
-    if (remaining < ALIGN_SIZE(paramSet->paramSetSize)) {
+    uint32_t total = sizeof(blob->size) + ALIGN_SIZE(blob->size) +
+        sizeof(int32_t) + sizeof(certInfo->index.size) + ALIGN_SIZE(certInfo->index.size) +
+        sizeof(certInfo->cert.size) + ALIGN_SIZE(certInfo->cert.size) + ALIGN_SIZE(paramSet->paramSetSize);
+    if (total > MAX_PROCESS_SIZE) {
         HKS_LOG_E("ipc blob + certInfo + paramSet total size exceeds MAX_PROCESS_SIZE");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -372,8 +372,9 @@ int32_t HksCheckIpcRenameKeyAlias(const struct HksBlob *oldKeyAlias, const struc
     int32_t ret = HksCheckBlob2AndParamSet(oldKeyAlias, newKeyAlias, paramSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check keyAlias or paramSet failed")
 
-    if ((MAX_PROCESS_SIZE - sizeof(oldKeyAlias->size) - ALIGN_SIZE(oldKeyAlias->size) -
-        sizeof(newKeyAlias->size) - ALIGN_SIZE(newKeyAlias->size) < ALIGN_SIZE(paramSet->paramSetSize))) {
+    if ((sizeof(oldKeyAlias->size) + ALIGN_SIZE(oldKeyAlias->size) +
+        sizeof(newKeyAlias->size) + ALIGN_SIZE(newKeyAlias->size) + ALIGN_SIZE(paramSet->paramSetSize)) >
+        MAX_PROCESS_SIZE) {
         HKS_LOG_E("ipc rename key alias check size failed");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
