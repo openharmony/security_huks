@@ -292,7 +292,8 @@ int32_t HksIpcServiceOnGetResourceIdAdapter(const struct HksProcessInfo *process
     const struct HksBlob *providerName, const struct HksParamSet *paramSet, struct HksBlob *resourceId)
 {
     int32_t ret = HksIpcCheckBlob(providerName, 1, HKS_EXT_MAX_PROVIDER_NAME_LEN);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnGetResourceIdarezAdapter invalid providerName blob")
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "HksIpcServiceOnGetResourceIdarezAdapter invalid providerName blob")
 
     std::string cppProviderName(reinterpret_cast<const char*>(providerName->data), providerName->size);
     CppParamSet cppParamSet(paramSet);
@@ -306,7 +307,7 @@ int32_t HksIpcServiceOnGetResourceIdAdapter(const struct HksProcessInfo *process
     }
     
     resourceId->size = static_cast<uint32_t>(cppResourceId.size());
-    resourceId->data = (uint8_t *)HksMalloc(resourceId->size);
+    resourceId->data = static_cast<uint8_t*>(HksMalloc(resourceId->size));
     HKS_IF_NULL_RETURN(resourceId->data, HKS_ERROR_MALLOC_FAIL)
     
     (void)memcpy_s(resourceId->data, resourceId->size, cppResourceId.c_str(), cppResourceId.size());
