@@ -371,7 +371,7 @@ int32_t HksCheckIpcRenameKeyAlias(const struct HksBlob *oldKeyAlias, const struc
 {
     int32_t ret = HksCheckBlob2AndParamSet(oldKeyAlias, newKeyAlias, paramSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check keyAlias or paramSet failed")
-    
+
     if (oldKeyAlias->size > MAX_PROCESS_SIZE || newKeyAlias->size > MAX_PROCESS_SIZE) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
