@@ -21,7 +21,7 @@ if (huks_enable_ukey_config == true) {
 
     sources = [
       "../../../huks_common_test/hks_mock_common/hks_mock_common.cpp",
-      "../provider_mgr_test/hks_external_adapter_mock.cpp",
+      "../provider_mgr_test/hks_ukey_system_adapter_mock.cpp",
       "./hks_app_observer_mock.cpp",
       "./hks_app_observer_test.cpp",
     ]

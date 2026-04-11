@@ -1,0 +1,65 @@
+import("//base/security/huks/build/config.gni")
+import("//base/security/huks/huks.gni")
+import("//build/ohos.gni")
+import("//build/test.gni")
+
+if (huks_enable_ukey_config == true) {
+  module_output_path = "huks/huks/extension_unittest"
+  ohos_unittest("ukey_three_stage_adapter_test") {
+    module_out_path = module_output_path
+
+    include_dirs = [
+      ".",
+      "//base/security/huks/services/huks_standard/huks_service/main/core/include",
+      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger/inc",
+      "//base/security/huks/frameworks/huks_standard/main/common/include",
+      "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
+      "//base/security/huks/test/unittest/huks_common_test/hks_mock_common",
+    ]
+
+    sources = [
+      "../../../huks_common_test/hks_mock_common/hks_mock_common.cpp",
+      "../ukey_client_service_test/hks_plugin_lifecycle_manager_mock.cpp",
+      "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_ukey_three_stage_adapter.cpp",
+      "./hks_ukey_three_stage_adapter_test.cpp",
+    ]
+
+    configs = [
+      "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+    ]
+
+    deps = [
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_util_standard_static",
+      "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
+    ]
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "c_utils:utils",
+      "googletest:gmock",
+      "googletest:gtest",
+      "hilog:libhilog",
+      "access_token:libaccesstoken_sdk",
+      "access_token:libnativetoken_shared",
+      "access_token:libtokenid_sdk",
+      "access_token:libtokensetproc_shared",
+      "os_account:os_account_innerkits",
+    ]
+
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+      cfi_cross_dso = true
+      boundary_sanitize = true
+      ubsan = true
+    }
+
+    subsystem_name = "security"
+    part_name = "huks"
+  }
+} else {
+  group("ukey_three_stage_adapter_test") {
+    testonly = true
+  }
+}

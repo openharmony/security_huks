@@ -31,7 +31,6 @@ if (os_level == "standard") {
 
     sources = [
       "src/hks_provider_life_cycle_manager.cpp",
-      "src/hks_external_adapter.cpp"
     ]
 
     defines = [ "L2_STANDARD" ]
