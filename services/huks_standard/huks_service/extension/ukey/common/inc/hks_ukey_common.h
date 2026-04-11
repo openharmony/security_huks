@@ -46,6 +46,8 @@ namespace Huks {
     constexpr int32_t MAX_ABILITY_NAME_LEN = 128;
     constexpr int32_t MAX_PROVIDER_NAME_LEN = 128;
     constexpr int32_t MAX_INDEX_LEN = 512;
+    constexpr int32_t MAX_BUNDLE_NAME_LEN = 128;
+    constexpr int32_t MIN_BUNDLE_NAME_LEN = 7;
 
     enum ExtensionErrCode {
         EXTENSION_SUCCESS = 0,

@@ -588,7 +588,26 @@ static int32_t UnpackInt32FromBuffer(const struct HksBlob *srcBlob, uint32_t *of
     return HKS_SUCCESS;
 }
 
-static int32_t UnpackBlobFromBuffer(const struct HksBlob *srcBlob, uint32_t *offset, struct HksBlob *out)
+static int32_t UnpackExtCertInfoFromBuffer(const struct HksBlob *srcBlob, uint32_t *offset,
+    struct HksExtCertInfo *certInfo)
+{
+    int32_t ret = UnpackInt32FromBuffer(srcBlob, offset, &certInfo->purpose);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    ret = UnpackBlobFromBuffer(srcBlob, offset, &certInfo->index);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    ret = UnpackBlobFromBuffer(srcBlob, offset, &certInfo->cert);
+    if (ret != HKS_SUCCESS) {
+        HKS_FREE(certInfo->index.data);
+        certInfo->index.data = NULL;
+    }
+    return ret;
+}
+
+int32_t UnpackBlobFromBuffer(const struct HksBlob *srcBlob, uint32_t *offset, struct HksBlob *out)
 {
     struct HksBlob view = { 0, NULL };
     int32_t ret = GetBlobFromBuffer(&view, srcBlob, offset);
@@ -610,25 +629,6 @@ static int32_t UnpackBlobFromBuffer(const struct HksBlob *srcBlob, uint32_t *off
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     return HKS_SUCCESS;
-}
-
-static int32_t UnpackExtCertInfoFromBuffer(const struct HksBlob *srcBlob, uint32_t *offset,
-    struct HksExtCertInfo *certInfo)
-{
-    int32_t ret = UnpackInt32FromBuffer(srcBlob, offset, &certInfo->purpose);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
-    ret = UnpackBlobFromBuffer(srcBlob, offset, &certInfo->index);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
-    ret = UnpackBlobFromBuffer(srcBlob, offset, &certInfo->cert);
-    if (ret != HKS_SUCCESS) {
-        HKS_FREE(certInfo->index.data);
-        certInfo->index.data = NULL;
-    }
-    return ret;
 }
 
 int32_t HksCertificatesUnpackFromService(const struct HksBlob *srcBlob, struct HksExtCertInfoSet *destData)

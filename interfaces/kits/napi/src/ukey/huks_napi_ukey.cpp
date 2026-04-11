@@ -126,6 +126,17 @@ static int32_t CallHksClearUkeyPinAuthState(const std::vector<uint8_t> &resource
     return HksClearUkeyPinAuthState(&resourceId);
 }
 
+static int32_t CallHksGetResourceId(const std::vector<uint8_t> &providerName, struct HksParamSet *paramSetIn,
+    struct HksBlob *resourceId)
+{
+    struct HksBlob providerNameBlob = {0, nullptr};
+    if (!providerName.empty()) {
+        providerNameBlob.size = static_cast<uint32_t>(providerName.size());
+        providerNameBlob.data = const_cast<uint8_t *>(providerName.data());
+    }
+    return HksGetResourceId(&providerNameBlob, paramSetIn, resourceId);
+}
+
 // NOTE: ParseString fills `str` with UTF-8 bytes WITHOUT a trailing NUL.
 // `str.size()` equals the byte length. Do NOT pass str.data() to APIs expecting C strings.
 // Convert to std::string or append '\0' when a NUL-terminated buffer is required.
@@ -584,6 +595,81 @@ napi_value HuksNapiClearUkeyPinAuthState(napi_env env, napi_callback_info info)
         }
         HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
     };
+    napi_value result = CreateAsyncWork(env, info, std::move(context), __func__);
+    if (result == nullptr) {
+        HKS_LOG_E("could not do async work");
+    }
+    return result;
+}
+
+static napi_status ParseGetResourceIdParams(napi_env env, napi_callback_info info, AsyncContext *context)
+{
+    GetResourceIdContext *asyncContext = reinterpret_cast<GetResourceIdContext *>(context);
+    size_t argc = HUKS_NAPI_TWO_ARGS;
+    napi_value argv[HUKS_NAPI_TWO_ARGS] = { nullptr };
+    NAPI_CALL_RETURN_ERR(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    NAPI_THROW_RETURN_ERR(env, argc < HUKS_NAPI_TWO_ARGS, napi_generic_failure,
+                          HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
+
+    napi_value result = ParseString(env, argv[0], asyncContext->providerName);
+    NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
+                          HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get providerName");
+
+    result = ParseHksCryptoExternalParams(env, argv[1], context->paramSetIn);
+    NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
+                          HUKS_ERR_CODE_INVALID_ARGUMENT, "could not get paramSet");
+    return napi_ok;
+}
+
+static void ExecuteGetResourceId(napi_env env, void *data)
+{
+    GetResourceIdContext *napiContext = static_cast<GetResourceIdContext *>(data);
+    struct HksBlob resourceId = {0, nullptr};
+    napiContext->result = CallHksGetResourceId(napiContext->providerName, napiContext->paramSetIn, &resourceId);
+    if (napiContext->result == HKS_SUCCESS) {
+        napiContext->resourceId.assign(resourceId.data, resourceId.data + resourceId.size);
+    }
+}
+
+static void ResolveGetResourceId(napi_env env, AsyncContext *context)
+{
+    GetResourceIdContext *napiContext = static_cast<GetResourceIdContext *>(context);
+    if (napiContext->result == HKS_ERROR_INVALID_ARGUMENT) {
+        napiContext->result = HKS_ERROR_NEW_INVALID_ARGUMENT;
+    }
+    if (napiContext->result != HKS_SUCCESS) {
+        HksReturnNapiUndefined(env, napiContext->callback, napiContext->deferred, napiContext->result);
+        return;
+    }
+    napi_value result = nullptr;
+    napi_status status = napi_create_string_utf8(env,
+        reinterpret_cast<const char *>(napiContext->resourceId.data()),
+        napiContext->resourceId.size(), &result);
+    if (status != napi_ok) {
+        HksReturnNapiUndefined(env, napiContext->callback, napiContext->deferred, HUKS_ERR_CODE_ILLEGAL_ARGUMENT);
+        return;
+    }
+    if (napiContext->callback != nullptr) {
+        napi_value undefined = nullptr;
+        napi_get_undefined(env, &undefined);
+        napi_value callback = nullptr;
+        napi_get_reference_value(env, napiContext->callback, &callback);
+        napi_value argv[] = { nullptr, result };
+        napi_call_function(env, undefined, callback, HUKS_NAPI_TWO_ARGS, argv, nullptr);
+    } else {
+        napi_resolve_deferred(env, napiContext->deferred, result);
+    }
+}
+
+napi_value HuksNapiGetResourceId(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_unique<GetResourceIdContext>();
+    NAPI_THROW(env, context == nullptr, HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not create context");
+
+    context->parse = ParseGetResourceIdParams;
+    context->execute = ExecuteGetResourceId;
+    context->resolve = ResolveGetResourceId;
+
     napi_value result = CreateAsyncWork(env, info, std::move(context), __func__);
     if (result == nullptr) {
         HKS_LOG_E("could not do async work");

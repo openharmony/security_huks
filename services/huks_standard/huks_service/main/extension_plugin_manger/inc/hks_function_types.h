@@ -49,8 +49,9 @@ enum class PluginMethodEnum {
     FUNC_ON_IMPORT_WRAPPED_KEY,
     FUNC_ON_EXPORT_PUBLIC_KEY,
     FUNC_ON_QUERY_ABILITY,
+    FUNC_ON_GET_RESOURCE_ID,
 
-    COUNT = 20,
+    COUNT,
 };
 
 using OnRegisterProviderFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &providerName,
@@ -92,6 +93,8 @@ using OnImportWrappedKeyFunc = int32_t (*)(const HksProcessInfo &processInfo, co
 using OnQueryAbilityFunc = int32_t (*)(const struct HksProcessInfo &processInfo, std::string &resourceId,
     CppAbilityInfo &abilityInfo);
 }
+using OnGetResourceIdFunc = int32_t (*)(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet, std::string &resourceId);
 }
 }
 #endif

@@ -126,6 +126,14 @@ int32_t HksIpcServiceOnExportProviderAllCertificates(const struct HksProcessInfo
     return pluginManager->OnExportProviderAllCertificates(*processInfo, index, paramSet, certificatesOut);
 }
 
+int32_t HksIpcServiceOnGetResourceId(const struct HksProcessInfo *processInfo, const std::string &providerName,
+    const CppParamSet &paramSet, std::string &resourceId)
+{
+    auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
+    return pluginManager->OnGetResourceId(*processInfo, providerName, paramSet, resourceId);
+}
+
 }
 }
 }

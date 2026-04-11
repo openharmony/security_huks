@@ -549,6 +549,38 @@ void HksIpcServiceGetRemoteProperty(const struct HksBlob *srcData, const uint8_t
 #endif
 }
 
+void HksIpcServiceGetResourceId(const struct HksBlob *srcData, const uint8_t *context)
+{
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    int32_t ret;
+    struct HksBlob providerName = { 0, NULL };
+    struct HksBlob resourceId = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    do {
+        ret  = HksUKeyGeneralUnpack(srcData, &providerName, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksUKeyGeneralUnpack Ipc in HksIpcServiceGetResourceId fail")
+
+        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcServiceOnGetResourceIdAdapter(&processInfo, &providerName, paramSet, &resourceId);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceOnGetResourceIdAdapter fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HksSendResponse(context, ret, ret == HKS_SUCCESS && resourceId.size != 0 ? &resourceId : NULL);
+
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+#endif
+}
+
 void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob keyAlias = { 0, NULL };

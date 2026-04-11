@@ -61,6 +61,8 @@ int32_t HksIpcServiceOnGetRemotePropertyAdapter(const struct HksProcessInfo *pro
 int32_t HksIpcQueryAbilityInfoAdapter(const struct HksProcessInfo *processInfo, struct HksBlob *resourceId,
     struct HksAbilityInfo *abilityInfo);
 
+int32_t HksIpcServiceOnGetResourceIdAdapter(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *providerName, const struct HksParamSet *paramSet, struct HksBlob *resourceId);
 #ifdef __cplusplus
 }
 #endif

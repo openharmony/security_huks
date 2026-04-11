@@ -59,6 +59,11 @@ public:
     struct HksParamSet *paramSetIn = nullptr;
     struct HksParamSet *paramSetOut = nullptr;
 };
+class GetResourceIdContext : public AsyncContext {
+public:
+    std::vector<uint8_t> providerName{};
+    std::vector<uint8_t> resourceId{};
+};
 
 class ProviderRegContext : public AsyncContext {
 public:
@@ -100,6 +105,8 @@ napi_value HuksNapiOpenResource(napi_env env, napi_callback_info info);
 napi_value HuksNapiCloseResource(napi_env env, napi_callback_info info);
 
 napi_value HuksNapiClearUkeyPinAuthState(napi_env env, napi_callback_info info);
+
+napi_value HuksNapiGetResourceId(napi_env env, napi_callback_info info);
 
 napi_value ParseString(napi_env env, napi_value object, std::vector<uint8_t> &alias);
 
