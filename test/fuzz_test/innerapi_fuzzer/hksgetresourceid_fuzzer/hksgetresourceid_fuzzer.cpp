@@ -38,7 +38,6 @@ int DoSomethingInterestingWithHksGetResourceId(uint8_t *data, size_t size)
     struct HksBlob providerName = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
     struct HksBlob resourceId = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
     WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
-    HksParamSet *psOut = nullptr;
     [[maybe_unused]] int ret = HksGetResourceId(&providerName, ps.s, &resourceId);
     return 0;
 }
