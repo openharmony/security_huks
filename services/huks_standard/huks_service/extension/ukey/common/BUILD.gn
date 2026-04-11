@@ -64,7 +64,10 @@ if (os_level == "standard") {
 
     include_dirs = [ "inc" ]
 
-    sources = [ "src/hks_ukey_common.cpp" ]
+    sources = [
+      "src/hks_ukey_common.cpp",
+      "src/hks_ukey_system_adapter.cpp",
+    ]
 
     public_configs = [ ":IHuks_Access_Ext_Base_config" ]
 

@@ -15,16 +15,15 @@
 #include "app_observer.h"
 #include "hks_error_code.h"
 #include "hks_log.h"
-#include "hks_external_adapter.h"
 #include "hks_remote_handle_manager.h"
 #include "hks_ukey_session_manager.h"
 #include "hks_cpp_paramset.h"
 #include "hks_mem.h"
 #include "hks_plugin_def.h"
 #include "hks_ukey_common.h"
+#include "hks_ukey_system_adapter.h"
 #include "hks_mock_common.h"
 #include "hks_type.h"
-#include "hks_error_code.h"
 #include "gtest/gtest.h"
 #include <string>
 #include <vector>
@@ -328,6 +327,86 @@ HWTEST_F(HksAppObserverTest, HksAppObserverTest012, TestSize.Level0)
 {
     auto &manager = HksAppObserverManager::GetInstance();
     manager.CleanupTriggeredObserver("com.nonexistent.bundle");
+}
+
+/**
+* @tc.name: HksAppObserverTest.HksAppObserverTest013
+* @tc.desc: Test HksGetBundleNameFromUid mock returns correct bundle name (used by RegisterObserver)
+* @tc.type: FUNC
+*/
+HWTEST_F(HksAppObserverTest, HksAppObserverTest013, TestSize.Level0) {
+    HksProcessInfo processInfo = CreateTestProcessInfoFromIPC();
+    std::string bundleName;
+    int32_t ret = HksGetBundleNameFromUid(processInfo.uidInt, bundleName);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_EQ(bundleName, "com.huawei.extensionhap.test");
+
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
+}
+
+/**
+* @tc.name: HksAppObserverTest.HksAppObserverTest014
+* @tc.desc: Test OnAppStopped clears uidToContextMap and triggers CleanupTriggeredObserver when map becomes empty
+* @tc.type: FUNC
+*/
+HWTEST_F(HksAppObserverTest, HksAppObserverTest014, TestSize.Level0) {
+    HksAppObserver observer("com.test.bundle");
+    HksProcessInfo processInfo1 = CreateTestProcessInfo();
+    processInfo1.uidInt = 200;
+    HksProcessInfo processInfo2 = CreateTestProcessInfo();
+    processInfo2.uidInt = 300;
+    CppParamSet paramSet = CreateParamSetWithAbilityAndUid("TestAbility", 200);
+
+    observer.AddProcessContext(processInfo1, paramSet);
+    observer.AddProcessContext(processInfo2, paramSet);
+
+    ResetHandleManagerMockFlags();
+    ResetSessionManagerMockFlags();
+
+    // Stop uid=200, map still has uid=300
+    AppExecFwk::AppStateData appState1;
+    appState1.bundleName = "com.test.bundle";
+    appState1.uid = 200;
+    observer.OnAppStopped(appState1);
+    EXPECT_TRUE(g_hksClearHandleCalled);
+    EXPECT_TRUE(g_clearAuthStateCalled);
+
+    // Stop uid=300, map becomes empty, triggers CleanupTriggeredObserver
+    ResetHandleManagerMockFlags();
+    ResetSessionManagerMockFlags();
+    AppExecFwk::AppStateData appState2;
+    appState2.bundleName = "com.test.bundle";
+    appState2.uid = 300;
+    observer.OnAppStopped(appState2);
+    EXPECT_TRUE(g_hksClearHandleCalled);
+    EXPECT_TRUE(g_clearAuthStateCalled);
+    EXPECT_TRUE(g_clearMapByUidCalled);
+}
+
+/**
+* @tc.name: HksAppObserverTest.HksAppObserverTest015
+* @tc.desc: Test OnAppStopped with empty abilityName (BuildParamSet produces empty param set internally)
+* @tc.type: FUNC
+*/
+HWTEST_F(HksAppObserverTest, HksAppObserverTest015, TestSize.Level0) {
+    HksAppObserver observer("com.test.bundle");
+    HksProcessInfo processInfo = CreateTestProcessInfo();
+    // Use empty param set (no HKS_EXT_CRYPTO_TAG_ABILITY_NAME), so BuildParamSet produces empty param set
+    CppParamSet paramSet = CreateEmptyParamSet();
+    observer.AddProcessContext(processInfo, paramSet);
+
+    AppExecFwk::AppStateData appState;
+    appState.bundleName = "com.test.bundle";
+    appState.uid = 100;
+    ResetHandleManagerMockFlags();
+    ResetSessionManagerMockFlags();
+
+    observer.OnAppStopped(appState);
+    // OnAppStopped should succeed even with empty abilityName (BuildParamSet returns empty params)
+    EXPECT_TRUE(g_hksClearHandleCalled);
+    EXPECT_TRUE(g_clearAuthStateCalled);
+    EXPECT_TRUE(g_clearMapByUidCalled);
 }
 
 // ==================== plugin_interface integration tests ====================

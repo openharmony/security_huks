@@ -13,12 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef HKS_EXTERNAL_ADAPTER_H
-#define HKS_EXTERNAL_ADAPTER_H
-
+#include "hks_ukey_system_adapter.h"
+#include "hks_error_code.h"
 #include <string>
-#include <vector>
 
-int32_t HksGetBundleNameFromUid(uint32_t uid, std::string &bundleName);
+namespace OHOS::Security::Huks {
 
-#endif
+int32_t HksGetBundleNameFromUid(uint32_t uid, std::string &bundleName)
+{
+    bundleName = "com.huawei.extensionhap.test";
+    return HKS_SUCCESS;
+}
+
+int32_t HksGetFrontUserId(int32_t &outId)
+{
+    outId = 100;
+    return HKS_SUCCESS;
+}
+
+}

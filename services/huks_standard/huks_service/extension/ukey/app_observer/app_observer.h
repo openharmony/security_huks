@@ -86,8 +86,6 @@ private:
     HksAppObserverManager() = default;
     ~HksAppObserverManager() = default;
 
-    int32_t GetBundleNameByUid(uint32_t uid, std::string &bundleName);
-
     std::mutex mutex_{};
     std::map<std::string, sptr<HksAppObserver>> observers_{};
 };
