@@ -16,6 +16,7 @@
 #include "hks_ipc_service.h"
 #include "hks_type.h"
 
+#include "hks_ipc_serialization.h"
 #include <dlfcn.h>
 #include <securec.h>
 #include <stdbool.h>
@@ -136,6 +137,52 @@ void HksIpcServiceUnregisterProvider(const struct HksBlob *srcData, const uint8_
 
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+#endif
+}
+
+void HksIpcServiceQueryAbilityInfo(const struct HksBlob *srcData, const uint8_t *context)
+{
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    struct HksBlob resourceId = { 0, NULL };
+    struct HksAbilityInfo abilityInfo;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    struct HksBlob outBlob = { 0, NULL };
+    int32_t ret;
+    uint64_t startTime = 0;
+    (void)HksElapsedRealTime(&startTime);
+
+    do {
+        ret = HksBlob3Unpack(srcData, &resourceId, &abilityInfo.bundleName, &abilityInfo.abilityName);
+        HKS_IF_NOT_SUCC_BREAK(ret, "HksIpcServiceQueryAbilityInfo Ipc fail")
+
+        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcQueryAbilityInfoAdapter(&processInfo, &resourceId, &abilityInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcQueryAbilityInfoAdapter fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksAllocInBlobWithThreeBlobs(&outBlob, &resourceId, &abilityInfo.bundleName, &abilityInfo.abilityName);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc outBlob fail")
+
+        ret = HksBlob3Pack(&resourceId, &abilityInfo.bundleName, &abilityInfo.abilityName, &outBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Huks service pack fail")
+    } while (0);
+
+    HksSendResponse(context, ret, &outBlob);
+
+    struct UKeyInfo ukeyInfo = { .eventId = HKS_EVENT_UKEY_EXPORT_CERT, .operation = HKS_UKEY_REPORT_UNREGISTER,
+        .providerName = abilityInfo.abilityName };
+    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret, .startTime = startTime };
+    struct HksParamSet tmp;
+    ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, &tmp, &ukeyCommon);
+
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(outBlob);
+
 #else
     (void)srcData;
     (void)context;

@@ -122,6 +122,21 @@ struct AutoRefCount {
     }
 };
 
+ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnQueryAbility(const HksProcessInfo &processInfo, std::string &resourceId,
+    CppAbilityInfo &abilityInfo))
+{
+    AutoRefCount refCnt(m_refCount, soMutex);
+    void *funcPtr = nullptr;
+    bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_QUERY_ABILITY, funcPtr);
+    HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "OnQueryAbility method enum not found in plugin provider map.")
+
+    int32_t ret = (*reinterpret_cast<OnQueryAbilityFunc>(funcPtr))(processInfo, resourceId, abilityInfo);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnQueryAbility fail, ret = %{public}d", ret)
+    HKS_LOG_I("query ability success");
+    return HKS_SUCCESS;
+}
+
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnRegistProvider(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet, std::function<void(HksProcessInfo)> callback))
 {

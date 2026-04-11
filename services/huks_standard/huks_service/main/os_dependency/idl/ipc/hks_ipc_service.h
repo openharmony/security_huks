@@ -29,6 +29,8 @@ void HksIpcServiceRegisterProvider(const struct HksBlob *srcData, const uint8_t 
 
 void HksIpcServiceUnregisterProvider(const struct HksBlob *srcData, const uint8_t *context);
 
+void HksIpcServiceQueryAbilityInfo(const struct HksBlob *srcData, const uint8_t *context);
+
 void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *context);
 
 void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8_t *context);

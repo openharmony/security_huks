@@ -75,6 +75,11 @@ struct HksParamSet {
     struct HksParam params[];
 };
 
+struct HksAbilityInfo {
+    struct HksBlob bundleName;
+    struct HksBlob abilityName;
+};
+
 struct HksExtCertInfoSet {
     uint32_t count;
     struct HksExtCertInfo *certs;
@@ -130,6 +135,7 @@ struct HksKeyAliasSet {
 #define HKS_SIGNATURE_MIN_SIZE 64
 #define HKS_ARRAY_SIZE(arr) ((sizeof(arr)) / (sizeof((arr)[0])))
 #define MAX_OUT_BLOB_SIZE (5 * 1024 * 1024)
+#define HKS_MAX_QUERY_RESULT 2176
 #define HKS_WRAPPED_FORMAT_MAX_SIZE (1024 * 1024)
 #define HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS 10
 #define HKS_IMPORT_ENVELOP_TOTAL_BLOBS 2
