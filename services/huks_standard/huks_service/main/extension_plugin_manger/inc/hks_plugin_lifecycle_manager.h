@@ -24,6 +24,7 @@
 #include <singleton.h>
 #include <string>
 
+#include "hks_cpp_abilityinfo.h"
 #include "hks_cpp_paramset.h"
 #include "hks_error_code.h"
 #include "hks_function_types.h"
@@ -73,6 +74,7 @@ public:
         const std::string &wrappingKeyIndex, const CppParamSet &paramSet, const std::vector<uint8_t> &wrappedData);
     int32_t OnExportPublicKey(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet, std::vector<uint8_t> &outData);
+    int32_t OnQueryAbility(const HksProcessInfo &processInfo, std::string &resourceId, CppAbilityInfo &abilityInfo);
 
 private:
     std::atomic<int32_t> m_refCount{0};

@@ -33,6 +33,9 @@ int32_t HksUkeyBlob2ParamSetUnpack(const struct HksBlob *srcData, struct HksBlob
 
 int32_t HksUKeyGeneralUnpackWithCertInfo(const struct HksBlob *srcData, struct HksBlob *resourceId,
     struct HksExtCertInfo *certInfo, struct HksParamSet **paramSet);
+
+int32_t HksBlob3Unpack(const struct HksBlob *srcData, struct HksBlob *blob1,
+    struct HksBlob *blob2, struct HksBlob *blob3);
 #endif
 
 int32_t HksGenerateKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,

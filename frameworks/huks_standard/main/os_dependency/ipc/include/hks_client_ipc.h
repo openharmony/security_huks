@@ -16,6 +16,7 @@
 #ifndef HKS_CLIENT_IPC_H
 #define HKS_CLIENT_IPC_H
 
+#include "hks_ipc_serialization.h"
 #include "hks_type_inner.h"
 
 #ifdef __cplusplus
@@ -29,6 +30,7 @@ int32_t HksClientRefreshKeyInfo(void);
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
 int32_t HksClientRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
 int32_t HksClientUnregisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
+int32_t HksClientQueryAbilityInfo(struct HksBlob *resourceId, struct HksAbilityInfo *abilityInfo);
 
 int32_t HksClientExportProviderCertificates(const struct HksBlob *providerName,
     const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
@@ -122,7 +124,6 @@ int32_t HksClientWrapKey(const struct HksBlob *keyAlias, const struct HksParamSe
 
 int32_t HksClientUnwrapKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksBlob *wrappedKey);
-
 #ifdef __cplusplus
 }
 #endif

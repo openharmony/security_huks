@@ -92,6 +92,7 @@ if (os_level == "standard") {
       "./ipc/src/hks_ipc_check.c",
       "./ipc/src/hks_ipc_slice.c",
       "./ipc/src/hks_request.cpp",
+      "./ipc/src/hks_ipc_serialization.c",
 
       # both client side and server side will include hks_sa_interface.cpp
       "../../../../services/huks_standard/huks_service/main/os_dependency/sa/hks_sa_interface.cpp",

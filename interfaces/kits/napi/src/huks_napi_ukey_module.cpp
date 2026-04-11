@@ -56,6 +56,7 @@ static napi_value CreateHuksExternalTag(napi_env env)
     AddInt32Property(env, tag, "HUKS_EXT_CRYPTO_TAG_UID", HKS_EXT_CRYPTO_TAG_UID);
     AddInt32Property(env, tag, "HUKS_EXT_CRYPTO_TAG_PURPOSE", HKS_EXT_CRYPTO_TAG_PURPOSE);
     AddInt32Property(env, tag, "HUKS_EXT_CRYPTO_TAG_TIMEOUT", HKS_EXT_CRYPTO_TAG_TIMEOUT);
+    AddInt32Property(env, tag, "HUKS_EXT_CRYPTO_TAG_ABILITY_INFO", HKS_EXT_CRYPTO_TAG_ABILITY_INFO);
 
     return tag;
 }

@@ -21,10 +21,12 @@
 #include "hks_ukey_system_adapter.h"
 #include "hks_error_code.h"
 #include "hks_log.h"
+#include "hks_plugin_def.h"
 #include "hks_template.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
 #include "refbase.h"
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <tuple>
@@ -32,6 +34,22 @@
 #include <chrono>
 #include <thread>
 namespace OHOS::Security::Huks {
+
+bool ProviderIndexKey::operator==(const ProviderIndexKey &other) const
+{
+    return providerInfo == other.providerInfo && index == other.index;
+}
+
+bool ProviderIndexKey::operator<(const ProviderIndexKey &other) const
+{
+    if (providerInfo < other.providerInfo) {
+        return true;
+    }
+    if (other.providerInfo < providerInfo) {
+        return false;
+    }
+    return index < other.index;
+}
 
 std::shared_ptr<HksProviderLifeCycleManager> HksProviderLifeCycleManager::GetInstanceWrapper()
 {
@@ -61,39 +79,71 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
         HKS_ERROR_UKY_PROVIDER_MGR_REGESTER_REACH_MAX_NUM, "OnRegisterProvider failed, providerNum is too much.")
     ProviderInfo providerInfo{};
     int32_t ret = HksGetProviderInfo(processInfo, providerName, paramSet, providerInfo);
-    providerInfo.m_userid = processInfo.userIdInt;
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
         "Fail to get provider info. providerName: %" LOG_PUBLIC "s. ret: %" LOG_PUBLIC "d", providerName.c_str(), ret)
-    HKS_LOG_I("bundleName: %" LOG_PUBLIC "s, abilityName: %" LOG_PUBLIC "s",
+    HKS_LOG_I("bundleName: %" LOG_PUBLIC "s, (abilityName: %" LOG_PUBLIC "s",
         providerInfo.m_bundleName.c_str(), providerInfo.m_abilityName.c_str());
     std::shared_ptr<HksExtAbilityConnectInfo> connectInfo{nullptr};
 
-    std::lock_guard<std::mutex> lock(m_registerMutex);
-    this->PrintRegisterProviders();
-    HKS_IF_TRUE_LOGE_RETURN(m_providerMap.Find(providerInfo, connectInfo),
-        HKS_ERROR_PROVIDER_HAS_REGISTERED, "OnRegisterProvider failed, providerName: %" LOG_PUBLIC "s,"
-        "bundleName: %" LOG_PUBLIC "s, abilityName: %" LOG_PUBLIC "s, already exist", providerName.c_str(),
-        providerInfo.m_bundleName.c_str(), providerInfo.m_abilityName.c_str())
-    AAFwk::Want want{};
-    want.SetElementName(providerInfo.m_bundleName, providerInfo.m_abilityName);
-    sptr<ExtensionConnection> connect(new (std::nothrow) ExtensionConnection(processInfo));
-    HKS_IF_TRUE_LOGE_RETURN(connect == nullptr, HKS_ERROR_NULL_POINTER, "new ExtensionConnection failed");
-    connect->callBackFromPlugin(callback);
-    if (!connect->IsConnected()) {
-        HKS_LOG_I("First time connect the Extension Ability. "
-            "m_bundleName: %" LOG_PUBLIC "s, m_abilityName: %" LOG_PUBLIC "s",
-            providerInfo.m_bundleName.c_str(), providerInfo.m_abilityName.c_str());
-        ret = connect->OnConnection(want, connect, processInfo.userIdInt);
-        HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "Connect extAbility failed. ret: %" LOG_PUBLIC "d", ret)
+    {
+        std::lock_guard<std::mutex> lock(m_registerMutex);
+        this->PrintRegisterProviders();
+        HKS_IF_TRUE_LOGE_RETURN(m_providerMap.Find(providerInfo, connectInfo),
+            HKS_ERROR_PROVIDER_HAS_REGISTERED, "OnRegisterProvider failed, providerName: %" LOG_PUBLIC "s,"
+            "bundleName: %" LOG_PUBLIC "s, abilityName: %" LOG_PUBLIC "s, already exist", providerName.c_str(),
+            providerInfo.m_bundleName.c_str(), providerInfo.m_abilityName.c_str())
+        AAFwk::Want want{};
+        want.SetElementName(providerInfo.m_bundleName, providerInfo.m_abilityName);
+        sptr<ExtensionConnection> connect(new (std::nothrow) ExtensionConnection(processInfo));
+        HKS_IF_TRUE_LOGE_RETURN(connect == nullptr, HKS_ERROR_NULL_POINTER, "new ExtensionConnection failed");
+        connect->callBackFromPlugin(callback);
+        if (!connect->IsConnected()) {
+            HKS_LOG_I("First time connect to Extension Ability. "
+                "m_bundleName: %" LOG_PUBLIC "s, m_abilityName: %" LOG_PUBLIC "s",
+                providerInfo.m_bundleName.c_str(), providerInfo.m_abilityName.c_str());
+            ret = connect->OnConnection(want, connect, processInfo.userIdInt);
+            HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "Connect extAbility failed. ret: %" LOG_PUBLIC "d", ret)
+        }
+
+        auto proxy = connect->GetExtConnectProxy();
+        HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NULL_POINTER, "connected, but getExtConnectProxy failed.");
+
+        connectInfo = std::make_shared<HksExtAbilityConnectInfo>(want, connect);
+        m_providerMap.Insert(providerInfo, connectInfo);
+        HKS_LOG_I("OnRegisterProvider Success! providerName: %" LOG_PUBLIC "s", providerName.c_str());
     }
+    
+    auto abilityInfoTag = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_INFO>();
+    HKS_IF_TRUE_LOGI_RETURN(abilityInfoTag.first != HKS_SUCCESS, ret, "there is no UiAbility")
 
-    auto proxy = connect->GetExtConnectProxy();
-    HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NULL_POINTER, "connected, but getExtConnectProxy failed.");
+    std::string jsonStr = std::string(abilityInfoTag.second.begin(), abilityInfoTag.second.end());
+    ret = RegisterUiAbility(processInfo, providerName, paramSet, jsonStr);
 
-    connectInfo = std::make_shared<HksExtAbilityConnectInfo>(want, connect);
-    m_providerMap.Insert(providerInfo, connectInfo);
-    HKS_LOG_I("OnRegisterProvider Success! providerName: %" LOG_PUBLIC "s", providerName.c_str());
     return ret;
+}
+
+int32_t HksProviderLifeCycleManager::OnQueryAbility(const HksProcessInfo &processInfo,
+    std::string &resourceId, CppAbilityInfo &abilityInfo)
+{
+    ProviderInfo providerInfo{};
+    std::string index{};
+    GetProviderInfoAndIndex(resourceId, providerInfo, index);
+    providerInfo.m_userid = processInfo.userIdInt;
+    ProviderIndexKey indexKey(providerInfo, index);
+
+    std::lock_guard<std::mutex> indexLock(m_providerIndexMutex);
+    std::string abilityName{};
+    auto it = m_providerIndexMap.Find(indexKey, abilityName);
+    if (!it) {
+        indexKey.index = "";
+        auto res = m_providerIndexMap.Find(indexKey, abilityName);
+        HKS_IF_NOT_TRUE_LOGE_RETURN(res, HKS_ERROR_NOT_EXIST, "Ui Ability not found");
+    }
+    
+    abilityInfo.abilityName = abilityName;
+    abilityInfo.bundleName = providerInfo.m_bundleName;
+    resourceId = index;
+    return HKS_SUCCESS;
 }
 
 int32_t HksProviderLifeCycleManager::GetExtensionProxy(const ProviderInfo &providerInfo,
@@ -179,6 +229,36 @@ int32_t HksProviderLifeCycleManager::HksHapGetConnectInfos(const HksProcessInfo 
     return HapGetAllConnectInfoByProviderName(bundleName, providerName, processInfo.userIdInt, connectionInfos);
 }
 
+int32_t HksProviderLifeCycleManager::UnregisterAllUiExtensionsByProviderInfo(
+    const ProviderInfo &providerInfo)
+{
+    HKS_LOG_I("UnregisterAllUiExtensionsByProviderInfo providerName: %" LOG_PUBLIC "s, abilityName: %" LOG_PUBLIC "s",
+        providerInfo.m_providerName.c_str(), providerInfo.m_abilityName.c_str());
+
+    ProviderInfo searchProviderInfo = providerInfo;
+
+    std::vector<ProviderIndexKey> keysToDelete{};
+    {
+        std::lock_guard<std::mutex> indexLock(m_providerIndexMutex);
+        m_providerIndexMap.Iterate([&](const ProviderIndexKey &key, const std::string &abilityName) {
+            if (key.providerInfo == searchProviderInfo) {
+                HKS_LOG_I("Found matching UI Extension: abilityName: %" LOG_PUBLIC "s, index: %" LOG_PUBLIC "s",
+                    abilityName.c_str(), key.index.c_str());
+                keysToDelete.push_back(key);
+            }
+        });
+
+        for (const auto &key : keysToDelete) {
+            HKS_LOG_I("Deleting UI Extension: index: %" LOG_PUBLIC "s", key.index.c_str());
+            m_providerIndexMap.Erase(key);
+        }
+    }
+    
+    HKS_LOG_I("UnregisterAllUiExtensionsByProviderInfo Success! providerName: %" LOG_PUBLIC "s,"
+        "deleted count: %" LOG_PUBLIC "zu", providerInfo.m_providerName.c_str(), keysToDelete.size());
+    return HKS_SUCCESS;
+}
+
 constexpr int WAIT_TIME_MS = 5;
 constexpr int WAIT_ITERATION = 6;
 int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &processInfo,
@@ -203,6 +283,7 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
         if (proxy == nullptr) {
             HKS_LOG_E("OnUnRegisterProvider proxy is nullptr. providerName: %" LOG_PUBLIC "s", providerName.c_str());
             m_providerMap.Erase(connectionInfo.first);
+            UnregisterAllUiExtensionsByProviderInfo(connectionInfo.first);
             deletecount++;
             continue;
         }
@@ -215,6 +296,7 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
         HKS_IF_NOT_TRUE_EXCU(isdeath,
             connectionInfo.second->m_connection->OnDisconnect(connectionInfo.second->m_connection));
         m_providerMap.Erase(connectionInfo.first);
+        UnregisterAllUiExtensionsByProviderInfo(connectionInfo.first);
         deletecount++;
         auto &stub = connectionInfo.second->m_connection;
         uint8_t waitIteration = WAIT_ITERATION;
@@ -245,7 +327,80 @@ int32_t HksGetProviderInfo(const HksProcessInfo &processInfo, const std::string 
     HKS_IF_TRUE_LOGE_RETURN(abilityName.second.size() >= MAX_ABILITY_NAME_LEN, HKS_ERROR_INVALID_ARGUMENT,
         "the abilityName is too long. size: %" LOG_PUBLIC "zu", abilityName.second.size())
     providerInfo.m_abilityName = std::string(abilityName.second.begin(), abilityName.second.end());
+    providerInfo.m_userid = processInfo.userIdInt;
     return HKS_SUCCESS;
 }
 
+int32_t HksProviderLifeCycleManager::CheckProviderIndexDuplicate(const ProviderIndexKey &key)
+{
+    std::string abilityName{};
+    std::lock_guard<std::mutex> lock(m_providerIndexMutex);
+    if (m_providerIndexMap.Find(key, abilityName)) {
+        HKS_LOG_E("ProviderIndexKey already exists. providerName: %" LOG_PUBLIC "s, "
+            "abilityName: %" LOG_PUBLIC "s, index: %" LOG_PUBLIC "s",
+            key.providerInfo.m_providerName.c_str(), key.providerInfo.m_abilityName.c_str(), key.index.c_str());
+        return HKS_ERROR_PROVIDER_HAS_REGISTERED;
+    }
+    return HKS_SUCCESS;
+}
+
+int32_t HksProviderLifeCycleManager::RegisterUiAbility(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet, std::string jsonStr)
+{
+    int32_t ret = 0;
+    HKS_LOG_I("New flow with HKS_EXT_CRYPTO_TAG_ABILITY_INFO");
+    std::vector<AbilityInfo> abilityInfoArray{};
+    do {
+        ret = ParseAbilityInfoArrayFromJson(jsonStr, abilityInfoArray);
+        HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS, "ParseAbilityInfoArrayFromJson failed. ret: %" LOG_PUBLIC "d", ret)
+        ret = RegisterProviderWithIndexArray(processInfo, providerName, paramSet, abilityInfoArray);
+        HKS_IF_TRUE_LOGI_RETURN(ret == HKS_SUCCESS, ret,
+            "RegisterProviderWithIndexArray Success! providerName: %" LOG_PUBLIC "s", providerName.c_str())
+    } while (0);
+    int32_t deletCount = 0;
+    (void)OnUnRegisterProvider(processInfo, providerName, paramSet, false, deletCount);
+    HKS_LOG_E("OnRegisterProvider fail");
+    return ret;
+}
+
+int32_t HksProviderLifeCycleManager::RegisterProviderWithIndexArray(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet, const std::vector<AbilityInfo> &abilityInfoArray)
+{
+    HKS_LOG_I("RegisterProviderWithIndexArray providerName: %" LOG_PUBLIC "s, ability count: %" LOG_PUBLIC "zu",
+        providerName.c_str(), abilityInfoArray.size());
+    
+    for (const auto &abilityInfo : abilityInfoArray) {
+        int32_t ret = RegisterSingleAbilityWithIndex(processInfo, providerName, paramSet, abilityInfo);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "regitst ui: %" LOG_PUBLIC "s fail", abilityInfo.abilityName.c_str())
+    }
+    return HKS_SUCCESS;
+}
+
+int32_t HksProviderLifeCycleManager::RegisterSingleAbilityWithIndex(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet, const AbilityInfo &abilityInfo)
+{
+    HKS_LOG_I("RegisterSingleAbilityWithIndex providerName: %" LOG_PUBLIC "s, uiAbilityName: %" LOG_PUBLIC "s,"
+        "index: %" LOG_PUBLIC "s", providerName.c_str(), abilityInfo.abilityName.c_str(), abilityInfo.index.c_str());
+    
+    ProviderInfo providerInfo{};
+    int32_t ret = HksGetProviderInfo(processInfo, providerName, paramSet, providerInfo);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "HksGetProviderInfo failed. ret: %" LOG_PUBLIC "d", ret)
+    
+    HKS_IF_TRUE_LOGE_RETURN(abilityInfo.abilityName.size() >= MAX_ABILITY_NAME_LEN, HKS_ERROR_INVALID_ARGUMENT,
+        "the uiAbilityName is too long. size: %" LOG_PUBLIC "zu", abilityInfo.abilityName.size())
+    
+    ProviderIndexKey indexKey{providerInfo, abilityInfo.index};
+    ret = CheckProviderIndexDuplicate(indexKey);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "CheckProviderIndexDuplicate failed. ret: %" LOG_PUBLIC "d", ret)
+    
+    {
+        std::lock_guard<std::mutex> indexLock(m_providerIndexMutex);
+        m_providerIndexMap.Insert(indexKey, abilityInfo.abilityName);
+    }
+    
+    HKS_LOG_I("RegisterSingleAbilityWithIndex Success! providerName: %" LOG_PUBLIC "s, index: %" LOG_PUBLIC "s",
+        providerName.c_str(), abilityInfo.index.c_str());
+    return HKS_SUCCESS;
+}
 }
