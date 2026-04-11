@@ -30,6 +30,10 @@
 extern "C" {
 #endif
 
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+int32_t UnpackBlobFromBuffer(const struct HksBlob *srcBlob, uint32_t *offset, struct HksBlob *out);
+#endif
+
 int32_t CopyUint32ToBuffer(uint32_t value, const struct HksBlob *destBlob, uint32_t *destOffset);
 int32_t CopyInt32ToBuffer(int32_t value, const struct HksBlob *destBlob, uint32_t *destOffset);
 
@@ -40,6 +44,7 @@ int32_t HksUKeyGeneralPackWithCertInfo(const struct HksBlob *blob, const struct 
 
 int32_t HksUkeyBlob2ParamSetPack(const struct HksBlob *oldKeyAlias, const struct HksBlob *newKeyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *destData);
+int32_t HksResourceIdUnpackFromService(const struct HksBlob *srcBlob, struct HksParamSet **resourceId);
 #endif
 
 int32_t HksGenerateKeyPack(struct HksBlob *destData, const struct HksBlob *keyAlias,

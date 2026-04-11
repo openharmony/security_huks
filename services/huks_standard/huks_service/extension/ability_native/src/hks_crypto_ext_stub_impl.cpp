@@ -216,6 +216,18 @@ ErrCode HksCryptoExtStubImpl::ExportPublicKey(
     return extension_->ExportPublicKey(index, params, outData, errcode);
 }
 
+ErrCode HksCryptoExtStubImpl::GetResourceId(
+    const CppParamSet &params,
+    std::string &resourceId,
+    int32_t &errcode)
+{
+    if (extension_ == nullptr) {
+        LOGE("extension is nullptr");
+        return HKS_ERROR_EXT_NULLPTR;
+    }
+    return extension_->GetResourceId(params, resourceId, errcode);
+}
+
 } // namespace Huks
 } // namespace Security
 } // namespace OHOS

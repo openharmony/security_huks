@@ -68,6 +68,8 @@ int32_t HksServiceClearPinAuthState(const struct HksProcessInfo *processInfo, co
 int32_t HksServiceGetRemoteProperty(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
     const struct HksBlob *propertyId, const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut);
 
+int32_t HksServiceGetResourceId(const struct HksProcessInfo *processInfo, const struct HksBlob *providerName,
+    const struct HksParamSet *paramSetIn, struct HksBlob *resourceId);
 #ifdef __cplusplus
 }
 #endif

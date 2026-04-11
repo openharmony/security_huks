@@ -652,6 +652,55 @@ int32_t HksClientClearPinAuthState(const struct HksBlob *index)
     HKS_FREE_BLOB(inBlob);
     return ret;
 }
+
+int32_t HksClientGetResourceId(const struct HksBlob *providerName, const struct HksParamSet *paramSetIn,
+    struct HksBlob *resourceId)
+{
+    if (resourceId == NULL || resourceId->data != NULL) {
+        HKS_LOG_E("resourceId must be NULL pointer");
+        return HKS_ERROR_NULL_POINTER;
+    }
+    
+    int32_t ret;
+    struct HksBlob inBlob = { 0, NULL };
+    struct HksBlob outBlob = { 0, NULL };
+    struct HksParamSet *newParamSet = NULL;
+    
+    outBlob.size = HKS_EXT_MAX_RESOURCE_ID_LEN;
+    outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
+    HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
+    
+    do {
+        ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null fail, ret = %" LOG_PUBLIC "d", ret)
+        
+        ret = HksCheckIpcBlob(providerName, HKS_EXT_MAX_PROVIDER_NAME_LEN);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check providerName fail")
+        
+        ret = HksAllocInBlob(&inBlob, providerName, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
+
+        ret = HksUKeyGeneralPack(providerName, newParamSet, &inBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetResourceIdPack fail")
+        
+        ret = HksSendRequest(HKS_MSG_EXT_GET_RESOURCE_ID, &inBlob, &outBlob, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "send request fail, ret = %" LOG_PUBLIC "d", ret)
+        
+        resourceId->size = outBlob.size;
+        resourceId->data = (uint8_t *)HksMalloc(resourceId->size);
+        HKS_IF_NULL_LOGE_RETURN(resourceId->data,
+            HKS_ERROR_INSUFFICIENT_MEMORY, "Failed to allocate memory for ResourceId")
+        
+        HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(resourceId->data, outBlob.size, outBlob.data, outBlob.size),
+            "memcpy_s resourceId failed")
+    } while (0);
+    
+    HksFreeParamSet(&newParamSet);
+    HKS_FREE_BLOB(inBlob);
+    HKS_FREE_BLOB(outBlob);
+    
+    return ret;
+}
 #endif
 
 int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
