@@ -14,12 +14,16 @@
  */
 
 #include "hks_ukey_service_provider_adapter.h"
+#include "hks_template.h"
 #include "hks_ukey_service_provider.h"
 #include "hks_ukey_common.h"
+#include "hks_cpp_abilityinfo.h"
 #include "hks_sa_interface.h"
 #include "hks_type.h"
 #include "securec.h"
+#include "hks_cpp_abilityinfo.h"
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -57,6 +61,40 @@ int32_t HksIpcProviderUnregAdapter(const struct HksProcessInfo *processInfo, con
     CppParamSet cppParamSet(paramSet);
 
     return OHOS::Security::Huks::HksIpcServiceProviderUnRegister(processInfo, cppresourceId, cppParamSet);
+}
+
+int32_t HksIpcQueryAbilityInfoAdapter(const struct HksProcessInfo *processInfo, struct HksBlob *resourceId,
+    HksAbilityInfo *abilityInfo)
+{
+    int32_t ret = HksIpcCheckBlob(&abilityInfo->abilityName, 1, HKS_EXT_MAX_PROVIDER_NAME_LEN);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcQueryAbilityInfoAdapter invalid abilityName blob")
+
+    ret = HksIpcCheckBlob(&abilityInfo->bundleName, 1, HKS_EXT_MAX_PROVIDER_NAME_LEN);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcQueryAbilityInfoAdapter invalid bundleName blob")
+
+    std::string cppResourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
+
+    CppAbilityInfo cppAbilityInfo(abilityInfo);
+
+    ret = OHOS::Security::Huks::HksIpcServiceQueryAbility(processInfo, cppResourceId, cppAbilityInfo);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksIpcServiceQueryAbility fail")
+    
+    abilityInfo->abilityName.size = cppAbilityInfo.abilityName.size();
+    ret = memcpy_s(abilityInfo->abilityName.data, abilityInfo->abilityName.size,
+        cppAbilityInfo.abilityName.data(), cppAbilityInfo.abilityName.size());
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INSUFFICIENT_MEMORY, "HksIpcQueryAbilityInfoAdapter copy out fail")
+
+    abilityInfo->bundleName.size = cppAbilityInfo.bundleName.size();
+    ret = memcpy_s(abilityInfo->bundleName.data, abilityInfo->bundleName.size,
+        cppAbilityInfo.bundleName.data(), cppAbilityInfo.bundleName.size());
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INSUFFICIENT_MEMORY, "HksIpcQueryAbilityInfoAdapter copy out fail")
+
+    (void)memset_s(resourceId->data, resourceId->size, 0, resourceId->size);
+    resourceId->size = cppResourceId.size();
+    ret = memcpy_s(resourceId->data, resourceId->size, cppResourceId.data(), cppResourceId.size());
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INSUFFICIENT_MEMORY, "HksIpcQueryAbilityInfoAdapter copy out fail")
+    
+    return ret;
 }
 
 int32_t HksIpcCreateRemKeyHandleAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,

@@ -18,6 +18,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "hks_type.h"
 
 #include "hks_type_inner.h"
 
@@ -109,6 +110,8 @@ int32_t HksWrapKeyPack(struct HksBlob *inBlob, const struct HksBlob *keyAlias, c
 
 int32_t HksUnwrapKeyPack(struct HksBlob *inBlob, const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksBlob *wrappedKey);
+int32_t HksQueryAbilityCopyResult(const struct HksBlob *resourceId, const struct HksAbilityInfo *abilityInfo,
+    struct HksBlob *outResourceId, struct HksAbilityInfo *outHksAbilityInfo);
 
 #ifdef __cplusplus
 }

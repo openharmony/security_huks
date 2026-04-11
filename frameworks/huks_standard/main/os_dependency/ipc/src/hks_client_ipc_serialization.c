@@ -15,6 +15,7 @@
 
 #include "hks_client_ipc_serialization.h"
 
+#include "hks_ipc_serialization.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -56,24 +57,6 @@ int32_t CopyInt32ToBuffer(int32_t value, const struct HksBlob *destBlob, uint32_
     return HKS_SUCCESS;
 }
 
-static int32_t CopyBlobToBuffer(const struct HksBlob *blob, const struct HksBlob *destBlob, uint32_t *destOffset)
-{
-    if ((*destOffset > destBlob->size) ||
-        ((destBlob->size - *destOffset) < (sizeof(blob->size) + ALIGN_SIZE(blob->size)))) {
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
-
-    HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, &(blob->size),
-        sizeof(blob->size)), HKS_ERROR_INSUFFICIENT_MEMORY, "copy destBlob data failed!")
-    *destOffset += sizeof(blob->size);
-
-    HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, blob->data,
-        blob->size), HKS_ERROR_INSUFFICIENT_MEMORY, "copy destBlob data failed!")
-    *destOffset += ALIGN_SIZE(blob->size);
-
-    return HKS_SUCCESS;
-}
-
 static int32_t CopyParamSetToBuffer(const struct HksParamSet *paramSet,
     const struct HksBlob *destBlob, uint32_t *destOffset)
 {
@@ -96,25 +79,6 @@ static int32_t GetUint32FromBuffer(uint32_t *value, const struct HksBlob *srcBlo
 
     *value = *((uint32_t *)(srcBlob->data + *srcOffset));
     *srcOffset += sizeof(*value);
-    return HKS_SUCCESS;
-}
-
-static int32_t GetBlobFromBuffer(struct HksBlob *blob, const struct HksBlob *srcBlob, uint32_t *srcOffset)
-{
-    if ((*srcOffset > srcBlob->size) || ((srcBlob->size - *srcOffset) < sizeof(blob->size))) {
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
-
-    uint32_t size = *((uint32_t *)(srcBlob->data + *srcOffset));
-    HKS_IF_TRUE_RETURN(IsAdditionOverflow(size, DEFAULT_ALIGN_MASK_SIZE), HKS_ERROR_INVALID_ARGUMENT)
-    if (ALIGN_SIZE(size) > (srcBlob->size - *srcOffset - sizeof(blob->size))) {
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
-    blob->size = size;
-    *srcOffset += sizeof(blob->size);
-    blob->data = (uint8_t *)(srcBlob->data + *srcOffset);
-    *srcOffset += ALIGN_SIZE(blob->size);
-
     return HKS_SUCCESS;
 }
 
@@ -164,6 +128,26 @@ int32_t HksUkeyBlob2ParamSetPack(const struct HksBlob *blob1, const struct HksBl
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy paramSet failed");
     } while (0);
     return ret;
+}
+
+int32_t HksQueryAbilityCopyResult(const struct HksBlob *resourceId, const struct HksAbilityInfo *abilityInfo,
+    struct HksBlob *outResourceId, struct HksAbilityInfo *outHksAbilityInfo)
+{
+    int32_t ret = memcpy_s(outResourceId->data, outResourceId->size, resourceId->data, resourceId->size);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INSUFFICIENT_MEMORY, "copy resourceId from outResourceId fail")
+    outResourceId->size = resourceId->size;
+
+    ret = memcpy_s(outHksAbilityInfo->bundleName.data, outHksAbilityInfo->bundleName.size, abilityInfo->bundleName.data,
+        abilityInfo->bundleName.size);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INSUFFICIENT_MEMORY, "querying copy bundleName fail in client")
+    outHksAbilityInfo->bundleName.size = abilityInfo->bundleName.size;
+
+    ret = memcpy_s(outHksAbilityInfo->abilityName.data, outHksAbilityInfo->abilityName.size,
+        abilityInfo->abilityName.data, abilityInfo->abilityName.size);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INSUFFICIENT_MEMORY, "querying copy abilityName fail in client")
+    outHksAbilityInfo->abilityName.size = abilityInfo->abilityName.size;
+
+    return HKS_SUCCESS;
 }
 
 int32_t HksUKeyGeneralPackWithCertInfo(const struct HksBlob *blob, const struct HksExtCertInfo *certInfo,

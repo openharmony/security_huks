@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 
+#include "hks_ukey_common.h"
 #include "hks_cpp_paramset.h"
 #include "hks_error_code.h"
 #include "hks_log.h"

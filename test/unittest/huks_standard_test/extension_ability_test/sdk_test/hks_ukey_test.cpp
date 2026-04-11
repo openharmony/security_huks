@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
+#include <cstdint>
 #include <gtest/gtest.h>
 
+#include "hks_type.h"
 #include "hks_ukey_test.h"
 #include "securec.h"
 #include "file_ex.h"
@@ -79,6 +81,24 @@ protected:
 
         return 0;
     }
+
+    static int32_t ConstructTestParamSet(struct HksParamSet **paramSet, HksParam params[], uint32_t paramsCnt)
+    {
+        uint32_t totalSize = sizeof(struct HksParamSet) + sizeof(struct HksParam) * paramsCnt;
+
+        *paramSet = (struct HksParamSet *)HksMalloc(totalSize);
+        if (*paramSet == nullptr) {
+            return HKS_ERROR_MALLOC_FAIL;
+        }
+        (*paramSet)->paramSetSize = totalSize;
+        (*paramSet)->paramsCnt = paramsCnt;
+
+        for (uint32_t i = 0; i < paramsCnt; i++) {
+            (*paramSet)->params[i] = params[i];
+        }
+
+        return 0;
+    }
 };
 
 void HksUKeyTest::SetUpTestCase(void)
@@ -114,6 +134,22 @@ HWTEST_F(HksUKeyTest, HksRegisterProviderTest, TestSize.Level0)
 
     HksFreeParamSet(&paramSet);
     HKS_TEST_LOG_I("TestHksUKey, Testcase_RegisterProvider pass!");
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+HWTEST_F(HksUKeyTest, HksRegisterProviderTest001, TestSize.Level0)
+{
+    std::string resourceId = "{\"providerName\":\"P01\",\"abilityName\":\"CryptoAbility\""
+        ",\"bundleName\":\"com.hmos.hukstest.ukey\",\"index\":{\"key\":\"key1\"}}";
+    struct HksAbilityInfo tmp{};
+    tmp.abilityName.data = (uint8_t*)HksMalloc(128);
+    tmp.abilityName.size = 128;
+    tmp.bundleName.data = (uint8_t*)HksMalloc(128);
+    tmp.bundleName.size = 128;
+    HksBlob resourceBlob = StringToHuksBlob(resourceId.data());
+    int32_t ret = HksQueryAbilityInfo(&resourceBlob, &tmp);
+    HKS_FREE_BLOB(tmp.abilityName);
+    HKS_FREE_BLOB(tmp.bundleName);
     EXPECT_NE(ret, HKS_SUCCESS);
 }
 
