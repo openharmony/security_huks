@@ -15,6 +15,7 @@
 
 #include "hks_service_ipc_serialization.h"
 
+#include "hks_ipc_serialization.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_template.h"
@@ -42,25 +43,6 @@ static int32_t CopyInt32ToBuffer(int32_t value, const struct HksBlob *destBlob, 
     }
 
     *destOffset += sizeof(value);
-    return HKS_SUCCESS;
-}
-
-static int32_t CopyBlobToBuffer(const struct HksBlob *blob, const struct HksBlob *destBlob, uint32_t *destOffset)
-{
-    HKS_IF_NOT_SUCC_RETURN(CheckBlob(blob), HKS_ERROR_INVALID_ARGUMENT)
-
-    HKS_IF_TRUE_RETURN((*destOffset > destBlob->size) ||
-        (destBlob->size - *destOffset < sizeof(blob->size) + ALIGN_SIZE(blob->size)), HKS_ERROR_BUFFER_TOO_SMALL)
-
-    HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, &(blob->size),
-        sizeof(blob->size)), HKS_ERROR_INSUFFICIENT_MEMORY, "copy destBlob data failed!")
-
-    *destOffset += sizeof(blob->size);
-
-    HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, blob->data,
-        blob->size), HKS_ERROR_INSUFFICIENT_MEMORY, "copy destBlob data failed!")
-
-    *destOffset += ALIGN_SIZE(blob->size);
     return HKS_SUCCESS;
 }
 
@@ -106,23 +88,6 @@ static int32_t GetUint32FromBuffer(uint32_t *value, const struct HksBlob *srcBlo
     }
 
     *srcOffset += sizeof(uint32_t);
-    return HKS_SUCCESS;
-}
-
-int32_t GetBlobFromBuffer(struct HksBlob *blob, const struct HksBlob *srcBlob, uint32_t *srcOffset)
-{
-    if ((*srcOffset > srcBlob->size) || ((srcBlob->size - *srcOffset) < sizeof(uint32_t))) {
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
-
-    uint32_t size = *((uint32_t *)(srcBlob->data + *srcOffset));
-    HKS_IF_TRUE_RETURN(IsAdditionOverflow(size, DEFAULT_ALIGN_MASK_SIZE), HKS_ERROR_INVALID_ARGUMENT)
-    HKS_IF_TRUE_RETURN(ALIGN_SIZE(size) > srcBlob->size - *srcOffset - sizeof(uint32_t), HKS_ERROR_BUFFER_TOO_SMALL)
-
-    blob->size = size;
-    *srcOffset += sizeof(blob->size);
-    blob->data = (uint8_t *)(srcBlob->data + *srcOffset);
-    *srcOffset += ALIGN_SIZE(blob->size);
     return HKS_SUCCESS;
 }
 

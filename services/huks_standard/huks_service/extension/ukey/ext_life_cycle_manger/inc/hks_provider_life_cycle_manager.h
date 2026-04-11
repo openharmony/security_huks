@@ -25,6 +25,8 @@
 #include <securec.h>
 #include <unordered_set>
 
+#include "hks_ukey_common.h"
+#include "hks_cpp_abilityinfo.h"
 #include "hks_cpp_paramset.h"
 #include "hks_plugin_def.h"
 #include "singleton.h"
@@ -40,10 +42,16 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
+struct ProviderIndexKey {
+    ProviderInfo providerInfo{};
+    std::string index{};
 
-constexpr int32_t HKS_MAX_PROVIDER_NUM = 10;
-constexpr int32_t MAX_ABILITY_NAME_LEN = 128;
-constexpr int32_t MAX_PROVIDER_NAME_LEN = 128;
+    ProviderIndexKey(ProviderInfo info, std::string inIndex)
+        : providerInfo(info), index(std::move(inIndex)) {}
+
+    bool operator==(const ProviderIndexKey &other) const;
+    bool operator<(const ProviderIndexKey &other) const;
+};
 
 class HksExtAbilityConnectInfo {
 public:
@@ -69,6 +77,7 @@ public:
     int32_t GetAllProviderInfosByProviderName(const std::string &providerName, const int32_t &userid,
         std::vector<ProviderInfo> &providerInfos);
     int32_t GetExtensionProxy(const ProviderInfo &providerInfo, sptr<IHuksAccessExtBase> &proxy);
+    int32_t OnQueryAbility(const HksProcessInfo &processInfo, std::string &resourceId, CppAbilityInfo &abilityInfo);
 private:
     void PrintRegisterProviders();
     int32_t HapGetAllConnectInfoByProviderName(const std::string &bundleName, const std::string &providerName,
@@ -77,9 +86,24 @@ private:
     int32_t HksHapGetConnectInfos(const HksProcessInfo &processInfo, const std::string &providerName,
         const CppParamSet &paramSet,
         std::vector<std::pair<ProviderInfo, std::shared_ptr<HksExtAbilityConnectInfo>>> &connectionInfos);
+    int32_t RegisterProviderWithIndexArray(const HksProcessInfo &processInfo, const std::string &providerName,
+        const CppParamSet &paramSet, const std::vector<AbilityInfo> &abilityInfoArray);
+    int32_t RegisterSingleAbilityWithIndex(const HksProcessInfo &processInfo, const std::string &providerName,
+        const CppParamSet &paramSet, const AbilityInfo &abilityInfo);
+    int32_t CheckProviderIndexDuplicate(const ProviderIndexKey &key);
+    int32_t UnregisterProviderWithIndexArray(const HksProcessInfo &processInfo, const std::string &providerName,
+        const CppParamSet &paramSet, bool isdeath, int32_t &deleteCount);
+    int32_t UnregisterSingleAbilityWithIndex(const HksProcessInfo &processInfo, const std::string &providerName,
+        const CppParamSet &paramSet, const AbilityInfo &abilityInfo, bool isdeath, int32_t &deleteCount);
+    int32_t UnregisterAllUiExtensionsByProviderInfo(const ProviderInfo &providerInfo);
+    int32_t RegisterUiAbility(const HksProcessInfo &processInfo,
+        const std::string &providerName, const CppParamSet &paramSet, std::string jsonStr);
     // ProviderInfo, connectionInfo
     OHOS::SafeMap<ProviderInfo, std::shared_ptr<HksExtAbilityConnectInfo>> m_providerMap{};
     std::mutex m_registerMutex{};
+    // ProviderIndexKey, abilityName
+    OHOS::SafeMap<ProviderIndexKey, std::string> m_providerIndexMap{};
+    std::mutex m_providerIndexMutex{};
 };
 }
 }
