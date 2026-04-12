@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -166,6 +166,7 @@ enum HuksExternalPinAuthState {
     /* supported for group key */\
     HKS_ASSIGN_ENUM_VALUE(HKS_TAG_KEY_ACCESS_GROUP, HKS_TAG_TYPE_BYTES | 523) \
     HKS_ASSIGN_ENUM_VALUE(HKS_TAG_DEVELOPER_ID, HKS_TAG_TYPE_BYTES | 524) \
+    HKS_ASSIGN_ENUM_VALUE(HKS_TAG_KEY_SECURITY_LEVEL, HKS_TAG_TYPE_UINT | 526) \
     HKS_ASSIGN_ENUM_VALUE(HKS_TAG_AAD, HKS_TAG_TYPE_BYTES | 527) \
     /* Extention TAG: 1001 - 9999 */\
     HKS_ASSIGN_ENUM_VALUE(HKS_TAG_IS_KEY_ALIAS, HKS_TAG_TYPE_BOOL | 1001) \
