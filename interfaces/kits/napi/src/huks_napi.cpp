@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -147,6 +147,7 @@ static void AddHuksTagPart2(napi_env env, napi_value tag)
     AddInt32Property(env, tag, "HUKS_TAG_KEY_OVERRIDE", HKS_TAG_KEY_OVERRIDE);
     AddInt32Property(env, tag, "HUKS_TAG_AE_TAG_LEN", HKS_TAG_AE_TAG_LEN);
     AddInt32Property(env, tag, "HUKS_TAG_KEY_ACCESS_GROUP", HKS_TAG_KEY_ACCESS_GROUP);
+    AddInt32Property(env, tag, "HUKS_TAG_KEY_SECURITY_LEVEL", HKS_TAG_KEY_SECURITY_LEVEL);
 
     /*
      * Other reserved TAG: 601 - 1000
@@ -726,6 +727,16 @@ static napi_value CreateHuksKeyWrapType(napi_env env)
 
     return keyWrapType;
 }
+
+static napi_value CreateHuksKeySecurityLevel(napi_env env)
+{
+    napi_value value = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &value));
+
+    AddInt32Property(env, value, "HUKS_KEY_SECURITY_LEVEL_TEE", HKS_KEY_SECURITY_LEVEL_TEE);
+    AddInt32Property(env, value, "HUKS_KEY_SECURITY_LEVEL_SE", HKS_KEY_SECURITY_LEVEL_SE);
+    return value;
+}
 }  // namespace HuksNapi
 
 using namespace HuksNapi;
@@ -806,7 +817,7 @@ static napi_value HuksNapiRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("HuksRsaPssSaltLenType", CreateHuksRsaPssSaltLenType(env)),
         DECLARE_NAPI_PROPERTY("HuksAuthStorageLevel", CreateHuksAuthStorageLevel(env)),
         DECLARE_NAPI_PROPERTY("HuksKeyWrapType", CreateHuksKeyWrapType(env)),
-
+        DECLARE_NAPI_PROPERTY("HuksKeySecurityLevel", CreateHuksKeySecurityLevel(env)),
     };
     napi_property_descriptor desc[HKS_ARRAY_SIZE(NAPI_FUNC_DESC) + HKS_ARRAY_SIZE(propDesc)];
 
