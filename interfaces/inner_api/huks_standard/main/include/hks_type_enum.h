@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -458,6 +458,12 @@ enum HksAgreePubKeyType {
 
 enum HksKeyWrapType {
     HKS_KEY_WRAP_TYPE_HUK = 2,
+};
+
+enum HksKeySecurityLevel {
+    HKS_KEY_SECURITY_LEVEL_TEE = 0,
+    HKS_KEY_SECURITY_LEVEL_SE = 1,
+    HKS_KEY_SECURITY_LEVEL_INDEPENDENT_SE = 2,
 };
 #endif
 
