@@ -660,12 +660,10 @@ int32_t HksClientGetResourceId(const struct HksBlob *providerName, const struct 
         HKS_LOG_E("resourceId must be NULL pointer");
         return HKS_ERROR_NULL_POINTER;
     }
-    
     int32_t ret;
     struct HksBlob inBlob = { 0, NULL };
     struct HksBlob outBlob = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
-    
     outBlob.size = HKS_EXT_MAX_RESOURCE_ID_LEN;
     outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
     HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
@@ -688,9 +686,11 @@ int32_t HksClientGetResourceId(const struct HksBlob *providerName, const struct 
         
         resourceId->size = outBlob.size;
         resourceId->data = (uint8_t *)HksMalloc(resourceId->size);
-        HKS_IF_NULL_LOGE_RETURN(resourceId->data,
-            HKS_ERROR_INSUFFICIENT_MEMORY, "Failed to allocate memory for ResourceId")
-        
+        if (resourceId->data == NULL) {
+            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
+            HKS_LOG_E("Failed to allocate memory for ResourceId");
+            break;
+        }
         HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(resourceId->data, outBlob.size, outBlob.data, outBlob.size),
             "memcpy_s resourceId failed")
     } while (0);
@@ -698,7 +698,6 @@ int32_t HksClientGetResourceId(const struct HksBlob *providerName, const struct 
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
     HKS_FREE_BLOB(outBlob);
-    
     return ret;
 }
 #endif
