@@ -19,6 +19,7 @@
 #include "hks_type.h"
 #include "hks_error_code.h"
 #include "hks_param.h"
+#include "hks_mem.h"
 #include "gtest/gtest.h"
 
 #include <string>
@@ -70,7 +71,7 @@ static void InitTestEnv(HksProcessInfo &processInfo, HksParamSet *&paramSet)
 static void FreeTestEnv(HksProcessInfo &processInfo, HksParamSet *&paramSet)
 {
     HksFreeParamSet(&paramSet);
-    free(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.processName);
 }
 
 static HksBlob MakeBlob(const std::string &s)
