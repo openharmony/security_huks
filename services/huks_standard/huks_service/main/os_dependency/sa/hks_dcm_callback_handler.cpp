@@ -161,7 +161,7 @@ static void SafeLogString(DcmBlob erroInfo)
     }
     char *data = reinterpret_cast<char*>(erroInfo.data);
     uint32_t size = erroInfo.size;
-    // 检查是否已有'\0'结尾
+
     if (data[size - 1] == '\0') {
         HKS_LOG_E("OfflineAnonAttest fail, DCM ERROR INFO: %" LOG_PUBLIC "s", data);
         return;
@@ -182,17 +182,17 @@ static int32_t MapDcmErrorCodeToHuks(DcmAnonymousResponse *response)
 {
     switch (response->errCode) {
         case DCM_ERROR_NETWORK_UNAVALIABLE:
-            return HUKS_ERR_CODE_NETWORK_UNAVALIABLE;
+            return HKS_ERROR_CODE_NETWORK_UNAVAILABLE;
         
         case DCM_ERROR_SERVICE_TIME_OUT:
             return HUKS_ERR_CODE_BUSY;
         
         case DCM_ERROR_INVALID_PRIVACY_KEY:
             SafeLogString(response->errInfo);
-            return HUKS_ERR_CODE_EXTERNAL_ERROR;
+            return HKS_ERROR_CODE_DCM_CALLBACK_ERROR;
         
         default:
-            return HUKS_ERR_CODE_EXTERNAL_ERROR;
+            return HKS_ERROR_CODE_DCM_CALLBACK_ERROR;
     }
 }
 
@@ -226,7 +226,7 @@ void HksDcmOfflineCallback(DcmAnonymousResponse *response)
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "PackAttestChain failed %" LOG_PUBLIC "d", ret)
         replyData = std::move(packedCertChain);
         replySize = packedBlob.size;
-    } while (false);
+    } while (0);
 
     hksProxy->SendAsyncReply(hksErrorCode, replyData, replySize);
     g_offlineInstanceList.RemoveWithoutLock(response->requestId);

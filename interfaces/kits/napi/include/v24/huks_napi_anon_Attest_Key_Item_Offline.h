@@ -16,6 +16,7 @@
 #ifndef HUKS_NAPI_ANON_ATTEST_KEY_ITEM_OFFLINE_H
 #define HUKS_NAPI_ANON_ATTEST_KEY_ITEM_OFFLINE_H
 
+#include "hks_error_code.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 #include "hks_type.h"
@@ -27,6 +28,16 @@ napi_value HuksNapiAnonAttestKeyItemOffline(napi_env env, napi_callback_info inf
 napi_value HuksNapiAnonAttestKeyItemOfflineAsUser(napi_env env, napi_callback_info info);
 
 napi_value AttestKeyAsyncWorkOffline(napi_env env, AttestKeyAsyncContext &context);
+
+struct NapiRes {
+    int32_t code{};
+    std::string errMsg{};
+    NapiRes(int32_t code, std::string errMsg) : code(code), errMsg(std::move(errMsg)) {}
+    static NapiRes Ok()
+    {
+        return {HKS_SUCCESS, ""};
+    }
+};
 }
 
 #endif
