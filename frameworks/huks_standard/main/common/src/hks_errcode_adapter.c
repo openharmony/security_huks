@@ -886,6 +886,20 @@ static struct HksError g_errCodeTable[] = {
             .errorMsg = "the resource info param is missing.",
             .data = NULL
         }
+    }, {
+        .innerErrCode = HKS_ERROR_CODE_NETWORK_UNAVAILABLE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_NETWORK_UNAVAILABLE,
+            .errorMsg = "the internet is unavaliable.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_CODE_DCM_CALLBACK_ERROR,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "the dcm callback fail.",
+            .data = NULL
+       }
     }
 };
 

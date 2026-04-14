@@ -37,6 +37,60 @@ namespace HuksNapiItem {
 constexpr int HUKS_NAPI_ATTEST_KEY_MIN_ARGS = 2;
 constexpr int HUKS_NAPI_ATTEST_KEY_MAX_ARGS = 3;
 constexpr int HUKS_NAPI_ATTEST_KEY_AS_USER_ARGS_COUNT = 3;
+constexpr int HKS_MAX_DATA_LEN = 0x6400000;
+
+NapiRes HuksParseKeyAlias(napi_env env, napi_value object, HksBlob *&alias)
+{
+    napi_valuetype valueType = napi_valuetype::napi_undefined;
+    napi_status status = napi_typeof(env, object, &valueType);
+    if (status != napi_ok) {
+        HKS_LOG_E("napi fail");
+        return {HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "napi fail"};
+    }
+
+    if (valueType != napi_valuetype::napi_string) {
+        HKS_LOG_E("no string type");
+        return {HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "the type of alias isn't string"};
+    }
+
+    size_t length = 0;
+    status = napi_get_value_string_utf8(env, object, nullptr, 0, &length);
+    if (status != napi_ok) {
+        HKS_LOG_E("could not get string length %" LOG_PUBLIC "d", status);
+        return {HUKS_ERR_CODE_INVALID_ARGUMENT, "could not get string length"};
+    }
+
+    if (length > HKS_MAX_DATA_LEN) {
+        HKS_LOG_E("input key alias length %" LOG_PUBLIC "zu too large", length);
+        return {HUKS_ERR_CODE_INVALID_ARGUMENT, "the length of alias is too long"};
+    }
+
+    char *data = static_cast<char *>(HksMalloc(length + 1));
+    if (data == nullptr) {
+        HKS_LOG_E("could not alloc memory");
+        return {HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "Insufficient memory."};
+    }
+    (void)memset_s(data, length + 1, 0, length + 1);
+
+    size_t result = 0;
+    status = napi_get_value_string_utf8(env, object, data, length + 1, &result);
+    if (status != napi_ok) {
+        HKS_FREE(data);
+        HKS_LOG_E("could not get string %" LOG_PUBLIC "d", status);
+        return {HUKS_ERR_CODE_INVALID_ARGUMENT, "could not get string"};
+    }
+
+    alias = static_cast<HksBlob *>(HksMalloc(sizeof(HksBlob)));
+    if (alias == nullptr) {
+        HKS_FREE(data);
+        HKS_LOG_E("could not alloc memory");
+        return {HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "Insufficient memory."};
+    }
+    alias->data = reinterpret_cast<uint8_t *>(data);
+    alias->size = static_cast<uint32_t>(length & UINT32_MAX);
+
+    return NapiRes::Ok();
+}
 
 static napi_value AttestKeyOfflineAsUserParseParams(napi_env env, napi_callback_info info,
     AttestKeyAsyncContext &context)
@@ -64,9 +118,9 @@ static napi_value AttestKeyOfflineAsUserParseParams(napi_env env, napi_callback_
         return nullptr;
     }
     index++;
-    result = ParseKeyAlias(env, argv[index], context->keyAlias);
-    if (result == nullptr) {
-        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get key alias");
+    NapiRes res = HuksParseKeyAlias(env, argv[index], context->keyAlias);
+    if (res.code != HKS_SUCCESS) {
+        HksNapiThrow(env, res.code, res.errMsg.data());
         HKS_LOG_E("could not get alias");
         return nullptr;
     }
@@ -123,7 +177,12 @@ napi_value AttestKeyAsyncWorkOffline(napi_env env, AttestKeyAsyncContext &contex
             HksSuccessReturnResult resultData{};
             SuccessReturnResultInit(resultData);
             resultData.certChain = napiContext->certChain;
-            HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+            if (napiContext->result == HKS_ERROR_INVALID_ARGUMENT || napiContext->result == HKS_ERROR_NULL_POINTER ||
+                napiContext->result == HKS_ERROR_PARAM_NOT_EXIST) {
+                napiContext->result = HKS_ERROR_NEW_INVALID_ARGUMENT;
+            }
+            HksReturnNapiResult(env, napiContext->callback, napiContext->deferred,
+                napiContext->result, resultData);
             DeleteAttestKeyAsyncContext(env, napiContext);
         }, static_cast<void *>(context), &context->asyncWork);
     if (status != napi_ok) {
@@ -186,23 +245,23 @@ napi_value HuksNapiAnonAttestKeyItemOffline(napi_env env, napi_callback_info inf
     }
 
     if (argc < HUKS_NAPI_ATTEST_KEY_MIN_ARGS) {
-        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
+        HksNapiThrow(env, HUKS_ERR_CODE_INVALID_ARGUMENT, "no enough params input");
         HKS_LOG_E("no enough params");
         DeleteAttestKeyAsyncContext(env, context);
         return nullptr;
     }
 
     size_t index = 0;
-    napi_value result = ParseKeyAlias(env, argv[index], context->keyAlias);
-    if (result == nullptr) {
-        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get key alias");
+    NapiRes res = HuksParseKeyAlias(env, argv[index], context->keyAlias);
+    if (res.code != HKS_SUCCESS) {
+        HksNapiThrow(env, res.code, res.errMsg.data());
         HKS_LOG_E("could not get alias");
         DeleteAttestKeyAsyncContext(env, context);
         return nullptr;
     }
 
     index++;
-    result = ParseHuksParams(env, argv[index], {}, context->paramSet);
+    napi_value result = ParseHuksParams(env, argv[index], {}, context->paramSet);
     if (result == nullptr) {
         HksNapiThrow(env, HUKS_ERR_CODE_INVALID_ARGUMENT, "could not get paramset");
         HKS_LOG_E("could not get paramset");

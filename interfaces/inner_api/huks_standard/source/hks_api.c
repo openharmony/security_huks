@@ -892,14 +892,14 @@ static int32_t ConstructOfflineAnonAttestParamSet(const struct HksParamSet *para
                 {.tag = HKS_TAG_ATTESTATION_MODE, .uint32Param = HKS_ATTESTATION_MODE_ANONYMOUS},
                 {.tag = HKS_TAG_ATTESTATION_BASE64, .boolParam = true},
                 {.tag = HKS_TAG_ANONYMOUS_ATTESTATION_MODE, .uint32Param = HKS_ANONYMOUS_ATTEST_OFFLINE}};
-            ret = HksAddParams(*newParamSet, offlineParams, sizeof(offlineParams)/sizeof(struct HksParam));
+            ret = HksAddParams(*newParamSet, offlineParams, sizeof(offlineParams) / sizeof(struct HksParam));
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add offline params fail");
         }
         
         ret = HksBuildParamSet(newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build paramSet fail");
         return HKS_SUCCESS;
-    } while (false);
+    } while (0);
     HksFreeParamSet(newParamSet);
     return ret;
 }

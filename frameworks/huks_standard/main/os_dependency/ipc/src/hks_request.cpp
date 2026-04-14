@@ -107,10 +107,14 @@ static int32_t HksSendAnonAttestRequestAndWaitAsyncReply(MessageParcel &data, co
 #ifndef HKS_UNTRUSTED_RUNNING_ENV
     int timeout = 10; // seconds
     auto [errCode, packedCerts, packedSize] = hksCallback->WaitForAsyncReply(timeout);
-    if (errCode != HKS_SUCCESS || packedCerts == nullptr || packedSize == 0) {
+    if (errCode != HKS_SUCCESS) {
         HKS_LOG_E("errCode %" LOG_PUBLIC "u fail or packedCerts empty or size %" LOG_PUBLIC "u 0", errCode, packedSize);
-        HKS_IF_TRUE_LOGE_RETURN(errCode == HKS_SUCCESS, HUKS_ERR_CODE_EXTERNAL_ERROR, "external fail")
         return errCode;
+    }
+
+    if (packedCerts == nullptr || packedSize == 0) {
+        HKS_LOG_E("dcm callback fail or packedCerts empty or size %" LOG_PUBLIC "u 0", packedSize);
+        return HKS_ERROR_BAD_STATE;
     }
 
     if (outBlob->size < packedSize) {
