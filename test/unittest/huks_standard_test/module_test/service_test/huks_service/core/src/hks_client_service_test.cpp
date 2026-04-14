@@ -300,27 +300,27 @@ static int32_t TestGenerateKeyWithProcessInfo(const struct HksBlob *keyAlias, co
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = HksInitParamSet(&paramSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksServiceDeleteProcessInfo HksInitParamSet failed");
+        HKS_LOG_E("HksInitParamSet failed");
         return ret;
     }
 
     ret = HksAddParams(paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksServiceDeleteProcessInfo HksAddParams failed");
+        HKS_LOG_E("HksAddParams failed");
         HksFreeParamSet(&paramSet);
         return ret;
     }
 
     ret = HksBuildParamSet(&paramSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksServiceDeleteProcessInfo HksBuildParamSet failed");
+        HKS_LOG_E("HksBuildParamSet failed");
         HksFreeParamSet(&paramSet);
         return ret;
     }
 
     ret = HksServiceGenerateKeyForDe(processInfo, keyAlias, paramSet, nullptr);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksServiceDeleteProcessInfo HksGenerateKey failed");
+        HKS_LOG_E("HksGenerateKey failed");
     }
     HksFreeParamSet(&paramSet);
     return ret;
@@ -349,7 +349,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest001, TestSize.Level0)
     uint64_t handle = 111;
     struct HksBlob operationHandle = { .size = sizeof(uint64_t), .data = (uint8_t *)&handle };
     CreateOperation(&processInfo, NULL, &operationHandle, true);
-    HksServiceDeleteProcessInfo(&processInfo);
+    HksServiceDeleteProcessInfo(&processInfo, false);
     ret = HksServiceKeyExistForDe(&processInfo, &keyAlias, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "HksClientServiceTest001 HksServiceDeleteProcessInfo failed, ret = " << ret;
 }
@@ -374,7 +374,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest009, TestSize.Level0)
     uint64_t handle = 111;
     struct HksBlob operationHandle = { .size = sizeof(uint64_t), .data = (uint8_t *)&handle };
     CreateOperation(&processInfo, NULL, &operationHandle, true);
-    HksServiceDeleteProcessInfo(&processInfo);
+    HksServiceDeleteProcessInfo(&processInfo, false);
     ret = HksServiceKeyExistForDe(&processInfo, &keyAlias, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "HksClientServiceTest009 HksServiceDeleteProcessInfo failed, ret = " << ret;
 }
@@ -399,7 +399,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest002, TestSize.Level0)
 
     struct HksBlob processName2 = { 0, nullptr };
     struct HksProcessInfo processInfo2 = { g_userId, processName2, g_userIdInt, 0, 0 };
-    HksServiceDeleteProcessInfo(&processInfo2);
+    HksServiceDeleteProcessInfo(&processInfo2, false);
     ret = HksServiceKeyExistForDe(&processInfo, &keyAlias, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "HksClientServiceTest002 HksServiceDeleteProcessInfo failed, ret = " << ret;
     HksChangeOldKeyOwner(HKS_CONFIG_KEY_STORE_PATH "/maindata", HUKS_UID);

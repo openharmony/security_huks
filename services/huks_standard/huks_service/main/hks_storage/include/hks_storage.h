@@ -74,6 +74,8 @@ void HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo *processInfo);
 
 #ifdef L2_STANDARD
 void HksServiceDeleteGroupKeyFile(const struct HksProcessInfo *processInfo, const char *developerId, const char *group);
+
+void HksServiceDeleteAncoUIDKeyFile(const struct HksProcessInfo *processInfo);
 #endif
 
 int32_t HksListAliasesByProcessName(const struct HksStoreFileInfo *fileInfo, struct HksKeyAliasSet **outData);

@@ -141,6 +141,19 @@ void HksPluginOnReceiveEvent(const void *data)
     g_pluginProxy->hksPluginOnReceiveEvent(data);
 }
 
+void HksPluginSubSystemEvent(void *matchingSkills)
+{
+    HKS_IF_NOT_SUCC_RETURN_VOID(RetryLoadPlugin())
+    g_pluginProxy->hksPluginSubSystemEvent(matchingSkills);
+}
+
+int32_t HksPluginGetAncoUser(int *userId)
+{
+    int32_t ret = RetryLoadPlugin();
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "load plugin failed")
+    return g_pluginProxy->hksPluginGetAncoUser(userId);
+}
+
 int32_t HksPluginOnLocalRequestWrapKey(uint32_t code, const void *data, void *reply)
 {
     HKS_IF_NULL_LOGE_RETURN(g_pluginProxy, HKS_ERROR_API_NOT_SUPPORTED, "wrap key not supported")
