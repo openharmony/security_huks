@@ -24,7 +24,8 @@ extern "C" {
 
 void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlob *response);
 
-int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *processInfo);
+int32_t HksGetProcessInfoForIPC(const struct HksParamSet *paramSet,
+    const uint8_t *context, struct HksProcessInfo *processInfo);
 
 int32_t HksGetFrontUserId(int32_t *outId);
 

@@ -35,7 +35,6 @@
 #include "hks_storage_manager.h"
 #include "hks_template.h"
 #include "hks_type_inner.h"
-
 #include "securec.h"
 
 #ifdef L2_STANDARD
@@ -307,7 +306,9 @@ static int32_t InitStorageMaterial(const struct HksProcessInfo *processInfo,
 #endif
     bool isPlainPath = GetIsPlainPath(storageLevel);
 
-    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0, 0, 0 };
+    struct HksStoreMaterial material = { DE_PATH, false, 0, 0, 0, 0, 0, 0 };
+    struct HksParam *ancoUidParam = NULL;
+    material.ancoOperation = HksGetParam(paramSet, HKS_TAG_ANCO_APP_UID, &ancoUidParam) == HKS_SUCCESS;
     do {
         ret = GetPathType(processInfo, storageType, storageLevel, &material);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get path type failed.")
@@ -362,7 +363,9 @@ int32_t HksManageStoreKeyBlob(const struct HksProcessInfo *processInfo, const st
 #else
     struct HksStoreFileInfo fileInfo = { { 0 } };
 #endif
-    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0, 0, 0 };
+    struct HksStoreMaterial material = { DE_PATH, false, 0, 0, 0, 0, 0, 0 };
+    struct HksParam *ancoUidParam = NULL;
+    material.ancoOperation = HksGetParam(paramSet, HKS_TAG_ANCO_APP_UID, &ancoUidParam) == HKS_SUCCESS;
     int32_t ret;
     do {
 #ifdef _STORAGE_LITE_
@@ -401,7 +404,9 @@ int32_t HksManageStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo, co
 #else
     struct HksStoreFileInfo fileInfo = { { 0 } };
 #endif
-    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0, 0, 0 };
+    struct HksStoreMaterial material = { DE_PATH, false, 0, 0, 0, 0, 0, 0 };
+    struct HksParam *ancoUidParam = NULL;
+    material.ancoOperation = HksGetParam(paramSet, HKS_TAG_ANCO_APP_UID, &ancoUidParam) == HKS_SUCCESS;
     int32_t ret;
     do {
 #ifdef _STORAGE_LITE_
@@ -433,7 +438,9 @@ int32_t HksManageStoreIsKeyBlobExist(const struct HksProcessInfo *processInfo, c
 #else
     struct HksStoreFileInfo fileInfo = { { 0 } };
 #endif
-    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0, 0, 0 };
+    struct HksStoreMaterial material = { DE_PATH, false, 0, 0, 0, 0, 0, 0 };
+    struct HksParam *ancoUidParam = NULL;
+    material.ancoOperation = HksGetParam(paramSet, HKS_TAG_ANCO_APP_UID, &ancoUidParam) == HKS_SUCCESS;
     int32_t ret;
     do {
 #ifdef _STORAGE_LITE_
@@ -465,7 +472,9 @@ int32_t HksManageStoreGetKeyBlob(const struct HksProcessInfo *processInfo, const
 #else
     struct HksStoreFileInfo fileInfo = { { 0 } };
 #endif
-    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0, 0, 0 };
+    struct HksStoreMaterial material = { DE_PATH, false, 0, 0, 0, 0, 0, 0 };
+    struct HksParam *ancoUidParam = NULL;
+    material.ancoOperation = HksGetParam(paramSet, HKS_TAG_ANCO_APP_UID, &ancoUidParam) == HKS_SUCCESS;
     int32_t ret;
     do {
 #ifdef _STORAGE_LITE_
@@ -508,7 +517,9 @@ int32_t HksManageStoreGetKeyBlobSize(const struct HksProcessInfo *processInfo, c
 #else
     struct HksStoreFileInfo fileInfo = { { 0 } };
 #endif
-    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0, 0, 0 };
+    struct HksStoreMaterial material = { DE_PATH, false, 0, 0, 0, 0, 0, 0 };
+    struct HksParam *ancoUidParam = NULL;
+    material.ancoOperation = HksGetParam(paramSet, HKS_TAG_ANCO_APP_UID, &ancoUidParam) == HKS_SUCCESS;
     int32_t ret;
     do {
 #ifdef _STORAGE_LITE_
@@ -546,7 +557,9 @@ int32_t HksManageGetKeyAliasByProcessName(const struct HksProcessInfo *processIn
 #else
     struct HksStoreFileInfo fileInfo = { { 0 } };
 #endif
-    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0, 0, 0 };
+    struct HksStoreMaterial material = { DE_PATH, false, 0, 0, 0, 0, 0, 0 };
+    struct HksParam *ancoUidParam = NULL;
+    material.ancoOperation = HksGetParam(paramSet, HKS_TAG_ANCO_APP_UID, &ancoUidParam) == HKS_SUCCESS;
     int32_t ret;
     do {
         ret = InitStorageMaterial(processInfo, paramSet, NULL, HKS_STORAGE_TYPE_KEY, &material);
@@ -574,7 +587,9 @@ int32_t HksManageGetKeyCountByProcessName(const struct HksProcessInfo *processIn
 #else
     struct HksStoreFileInfo fileInfo = { { 0 } };
 #endif
-    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0, 0, 0 };
+    struct HksStoreMaterial material = { DE_PATH, false, 0, 0, 0, 0, 0, 0 };
+    struct HksParam *ancoUidParam = NULL;
+    material.ancoOperation = HksGetParam(paramSet, HKS_TAG_ANCO_APP_UID, &ancoUidParam) == HKS_SUCCESS;
     int32_t ret;
     do {
 #ifdef _STORAGE_LITE_
@@ -606,7 +621,9 @@ int32_t HksManageListAliasesByProcessName(const struct HksProcessInfo *processIn
 #else
     struct HksStoreFileInfo fileInfo = { { 0 } };
 #endif
-    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0, 0, 0 };
+    struct HksStoreMaterial material = { DE_PATH, false, 0, 0, 0, 0, 0, 0 };
+    struct HksParam *ancoUidParam = NULL;
+    material.ancoOperation = HksGetParam(paramSet, HKS_TAG_ANCO_APP_UID, &ancoUidParam) == HKS_SUCCESS;
     int32_t ret;
     do {
         ret = InitStorageMaterial(processInfo, paramSet, NULL, HKS_STORAGE_TYPE_KEY, &material);
@@ -638,8 +655,8 @@ int32_t HksManageStoreRenameKeyAlias(const struct HksProcessInfo *processInfo,
     UnlockIfDe(paramSet);
     struct HksStoreFileInfo oldKeyFileInfo = { { 0 } };
     struct HksStoreFileInfo newKeyFileInfo = { { 0 } };
-    struct HksStoreMaterial oldKeyMaterial = { DE_PATH, 0, 0, 0, 0, 0, 0 };
-    struct HksStoreMaterial newKeyMaterial = { DE_PATH, 0, 0, 0, 0, 0, 0 };
+    struct HksStoreMaterial oldKeyMaterial = { DE_PATH, false, 0, 0, 0, 0, 0, 0 };
+    struct HksStoreMaterial newKeyMaterial = { DE_PATH, false, 0, 0, 0, 0, 0, 0 };
     int32_t ret;
     do {
         ret = InitStorageMaterial(processInfo, paramSet, oldKeyAlias, storageType, &oldKeyMaterial);

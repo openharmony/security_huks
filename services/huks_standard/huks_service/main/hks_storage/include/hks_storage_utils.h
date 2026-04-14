@@ -69,6 +69,7 @@ enum HksPathType {
 
 struct HksStoreMaterial {
     enum HksPathType pathType;
+    bool ancoOperation;
     char *userIdPath;
     char *uidPath;
     /**

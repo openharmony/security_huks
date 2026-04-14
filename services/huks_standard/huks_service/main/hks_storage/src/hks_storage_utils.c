@@ -597,6 +597,21 @@ static int32_t ConstructGroupKeyPath(const struct HksStoreMaterial *material, co
     }
     return ret;
 }
+
+static int32_t ConstructAncoPath(const struct HksStoreMaterial *material, const char *dataPath,
+    struct HksStoreInfo *fileInfoPath)
+{
+    HKS_IF_TRUE_LOGE_RETURN(material->pathType != CE_PATH, HKS_ERROR_NOT_SUPPORTED,
+        "not support type %" LOG_PUBLIC "u", material->pathType)
+
+    int32_t ret = CheckUserPathExist(CE_PATH, material->userIdPath);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check user path exist failed.")
+    int32_t offset = sprintf_s(fileInfoPath->path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s/%s/%s", HKS_CE_ROOT_PATH,
+        material->userIdPath, dataPath, HKS_ANCO_PATH, material->uidPath, material->storageTypePath);
+
+    HKS_IF_TRUE_LOGE_RETURN(offset < 0, HKS_ERROR_INSUFFICIENT_MEMORY, "get path failed")
+    return HKS_SUCCESS;
+}
 #endif
 
 static int32_t ConstructPath(const struct HksStoreMaterial *material, const char *deDataPath,
@@ -665,6 +680,8 @@ static int32_t GetPathInfo(const struct HksStoreMaterial *material, const char *
 #ifdef L2_STANDARD
     if (IsGroupKeyMaterial(material)) {
         ret = ConstructGroupKeyPath(material, deDataPath, ceOrEceDataPath, fileInfoPath);
+    } else if (material->ancoOperation) {
+        ret = ConstructAncoPath(material, ceOrEceDataPath, fileInfoPath);
     } else {
         ret = ConstructPath(material, deDataPath, ceOrEceDataPath, fileInfoPath);
     }
