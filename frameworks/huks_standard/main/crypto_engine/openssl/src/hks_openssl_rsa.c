@@ -163,36 +163,28 @@ static int32_t RsaSaveKeyMaterial(const RSA *rsa, const uint32_t keySize, struct
     keyMaterial->keySize = keySize;
 
     uint8_t tmp_buff[keyByteLen];
-    if (memset_s(tmp_buff, keyByteLen, 0, keyByteLen) != EOK) {
-        HKS_FREE(rawMaterial);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    do {
+        HKS_IF_TRUE_BREAK(memset_s(tmp_buff, keyByteLen, 0, keyByteLen) != EOK)
 
-    uint32_t offset = sizeof(*keyMaterial);
-    keyMaterial->nSize = (uint32_t)BN_bn2bin(RSA_get0_n(rsa), tmp_buff);
-    if (memcpy_s(rawMaterial + offset, keyByteLen, tmp_buff, keyMaterial->nSize) != EOK) {
-        HKS_FREE(rawMaterial);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+        uint32_t offset = sizeof(*keyMaterial);
+        keyMaterial->nSize = (uint32_t)BN_bn2bin(RSA_get0_n(rsa), tmp_buff);
+        HKS_IF_TRUE_BREAK(memcpy_s(rawMaterial + offset, keyByteLen, tmp_buff, keyMaterial->nSize) != EOK)
 
-    offset += keyMaterial->nSize;
-    keyMaterial->eSize = (uint32_t)BN_bn2bin(RSA_get0_e(rsa), tmp_buff);
-    if (memcpy_s(rawMaterial + offset, keyByteLen, tmp_buff, keyMaterial->eSize) != EOK) {
-        HKS_FREE(rawMaterial);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+        offset += keyMaterial->nSize;
+        keyMaterial->eSize = (uint32_t)BN_bn2bin(RSA_get0_e(rsa), tmp_buff);
+        HKS_IF_TRUE_BREAK(memcpy_s(rawMaterial + offset, keyByteLen, tmp_buff, keyMaterial->eSize) != EOK)
 
-    offset += keyMaterial->eSize;
-    keyMaterial->dSize = (uint32_t)BN_bn2bin(RSA_get0_d(rsa), tmp_buff);
-    if (memcpy_s(rawMaterial + offset, keyByteLen, tmp_buff, keyMaterial->dSize) != EOK) {
-        HKS_FREE(rawMaterial);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+        offset += keyMaterial->eSize;
+        keyMaterial->dSize = (uint32_t)BN_bn2bin(RSA_get0_d(rsa), tmp_buff);
+        HKS_IF_TRUE_BREAK(memcpy_s(rawMaterial + offset, keyByteLen, tmp_buff, keyMaterial->dSize) != EOK)
 
-    key->data = rawMaterial;
-    key->size = sizeof(struct KeyMaterialRsa) + keyMaterial->nSize + keyMaterial->eSize + keyMaterial->dSize;
+        key->data = rawMaterial;
+        key->size = sizeof(struct KeyMaterialRsa) + keyMaterial->nSize + keyMaterial->eSize + keyMaterial->dSize;
+        return HKS_SUCCESS;
+    } while (0);
 
-    return HKS_SUCCESS;
+    HKS_FREE(rawMaterial);
+    return HKS_ERROR_INSUFFICIENT_MEMORY;
 }
 
 int32_t HksOpensslRsaGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
