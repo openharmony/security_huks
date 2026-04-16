@@ -18,6 +18,7 @@
 #include <cstdio>
 #include <string>
 #include "hks_cpp_paramset.h"
+#include "hks_cpp_abilityinfo.h"
 #include "hks_plugin_def.h"
 #include "hks_cfi.h"
 
@@ -147,6 +148,31 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnExp
     return 0;
 }
 
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnGetResourceId(
+    const HksProcessInfo &processInfo, const std::string &providerName,
+    const CppParamSet &paramSet, std::string &resourceId))
+{
+    resourceId = "testResourceId";
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnQueryAbilityInfo(
+    const HksProcessInfo &processInfo, std::string &resourceId, CppAbilityInfo &abilityInfo))
+{
+    return 0;
+}
+
+extern "C" void *__wrap_dlopen(const char* filename, int flags)
+{
+    static int fakeHandle = 1;
+    return &fakeHandle;
+}
+
+extern "C" int __wrap_dlclose(void* handle)
+{
+    return 0;
+}
+
 extern "C" void *__wrap_dlsym(void* handle, const char* symbol)
 {
     static const struct {
@@ -206,6 +232,12 @@ extern "C" void *__wrap_dlsym(void* handle, const char* symbol)
          {"_ZN4OHOS8Security4Huks29HksExtPluginOnExportPublicKeyERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRNS5_6vectorIhNS9_IhEEEE",
          (void*)Fake_HksExtPluginOnExportPublicKey},
+         {"_ZN4OHOS8Security4Huks27HksExtPluginOnGetResourceIdERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_",
+         (void*)Fake_HksExtPluginOnGetResourceId},
+         {"_ZN4OHOS8Security4Huks30HksExtPluginOnQueryAbilityInfoERK14HksProcessInfoRNSt3__h12basic_stringIcNS5_11"
+        "char_traitsIcEENS5_9allocatorIcEEEER14CppAbilityInfo",
+         (void*)Fake_HksExtPluginOnQueryAbilityInfo},
          {"_ZN4OHOS8Security4Huks36HksExtPluginOnUnregisterAllObserversEv",
          (void*)Fake_HksExtPluginOnUnregisterAllObservers},
     };
