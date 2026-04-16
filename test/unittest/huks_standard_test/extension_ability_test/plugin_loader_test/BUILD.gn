@@ -38,7 +38,11 @@ if (huks_enable_ukey_config == true) {
       "-Werror",
     ]
 
-    ldflags = [ "-Wl,--wrap=dlsym" ]
+    ldflags = [
+      "-Wl,--wrap=dlopen",
+      "-Wl,--wrap=dlclose",
+      "-Wl,--wrap=dlsym",
+    ]
 
     sanitize = {
       integer_overflow = true
