@@ -183,6 +183,7 @@ static int32_t RsaSaveKeyMaterial(const RSA *rsa, const uint32_t keySize, struct
         return HKS_SUCCESS;
     } while (0);
 
+    memset_s(tmp_buff, keyByteLen, 0, keyByteLen);
     HKS_FREE(rawMaterial);
     return HKS_ERROR_INSUFFICIENT_MEMORY;
 }
