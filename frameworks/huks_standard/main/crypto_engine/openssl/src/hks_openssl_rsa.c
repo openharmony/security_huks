@@ -180,6 +180,7 @@ static int32_t RsaSaveKeyMaterial(const RSA *rsa, const uint32_t keySize, struct
 
         key->data = rawMaterial;
         key->size = sizeof(struct KeyMaterialRsa) + keyMaterial->nSize + keyMaterial->eSize + keyMaterial->dSize;
+        memset_s(tmp_buff, keyByteLen, 0, keyByteLen);
         return HKS_SUCCESS;
     } while (0);
 
