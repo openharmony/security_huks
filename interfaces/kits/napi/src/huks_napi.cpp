@@ -81,6 +81,7 @@ static void AddHuksTagPart1(napi_env env, napi_value tag)
     AddInt32Property(env, tag, "HUKS_TAG_AAD", HKS_TAG_AAD);
     AddInt32Property(env, tag, "HUKS_TAG_NONCE", HKS_TAG_NONCE);
     AddInt32Property(env, tag, "HUKS_TAG_IV", HKS_TAG_IV);
+    AddInt32Property(env, tag, "HUKS_TAG_CONTEXT", HKS_TAG_CONTEXT);
 
     /* Key derivation TAG */
     AddInt32Property(env, tag, "HUKS_TAG_INFO", HKS_TAG_INFO);
@@ -259,6 +260,10 @@ static napi_value CreateHuksKeySize(napi_env env)
     AddInt32Property(env, keySize, "HUKS_3DES_KEY_SIZE_128", HKS_3DES_KEY_SIZE_128);
     AddInt32Property(env, keySize, "HUKS_3DES_KEY_SIZE_192", HKS_3DES_KEY_SIZE_192);
 
+    AddInt32Property(env, keySize, "HUKS_ML_DSA_KEY_PARAM_SET_44", HKS_ML_DSA_KEY_PARAM_SET_44);
+    AddInt32Property(env, keySize, "HUKS_ML_DSA_KEY_PARAM_SET_65", HKS_ML_DSA_KEY_PARAM_SET_65);
+    AddInt32Property(env, keySize, "HUKS_ML_DSA_KEY_PARAM_SET_87", HKS_ML_DSA_KEY_PARAM_SET_87);
+
     return keySize;
 }
 
@@ -288,6 +293,8 @@ static napi_value CreateHuksKeyAlg(napi_env env)
     AddInt32Property(env, keyAlg, "HUKS_ALG_DES", HKS_ALG_DES);
     AddInt32Property(env, keyAlg, "HUKS_ALG_3DES", HKS_ALG_3DES);
     AddInt32Property(env, keyAlg, "HUKS_ALG_CMAC", HKS_ALG_CMAC);
+
+    AddInt32Property(env, keyAlg, "HUKS_ALG_ML_DSA", HKS_ALG_ML_DSA);
 
     return keyAlg;
 }

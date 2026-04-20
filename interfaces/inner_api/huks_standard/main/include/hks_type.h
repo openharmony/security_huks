@@ -127,6 +127,7 @@ struct HksKeyAliasSet {
 #define HKS_AE_TAG_LEN 16
 #define HKS_BITS_PER_BYTE 8
 #define MAX_KEY_SIZE 2048
+#define ML_DSA_MAX_KEY_SIZE 10000
 #define HKS_AE_NONCE_LEN 12
 #define HKS_MAX_KEY_ALIAS_LEN 128
 #define HKS_MAX_PROCESS_NAME_LEN 50
@@ -221,6 +222,17 @@ struct HksKeyMaterialEcc {
     uint32_t xSize;
     uint32_t ySize;
     uint32_t zSize;
+};
+
+/**
+ * @brief hks ml-dsa key material
+ */
+struct HksKeyMaterialMlDsa {
+    enum HksKeyAlg keyAlg;
+    uint32_t keyParamSet;
+    uint32_t pubKeySize;
+    uint32_t priKeySize;
+    uint32_t reserved;
 };
 
 /**

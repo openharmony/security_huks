@@ -37,6 +37,7 @@ static uint32_t g_validTags[] = {
     HKS_TAG_AAD,
     HKS_TAG_NONCE,
     HKS_TAG_IV,
+    HKS_TAG_CONTEXT,
 
     HKS_TAG_SALT,
     HKS_TAG_PWD,
