@@ -135,7 +135,6 @@ int32_t HuksPluginLifeCycleMgr::OnUpdateSession(const HksProcessInfo &processInf
     const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
     std::vector<uint8_t> &outData)
 {
-    // 填充空数据，避免 memcpy_s 因空 vector.data() 返回 nullptr 而失败
     outData.assign(1, 0);
     return HKS_SUCCESS;
 }
@@ -144,6 +143,7 @@ int32_t HuksPluginLifeCycleMgr::OnFinishSession(const HksProcessInfo &processInf
     const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
     std::vector<uint8_t> &outData)
 {
+    outData.assign(1, 0);
     return HKS_SUCCESS;
 }
 
@@ -168,7 +168,6 @@ int32_t HuksPluginLifeCycleMgr::OnImportWrappedKey(const HksProcessInfo &process
 int32_t HuksPluginLifeCycleMgr::OnExportPublicKey(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, std::vector<uint8_t> &outData)
 {
-    // 填充空数据，避免 memcpy_s 因空 vector.data() 返回 nullptr 而失败
     outData.assign(1, 0);
     return HKS_SUCCESS;
 }
