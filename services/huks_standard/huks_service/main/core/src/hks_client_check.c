@@ -188,7 +188,7 @@ static int32_t CheckUserAuthParamsValidity(const struct HksParamSet *paramSet, u
                 HKS_IF_TRUE_LOGE_RETURN(authTimeout->uint32Param > ASSET_MAX_AUTH_TIMEOUT_SECOND ||
                     authTimeout->uint32Param == 0, HKS_ERROR_INVALID_TIME_OUT, "invalid auth timeout param")
             } else {
-                HKS_IF_TRUE_LOGE_RETURN(authTimeout->uint32Param > MAX_AUTH_TIMEOUT_SECOND ||
+                HKS_IF_TRUE_LOGE_RETURN(authTimeout->uint32Param > MAX_AUTH_TIMEOUT_SECOND_INNER ||
                     authTimeout->uint32Param == 0, HKS_ERROR_INVALID_TIME_OUT, "invalid auth timeout param")
             }
         }
