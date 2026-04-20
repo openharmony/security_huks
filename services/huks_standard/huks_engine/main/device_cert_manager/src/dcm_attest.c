@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "hks_error_code.h"
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
 #else
@@ -1213,14 +1214,15 @@ static int32_t BuildAttestMsgClaims(struct HksBlob *out, const struct HksParamSe
     ret = DcmInsertClaim(out, &hksAttestationChallengeOid, &challengeBlob, HKS_SECURITY_LEVEL_LOW);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert challenge fail\n")
 
-    struct HksParam *keyId = NULL;
-    ret = HksGetParam(paramSet, HKS_TAG_ATTESTATION_ID_ALIAS, &keyId);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyId param failed!")
+    do {
+        struct HksParam *keyId = NULL;
+        ret = HksGetParam(paramSet, HKS_TAG_ATTESTATION_ID_ALIAS, &keyId);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get keyId param failed!")
 
-    struct HksAsn1Blob keyIdBlob = { ASN_1_TAG_TYPE_OCT_STR, keyId->blob.size, keyId->blob.data };
-    ret = DcmInsertClaim(out, &hksKeyIdOid, &keyIdBlob, secLevel);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert keyId fail\n")
-
+        struct HksAsn1Blob keyIdBlob = { ASN_1_TAG_TYPE_OCT_STR, keyId->blob.size, keyId->blob.data };
+        ret = DcmInsertClaim(out, &hksKeyIdOid, &keyIdBlob, secLevel);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "insert keyId fail\n")
+    } while (0);
     ret = InsertAppIdClaim(out, paramSet, secLevel);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert appId fail\n")
 
@@ -1410,6 +1412,10 @@ static int32_t GetCertOrKey(enum HksCertType type, struct HksBlob *out)
             return ReadCertOrKey(g_anonCaCert, sizeof(g_anonCaCert), out);
         case HKS_ANON_ROOT_CERT:
             return ReadCertOrKey(g_anonRootCert, sizeof(g_anonRootCert), out);
+        case HKS_ANON_CA_DEV_KEY:
+            return ReadCertOrKey(g_anonCaDevKey, sizeof(g_anonCaDevKey), out);
+        case HKS_ANON_CA_DEV_CERT:
+            return ReadCertOrKey(g_anonCaDevCert, sizeof(g_anonCaDevCert), out);
         default:
             break;
     }
@@ -1433,6 +1439,17 @@ static int32_t GetCertAndKey(struct HksAttestSpec *attestSpec)
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get anon ca key fail")
     }
 
+    return ret;
+}
+
+static int32_t GetOfflineCertAndKey(struct HksAttestSpec *attestSpec)
+{
+    int32_t ret;
+    ret = GetCertOrKey(HKS_ANON_CA_DEV_CERT, &attestSpec->devCert);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get anon ca dev cert fail")
+
+    ret = GetCertOrKey(HKS_ANON_CA_DEV_KEY, &attestSpec->devKey);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get anon ca dev key fail")
     return ret;
 }
 
@@ -1469,15 +1486,10 @@ static int32_t CheckAttestUsageSpec(const struct HksUsageSpec *usageSpec)
             HKS_LOG_E("invalid alg %" LOG_PUBLIC "u\n", usageSpec->algType);
             return HKS_ERROR_INVALID_ARGUMENT;
     }
-    if ((usageSpec->algType == HKS_ALG_RSA) && (usageSpec->padding != HKS_PADDING_PSS) &&
-        (usageSpec->padding != HKS_PADDING_PKCS1_V1_5)) {
-        HKS_LOG_E("invalid padding\n");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
     return HKS_SUCCESS;
 }
 
-static int32_t BuildAttestSpec(bool isAnonAttest, const struct HksParamSet *keyNodeParamSet,
+static int32_t BuildOfflineAttestSpec(const struct HksParamSet *keyNodeParamSet,
     const struct HksParamSet *paramSet, struct HksBlob *rawKey, struct HksAttestSpec **outAttestSpec)
 {
     struct HksAttestSpec *attestSpec = HksMalloc(sizeof(struct HksAttestSpec));
@@ -1485,7 +1497,7 @@ static int32_t BuildAttestSpec(bool isAnonAttest, const struct HksParamSet *keyN
 
     (void)memset_s(attestSpec, sizeof(struct HksAttestSpec), 0, sizeof(struct HksAttestSpec));
 
-    attestSpec->isAnonAttest = isAnonAttest;
+    attestSpec->isAnonAttest = true;
 
     SetAttestCertValid(&attestSpec->validity);
 
@@ -1505,10 +1517,14 @@ static int32_t BuildAttestSpec(bool isAnonAttest, const struct HksParamSet *keyN
     attestSpec->claimsOid = hksAttestationExtensionOid;
     attestSpec->attestKey.size = rawKey->size;
     attestSpec->attestKey.data = HksMalloc(rawKey->size);
-    HKS_IF_NULL_LOGE_RETURN(attestSpec->attestKey.data, HKS_ERROR_MALLOC_FAIL, "fail to malloc raw key")
+    if (attestSpec->attestKey.data == NULL) {
+        HKS_LOG_E("get attestKey.data fail\n");
+        FreeAttestSpec(&attestSpec);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
     (void)memcpy_s(attestSpec->attestKey.data, rawKey->size, rawKey->data, rawKey->size);
 
-    ret = GetCertAndKey(attestSpec);
+    ret = GetOfflineCertAndKey(attestSpec);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get cert and key fail\n");
         FreeAttestSpec(&attestSpec);
@@ -1516,6 +1532,45 @@ static int32_t BuildAttestSpec(bool isAnonAttest, const struct HksParamSet *keyN
     }
     *outAttestSpec = attestSpec;
     return HKS_SUCCESS;
+}
+
+static int32_t BuildAttestSpec(bool isAnonAttest, const struct HksParamSet *keyNodeParamSet,
+    const struct HksParamSet *paramSet, struct HksBlob *rawKey, struct HksAttestSpec **outAttestSpec)
+{
+    struct HksAttestSpec *attestSpec = HksMalloc(sizeof(struct HksAttestSpec));
+    HKS_IF_NULL_LOGE_RETURN(attestSpec, HKS_ERROR_MALLOC_FAIL, "malloc attestSpec fail\n")
+
+    (void)memset_s(attestSpec, sizeof(struct HksAttestSpec), 0, sizeof(struct HksAttestSpec));
+
+    attestSpec->isAnonAttest = isAnonAttest;
+
+    SetAttestCertValid(&attestSpec->validity);
+    int32_t ret = 0;
+    do {
+        HksFillUsageSpec(keyNodeParamSet, &attestSpec->usageSpec);
+        ret = CheckAttestUsageSpec(&attestSpec->usageSpec);
+        HKS_IF_NOT_SUCC_BREAK(ret)
+
+        ret = BuildAttestClaims(paramSet, keyNodeParamSet, attestSpec);
+        HKS_IF_NOT_SUCC_BREAK(ret)
+
+        attestSpec->claimsOid = hksAttestationExtensionOid;
+        attestSpec->attestKey.size = rawKey->size;
+        ret = HKS_ERROR_MALLOC_FAIL;
+        attestSpec->attestKey.data = HksMalloc(rawKey->size);
+        HKS_IF_NULL_LOGE_BREAK(attestSpec->attestKey.data, "fail to malloc raw key")
+
+        (void)memcpy_s(attestSpec->attestKey.data, rawKey->size, rawKey->data, rawKey->size);
+
+        ret = GetCertAndKey(attestSpec);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get cert and key fail\n")
+
+        *outAttestSpec = attestSpec;
+        return HKS_SUCCESS;
+    } while (0);
+
+    FreeAttestSpec(&attestSpec);
+    return ret;
 }
 
 static int32_t CreateHwAttestCert(const struct HksAttestSpec *attestSpec, struct HksBlob *outAttestCert,
@@ -1608,11 +1663,41 @@ static int32_t FormatAttestChain(const struct HksBlob *attestCert, const struct 
     return HKS_SUCCESS;
 }
 
+static int32_t FormatOfflineAttestChain(const struct HksBlob *attestCert, const struct HksAttestSpec *attestSpec,
+    struct HksBlob *certChain)
+{
+    struct HksBlob tmp = *certChain;
+    *((uint32_t *)tmp.data) = HKS_ATTEST_CERT_COUNT;
+    tmp.data += sizeof(uint32_t);
+    tmp.size -= sizeof(uint32_t);
+
+    int32_t ret = CopyBlobToBuffer(attestCert, &tmp);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy attest cert fail")
+
+    ret = FormatCertToBuf(HKS_ANON_CA_DEV_CERT, &tmp);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "format anon ca dev cert failed!")
+
+    ret = FormatCertToBuf(HKS_ANON_CA_CERT, &tmp);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "format anon ca cert failed!")
+
+    ret = FormatCertToBuf(HKS_ANON_ROOT_CERT, &tmp);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "format anon root cert failed!")
+
+    certChain->size = tmp.data - certChain->data;
+    HKS_LOG_I("certChain size after format is %" LOG_PUBLIC "u", certChain->size);
+    return HKS_SUCCESS;
+}
+
 int32_t CreateAttestCertChain(bool isAnonAttest, const struct HksParamSet *keyNodeParamSet,
     const struct HksParamSet *paramSet, struct HksBlob *certChain, struct HksBlob *rawKey)
 {
+    struct HksParam *anonMode = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_ANONYMOUS_ATTESTATION_MODE, &anonMode);
+    if (ret == HKS_SUCCESS && anonMode->uint32Param == HKS_ANONYMOUS_ATTEST_OFFLINE) {
+        return CreateOfflineAttestCertChain(keyNodeParamSet, paramSet, certChain, rawKey);
+    }
     struct HksAttestSpec *attestSpec = NULL;
-    int32_t ret = BuildAttestSpec(isAnonAttest, keyNodeParamSet, paramSet, rawKey, &attestSpec);
+    ret = BuildAttestSpec(isAnonAttest, keyNodeParamSet, paramSet, rawKey, &attestSpec);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "build attest spec failed")
 
     struct HksBlob attestCert;
@@ -1624,6 +1709,31 @@ int32_t CreateAttestCertChain(bool isAnonAttest, const struct HksParamSet *keyNo
     }
 
     ret = FormatAttestChain(&attestCert, attestSpec, certChain);
+    HKS_FREE_BLOB(attestCert);
+    FreeAttestSpec(&attestSpec);
+    return ret;
+}
+
+int32_t CreateOfflineAttestCertChain(const struct HksParamSet *keyNodeParamSet,
+    const struct HksParamSet *paramSet, struct HksBlob *certChain, struct HksBlob *rawKey)
+{
+    struct HksAttestSpec *attestSpec = NULL;
+    int32_t ret = BuildOfflineAttestSpec(keyNodeParamSet, paramSet, rawKey, &attestSpec);
+    if (ret != HKS_SUCCESS) {
+        FreeAttestSpec(&attestSpec);
+        HKS_LOG_E("BuildOfflineAttestSpec failed");
+        return ret;
+    }
+
+    struct HksBlob attestCert;
+    ret = CreateHwAttestCert(attestSpec, &attestCert, HKS_ALG_ECC);
+    if (ret != HKS_SUCCESS) {
+        FreeAttestSpec(&attestSpec);
+        HKS_LOG_E("build attest spec failed");
+        return ret;
+    }
+
+    ret = FormatOfflineAttestChain(&attestCert, attestSpec, certChain);
     HKS_FREE_BLOB(attestCert);
     FreeAttestSpec(&attestSpec);
     return ret;
