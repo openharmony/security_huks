@@ -34,9 +34,10 @@
 #define HUKS_ENVELOP_LEN_SIZE 16
 #define HUKS_BITE_TO_BYTE 8
 
-int32_t CopyToInnerKey(const struct HksBlob *key, struct HksBlob *outKey)
+int32_t CopyToInnerKey(const struct HksBlob *key, uint32_t alg, struct HksBlob *outKey)
 {
-    if ((key->size == 0) || (key->size > MAX_KEY_SIZE)) {
+    uint32_t maxSize = (alg == HKS_ALG_ML_DSA) ? ML_DSA_MAX_KEY_SIZE : MAX_KEY_SIZE;
+    if ((key->size == 0) || (key->size > maxSize)) {
         HKS_LOG_E("invalid input key size: %" LOG_PUBLIC "u", key->size);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -108,7 +109,7 @@ static int32_t HksSymmetricKeySizeCheck(
             return HKS_ERROR_INVALID_ALGORITHM;
     }
 
-    return CopyToInnerKey(key, outKey);
+    return CopyToInnerKey(key, algParam->uint32Param, outKey);
 }
 
 
@@ -134,7 +135,7 @@ int32_t GetHksPubKeyInnerFormat(const struct HksParamSet *paramSet,
         case HKS_ALG_HMAC:
         case HKS_ALG_SM3:
         case HKS_ALG_SM4:
-            return CopyToInnerKey(key, outKey);
+            return CopyToInnerKey(key, algParam->uint32Param, outKey);
 #endif
 #if defined(HKS_SUPPORT_X25519_C) || defined(HKS_SUPPORT_ED25519_C)
         case HKS_ALG_ED25519:
@@ -150,6 +151,10 @@ int32_t GetHksPubKeyInnerFormat(const struct HksParamSet *paramSet,
         case HKS_ALG_DH:
         case HKS_ALG_SM2:
             return TranslateFromX509PublicKey(algParam->uint32Param, key, outKey);
+#endif
+#if defined(HKS_SUPPORT_ML_DSA_C)
+        case HKS_ALG_ML_DSA:
+            return TranslateToInnerMlDsaFormat(paramSet, key, outKey);
 #endif
         default:
             return HKS_ERROR_INVALID_ALGORITHM;

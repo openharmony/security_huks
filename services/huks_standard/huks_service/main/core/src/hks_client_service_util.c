@@ -110,7 +110,7 @@ int32_t GetKeyFileData(const struct HksProcessInfo *processInfo, const struct Hk
     int32_t ret = HksManageStoreGetKeyBlobSize(processInfo, paramSet, keyAlias, &size, mode);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyblob size from storage failed, ret = %" LOG_PUBLIC "d.", ret)
 
-    HKS_IF_TRUE_LOGE_RETURN(size > MAX_KEY_SIZE, HKS_ERROR_INVALID_KEY_FILE,
+    HKS_IF_TRUE_LOGE_RETURN(size > ML_DSA_MAX_KEY_SIZE, HKS_ERROR_INVALID_KEY_FILE,
         "invalid key size, size = %" LOG_PUBLIC "u", size)
 
     key->data = (uint8_t *)HksMalloc(size);

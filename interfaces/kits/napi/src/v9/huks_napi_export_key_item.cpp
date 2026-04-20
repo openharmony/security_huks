@@ -88,11 +88,11 @@ static int32_t PrePareExportKeyContextBuffer(ExportKeyAsyncContext context)
         return HKS_ERROR_MALLOC_FAIL;
     }
 
-    context->key->data = static_cast<uint8_t *>(HksMalloc(MAX_KEY_SIZE));
+    context->key->data = static_cast<uint8_t *>(HksMalloc(ML_DSA_MAX_KEY_SIZE));
     if (context->key->data == nullptr) {
         return HKS_ERROR_MALLOC_FAIL;
     }
-    context->key->size = MAX_KEY_SIZE;
+    context->key->size = ML_DSA_MAX_KEY_SIZE;
     return HKS_SUCCESS;
 }
 

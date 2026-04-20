@@ -52,7 +52,13 @@ int32_t HksImportKeyAdapter(const struct HksBlob *keyAlias,
     if ((ret == HKS_SUCCESS) &&
         ((importKeyTypeParam->uint32Param == HKS_KEY_TYPE_PRIVATE_KEY) ||
         (importKeyTypeParam->uint32Param == HKS_KEY_TYPE_KEY_PAIR))) {
-        ret = CopyToInnerKey(key, &innerKey);
+        uint32_t alg = 0;
+        struct HksParam *algParam = NULL;
+        ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
+        if (ret == HKS_SUCCESS) {
+            alg = algParam->uint32Param;
+        }
+        ret = CopyToInnerKey(key, alg, &innerKey);
     } else {
         ret = GetHksPubKeyInnerFormat(paramSet, key, &innerKey);
     }
@@ -87,10 +93,10 @@ int32_t HksAgreeKeyAdapter(const struct HksParamSet *paramSet, const struct HksB
 int32_t HksExportPublicKeyAdapter(const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *key)
 {
-    uint8_t *buffer = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
+    uint8_t *buffer = (uint8_t *)HksMalloc(ML_DSA_MAX_KEY_SIZE);
     HKS_IF_NULL_LOGE_RETURN(buffer, HKS_ERROR_MALLOC_FAIL, "malloc failed")
-    (void)memset_s(buffer, MAX_KEY_SIZE, 0, MAX_KEY_SIZE);
-    struct HksBlob publicKey = { MAX_KEY_SIZE, buffer };
+    (void)memset_s(buffer, ML_DSA_MAX_KEY_SIZE, 0, ML_DSA_MAX_KEY_SIZE);
+    struct HksBlob publicKey = { ML_DSA_MAX_KEY_SIZE, buffer };
 
     int32_t ret = HksClientExportPublicKey(keyAlias, paramSet, &publicKey);
 #ifdef L2_STANDARD
