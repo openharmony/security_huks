@@ -1454,7 +1454,7 @@ static int32_t AddAppInfoToParamSet(const struct HksProcessInfo *processInfo, st
             ret = HksGetHapInfo(processInfo, appInfo);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetHapInfo failed")
         } else if (appidType == HKS_SA_TYPE) {
-            ret = HksGetSaInfo(processInfo, appInfo);
+            ret = HksGetSaInfo(appInfo);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetSaInfo failed")
         }
 
@@ -1991,7 +1991,7 @@ int32_t HksServiceAbortByPid(int32_t pid)
     return ret;
 }
 
-void HksServiceDeleteProcessInfo(const struct HksProcessInfo *processInfo)
+void HksServiceDeleteProcessInfo(const struct HksProcessInfo *processInfo, bool anco)
 {
 #ifndef __LITEOS_M__
     HKS_LOG_I("remove session");
@@ -2000,9 +2000,18 @@ void HksServiceDeleteProcessInfo(const struct HksProcessInfo *processInfo)
     if (processInfo->processName.size == 0) {
         HksServiceDeleteUserIDKeyAliasFile(&processInfo->userId);
     } else {
-        HksServiceDeleteUIDKeyAliasFile(processInfo);
+        if (anco) {
+#ifdef L2_STANDARD
+            HksServiceDeleteAncoUIDKeyFile(processInfo);
+#else
+            HKS_LOG_E("only L2 device supported anco");
+#endif
+        } else {
+            HksServiceDeleteUIDKeyAliasFile(processInfo);
+        }
     }
 #else
+    (void)anco;
     (void)processInfo;
 #endif
 }

@@ -33,6 +33,8 @@ int32_t RetryLoadPlugin(void);
 int32_t HksPluginOnRemoteRequest(uint32_t code, void *data, void *reply, void *option);
 int32_t HksPluginOnLocalRequest(uint32_t code, const void *data, void *reply);
 void HksPluginOnReceiveEvent(const void *data);
+void HksPluginSubSystemEvent(void *matchingSkills);
+int32_t HksPluginGetAncoUser(int *userId);
 
 int32_t HksPluginOnLocalRequestWrapKey(uint32_t code, const void *data, void *reply);
 int32_t HksPluginWrapKey(const struct HksBlob *srcData, const uint8_t *context);

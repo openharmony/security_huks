@@ -18,6 +18,7 @@
 
 #include "hks_storage_utils.h"
 
+static const int HKS_ANCO_BROKER_UID = 5557;
 #ifdef __cplusplus
 extern "C" {
 #endif
