@@ -59,7 +59,7 @@ CppParamSet::CppParamSet(const std::vector<HksParam> &params)
     HKS_LOG_D("CppParamSet constructor with params success");
 }
 
-CppParamSet::CppParamSet(HksParamSet *paramSetIn, bool takeOwnership)
+CppParamSet::CppParamSet(HksParamSet *&paramSetIn, bool takeOwnership)
 {
     if (takeOwnership) {
         this->ptr_ = paramSetIn;

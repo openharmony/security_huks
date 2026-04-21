@@ -38,7 +38,7 @@ typedef struct HksCallerInfo {
 
 int32_t HksGetHapInfo(const struct HksProcessInfo *processInfo, struct HksBlob *hapInfo);
 
-int32_t HksGetSaInfo(const struct HksProcessInfo *processInfo, struct HksBlob *saInfo);
+int32_t HksGetSaInfo(struct HksBlob *saInfo);
 
 int32_t GetCallerName(const struct HksProcessInfo *processInfo, struct HksBlob *appInfo);
 

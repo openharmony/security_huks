@@ -75,7 +75,8 @@ struct HksBasicInterface {
     int32_t (*hksManageGetKeyCountByProcessName)(const struct HksProcessInfo *processInfo,
         const struct HksParamSet *paramSet, uint32_t *fileCount);
 
-    int32_t (*hksGetProcessInfoForIPC)(const uint8_t *context, struct HksProcessInfo *processInfo);
+    int32_t (*hksGetProcessInfoForIPC)(const struct HksParamSet *paramSet,
+        const uint8_t *context, struct HksProcessInfo *processInfo);
 
     int32_t (*appendStorageParamsForGen)(const struct HksProcessInfo *processInfo,
         const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
@@ -97,6 +98,8 @@ struct HksPluginProxy {
     int32_t (*hksPluginOnRemoteRequest)(uint32_t code, void *data, void *reply, void *option);
     int32_t (*hksPluginOnLocalRequest)(uint32_t code, const void *data, void *reply);
     void (*hksPluginOnReceiveEvent)(const void *eventData);
+    void (*hksPluginSubSystemEvent)(void *matchingSkills);
+    int32_t (*hksPluginGetAncoUser)(int *userId);
 };
 
 #ifdef __cplusplus

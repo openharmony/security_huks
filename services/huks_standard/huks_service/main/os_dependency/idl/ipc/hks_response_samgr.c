@@ -68,30 +68,42 @@ void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlo
     }
 }
 
-int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *processInfo)
+int32_t HksGetProcessInfoForIPC(const struct HksParamSet *paramSet,
+    const uint8_t *context, struct HksProcessInfo *processInfo)
 {
+    (void)paramSet;
     if ((context == NULL) || (processInfo == NULL)) {
         HKS_LOG_D("Don't need get process name in hosp.");
         return HKS_SUCCESS;
     }
     HksIpcContext *ipcContext = (HksIpcContext *)context;
     uint32_t callingUid = (uint32_t)(ipcContext->callingUid);
-    uint8_t *name = (uint8_t *)HksMalloc(sizeof(callingUid));
-    HKS_IF_NULL_LOGE_RETURN(name, HKS_ERROR_MALLOC_FAIL, "GetProcessName malloc failed.")
-    (void)memcpy_s(name, sizeof(callingUid), &callingUid, sizeof(callingUid));
-    processInfo->processName.data = name;
-    processInfo->processName.size = sizeof(callingUid);
+    uint8_t *name = NULL;
+    uint8_t *userId = NULL;
+    int32_t ret = HKS_ERROR_MALLOC_FAIL;
+    do {
+        name = (uint8_t *)HksMalloc(sizeof(callingUid));
+        HKS_IF_NULL_LOGE_BREAK(name, "GetProcessName malloc failed.")
+        (void)memcpy_s(name, sizeof(callingUid), &callingUid, sizeof(callingUid));
+        processInfo->processName.data = name;
+        processInfo->processName.size = sizeof(callingUid);
 
-    uint8_t *userId = (uint8_t *)HksMalloc(strlen(g_userId));
-    HKS_IF_NULL_LOGE_RETURN(userId, HKS_ERROR_MALLOC_FAIL, "GetProcessUserId malloc failed.")
-    processInfo->userId.data = userId;
-    processInfo->userId.size = strlen(g_userId);
-    (void)memcpy_s(processInfo->userId.data, processInfo->userId.size, g_userId, strlen(g_userId));
+        userId = (uint8_t *)HksMalloc(strlen(g_userId));
+        HKS_IF_NULL_LOGE_BREAK(userId, "GetProcessUserId malloc failed.")
+        processInfo->userId.data = userId;
+        processInfo->userId.size = strlen(g_userId);
+        (void)memcpy_s(processInfo->userId.data, processInfo->userId.size, g_userId, strlen(g_userId));
 
-    processInfo->accessTokenId = 0;
-    processInfo->userIdInt = 0;
+        processInfo->accessTokenId = 0;
+        processInfo->userIdInt = 0;
 
-    return HKS_SUCCESS;
+        return HKS_SUCCESS;
+    } while (0);
+
+    HKS_FREE(name);
+    HKS_FREE(userId);
+    processInfo->processName.data = NULL;
+    return ret;
 }
 
 int32_t HksGetFrontUserId(int32_t *outId)

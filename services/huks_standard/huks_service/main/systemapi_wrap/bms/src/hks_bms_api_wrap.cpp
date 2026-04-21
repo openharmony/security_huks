@@ -208,9 +208,8 @@ static int32_t HksGetHapPkgName(const struct HksProcessInfo *processInfo, struct
     return HKS_SUCCESS;
 }
 
-int32_t HksGetSaInfo(const struct HksProcessInfo *processInfo, struct HksBlob *saInfo)
+int32_t HksGetSaInfo(struct HksBlob *saInfo)
 {
-    HKS_IF_NULL_LOGE_RETURN(processInfo, HKS_ERROR_NULL_POINTER, "processInfo is nullptr.")
     HKS_IF_NULL_LOGE_RETURN(saInfo, HKS_ERROR_NULL_POINTER, "saInfo is nullptr.")
 
     auto callingTokenId = IPCSkeleton::GetCallingTokenID();
