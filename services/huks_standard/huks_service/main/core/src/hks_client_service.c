@@ -1170,7 +1170,7 @@ int32_t HksServiceImportWrappedKey(const struct HksProcessInfo *processInfo, con
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
         if (HksCheckIsUkeyOperation(paramSet, &ret) == HKS_SUCCESS) {
             ret = HksCheckMultiSetTag(paramSet);
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckMultiSetTag failed, ret = %" LOG_PUBLIC "d", ret)
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckMultiSetTag failed, ret = %" LOG_PUBLIC "d", ret)
             ret = HksServiceOnUkeyImportWrappedKey(processInfo, keyAlias, wrappingKeyAlias, paramSet, wrappedKeyData);
             HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyImportWrappedKey failed, ret = %" LOG_PUBLIC "d", ret)
             break;

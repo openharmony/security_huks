@@ -33,6 +33,8 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
+#define CERT_UID 3515
+#define CERT_BUNDLE_NAME "com.ohos.certmanager"
 
 const std::map<int32_t, int32_t> g_commonErrCodeMapping = {
     {EXTENSION_SUCCESS, HKS_SUCCESS},
@@ -49,7 +51,8 @@ const std::map<int32_t, int32_t> g_commonErrCodeMapping = {
 
 const std::map<int32_t, int32_t> g_getResourceIdErrCodeMapping = {
     {EXTENSION_SUCCESS, HKS_SUCCESS},
-    {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR}
+    {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
+    {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
 };
 
 const std::map<int32_t, int32_t> g_clearPinStateErrCodeMapping = {
@@ -255,6 +258,7 @@ public:
     
 private:
     bool IsProviderNumExceedLimit(const ProviderInfo &providerInfo);
+    int32_t CheckCallerForUid(const HksProcessInfo &processInfo, const CppParamSet &paramSet, CppParamSet &newParamSet)
 
     OHOS::SafeMap<std::pair<uint32_t, std::string>, std::string> uidIndexToHandle_;
     OHOS::SafeMap<std::pair<uint32_t, std::string>, int32_t> uidIndexToAuthState_;
