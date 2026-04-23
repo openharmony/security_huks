@@ -34,10 +34,14 @@
 #include "openssl/params.h"
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
+
+#ifdef ISOLATE_OHOS_SDK
 #include <bsl_err.h>
 #include <crypt_eal_codecs.h>
 #include <crypt_eal_pkey.h>
 #include <crypt_errno.h>
+#endif
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -379,6 +383,7 @@ static int32_t Curve25519ToX509PublicKey(const struct HksBlob *publicKey, struct
 #endif
 
 #if defined(HKS_SUPPORT_ML_DSA_C) && defined(HKS_SUPPORT_ML_DSA_GET_PUBLIC_KEY)
+#ifdef ISOLATE_OHOS_SDK
 // openhitls bsl/err/src/err.c Error information stack size #define SAL_MAX_ERROR_STACK 20
 #define OPENHITLS_ERROR_STACK_DEPTH  20
 
@@ -482,6 +487,14 @@ static int32_t MlDsaPublicKeyToX509(const struct HksBlob *publicKey, struct HksB
     CRYPT_EAL_PkeyFreeCtx(ctx);
     return ret;
 }
+#else
+static int32_t MlDsaPublicKeyToX509(const struct HksBlob *publicKey, struct HksBlob *x509Key)
+{
+    (void)publicKey;
+    (void)x509Key;
+    return HKS_ERROR_NOT_SUPPORTED;
+}
+#endif
 #endif
 
 static int32_t TranslateToX509PublicKeySwitchAlg(const struct HksPubKeyInfo *publicKeyInfo,
@@ -876,6 +889,7 @@ int32_t TranslateFromX509PublicKey(const uint32_t alg, const struct HksBlob *x50
     return ret;
 }
 
+#ifdef ISOLATE_OHOS_SDK
 #define HKS_ML_DSA_PUB_KEY_SIZE_1312  1312
 #define HKS_ML_DSA_PUB_KEY_SIZE_1952  1952
 #define HKS_ML_DSA_PUB_KEY_SIZE_2592  2592
@@ -951,5 +965,15 @@ int32_t TranslateToInnerMlDsaFormat(const struct HksParamSet *paramSet, const st
     }
     return ret;
 }
+#else
+int32_t TranslateToInnerMlDsaFormat(const struct HksParamSet *paramSet, const struct HksBlob *x509Key,
+    struct HksBlob *publicKey)
+{
+    (void)paramSet;
+    (void)x509Key;
+    (void)publicKey;
+    return HKS_ERROR_NOT_SUPPORTED;
+}
+#endif
 #endif
 
