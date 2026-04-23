@@ -64,7 +64,8 @@ if (os_level == "standard") {
     ]
     complete_static_lib = true
 
-    if (support_jsapi) {
+    if (!build_ohos_sdk) {
+      defines += [ "ISOLATE_OHOS_SDK" ]
       external_deps += [
         "openhitls:openhitls_bsl",
         "openhitls:openhitls_crypto",
