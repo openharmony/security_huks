@@ -15,7 +15,7 @@ import("//build/ohos.gni")
 
 group("huks_sdk_test") {
   testonly = true
-  if (os_level == "standard") {
+  if (os_level == "standard" && support_jsapi) {
     if (huks_test_suite_running_environment == "system") {
       deps = [
         #"//base/security/huks/test:reliability",
@@ -70,7 +70,7 @@ group("cipher_napi") {
 }
 
 group("huks_crypto_extension") {
-  if (os_level == "standard") {
+  if (os_level == "standard" && support_jsapi) {
     deps = [
       "//base/security/huks/interfaces/js/crypto_extension_module:cryptoextensionability_napi",
       "//base/security/huks/services/huks_standard/huks_service/extension/ability_native:crypto_extension_ability_native",
