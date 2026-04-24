@@ -272,7 +272,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
 
     uint32_t uid = processInfo.uidInt;
     auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
-    HKS_IF_TRUE_EXCU(uidParam.first == HKS_SUCCESS, uid = static_cast<uint32_t>(uidParam.second););
+    HKS_IF_TRUE_EXCU(uidParam.first == HKS_SUCCESS, uid = static_cast<uint32_t>(uidParam.second));
 
     ProviderInfo providerInfo{};
     std::string handle;
@@ -437,7 +437,7 @@ int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processI
 
     uint32_t uid = processInfo.uidInt;
     auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
-    HKS_IF_TRUE_EXCU(uidParam.first == HKS_SUCCESS, uid = static_cast<uint32_t>(uidParam.second););
+    HKS_IF_TRUE_EXCU(uidParam.first == HKS_SUCCESS, uid = static_cast<uint32_t>(uidParam.second));
     if (!OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(IPCSkeleton::GetCallingFullTokenID())) {
         HKS_IF_TRUE_LOGE_RETURN(propertyId == "SKF_ExportPublicKey", HKS_ERROR_INVALID_ARGUMENT,
             "Non-system app are not allowed to use SKF_ExportPublicKey")
