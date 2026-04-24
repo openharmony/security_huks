@@ -258,7 +258,7 @@ public:
     
 private:
     bool IsProviderNumExceedLimit(const ProviderInfo &providerInfo);
-    int32_t CheckCallerForUid(const HksProcessInfo &processInfo, const CppParamSet &paramSet, CppParamSet &newParamSet)
+    int32_t CheckCallerForUid(const HksProcessInfo &processInfo, const CppParamSet &paramSet, CppParamSet &newParamSet);
 
     OHOS::SafeMap<std::pair<uint32_t, std::string>, std::string> uidIndexToHandle_;
     OHOS::SafeMap<std::pair<uint32_t, std::string>, int32_t> uidIndexToAuthState_;

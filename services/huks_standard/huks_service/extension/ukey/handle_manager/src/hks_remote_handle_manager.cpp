@@ -705,7 +705,8 @@ void HksRemoteHandleManager::ClearMapByUid(const uint32_t uid)
     }
 }
 
-int32_t HksRemoteHandleManager::CheckCallerForUid(const HksProcessInfo &processInfo, const CppParamSet &paramSet, CppParamSet &newParamSet)
+int32_t HksRemoteHandleManager::CheckCallerForUid(const HksProcessInfo &processInfo,
+    const CppParamSet &paramSet, CppParamSet &newParamSet)
 {
     auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
     if (uidParam.first != HKS_SUCCESS) {
@@ -722,7 +723,7 @@ int32_t HksRemoteHandleManager::CheckCallerForUid(const HksProcessInfo &processI
     HKS_IF_TRUE_LOGE_RETURN(bundleName.empty(), HKS_ERROR_INVALID_ARGUMENT,
         "CheckCallerForUid Bundle name is empty for uid: %" LOG_PUBLIC "u", processInfo.uidInt);
 
-    HKS_IF_NOT_TRUE_LOGE_RETURN(processInfo.uidInt == CERT_UID || bundleName == CERT_BUNDLE_NAME,
+    HKS_IF_TRUE_LOGE_RETURN(processInfo.uidInt != CERT_UID && bundleName != CERT_BUNDLE_NAME,
         HKS_ERROR_INVALID_ARGUMENT, "Non-Certificate management application and SA are not allowed to pass in uid.")
     return HKS_SUCCESS;
 }
