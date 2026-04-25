@@ -716,15 +716,11 @@ int32_t HksRemoteHandleManager::CheckCallerForUid(const HksProcessInfo &processI
         newParamSet.AddParams(params);
         return HKS_SUCCESS;
     }
-    std::string bundleName{};
-    int32_t ret = HksGetBundleNameFromUid(processInfo.uidInt, bundleName);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
-        "CheckCallerForUid Failed to get bundle name for uid: %" LOG_PUBLIC "u", processInfo.uidInt);
-    HKS_IF_TRUE_LOGE_RETURN(bundleName.empty(), HKS_ERROR_INVALID_ARGUMENT,
-        "CheckCallerForUid Bundle name is empty for uid: %" LOG_PUBLIC "u", processInfo.uidInt);
+    
+    auto accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
+    HKS_IF_NOT_TRUE_LOGE_RETURN(OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx),
+        HKS_ERROR_NOT_SYSTEM_APP, "CheckCallerForUid: not system hap, check permission failed.");
 
-    HKS_IF_TRUE_LOGE_RETURN(processInfo.uidInt != CERT_UID && bundleName != CERT_BUNDLE_NAME,
-        HKS_ERROR_INVALID_ARGUMENT, "Non-Certificate management application and SA are not allowed to pass in uid.")
     return HKS_SUCCESS;
 }
 
