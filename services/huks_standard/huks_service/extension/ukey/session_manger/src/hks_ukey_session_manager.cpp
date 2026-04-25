@@ -344,7 +344,7 @@ bool CheckAndAppendProcessInfo(CppParamSet &paramSet, const HksProcessInfo &proc
     std::vector<HksParam> params = {
         { .tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = runtimeUid}
     };
-    paramSet.AddParams(params);
+    HKS_IF_NOT_TRUE_LOGE_RETURN(paramSet.AddParams(params), HKS_ERROR_INVALID_ARGUMENT, "add uid to paramset fail.")
     return true;
 }
 }
