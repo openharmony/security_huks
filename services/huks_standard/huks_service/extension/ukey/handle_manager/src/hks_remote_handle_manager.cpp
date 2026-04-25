@@ -702,14 +702,13 @@ void HksRemoteHandleManager::ClearMapByUid(const uint32_t uid)
 int32_t HksRemoteHandleManager::VerifyCallerAndAdjustUidParam(const HksProcessInfo &processInfo,
     const CppParamSet &paramSet, CppParamSet &newParamSet)
 {
-    newParamSet = paramSet;
     auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
     if (uidParam.first != HKS_SUCCESS) {
         std::vector<HksParam> params = {
             { .tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(processInfo.uidInt)}
         };
-        HKS_IF_NOT_TRUE_LOGE_RETURN(newParamSet.AddParams(params),
-            HKS_ERROR_INVALID_ARGUMENT, "add uid to paramset fail.")
+        newParamSet = CppParamSet(paramSet, params);
+        HKS_IF_NULL_LOGE_RETURN(newParamSet.GetParamSet(), HKS_ERROR_NULL_POINTER, "new paramset fail.")
         return HKS_SUCCESS;
     }
     
