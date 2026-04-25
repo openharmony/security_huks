@@ -148,8 +148,8 @@ int32_t HksRemoteHandleManager::ParseAndValidateIndex(const std::string &index, 
 int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet)
 {
-    CppParamSet newParamSet(paramSet);
-    int32_t ret = CheckCallerForUid(processInfo, paramSet, newParamSet);
+    CppParamSet newParamSet{};
+    int32_t ret = VerifyCallerAndAdjustUidParam(processInfo, paramSet, &newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "uid check in %" LOG_PUBLIC "s failed.", __PRETTY_FUNCTION__)
 
     ProviderInfo providerInfo{};
@@ -185,8 +185,8 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &process
 int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet)
 {
-    CppParamSet newParamSet(paramSet);
-    int32_t ret = CheckCallerForUid(processInfo, paramSet, newParamSet);
+    CppParamSet newParamSet{};
+    int32_t ret = VerifyCallerAndAdjustUidParam(processInfo, paramSet, &newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "uid check in %" LOG_PUBLIC "s failed.", __PRETTY_FUNCTION__)
 
     ProviderInfo providerInfo{};
@@ -260,8 +260,8 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
 int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, int32_t &state)
 {
-    CppParamSet newParamSet(paramSet);
-    int32_t ret = CheckCallerForUid(processInfo, paramSet, newParamSet);
+    CppParamSet newParamSet{};
+    int32_t ret = VerifyCallerAndAdjustUidParam(processInfo, paramSet, &newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "uid check in %" LOG_PUBLIC "s failed.", __PRETTY_FUNCTION__)
 
     uint32_t uid = processInfo.uidInt;
@@ -293,8 +293,8 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
 int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet)
 {
-    CppParamSet newParamSet(paramSet);
-    int32_t ret = CheckCallerForUid(processInfo, paramSet, newParamSet);
+    CppParamSet newParamSet{};
+    int32_t ret = VerifyCallerAndAdjustUidParam(processInfo, paramSet, &newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "uid check in %" LOG_PUBLIC "s failed.", __PRETTY_FUNCTION__)
 
     ProviderInfo providerInfo{};
@@ -317,8 +317,8 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &proce
 int32_t HksRemoteHandleManager::FindRemoteCertificate(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet, std::string &cert)
 {
-    CppParamSet newParamSet(paramSet);
-    int32_t ret = CheckCallerForUid(processInfo, paramSet, newParamSet);
+    CppParamSet newParamSet{};
+    int32_t ret = VerifyCallerAndAdjustUidParam(processInfo, paramSet, &newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "uid check in %" LOG_PUBLIC "s failed.", __PRETTY_FUNCTION__)
 
     ProviderInfo providerInfo = {"", "", ""};
@@ -351,8 +351,8 @@ int32_t HksRemoteHandleManager::FindRemoteCertificate(const HksProcessInfo &proc
 int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet, std::string &certVec)
 {
-    CppParamSet newParamSet(paramSet);
-    int32_t ret = CheckCallerForUid(processInfo, paramSet, newParamSet);
+    CppParamSet newParamSet{};
+    int32_t ret = VerifyCallerAndAdjustUidParam(processInfo, paramSet, &newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "uid check in %" LOG_PUBLIC "s failed.", __PRETTY_FUNCTION__)
 
     auto providerLifeManager = HksProviderLifeCycleManager::GetInstanceWrapper();
@@ -392,8 +392,8 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
 int32_t HksRemoteHandleManager::ImportRemoteCertificate(const HksProcessInfo &processInfo, const std::string &index,
     const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet)
 {
-    CppParamSet newParamSet(paramSet);
-    int32_t ret = CheckCallerForUid(processInfo, paramSet, newParamSet);
+    CppParamSet newParamSet{};
+    int32_t ret = VerifyCallerAndAdjustUidParam(processInfo, paramSet, &newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "uid check in %" LOG_PUBLIC "s failed.", __PRETTY_FUNCTION__)
 
     ProviderInfo providerInfo = {"", "", ""};
@@ -425,8 +425,8 @@ int32_t HksRemoteHandleManager::ImportRemoteCertificate(const HksProcessInfo &pr
 int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processInfo, const std::string &index,
     const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams)
 {
-    CppParamSet newParamSet(paramSet);
-    int32_t ret = CheckCallerForUid(processInfo, paramSet, newParamSet);
+    CppParamSet newParamSet{};
+    int32_t ret = VerifyCallerAndAdjustUidParam(processInfo, paramSet, &newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "uid check in %" LOG_PUBLIC "s failed.", __PRETTY_FUNCTION__)
 
     uint32_t uid = processInfo.uidInt;
@@ -461,8 +461,8 @@ int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processI
 int32_t HksRemoteHandleManager::RemoteImportWrappedKey(const HksProcessInfo &processInfo, const std::string &index,
     const std::string &wrappingKeyIndex, const CppParamSet &paramSet, const std::vector<uint8_t> &wrappedData)
 {
-    CppParamSet newParamSet(paramSet);
-    int32_t ret = CheckCallerForUid(processInfo, paramSet, newParamSet);
+    CppParamSet newParamSet{};
+    int32_t ret = VerifyCallerAndAdjustUidParam(processInfo, paramSet, &newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "uid check in %" LOG_PUBLIC "s failed.", __PRETTY_FUNCTION__)
 
     std::string newIndex;
@@ -492,8 +492,8 @@ int32_t HksRemoteHandleManager::RemoteImportWrappedKey(const HksProcessInfo &pro
 int32_t HksRemoteHandleManager::RemoteExportPublicKey(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, std::vector<uint8_t> &outData)
 {
-    CppParamSet newParamSet(paramSet);
-    int32_t ret = CheckCallerForUid(processInfo, paramSet, newParamSet);
+    CppParamSet newParamSet{};
+    int32_t ret = VerifyCallerAndAdjustUidParam(processInfo, paramSet, &newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "uid check in %" LOG_PUBLIC "s failed.", __PRETTY_FUNCTION__)
 
     std::string newIndex;
@@ -518,8 +518,8 @@ int32_t HksRemoteHandleManager::RemoteExportPublicKey(const HksProcessInfo &proc
 int32_t HksRemoteHandleManager::ExtensionGenerateKey(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet)
 {
-    CppParamSet newParamSet(paramSet);
-    int32_t ret = CheckCallerForUid(processInfo, paramSet, newParamSet);
+    CppParamSet newParamSet{};
+    int32_t ret = VerifyCallerAndAdjustUidParam(processInfo, paramSet, &newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "uid check in %" LOG_PUBLIC "s failed.", __PRETTY_FUNCTION__)
 
     ProviderInfo providerInfo{};
@@ -545,8 +545,8 @@ int32_t HksRemoteHandleManager::ExtensionGenerateKey(const HksProcessInfo &proce
 int32_t HksRemoteHandleManager::GetResourceId(const HksProcessInfo &processInfo,
     const std::string &providerName, const CppParamSet &paramSet, std::string &resourceId)
 {
-    CppParamSet newParamSet(paramSet);
-    int32_t ret = CheckCallerForUid(processInfo, paramSet, newParamSet);
+    CppParamSet newParamSet{};
+    int32_t ret = VerifyCallerAndAdjustUidParam(processInfo, paramSet, &newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "uid check in %" LOG_PUBLIC "s failed.", __PRETTY_FUNCTION__)
 
     ProviderInfo providerInfo{};
@@ -699,21 +699,23 @@ void HksRemoteHandleManager::ClearMapByUid(const uint32_t uid)
     }
 }
 
-int32_t HksRemoteHandleManager::CheckCallerForUid(const HksProcessInfo &processInfo,
+int32_t HksRemoteHandleManager::VerifyCallerAndAdjustUidParam(const HksProcessInfo &processInfo,
     const CppParamSet &paramSet, CppParamSet &newParamSet)
 {
+    newParamSet = paramSet;
     auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
     if (uidParam.first != HKS_SUCCESS) {
         std::vector<HksParam> params = {
             { .tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(processInfo.uidInt)}
         };
-        newParamSet.AddParams(params);
+        HKS_IF_NOT_TRUE_LOGE_RETURN(newParamSet.AddParams(params),
+            HKS_ERROR_INVALID_ARGUMENT, "add uid to paramset fail.")
         return HKS_SUCCESS;
     }
     
     auto accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
     HKS_IF_NOT_TRUE_LOGE_RETURN(OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx),
-        HKS_ERROR_NOT_SYSTEM_APP, "CheckCallerForUid: not system hap, check permission failed.");
+        HKS_ERROR_NOT_SYSTEM_APP, "VerifyCallerAndAdjustUidParam: not system hap, check permission failed.");
 
     return HKS_SUCCESS;
 }
