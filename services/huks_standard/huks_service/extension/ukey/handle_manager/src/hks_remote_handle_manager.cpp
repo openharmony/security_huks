@@ -223,15 +223,9 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
 int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t& retryCnt)
 {
-    std::string bundleName{};
-    int32_t ret = HksGetBundleNameFromUid(processInfo.uidInt, bundleName);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
-        "RemoteVerifyPin Failed to get bundle name for uid: %" LOG_PUBLIC "u", processInfo.uidInt);
-    HKS_IF_TRUE_LOGE_RETURN(bundleName.empty(), HKS_ERROR_INVALID_ARGUMENT,
-        "RemoteVerifyPin Bundle name is empty for uid: %" LOG_PUBLIC "u", processInfo.uidInt);
-
-    HKS_IF_NOT_TRUE_LOGE_RETURN(processInfo.uidInt == CERT_UID || bundleName == CERT_BUNDLE_NAME,
-        HKS_ERROR_NO_PERMISSION, "Non-Certificate management application and SA are not allowed to use this interface.")
+    auto accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
+    HKS_IF_NOT_TRUE_LOGE_RETURN(OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx),
+        HKS_ERROR_NOT_SYSTEM_APP, "RemoteVerifyPin: not system hap, check permission failed.");
 
     auto uid = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
     HKS_IF_TRUE_LOGE_RETURN(uid.first != HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
@@ -241,7 +235,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
         "Get pin failed. ret: %" LOG_PUBLIC "d", pin.first)
     ProviderInfo providerInfo{};
     std::string handle;
-    ret = ParseAndValidateIndex(index, uid.second, providerInfo, handle);
+    int32_t ret = ParseAndValidateIndex(index, uid.second, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     int32_t userId = HksGetUserIdFromUid(uid.second);
     providerInfo.m_userid = userId;
