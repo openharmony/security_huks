@@ -202,8 +202,8 @@ static int32_t HandleSpecialAsyncTypes(enum HksIpcInterfaceCode type, MessagePar
             "WriteRemoteObject fail");
         return HksSendAnonAttestRequestAndWaitAsyncReply(data, paramSet, proxy, hksCallback, outBlob);
     }
-    if (type == HKS_MSG_EXT_GET_REMOTE_PROPERTY) {
-        return HksExtSendAsyncMessage(data, paramSet, proxy, outBlob, HKS_MSG_EXT_GET_REMOTE_PROPERTY);
+    if (type == HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY) {
+        return HksExtSendAsyncMessage(data, paramSet, proxy, outBlob, HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY);
     }
     return HKS_SUCCESS;
 }
@@ -240,7 +240,7 @@ int32_t HksSendRequest(enum HksIpcInterfaceCode type, const struct HksBlob *inBl
     }
 
     ret = HandleSpecialAsyncTypes(type, data, paramSet, proxy, outBlob);
-    if (ret != HKS_SUCCESS || type == HKS_MSG_ATTEST_KEY_ASYNC_REPLY || type == HKS_MSG_EXT_GET_REMOTE_PROPERTY)
+    if (ret != HKS_SUCCESS || type == HKS_MSG_ATTEST_KEY_ASYNC_REPLY || type == HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY)
         return ret;
 
     int error = proxy->SendRequest(type, data, reply, option);

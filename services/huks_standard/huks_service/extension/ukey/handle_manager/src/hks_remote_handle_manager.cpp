@@ -422,7 +422,8 @@ int32_t HksRemoteHandleManager::ImportRemoteCertificate(const HksProcessInfo &pr
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processInfo, const std::string &index,
+int32_t HksRemoteHandleManager::SetOrGetRemoteProperty(const HksProcessInfo &processInfo,
+    enum HksExtPropertyOperation operation, const std::string &index,
     const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams)
 {
     CppParamSet newParamSet{};
@@ -450,11 +451,11 @@ int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processI
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
-    auto ipccode = proxy->GetProperty(handle, propertyId, paramSet, outParams, ret);
+    auto ipccode = proxy->SetOrGetProperty(static_cast<uint32_t>(operation), handle, propertyId, paramSet, outParams, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     ret = ConvertExtensionToHksErrorCode(ret, g_getPropertyErrCodeMapping);
     ClearMapByHandle(ret, handle);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote GetProperty failed: %" LOG_PUBLIC "d", ret)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote SetOrGetProperty failed: %" LOG_PUBLIC "d", ret)
     return HKS_SUCCESS;
 }
 
