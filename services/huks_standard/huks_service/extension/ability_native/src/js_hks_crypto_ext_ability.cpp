@@ -778,6 +778,20 @@ void GetOpenRemoteHandleParams(const napi_env &env, const napi_value &funcResult
     }
 }
 
+void GetResourceIdParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
+{
+    napi_value napiHandle = nullptr;
+    auto status = napi_get_named_property(env, funcResult, "resourceId", &napiHandle);
+    if (status != napi_ok || napiHandle == nullptr) {
+        LOGE("GetOpenRemoteHandleParams::napi_get_named_property failed, status:%d", status);
+        return;
+    }
+    auto result = GetStringValue(env, napiHandle, resultParams.handle);
+    if (result != HKS_SUCCESS) {
+        LOGE("GetOpenRemoteHandleParams::Convert js napiHandle fail.result:%d", result);
+    }
+}
+
 void GetAuthUkeyPinParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
     napi_value napiAuthState = nullptr;
@@ -1007,8 +1021,10 @@ int32_t ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
     switch (resultParams.paramType) {
         case CryptoResultParamType::OPEN_REMOTE_HANDLE:
         case CryptoResultParamType::INIT_SESSION:
-        case CryptoResultParamType::GET_RESOURCE_ID:
             GetOpenRemoteHandleParams(env, funcResult, resultParams);
+            break;
+        case CryptoResultParamType::GET_RESOURCE_ID:
+            GetResourceIdParams(env, funcResult, resultParams);
             break;
         case CryptoResultParamType::AUTH_UKEY_PIN:
             GetAuthUkeyPinParams(env, funcResult, resultParams);
