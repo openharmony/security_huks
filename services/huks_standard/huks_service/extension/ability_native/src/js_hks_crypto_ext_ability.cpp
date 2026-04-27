@@ -783,12 +783,12 @@ void GetResourceIdParams(const napi_env &env, const napi_value &funcResult, Cryp
     napi_value napiHandle = nullptr;
     auto status = napi_get_named_property(env, funcResult, "resourceId", &napiHandle);
     if (status != napi_ok || napiHandle == nullptr) {
-        LOGE("GetOpenRemoteHandleParams::napi_get_named_property failed, status:%d", status);
+        LOGE("GetResourceIdParams::napi_get_named_property failed, status:%d", status);
         return;
     }
     auto result = GetStringValue(env, napiHandle, resultParams.handle);
     if (result != HKS_SUCCESS) {
-        LOGE("GetOpenRemoteHandleParams::Convert js napiHandle fail.result:%d", result);
+        LOGE("GetResourceIdParams::Convert js napiHandle fail.result:%d", result);
     }
 }
 
