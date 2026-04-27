@@ -434,12 +434,12 @@ int32_t HksRemoteHandleManager::SetOrGetRemoteProperty(const HksProcessInfo &pro
     auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
     HKS_IF_TRUE_EXCU(uidParam.first == HKS_SUCCESS, uid = static_cast<uint32_t>(uidParam.second));
     if (!OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(IPCSkeleton::GetCallingFullTokenID())) {
-        HKS_IF_TRUE_LOGE_RETURN(propertyId == "SKF_ExportPublicKey", HKS_ERROR_INVALID_ARGUMENT,
-            "Non-system app are not allowed to use SKF_ExportPublicKey")
+        HKS_IF_TRUE_LOGE_RETURN(uidParam.first == HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
+            "Non-system app are not allowed to take uid")
     }
-    if (std::find(VALID_PROPERTYID.begin(), VALID_PROPERTYID.end(), propertyId) == VALID_PROPERTYID.end()) {
-        HKS_LOG_E("Invalid propertyId");
-        return HKS_ERROR_INVALID_ARGUMENT;
+    uint32_t uid = processInfo.uidInt;
+    if (uidParam.first == HKS_SUCCESS) {
+        uid = static_cast<uint32_t>(uidParam.second);
     }
     ProviderInfo providerInfo{};
     std::string handle;
