@@ -171,23 +171,6 @@ static int32_t HksAllocInBlobForSetOrGetProperty(struct HksBlob *inBlob,
     return HKS_SUCCESS;
 }
 
-static int32_t HksAllocInBlobWithTwoBlobs(struct HksBlob *inBlob,
-    const struct HksBlob *blob1, const struct HksBlob *blob2, const struct HksParamSet *paramSet)
-{
-    if (inBlob == NULL || blob1 == NULL || blob2 == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
-    uint32_t size = (uint32_t)(sizeof(blob1->size) + ALIGN_SIZE(blob1->size));
-    size += (uint32_t)(sizeof(blob2->size) + ALIGN_SIZE(blob2->size));
-    if (paramSet != NULL) {
-        size += ALIGN_SIZE(paramSet->paramSetSize);
-    }
-    inBlob->data = (uint8_t *)HksMalloc(size);
-    HKS_IF_NULL_LOGE_RETURN(inBlob->data, HKS_ERROR_MALLOC_FAIL, "malloc inBlob fail");
-    inBlob->size = size;
-    return HKS_SUCCESS;
-}
-
 static int32_t HksAllocInBlobWithCertInfo(struct HksBlob *inBlob,
     const struct HksBlob *blob,
     const struct HksExtCertInfo *certInfo,
