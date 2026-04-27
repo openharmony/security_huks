@@ -1025,7 +1025,7 @@ int32_t ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
         case CryptoResultParamType::EXPORT_PUBLIC_KEY:
             GetSessionParams(env, funcResult, resultParams);
             break;
-        case CryptoResultParamType::GET_PROPERTY:
+        case CryptoResultParamType::SET_OR_GET_PROPERTY:
             GetGetPropertyParams(env, funcResult, resultParams);
             break;
         default:
@@ -1587,7 +1587,8 @@ int32_t JsHksCryptoExtAbility::FinishSession(const std::string &handle, const Cp
     return dataParam->hksErrorCode;
 }
 
-int32_t JsHksCryptoExtAbility::GetProperty(const std::string &handle, const std::string &propertyId,
+int32_t JsHksCryptoExtAbility::SetOrGetProperty(uint32_t operation,
+    const std::string &handle, const std::string &propertyId,
     const CppParamSet &params, CppParamSet &outParams, int32_t &errcode)
 {
     auto argParser = [handle, propertyId, params](napi_env &env, napi_value *argv, size_t &argc) -> bool {
@@ -1599,23 +1600,27 @@ int32_t JsHksCryptoExtAbility::GetProperty(const std::string &handle, const std:
     };
     std::shared_ptr<CryptoResultParam> dataParam = std::make_shared<CryptoResultParam>();
     HksParamSet *defaultParamSet = nullptr;
-    dataParam->paramType = CryptoResultParamType::GET_PROPERTY;
+    dataParam->paramType = CryptoResultParamType::SET_OR_GET_PROPERTY;
     auto retParser = [dataParam](napi_env &env, napi_value result) -> bool {
         return CheckAndCallPromise(env, result, dataParam);
     };
 
     dataParam->callJsExMethodDone.store(false);
-    int32_t ret = CallJsMethod("onGetProperty", jsRuntime_, jsObj_.get(), argParser, retParser);
+    const char *jsMethodName = (operation == HKS_EXT_PROPERTY_OPERATION_SET)
+        ? "onSetProperty" : "onGetProperty";
+    int32_t ret = CallJsMethod(jsMethodName, jsRuntime_, jsObj_.get(), argParser, retParser);
     if (ret != ERR_OK) {
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
     WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
-    if (dataParam->paramSet.GetParamSet() == nullptr) {
-        LOGE("paramSet is nullptr. HksInitParamSet:%d", HksInitParamSet(&defaultParamSet));
-        dataParam->paramSet = CppParamSet(defaultParamSet, true);
+    if (operation == HKS_EXT_PROPERTY_OPERATION_GET) {
+        if (dataParam->paramSet.GetParamSet() == nullptr) {
+            LOGE("paramSet is nullptr. HksInitParamSet:%d", HksInitParamSet(&defaultParamSet));
+            dataParam->paramSet = CppParamSet(defaultParamSet, true);
+        }
+        outParams = std::move(dataParam->paramSet);
     }
-    outParams = std::move(dataParam->paramSet);
     return dataParam->hksErrorCode;
 }
 

@@ -40,7 +40,7 @@ typedef enum {
     INIT_SESSION,
     UPDATE_SESSION,
     FINISH_SESSION,
-    GET_PROPERTY,
+    SET_OR_GET_PROPERTY,
     CLEAR_UKEY_PIN_AUTH,
     IMPORT_WRAPPED_KEY,
     EXPORT_PUBLIC_KEY,
@@ -122,8 +122,8 @@ public:
         std::vector<uint8_t> &outData, int32_t &errcode) override;
     int32_t FinishSession(const std::string &handle, const CppParamSet &params, const std::vector<uint8_t> &inData,
         std::vector<uint8_t> &outData, int32_t &errcode) override;
-    int32_t GetProperty(const std::string &handle, const std::string &propertyId, const CppParamSet &params,
-        CppParamSet &outParams, int32_t &errcode) override;
+    int32_t SetOrGetProperty(uint32_t operation, const std::string &handle, const std::string &propertyId,
+        const CppParamSet &params, CppParamSet &outParams, int32_t &errcode) override;
     int32_t ClearUkeyPinAuthState(const std::string &handle, const CppParamSet &params, int32_t &errcode) override;
     int32_t ImportWrappedKey(const std::string &index, const std::string &wrappingKeyIndex,
         const CppParamSet &params, const std::vector<uint8_t> &wrappedData, int32_t &errcode) override;

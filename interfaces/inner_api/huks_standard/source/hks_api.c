@@ -450,18 +450,28 @@ HKS_API_EXPORT int32_t HksClearUkeyPinAuthState(const struct HksBlob *resourceId
 #endif
 }
 
-HKS_API_EXPORT int32_t HksGetRemoteProperty(const struct HksBlob *resourceId, const struct HksBlob *propertyId,
+HKS_API_EXPORT int32_t HksSetOrGetRemoteProperty(enum HksExtPropertyOperation operation,
+    const struct HksBlob *resourceId, const struct HksBlob *propertyId,
     const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut)
 {
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
-    HKS_LOG_D("enter GetRemoteProperty");
+    HKS_LOG_D("enter SetOrGetRemoteProperty, operation = %" LOG_PUBLIC "d", operation);
     if ((resourceId == NULL) || (propertyId == NULL) || (paramSetIn == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
-    int32_t ret = HksClientGetRemoteProperty(resourceId, propertyId, paramSetIn, propertySetOut);
-    HKS_IF_NOT_SUCC_LOGE(ret, "leave GetRemoteProperty, result = %" LOG_PUBLIC "d", ret);
+    if (operation != HKS_EXT_PROPERTY_OPERATION_GET && operation != HKS_EXT_PROPERTY_OPERATION_SET) {
+        HKS_LOG_E("invalid operation type");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    if (operation == HKS_EXT_PROPERTY_OPERATION_GET && propertySetOut == NULL) {
+        HKS_LOG_E("propertySetOut cannot be NULL for GET operation");
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientSetOrGetRemoteProperty(operation, resourceId, propertyId, paramSetIn, propertySetOut);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave SetOrGetRemoteProperty, result = %" LOG_PUBLIC "d", ret);
     return ret;
 #else
+    (void)operation;
     (void)resourceId;
     (void)propertyId;
     (void)paramSetIn;

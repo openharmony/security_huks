@@ -77,7 +77,7 @@ public:
     uint32_t retryCount = 0;
 };
 
-class UkeyGetPropertyContext : public AsyncContext {
+class UkeyPropertyContext : public AsyncContext {
 public:
     std::vector<uint8_t> resourceId{};
     std::vector<uint8_t> propertyId{};
@@ -99,6 +99,8 @@ napi_value HuksNapiAuthUkeyPin(napi_env env, napi_callback_info info);
 napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info);
 
 napi_value HuksNapiGetProperty(napi_env env, napi_callback_info info);
+
+napi_value HuksNapiSetProperty(napi_env env, napi_callback_info info);
 
 napi_value HuksNapiOpenResource(napi_env env, napi_callback_info info);
 
