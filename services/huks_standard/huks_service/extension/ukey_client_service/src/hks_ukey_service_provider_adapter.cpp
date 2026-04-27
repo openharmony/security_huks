@@ -256,15 +256,15 @@ static int32_t RemotePropertyPack(const CppParamSet &cppParamSet,
     return ret;
 }
 
-int32_t HksIpcServiceOnGetRemotePropertyAdapter(const struct HksProcessInfo *processInfo,
-    const struct HksBlob *resourceId, const struct HksBlob *propertyId,
+int32_t HksIpcServiceOnSetOrGetRemotePropertyAdapter(const struct HksProcessInfo *processInfo,
+    enum HksExtPropertyOperation operation, const struct HksBlob *resourceId, const struct HksBlob *propertyId,
     const struct HksParamSet *paramSet, const uint8_t *remoteObject)
 {
     int32_t ret = HksIpcCheckBlob(resourceId, 1, HKS_EXT_MAX_RESOURCE_ID_LEN);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnGetRemotePropertyAdapter invalid resourceId blob")
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnSetOrGetRemotePropertyAdapter invalid resourceId blob")
 
     ret = HksIpcCheckBlob(propertyId, 1, HKS_EXT_MAX_PROPERTY_ID_LEN);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnGetRemotePropertyAdapter invalid propertyId blob")
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnSetOrGetRemotePropertyAdapter invalid propertyId blob")
 
     std::string cppResourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
     std::string cppPropertyId(reinterpret_cast<const char*>(propertyId->data), propertyId->size);
@@ -275,16 +275,16 @@ int32_t HksIpcServiceOnGetRemotePropertyAdapter(const struct HksProcessInfo *pro
         reinterpret_cast<OHOS::IRemoteObject *>(const_cast<uint8_t *>(remoteObject)));
     HKS_IF_NULL_LOGE_RETURN(hksExtProxy, HKS_ERROR_NULL_POINTER, "hksExtProxy is null");
 
-    ret = OHOS::Security::Huks::HksIpcServiceOnGetRemoteProperty(processInfo, cppResourceId,
-        cppPropertyId, cppParamSet, cppOutParams);
-    HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceOnGetRemoteProperty fail. ret = %" LOG_PUBLIC "d", ret);
+    ret = OHOS::Security::Huks::HksIpcServiceOnSetOrGetRemoteProperty(processInfo, operation,
+        cppResourceId, cppPropertyId, cppParamSet, cppOutParams);
+    HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceOnSetOrGetRemoteProperty fail. ret = %" LOG_PUBLIC "d", ret);
     
     std::unique_ptr<uint8_t[]> outData;
     uint32_t outSize = 0;
     ret = RemotePropertyPack(cppOutParams, outData, outSize, ret);
     HKS_IF_NOT_SUCC_LOGE(ret, "PackRemoteProperty fail");
 
-    hksExtProxy->SendAsyncReply(HKS_SUCCESS, outData, outSize, HKS_MSG_EXT_GET_REMOTE_PROPERTY_REPLY);
+    hksExtProxy->SendAsyncReply(HKS_SUCCESS, outData, outSize, HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY);
     return HKS_SUCCESS;
 }
 

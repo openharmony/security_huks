@@ -511,10 +511,11 @@ void HksIpcServiceImportCertificate(const struct HksBlob *srcData, const uint8_t
 #endif
 }
 
-void HksIpcServiceGetRemoteProperty(const struct HksBlob *srcData, const uint8_t *context, const uint8_t *remoteObject)
+void HksIpcServiceSetOrGetRemoteProperty(const struct HksBlob *srcData, const uint8_t *context, const uint8_t *remoteObject)
 {
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
     int32_t ret;
+    enum HksExtPropertyOperation operation = HKS_EXT_PROPERTY_OPERATION_GET;
     struct HksBlob resourceId = { 0, NULL };
     struct HksBlob propertyId = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
@@ -522,8 +523,8 @@ void HksIpcServiceGetRemoteProperty(const struct HksBlob *srcData, const uint8_t
     uint64_t startTime = 0;
     (void)HksElapsedRealTime(&startTime);
     do {
-        ret  = HksUkeyBlob2ParamSetUnpack(srcData, &resourceId, &propertyId, &paramSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRenameKeyAliasUnpack Ipc fail")
+        ret = HksSetOrGetRemotePropertyUnpack(srcData, &operation, &resourceId, &propertyId, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSetOrGetRemotePropertyUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
@@ -531,8 +532,9 @@ void HksIpcServiceGetRemoteProperty(const struct HksBlob *srcData, const uint8_t
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &resourceId, &propertyId, paramSet, remoteObject);
-        HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceRenameKeyAliasy fail, ret = %" LOG_PUBLIC "d", ret)
+        ret = HksIpcServiceOnSetOrGetRemotePropertyAdapter(&processInfo, operation,
+            &resourceId, &propertyId, paramSet, remoteObject);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceSetOrGetRemoteProperty fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     struct UKeyInfo ukeyInfo = { .eventId = HKS_EVENT_UKSY_GET_REMOTE_PROPERTY, .resourceId = resourceId,

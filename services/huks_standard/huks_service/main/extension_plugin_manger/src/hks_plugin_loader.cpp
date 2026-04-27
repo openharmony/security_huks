@@ -139,8 +139,8 @@ static void RegisterRemoteHandleMethodMaps(OHOS::SafeMap<PluginMethodEnum, std::
     map.Insert(PluginMethodEnum::FUNC_ON_CLOSE_REMOTE_KEY_HANDLE,
         "_ZN4OHOS8Security4Huks31HksExtPluginOnCloseRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet");
-    map.Insert(PluginMethodEnum::FUNC_ON_GET_REMOTE_PROPERTY,
-        "_ZN4OHOS8Security4Huks31HksExtPluginOnGetRemotePropertyERK14HksProcessInfoRKNSt3__h12basic_string"
+    map.Insert(PluginMethodEnum::FUNC_ON_SET_OR_GET_REMOTE_PROPERTY,
+        "_ZN4OHOS8Security4Huks36HksExtPluginOnSetOrGetRemotePropertyERK14HksProcessInfoW21HksExtPropertyOperationRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEESD_RK11CppParamSetRSE_");
 }
 

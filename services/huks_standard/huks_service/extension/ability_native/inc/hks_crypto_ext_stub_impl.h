@@ -99,7 +99,8 @@ public:
         std::vector<uint8_t>& outData,
         int32_t& errcode) override;
 
-    ErrCode GetProperty(
+    ErrCode SetOrGetProperty(
+        uint32_t operation,
         const std::string& handle,
         const std::string& propertyId,
         const CppParamSet& params,

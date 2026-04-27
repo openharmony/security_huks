@@ -160,13 +160,15 @@ int32_t HksServiceClearPinAuthState(const struct HksProcessInfo *processInfo, co
 #endif
 }
 
-int32_t HksServiceGetRemoteProperty(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
+int32_t HksServiceSetOrGetRemoteProperty(const struct HksProcessInfo *processInfo,
+    enum HksExtPropertyOperation operation, const struct HksBlob *resourceId,
     const struct HksBlob *propertyId, const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut)
 {
 #ifdef L2_STANDARD
-    return HksIpcServiceOnGetRemotePropertyAdapter(processInfo, resourceId, propertyId, paramSetIn, NULL);
+    return HksIpcServiceOnSetOrGetRemotePropertyAdapter(processInfo, operation, resourceId, propertyId, paramSetIn, NULL);
 #else
     (void)processInfo;
+    (void)operation;
     (void)resourceId;
     (void)propertyId;
     (void)paramSetIn;

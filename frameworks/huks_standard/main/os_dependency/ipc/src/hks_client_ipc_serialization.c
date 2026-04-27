@@ -130,6 +130,28 @@ int32_t HksUkeyBlob2ParamSetPack(const struct HksBlob *blob1, const struct HksBl
     return ret;
 }
 
+int32_t HksSetOrGetRemotePropertyPack(enum HksExtPropertyOperation operation,
+    const struct HksBlob *resourceId, const struct HksBlob *propertyId,
+    const struct HksParamSet *paramSet, struct HksBlob *destData)
+{
+    uint32_t offset = 0;
+    int32_t ret;
+    do {
+        ret = CopyUint32ToBuffer((uint32_t)operation, destData, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy operation failed");
+
+        ret = CopyBlobToBuffer(resourceId, destData, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy resourceId failed");
+
+        ret = CopyBlobToBuffer(propertyId, destData, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy propertyId failed");
+
+        ret = CopyParamSetToBuffer(paramSet, destData, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy paramSet failed");
+    } while (0);
+    return ret;
+}
+
 int32_t HksQueryAbilityCopyResult(const struct HksBlob *resourceId, const struct HksAbilityInfo *abilityInfo,
     struct HksBlob *outResourceId, struct HksAbilityInfo *outHksAbilityInfo)
 {
