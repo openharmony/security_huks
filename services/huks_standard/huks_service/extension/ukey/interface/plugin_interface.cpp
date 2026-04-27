@@ -124,7 +124,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnOpenRemoteHandle(
     RegisterObserverForProcess(processInfo, paramSetWithUid);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
-    auto ret = handleMgr->CreateRemoteHandle(processInfo, index, paramSetWithUid);
+    auto ret = handleMgr->CreateRemoteHandle(processInfo, index, paramSet);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
