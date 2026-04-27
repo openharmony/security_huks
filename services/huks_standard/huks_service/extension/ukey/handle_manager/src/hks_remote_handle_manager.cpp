@@ -473,9 +473,14 @@ int32_t HksRemoteHandleManager::RemoteImportWrappedKey(const HksProcessInfo &pro
 
     std::string newWrappingKeyIndex;
     ProviderInfo wrappingKeyProviderInfo;
-    ret = ParseAndValidateIndex(wrappingKeyIndex, processInfo.uidInt, providerInfo, newWrappingKeyIndex);
+    ret = ParseAndValidateIndex(wrappingKeyIndex, processInfo.uidInt, wrappingKeyProviderInfo, newWrappingKeyIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
         "ParseAndValidateIndex for wrapping key failed, ret = %" LOG_PUBLIC "d", ret)
+
+    HKS_IF_NOT_TRUE_LOGE_RETURN(providerInfo.m_abilityName == wrappingKeyProviderInfo.m_abilityName &&
+        providerInfo.m_bundleName && wrappingKeyProviderInfo.m_bundleName &&
+        providerInfo.m_providerName && wrappingKeyProviderInfo.m_providerName, HKS_ERROR_INVALID_ARGUMENT
+        "The abilityName or bundleName or providerName passed in is inconsistent.")
 
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
