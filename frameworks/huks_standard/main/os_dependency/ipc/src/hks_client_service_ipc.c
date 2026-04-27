@@ -153,6 +153,24 @@ static int32_t HksAllocInBlob(struct HksBlob *inBlob,
     return HKS_SUCCESS;
 }
 
+static int32_t HksAllocInBlobForSetOrGetProperty(struct HksBlob *inBlob,
+    const struct HksBlob *blob1, const struct HksBlob *blob2, const struct HksParamSet *paramSet)
+{
+    if (inBlob == NULL || blob1 == NULL || blob2 == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    uint32_t size = sizeof(uint32_t);
+    size += (uint32_t)(sizeof(blob1->size) + ALIGN_SIZE(blob1->size));
+    size += (uint32_t)(sizeof(blob2->size) + ALIGN_SIZE(blob2->size));
+    if (paramSet != NULL) {
+        size += ALIGN_SIZE(paramSet->paramSetSize);
+    }
+    inBlob->data = (uint8_t *)HksMalloc(size);
+    HKS_IF_NULL_LOGE_RETURN(inBlob->data, HKS_ERROR_MALLOC_FAIL, "malloc inBlob fail");
+    inBlob->size = size;
+    return HKS_SUCCESS;
+}
+
 static int32_t HksAllocInBlobWithTwoBlobs(struct HksBlob *inBlob,
     const struct HksBlob *blob1, const struct HksBlob *blob2, const struct HksParamSet *paramSet)
 {
@@ -587,12 +605,15 @@ int32_t HksClientCloseRemoteHandle(const struct HksBlob *resourceId, const struc
     return ret;
 }
 
-int32_t HksClientGetRemoteProperty(const struct HksBlob *resourceId, const struct HksBlob *propertyId,
+int32_t HksClientSetOrGetRemoteProperty(enum HksExtPropertyOperation operation,
+    const struct HksBlob *resourceId, const struct HksBlob *propertyId,
     const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut)
 {
-    if (propertySetOut == NULL || *propertySetOut != NULL) {
-        HKS_LOG_E("propertySetOut must be NULL pointer");
-        return HKS_ERROR_NULL_POINTER;
+    if (operation == HKS_EXT_PROPERTY_OPERATION_GET) {
+        if (propertySetOut == NULL || *propertySetOut != NULL) {
+            HKS_LOG_E("propertySetOut must be NULL pointer for GET operation");
+            return HKS_ERROR_NULL_POINTER;
+        }
     }
 
     int32_t ret;
@@ -600,9 +621,11 @@ int32_t HksClientGetRemoteProperty(const struct HksBlob *resourceId, const struc
     struct HksBlob outBlob = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
 
-    outBlob.size = MAX_OUT_BLOB_SIZE;
-    outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
-    HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
+    if (operation == HKS_EXT_PROPERTY_OPERATION_GET) {
+        outBlob.size = MAX_OUT_BLOB_SIZE;
+        outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
+        HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
+    }
 
     do {
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
@@ -612,17 +635,20 @@ int32_t HksClientGetRemoteProperty(const struct HksBlob *resourceId, const struc
             HKS_EXT_MAX_PROPERTY_ID_LEN);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check remote property fail")
 
-        ret = HksAllocInBlobWithTwoBlobs(&inBlob, resourceId, propertyId, newParamSet);
+        ret = HksAllocInBlobForSetOrGetProperty(&inBlob, resourceId, propertyId, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
-        ret = HksUkeyBlob2ParamSetPack(resourceId, propertyId, newParamSet, &inBlob);
+        ret = HksSetOrGetRemotePropertyPack(operation, resourceId, propertyId, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "pack remote property fail")
 
-        ret = HksSendRequest(HKS_MSG_EXT_GET_REMOTE_PROPERTY, &inBlob, &outBlob, newParamSet);
+        ret = HksSendRequest(HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY, &inBlob, 
+            (operation == HKS_EXT_PROPERTY_OPERATION_GET) ? &outBlob : NULL, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "send request fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksRemotePropertyUnpackFromService(&outBlob, propertySetOut);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRemotePropertyUnpackFromService fail")
+        if (operation == HKS_EXT_PROPERTY_OPERATION_GET) {
+            ret = HksRemotePropertyUnpackFromService(&outBlob, propertySetOut);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRemotePropertyUnpackFromService fail")
+        }
     } while (0);
 
     HksFreeParamSet(&newParamSet);

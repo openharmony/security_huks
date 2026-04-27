@@ -233,7 +233,8 @@ public:
     int32_t MergeProviderCertificates(const ProviderInfo &providerInfo, const std::string &providerCertVec,
         CommJsonObject &combinedArray);
 
-    int32_t GetRemoteProperty(const HksProcessInfo &processInfo, const std::string& index,
+    int32_t SetOrGetRemoteProperty(const HksProcessInfo &processInfo,
+        enum HksExtPropertyOperation operation, const std::string& index,
         const std::string& propertyId, const CppParamSet& paramSet, CppParamSet& outParams);
     int32_t RemoteExportPublicKey(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet, std::vector<uint8_t> &outData);

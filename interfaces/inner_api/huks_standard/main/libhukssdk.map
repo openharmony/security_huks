@@ -77,7 +77,7 @@
     HksExportCertificate;
     HksImportCertificate;
     HksFreeExtCertSet;
-    HksGetRemoteProperty;
+    HksSetOrGetRemoteProperty;
     HksQueryAbilityInfo;
     HksGetResourceId;
   local: *;
