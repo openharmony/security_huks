@@ -185,7 +185,7 @@ static uint32_t g_validTags[] = {
     HKS_TAG_ANCO_APP_UID,
     HKS_TAG_ANCO_CHALLENGE,
     HKS_TAG_ANCO_USER_ID,
-    HKS_TAG_PlAIN_TEXT
+    HKS_TAG_PLAIN_TEXT
 };
 
 HKS_API_EXPORT enum HksTagType GetTagType(enum HksTag tag)
