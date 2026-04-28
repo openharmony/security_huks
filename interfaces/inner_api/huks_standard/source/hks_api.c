@@ -470,6 +470,9 @@ HKS_API_EXPORT int32_t HksGetRemoteProperty(const struct HksBlob *resourceId, co
 #endif
 }
 
+/*
+    The caller needs to apply for an HksBlob of size 1024 by themselves and release it on their own.
+*/
 HKS_API_EXPORT int32_t HksGetResourceId(const struct HksBlob *providerName, const struct HksParamSet *paramSetIn,
     struct HksBlob *resourceId)
 {

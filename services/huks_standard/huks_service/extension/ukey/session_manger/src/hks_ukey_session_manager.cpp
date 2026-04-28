@@ -34,6 +34,8 @@
 #include "hks_log.h"
 #include "hks_template.h"
 #include "hks_type_enum.h"
+#include "tokenid_kit.h"
+#include "ipc_skeleton.h"
 namespace OHOS {
 namespace Security {
 namespace Huks {
@@ -336,15 +338,22 @@ void HksSessionManager::ClearSessionMapByHandle(int32_t ret, uint32_t handle)
 bool CheckAndAppendProcessInfo(CppParamSet &paramSet, const HksProcessInfo &processInfo)
 {
     auto runtimeUid = static_cast<int32_t>(processInfo.uidInt);
-    if (paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>().first == HKS_SUCCESS) {
-        int32_t paramUid = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>().second;
-        HKS_IF_TRUE_LOGE_RETURN(runtimeUid != paramUid, false,
-            "uid not match. paramUid: %" LOG_PUBLIC "d, runtimeUid: %" LOG_PUBLIC "d", paramUid, runtimeUid)
+    if (paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>().first != HKS_SUCCESS) {
+        std::vector<HksParam> params = {
+            { .tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = runtimeUid}
+        };
+        HKS_IF_NOT_TRUE_LOGE_RETURN(paramSet.AddParams(params), false, "add uid to paramset fail.")
+        return true;
     }
-    std::vector<HksParam> params = {
-        { .tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = runtimeUid}
-    };
-    HKS_IF_NOT_TRUE_LOGE_RETURN(paramSet.AddParams(params), HKS_ERROR_INVALID_ARGUMENT, "add uid to paramset fail.")
+
+    int32_t paramUid = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>().second;
+    auto accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
+    HKS_IF_NOT_TRUE_LOGE_RETURN(OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx),
+        false, "VerifyCallerAndAdjustUidParam: not system hap, check permission failed.");
+
+    HKS_IF_TRUE_LOGE_RETURN(runtimeUid != paramUid, false,
+        "uid not match. paramUid: %" LOG_PUBLIC "d, runtimeUid: %" LOG_PUBLIC "d", paramUid, runtimeUid)
+
     return true;
 }
 }

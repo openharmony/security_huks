@@ -58,6 +58,7 @@ if (os_level == "standard") {
       "hilog:libhilog",
       "ipc:ipc_single",
       "samgr:samgr_proxy",
+      "access_token:libtokenid_sdk",
     ]
   }
 }
