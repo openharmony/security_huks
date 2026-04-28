@@ -715,7 +715,8 @@ int32_t HksRemoteHandleManager::VerifyCallerAndAdjustUidParam(const HksProcessIn
     auto accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
     HKS_IF_NOT_TRUE_LOGE_RETURN(OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx),
         HKS_ERROR_NOT_SYSTEM_APP, "VerifyCallerAndAdjustUidParam: not system hap, check permission failed.");
-
+    
+    newParamSet = CppParamSet(paramSet);
     return HKS_SUCCESS;
 }
 
