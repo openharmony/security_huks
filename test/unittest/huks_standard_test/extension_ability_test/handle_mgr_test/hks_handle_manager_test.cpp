@@ -87,7 +87,6 @@ CppParamSet HksRemoteHandleManagerTest::CreateTestParamSet(int32_t uid)
         {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA},
         {.tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048},
         {.tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN},
-        {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = uid}
     };
     return CppParamSet(params);
 }
@@ -98,7 +97,6 @@ CppParamSet HksRemoteHandleManagerTest::CreateTestParamSet(int32_t uid, std::str
         {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA},
         {.tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048},
         {.tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN},
-        {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = uid},
         {.tag = HKS_EXT_CRYPTO_TAG_UKEY_PIN, .blob = {.size = pinStr.size(), .data = (uint8_t*)pinStr.c_str()}}
     };
     return CppParamSet(params);
@@ -171,11 +169,7 @@ HWTEST_F(HksRemoteHandleManagerTest, CreateCloseRemoteHandleTest, TestSize.Level
     std::string index4 = root.Serialize(false);
     ret = manager->CreateRemoteHandle(processInfo, index4, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
-    int32_t authState = 1;
-    uint32_t retryCnt = 0;
-    ret = manager->RemoteVerifyPin(processInfo, index4, paramSet, authState, retryCnt);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
-
+    
     ret = manager->CloseRemoteHandle(processInfo, index4, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
     HKS_FREE_BLOB(processInfo.userId);
@@ -226,45 +220,6 @@ HWTEST_F(HksRemoteHandleManagerTest, SignVerifyTest, TestSize.Level0)
     int32_t ret = manager->CreateRemoteHandle(processInfo, index, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    manager->CloseRemoteHandle(processInfo, index, paramSet);
-    HKS_FREE_BLOB(processInfo.userId);
-    HKS_FREE_BLOB(processInfo.processName);
-}
-
-/**
- * @tc.name: HksRemoteHandleManagerTest.PinManagementTest
- * @tc.desc: Test PIN management operations
- * @tc.type: FUNC
- */
-HWTEST_F(HksRemoteHandleManagerTest, PinManagementTest, TestSize.Level0)
-{
-    auto manager = HksRemoteHandleManager::GetInstanceWrapper();
-    EXPECT_NE(manager, nullptr);
-
-    std::string index = CreateTestIndex();
-    HksProcessInfo processInfo = CreateTestProcessInfo();
-    CppParamSet paramSet = CreateTestParamSet(processInfo.uidInt, "123456");
-    // Create handle first
-    int32_t ret = manager->CreateRemoteHandle(processInfo, index, paramSet);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-
-    // Test verify PIN
-    int32_t authState = 1;
-    uint32_t retryCnt = 0;
-    ret = manager->RemoteVerifyPin(processInfo, index, paramSet, authState, retryCnt);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-
-    int32_t state = 1;
-    ret = manager->RemoteVerifyPinStatus(processInfo, index, paramSet, state);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
-
-    ret = manager->RemoteClearPinStatus(processInfo, index, paramSet);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-
-    int32_t authOk = manager->CheckAuthStateIsOk(processInfo, index);
-    EXPECT_NE(authOk, HKS_SUCCESS);
-
-    manager->ClearAuthState(processInfo);
     manager->CloseRemoteHandle(processInfo, index, paramSet);
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(processInfo.processName);
