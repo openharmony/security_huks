@@ -1448,20 +1448,14 @@ int32_t JsHksCryptoExtAbility::ImportCertificate(const std::string &index, const
     const CppParamSet &params, int32_t &errcode)
 {
     auto argParser = [index, &certInfo, params](napi_env &env, napi_value *argv, size_t &argc) -> bool {
-        // 第1个参数：resourceId (string)
+        // first：resourceId (string)
         napi_value nativeIndex = nullptr;
         auto status = napi_create_string_utf8(env, index.c_str(), index.length(), &nativeIndex);
         HKS_IF_TRUE_LOGE_RETURN(status != napi_ok || nativeIndex == nullptr, false,
             "create string utf8 for index failed, status:%d", status)
         argv[ARGC_ZERO] = nativeIndex;
 
-        // 第2个参数：certInfo (HuksCryptoExtensionCertInfo)
-        napi_value certObj = nullptr;
-        auto ret = ConvertCertInfoIdlToJsObject(env, certInfo, certObj);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "ConvertCertInfoIdlToJsObject failed, ret:%d", ret)
-        argv[ARGC_ONE] = certObj;
-
-        // 第3个参数：params (optional HuksExternalCryptoParam[])
+        // second：params (optional HuksExternalCryptoParam[])
         napi_value nativeCppParamSet = nullptr;
         if (params.GetParamSet()) {
             nativeCppParamSet = GenerateHksParamArray(env, *params.GetParamSet());
@@ -1470,7 +1464,13 @@ int32_t JsHksCryptoExtAbility::ImportCertificate(const std::string &index, const
             status = napi_get_undefined(env, &nativeCppParamSet);
             HKS_IF_TRUE_LOGE_RETURN(status != napi_ok, false, "get undefined failed")
         }
-        argv[ARGC_TWO] = nativeCppParamSet;
+        argv[ARGC_ONE] = nativeCppParamSet;
+
+        // third：certInfo (HuksCryptoExtensionCertInfo)
+        napi_value certObj = nullptr;
+        auto ret = ConvertCertInfoIdlToJsObject(env, certInfo, certObj);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "ConvertCertInfoIdlToJsObject failed, ret:%d", ret)
+        argv[ARGC_TWO] = certObj;
 
         argc = ARGC_THREE;
         return true;
