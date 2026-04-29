@@ -59,7 +59,7 @@ public:
     virtual int FinishSession(const std::string &handle, const CppParamSet &params, const std::vector<uint8_t> &inData,
         std::vector<uint8_t> &outData, int32_t &errcode);
     virtual int SetOrGetProperty(uint32_t operation, const std::string& handle, const std::string& propertyId,
-        const CppParamSet& params, CppParamSet& outParams, int32_t& errcode);
+        CppParamSet& params, int32_t& errcode);
     virtual int ClearUkeyPinAuthState(const std::string& handle, const CppParamSet& params, int32_t& errcode);
     virtual int ImportWrappedKey(const std::string& index, const std::string& wrappingKeyIndex,
         const CppParamSet& params, const std::vector<uint8_t>& wrappedData, int32_t& errcode);

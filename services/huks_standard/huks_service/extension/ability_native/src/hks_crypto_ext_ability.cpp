@@ -136,7 +136,7 @@ int32_t HksCryptoExtAbility::FinishSession(const std::string &handle, const CppP
 
 int32_t HksCryptoExtAbility::SetOrGetProperty(uint32_t operation,
     const std::string &handle, const std::string &propertyId,
-    const CppParamSet &params, CppParamSet &outParams, int32_t &errcode)
+    CppParamSet &params, int32_t &errcode)
 {
     LOGE("HksCryptoExtAbility::SetOrGetProperty Undefined operation");
     return HKS_ERROR_EXT_UNDEFINED_OPERATION;

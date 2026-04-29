@@ -1605,7 +1605,7 @@ int32_t JsHksCryptoExtAbility::FinishSession(const std::string &handle, const Cp
 
 int32_t JsHksCryptoExtAbility::SetOrGetProperty(uint32_t operation,
     const std::string &handle, const std::string &propertyId,
-    const CppParamSet &params, CppParamSet &outParams, int32_t &errcode)
+    CppParamSet &params, int32_t &errcode)
 {
     auto argParser = [handle, propertyId, params](napi_env &env, napi_value *argv, size_t &argc) -> bool {
         struct HandleInfoParam param = {
@@ -1630,13 +1630,11 @@ int32_t JsHksCryptoExtAbility::SetOrGetProperty(uint32_t operation,
         return ret;
     }
     WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
-    if (operation == HKS_EXT_PROPERTY_OPERATION_GET) {
-        if (dataParam->paramSet.GetParamSet() == nullptr) {
-            LOGE("paramSet is nullptr. HksInitParamSet:%d", HksInitParamSet(&defaultParamSet));
-            dataParam->paramSet = CppParamSet(defaultParamSet, true);
-        }
-        outParams = std::move(dataParam->paramSet);
+    if (dataParam->paramSet.GetParamSet() == nullptr) {
+        LOGE("paramSet is nullptr. HksInitParamSet:%d", HksInitParamSet(&defaultParamSet));
+        dataParam->paramSet = CppParamSet(defaultParamSet, true);
     }
+    params = std::move(dataParam->paramSet);
     return dataParam->hksErrorCode;
 }
 

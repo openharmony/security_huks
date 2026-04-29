@@ -424,38 +424,43 @@ int32_t HksRemoteHandleManager::ImportRemoteCertificate(const HksProcessInfo &pr
 
 int32_t HksRemoteHandleManager::SetOrGetRemoteProperty(const HksProcessInfo &processInfo,
     enum HksExtPropertyOperation operation, const std::string &index,
-    const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams)
+    const std::string &propertyId, CppParamSet &paramSet)
 {
     CppParamSet newParamSet{};
     int32_t ret = VerifyCallerAndAdjustUidParam(processInfo, paramSet, newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "uid check in %" LOG_PUBLIC "s failed.", __PRETTY_FUNCTION__)
 
     uint32_t uid = processInfo.uidInt;
-    auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
-    HKS_IF_TRUE_EXCU(uidParam.first == HKS_SUCCESS, uid = static_cast<uint32_t>(uidParam.second));
-    if (!OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(IPCSkeleton::GetCallingFullTokenID())) {
-        HKS_IF_TRUE_LOGE_RETURN(uidParam.first == HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
-            "Non-system app are not allowed to take uid")
-    }
-    uint32_t uid = processInfo.uidInt;
+    auto uidParam = newParamSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
     if (uidParam.first == HKS_SUCCESS) {
         uid = static_cast<uint32_t>(uidParam.second);
     }
+    
+    if (operation == HKS_EXT_PROPERTY_OPERATION_GET) {
+        if (std::find(VALID_PROPERTYID.begin(), VALID_PROPERTYID.end(), propertyId) == VALID_PROPERTYID.end()) {
+            HKS_LOG_E("Invalid propertyId for GET operation");
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+    }
+    
     ProviderInfo providerInfo{};
     std::string handle;
     ret = ParseAndValidateIndex(index, uid, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
-    int32_t userId = HksGetUserIdFromUid(uid);
-    providerInfo.m_userid = userId;
+    providerInfo.m_userid = HksGetUserIdFromUid(uid);
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
-    auto ipccode = proxy->SetOrGetProperty(static_cast<uint32_t>(operation), handle, propertyId, paramSet, outParams, ret);
+    auto ipccode = proxy->SetOrGetProperty(static_cast<uint32_t>(operation), handle, propertyId, newParamSet, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    ret = ConvertExtensionToHksErrorCode(ret, g_getPropertyErrCodeMapping);
+    ret = ConvertExtensionToHksErrorCode(ret, operation == HKS_EXT_PROPERTY_OPERATION_GET
+        ? g_getPropertyErrCodeMapping : g_commonErrCodeMapping);
     ClearMapByHandle(ret, handle);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote SetOrGetProperty failed: %" LOG_PUBLIC "d", ret)
+    if (operation == HKS_EXT_PROPERTY_OPERATION_GET) {
+        paramSet = std::move(newParamSet);
+    }
     return HKS_SUCCESS;
 }
 

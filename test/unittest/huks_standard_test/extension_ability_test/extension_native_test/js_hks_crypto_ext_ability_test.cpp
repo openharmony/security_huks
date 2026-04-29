@@ -1476,7 +1476,7 @@ HWTEST_F(JsCryptoExtAbilityTest, abilityTest_0001, testing::ext::TestSize.Level0
 
     EXPECT_EQ(ability->FinishSession(handle, params, inData, outData, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
 
-    EXPECT_EQ(ability->GetProperty(handle, propertyId, params, outParams, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+    EXPECT_EQ(ability->SetOrGetProperty(0, handle, propertyId, params, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
     EXPECT_EQ(ability->ClearUkeyPinAuthState(handle, params, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
 }
 

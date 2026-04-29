@@ -167,15 +167,14 @@ ErrCode HksCryptoExtStubImpl::SetOrGetProperty(
     uint32_t operation,
     const std::string& handle,
     const std::string& propertyId,
-    const CppParamSet& params,
-    CppParamSet& outParams,
+    CppParamSet& params,
     int32_t& errcode)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
         return HKS_ERROR_EXT_NULLPTR;
     }
-    return extension_->SetOrGetProperty(operation, handle, propertyId, params, outParams, errcode);
+    return extension_->SetOrGetProperty(operation, handle, propertyId, params, errcode);
 }
 
 ErrCode HksCryptoExtStubImpl::ClearUkeyPinAuthState(
