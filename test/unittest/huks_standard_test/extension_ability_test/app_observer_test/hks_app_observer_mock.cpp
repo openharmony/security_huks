@@ -142,11 +142,11 @@ ErrCode ExportProviderCertificates(
         std::vector<uint8_t>& outData,
         int32_t& errcode) { errcode = HKS_SUCCESS; return ERR_OK; }
 
-    ErrCode GetProperty(
+    ErrCode SetOrGetProperty(
+        uint32_t operation,
         const std::string& handle,
         const std::string& propertyId,
-        const CppParamSet& params,
-        CppParamSet& outParams,
+        CppParamSet& params,
         int32_t& errcode) { errcode = HKS_SUCCESS; return ERR_OK; }
 
     ErrCode GetResourceId(
@@ -331,12 +331,12 @@ int32_t HksRemoteHandleManager::MergeProviderCertificates(const ProviderInfo &pr
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::GetRemoteProperty(const HksProcessInfo &processInfo,
-    const std::string &index, const std::string &propertyId, const CppParamSet &paramSet,
-    CppParamSet &outParams)
-{
-    return HKS_SUCCESS;
-}
+int32_t HksRemoteHandleManager::SetOrGetRemoteProperty(const HksProcessInfo &processInfo,
+        enum HksExtPropertyOperation operation, const std::string &index,
+        const std::string &propertyId, CppParamSet &paramSet)
+    {
+        return HKS_SUCCESS;
+    }
 
 int32_t HksRemoteHandleManager::RemoteImportWrappedKey(const HksProcessInfo &processInfo,
     const std::string &index, const std::string &wrappingKeyIndex, const CppParamSet &paramSet,

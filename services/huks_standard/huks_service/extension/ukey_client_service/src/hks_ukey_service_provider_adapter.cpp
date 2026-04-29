@@ -269,19 +269,18 @@ int32_t HksIpcServiceOnSetOrGetRemotePropertyAdapter(const struct HksProcessInfo
     std::string cppResourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
     std::string cppPropertyId(reinterpret_cast<const char*>(propertyId->data), propertyId->size);
     CppParamSet cppParamSet(paramSet);
-    CppParamSet cppOutParams;
 
     auto hksExtProxy = OHOS::iface_cast<OHOS::Security::Hks::IHksExtService>(
         reinterpret_cast<OHOS::IRemoteObject *>(const_cast<uint8_t *>(remoteObject)));
     HKS_IF_NULL_LOGE_RETURN(hksExtProxy, HKS_ERROR_NULL_POINTER, "hksExtProxy is null");
 
     ret = OHOS::Security::Huks::HksIpcServiceOnSetOrGetRemoteProperty(processInfo, operation,
-        cppResourceId, cppPropertyId, cppParamSet, cppOutParams);
+        cppResourceId, cppPropertyId, cppParamSet);
     HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceOnSetOrGetRemoteProperty fail. ret = %" LOG_PUBLIC "d", ret);
     
     std::unique_ptr<uint8_t[]> outData;
     uint32_t outSize = 0;
-    ret = RemotePropertyPack(cppOutParams, outData, outSize, ret);
+    ret = RemotePropertyPack(cppParamSet, outData, outSize, ret);
     HKS_IF_NOT_SUCC_LOGE(ret, "PackRemoteProperty fail");
 
     hksExtProxy->SendAsyncReply(HKS_SUCCESS, outData, outSize, HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY);

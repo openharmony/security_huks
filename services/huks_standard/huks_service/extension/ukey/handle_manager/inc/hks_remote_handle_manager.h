@@ -235,8 +235,8 @@ public:
         CommJsonObject &combinedArray);
 
     int32_t SetOrGetRemoteProperty(const HksProcessInfo &processInfo,
-        enum HksExtPropertyOperation operation, const std::string& index,
-        const std::string& propertyId, const CppParamSet& paramSet, CppParamSet& outParams);
+        enum HksExtPropertyOperation operation, const std::string &index,
+        const std::string &propertyId, CppParamSet &paramSet);
     int32_t RemoteExportPublicKey(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet, std::vector<uint8_t> &outData);
     int32_t RemoteImportWrappedKey(const HksProcessInfo &processInfo, const std::string &index,
