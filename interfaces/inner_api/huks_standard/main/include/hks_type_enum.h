@@ -471,6 +471,14 @@ enum HksKeySecurityLevel {
     HKS_KEY_SECURITY_LEVEL_SE = 1,
     HKS_KEY_SECURITY_LEVEL_INDEPENDENT_SE = 2,
 };
+
+/**
+ * @brief hks ext property operation type
+ */
+enum HksExtPropertyOperation {
+    HKS_EXT_PROPERTY_OPERATION_GET = 0,
+    HKS_EXT_PROPERTY_OPERATION_SET = 1,
+};
 #endif
 
 #ifdef __cplusplus
