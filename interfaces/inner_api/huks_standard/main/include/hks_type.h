@@ -168,11 +168,6 @@ struct HksKeyAliasSet {
 #define HKS_EXT_MAX_RESOURCE_ID_LEN 1024
 #define HKS_EXT_MAX_PROPERTY_ID_LEN 100
 
-enum HksExtPropertyOperation {
-    HKS_EXT_PROPERTY_OPERATION_GET = 0,
-    HKS_EXT_PROPERTY_OPERATION_SET = 1,
-};
-
 struct HksExtCertInfo {
     int32_t purpose;
     struct HksBlob index;
