@@ -303,7 +303,7 @@ int32_t HksIpcServiceOnGetResourceIdAdapter(const struct HksProcessInfo *process
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksIpcServiceOnGetResourceId fail. ret = %" LOG_PUBLIC "d", ret);
 
     if (cppResourceId.size() > HKS_EXT_MAX_RESOURCE_ID_LEN) {
-        HKS_LOG_E("cppResourceId too long, size: %" LOG_PUBLIC "u", cppResourceId.size());
+        HKS_LOG_E("cppResourceId too long, size: %" LOG_PUBLIC "zu", cppResourceId.size());
         return HKS_ERROR_INSUFFICIENT_DATA;
     }
     
