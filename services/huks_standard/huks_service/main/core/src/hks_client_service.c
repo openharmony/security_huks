@@ -1745,6 +1745,10 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
 
         common.ret = HuksAccessUpdate(handle, common.newParamSet, inData, outData);
         IfNotSuccAppendHdiErrorInfo(common.ret);
+        if (common.ret != HKS_SUCCESS) {
+            HKS_LOG_E("HuksAccessUpdate fail, ret = %" LOG_PUBLIC "d", common.ret);
+            MarkAndDeleteOperationByUnion(&common.unionOp, handle);
+        }
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "update execution failed, ret = %" LOG_PUBLIC "d", common.ret);
     } while (0);
 #ifdef L2_STANDARD
@@ -1753,10 +1757,6 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
         common.unionOp.isSe ? NULL : common.unionOp.op.operation };
     (void)HksThreeStageReport(__func__, processInfo, common.newParamSet, &info);
 #endif
-    if (common.ret != HKS_SUCCESS) {
-        HKS_LOG_E("HuksAccessUpdate fail, ret = %" LOG_PUBLIC "d", common.ret);
-        MarkAndDeleteOperationByUnion(&common.unionOp, handle);
-    }
     UpdateEnd(&common.unionOp, &common.traceId);
     HksFreeParamSet(&common.newParamSet);
     return common.ret;
