@@ -51,6 +51,7 @@ void HksMlDsaSignVerifyPart2Test::TearDown()
     std::system("find /data/service/el1/public/huks_service -user root -delete");
 }
 
+// ML-DSA paramset id 44, der public key len 1334, signature size 2420
 static const uint32_t g_mldsa44PublicKeySize = 1334;
 static const uint32_t g_mldsa44SignatureSize = 2420;
 

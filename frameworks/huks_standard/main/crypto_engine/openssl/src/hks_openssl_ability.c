@@ -35,6 +35,7 @@
 #include "hks_openssl_hash.h"
 #include "hks_openssl_hmac.h"
 #include "hks_openssl_kdf.h"
+#include "hks_openssl_ml_dsa.h"
 #include "hks_openssl_rsa.h"
 #include "hks_openssl_sm2.h"
 #include "hks_openssl_sm3.h"
@@ -51,6 +52,9 @@ static void RegisterAbilityGenerateKey(void)
 #endif
 #if defined(HKS_SUPPORT_ECC_C) && defined(HKS_SUPPORT_ECC_GENERATE_KEY)
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_GENERATE_KEY(HKS_ALG_ECC), HksOpensslEccGenerateKey);
+#endif
+#if defined(HKS_SUPPORT_ML_DSA_C) && defined(HKS_SUPPORT_ML_DSA_GENERATE_KEY)
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_GENERATE_KEY(HKS_ALG_ML_DSA), HksOpensslMlDsaGenerateKey);
 #endif
 #if defined(HKS_SUPPORT_X25519_C) && defined(HKS_SUPPORT_X25519_GENERATE_KEY)
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_GENERATE_KEY(HKS_ALG_X25519), HksOpensslCurve25519GenerateKey);
@@ -92,6 +96,9 @@ static void RegisterAbilityGetPublicKey(void)
 #if defined(HKS_SUPPORT_ECC_C) && defined(HKS_SUPPORT_ECC_GET_PUBLIC_KEY)
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_GET_PUBLIC_KEY(HKS_ALG_ECC), HksOpensslGetEccPubKey);
 #endif
+#if defined(HKS_SUPPORT_ML_DSA_C) && defined(HKS_SUPPORT_ML_DSA_GET_PUBLIC_KEY)
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_GET_PUBLIC_KEY(HKS_ALG_ML_DSA), HksOpensslMlDsaGetPubKey);
+#endif
 #if defined(HKS_SUPPORT_ED25519_C) && defined(HKS_SUPPORT_ED2519_GET_PUBLIC_KEY)
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_GET_PUBLIC_KEY(HKS_ALG_ED25519), HksOpensslGetEd25519PubKey);
 #endif
@@ -117,6 +124,9 @@ static void RegisterAbilitySign(void)
 #if defined(HKS_SUPPORT_ECC_C) && defined(HKS_SUPPORT_ECDSA_C) && defined(HKS_SUPPORT_ECDSA_SIGN_VERIFY)
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_SIGN(HKS_ALG_ECC), HksOpensslEcdsaSign);
 #endif
+#if defined(HKS_SUPPORT_ML_DSA_C) && defined(HKS_SUPPORT_ML_DSA_SIGN_VERIFY)
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_SIGN(HKS_ALG_ML_DSA), HksOpensslMlDsaSign);
+#endif
 #if defined(HKS_SUPPORT_ED25519_C) && defined(HKS_SUPPORT_ED25519_SIGN_VERIFY)
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_SIGN(HKS_ALG_ED25519), HksOpensslEd25519Sign);
 #endif
@@ -135,6 +145,9 @@ static void RegisterAbilityVerify(void)
 #endif
 #if defined(HKS_SUPPORT_ECC_C) && defined(HKS_SUPPORT_ECDSA_C) && defined(HKS_SUPPORT_ECDSA_SIGN_VERIFY)
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_VERIFY(HKS_ALG_ECC), HksOpensslEcdsaVerify);
+#endif
+#if defined(HKS_SUPPORT_ML_DSA_C) && defined(HKS_SUPPORT_ML_DSA_SIGN_VERIFY)
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_VERIFY(HKS_ALG_ML_DSA), HksOpensslMlDsaVerify);
 #endif
 #if defined(HKS_SUPPORT_ED25519_C) && defined(HKS_SUPPORT_ED25519_SIGN_VERIFY)
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_VERIFY(HKS_ALG_ED25519), HksOpensslEd25519Verify);
