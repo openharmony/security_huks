@@ -213,6 +213,14 @@ static const uint32_t g_eccDigest[] = {
 };
 #endif
 
+#ifdef HKS_SUPPORT_ML_DSA_C
+static const uint32_t g_mlDsaParamSetId[] = {
+    HKS_ML_DSA_KEY_PARAM_SET_44,
+    HKS_ML_DSA_KEY_PARAM_SET_65,
+    HKS_ML_DSA_KEY_PARAM_SET_87,
+};
+#endif
+
 #ifdef HKS_SUPPORT_SM2_C
 static const uint32_t g_sm2KeySize[] = {
     HKS_SM2_KEY_SIZE_256
@@ -758,6 +766,33 @@ static const struct ExpectParamsValuesChecker g_expectEcdhParams[] = {
 };
 #endif
 
+#ifdef HKS_SUPPORT_ML_DSA_C
+static const struct ParamsValuesChecker g_mldsaParamSet[] = {
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { false, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { false, 0, false}, { true, 0, false}, { false, 0, false},
+        { false, 0, false} } }
+};
+static const struct ExpectParamsValuesChecker g_expectMlDsaParams[] = {
+    { HKS_CHECK_TYPE_GEN_KEY, {
+        { true, g_mlDsaParamSetId, HKS_ARRAY_SIZE(g_mlDsaParamSetId) },
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { false, NULL, 0 }
+        }
+    },
+    { HKS_CHECK_TYPE_USE_KEY, {
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { false, NULL, 0 }
+        }
+    }
+};
+#endif
+
 static struct HksAlgParamSetHandler g_hksAlgParamSetHandlerPart1[] = {
 #ifdef HKS_SUPPORT_RSA_C
     { HKS_ALG_RSA, g_rsaParamSet, HKS_ARRAY_SIZE(g_rsaParamSet), g_expectRsaParams, HKS_ARRAY_SIZE(g_expectRsaParams) },
@@ -812,6 +847,10 @@ static struct HksAlgParamSetHandler g_hksAlgParamSetHandlerPart2[] = {
 #ifdef HKS_SUPPORT_ECDH_C
     { HKS_ALG_ECDH, g_ecdhParamSet, HKS_ARRAY_SIZE(g_ecdhParamSet), g_expectEcdhParams,
         HKS_ARRAY_SIZE(g_expectEcdhParams) },
+#endif
+#ifdef HKS_SUPPORT_ML_DSA_C
+    { HKS_ALG_ML_DSA, g_mldsaParamSet, HKS_ARRAY_SIZE(g_mldsaParamSet), g_expectMlDsaParams,
+        HKS_ARRAY_SIZE(g_expectMlDsaParams) },
 #endif
 };
 
@@ -921,6 +960,13 @@ static const uint32_t g_invalidPurpose[][2] = {
             HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT | HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
     },
 #endif
+#ifdef HKS_SUPPORT_ML_DSA_C
+    {
+        HKS_ALG_ML_DSA,
+        HKS_KEY_PURPOSE_DERIVE | HKS_KEY_PURPOSE_MAC | HKS_KEY_PURPOSE_WRAP |
+            HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+    },
+#endif
 };
 
 static const uint32_t g_invalidImportKeyPurpose[][2] = {
@@ -939,6 +985,12 @@ static const uint32_t g_invalidImportKeyPurpose[][2] = {
 #ifdef HKS_SUPPORT_SM2_C
     {
         HKS_ALG_SM2,
+        HKS_KEY_PURPOSE_WRAP | HKS_KEY_PURPOSE_UNWRAP,
+    },
+#endif
+#ifdef HKS_SUPPORT_ML_DSA_C
+    {
+        HKS_ALG_ML_DSA,
         HKS_KEY_PURPOSE_WRAP | HKS_KEY_PURPOSE_UNWRAP,
     },
 #endif
