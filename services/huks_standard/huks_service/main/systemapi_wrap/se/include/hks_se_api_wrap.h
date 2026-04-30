@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,30 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef HKS_CLIENT_SERVICE_COMMON_H
-#define HKS_CLIENT_SERVICE_COMMON_H
+#ifndef HKS_SE_API_WRAP_H
+#define HKS_SE_API_WRAP_H
 
-#include "hks_type.h"
+#include "hks_type_inner.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
+int32_t HksSePermissionCheck(const struct HksProcessInfo *processInfo);
 
-int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet,
-    struct HksParamSet **outParamSet, int frontUserId);
+int32_t HksSeIncrementSeCount(void);
 
-void HksSetScreenState(bool state);
-    
-bool HksGetScreenState(void);
-
-bool IsSeSecurityLevel(const struct HksParamSet *paramSet);
-
-bool IsSeHandle(const struct HksBlob *handle);
+int32_t HksSeDecrementSeCount(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif // HKS_SE_API_WRAP_H

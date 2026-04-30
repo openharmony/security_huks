@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,12 @@ int32_t HuksAccessImportWrappedKey(const struct HksBlob *wrappingKeyAlias, const
     const struct HksBlob *wrappedKeyData, const struct HksParamSet *paramSet, struct HksBlob *keyOut);
 
 int32_t HuksAccessExportPublicKey(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    struct HksBlob *keyOut);
+
+int32_t HuksAccessWrapKey(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    struct HksBlob *wrappedKey);
+
+int32_t HuksAccessUnwrapKey(const struct HksParamSet *paramSet, const struct HksBlob *wrappedKey,
     struct HksBlob *keyOut);
 
 int32_t HuksAccessInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@
 #include "securec.h"
 #include "hks_core_service_key_attest.h"
 #include "hks_core_service_key_generate.h"
+#include "hks_core_service_key_extension.h"
 #include "hks_core_service_key_operate_one_stage.h"
 #include "hks_core_service_key_operate_three_stage.h"
 #include "hks_core_service_key_other.h"
@@ -66,6 +67,16 @@ int32_t HuksHdiImportWrappedKey(const struct HksBlob *keyAlias, const struct Hks
 int32_t HuksHdiExportPublicKey(const struct HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *keyOut)
 {
     return HksCoreExportPublicKey(key, paramSet, keyOut);
+}
+
+int32_t HuksHdiWrapKey(const struct HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *wrappedKey)
+{
+    return HksCoreWrapKey(NULL, key, paramSet, wrappedKey);
+}
+
+int32_t HuksHdiUnwrapKey(const struct HksParamSet *paramSet, const struct HksBlob *wrappedKey, struct HksBlob *keyOut)
+{
+    return HksCoreUnwrapKey(NULL, wrappedKey, paramSet, keyOut);
 }
 
 int32_t HuksHdiInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle,
@@ -198,6 +209,8 @@ struct HuksHdi *HuksCreateHdiDevicePtr(void)
     hdiDevicePtr->HuksHdiImportKey        = HuksHdiImportKey;
     hdiDevicePtr->HuksHdiImportWrappedKey = HuksHdiImportWrappedKey;
     hdiDevicePtr->HuksHdiExportPublicKey  = HuksHdiExportPublicKey;
+    hdiDevicePtr->HuksHdiWrapKey          = HuksHdiWrapKey;
+    hdiDevicePtr->HuksHdiUnwrapKey        = HuksHdiUnwrapKey;
     hdiDevicePtr->HuksHdiInit             = HuksHdiInit;
     hdiDevicePtr->HuksHdiUpdate           = HuksHdiUpdate;
     hdiDevicePtr->HuksHdiFinish           = HuksHdiFinish;

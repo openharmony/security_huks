@@ -30,6 +30,8 @@
 extern "C" {
 #endif
 
+void IfNotSuccAppendHdiErrorInfo(int32_t hdiRet);
+
 int32_t GetKeyParamSet(const struct HksBlob *key, struct HksParamSet *paramSet);
 
 #ifndef _STORAGE_LITE_
@@ -59,6 +61,12 @@ int32_t AppendNewInfoForUseKeyInService(const struct HksParamSet *paramSet,
     const struct HksProcessInfo *processInfo, struct HksParamSet **outParamSet);
 
 int32_t AppendStorageLevelIfNotExist(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
+
+int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *key, enum HksStorageType mode);
+
+int32_t CheckKeyCondition(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet);
 
 #ifdef __cplusplus
 }
