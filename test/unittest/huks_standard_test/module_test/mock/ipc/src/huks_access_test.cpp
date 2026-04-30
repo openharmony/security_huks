@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -651,6 +651,58 @@ HWTEST_F(HuksAccessTest, HuksAccessTest048, TestSize.Level0)
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
     int32_t ret = HuksAccessGenerateRandom(nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HuksAccessTest.HuksAccessTest049
+ * @tc.desc: tdd HksCreateHuksHdiDevice, expect HKS_ERROR_NULL_POINTER
+ * @tc.type: FUNC
+ */
+HWTEST_F(HuksAccessTest, HuksAccessTest049, TestSize.Level0)
+{
+    HksEnableCreateOrDestroy(true);
+    HksEnableSetHid(false);
+    int32_t ret = HuksAccessWrapKey(nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HuksAccessTest.HuksAccessTest050
+ * @tc.desc: tdd HksCreateHuksHdiDevice, expect HKS_ERROR_NULL_POINTER
+ * @tc.type: FUNC
+ */
+HWTEST_F(HuksAccessTest, HuksAccessTest050, TestSize.Level0)
+{
+    HksEnableCreateOrDestroy(false);
+    HksEnableSetHid(false);
+    int32_t ret = HuksAccessWrapKey(nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HuksAccessTest.HuksAccessTest051
+ * @tc.desc: tdd HksCreateHuksHdiDevice, expect HKS_ERROR_NULL_POINTER
+ * @tc.type: FUNC
+ */
+HWTEST_F(HuksAccessTest, HuksAccessTest051, TestSize.Level0)
+{
+    HksEnableCreateOrDestroy(true);
+    HksEnableSetHid(false);
+    int32_t ret = HuksAccessUnwrapKey(nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HuksAccessTest.HuksAccessTest052
+ * @tc.desc: tdd HksCreateHuksHdiDevice, expect HKS_ERROR_NULL_POINTER
+ * @tc.type: FUNC
+ */
+HWTEST_F(HuksAccessTest, HuksAccessTest052, TestSize.Level0)
+{
+    HksEnableCreateOrDestroy(false);
+    HksEnableSetHid(false);
+    int32_t ret = HuksAccessUnwrapKey(nullptr, nullptr, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS);
 }
 }

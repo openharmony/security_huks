@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -235,6 +235,24 @@ ENABLE_CFI(int32_t HuksAccessExportPublicKey(const struct HksBlob *key, const st
     HDI_CONVERTER_FUNC_EXPORTPUBLICKEY(key, paramSetInNew, keyOut, ret, HdiProxyExportPublicKey)
     HksFreeParamSet(&paramSetInNew);
     return ret;
+}
+
+ENABLE_CFI(int32_t HuksAccessWrapKey(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    struct HksBlob *wrappedKey))
+{
+    (void)key;
+    (void)paramSet;
+    (void)wrappedKey;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+}
+
+ENABLE_CFI(int32_t HuksAccessUnwrapKey(const struct HksParamSet *paramSet, const struct HksBlob *wrappedKey,
+    struct HksBlob *keyOut))
+{
+    (void)wrappedKey;
+    (void)paramSet;
+    (void)wrappedKey;
+    return HKS_ERROR_API_NOT_SUPPORTED;
 }
 
 static int32_t HdiProxyInit(const struct  HuksBlob *key, const struct HuksParamSet *paramSet,

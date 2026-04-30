@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -378,6 +378,26 @@ struct HuksHdi {
      * @return error code, see hks_type.h
      */
     int32_t (*HuksHdiExportPublicKey)(const struct HksBlob *key, const struct HksParamSet *paramSet,
+        struct HksBlob *keyOut);
+
+    /**
+     * @brief wrap key
+     * @param key key need to wrap
+     * @param paramSet required parameter set
+     * @param wrappedKey wrapped key
+     * @return error code, see hks_type.h
+     */
+    int32_t (*HuksHdiWrapKey)(const struct HksBlob *key, const struct HksParamSet *paramSet,
+        struct HksBlob *wrappedKey);
+
+    /**
+     * @brief unwrap key
+     * @param paramSet required parameter set
+     * @param wrappedKey wrapped key
+     * @param keyOut output key
+     * @return error code, see hks_type.h
+     */
+    int32_t (*HuksHdiUnwrapKey)(const struct HksParamSet *paramSet, const struct HksBlob *wrappedKey,
         struct HksBlob *keyOut);
 
     /**
