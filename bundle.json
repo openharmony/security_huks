@@ -92,7 +92,8 @@
           "bounds_checking_function",
           "mbedtls",
           "cJSON",
-          "init"
+          "init",
+          "ets_frontend"
         ]
       },
       "build": {
