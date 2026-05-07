@@ -1345,7 +1345,7 @@ HWTEST_F(JsCryptoExtAbilityTest, ConvertFunctionResult_0002, testing::ext::TestS
 {
     CryptoResultParam resultParams;
     napi_value value = (napi_value)1;
-    resultParams.paramType = CryptoResultParamType::GET_PROPERTY;
+    resultParams.paramType = CryptoResultParamType::SET_OR_GET_PROPERTY;
     EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
         .WillOnce(DoAll(Invoke(&ReturnsNonNullValue), Return(napi_ok)));
     EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _)).WillOnce(Return(napi_ok));
