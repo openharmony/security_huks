@@ -817,8 +817,8 @@ static const FuzzHuksApi g_fuzzApis[] = {
     { FuzzExtClearPinAuthState,     HKS_MSG_EXT_CLEAR_PIN_AUTH_STATE },
     { FuzzExtExportProviderCertificates, HKS_MSG_EXT_EXPORT_PROVIDER_CERTIFICATES },
     { FuzzExtExportCertificate,     HKS_MSG_EXT_EXPORT_CERTIFICATE },
-    { FuzzExtGetRemoteProperty,     HKS_MSG_EXT_GET_REMOTE_PROPERTY },
-    { FuzzExtGetRemotePropertyReply, HKS_MSG_EXT_GET_REMOTE_PROPERTY_REPLY },
+    { FuzzExtGetRemoteProperty,     HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY },
+    { FuzzExtGetRemotePropertyReply, HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY },
 };
 
 static void ConcurrentFuzzHuksService(FuzzedDataProvider &fdp)
