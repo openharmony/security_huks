@@ -69,16 +69,6 @@ int32_t HuksHdiExportPublicKey(const struct HksBlob *key, const struct HksParamS
     return HksCoreExportPublicKey(key, paramSet, keyOut);
 }
 
-int32_t HuksHdiWrapKey(const struct HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *wrappedKey)
-{
-    return HksCoreWrapKey(NULL, key, paramSet, wrappedKey);
-}
-
-int32_t HuksHdiUnwrapKey(const struct HksParamSet *paramSet, const struct HksBlob *wrappedKey, struct HksBlob *keyOut)
-{
-    return HksCoreUnwrapKey(NULL, wrappedKey, paramSet, keyOut);
-}
-
 int32_t HuksHdiInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle,
     struct HksBlob *token)
 {
@@ -209,8 +199,6 @@ struct HuksHdi *HuksCreateHdiDevicePtr(void)
     hdiDevicePtr->HuksHdiImportKey        = HuksHdiImportKey;
     hdiDevicePtr->HuksHdiImportWrappedKey = HuksHdiImportWrappedKey;
     hdiDevicePtr->HuksHdiExportPublicKey  = HuksHdiExportPublicKey;
-    hdiDevicePtr->HuksHdiWrapKey          = HuksHdiWrapKey;
-    hdiDevicePtr->HuksHdiUnwrapKey        = HuksHdiUnwrapKey;
     hdiDevicePtr->HuksHdiInit             = HuksHdiInit;
     hdiDevicePtr->HuksHdiUpdate           = HuksHdiUpdate;
     hdiDevicePtr->HuksHdiFinish           = HuksHdiFinish;
