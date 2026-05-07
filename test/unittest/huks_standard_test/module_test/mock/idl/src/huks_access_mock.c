@@ -74,18 +74,6 @@ ENABLE_CFI(int32_t HuksAccessExportPublicKey(const struct HksBlob *key, const st
     return HksCoreExportPublicKey(key, paramSet, keyOut);
 }
 
-int32_t HuksAccessWrapKey(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    struct HksBlob *wrappedKey)
-{
-    return HksCoreWrapKey(NULL, key, paramSet, wrappedKey);
-}
-
-int32_t HuksAccessUnwrapKey(const struct HksParamSet *paramSet, const struct HksBlob *wrappedKey,
-    struct HksBlob *keyOut)
-{
-    return HksCoreUnwrapKey(NULL, wrappedKey, paramSet, keyOut);
-}
-
 ENABLE_CFI(int32_t HuksAccessInit(const struct  HksBlob *key, const struct HksParamSet *paramSet,
     struct HksBlob *handle, struct HksBlob *token))
 {

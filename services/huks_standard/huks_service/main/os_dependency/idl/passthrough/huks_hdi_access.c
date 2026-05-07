@@ -237,24 +237,6 @@ ENABLE_CFI(int32_t HuksAccessExportPublicKey(const struct HksBlob *key, const st
     return ret;
 }
 
-ENABLE_CFI(int32_t HuksAccessWrapKey(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    struct HksBlob *wrappedKey))
-{
-    (void)key;
-    (void)paramSet;
-    (void)wrappedKey;
-    return HKS_ERROR_API_NOT_SUPPORTED;
-}
-
-ENABLE_CFI(int32_t HuksAccessUnwrapKey(const struct HksParamSet *paramSet, const struct HksBlob *wrappedKey,
-    struct HksBlob *keyOut))
-{
-    (void)wrappedKey;
-    (void)paramSet;
-    (void)wrappedKey;
-    return HKS_ERROR_API_NOT_SUPPORTED;
-}
-
 static int32_t HdiProxyInit(const struct  HuksBlob *key, const struct HuksParamSet *paramSet,
     struct HuksBlob *handle, struct HuksBlob *token)
 {
