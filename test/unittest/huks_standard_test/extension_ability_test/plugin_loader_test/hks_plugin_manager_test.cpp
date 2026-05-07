@@ -136,7 +136,9 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest003, TestSize.Level0)
     std::string propertyId = "";
     CppParamSet outParams(g_genAesParams);
     const std::string index = "";
-    ret = mgr->OnSetOrGetRemoteProperty(processInfo, HKS_EXT_PROPERTY_OPERATION_GET, index, propertyId, outParams);
+    PropertyOperationInfo propertyInfo = { .operation = HKS_EXT_PROPERTY_OPERATION_GET,
+        .resourceId = index, .propertyId = propertyId };
+    ret = mgr->OnSetOrGetRemoteProperty(processInfo, propertyInfo, outParams);
     EXPECT_EQ(ret, 0) << "fail: OnSetOrGetRemoteProperty fail";
 
     std::string certsJson = "";
@@ -256,7 +258,9 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest005, TestSize.Level0)
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
     CppParamSet outParams(tmpParams);
-    ret = mgr->OnSetOrGetRemoteProperty(processInfo, HKS_EXT_PROPERTY_OPERATION_GET, index, "propId", outParams);
+    PropertyOperationInfo propertyInfo = { .operation = HKS_EXT_PROPERTY_OPERATION_GET,
+        .resourceId = index, .propertyId = "propId" };
+    ret = mgr->OnSetOrGetRemoteProperty(processInfo, propertyInfo, outParams);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 }
 
