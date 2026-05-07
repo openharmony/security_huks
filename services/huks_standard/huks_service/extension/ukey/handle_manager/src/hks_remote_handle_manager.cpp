@@ -61,8 +61,8 @@ void HksRemoteHandleManager::ReleaseInstance()
     HksRemoteHandleManager::DestroyInstance();
 }
 
-static int32_t WrapIndexWithProviderInfo(const ProviderInfo& providerInfo, const std::string& originalIndex,
-    std::string& wrappedIndex)
+static int32_t WrapIndexWithProviderInfo(const ProviderInfo &providerInfo, const std::string &originalIndex,
+    std::string &wrappedIndex)
 {
     CommJsonObject root = CommJsonObject::CreateObject();
     HKS_IF_TRUE_LOGE_RETURN(root.IsNull(), HKS_ERROR_JSON_SERIALIZE_FAILED, "Create JSON object failed")
@@ -78,8 +78,8 @@ static int32_t WrapIndexWithProviderInfo(const ProviderInfo& providerInfo, const
     return HKS_SUCCESS;
 }
 
-static int32_t CheckIndexSizeAndSetIndex(const std::string& index, const ProviderInfo& providerInfo,
-    std::string& resourceId)
+static int32_t CheckIndexSizeAndSetIndex(const std::string &index, const ProviderInfo &providerInfo,
+    std::string &resourceId)
 {
     HKS_IF_TRUE_LOGE_RETURN(index.size() > MAX_INDEX_SIZE, HKS_ERROR_NEW_INVALID_ARGUMENT,
         "index is too long, size = %" LOG_PUBLIC "zu", index.size())
