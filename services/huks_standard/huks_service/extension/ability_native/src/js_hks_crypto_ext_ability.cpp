@@ -596,7 +596,7 @@ napi_status GetUint8ArrayValue(napi_env env, napi_value value, HksBlob &result)
     napi_typedarray_type type;
     napi_value array = nullptr;
     size_t offset = 0;
-    auto status = napi_get_typedarray_info(env, value, &type, &length, (void **)(&data), &array, &offset);
+    auto status = napi_get_typedarray_info(env, value, &type, &length, &data, &array, &offset);
     if (status != napi_ok) {
         LOGE("napi_get_typedarray_info failed %d", int32_t(status));
         return status;
@@ -607,12 +607,14 @@ napi_status GetUint8ArrayValue(napi_env env, napi_value value, HksBlob &result)
     }
 
     uint8_t *uint8Data = nullptr;
+    void *tmp = nullptr;
     size_t byte_length = 0;
-    status = napi_get_arraybuffer_info(env, array, (void **)&uint8Data, &byte_length);
+    status = napi_get_arraybuffer_info(env, array, &tmp, &byte_length);
     if (status != napi_ok) {
         LOGE("napi_get_typedarray_info %d", int32_t(status));
         return status;
     }
+    uint8Data = static_cast<uint8_t*>(tmp);
     if (byte_length > UINT32_MAX) {
         LOGE("byte_length is out of uint32_t.");
         return napi_invalid_arg;
