@@ -92,9 +92,9 @@ int32_t HuksPluginLifeCycleMgr::OnClearUkeyPinAuthStatus(const HksProcessInfo &p
     return HKS_SUCCESS;
 }
 
-int32_t HuksPluginLifeCycleMgr::OnGetRemoteProperty(const HksProcessInfo &processInfo,
-    const std::string &index, const std::string &propertyId, const CppParamSet &paramSet,
-    CppParamSet &outParams)
+int32_t HuksPluginLifeCycleMgr::OnSetOrGetRemoteProperty(const HksProcessInfo &processInfo,
+    enum HksExtPropertyOperation operation, const std::string &index,
+    const std::string &propertyId, CppParamSet &paramSet)
 {
     return HKS_SUCCESS;
 }
