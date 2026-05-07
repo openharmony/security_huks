@@ -53,7 +53,8 @@ public:
         const std::string &index, const CppParamSet &paramSet, int32_t &state);
     int32_t OnClearUkeyPinAuthStatus(const HksProcessInfo &processInfo, const std::string &index);
 int32_t OnSetOrGetRemoteProperty(const HksProcessInfo &processInfo,
-    const PropertyOperationInfo &propertyInfo, CppParamSet &paramSet);
+    enum HksExtPropertyOperation operation, const std::string &index,
+    const std::string &propertyId, CppParamSet &paramSet);
     int32_t OnExportCertificate(const HksProcessInfo &processInfo,
         const std::string &index, const CppParamSet &paramSet, std::string &certsJson);
     int32_t OnExportProviderAllCertificates(const HksProcessInfo &processInfo,
