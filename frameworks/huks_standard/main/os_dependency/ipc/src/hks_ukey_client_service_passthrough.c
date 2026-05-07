@@ -218,7 +218,13 @@ int32_t HksClientSetOrGetRemoteProperty(enum HksExtPropertyOperation operation,
         0,
         0
     };
-    return HksServiceSetOrGetRemoteProperty(&processInfo, operation, resourceId, propertyId, paramSetIn, propertySetOut);
+    
+    struct HksExtPropertyOperationInfo propertyInfo;
+    propertyInfo.operation = operation;
+    propertyInfo.resourceId = resourceId;
+    propertyInfo.propertyId = propertyId;
+    
+    return HksServiceSetOrGetRemoteProperty(&processInfo, &propertyInfo, paramSetIn, propertySetOut);
 }
 
 int32_t HksClientGetResourceId(const struct HksBlob *providerName, const struct HksParamSet *paramSetIn,
