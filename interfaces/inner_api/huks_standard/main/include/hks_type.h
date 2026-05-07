@@ -90,8 +90,8 @@ struct HksExtCertInfoSet {
  */
 struct HksExtPropertyOperationInfo {
     enum HksExtPropertyOperation operation;
-    struct HksBlob *resourceId;
-    struct HksBlob *propertyId;
+    const struct HksBlob *resourceId;
+    const struct HksBlob *propertyId;
 };
 
 /**
