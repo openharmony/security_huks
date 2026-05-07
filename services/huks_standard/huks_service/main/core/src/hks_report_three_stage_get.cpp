@@ -138,7 +138,7 @@ static void GetKeyAccessInfo(const struct HksParamSet *paramSet, HksEventKeyAcce
     }
 
     if (HksGetParam(paramSet, HKS_TAG_FRONT_USER_ID, &param) == HKS_SUCCESS) {
-        info->frontUserId = (uint32_t)param->int32Param;
+        info->frontUserId = static_cast<uint32_t>(param->int32Param);
     }
 
     if (HksGetParam(paramSet, HKS_TAG_USER_AUTH_MODE, &param) == HKS_SUCCESS) {
@@ -146,7 +146,7 @@ static void GetKeyAccessInfo(const struct HksParamSet *paramSet, HksEventKeyAcce
     }
 
     if (HksGetParam(paramSet, HKS_TAG_IS_DEVICE_PASSWORD_SET, &param) == HKS_SUCCESS) {
-        info->needPwdSet = (uint32_t)param->boolParam;
+        info->needPwdSet = static_cast<uint32_t>(param->boolParam);
     }
 }
 
