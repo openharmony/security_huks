@@ -82,14 +82,14 @@ static void ConvertCertInfoToIdl(const struct HksExtCertInfo &certInfo, HksExtCe
 {
     idlOut.purpose = certInfo.purpose;
     
-    // 转换 index
+    // Convert index
     if (certInfo.index.data != nullptr && certInfo.index.size > 0) {
         idlOut.index.assign(certInfo.index.data, certInfo.index.data + certInfo.index.size);
     } else {
         idlOut.index.clear();
     }
     
-    // 转换 cert
+    // Convert cert
     if (certInfo.cert.data != nullptr && certInfo.cert.size > 0) {
         idlOut.cert.assign(certInfo.cert.data, certInfo.cert.data + certInfo.cert.size);
     } else {
