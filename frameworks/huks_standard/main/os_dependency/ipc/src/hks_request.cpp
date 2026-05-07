@@ -167,6 +167,10 @@ static int32_t HksExtSendAsyncMessage(MessageParcel &data, const struct HksParam
         return HUKS_ERR_CODE_EXTERNAL_ERROR;
     }
 
+    if (outBlob == nullptr) {
+        return HKS_SUCCESS;
+    }
+
     HKS_IF_TRUE_LOGE_RETURN(outBlob->size < receivedSize, HKS_ERROR_BUFFER_TOO_SMALL,
         "outBlob too small %" LOG_PUBLIC "u < %" LOG_PUBLIC "u", outBlob->size, receivedSize);
 

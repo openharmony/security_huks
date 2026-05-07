@@ -463,10 +463,6 @@ HKS_API_EXPORT int32_t HksSetOrGetRemoteProperty(enum HksExtPropertyOperation op
         HKS_LOG_E("invalid operation type");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    if (operation == HKS_EXT_PROPERTY_OPERATION_GET && propertySetOut == NULL) {
-        HKS_LOG_E("propertySetOut cannot be NULL for GET operation");
-        return HKS_ERROR_NULL_POINTER;
-    }
     int32_t ret = HksClientSetOrGetRemoteProperty(operation, resourceId, propertyId, paramSetIn, propertySetOut);
     HKS_IF_NOT_SUCC_LOGE(ret, "leave SetOrGetRemoteProperty, result = %" LOG_PUBLIC "d", ret);
     return ret;

@@ -436,13 +436,6 @@ int32_t HksRemoteHandleManager::SetOrGetRemoteProperty(const HksProcessInfo &pro
         uid = static_cast<uint32_t>(uidParam.second);
     }
     
-    if (operation == HKS_EXT_PROPERTY_OPERATION_GET) {
-        if (std::find(VALID_PROPERTYID.begin(), VALID_PROPERTYID.end(), propertyId) == VALID_PROPERTYID.end()) {
-            HKS_LOG_E("Invalid propertyId for GET operation");
-            return HKS_ERROR_INVALID_ARGUMENT;
-        }
-    }
-    
     ProviderInfo providerInfo{};
     std::string handle;
     ret = ParseAndValidateIndex(index, uid, providerInfo, handle);
