@@ -532,8 +532,12 @@ void HksIpcServiceSetOrGetRemoteProperty(const struct HksBlob *srcData, const ui
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksIpcServiceOnSetOrGetRemotePropertyAdapter(&processInfo, operation,
-            &resourceId, &propertyId, paramSet, remoteObject);
+        struct HksExtPropertyOperationInfo propertyInfo;
+        propertyInfo.operation = operation;
+        propertyInfo.resourceId = &resourceId;
+        propertyInfo.propertyId = &propertyId;
+
+        ret = HksIpcServiceOnSetOrGetRemotePropertyAdapter(&processInfo, &propertyInfo, paramSet, remoteObject);
         HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceSetOrGetRemoteProperty fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
