@@ -470,7 +470,7 @@ HKS_API_EXPORT int32_t HksGetRemoteProperty(const struct HksBlob *resourceId, co
 #endif
 }
 
-/* 
+/*
  * On success: resourceId->data is allocated and must be freed by caller using HKS_FREE_BLOB.
  * On failure: no memory allocated, caller does nothing.
  */

@@ -629,7 +629,7 @@ static void ExecuteGetResourceId(napi_env env, void *data)
     if (napiContext->result == HKS_SUCCESS) {
         napiContext->resourceId.assign(resourceId.data, resourceId.data + resourceId.size);
     }
-    HKS_FREE_BLOB(resourceId); 
+    HKS_FREE_BLOB(resourceId);
 }
 
 static void ResolveGetResourceId(napi_env env, AsyncContext *context)
