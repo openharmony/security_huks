@@ -615,10 +615,8 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest017, TestSize.Level0)
 
     std::string index = "testIdx";
     std::string propertyId = "prop";
-    PropertyOperationInfo propertyInfo = { .operation = HKS_EXT_PROPERTY_OPERATION_GET,
-        .resourceId = index, .propertyId = propertyId };
     EXPECT_EQ(HksIpcServiceOnSetOrGetRemoteProperty(&processInfo,
-        propertyInfo, cppParamSet), HKS_SUCCESS);
+        HKS_EXT_PROPERTY_OPERATION_GET, index, propertyId, cppParamSet), HKS_SUCCESS);
 
     std::string certsJson;
     EXPECT_EQ(HksIpcServiceOnExportCertificate(&processInfo, index, cppParamSet, certsJson), HKS_SUCCESS);
