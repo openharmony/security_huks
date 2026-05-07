@@ -699,11 +699,11 @@ int32_t HksRemotePropertyUnpackFromService(const struct HksBlob *srcBlob, struct
     ret = UnpackInt32FromBuffer(srcBlob, &offset, &returnResult);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "UnpackInt32FromBuffer fail")
 
-    struct HksParamSet *paramSetView = NULL;
-
-    if (offset == srcBlob->size) {
+    if (propertySetOut == NULL || offset == srcBlob->size) {
         return returnResult;
     }
+
+    struct HksParamSet *paramSetView = NULL;
 
     ret = GetParamSetFromBuffer(&paramSetView, srcBlob, &offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetParamSetFromBuffer fail")

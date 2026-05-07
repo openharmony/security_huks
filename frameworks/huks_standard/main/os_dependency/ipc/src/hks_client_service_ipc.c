@@ -604,11 +604,9 @@ int32_t HksClientSetOrGetRemoteProperty(enum HksExtPropertyOperation operation,
     struct HksBlob outBlob = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
 
-    if (operation == HKS_EXT_PROPERTY_OPERATION_GET) {
-        outBlob.size = MAX_OUT_BLOB_SIZE;
-        outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
-        HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
-    }
+    outBlob.size = MAX_OUT_BLOB_SIZE;
+    outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
+    HKS_IF_NULL_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL);
 
     do {
         ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
@@ -624,14 +622,11 @@ int32_t HksClientSetOrGetRemoteProperty(enum HksExtPropertyOperation operation,
         ret = HksSetOrGetRemotePropertyPack(operation, resourceId, propertyId, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "pack remote property fail")
 
-        ret = HksSendRequest(HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY, &inBlob, 
-            (operation == HKS_EXT_PROPERTY_OPERATION_GET) ? &outBlob : NULL, newParamSet);
+        ret = HksSendRequest(HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY, &inBlob, &outBlob, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "send request fail, ret = %" LOG_PUBLIC "d", ret)
 
-        if (operation == HKS_EXT_PROPERTY_OPERATION_GET) {
-            ret = HksRemotePropertyUnpackFromService(&outBlob, propertySetOut);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRemotePropertyUnpackFromService fail")
-        }
+        ret = HksRemotePropertyUnpackFromService(&outBlob, operation == HKS_EXT_PROPERTY_OPERATION_GET ? propertySetOut : NULL);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRemotePropertyUnpackFromService fail")
     } while (0);
 
     HksFreeParamSet(&newParamSet);
