@@ -410,7 +410,7 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest010, TestSize.Level0)
 
 /**
 * @tc.name: HksUkeyClientServiceTest.HksUkeyClientServiceTest011
-* @tc.desc: HksIpcServiceOnGetRemotePropertyAdapter — null/invalid resourceId
+* @tc.desc: HksIpcServiceOnSetOrGetRemotePropertyAdapter — null/invalid resourceId
 * @tc.type: FUNC
 */
 HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest011, TestSize.Level0) {
@@ -423,22 +423,22 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest011, TestSize.Level0)
     HksBlob propBlob = { .size = static_cast<uint32_t>(propStr.size()),
         .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(propStr.data())) };
 
-    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, nullptr, &propBlob, paramSet, nullptr),
-        HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksIpcServiceOnSetOrGetRemotePropertyAdapter(&processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
+        nullptr, &propBlob, paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob nullDataBlob = { .size = 1, .data = nullptr };
-    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &nullDataBlob, &propBlob, paramSet, nullptr),
-        HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksIpcServiceOnSetOrGetRemotePropertyAdapter(&processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
+        &nullDataBlob, &propBlob, paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob emptyBlob = {};
-    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &emptyBlob, &propBlob, paramSet, nullptr),
-        HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksIpcServiceOnSetOrGetRemotePropertyAdapter(&processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
+        &emptyBlob, &propBlob, paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
 
     std::string longRes(1025, 'r');
     HksBlob longResBlob = { .size = static_cast<uint32_t>(longRes.size()),
         .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(longRes.data())) };
-    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &longResBlob, &propBlob, paramSet, nullptr),
-        HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksIpcServiceOnSetOrGetRemotePropertyAdapter(&processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
+        &longResBlob, &propBlob, paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
 
     HksFreeParamSet(&paramSet);
     HKS_FREE_BLOB(processInfo.userId);
@@ -447,7 +447,7 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest011, TestSize.Level0)
 
 /**
 * @tc.name: HksUkeyClientServiceTest.HksUkeyClientServiceTest012
-* @tc.desc: HksIpcServiceOnGetRemotePropertyAdapter — null/invalid propertyId
+* @tc.desc: HksIpcServiceOnSetOrGetRemotePropertyAdapter — null/invalid propertyId
 * @tc.type: FUNC
 */
 HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest012, TestSize.Level0) {
@@ -460,22 +460,22 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest012, TestSize.Level0)
     HksBlob resBlob = { .size = static_cast<uint32_t>(resStr.size()),
         .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(resStr.data())) };
 
-    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &resBlob, nullptr, paramSet, nullptr),
-        HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksIpcServiceOnSetOrGetRemotePropertyAdapter(&processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
+        &resBlob, nullptr, paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob nullDataBlob = { .size = 1, .data = nullptr };
-    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &resBlob, &nullDataBlob, paramSet, nullptr),
-        HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksIpcServiceOnSetOrGetRemotePropertyAdapter(&processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
+        &resBlob, &nullDataBlob, paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob emptyBlob = {};
-    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &resBlob, &emptyBlob, paramSet, nullptr),
-        HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksIpcServiceOnSetOrGetRemotePropertyAdapter(&processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
+        &resBlob, &emptyBlob, paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
 
     std::string longProp(101, 'p');
     HksBlob longPropBlob = { .size = static_cast<uint32_t>(longProp.size()),
         .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(longProp.data())) };
-    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &resBlob, &longPropBlob, paramSet, nullptr),
-        HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksIpcServiceOnSetOrGetRemotePropertyAdapter(&processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
+        &resBlob, &longPropBlob, paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
 
     HksFreeParamSet(&paramSet);
     HKS_FREE_BLOB(processInfo.userId);
@@ -484,7 +484,7 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest012, TestSize.Level0)
 
 /**
 * @tc.name: HksUkeyClientServiceTest.HksUkeyClientServiceTest013
-* @tc.desc: HksIpcServiceOnGetRemotePropertyAdapter — null remoteObject returns NULL_POINTER
+* @tc.desc: HksIpcServiceOnSetOrGetRemotePropertyAdapter — null remoteObject returns NULL_POINTER
 * @tc.type: FUNC
 */
 HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest013, TestSize.Level0) {
@@ -500,8 +500,8 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest013, TestSize.Level0)
     HksBlob propBlob = { .size = static_cast<uint32_t>(propStr.size()),
         .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(propStr.data())) };
 
-    int32_t ret = HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &resBlob, &propBlob,
-        paramSet, nullptr);
+    int32_t ret = HksIpcServiceOnSetOrGetRemotePropertyAdapter(&processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
+        &resBlob, &propBlob, paramSet, nullptr);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER);
 
     HksFreeParamSet(&paramSet);
@@ -584,7 +584,7 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest016, TestSize.Level0)
 
 /**
 * @tc.name: HksUkeyClientServiceTest.HksUkeyClientServiceTest017
-* @tc.desc: OnGetRemoteProperty/OnExportCertificate/OnExportProviderAllCertificates normal flow
+* @tc.desc: OnSetOrGetRemoteProperty/OnExportCertificate/OnExportProviderAllCertificates normal flow
 * @tc.type: FUNC
 */
 HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest017, TestSize.Level0) {
@@ -597,9 +597,8 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest017, TestSize.Level0)
 
     std::string index = "testIdx";
     std::string propertyId = "prop";
-    CppParamSet outParams;
-    EXPECT_EQ(HksIpcServiceOnGetRemoteProperty(&processInfo, index, propertyId, cppParamSet, outParams),
-        HKS_SUCCESS);
+    EXPECT_EQ(HksIpcServiceOnSetOrGetRemoteProperty(&processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
+        index, propertyId, cppParamSet), HKS_SUCCESS);
 
     std::string certsJson;
     EXPECT_EQ(HksIpcServiceOnExportCertificate(&processInfo, index, cppParamSet, certsJson), HKS_SUCCESS);
