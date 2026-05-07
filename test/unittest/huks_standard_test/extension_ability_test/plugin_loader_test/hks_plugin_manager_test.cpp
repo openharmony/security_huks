@@ -136,9 +136,8 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest003, TestSize.Level0)
     std::string propertyId = "";
     CppParamSet outParams(g_genAesParams);
     const std::string index = "";
-    PropertyOperationInfo propertyInfo = { .operation = HKS_EXT_PROPERTY_OPERATION_GET,
-        .resourceId = index, .propertyId = propertyId };
-    ret = mgr->OnSetOrGetRemoteProperty(processInfo, propertyInfo, outParams);
+    ret = mgr->OnSetOrGetRemoteProperty(processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
+        index, propertyId, outParams);
     EXPECT_EQ(ret, 0) << "fail: OnSetOrGetRemoteProperty fail";
 
     std::string certsJson = "";
@@ -258,9 +257,8 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest005, TestSize.Level0)
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
     CppParamSet outParams(tmpParams);
-    PropertyOperationInfo propertyInfo = { .operation = HKS_EXT_PROPERTY_OPERATION_GET,
-        .resourceId = index, .propertyId = "propId" };
-    ret = mgr->OnSetOrGetRemoteProperty(processInfo, propertyInfo, outParams);
+    ret = mgr->OnSetOrGetRemoteProperty(processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
+        index, "propId", outParams);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 }
 
@@ -491,15 +489,16 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest013, TestSize.Level0)
     // 清空map使LoadPlugins失败
     loader->m_pluginMethodNameMap.Clear();
 
-    HksProcessInfo processInfo {};
+HksProcessInfo processInfo {};
     std::vector<HksParam> tmpParams = {
         {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
     };
     CppParamSet paramSet(tmpParams);
 
     auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
-    int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
-    EXPECT_NE(ret, HKS_SUCCESS) << "fail: RegisterProvider should fail when LoadPlugins fails";
+    int ret = mgr->OnSetOrGetRemoteProperty(processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
+        TEST_RESOURCE_ID, TEST_PROPERTY_ID, paramSet);
+    EXPECT_NE(ret, HKS_SUCCESS) << "fail: OnSetOrGetRemoteProperty should fail when plugin not loaded";
 }
 
 /**

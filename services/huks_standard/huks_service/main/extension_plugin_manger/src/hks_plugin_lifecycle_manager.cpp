@@ -243,7 +243,8 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnClearUkeyPinAuthStatus(const HksPro
 }
 
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnSetOrGetRemoteProperty(
-    const HksProcessInfo &processInfo, const PropertyOperationInfo &propertyInfo, CppParamSet &paramSet))
+    const HksProcessInfo &processInfo, enum HksExtPropertyOperation operation,
+    const std::string &index, const std::string &propertyId, CppParamSet &paramSet))
 {
     AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
@@ -251,8 +252,8 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnSetOrGetRemoteProperty(
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
         "SetOrGetRemoteProperty method enum not found in plugin provider map.")
     
-    int32_t ret = (*reinterpret_cast<OnSetOrGetRemotePropertyFunc>(funcPtr))(processInfo,
-        propertyInfo, paramSet);
+    int32_t ret = (*reinterpret_cast<OnSetOrGetRemotePropertyFunc>(funcPtr))(processInfo, operation,
+        index, propertyId, paramSet);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "SetOrGetRemoteProperty fail, ret = %{public}d", ret)
     HKS_LOG_I("set or get remote property success");
     return HKS_SUCCESS;

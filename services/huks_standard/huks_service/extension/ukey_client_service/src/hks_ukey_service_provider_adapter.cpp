@@ -266,11 +266,9 @@ int32_t HksIpcServiceOnSetOrGetRemotePropertyAdapter(const struct HksProcessInfo
     ret = HksIpcCheckBlob(propertyInfo->propertyId, 1, HKS_EXT_MAX_PROPERTY_ID_LEN);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnSetOrGetRemotePropertyAdapter invalid propertyId blob")
 
-    PropertyOperationInfo cppPropertyInfo;
-    cppPropertyInfo.operation = propertyInfo->operation;
-    cppPropertyInfo.resourceId = std::string(reinterpret_cast<const char*>(propertyInfo->resourceId->data),
+    std::string resourceIdStr(reinterpret_cast<const char*>(propertyInfo->resourceId->data),
         propertyInfo->resourceId->size);
-    cppPropertyInfo.propertyId = std::string(reinterpret_cast<const char*>(propertyInfo->propertyId->data),
+    std::string propertyIdStr(reinterpret_cast<const char*>(propertyInfo->propertyId->data),
         propertyInfo->propertyId->size);
     CppParamSet cppParamSet(paramSet);
 
@@ -279,7 +277,7 @@ int32_t HksIpcServiceOnSetOrGetRemotePropertyAdapter(const struct HksProcessInfo
     HKS_IF_NULL_LOGE_RETURN(hksExtProxy, HKS_ERROR_NULL_POINTER, "hksExtProxy is null");
 
     ret = OHOS::Security::Huks::HksIpcServiceOnSetOrGetRemoteProperty(processInfo,
-        cppPropertyInfo, cppParamSet);
+        propertyInfo->operation, resourceIdStr, propertyIdStr, cppParamSet);
     HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceOnSetOrGetRemoteProperty fail. ret = %" LOG_PUBLIC "d", ret);
     
     std::unique_ptr<uint8_t[]> outData;
