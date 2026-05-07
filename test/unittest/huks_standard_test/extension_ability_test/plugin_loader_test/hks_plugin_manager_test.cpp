@@ -489,16 +489,15 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest013, TestSize.Level0)
     // 清空map使LoadPlugins失败
     loader->m_pluginMethodNameMap.Clear();
 
-HksProcessInfo processInfo {};
+    HksProcessInfo processInfo {};
     std::vector<HksParam> tmpParams = {
         {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
-    };
+    };	 
     CppParamSet paramSet(tmpParams);
 
     auto mgr = HuksPluginLifeCycleMgr::GetInstanceWrapper();
-    int ret = mgr->OnSetOrGetRemoteProperty(processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
-        TEST_RESOURCE_ID, TEST_PROPERTY_ID, paramSet);
-    EXPECT_NE(ret, HKS_SUCCESS) << "fail: OnSetOrGetRemoteProperty should fail when plugin not loaded";
+    int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
+    EXPECT_NE(ret, HKS_SUCCESS) << "fail: RegisterProvider should fail when LoadPlugins fails";
 }
 
 /**
