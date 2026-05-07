@@ -262,7 +262,7 @@ static void HksIpcServiceTest000()
     data.WriteBuffer(testData, dataSize);
 
     HksExtStub stub;
-    (void)stub.OnRemoteRequest(HKS_MSG_EXT_GET_REMOTE_PROPERTY_REPLY, data, reply, option);
+    (void)stub.OnRemoteRequest(HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY, data, reply, option);
 }
 
 
