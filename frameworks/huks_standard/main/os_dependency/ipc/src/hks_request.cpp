@@ -242,6 +242,7 @@ int32_t HksSendRequest(enum HksIpcInterfaceCode type, const struct HksBlob *inBl
     ret = HandleSpecialAsyncTypes(type, data, paramSet, proxy, outBlob);
     if (ret != HKS_SUCCESS || type == HKS_MSG_ATTEST_KEY_ASYNC_REPLY || type == HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY)
         return ret;
+    }
 
     int error = proxy->SendRequest(type, data, reply, option);
     HKS_IF_TRUE_LOGE_RETURN(error != 0, HKS_ERROR_IPC_MSG_FAIL, "SendRequest failed %" LOG_PUBLIC "d", error);
