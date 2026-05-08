@@ -529,6 +529,8 @@ static void AddHuksErrCodePart(napi_env env, napi_value errorCode)
     AddInt32Property(env, errorCode, "HUKS_ERR_CODE_PIN_NO_AUTH", HUKS_ERR_CODE_PIN_NO_AUTH);
     AddInt32Property(env, errorCode, "HUKS_ERR_CODE_BUSY", HUKS_ERR_CODE_BUSY);
     AddInt32Property(env, errorCode, "HUKS_ERR_CODE_EXCEED_LIMIT", HUKS_ERR_CODE_EXCEED_LIMIT);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_SE_FAULT", HUKS_ERR_CODE_SE_FAULT);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_NETWORK_UNAVAILABLE", HUKS_ERR_CODE_NETWORK_UNAVAILABLE);
 }
 
 static napi_value CreateHuksErrCode(napi_env env)

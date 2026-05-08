@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,8 +36,7 @@ void HksPluginOnReceiveEvent(const void *data);
 void HksPluginSubSystemEvent(void *matchingSkills);
 int32_t HksPluginGetAncoUser(int *userId);
 
-int32_t HksPluginOnLocalRequestWrapKey(uint32_t code, const void *data, void *reply);
-int32_t HksPluginWrapKey(const struct HksBlob *srcData, const uint8_t *context);
+int32_t HksPluginOnAccessWrapKey(uint32_t code, const void *data, void *reply);
 
 int32_t HksPluginImportWrappedKey(const struct HksImportKeyStoreArgs *data, struct HksBlob *reply);
 
