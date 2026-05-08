@@ -80,15 +80,17 @@ static int32_t MlDsaGetKeyMaterial(EVP_PKEY *pkey, uint32_t paramSetId, struct H
     uint32_t offset = sizeof(*keyMaterial);
     int32_t ret = HKS_OPENSSL_SUCCESS;
     do {
-        ret = EVP_PKEY_get_raw_public_key(pkey, rawMaterial + offset, &pubKeySize);
+        size_t pubSize = pubKeySize;
+        ret = EVP_PKEY_get_raw_public_key(pkey, rawMaterial + offset, &pubSize);
         if (ret != HKS_OPENSSL_SUCCESS) {
             HKS_LOG_E("get ml-dsa pub key failed, ret = 0x%x", ret);
             HksLogOpensslError();
             break;
         }
 
+        size_t priSize = priKeySize;
         offset += keyMaterial->pubKeySize;
-        ret = EVP_PKEY_get_raw_private_key(pkey, rawMaterial + offset, &priKeySize);
+        ret = EVP_PKEY_get_raw_private_key(pkey, rawMaterial + offset, &priSize);
         if (ret != HKS_OPENSSL_SUCCESS) {
             HKS_LOG_E("get ml-dsa pri key failed, ret = 0x%x", ret);
             HksLogOpensslError();
