@@ -241,7 +241,7 @@ int32_t HksSendRequest(enum HksIpcInterfaceCode type, const struct HksBlob *inBl
 
     ret = HandleSpecialAsyncTypes(type, data, paramSet, proxy, outBlob);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
-    if (type == HKS_MSG_ATTEST_KEY_ASYNC_REPLY || type == HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY)
+    if (type == HKS_MSG_ATTEST_KEY_ASYNC_REPLY || type == HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY) {
         return ret;
     }
 
