@@ -101,8 +101,8 @@ static int32_t CallHksGetRemoteProperty(const std::vector<uint8_t> &resourceIdV,
     return HksSetOrGetRemoteProperty(HKS_EXT_PROPERTY_OPERATION_GET, &resourceId, &propertyId, paramSetIn, paramSetOut);
 }
 
-static int32_t CallHksSetRemoteProperty(const std::vector<uint8_t> &resourceIdV, const std::vector<uint8_t> &propertyIdV,
-    const struct HksParamSet *paramSetIn)
+static int32_t CallHksSetRemoteProperty(const std::vector<uint8_t> &resourceIdV,
+    const std::vector<uint8_t> &propertyIdV, const struct HksParamSet *paramSetIn)
 {
     struct HksBlob resourceId = {0, nullptr};
     if (!resourceIdV.empty()) {

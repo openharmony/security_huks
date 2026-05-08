@@ -244,7 +244,7 @@ int32_t HksSendRequest(enum HksIpcInterfaceCode type, const struct HksBlob *inBl
         return ret;
     }
 
-    int error = proxy->SendRequest(type, data, reply, option);
-    HKS_IF_TRUE_LOGE_RETURN(error != 0, HKS_ERROR_IPC_MSG_FAIL, "SendRequest failed %" LOG_PUBLIC "d", error);
+    int32_t errorCode = proxy->SendRequest(type, data, reply, option);
+    HKS_IF_TRUE_LOGE_RETURN(errorCode != 0, HKS_ERROR_IPC_MSG_FAIL, "SendRequest failed %" LOG_PUBLIC "d", errorCode);
     return HksReadRequestReply(reply, outBlob);
 }
