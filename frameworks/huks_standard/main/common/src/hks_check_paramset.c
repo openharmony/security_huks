@@ -99,6 +99,9 @@ static uint32_t g_genKeyAlg[] = {
 #ifdef HKS_SUPPORT_SM4_C
     HKS_ALG_SM4,
 #endif
+#ifdef HKS_SUPPORT_ML_DSA_C
+    HKS_ALG_ML_DSA,
+#endif
 };
 
 static uint32_t g_importKeyAlg[] = {
@@ -144,6 +147,9 @@ static uint32_t g_importKeyAlg[] = {
 #ifdef HKS_SUPPORT_SM4_C
     HKS_ALG_SM4,
 #endif
+#ifdef HKS_SUPPORT_ML_DSA_C
+    HKS_ALG_ML_DSA,
+#endif
 };
 
 static uint32_t g_cipherAlg[] = {
@@ -182,6 +188,9 @@ static uint32_t g_signAlg[] = {
 #endif
 #ifdef HKS_SUPPORT_SM2_C
     HKS_ALG_SM2,
+#endif
+#ifdef HKS_SUPPORT_ML_DSA_C
+    HKS_ALG_ML_DSA,
 #endif
 };
 #endif
@@ -581,6 +590,7 @@ static int32_t CheckImportKeySize(uint32_t alg, const struct ParamsValues *param
         case HKS_ALG_X25519:
         case HKS_ALG_RSA:
         case HKS_ALG_ECC:
+        case HKS_ALG_ML_DSA:
         case HKS_ALG_SM2:
         case HKS_ALG_DH: {
             if (key->size < sizeof(struct HksPubKeyInfo)) {
@@ -752,6 +762,43 @@ static int32_t CheckEccKeyLen(uint32_t alg, uint32_t keyType, const struct Param
     return HKS_SUCCESS;
 }
 
+static int32_t CheckMlDsaKeyLen(uint32_t alg, uint32_t keyType, const struct ParamsValues *params,
+    const struct HksBlob *key)
+{
+    (void)keyType;
+    if (key->size < sizeof(struct HksKeyMaterialMlDsa)) {
+        HKS_LOG_E("invalid import ml-dsa key size: %u", key->size);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    struct HksKeyMaterialMlDsa *keyMaterial = (struct HksKeyMaterialMlDsa *)(key->data);
+    if ((keyMaterial->keyAlg != alg) || (keyMaterial->keyParamSet != params->keyLen.value)) {
+        HKS_LOG_E("invalid import ml-dsa key material");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    if ((keyMaterial->keyParamSet == HKS_ML_DSA_KEY_PARAM_SET_44 &&
+        (keyMaterial->pubKeySize != HKS_ML_DSA_PUB_KEY_SIZE_1312 ||
+        keyMaterial->priKeySize != HKS_ML_DSA_PRI_KEY_SIZE_2560)) ||
+        (keyMaterial->keyParamSet == HKS_ML_DSA_KEY_PARAM_SET_65 &&
+        (keyMaterial->pubKeySize != HKS_ML_DSA_PUB_KEY_SIZE_1952 ||
+        keyMaterial->priKeySize != HKS_ML_DSA_PRI_KEY_SIZE_4032)) ||
+        (keyMaterial->keyParamSet == HKS_ML_DSA_KEY_PARAM_SET_87 &&
+        (keyMaterial->pubKeySize != HKS_ML_DSA_PUB_KEY_SIZE_2592 ||
+        keyMaterial->priKeySize != HKS_ML_DSA_PRI_KEY_SIZE_4896))) {
+        HKS_LOG_E("invalid import ml-dsa key material public key size or private key size");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    uint32_t keySize = sizeof(struct HksKeyMaterialMlDsa) + keyMaterial->pubKeySize + keyMaterial->priKeySize;
+    if (key->size < keySize) {
+        HKS_LOG_E("import key size[%u] smaller than keySize[%u]", key->size, keySize);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    return HKS_SUCCESS;
+}
+
 static int32_t CheckDsaKeyLen(uint32_t alg, uint32_t keyType, const struct ParamsValues *params,
     const struct HksBlob *key)
 {
@@ -880,6 +927,8 @@ static int32_t CheckKeyLen(uint32_t alg, uint32_t keyType, const struct ParamsVa
         case HKS_ALG_ECC:
         case HKS_ALG_SM2:
             return CheckEccKeyLen(alg, keyType, params, key);
+        case HKS_ALG_ML_DSA:
+            return CheckMlDsaKeyLen(alg, keyType, params, key);
         case HKS_ALG_DSA:
             return CheckDsaKeyLen(alg, keyType, params, key);
         case HKS_ALG_X25519:

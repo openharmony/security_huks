@@ -728,6 +728,23 @@ static int32_t GetCurve25519PrivateOrPairInnerFormat(uint8_t alg, uint32_t keyTy
     return HKS_SUCCESS;
 }
 
+static int32_t CopyToMlDsaInnerKey(const struct HksBlob *key, struct HksBlob *outKey)
+{
+    if ((key->size == 0) || (key->size > ML_DSA_MAX_KEY_SIZE)) {
+        HKS_LOG_E("invalid input key size: %u", key->size);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    uint8_t *outData = (uint8_t *)HksMalloc(key->size);
+    HKS_IF_NULL_LOGE_RETURN(outData, HKS_ERROR_MALLOC_FAIL, "ml-dsa key malloc failed")
+
+    (void)memcpy_s(outData, key->size, key->data, key->size);
+    outKey->data = outData;
+    outKey->size = key->size;
+
+    return HKS_SUCCESS;
+}
+
 static int32_t GetPrivateOrPairInnerFormat(uint32_t keyType, const struct HksBlob *key,
     const struct HksParamSet *paramSet, struct HksBlob *outKey)
 {
@@ -749,6 +766,8 @@ static int32_t GetPrivateOrPairInnerFormat(uint32_t keyType, const struct HksBlo
         case HKS_ALG_SM4:
         case HKS_ALG_AES:
             return CopyToInnerKey(key, algParam->uint32Param, outKey);
+        case HKS_ALG_ML_DSA:
+            return CopyToMlDsaInnerKey(key, outKey);
         case HKS_ALG_ED25519:
         case HKS_ALG_X25519:
             return GetCurve25519PrivateOrPairInnerFormat(algParam->uint32Param, keyType, key, outKey);

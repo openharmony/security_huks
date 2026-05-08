@@ -47,6 +47,7 @@ if (os_level == "standard") {
       "src/hks_openssl_hash.c",
       "src/hks_openssl_hmac.c",
       "src/hks_openssl_kdf.c",
+      "src/hks_openssl_ml_dsa.c",
       "src/hks_openssl_rsa.c",
       "src/hks_openssl_sm2.c",
       "src/hks_openssl_sm3.c",
