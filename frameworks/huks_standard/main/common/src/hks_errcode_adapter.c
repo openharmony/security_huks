@@ -900,6 +900,48 @@ static struct HksError g_errCodeTable[] = {
             .errorMsg = "the dcm callback fail.",
             .data = NULL
        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_BASIC_NOT_AVAILABLE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_SE_FAULT,
+            .errorMsg = "the se basic not available.",
+            .data = NULL
+       }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_NOT_AVAILABLE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_SE_FAULT,
+            .errorMsg = "the secure environment not available.",
+            .data = NULL
+       }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_ALG_NOT_SUPPORT,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED,
+            .errorMsg = "the alg not supported in secure environment.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_COUNT_EXCEED_LIMIT,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_BUSY,
+            .errorMsg = "the se calling is too busy.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_SESSION_EXCEED_LIMIT,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_BUSY,
+            .errorMsg = "the se session is too busy.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_IMPORT_KEY_SE_LEVEL_MISMATCH,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "the security level in wrapping and paramset mismatch.",
+            .data = NULL
+        }
     }
 };
 

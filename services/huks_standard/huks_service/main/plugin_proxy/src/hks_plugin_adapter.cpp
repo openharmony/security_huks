@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -154,7 +154,7 @@ int32_t HksPluginGetAncoUser(int *userId)
     return g_pluginProxy->hksPluginGetAncoUser(userId);
 }
 
-int32_t HksPluginOnLocalRequestWrapKey(uint32_t code, const void *data, void *reply)
+int32_t HksPluginOnAccessWrapKey(uint32_t code, const void *data, void *reply)
 {
     HKS_IF_NULL_LOGE_RETURN(g_pluginProxy, HKS_ERROR_API_NOT_SUPPORTED, "wrap key not supported")
     return g_pluginProxy->hksPluginOnLocalRequest(code, data, reply);

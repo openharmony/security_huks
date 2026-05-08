@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -348,7 +348,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest001, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest001 HksServiceDeleteProcessInfo failed, ret = " << ret;
     uint64_t handle = 111;
     struct HksBlob operationHandle = { .size = sizeof(uint64_t), .data = (uint8_t *)&handle };
-    CreateOperation(&processInfo, NULL, &operationHandle, true);
+    HksCreateOperation(&processInfo, NULL, &operationHandle, true);
     HksServiceDeleteProcessInfo(&processInfo, false);
     ret = HksServiceKeyExistForDe(&processInfo, &keyAlias, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "HksClientServiceTest001 HksServiceDeleteProcessInfo failed, ret = " << ret;
@@ -373,7 +373,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest009, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest009 HksServiceDeleteProcessInfo failed, ret = " << ret;
     uint64_t handle = 111;
     struct HksBlob operationHandle = { .size = sizeof(uint64_t), .data = (uint8_t *)&handle };
-    CreateOperation(&processInfo, NULL, &operationHandle, true);
+    HksCreateOperation(&processInfo, NULL, &operationHandle, true);
     HksServiceDeleteProcessInfo(&processInfo, false);
     ret = HksServiceKeyExistForDe(&processInfo, &keyAlias, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "HksClientServiceTest009 HksServiceDeleteProcessInfo failed, ret = " << ret;
@@ -1029,11 +1029,6 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest019, TestSize.Level0)
     ret = HksServiceChangeStorageLevel(&processInfo, &oldAlias, newParamSet, newParamSet);
     ASSERT_NE(ret, HKS_SUCCESS);
 
-    uint8_t remoteObject[] = {1, 2, 3, 4, 5};
-    ret = HksServiceWrapKey(&oldAlias, remoteObject);
-    ASSERT_NE(ret, HKS_SUCCESS);
-    ret = HksServiceUnwrapKey(&oldAlias, remoteObject);
-    ASSERT_NE(ret, HKS_SUCCESS);
     HksFreeParamSet(&newParamSet);
 }
 }
