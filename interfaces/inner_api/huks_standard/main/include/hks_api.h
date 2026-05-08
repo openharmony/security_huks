@@ -108,29 +108,115 @@ HKS_API_EXPORT int32_t HksFinish(const struct HksBlob *handle, const struct HksP
     const struct HksBlob *inData, struct HksBlob *outData);
 
 #ifndef HKS_CHIPSET_API
+
+/**
+ * @brief Register a provider to HUKS
+ * @param name provider name
+ * @param paramSetIn required parameter set
+ * @return error code, see hks_type.h
+ */
 HKS_API_EXPORT int32_t HksRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
+
+/**
+ * @brief Unregister a previously registered provider.
+ * @param name provider name
+ * @param paramSetIn required parameter set
+ * @return error code, see hks_type.h
+ */
 HKS_API_EXPORT int32_t HksUnregisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
+
+/**
+ * @brief Query ability information of a provider identified by resourceId
+ * @param resourceId resource identifier
+ * @param abilityInfo ability information
+ * @return error code, see hks_type.h
+ */
 HKS_API_EXPORT int32_t HksQueryAbilityInfo(struct HksBlob *resourceId, struct HksAbilityInfo *abilityInfo);
 
+/**
+ * @brief Export certificates of a provider
+ * @param providerName provider name
+ * @param paramSetIn required parameter set
+ * @param certSet certificate set containing provider certificates
+ * @return error code, see hks_type.h
+ */
 HKS_API_EXPORT int32_t HksExportProviderCertificates(const struct HksBlob *providerName,
     const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
+
+/**
+ * @brief Export certificate associated with a specific resource
+ * @param resourceId resource identifier
+ * @param paramSetIn required parameter set
+ * @param certSet certificate set containing the resource certificate.
+ * @return error code, see hks_type.h
+ */
 HKS_API_EXPORT int32_t HksExportCertificate(const struct HksBlob *resourceId,
     const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
+
+/**
+ * @brief Import certificate for a resource
+ * @param resourceId resource identifier
+ * @param certInfo certificate information to import
+ * @param paramSetIn required parameter set
+ * @return error code, see hks_type.h
+ */
 HKS_API_EXPORT int32_t HksImportCertificate(const struct HksBlob *resourceId,
     const struct HksExtCertInfo *certInfo, const struct HksParamSet *paramSetIn);
-HKS_API_EXPORT int32_t HksOpenRemoteHandle(const struct HksBlob *resourceId,
-    const struct HksParamSet *paramSetIn);
-HKS_API_EXPORT int32_t HksCloseRemoteHandle(const struct HksBlob *resourceId,
-    const struct HksParamSet *paramSetIn);
+
+/**
+ * @brief Open a remote handle for a resource
+ * @param resourceId resource identifier
+ * @param paramSetIn required parameter set
+ * @return error code, see hks_type.h
+ */
+HKS_API_EXPORT int32_t HksOpenRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn);
+
+/**
+ * @brief Close a remote handle previously opened
+ * @param resourceId resource identifier
+ * @param paramSetIn required parameter set
+ * @return error code, see hks_type.h
+ */
+HKS_API_EXPORT int32_t HksCloseRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn);
+
+/**
+ * @brief Authenticate UKey PIN
+ * @param resourceId resource identifier
+ * @param paramSetIn required parameter set
+ * @param retryCount remaining retry count on failure
+ * @return error code, see hks_type.h
+ */
 HKS_API_EXPORT int32_t HksAuthUkeyPin(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn,
     uint32_t *retryCount);
-HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *name, const struct HksParamSet *paramSetIn,
+
+/**
+ * @brief Get current PIN authentication status for a UKey
+ * @param resourceId resource identifier
+ * @param paramSetIn required parameter set
+ * @param status authentication status (e.g., 0 = not authed, 1 = authed, 2 = locked)
+ * @return error code, see hks_type.h
+ */
+HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn,
     int32_t *status);
+
+/**
+ * @brief Clear PIN authentication state for a UKey
+ * @param resourceId resource identifier
+ * @return error code, see hks_type.h
+ */
 HKS_API_EXPORT int32_t HksClearUkeyPinAuthState(const struct HksBlob *resourceId);
 
 HKS_API_EXPORT int32_t HksSetOrGetRemoteProperty(enum HksExtPropertyOperation operation,
     const struct HksBlob *resourceId, const struct HksBlob *propertyId,
     const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut);
+
+/**
+ * @brief Obtain a resource ID from a provider name and input parameters
+ * @param providerName provider name
+ * @param paramSetIn required parameter set
+ * @param resourceId resource ID blob. On success, caller must free resourceId->data using HKS_FREE_BLOB.
+ * @return error code, see hks_type.h
+ */
 HKS_API_EXPORT int32_t HksGetResourceId(const struct HksBlob *providerName, const struct HksParamSet *paramSetIn,
     struct HksBlob *resourceId);
 
