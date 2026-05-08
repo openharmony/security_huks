@@ -447,8 +447,7 @@ int32_t HksRemoteHandleManager::SetOrGetRemoteProperty(const HksProcessInfo &pro
 
     auto ipccode = proxy->SetOrGetProperty(static_cast<uint32_t>(operation), handle, propertyId, newParamSet, ret);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    ret = ConvertExtensionToHksErrorCode(ret, operation == HKS_EXT_PROPERTY_OPERATION_GET
-        ? g_getPropertyErrCodeMapping : g_commonErrCodeMapping);
+    ret = ConvertExtensionToHksErrorCode(ret, g_getPropertyErrCodeMapping);
     ClearMapByHandle(ret, handle);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote SetOrGetProperty failed: %" LOG_PUBLIC "d", ret)
     if (operation == HKS_EXT_PROPERTY_OPERATION_GET) {
