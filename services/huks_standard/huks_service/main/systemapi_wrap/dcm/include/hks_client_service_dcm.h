@@ -25,6 +25,8 @@ extern "C" {
 
 int32_t DcmGenerateCertChain(struct HksBlob *cert, const uint8_t *remoteObject);
 
+int32_t DcmSeGenerateCertChain(struct HksBlob *seCert, const uint8_t *remoteObject);
+
 int32_t DcmLocalGenerateCertChain(const struct HksProcessInfo *processInfo, struct HksBlob *cert,
     const uint8_t *remoteObject);
 

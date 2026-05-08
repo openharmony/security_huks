@@ -280,7 +280,7 @@ static int32_t HksAddBatchTimeToOperation(const struct HksParamSet *paramSet, st
     return HKS_SUCCESS;
 }
 
-int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+int32_t HksCreateOperation(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     const struct HksBlob *operationHandle, bool abortable)
 {
     struct HksOperation *operation = (struct HksOperation *)HksMalloc(sizeof(struct HksOperation));

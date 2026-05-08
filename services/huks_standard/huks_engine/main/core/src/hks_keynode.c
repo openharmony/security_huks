@@ -273,7 +273,7 @@ static int32_t GenerateKeyNodeHandle(uint64_t *handle)
 {
     uint32_t handleData = 0;
     struct HksBlob opHandle = {
-        .size = sizeof(uint32_t),
+        .size = sizeof(uint32_t) - sizeof(uint8_t),
         .data = (uint8_t *)&handleData
     };
 

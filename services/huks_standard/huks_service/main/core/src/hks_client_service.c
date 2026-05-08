@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,7 @@
 #include "hks_plugin_adapter.h"
 #include "hks_report.h"
 #include "hks_session_manager.h"
+#include "hks_se_session_manager.h"
 #include "hks_storage.h"
 #include "hks_storage_manager.h"
 #include "hks_template.h"
@@ -111,62 +112,8 @@ static int32_t HksCheckMultiSetTag(const struct HksParamSet *paramSet)
 }
 #endif
 
-static void IfNotSuccAppendHdiErrorInfo(int32_t hdiRet)
-{
-    (void)hdiRet;
-#ifdef L2_STANDARD
-    if (hdiRet == HKS_SUCCESS) {
-        return;
-    }
-    uint32_t errInfoSize = sizeof(struct ErrorInfo);
-    uint8_t *errInfo = (uint8_t *)HksMalloc(errInfoSize);
-    HKS_IF_NULL_RETURN_VOID(errInfo)
-    struct HksBlob errMsg = {.size =  errInfoSize, .data = errInfo};
-    int32_t ret = HuksAccessGetErrorInfo(&errMsg);
-    if (ret == HKS_ERROR_API_NOT_SUPPORTED) {
-        HKS_FREE(errInfo);
-        return;
-    }
-    uint32_t offset = sizeof(struct ErrorInfoHead);
-    if (ret == HKS_SUCCESS && CheckBlob(&errMsg) == HKS_SUCCESS && errMsg.size > offset) {
-        HksAppendThreadErrMsg((uint8_t *)(errMsg.data + offset), errMsg.size - offset);
-    } else {
-        HKS_LOG_E("HuksAccessGetErrorInfo fail, ret = %" LOG_PUBLIC "d, errMsg size = %" LOG_PUBLIC "u",
-            ret, errMsg.size);
-    }
-    HKS_FREE(errInfo);
-#endif
-}
-
 #ifndef _CUT_AUTHENTICATE_
 #ifdef _STORAGE_LITE_
-static int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSet, struct HksBlob *key, enum HksStorageType mode)
-{
-    (void)paramSet;
-    int32_t ret = HksManageStoreGetKeyBlob(processInfo, NULL, keyAlias, key, mode);
-    HKS_IF_NOT_SUCC_LOGE(ret, "get key blob from storage failed, ret = %" LOG_PUBLIC "d", ret)
-    return ret;
-}
-
-static int32_t CheckKeyCondition(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSet)
-{
-    (void)paramSet;
-    /* check is enough buffer to store */
-    uint32_t size = 0;
-    int32_t ret = HksStoreGetToatalSize(&size);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get total size from storage failed, ret = %" LOG_PUBLIC "d", ret)
-
-    if (size >= MAX_KEY_SIZE) {
-        /* is key exist */
-        ret = HksManageStoreIsKeyBlobExist(processInfo, NULL, keyAlias, HKS_STORAGE_TYPE_KEY);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_STORAGE_FAILURE, "buffer exceeds limit")
-    }
-
-    return HKS_SUCCESS;
-}
-
 int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     struct HksKeyInfo *keyInfoList, uint32_t *listCount)
 {
@@ -182,94 +129,8 @@ int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, const
 
     return ret;
 }
-#else
 
-#ifdef HKS_ENABLE_UPGRADE_KEY
-static int32_t CheckAndUpgradeKeyIfNeed(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSet, struct HksBlob *key)
-{
-     // check version and upgrade key if need
-    struct HksParam *keyVersion = NULL;
-    int32_t ret = HksGetParam((const struct HksParamSet *)key->data, HKS_TAG_KEY_VERSION, &keyVersion);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CORRUPT_FILE, "get param key version failed!")
-    if (keyVersion->uint32Param == HKS_KEY_VERSION) {
-        return ret;
-    }
-    struct HksBlob newKey = { .size = 0, .data = NULL };
-    do {
-        if (keyVersion->uint32Param == 0 || keyVersion->uint32Param > HKS_KEY_VERSION) {
-            ret = HKS_ERROR_BAD_STATE;
-            break;
-        }
-
-        newKey.data = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
-        if (newKey.data == NULL) {
-            ret = HKS_ERROR_MALLOC_FAIL;
-            break;
-        }
-        newKey.size = MAX_KEY_SIZE;
-        ret = HksDoUpgradeKeyAccess(key, paramSet, &newKey);
-        IfNotSuccAppendHdiErrorInfo(ret);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "do upgrade access failed!")
-        ret = HksManageStoreKeyBlob(processInfo, paramSet, keyAlias, &newKey, HKS_STORAGE_TYPE_KEY);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "store upgraded key blob failed!")
-
-        HKS_FREE_BLOB(*key);
-        key->data = newKey.data;
-        key->size = newKey.size;
-        return ret;
-    } while (0);
-    HKS_FREE_BLOB(*key);
-    HKS_FREE_BLOB(newKey);
-    return ret;
-}
-#endif
-
-static int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSet, struct HksBlob *key, enum HksStorageType mode)
-{
-    int32_t ret;
-#ifdef HKS_ENABLE_SMALL_TO_SERVICE
-    ret = HksManageStoreIsKeyBlobExist(processInfo, paramSet, keyAlias, mode);
-    if (ret != HKS_SUCCESS) {
-        if (HksCheckNeedUpgradeForSmallToService(processInfo) == HKS_SUCCESS) {
-            ret = HksChangeKeyOwnerForSmallToService(processInfo, paramSet, keyAlias, mode);
-            HKS_IF_NOT_SUCCESS_LOGE_RETURN(ret, HKS_ERROR_NOT_EXIST,
-                "do upgrade operation for small to service failed, ret = %" LOG_PUBLIC "d", ret)
-        }
-    }
-#endif
-    ret = GetKeyFileData(processInfo, paramSet, keyAlias, key, mode);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key fail data failed!")
-
-#ifdef HKS_ENABLE_UPGRADE_KEY
-    // check version and upgrade key if need
-    ret = CheckAndUpgradeKeyIfNeed(processInfo, keyAlias, paramSet, key);
-#endif
-    return ret;
-}
-
-// pre-declaration for used in CheckKeyCondition
-int32_t HksServiceDeleteKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSet);
-
-static int32_t CheckKeyCondition(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSet)
-{
-    struct HksParam *isKeyOverride = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_OVERRIDE, &isKeyOverride);
-    if (ret != HKS_SUCCESS || isKeyOverride->boolParam) {
-        ret = HksServiceDeleteKey(processInfo, keyAlias, paramSet);
-        HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS && ret != HKS_ERROR_NOT_EXIST, ret,
-            "delete keyblob from storage failed, ret = %" LOG_PUBLIC "d", ret)
-    }
-
-    uint32_t fileCount;
-    ret = HksManageGetKeyCountByProcessName(processInfo, paramSet, &fileCount);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    return ret;
-}
+#else /* _STORAGE_LITE_ */
 
 int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     struct HksKeyInfo *keyInfoList, uint32_t *listCount)
@@ -319,7 +180,7 @@ int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, const
 
     return ret;
 }
-#endif
+#endif /* _STORAGE_LITE_ */
 #endif /* _CUT_AUTHENTICATE_ */
 
 #ifndef _CUT_AUTHENTICATE_
@@ -1546,7 +1407,11 @@ static int32_t DcmGenerateCertChainInAttestKey(
     if (ret == HKS_SUCCESS && anonyModeParam->uint32Param == HKS_ANONYMOUS_ATTEST_OFFLINE) {
         ret = DcmLocalGenerateCertChain(processInfo, certChain, remoteObject);
     } else {
-        ret = DcmGenerateCertChain(certChain, remoteObject);
+        if (IsSeSecurityLevel(paramSet)) {
+            ret = DcmSeGenerateCertChain(certChain, remoteObject);
+        } else {
+            ret = DcmGenerateCertChain(certChain, remoteObject);
+        }
     }
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
     HksUpgradeOrRequestLockRead();
@@ -1638,6 +1503,106 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
 }
 #endif // HKS_SUPPORT_API_ATTEST_KEY
 
+static int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+    const struct HksBlob *handle, bool abortable)
+{
+    if (IsSeHandle(handle)) {
+        return HksCreateSeOperation(processInfo, paramSet, handle);
+    }
+
+    return HksCreateOperation(processInfo, paramSet, handle, abortable);
+}
+
+typedef struct {
+    bool isSe;
+    union {
+        struct HksOperation *operation;
+        struct HksSeOperation *seOperation;
+    } op;
+} HksOperationUnion;
+
+static int32_t QueryOperationWrapper(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *handle, HksOperationUnion *unionOp)
+{
+    unionOp->isSe = IsSeHandle(handle);
+    if (unionOp->isSe) {
+        unionOp->op.seOperation = HksQuerySeOperationAndMarkInUse(processInfo, handle);
+    } else {
+        unionOp->op.operation = QueryOperationAndMarkInUse(processInfo, handle);
+    }
+    if ((unionOp->isSe ? (void *)unionOp->op.seOperation : (void *)unionOp->op.operation) == NULL) {
+        HKS_LOG_E("operationHandle is not exist or being busy");
+        return HKS_ERROR_NOT_EXIST;
+    }
+    return HKS_SUCCESS;
+}
+
+static bool IsOperationExist(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *handle, HksOperationUnion *unionOp)
+{
+    if (unionOp->isSe) {
+        unionOp->op.seOperation = HksQuerySeOperationAndMarkInUse(processInfo, handle);
+    } else {
+        unionOp->op.operation = QueryOperationAndMarkInUse(processInfo, handle);
+    }
+    if ((unionOp->isSe ? (void *)unionOp->op.seOperation : (void *)unionOp->op.operation) == NULL) {
+        HKS_LOG_I("operationHandle is not exist or being busy");
+        return false;
+    }
+    return true;
+}
+
+static int32_t CheckAccessTokenWrapper(const HksOperationUnion *unionOp,
+    const struct HksProcessInfo *processInfo)
+{
+    (void)unionOp;
+    (void)processInfo;
+#ifdef HKS_SUPPORT_ACCESS_TOKEN
+    uint64_t accessTokenId = unionOp->isSe ? unionOp->op.seOperation->processInfo.accessTokenId
+                                           : unionOp->op.operation->accessTokenId;
+    if (accessTokenId != processInfo->accessTokenId) {
+        HKS_LOG_E("compare access token id failed, unauthorized calling");
+        return HKS_ERROR_BAD_STATE;
+    }
+#endif
+    return HKS_SUCCESS;
+}
+
+static int32_t QueryAndCheckAccessToken(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *handle, HksOperationUnion *unionOp)
+{
+    int32_t ret = QueryOperationWrapper(processInfo, handle, unionOp);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "QueryOperationWrapper fail")
+    return CheckAccessTokenWrapper(unionOp, processInfo);
+}
+
+static void MarkOperationUnUseWrapper(HksOperationUnion *unionOp)
+{
+    if (unionOp == NULL) {
+        return;
+    }
+    if (unionOp->isSe) {
+        HksMarkSeOperationUnUse(unionOp->op.seOperation);
+    } else {
+        MarkOperationUnUse(unionOp->op.operation);
+    }
+}
+
+static void MarkAndDeleteOperationByUnion(HksOperationUnion *unionOp, const struct HksBlob *handle)
+{
+    if (unionOp == NULL) {
+        return;
+    }
+    MarkOperationUnUseWrapper(unionOp);
+    if (unionOp->isSe) {
+        HksDeleteSeOperation(handle);
+        unionOp->op.seOperation = NULL;
+    } else {
+        DeleteOperation(handle);
+        unionOp->op.operation = NULL;
+    }
+}
+
 int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *handle, struct HksBlob *token)
 {
@@ -1715,10 +1680,9 @@ static void MarkAndDeleteOperation(struct HksOperation **operation, const struct
     *operation = NULL;
 }
 
-static void HksUpdateEnd(struct HksOperation **operation, struct HksHitraceId *traceId)
+static void UpdateEnd(HksOperationUnion *unionOp, struct HksHitraceId *traceId)
 {
-    HKS_IF_TRUE_LOGE_RETURN_VOID(operation == NULL || traceId == NULL, "operation is null")
-    MarkOperationUnUse(*operation);
+    MarkOperationUnUseWrapper(unionOp);
     HksHitraceEnd(traceId);
 }
 
@@ -1726,18 +1690,22 @@ struct HksUpdateCommon {
     uint64_t startTime;
     struct HksHitraceId traceId;
     struct HksParamSet *newParamSet;
-    struct HksOperation *operation;
+    HksOperationUnion unionOp;
     int32_t ret;
 };
 
-static int32_t CheckBatchOperation(struct HksOperation *operation, const struct HksBlob *handle)
+static int32_t CheckBatchOperation(HksOperationUnion *unionOp, const struct HksBlob *handle)
 {
+    if (unionOp->isSe) {
+        return HKS_SUCCESS;
+    }
     int32_t ret = HKS_SUCCESS;
-    if (operation->isBatchOperation) {
-        ret = HksServiceCheckBatchUpdateTime(operation);
+    if (unionOp->op.operation->isBatchOperation) {
+        ret = HksServiceCheckBatchUpdateTime(unionOp->op.operation);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksServiceCheckBatchUpdateTime fail, ret = %" LOG_PUBLIC "d", ret);
-            MarkAndDeleteOperation(&operation, handle);
+            MarkOperationUnUse(unionOp->op.operation);
+            DeleteOperation(handle);
         }
     }
     return ret;
@@ -1746,7 +1714,7 @@ static int32_t CheckBatchOperation(struct HksOperation *operation, const struct 
 int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
 {
-    struct HksUpdateCommon common = {0, {0}, NULL, NULL, 0};
+    struct HksUpdateCommon common = {0, {0}, NULL, {false, {NULL}}, 0};
     (void)HksElapsedRealTime(&common.startTime);
 
 #ifdef L2_STANDARD
@@ -1760,22 +1728,16 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
         }
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", common.ret)
 #endif
-        common.operation = QueryOperationAndMarkInUse(processInfo, handle);
-        common.ret = (common.operation == NULL ? HKS_ERROR_NOT_EXIST : HKS_SUCCESS);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "operationHandle is not exist or being busy")
+        common.ret = QueryOperationWrapper(processInfo, handle, &common.unionOp);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "QueryOperationWrapper fail")
 
-#ifdef HKS_SUPPORT_ACCESS_TOKEN
-        if (common.operation->accessTokenId != processInfo->accessTokenId) {
-            HKS_LOG_E("compare access token id failed, unauthorized calling");
-            common.ret = HKS_ERROR_BAD_STATE;
-            break;
-        }
-#endif
+        common.ret = CheckAccessTokenWrapper(&common.unionOp, processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "CheckAccessTokenWrapper fail")
 
-        common.ret = CheckBatchOperation(common.operation, handle);
+        common.ret = CheckBatchOperation(&common.unionOp, handle);
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "CheckBatchOperation fail, ret = %" LOG_PUBLIC "d", common.ret)
-
-        common.ret = AppendProcessInfoAndDefault(paramSet, processInfo, common.operation, &common.newParamSet, false);
+        common.ret = AppendProcessInfoAndDefault(paramSet, processInfo,
+            common.unionOp.isSe ? NULL : common.unionOp.op.operation, &common.newParamSet, false);
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "append process info failed, ret = %" LOG_PUBLIC "d", common.ret)
 
         common.ret = HksCheckAcrossAccountsPermission(common.newParamSet, processInfo->userIdInt);
@@ -1785,31 +1747,19 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
         IfNotSuccAppendHdiErrorInfo(common.ret);
         if (common.ret != HKS_SUCCESS) {
             HKS_LOG_E("HuksAccessUpdate fail, ret = %" LOG_PUBLIC "d", common.ret);
-            MarkAndDeleteOperation(&common.operation, handle);
+            MarkAndDeleteOperationByUnion(&common.unionOp, handle);
         }
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "update execution failed, ret = %" LOG_PUBLIC "d", common.ret);
     } while (0);
 #ifdef L2_STANDARD
     HksThreeStageReportInfo info = { common.ret, inData->size, HKS_UPDATE, common.startTime,
-        common.traceId.traceId.chainId, handle, common.operation };
+        common.traceId.traceId.chainId, handle,
+        common.unionOp.isSe ? NULL : common.unionOp.op.operation };
     (void)HksThreeStageReport(__func__, processInfo, common.newParamSet, &info);
 #endif
-    HksUpdateEnd(&common.operation, &common.traceId);
+    UpdateEnd(&common.unionOp, &common.traceId);
     HksFreeParamSet(&common.newParamSet);
     return common.ret;
-}
-
-static int32_t AppendAndQueryInFinish(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
-    struct HksOperation **outOperation)
-{
-    struct HksOperation *operation = QueryOperationAndMarkInUse(processInfo, handle);
-    HKS_IF_NULL_LOGE_RETURN(operation, HKS_ERROR_NOT_EXIST, "operationHandle is not exist or being busy")
-#ifdef HKS_SUPPORT_ACCESS_TOKEN
-    HKS_IF_TRUE_LOGE_RETURN(operation->accessTokenId != processInfo->accessTokenId, HKS_ERROR_BAD_STATE,
-        "compare access token id failed, unauthorized calling")
-#endif
-    *outOperation = operation;
-    return HKS_SUCCESS;
 }
 
 static int32_t InitOutputDataForFinish(struct HksBlob *output, const struct HksBlob *outData, bool isStorage)
@@ -1833,14 +1783,14 @@ struct HksFinshCommon {
     struct HksParamSet *newParamSet;
     bool isNeedStorage;
     uint32_t outSize;
-    struct HksOperation *operation;
+    HksOperationUnion unionOp;
     int32_t ret;
 };
 
 int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
 {
-    struct HksFinshCommon common = {0, {0}, NULL, false, outData->size, NULL, 0};
+    struct HksFinshCommon common = {0, {0}, NULL, false, outData->size, {false, {NULL}}, 0};
     (void)HksElapsedRealTime(&common.startTime);
 
 #ifdef L2_STANDARD
@@ -1862,10 +1812,10 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
         }
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", common.ret)
 #endif
-        common.ret = AppendAndQueryInFinish(handle, processInfo, &common.operation);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "AppendAndQueryInFinish fail, ret = %" LOG_PUBLIC "d", common.ret)
-
-        common.ret = AppendProcessInfoAndDefault(paramSet, processInfo, common.operation, &common.newParamSet, true);
+        common.ret = QueryAndCheckAccessToken(processInfo, handle, &common.unionOp);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "QueryAndCheckAccessToken fail")
+        common.ret = AppendProcessInfoAndDefault(paramSet, processInfo,
+            common.unionOp.isSe ? NULL : common.unionOp.op.operation, &common.newParamSet, true);
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "append process info failed, ret = %" LOG_PUBLIC "d", common.ret)
 
         common.ret = HksCheckAcrossAccountsPermission(common.newParamSet, processInfo->userIdInt);
@@ -1882,66 +1832,70 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
         (void)memset_s(output.data, output.size, 0, output.size);
     }
     HKS_FREE_BLOB(output);
-    if (common.operation != NULL) {
 #ifdef L2_STANDARD
-        HksThreeStageReportInfo info = { common.ret, inData->size, HKS_FINISH, common.startTime,
-            common.traceId.traceId.chainId, handle, common.operation };
-        (void)HksThreeStageReport(__func__, processInfo, common.newParamSet, &info);
+    HksThreeStageReportInfo info = { common.ret, inData->size, HKS_FINISH, common.startTime,
+        common.traceId.traceId.chainId, handle,
+        common.unionOp.isSe ? NULL : common.unionOp.op.operation };
+    (void)HksThreeStageReport(__func__, processInfo, common.newParamSet, &info);
 #endif
-        MarkAndDeleteOperation(&common.operation, handle);
-    }
+    MarkAndDeleteOperationByUnion(&common.unionOp, handle);
     HksFreeParamSet(&common.newParamSet);
     HksHitraceEnd(&common.traceId);
     return common.ret;
 }
 
+struct HksAbortCommon {
+    uint64_t startTime;
+    struct HksHitraceId traceId;
+    struct HksParamSet *newParamSet;
+    HksOperationUnion unionOp;
+    int32_t ret;
+};
+
 int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet)
 {
-    uint64_t startTime = 0;
-    (void)HksElapsedRealTime(&startTime);
-    struct HksHitraceId traceId = {0};
+    struct HksAbortCommon common = {0, {0}, NULL, {IsSeHandle(handle), {NULL}}, 0};
+    (void)HksElapsedRealTime(&common.startTime);
 
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
+    common.traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
-    struct HksParamSet *newParamSet = NULL;
-    struct HksOperation *operation = NULL;
-    int32_t ret;
     do {
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
-        if (HksCheckIsUkeyOperation(paramSet, &ret) == HKS_SUCCESS) {
-            ret = HksServiceOnUkeyAbortSession(processInfo, handle, paramSet);
+        if (HksCheckIsUkeyOperation(paramSet, &common.ret) == HKS_SUCCESS) {
+            common.ret = HksServiceOnUkeyAbortSession(processInfo, handle, paramSet);
             break;
         }
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", ret)
+        HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", common.ret)
 #endif
-        operation = QueryOperationAndMarkInUse(processInfo, handle);
-        if (operation == NULL) {
-            HKS_LOG_E("operationHandle is not exist or being busy");
-            ret = HKS_SUCCESS; /* return success if the handle is not found */
+        if (!IsOperationExist(processInfo, handle, &common.unionOp)) {
+            common.ret = HKS_SUCCESS;
             break;
         }
+        common.ret = AppendProcessInfoAndDefault(paramSet, processInfo,
+            common.unionOp.isSe ? NULL : common.unionOp.op.operation, &common.newParamSet, false);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "append process info failed, ret = %" LOG_PUBLIC "d", common.ret)
 
-        ret = AppendProcessInfoAndDefault(paramSet, processInfo, operation, &newParamSet, false);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append process info failed, ret = %" LOG_PUBLIC "d", ret)
+        common.ret = HksCheckAcrossAccountsPermission(common.newParamSet, processInfo->userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d",
+            common.ret)
 
-        ret = HksCheckAcrossAccountsPermission(newParamSet, processInfo->userIdInt);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = HuksAccessAbort(handle, newParamSet);
-        IfNotSuccAppendHdiErrorInfo(ret);
-        HKS_IF_NOT_SUCC_LOGE(ret, "HuksAccessAbort fail, ret = %" LOG_PUBLIC "d", ret)
+        common.ret = HuksAccessAbort(handle, common.newParamSet);
+        IfNotSuccAppendHdiErrorInfo(common.ret);
+        HKS_IF_NOT_SUCC_LOGE(common.ret, "HuksAccessAbort fail, ret = %" LOG_PUBLIC "d", common.ret)
 #ifdef L2_STANDARD
-        HksThreeStageReportInfo info = { ret, 0, HKS_ABORT, startTime, traceId.traceId.chainId, handle, operation };
-        (void)HksThreeStageReport(__func__, processInfo, newParamSet, &info);
+        HksThreeStageReportInfo info = { common.ret, 0, HKS_ABORT, common.startTime,
+            common.traceId.traceId.chainId, handle,
+            common.unionOp.isSe ? NULL : common.unionOp.op.operation };
+        (void)HksThreeStageReport(__func__, processInfo, common.newParamSet, &info);
 #endif
-        MarkAndDeleteOperation(&operation, handle);
+        MarkAndDeleteOperationByUnion(&common.unionOp, handle);
     } while (0);
-    MarkOperationUnUse(operation);
-    HksFreeParamSet(&newParamSet);
-    HksHitraceEnd(&traceId);
-    return ret;
+    MarkOperationUnUseWrapper(&common.unionOp);
+    HksFreeParamSet(&common.newParamSet);
+    HksHitraceEnd(&common.traceId);
+    return common.ret;
 }
 
 static int32_t BuildAbortParamSet(struct HksParamSet **newParamSet)
@@ -2262,16 +2216,112 @@ int32_t HksServiceChangeStorageLevel(const struct HksProcessInfo *processInfo, c
 #endif
 }
 
-int32_t HksServiceWrapKey(const struct HksBlob *srcData, const uint8_t *context)
+static int32_t CheckWrapKeyType(const struct HksParamSet *paramSetIn)
 {
-    struct HksIpcData ipcData = { srcData, context };
-    uint32_t size = sizeof(ipcData);
-    return HksPluginOnLocalRequestWrapKey(CODE_SA_WRAP_KEY, &ipcData, &size);
+    struct HksParam *wrapTypeParam = NULL;
+    int32_t ret = HksGetParam(paramSetIn, HKS_TAG_KEY_WRAP_TYPE, &wrapTypeParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get wrapTypeParam failed")
+ 
+    switch (wrapTypeParam->uint32Param) {
+        case HKS_KEY_WRAP_TYPE_HUK:
+            return HKS_SUCCESS;
+        default:
+            HKS_LOG_E("invalid wrap type, type = %" LOG_PUBLIC "d", wrapTypeParam->uint32Param);
+            return HKS_ERROR_INVALID_KEY_WRAP_TYPE;
+    }
 }
 
-int32_t HksServiceUnwrapKey(const struct HksBlob *srcData, const uint8_t *context)
+struct HksAccessWrapKeyArgs {
+    const struct HksBlob *inData;
+    const struct HksParamSet *paramSet;
+    struct HksBlob *outData;
+};
+
+static int32_t AccessWrapKey(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    struct HksBlob *wrappedKey)
 {
-    struct HksIpcData ipcData = { srcData, context };
-    uint32_t size = sizeof(ipcData);
-    return HksPluginOnLocalRequestWrapKey(CODE_SA_UNWRAP_KEY, &ipcData, &size);
+    struct HksAccessWrapKeyArgs args = {
+        .inData = key,
+        .paramSet = paramSet,
+        .outData = wrappedKey
+    };
+    uint32_t size = sizeof(args);
+    return HksPluginOnAccessWrapKey(CODE_SA_WRAP_KEY, &args, &size);
+}
+
+static int32_t AccessUnwrapKey(const struct HksParamSet *paramSet, const struct HksBlob *wrappedKey,
+    struct HksBlob *keyOut)
+{
+    struct HksAccessWrapKeyArgs args = {
+        .inData = wrappedKey,
+        .paramSet = paramSet,
+        .outData = keyOut
+    };
+    uint32_t size = sizeof(args);
+    return HksPluginOnAccessWrapKey(CODE_SA_UNWRAP_KEY, &args, &size);
+}
+
+int32_t HksServiceWrapKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *wrappedKey)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    struct HksBlob keyFromFile = { 0, NULL };
+
+    do {
+        ret = HksCheckWrapAndUnwrapKeyParams(&processInfo->processName, keyAlias, paramSet, wrappedKey);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check wrap params failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetKeyAndNewParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
+
+        ret = CheckWrapKeyType(newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check wrap type failed, ret = %" LOG_PUBLIC "d.", ret)
+
+        ret = AccessWrapKey(&keyFromFile, newParamSet, wrappedKey);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAccessWrapKey failed, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HKS_FREE_BLOB(keyFromFile);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+int32_t HksServiceUnwrapKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, const struct HksBlob *wrappedKey)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    uint8_t *keyOutBuffer = NULL;
+
+    do {
+        ret = HksCheckWrapAndUnwrapKeyParams(&processInfo->processName, keyAlias, paramSet, wrappedKey);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check wrap params failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = AppendNewInfoForGenKeyInService(processInfo, paramSet, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append processName tag failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = CheckKeyCondition(processInfo, keyAlias, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check key condition failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = CheckWrapKeyType(newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check wrap type failed, ret = %" LOG_PUBLIC "d.", ret)
+
+        keyOutBuffer = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
+        if (keyOutBuffer == NULL) {
+            ret = HKS_ERROR_MALLOC_FAIL;
+            break;
+        }
+        struct HksBlob keyOut = { MAX_KEY_SIZE, keyOutBuffer };
+        ret = AccessUnwrapKey(newParamSet, wrappedKey, &keyOut);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAccessUnwrapKey failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksManageStoreKeyBlob(processInfo, newParamSet, keyAlias,
+            &keyOut, HKS_STORAGE_TYPE_KEY);
+        HKS_IF_NOT_SUCC_LOGE(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HKS_FREE(keyOutBuffer);
+    HksFreeParamSet(&newParamSet);
+    return ret;
 }
