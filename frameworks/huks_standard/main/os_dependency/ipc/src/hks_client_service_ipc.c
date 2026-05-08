@@ -691,6 +691,7 @@ int32_t HksClientGetResourceId(const struct HksBlob *providerName, const struct 
             break;
         }
         if (memcpy_s(resourceId->data, outBlob.size, outBlob.data, outBlob.size) != EOK) {
+            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
             HKS_FREE_BLOB(*resourceId);
             HKS_LOG_E("memcpy_s resourceId failed");
             break;
