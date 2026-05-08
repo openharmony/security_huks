@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,9 @@ int32_t HksCheckGenAndImportKeyParams(const struct HksBlob *processName, const s
 
 int32_t HksCheckImportWrappedKeyParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
     const struct HksBlob *wrappingKeyAlias, const struct HksParamSet *paramSetIn, const struct HksBlob *wrappedKeyData);
+
+int32_t HksCheckWrapAndUnwrapKeyParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSetIn, const struct HksBlob *wrappedKey);
 
 int32_t HksCheckAllParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, const struct HksBlob *data1, const struct HksBlob *data2);

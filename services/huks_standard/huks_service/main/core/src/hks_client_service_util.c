@@ -25,6 +25,10 @@
 #include "hks_mem.h"
 #include "hks_storage_manager.h"
 #include "hks_template.h"
+#include "huks_access.h"
+#include "hks_upgrade_key_accesser.h"
+#include "hks_report_common.h"
+#include "hks_storage.h"
 
 #ifdef HKS_SUPPORT_GET_BUNDLE_INFO
 #include "hks_bms_api_wrap.h"
@@ -43,6 +47,33 @@
 #ifdef _STORAGE_LITE_
 #include "hks_storage_adapter.h"
 #endif
+
+void IfNotSuccAppendHdiErrorInfo(int32_t hdiRet)
+{
+    (void)hdiRet;
+#ifdef L2_STANDARD
+    if (hdiRet == HKS_SUCCESS) {
+        return;
+    }
+    uint32_t errInfoSize = sizeof(struct ErrorInfo);
+    uint8_t *errInfo = (uint8_t *)HksMalloc(errInfoSize);
+    HKS_IF_NULL_RETURN_VOID(errInfo)
+    struct HksBlob errMsg = {.size =  errInfoSize, .data = errInfo};
+    int32_t ret = HuksAccessGetErrorInfo(&errMsg);
+    if (ret == HKS_ERROR_API_NOT_SUPPORTED) {
+        HKS_FREE(errInfo);
+        return;
+    }
+    uint32_t offset = sizeof(struct ErrorInfoHead);
+    if (ret == HKS_SUCCESS && CheckBlob(&errMsg) == HKS_SUCCESS && errMsg.size > offset) {
+        HksAppendThreadErrMsg((uint8_t *)(errMsg.data + offset), errMsg.size - offset);
+    } else {
+        HKS_LOG_E("HuksAccessGetErrorInfo fail, ret = %" LOG_PUBLIC "d, errMsg size = %" LOG_PUBLIC "u",
+            ret, errMsg.size);
+    }
+    HKS_FREE(errInfo);
+#endif
+}
 
 #ifndef _CUT_AUTHENTICATE_
 #ifdef _STORAGE_LITE_
@@ -610,4 +641,124 @@ int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo
     return AppendProcessInfoAndDefault(paramSet, processInfo, NULL, outParamSet, true);
 }
 #endif /* HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL */
+#endif /* _CUT_AUTHENTICATE_ */
+
+#ifndef _CUT_AUTHENTICATE_
+#ifdef _STORAGE_LITE_
+int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *key, enum HksStorageType mode)
+{
+    (void)paramSet;
+    int32_t ret = HksManageStoreGetKeyBlob(processInfo, NULL, keyAlias, key, mode);
+    HKS_IF_NOT_SUCC_LOGE(ret, "get key blob from storage failed, ret = %" LOG_PUBLIC "d", ret)
+    return ret;
+}
+
+int32_t CheckKeyCondition(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet)
+{
+    (void)paramSet;
+    /* check is enough buffer to store */
+    uint32_t size = 0;
+    int32_t ret = HksStoreGetToatalSize(&size);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get total size from storage failed, ret = %" LOG_PUBLIC "d", ret)
+
+    if (size >= MAX_KEY_SIZE) {
+        /* is key exist */
+        ret = HksManageStoreIsKeyBlobExist(processInfo, NULL, keyAlias, HKS_STORAGE_TYPE_KEY);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_STORAGE_FAILURE, "buffer exceeds limit")
+    }
+
+    return HKS_SUCCESS;
+}
+
+#else
+
+#ifdef HKS_ENABLE_UPGRADE_KEY
+static int32_t CheckAndUpgradeKeyIfNeed(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *key)
+{
+     // check version and upgrade key if need
+    struct HksParam *keyVersion = NULL;
+    int32_t ret = HksGetParam((const struct HksParamSet *)key->data, HKS_TAG_KEY_VERSION, &keyVersion);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CORRUPT_FILE, "get param key version failed!")
+    if (keyVersion->uint32Param == HKS_KEY_VERSION) {
+        return ret;
+    }
+    struct HksBlob newKey = { .size = 0, .data = NULL };
+    do {
+        if (keyVersion->uint32Param == 0 || keyVersion->uint32Param > HKS_KEY_VERSION) {
+            ret = HKS_ERROR_BAD_STATE;
+            break;
+        }
+
+        newKey.data = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
+        if (newKey.data == NULL) {
+            ret = HKS_ERROR_MALLOC_FAIL;
+            break;
+        }
+        newKey.size = MAX_KEY_SIZE;
+        ret = HksDoUpgradeKeyAccess(key, paramSet, &newKey);
+        IfNotSuccAppendHdiErrorInfo(ret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "do upgrade access failed!")
+        ret = HksManageStoreKeyBlob(processInfo, paramSet, keyAlias, &newKey, HKS_STORAGE_TYPE_KEY);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "store upgraded key blob failed!")
+
+        HKS_FREE_BLOB(*key);
+        key->data = newKey.data;
+        key->size = newKey.size;
+        return ret;
+    } while (0);
+    HKS_FREE_BLOB(*key);
+    HKS_FREE_BLOB(newKey);
+    return ret;
+}
+#endif
+
+int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *key, enum HksStorageType mode)
+{
+    int32_t ret;
+#ifdef HKS_ENABLE_SMALL_TO_SERVICE
+    ret = HksManageStoreIsKeyBlobExist(processInfo, paramSet, keyAlias, mode);
+    if (ret != HKS_SUCCESS) {
+        if (HksCheckNeedUpgradeForSmallToService(processInfo) == HKS_SUCCESS) {
+            ret = HksChangeKeyOwnerForSmallToService(processInfo, paramSet, keyAlias, mode);
+            HKS_IF_NOT_SUCCESS_LOGE_RETURN(ret, HKS_ERROR_NOT_EXIST,
+                "do upgrade operation for small to service failed, ret = %" LOG_PUBLIC "d", ret)
+        }
+    }
+#endif
+    ret = GetKeyFileData(processInfo, paramSet, keyAlias, key, mode);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key fail data failed!")
+
+#ifdef HKS_ENABLE_UPGRADE_KEY
+    // check version and upgrade key if need
+    ret = CheckAndUpgradeKeyIfNeed(processInfo, keyAlias, paramSet, key);
+#endif
+    return ret;
+}
+
+// pre-declaration for used in CheckKeyCondition
+int32_t HksServiceDeleteKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet);
+
+int32_t CheckKeyCondition(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet)
+{
+    struct HksParam *isKeyOverride = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_OVERRIDE, &isKeyOverride);
+    if (ret != HKS_SUCCESS || isKeyOverride->boolParam) {
+        ret = HksServiceDeleteKey(processInfo, keyAlias, paramSet);
+        HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS && ret != HKS_ERROR_NOT_EXIST, ret,
+            "delete keyblob from storage failed, ret = %" LOG_PUBLIC "d", ret)
+    }
+
+    uint32_t fileCount;
+    ret = HksManageGetKeyCountByProcessName(processInfo, paramSet, &fileCount);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    return ret;
+}
+#endif
 #endif /* _CUT_AUTHENTICATE_ */

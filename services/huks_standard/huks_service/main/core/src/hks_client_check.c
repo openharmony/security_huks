@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,18 @@ int32_t HksCheckImportWrappedKeyParams(const struct HksBlob *processName, const 
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     return CheckProcessNameAndKeyAliasSize(processName->size, wrappingKeyAlias->size);
+}
+
+int32_t HksCheckWrapAndUnwrapKeyParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSetIn, const struct HksBlob *wrappedKey)
+{
+    int32_t ret = HksCheckBlob3AndParamSet(processName, keyAlias, wrappedKey, paramSetIn);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+ 
+    ret = CheckProcessNameAndKeyAliasSize(processName->size, keyAlias->size);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    return HKS_SUCCESS;
 }
 
 int32_t HksCheckAllParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,

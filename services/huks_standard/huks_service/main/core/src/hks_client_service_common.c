@@ -18,11 +18,13 @@
 
 #include <stdatomic.h>
 #include <stddef.h>
+#include <securec.h>
 
 #include "hks_log.h"
 #include "hks_param.h"
 #include "hks_template.h"
 #include "hks_type_enum.h"
+#include "hks_type_inner.h"
 
 static volatile atomic_bool g_isScreenOn = false;
 
@@ -88,4 +90,30 @@ void HksSetScreenState(bool state)
 bool HksGetScreenState(void)
 {
     return atomic_load(&g_isScreenOn);
+}
+
+bool IsSeSecurityLevel(const struct HksParamSet *paramSet)
+{
+    struct HksParam *securityLevelParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_SECURITY_LEVEL, &securityLevelParam);
+    HKS_IF_TRUE_RETURN(ret != HKS_SUCCESS, false)
+
+    HKS_LOG_I("security level is %" LOG_PUBLIC "u", securityLevelParam->uint32Param);
+    return securityLevelParam->uint32Param == HKS_KEY_SECURITY_LEVEL_SE ||
+           securityLevelParam->uint32Param == HKS_KEY_SECURITY_LEVEL_INDEPENDENT_SE;
+}
+
+bool IsSeHandle(const struct HksBlob *handle)
+{
+    HKS_IF_TRUE_RETURN(handle == NULL || handle->size != sizeof(uint64_t), false)
+
+    uint64_t handleVal = 0;
+    HKS_IF_TRUE_RETURN(memcpy_s(&handleVal, sizeof(handleVal), handle->data, sizeof(handleVal)) != EOK, false)
+
+    if ((handleVal >> HKS_SE_HANDLE_MASK_BIT) != 0) {
+        HKS_LOG_I("is se handle");
+        return true;
+    }
+
+    return false;
 }

@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (C) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -41,6 +41,7 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",  # hks_osaccount_check.h
       "//base/security/huks/services/huks_standard/huks_service/main/upgrade/lock/include",
       "//base/security/huks/services/huks_standard/huks_service/main/ha/include",
+      "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/se/include",
       "//base/security/huks/frameworks/huks_standard/main/common/include"
     ]
 
@@ -54,6 +55,7 @@ if (os_level == "standard") {
       "src/hks_client_service_common.c",
       "src/hks_client_service_util.c",
       "src/hks_session_manager.c",
+      "src/hks_se_session_manager.c",
     ]
 
     defines = [ "HKS_ENABLE_CLEAN_FILE" ]
@@ -150,6 +152,8 @@ if (os_level == "standard") {
       deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms:libhuks_bms_systemapi_wrap_static" ]
     }
 
+    deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/se:libhuks_se_systemapi_wrap_static" ]
+
     configs = [
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]
@@ -190,6 +194,7 @@ if (os_level == "standard") {
       "src/hks_client_service_common.c",
       "src/hks_client_service_util.c",
       "src/hks_session_manager.c",
+      "src/hks_se_session_manager.c",
     ]
     sources += [
       "src/hks_hitrace.c",

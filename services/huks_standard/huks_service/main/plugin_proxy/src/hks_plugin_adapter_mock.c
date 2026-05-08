@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,18 +51,11 @@ int32_t RetryLoadPlugin(void)
     return HKS_SUCCESS;
 }
 
-int32_t HksPluginOnLocalRequestWrapKey(uint32_t code, const void *data, void *reply)
+int32_t HksPluginOnAccessWrapKey(uint32_t code, const void *data, void *reply)
 {
     (void)(code);
     (void)(data);
     (void)(reply);
-    return HKS_SUCCESS;
-}
-
-int32_t HksPluginWrapKey(const struct HksBlob *srcData, const uint8_t *context)
-{
-    (void)(srcData);
-    (void)(context);
     return HKS_SUCCESS;
 }
 
