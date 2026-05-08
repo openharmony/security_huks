@@ -164,13 +164,13 @@ static void FreeRuntimeParamSet(struct HksParamSet **paramSet)
             return;
         }
         bool hasCalcHash = true;
-        /* If the algorithm is ed25519, the plaintext is directly cached, and if the digest is HKS_DIGEST_NONE, the
-           hash value has been passed in by the user. So the hash value does not need to be free.
+        /* If the algorithm is ed25519 or ml-dsa, the plaintext is directly cached, and if the digest is
+           HKS_DIGEST_NONE, the hash value has been passed in by the user. So the hash value does not need to be free.
         */
         if (ret == HKS_SUCCESS) {
             hasCalcHash = param3->uint32Param != HKS_DIGEST_NONE;
         }
-        hasCalcHash &= (param2->uint32Param != HKS_ALG_ED25519);
+        hasCalcHash &= (param2->uint32Param != HKS_ALG_ED25519 && param2->uint32Param != HKS_ALG_ML_DSA);
 
         bool isAesCcm = false;
         ret = SetAesCcmModeTag(*paramSet, param2->uint32Param, param1->uint32Param, &isAesCcm);

@@ -890,12 +890,13 @@ int32_t TranslateFromX509PublicKey(const uint32_t alg, const struct HksBlob *x50
 }
 
 #ifdef ISOLATE_OHOS_SDK
-#define HKS_ML_DSA_PUB_KEY_SIZE_1312  1312
-#define HKS_ML_DSA_PUB_KEY_SIZE_1952  1952
-#define HKS_ML_DSA_PUB_KEY_SIZE_2592  2592
-
 static int32_t MlDsaGetPubKeySize(uint32_t keyParamSetId, uint32_t *pubKeySize)
 {
+    if (pubKeySize == NULL) {
+        HKS_LOG_E("pubKeySize is null");
+        return HKS_ERROR_NULL_POINTER;
+    }
+
     if (keyParamSetId == HKS_ML_DSA_KEY_PARAM_SET_44) {
         *pubKeySize = HKS_ML_DSA_PUB_KEY_SIZE_1312;
     } else if (keyParamSetId == HKS_ML_DSA_KEY_PARAM_SET_65) {

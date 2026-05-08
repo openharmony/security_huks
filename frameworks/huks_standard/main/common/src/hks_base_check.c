@@ -978,6 +978,14 @@ int32_t HksCheckSignature(uint32_t cmdId, uint32_t alg, uint32_t keySize, const 
                 HKS_ERROR_INVALID_ARGUMENT, "check key size: key size value %" LOG_PUBLIC "u not expected", keySize)
             return CheckEccSignature(cmdId, keySize, signature);
 #endif
+#if defined(HKS_SUPPORT_ML_DSA_C) && defined(HKS_SUPPORT_ML_DSA_SIGN_VERIFY)
+        case HKS_ALG_ML_DSA:
+            if (HksCheckValue(keySize, g_mlDsaParamSetId, HKS_ARRAY_SIZE(g_mlDsaParamSetId)) != HKS_SUCCESS) {
+                HKS_LOG_E("check key param set id: value %u not expected", keySize);
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+            return HKS_SUCCESS;
+#endif
         default:
             return ret;
     }
@@ -1249,12 +1257,12 @@ int32_t HksCheckSecureSignParams(uint32_t secureSignType)
 #endif
 }
 
-/* If the algorithm is ed25519 or sm2, the plaintext is directly cached, and if the digest is HKS_DIGEST_NONE, the
-   hash value has been passed in by the user. So the hash value does not need to be free.
+/* If the algorithm is ed25519, ml-dsa or sm2, the plaintext is directly cached, and if the digest is HKS_DIGEST_NONE,
+   the hash value has been passed in by the user. So the hash value does not need to be free.
 */
 int32_t HksCheckNeedCache(uint32_t alg, uint32_t digest)
 {
-    if ((alg == HKS_ALG_ED25519) || (alg == HKS_ALG_SM2) || (digest == HKS_DIGEST_NONE)) {
+    if ((alg == HKS_ALG_ED25519) || (alg == HKS_ALG_ML_DSA) || (alg == HKS_ALG_SM2) || (digest == HKS_DIGEST_NONE)) {
         HKS_LOG_I("need to cache the data");
         return HKS_SUCCESS;
     }

@@ -345,4 +345,44 @@ HWTEST_F(HksMlDsaSignVerifyPart1Test, HksMlDsaSignVerifyPart1Test005, TestSize.L
 
     HksFreeParamSet(&genParamSet);
 }
+
+
+/**
+ * @tc.name: HksMlDsaSignVerifyPart1Test.HksMlDsaSignVerifyPart1Test006
+ * @tc.desc: alg-MlDsa, pur-sign/verify, secId-44, message-102401
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksMlDsaSignVerifyPart1Test, HksMlDsaSignVerifyPart1Test006, TestSize.Level0)
+{
+    const char *keyAliasString = "HksMlDsaSignVerifyPart1Test006";
+    struct HksBlob keyAlias = {strlen(keyAliasString), (uint8_t *)keyAliasString};
+    struct HksParamSet *genParamSet = nullptr;
+    struct HksParamSet *signParamSet = nullptr;
+    struct HksParamSet *verifyParamSet = nullptr;
+
+    int32_t ret = InitParamSet(&genParamSet, g_genParamsTest001, sizeof(g_genParamsTest001) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+    ret = InitParamSet(&signParamSet, g_signParamsTest001, sizeof(g_signParamsTest001) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+    ret = InitParamSet(&verifyParamSet, g_verifyParamsTest001, sizeof(g_verifyParamsTest001) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
+
+    uint8_t outDataS[ML_DSA_COMMON_SIZE] = {0};
+    struct HksBlob outData = { ML_DSA_COMMON_SIZE, outDataS };
+    ret = HksMlDsaTestSignVerify(&keyAlias, signParamSet, &inDataInvalid, &outData);
+    EXPECT_EQ(ret, HKS_FAILURE) << "HksMlDsaTestSignVerify failed.";
+
+    ret = HksMlDsaTestSignVerify(&keyAlias, verifyParamSet, &inDataInvalid, &outData);
+    EXPECT_EQ(ret, HKS_FAILURE) << "HksMlDsaTestSignVerify failed.";
+
+    ret = HksDeleteKeyForDe(&keyAlias, verifyParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&signParamSet);
+    HksFreeParamSet(&verifyParamSet);
+}
 } // namespace Unittest::SifnVerify

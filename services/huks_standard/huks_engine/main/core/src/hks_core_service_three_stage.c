@@ -56,6 +56,8 @@
 #define MAX_BUF_SIZE                     (5 * 1024 * 1024)
 #define HKS_AES_GCM_NONCE_LEN            12
 #define HKS_AES_CCM_NONCE_LEN            7
+#define HKS_ML_DSA_CONTEXT_MAX_SIZE      255
+#define HKS_ML_DSA_MESSAGE_MAX_SIZE      102400
 
 static int32_t CheckRsaCipherData(bool isEncrypt, uint32_t keyLen, struct HksUsageSpec *usageSpec,
     const struct HksBlob *outData)
@@ -254,6 +256,8 @@ static int32_t SignVerifyAuth(const struct HuksKeyNode *keyNode, const struct Hk
         return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_RSA, keyNode);
     } else if (algParam->uint32Param == HKS_ALG_ED25519) {
         return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_ED25519, keyNode);
+    } else if (algParam->uint32Param == HKS_ALG_ML_DSA) {
+        return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_ML_DSA, keyNode);
     }
     return HKS_ERROR_INVALID_ALGORITHM;
 }
@@ -360,10 +364,11 @@ static int32_t CopyNewCachedData(const struct HksBlob *cachedBlob, const struct 
 }
 
 static int32_t GetNewCachedData(const struct HksBlob *cachedBlob, const struct HksBlob *inData,
-    struct HksBlob *newBlob)
+    struct HksBlob *newBlob, uint32_t alg)
 {
-    if ((cachedBlob->size > MAX_BUF_SIZE) || (inData->size > (MAX_BUF_SIZE - cachedBlob->size))) {
-        HKS_LOG_E("input data size too large, size = %" LOG_PUBLIC "u", inData->size);
+    uint32_t maxSize = (alg == HKS_ALG_ML_DSA) ? HKS_ML_DSA_MESSAGE_MAX_SIZE : MAX_BUF_SIZE;
+    if ((cachedBlob->size > maxSize) || (inData->size > (maxSize - cachedBlob->size))) {
+        HKS_LOG_E("input data size too large, size = %" LOG_PUBLIC "u", cachedBlob->size + inData->size);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -382,7 +387,7 @@ static int32_t GetNewCachedData(const struct HksBlob *cachedBlob, const struct H
     return HKS_SUCCESS;
 }
 
-static int32_t UpdateCachedData(const struct HuksKeyNode *keyNode, const struct HksBlob *srcData)
+static int32_t UpdateCachedData(const struct HuksKeyNode *keyNode, uint32_t alg, const struct HksBlob *srcData)
 {
     struct HksParam *ctxParam = NULL;
     int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_CRYPTO_CTX, &ctxParam);
@@ -395,7 +400,7 @@ static int32_t UpdateCachedData(const struct HuksKeyNode *keyNode, const struct 
     struct HksBlob *newCachedBlob = (struct HksBlob *)HksMalloc(sizeof(struct HksBlob));
     HKS_IF_NULL_LOGE_RETURN(newCachedBlob, HKS_ERROR_MALLOC_FAIL, "malloc new blob failed")
 
-    ret = GetNewCachedData(cachedData, srcData, newCachedBlob);
+    ret = GetNewCachedData(cachedData, srcData, newCachedBlob, alg);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get new cached data failed, ret = %" LOG_PUBLIC "d", ret);
         HKS_FREE(newCachedBlob);
@@ -420,7 +425,7 @@ static void FreeCachedData(struct HksBlob **cachedData)
     HKS_FREE(*cachedData);
 }
 
-static int32_t FinishCachedData(const struct HuksKeyNode *keyNode, const struct HksBlob *srcData,
+static int32_t FinishCachedData(const struct HuksKeyNode *keyNode, uint32_t alg, const struct HksBlob *srcData,
     struct HksBlob *outData)
 {
     struct HksParam *ctxParam = NULL;
@@ -431,7 +436,7 @@ static int32_t FinishCachedData(const struct HuksKeyNode *keyNode, const struct 
     HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_BAD_STATE, "ctx is invalid: null!")
 
     struct HksBlob *cachedData = (struct HksBlob *)ctx;
-    ret = GetNewCachedData(cachedData, srcData, outData);
+    ret = GetNewCachedData(cachedData, srcData, outData, alg);
     HKS_IF_NOT_SUCC_LOGE(ret, "get new cached data failed, ret = %" LOG_PUBLIC "d", ret)
 
     FreeCachedData(&cachedData);
@@ -542,6 +547,28 @@ static int32_t CheckSignVerifyParams(const struct HuksKeyNode *keyNode, const st
     return ret;
 }
 
+static int32_t HksFillUsageSpecWithContext(const struct HksParamSet *paramset, struct HksUsageSpec *usageSpec)
+{
+    struct HksBlob context = { 0, NULL };
+    struct HksParam *ctxParam = NULL;
+    int32_t ret = HksGetParam(paramset, HKS_TAG_CONTEXT, &ctxParam);
+    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+        usageSpec->algParam = (void *)&context;
+        return HKS_SUCCESS;
+    } else if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get context from keyNode runtimeParamSet failed, ret = %d", ret);
+        return ret;
+    }
+
+    if (ctxParam->blob.size > HKS_ML_DSA_CONTEXT_MAX_SIZE) {
+        HKS_LOG_E("invalid ml-dsa context size");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    usageSpec->algParam = (void *)ctxParam;
+    return HKS_SUCCESS;
+}
+
 static int32_t CoreSignVerify(const struct HuksKeyNode *keyNode, const struct HksBlob *inData,
     struct HksBlob *outData)
 {
@@ -568,6 +595,16 @@ static int32_t CoreSignVerify(const struct HuksKeyNode *keyNode, const struct Hk
         ret = HKS_ERROR_NOT_SUPPORTED;
 #endif
     } else {
+        if (usageSpec.algType == HKS_ALG_ML_DSA) {
+            ret = HksFillUsageSpecWithContext(keyNode->runtimeParamSet, &usageSpec);
+            if (ret != HKS_SUCCESS) {
+                HKS_LOG_E("fill ml-dsa context fail");
+                (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
+                HKS_FREE(rawKey.data);
+                return ret;
+            }
+        }
+
         if (usageSpec.purpose == HKS_KEY_PURPOSE_SIGN) {
             ret = HksCryptoHalSign(&rawKey, &usageSpec, inData, outData);
         } else {
@@ -1077,7 +1114,7 @@ static int32_t CoreAesCipherUpdate(const struct HuksKeyNode *keyNode, const stru
         if (outData != NULL) {
             outData->size = 0;
         }
-        return UpdateCachedData(keyNode, inData);
+        return UpdateCachedData(keyNode, alg, inData);
     }
 
     return CoreCipherUpdate(keyNode, inData, outData, alg);
@@ -1094,7 +1131,7 @@ static int32_t CoreAesCipherFinish(const struct HuksKeyNode *keyNode, const bool
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "cipher finish in data size too long")
 
         struct HksBlob tempInData = { 0, NULL };
-        ret = FinishCachedData(keyNode, inData, &tempInData);
+        ret = FinishCachedData(keyNode, HKS_ALG_AES, inData, &tempInData);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "cipher finish get aes cipher cached data failed")
 
         ret = CoreAesCcmCipherFinish(keyNode, isEncrypt, &tempInData, outData);
@@ -1392,7 +1429,7 @@ static int32_t CoreRsaCipherFinish(const struct HuksKeyNode *keyNode, const stru
     struct HksBlob *outData)
 {
     struct HksBlob tempInData = { 0, NULL };
-    int32_t ret = FinishCachedData(keyNode, inData, &tempInData);
+    int32_t ret = FinishCachedData(keyNode, HKS_ALG_RSA, inData, &tempInData);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get rsa cipher cached data failed")
 
     ret = RsaCipherFinish(keyNode, &tempInData, outData);
@@ -1404,7 +1441,7 @@ static int32_t CoreSm2CipherFinish(const struct HuksKeyNode *keyNode, const stru
     struct HksBlob *outData)
 {
     struct HksBlob tempInData = { 0, NULL };
-    int32_t ret = FinishCachedData(keyNode, inData, &tempInData);
+    int32_t ret = FinishCachedData(keyNode, HKS_ALG_SM2, inData, &tempInData);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get sm2 cipher cached data failed")
 
     ret = Sm2CipherFinish(keyNode, &tempInData, outData);
@@ -1563,7 +1600,7 @@ int32_t HksCoreSignVerifyThreeStageUpdate(const struct HuksKeyNode *keyNode, con
 #else
     if (HksCheckNeedCache(algParam->uint32Param, digest) == HKS_SUCCESS) {
 #endif
-        return UpdateCachedData(keyNode, srcData);
+        return UpdateCachedData(keyNode, algParam->uint32Param, srcData);
     } else {
         return CoreHashUpdate(keyNode, srcData);
     }
@@ -1600,7 +1637,7 @@ int32_t HksCoreSignVerifyThreeStageFinish(const struct HuksKeyNode *keyNode, con
 #else
     if (HksCheckNeedCache(algParam->uint32Param, digest) == HKS_SUCCESS) {
 #endif
-        ret = FinishCachedData(keyNode, &message, &signVerifyData);
+        ret = FinishCachedData(keyNode, algParam->uint32Param, &message, &signVerifyData);
     } else {
         ret = CoreHashFinish(keyNode, &message, &signVerifyData);
     }
@@ -1668,7 +1705,7 @@ int32_t HksCoreCryptoThreeStageUpdate(const struct HuksKeyNode *keyNode, const s
         "get param get 0x%" LOG_PUBLIC "x failed", HKS_TAG_ALGORITHM)
 
     if ((algParam->uint32Param == HKS_ALG_RSA) || (algParam->uint32Param == HKS_ALG_SM2)) {
-        return UpdateCachedData(keyNode, inData);
+        return UpdateCachedData(keyNode, algParam->uint32Param, inData);
     } else if (algParam->uint32Param == HKS_ALG_AES) {
         return CoreAesCipherUpdate(keyNode, inData, outData, alg);
 #ifdef HKS_SUPPORT_DES_C
