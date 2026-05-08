@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef HKS_CLIENT_SERVICE_COMMON_H
-#define HKS_CLIENT_SERVICE_COMMON_H
+#ifndef HKS_CORE_SERVICE_EXTENSION_H
+#define HKS_CORE_SERVICE_EXTENSION_H
+
+#include <stdint.h>
 
 #include "hks_type.h"
 
@@ -22,21 +24,14 @@
 extern "C" {
 #endif
 
-int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
+int32_t HksCoreWrapKey(const struct HksBlob *keyAlias, const struct HksBlob *key,
+    const struct HksParamSet *paramSet, struct HksBlob *wrappedKey);
 
-int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet,
-    struct HksParamSet **outParamSet, int frontUserId);
-
-void HksSetScreenState(bool state);
-    
-bool HksGetScreenState(void);
-
-bool IsSeSecurityLevel(const struct HksParamSet *paramSet);
-
-bool IsSeHandle(const struct HksBlob *handle);
+int32_t HksCoreUnwrapKey(const struct HksBlob *keyAlias, const struct HksBlob *wrappedKey,
+    const struct HksParamSet *paramSet, struct HksBlob *keyOut);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /* HKS_CORE_SERVICE_EXTENSION_H */

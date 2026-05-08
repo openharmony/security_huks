@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,7 @@
 
 #include "hks_core_service_key_attest.h"
 #include "hks_core_service_key_generate.h"
+#include "hks_core_service_key_extension.h"
 #include "hks_core_service_key_operate_one_stage.h"
 #include "hks_core_service_key_operate_three_stage.h"
 #include "hks_core_service_key_other.h"

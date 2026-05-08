@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,7 +65,98 @@ ENABLE_CFI(int32_t DcmGenerateCertChain(struct HksBlob *cert, const uint8_t *rem
         ret = HksDcmCallbackHandlerSetRequestIdWithoutLock(remoteObject, request.requestId);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDcmCallbackHandlerSetRequestIdWithoutLock failed %" LOG_PUBLIC "d", ret)
         return HKS_SUCCESS;
-    } while (false);
+    } while (0);
+    return ret;
+}
+
+static int32_t ParseSeAttestKeyData(const struct HksBlob *seCert, struct HksBlob *seKeyBlob,
+    struct HksBlob *paramSetBlob, struct HksBlob *certChain)
+{
+    uint8_t *buf = seCert->data;
+    uint32_t offset = 0;
+
+    HKS_IF_TRUE_LOGE_RETURN(offset + sizeof(uint32_t) > seCert->size, HKS_ERROR_INVALID_ARGUMENT,
+        "seCert data too small for seKeyBlob size");
+
+    uint32_t seKeyBlobSize = *(static_cast<uint32_t *>(static_cast<void *>(buf + offset)));
+    offset += sizeof(uint32_t);
+
+    HKS_IF_TRUE_LOGE_RETURN(offset + seKeyBlobSize > seCert->size, HKS_ERROR_INVALID_ARGUMENT,
+        "seCert data too small for seKeyBlob data");
+
+    seKeyBlob->size = seKeyBlobSize;
+    seKeyBlob->data = buf + offset;
+    offset += seKeyBlobSize;
+
+    HKS_IF_TRUE_LOGE_RETURN(offset + sizeof(uint32_t) > seCert->size, HKS_ERROR_INVALID_ARGUMENT,
+        "seCert data too small for paramSet size");
+
+    uint32_t paramSetSize = *(static_cast<uint32_t *>(static_cast<void *>(buf + offset)));
+    offset += sizeof(uint32_t);
+
+    HKS_IF_TRUE_LOGE_RETURN(offset + paramSetSize > seCert->size, HKS_ERROR_INVALID_ARGUMENT,
+        "seCert data too small for paramSet data");
+
+    paramSetBlob->size = paramSetSize;
+    paramSetBlob->data = buf + offset;
+    offset += paramSetSize;
+
+    HKS_IF_TRUE_LOGE_RETURN(offset + sizeof(uint32_t) > seCert->size, HKS_ERROR_INVALID_ARGUMENT,
+        "seCert data too small for certChain size");
+
+    uint32_t certChainSize = *(static_cast<uint32_t *>(static_cast<void *>(buf + offset)));
+    offset += sizeof(uint32_t);
+
+    HKS_IF_TRUE_LOGE_RETURN(offset + certChainSize > seCert->size, HKS_ERROR_INVALID_ARGUMENT,
+        "seCert data too small for certChain data");
+
+    certChain->size = certChainSize;
+    certChain->data = buf + offset;
+
+    HKS_LOG_I("data size: seKeyBlob: %" LOG_PUBLIC "u, paramset: %" LOG_PUBLIC "u, certChain: %" LOG_PUBLIC "u",
+        seKeyBlob->size, paramSetBlob->size, certChain->size);
+    return HKS_SUCCESS;
+}
+
+ENABLE_CFI(int32_t DcmSeGenerateCertChain(struct HksBlob *seCert, const uint8_t *remoteObject))
+{
+    HKS_LOG_I("enter DcmSeGenerateCertChain");
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(seCert), HKS_ERROR_NEW_INVALID_ARGUMENT, "invalid in seCert");
+
+    struct HksBlob seKeyBlob = { 0, NULL };
+    struct HksBlob paramSetBlob = { 0, NULL };
+    struct HksBlob certChain = { 0, NULL };
+
+    int32_t ret = ParseSeAttestKeyData(seCert, &seKeyBlob, &paramSetBlob, &certChain);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ParseSeAttestKeyData failed");
+
+    SeAttestFunction fun = HksGetDcmFunction<SeAttestFunction>("DcmAnonymousAttestKeySe");
+    HKS_IF_NULL_LOGE_RETURN(fun, HKS_ERROR_UNKNOWN_ERROR, "HksGetDcmFunction failed");
+
+    ret = HKS_ERROR_UNKNOWN_ERROR;
+    do {
+        DcmAnonymousRequest request = {
+            .blob = { .size = certChain.size, .data = certChain.data },
+            .requestId = 0,
+        };
+
+        DcmBlob dcmSeKeyBlob = { .size = seKeyBlob.size, .data = seKeyBlob.data };
+        DcmBlob dcmParamSetBlob = { .size = paramSetBlob.size, .data = paramSetBlob.data };
+
+        std::lock_guard<std::mutex> lockGuard(HksDcmCallbackHandlerGetMapMutex());
+        ret = fun(&dcmSeKeyBlob, &dcmParamSetBlob, &request, [](DcmAnonymousResponse *response) {
+            HksDcmCallback(response);
+        });
+        HKS_LOG_I("got requestId %" LOG_PUBLIC PRIu64, request.requestId);
+        if (ret != DCM_SUCCESS) {
+            HKS_LOG_E("DcmAnonymousAttestKeySe failed %" LOG_PUBLIC "d", ret);
+            ret = HUKS_ERR_CODE_EXTERNAL_ERROR;
+            break;
+        }
+        ret = HksDcmCallbackHandlerSetRequestIdWithoutLock(remoteObject, request.requestId);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDcmCallbackHandlerSetRequestIdWithoutLock failed %" LOG_PUBLIC "d", ret)
+        return HKS_SUCCESS;
+    } while (0);
     return ret;
 }
 
