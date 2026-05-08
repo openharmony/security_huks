@@ -78,7 +78,7 @@ static int32_t WrapIndexWithProviderInfo(const ProviderInfo &providerInfo, const
     return HKS_SUCCESS;
 }
 
-static int32_t CheckIndexSizeAndSetIndex(const std::string &index, const ProviderInfo &providerInfo,
+static int32_t GenerateResourceId(const std::string &index, const ProviderInfo &providerInfo,
     std::string &resourceId)
 {
     HKS_IF_TRUE_LOGE_RETURN(index.size() > MAX_INDEX_SIZE, HKS_ERROR_NEW_INVALID_ARGUMENT,
@@ -601,8 +601,8 @@ int32_t HksRemoteHandleManager::GetResourceId(const HksProcessInfo &processInfo,
     ret = ConvertExtensionToHksErrorCode(ret, g_getResourceIdErrCodeMapping);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetResourceId failed, ret = %" LOG_PUBLIC "d", ret)
 
-    ret = CheckIndexSizeAndSetIndex(resourceResult, providerInfo, resourceId);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret , "CheckIndexSizeAndSetIndex fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = GenerateResourceId(resourceResult, providerInfo, resourceId);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GenerateResourceId fail, ret = %" LOG_PUBLIC "d", ret)
 
     HKS_LOG_I("leave HksRemoteHandleManager::GetResourceId, ret = %" LOG_PUBLIC "d", ret);
     return HKS_SUCCESS;
