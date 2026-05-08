@@ -511,7 +511,8 @@ void HksIpcServiceImportCertificate(const struct HksBlob *srcData, const uint8_t
 #endif
 }
 
-void HksIpcServiceSetOrGetRemoteProperty(const struct HksBlob *srcData, const uint8_t *context, const uint8_t *remoteObject)
+void HksIpcServiceSetOrGetRemoteProperty(const struct HksBlob *srcData,
+    const uint8_t *context, const uint8_t *remoteObject)
 {
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
     int32_t ret;

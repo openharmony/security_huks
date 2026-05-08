@@ -85,8 +85,8 @@ static int32_t CallHksGetUkeyPinAuthState(const std::vector<uint8_t> &index, str
     return HksGetUkeyPinAuthState(&indexBlob, paramSetIn, status);
 }
 
-static int32_t CallHksGetRemoteProperty(const std::vector<uint8_t> &resourceIdV, const std::vector<uint8_t> &propertyIdV,
-    const struct HksParamSet *paramSetIn, struct HksParamSet **paramSetOut)
+static int32_t CallHksGetRemoteProperty(const std::vector<uint8_t> &resourceIdV,
+    const std::vector<uint8_t> &propertyIdV, const struct HksParamSet *paramSetIn, struct HksParamSet **paramSetOut)
 {
     struct HksBlob resourceId = {0, nullptr};
     if (!resourceIdV.empty()) {

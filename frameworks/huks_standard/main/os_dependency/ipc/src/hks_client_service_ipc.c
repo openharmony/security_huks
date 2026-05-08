@@ -625,7 +625,8 @@ int32_t HksClientSetOrGetRemoteProperty(enum HksExtPropertyOperation operation,
         ret = HksSendRequest(HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY, &inBlob, &outBlob, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "send request fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksRemotePropertyUnpackFromService(&outBlob, operation == HKS_EXT_PROPERTY_OPERATION_GET ? propertySetOut : NULL);
+        ret = HksRemotePropertyUnpackFromService(&outBlob,
+            (operation == HKS_EXT_PROPERTY_OPERATION_GET) ? propertySetOut : NULL);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRemotePropertyUnpackFromService fail")
     } while (0);
 

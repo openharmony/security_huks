@@ -261,10 +261,10 @@ int32_t HksIpcServiceOnSetOrGetRemotePropertyAdapter(const struct HksProcessInfo
     const uint8_t *remoteObject)
 {
     int32_t ret = HksIpcCheckBlob(propertyInfo->resourceId, 1, HKS_EXT_MAX_RESOURCE_ID_LEN);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnSetOrGetRemotePropertyAdapter invalid resourceId blob")
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "invalid resourceId blob")
 
     ret = HksIpcCheckBlob(propertyInfo->propertyId, 1, HKS_EXT_MAX_PROPERTY_ID_LEN);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnSetOrGetRemotePropertyAdapter invalid propertyId blob")
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "invalid propertyId blob")
 
     std::string resourceIdStr(reinterpret_cast<const char*>(propertyInfo->resourceId->data),
         propertyInfo->resourceId->size);
