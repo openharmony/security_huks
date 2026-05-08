@@ -683,7 +683,6 @@ int32_t HksClientGetResourceId(const struct HksBlob *providerName, const struct 
         
         ret = HksSendRequest(HKS_MSG_EXT_GET_RESOURCE_ID, &inBlob, &outBlob, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "send request fail, ret = %" LOG_PUBLIC "d", ret)
-        
         resourceId->size = outBlob.size;
         resourceId->data = (uint8_t *)HksMalloc(resourceId->size);
         if (resourceId->data == NULL) {
@@ -691,10 +690,13 @@ int32_t HksClientGetResourceId(const struct HksBlob *providerName, const struct 
             HKS_LOG_E("Failed to allocate memory for ResourceId");
             break;
         }
-        HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(resourceId->data, outBlob.size, outBlob.data, outBlob.size),
-            "memcpy_s resourceId failed")
+        if (memcpy_s(resourceId->data, outBlob.size, outBlob.data, outBlob.size) != EOK) {
+            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
+            HKS_FREE_BLOB(*resourceId);
+            HKS_LOG_E("memcpy_s resourceId failed");
+            break;
+        }
     } while (0);
-    
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
     HKS_FREE_BLOB(outBlob);
