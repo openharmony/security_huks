@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (C) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -35,6 +35,8 @@ ohos_unittest("hukssdk_test") {
     # "./src/hks_modify_key_test.cpp",
     "./src/hks_others_test.cpp",
     "./src/hks_wrap_key_test.cpp",
+    #"./src/hks_se_test.cpp",
+    #"./src/hks_se_session_manager_test.cpp",
 
     # "./src/hks_safe_cipher_key_test.cpp",
     # "./src/hks_safe_compare_key_test.cpp",

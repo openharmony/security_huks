@@ -472,6 +472,14 @@ enum HksKeySecurityLevel {
     HKS_KEY_SECURITY_LEVEL_INDEPENDENT_SE = 2,
 };
 
+enum HksWrapKeyByHukVersion {
+    HKS_WRAP_KEY_BY_HUK_VERSION_DEFAULT = 0,
+
+    /* 100 ~ 199 se wrappedKey */
+    HKS_WRAP_KEY_BY_HUK_VERSION_SE = 100,
+    /* 200 ~ 299  se wrappedKey */
+    HKS_WRAP_KEY_BY_HUK_VERSION_INDEPENDENT_SE = 200,
+};
 #endif
 
 /**

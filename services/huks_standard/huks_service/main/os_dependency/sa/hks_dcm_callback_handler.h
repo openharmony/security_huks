@@ -60,6 +60,8 @@ typedef struct {
 
 typedef void (*DcmCallback)(DcmAnonymousResponse *response);
 typedef int32_t (*AttestFunction)(DcmAnonymousRequest *requset, DcmCallback callback);
+typedef int32_t (*SeAttestFunction)(const DcmBlob *seKeyBlob, const DcmBlob *paramSetBlob, DcmAnonymousRequest *request,
+    DcmCallback callback);
 typedef int32_t (*LocalAttestFunction)(DcmApplyAnonymousRequest *request, DcmBlob *localKeyAttest,
     DcmCallback callback);
 

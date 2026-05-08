@@ -44,7 +44,7 @@ struct HksOperation {
 extern "C" {
 #endif
 
-int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+int32_t HksCreateOperation(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     const struct HksBlob *operationHandle, bool abortable);
 
 struct HksOperation *QueryOperationAndMarkInUse(const struct HksProcessInfo *processInfo,
