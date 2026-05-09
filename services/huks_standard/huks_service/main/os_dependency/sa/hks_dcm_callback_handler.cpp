@@ -86,7 +86,7 @@ private:
     }
 };
 
-int32_t CopyBlobToBuffer(const struct DcmBlob *blob, struct HksBlob *buf)
+static int32_t CopyBlobToBuffer(const struct DcmBlob *blob, struct HksBlob *buf)
 {
     HKS_IF_TRUE_LOGE_RETURN(buf->size < sizeof(blob->size) + ALIGN_SIZE(blob->size), HKS_ERROR_BUFFER_TOO_SMALL,
         "buf size smaller than blob size")
