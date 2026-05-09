@@ -1202,9 +1202,12 @@ static int32_t CheckTuiPinAccessType(uint32_t authAccessType)
     return HKS_SUCCESS;
 }
 
-static int32_t HksCheckAuthAccessTypeByUserAuthType(uint32_t userAuthType, uint32_t authAccessType)
+static int32_t HksCheckAuthAccessTypeByUserAuthType(struct HksParam *userAuthTypeParam, uint32_t authAccessType)
 {
-    if ((userAuthType & HKS_USER_AUTH_TYPE_TUI_PIN) != 0) {
+    if (userAuthTypeParam == NULL) {
+        return HKS_SUCCESS;
+    }
+    if ((userAuthTypeParam->uint32Param & HKS_USER_AUTH_TYPE_TUI_PIN) != 0) {
         return CheckTuiPinAccessType(authAccessType);
     }
     uint32_t valuesCnt = HKS_ARRAY_SIZE(g_expectAuthAccessParams);
@@ -1212,7 +1215,7 @@ static int32_t HksCheckAuthAccessTypeByUserAuthType(uint32_t userAuthType, uint3
     uint32_t tempType = 0;
     for (uint32_t i = 0; i < valuesCnt; i++) {
         struct AuthAccessTypeChecker checker = g_expectAuthAccessParams[i];
-        if ((checker.userAuthType & userAuthType) != 0 &&
+        if ((checker.userAuthType & userAuthTypeParam->uint32Param) != 0 &&
             HasValidAuthAccessType(checker.allowAuthAccessTypes, authAccessType, &tempType) == HKS_SUCCESS) {
             validAuthAccessType |= tempType;
         }
@@ -1229,20 +1232,31 @@ static int32_t HksCheckAuthAccessTypeByUserAuthType(uint32_t userAuthType, uint3
 }
 #endif
 
-int32_t HksCheckUserAuthParams(uint32_t userAuthType, uint32_t authAccessType, uint32_t challengeType)
+int32_t HksCheckUserAuthParams(struct HksParam *userAuthTypeParam, uint32_t authAccessType, uint32_t challengeType,
+    struct HksParam *userAuthTypeAtlParam)
 {
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
-    int32_t ret = HksCheckValue(userAuthType, g_supportUserAuthTypes, HKS_ARRAY_SIZE(g_supportUserAuthTypes));
-    HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_INVALID_AUTH_TYPE)
+    int32_t ret = HKS_SUCCESS;
+    if (userAuthTypeParam != NULL) {
+        ret = HksCheckValue(userAuthTypeParam->uint32Param, g_supportUserAuthTypes,
+            HKS_ARRAY_SIZE(g_supportUserAuthTypes));
+        HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_INVALID_AUTH_TYPE)
+    }
+    if (userAuthTypeAtlParam != NULL) {
+        ret = HksCheckValue(userAuthTypeAtlParam->uint32Param, g_supportUserAuthAtlTypes,
+            HKS_ARRAY_SIZE(g_supportUserAuthAtlTypes));
+        HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_INVALID_AUTH_TYPE)
+    }
 
     ret = HksCheckValue(challengeType, g_userAuthChallengeType, HKS_ARRAY_SIZE(g_userAuthChallengeType));
     HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_INVALID_CHALLENGE_TYPE)
 
-    return HksCheckAuthAccessTypeByUserAuthType(userAuthType, authAccessType);
+    return HksCheckAuthAccessTypeByUserAuthType(userAuthTypeParam, authAccessType);
 #else
-    (void)userAuthType;
+    (void)userAuthTypeParam;
     (void)authAccessType;
     (void)challengeType;
+    (void)userAuthTypeAtlParam;
     return HKS_SUCCESS;
 #endif
 }

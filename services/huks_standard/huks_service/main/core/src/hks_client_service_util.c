@@ -582,7 +582,9 @@ int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo
 {
     uint32_t userAuthType = 0;
     uint32_t authAccessType = 0;
-    int32_t ret = HksCheckAndGetUserAuthInfo(paramSet, processInfo->uidInt, &userAuthType, &authAccessType);
+    uint32_t userAuthTypeAtl = 0;
+    int32_t ret = HksCheckAndGetUserAuthInfo(paramSet, processInfo->uidInt, &userAuthType,
+        &authAccessType, &userAuthTypeAtl); // callback
     if (ret == HKS_ERROR_NOT_SUPPORTED) {
         struct HksParamSet *newParamSet = NULL;
         ret = AppendProcessInfoAndDefault(paramSet, processInfo, NULL, &newParamSet, true);
@@ -612,8 +614,9 @@ int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo
             void *data = HksLockUserIdm();
             HKS_IF_NULL_LOGE_RETURN(data, HKS_ERROR_SESSION_REACHED_LIMIT, "HksLockUserIdm fail")
             do {
-                ret = CheckIfUserIamSupportCurType(processInfo->userIdInt, userAuthType); // callback
-                HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+                HKS_IF_TRUE_LOGE_RETURN((userAuthType == 0), HKS_ERROR_NOT_SUPPORTED, "invalid user auth type")
+                uint32_t userAuthret = CheckIfUserIamSupportCurType(processInfo->userIdInt, userAuthType); // callback
+                HKS_IF_NOT_SUCC_LOGE_BREAK((userAuthret),
                     "UserIAM do not support current user auth or not enrolled cur auth info")
 
                 // callback

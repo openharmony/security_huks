@@ -335,6 +335,7 @@ struct HksAuthTokenKey {
  */
 typedef struct __attribute__((__packed__)) HksSecureSignAuthInfo {
     uint32_t userAuthType;
+    uint32_t userAuthAtlType;
     uint64_t authenticatorId;
     uint64_t credentialId;
 } __attribute__((__packed__)) HksSecureSignAuthInfo;

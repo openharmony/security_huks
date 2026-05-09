@@ -64,6 +64,29 @@ int32_t HksCoreConvertUserIamTypeToHksType(enum HksUserIamType type, uint32_t us
     }
     return HKS_ERROR_NOT_SUPPORTED;
 }
+
+int32_t ConvertToHksAuthTrustLevel(uint32_t authType, enum HksUserAuthAtlType *hksAuthAtlType)
+{
+    switch (authType) {
+        case HKS_IAM_USER_AUTH_ATL1:
+            *hksAuthAtlType = HKS_USER_AUTH_ATL1;
+            break;
+        case HKS_IAM_USER_AUTH_ATL2:
+            *hksAuthAtlType = HKS_USER_AUTH_ATL2;
+            break;
+        case HKS_IAM_USER_AUTH_ATL3:
+            *hksAuthAtlType = HKS_USER_AUTH_ATL3;
+            break;
+        case HKS_IAM_USER_AUTH_ATL4:
+            *hksAuthAtlType = HKS_USER_AUTH_ATL4;
+            break;
+        default:
+            HKS_LOG_E("Invalid authType!");
+            return HKS_ERROR_NOT_SUPPORTED;
+    }
+    return HKS_SUCCESS;
+}
+
 #else
 
 #include "hks_useridm_api_wrap.h"

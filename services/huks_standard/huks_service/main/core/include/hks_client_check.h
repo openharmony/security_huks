@@ -67,7 +67,7 @@ int32_t HksCheckServiceInitParams(const struct HksBlob *processName, const struc
     const struct HksParamSet *paramSet);
 
 int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t uid, uint32_t *userAuthType,
-    uint32_t *authAccessType);
+    uint32_t *authAccessType, uint32_t *userAuthTypeAtl);
 
 int32_t HksCheckUserAuthKeyPurposeValidity(const struct HksParamSet *paramSet);
 
