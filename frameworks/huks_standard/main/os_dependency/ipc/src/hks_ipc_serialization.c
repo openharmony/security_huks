@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "hks_ipc_serialization.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -24,7 +25,7 @@
 #include "hks_type_enum.h"
 #include "securec.h"
 
-int32_t CopyBlobToBuffer(const struct HksBlob *blob, struct HksBlob *destBlob, uint32_t *destOffset)
+int32_t CopyBlobToBuffer(const struct HksBlob *blob, const struct HksBlob *destBlob, uint32_t *destOffset)
 {
     if ((*destOffset > destBlob->size) ||
         ((destBlob->size - *destOffset) < (sizeof(blob->size) + ALIGN_SIZE(blob->size)))) {

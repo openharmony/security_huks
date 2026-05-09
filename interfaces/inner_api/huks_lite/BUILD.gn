@@ -317,6 +317,7 @@ if (ohos_kernel_type == "liteos_m") {
       "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ipc_check.c",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ipc_slice.c",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_samgr_client_proxy.c",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ipc_serialization.c",
     ]
 
     configs += [ ":hilog_dir" ]
