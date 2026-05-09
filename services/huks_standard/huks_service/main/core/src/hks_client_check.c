@@ -249,7 +249,7 @@ int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t 
     ret = HksGetParam(paramSet, HKS_TAG_CHALLENGE_TYPE, &challengeTypeParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_CHALLENGE_TYPE_FAILED, "get challenge type param failed")
 
-    ret = HksCheckUserAuthParams(userAuthTypeParam, *authAccessType, challengeTypeParam->uint32Param,
+    ret = HksCheckUserAuthParams(userAuthTypeParam, accessTypeParam->uint32Param, challengeTypeParam->uint32Param,
         userAuthTypeAtlParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check user auth params failed")
 
