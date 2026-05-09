@@ -165,7 +165,7 @@ int HksExtStub::ProcessExtGetRemotePropertyReply(MessageParcel& data)
     uint32_t errCode = 1;
     if (!data.ReadUint32(errCode) || errCode != HKS_SUCCESS) {
         HKS_LOG_E("ipc client read errCode %" LOG_PUBLIC "u", errCode);
-        SendAsyncReply(errCode, receivedData, 0, HKS_MSG_EXT_GET_REMOTE_PROPERTY_REPLY);
+        SendAsyncReply(errCode, receivedData, 0, HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY);
         return ERR_INVALID_DATA;
     }
     uint32_t receivedSize = 0;
@@ -187,7 +187,7 @@ int HksExtStub::ProcessExtGetRemotePropertyReply(MessageParcel& data)
         receivedData = std::move(receivedPtr);
         receivedSize = size;
     } while (false);
-    SendAsyncReply(errCode, receivedData, receivedSize, HKS_MSG_EXT_GET_REMOTE_PROPERTY);
+    SendAsyncReply(errCode, receivedData, receivedSize, HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY);
     return err;
 }
 
@@ -218,7 +218,7 @@ int HksExtStub::OnRemoteRequest(uint32_t code,
         return ERR_INVALID_DATA;
     }
     switch (code) {
-        case HKS_MSG_EXT_GET_REMOTE_PROPERTY_REPLY:
+        case HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY:
             return ProcessExtGetRemotePropertyReply(data);
         default:
             HKS_LOG_E("OnRemoteRequest unexpected code %" LOG_PUBLIC "u", code);

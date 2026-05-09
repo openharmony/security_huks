@@ -300,13 +300,22 @@ HWTEST_F(HksRemoteHandleManagerTest, PropertyTest, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     // Test get property with valid property ID
-    CppParamSet outParams;
-    ret = manager->GetRemoteProperty(processInfo, index, "SKF_GetDevInfo", paramSet, outParams);
+    CppParamSet getPropertyParamSet = CreateTestParamSet();
+    ret = manager->SetOrGetRemoteProperty(processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
+        index, "SKF_GetDevInfo", getPropertyParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     // Test get property with invalid property ID
-    ret = manager->GetRemoteProperty(processInfo, index, "INVALID_PROPERTY", paramSet, outParams);
+    CppParamSet invalidPropertyParamSet = CreateTestParamSet();
+    ret = manager->SetOrGetRemoteProperty(processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
+        index, "INVALID_PROPERTY", invalidPropertyParamSet);
     EXPECT_NE(ret, HKS_SUCCESS);
+
+    // Test set property
+    CppParamSet setPropertyParamSet = CreateTestParamSet();
+    ret = manager->SetOrGetRemoteProperty(processInfo, HKS_EXT_PROPERTY_OPERATION_SET,
+        index, "SKF_SetDevInfo", setPropertyParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
 
     // Cleanup
     manager->CloseRemoteHandle(processInfo, index, paramSet);

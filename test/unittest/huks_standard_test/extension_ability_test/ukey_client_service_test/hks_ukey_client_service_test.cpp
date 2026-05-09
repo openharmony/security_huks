@@ -410,7 +410,7 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest010, TestSize.Level0)
 
 /**
 * @tc.name: HksUkeyClientServiceTest.HksUkeyClientServiceTest011
-* @tc.desc: HksIpcServiceOnGetRemotePropertyAdapter — null/invalid resourceId
+* @tc.desc: HksIpcServiceOnSetOrGetRemotePropertyAdapter — null/invalid resourceId
 * @tc.type: FUNC
 */
 HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest011, TestSize.Level0) {
@@ -423,22 +423,30 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest011, TestSize.Level0)
     HksBlob propBlob = { .size = static_cast<uint32_t>(propStr.size()),
         .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(propStr.data())) };
 
-    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, nullptr, &propBlob, paramSet, nullptr),
-        HKS_ERROR_INVALID_ARGUMENT);
+    HksExtPropertyOperationInfo propertyInfoNullRes = { .operation = HKS_EXT_PROPERTY_OPERATION_GET,
+        .resourceId = nullptr, .propertyId = &propBlob };
+    EXPECT_EQ(HksIpcServiceOnSetOrGetRemotePropertyAdapter(&processInfo, &propertyInfoNullRes,
+        paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob nullDataBlob = { .size = 1, .data = nullptr };
-    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &nullDataBlob, &propBlob, paramSet, nullptr),
-        HKS_ERROR_INVALID_ARGUMENT);
+    HksExtPropertyOperationInfo propertyInfoNullData = { .operation = HKS_EXT_PROPERTY_OPERATION_GET,
+        .resourceId = &nullDataBlob, .propertyId = &propBlob };
+    EXPECT_EQ(HksIpcServiceOnSetOrGetRemotePropertyAdapter(&processInfo, &propertyInfoNullData,
+        paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob emptyBlob = {};
-    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &emptyBlob, &propBlob, paramSet, nullptr),
-        HKS_ERROR_INVALID_ARGUMENT);
+    HksExtPropertyOperationInfo propertyInfoEmpty = { .operation = HKS_EXT_PROPERTY_OPERATION_GET,
+        .resourceId = &emptyBlob, .propertyId = &propBlob };
+    EXPECT_EQ(HksIpcServiceOnSetOrGetRemotePropertyAdapter(&processInfo, &propertyInfoEmpty,
+        paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
 
     std::string longRes(1025, 'r');
     HksBlob longResBlob = { .size = static_cast<uint32_t>(longRes.size()),
         .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(longRes.data())) };
-    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &longResBlob, &propBlob, paramSet, nullptr),
-        HKS_ERROR_INVALID_ARGUMENT);
+    HksExtPropertyOperationInfo propertyInfoLongRes = { .operation = HKS_EXT_PROPERTY_OPERATION_GET,
+        .resourceId = &longResBlob, .propertyId = &propBlob };
+    EXPECT_EQ(HksIpcServiceOnSetOrGetRemotePropertyAdapter(&processInfo, &propertyInfoLongRes,
+        paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
 
     HksFreeParamSet(&paramSet);
     HKS_FREE_BLOB(processInfo.userId);
@@ -447,7 +455,7 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest011, TestSize.Level0)
 
 /**
 * @tc.name: HksUkeyClientServiceTest.HksUkeyClientServiceTest012
-* @tc.desc: HksIpcServiceOnGetRemotePropertyAdapter — null/invalid propertyId
+* @tc.desc: HksIpcServiceOnSetOrGetRemotePropertyAdapter — null/invalid propertyId
 * @tc.type: FUNC
 */
 HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest012, TestSize.Level0) {
@@ -460,22 +468,30 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest012, TestSize.Level0)
     HksBlob resBlob = { .size = static_cast<uint32_t>(resStr.size()),
         .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(resStr.data())) };
 
-    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &resBlob, nullptr, paramSet, nullptr),
-        HKS_ERROR_INVALID_ARGUMENT);
+    HksExtPropertyOperationInfo propertyInfoNullProp = { .operation = HKS_EXT_PROPERTY_OPERATION_GET,
+        .resourceId = &resBlob, .propertyId = nullptr };
+    EXPECT_EQ(HksIpcServiceOnSetOrGetRemotePropertyAdapter(&processInfo, &propertyInfoNullProp,
+        paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob nullDataBlob = { .size = 1, .data = nullptr };
-    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &resBlob, &nullDataBlob, paramSet, nullptr),
-        HKS_ERROR_INVALID_ARGUMENT);
+    HksExtPropertyOperationInfo propertyInfoNullDataProp = { .operation = HKS_EXT_PROPERTY_OPERATION_GET,
+        .resourceId = &resBlob, .propertyId = &nullDataBlob };
+    EXPECT_EQ(HksIpcServiceOnSetOrGetRemotePropertyAdapter(&processInfo, &propertyInfoNullDataProp,
+        paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob emptyBlob = {};
-    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &resBlob, &emptyBlob, paramSet, nullptr),
-        HKS_ERROR_INVALID_ARGUMENT);
+    HksExtPropertyOperationInfo propertyInfoEmptyProp = { .operation = HKS_EXT_PROPERTY_OPERATION_GET,
+        .resourceId = &resBlob, .propertyId = &emptyBlob };
+    EXPECT_EQ(HksIpcServiceOnSetOrGetRemotePropertyAdapter(&processInfo, &propertyInfoEmptyProp,
+        paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
 
     std::string longProp(101, 'p');
     HksBlob longPropBlob = { .size = static_cast<uint32_t>(longProp.size()),
         .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(longProp.data())) };
-    EXPECT_EQ(HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &resBlob, &longPropBlob, paramSet, nullptr),
-        HKS_ERROR_INVALID_ARGUMENT);
+    HksExtPropertyOperationInfo propertyInfoLongProp = { .operation = HKS_EXT_PROPERTY_OPERATION_GET,
+        .resourceId = &resBlob, .propertyId = &longPropBlob };
+    EXPECT_EQ(HksIpcServiceOnSetOrGetRemotePropertyAdapter(&processInfo, &propertyInfoLongProp,
+        paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
 
     HksFreeParamSet(&paramSet);
     HKS_FREE_BLOB(processInfo.userId);
@@ -484,7 +500,7 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest012, TestSize.Level0)
 
 /**
 * @tc.name: HksUkeyClientServiceTest.HksUkeyClientServiceTest013
-* @tc.desc: HksIpcServiceOnGetRemotePropertyAdapter — null remoteObject returns NULL_POINTER
+* @tc.desc: HksIpcServiceOnSetOrGetRemotePropertyAdapter — null remoteObject returns NULL_POINTER
 * @tc.type: FUNC
 */
 HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest013, TestSize.Level0) {
@@ -500,7 +516,9 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest013, TestSize.Level0)
     HksBlob propBlob = { .size = static_cast<uint32_t>(propStr.size()),
         .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(propStr.data())) };
 
-    int32_t ret = HksIpcServiceOnGetRemotePropertyAdapter(&processInfo, &resBlob, &propBlob,
+    HksExtPropertyOperationInfo propertyInfo = { .operation = HKS_EXT_PROPERTY_OPERATION_GET,
+        .resourceId = &resBlob, .propertyId = &propBlob };
+    int32_t ret = HksIpcServiceOnSetOrGetRemotePropertyAdapter(&processInfo, &propertyInfo,
         paramSet, nullptr);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER);
 
@@ -584,7 +602,7 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest016, TestSize.Level0)
 
 /**
 * @tc.name: HksUkeyClientServiceTest.HksUkeyClientServiceTest017
-* @tc.desc: OnGetRemoteProperty/OnExportCertificate/OnExportProviderAllCertificates normal flow
+* @tc.desc: OnSetOrGetRemoteProperty/OnExportCertificate/OnExportProviderAllCertificates normal flow
 * @tc.type: FUNC
 */
 HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest017, TestSize.Level0) {
@@ -597,9 +615,8 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest017, TestSize.Level0)
 
     std::string index = "testIdx";
     std::string propertyId = "prop";
-    CppParamSet outParams;
-    EXPECT_EQ(HksIpcServiceOnGetRemoteProperty(&processInfo, index, propertyId, cppParamSet, outParams),
-        HKS_SUCCESS);
+    EXPECT_EQ(HksIpcServiceOnSetOrGetRemoteProperty(&processInfo,
+        HKS_EXT_PROPERTY_OPERATION_GET, index, propertyId, cppParamSet), HKS_SUCCESS);
 
     std::string certsJson;
     EXPECT_EQ(HksIpcServiceOnExportCertificate(&processInfo, index, cppParamSet, certsJson), HKS_SUCCESS);

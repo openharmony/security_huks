@@ -201,7 +201,8 @@ int32_t HksClientClearPinAuthState(const struct HksBlob *index)
     return HksServiceClearPinAuthState(&processInfo, index);
 }
 
-int32_t HksClientGetRemoteProperty(const struct HksBlob *resourceId, const struct HksBlob *propertyId,
+int32_t HksClientSetOrGetRemoteProperty(enum HksExtPropertyOperation operation,
+    const struct HksBlob *resourceId, const struct HksBlob *propertyId,
     const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut)
 {
     char *processName = NULL;
@@ -217,7 +218,13 @@ int32_t HksClientGetRemoteProperty(const struct HksBlob *resourceId, const struc
         0,
         0
     };
-    return HksServiceGetRemoteProperty(&processInfo, resourceId, propertyId, paramSetIn, propertySetOut);
+    
+    struct HksExtPropertyOperationInfo propertyInfo;
+    propertyInfo.operation = operation;
+    propertyInfo.resourceId = resourceId;
+    propertyInfo.propertyId = propertyId;
+    
+    return HksServiceSetOrGetRemoteProperty(&processInfo, &propertyInfo, paramSetIn, propertySetOut);
 }
 
 int32_t HksClientGetResourceId(const struct HksBlob *providerName, const struct HksParamSet *paramSetIn,

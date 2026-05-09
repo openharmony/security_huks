@@ -160,15 +160,15 @@ int32_t HksServiceClearPinAuthState(const struct HksProcessInfo *processInfo, co
 #endif
 }
 
-int32_t HksServiceGetRemoteProperty(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
-    const struct HksBlob *propertyId, const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut)
+int32_t HksServiceSetOrGetRemoteProperty(const struct HksProcessInfo *processInfo,
+    const struct HksExtPropertyOperationInfo *propertyInfo, const struct HksParamSet *paramSetIn,
+    struct HksParamSet **propertySetOut)
 {
 #ifdef L2_STANDARD
-    return HksIpcServiceOnGetRemotePropertyAdapter(processInfo, resourceId, propertyId, paramSetIn, NULL);
+    return HksIpcServiceOnSetOrGetRemotePropertyAdapter(processInfo, propertyInfo, paramSetIn, NULL);
 #else
     (void)processInfo;
-    (void)resourceId;
-    (void)propertyId;
+    (void)propertyInfo;
     (void)paramSetIn;
     (void)propertySetOut;
     return HKS_ERROR_API_NOT_SUPPORTED;

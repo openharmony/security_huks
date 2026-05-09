@@ -52,8 +52,9 @@ int32_t HksIpcServiceOnAuthUkeyPin(const struct HksProcessInfo *processInfo, con
 int32_t HksIpcServiceOnGetVerifyPinStatus(const struct HksProcessInfo *processInfo, const std::string &index,
     const CppParamSet &paramSet, int32_t &state);
 int32_t HksIpcServiceOnClearUkeyPinAuthStatus(const struct HksProcessInfo *processInfo, const std::string &index);
-int32_t HksIpcServiceOnGetRemoteProperty(const HksProcessInfo *processInfo, const std::string &index,
-    const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams);
+int32_t HksIpcServiceOnSetOrGetRemoteProperty(const HksProcessInfo *processInfo,
+    enum HksExtPropertyOperation operation, const std::string &index,
+    const std::string &propertyId, CppParamSet &paramSet);
 int32_t HksIpcServiceOnExportCertificate(const struct HksProcessInfo *processInfo, const std::string &index,
     const CppParamSet &paramSet, std::string &certificatesOut);
 int32_t HksIpcServiceOnExportProviderAllCertificates(const struct HksProcessInfo *processInfo, const std::string &index,

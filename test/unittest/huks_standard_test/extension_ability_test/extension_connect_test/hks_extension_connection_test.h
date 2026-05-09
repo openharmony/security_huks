@@ -57,8 +57,8 @@ public:
     MOCK_METHOD(ErrCode, FinishSession, (const std::string &handle, const CppParamSet &params,
         const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData, int &errcode), (override));
 
-    MOCK_METHOD(ErrCode, GetProperty, (const std::string &handle, const std::string &propertyId,
-        const CppParamSet &params, CppParamSet &outParams, int &errcode), (override));
+    MOCK_METHOD(ErrCode, SetOrGetProperty, (uint32_t operation, const std::string &handle,
+        const std::string &propertyId, CppParamSet &params, int &errcode), (override));
 
     MOCK_METHOD(ErrCode, ClearUkeyPinAuthState,
         (const std::string &handle, const CppParamSet &params, int &errcode), (override));

@@ -86,6 +86,15 @@ struct HksExtCertInfoSet {
 };
 
 /**
+ * @brief hks ext property operation info
+ */
+struct HksExtPropertyOperationInfo {
+    enum HksExtPropertyOperation operation;
+    const struct HksBlob *resourceId;
+    const struct HksBlob *propertyId;
+};
+
+/**
  * @brief hks certificate chain
  */
 struct HksCertChain {

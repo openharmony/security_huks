@@ -148,11 +148,11 @@ public:
         return -1;
     };
 
-    ErrCode GetProperty(
+    ErrCode SetOrGetProperty(
+        uint32_t operation,
         const std::string& handle,
         const std::string& propertyId,
-        const CppParamSet& params,
-        CppParamSet& outParams,
+        CppParamSet& params,
         int32_t& errcode) { return -1; };
     
     ErrCode GetResourceId(

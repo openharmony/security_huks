@@ -197,6 +197,30 @@ int32_t HksUkeyBlob2ParamSetUnpack(const struct HksBlob *srcData, struct HksBlob
     return ret;
 }
 
+int32_t HksSetOrGetRemotePropertyUnpack(const struct HksBlob *srcData,
+    enum HksExtPropertyOperation *operation, struct HksBlob *blob1,
+    struct HksBlob *blob2, struct HksParamSet **paramSet)
+{
+    uint32_t offset = 0;
+    int32_t ret;
+    uint32_t opValue = 0;
+    do {
+        ret = GetUint32FromBuffer(&opValue, srcData, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get operation failed!");
+        *operation = (enum HksExtPropertyOperation)opValue;
+
+        ret = GetBlobFromBuffer(blob1, srcData, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get blob1 failed!");
+
+        ret = GetBlobFromBuffer(blob2, srcData, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get blob2 failed!");
+
+        ret = GetParamSetFromBuffer(paramSet, srcData, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get paramSet failed!");
+    } while (0);
+    return ret;
+}
+
 int32_t HksUKeyGeneralUnpackWithCertInfo(const struct HksBlob *srcData,
     struct HksBlob *resourceId,
     struct HksExtCertInfo *certInfo,

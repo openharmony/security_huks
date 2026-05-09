@@ -178,13 +178,12 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0009, testing
     CppParamSet params;
     std::string handle;
     std::string propertyId;
-    CppParamSet outParams;
     int32_t errcode;
-    EXPECT_EQ(hksCryptoExtStubImpl.GetProperty(
-        handle, propertyId, params, outParams, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(hksCryptoExtStubImpl.SetOrGetProperty(
+        0, handle, propertyId, params, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
     HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
-    EXPECT_EQ(hksCryptoExtStubImplNullptr.GetProperty(
-        handle, propertyId, params, outParams, errcode), HKS_ERROR_EXT_NULLPTR);
+    EXPECT_EQ(hksCryptoExtStubImplNullptr.SetOrGetProperty(
+        0, handle, propertyId, params, errcode), HKS_ERROR_EXT_NULLPTR);
 }
 
 HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0010, testing::ext::TestSize.Level0)

@@ -44,6 +44,9 @@ int32_t HksUKeyGeneralPackWithCertInfo(const struct HksBlob *blob, const struct 
 
 int32_t HksUkeyBlob2ParamSetPack(const struct HksBlob *oldKeyAlias, const struct HksBlob *newKeyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *destData);
+int32_t HksSetOrGetRemotePropertyPack(enum HksExtPropertyOperation operation,
+    const struct HksBlob *resourceId, const struct HksBlob *propertyId,
+    const struct HksParamSet *paramSet, struct HksBlob *destData);
 int32_t HksResourceIdUnpackFromService(const struct HksBlob *srcBlob, struct HksParamSet **resourceId);
 #endif
 

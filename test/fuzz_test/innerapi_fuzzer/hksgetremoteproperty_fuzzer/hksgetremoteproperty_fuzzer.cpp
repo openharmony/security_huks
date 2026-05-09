@@ -20,26 +20,30 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_type.h"
+#include "hks_type_enum.h"
 
 #include "hks_fuzz_util.h"
 
-constexpr int BLOB_NUM = 2;
+constexpr int BLOB_NUM = 3;
 
 namespace OHOS {
 namespace Security {
 namespace Hks {
 
-int DoSomethingInterestingWithHksGetRemoteProperty(uint8_t *data, size_t size)
+int DoSomethingInterestingWithHksSetOrGetRemoteProperty(uint8_t *data, size_t size)
 {
     if (data == nullptr || size < (BLOB_NUM * sizeof(uint32_t))) {
         return -1;
     }
 
+    uint32_t operation = *ReadData<uint32_t *>(data, size, sizeof(uint32_t));
     struct HksBlob resourceId = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
     struct HksBlob propertyId = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
     WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
     HksParamSet *psOut = nullptr;
-    [[maybe_unused]] int ret = HksGetRemoteProperty(&resourceId, &propertyId, ps.s, &psOut);
+    [[maybe_unused]] int ret = HksSetOrGetRemoteProperty(
+        static_cast<enum HksExtPropertyOperation>(operation % 2),
+        &resourceId, &propertyId, ps.s, &psOut);
     return 0;
 }
 
@@ -48,6 +52,6 @@ int DoSomethingInterestingWithHksGetRemoteProperty(uint8_t *data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     std::vector<uint8_t> v(data, data + size);
-    (void)OHOS::Security::Hks::DoSomethingInterestingWithHksGetRemoteProperty(v.data(), v.size());
+    (void)OHOS::Security::Hks::DoSomethingInterestingWithHksSetOrGetRemoteProperty(v.data(), v.size());
     return 0;
 }

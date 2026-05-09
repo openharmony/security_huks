@@ -258,11 +258,11 @@ static int32_t ProcessAttestOrNormalMessage(
                 new (std::nothrow) OHOS::Security::Hks::HksDeathRecipient(callingPid, callingUid));
             HKS_LOG_I("Add bundleDead for pid: %" LOG_PUBLIC "d, uid: %" LOG_PUBLIC "d", callingPid, callingUid);
         }
-    } else if (code == HKS_MSG_EXT_GET_REMOTE_PROPERTY) {
+    } else if (code == HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY) {
         auto ptr = data.ReadRemoteObject();
         // ReadRemoteObject will fail if huks_service has no selinux permission to call the client side.
         HKS_IF_NULL_LOGE_RETURN(ptr, HKS_ERROR_IPC_INIT_FAIL, "ReadExtRemoteObject ptr failed")
-        HksIpcServiceGetRemoteProperty(reinterpret_cast<const HksBlob *>(&srcData),
+        HksIpcServiceSetOrGetRemoteProperty(reinterpret_cast<const HksBlob *>(&srcData),
             reinterpret_cast<const uint8_t *>(&reply), reinterpret_cast<const uint8_t *>(ptr.GetRefPtr()));
         return HKS_SUCCESS;
     }
