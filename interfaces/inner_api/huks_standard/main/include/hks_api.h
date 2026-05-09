@@ -206,6 +206,15 @@ HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *resourceId, 
  */
 HKS_API_EXPORT int32_t HksClearUkeyPinAuthState(const struct HksBlob *resourceId);
 
+/**
+ * @brief Set or get remote properties for a UKey resource
+ * @param operation operation type (set or get), see HksExtPropertyOperation
+ * @param resourceId resource identifier
+ * @param propertyId property identifier
+ * @param paramSetIn required parameter set
+ * @param propertySetOut pointer to receive the property parameter set when operation is get, can be NULL for set
+ * @return error code, see hks_type.h
+ */
 HKS_API_EXPORT int32_t HksSetOrGetRemoteProperty(enum HksExtPropertyOperation operation,
     const struct HksBlob *resourceId, const struct HksBlob *propertyId,
     const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut);
