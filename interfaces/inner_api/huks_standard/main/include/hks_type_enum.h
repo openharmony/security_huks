@@ -369,6 +369,24 @@ enum HksIamUserAuthType {
 };
 
 /**
+ * @brief hks user auth atl type
+ * @see `enum AuthTrustLevel` in `drivers/interface/user_auth/v4_1/UserAuthTypes.idl`
+ */
+enum HksIamUserAuthAtl {
+    HKS_IAM_USER_AUTH_ATL1 = 10000,
+    HKS_IAM_USER_AUTH_ATL2 = 20000,
+    HKS_IAM_USER_AUTH_ATL3 = 30000,
+    HKS_IAM_USER_AUTH_ATL4 = 40000,
+};
+
+enum HksUserAuthAtlType {
+    HKS_USER_AUTH_ATL1 = 1,
+    HKS_USER_AUTH_ATL2 = 2,
+    HKS_USER_AUTH_ATL3 = 3,
+    HKS_USER_AUTH_ATL4 = 4,
+};
+
+/**
  * @brief hks auth access type
  */
 enum HksAuthAccessType {
