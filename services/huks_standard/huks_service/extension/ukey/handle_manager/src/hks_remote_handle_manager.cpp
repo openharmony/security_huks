@@ -66,12 +66,11 @@ static int32_t WrapIndexWithProviderInfo(const ProviderInfo &providerInfo, const
 {
     CommJsonObject root = CommJsonObject::CreateObject();
     HKS_IF_TRUE_LOGE_RETURN(root.IsNull(), HKS_ERROR_JSON_SERIALIZE_FAILED, "Create JSON object failed")
-    if (!root.SetValue(PROVIDER_NAME_KEY, providerInfo.m_providerName) ||
+    HKS_IF_TRUE_LOGE_RETURN(!root.SetValue(PROVIDER_NAME_KEY, providerInfo.m_providerName) ||
         !root.SetValue(ABILITY_NAME_KEY, providerInfo.m_abilityName) ||
-        !root.SetValue(BUNDLE_NAME_KEY, providerInfo.m_bundleName)) {
-        HKS_LOG_E("Set provider info to index failed");
-        return HKS_ERROR_JSON_SERIALIZE_FAILED;
-    }
+        !root.SetValue(BUNDLE_NAME_KEY, providerInfo.m_bundleName),
+        HKS_ERROR_JSON_SERIALIZE_FAILED, "Set provider info to index failed")
+
     HKS_IF_TRUE_LOGE_RETURN(!root.SetValue("index", originalIndex), HKS_ERROR_JSON_SERIALIZE_FAILED,
         "Set original index failed")
     wrappedIndex = root.Serialize(false);
@@ -122,9 +121,9 @@ int32_t HksRemoteHandleManager::MergeProviderCertificates(const ProviderInfo &pr
             indexResult.second.size() > MAX_INDEX_SIZE,
             "Failed to convert indexValue to string, error code: %" LOG_PUBLIC "d", indexResult.first)
         std::string wrappedIndex;
-        if (WrapIndexWithProviderInfo(providerInfo, indexResult.second, wrappedIndex) == HKS_SUCCESS) {
-            HKS_IF_TRUE_CONTINUE(!certObj.SetValue("index", wrappedIndex))
-        }
+        HKS_IF_TRUE_CONTINUE(WrapIndexWithProviderInfo(providerInfo, indexResult.second, wrappedIndex) == HKS_SUCCESS
+            && !certObj.SetValue("index", wrappedIndex))
+
         HKS_IF_TRUE_LOGE(!combinedArray.AppendElement(certObj), "append certObj to combinedArray fail.")
     }
     return HKS_SUCCESS;
@@ -136,10 +135,8 @@ int32_t HksRemoteHandleManager::GetProviderProxy(const ProviderInfo &providerInf
     auto providerManager = HksProviderLifeCycleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(providerManager == nullptr, HKS_ERROR_NULL_POINTER, "Get provider manager instance failed")
     int32_t ret = providerManager->GetExtensionProxy(providerInfo, proxy);
-    if (ret != HKS_SUCCESS || proxy == nullptr) {
-        HKS_LOG_E("Get extension proxy failed for provider: %" LOG_PUBLIC "s", providerInfo.m_providerName.c_str());
-        return HKS_ERROR_NOT_EXIST;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS || proxy == nullptr, HKS_ERROR_NOT_EXIST,
+        "Get extension proxy failed for provider: %" LOG_PUBLIC "s", providerInfo.m_providerName.c_str())
     return HKS_SUCCESS;
 }
 
@@ -293,9 +290,8 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     ret = ConvertExtensionToHksErrorCode(ret, g_getPinAuthStateErrCodeMapping);
     ClearMapByHandle(ret, handle);
     uidIndexToAuthState_.EnsureInsert({uid, index}, state);
-    if (ret == HUKS_ERR_CODE_PIN_LOCKED || ret == HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_TRUE_RETURN(ret == HUKS_ERR_CODE_PIN_LOCKED || ret == HKS_SUCCESS, ret)
+
     HKS_LOG_E("Remote verify pin status failed: %" LOG_PUBLIC "d", ret);
     return ret;
 }
@@ -649,9 +645,7 @@ void HksRemoteHandleManager::ClearAuthState(const HksProcessInfo &processInfo)
 {
     std::vector<std::pair<uint32_t, std::string>> keysToRemove;
     auto iterFunc = [&](std::pair<uint32_t, std::string> key, int32_t &value) {
-        if (key.first == processInfo.uidInt) {
-            keysToRemove.push_back(key);
-        }
+        HKS_IF_TRUE_EXCU(key.first == processInfo.uidInt, keysToRemove.push_back(key));
     };
     uidIndexToAuthState_.Iterate(iterFunc);
     struct HksParam uid = {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = processInfo.uidInt};
@@ -666,9 +660,7 @@ void HksRemoteHandleManager::ClearAuthState(const HksProcessInfo &processInfo)
 bool HksRemoteHandleManager::IsProviderNumExceedLimit(const ProviderInfo &providerInfo)
 {
     int32_t num = 0;
-    if (providerInfoToNum_.Find(providerInfo, num)) {
-        return num >= MAX_PROVIDER_TOTAL_NUM;
-    }
+    HKS_IF_TRUE_RETURN(providerInfoToNum_.Find(providerInfo, num), num >= MAX_PROVIDER_TOTAL_NUM)
     return false;
 }
 
@@ -679,9 +671,7 @@ void HksRemoteHandleManager::ClearMapByHandle(const int32_t &ret, const std::str
     }
     std::vector<std::pair<uint32_t, std::string>> keysToRemove;
     auto iterFunc = [&](std::pair<uint32_t, std::string> key, std::string &value) {
-        if (value == handle) {
-            keysToRemove.push_back(key);
-        }
+        HKS_IF_TRUE_EXCU(value == handle, keysToRemove.push_back(key));
     };
     uidIndexToHandle_.Iterate(iterFunc);
     for (auto &key : keysToRemove) {
@@ -703,9 +693,7 @@ void HksRemoteHandleManager::ClearMapByUid(const uint32_t uid)
     HksProcessInfo processInfo = {};
     processInfo.uidInt = uid;
     auto iterFunc = [&](std::pair<uint32_t, std::string> key, std::string &value) {
-        if (key.first == uid) {
-            keysToRemove.push_back(key);
-        }
+        HKS_IF_TRUE_EXCU(key.first == uid, keysToRemove.push_back(key));
     };
     uidIndexToHandle_.Iterate(iterFunc);
     for (auto &key : keysToRemove) {
