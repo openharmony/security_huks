@@ -85,13 +85,13 @@ int32_t HksIpcServiceOnClearUkeyPinAuthStatus(const struct HksProcessInfo *proce
     return ret;
 }
 
-int32_t HksIpcServiceOnGetRemoteProperty(const HksProcessInfo *processInfo, const std::string &index,
-    const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams)
+int32_t HksIpcServiceOnSetOrGetRemoteProperty(const HksProcessInfo *processInfo,
+    enum HksExtPropertyOperation operation, const std::string &index,
+    const std::string &propertyId, CppParamSet &paramSet)
 {
     auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
-    int32_t ret = pluginManager->OnGetRemoteProperty(*processInfo, index, propertyId, paramSet, outParams);
-    return ret;
+    return pluginManager->OnSetOrGetRemoteProperty(*processInfo, operation, index, propertyId, paramSet);
 }
 
 int32_t HksIpcServiceOnExportCertificate(const struct HksProcessInfo *processInfo, const std::string &index,

@@ -1145,7 +1145,7 @@ HWTEST_F(HksIpcServiceTest, HksIpcServiceTest031, TestSize.Level0)
     uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
     struct HksParamSet *tmpParamSetOut = NULL;
     EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&tmpParamSetOut));
-    HksIpcServiceGetRemoteProperty(&srcData, context, nullptr);
+    HksIpcServiceSetOrGetRemoteProperty(&srcData, context, nullptr);
     HksFreeParamSet(&tmpParamSetOut);
 }
 

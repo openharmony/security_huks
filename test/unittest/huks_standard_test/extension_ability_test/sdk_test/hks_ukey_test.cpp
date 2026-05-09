@@ -297,7 +297,7 @@ HWTEST_F(HksUKeyTest, HksClearPinAuthStateTest, TestSize.Level0)
     EXPECT_NE(ret, HKS_SUCCESS);
 }
 
-HWTEST_F(HksUKeyTest, HksGetRemotePropertyTest, TestSize.Level0)
+HWTEST_F(HksUKeyTest, HksSetOrGetRemotePropertyTest, TestSize.Level0)
 {
     int32_t ret = 0;
     const char *index =
@@ -318,13 +318,44 @@ HWTEST_F(HksUKeyTest, HksGetRemotePropertyTest, TestSize.Level0)
 
     struct HksParamSet *propertySetOut = nullptr;
 
-    ret = HksGetRemoteProperty(&resourceId, &propertyId, paramSet, &propertySetOut);
+    ret = HksSetOrGetRemoteProperty(HKS_EXT_PROPERTY_OPERATION_GET,
+        &resourceId, &propertyId, paramSet, &propertySetOut);
     if (ret != 0) {
-        HKS_TEST_LOG_I("failed, HksGetRemoteProperty ret = %d", ret);
+        HKS_TEST_LOG_I("failed, HksSetOrGetRemoteProperty GET ret = %d", ret);
     }
 
     HksFreeParamSet(&propertySetOut);
-    HKS_TEST_LOG_I("TestHksUKey, Testcase_GetUkeyPinAuthState pass!");
+    HKS_TEST_LOG_I("TestHksUKey, Testcase_SetOrGetRemoteProperty pass!");
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+HWTEST_F(HksUKeyTest, HksSetRemotePropertyTest, TestSize.Level0)
+{
+    int32_t ret = 0;
+    const char *index =
+        "{\"providerName\":\"testHap\","
+        "\"abilityName\":\"com.cryptoapplication\","
+        "\"bundleName\":\"CryptoExtension\","
+        "\"index\":{\"key\":\"testkey1\"}}";
+    struct HksBlob resourceId = StringToHuksBlob(index);
+    EXPECT_NE(resourceId.data, nullptr);
+
+    const char *propertyIndex = "{\"property\":\"test_property\"}";
+    struct HksBlob propertyId = StringToHuksBlob(propertyIndex);
+    EXPECT_NE(propertyId.data, nullptr);
+
+    struct HksParamSet *paramSet = nullptr;
+    ret = ConstructTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksSetOrGetRemoteProperty(HKS_EXT_PROPERTY_OPERATION_SET,
+        &resourceId, &propertyId, paramSet, nullptr);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("failed, HksSetOrGetRemoteProperty SET ret = %d", ret);
+    }
+
+    HksFreeParamSet(&paramSet);
+    HKS_TEST_LOG_I("TestHksUKey, Testcase_SetRemoteProperty pass!");
     EXPECT_NE(ret, HKS_SUCCESS);
 }
 

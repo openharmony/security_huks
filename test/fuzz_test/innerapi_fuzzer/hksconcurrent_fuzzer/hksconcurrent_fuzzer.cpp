@@ -741,6 +741,7 @@ static int32_t FuzzExtExportCertificate(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzExtGetRemoteProperty(FuzzedDataProvider &fdp) {
+    uint32_t operation = fdp.ConsumeIntegralInRange(0, 1);
     uint32_t resourceIdSize = fdp.ConsumeIntegralInRange(0, 64);
     std::vector<uint8_t> resourceIdVec = fdp.ConsumeBytes<uint8_t>(resourceIdSize);
     struct HksBlob resourceId = { static_cast<uint32_t>(resourceIdVec.size()), resourceIdVec.data() };
@@ -753,7 +754,8 @@ static int32_t FuzzExtGetRemoteProperty(FuzzedDataProvider &fdp) {
 
     struct HksParamSet *propertySetOut = nullptr;
 
-    return HksGetRemoteProperty(&resourceId, &propertyId, ps.s, &propertySetOut);
+    return HksSetOrGetRemoteProperty(static_cast<enum HksExtPropertyOperation>(operation),
+        &resourceId, &propertyId, ps.s, &propertySetOut);
 }
 
 static int32_t FuzzExtGetRemotePropertyReply(FuzzedDataProvider &fdp) {
@@ -815,8 +817,8 @@ static const FuzzHuksApi g_fuzzApis[] = {
     { FuzzExtClearPinAuthState,     HKS_MSG_EXT_CLEAR_PIN_AUTH_STATE },
     { FuzzExtExportProviderCertificates, HKS_MSG_EXT_EXPORT_PROVIDER_CERTIFICATES },
     { FuzzExtExportCertificate,     HKS_MSG_EXT_EXPORT_CERTIFICATE },
-    { FuzzExtGetRemoteProperty,     HKS_MSG_EXT_GET_REMOTE_PROPERTY },
-    { FuzzExtGetRemotePropertyReply, HKS_MSG_EXT_GET_REMOTE_PROPERTY_REPLY },
+    { FuzzExtGetRemoteProperty,     HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY },
+    { FuzzExtGetRemotePropertyReply, HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY },
 };
 
 static void ConcurrentFuzzHuksService(FuzzedDataProvider &fdp)

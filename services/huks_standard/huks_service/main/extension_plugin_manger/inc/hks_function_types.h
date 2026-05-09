@@ -35,7 +35,6 @@ enum class PluginMethodEnum {
     FUNC_ON_AUTH_UKEY_PIN,
     FUNC_ON_GET_VERIFY_PIN_STATUS,
     FUNC_ON_CLEAR_PIN_STATUS,
-    FUNC_ON_GET_REMOTE_PROPERTY,
     FUNC_ON_LIST_INDEX_CERTIFICATE,
     FUNC_ON_LIST_PROVIDER_ALL_CERTIFICATE,
 
@@ -50,6 +49,7 @@ enum class PluginMethodEnum {
     FUNC_ON_EXPORT_PUBLIC_KEY,
     FUNC_ON_QUERY_ABILITY,
     FUNC_ON_GET_RESOURCE_ID,
+    FUNC_ON_SET_OR_GET_REMOTE_PROPERTY,
 
     COUNT,
 };
@@ -67,8 +67,9 @@ using OnAuthUkeyPinFunc = int32_t (*)(const HksProcessInfo &processInfo,
 using OnGetVerifyPinStatusFunc = int32_t (*)(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, int32_t &state);
 using OnClearUkeyPinAuthStatusFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index);
-using OnGetRemotePropertyFunc = int32_t (*)(const HksProcessInfo &processInfo,
-    const std::string &index, const std::string &propertyId, const CppParamSet &paramSet, CppParamSet &outParams);
+using OnSetOrGetRemotePropertyFunc = int32_t (*)(const HksProcessInfo &processInfo,
+    enum HksExtPropertyOperation operation, const std::string &index, const std::string &propertyId,
+    CppParamSet &paramSet);
 using OnListIndexCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, std::string &certsJson);
 using OnListProviderAllCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo,

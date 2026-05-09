@@ -153,13 +153,14 @@ static int32_t HksAllocInBlob(struct HksBlob *inBlob,
     return HKS_SUCCESS;
 }
 
-static int32_t HksAllocInBlobWithTwoBlobs(struct HksBlob *inBlob,
+static int32_t HksAllocInBlobForSetOrGetProperty(struct HksBlob *inBlob,
     const struct HksBlob *blob1, const struct HksBlob *blob2, const struct HksParamSet *paramSet)
 {
     if (inBlob == NULL || blob1 == NULL || blob2 == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
-    uint32_t size = (uint32_t)(sizeof(blob1->size) + ALIGN_SIZE(blob1->size));
+    uint32_t size = sizeof(uint32_t);
+    size += (uint32_t)(sizeof(blob1->size) + ALIGN_SIZE(blob1->size));
     size += (uint32_t)(sizeof(blob2->size) + ALIGN_SIZE(blob2->size));
     if (paramSet != NULL) {
         size += ALIGN_SIZE(paramSet->paramSetSize);
@@ -587,12 +588,15 @@ int32_t HksClientCloseRemoteHandle(const struct HksBlob *resourceId, const struc
     return ret;
 }
 
-int32_t HksClientGetRemoteProperty(const struct HksBlob *resourceId, const struct HksBlob *propertyId,
+int32_t HksClientSetOrGetRemoteProperty(enum HksExtPropertyOperation operation,
+    const struct HksBlob *resourceId, const struct HksBlob *propertyId,
     const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut)
 {
-    if (propertySetOut == NULL || *propertySetOut != NULL) {
-        HKS_LOG_E("propertySetOut must be NULL pointer");
-        return HKS_ERROR_NULL_POINTER;
+    if (operation == HKS_EXT_PROPERTY_OPERATION_GET) {
+        if (propertySetOut == NULL || *propertySetOut != NULL) {
+            HKS_LOG_E("propertySetOut must be NULL pointer for GET operation");
+            return HKS_ERROR_NULL_POINTER;
+        }
     }
 
     int32_t ret;
@@ -612,16 +616,17 @@ int32_t HksClientGetRemoteProperty(const struct HksBlob *resourceId, const struc
             HKS_EXT_MAX_PROPERTY_ID_LEN);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check remote property fail")
 
-        ret = HksAllocInBlobWithTwoBlobs(&inBlob, resourceId, propertyId, newParamSet);
+        ret = HksAllocInBlobForSetOrGetProperty(&inBlob, resourceId, propertyId, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
-        ret = HksUkeyBlob2ParamSetPack(resourceId, propertyId, newParamSet, &inBlob);
+        ret = HksSetOrGetRemotePropertyPack(operation, resourceId, propertyId, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "pack remote property fail")
 
-        ret = HksSendRequest(HKS_MSG_EXT_GET_REMOTE_PROPERTY, &inBlob, &outBlob, newParamSet);
+        ret = HksSendRequest(HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY, &inBlob, &outBlob, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "send request fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksRemotePropertyUnpackFromService(&outBlob, propertySetOut);
+        ret = HksRemotePropertyUnpackFromService(&outBlob,
+            (operation == HKS_EXT_PROPERTY_OPERATION_GET) ? propertySetOut : NULL);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRemotePropertyUnpackFromService fail")
     } while (0);
 

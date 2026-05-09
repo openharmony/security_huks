@@ -106,7 +106,7 @@ struct OH_Huks_Result OH_Huks_GetProperty(const struct OH_Huks_Blob *resourceId,
         return ConvertApiResult(HKS_ERROR_NULL_POINTER);
     }
     struct HksParamSet *innerOut = NULL;
-    int32_t ret = HksGetRemoteProperty(
+    int32_t ret = HksSetOrGetRemoteProperty(HKS_EXT_PROPERTY_OPERATION_GET,
         (const struct HksBlob *)resourceId, (const struct HksBlob *)propertyId,
         (const struct HksParamSet *)paramSetIn, &innerOut);
     if (ret == HKS_SUCCESS) {

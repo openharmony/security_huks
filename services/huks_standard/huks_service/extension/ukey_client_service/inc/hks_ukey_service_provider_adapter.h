@@ -54,9 +54,9 @@ int32_t HksIpcGetUkeyPinAuthStateAdapter(const struct HksProcessInfo *processInf
 
 int32_t HksIpcClearPinStatusAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *index);
 
-int32_t HksIpcServiceOnGetRemotePropertyAdapter(const struct HksProcessInfo *processInfo,
-    const struct HksBlob *resourceId, const struct HksBlob *propertyId,
-    const struct HksParamSet *paramSet, const uint8_t *remoteObject);
+int32_t HksIpcServiceOnSetOrGetRemotePropertyAdapter(const struct HksProcessInfo *processInfo,
+    const struct HksExtPropertyOperationInfo *propertyInfo, const struct HksParamSet *paramSet,
+    const uint8_t *remoteObject);
 
 int32_t HksIpcQueryAbilityInfoAdapter(const struct HksProcessInfo *processInfo, struct HksBlob *resourceId,
     struct HksAbilityInfo *abilityInfo);

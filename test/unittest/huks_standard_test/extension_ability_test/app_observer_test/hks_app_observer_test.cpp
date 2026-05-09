@@ -621,7 +621,7 @@ HWTEST_F(HksAppObserverTest, PluginInterfaceTest009, TestSize.Level0)
 
 /**
 * @tc.name: HksAppObserverTest.PluginInterfaceTest010
-* @tc.desc: Test HksExtPluginOnClearUkeyPinAuthState and OnGetRemoteProperty
+* @tc.desc: Test HksExtPluginOnClearUkeyPinAuthState and OnSetOrGetRemoteProperty
 * @tc.type: FUNC
 */
 HWTEST_F(HksAppObserverTest, PluginInterfaceTest010, TestSize.Level0)
@@ -633,8 +633,8 @@ HWTEST_F(HksAppObserverTest, PluginInterfaceTest010, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     CppParamSet paramSet = CreateParamSetWithAbilityAndUid("TestCryptoAbility", 100);
-    CppParamSet outParams;
-    ret = HksExtPluginOnGetRemoteProperty(processInfo, index, "SKF_GetDevInfo", paramSet, outParams);
+    ret = HksExtPluginOnSetOrGetRemoteProperty(processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
+        index, "SKF_GetDevInfo", paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     HKS_FREE_BLOB(processInfo.userId);

@@ -163,18 +163,18 @@ ErrCode HksCryptoExtStubImpl::FinishSession(
     return extension_->FinishSession(handle, params, inData, outData, errcode);
 }
 
-ErrCode HksCryptoExtStubImpl::GetProperty(
+ErrCode HksCryptoExtStubImpl::SetOrGetProperty(
+    uint32_t operation,
     const std::string& handle,
     const std::string& propertyId,
-    const CppParamSet& params,
-    CppParamSet& outParams,
+    CppParamSet& params,
     int32_t& errcode)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
         return HKS_ERROR_EXT_NULLPTR;
     }
-    return extension_->GetProperty(handle, propertyId, params, outParams, errcode);
+    return extension_->SetOrGetProperty(operation, handle, propertyId, params, errcode);
 }
 
 ErrCode HksCryptoExtStubImpl::ClearUkeyPinAuthState(

@@ -489,6 +489,14 @@ enum HksWrapKeyByHukVersion {
 };
 #endif
 
+/**
+ * @brief hks ext property operation type
+ */
+enum HksExtPropertyOperation {
+    HKS_EXT_PROPERTY_OPERATION_GET = 0,
+    HKS_EXT_PROPERTY_OPERATION_SET = 1,
+};
+
 #ifdef __cplusplus
 }
 #endif

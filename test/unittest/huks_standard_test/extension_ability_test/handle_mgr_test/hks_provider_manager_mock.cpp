@@ -161,11 +161,11 @@ ErrCode ExportProviderCertificates(
         std::vector<uint8_t>& outData,
         int32_t& errcode) { return HKS_SUCCESS; };
 
-    ErrCode GetProperty(
+    ErrCode SetOrGetProperty(
+        uint32_t operation,
         const std::string& handle,
         const std::string& propertyId,
-        const CppParamSet& params,
-        CppParamSet& outParams,
+        CppParamSet& params,
         int32_t& errcode) { return HKS_SUCCESS; };
     
     ErrCode GetResourceId(

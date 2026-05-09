@@ -68,7 +68,7 @@ HWTEST_F(CryptoExtAbilityTest, HksCryptoExtAbilityTestAbilityTest_0000, testing:
     EXPECT_EQ(HksAbility.InitSession(index, params, handle, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
     EXPECT_EQ(HksAbility.UpdateSession(handle, params, inData, outData, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
     EXPECT_EQ(HksAbility.FinishSession(handle, params, inData, outData, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
-    EXPECT_EQ(HksAbility.GetProperty(handle, propertyId, params, outParams, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.SetOrGetProperty(0, handle, propertyId, params, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
     EXPECT_EQ(HksAbility.ClearUkeyPinAuthState(handle, params, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
 }
 

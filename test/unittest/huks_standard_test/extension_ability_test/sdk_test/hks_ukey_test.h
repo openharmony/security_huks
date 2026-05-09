@@ -25,6 +25,7 @@ int HksGetUkeyPinAuthStateTest(void);
 int HksOpenRemoteHandleTest(void);
 int HksGetRemoteHandleTest(void);
 int HksClearPinAuthStateTest(void);
-int HksGetRemotePropertyTest(void);
+int HksSetOrGetRemotePropertyTest(void);
+int HksSetRemotePropertyTest(void);
 
 #endif
