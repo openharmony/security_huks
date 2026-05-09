@@ -237,9 +237,19 @@ int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t 
 
     struct HksParam *userAuthTypeParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_USER_AUTH_TYPE, &userAuthTypeParam);
+
     struct HksParam *userAuthTypeAtlParam = NULL;
     int32_t retAtl = HksGetParam(paramSet, HKS_TAG_USER_AUTH_TYPE_ATL, &userAuthTypeAtlParam);
-    HKS_IF_NOT_SUCC_RETURN((ret && retAtl), HKS_ERROR_NOT_SUPPORTED)
+
+    if (ret == HKS_ERROR_PARAM_NOT_EXIST && retAtl == HKS_ERROR_PARAM_NOT_EXIST) {
+        return HKS_ERROR_NOT_SUPPORTED;
+    } else if (ret != HKS_SUCCESS && ret != HKS_ERROR_PARAM_NOT_EXIST) {
+        HKS_LOG_E("get user auth type failed!");
+        return ret;
+    } else if (retAtl != HKS_SUCCESS && retAtl != HKS_ERROR_PARAM_NOT_EXIST) {
+        HKS_LOG_E("get user auth trust level failed!");
+        return retAtl;
+    }
 
     struct HksParam *accessTypeParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_KEY_AUTH_ACCESS_TYPE, &accessTypeParam);

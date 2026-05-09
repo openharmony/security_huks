@@ -584,7 +584,7 @@ int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo
     uint32_t authAccessType = 0;
     uint32_t userAuthTypeAtl = 0;
     int32_t ret = HksCheckAndGetUserAuthInfo(paramSet, processInfo->uidInt, &userAuthType,
-        &authAccessType, &userAuthTypeAtl); // callback
+        &authAccessType, &userAuthTypeAtl);
     if (ret == HKS_ERROR_NOT_SUPPORTED) {
         struct HksParamSet *newParamSet = NULL;
         ret = AppendProcessInfoAndDefault(paramSet, processInfo, NULL, &newParamSet, true);
