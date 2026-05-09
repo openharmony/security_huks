@@ -124,16 +124,14 @@ static int32_t CheckAuthTypeValidity(const struct HksParamSet *keyBlobParamSet, 
     int32_t atlRet = HksGetParam(keyBlobParamSet, HKS_TAG_USER_AUTH_TYPE_ATL, &blobUserAuthAtl);
     if (ret == HKS_ERROR_PARAM_NOT_EXIST && atlRet == HKS_ERROR_PARAM_NOT_EXIST) {
         return HKS_ERROR_PARAM_NOT_EXIST;
+    } else if (ret != HKS_SUCCESS && ret != HKS_ERROR_NOT_EXIST) {
+        HKS_LOG_E("get blob user auth type failed!");
+        return ret;
+    } else if (atlRet != HKS_SUCCESS && atlRet != HKS_ERROR_PARAM_NOT_EXIST) {
+        HKS_LOG_E("get blob user auth trust level failed!");
+        return atlRet;
     }
-    if (ret != HKS_SUCCESS || atlRet != HKS_SUCCESS) {
-        if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
-            return atlRet;
-        } else if (atlRet == HKS_ERROR_PARAM_NOT_EXIST) {
-            return ret;
-        } else {
-            return (ret != HKS_SUCCESS) ? ret : atlRet;
-        }
-    }
+
     return HKS_SUCCESS;
 }
 
@@ -570,13 +568,11 @@ static int32_t VerifyAuthTokenInfo(const struct HuksKeyNode *keyNode, const stru
         ret = VerifyFrontUserIdIfNeed(keyBlobParamSet, authToken);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "verify Front User Id failed!")
     } else {
+        HKS_IF_NULL_LOGE_RETURN(userAuthType, HKS_ERROR_NOT_SUPPORTED,
+            "current auth access type requires user auth type as input!")
+
         ret = VerifySecureUidIfNeed(keyBlobParamSet, authToken, authAccessType->uint32Param);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "verify sec uid failed!")
-
-        HKS_IF_TRUE_RETURN(userAuthType == NULL && userAuthAtl != NULL &&
-            (authAccessType->uint32Param & HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL) != 0, HKS_SUCCESS)
-        HKS_IF_NULL_LOGE_RETURN(userAuthType, HKS_ERROR_NOT_SUPPORTED,
-            "user auth type is not set, but auth access type has invalid new bio enroll!")
 
         ret = VerifyEnrolledIdInfoIfNeed(keyBlobParamSet, authToken, userAuthType,
             authAccessType->uint32Param, authTokenAuthType);
@@ -779,13 +775,13 @@ static int32_t GetSecureSignAuthInfo(const struct HuksKeyNode *keyNode, struct H
 
     struct HksParam *authTypeParam = NULL;
     ret = HksGetParam(keyNode->keyBlobParamSet, HKS_TAG_USER_AUTH_TYPE, &authTypeParam);
-    if (ret == HKS_SUCCESS) {
-        uint32_t hksAuthType;
-        ret = HksCoreConvertUserIamTypeToHksType(HKS_AUTH_TYPE, authToken->plaintextData.authType, &hksAuthType);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "invalid user iam auth type")
-        secureSignInfo->userAuthType = hksAuthType;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "user auth type not exist, get secure sign auth info failed")
 
+    uint32_t hksAuthType;
+    ret = HksCoreConvertUserIamTypeToHksType(HKS_AUTH_TYPE, authToken->plaintextData.authType, &hksAuthType);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "invalid user iam auth type")
+
+    secureSignInfo->userAuthType = hksAuthType;
     secureSignInfo->credentialId = authToken->ciphertextData.credentialId;
     secureSignInfo->authenticatorId = authToken->ciphertextData.enrolledId;
     return HKS_SUCCESS;
