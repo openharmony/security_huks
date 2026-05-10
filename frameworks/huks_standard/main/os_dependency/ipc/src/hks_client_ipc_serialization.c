@@ -946,7 +946,7 @@ int32_t HksDecapsulateUnpackFromService(const struct HksBlob *srcData, struct Hk
     HKS_IF_TRUE_LOGI_RETURN(tmpBlob.size == 0, HKS_SUCCESS, "shared key keep in huks")
 
     HKS_IF_TRUE_LOGE_RETURN(memcpy_s(sharedSecret->data, sharedSecret->size, tmpBlob.data, tmpBlob.size) != EOK,
-    HKS_ERROR_INSUFFICIENT_MEMORY, "memcpy sharedSecret fail")
+        HKS_ERROR_INSUFFICIENT_MEMORY, "memcpy sharedSecret fail")
     sharedSecret->size = tmpBlob.size;
 
     return HKS_SUCCESS;
