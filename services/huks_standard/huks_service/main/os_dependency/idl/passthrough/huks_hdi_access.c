@@ -35,7 +35,7 @@
 #include "hks_template.h"
 #include "hks_cfi.h"
 #include "hks_check_paramset.h"
-// new veison must in order, Higher versions cannot use interfaces from lower versions
+#include "hks_core_service_key_operate_one_stage.h"
 enum HdiVersion {
     INVALID = 0,
     V1_0 = 1,
@@ -49,9 +49,8 @@ typedef struct {
     GetHdiInstanceFunc func;
 } HdiInstance;
 
-// version sequence must in order, get instance from front to back
 static const HdiInstance HDI_INSTANCE_LIST[] = {
-    { V1_1, GeyHuksHdiInstanceV1_1 },
+    {V1_1, GeyHuksHdiInstanceV1_1},
 };
 
 static enum HdiVersion g_hdiInstanceVersion;
@@ -637,6 +636,19 @@ ENABLE_CFI(int32_t HuksAccessAttestKey(const struct HksBlob *key, const struct H
     return ret;
 }
 #endif
+
+ENABLE_CFI(int32_t HuksAccessEncapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksEncapsulationResult *encapResult))
+{
+    return HksCoreEncapsulate(keyAlias, paramSet, sharedKeyAlias, sharedKeyParamSet, encapResult);
+}
+
+ENABLE_CFI(int32_t HuksAccessDecapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksParamSet *sharedKeyParamSet, struct HksBlob *encapsData, struct HksBlob *hdiSharedSecret))
+{
+    return HksCoreDecapsulate(keyAlias, paramSet, sharedKeyParamSet, encapsData, hdiSharedSecret);
+}
 
 #endif /* _CUT_AUTHENTICATE_ */
 

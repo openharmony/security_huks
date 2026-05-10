@@ -437,3 +437,64 @@ int32_t HksCheckIpcUnwrapKey(const struct HksBlob *keyAlias, const struct HksPar
     }
     return HKS_SUCCESS;
 }
+
+int32_t HksCheckIpcEncapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet, uint32_t *outSize)
+{
+    int32_t ret = HksCheckParamSetValidity(paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NEW_INVALID_ARGUMENT, "check paramSet failed")
+
+    ret = HksCheckBlob2(keyAlias, sharedKeyAlias);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NEW_INVALID_ARGUMENT, "check keyAlias failed")
+
+    HKS_IF_TRUE_LOGE_RETURN(keyAlias->size > HKS_MAX_KEY_ALIAS_LEN, HKS_ERROR_NEW_INVALID_ARGUMENT,
+        "keyAlias size %" LOG_PUBLIC "d is out of range", keyAlias->size)
+
+    uint32_t totalSize = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) +
+        ALIGN_SIZE(paramSet->paramSetSize) + sizeof(uint32_t);
+
+    HKS_IF_TRUE_LOGE_RETURN(keyAlias->size > HKS_MAX_KEY_ALIAS_LEN, HKS_ERROR_NEW_INVALID_ARGUMENT,
+        "sharedKeyAlias size %" LOG_PUBLIC "d is out of range", keyAlias->size)
+
+    ret = HksCheckParamSetValidity(sharedKeyParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NEW_INVALID_ARGUMENT, "check sharedKeyParamSet failed")
+
+    totalSize += sizeof(sharedKeyAlias->size) + ALIGN_SIZE(sharedKeyAlias->size) +
+        ALIGN_SIZE(sharedKeyParamSet->paramSetSize);
+    HKS_IF_TRUE_LOGE_RETURN(totalSize > MAX_PROCESS_SIZE, HKS_ERROR_NEW_INVALID_ARGUMENT,
+        "HksCheckIpcEncapsulate fail")
+    
+    *outSize = totalSize;
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksCheckIpcDecapsulateConcret(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksBlob *encapOrsharedSecret)
+{
+    int32_t ret = HksCheckParamSetValidity(paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NEW_INVALID_ARGUMENT, "check paramSet failed")
+
+    ret = HksCheckBlob3(keyAlias, sharedKeyAlias, encapOrsharedSecret);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NEW_INVALID_ARGUMENT, "Decapsulate check blob failed")
+
+    HKS_IF_TRUE_LOGE_RETURN(keyAlias->size > HKS_MAX_KEY_ALIAS_LEN, HKS_ERROR_NEW_INVALID_ARGUMENT,
+        "keyAlias size %" LOG_PUBLIC "d is out of range", keyAlias->size)
+
+    HKS_IF_TRUE_LOGE_RETURN(sharedKeyAlias->size > HKS_MAX_KEY_ALIAS_LEN, HKS_ERROR_NEW_INVALID_ARGUMENT,
+        "sharedKeyAlias size %" LOG_PUBLIC "d is out of range", sharedKeyAlias->size)
+
+    ret = HksCheckParamSetValidity(sharedKeyParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NEW_INVALID_ARGUMENT, "check sharedKeyParamSet failed")
+
+    uint32_t totalSize = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) +
+        ALIGN_SIZE(paramSet->paramSetSize) +
+        sizeof(sharedKeyAlias->size) + ALIGN_SIZE(sharedKeyAlias->size) +
+        ALIGN_SIZE(sharedKeyParamSet->paramSetSize) +
+        sizeof(encapOrsharedSecret->size) + ALIGN_SIZE(encapOrsharedSecret->size);
+    HKS_IF_TRUE_LOGE_RETURN(totalSize > MAX_PROCESS_SIZE, HKS_ERROR_NEW_INVALID_ARGUMENT,
+        "HksCheckIpcDecapsulateConcret fail")
+
+    return HKS_SUCCESS;
+}

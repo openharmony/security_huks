@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,17 @@
  * limitations under the License.
  */
 
-#include "huks_hdi_v1_1_adapter.h"
+#ifndef HKS_OPENSSL_MLKEM_H
+#define HKS_OPENSSL_MLKEM_H
 
-#include "v1_1/ihuks.h"
+#include "hks_type.h"
+#include "hks_crypto_hal.h"
+#include "hks_openssl_engine.h"
 
-struct IHuks *GeyHuksHdiInstanceV1_1()
-{
-    return IHuksGetInstance("hdi_service", true);
-}
+int32_t HksOpensslMlKemEncapsulate(const struct HksBlob *rawKey, const struct HksKeySpec *spec,
+    struct HksEncapsulationResult *encapResult);
+
+int32_t HksOpensslMlKemDecapsulate(const struct HksBlob *rawKey, const struct HksKeySpec *spec,
+    const struct HksBlob *ciphertext, struct HksBlob *sharedSecret);
+
+#endif /* HKS_OPENSSL_MLKEM_H */

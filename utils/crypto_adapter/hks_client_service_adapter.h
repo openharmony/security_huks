@@ -31,6 +31,9 @@ int32_t TranslateFromX509PublicKey(const uint32_t alg, const struct HksBlob *x50
 int32_t TranslateToInnerMlDsaFormat(const struct HksParamSet *paramSet, const struct HksBlob *x509Key,
     struct HksBlob *publicKey);
 
+int32_t TranslateToInnerMlKemFormat(const struct HksParamSet *paramSet, const struct HksBlob *x509Key,
+    struct HksBlob *publicKey);
+
 #ifdef __cplusplus
 }
 #endif

@@ -123,8 +123,8 @@ static int32_t GetPurposeAndAlgorithm(const struct HksParamSet *paramSet, uint32
     }
 
     if (*alg == HKS_ALG_HMAC || *alg == HKS_ALG_SM3 || *pur == HKS_KEY_PURPOSE_SIGN || *pur == HKS_KEY_PURPOSE_VERIFY) {
-        if (*alg == HKS_ALG_ED25519 || *alg == HKS_ALG_ML_DSA) {
-            HKS_LOG_I("Algorithm is ed25519 or ml-dsa, not need to check digest");
+        if (*alg == HKS_ALG_ED25519 || *alg == HKS_ALG_ML_DSA || *alg == HKS_ALG_ML_KEM) {
+            HKS_LOG_I("Algorithm is ed25519, ml-dsa or ml-kem, not need to check digest");
             return HKS_SUCCESS;
         }
         for (i = 0; i < paramSet->paramsCnt; i++) {

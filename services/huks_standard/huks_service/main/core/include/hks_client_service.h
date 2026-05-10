@@ -149,6 +149,14 @@ int32_t HksServiceWrapKey(const struct HksProcessInfo *processInfo, const struct
 int32_t HksServiceUnwrapKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, const struct HksBlob *wrappedKey);
 
+int32_t HksServiceEncapsulate(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParamSet,
+    struct HksEncapsulationResult *encapResult);
+
+int32_t HksServiceDecapsulate(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParamSet,
+    struct HksBlob *encapOrsharedSecret);
+
 #ifdef __cplusplus
 }
 #endif

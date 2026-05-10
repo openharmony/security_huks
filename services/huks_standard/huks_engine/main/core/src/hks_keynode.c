@@ -170,7 +170,8 @@ static void FreeRuntimeParamSet(struct HksParamSet **paramSet)
         if (ret == HKS_SUCCESS) {
             hasCalcHash = param3->uint32Param != HKS_DIGEST_NONE;
         }
-        hasCalcHash &= (param2->uint32Param != HKS_ALG_ED25519 && param2->uint32Param != HKS_ALG_ML_DSA);
+        hasCalcHash &= (param2->uint32Param != HKS_ALG_ED25519 &&
+            param2->uint32Param != HKS_ALG_ML_DSA && param2->uint32Param != HKS_ALG_ML_KEM);
 
         bool isAesCcm = false;
         ret = SetAesCcmModeTag(*paramSet, param2->uint32Param, param1->uint32Param, &isAesCcm);

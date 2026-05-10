@@ -511,3 +511,43 @@ int32_t HksClientUnwrapKey(const struct HksBlob *keyAlias, const struct HksParam
     (void)wrappedKey;
     return HKS_ERROR_API_NOT_SUPPORTED;
 }
+
+int32_t HksClientEncapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksEncapsulationResult *encapResult)
+{
+    char *processName = NULL;
+    char *userId = NULL;
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSet, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+        "get process info failed")
+
+    struct HksProcessInfo processInfo = {
+        { strlen(userId), (uint8_t *)userId },
+        { strlen(processName), (uint8_t *)processName },
+        0,
+        0,
+        0,
+        0
+    };
+    return HksServiceEncapsulate(&processInfo, keyAlias, paramSet, sharedKeyParamSet, encapResult);
+}
+
+int32_t HksClientDecapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksBlob *encapOrsharedSecret)
+{
+    char *processName = NULL;
+    char *userId = NULL;
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSet, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+        "get process info failed")
+
+    struct HksProcessInfo processInfo = {
+        { strlen(userId), (uint8_t *)userId },
+        { strlen(processName), (uint8_t *)processName },
+        0,
+        0,
+        0,
+        0
+    };
+    return HksServiceDecapsulate(&processInfo, keyAlias, paramSet, sharedKeyParamSet, encapOrsharedSecret);
+}

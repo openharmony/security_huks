@@ -176,6 +176,19 @@ int32_t HuksHdiGetStatInfo(struct HksBlob *statInfo)
     (void)statInfo;
     return HKS_ERROR_API_NOT_SUPPORTED;
 }
+int32_t HuksHdiEncapsulate(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksEncapsulationResult *encapResult)
+{
+    return HksCoreEncapsulate(key, paramSet, sharedKeyAlias, sharedKeyParamSet, encapResult);
+}
+
+int32_t HuksHdiDecapsulate(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksParamSet *sharedKeyParamSet, const struct HksBlob *encapsulatedData,
+    struct HksBlob *sharedSecret)
+{
+    return HksCoreDecapsulate(key, paramSet, sharedKeyParamSet, encapsulatedData, sharedSecret);
+}
 #ifdef _STORAGE_LITE_
 int32_t HuksHdiCalcMacHeader(const struct HksParamSet *paramSet, const struct HksBlob *salt,
     const struct HksBlob *srcData, struct HksBlob *mac)
