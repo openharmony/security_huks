@@ -39,6 +39,7 @@
 #include "hks_template.h"
 #include "hks_type.h"
 #include "hks_util.h"
+#include "hks_common_check.h"
 
 #ifndef HKS_CHIPSET_API
 #include "hks_client_service_adapter_common.h"
@@ -1153,6 +1154,117 @@ HKS_API_EXPORT int32_t HksChangeStorageLevel(const struct HksBlob *keyAlias, con
     }
     int32_t ret = HksClientChangeStorageLevel(keyAlias, srcParamSet, destParamSet);
     HKS_IF_NOT_SUCC_LOGE(ret, "leave ChangeStorageLevel, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+}
+
+static int32_t ConstructDummySharedKeyParams(struct HksBlob *dummyAlias, struct HksParamSet **dummyParamSet)
+{
+    int32_t ret = HksInitParamSet(dummyParamSet);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    ret = HksBuildParamSet(dummyParamSet);
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(dummyParamSet);
+        return ret;
+    }
+
+    dummyAlias->size = 1;
+    dummyAlias->data = HksMalloc(dummyAlias->size);
+
+    return HKS_SUCCESS;
+}
+
+HKS_API_EXPORT int32_t HksEncapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksEncapsulationResult *encapResult)
+{
+    HKS_LOG_D("enter Encapsulate");
+    if (keyAlias == NULL || paramSet == NULL || encapResult == NULL) {
+        HKS_LOG_E("the pointer param entered is invalid");
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    struct HksBlob dummyAlias = {0, NULL};
+    struct HksParamSet *dummyParamSet = NULL;
+    const struct HksBlob *actualAlias = sharedKeyAlias;
+    const struct HksParamSet *actualParamSet = sharedKeyParamSet;
+    int32_t ret;
+
+    do {
+        if (sharedKeyAlias == NULL && sharedKeyParamSet == NULL) {
+            ret = ConstructDummySharedKeyParams(&dummyAlias, &dummyParamSet);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "construct dummy sharedKey params fail")
+            actualAlias = &dummyAlias;
+            actualParamSet = dummyParamSet;
+        } else if (sharedKeyParamSet != NULL) {
+            ret = HksCheckParamSetValidity(sharedKeyParamSet);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check sharedKeyParamSet validity fail")
+
+            struct HksParam *keySizeParam = NULL;
+            ret = HksGetParam(sharedKeyParamSet, HKS_TAG_KEY_SIZE, &keySizeParam);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+                "HksEncapsulate sharedKeyParamSet must contain HKS_TAG_KEY_SIZE for storage")
+        }
+
+        ret = HksClientEncapsulate(keyAlias, paramSet, actualAlias, actualParamSet, encapResult);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientEncapsulate fail")
+    } while (false);
+
+    HksFreeParamSet(&dummyParamSet);
+    HKS_FREE_BLOB(dummyAlias);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave Encapsulate, result = %" LOG_PUBLIC "d", ret);
+    return ret;
+}
+
+HKS_API_EXPORT void FreeHksEncapsulationResult(struct HksEncapsulationResult *encapResult)
+{
+    if (encapResult == NULL) {
+        return;
+    }
+    HKS_FREE(encapResult->encapsulatedData.data);
+    HKS_FREE(encapResult->sharedSecret.data);
+    encapResult->encapsulatedData.size = 0;
+    encapResult->sharedSecret.size = 0;
+}
+
+HKS_API_EXPORT int32_t HksDecapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksBlob *encapOrsharedSecret)
+{
+    HKS_LOG_D("enter Decapsulate");
+    if (keyAlias == NULL || paramSet == NULL || encapOrsharedSecret == NULL) {
+        HKS_LOG_E("the pointer param entered is invalid");
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    struct HksBlob dummyAlias = {0, NULL};
+    struct HksParamSet *dummyParamSet = NULL;
+    const struct HksBlob *actualAlias = sharedKeyAlias;
+    const struct HksParamSet *actualParamSet = sharedKeyParamSet;
+    int32_t ret;
+
+    do {
+        if (sharedKeyAlias == NULL && sharedKeyParamSet == NULL) {
+            ret = ConstructDummySharedKeyParams(&dummyAlias, &dummyParamSet);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "construct dummy sharedKey params fail")
+            actualAlias = &dummyAlias;
+            actualParamSet = dummyParamSet;
+        } else if (sharedKeyParamSet != NULL) {
+            ret = HksCheckParamSetValidity(sharedKeyParamSet);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check sharedKeyParamSet validity fail")
+
+            struct HksParam *keySizeParam = NULL;
+            ret = HksGetParam(sharedKeyParamSet, HKS_TAG_KEY_SIZE, &keySizeParam);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+                "HksDecapsulate sharedKeyParamSet must contain HKS_TAG_KEY_SIZE for storage")
+        }
+
+        ret = HksClientDecapsulate(keyAlias, paramSet, actualAlias, actualParamSet, encapOrsharedSecret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientDecapsulate fail")
+    } while (false);
+
+    HksFreeParamSet(&dummyParamSet);
+    HKS_IF_NOT_SUCC_LOGE(ret, "leave Decapsulate, result = %" LOG_PUBLIC "d", ret);
     return ret;
 }
 

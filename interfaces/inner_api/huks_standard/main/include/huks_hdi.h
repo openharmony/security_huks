@@ -277,7 +277,6 @@
                  HDI_ADAPTER_PARAM(agreedKey, &agreedKeyCore));  \
     HDI_CONVERTER_PARAM_OUT_BLOB(agreedKeyCore, agreedKey)
 
-
 #define HDI_CONVERTER_FUNC_DERIVEKEY(paramSet, kdfKey, derivedKey, ret, func)  \
     struct HuksParamSet paramSetCore = {0};  \
     struct HuksBlob kdfKeyCore = {0};  \

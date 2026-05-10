@@ -497,6 +497,91 @@ static int32_t MlDsaPublicKeyToX509(const struct HksBlob *publicKey, struct HksB
 #endif
 #endif
 
+#if defined(HKS_SUPPORT_ML_KEM_C) && defined(HKS_SUPPORT_ML_KEM_GET_PUBLIC_KEY)
+#ifdef ISOLATE_OHOS_SDK
+static int32_t MlKemGetParamId(uint32_t keyParamSetId, uint32_t *alg)
+{
+    if (keyParamSetId == HKS_ML_KEM_KEY_PARAM_SET_768) {
+        *alg = CRYPT_KEM_TYPE_MLKEM_768;
+    } else if (keyParamSetId == HKS_ML_KEM_KEY_PARAM_SET_1024) {
+        *alg = CRYPT_KEM_TYPE_MLKEM_1024;
+    } else {
+        HKS_LOG_E("invalid ml-kem paramSet id");
+        return HKS_ERROR_INVALID_KEY_SIZE;
+    }
+
+    return HKS_SUCCESS;
+}
+
+static int32_t MlKemPublicKeyToX509(const struct HksBlob *publicKey, struct HksBlob *x509Key)
+{
+    struct HksKeyMaterialMlKem *keyMaterial = (struct HksKeyMaterialMlKem *)publicKey->data;
+    uint32_t alg = 0;
+    int32_t ret = MlKemGetParamId(keyMaterial->keyParamSet, &alg);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get ml-kem param id fail")
+
+    ClearHitlsError();
+    CRYPT_EAL_PkeyCtx *ctx = CRYPT_EAL_PkeyNewCtx(CRYPT_PKEY_ML_KEM);
+    if (ctx == NULL) {
+        LOG_HITLS_ERROR("create ml-kem ctx failed");
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+
+    ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    BSL_Buffer pubBuff = { NULL, 0 };
+    do {
+        ClearHitlsError();
+        int32_t hitlsRet = CRYPT_EAL_PkeySetParaById(ctx, alg);
+        if (hitlsRet != CRYPT_SUCCESS) {
+            LOG_HITLS_ERROR("set ml-kem param failed, hitlsRet = %d", hitlsRet);
+            break;
+        }
+
+        CRYPT_EAL_PkeyPub pubKey = { 0 };
+        pubKey.id = CRYPT_PKEY_ML_KEM;
+        pubKey.key.kemEk.data = publicKey->data + sizeof(struct HksKeyMaterialMlKem);
+        pubKey.key.kemEk.len = keyMaterial->pubKeySize;
+
+        ClearHitlsError();
+        hitlsRet = CRYPT_EAL_PkeySetPub(ctx, &pubKey);
+        if (hitlsRet != CRYPT_SUCCESS) {
+            LOG_HITLS_ERROR("set ml-kem pubkey failed, hitlsRet = %d", hitlsRet);
+            break;
+        }
+
+        ClearHitlsError();
+        hitlsRet = CRYPT_EAL_EncodeBuffKey(ctx, NULL, BSL_FORMAT_ASN1, CRYPT_PUBKEY_SUBKEY, &pubBuff);
+        if (hitlsRet != CRYPT_SUCCESS) {
+            LOG_HITLS_ERROR("encode ml-kem pubkey failed, hitlsRet = %d", hitlsRet);
+            break;
+        }
+
+        x509Key->data = (uint8_t *)HksMalloc(pubBuff.dataLen);
+        if (x509Key->data == NULL) {
+            HKS_LOG_E("ml-kem to x509 public key malloc data failed");
+            ret = HKS_ERROR_MALLOC_FAIL;
+            break;
+        }
+
+        (void)memcpy_s(x509Key->data, pubBuff.dataLen, pubBuff.data, pubBuff.dataLen);
+        x509Key->size = pubBuff.dataLen;
+        ret = HKS_SUCCESS;
+    } while (0);
+
+    BSL_SAL_Free(pubBuff.data);
+    CRYPT_EAL_PkeyFreeCtx(ctx);
+    return ret;
+}
+#else
+static int32_t MlKemPublicKeyToX509(const struct HksBlob *publicKey, struct HksBlob *x509Key)
+{
+    (void)publicKey;
+    (void)x509Key;
+    return HKS_ERROR_NOT_SUPPORTED;
+}
+#endif
+#endif
+
 static int32_t TranslateToX509PublicKeySwitchAlg(const struct HksPubKeyInfo *publicKeyInfo,
     const struct HksBlob *material1, const struct HksBlob *material2, const struct HksBlob *publicKey,
     struct HksBlob *x509Key)
@@ -531,6 +616,10 @@ static int32_t TranslateToX509PublicKeySwitchAlg(const struct HksPubKeyInfo *pub
         case HKS_ALG_ML_DSA:
             return MlDsaPublicKeyToX509(publicKey, x509Key);
 #endif
+#if defined(HKS_SUPPORT_ML_KEM_C) && defined(HKS_SUPPORT_ML_KEM_GET_PUBLIC_KEY)
+        case HKS_ALG_ML_KEM:
+            return MlKemPublicKeyToX509(publicKey, x509Key);
+#endif
         default:
             HKS_LOG_E("Unsupport alg type! type = 0x%" LOG_PUBLIC "X", publicKeyInfo->keyAlg);
             return HKS_ERROR_INVALID_ARGUMENT;
@@ -564,7 +653,7 @@ int32_t TranslateToX509PublicKey(const struct HksBlob *publicKey, struct HksBlob
 }
 
 #if defined(HKS_SUPPORT_RSA_C) || defined(HKS_SUPPORT_ECC_C) || defined(HKS_SUPPORT_DSA_C) || \
-    defined(HKS_SUPPORT_DH_C) || defined(HKS_SUPPORT_ML_DSA_C)
+    defined(HKS_SUPPORT_DH_C) || defined(HKS_SUPPORT_ML_DSA_C) || defined(HKS_SUPPORT_ML_KEM_C)
 #ifdef HKS_SUPPORT_RSA_C
 static int32_t X509PublicKeyToRsa(EVP_PKEY *pkey, struct HksBlob *rsaPublicKey)
 {
@@ -890,6 +979,13 @@ int32_t TranslateFromX509PublicKey(const uint32_t alg, const struct HksBlob *x50
 }
 
 #ifdef ISOLATE_OHOS_SDK
+#define HKS_ML_DSA_PUB_KEY_SIZE_1312  1312
+#define HKS_ML_DSA_PUB_KEY_SIZE_1952  1952
+#define HKS_ML_DSA_PUB_KEY_SIZE_2592  2592
+
+#define HKS_ML_KEM_PUB_KEY_SIZE_1184  1184
+#define HKS_ML_KEM_PUB_KEY_SIZE_1568  1568
+
 static int32_t MlDsaGetPubKeySize(uint32_t keyParamSetId, uint32_t *pubKeySize)
 {
     if (pubKeySize == NULL) {
@@ -976,5 +1072,102 @@ int32_t TranslateToInnerMlDsaFormat(const struct HksParamSet *paramSet, const st
     return HKS_ERROR_NOT_SUPPORTED;
 }
 #endif
+#endif
+
+#ifdef HKS_SUPPORT_ML_KEM_C
+#ifdef ISOLATE_OHOS_SDK
+static int32_t MlKemGetPubKeySize(uint32_t keyParamSetId, uint32_t *pubKeySize)
+{
+    if (pubKeySize == NULL) {
+        HKS_LOG_E("pubKeySize is null");
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    if (keyParamSetId == HKS_ML_KEM_KEY_PARAM_SET_768) {
+        *pubKeySize = HKS_ML_KEM_PUB_KEY_SIZE_1184;
+    } else if (keyParamSetId == HKS_ML_KEM_KEY_PARAM_SET_1024) {
+        *pubKeySize = HKS_ML_KEM_PUB_KEY_SIZE_1568;
+    } else {
+        HKS_LOG_E("invalid ml-kem paramSet id");
+        return HKS_ERROR_INVALID_KEY_SIZE;
+    }
+
+    return HKS_SUCCESS;
+}
+
+int32_t TranslateToInnerMlKemFormat(const struct HksParamSet *paramSet, const struct HksBlob *x509Key,
+    struct HksBlob *publicKey)
+{
+    struct HksParam *keyParamSetId = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_SIZE, &keyParamSetId);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "get ml-kem key size fail")
+
+    uint32_t pubKeySize = 0;
+    ret = MlKemGetPubKeySize(keyParamSetId->uint32Param, &pubKeySize);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get ml-kem public key size fail")
+
+    uint32_t totalSize = sizeof(struct HksKeyMaterialMlKem) + pubKeySize;
+    uint8_t *keyBuffer = (uint8_t *)HksMalloc(totalSize);
+    HKS_IF_NULL_LOGE_RETURN(keyBuffer, HKS_ERROR_MALLOC_FAIL, "ml-kem public key malloc failed")
+
+    struct HksKeyMaterialMlKem *keyMaterial = (struct HksKeyMaterialMlKem *)keyBuffer;
+    keyMaterial->keyAlg = HKS_ALG_ML_KEM;
+    keyMaterial->keyParamSet = keyParamSetId->uint32Param;
+    keyMaterial->pubKeySize = pubKeySize;
+    keyMaterial->priKeySize = 0;
+    keyMaterial->reserved = 0;
+
+    CRYPT_EAL_PkeyCtx *ctx = NULL;
+    BSL_Buffer derBuffer = { .data = x509Key->data, .dataLen = x509Key->size };
+    int32_t hitlsRet = CRYPT_SUCCESS;
+    do {
+        ClearHitlsError();
+        hitlsRet = CRYPT_EAL_DecodeBuffKey(BSL_FORMAT_ASN1, CRYPT_PUBKEY_SUBKEY, &derBuffer, NULL, 0, &ctx);
+        if (hitlsRet != CRYPT_SUCCESS) {
+            LOG_HITLS_ERROR("decode ml-kem x509 public key fail, hitlsRet = %d", hitlsRet);
+            break;
+        }
+
+        CRYPT_EAL_PkeyPub pubKey = { 0 };
+        pubKey.id = CRYPT_PKEY_ML_KEM;
+        pubKey.key.kemEk.data = keyBuffer + sizeof(struct HksKeyMaterialMlKem);
+        pubKey.key.kemEk.len = pubKeySize;
+        ClearHitlsError();
+        hitlsRet = CRYPT_EAL_PkeyGetPub(ctx, &pubKey);
+        if (hitlsRet != CRYPT_SUCCESS) {
+            LOG_HITLS_ERROR("get ml-kem x509 public key fail, hitlsRet = %d", hitlsRet);
+            break;
+        }
+
+        publicKey->data = keyBuffer;
+        publicKey->size = totalSize;
+    } while (0);
+
+    CRYPT_EAL_PkeyFreeCtx(ctx);
+    if (hitlsRet != CRYPT_SUCCESS) {
+        HKS_FREE(keyBuffer);
+        ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+    return ret;
+}
+#else
+int32_t TranslateToInnerMlKemFormat(const struct HksParamSet *paramSet, const struct HksBlob *x509Key,
+    struct HksBlob *publicKey)
+{
+    (void)paramSet;
+    (void)x509Key;
+    (void)publicKey;
+    return HKS_ERROR_NOT_SUPPORTED;
+}
+#endif
+#else
+int32_t TranslateToInnerMlKemFormat(const struct HksParamSet *paramSet, const struct HksBlob *x509Key,
+    struct HksBlob *publicKey)
+{
+    (void)paramSet;
+    (void)x509Key;
+    (void)publicKey;
+    return HKS_ERROR_NOT_SUPPORTED;
+}
 #endif
 

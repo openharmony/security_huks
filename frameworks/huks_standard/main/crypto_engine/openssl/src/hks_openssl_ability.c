@@ -36,10 +36,12 @@
 #include "hks_openssl_hmac.h"
 #include "hks_openssl_kdf.h"
 #include "hks_openssl_ml_dsa.h"
+#include "hks_openssl_ml_kem.h"
 #include "hks_openssl_rsa.h"
 #include "hks_openssl_sm2.h"
 #include "hks_openssl_sm3.h"
 #include "hks_openssl_sm4.h"
+#include "hks_openssl_mlkem.h"
 #include "hks_type.h"
 
 static void RegisterAbilityGenerateKey(void)
@@ -86,6 +88,9 @@ static void RegisterAbilityGenerateKey(void)
 #if defined(HKS_SUPPORT_3DES_C) && defined(HKS_SUPPORT_3DES_GENERATE_KEY)
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_GENERATE_KEY(HKS_ALG_3DES), HksOpenssl3DesGenerateKey);
 #endif
+#if defined(HKS_SUPPORT_ML_KEM_C) && defined(HKS_SUPPORT_ML_KEM_GENERATE_KEY)
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_GENERATE_KEY(HKS_ALG_ML_KEM), HksOpensslMlKemGenerateKey);
+#endif
 }
 
 static void RegisterAbilityGetPublicKey(void)
@@ -113,6 +118,9 @@ static void RegisterAbilityGetPublicKey(void)
 #endif
 #if defined(HKS_SUPPORT_SM2_C) && defined(HKS_SUPPORT_SM2_GET_PUBLIC_KEY)
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_GET_PUBLIC_KEY(HKS_ALG_SM2), HksOpensslGetEccPubKey);
+#endif
+#if defined(HKS_SUPPORT_ML_KEM_C) && defined(HKS_SUPPORT_ML_KEM_GET_PUBLIC_KEY)
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_GET_PUBLIC_KEY(HKS_ALG_ML_KEM), HksOpensslMlKemGetPubKey);
 #endif
 }
 
@@ -280,6 +288,14 @@ static void RegisterAbilityAgree(void)
 #endif
 }
 
+static void RegisterAbilityMlKem(void)
+{
+#ifdef HKS_SUPPORT_ML_KEM
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCAPSULATE(HKS_ALG_ML_KEM), HksOpensslMlKemEncapsulate);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECAPSULATE(HKS_ALG_ML_KEM), HksOpensslMlKemDecapsulate);
+#endif
+}
+
 static void RegisterAbilityDerive(void)
 {
 #ifdef HKS_SUPPORT_KDF_HKDF
@@ -337,6 +353,7 @@ int32_t HksCryptoAbilityInitBase(void)
     RegisterAbilityEncrypt();
     RegisterAbilityDecrypt();
     RegisterAbilityAgree();
+    RegisterAbilityMlKem();
     RegisterAbilityDerive();
     RegisterAbilityHmac();
     RegisterAbilityHash();

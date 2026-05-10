@@ -119,6 +119,14 @@ struct HksKeyAliasSet {
     struct HksBlob *aliases;
 };
 
+/**
+ * @brief hks encapsulation result for ML-KEM
+ */
+struct HksEncapsulationResult {
+    struct HksBlob encapsulatedData;
+    struct HksBlob sharedSecret;
+};
+
 #ifndef HKS_CHIPSET_API
 /*
  * a.b.c.d => a * 1000 + b * 100 + c * 10 + d
@@ -137,6 +145,7 @@ struct HksKeyAliasSet {
 #define HKS_BITS_PER_BYTE 8
 #define MAX_KEY_SIZE 2048
 #define ML_DSA_MAX_KEY_SIZE 10000
+#define ML_KEM_MAX_KEY_SIZE 6000
 #define HKS_AE_NONCE_LEN 12
 #define HKS_MAX_KEY_ALIAS_LEN 128
 #define HKS_MAX_PROCESS_NAME_LEN 50
@@ -280,6 +289,17 @@ struct HksKeyMaterial25519 {
 };
 
 /**
+ * @brief hks ml-kem key material
+ */
+struct HksKeyMaterialMlKem {
+    enum HksKeyAlg keyAlg;
+    uint32_t keyParamSet;
+    uint32_t pubKeySize;
+    uint32_t priKeySize;
+    uint32_t reserved;
+};
+
+/**
  * @brief hks user auth token plaintext data
  * @see `TokenDataPlain` in `drivers/peripheral/user_auth/hdi_service/user_auth/inc/user_sign_centre.h`
  */
@@ -358,6 +378,11 @@ struct SecInfoWrap {
 #define HKS_MAX_KEY_LEN (HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_4096) * HKS_KEY_MATERIAL_NUM)
 #define HKS_MAX_KEY_MATERIAL_LEN (sizeof(struct HksPubKeyInfo) + HKS_MAX_KEY_LEN + HKS_AE_TAG_LEN)
 #define COMMON_EVENT_HKS_BINDER_DIED "ohos.hks.action.BINDER_DIED"
+
+#define HKS_ML_KEM_SHARED_SECRET_LEN 32
+#define HKS_ML_KEM_768_CIPHERTEXT_LEN 1088
+#define HKS_ML_KEM_1024_CIPHERTEXT_LEN 1568
+#define HKS_ML_KEM_MAX_CIPHERTEXT_LEN HKS_ML_KEM_1024_CIPHERTEXT_LEN
 
 /**
  * @brief hks store header info

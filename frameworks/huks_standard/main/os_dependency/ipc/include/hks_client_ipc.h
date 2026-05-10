@@ -127,6 +127,14 @@ int32_t HksClientWrapKey(const struct HksBlob *keyAlias, const struct HksParamSe
 
 int32_t HksClientUnwrapKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksBlob *wrappedKey);
+
+int32_t HksClientEncapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksEncapsulationResult *encapResult);
+
+int32_t HksClientDecapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksBlob *encapOrsharedSecret);
 #ifdef __cplusplus
 }
 #endif

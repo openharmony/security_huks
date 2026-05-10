@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <unistd.h>
 #define HUKS_DISABLE_LOG_AT_FILE_TO_REDUCE_ROM_SIZE
 
 #include "hks_error_code.h"
@@ -525,21 +526,20 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
 {
     struct HksParamSet *newParamSet = NULL;
     uint64_t enterTime = 0;
-    int32_t ret;
     (void)HksElapsedRealTime(&enterTime);
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
     if (HksCheckIsUkeyOperation(paramSetIn, &ret) == HKS_SUCCESS) {
         return GenerateKeyUkeyOperation(processInfo, keyAlias, paramSetIn);
     }
 #endif
-    uint8_t *keyOutBuffer = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
+    uint8_t *keyOutBuffer = (uint8_t *)HksMalloc(ML_DSA_MAX_KEY_SIZE);
     HKS_IF_NULL_RETURN(keyOutBuffer, HKS_ERROR_MALLOC_FAIL)
     struct HksHitraceId traceId = {0};
-
+    int32_t ret = 0;
 #ifdef L2_STANDARD
     traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
-    struct HksBlob output = { MAX_KEY_SIZE, keyOutBuffer };
+    struct HksBlob output = { ML_DSA_MAX_KEY_SIZE, keyOutBuffer };
     struct HksBlob keyIn = { 0, NULL };
     do {
         /* if user don't pass the key out buffer, we will use a tmp key out buffer */
@@ -2323,5 +2323,142 @@ int32_t HksServiceUnwrapKey(const struct HksProcessInfo *processInfo, const stru
 
     HKS_FREE(keyOutBuffer);
     HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+static int32_t HksCheckAndBuildShareParam(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+    struct HksParamSet **newParamSet)
+{
+    int32_t ret = HksCheckParamSetValidity(paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check sharedKeyParamSet failed, ret = %" LOG_PUBLIC "d", ret)
+
+    struct HksParam *sharedKeyAlias = NULL;
+    ret = HksGetParam(paramSet, HKS_TAG_KEY_ALIAS, &sharedKeyAlias);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckAndBuildShareParam get shared key alias fail")
+
+    ret = AppendNewInfoForGenKeyInService(processInfo, paramSet, newParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Encaps AppendNewInfoForGenKeyInService fail")
+
+    ret = CheckKeyCondition(processInfo, &sharedKeyAlias->blob, *newParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "encaps check key condition fail")
+
+    return ret;
+}
+
+int32_t HksServiceEncapsulate(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParamSet,
+    struct HksEncapsulationResult *encapResult)
+{
+    int32_t ret;
+    uint64_t startTime = 0;
+    (void)HksElapsedRealTime(&startTime);
+    struct HksParamSet *newParamSet = NULL;
+    struct HksParamSet *newShareParamSet = NULL;
+    struct HksBlob keyFromFile = { 0, NULL };
+    struct HksHitraceId traceId = {0};
+
+#ifdef L2_STANDARD
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
+#endif
+
+    do {
+        ret = HksCheckAndBuildShareParam(processInfo, sharedKeyParamSet, &newShareParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check sharedKeyParamSet failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "encapsulate: get key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
+
+        struct HksParam *sharedKeyAlias = NULL;
+        ret = HksGetParam(newShareParamSet, HKS_TAG_KEY_ALIAS, &sharedKeyAlias);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceEncapsulate get shared key alias fail")
+        ret = HuksAccessEncapsulate(&keyFromFile, newParamSet, &sharedKeyAlias->blob,
+            newShareParamSet, encapResult);
+        IfNotSuccAppendHdiErrorInfo(ret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAccessEncapsulate fail")
+
+        struct HksParam *keySize = NULL;
+        ret = HksGetParam(newShareParamSet, HKS_TAG_KEY_SIZE, &keySize);
+        if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+            ret = HKS_SUCCESS;
+            break;
+        }
+
+        HksManageStoreKeyBlob(processInfo, newShareParamSet, &sharedKeyAlias->blob, &encapResult->sharedSecret,
+            HKS_STORAGE_TYPE_KEY);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
+        (void)memset_s(encapResult->sharedSecret.data, encapResult->sharedSecret.size, 0,
+            encapResult->sharedSecret.size);
+        encapResult->sharedSecret.size = 0;
+    } while (0);
+
+#ifdef L2_STANDARD
+    HksOneStageReportInfo info = {ret, startTime, traceId.traceId.chainId, __func__, HKS_ONE_STAGE_ENCAPSULATE};
+    (void)HksOneStageEventReport(keyAlias, &keyFromFile, newParamSet, processInfo, &info);
+#endif
+    HksHitraceEnd(&traceId);
+    HKS_MEMSET_FREE_BLOB(keyFromFile);
+    HksFreeParamSet(&newParamSet);
+    HksFreeParamSet(&newShareParamSet);
+    return ret;
+}
+
+int32_t HksServiceDecapsulate(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParamSet,
+    struct HksBlob *encapOrsharedSecret)
+{
+    int32_t ret;
+    uint64_t startTime = 0;
+    (void)HksElapsedRealTime(&startTime);
+    struct HksParamSet *newParamSet = NULL;
+    struct HksParamSet *newSharedKeyParamSet = NULL;
+    struct HksBlob keyFromFile = { 0, NULL };
+    struct HksHitraceId traceId = {0};
+    struct HksBlob outData = { 0, NULL };
+
+#ifdef L2_STANDARD
+    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
+#endif
+
+    do {
+        ret = HksCheckBlobAndParamSet(keyAlias, paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check keyAlias and paramSet failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAndBuildShareParam(processInfo, sharedKeyParamSet, &newSharedKeyParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check sharedKeyParamSet failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "decapsulate: get key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HuksAccessDecapsulate(&keyFromFile, newParamSet, newSharedKeyParamSet, encapOrsharedSecret, &outData);
+        IfNotSuccAppendHdiErrorInfo(ret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAccessEncapsulate fail")
+
+        struct HksParam *keySize = NULL;
+        ret = HksGetParam(newSharedKeyParamSet, HKS_TAG_KEY_SIZE, &keySize);
+        if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+            ret = HKS_SUCCESS;
+            break;
+        }
+
+        struct HksParam *keyalias = NULL;
+        ret = HksGetParam(newSharedKeyParamSet, HKS_TAG_KEY_ALIAS, &keyalias);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCoreDecapsulate get key alias fail")
+
+        HksManageStoreKeyBlob(processInfo, newSharedKeyParamSet, &keyalias->blob, &outData,
+            HKS_STORAGE_TYPE_KEY);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
+        (void)memset_s(outData.data, outData.size, 0, outData.size);
+        outData.size = 0;
+    } while (0);
+
+#ifdef L2_STANDARD
+    *encapOrsharedSecret = outData;
+    HksOneStageReportInfo info = {ret, startTime, traceId.traceId.chainId, __func__, HKS_ONE_STAGE_DECAPSULATE};
+    (void)HksOneStageEventReport(encapOrsharedSecret, &keyFromFile, newParamSet, processInfo, &info);
+#endif
+    HksHitraceEnd(&traceId);
+    HKS_MEMSET_FREE_BLOB(keyFromFile);
+    HksFreeParamSet(&newParamSet);
+    HksFreeParamSet(&newSharedKeyParamSet);
     return ret;
 }

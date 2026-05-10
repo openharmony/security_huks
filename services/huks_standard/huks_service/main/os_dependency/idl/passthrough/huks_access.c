@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "securec.h"
+#include <stdint.h>
 #define HUKS_DISABLE_LOG_AT_FILE_TO_REDUCE_ROM_SIZE
 
 #ifdef HKS_CONFIG_FILE
@@ -391,6 +393,29 @@ ENABLE_CFI(int32_t HuksAccessAttestKey(const struct HksBlob *key, const struct H
     return ret;
 }
 #endif
+
+ENABLE_CFI(int32_t HuksAccessEncapsulate(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksEncapsulationResult *encapResult))
+{
+    (void)key;
+    (void)paramSet;
+    (void)sharedKeyAlias;
+    (void)sharedKeyParamSet;
+    (void)encapResult;
+    return HKS_ERROR_NOT_SUPPORTED;
+}
+
+ENABLE_CFI(int32_t HuksAccessDecapsulate(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksParamSet *sharedKeyParamSet, struct HksBlob *encapsData, struct HksBlob *hdiSharedSecret))
+{
+    (void)key;
+    (void)paramSet;
+    (void)sharedKeyParamSet;
+    (void)encapsData;
+    (void)hdiSharedSecret;
+    return HKS_ERROR_NOT_SUPPORTED;
+}
 
 #endif /* _CUT_AUTHENTICATE_ */
 

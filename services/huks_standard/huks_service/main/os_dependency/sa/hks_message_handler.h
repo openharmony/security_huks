@@ -50,6 +50,8 @@ const struct HksIpcEntryPoint HKS_IPC_MESSAGE_HANDLER[] = {
     { HKS_MSG_CHANGE_STORAGE_LEVEL, HksIpcChangeStorageLevel },
     { HKS_MSG_WRAP_KEY, HksIpcWrapKey },
     { HKS_MSG_UNWRAP_KEY, HksIpcUnwrapKey },
+    { HKS_MSG_ENCAPSULATE, HksIpcServiceEncapsulate },
+    { HKS_MSG_DECAPSULATE, HksIpcServiceDecapsulate },
 
     { HKS_MSG_EXT_REGISTER, HksIpcServiceRegisterProvider },
     { HKS_MSG_EXT_UNREGISTER, HksIpcServiceUnregisterProvider },

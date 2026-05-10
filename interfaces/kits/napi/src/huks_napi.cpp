@@ -54,6 +54,7 @@
 #include "huks_napi_update_finish_session.h"
 #include "huks_napi_wrap_key.h"
 #include "huks_napi_anon_Attest_Key_Item_Offline.h"
+#include "huks_napi_ml_kem.h"
 // UKey functions moved to separate shared library huksexternalcrypto_napi
 
 namespace HuksNapi {
@@ -264,6 +265,9 @@ static napi_value CreateHuksKeySize(napi_env env)
     AddInt32Property(env, keySize, "HUKS_ML_DSA_KEY_PARAM_SET_65", HKS_ML_DSA_KEY_PARAM_SET_65);
     AddInt32Property(env, keySize, "HUKS_ML_DSA_KEY_PARAM_SET_87", HKS_ML_DSA_KEY_PARAM_SET_87);
 
+    AddInt32Property(env, keySize, "HUKS_ML_KEM_KEY_PARAM_SET_768", HKS_ML_KEM_KEY_PARAM_SET_768);
+    AddInt32Property(env, keySize, "HUKS_ML_KEM_KEY_PARAM_SET_1024", HKS_ML_KEM_KEY_PARAM_SET_1024);
+
     return keySize;
 }
 
@@ -295,6 +299,7 @@ static napi_value CreateHuksKeyAlg(napi_env env)
     AddInt32Property(env, keyAlg, "HUKS_ALG_CMAC", HKS_ALG_CMAC);
 
     AddInt32Property(env, keyAlg, "HUKS_ALG_ML_DSA", HKS_ALG_ML_DSA);
+    AddInt32Property(env, keyAlg, "HUKS_ALG_ML_KEM", HKS_ALG_ML_KEM);
 
     return keyAlg;
 }
@@ -794,6 +799,8 @@ napi_property_descriptor NAPI_FUNC_DESC[] = {
     DECLARE_NAPI_FUNCTION("listAliases", HuksNapiListAliases),
     DECLARE_NAPI_FUNCTION("wrapKeyItem", HuksNapiWrapKey),
     DECLARE_NAPI_FUNCTION("unwrapKeyItem", HuksNapiUnwrapKey),
+    DECLARE_NAPI_FUNCTION("encapsulate", HuksNapiMlKemEncapsulate),
+    DECLARE_NAPI_FUNCTION("decapsulate", HuksNapiMlKemDecapsulate),
 
 };
 

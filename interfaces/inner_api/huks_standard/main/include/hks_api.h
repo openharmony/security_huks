@@ -108,124 +108,29 @@ HKS_API_EXPORT int32_t HksFinish(const struct HksBlob *handle, const struct HksP
     const struct HksBlob *inData, struct HksBlob *outData);
 
 #ifndef HKS_CHIPSET_API
-
-/**
- * @brief Register a provider to HUKS
- * @param name provider name
- * @param paramSetIn required parameter set
- * @return error code, see hks_type.h
- */
 HKS_API_EXPORT int32_t HksRegisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
-
-/**
- * @brief Unregister a previously registered provider.
- * @param name provider name
- * @param paramSetIn required parameter set
- * @return error code, see hks_type.h
- */
 HKS_API_EXPORT int32_t HksUnregisterProvider(const struct HksBlob *name, const struct HksParamSet *paramSetIn);
-
-/**
- * @brief Query ability information of a provider identified by resourceId
- * @param resourceId resource identifier
- * @param abilityInfo ability information
- * @return error code, see hks_type.h
- */
 HKS_API_EXPORT int32_t HksQueryAbilityInfo(struct HksBlob *resourceId, struct HksAbilityInfo *abilityInfo);
 
-/**
- * @brief Export certificates of a provider
- * @param providerName provider name
- * @param paramSetIn required parameter set
- * @param certSet certificate set containing provider certificates
- * @return error code, see hks_type.h
- */
 HKS_API_EXPORT int32_t HksExportProviderCertificates(const struct HksBlob *providerName,
     const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
-
-/**
- * @brief Export certificate associated with a specific resource
- * @param resourceId resource identifier
- * @param paramSetIn required parameter set
- * @param certSet certificate set containing the resource certificate.
- * @return error code, see hks_type.h
- */
 HKS_API_EXPORT int32_t HksExportCertificate(const struct HksBlob *resourceId,
     const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
-
-/**
- * @brief Import certificate for a resource
- * @param resourceId resource identifier
- * @param certInfo certificate information to import
- * @param paramSetIn required parameter set
- * @return error code, see hks_type.h
- */
 HKS_API_EXPORT int32_t HksImportCertificate(const struct HksBlob *resourceId,
     const struct HksExtCertInfo *certInfo, const struct HksParamSet *paramSetIn);
-
-/**
- * @brief Open a remote handle for a resource
- * @param resourceId resource identifier
- * @param paramSetIn required parameter set
- * @return error code, see hks_type.h
- */
-HKS_API_EXPORT int32_t HksOpenRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn);
-
-/**
- * @brief Close a remote handle previously opened
- * @param resourceId resource identifier
- * @param paramSetIn required parameter set
- * @return error code, see hks_type.h
- */
-HKS_API_EXPORT int32_t HksCloseRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn);
-
-/**
- * @brief Authenticate UKey PIN
- * @param resourceId resource identifier
- * @param paramSetIn required parameter set
- * @param retryCount remaining retry count on failure
- * @return error code, see hks_type.h
- */
+HKS_API_EXPORT int32_t HksOpenRemoteHandle(const struct HksBlob *resourceId,
+    const struct HksParamSet *paramSetIn);
+HKS_API_EXPORT int32_t HksCloseRemoteHandle(const struct HksBlob *resourceId,
+    const struct HksParamSet *paramSetIn);
 HKS_API_EXPORT int32_t HksAuthUkeyPin(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn,
     uint32_t *retryCount);
-
-/**
- * @brief Get current PIN authentication status for a UKey
- * @param resourceId resource identifier
- * @param paramSetIn required parameter set
- * @param status authentication status (e.g., 0 = not authed, 1 = authed, 2 = locked)
- * @return error code, see hks_type.h
- */
-HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn,
+HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *name, const struct HksParamSet *paramSetIn,
     int32_t *status);
-
-/**
- * @brief Clear PIN authentication state for a UKey
- * @param resourceId resource identifier
- * @return error code, see hks_type.h
- */
 HKS_API_EXPORT int32_t HksClearUkeyPinAuthState(const struct HksBlob *resourceId);
 
-/**
- * @brief Set or get remote properties for a UKey resource
- * @param operation operation type (set or get), see HksExtPropertyOperation
- * @param resourceId resource identifier
- * @param propertyId property identifier
- * @param paramSetIn required parameter set
- * @param propertySetOut pointer to receive the property parameter set when operation is get, can be NULL for set
- * @return error code, see hks_type.h
- */
 HKS_API_EXPORT int32_t HksSetOrGetRemoteProperty(enum HksExtPropertyOperation operation,
     const struct HksBlob *resourceId, const struct HksBlob *propertyId,
     const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut);
-
-/**
- * @brief Obtain a resource ID from a provider name and input parameters
- * @param providerName provider name
- * @param paramSetIn required parameter set
- * @param resourceId resource ID blob. On success, caller must free resourceId->data using HKS_FREE_BLOB.
- * @return error code, see hks_type.h
- */
 HKS_API_EXPORT int32_t HksGetResourceId(const struct HksBlob *providerName, const struct HksParamSet *paramSetIn,
     struct HksBlob *resourceId);
 
@@ -426,6 +331,47 @@ HKS_API_EXPORT int32_t HksWrapKey(const struct HksBlob *keyAlias, const struct H
  */
 HKS_API_EXPORT int32_t HksUnwrapKey(const struct HksBlob *keyAlias, const struct HksBlob *targetKeyAlias,
     const struct HksBlob *wrappedData, const struct HksParamSet *paramSet);
+
+/**
+ * @brief ML-KEM encapsulation operation
+ * @param keyAlias public key alias for encapsulation (required)
+ * @param paramSet required parameter set for encapsulation (required)
+ * @param sharedKeyAlias alias for storing the derived shared key (optional)
+ *        - If NULL: sharedSecret will be returned in encapResult->sharedSecret
+ *        - If non-NULL: shared key will be stored, encapResult->sharedSecret will be empty
+ * @param sharedKeyParamSet parameter set for the stored shared key
+ *        - Required if sharedKeyAlias is non-NULL
+ *        - Ignored if sharedKeyAlias is NULL
+ * @param encapResult encapsulation result (output, HUKS allocates memory)
+ *        - encapResult->encapsulatedData: ciphertext (HUKS allocates)
+ *        - encapResult->sharedSecret:
+ *          - If sharedKeyAlias is NULL: shared secret (HUKS allocates)
+ *          - If sharedKeyAlias is non-NULL: empty blob (size=0, data=NULL)
+ * @return error code, see hks_type.h
+ */
+HKS_API_EXPORT int32_t HksEncapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksEncapsulationResult *encapResult);
+
+/**
+ * @brief ML-KEM decapsulation operation
+ * @param keyAlias private key alias for decapsulation (required)
+ * @param paramSet required parameter set for decapsulation (required)
+ * @param sharedKeyAlias alias for storing the derived shared key (optional)
+ *        - If NULL: sharedSecret will be returned to caller
+ *        - If non-NULL: shared key will be stored
+ * @param sharedKeyParamSet parameter set for the stored shared key
+ *        - Required if sharedKeyAlias is non-NULL
+ *        - Ignored if sharedKeyAlias is NULL
+ * @param ciphertext ciphertext to decapsulate (required)
+ * @param sharedSecret output shared secret
+ *        - If sharedKeyAlias is NULL: output buffer provided by caller (required)
+ *        - If sharedKeyAlias is non-NULL: ignored (can be NULL)
+ * @return error code, see hks_type.h
+ */
+HKS_API_EXPORT int32_t HksDecapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksBlob *encapOrsharedSecret);
 
 /**
  * @brief Big-numble exponent mod x = a^e mod n

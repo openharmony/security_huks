@@ -17,6 +17,7 @@
 #define HKS_CRYPTO_HAL_H
 
 #include "hks_type.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -207,6 +208,12 @@ int32_t HksCryptoHalAddEntropy(const struct HksBlob *entropy);
 
 int32_t HksCryptoHalAgreeKey(const struct HksBlob *nativeKey, const struct HksBlob *pubKey,
     const struct HksKeySpec *spec, struct HksBlob *sharedKey);
+
+int32_t HksCryptoHalMlKemEncapsulate(const struct HksBlob *rawKey, const struct HksKeySpec *spec,
+    struct HksEncapsulationResult *encapResult);
+
+int32_t HksCryptoHalMlKemDecapsulate(const struct HksBlob *rawKey, const struct HksKeySpec *spec,
+    const struct HksBlob *ciphertext, struct HksBlob *sharedSecret);
 
 int32_t HksCryptoHalSign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *signature);
