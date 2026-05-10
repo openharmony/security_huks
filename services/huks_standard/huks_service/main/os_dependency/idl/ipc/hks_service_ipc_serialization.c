@@ -840,8 +840,8 @@ int32_t HksDecapsulateUnpack(const struct HksBlob *srcData, struct HksBlob *shar
 int32_t HksEncapsulateResponsePack(struct HksEncapsulationResult *encapResult, struct HksBlob *responseBlob)
 {
     uint32_t offset = 0;
-    uint32_t responseSize = ALIGN_SIZE(sizeof(uint32_t)) + ALIGN_SIZE(encapResult->encapsulatedData.size)
-        + ALIGN_SIZE(sizeof(uint32_t)) + ALIGN_SIZE(encapResult->sharedSecret.size);
+    uint32_t responseSize = ALIGN_SIZE(sizeof(uint32_t)) + ALIGN_SIZE(encapResult->encapsulatedData.size) +
+        ALIGN_SIZE(sizeof(uint32_t)) + ALIGN_SIZE(encapResult->sharedSecret.size);
     responseBlob->size = responseSize;
 
     responseBlob->data = (uint8_t *)HksMalloc(responseBlob->size);
