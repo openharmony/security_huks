@@ -49,10 +49,10 @@ static constexpr std::array g_hksIamAuthTypeConvertMap = {
 };
 
 static constexpr std::array g_hksIamAuthTrustLevelConvertMap = {
-    std::pair<HksUserAuthType, USER_IAM::AuthTrustLevel>(HKS_USER_AUTH_ATL1, USER_IAM::AuthTrustLevel::ATL1),
-    std::pair<HksUserAuthType, USER_IAM::AuthTrustLevel>(HKS_USER_AUTH_ATL2, USER_IAM::AuthTrustLevel::ATL2),
-    std::pair<HksUserAuthType, USER_IAM::AuthTrustLevel>(HKS_USER_AUTH_ATL3, USER_IAM::AuthTrustLevel::ATL3),
-    std::pair<HksUserAuthType, USER_IAM::AuthTrustLevel>(HKS_USER_AUTH_ATL4, USER_IAM::AuthTrustLevel::ATL4),
+    std::pair<HksUserAuthAtlType, USER_IAM::AuthTrustLevel>(HKS_USER_AUTH_ATL1, USER_IAM::AuthTrustLevel::ATL1),
+    std::pair<HksUserAuthAtlType, USER_IAM::AuthTrustLevel>(HKS_USER_AUTH_ATL2, USER_IAM::AuthTrustLevel::ATL2),
+    std::pair<HksUserAuthAtlType, USER_IAM::AuthTrustLevel>(HKS_USER_AUTH_ATL3, USER_IAM::AuthTrustLevel::ATL3),
+    std::pair<HksUserAuthAtlType, USER_IAM::AuthTrustLevel>(HKS_USER_AUTH_ATL4, USER_IAM::AuthTrustLevel::ATL4),
 };
 
 void *HksLockUserIdm(void)
