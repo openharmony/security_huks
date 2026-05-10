@@ -75,6 +75,28 @@ static int32_t ConvertToHksAuthType(uint32_t authType, enum HksUserAuthType *hks
     return HKS_SUCCESS;
 }
 
+static int32_t ConvertToHksAuthTrustLevel(uint32_t authType, enum HksUserAuthAtlType *hksAuthAtlType)
+{
+    switch (authType) {
+        case HKS_IAM_USER_AUTH_ATL1:
+            *hksAuthAtlType = HKS_USER_AUTH_ATL1;
+            break;
+        case HKS_IAM_USER_AUTH_ATL2:
+            *hksAuthAtlType = HKS_USER_AUTH_ATL2;
+            break;
+        case HKS_IAM_USER_AUTH_ATL3:
+            *hksAuthAtlType = HKS_USER_AUTH_ATL3;
+            break;
+        case HKS_IAM_USER_AUTH_ATL4:
+            *hksAuthAtlType = HKS_USER_AUTH_ATL4;
+            break;
+        default:
+            HKS_LOG_E("Invalid authType!");
+            return HKS_ERROR_NOT_SUPPORTED;
+    }
+    return HKS_SUCCESS;
+}
+
 static struct EnrolledInfoWrap EnrolledInfoParams[g_paramSidMax][3] = {
     {
         {
@@ -130,4 +152,10 @@ int32_t HksConvertUserIamTypeToHksType(enum HksUserIamType userIamType, uint32_t
     HKS_IF_NULL_RETURN(hksValue, HKS_ERROR_NULL_POINTER)
     HKS_IF_TRUE_RETURN(userIamType != HKS_AUTH_TYPE, HKS_ERROR_NOT_SUPPORTED)
     return ConvertToHksAuthType(userIamValue, (enum HksUserAuthType *)hksValue);
+}
+
+int32_t HksConvertToHksAuthTrustLevel(uint32_t authAtlType, uint32_t *hksAuthAtlType)
+{
+    HKS_IF_NULL_RETURN(hksAuthAtlType, HKS_ERROR_NULL_POINTER)
+    return ConvertToHksAuthTrustLevel(authAtlType, (enum HksUserAuthAtlType *)hksAuthAtlType);
 }

@@ -1099,6 +1099,13 @@ static const uint32_t g_supportUserAuthTypes[] = {
     HKS_USER_AUTH_TYPE_TUI_PIN | HKS_USER_AUTH_TYPE_FACE | HKS_USER_AUTH_TYPE_FINGERPRINT
 };
 
+static const uint32_t g_supportUserAuthAtlTypes[] = {
+    HKS_USER_AUTH_ATL1,
+    HKS_USER_AUTH_ATL2,
+    HKS_USER_AUTH_ATL3,
+    HKS_USER_AUTH_ATL4,
+};
+
 static const uint32_t g_supportSecureSignType[] = {
     HKS_SECURE_SIGN_WITH_AUTHINFO
 };

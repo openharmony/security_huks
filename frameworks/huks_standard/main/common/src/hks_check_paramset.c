@@ -551,11 +551,30 @@ static int32_t CheckGenKeyMacDeriveParams(
     return ret;
 }
 
+static int32_t CheckIfSetSecureSign(const struct HksParamSet *paramSet)
+{
+    struct HksParam *secureSignInfo = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_SECURE_SIGN_TYPE, &secureSignInfo);
+    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+        return HKS_SUCCESS;
+    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get tag from paramSet failed")
+
+    struct HksParam *userAuthType = NULL;
+    ret = HksGetParam(paramSet, HKS_TAG_USER_AUTH_TYPE, &userAuthType);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get tag from paramSet failed");
+
+    return HKS_SUCCESS;
+}
+
 static int32_t CoreCheckGenKeyParams(const struct HksParamSet *paramSet, struct ParamsValues *params, uint32_t keyFlag)
 {
     uint32_t alg;
     int32_t ret = HksCheckParamSetTag(paramSet);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    ret = CheckIfSetSecureSign(paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check set secure sign info failed!")
 
     ret = CheckAndGetAlgorithm(paramSet, g_genKeyAlg, HKS_ARRAY_SIZE(g_genKeyAlg), &alg);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check and get alg failed")
