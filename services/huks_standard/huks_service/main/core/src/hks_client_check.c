@@ -237,10 +237,8 @@ int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t 
 
     struct HksParam *userAuthTypeParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_USER_AUTH_TYPE, &userAuthTypeParam);
-
     struct HksParam *userAuthTypeAtlParam = NULL;
     int32_t retAtl = HksGetParam(paramSet, HKS_TAG_USER_AUTH_TYPE_ATL, &userAuthTypeAtlParam);
-
     if (ret == HKS_ERROR_PARAM_NOT_EXIST && retAtl == HKS_ERROR_PARAM_NOT_EXIST) {
         return HKS_ERROR_NOT_SUPPORTED;
     } else if (ret != HKS_SUCCESS && ret != HKS_ERROR_PARAM_NOT_EXIST) {
