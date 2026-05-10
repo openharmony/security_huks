@@ -28,6 +28,13 @@ enum AuthType : int32_t {
     FINGERPRINT = 4,
 };
 
+enum AuthTrustLevel : int32_t {
+    ATL1 = 10000,
+    ATL2 = 20000,
+    ATL3 = 30000,
+    ATL4 = 40000,
+};
+
 struct CredentialInfo {
     uint64_t credentialId {0};
     uint64_t templateId {0};

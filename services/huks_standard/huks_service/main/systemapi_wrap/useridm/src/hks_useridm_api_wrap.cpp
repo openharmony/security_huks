@@ -48,6 +48,13 @@ static constexpr std::array g_hksIamAuthTypeConvertMap = {
     std::pair<HksUserAuthType, USER_IAM::AuthType>(HKS_USER_AUTH_TYPE_FINGERPRINT, USER_IAM::AuthType::FINGERPRINT),
 };
 
+static constexpr std::array g_hksIamAuthTrustLevelConvertMap = {
+    std::pair<HksUserAuthAtlType, USER_IAM::AuthTrustLevel>(HKS_USER_AUTH_ATL1, USER_IAM::AuthTrustLevel::ATL1),
+    std::pair<HksUserAuthAtlType, USER_IAM::AuthTrustLevel>(HKS_USER_AUTH_ATL2, USER_IAM::AuthTrustLevel::ATL2),
+    std::pair<HksUserAuthAtlType, USER_IAM::AuthTrustLevel>(HKS_USER_AUTH_ATL3, USER_IAM::AuthTrustLevel::ATL3),
+    std::pair<HksUserAuthAtlType, USER_IAM::AuthTrustLevel>(HKS_USER_AUTH_ATL4, USER_IAM::AuthTrustLevel::ATL4),
+};
+
 void *HksLockUserIdm(void)
 {
     auto *cntr = new (std::nothrow) OHOS::Security::Hks::HksIpcCounter();
@@ -86,6 +93,19 @@ static int32_t ConvertToHksAuthType(enum USER_IAM::AuthType iamAuthType, enum Hk
         }
     }
     HKS_LOG_E("Invalid iamAuthType: %" LOG_PUBLIC "d!", iamAuthType);
+    return HKS_ERROR_NOT_SUPPORTED;
+}
+
+static int32_t ConvertToHksAuthTrustLevel(enum USER_IAM::AuthTrustLevel iamAuthTrustLevel,
+    enum HksUserAuthAtlType *hksAuthAtlType)
+{
+    for (auto[hksType, iamType] : g_hksIamAuthTrustLevelConvertMap) {
+        if (iamAuthTrustLevel == iamType) {
+            *hksAuthAtlType = hksType;
+            return HKS_SUCCESS;
+        }
+    }
+    HKS_LOG_E("Invalid iamAuthTrustLevel: %" LOG_PUBLIC "d!", iamAuthTrustLevel);
     return HKS_ERROR_NOT_SUPPORTED;
 }
 
@@ -280,6 +300,13 @@ int32_t HksConvertUserIamTypeToHksType(enum HksUserIamType type, uint32_t userIa
     return ConvertToHksAuthType(static_cast<enum USER_IAM::AuthType>(userIamValue),
         reinterpret_cast<enum HksUserAuthType *>(hksValue));
 }
+
+int32_t HksConvertToHksAuthTrustLevel(uint32_t authAtlType, uint32_t *hksAuthAtlType)
+{
+    HKS_IF_NULL_RETURN(hksAuthAtlType, HKS_ERROR_NULL_POINTER)
+    return ConvertToHksAuthTrustLevel(static_cast<enum USER_IAM::AuthTrustLevel>(authAtlType),
+        reinterpret_cast<enum HksUserAuthAtlType *>(hksAuthAtlType));
+}
 #else
 int32_t HksUserIdmGetSecInfo(int32_t userId, struct SecInfoWrap **outSecInfo)
 {
@@ -301,6 +328,13 @@ int32_t HksConvertUserIamTypeToHksType(enum HksUserIamType type, uint32_t userIa
     (void)type;
     (void)userIamValue;
     (void)hksValue;
+    return HKS_ERROR_NOT_SUPPORTED;
+}
+
+int32_t HksConvertToHksAuthTrustLevel(uint32_t authAtlType, uint32_t *hksAuthAtlType)
+{
+    (void)authAtlType;
+    (void)hksAuthAtlType;
     return HKS_ERROR_NOT_SUPPORTED;
 }
 #endif
