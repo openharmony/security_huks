@@ -36,6 +36,8 @@ int32_t UnpackBlobFromBuffer(const struct HksBlob *srcBlob, uint32_t *offset, st
 
 int32_t CopyUint32ToBuffer(uint32_t value, const struct HksBlob *destBlob, uint32_t *destOffset);
 int32_t CopyInt32ToBuffer(int32_t value, const struct HksBlob *destBlob, uint32_t *destOffset);
+int32_t CopyParamSetToBuffer(const struct HksParamSet *paramSet,
+    const struct HksBlob *destBlob, uint32_t *destOffset);
 
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
 int32_t HksUKeyGeneralPack(const struct HksBlob *blob, const struct HksParamSet *paramSet, struct HksBlob *destData);

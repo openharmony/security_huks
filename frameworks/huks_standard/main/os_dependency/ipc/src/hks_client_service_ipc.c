@@ -1641,10 +1641,16 @@ int32_t HksClientDecapsulate(const struct HksBlob *keyAlias, const struct HksPar
     HKS_IF_NULL_LOGE_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL, "malloc inblob data fail")
     outBlob.size = MAX_KEY_SIZE;
     outBlob.data = HksMalloc(MAX_KEY_SIZE);
-
+    uint32_t offset = 0;
     do {
-        ret = HksDecapsulatePack(&inBlob, keyAlias, paramSet, sharedKeyAlias, sharedKeyParamSet, encapOrsharedSecret);
+        ret = HksDecapsulatePack(&inBlob, keyAlias, paramSet, sharedKeyAlias, &offset);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDecapsulatePack fail.")
+
+        ret = CopyParamSetToBuffer(sharedKeyParamSet, &inBlob, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy sharedKeyParamSet fail")
+
+        ret = CopyBlobToBuffer(encapOrsharedSecret, &inBlob, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy encapOrsharedSecret fail")
 
         ret = HksSendRequest(HKS_MSG_DECAPSULATE, &inBlob, &outBlob, paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
