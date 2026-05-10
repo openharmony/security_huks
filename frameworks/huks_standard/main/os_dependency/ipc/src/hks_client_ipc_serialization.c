@@ -60,7 +60,7 @@ int32_t CopyInt32ToBuffer(int32_t value, const struct HksBlob *destBlob, uint32_
     return HKS_SUCCESS;
 }
 
-static int32_t CopyParamSetToBuffer(const struct HksParamSet *paramSet,
+int32_t CopyParamSetToBuffer(const struct HksParamSet *paramSet,
     const struct HksBlob *destBlob, uint32_t *destOffset)
 {
     if ((*destOffset > destBlob->size) || (destBlob->size - *destOffset < ALIGN_SIZE(paramSet->paramSetSize))) {
@@ -857,24 +857,16 @@ int32_t HksEncapsulatePack(struct HksBlob *destData, const struct HksBlob *keyAl
 }
 
 int32_t HksDecapsulatePack(struct HksBlob *destData, const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
-    const struct HksBlob *encapOrsharedSecret)
+    const struct HksBlob *sharedKeyAlias, uint32_t *offset)
 {
-    uint32_t offset = 0;
-    int32_t ret = CopyBlobToBuffer(keyAlias, destData, &offset);
+    int32_t ret = CopyBlobToBuffer(keyAlias, destData, offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy keyAlias fail")
 
-    ret = CopyParamSetToBuffer(paramSet, destData, &offset);
+    ret = CopyParamSetToBuffer(paramSet, destData, offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy paramSet fail")
 
-    ret = CopyBlobToBuffer(sharedKeyAlias, destData, &offset);
+    ret = CopyBlobToBuffer(sharedKeyAlias, destData, offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy sharedKeyAlias fail")
-
-    ret = CopyParamSetToBuffer(sharedKeyParamSet, destData, &offset);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy sharedKeyParamSet fail")
-
-    ret = CopyBlobToBuffer(encapOrsharedSecret, destData, &offset);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy encapOrsharedSecret fail")
 
     return HKS_SUCCESS;
 }
