@@ -512,6 +512,7 @@ int32_t HksClientUnwrapKey(const struct HksBlob *keyAlias, const struct HksParam
     return HKS_ERROR_API_NOT_SUPPORTED;
 }
 
+#ifdef HKS_SUPPORT_ML_KEM_C
 int32_t HksClientEncapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
     struct HksEncapsulationResult *encapResult)
@@ -551,3 +552,28 @@ int32_t HksClientDecapsulate(const struct HksBlob *keyAlias, const struct HksPar
     };
     return HksServiceDecapsulate(&processInfo, keyAlias, paramSet, sharedKeyParamSet, encapOrsharedSecret);
 }
+#else
+int32_t HksClientEncapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksEncapsulationResult *encapResult)
+{
+    (void)keyAlias;
+    (void)paramSet;
+    (void)sharedKeyAlias;
+    (void)sharedKeyParamSet;
+    (void)encapResult;
+    return HKS_ERROR_NOT_SUPPORTED;
+}
+
+int32_t HksClientDecapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksBlob *encapOrsharedSecret)
+{
+    (void)keyAlias;
+    (void)paramSet;
+    (void)sharedKeyAlias;
+    (void)sharedKeyParamSet;
+    (void)encapOrsharedSecret;
+    return HKS_ERROR_NOT_SUPPORTED;
+}
+#endif
