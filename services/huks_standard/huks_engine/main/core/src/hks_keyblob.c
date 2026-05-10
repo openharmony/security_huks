@@ -480,7 +480,14 @@ static int32_t GetAadAndParamSet(const struct HksBlob *inData, struct HksBlob *a
 
 struct HksKeyNode *HksGenerateKeyNode(const struct HksBlob *key)
 {
-    if (key->size > ML_DSA_MAX_KEY_SIZE) {
+    uint32_t maxSize = MAX_KEY_SIZE;
+#ifdef HKS_SUPPORT_ML_DSA_C
+    maxSize = (maxSize < ML_DSA_MAX_KEY_SIZE) ? ML_DSA_MAX_KEY_SIZE : maxSize;
+#endif
+#ifdef HKS_SUPPORT_ML_KEM_C
+    maxSize = (maxSize < ML_KEM_MAX_KEY_SIZE) ? ML_KEM_MAX_KEY_SIZE : maxSize;
+#endif
+    if (key->size > maxSize) {
         HKS_LOG_E("invalid key blob size %" LOG_PUBLIC "x", key->size);
         return NULL;
     }

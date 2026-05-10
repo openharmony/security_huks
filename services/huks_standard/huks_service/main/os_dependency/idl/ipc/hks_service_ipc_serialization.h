@@ -18,6 +18,7 @@
 
 #include "hks_param.h"
 #include "hks_type_inner.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -112,6 +113,19 @@ int32_t HksWrapKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias
 int32_t HksUnwrapKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias, struct HksParamSet **paramSet,
     struct HksBlob *wrappedKey);
 
+int32_t HksEncapsulateUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias, struct HksParamSet **paramSet,
+    struct HksBlob *sharedKeyAlias, struct HksParamSet **sharedKeyParamSet);
+
+int32_t HksKeyParamUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
+    struct HksParamSet **paramSet, uint32_t *offset);
+
+int32_t HksDecapsulateUnpack(const struct HksBlob *srcData, struct HksBlob *sharedKeyAlias,
+    struct HksParamSet **sharedKeyParamSet, struct HksBlob *encapOrsharedSecret, uint32_t *offset);
+
+int32_t HksEncapsulateResponsePack(struct HksEncapsulationResult *encapResult, struct HksBlob *responseBlob);
+
+int32_t CopyBlobToBufferForEmptyData(const struct HksBlob *blob,
+    struct HksBlob *destBlob, uint32_t *destOffset);
 #ifdef __cplusplus
 }
 #endif

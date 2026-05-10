@@ -64,6 +64,8 @@ enum HksOperationType {
     HKS_OPERATION_CMAC_FREE_CTX = 0x24,                        /* cmac free ctx */
     HKS_OPERATION_SIGN_ISO_IEC_9796_2 = 0x25,                  /* sign ISO/IEC 9796-2 */
     HKS_OPERATION_VERIFY_ISO_IEC_9796_2 = 0x26,                /* verify ISO/IEC 9796-2 */
+    HKS_OPERATION_ENCAPSULATE = 0x27,                          /* encapsulate (ML-KEM) */
+    HKS_OPERATION_DECAPSULATE = 0x28,                          /* decapsulate (ML-KEM) */
 };
 
 struct HksAbility {
@@ -123,6 +125,9 @@ struct HksAbility {
 #define HKS_CRYPTO_ABILITY_FILL_RANDOM          HKS_CRYPTO_ABILITY(HKS_OPERATION_FILL_RANDOM, 0)
 #define HKS_CRYPTO_ABILITY_BN_EXP_MOD           HKS_CRYPTO_ABILITY(HKS_OPERATION_BN_EXP_MOD, 0)
 #define HKS_CRYPTO_ABILITY_FILL_PRI_RANDOM          HKS_CRYPTO_ABILITY(HKS_OPERATION_FILL_PRI_RANDOM, 0)
+
+#define HKS_CRYPTO_ABILITY_ENCAPSULATE(alg)     HKS_CRYPTO_ABILITY(HKS_OPERATION_ENCAPSULATE, alg)
+#define HKS_CRYPTO_ABILITY_DECAPSULATE(alg)     HKS_CRYPTO_ABILITY(HKS_OPERATION_DECAPSULATE, alg)
 
 #ifdef __cplusplus
 extern "C" {

@@ -36,7 +36,13 @@
 
 int32_t CopyToInnerKey(const struct HksBlob *key, uint32_t alg, struct HksBlob *outKey)
 {
-    uint32_t maxSize = (alg == HKS_ALG_ML_DSA) ? ML_DSA_MAX_KEY_SIZE : MAX_KEY_SIZE;
+    uint32_t maxSize = MAX_KEY_SIZE;
+    if (alg == HKS_ALG_ML_DSA) {
+        maxSize = ML_DSA_MAX_KEY_SIZE;
+    } else if (alg == HKS_ALG_ML_KEM) {
+        maxSize = ML_KEM_MAX_KEY_SIZE;
+    }
+    
     if ((key->size == 0) || (key->size > maxSize)) {
         HKS_LOG_E("invalid input key size: %" LOG_PUBLIC "u", key->size);
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -155,6 +161,10 @@ int32_t GetHksPubKeyInnerFormat(const struct HksParamSet *paramSet,
 #if defined(HKS_SUPPORT_ML_DSA_C)
         case HKS_ALG_ML_DSA:
             return TranslateToInnerMlDsaFormat(paramSet, key, outKey);
+#endif
+#if defined(HKS_SUPPORT_ML_KEM_C)
+        case HKS_ALG_ML_KEM:
+            return TranslateToInnerMlKemFormat(paramSet, key, outKey);
 #endif
         default:
             return HKS_ERROR_INVALID_ALGORITHM;

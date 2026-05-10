@@ -70,6 +70,8 @@ enum HksReportStage {
     HKS_ONE_STAGE_AGREE = 9,
     HKS_ONE_STAGE_MAC = 10,
     HKS_ONE_STAGE_ATTEST = 11,
+    HKS_ONE_STAGE_ENCAPSULATE = 12,
+    HKS_ONE_STAGE_DECAPSULATE = 13,
 };
 
 #define IF_UKEY_EVENT(eventId) ((eventId) >= HKS_EVENT_UKEY_START && (eventId) <= HKS_EVENT_UKEY_END)

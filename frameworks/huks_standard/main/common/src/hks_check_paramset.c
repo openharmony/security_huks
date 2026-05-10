@@ -102,6 +102,9 @@ static uint32_t g_genKeyAlg[] = {
 #ifdef HKS_SUPPORT_ML_DSA_C
     HKS_ALG_ML_DSA,
 #endif
+#ifdef HKS_SUPPORT_ML_KEM_C
+    HKS_ALG_ML_KEM,
+#endif
 };
 
 static uint32_t g_importKeyAlg[] = {
@@ -149,6 +152,9 @@ static uint32_t g_importKeyAlg[] = {
 #endif
 #ifdef HKS_SUPPORT_ML_DSA_C
     HKS_ALG_ML_DSA,
+#endif
+#ifdef HKS_SUPPORT_ML_KEM_C
+    HKS_ALG_ML_KEM,
 #endif
 };
 
@@ -590,7 +596,7 @@ static int32_t CheckImportKeySize(uint32_t alg, const struct ParamsValues *param
         case HKS_ALG_X25519:
         case HKS_ALG_RSA:
         case HKS_ALG_ECC:
-        case HKS_ALG_ML_DSA:
+        case HKS_ALG_ML_KEM:
         case HKS_ALG_SM2:
         case HKS_ALG_DH: {
             if (key->size < sizeof(struct HksPubKeyInfo)) {
@@ -918,6 +924,40 @@ static int32_t CheckDHKeyLen(uint32_t alg, uint32_t keyType, const struct Params
     return HKS_SUCCESS;
 }
 
+static int32_t CheckMlKemKeyLen(uint32_t alg, uint32_t keyType, const struct ParamsValues *params,
+    const struct HksBlob *key)
+{
+    (void)keyType;
+    if (key->size < sizeof(struct HksKeyMaterialMlKem)) {
+        HKS_LOG_E("invalid import ml-kem key size: %u", key->size);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    struct HksKeyMaterialMlKem *keyMaterial = (struct HksKeyMaterialMlKem *)(key->data);
+    if ((keyMaterial->keyAlg != alg) || (keyMaterial->keyParamSet != params->keyLen.value)) {
+        HKS_LOG_E("invalid import ml-kem key material");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    if ((keyMaterial->keyParamSet == HKS_ML_KEM_KEY_PARAM_SET_768 &&
+        (keyMaterial->pubKeySize != HKS_ML_KEM_PUB_KEY_SIZE_1184 ||
+        keyMaterial->priKeySize != HKS_ML_KEM_PRI_KEY_SIZE_2400)) ||
+        (keyMaterial->keyParamSet == HKS_ML_KEM_KEY_PARAM_SET_1024 &&
+        (keyMaterial->pubKeySize != HKS_ML_KEM_PUB_KEY_SIZE_1568 ||
+        keyMaterial->priKeySize != HKS_ML_KEM_PRI_KEY_SIZE_3168))) {
+        HKS_LOG_E("invalid import ml-kem key material public key size or private key size");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    uint32_t keySize = sizeof(struct HksKeyMaterialMlKem) + keyMaterial->pubKeySize + keyMaterial->priKeySize;
+    if (key->size < keySize) {
+        HKS_LOG_E("import ml-kem key size[%u] smaller than keySize[%u]", key->size, keySize);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    return HKS_SUCCESS;
+}
+
 static int32_t CheckKeyLen(uint32_t alg, uint32_t keyType, const struct ParamsValues *params,
     const struct HksBlob *key)
 {
@@ -929,6 +969,8 @@ static int32_t CheckKeyLen(uint32_t alg, uint32_t keyType, const struct ParamsVa
             return CheckEccKeyLen(alg, keyType, params, key);
         case HKS_ALG_ML_DSA:
             return CheckMlDsaKeyLen(alg, keyType, params, key);
+        case HKS_ALG_ML_KEM:
+            return CheckMlKemKeyLen(alg, keyType, params, key);
         case HKS_ALG_DSA:
             return CheckDsaKeyLen(alg, keyType, params, key);
         case HKS_ALG_X25519:

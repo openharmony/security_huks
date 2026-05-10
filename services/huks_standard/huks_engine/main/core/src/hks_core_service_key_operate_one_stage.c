@@ -12,6 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "hks_core_service_key_generate.h"
+#include "hks_error_code.h"
+#include <stdint.h>
+#include <stdio.h>
 #define HUKS_DISABLE_LOG_AT_FILE_TO_REDUCE_ROM_SIZE
 
 #ifdef HKS_CONFIG_FILE
@@ -452,5 +456,101 @@ int32_t HksCoreUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet
     return HKS_ERROR_NOT_SUPPORTED;
 }
 #endif
+
+static int32_t HksMlKemImportCheck(const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksBlob *shareKey)
+{
+    struct HksBlob outKey = { 0, NULL };
+    struct HksParam *keySize = NULL;
+    int32_t ret = HksGetParam(sharedKeyParamSet, HKS_TAG_KEY_SIZE, &keySize);
+    HKS_IF_TRUE_RETURN(ret == HKS_ERROR_PARAM_NOT_EXIST, HKS_SUCCESS)
+
+    outKey.data = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
+    HKS_IF_NULL_RETURN(outKey.data, HKS_ERROR_MALLOC_FAIL)
+    outKey.size = MAX_KEY_SIZE;
+
+    ret = HksCoreImportKey(sharedKeyAlias, shareKey, sharedKeyParamSet, &outKey);
+    HKS_IF_NOT_SUCC_LOGE(ret, "import shared key failed!")
+
+    HKS_MEMSET_FREE_BLOB(*shareKey);
+    *shareKey = outKey;
+    return ret;
+}
+
+int32_t HksCoreEncapsulate(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksEncapsulationResult *encapResult)
+{
+    struct HksKeyNode *keyNode = HksGenerateKeyNode(key);
+    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_CORRUPT_FILE, "Encapsulate generate keynode failed")
+    int32_t ret = 0;
+    struct HksBlob rawKey = { 0, NULL };
+
+    do {
+        ret = HksProcessIdentityVerify(keyNode->paramSet, paramSet);
+        HKS_IF_NOT_SUCC_BREAK(ret)
+
+        ret = HksGetRawKey(keyNode->paramSet, &rawKey);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Encapsulate get raw key failed!")
+
+        struct HksKeySpec spec = {0};
+        spec.algType = HKS_ALG_ML_KEM;
+
+        struct HksParam *keySizeParam = NULL;
+        ret = HksGetParam(paramSet, HKS_TAG_KEY_SIZE, &keySizeParam);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key size param failed!")
+        spec.keyLen = keySizeParam->uint32Param;
+
+        ret = HksCryptoHalMlKemEncapsulate(&rawKey, &spec, encapResult);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCryptoHalMlKemEncapsulate failed!")
+
+        ret = HksMlKemImportCheck(sharedKeyAlias, sharedKeyParamSet, &encapResult->sharedSecret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksMlKemImportCheck failed, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HksFreeKeyNode(&keyNode);
+    HKS_MEMSET_FREE_BLOB(rawKey);
+    return ret;
+}
+
+int32_t HksCoreDecapsulate(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksParamSet *sharedKeyParamSet, const struct HksBlob *encaps,
+    struct HksBlob *sharedSecret)
+{
+    struct HksKeyNode *keyNode = HksGenerateKeyNode(key);
+    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_CORRUPT_FILE, "Decapsulate generate keynode failed")
+    int32_t ret = 0;
+    struct HksBlob rawKey = { 0, NULL };
+
+    do {
+        ret = HksProcessIdentityVerify(keyNode->paramSet, paramSet);
+        HKS_IF_NOT_SUCC_BREAK(ret)
+
+        ret = HksGetRawKey(keyNode->paramSet, &rawKey);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Decapsulate get raw key failed!")
+
+        struct HksKeySpec spec = {0};
+        spec.algType = HKS_ALG_ML_KEM;
+
+        struct HksParam *keySizeParam = NULL;
+        ret = HksGetParam(paramSet, HKS_TAG_KEY_SIZE, &keySizeParam);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key size param failed!")
+        spec.keyLen = keySizeParam->uint32Param;
+
+        ret = HksCryptoHalMlKemDecapsulate(&rawKey, &spec, encaps, sharedSecret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCryptoHalMlKemDecapsulate failed!")
+
+        struct HksParam *keyalias = NULL;
+        ret = HksGetParam(sharedKeyParamSet, HKS_TAG_KEY_ALIAS, &keyalias);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCoreDecapsulate get key alias fail")
+
+        ret = HksMlKemImportCheck(&keyalias->blob, sharedKeyParamSet, sharedSecret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCoreDecapsulate failed, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HksFreeKeyNode(&keyNode);
+    HKS_MEMSET_FREE_BLOB(rawKey);
+    return ret;
+}
 
 #endif /* _CUT_AUTHENTICATE_ */

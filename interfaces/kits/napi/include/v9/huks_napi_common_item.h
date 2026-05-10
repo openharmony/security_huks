@@ -62,6 +62,9 @@ struct HksSuccessReturnResult {
     struct HksBlob *index;
     uint32_t retryCount;
     int32_t outStatus = -1;
+
+    // ML-KEM encapsulation result
+    struct HksBlob *sharedSecret;
 };
 
 struct HksSuccessListAliasesResult {
@@ -85,6 +88,8 @@ const std::string HKS_RESULT_PRPPERTY_PROPERTIES = "properties";
 const std::string HKS_RESULT_PRPPERTY_CERTCHAINS = "certChains";
 
 const std::string HKS_RESULT_PRPPERTY_ALIASES = "keyAliases";
+
+const std::string HKS_RESULT_PROPERTY_SHAREDSECRET = "sharedSecret";
 
 const std::string BUSINESS_ERROR_PROPERTY_CODE = "code";
 const std::string BUSINESS_ERROR_PROPERTY_MESSAGE = "message";

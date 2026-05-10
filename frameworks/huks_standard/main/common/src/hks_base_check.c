@@ -1262,7 +1262,8 @@ int32_t HksCheckSecureSignParams(uint32_t secureSignType)
 */
 int32_t HksCheckNeedCache(uint32_t alg, uint32_t digest)
 {
-    if ((alg == HKS_ALG_ED25519) || (alg == HKS_ALG_ML_DSA) || (alg == HKS_ALG_SM2) || (digest == HKS_DIGEST_NONE)) {
+    if ((alg == HKS_ALG_ED25519) || (alg == HKS_ALG_ML_DSA) || (alg == HKS_ALG_ML_KEM) ||
+        (alg == HKS_ALG_SM2) || (digest == HKS_DIGEST_NONE)) {
         HKS_LOG_I("need to cache the data");
         return HKS_SUCCESS;
     }

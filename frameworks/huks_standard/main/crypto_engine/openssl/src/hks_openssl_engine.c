@@ -343,6 +343,39 @@ int32_t HksCryptoHalAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
     return func(nativeKey, pubKey, spec, sharedKey);
 }
 
+#ifdef HKS_SUPPORT_ML_KEM
+typedef int32_t (*MlKemEncapsulate)(const struct HksBlob *rawKey, const struct HksKeySpec *spec,
+    struct HksEncapsulationResult *encapResult);
+
+int32_t HksCryptoHalMlKemEncapsulate(const struct HksBlob *rawKey, const struct HksKeySpec *spec,
+    struct HksEncapsulationResult *encapResult)
+{
+    HKS_IF_NULL_LOGE_RETURN(rawKey, HKS_ERROR_INVALID_ARGUMENT, "rawKey is null!")
+    HKS_IF_NULL_LOGE_RETURN(spec, HKS_ERROR_INVALID_ARGUMENT, "spec is null!")
+    HKS_IF_NULL_LOGE_RETURN(encapResult, HKS_ERROR_INVALID_ARGUMENT, "encapResult is null!")
+
+    MlKemEncapsulate func = (MlKemEncapsulate)GetAbility(HKS_CRYPTO_ABILITY_ENCAPSULATE(spec->algType));
+    HKS_IF_NULL_LOGE_RETURN(func, HKS_ERROR_INVALID_ARGUMENT, "MlKemEncapsulate func is null!")
+    return func(rawKey, spec, encapResult);
+}
+
+typedef int32_t (*MlKemDecapsulate)(const struct HksBlob *rawKey, const struct HksKeySpec *spec,
+    const struct HksBlob *ciphertext, struct HksBlob *sharedSecret);
+
+int32_t HksCryptoHalMlKemDecapsulate(const struct HksBlob *rawKey, const struct HksKeySpec *spec,
+    const struct HksBlob *ciphertext, struct HksBlob *sharedSecret)
+{
+    HKS_IF_NULL_LOGE_RETURN(rawKey, HKS_ERROR_INVALID_ARGUMENT, "rawKey is null!")
+    HKS_IF_NULL_LOGE_RETURN(spec, HKS_ERROR_INVALID_ARGUMENT, "spec is null!")
+    HKS_IF_NULL_LOGE_RETURN(ciphertext, HKS_ERROR_INVALID_ARGUMENT, "ciphertext is null!")
+    HKS_IF_NULL_LOGE_RETURN(sharedSecret, HKS_ERROR_INVALID_ARGUMENT, "sharedSecret is null!")
+
+    MlKemDecapsulate func = (MlKemDecapsulate)GetAbility(HKS_CRYPTO_ABILITY_DECAPSULATE(spec->algType));
+    HKS_IF_NULL_LOGE_RETURN(func, HKS_ERROR_INVALID_ARGUMENT, "MlKemDecapsulate func is null!")
+    return func(rawKey, spec, ciphertext, sharedSecret);
+}
+#endif
+
 int32_t HksCryptoHalSign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *signature)
 {

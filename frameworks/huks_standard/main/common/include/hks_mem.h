@@ -74,6 +74,13 @@ int32_t HksMemCmp(const void *ptr1, const void *ptr2, uint32_t size);
     (blob).size = 0; \
 } while (0)
 
+#define HKS_FREE_ENCAPSULATION_RESULT(encapResult) do { \
+    if ((encapResult) != HKS_NULL_POINTER) { \
+        HKS_MEMSET_FREE_BLOB((encapResult)->encapsulatedData); \
+        HKS_MEMSET_FREE_BLOB((encapResult)->sharedSecret); \
+    } \
+} while (0)
+
 #ifdef __cplusplus
 }
 #endif

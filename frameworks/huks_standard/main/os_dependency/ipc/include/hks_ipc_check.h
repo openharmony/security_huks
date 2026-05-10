@@ -83,6 +83,13 @@ int32_t HksCheckIpcWrapKey(const struct HksBlob *keyAlias, const struct HksParam
 int32_t HksCheckIpcUnwrapKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksBlob *wrappedKey);
 
+int32_t HksCheckIpcEncapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet, uint32_t *outSize);
+
+int32_t HksCheckIpcDecapsulateConcret(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksBlob *encapOrsharedSecret);
+
 #ifdef __cplusplus
 }
 #endif
