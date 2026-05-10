@@ -1602,7 +1602,7 @@ int32_t HksClientEncapsulate(const struct HksBlob *keyAlias, const struct HksPar
     struct HksBlob outBlob = { 0, NULL };
     inBlob.data = HksMalloc(inSize);
     outBlob.data = HksMalloc(ALIGN_SIZE(HKS_ML_KEM_MAX_CIPHERTEXT_LEN) + ALIGN_SIZE(MAX_KEY_SIZE));
-    outBlob.data = ALIGN_SIZE(HKS_ML_KEM_MAX_CIPHERTEXT_LEN) + ALIGN_SIZE(MAX_KEY_SIZE);
+    outBlob.size = ALIGN_SIZE(HKS_ML_KEM_MAX_CIPHERTEXT_LEN) + ALIGN_SIZE(MAX_KEY_SIZE);
 
     do {
         ret = HksEncapsulatePack(&inBlob, keyAlias, paramSet, sharedKeyAlias, sharedKeyParamSet);

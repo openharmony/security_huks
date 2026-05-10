@@ -398,54 +398,23 @@ ENABLE_CFI(int32_t HuksAccessEncapsulate(const struct HksBlob *key, const struct
     const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
     struct HksEncapsulationResult *encapResult))
 {
-    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
-
-    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiEncapsulate, HKS_ERROR_NULL_POINTER,
-        "Encapsulate function is null pointer")
-    struct HksParamSet *paramSetInNew = NULL;
-    struct HksParamSet *sharedKeyParamSetNew = NULL;
-    int32_t ret = 0;
-    do {
-        ret = HandleKeyClassTag(paramSet, &paramSetInNew);
-        HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS, "paramSet HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = HandleKeyClassTag(sharedKeyParamSet, &sharedKeyParamSetNew);
-        HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = g_hksHalDevicePtr->HuksHdiEncapsulate(key, paramSetInNew, sharedKeyAlias, sharedKeyParamSetNew, encapResult);
-        HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS, "HuksHdiEncapsulate, ret = %" LOG_PUBLIC "d", ret)
-    }while (0);
-    HksFreeParamSet(&paramSetInNew);
-    HksFreeParamSet(&sharedKeyParamSetNew);
-    return ret;
+    (void)key;
+    (void)paramSet;
+    (void)sharedKeyAlias;
+    (void)sharedKeyParamSet;
+    (void)encapResult;
+    return HKS_ERROR_NOT_SUPPORTED;
 }
 
 ENABLE_CFI(int32_t HuksAccessDecapsulate(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksParamSet *sharedKeyParamSet, struct HksBlob *encapsData, struct HksBlob *hdiSharedSecret))
 {
-    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
-
-    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiDecapsulate, HKS_ERROR_NULL_POINTER,
-        "Decapsulate function is null pointer")
-    struct HksParamSet *paramSetInNew = NULL;
-    struct HksParamSet *sharedKeyParamSetNew = NULL;
-
-    int32_t ret = 0;
-    do {
-        ret = HandleKeyClassTag(paramSet, &paramSetInNew);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret != HKS_SUCCESS, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = HandleKeyClassTag(sharedKeyParamSet, &sharedKeyParamSetNew);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HandleKeyClassTag for sharedKeyParamSet fail, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = g_hksHalDevicePtr->HuksHdiDecapsulate(key, paramSetInNew, sharedKeyParamSetNew,
-            encapsData, hdiSharedSecret);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HDI Decapsulate fail, ret = %" LOG_PUBLIC "d", ret)
-    } while (0);
-
-    HksFreeParamSet(&paramSetInNew);
-    HksFreeParamSet(&sharedKeyParamSetNew);
-    return ret;
+    (void)key;
+    (void)paramSet;
+    (void)sharedKeyParamSet;
+    (void)encapsData;
+    (void)hdiSharedSecret;
+    return HKS_ERROR_NOT_SUPPORTED;
 }
 
 #endif /* _CUT_AUTHENTICATE_ */
