@@ -105,4 +105,11 @@ int32_t HksCoreConvertUserIamTypeToHksType(enum HksUserIamType type, uint32_t us
     (void)hksValue;
     return HKS_ERROR_NOT_SUPPORTED;
 }
+
+int32_t ConvertToHksAuthTrustLevel(uint32_t authType, enum HksUserAuthAtlType *hksAuthAtlType)
+{
+    (void)authType;
+    (void)hksAuthAtlType;
+    return HKS_ERROR_NOT_SUPPORTED;
+}
 #endif
