@@ -103,20 +103,11 @@ static int32_t MlKemEncapsulate(EVP_PKEY *pkey, struct HksEncapsulationResult *e
 
         encapResult->encapsulatedData.size = ciphertextLen;
         encapResult->encapsulatedData.data = (uint8_t *)HksMalloc(ciphertextLen);
-        if (encapResult->encapsulatedData.data == NULL) {
-            HKS_LOG_E("malloc ciphertext failed");
-            ret = HKS_ERROR_MALLOC_FAIL;
-            break;
-        }
+        HKS_IF_NULL_LOGE_BREAK(encapResult->encapsulatedData.data, "malloc ciphertext failed")
 
         encapResult->sharedSecret.size = sharedSecretLen;
         encapResult->sharedSecret.data = (uint8_t *)HksMalloc(sharedSecretLen);
-        if (encapResult->sharedSecret.data == NULL) {
-            HKS_FREE(encapResult->encapsulatedData.data);
-            HKS_LOG_E("malloc sharedSecret failed");
-            ret = HKS_ERROR_MALLOC_FAIL;
-            break;
-        }
+        HKS_IF_NULL_LOGE_BREAK(encapResult->sharedSecret.data, "malloc sharedSecret failed")
 
         ret = EVP_PKEY_encapsulate(ctx, encapResult->encapsulatedData.data, &ciphertextLen,
             encapResult->sharedSecret.data, &sharedSecretLen);
