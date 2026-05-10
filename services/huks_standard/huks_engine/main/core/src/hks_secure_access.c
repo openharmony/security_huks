@@ -540,7 +540,7 @@ static int32_t VerifyAuthTypeOrTrustLevl(struct HksParam *userAuthType, struct H
     if (userAuthAtl != NULL) {
         int32_t ret = ConvertToHksAuthTrustLevel(plainText->authTrustLevel, &authTokenAtlType);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NOT_SUPPORTED, "invalid user iam auth trust level:not support!")
-        HKS_IF_NOT_SUCC_LOGE_RETURN((authTokenAtlType >= userAuthAtl->uint32Param),
+        HKS_IF_NOT_TRUE_LOGE_RETURN((authTokenAtlType >= userAuthAtl->uint32Param),
             HKS_ERROR_KEY_AUTH_VERIFY_FAILED, "current keyblob auth do not support current auth token atl!");
     }
     return HKS_SUCCESS;
