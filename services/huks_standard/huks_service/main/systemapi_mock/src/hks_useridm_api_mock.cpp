@@ -157,5 +157,5 @@ int32_t HksConvertUserIamTypeToHksType(enum HksUserIamType userIamType, uint32_t
 int32_t HksConvertToHksAuthTrustLevel(uint32_t authAtlType, uint32_t *hksAuthAtlType)
 {
     HKS_IF_NULL_RETURN(hksAuthAtlType, HKS_ERROR_NULL_POINTER)
-    return ConvertToHksAuthType(authAtlType, (enum HksUserAuthAtlType *)hksAuthAtlType);
+    return ConvertToHksAuthTrustLevel(authAtlType, (enum HksUserAuthAtlType *)hksAuthAtlType);
 }
