@@ -304,7 +304,7 @@ int32_t HksConvertUserIamTypeToHksType(enum HksUserIamType type, uint32_t userIa
 int32_t HksConvertToHksAuthTrustLevel(uint32_t authAtlType, uint32_t *hksAuthAtlType)
 {
     HKS_IF_NULL_RETURN(hksAuthAtlType, HKS_ERROR_NULL_POINTER)
-    return ConvertToHksAuthType(static_cast<enum USER_IAM::AuthTrustLevel>(authAtlType),
+    return ConvertToHksAuthTrustLevel(static_cast<enum USER_IAM::AuthTrustLevel>(authAtlType),
         reinterpret_cast<enum HksUserAuthAtlType *>(hksAuthAtlType));
 }
 #else
