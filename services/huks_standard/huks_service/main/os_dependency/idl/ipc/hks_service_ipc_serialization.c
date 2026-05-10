@@ -21,6 +21,7 @@
 #include "hks_template.h"
 
 #include <securec.h>
+#include <stdint.h>
 
 static int32_t CopyUint32ToBuffer(uint32_t value, const struct HksBlob *destBlob, uint32_t *destOffset)
 {
@@ -59,6 +60,41 @@ static int32_t CopyExtCertInfoToBuffer(const struct HksExtCertInfo *certInfo, co
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy CopyBlobToBuffer failed")
 
     return ret;
+}
+
+int32_t CopyBlobToBufferForEmptyData(const struct HksBlob *blob,
+    struct HksBlob *destBlob, uint32_t *destOffset)
+{
+    uint32_t needSize = sizeof(blob->size);
+    if (blob->size > 0) {
+        needSize += ALIGN_SIZE(blob->size);
+    }
+
+    if ((*destOffset > destBlob->size) ||
+        ((destBlob->size - *destOffset) < needSize)) {
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
+
+    if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset,
+        &(blob->size), sizeof(blob->size)) != EOK) {
+        HKS_LOG_E("copy blob size failed");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    *destOffset += sizeof(blob->size);
+
+    if (blob->size == 0) {
+        *destOffset += DEFAULT_ALIGN_MASK_SIZE;
+        return HKS_SUCCESS;
+    }
+
+    if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset,
+        blob->data, blob->size) != EOK) {
+        HKS_LOG_E("copy blob data failed");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    *destOffset += ALIGN_SIZE(blob->size);
+
+    return HKS_SUCCESS;
 }
 
 static int32_t CopyParamSetToBuffer(const struct HksParamSet *paramSet,
@@ -751,6 +787,71 @@ int32_t HksUnwrapKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAli
 
     ret = GetBlobFromBuffer(wrappedKey, srcData, &offset);
     HKS_IF_NOT_SUCC_LOGE(ret, "get wrappedKey fail")
+
+    return ret;
+}
+
+int32_t HksEncapsulateUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias, struct HksParamSet **paramSet,
+    struct HksBlob *sharedKeyAlias, struct HksParamSet **sharedKeyParamSet)
+{
+    uint32_t offset = 0;
+    int32_t ret = GetBlobFromBuffer(keyAlias, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyAlias fail")
+
+    ret = GetParamSetFromBuffer(paramSet, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get paramSet fail")
+
+    ret = GetBlobFromBuffer(sharedKeyAlias, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "malloc sharedKeyAlias fail")
+
+    ret = GetParamSetFromBuffer(sharedKeyParamSet, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get sharedKeyParamSet fail")
+
+    return HKS_SUCCESS;
+}
+
+int HksKeyParamUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
+    struct HksParamSet **paramSet, uint32_t *offset)
+{
+    int32_t ret = GetBlobFromBuffer(keyAlias, srcData, offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyAlias fail")
+
+    ret = GetParamSetFromBuffer(paramSet, srcData, offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get paramSet fail")
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksDecapsulateUnpack(const struct HksBlob *srcData, struct HksBlob *sharedKeyAlias,
+    struct HksParamSet **sharedKeyParamSet, struct HksBlob *encapOrsharedSecret, uint32_t *offset)
+{
+    int32_t ret = GetBlobFromBuffer(sharedKeyAlias, srcData, offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get sharedKeyAlias fail")
+
+    ret = GetParamSetFromBuffer(sharedKeyParamSet, srcData, offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get sharedKeyParamSet fail")
+
+    ret = GetBlobFromBuffer(encapOrsharedSecret, srcData, offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get encapOrsharedSecret fail")
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksEncapsulateResponsePack(struct HksEncapsulationResult *encapResult, struct HksBlob *responseBlob)
+{
+    uint32_t offset = 0;
+    uint32_t responseSize = ALIGN_SIZE(sizeof(uint32_t)) + ALIGN_SIZE(encapResult->encapsulatedData.size) +
+        ALIGN_SIZE(sizeof(uint32_t)) + ALIGN_SIZE(encapResult->sharedSecret.size);
+    responseBlob->size = responseSize;
+
+    responseBlob->data = (uint8_t *)HksMalloc(responseBlob->size);
+    HKS_IF_NULL_LOGE_RETURN(responseBlob->data, HKS_ERROR_MALLOC_FAIL, "HksIpcServiceEncapsulate malloc fail")
+
+    int32_t ret = CopyBlobToBuffer(&encapResult->encapsulatedData, responseBlob, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy encapsulatedData to responseBlob fail")
+
+    ret = CopyBlobToBufferForEmptyData(&encapResult->sharedSecret, responseBlob, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy sharedSecret to responseBlob fail")
 
     return ret;
 }

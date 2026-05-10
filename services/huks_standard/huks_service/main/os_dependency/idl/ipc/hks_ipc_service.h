@@ -104,6 +104,10 @@ void HksIpcWrapKey(const struct HksBlob *srcData, const uint8_t *context);
 
 void HksIpcUnwrapKey(const struct HksBlob *srcData, const uint8_t *context);
 
+void HksIpcServiceEncapsulate(const struct HksBlob *srcData, const uint8_t *context);
+
+void HksIpcServiceDecapsulate(const struct HksBlob *srcData, const uint8_t *context);
+
 #ifdef __cplusplus
 }
 #endif

@@ -14,6 +14,7 @@
  */
 
 #include "hks_ipc_service.h"
+#include "hks_error_code.h"
 #include "hks_type.h"
 
 #include "hks_ipc_serialization.h"
@@ -21,9 +22,12 @@
 #include <securec.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
+#include "hks_common_check.h"
 
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
@@ -602,7 +606,10 @@ static int32_t HksAllocateMemForKey(const struct HksParamSet *paramSet, struct H
         alg = algParam->uint32Param;
     }
 
-    uint32_t size = (alg == HKS_ALG_ML_DSA) ? ML_DSA_MAX_KEY_SIZE : MAX_KEY_SIZE;
+    uint32_t size = MAX_KEY_SIZE;
+    if (alg == HKS_ALG_ML_DSA || alg == HKS_ALG_ML_KEM) {
+        size = ML_DSA_MAX_KEY_SIZE;
+    }
     key->data = (uint8_t *)HksMalloc(size);
     if (key->data == NULL) {
         HKS_LOG_E("malloc fail.");
@@ -1650,6 +1657,137 @@ void HksIpcUnwrapKey(const struct HksBlob *srcData, const uint8_t *context)
 
     DecrementSeCountByParamSet(isSeCalling);
 
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+}
+
+static int32_t CheckAndBuildSharedKeyParamSet(const struct HksBlob *sharedKeyAlias,
+    const struct HksParamSet *sharedKeyParamSet, struct HksParamSet **newSharedKeyParamSet)
+{
+    int32_t ret = HksCheckBlobAndParamSet(sharedKeyAlias, sharedKeyParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NEW_INVALID_ARGUMENT, "CheckAndBuildSharedKeyParamSet fail")
+
+    ret = HksCheckParamSet(sharedKeyParamSet, sharedKeyParamSet->paramSetSize);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check sharedKeyParamSet failed, ret = %" LOG_PUBLIC "d", ret)
+
+    ret = HksInitParamSet(newSharedKeyParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "init paramSet fail")
+    do {
+        ret = HksAddParams(*newSharedKeyParamSet, sharedKeyParamSet->params, sharedKeyParamSet->paramsCnt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckAndBuildSharedKeyParamSet add paramset fail")
+
+        struct HksParam keyalias = {
+            .tag = HKS_TAG_KEY_ALIAS,
+            .blob = *sharedKeyAlias,
+        };
+        ret = HksAddParams(*newSharedKeyParamSet, &keyalias, 1);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add param attestMode fail")
+
+        ret = HksBuildParamSet(newSharedKeyParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build paramSet fail")
+
+        return HKS_SUCCESS;
+    } while (false);
+
+    HksFreeParamSet(newSharedKeyParamSet);
+    return ret;
+}
+
+void HksIpcServiceEncapsulate(const struct HksBlob *srcData, const uint8_t *context)
+{
+    struct HksBlob keyAlias = { 0, NULL };
+    struct HksBlob sharedKeyAlias = { 0, NULL };
+    struct HksBlob responseBlob = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksParamSet *newParamSet = NULL;
+    struct HksParamSet *sharedKeyParamSet = NULL;
+    struct HksEncapsulationResult encapResult = { { 0, NULL }, { 0, NULL } };
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    int32_t ret;
+
+    do {
+        ret = HksEncapsulateUnpack(srcData, &keyAlias, &paramSet, &sharedKeyAlias,
+            &sharedKeyParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksEncapsulateUnpack fail")
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = CheckAndBuildSharedKeyParamSet(&sharedKeyAlias, sharedKeyParamSet, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check keyAlias and paramSet failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksServiceEncapsulate(&processInfo, &keyAlias, paramSet, newParamSet, &encapResult);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceEncapsulate fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksEncapsulateResponsePack(&encapResult, &responseBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksEncapsulateResponsePack fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+    HksSendResponse(context, ret, ret == HKS_SUCCESS ? &responseBlob : NULL);
+
+    HKS_FREE_ENCAPSULATION_RESULT(&encapResult);
+    HksFreeParamSet(&newParamSet);
+    HKS_MEMSET_FREE_BLOB(responseBlob);
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+}
+
+void HksIpcServiceDecapsulate(const struct HksBlob *srcData, const uint8_t *context)
+{
+    struct HksBlob keyAlias = { 0, NULL };
+    struct HksBlob sharedKeyAlias = { 0, NULL };
+    struct HksBlob encapOrsharedSecret = { 0, NULL };
+    struct HksParamSet *newSharedKeyParamSet = NULL;
+    struct HksParamSet *paramSet = NULL;
+    struct HksParamSet *sharedKeyParamSet = NULL;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    struct HksBlob responseBlob = { 0, NULL };
+    int32_t ret;
+
+    do {
+        uint32_t offset = 0;
+        ret = HksKeyParamUnpack(srcData, &keyAlias, &paramSet, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDecapsulateUnpack fail")
+
+        ret = HksDecapsulateUnpack(srcData, &sharedKeyAlias, &sharedKeyParamSet,
+            &encapOrsharedSecret, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDecapsulateUnpack fail")
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = CheckAndBuildSharedKeyParamSet(&sharedKeyAlias, sharedKeyParamSet, &newSharedKeyParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check and build sharedKeyParamSet failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksServiceDecapsulate(&processInfo, &keyAlias, paramSet,
+            newSharedKeyParamSet, &encapOrsharedSecret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceDecapsulate fail, ret = %" LOG_PUBLIC "d", ret)
+
+        uint32_t responseSize = sizeof(uint32_t);
+        if (encapOrsharedSecret.size > 0) {
+            responseSize += ALIGN_SIZE(encapOrsharedSecret.size);
+        } else {
+            responseSize += DEFAULT_ALIGN_MASK_SIZE;
+        }
+        responseBlob.size = responseSize;
+        ret = HKS_ERROR_MALLOC_FAIL;
+        responseBlob.data = (uint8_t *)HksMalloc(responseBlob.size);
+        HKS_IF_NULL_BREAK(responseBlob.data)
+
+        offset = 0;
+        ret = CopyBlobToBufferForEmptyData(&encapOrsharedSecret, &responseBlob, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceDecapsulate Copy sharedSecret to responseBlob fail.")
+    } while (0);
+    HksSendResponse(context, ret, ret == HKS_SUCCESS ? &responseBlob : NULL);
+
+    HksFreeParamSet(&newSharedKeyParamSet);
+    HKS_MEMSET_FREE_BLOB(responseBlob);
+    HKS_MEMSET_FREE_BLOB(encapOrsharedSecret);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
 }

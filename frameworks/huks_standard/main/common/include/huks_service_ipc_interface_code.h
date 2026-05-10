@@ -66,6 +66,9 @@ enum HksIpcInterfaceCode {
     HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY,
     HKS_MSG_EXT_QUERY_ABILITY_INFO,
     HKS_MSG_EXT_GET_RESOURCE_ID,
+
+    HKS_MSG_ENCAPSULATE,
+    HKS_MSG_DECAPSULATE,
     /* new cmd type must be added before HKS_MSG_MAX */
     HKS_MSG_MAX,
 };

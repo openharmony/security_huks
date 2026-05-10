@@ -196,3 +196,18 @@ ENABLE_CFI(int32_t HuksAccessGetStatInfo(struct HksBlob *statInfo))
     (void)statInfo;
     return HKS_SUCCESS;
 }
+
+#ifndef _CUT_AUTHENTICATE_
+ENABLE_CFI(int32_t HuksAccessEncapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksEncapsulationResult *encapResult))
+{
+    return HksCoreEncapsulate(keyAlias, paramSet, sharedKeyAlias, sharedKeyParamSet, encapResult);
+}
+
+ENABLE_CFI(int32_t HuksAccessDecapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksParamSet *sharedKeyParamSet, struct HksBlob *encapsulatedData, struct HksBlob *sharedSecret))
+{
+    return HksCoreDecapsulate(keyAlias, paramSet, sharedKeyParamSet, encapsulatedData, sharedSecret);
+}
+#endif

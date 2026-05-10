@@ -1589,3 +1589,76 @@ int32_t HksClientUnwrapKey(const struct HksBlob *keyAlias, const struct HksParam
     HKS_FREE_BLOB(inBlob);
     return ret;
 }
+
+int32_t HksClientEncapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksEncapsulationResult *encapResult)
+{
+    uint32_t inSize = 0;
+    int32_t ret = HksCheckIpcEncapsulate(keyAlias, paramSet, sharedKeyAlias, sharedKeyParamSet, &inSize);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckIpcEncapsulate fail.")
+
+    struct HksBlob inBlob = { inSize, NULL };
+    struct HksBlob outBlob = { 0, NULL };
+    inBlob.data = HksMalloc(inSize);
+    outBlob.data = HksMalloc(ALIGN_SIZE(HKS_ML_KEM_MAX_CIPHERTEXT_LEN) + ALIGN_SIZE(MAX_KEY_SIZE));
+    outBlob.size = ALIGN_SIZE(HKS_ML_KEM_MAX_CIPHERTEXT_LEN) + ALIGN_SIZE(MAX_KEY_SIZE);
+
+    do {
+        ret = HksEncapsulatePack(&inBlob, keyAlias, paramSet, sharedKeyAlias, sharedKeyParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksEncapsulatePack fail.")
+
+        ret = HksSendRequest(HKS_MSG_ENCAPSULATE, &inBlob, &outBlob, paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksEncapsulateUnpackFromService(&outBlob, encapResult);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksEncapsulateUnpackFromService fail.")
+    } while (0);
+
+    HKS_FREE_BLOB(inBlob);
+    HKS_FREE_BLOB(outBlob);
+    return ret;
+}
+
+int32_t HksClientDecapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksBlob *encapOrsharedSecret)
+{
+    int32_t ret = HksCheckIpcDecapsulateConcret(keyAlias, paramSet, sharedKeyAlias, sharedKeyParamSet,
+        encapOrsharedSecret);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckIpcDecapsulateConcret fail.")
+
+    struct HksBlob inBlob = { 0, NULL };
+    struct HksBlob outBlob = { 0, NULL };
+    uint32_t inSize = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) +
+        ALIGN_SIZE(paramSet->paramSetSize) +
+        sizeof(sharedKeyAlias->size) + ALIGN_SIZE(sharedKeyAlias->size) +
+        ALIGN_SIZE(sharedKeyParamSet->paramSetSize) +
+        sizeof(encapOrsharedSecret->size) + ALIGN_SIZE(encapOrsharedSecret->size);
+
+    inBlob.size = inSize;
+    inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
+    HKS_IF_NULL_LOGE_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL, "malloc inblob data fail")
+    outBlob.size = MAX_KEY_SIZE;
+    outBlob.data = HksMalloc(MAX_KEY_SIZE);
+    uint32_t offset = 0;
+    do {
+        ret = HksDecapsulatePack(&inBlob, keyAlias, paramSet, sharedKeyAlias, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDecapsulatePack fail.")
+
+        ret = CopyParamSetToBuffer(sharedKeyParamSet, &inBlob, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy sharedKeyParamSet fail")
+
+        ret = CopyBlobToBuffer(encapOrsharedSecret, &inBlob, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy encapOrsharedSecret fail")
+
+        ret = HksSendRequest(HKS_MSG_DECAPSULATE, &inBlob, &outBlob, paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksDecapsulateUnpackFromService(&outBlob, encapOrsharedSecret);
+    } while (0);
+
+    HKS_FREE_BLOB(inBlob);
+    HKS_FREE_BLOB(outBlob);
+    return ret;
+}

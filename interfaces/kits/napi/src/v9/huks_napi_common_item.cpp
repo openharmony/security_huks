@@ -852,7 +852,8 @@ static napi_value AddHandleOrChallenge(napi_env env, napi_value &object,
 }
 
 static napi_value AddOutDataParamSetOrCertChain(napi_env env, napi_value &object,
-    const struct HksBlob *outData, const HksParamSet *paramSet, const struct HksCertChain *certChain)
+    const struct HksBlob *outData, const HksParamSet *paramSet, const struct HksCertChain *certChain,
+    const struct HksBlob *sharedSecret = nullptr)
 {
     napi_value addResult = nullptr;
 
@@ -892,6 +893,20 @@ static napi_value AddOutDataParamSetOrCertChain(napi_env env, napi_value &object
         addResult = GetInt32(env, 0);
     }
 
+    // add sharedSecret (ML-KEM encapsulation result)
+    if ((sharedSecret != nullptr) && (sharedSecret->data != nullptr) && (sharedSecret->size != 0)) {
+        napi_value sharedSecretJs = nullptr;
+        napi_value sharedSecretBuffer = GenerateArrayBuffer(env, sharedSecret->data, sharedSecret->size);
+        if (sharedSecretBuffer == nullptr) {
+            HKS_LOG_E("add sharedSecret failed");
+            return nullptr;
+        }
+        NAPI_CALL(env, napi_create_typedarray(env, napi_uint8_array, sharedSecret->size, sharedSecretBuffer,
+            0, &sharedSecretJs));
+        NAPI_CALL(env, napi_set_named_property(env, object, HKS_RESULT_PROPERTY_SHAREDSECRET.c_str(), sharedSecretJs));
+        addResult = GetInt32(env, 0);
+    }
+
     return addResult;
 }
 
@@ -918,7 +933,7 @@ static napi_value GenerateResult(napi_env env, const struct HksSuccessReturnResu
 
     napi_value status1 = AddHandleOrChallenge(env, result, resultData.handle, resultData.challenge);
     napi_value status2 = AddOutDataParamSetOrCertChain(env, result,
-        resultData.outData, resultData.paramSet, resultData.certChain);
+        resultData.outData, resultData.paramSet, resultData.certChain, resultData.sharedSecret);
     if (status1 == nullptr && status2 == nullptr) {
         return GetNull(env);
     }
@@ -1071,6 +1086,9 @@ void SuccessReturnResultInit(struct HksSuccessReturnResult &resultData)
     resultData.index = nullptr;
     resultData.retryCount = 0;
     resultData.outStatus = -1;
+
+    // ML-KEM encapsulation
+    resultData.sharedSecret = nullptr;
 }
 
 void SuccessListAliasesReturnResultInit(struct HksSuccessListAliasesResult &resultData)

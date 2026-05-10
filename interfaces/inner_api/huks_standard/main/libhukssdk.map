@@ -80,5 +80,7 @@
     HksSetOrGetRemoteProperty;
     HksQueryAbilityInfo;
     HksGetResourceId;
+    HksEncapsulate;
+    HksDecapsulate;
   local: *;
 };

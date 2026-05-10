@@ -36,6 +36,8 @@ int32_t UnpackBlobFromBuffer(const struct HksBlob *srcBlob, uint32_t *offset, st
 
 int32_t CopyUint32ToBuffer(uint32_t value, const struct HksBlob *destBlob, uint32_t *destOffset);
 int32_t CopyInt32ToBuffer(int32_t value, const struct HksBlob *destBlob, uint32_t *destOffset);
+int32_t CopyParamSetToBuffer(const struct HksParamSet *paramSet,
+    const struct HksBlob *destBlob, uint32_t *destOffset);
 
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
 int32_t HksUKeyGeneralPack(const struct HksBlob *blob, const struct HksParamSet *paramSet, struct HksBlob *destData);
@@ -118,6 +120,17 @@ int32_t HksWrapKeyPack(struct HksBlob *inBlob, const struct HksBlob *keyAlias, c
 
 int32_t HksUnwrapKeyPack(struct HksBlob *inBlob, const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksBlob *wrappedKey);
+
+int32_t HksEncapsulatePack(struct HksBlob *destData, const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet);
+
+int32_t HksDecapsulatePack(struct HksBlob *destData, const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, uint32_t *offset);
+
+int32_t HksDecapsulateUnpackFromService(const struct HksBlob *srcData, struct HksBlob *sharedSecret);
+
+int32_t HksEncapsulateUnpackFromService(const struct HksBlob *srcData, struct HksEncapsulationResult *encapResult);
+
 int32_t HksQueryAbilityCopyResult(const struct HksBlob *resourceId, const struct HksAbilityInfo *abilityInfo,
     struct HksBlob *outResourceId, struct HksAbilityInfo *outHksAbilityInfo);
 

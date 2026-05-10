@@ -29,6 +29,8 @@ napi_value HuksNapiAnonAttestKeyItemOfflineAsUser(napi_env env, napi_callback_in
 
 napi_value AttestKeyAsyncWorkOffline(napi_env env, AttestKeyAsyncContext &context);
 
+#ifndef NAPI_RES_DEFINED
+#define NAPI_RES_DEFINED
 struct NapiRes {
     int32_t code{};
     std::string errMsg{};
@@ -38,6 +40,7 @@ struct NapiRes {
         return {HKS_SUCCESS, ""};
     }
 };
+#endif
 }
 
 #endif
