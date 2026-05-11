@@ -242,9 +242,9 @@ HWTEST_F(HksUKeyTest, HksOpenRemoteHandleTest, TestSize.Level0)
     ret = ConstructTestParamSet(&paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    ret = HksOpenRemoteHandle(&resourceId, paramSet);
+    ret = HksOpenRemoteResource(&resourceId, paramSet);
     if (ret != 0) {
-        HKS_TEST_LOG_I("failed, HksOpenRemoteHandle ret = %d", ret);
+        HKS_TEST_LOG_I("failed, HksOpenRemoteResource ret = %d", ret);
     }
 
     HksFreeParamSet(&paramSet);
@@ -267,9 +267,9 @@ HWTEST_F(HksUKeyTest, HksCloseRemoteHandleTest, TestSize.Level0)
     ret = ConstructTestParamSet(&paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    ret = HksCloseRemoteHandle(&resourceId, paramSet);
+    ret = HksCloseRemoteResource(&resourceId, paramSet);
     if (ret != 0) {
-        HKS_TEST_LOG_I("failed, HksCloseRemoteHandle ret = %d", ret);
+        HKS_TEST_LOG_I("failed, HksCloseRemoteResource ret = %d", ret);
     }
 
     HksFreeParamSet(&paramSet);

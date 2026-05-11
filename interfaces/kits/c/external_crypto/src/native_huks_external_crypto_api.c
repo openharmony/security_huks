@@ -48,7 +48,7 @@ struct OH_Huks_Result OH_Huks_UnregisterProvider(const struct OH_Huks_Blob *prov
 struct OH_Huks_Result OH_Huks_OpenResource(const struct OH_Huks_Blob *resourceId,
     const OH_Huks_ExternalCryptoParamSet *paramSet)
 {
-    int32_t ret = HksOpenRemoteHandle((const struct HksBlob *) resourceId,
+    int32_t ret = HksOpenRemoteResource((const struct HksBlob *) resourceId,
         (const struct HksParamSet *) paramSet);
     return ConvertApiResult(ret);
 }
@@ -56,7 +56,7 @@ struct OH_Huks_Result OH_Huks_OpenResource(const struct OH_Huks_Blob *resourceId
 struct OH_Huks_Result OH_Huks_CloseResource(const struct OH_Huks_Blob *resourceId,
     const OH_Huks_ExternalCryptoParamSet *paramSet)
 {
-    int32_t ret = HksCloseRemoteHandle((const struct HksBlob *) resourceId,
+    int32_t ret = HksCloseRemoteResource((const struct HksBlob *) resourceId,
         (const struct HksParamSet *) paramSet);
     return ConvertApiResult(ret);
 }
