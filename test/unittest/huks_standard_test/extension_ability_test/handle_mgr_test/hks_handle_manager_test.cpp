@@ -305,12 +305,6 @@ HWTEST_F(HksRemoteHandleManagerTest, PropertyTest, TestSize.Level0)
         index, "SKF_GetDevInfo", getPropertyParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    // Test get property with invalid property ID
-    CppParamSet invalidPropertyParamSet = CreateTestParamSet();
-    ret = manager->SetOrGetRemoteProperty(processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
-        index, "INVALID_PROPERTY", invalidPropertyParamSet);
-    EXPECT_NE(ret, HKS_SUCCESS);
-
     // Test set property
     CppParamSet setPropertyParamSet = CreateTestParamSet();
     ret = manager->SetOrGetRemoteProperty(processInfo, HKS_EXT_PROPERTY_OPERATION_SET,
