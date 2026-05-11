@@ -400,7 +400,7 @@ HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *resourceId,
 #endif
 }
 
-HKS_API_EXPORT int32_t HksOpenRemoteHandle(const struct HksBlob *resourceId,
+HKS_API_EXPORT int32_t HksOpenRemoteResource(const struct HksBlob *resourceId,
     const struct HksParamSet *paramSetIn)
 {
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
@@ -418,7 +418,7 @@ HKS_API_EXPORT int32_t HksOpenRemoteHandle(const struct HksBlob *resourceId,
 #endif
 }
 
-HKS_API_EXPORT int32_t HksCloseRemoteHandle(const struct HksBlob *resourceId,
+HKS_API_EXPORT int32_t HksCloseRemoteResource(const struct HksBlob *resourceId,
     const struct HksParamSet *paramSetIn)
 {
 #ifdef HKS_UKEY_EXTENSION_CRYPTO

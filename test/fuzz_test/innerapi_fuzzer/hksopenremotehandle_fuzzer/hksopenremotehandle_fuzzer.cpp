@@ -36,7 +36,7 @@ int DoSomethingInterestingWithHksOpenRemoteHandle(uint8_t *data, size_t size)
     struct HksBlob resourceId = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
 
     WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
-    [[maybe_unused]] int ret = HksOpenRemoteHandle(&resourceId, ps.s);
+    [[maybe_unused]] int ret = HksOpenRemoteResource(&resourceId, ps.s);
     return 0;
 }
 
