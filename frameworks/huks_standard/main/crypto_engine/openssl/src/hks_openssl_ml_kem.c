@@ -76,7 +76,8 @@ static int32_t MlKemGetKeyMaterial(EVP_PKEY *pkey, uint32_t paramSetId, struct H
     uint32_t offset = sizeof(*keyMaterial);
     ret = HKS_SUCCESS;
     do {
-        if (EVP_PKEY_get_raw_public_key(pkey, rawMaterial + offset, &pubKeySize) != HKS_OPENSSL_SUCCESS) {
+        size_t pubData = pubKeySize;
+        if (EVP_PKEY_get_raw_public_key(pkey, rawMaterial + offset, &data) != HKS_OPENSSL_SUCCESS) {
             HKS_LOG_E("get ml-kem pub key failed");
             HksLogOpensslError();
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
@@ -84,7 +85,8 @@ static int32_t MlKemGetKeyMaterial(EVP_PKEY *pkey, uint32_t paramSetId, struct H
         }
 
         offset += keyMaterial->pubKeySize;
-        if (EVP_PKEY_get_raw_private_key(pkey, rawMaterial + offset, &priKeySize) != HKS_OPENSSL_SUCCESS) {
+        size_t priData = priKeySize;
+        if (EVP_PKEY_get_raw_private_key(pkey, rawMaterial + offset, &priData) != HKS_OPENSSL_SUCCESS) {
             HKS_LOG_E("get ml-kem pri key failed");
             HksLogOpensslError();
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
