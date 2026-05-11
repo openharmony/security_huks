@@ -70,8 +70,8 @@
     HksUnregisterProvider;
     HksAuthUkeyPin;
     HksGetUkeyPinAuthState;
-    HksOpenRemoteHandle;
-    HksCloseRemoteHandle;
+    HksOpenRemoteResource;
+    HksCloseRemoteResource;
     HksClearUkeyPinAuthState;
     HksExportProviderCertificates;
     HksExportCertificate;
