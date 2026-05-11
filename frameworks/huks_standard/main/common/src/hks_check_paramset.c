@@ -615,6 +615,7 @@ static int32_t CheckImportKeySize(uint32_t alg, const struct ParamsValues *param
         case HKS_ALG_X25519:
         case HKS_ALG_RSA:
         case HKS_ALG_ECC:
+        case HKS_ALG_ML_DSA:
         case HKS_ALG_ML_KEM:
         case HKS_ALG_SM2:
         case HKS_ALG_DH: {

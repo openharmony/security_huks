@@ -62,8 +62,9 @@ static int32_t MlKemEncapsulateInitCtx(const struct HksBlob *rawKey, EVP_PKEY **
 
     uint32_t offset = sizeof(struct HksKeyMaterialMlKem);
     OSSL_PARAM params[2];
+    size_t pubData = keyMaterial->pubKeySize;
     params[0] = OSSL_PARAM_construct_octet_string(OSSL_PKEY_PARAM_PUB_KEY,
-        rawKey->data + offset, keyMaterial->pubKeySize);
+        rawKey->data + offset, pubData);
     params[1] = OSSL_PARAM_construct_end();
 
     ret = EVP_PKEY_fromdata(ctx, pkey, EVP_PKEY_PUBLIC_KEY, params);
@@ -206,7 +207,8 @@ static int32_t MlKemDecapsulate(EVP_PKEY *pkey, const struct HksBlob *ciphertext
         }
 
         size_t sharedSecretLen = HKS_ML_KEM_SHARED_SECRET_LEN;
-        ret = EVP_PKEY_decapsulate(ctx, NULL, &sharedSecretLen, ciphertext->data, ciphertext->size);
+        size_t ciphertextSize = ciphertext->size;
+        ret = EVP_PKEY_decapsulate(ctx, NULL, &sharedSecretLen, ciphertext->data, ciphertextSize);
         if (ret != HKS_OPENSSL_SUCCESS) {
             HKS_LOG_E("EVP_PKEY_decapsulate get length failed");
             HksLogOpensslError();
@@ -222,7 +224,7 @@ static int32_t MlKemDecapsulate(EVP_PKEY *pkey, const struct HksBlob *ciphertext
         }
 
         ret = EVP_PKEY_decapsulate(ctx, sharedSecret->data, &sharedSecretLen,
-            ciphertext->data, ciphertext->size);
+            ciphertext->data, ciphertextSize);
         if (ret != HKS_OPENSSL_SUCCESS) {
             HKS_LOG_E("EVP_PKEY_decapsulate failed");
             HksLogOpensslError();
