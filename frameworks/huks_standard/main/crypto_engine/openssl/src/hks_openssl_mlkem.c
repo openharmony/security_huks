@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <cstddef>
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
 #else
