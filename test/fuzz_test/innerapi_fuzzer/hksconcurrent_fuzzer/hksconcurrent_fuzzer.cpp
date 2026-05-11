@@ -682,7 +682,7 @@ static int32_t FuzzExtOpenRemoteHandle(FuzzedDataProvider &fdp) {
 
     WrapParamSet ps = ConstructParamSetFromFdp(fdp);
 
-    return HksOpenRemoteHandle(&resourceId, ps.s);
+    return HksOpenRemoteResource(&resourceId, ps.s);
 }
 
 static int32_t FuzzExtGetRemoteHandle(FuzzedDataProvider &fdp) {
@@ -697,7 +697,7 @@ static int32_t FuzzExtCloseRemoteHandle(FuzzedDataProvider &fdp) {
 
     WrapParamSet ps = ConstructParamSetFromFdp(fdp);
 
-    return HksCloseRemoteHandle(&resourceId, ps.s);
+    return HksCloseRemoteResource(&resourceId, ps.s);
 }
 
 static int32_t FuzzExtUkeySign(FuzzedDataProvider &fdp) {

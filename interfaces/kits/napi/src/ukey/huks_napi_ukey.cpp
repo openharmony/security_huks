@@ -127,9 +127,9 @@ static int32_t CallHksResourceOp(const std::vector<uint8_t> &resourceId, struct 
         resourceIdBlob.data = const_cast<uint8_t *>(resourceId.data());
     }
     if (isOpen) {
-        return HksOpenRemoteHandle(&resourceIdBlob, paramSetIn);
+        return HksOpenRemoteResource(&resourceIdBlob, paramSetIn);
     }
-    return HksCloseRemoteHandle(&resourceIdBlob, paramSetIn);
+    return HksCloseRemoteResource(&resourceIdBlob, paramSetIn);
 }
 
 static int32_t CallHksClearUkeyPinAuthState(const std::vector<uint8_t> &resourceIdV)
