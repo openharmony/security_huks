@@ -457,7 +457,7 @@ HWTEST_F(HksUKeyTest, HksImportCertificateTest001, TestSize.Level0)
     struct HksParamSet *paramSet = nullptr;
     struct HksBlob keyAlias = StringToHuksBlob("test_import_cert_alias");
 
-    struct HksExtCertInfo certInfo = { 0 };
+    struct HksExtCertInfo certInfo = {};
     certInfo.purpose = 1;
 
     const char *indexStr = "cert_index_0";
@@ -505,6 +505,35 @@ HWTEST_F(HksUKeyTest, HksImportCertificateTest002, TestSize.Level0)
     EXPECT_NE(ret, HKS_SUCCESS);
 
     HKS_TEST_LOG_I("TestHksUKey, Testcase_HksImportCertificateTest002 pass!");
+}
+
+/**
+* @tc.name: HksGetResourceIdTest001
+* @tc.desc: 测试GetResourceId接口（else分支，返回HKS_ERROR_API_NOT_SUPPORTED）
+* @tc.type: FUNC
+*/
+HWTEST_F(HksUKeyTest, HksGetResourceIdTest001, TestSize.Level0)
+{
+    int32_t ret = 0;
+    const char *providerNameStr = "test_provider";
+    struct HksBlob providerName = StringToHuksBlob(providerNameStr);
+    EXPECT_NE(providerName.data, nullptr);
+
+    struct HksParamSet *paramSet = nullptr;
+    ret = ConstructTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    uint8_t resourceIdData[128] = {0};
+    struct HksBlob resourceId = { sizeof(resourceIdData), resourceIdData };
+
+    ret = HksGetResourceId(&providerName, paramSet, &resourceId);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("failed, HksGetResourceId ret = %d", ret);
+    }
+
+    HksFreeParamSet(&paramSet);
+    HKS_TEST_LOG_I("TestHksUKey, Testcase_HksGetResourceIdTest001 pass!");
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 }// namespace
