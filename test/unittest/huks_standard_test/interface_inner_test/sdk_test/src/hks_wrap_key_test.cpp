@@ -74,28 +74,6 @@ OH_Huks_Result InitParamSet(struct OH_Huks_ParamSet **paramSet, const struct OH_
 static const uint32_t IV_SIZE = 16;
 static uint8_t IV[IV_SIZE] = { 0 }; // this is a test value, for real use the iv should be different every time.
 
-static struct OH_Huks_Param g_genEncDecParams[] = {
-    {
-        .tag = OH_HUKS_TAG_ALGORITHM,
-        .uint32Param = OH_HUKS_ALG_AES
-    }, {
-        .tag = OH_HUKS_TAG_PURPOSE,
-        .uint32Param = OH_HUKS_KEY_PURPOSE_ENCRYPT | OH_HUKS_KEY_PURPOSE_DECRYPT
-    }, {
-        .tag = OH_HUKS_TAG_KEY_SIZE,
-        .uint32Param = OH_HUKS_AES_KEY_SIZE_256
-    }, {
-        .tag = OH_HUKS_TAG_PADDING,
-        .uint32Param = OH_HUKS_PADDING_NONE
-    }, {
-        .tag = OH_HUKS_TAG_BLOCK_MODE,
-        .uint32Param = OH_HUKS_MODE_CBC
-    }, {
-        .tag = OH_HUKS_TAG_IS_ALLOWED_WRAP,
-        .boolParam = true
-    }
-};
-
 static struct OH_Huks_Param g_encryptParams[] = {
     {
         .tag = OH_HUKS_TAG_ALGORITHM,
@@ -226,6 +204,28 @@ static struct OH_Huks_Param g_genTuiParams[] = {
     }
 };
 
+static struct OH_Huks_Param g_genEncDecParams[] = {
+    {
+        .tag = OH_HUKS_TAG_ALGORITHM,
+        .uint32Param = OH_HUKS_ALG_AES
+    }, {
+        .tag = OH_HUKS_TAG_PURPOSE,
+        .uint32Param = OH_HUKS_KEY_PURPOSE_ENCRYPT | OH_HUKS_KEY_PURPOSE_DECRYPT
+    }, {
+        .tag = OH_HUKS_TAG_KEY_SIZE,
+        .uint32Param = OH_HUKS_AES_KEY_SIZE_256
+    }, {
+        .tag = OH_HUKS_TAG_PADDING,
+        .uint32Param = OH_HUKS_PADDING_NONE
+    }, {
+        .tag = OH_HUKS_TAG_BLOCK_MODE,
+        .uint32Param = OH_HUKS_MODE_CBC
+    }, {
+        .tag = OH_HUKS_TAG_IS_ALLOWED_WRAP,
+        .boolParam = true
+    }
+};
+
 static struct OH_Huks_Param g_wrapParams[] = {
     {
         .tag = OH_HUKS_TAG_KEY_WRAP_TYPE,
@@ -245,9 +245,17 @@ HWTEST_F(HksWrapKeyTest, HksWrapKeyTest001, TestSize.Level0)
 {
     char tmpKeyAlias[] = "wrap_key";
     struct OH_Huks_Blob keyAlias = { (uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct OH_Huks_ParamSet *genParamSet = nullptr;
     struct OH_Huks_ParamSet *wrapParamSet = nullptr;
     OH_Huks_Result ohResult;
     do {
+        ohResult = InitParamSet(&genParamSet, g_genEncDecParams, sizeof(g_genEncDecParams) / sizeof(OH_Huks_Param));
+        EXPECT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        /* 1. generate key */
+        ohResult = OH_Huks_GenerateKeyItem(&keyAlias, genParamSet, nullptr);
+        EXPECT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "OH_Huks_GenerateKeyItem fail";
+
         ohResult = InitParamSet(&wrapParamSet, g_wrapParams, sizeof(g_wrapParams) / sizeof(OH_Huks_Param));
         EXPECT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
 
@@ -262,6 +270,8 @@ HWTEST_F(HksWrapKeyTest, HksWrapKeyTest001, TestSize.Level0)
         ohResult = OH_Huks_UnwrapKey(&keyAlias, wrapParamSet, &wrappedKey);
         EXPECT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_NOT_SUPPORTED_API) << "OH_Huks_UnwrapKey fail";
     } while (0);
+
+    OH_Huks_FreeParamSet(&genParamSet);
     OH_Huks_FreeParamSet(&wrapParamSet);
 }
 
