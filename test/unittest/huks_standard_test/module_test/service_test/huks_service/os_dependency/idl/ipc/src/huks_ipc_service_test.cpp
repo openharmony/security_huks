@@ -21,6 +21,9 @@
 #include "hks_mem.h"
 #include "hks_type.h"
 #include "hks_param.h"
+#include "hks_client_ipc_serialization.h"
+#include "hks_type_enum.h"
+#include "hks_ipc_serialization.h"
 
 using namespace testing::ext;
 using namespace OHOS;
@@ -1176,81 +1179,110 @@ HWTEST_F(HksIpcServiceTest, HksIpcServiceTest032, TestSize.Level0)
  * @tc.desc: tdd HksIpcServiceQueryAbilityInfo, expect HKS_SUCCESS
  * @tc.type: FUNC
  */
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
 HWTEST_F(HksIpcServiceTest, HksIpcServiceTest033, TestSize.Level0)
 {
     HKS_LOG_I("enter HksIpcServiceTest033");
-    uint8_t data[] = {
-        0x07, 0x00, 0x00, 0x00, 0x74, 0x65, 0x73, 0x74, 0x48, 0x61, 0x70, 0x00,
-        0x10, 0x00, 0x00, 0x00, 0x63, 0x6F, 0x6D, 0x2E, 0x74, 0x65, 0x73, 0x74, 0x2E, 0x61, 0x70, 0x70, 0x00, 0x00,
-        0x10, 0x00, 0x00, 0x00, 0x54, 0x65, 0x73, 0x74, 0x41, 0x62, 0x69, 0x6C, 0x69, 0x74, 0x79, 0x00, 0x00, 0x00
-    };
-    const struct HksBlob srcData = {
-        .size = sizeof(data) / sizeof(data[0]),
-        .data = data
-    };
+    struct HksBlob resourceId = { 7, (uint8_t *)"testHap" };
+    struct HksBlob bundleName = { 10, (uint8_t *)"com.test.app" };
+    struct HksBlob abilityName = { 10, (uint8_t *)"TestAbility" };
+    
+    struct HksParamSet *paramSet = NULL;
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&paramSet));
+    EXPECT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet));
+    
+    uint32_t bufSize = sizeof(resourceId.size) + ALIGN_SIZE(resourceId.size) +
+                       sizeof(bundleName.size) + ALIGN_SIZE(bundleName.size) +
+                       sizeof(abilityName.size) + ALIGN_SIZE(abilityName.size) +
+                       ALIGN_SIZE(paramSet->paramSetSize);
+    uint8_t *bufData = (uint8_t *)HksMalloc(bufSize);
+    EXPECT_NE(bufData, nullptr);
+    struct HksBlob srcData = { bufSize, bufData };
+    
+    HksUkeyBlob2ParamSetPack(&bundleName, &abilityName, paramSet, &srcData);
+    
     MessageParcel reply;
     uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
     struct HksParamSet *tmpParamSetOut = NULL;
     EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&tmpParamSetOut));
     HksIpcServiceQueryAbilityInfo(&srcData, context);
     HksFreeParamSet(&tmpParamSetOut);
+    HksFreeParamSet(&paramSet);
+    HKS_FREE(bufData);
 }
+#endif
 
 /**
  * @tc.name: HksIpcServiceTest.HksIpcServiceTest034
  * @tc.desc: tdd HksIpcServiceImportCertificate, expect HKS_SUCCESS
  * @tc.type: FUNC
  */
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
 HWTEST_F(HksIpcServiceTest, HksIpcServiceTest034, TestSize.Level0)
 {
     HKS_LOG_I("enter HksIpcServiceTest034");
-    uint8_t data[] = {
-        0x07, 0x00, 0x00, 0x00, 0x74, 0x65, 0x73, 0x74, 0x48, 0x61, 0x70, 0x00,
-        0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x38, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x42, 0x0D, 0x03, 0x10, 0x00, 0x00, 0x00, 0x00,
-        0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xE5, 0xA0, 0x87, 0x42, 0x6A, 0x55, 0x00, 0x00,
-        0x41, 0x0D, 0x03, 0x10, 0x00, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0xF8, 0xA0, 0x87, 0x42, 0x6A, 0x55, 0x00, 0x00
-    };
-    const struct HksBlob srcData = {
-        .size = sizeof(data) / sizeof(data[0]),
-        .data = data
-    };
+    struct HksBlob resourceId = { 7, (uint8_t *)"testHap" };
+    struct HksExtCertInfo certInfo = { 0, { 4, (uint8_t *)"idx1" }, { 4, (uint8_t *)"cert" } };
+    
+    struct HksParamSet *paramSet = NULL;
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&paramSet));
+    EXPECT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet));
+    
+    uint32_t bufSize = sizeof(resourceId.size) + ALIGN_SIZE(resourceId.size) +
+                       sizeof(certInfo.purpose) +
+                       sizeof(certInfo.index.size) + ALIGN_SIZE(certInfo.index.size) +
+                       sizeof(certInfo.cert.size) + ALIGN_SIZE(certInfo.cert.size) +
+                       ALIGN_SIZE(paramSet->paramSetSize);
+    uint8_t *bufData = (uint8_t *)HksMalloc(bufSize);
+    EXPECT_NE(bufData, nullptr);
+    struct HksBlob srcData = { bufSize, bufData };
+    
+    HksUKeyGeneralPackWithCertInfo(&resourceId, &certInfo, paramSet, &srcData);
+    
     MessageParcel reply;
     uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
     struct HksParamSet *tmpParamSetOut = NULL;
     EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&tmpParamSetOut));
     HksIpcServiceImportCertificate(&srcData, context);
     HksFreeParamSet(&tmpParamSetOut);
+    HksFreeParamSet(&paramSet);
+    HKS_FREE(bufData);
 }
+#endif
 
 /**
  * @tc.name: HksIpcServiceTest.HksIpcServiceTest035
  * @tc.desc: tdd HksIpcServiceGetResourceId, expect HKS_SUCCESS
  * @tc.type: FUNC
  */
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
 HWTEST_F(HksIpcServiceTest, HksIpcServiceTest035, TestSize.Level0)
 {
     HKS_LOG_I("enter HksIpcServiceTest035");
-    uint8_t data[] = {
-        0x07, 0x00, 0x00, 0x00, 0x74, 0x65, 0x73, 0x74, 0x48, 0x61, 0x70, 0x00,
-        0x38, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x42, 0x0D, 0x03, 0x10, 0x00, 0x00, 0x00, 0x00,
-        0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xE5, 0xA0, 0x87, 0x42, 0x6A, 0x55, 0x00, 0x00,
-        0x41, 0x0D, 0x03, 0x10, 0x00, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0xF8, 0xA0, 0x87, 0x42, 0x6A, 0x55, 0x00, 0x00
-    };
-    const struct HksBlob srcData = {
-        .size = sizeof(data) / sizeof(data[0]),
-        .data = data
-    };
+    struct HksBlob resourceId = { 7, (uint8_t *)"testHap" };
+    
+    struct HksParamSet *paramSet = NULL;
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&paramSet));
+    EXPECT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet));
+    
+    uint32_t bufSize = sizeof(resourceId.size) + ALIGN_SIZE(resourceId.size) +
+                       ALIGN_SIZE(paramSet->paramSetSize);
+    uint8_t *bufData = (uint8_t *)HksMalloc(bufSize);
+    EXPECT_NE(bufData, nullptr);
+    struct HksBlob srcData = { bufSize, bufData };
+    
+    HksUKeyGeneralPack(&resourceId, paramSet, &srcData);
+    
     MessageParcel reply;
     uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
     struct HksParamSet *tmpParamSetOut = NULL;
     EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&tmpParamSetOut));
     HksIpcServiceGetResourceId(&srcData, context);
     HksFreeParamSet(&tmpParamSetOut);
+    HksFreeParamSet(&paramSet);
+    HKS_FREE(bufData);
 }
+#endif
 
 /**
  * @tc.name: HksIpcServiceTest.HksIpcServiceTest036
@@ -1261,26 +1293,36 @@ HWTEST_F(HksIpcServiceTest, HksIpcServiceTest035, TestSize.Level0)
 HWTEST_F(HksIpcServiceTest, HksIpcServiceTest036, TestSize.Level0)
 {
     HKS_LOG_I("enter HksIpcServiceTest036");
-    uint8_t data[] = {
-        0x20, 0x00, 0x00, 0x00, 0x41, 0x54, 0x5f, 0x63, 0x6f, 0x6d, 0x2e, 0x68, 0x75, 0x61, 0x77, 0x65,
-        0x69, 0x2e, 0x67, 0x61, 0x6d, 0x65, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x73,
-        0x61, 0x5f, 0x43, 0x4e, 0x68, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x20,
-        0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x20,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x3c, 0x01, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    const char *alias = "AT_com.huawei.game.service.sa_CN";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    
+    struct HksParamSet *paramSet = NULL;
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&paramSet));
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
     };
-    const struct HksBlob srcData = {
-        .size = sizeof(data) / sizeof(data[0]),
-        .data = data
-    };
+    EXPECT_EQ(HKS_SUCCESS, HksAddParams(paramSet, params, sizeof(params)/sizeof(params[0])));
+    EXPECT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet));
+    
+    struct HksBlob keyOut = { 0, NULL };
+    uint32_t bufSize = sizeof(keyAlias.size) + ALIGN_SIZE(keyAlias.size) +
+                       ALIGN_SIZE(paramSet->paramSetSize) + sizeof(uint32_t);
+    uint8_t *bufData = (uint8_t *)HksMalloc(bufSize);
+    EXPECT_NE(bufData, nullptr);
+    struct HksBlob srcData = { bufSize, bufData };
+    
+    EXPECT_EQ(HKS_SUCCESS, HksGenerateKeyPack(&srcData, &keyAlias, paramSet, &keyOut));
+    
     MessageParcel reply;
     uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
     struct HksParamSet *tmpParamSetOut = NULL;
     EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&tmpParamSetOut));
     HksIpcServiceGenerateKey(&srcData, context);
     HksFreeParamSet(&tmpParamSetOut);
+    HksFreeParamSet(&paramSet);
+    HKS_FREE(bufData);
 }
 
 /**
@@ -1292,26 +1334,35 @@ HWTEST_F(HksIpcServiceTest, HksIpcServiceTest036, TestSize.Level0)
 HWTEST_F(HksIpcServiceTest, HksIpcServiceTest037, TestSize.Level0)
 {
     HKS_LOG_I("enter HksIpcServiceTest037");
-    uint8_t data[] = {
-        0x20, 0x00, 0x00, 0x00, 0x41, 0x54, 0x5f, 0x63, 0x6f, 0x6d, 0x2e, 0x68, 0x75, 0x61, 0x77, 0x65,
-        0x69, 0x2e, 0x67, 0x61, 0x6d, 0x65, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x73,
-        0x61, 0x5f, 0x43, 0x4e, 0x68, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x20,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x14, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x20,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x3c, 0x01, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    const char *alias = "test_ml_dsa_key";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    
+    struct HksParamSet *paramSet = NULL;
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&paramSet));
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ML_DSA },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = 2048 },
     };
-    const struct HksBlob srcData = {
-        .size = sizeof(data) / sizeof(data[0]),
-        .data = data
-    };
+    EXPECT_EQ(HKS_SUCCESS, HksAddParams(paramSet, params, sizeof(params)/sizeof(params[0])));
+    EXPECT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet));
+    
+    struct HksBlob keyOut = { 0, NULL };
+    uint32_t bufSize = sizeof(keyAlias.size) + ALIGN_SIZE(keyAlias.size) +
+                       ALIGN_SIZE(paramSet->paramSetSize) + sizeof(uint32_t);
+    uint8_t *bufData = (uint8_t *)HksMalloc(bufSize);
+    EXPECT_NE(bufData, nullptr);
+    struct HksBlob srcData = { bufSize, bufData };
+    
+    EXPECT_EQ(HKS_SUCCESS, HksGenerateKeyPack(&srcData, &keyAlias, paramSet, &keyOut));
+    
     MessageParcel reply;
     uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
     struct HksParamSet *tmpParamSetOut = NULL;
     EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&tmpParamSetOut));
     HksIpcServiceGenerateKey(&srcData, context);
     HksFreeParamSet(&tmpParamSetOut);
+    HksFreeParamSet(&paramSet);
+    HKS_FREE(bufData);
 }
 
 /**
@@ -1323,28 +1374,37 @@ HWTEST_F(HksIpcServiceTest, HksIpcServiceTest037, TestSize.Level0)
 HWTEST_F(HksIpcServiceTest, HksIpcServiceTest038, TestSize.Level0)
 {
     HKS_LOG_I("enter HksIpcServiceTest038");
-    uint8_t data[] = {
-        0x20, 0x00, 0x00, 0x00, 0x41, 0x54, 0x5f, 0x63, 0x6f, 0x6d, 0x2e, 0x68, 0x75, 0x61, 0x77, 0x65,
-        0x69, 0x2e, 0x67, 0x61, 0x6d, 0x65, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x73,
-        0x61, 0x5f, 0x43, 0x4e, 0x68, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x20,
-        0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x20,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3c, 0x01, 0x00, 0x20,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    const char *alias = "test_always_valid_key";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    
+    struct HksParamSet *paramSet = NULL;
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&paramSet));
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT },
+        { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_ALWAYS_VALID },
     };
-    const struct HksBlob srcData = {
-        .size = sizeof(data) / sizeof(data[0]),
-        .data = data
-    };
+    EXPECT_EQ(HKS_SUCCESS, HksAddParams(paramSet, params, sizeof(params)/sizeof(params[0])));
+    EXPECT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet));
+    
+    struct HksBlob keyOut = { 0, NULL };
+    uint32_t bufSize = sizeof(keyAlias.size) + ALIGN_SIZE(keyAlias.size) +
+                       ALIGN_SIZE(paramSet->paramSetSize) + sizeof(uint32_t);
+    uint8_t *bufData = (uint8_t *)HksMalloc(bufSize);
+    EXPECT_NE(bufData, nullptr);
+    struct HksBlob srcData = { bufSize, bufData };
+    
+    EXPECT_EQ(HKS_SUCCESS, HksGenerateKeyPack(&srcData, &keyAlias, paramSet, &keyOut));
+    
     MessageParcel reply;
     uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
     struct HksParamSet *tmpParamSetOut = NULL;
     EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&tmpParamSetOut));
     HksIpcServiceGenerateKey(&srcData, context);
     HksFreeParamSet(&tmpParamSetOut);
+    HksFreeParamSet(&paramSet);
+    HKS_FREE(bufData);
 }
 
 /**
@@ -1355,23 +1415,32 @@ HWTEST_F(HksIpcServiceTest, HksIpcServiceTest038, TestSize.Level0)
 HWTEST_F(HksIpcServiceTest, HksIpcServiceTest039, TestSize.Level0)
 {
     HKS_LOG_I("enter HksIpcServiceTest039");
-    uint8_t data[] = {
-        0x10, 0x00, 0x00, 0x00, 0x74, 0x65, 0x73, 0x74, 0x5f, 0x6f, 0x6c, 0x64, 0x5f, 0x6b, 0x65, 0x79,
-        0x00, 0x10, 0x00, 0x00, 0x00, 0x74, 0x65, 0x73, 0x74, 0x5f, 0x6e, 0x65, 0x77, 0x5f, 0x6b, 0x65,
-        0x79, 0x00, 0x20, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x3c, 0x01, 0x00, 0x20, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00
-    };
-    const struct HksBlob srcData = {
-        .size = sizeof(data) / sizeof(data[0]),
-        .data = data
-    };
+    const char *oldAlias = "test_old_key";
+    const char *newAlias = "test_new_key";
+    struct HksBlob oldKeyAlias = { strlen(oldAlias), (uint8_t *)oldAlias };
+    struct HksBlob newKeyAlias = { strlen(newAlias), (uint8_t *)newAlias };
+    
+    struct HksParamSet *paramSet = NULL;
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&paramSet));
+    EXPECT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet));
+    
+    uint32_t bufSize = sizeof(oldKeyAlias.size) + ALIGN_SIZE(oldKeyAlias.size) +
+                       sizeof(newKeyAlias.size) + ALIGN_SIZE(newKeyAlias.size) +
+                       ALIGN_SIZE(paramSet->paramSetSize);
+    uint8_t *bufData = (uint8_t *)HksMalloc(bufSize);
+    EXPECT_NE(bufData, nullptr);
+    struct HksBlob srcData = { bufSize, bufData };
+    
+    EXPECT_EQ(HKS_SUCCESS, HksRenameKeyAliasPack(&oldKeyAlias, &newKeyAlias, paramSet, &srcData));
+    
     MessageParcel reply;
     uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
     struct HksParamSet *tmpParamSetOut = NULL;
     EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&tmpParamSetOut));
     HksIpcServiceRenameKeyAlias(&srcData, context);
     HksFreeParamSet(&tmpParamSetOut);
+    HksFreeParamSet(&paramSet);
+    HKS_FREE(bufData);
 }
 
 /**
@@ -1383,24 +1452,35 @@ HWTEST_F(HksIpcServiceTest, HksIpcServiceTest039, TestSize.Level0)
 HWTEST_F(HksIpcServiceTest, HksIpcServiceTest040, TestSize.Level0)
 {
     HKS_LOG_I("enter HksIpcServiceTest040");
-    uint8_t data[] = {
-        0x10, 0x00, 0x00, 0x00, 0x74, 0x65, 0x73, 0x74, 0x5f, 0x6b, 0x65, 0x79, 0x5f, 0x61, 0x6c, 0x69,
-        0x61, 0x73, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x3c, 0x01, 0x00, 0x20,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x3c, 0x01, 0x00, 0x20,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00
-    };
-    const struct HksBlob srcData = {
-        .size = sizeof(data) / sizeof(data[0]),
-        .data = data
-    };
+    const char *alias = "test_key_alias";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    
+    struct HksParamSet *srcParamSet = NULL;
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&srcParamSet));
+    EXPECT_EQ(HKS_SUCCESS, HksBuildParamSet(&srcParamSet));
+    
+    struct HksParamSet *destParamSet = NULL;
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&destParamSet));
+    EXPECT_EQ(HKS_SUCCESS, HksBuildParamSet(&destParamSet));
+    
+    uint32_t bufSize = sizeof(keyAlias.size) + ALIGN_SIZE(keyAlias.size) +
+                       ALIGN_SIZE(srcParamSet->paramSetSize) +
+                       ALIGN_SIZE(destParamSet->paramSetSize);
+    uint8_t *bufData = (uint8_t *)HksMalloc(bufSize);
+    EXPECT_NE(bufData, nullptr);
+    struct HksBlob srcData = { bufSize, bufData };
+    
+    EXPECT_EQ(HKS_SUCCESS, HksChangeStorageLevelPack(&srcData, &keyAlias, srcParamSet, destParamSet));
+    
     MessageParcel reply;
     uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
     struct HksParamSet *tmpParamSetOut = NULL;
     EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&tmpParamSetOut));
     HksIpcChangeStorageLevel(&srcData, context);
     HksFreeParamSet(&tmpParamSetOut);
+    HksFreeParamSet(&srcParamSet);
+    HksFreeParamSet(&destParamSet);
+    HKS_FREE(bufData);
 }
 
 /**
@@ -1411,23 +1491,30 @@ HWTEST_F(HksIpcServiceTest, HksIpcServiceTest040, TestSize.Level0)
 HWTEST_F(HksIpcServiceTest, HksIpcServiceTest041, TestSize.Level0)
 {
     HKS_LOG_I("enter HksIpcServiceTest041");
-    uint8_t data[] = {
-        0x10, 0x00, 0x00, 0x00, 0x74, 0x65, 0x73, 0x74, 0x5f, 0x6b, 0x65, 0x79, 0x5f, 0x61, 0x6c, 0x69,
-        0x61, 0x73, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x3c, 0x01, 0x00, 0x20,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00
-    };
-    const struct HksBlob srcData = {
-        .size = sizeof(data) / sizeof(data[0]),
-        .data = data
-    };
+    const char *alias = "test_key_alias";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    
+    struct HksParamSet *paramSet = NULL;
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&paramSet));
+    EXPECT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet));
+    
+    struct HksBlob wrappedKey = { 16, (uint8_t *)"wrapped_key_data" };
+    uint32_t bufSize = sizeof(keyAlias.size) + ALIGN_SIZE(keyAlias.size) +
+                       ALIGN_SIZE(paramSet->paramSetSize) + sizeof(uint32_t);
+    uint8_t *bufData = (uint8_t *)HksMalloc(bufSize);
+    EXPECT_NE(bufData, nullptr);
+    struct HksBlob srcData = { bufSize, bufData };
+    
+    EXPECT_EQ(HKS_SUCCESS, HksWrapKeyPack(&srcData, &keyAlias, paramSet, &wrappedKey));
+    
     MessageParcel reply;
     uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
     struct HksParamSet *tmpParamSetOut = NULL;
     EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&tmpParamSetOut));
     HksIpcWrapKey(&srcData, context);
     HksFreeParamSet(&tmpParamSetOut);
+    HksFreeParamSet(&paramSet);
+    HKS_FREE(bufData);
 }
 
 /**
@@ -1439,22 +1526,33 @@ HWTEST_F(HksIpcServiceTest, HksIpcServiceTest041, TestSize.Level0)
 HWTEST_F(HksIpcServiceTest, HksIpcServiceTest042, TestSize.Level0)
 {
     HKS_LOG_I("enter HksIpcServiceTest042");
-    uint8_t data[] = {
-        0x10, 0x00, 0x00, 0x00, 0x74, 0x65, 0x73, 0x74, 0x5f, 0x6b, 0x65, 0x79, 0x5f, 0x61, 0x6c, 0x69,
-        0x61, 0x73, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x3c, 0x01, 0x00, 0x20,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00
-    };
-    const struct HksBlob srcData = {
-        .size = sizeof(data) / sizeof(data[0]),
-        .data = data
-    };
+    const char *alias = "test_key_alias";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    
+    struct HksParamSet *paramSet = NULL;
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&paramSet));
+    EXPECT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet));
+    
+    uint8_t wrappedKeyData[] = { 0x01, 0x00, 0x00, 0x00, 'd', 'a', 't', 'a' };
+    struct HksBlob wrappedKey = { sizeof(wrappedKeyData), wrappedKeyData };
+    
+    uint32_t bufSize = sizeof(keyAlias.size) + ALIGN_SIZE(keyAlias.size) +
+                       ALIGN_SIZE(paramSet->paramSetSize) +
+                       sizeof(wrappedKey.size) + ALIGN_SIZE(wrappedKey.size);
+    uint8_t *bufData = (uint8_t *)HksMalloc(bufSize);
+    EXPECT_NE(bufData, nullptr);
+    struct HksBlob srcData = { bufSize, bufData };
+    
+    EXPECT_EQ(HKS_SUCCESS, HksUnwrapKeyPack(&srcData, &keyAlias, paramSet, &wrappedKey));
+    
     MessageParcel reply;
     uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
     struct HksParamSet *tmpParamSetOut = NULL;
     EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&tmpParamSetOut));
     HksIpcUnwrapKey(&srcData, context);
     HksFreeParamSet(&tmpParamSetOut);
+    HksFreeParamSet(&paramSet);
+    HKS_FREE(bufData);
 }
 
 /**
@@ -1466,22 +1564,33 @@ HWTEST_F(HksIpcServiceTest, HksIpcServiceTest042, TestSize.Level0)
 HWTEST_F(HksIpcServiceTest, HksIpcServiceTest043, TestSize.Level0)
 {
     HKS_LOG_I("enter HksIpcServiceTest043");
-    uint8_t data[] = {
-        0x10, 0x00, 0x00, 0x00, 0x74, 0x65, 0x73, 0x74, 0x5f, 0x6b, 0x65, 0x79, 0x5f, 0x61, 0x6c, 0x69,
-        0x61, 0x73, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x3c, 0x01, 0x00, 0x20,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00
-    };
-    const struct HksBlob srcData = {
-        .size = sizeof(data) / sizeof(data[0]),
-        .data = data
-    };
+    const char *alias = "test_key_alias";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    
+    struct HksParamSet *paramSet = NULL;
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&paramSet));
+    EXPECT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet));
+    
+    uint8_t wrappedKeyData[] = { 0x64, 0x00, 0x00, 0x00, 'd', 'a', 't', 'a' };
+    struct HksBlob wrappedKey = { sizeof(wrappedKeyData), wrappedKeyData };
+    
+    uint32_t bufSize = sizeof(keyAlias.size) + ALIGN_SIZE(keyAlias.size) +
+                       ALIGN_SIZE(paramSet->paramSetSize) +
+                       sizeof(wrappedKey.size) + ALIGN_SIZE(wrappedKey.size);
+    uint8_t *bufData = (uint8_t *)HksMalloc(bufSize);
+    EXPECT_NE(bufData, nullptr);
+    struct HksBlob srcData = { bufSize, bufData };
+    
+    EXPECT_EQ(HKS_SUCCESS, HksUnwrapKeyPack(&srcData, &keyAlias, paramSet, &wrappedKey));
+    
     MessageParcel reply;
     uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
     struct HksParamSet *tmpParamSetOut = NULL;
     EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&tmpParamSetOut));
     HksIpcUnwrapKey(&srcData, context);
     HksFreeParamSet(&tmpParamSetOut);
+    HksFreeParamSet(&paramSet);
+    HKS_FREE(bufData);
 }
 
 /**
@@ -1493,22 +1602,33 @@ HWTEST_F(HksIpcServiceTest, HksIpcServiceTest043, TestSize.Level0)
 HWTEST_F(HksIpcServiceTest, HksIpcServiceTest044, TestSize.Level0)
 {
     HKS_LOG_I("enter HksIpcServiceTest044");
-    uint8_t data[] = {
-        0x10, 0x00, 0x00, 0x00, 0x74, 0x65, 0x73, 0x74, 0x5f, 0x6b, 0x65, 0x79, 0x5f, 0x61, 0x6c, 0x69,
-        0x61, 0x73, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x3c, 0x01, 0x00, 0x20,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00
-    };
-    const struct HksBlob srcData = {
-        .size = sizeof(data) / sizeof(data[0]),
-        .data = data
-    };
+    const char *alias = "test_key_alias";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    
+    struct HksParamSet *paramSet = NULL;
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&paramSet));
+    EXPECT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet));
+    
+    uint8_t wrappedKeyData[] = { 0xC8, 0x00, 0x00, 0x00, 'd', 'a', 't', 'a' };
+    struct HksBlob wrappedKey = { sizeof(wrappedKeyData), wrappedKeyData };
+    
+    uint32_t bufSize = sizeof(keyAlias.size) + ALIGN_SIZE(keyAlias.size) +
+                       ALIGN_SIZE(paramSet->paramSetSize) +
+                       sizeof(wrappedKey.size) + ALIGN_SIZE(wrappedKey.size);
+    uint8_t *bufData = (uint8_t *)HksMalloc(bufSize);
+    EXPECT_NE(bufData, nullptr);
+    struct HksBlob srcData = { bufSize, bufData };
+    
+    EXPECT_EQ(HKS_SUCCESS, HksUnwrapKeyPack(&srcData, &keyAlias, paramSet, &wrappedKey));
+    
     MessageParcel reply;
     uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
     struct HksParamSet *tmpParamSetOut = NULL;
     EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&tmpParamSetOut));
     HksIpcUnwrapKey(&srcData, context);
     HksFreeParamSet(&tmpParamSetOut);
+    HksFreeParamSet(&paramSet);
+    HKS_FREE(bufData);
 }
 
 /**
@@ -1520,22 +1640,33 @@ HWTEST_F(HksIpcServiceTest, HksIpcServiceTest044, TestSize.Level0)
 HWTEST_F(HksIpcServiceTest, HksIpcServiceTest045, TestSize.Level0)
 {
     HKS_LOG_I("enter HksIpcServiceTest045");
-    uint8_t data[] = {
-        0x10, 0x00, 0x00, 0x00, 0x74, 0x65, 0x73, 0x74, 0x5f, 0x6b, 0x65, 0x79, 0x5f, 0x61, 0x6c, 0x69,
-        0x61, 0x73, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x3c, 0x01, 0x00, 0x20,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00
-    };
-    const struct HksBlob srcData = {
-        .size = sizeof(data) / sizeof(data[0]),
-        .data = data
-    };
+    const char *alias = "test_key_alias";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    
+    struct HksParamSet *paramSet = NULL;
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&paramSet));
+    EXPECT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet));
+    
+    uint8_t wrappedKeyData[] = { 0x01, 0x02 };
+    struct HksBlob wrappedKey = { sizeof(wrappedKeyData), wrappedKeyData };
+    
+    uint32_t bufSize = sizeof(keyAlias.size) + ALIGN_SIZE(keyAlias.size) +
+                       ALIGN_SIZE(paramSet->paramSetSize) +
+                       sizeof(wrappedKey.size) + ALIGN_SIZE(wrappedKey.size);
+    uint8_t *bufData = (uint8_t *)HksMalloc(bufSize);
+    EXPECT_NE(bufData, nullptr);
+    struct HksBlob srcData = { bufSize, bufData };
+    
+    EXPECT_EQ(HKS_SUCCESS, HksUnwrapKeyPack(&srcData, &keyAlias, paramSet, &wrappedKey));
+    
     MessageParcel reply;
     uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
     struct HksParamSet *tmpParamSetOut = NULL;
     EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&tmpParamSetOut));
     HksIpcUnwrapKey(&srcData, context);
     HksFreeParamSet(&tmpParamSetOut);
+    HksFreeParamSet(&paramSet);
+    HKS_FREE(bufData);
 }
 
 /**
@@ -1547,28 +1678,37 @@ HWTEST_F(HksIpcServiceTest, HksIpcServiceTest045, TestSize.Level0)
 HWTEST_F(HksIpcServiceTest, HksIpcServiceTest046, TestSize.Level0)
 {
     HKS_LOG_I("enter HksIpcServiceTest046");
-    uint8_t data[] = {
-        0x20, 0x00, 0x00, 0x00, 0x41, 0x54, 0x5f, 0x63, 0x6f, 0x6d, 0x2e, 0x68, 0x75, 0x61, 0x77, 0x65,
-        0x69, 0x2e, 0x67, 0x61, 0x6d, 0x65, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x73,
-        0x61, 0x5f, 0x43, 0x4e, 0x00, 0x01, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x20,
-        0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x20,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x3c, 0x01, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x0A, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    const char *alias = "test_tee_key";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    
+    struct HksParamSet *paramSet = NULL;
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&paramSet));
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT },
+        { .tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_TEE },
     };
-    const struct HksBlob srcData = {
-        .size = sizeof(data) / sizeof(data[0]),
-        .data = data
-    };
+    EXPECT_EQ(HKS_SUCCESS, HksAddParams(paramSet, params, sizeof(params)/sizeof(params[0])));
+    EXPECT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet));
+    
+    struct HksBlob keyOut = { 0, NULL };
+    uint32_t bufSize = sizeof(keyAlias.size) + ALIGN_SIZE(keyAlias.size) +
+                       ALIGN_SIZE(paramSet->paramSetSize) + sizeof(uint32_t);
+    uint8_t *bufData = (uint8_t *)HksMalloc(bufSize);
+    EXPECT_NE(bufData, nullptr);
+    struct HksBlob srcData = { bufSize, bufData };
+    
+    EXPECT_EQ(HKS_SUCCESS, HksGenerateKeyPack(&srcData, &keyAlias, paramSet, &keyOut));
+    
     MessageParcel reply;
     uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
     struct HksParamSet *tmpParamSetOut = NULL;
     EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&tmpParamSetOut));
     HksIpcServiceGenerateKey(&srcData, context);
     HksFreeParamSet(&tmpParamSetOut);
+    HksFreeParamSet(&paramSet);
+    HKS_FREE(bufData);
 }
 
 /**
@@ -1580,28 +1720,37 @@ HWTEST_F(HksIpcServiceTest, HksIpcServiceTest046, TestSize.Level0)
 HWTEST_F(HksIpcServiceTest, HksIpcServiceTest047, TestSize.Level0)
 {
     HKS_LOG_I("enter HksIpcServiceTest047");
-    uint8_t data[] = {
-        0x20, 0x00, 0x00, 0x00, 0x41, 0x54, 0x5f, 0x63, 0x6f, 0x6d, 0x2e, 0x68, 0x75, 0x61, 0x77, 0x65,
-        0x69, 0x2e, 0x67, 0x61, 0x6d, 0x65, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x73,
-        0x61, 0x5f, 0x43, 0x4e, 0x00, 0x01, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x20,
-        0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x20,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x3c, 0x01, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x0A, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    const char *alias = "test_se_key";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    
+    struct HksParamSet *paramSet = NULL;
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&paramSet));
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT },
+        { .tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE },
     };
-    const struct HksBlob srcData = {
-        .size = sizeof(data) / sizeof(data[0]),
-        .data = data
-    };
+    EXPECT_EQ(HKS_SUCCESS, HksAddParams(paramSet, params, sizeof(params)/sizeof(params[0])));
+    EXPECT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet));
+    
+    struct HksBlob keyOut = { 0, NULL };
+    uint32_t bufSize = sizeof(keyAlias.size) + ALIGN_SIZE(keyAlias.size) +
+                       ALIGN_SIZE(paramSet->paramSetSize) + sizeof(uint32_t);
+    uint8_t *bufData = (uint8_t *)HksMalloc(bufSize);
+    EXPECT_NE(bufData, nullptr);
+    struct HksBlob srcData = { bufSize, bufData };
+    
+    EXPECT_EQ(HKS_SUCCESS, HksGenerateKeyPack(&srcData, &keyAlias, paramSet, &keyOut));
+    
     MessageParcel reply;
     uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
     struct HksParamSet *tmpParamSetOut = NULL;
     EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&tmpParamSetOut));
     HksIpcServiceGenerateKey(&srcData, context);
     HksFreeParamSet(&tmpParamSetOut);
+    HksFreeParamSet(&paramSet);
+    HKS_FREE(bufData);
 }
 
 /**
@@ -1613,27 +1762,36 @@ HWTEST_F(HksIpcServiceTest, HksIpcServiceTest047, TestSize.Level0)
 HWTEST_F(HksIpcServiceTest, HksIpcServiceTest048, TestSize.Level0)
 {
     HKS_LOG_I("enter HksIpcServiceTest048");
-    uint8_t data[] = {
-        0x20, 0x00, 0x00, 0x00, 0x41, 0x54, 0x5f, 0x63, 0x6f, 0x6d, 0x2e, 0x68, 0x75, 0x61, 0x77, 0x65,
-        0x69, 0x2e, 0x67, 0x61, 0x6d, 0x65, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x73,
-        0x61, 0x5f, 0x43, 0x4e, 0x00, 0x01, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x20,
-        0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 000, 0x00, 0x00, 0x02, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x20,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x3c, 0x01, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x0A, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    const char *alias = "test_invalid_level_key";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    
+    struct HksParamSet *paramSet = NULL;
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&paramSet));
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT },
+        { .tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = 999 },
     };
-    const struct HksBlob srcData = {
-        .size = sizeof(data) / sizeof(data[0]),
-        .data = data
-    };
+    EXPECT_EQ(HKS_SUCCESS, HksAddParams(paramSet, params, sizeof(params)/sizeof(params[0])));
+    EXPECT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet));
+    
+    struct HksBlob keyOut = { 0, NULL };
+    uint32_t bufSize = sizeof(keyAlias.size) + ALIGN_SIZE(keyAlias.size) +
+                       ALIGN_SIZE(paramSet->paramSetSize) + sizeof(uint32_t);
+    uint8_t *bufData = (uint8_t *)HksMalloc(bufSize);
+    EXPECT_NE(bufData, nullptr);
+    struct HksBlob srcData = { bufSize, bufData };
+    
+    EXPECT_EQ(HKS_SUCCESS, HksGenerateKeyPack(&srcData, &keyAlias, paramSet, &keyOut));
+    
     MessageParcel reply;
     uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
     struct HksParamSet *tmpParamSetOut = NULL;
     EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&tmpParamSetOut));
     HksIpcServiceGenerateKey(&srcData, context);
     HksFreeParamSet(&tmpParamSetOut);
+    HksFreeParamSet(&paramSet);
+    HKS_FREE(bufData);
 }
 }
