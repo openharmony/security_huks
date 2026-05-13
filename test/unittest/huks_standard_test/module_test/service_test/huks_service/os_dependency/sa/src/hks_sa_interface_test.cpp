@@ -214,7 +214,7 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest011, TestSize.Level0)
     uint32_t errCode = HKS_SUCCESS;
     std::unique_ptr<uint8_t[]> sendData = std::make_unique<uint8_t[]>(100);
     uint32_t sendSize = 100;
-    uint32_t msgCode = HKS_MSG_EXT_GET_REMOTE_PROPERTY_REPLY;
+    uint32_t msgCode = HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY;
     
     hksExtStub.SendAsyncReply(errCode, sendData, sendSize, msgCode);
 }
@@ -227,7 +227,7 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest012, TestSize.Level0)
     uint32_t errCode = HKS_ERROR_BAD_STATE;
     std::unique_ptr<uint8_t[]> sendData = nullptr;
     uint32_t sendSize = 0;
-    uint32_t msgCode = HKS_MSG_EXT_GET_REMOTE_PROPERTY_REPLY;
+    uint32_t msgCode = HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY;
     
     hksExtStub.SendAsyncReply(errCode, sendData, sendSize, msgCode);
 }
@@ -253,7 +253,7 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest014, TestSize.Level0)
     uint32_t errCode = HKS_SUCCESS;
     std::unique_ptr<uint8_t[]> sendData = std::make_unique<uint8_t[]>(50);
     uint32_t sendSize = 50;
-    uint32_t msgCode = HKS_MSG_EXT_GET_REMOTE_PROPERTY_REPLY;
+    uint32_t msgCode = HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY;
     
     hksExtStub.SendAsyncReply(errCode, sendData, sendSize, msgCode);
     
@@ -291,7 +291,7 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest016, TestSize.Level0)
     
     data.WriteInterfaceToken(u"wrong.token");
     
-    int ret = hksExtStub.OnRemoteRequest(HKS_MSG_EXT_GET_REMOTE_PROPERTY_REPLY, data, reply, option);
+    int ret = hksExtStub.OnRemoteRequest(HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY, data, reply, option);
     HKS_LOG_I("HksExtStub OnRemoteRequest with wrong token returned: %d", ret);
 }
 
@@ -310,7 +310,7 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest017, TestSize.Level0)
     uint8_t testData[10] = {0};
     data.WriteBuffer(testData, 10);
     
-    int ret = hksExtStub.OnRemoteRequest(HKS_MSG_EXT_GET_REMOTE_PROPERTY_REPLY, data, reply, option);
+    int ret = hksExtStub.OnRemoteRequest(HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY, data, reply, option);
     HKS_LOG_I("HksExtStub OnRemoteRequest with success code returned: %d", ret);
 }
 
@@ -326,7 +326,7 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest018, TestSize.Level0)
     data.WriteInterfaceToken(u"ohos.security.hksext.service");
     data.WriteUint32(HKS_ERROR_BAD_STATE);
     
-    int ret = hksExtStub.OnRemoteRequest(HKS_MSG_EXT_GET_REMOTE_PROPERTY_REPLY, data, reply, option);
+    int ret = hksExtStub.OnRemoteRequest(HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY, data, reply, option);
     HKS_LOG_I("HksExtStub OnRemoteRequest with error code returned: %d", ret);
 }
 
@@ -343,7 +343,7 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest019, TestSize.Level0)
     data.WriteUint32(HKS_SUCCESS);
     data.WriteUint32(0);
     
-    int ret = hksExtStub.OnRemoteRequest(HKS_MSG_EXT_GET_REMOTE_PROPERTY_REPLY, data, reply, option);
+    int ret = hksExtStub.OnRemoteRequest(HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY, data, reply, option);
     HKS_LOG_I("HksExtStub OnRemoteRequest with invalid size returned: %d", ret);
 }
 
@@ -360,7 +360,7 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest020, TestSize.Level0)
     data.WriteUint32(HKS_SUCCESS);
     data.WriteUint32(MAX_OUT_BLOB_SIZE + 1);
     
-    int ret = hksExtStub.OnRemoteRequest(HKS_MSG_EXT_GET_REMOTE_PROPERTY_REPLY, data, reply, option);
+    int ret = hksExtStub.OnRemoteRequest(HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY, data, reply, option);
     HKS_LOG_I("HksExtStub OnRemoteRequest with large size returned: %d", ret);
 }
 
@@ -390,7 +390,7 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest022, TestSize.Level0)
         uint32_t errCode = i == 0 ? HKS_SUCCESS : HKS_ERROR_BAD_STATE;
         std::unique_ptr<uint8_t[]> sendData = i == 0 ? std::make_unique<uint8_t[]>(50) : nullptr;
         uint32_t sendSize = i == 0 ? 50 : 0;
-        uint32_t msgCode = HKS_MSG_EXT_GET_REMOTE_PROPERTY_REPLY;
+        uint32_t msgCode = HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY;
         
         hksExtStub.SendAsyncReply(errCode, sendData, sendSize, msgCode);
         
