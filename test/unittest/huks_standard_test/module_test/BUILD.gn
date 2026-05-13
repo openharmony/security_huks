@@ -215,6 +215,7 @@ ohos_unittest("huks_module_test") {
 
   if (huks_security_level != "software") {
     sources += [ "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/sa/src/hks_dcm_callback_handler_test.cpp" ]
+    sources += [ "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/sa/src/hks_osaccount_check_test.cpp" ]
   }
 
   # engine test
@@ -325,9 +326,14 @@ ohos_unittest("huks_module_test") {
   ]
 
   if (os_level == "standard") {
+    sources += [
+      "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/sa/src/hks_sa_interface_test.cpp",
+      "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/sa/src/hks_xcollie_test.cpp",
+    ]
     external_deps += [
       "openssl:libcrypto_shared",
       "safwk:system_ability_fwk",
+      "hicollie:libhicollie",
     ]
   }
 
