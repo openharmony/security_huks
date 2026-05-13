@@ -614,7 +614,7 @@ int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo
             void *data = HksLockUserIdm();
             HKS_IF_NULL_LOGE_RETURN(data, HKS_ERROR_SESSION_REACHED_LIMIT, "HksLockUserIdm fail")
             do {
-                HKS_IF_TRUE_LOGE_BREAK((userAuthType == 0), "invalid user auth type", HKS_ERROR_NOT_SUPPORTED);
+                HKS_IF_TRUE_LOGE_BREAK((userAuthType == 0), "invalid user auth type");
                 ret = CheckIfUserIamSupportCurType(processInfo->userIdInt, userAuthType); // callback
                 HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
                     "UserIAM do not support current user auth or not enrolled cur auth info")
