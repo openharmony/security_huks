@@ -311,7 +311,7 @@ HWTEST_F(HksUkeyExtensionCryptoTest, HksOpenRemoteHandleTest001, TestSize.Level0
     ret = ConstructTestParamSet(&paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    ret = HksOpenRemoteHandle(&resourceId, paramSet);
+    ret = HksOpenRemoteResource(&resourceId, paramSet);
     if (ret != HKS_SUCCESS) {
         HKS_TEST_LOG_I("HksOpenRemoteHandleTest001, ret = %d", ret);
     }
@@ -333,7 +333,7 @@ HWTEST_F(HksUkeyExtensionCryptoTest, HksCloseRemoteHandleTest001, TestSize.Level
     ret = ConstructTestParamSet(&paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    ret = HksCloseRemoteHandle(&resourceId, paramSet);
+    ret = HksCloseRemoteResource(&resourceId, paramSet);
     if (ret != HKS_SUCCESS) {
         HKS_TEST_LOG_I("HksCloseRemoteHandleTest001, ret = %d", ret);
     }
@@ -378,7 +378,7 @@ HWTEST_F(HksUkeyExtensionCryptoTest, HksGetRemotePropertyTest001, TestSize.Level
 
     struct HksParamSet *propertySetOut = nullptr;
 
-    ret = HksGetRemoteProperty(&resourceId, &propertyId, paramSet, &propertySetOut);
+    ret = HksSetOrGetRemoteProperty(HKS_EXT_PROPERTY_OPERATION_GET, &resourceId, &propertyId, paramSet, &propertySetOut);
     if (ret != HKS_SUCCESS) {
         HKS_TEST_LOG_I("HksGetRemotePropertyTest001, ret = %d", ret);
     }
