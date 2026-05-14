@@ -527,6 +527,7 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
     struct HksParamSet *newParamSet = NULL;
     uint64_t enterTime = 0;
     (void)HksElapsedRealTime(&enterTime);
+    int32_t ret = 0;
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
     if (HksCheckIsUkeyOperation(paramSetIn, &ret) == HKS_SUCCESS) {
         return GenerateKeyUkeyOperation(processInfo, keyAlias, paramSetIn);
@@ -535,7 +536,6 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
     uint8_t *keyOutBuffer = (uint8_t *)HksMalloc(ML_DSA_MAX_KEY_SIZE);
     HKS_IF_NULL_RETURN(keyOutBuffer, HKS_ERROR_MALLOC_FAIL)
     struct HksHitraceId traceId = {0};
-    int32_t ret = 0;
 #ifdef L2_STANDARD
     traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif

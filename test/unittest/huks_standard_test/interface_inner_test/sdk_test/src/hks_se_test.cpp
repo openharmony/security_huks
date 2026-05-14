@@ -85,9 +85,6 @@ static struct OH_Huks_Param g_genSm2Params[] = {
     {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_SIGN | OH_HUKS_KEY_PURPOSE_VERIFY},
     {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM2_KEY_SIZE_256},
     {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_SM3},
-    {.tag = OH_HUKS_TAG_USER_AUTH_TYPE, .uint32Param = OH_HUKS_USER_AUTH_TYPE_TUI_PIN},
-    {.tag = OH_HUKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = OH_HUKS_AUTH_ACCESS_ALWAYS_VALID},
-    {.tag = OH_HUKS_TAG_CHALLENGE_TYPE, .uint32Param = OH_HUKS_CHALLENGE_TYPE_NORMAL},
     {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
 };
 
@@ -96,9 +93,6 @@ static struct OH_Huks_Param g_genSm2CryptoParams[] = {
     {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_ENCRYPT | OH_HUKS_KEY_PURPOSE_DECRYPT},
     {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM2_KEY_SIZE_256},
     {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_SM3},
-    {.tag = OH_HUKS_TAG_USER_AUTH_TYPE, .uint32Param = OH_HUKS_USER_AUTH_TYPE_TUI_PIN},
-    {.tag = OH_HUKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = OH_HUKS_AUTH_ACCESS_ALWAYS_VALID},
-    {.tag = OH_HUKS_TAG_CHALLENGE_TYPE, .uint32Param = OH_HUKS_CHALLENGE_TYPE_NORMAL},
     {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
 };
 
@@ -107,9 +101,6 @@ static struct OH_Huks_Param g_genSm2NoDigestParams[] = {
     {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_SIGN | OH_HUKS_KEY_PURPOSE_VERIFY},
     {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM2_KEY_SIZE_256},
     {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_NONE},
-    {.tag = OH_HUKS_TAG_USER_AUTH_TYPE, .uint32Param = OH_HUKS_USER_AUTH_TYPE_TUI_PIN},
-    {.tag = OH_HUKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = OH_HUKS_AUTH_ACCESS_ALWAYS_VALID},
-    {.tag = OH_HUKS_TAG_CHALLENGE_TYPE, .uint32Param = OH_HUKS_CHALLENGE_TYPE_NORMAL},
     {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
 };
 
@@ -121,9 +112,6 @@ static struct OH_Huks_Param g_genSm4Params[] = {
     {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_PKCS7},
     {.tag = OH_HUKS_TAG_BLOCK_MODE, .uint32Param = OH_HUKS_MODE_CBC},
     {.tag = OH_HUKS_TAG_IS_ALLOWED_WRAP, .boolParam = true},
-    {.tag = OH_HUKS_TAG_USER_AUTH_TYPE, .uint32Param = OH_HUKS_USER_AUTH_TYPE_TUI_PIN},
-    {.tag = OH_HUKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = OH_HUKS_AUTH_ACCESS_ALWAYS_VALID},
-    {.tag = OH_HUKS_TAG_CHALLENGE_TYPE, .uint32Param = OH_HUKS_CHALLENGE_TYPE_NORMAL},
     {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
 };
 
@@ -131,32 +119,28 @@ static struct OH_Huks_Param g_sm2SignParams[] = {
     {.tag = OH_HUKS_TAG_ALGORITHM, .uint32Param = OH_HUKS_ALG_SM2},
     {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM2_KEY_SIZE_256},
     {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_SIGN},
-    {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_SM3},
-    {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
+    {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_SM3}
 };
 
 static struct OH_Huks_Param g_sm2NoDigestSignParams[] = {
     {.tag = OH_HUKS_TAG_ALGORITHM, .uint32Param = OH_HUKS_ALG_SM2},
     {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM2_KEY_SIZE_256},
     {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_SIGN},
-    {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_NONE},
-    {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
+    {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_NONE}
 };
 
 static struct OH_Huks_Param g_sm2VerifyParams[] = {
     {.tag = OH_HUKS_TAG_ALGORITHM, .uint32Param = OH_HUKS_ALG_SM2},
     {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM2_KEY_SIZE_256},
     {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_VERIFY},
-    {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_SM3},
-    {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
+    {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_SM3}
 };
 
 static struct OH_Huks_Param g_sm2NoDigestVerifyParams[] = {
     {.tag = OH_HUKS_TAG_ALGORITHM, .uint32Param = OH_HUKS_ALG_SM2},
     {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM2_KEY_SIZE_256},
     {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_VERIFY},
-    {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_NONE},
-    {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
+    {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_NONE}
 };
 
 static struct OH_Huks_Param g_sm4EncryptParams[] = {
@@ -165,8 +149,7 @@ static struct OH_Huks_Param g_sm4EncryptParams[] = {
     {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_ENCRYPT},
     {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_PKCS7},
     {.tag = OH_HUKS_TAG_BLOCK_MODE, .uint32Param = OH_HUKS_MODE_CBC},
-    {.tag = OH_HUKS_TAG_IV, .blob = {.size = IV_SIZE, .data = (uint8_t *)IV}},
-    {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE},
+    {.tag = OH_HUKS_TAG_IV, .blob = {.size = IV_SIZE, .data = (uint8_t *)IV}}
 };
 
 static struct OH_Huks_Param g_sm4DecryptParams[] = {
@@ -175,8 +158,7 @@ static struct OH_Huks_Param g_sm4DecryptParams[] = {
     {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_DECRYPT},
     {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_PKCS7},
     {.tag = OH_HUKS_TAG_BLOCK_MODE, .uint32Param = OH_HUKS_MODE_CBC},
-    {.tag = OH_HUKS_TAG_IV, .blob = {.size = IV_SIZE, .data = (uint8_t *)IV}},
-    {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
+    {.tag = OH_HUKS_TAG_IV, .blob = {.size = IV_SIZE, .data = (uint8_t *)IV}}
 };
 
 static struct OH_Huks_Param g_sm2EncryptParams[] = {
@@ -184,8 +166,7 @@ static struct OH_Huks_Param g_sm2EncryptParams[] = {
     {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM2_KEY_SIZE_256},
     {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_ENCRYPT},
     {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_SM3},
-    {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_NONE},
-    {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
+    {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_NONE}
 };
 
 static struct OH_Huks_Param g_sm2DecryptParams[] = {
@@ -193,13 +174,11 @@ static struct OH_Huks_Param g_sm2DecryptParams[] = {
     {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM2_KEY_SIZE_256},
     {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_DECRYPT},
     {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_SM3},
-    {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_NONE},
-    {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
+    {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_NONE}
 };
 
 static struct OH_Huks_Param g_wrapParams[] = {
-    {.tag = OH_HUKS_TAG_KEY_WRAP_TYPE, .uint32Param = OH_HUKS_KEY_WRAP_TYPE_HUK_BASED},
-    {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
+    {.tag = OH_HUKS_TAG_KEY_WRAP_TYPE, .uint32Param = OH_HUKS_KEY_WRAP_TYPE_HUK_BASED}
 };
 
 static struct OH_Huks_Param g_seEnvelopIniSm2[] = {
@@ -208,9 +187,6 @@ static struct OH_Huks_Param g_seEnvelopIniSm2[] = {
     {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM2_KEY_SIZE_256},
     {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_SM3},
     {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_NONE},
-    {.tag = OH_HUKS_TAG_USER_AUTH_TYPE, .uint32Param = OH_HUKS_USER_AUTH_TYPE_TUI_PIN},
-    {.tag = OH_HUKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = OH_HUKS_AUTH_ACCESS_ALWAYS_VALID},
-    {.tag = OH_HUKS_TAG_CHALLENGE_TYPE, .uint32Param = OH_HUKS_CHALLENGE_TYPE_NORMAL},
     {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
 };
 
@@ -219,8 +195,7 @@ static struct OH_Huks_Param g_seEnvelopEnSm2[] = {
     {.tag = OH_HUKS_TAG_ALGORITHM, .uint32Param = OH_HUKS_ALG_SM2},
     {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM2_KEY_SIZE_256},
     {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_SM3},
-    {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_NONE},
-    {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
+    {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_NONE}
 };
 
 static struct OH_Huks_Param g_normalEnvelopIniSm2[] = {
@@ -267,9 +242,6 @@ static struct OH_Huks_Param g_seEnvelopIniSm2Sign[] = {
     {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM2_KEY_SIZE_256},
     {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_SM3},
     {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_NONE},
-    {.tag = OH_HUKS_TAG_USER_AUTH_TYPE, .uint32Param = OH_HUKS_USER_AUTH_TYPE_TUI_PIN},
-    {.tag = OH_HUKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = OH_HUKS_AUTH_ACCESS_ALWAYS_VALID},
-    {.tag = OH_HUKS_TAG_CHALLENGE_TYPE, .uint32Param = OH_HUKS_CHALLENGE_TYPE_NORMAL},
     {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
 };
 
@@ -278,8 +250,7 @@ static struct OH_Huks_Param g_seEnvelopEnSm2Sign[] = {
     {.tag = OH_HUKS_TAG_ALGORITHM, .uint32Param = OH_HUKS_ALG_SM2},
     {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM2_KEY_SIZE_256},
     {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_SM3},
-    {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_NONE},
-    {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
+    {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_NONE}
 };
 
 static struct OH_Huks_Param g_genSm4EcbParams[] = {
@@ -288,9 +259,6 @@ static struct OH_Huks_Param g_genSm4EcbParams[] = {
     {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM4_KEY_SIZE_128},
     {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_PKCS7},
     {.tag = OH_HUKS_TAG_BLOCK_MODE, .uint32Param = OH_HUKS_MODE_ECB},
-    {.tag = OH_HUKS_TAG_USER_AUTH_TYPE, .uint32Param = OH_HUKS_USER_AUTH_TYPE_TUI_PIN},
-    {.tag = OH_HUKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = OH_HUKS_AUTH_ACCESS_ALWAYS_VALID},
-    {.tag = OH_HUKS_TAG_CHALLENGE_TYPE, .uint32Param = OH_HUKS_CHALLENGE_TYPE_NORMAL},
     {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
 };
 
@@ -298,16 +266,14 @@ static struct OH_Huks_Param g_sm4EcbEncryptParams[] = {
     {.tag = OH_HUKS_TAG_ALGORITHM, .uint32Param = OH_HUKS_ALG_SM4},
     {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_ENCRYPT},
     {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_PKCS7},
-    {.tag = OH_HUKS_TAG_BLOCK_MODE, .uint32Param = OH_HUKS_MODE_ECB},
-    {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
+    {.tag = OH_HUKS_TAG_BLOCK_MODE, .uint32Param = OH_HUKS_MODE_ECB}
 };
 
 static struct OH_Huks_Param g_sm4EcbDecryptParams[] = {
     {.tag = OH_HUKS_TAG_ALGORITHM, .uint32Param = OH_HUKS_ALG_SM4},
     {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_DECRYPT},
     {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_PKCS7},
-    {.tag = OH_HUKS_TAG_BLOCK_MODE, .uint32Param = OH_HUKS_MODE_ECB},
-    {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
+    {.tag = OH_HUKS_TAG_BLOCK_MODE, .uint32Param = OH_HUKS_MODE_ECB}
 };
 
 static struct OH_Huks_Param g_genSm4CtrParams[] = {
@@ -317,9 +283,6 @@ static struct OH_Huks_Param g_genSm4CtrParams[] = {
     {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_NONE},
     {.tag = OH_HUKS_TAG_BLOCK_MODE, .uint32Param = OH_HUKS_MODE_CTR},
     {.tag = OH_HUKS_TAG_IS_ALLOWED_WRAP, .boolParam = true},
-    {.tag = OH_HUKS_TAG_USER_AUTH_TYPE, .uint32Param = OH_HUKS_USER_AUTH_TYPE_TUI_PIN},
-    {.tag = OH_HUKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = OH_HUKS_AUTH_ACCESS_ALWAYS_VALID},
-    {.tag = OH_HUKS_TAG_CHALLENGE_TYPE, .uint32Param = OH_HUKS_CHALLENGE_TYPE_NORMAL},
     {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
 };
 
@@ -328,8 +291,7 @@ static struct OH_Huks_Param g_sm4CtrEncryptParams[] = {
     {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_ENCRYPT},
     {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_NONE},
     {.tag = OH_HUKS_TAG_BLOCK_MODE, .uint32Param = OH_HUKS_MODE_CTR},
-    {.tag = OH_HUKS_TAG_IV, .blob = {.size = IV_SIZE, .data = (uint8_t *)IV}},
-    {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
+    {.tag = OH_HUKS_TAG_IV, .blob = {.size = IV_SIZE, .data = (uint8_t *)IV}}
 };
 
 static struct OH_Huks_Param g_sm4CtrDecryptParams[] = {
@@ -337,8 +299,7 @@ static struct OH_Huks_Param g_sm4CtrDecryptParams[] = {
     {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_DECRYPT},
     {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_NONE},
     {.tag = OH_HUKS_TAG_BLOCK_MODE, .uint32Param = OH_HUKS_MODE_CTR},
-    {.tag = OH_HUKS_TAG_IV, .blob = {.size = IV_SIZE, .data = (uint8_t *)IV}},
-    {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
+    {.tag = OH_HUKS_TAG_IV, .blob = {.size = IV_SIZE, .data = (uint8_t *)IV}}
 };
 
 static struct OH_Huks_Param g_genSm4CbcNoPaddingParams[] = {
@@ -347,9 +308,6 @@ static struct OH_Huks_Param g_genSm4CbcNoPaddingParams[] = {
     {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM4_KEY_SIZE_128},
     {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_NONE},
     {.tag = OH_HUKS_TAG_BLOCK_MODE, .uint32Param = OH_HUKS_MODE_CBC},
-    {.tag = OH_HUKS_TAG_USER_AUTH_TYPE, .uint32Param = OH_HUKS_USER_AUTH_TYPE_TUI_PIN},
-    {.tag = OH_HUKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = OH_HUKS_AUTH_ACCESS_ALWAYS_VALID},
-    {.tag = OH_HUKS_TAG_CHALLENGE_TYPE, .uint32Param = OH_HUKS_CHALLENGE_TYPE_NORMAL},
     {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
 };
 
@@ -358,8 +316,7 @@ static struct OH_Huks_Param g_sm4CbcNoPaddingEncryptParams[] = {
     {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_ENCRYPT},
     {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_NONE},
     {.tag = OH_HUKS_TAG_BLOCK_MODE, .uint32Param = OH_HUKS_MODE_CBC},
-    {.tag = OH_HUKS_TAG_IV, .blob = {.size = IV_SIZE, .data = (uint8_t *)IV}},
-    {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
+    {.tag = OH_HUKS_TAG_IV, .blob = {.size = IV_SIZE, .data = (uint8_t *)IV}}
 };
 
 static struct OH_Huks_Param g_sm4CbcNoPaddingDecryptParams[] = {
@@ -367,7 +324,49 @@ static struct OH_Huks_Param g_sm4CbcNoPaddingDecryptParams[] = {
     {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_DECRYPT},
     {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_NONE},
     {.tag = OH_HUKS_TAG_BLOCK_MODE, .uint32Param = OH_HUKS_MODE_CBC},
-    {.tag = OH_HUKS_TAG_IV, .blob = {.size = IV_SIZE, .data = (uint8_t *)IV}},
+    {.tag = OH_HUKS_TAG_IV, .blob = {.size = IV_SIZE, .data = (uint8_t *)IV}}
+};
+
+static struct OH_Huks_Param g_genSm2ParamsNoAuth[] = {
+    {.tag = OH_HUKS_TAG_ALGORITHM, .uint32Param = OH_HUKS_ALG_SM2},
+    {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_SIGN | OH_HUKS_KEY_PURPOSE_VERIFY},
+    {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM2_KEY_SIZE_256},
+    {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_SM3},
+    {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
+};
+
+static struct OH_Huks_Param g_genSm2NoDigestParamsNoAuth[] = {
+    {.tag = OH_HUKS_TAG_ALGORITHM, .uint32Param = OH_HUKS_ALG_SM2},
+    {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_SIGN | OH_HUKS_KEY_PURPOSE_VERIFY},
+    {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM2_KEY_SIZE_256},
+    {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_NONE},
+    {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
+};
+
+static struct OH_Huks_Param g_genSm2CryptoParamsNoAuth[] = {
+    {.tag = OH_HUKS_TAG_ALGORITHM, .uint32Param = OH_HUKS_ALG_SM2},
+    {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_ENCRYPT | OH_HUKS_KEY_PURPOSE_DECRYPT},
+    {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM2_KEY_SIZE_256},
+    {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_SM3},
+    {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
+};
+
+static struct OH_Huks_Param g_genSm4ParamsNoAuth[] = {
+    {.tag = OH_HUKS_TAG_ALGORITHM, .uint32Param = OH_HUKS_ALG_SM4},
+    {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_ENCRYPT | OH_HUKS_KEY_PURPOSE_DECRYPT},
+    {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM4_KEY_SIZE_128},
+    {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_PKCS7},
+    {.tag = OH_HUKS_TAG_BLOCK_MODE, .uint32Param = OH_HUKS_MODE_CBC},
+    {.tag = OH_HUKS_TAG_IS_ALLOWED_WRAP, .boolParam = true},
+    {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
+};
+
+static struct OH_Huks_Param g_genSm4CbcNoPaddingParamsNoAuth[] = {
+    {.tag = OH_HUKS_TAG_ALGORITHM, .uint32Param = OH_HUKS_ALG_SM4},
+    {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_ENCRYPT | OH_HUKS_KEY_PURPOSE_DECRYPT},
+    {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM4_KEY_SIZE_128},
+    {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_NONE},
+    {.tag = OH_HUKS_TAG_BLOCK_MODE, .uint32Param = OH_HUKS_MODE_CBC},
     {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
 };
 
@@ -460,6 +459,359 @@ OH_Huks_Result HksSm2Decrypt(const struct OH_Huks_Blob *keyAlias,
         return ret;
     }
     ret = OH_Huks_FinishSession(&handleBlob, paramSet, cipherText, plainText);
+    return ret;
+}
+
+OH_Huks_Result HksSm4EncryptUpdateOnce(const struct OH_Huks_Blob *keyAlias,
+    const struct OH_Huks_ParamSet *paramSet, const struct OH_Huks_Blob *inData,
+    struct OH_Huks_Blob *outData)
+{
+    uint8_t handle[sizeof(uint64_t)] = {0};
+    struct OH_Huks_Blob handleBlob = {sizeof(uint64_t), handle};
+    OH_Huks_Result ret = OH_Huks_InitSession(keyAlias, paramSet, &handleBlob, nullptr);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    uint8_t updateOut[1024] = {0};
+    struct OH_Huks_Blob updateOutBlob = {1024, updateOut};
+    struct OH_Huks_Blob updateIn = {inData->size - 4, inData->data};
+    ret = OH_Huks_UpdateSession(&handleBlob, paramSet, &updateIn, &updateOutBlob);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    uint8_t finishOut[1024] = {0};
+    struct OH_Huks_Blob finishOutBlob = {1024, finishOut};
+    struct OH_Huks_Blob finishInBlob = {4, inData->data + inData->size - 4};
+    ret = OH_Huks_FinishSession(&handleBlob, paramSet, &finishInBlob, &finishOutBlob);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    memcpy_s(outData->data, outData->size, updateOutBlob.data, updateOutBlob.size);
+    memcpy_s(outData->data + updateOutBlob.size, outData->size - updateOutBlob.size,
+        finishOutBlob.data, finishOutBlob.size);
+    outData->size = updateOutBlob.size + finishOutBlob.size;
+    return ret;
+}
+
+OH_Huks_Result HksSm4DecryptUpdateOnce(const struct OH_Huks_Blob *keyAlias,
+    const struct OH_Huks_ParamSet *paramSet, const struct OH_Huks_Blob *cipherText,
+    struct OH_Huks_Blob *plainText)
+{
+    uint8_t handle[sizeof(uint64_t)] = {0};
+    struct OH_Huks_Blob handleBlob = {sizeof(uint64_t), handle};
+    OH_Huks_Result ret = OH_Huks_InitSession(keyAlias, paramSet, &handleBlob, nullptr);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    ret = OH_Huks_FinishSession(&handleBlob, paramSet, cipherText, plainText);
+    return ret;
+}
+
+OH_Huks_Result HksSm4EncryptUpdateFiveTimes(const struct OH_Huks_Blob *keyAlias,
+    const struct OH_Huks_ParamSet *paramSet, const struct OH_Huks_Blob *inData,
+    struct OH_Huks_Blob *outData)
+{
+    uint8_t handle[sizeof(uint64_t)] = {0};
+    struct OH_Huks_Blob handleBlob = {sizeof(uint64_t), handle};
+    OH_Huks_Result ret = OH_Huks_InitSession(keyAlias, paramSet, &handleBlob, nullptr);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    uint8_t updateOut[1024] = {0};
+    struct OH_Huks_Blob updateOutBlob = {1024, updateOut};
+    uint32_t totalUpdateOutSize = 0;
+    const uint32_t chunkSize = 16;
+    for (uint32_t i = 0; i < 4; i++) {
+        struct OH_Huks_Blob chunk = {chunkSize, inData->data + i * chunkSize};
+        ret = OH_Huks_UpdateSession(&handleBlob, paramSet, &chunk, &updateOutBlob);
+        if (ret.errorCode != OH_HUKS_SUCCESS) {
+            return ret;
+        }
+        memcpy_s(outData->data + totalUpdateOutSize, outData->size - totalUpdateOutSize,
+            updateOutBlob.data, updateOutBlob.size);
+        totalUpdateOutSize += updateOutBlob.size;
+    }
+    uint8_t finishOut[1024] = {0};
+    struct OH_Huks_Blob finishOutBlob = {1024, finishOut};
+    struct OH_Huks_Blob finishInBlob = {inData->size - 64, inData->data + 64};
+    ret = OH_Huks_FinishSession(&handleBlob, paramSet, &finishInBlob, &finishOutBlob);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    memcpy_s(outData->data + totalUpdateOutSize, outData->size - totalUpdateOutSize,
+        finishOutBlob.data, finishOutBlob.size);
+    outData->size = totalUpdateOutSize + finishOutBlob.size;
+    return ret;
+}
+
+OH_Huks_Result HksSm4DecryptUpdateFiveTimes(const struct OH_Huks_Blob *keyAlias,
+    const struct OH_Huks_ParamSet *paramSet, const struct OH_Huks_Blob *cipherText,
+    struct OH_Huks_Blob *plainText)
+{
+    uint8_t handle[sizeof(uint64_t)] = {0};
+    struct OH_Huks_Blob handleBlob = {sizeof(uint64_t), handle};
+    OH_Huks_Result ret = OH_Huks_InitSession(keyAlias, paramSet, &handleBlob, nullptr);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    ret = OH_Huks_FinishSession(&handleBlob, paramSet, cipherText, plainText);
+    return ret;
+}
+
+OH_Huks_Result HksSm4NoPaddingEncryptUpdateTwoTimes(const struct OH_Huks_Blob *keyAlias,
+    const struct OH_Huks_ParamSet *paramSet, const struct OH_Huks_Blob *inData,
+    struct OH_Huks_Blob *outData)
+{
+    uint8_t handle[sizeof(uint64_t)] = {0};
+    struct OH_Huks_Blob handleBlob = {sizeof(uint64_t), handle};
+    OH_Huks_Result ret = OH_Huks_InitSession(keyAlias, paramSet, &handleBlob, nullptr);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    uint8_t updateOut[1024] = {0};
+    struct OH_Huks_Blob updateOutBlob = {1024, updateOut};
+    struct OH_Huks_Blob chunk1 = {32, inData->data};
+    ret = OH_Huks_UpdateSession(&handleBlob, paramSet, &chunk1, &updateOutBlob);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    uint8_t finishOut[1024] = {0};
+    struct OH_Huks_Blob finishOutBlob = {1024, finishOut};
+    struct OH_Huks_Blob finishInBlob = {inData->size - 32, inData->data + 32};
+    ret = OH_Huks_FinishSession(&handleBlob, paramSet, &finishInBlob, &finishOutBlob);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    memcpy_s(outData->data, outData->size, updateOutBlob.data, updateOutBlob.size);
+    memcpy_s(outData->data + updateOutBlob.size, outData->size - updateOutBlob.size,
+        finishOutBlob.data, finishOutBlob.size);
+    outData->size = updateOutBlob.size + finishOutBlob.size;
+    return ret;
+}
+
+OH_Huks_Result HksSm4NoPaddingDecryptUpdateTwoTimes(const struct OH_Huks_Blob *keyAlias,
+    const struct OH_Huks_ParamSet *paramSet, const struct OH_Huks_Blob *cipherText,
+    struct OH_Huks_Blob *plainText)
+{
+    uint8_t handle[sizeof(uint64_t)] = {0};
+    struct OH_Huks_Blob handleBlob = {sizeof(uint64_t), handle};
+    OH_Huks_Result ret = OH_Huks_InitSession(keyAlias, paramSet, &handleBlob, nullptr);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    ret = OH_Huks_FinishSession(&handleBlob, paramSet, cipherText, plainText);
+    return ret;
+}
+
+OH_Huks_Result HksSm2EncryptUpdateOnce(const struct OH_Huks_Blob *keyAlias,
+    const struct OH_Huks_ParamSet *paramSet, const struct OH_Huks_Blob *inData,
+    struct OH_Huks_Blob *outData)
+{
+    uint8_t handle[sizeof(uint64_t)] = {0};
+    struct OH_Huks_Blob handleBlob = {sizeof(uint64_t), handle};
+    OH_Huks_Result ret = OH_Huks_InitSession(keyAlias, paramSet, &handleBlob, nullptr);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    ret = OH_Huks_FinishSession(&handleBlob, paramSet, inData, outData);
+    return ret;
+}
+
+OH_Huks_Result HksSm2DecryptUpdateOnce(const struct OH_Huks_Blob *keyAlias,
+    const struct OH_Huks_ParamSet *paramSet, const struct OH_Huks_Blob *cipherText,
+    struct OH_Huks_Blob *plainText)
+{
+    uint8_t handle[sizeof(uint64_t)] = {0};
+    struct OH_Huks_Blob handleBlob = {sizeof(uint64_t), handle};
+    OH_Huks_Result ret = OH_Huks_InitSession(keyAlias, paramSet, &handleBlob, nullptr);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    ret = OH_Huks_FinishSession(&handleBlob, paramSet, cipherText, plainText);
+    return ret;
+}
+
+OH_Huks_Result HksSm2EncryptUpdateTwoTimes(const struct OH_Huks_Blob *keyAlias,
+    const struct OH_Huks_ParamSet *paramSet, const struct OH_Huks_Blob *inData,
+    struct OH_Huks_Blob *outData)
+{
+    uint8_t handle[sizeof(uint64_t)] = {0};
+    struct OH_Huks_Blob handleBlob = {sizeof(uint64_t), handle};
+    OH_Huks_Result ret = OH_Huks_InitSession(keyAlias, paramSet, &handleBlob, nullptr);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    ret = OH_Huks_FinishSession(&handleBlob, paramSet, inData, outData);
+    return ret;
+}
+
+OH_Huks_Result HksSm2DecryptUpdateTwoTimes(const struct OH_Huks_Blob *keyAlias,
+    const struct OH_Huks_ParamSet *paramSet, const struct OH_Huks_Blob *cipherText,
+    struct OH_Huks_Blob *plainText)
+{
+    uint8_t handle[sizeof(uint64_t)] = {0};
+    struct OH_Huks_Blob handleBlob = {sizeof(uint64_t), handle};
+    OH_Huks_Result ret = OH_Huks_InitSession(keyAlias, paramSet, &handleBlob, nullptr);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    ret = OH_Huks_FinishSession(&handleBlob, paramSet, cipherText, plainText);
+    return ret;
+}
+
+OH_Huks_Result HksSm2SignUpdateOnce(const struct OH_Huks_Blob *keyAlias,
+    const struct OH_Huks_ParamSet *paramSet, const struct OH_Huks_Blob *inData,
+    struct OH_Huks_Blob *outData)
+{
+    uint8_t handle[sizeof(uint64_t)] = {0};
+    struct OH_Huks_Blob handleBlob = {sizeof(uint64_t), handle};
+    OH_Huks_Result ret = OH_Huks_InitSession(keyAlias, paramSet, &handleBlob, nullptr);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    uint8_t tempOut[1024] = {0};
+    struct OH_Huks_Blob updateOut = {1024, tempOut};
+    ret = OH_Huks_UpdateSession(&handleBlob, paramSet, inData, &updateOut);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    uint8_t finishIn[1] = {0};
+    struct OH_Huks_Blob finishInBlob = {0, finishIn};
+    ret = OH_Huks_FinishSession(&handleBlob, paramSet, &finishInBlob, outData);
+    return ret;
+}
+
+OH_Huks_Result HksSm2SignUpdateFiveTimes(const struct OH_Huks_Blob *keyAlias,
+    const struct OH_Huks_ParamSet *paramSet, const struct OH_Huks_Blob *inData,
+    struct OH_Huks_Blob *outData)
+{
+    uint8_t handle[sizeof(uint64_t)] = {0};
+    struct OH_Huks_Blob handleBlob = {sizeof(uint64_t), handle};
+    OH_Huks_Result ret = OH_Huks_InitSession(keyAlias, paramSet, &handleBlob, nullptr);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    uint8_t tempOut[1024] = {0};
+    struct OH_Huks_Blob updateOut = {1024, tempOut};
+    const uint32_t chunkSize = 100;
+    for (uint32_t i = 0; i < 5; i++) {
+        struct OH_Huks_Blob chunk = {chunkSize, inData->data + i * chunkSize};
+        ret = OH_Huks_UpdateSession(&handleBlob, paramSet, &chunk, &updateOut);
+        if (ret.errorCode != OH_HUKS_SUCCESS) {
+            return ret;
+        }
+    }
+    uint8_t finishIn[1] = {0};
+    struct OH_Huks_Blob finishInBlob = {0, finishIn};
+    ret = OH_Huks_FinishSession(&handleBlob, paramSet, &finishInBlob, outData);
+    return ret;
+}
+
+OH_Huks_Result HksSm2VerifyUpdateOnce(const struct OH_Huks_Blob *keyAlias,
+    const struct OH_Huks_ParamSet *paramSet, const struct OH_Huks_Blob *inData,
+    const struct OH_Huks_Blob *signature)
+{
+    uint8_t handle[sizeof(uint64_t)] = {0};
+    struct OH_Huks_Blob handleBlob = {sizeof(uint64_t), handle};
+    OH_Huks_Result ret = OH_Huks_InitSession(keyAlias, paramSet, &handleBlob, nullptr);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    uint8_t temp[] = "out";
+    struct OH_Huks_Blob verifyOut = {(uint32_t)sizeof(temp), temp};
+    ret = OH_Huks_UpdateSession(&handleBlob, paramSet, inData, &verifyOut);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    ret = OH_Huks_FinishSession(&handleBlob, paramSet, signature, &verifyOut);
+    return ret;
+}
+
+OH_Huks_Result HksSm2VerifyUpdateFiveTimes(const struct OH_Huks_Blob *keyAlias,
+    const struct OH_Huks_ParamSet *paramSet, const struct OH_Huks_Blob *inData,
+    const struct OH_Huks_Blob *signature)
+{
+    uint8_t handle[sizeof(uint64_t)] = {0};
+    struct OH_Huks_Blob handleBlob = {sizeof(uint64_t), handle};
+    OH_Huks_Result ret = OH_Huks_InitSession(keyAlias, paramSet, &handleBlob, nullptr);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    uint8_t temp[] = "out";
+    struct OH_Huks_Blob verifyOut = {(uint32_t)sizeof(temp), temp};
+    const uint32_t chunkSize = 100;
+    for (uint32_t i = 0; i < 5; i++) {
+        struct OH_Huks_Blob chunk = {chunkSize, inData->data + i * chunkSize};
+        ret = OH_Huks_UpdateSession(&handleBlob, paramSet, &chunk, &verifyOut);
+        if (ret.errorCode != OH_HUKS_SUCCESS) {
+            return ret;
+        }
+    }
+    ret = OH_Huks_FinishSession(&handleBlob, paramSet, signature, &verifyOut);
+    return ret;
+}
+
+OH_Huks_Result HksSm2NoDigestSignUpdateThreeTimes(const struct OH_Huks_Blob *keyAlias,
+    const struct OH_Huks_ParamSet *paramSet, const struct OH_Huks_Blob *inData,
+    struct OH_Huks_Blob *outData)
+{
+    uint8_t handle[sizeof(uint64_t)] = {0};
+    struct OH_Huks_Blob handleBlob = {sizeof(uint64_t), handle};
+    OH_Huks_Result ret = OH_Huks_InitSession(keyAlias, paramSet, &handleBlob, nullptr);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    uint8_t tempOut[1024] = {0};
+    struct OH_Huks_Blob updateOut = {1024, tempOut};
+    struct OH_Huks_Blob chunk1 = {10, inData->data};
+    ret = OH_Huks_UpdateSession(&handleBlob, paramSet, &chunk1, &updateOut);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    struct OH_Huks_Blob chunk2 = {10, inData->data + 10};
+    ret = OH_Huks_UpdateSession(&handleBlob, paramSet, &chunk2, &updateOut);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    struct OH_Huks_Blob chunk3 = {12, inData->data + 20};
+    ret = OH_Huks_UpdateSession(&handleBlob, paramSet, &chunk3, &updateOut);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    uint8_t finishIn[1] = {0};
+    struct OH_Huks_Blob finishInBlob = {0, finishIn};
+    ret = OH_Huks_FinishSession(&handleBlob, paramSet, &finishInBlob, outData);
+    return ret;
+}
+
+OH_Huks_Result HksSm2NoDigestVerifyUpdateThreeTimes(const struct OH_Huks_Blob *keyAlias,
+    const struct OH_Huks_ParamSet *paramSet, const struct OH_Huks_Blob *inData,
+    const struct OH_Huks_Blob *signature)
+{
+    uint8_t handle[sizeof(uint64_t)] = {0};
+    struct OH_Huks_Blob handleBlob = {sizeof(uint64_t), handle};
+    OH_Huks_Result ret = OH_Huks_InitSession(keyAlias, paramSet, &handleBlob, nullptr);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    uint8_t temp[] = "out";
+    struct OH_Huks_Blob verifyOut = {(uint32_t)sizeof(temp), temp};
+    struct OH_Huks_Blob chunk1 = {10, inData->data};
+    ret = OH_Huks_UpdateSession(&handleBlob, paramSet, &chunk1, &verifyOut);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    struct OH_Huks_Blob chunk2 = {10, inData->data + 10};
+    ret = OH_Huks_UpdateSession(&handleBlob, paramSet, &chunk2, &verifyOut);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    struct OH_Huks_Blob chunk3 = {12, inData->data + 20};
+    ret = OH_Huks_UpdateSession(&handleBlob, paramSet, &chunk3, &verifyOut);
+    if (ret.errorCode != OH_HUKS_SUCCESS) {
+        return ret;
+    }
+    ret = OH_Huks_FinishSession(&handleBlob, paramSet, signature, &verifyOut);
     return ret;
 }
 
@@ -777,9 +1129,6 @@ HWTEST_F(HksSeTest, HksSeImportEnvelopSm2Cipher, TestSize.Level0)
         {.tag = OH_HUKS_TAG_UNWRAP_ALGORITHM_SUITE, .uint32Param = OH_HUKS_UNWRAP_SUITE_SM2_SM4_ECB_NOPADDING},
         {.tag = OH_HUKS_TAG_IMPORT_KEY_TYPE, .uint32Param = OH_HUKS_KEY_TYPE_KEY_PAIR},
         {.tag = OH_HUKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, .blob = sm2PubKeyBlob},
-        {.tag = OH_HUKS_TAG_USER_AUTH_TYPE, .uint32Param = OH_HUKS_USER_AUTH_TYPE_TUI_PIN},
-        {.tag = OH_HUKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = OH_HUKS_AUTH_ACCESS_ALWAYS_VALID},
-        {.tag = OH_HUKS_TAG_CHALLENGE_TYPE, .uint32Param = OH_HUKS_CHALLENGE_TYPE_NORMAL},
         {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
     };
 
@@ -870,9 +1219,6 @@ HWTEST_F(HksSeTest, HksSeImportEnvelopSm2SignVerify, TestSize.Level0)
         {.tag = OH_HUKS_TAG_UNWRAP_ALGORITHM_SUITE, .uint32Param = OH_HUKS_UNWRAP_SUITE_SM2_SM4_ECB_NOPADDING},
         {.tag = OH_HUKS_TAG_IMPORT_KEY_TYPE, .uint32Param = OH_HUKS_KEY_TYPE_KEY_PAIR},
         {.tag = OH_HUKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, .blob = sm2PubKeyBlob},
-        {.tag = OH_HUKS_TAG_USER_AUTH_TYPE, .uint32Param = OH_HUKS_USER_AUTH_TYPE_TUI_PIN},
-        {.tag = OH_HUKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = OH_HUKS_AUTH_ACCESS_ALWAYS_VALID},
-        {.tag = OH_HUKS_TAG_CHALLENGE_TYPE, .uint32Param = OH_HUKS_CHALLENGE_TYPE_NORMAL},
         {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
     };
 
@@ -948,9 +1294,6 @@ HWTEST_F(HksSeTest, HksSeImportEnvelopSm4CipherEcb, TestSize.Level0)
         {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM4_KEY_SIZE_128},
         {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_NONE},
         {.tag = OH_HUKS_TAG_UNWRAP_ALGORITHM_SUITE, .uint32Param = OH_HUKS_UNWRAP_SUITE_SM2_SM4_ECB_NOPADDING},
-        {.tag = OH_HUKS_TAG_USER_AUTH_TYPE, .uint32Param = OH_HUKS_USER_AUTH_TYPE_TUI_PIN},
-        {.tag = OH_HUKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = OH_HUKS_AUTH_ACCESS_ALWAYS_VALID},
-        {.tag = OH_HUKS_TAG_CHALLENGE_TYPE, .uint32Param = OH_HUKS_CHALLENGE_TYPE_NORMAL},
         {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
     };
 
@@ -958,16 +1301,14 @@ HWTEST_F(HksSeTest, HksSeImportEnvelopSm4CipherEcb, TestSize.Level0)
         {.tag = OH_HUKS_TAG_ALGORITHM, .uint32Param = OH_HUKS_ALG_SM4},
         {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_ENCRYPT},
         {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_NONE},
-        {.tag = OH_HUKS_TAG_BLOCK_MODE, .uint32Param = OH_HUKS_MODE_ECB},
-        {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
+        {.tag = OH_HUKS_TAG_BLOCK_MODE, .uint32Param = OH_HUKS_MODE_ECB}
     };
 
     struct OH_Huks_Param sm4EcbDecryptParams[] = {
         {.tag = OH_HUKS_TAG_ALGORITHM, .uint32Param = OH_HUKS_ALG_SM4},
         {.tag = OH_HUKS_TAG_PURPOSE, .uint32Param = OH_HUKS_KEY_PURPOSE_DECRYPT},
         {.tag = OH_HUKS_TAG_PADDING, .uint32Param = OH_HUKS_PADDING_NONE},
-        {.tag = OH_HUKS_TAG_BLOCK_MODE, .uint32Param = OH_HUKS_MODE_ECB},
-        {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
+        {.tag = OH_HUKS_TAG_BLOCK_MODE, .uint32Param = OH_HUKS_MODE_ECB}
     };
 
     do {
@@ -1045,9 +1386,6 @@ HWTEST_F(HksSeTest, HksSeImportEnvelopSm4CipherCbcPkcs7, TestSize.Level0)
         {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM4_KEY_SIZE_128},
         {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_NONE},
         {.tag = OH_HUKS_TAG_UNWRAP_ALGORITHM_SUITE, .uint32Param = OH_HUKS_UNWRAP_SUITE_SM2_SM4_ECB_NOPADDING},
-        {.tag = OH_HUKS_TAG_USER_AUTH_TYPE, .uint32Param = OH_HUKS_USER_AUTH_TYPE_TUI_PIN},
-        {.tag = OH_HUKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = OH_HUKS_AUTH_ACCESS_ALWAYS_VALID},
-        {.tag = OH_HUKS_TAG_CHALLENGE_TYPE, .uint32Param = OH_HUKS_CHALLENGE_TYPE_NORMAL},
         {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
     };
 
@@ -1126,9 +1464,6 @@ HWTEST_F(HksSeTest, HksSeImportEnvelopSm4CipherCbcNoPadding, TestSize.Level0)
         {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM4_KEY_SIZE_128},
         {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_NONE},
         {.tag = OH_HUKS_TAG_UNWRAP_ALGORITHM_SUITE, .uint32Param = OH_HUKS_UNWRAP_SUITE_SM2_SM4_ECB_NOPADDING},
-        {.tag = OH_HUKS_TAG_USER_AUTH_TYPE, .uint32Param = OH_HUKS_USER_AUTH_TYPE_TUI_PIN},
-        {.tag = OH_HUKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = OH_HUKS_AUTH_ACCESS_ALWAYS_VALID},
-        {.tag = OH_HUKS_TAG_CHALLENGE_TYPE, .uint32Param = OH_HUKS_CHALLENGE_TYPE_NORMAL},
         {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
     };
 
@@ -1209,9 +1544,6 @@ HWTEST_F(HksSeTest, HksSeImportEnvelopSm4CipherCtr, TestSize.Level0)
         {.tag = OH_HUKS_TAG_KEY_SIZE, .uint32Param = OH_HUKS_SM4_KEY_SIZE_128},
         {.tag = OH_HUKS_TAG_DIGEST, .uint32Param = OH_HUKS_DIGEST_NONE},
         {.tag = OH_HUKS_TAG_UNWRAP_ALGORITHM_SUITE, .uint32Param = OH_HUKS_UNWRAP_SUITE_SM2_SM4_ECB_NOPADDING},
-        {.tag = OH_HUKS_TAG_USER_AUTH_TYPE, .uint32Param = OH_HUKS_USER_AUTH_TYPE_TUI_PIN},
-        {.tag = OH_HUKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = OH_HUKS_AUTH_ACCESS_ALWAYS_VALID},
-        {.tag = OH_HUKS_TAG_CHALLENGE_TYPE, .uint32Param = OH_HUKS_CHALLENGE_TYPE_NORMAL},
         {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
     };
 
@@ -1431,9 +1763,6 @@ HWTEST_F(HksSeTest, HksSeImportEnvelopSecurityLevelMismatch001, TestSize.Level0)
         {.tag = OH_HUKS_TAG_UNWRAP_ALGORITHM_SUITE, .uint32Param = OH_HUKS_UNWRAP_SUITE_SM2_SM4_ECB_NOPADDING},
         {.tag = OH_HUKS_TAG_IMPORT_KEY_TYPE, .uint32Param = OH_HUKS_KEY_TYPE_KEY_PAIR},
         {.tag = OH_HUKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, .blob = sm2PubKeyBlob},
-        {.tag = OH_HUKS_TAG_USER_AUTH_TYPE, .uint32Param = OH_HUKS_USER_AUTH_TYPE_TUI_PIN},
-        {.tag = OH_HUKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = OH_HUKS_AUTH_ACCESS_ALWAYS_VALID},
-        {.tag = OH_HUKS_TAG_CHALLENGE_TYPE, .uint32Param = OH_HUKS_CHALLENGE_TYPE_NORMAL},
         {.tag = HKS_TAG_KEY_SECURITY_LEVEL, .uint32Param = HKS_KEY_SECURITY_LEVEL_SE}
     };
 
@@ -1513,7 +1842,7 @@ HWTEST_F(HksSeTest, HksSeImportEnvelopSecurityLevelMismatch002, TestSize.Level0)
 
         ohResult = ImportEnvelopSm2Key(&keyAliasBlob, &kekAliasBlob, sm2NormalImportParams,
             sizeof(sm2NormalImportParams) / sizeof(OH_Huks_Param), &cipherData, &sm2PrivateKeyBlob, &importParamSet);
-        ASSERT_EQ(ohResult.errorCode, OH_HUKS_ERR_CODE_INVALID_ARGUMENT)
+        ASSERT_EQ(ohResult.errorCode, HUKS_ERR_CODE_EXTERNAL_ERROR)
             << "ImportEnvelopSm2Key should fail when KEK is SE key but import does not specify SE level";
 
         (void)OH_Huks_DeleteKeyItem(&kekAliasBlob, kekGenParamSet);
@@ -1741,6 +2070,387 @@ HWTEST_F(HksSeTest, HksSeAbortSessionTest, TestSize.Level0)
 
     OH_Huks_FreeParamSet(&genParamSet);
     OH_Huks_FreeParamSet(&encryptParamSet);
+    (void)OH_Huks_DeleteKeyItem(&keyAlias, genParamSet);
+}
+
+static const uint32_t UPDATE_DATA_SIZE_100 = 100;
+static const uint32_t UPDATE_DATA_SIZE_500 = 500;
+static const uint32_t UPDATE_DATA_SIZE_80 = 80;
+static const uint32_t UPDATE_DATA_SIZE_48 = 48;
+static const uint32_t UPDATE_DATA_SIZE_32 = 32;
+static const uint32_t UPDATE_DATA_SIZE_16 = 16;
+
+HWTEST_F(HksSeTest, HksSeCipherTestSm4CbcPkcs7NoAuthUpdateOnce, TestSize.Level0)
+{
+    char tmpKeyAlias[] = "se_sm4_cbc_pkcs7_no_auth_update_once_key";
+    struct OH_Huks_Blob keyAlias = {(uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias};
+    struct OH_Huks_ParamSet *genParamSet = nullptr;
+    struct OH_Huks_ParamSet *encryptParamSet = nullptr;
+    struct OH_Huks_ParamSet *decryptParamSet = nullptr;
+    OH_Huks_Result ohResult;
+    do {
+        ohResult = InitParamSet(&genParamSet, g_genSm4ParamsNoAuth,
+            sizeof(g_genSm4ParamsNoAuth) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        ohResult = OH_Huks_GenerateKeyItem(&keyAlias, genParamSet, nullptr);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "GenerateKeyItem fail";
+
+        ohResult = InitParamSet(&encryptParamSet, g_sm4EncryptParams,
+            sizeof(g_sm4EncryptParams) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        uint8_t inData[UPDATE_DATA_SIZE_100] = {0};
+        for (uint32_t i = 0; i < UPDATE_DATA_SIZE_100; i++) {
+            inData[i] = (uint8_t)(i % 256);
+        }
+        struct OH_Huks_Blob inDataBlob = {UPDATE_DATA_SIZE_100, inData};
+        uint8_t cipher[COMMON_DATA_SIZE] = {0};
+        struct OH_Huks_Blob cipherText = {COMMON_DATA_SIZE, cipher};
+
+        ohResult = HksSm4EncryptUpdateOnce(&keyAlias, encryptParamSet, &inDataBlob, &cipherText);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "HksSm4EncryptUpdateOnce fail";
+
+        ohResult = InitParamSet(&decryptParamSet, g_sm4DecryptParams,
+            sizeof(g_sm4DecryptParams) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        uint8_t plain[COMMON_DATA_SIZE] = {0};
+        struct OH_Huks_Blob plainText = {COMMON_DATA_SIZE, plain};
+
+        ohResult = HksSm4DecryptUpdateOnce(&keyAlias, decryptParamSet, &cipherText, &plainText);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "HksSm4DecryptUpdateOnce fail";
+
+        ASSERT_EQ(plainText.size, UPDATE_DATA_SIZE_100) << "Decrypted data size mismatch";
+        ASSERT_EQ(memcmp(plainText.data, inData, UPDATE_DATA_SIZE_100), 0) << "Decrypted data content mismatch";
+    } while (0);
+
+    FreeThreeParamset(&genParamSet, &encryptParamSet, &decryptParamSet);
+    (void)OH_Huks_DeleteKeyItem(&keyAlias, genParamSet);
+}
+
+HWTEST_F(HksSeTest, HksSeCipherTestSm4CbcPkcs7NoAuthUpdateFiveTimes, TestSize.Level0)
+{
+    char tmpKeyAlias[] = "se_sm4_cbc_pkcs7_no_auth_update_five_key";
+    struct OH_Huks_Blob keyAlias = {(uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias};
+    struct OH_Huks_ParamSet *genParamSet = nullptr;
+    struct OH_Huks_ParamSet *encryptParamSet = nullptr;
+    struct OH_Huks_ParamSet *decryptParamSet = nullptr;
+    OH_Huks_Result ohResult;
+    do {
+        ohResult = InitParamSet(&genParamSet, g_genSm4ParamsNoAuth,
+            sizeof(g_genSm4ParamsNoAuth) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        ohResult = OH_Huks_GenerateKeyItem(&keyAlias, genParamSet, nullptr);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "GenerateKeyItem fail";
+
+        ohResult = InitParamSet(&encryptParamSet, g_sm4EncryptParams,
+            sizeof(g_sm4EncryptParams) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        uint8_t inData[UPDATE_DATA_SIZE_80] = {0};
+        for (uint32_t i = 0; i < UPDATE_DATA_SIZE_80; i++) {
+            inData[i] = (uint8_t)(i % 256);
+        }
+        struct OH_Huks_Blob inDataBlob = {UPDATE_DATA_SIZE_80, inData};
+        uint8_t cipher[COMMON_DATA_SIZE] = {0};
+        struct OH_Huks_Blob cipherText = {COMMON_DATA_SIZE, cipher};
+
+        ohResult = HksSm4EncryptUpdateFiveTimes(&keyAlias, encryptParamSet, &inDataBlob, &cipherText);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "HksSm4EncryptUpdateFiveTimes fail";
+
+        ohResult = InitParamSet(&decryptParamSet, g_sm4DecryptParams,
+            sizeof(g_sm4DecryptParams) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        uint8_t plain[COMMON_DATA_SIZE] = {0};
+        struct OH_Huks_Blob plainText = {COMMON_DATA_SIZE, plain};
+
+        ohResult = HksSm4DecryptUpdateFiveTimes(&keyAlias, decryptParamSet, &cipherText, &plainText);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "HksSm4DecryptUpdateFiveTimes fail";
+
+        ASSERT_EQ(plainText.size, UPDATE_DATA_SIZE_80) << "Decrypted data size mismatch";
+        ASSERT_EQ(memcmp(plainText.data, inData, UPDATE_DATA_SIZE_80), 0) << "Decrypted data content mismatch";
+    } while (0);
+
+    FreeThreeParamset(&genParamSet, &encryptParamSet, &decryptParamSet);
+    (void)OH_Huks_DeleteKeyItem(&keyAlias, genParamSet);
+}
+
+HWTEST_F(HksSeTest, HksSeCipherTestSm4CbcNoPaddingNoAuthUpdateTwoTimes, TestSize.Level0)
+{
+    char tmpKeyAlias[] = "se_sm4_cbc_nopadding_no_auth_update_two_key";
+    struct OH_Huks_Blob keyAlias = {(uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias};
+    struct OH_Huks_ParamSet *genParamSet = nullptr;
+    struct OH_Huks_ParamSet *encryptParamSet = nullptr;
+    struct OH_Huks_ParamSet *decryptParamSet = nullptr;
+    OH_Huks_Result ohResult;
+    do {
+        ohResult = InitParamSet(&genParamSet, g_genSm4CbcNoPaddingParamsNoAuth,
+            sizeof(g_genSm4CbcNoPaddingParamsNoAuth) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        ohResult = OH_Huks_GenerateKeyItem(&keyAlias, genParamSet, nullptr);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "GenerateKeyItem fail";
+
+        ohResult = InitParamSet(&encryptParamSet, g_sm4CbcNoPaddingEncryptParams,
+            sizeof(g_sm4CbcNoPaddingEncryptParams) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        uint8_t inData[UPDATE_DATA_SIZE_48] = {0};
+        for (uint32_t i = 0; i < UPDATE_DATA_SIZE_48; i++) {
+            inData[i] = (uint8_t)(i + 1);
+        }
+        struct OH_Huks_Blob inDataBlob = {UPDATE_DATA_SIZE_48, inData};
+        uint8_t cipher[COMMON_DATA_SIZE] = {0};
+        struct OH_Huks_Blob cipherText = {COMMON_DATA_SIZE, cipher};
+
+        ohResult = HksSm4NoPaddingEncryptUpdateTwoTimes(&keyAlias, encryptParamSet, &inDataBlob, &cipherText);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "HksSm4NoPaddingEncryptUpdateTwoTimes fail";
+
+        ohResult = InitParamSet(&decryptParamSet, g_sm4CbcNoPaddingDecryptParams,
+            sizeof(g_sm4CbcNoPaddingDecryptParams) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        uint8_t plain[COMMON_DATA_SIZE] = {0};
+        struct OH_Huks_Blob plainText = {COMMON_DATA_SIZE, plain};
+
+        ohResult = HksSm4NoPaddingDecryptUpdateTwoTimes(&keyAlias, decryptParamSet, &cipherText, &plainText);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "HksSm4NoPaddingDecryptUpdateTwoTimes fail";
+
+        ASSERT_EQ(plainText.size, UPDATE_DATA_SIZE_48) << "Decrypted data size mismatch";
+        ASSERT_EQ(memcmp(plainText.data, inData, UPDATE_DATA_SIZE_48), 0) << "Decrypted data content mismatch";
+    } while (0);
+
+    FreeThreeParamset(&genParamSet, &encryptParamSet, &decryptParamSet);
+    (void)OH_Huks_DeleteKeyItem(&keyAlias, genParamSet);
+}
+
+HWTEST_F(HksSeTest, HksSeSignVerifyTestSm2Sm3NoAuthUpdateOnce, TestSize.Level0)
+{
+    char tmpKeyAlias[] = "se_sm2_sm3_no_auth_update_once_sign_key";
+    struct OH_Huks_Blob keyAlias = {(uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias};
+    struct OH_Huks_ParamSet *genParamSet = nullptr;
+    struct OH_Huks_ParamSet *signParamSet = nullptr;
+    struct OH_Huks_ParamSet *verifyParamSet = nullptr;
+    OH_Huks_Result ohResult;
+    do {
+        ohResult = InitParamSet(&genParamSet, g_genSm2ParamsNoAuth,
+            sizeof(g_genSm2ParamsNoAuth) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        ohResult = OH_Huks_GenerateKeyItem(&keyAlias, genParamSet, nullptr);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "GenerateKeyItem fail";
+
+        ohResult = InitParamSet(&signParamSet, g_sm2SignParams,
+            sizeof(g_sm2SignParams) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        uint8_t inData[UPDATE_DATA_SIZE_100] = {0};
+        for (uint32_t i = 0; i < UPDATE_DATA_SIZE_100; i++) {
+            inData[i] = (uint8_t)(i % 256);
+        }
+        struct OH_Huks_Blob inDataBlob = {UPDATE_DATA_SIZE_100, inData};
+        uint8_t signOut[SIGN_OUT_SIZE] = {0};
+        struct OH_Huks_Blob signature = {SIGN_OUT_SIZE, signOut};
+
+        ohResult = HksSm2SignUpdateOnce(&keyAlias, signParamSet, &inDataBlob, &signature);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "HksSm2SignUpdateOnce fail";
+
+        ohResult = InitParamSet(&verifyParamSet, g_sm2VerifyParams,
+            sizeof(g_sm2VerifyParams) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        ohResult = HksSm2VerifyUpdateOnce(&keyAlias, verifyParamSet, &inDataBlob, &signature);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "HksSm2VerifyUpdateOnce fail";
+    } while (0);
+
+    FreeThreeParamset(&genParamSet, &signParamSet, &verifyParamSet);
+    (void)OH_Huks_DeleteKeyItem(&keyAlias, genParamSet);
+}
+
+HWTEST_F(HksSeTest, HksSeSignVerifyTestSm2Sm3NoAuthUpdateFiveTimes, TestSize.Level0)
+{
+    char tmpKeyAlias[] = "se_sm2_sm3_no_auth_update_five_sign_key";
+    struct OH_Huks_Blob keyAlias = {(uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias};
+    struct OH_Huks_ParamSet *genParamSet = nullptr;
+    struct OH_Huks_ParamSet *signParamSet = nullptr;
+    struct OH_Huks_ParamSet *verifyParamSet = nullptr;
+    OH_Huks_Result ohResult;
+    do {
+        ohResult = InitParamSet(&genParamSet, g_genSm2ParamsNoAuth,
+            sizeof(g_genSm2ParamsNoAuth) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        ohResult = OH_Huks_GenerateKeyItem(&keyAlias, genParamSet, nullptr);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "GenerateKeyItem fail";
+
+        ohResult = InitParamSet(&signParamSet, g_sm2SignParams,
+            sizeof(g_sm2SignParams) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        uint8_t inData[UPDATE_DATA_SIZE_500] = {0};
+        for (uint32_t i = 0; i < UPDATE_DATA_SIZE_500; i++) {
+            inData[i] = (uint8_t)(i % 256);
+        }
+        struct OH_Huks_Blob inDataBlob = {UPDATE_DATA_SIZE_500, inData};
+        uint8_t signOut[SIGN_OUT_SIZE] = {0};
+        struct OH_Huks_Blob signature = {SIGN_OUT_SIZE, signOut};
+
+        ohResult = HksSm2SignUpdateFiveTimes(&keyAlias, signParamSet, &inDataBlob, &signature);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "HksSm2SignUpdateFiveTimes fail";
+
+        ohResult = InitParamSet(&verifyParamSet, g_sm2VerifyParams,
+            sizeof(g_sm2VerifyParams) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        ohResult = HksSm2VerifyUpdateFiveTimes(&keyAlias, verifyParamSet, &inDataBlob, &signature);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "HksSm2VerifyUpdateFiveTimes fail";
+    } while (0);
+
+    FreeThreeParamset(&genParamSet, &signParamSet, &verifyParamSet);
+    (void)OH_Huks_DeleteKeyItem(&keyAlias, genParamSet);
+}
+
+HWTEST_F(HksSeTest, HksSeSignVerifyTestSm2NoDigestNoAuthUpdateThreeTimes, TestSize.Level0)
+{
+    char tmpKeyAlias[] = "se_sm2_nodigest_no_auth_update_three_sign_key";
+    struct OH_Huks_Blob keyAlias = {(uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias};
+    struct OH_Huks_ParamSet *genParamSet = nullptr;
+    struct OH_Huks_ParamSet *signParamSet = nullptr;
+    struct OH_Huks_ParamSet *verifyParamSet = nullptr;
+    OH_Huks_Result ohResult;
+    do {
+        ohResult = InitParamSet(&genParamSet, g_genSm2NoDigestParamsNoAuth,
+            sizeof(g_genSm2NoDigestParamsNoAuth) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        ohResult = OH_Huks_GenerateKeyItem(&keyAlias, genParamSet, nullptr);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "GenerateKeyItem fail";
+
+        ohResult = InitParamSet(&signParamSet, g_sm2NoDigestSignParams,
+            sizeof(g_sm2NoDigestSignParams) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        uint8_t inData[UPDATE_DATA_SIZE_32] = {0};
+        for (uint32_t i = 0; i < UPDATE_DATA_SIZE_32; i++) {
+            inData[i] = (uint8_t)(i + 1);
+        }
+        struct OH_Huks_Blob inDataBlob = {UPDATE_DATA_SIZE_32, inData};
+        uint8_t signOut[SIGN_OUT_SIZE] = {0};
+        struct OH_Huks_Blob signature = {SIGN_OUT_SIZE, signOut};
+
+        ohResult = HksSm2NoDigestSignUpdateThreeTimes(&keyAlias, signParamSet, &inDataBlob, &signature);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "HksSm2NoDigestSignUpdateThreeTimes fail";
+
+        ohResult = InitParamSet(&verifyParamSet, g_sm2NoDigestVerifyParams,
+            sizeof(g_sm2NoDigestVerifyParams) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        ohResult = HksSm2NoDigestVerifyUpdateThreeTimes(&keyAlias, verifyParamSet, &inDataBlob, &signature);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "HksSm2NoDigestVerifyUpdateThreeTimes fail";
+    } while (0);
+
+    FreeThreeParamset(&genParamSet, &signParamSet, &verifyParamSet);
+    (void)OH_Huks_DeleteKeyItem(&keyAlias, genParamSet);
+}
+
+HWTEST_F(HksSeTest, HksSeCipherTestSm2Sm3NoPaddingNoAuthUpdateOnce, TestSize.Level0)
+{
+    char tmpKeyAlias[] = "se_sm2_sm3_nopadding_no_auth_update_once_key";
+    struct OH_Huks_Blob keyAlias = {(uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias};
+    struct OH_Huks_ParamSet *genParamSet = nullptr;
+    struct OH_Huks_ParamSet *encryptParamSet = nullptr;
+    struct OH_Huks_ParamSet *decryptParamSet = nullptr;
+    OH_Huks_Result ohResult;
+    do {
+        ohResult = InitParamSet(&genParamSet, g_genSm2CryptoParamsNoAuth,
+            sizeof(g_genSm2CryptoParamsNoAuth) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        ohResult = OH_Huks_GenerateKeyItem(&keyAlias, genParamSet, nullptr);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "GenerateKeyItem fail";
+
+        ohResult = InitParamSet(&encryptParamSet, g_sm2EncryptParams,
+            sizeof(g_sm2EncryptParams) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        uint8_t inData[UPDATE_DATA_SIZE_16] = {0};
+        for (uint32_t i = 0; i < UPDATE_DATA_SIZE_16; i++) {
+            inData[i] = (uint8_t)(i + 1);
+        }
+        struct OH_Huks_Blob inDataBlob = {UPDATE_DATA_SIZE_16, inData};
+        uint8_t cipher[COMMON_DATA_SIZE] = {0};
+        struct OH_Huks_Blob cipherText = {COMMON_DATA_SIZE, cipher};
+
+        ohResult = HksSm2EncryptUpdateOnce(&keyAlias, encryptParamSet, &inDataBlob, &cipherText);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "HksSm2EncryptUpdateOnce fail";
+
+        ohResult = InitParamSet(&decryptParamSet, g_sm2DecryptParams,
+            sizeof(g_sm2DecryptParams) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        uint8_t plain[COMMON_DATA_SIZE] = {0};
+        struct OH_Huks_Blob plainText = {COMMON_DATA_SIZE, plain};
+
+        ohResult = HksSm2DecryptUpdateOnce(&keyAlias, decryptParamSet, &cipherText, &plainText);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "HksSm2DecryptUpdateOnce fail";
+
+        ASSERT_EQ(plainText.size, UPDATE_DATA_SIZE_16) << "Decrypted data size mismatch";
+        ASSERT_EQ(memcmp(plainText.data, inData, UPDATE_DATA_SIZE_16), 0) << "Decrypted data content mismatch";
+    } while (0);
+
+    FreeThreeParamset(&genParamSet, &encryptParamSet, &decryptParamSet);
+    (void)OH_Huks_DeleteKeyItem(&keyAlias, genParamSet);
+}
+
+HWTEST_F(HksSeTest, HksSeCipherTestSm2Sm3NoPaddingNoAuthUpdateTwoTimes, TestSize.Level0)
+{
+    char tmpKeyAlias[] = "se_sm2_sm3_nopadding_no_auth_update_two_key";
+    struct OH_Huks_Blob keyAlias = {(uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias};
+    struct OH_Huks_ParamSet *genParamSet = nullptr;
+    struct OH_Huks_ParamSet *encryptParamSet = nullptr;
+    struct OH_Huks_ParamSet *decryptParamSet = nullptr;
+    OH_Huks_Result ohResult;
+    do {
+        ohResult = InitParamSet(&genParamSet, g_genSm2CryptoParamsNoAuth,
+            sizeof(g_genSm2CryptoParamsNoAuth) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        ohResult = OH_Huks_GenerateKeyItem(&keyAlias, genParamSet, nullptr);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "GenerateKeyItem fail";
+
+        ohResult = InitParamSet(&encryptParamSet, g_sm2EncryptParams,
+            sizeof(g_sm2EncryptParams) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        uint8_t inData[UPDATE_DATA_SIZE_32] = {0};
+        for (uint32_t i = 0; i < UPDATE_DATA_SIZE_32; i++) {
+            inData[i] = (uint8_t)(i + 1);
+        }
+        struct OH_Huks_Blob inDataBlob = {UPDATE_DATA_SIZE_32, inData};
+        uint8_t cipher[COMMON_DATA_SIZE] = {0};
+        struct OH_Huks_Blob cipherText = {COMMON_DATA_SIZE, cipher};
+
+        ohResult = HksSm2EncryptUpdateTwoTimes(&keyAlias, encryptParamSet, &inDataBlob, &cipherText);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "HksSm2EncryptUpdateTwoTimes fail";
+
+        ohResult = InitParamSet(&decryptParamSet, g_sm2DecryptParams,
+            sizeof(g_sm2DecryptParams) / sizeof(OH_Huks_Param));
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "InitParamSet fail";
+
+        uint8_t plain[COMMON_DATA_SIZE] = {0};
+        struct OH_Huks_Blob plainText = {COMMON_DATA_SIZE, plain};
+
+        ohResult = HksSm2DecryptUpdateTwoTimes(&keyAlias, decryptParamSet, &cipherText, &plainText);
+        ASSERT_EQ(ohResult.errorCode, OH_HUKS_SUCCESS) << "HksSm2DecryptUpdateTwoTimes fail";
+
+        ASSERT_EQ(plainText.size, UPDATE_DATA_SIZE_32) << "Decrypted data size mismatch";
+        ASSERT_EQ(memcmp(plainText.data, inData, UPDATE_DATA_SIZE_32), 0) << "Decrypted data content mismatch";
+    } while (0);
+
+    FreeThreeParamset(&genParamSet, &encryptParamSet, &decryptParamSet);
     (void)OH_Huks_DeleteKeyItem(&keyAlias, genParamSet);
 }
 }
