@@ -66,7 +66,7 @@ typedef struct {
 } FieldMapping;
 
 // Field mapping table
-static const FieldMapping g_fieldMappings[] = {
+static const FieldMapping FIELD_MAPPINGS[] = {
     {FLAG_RESOURCE_ID,      HKS_TAG_PARAM4_BUFFER,  "resource_id",      FIELD_TYPE_BUFFER},
     {FLAG_PROVIDER_NAME,    HKS_TAG_PARAM5_BUFFER,  "provider_name",    FIELD_TYPE_BUFFER},
     {FLAG_ABILITY_NAME,     HKS_TAG_PARAM6_BUFFER,  "ability_name",     FIELD_TYPE_BUFFER},
@@ -90,51 +90,85 @@ typedef struct {
 } UKeyEventConfig;
 
 // Event configuration table (18 events)
-static const UKeyEventConfig g_ukeyEventConfigs[] = {
-    {HKS_EVENT_UKEY_REGISTER_PROVIDER, FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME |
-        FLAG_DETAIL_ERRCODE, COMPARE_NONE},
-    {HKS_EVENT_UKEY_GET_AUTH_PIN_STATE, FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME |
-        FLAG_EXT_BUNDLE_NAME | FLAG_DETAIL_ERRCODE | FLAG_STATE, COMPARE_RESOURCE_ID},
-    {HKS_EVENT_UKEY_AUTH_PIN, FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME |
-        FLAG_DETAIL_ERRCODE | FLAG_CALL_AUTH_UID, COMPARE_RESOURCE_ID},
-    {HKS_EVENT_UKEY_OPERATE_REMOTE_HANDLE, FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME |
-        FLAG_EXT_BUNDLE_NAME | FLAG_DETAIL_ERRCODE | FLAG_OPERATION, COMPARE_RESOURCE_ID},
-    {HKS_EVENT_UKEY_EXPORT_PROVIDER_CERT, FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME |
-        FLAG_DETAIL_ERRCODE | FLAG_PURPOSE, COMPARE_PROVIDER_NAME},
-    {HKS_EVENT_UKEY_EXPORT_CERT, FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME |
-        FLAG_DETAIL_ERRCODE | FLAG_PURPOSE, COMPARE_RESOURCE_ID},
-    {HKS_EVENT_UKSY_GET_REMOTE_PROPERTY, FLAG_RESOURCE_ID | FLAG_PROPERTY_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME |
-        FLAG_EXT_BUNDLE_NAME | FLAG_DETAIL_ERRCODE, COMPARE_RESOURCE_ID},
-    {HKS_EVENT_UKEY_IMPORT_CERT, FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME |
-        FLAG_DETAIL_ERRCODE, COMPARE_RESOURCE_ID},
-    {HKS_EVENT_UKEY_GET_RESOURCE_ID, FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME |
-        FLAG_DETAIL_ERRCODE | FLAG_EXTRA_DATA, COMPARE_RESOURCE_ID},
-    {HKS_EVENT_UKEY_CLEAR_PIN_STATE, FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME |
-        FLAG_DETAIL_ERRCODE, COMPARE_RESOURCE_ID},
-    {HKS_EVENT_UKEY_INIT_SESSION, FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME |
-        FLAG_ALG | FLAG_PURPOSE | FLAG_DETAIL_ERRCODE | FLAG_HANDLE | FLAG_EXTRA_DATA, COMPARE_HANDLE},
-    {HKS_EVENT_UKEY_UPDATE_SESSION, FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME | FLAG_ALG |
-        FLAG_PURPOSE | FLAG_DETAIL_ERRCODE | FLAG_HANDLE | FLAG_EXTRA_DATA, COMPARE_HANDLE},
-    {HKS_EVENT_UKEY_FINISH_SESSION, FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME | FLAG_ALG |
-        FLAG_PURPOSE | FLAG_DETAIL_ERRCODE | FLAG_HANDLE | FLAG_EXTRA_DATA, COMPARE_HANDLE},
-    {HKS_EVENT_UKEY_ABORT_SESSION, FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME | FLAG_ALG |
-        FLAG_PURPOSE | FLAG_DETAIL_ERRCODE | FLAG_HANDLE | FLAG_EXTRA_DATA, COMPARE_HANDLE},
-    {HKS_EVENT_UKEY_GENERATE_KEY, FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME |
-        FLAG_ALG | FLAG_PURPOSE | FLAG_DETAIL_ERRCODE, COMPARE_RESOURCE_ID},
-    {HKS_EVENT_UKEY_EXPORT_PUBLIC_KEY, FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME |
-        FLAG_EXT_BUNDLE_NAME | FLAG_ALG | FLAG_PURPOSE | FLAG_DETAIL_ERRCODE, COMPARE_RESOURCE_ID},
-    {HKS_EVENT_UKEY_IMPORT_WRAPPED_KEY, FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME |
-        FLAG_EXT_BUNDLE_NAME | FLAG_ALG | FLAG_PURPOSE | FLAG_DETAIL_ERRCODE, COMPARE_RESOURCE_ID},
-    {HKS_EVENT_UKEY_SET_REMOTE_PROPERTY, FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME |
-        FLAG_EXT_BUNDLE_NAME | FLAG_DETAIL_ERRCODE | FLAG_PROPERTY_ID, COMPARE_RESOURCE_ID},
+static const UKeyEventConfig UKEY_EVENT_CONFIGS[] = {
+    {HKS_EVENT_UKEY_REGISTER_PROVIDER,
+        FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME | FLAG_DETAIL_ERRCODE,
+        COMPARE_NONE},
+    {HKS_EVENT_UKEY_GET_AUTH_PIN_STATE,
+        FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME |
+        FLAG_DETAIL_ERRCODE | FLAG_STATE,
+        COMPARE_RESOURCE_ID},
+    {HKS_EVENT_UKEY_AUTH_PIN,
+        FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME |
+        FLAG_DETAIL_ERRCODE | FLAG_CALL_AUTH_UID,
+        COMPARE_RESOURCE_ID},
+    {HKS_EVENT_UKEY_OPERATE_REMOTE_HANDLE,
+        FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME |
+        FLAG_DETAIL_ERRCODE | FLAG_OPERATION,
+        COMPARE_RESOURCE_ID},
+    {HKS_EVENT_UKEY_EXPORT_PROVIDER_CERT,
+        FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME | FLAG_DETAIL_ERRCODE | FLAG_PURPOSE,
+        COMPARE_PROVIDER_NAME},
+    {HKS_EVENT_UKEY_EXPORT_CERT,
+        FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME |
+        FLAG_DETAIL_ERRCODE | FLAG_PURPOSE,
+        COMPARE_RESOURCE_ID},
+    {HKS_EVENT_UKSY_GET_REMOTE_PROPERTY,
+        FLAG_RESOURCE_ID | FLAG_PROPERTY_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME |
+        FLAG_EXT_BUNDLE_NAME | FLAG_DETAIL_ERRCODE,
+        COMPARE_RESOURCE_ID},
+    {HKS_EVENT_UKEY_IMPORT_CERT,
+        FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME |
+        FLAG_DETAIL_ERRCODE,
+        COMPARE_RESOURCE_ID},
+    {HKS_EVENT_UKEY_GET_RESOURCE_ID,
+        FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME |
+        FLAG_DETAIL_ERRCODE | FLAG_EXTRA_DATA,
+        COMPARE_RESOURCE_ID},
+    {HKS_EVENT_UKEY_CLEAR_PIN_STATE,
+        FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME |
+        FLAG_DETAIL_ERRCODE,
+        COMPARE_RESOURCE_ID},
+    {HKS_EVENT_UKEY_INIT_SESSION,
+        FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME |
+        FLAG_ALG | FLAG_PURPOSE | FLAG_DETAIL_ERRCODE | FLAG_HANDLE | FLAG_EXTRA_DATA,
+        COMPARE_HANDLE},
+    {HKS_EVENT_UKEY_UPDATE_SESSION,
+        FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME | FLAG_ALG |
+        FLAG_PURPOSE | FLAG_DETAIL_ERRCODE | FLAG_HANDLE | FLAG_EXTRA_DATA,
+        COMPARE_HANDLE},
+    {HKS_EVENT_UKEY_FINISH_SESSION,
+        FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME | FLAG_ALG |
+        FLAG_PURPOSE | FLAG_DETAIL_ERRCODE | FLAG_HANDLE | FLAG_EXTRA_DATA,
+        COMPARE_HANDLE},
+    {HKS_EVENT_UKEY_ABORT_SESSION,
+        FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME | FLAG_ALG |
+        FLAG_PURPOSE | FLAG_DETAIL_ERRCODE | FLAG_HANDLE | FLAG_EXTRA_DATA,
+        COMPARE_HANDLE},
+    {HKS_EVENT_UKEY_GENERATE_KEY,
+        FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME | FLAG_EXT_BUNDLE_NAME |
+        FLAG_ALG | FLAG_PURPOSE | FLAG_DETAIL_ERRCODE,
+        COMPARE_RESOURCE_ID},
+    {HKS_EVENT_UKEY_EXPORT_PUBLIC_KEY,
+        FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME |
+        FLAG_EXT_BUNDLE_NAME | FLAG_ALG | FLAG_PURPOSE | FLAG_DETAIL_ERRCODE,
+        COMPARE_RESOURCE_ID},
+    {HKS_EVENT_UKEY_IMPORT_WRAPPED_KEY,
+        FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME |
+        FLAG_EXT_BUNDLE_NAME | FLAG_ALG | FLAG_PURPOSE | FLAG_DETAIL_ERRCODE,
+        COMPARE_RESOURCE_ID},
+    {HKS_EVENT_UKEY_SET_REMOTE_PROPERTY,
+        FLAG_RESOURCE_ID | FLAG_PROVIDER_NAME | FLAG_ABILITY_NAME |
+        FLAG_EXT_BUNDLE_NAME | FLAG_DETAIL_ERRCODE | FLAG_PROPERTY_ID,
+        COMPARE_RESOURCE_ID},
 };
 
 // Find event configuration
 static const UKeyEventConfig* FindEventConfig(uint32_t eventId)
 {
-    for (size_t i = 0; i < sizeof(g_ukeyEventConfigs) / sizeof(g_ukeyEventConfigs[0]); i++) {
-        if (g_ukeyEventConfigs[i].eventId == eventId) {
-            return &g_ukeyEventConfigs[i];
+    for (size_t i = 0; i < sizeof(UKEY_EVENT_CONFIGS) / sizeof(UKEY_EVENT_CONFIGS[0]); i++) {
+        if (UKEY_EVENT_CONFIGS[i].eventId == eventId) {
+            return &UKEY_EVENT_CONFIGS[i];
         }
     }
     return nullptr;
@@ -202,9 +236,9 @@ static int32_t GenericAddUKeyParamSet(const struct UKeyInfo* ukeyInfo, uint32_t 
     std::vector<struct HksParam> params;
     params.push_back({.tag = HKS_TAG_PARAM0_UINT32, .uint32Param = eventId});
 
-    for (size_t i = 0; i < sizeof(g_fieldMappings) / sizeof(g_fieldMappings[0]); i++) {
-        if (config->fieldFlags & g_fieldMappings[i].flag) {
-            AddFieldParam(params, &g_fieldMappings[i], ukeyInfo);
+    for (size_t i = 0; i < sizeof(FIELD_MAPPINGS) / sizeof(FIELD_MAPPINGS[0]); i++) {
+        if (config->fieldFlags & FIELD_MAPPINGS[i].flag) {
+            AddFieldParam(params, &FIELD_MAPPINGS[i], ukeyInfo);
         }
     }
     return HksAddParams(reportParamSet, params.data(), params.size());
@@ -238,7 +272,7 @@ static int32_t ExtractFieldFromParamSet(const struct HksParamSet *paramSetIn, st
 }
 
 // Generic ParamSetToEventInfo function (simplified to 20 lines)
-int32_t GenericParamSetToEventInfo(const struct HksParamSet *paramSetIn, 
+int32_t GenericParamSetToEventInfo(const struct HksParamSet *paramSetIn,
     struct HksEventInfo *eventInfo, uint32_t eventId)
 {
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
@@ -251,10 +285,10 @@ int32_t GenericParamSetToEventInfo(const struct HksParamSet *paramSetIn,
     const UKeyEventConfig* config = FindEventConfig(eventId);
     if (config == nullptr) return HKS_ERROR_INVALID_ARGUMENT;
 
-    for (size_t i = 0; i < sizeof(g_fieldMappings) / sizeof(g_fieldMappings[0]); i++) {
-        if (config->fieldFlags & g_fieldMappings[i].flag) {
-            ret = ExtractFieldFromParamSet(paramSetIn, eventInfo, &g_fieldMappings[i]);
-            HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Extract field %s failed", g_fieldMappings[i].name)
+    for (size_t i = 0; i < sizeof(FIELD_MAPPINGS) / sizeof(FIELD_MAPPINGS[0]); i++) {
+        if (config->fieldFlags & FIELD_MAPPINGS[i].flag) {
+            ret = ExtractFieldFromParamSet(paramSetIn, eventInfo, &FIELD_MAPPINGS[i]);
+            HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Extract field %s failed", FIELD_MAPPINGS[i].name)
         }
     }
     (void)commEventInfo.release();
@@ -271,7 +305,7 @@ bool GenericNeedReport(const struct HksEventInfo *eventInfo)
 }
 
 // Generic EventInfoEqual function
-bool GenericEventInfoEqual(const struct HksEventInfo *eventInfo1, 
+bool GenericEventInfoEqual(const struct HksEventInfo *eventInfo1,
     const struct HksEventInfo *eventInfo2, uint32_t eventId)
 {
     HKS_IF_TRUE_RETURN(eventInfo1 == nullptr || eventInfo2 == nullptr, false)
@@ -365,18 +399,21 @@ int32_t GenericEventInfoToMap(const struct HksEventInfo *eventInfo,
     auto insertRet = reportData.insert_or_assign("event_id", std::to_string(eventId));
     HKS_IF_NOT_TRUE_LOGI_RETURN(insertRet.second, HKS_ERROR_BUFFER_TOO_SMALL, "reportData insert eventId failed!");
 
-    for (size_t i = 0; i < sizeof(g_fieldMappings) / sizeof(g_fieldMappings[0]); i++) {
-        if (config->fieldFlags & g_fieldMappings[i].flag) {
-            int32_t ret = ConvertFieldToMap(eventInfo, reportData, &g_fieldMappings[i]);
-            HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Convert field %s failed", g_fieldMappings[i].name)
+    for (size_t i = 0; i < sizeof(FIELD_MAPPINGS) / sizeof(FIELD_MAPPINGS[0]); i++) {
+        if (config->fieldFlags & FIELD_MAPPINGS[i].flag) {
+            int32_t ret = ConvertFieldToMap(eventInfo, reportData, &FIELD_MAPPINGS[i]);
+            HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Convert field %s failed", FIELD_MAPPINGS[i].name)
         }
     }
     return HKS_SUCCESS;
 }
 
 // Wrapper functions (non-inline to export symbols for HA Plugin)
-int32_t HksRegProviderParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo) {
-    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_REGISTER_PROVIDER); }
+int32_t HksRegProviderParamSetToEventInfo(const struct HksParamSet *paramSetIn,
+    struct HksEventInfo *eventInfo)
+{
+    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_REGISTER_PROVIDER);
+}
 bool HksRegProviderNeedReport(const struct HksEventInfo *eventInfo)
 {
     return GenericNeedReport(eventInfo);
