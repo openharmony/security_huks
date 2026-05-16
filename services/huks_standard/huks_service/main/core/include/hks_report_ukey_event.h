@@ -284,11 +284,10 @@ void ReportUKeySessionEvent(uint32_t eventId, int32_t ret, const struct HksBlob 
     const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet);
 
 void ReportUKeyKeyEvent(uint32_t eventId, int32_t ret,
-    const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet)
+    const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
 #endif

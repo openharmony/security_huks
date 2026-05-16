@@ -160,8 +160,6 @@ void HksIpcServiceQueryAbilityInfo(const struct HksBlob *srcData, const uint8_t 
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     struct HksBlob outBlob = { 0, NULL };
     int32_t ret;
-    uint64_t startTime = 0;
-    (void)HksElapsedRealTime(&startTime);
 
     do {
         ret = HksBlob3Unpack(srcData, &resourceId, &abilityInfo.bundleName, &abilityInfo.abilityName);
@@ -181,13 +179,7 @@ void HksIpcServiceQueryAbilityInfo(const struct HksBlob *srcData, const uint8_t 
     } while (0);
 
     HksSendResponse(context, ret, &outBlob);
-
-    struct UKeyInfo ukeyInfo = { .eventId = HKS_EVENT_UKEY_EXPORT_CERT, .operation = HKS_UKEY_REPORT_UNREGISTER,
-        .providerName = abilityInfo.abilityName };
-    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret, .startTime = startTime };
-    struct HksParamSet tmp;
-    ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, &tmp, &ukeyCommon);
-
+    
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(outBlob);

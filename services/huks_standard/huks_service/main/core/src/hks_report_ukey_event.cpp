@@ -232,6 +232,7 @@ static int32_t ExtractFieldFromParamSet(const struct HksParamSet *paramSetIn, st
         case FLAG_OPERATION: eventInfo->ukeyInfo.purpose = param->uint32Param; break;
         case FLAG_STATE: eventInfo->ukeyInfo.state = param->int32Param; break;
         case FLAG_CALL_AUTH_UID: eventInfo->ukeyInfo.callAuthUid = param->int32Param; break;
+        default: return HKS_SUCCESS;
     }
     return ret;
 }
@@ -764,7 +765,7 @@ void ReportUKeySessionEvent(uint32_t eventId, int32_t ret,
     const struct HksParamSet *paramSet)
 {
     struct UKeyInfo ukeyInfo = { .eventId = eventId, .detailErrcode = ret };
-    if (handle != NULL && handle->size > 0) {
+    if (handle != nullptr && handle->size > 0) {
         ukeyInfo.handle = *handle;
     }
     struct UKeyCommonInfo ukeyCommon = { .returnCode = ret };
