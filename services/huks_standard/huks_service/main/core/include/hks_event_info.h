@@ -214,7 +214,8 @@ typedef struct DataSizeInfo {
 typedef struct UKeyEventInfo {
     int32_t callAuthUid;
     int32_t state;
-    int32_t purpose;
+    uint32_t purpose;
+    uint32_t operation;
     char *providerName;
     char *abilityName;
     char *resourceId;

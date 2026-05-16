@@ -262,7 +262,7 @@ static int32_t ExtractFieldFromParamSet(const struct HksParamSet *paramSetIn, st
         case FLAG_ALG: eventInfo->ukeyInfo.alg = param->uint32Param; break;
         case FLAG_PURPOSE: eventInfo->ukeyInfo.purpose = param->uint32Param; break;
         case FLAG_DETAIL_ERRCODE: eventInfo->ukeyInfo.detailErrcode = param->uint32Param; break;
-        case FLAG_OPERATION: eventInfo->ukeyInfo.purpose = param->uint32Param; break;
+        case FLAG_OPERATION: eventInfo->ukeyInfo.operation = param->uint32Param; break;
         case FLAG_STATE: eventInfo->ukeyInfo.state = param->int32Param; break;
         case FLAG_CALL_AUTH_UID: eventInfo->ukeyInfo.callAuthUid = param->int32Param; break;
         default: return HKS_SUCCESS;
@@ -377,7 +377,7 @@ static int32_t ConvertFieldToMap(const struct HksEventInfo *eventInfo,
         case FLAG_ALG: value = std::to_string(eventInfo->ukeyInfo.alg); break;
         case FLAG_PURPOSE: value = std::to_string(eventInfo->ukeyInfo.purpose); break;
         case FLAG_DETAIL_ERRCODE: value = std::to_string(eventInfo->ukeyInfo.detailErrcode); break;
-        case FLAG_OPERATION: value = std::to_string(eventInfo->ukeyInfo.purpose); break;
+        case FLAG_OPERATION: value = std::to_string(eventInfo->ukeyInfo.operation); break;
         case FLAG_STATE: value = std::to_string(eventInfo->ukeyInfo.state); break;
         case FLAG_CALL_AUTH_UID: value = std::to_string(eventInfo->ukeyInfo.callAuthUid); break;
         default: return HKS_SUCCESS;
