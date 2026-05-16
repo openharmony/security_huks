@@ -318,7 +318,7 @@ bool GenericEventInfoEqual(const struct HksEventInfo *eventInfo1,
 
     switch (config->compareType) {
         case COMPARE_RESOURCE_ID:
-            HKS_IF_TRUE_RETURN(eventInfo1->ukeyInfo.resourceId == nullptr || 
+            HKS_IF_TRUE_RETURN(eventInfo1->ukeyInfo.resourceId == nullptr ||
                 eventInfo2->ukeyInfo.resourceId == nullptr, false)
             return strcmp(eventInfo1->ukeyInfo.resourceId, eventInfo2->ukeyInfo.resourceId) == 0;
 
