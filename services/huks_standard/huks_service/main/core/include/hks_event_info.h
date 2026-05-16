@@ -53,8 +53,18 @@ enum HksEventId {
     HKS_EVENT_UKEY_EXPORT_PROVIDER_CERT = 35,
     HKS_EVENT_UKEY_EXPORT_CERT = 36,
     HKS_EVENT_UKSY_GET_REMOTE_PROPERTY = 37,
-    HKS_EVENT_UKEY_IMPORT_CERT = 38,
-    HKS_EVENT_UKEY_END = HKS_EVENT_UKEY_IMPORT_CERT
+    HKS_EVENT_UKEY_INIT_SESSION = 38,
+    HKS_EVENT_UKEY_UPDATE_SESSION = 39,
+    HKS_EVENT_UKEY_FINISH_SESSION = 40,
+    HKS_EVENT_UKEY_ABORT_SESSION = 41,
+    HKS_EVENT_UKEY_IMPORT_CERT = 42,
+    HKS_EVENT_UKEY_GET_RESOURCE_ID = 43,
+    HKS_EVENT_UKEY_CLEAR_PIN_STATE = 44,
+    HKS_EVENT_UKEY_GENERATE_KEY = 45,
+    HKS_EVENT_UKEY_EXPORT_PUBLIC_KEY = 46,
+    HKS_EVENT_UKEY_IMPORT_WRAPPED_KEY = 47,
+    HKS_EVENT_UKEY_SET_REMOTE_PROPERTY = 48,
+    HKS_EVENT_UKEY_END = HKS_EVENT_UKEY_SET_REMOTE_PROPERTY
 };
 
 // modify this please sync modify g_threeStage
@@ -204,11 +214,17 @@ typedef struct DataSizeInfo {
 typedef struct UKeyEventInfo {
     int32_t callAuthUid;
     int32_t state;
-    int32_t purpose;
+    uint32_t purpose;
+    uint32_t operation;
     char *providerName;
     char *abilityName;
     char *resourceId;
     char *propertyId;
+    char *extBundleName;
+    uint32_t alg;
+    uint32_t detailErrcode;
+    uint64_t handle;
+    char *extraData;
 } UKeyEventInfo;
 
 typedef struct HksEventInfo {
