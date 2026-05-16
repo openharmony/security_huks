@@ -261,7 +261,7 @@ int32_t GenericParamSetToEventInfo(const struct HksParamSet *paramSetIn,
 }
 
 // Generic NeedReport function
-bool GenericNeedReport(const struct HksEventInfo *eventInfo, uint32_t eventId)
+bool GenericNeedReport(const struct HksEventInfo *eventInfo)
 {
     if (eventInfo == nullptr) {
         return false;

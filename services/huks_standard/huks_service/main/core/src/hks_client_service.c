@@ -511,28 +511,6 @@ static int32_t GenerateKeyOperation(const struct HksProcessInfo *processInfo, co
 }
 
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
-// Helper: Report ukey session event (Init/Update/Finish/Abort)
-static inline void ReportUKeySessionEvent(uint32_t eventId, int32_t ret,
-    const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
-    const struct HksParamSet *paramSet)
-{
-    struct UKeyInfo ukeyInfo = { .eventId = eventId, .detailErrcode = ret };
-    if (handle != NULL && handle->size > 0) {
-        ukeyInfo.handle = *handle;
-    }
-    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret };
-    ReportUKeyEvent(&ukeyInfo, __func__, processInfo, paramSet, &ukeyCommon);
-}
-
-// Helper: Report ukey key operation event (Generate/Export/ImportWrapped)
-static inline void ReportUKeyKeyEvent(uint32_t eventId, int32_t ret,
-    const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet)
-{
-    struct UKeyInfo ukeyInfo = { .eventId = eventId, .detailErrcode = ret };
-    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret };
-    ReportUKeyEvent(&ukeyInfo, __func__, processInfo, paramSet, &ukeyCommon);
-}
-
 static int32_t GenerateKeyUkeyOperation(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn)
 {
