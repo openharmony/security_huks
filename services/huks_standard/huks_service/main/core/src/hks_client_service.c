@@ -1625,7 +1625,6 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
         if (HksCheckIsUkeyOperation(paramSet, &ret) == HKS_SUCCESS) {
             ret = HksServiceOnUkeyInitSession(processInfo, keyAlias, paramSet, handle);
-            ReportUKeySessionEvent(HKS_EVENT_UKEY_INIT_SESSION, ret, handle, processInfo, paramSet);
             break;
         }
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", ret)
@@ -1729,7 +1728,6 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
         if (HksCheckIsUkeyOperation(paramSet, &common.ret) == HKS_SUCCESS) {
             common.ret = HksServiceOnUkeyUpdateSession(processInfo, handle, paramSet, inData, outData);
-            ReportUKeySessionEvent(HKS_EVENT_UKEY_UPDATE_SESSION, common.ret, handle, processInfo, paramSet);
             break;
         }
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", common.ret)
@@ -1814,7 +1812,6 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
         if (HksCheckIsUkeyOperation(paramSet, &common.ret) == HKS_SUCCESS) {
             common.ret = HksServiceOnUkeyFinishSession(processInfo, handle, paramSet, inData, outData);
-            ReportUKeySessionEvent(HKS_EVENT_UKEY_FINISH_SESSION, common.ret, handle, processInfo, paramSet);
             break;
         }
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", common.ret)
@@ -1872,7 +1869,6 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
         if (HksCheckIsUkeyOperation(paramSet, &common.ret) == HKS_SUCCESS) {
             common.ret = HksServiceOnUkeyAbortSession(processInfo, handle, paramSet);
-            ReportUKeySessionEvent(HKS_EVENT_UKEY_ABORT_SESSION, common.ret, handle, processInfo, paramSet);
             break;
         }
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", common.ret)
