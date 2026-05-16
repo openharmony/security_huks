@@ -72,6 +72,7 @@
 #ifdef L2_STANDARD
 #include "hks_ha_event_report.h"
 #include "hks_ukey_three_stage_adapter.h"
+#include "hks_report_ukey_event.h"
 #endif
 
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
@@ -510,6 +511,28 @@ static int32_t GenerateKeyOperation(const struct HksProcessInfo *processInfo, co
 }
 
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
+// Helper: Report ukey session event (Init/Update/Finish/Abort)
+static inline void ReportUKeySessionEvent(uint32_t eventId, int32_t ret,
+    const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
+    const struct HksParamSet *paramSet)
+{
+    struct UKeyInfo ukeyInfo = { .eventId = eventId, .detailErrcode = ret };
+    if (handle != NULL && handle->size > 0) {
+        ukeyInfo.handle = *handle;
+    }
+    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret };
+    ReportUKeyEvent(&ukeyInfo, __func__, processInfo, paramSet, &ukeyCommon);
+}
+
+// Helper: Report ukey key operation event (Generate/Export/ImportWrapped)
+static inline void ReportUKeyKeyEvent(uint32_t eventId, int32_t ret,
+    const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet)
+{
+    struct UKeyInfo ukeyInfo = { .eventId = eventId, .detailErrcode = ret };
+    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret };
+    ReportUKeyEvent(&ukeyInfo, __func__, processInfo, paramSet, &ukeyCommon);
+}
+
 static int32_t GenerateKeyUkeyOperation(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn)
 {
@@ -517,6 +540,7 @@ static int32_t GenerateKeyUkeyOperation(const struct HksProcessInfo *processInfo
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckMultiSetTag failed, ret = %" LOG_PUBLIC "d", ret)
     ret = HksServiceOnUkeyGenerateKey(processInfo, keyAlias, paramSetIn);
     HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyGenerateKey failed, ret = %" LOG_PUBLIC "d", ret)
+    ReportUKeyKeyEvent(HKS_EVENT_UKEY_GENERATE_KEY, ret, processInfo, paramSetIn);
     return ret;
 }
 #endif
@@ -1034,6 +1058,7 @@ int32_t HksServiceImportWrappedKey(const struct HksProcessInfo *processInfo, con
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckMultiSetTag failed, ret = %" LOG_PUBLIC "d", ret)
             ret = HksServiceOnUkeyImportWrappedKey(processInfo, keyAlias, wrappingKeyAlias, paramSet, wrappedKeyData);
             HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyImportWrappedKey failed, ret = %" LOG_PUBLIC "d", ret)
+            ReportUKeyKeyEvent(HKS_EVENT_UKEY_IMPORT_WRAPPED_KEY, ret, processInfo, paramSet);
             break;
         }
 #endif
@@ -1072,6 +1097,7 @@ int32_t HksServiceExportPublicKey(const struct HksProcessInfo *processInfo, cons
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckMultiSetTag failed, ret = %" LOG_PUBLIC "d", ret)
             ret = HksServiceOnUkeyExportPublicKey(processInfo, keyAlias, paramSet, key);
             HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceOnUkeyExportPublicKey failed, ret = %" LOG_PUBLIC "d", ret)
+            ReportUKeyKeyEvent(HKS_EVENT_UKEY_EXPORT_PUBLIC_KEY, ret, processInfo, paramSet);
             break;
         }
 #endif
@@ -1621,6 +1647,7 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
         if (HksCheckIsUkeyOperation(paramSet, &ret) == HKS_SUCCESS) {
             ret = HksServiceOnUkeyInitSession(processInfo, keyAlias, paramSet, handle);
+            ReportUKeySessionEvent(HKS_EVENT_UKEY_INIT_SESSION, ret, handle, processInfo, paramSet);
             break;
         }
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", ret)
@@ -1724,6 +1751,7 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
         if (HksCheckIsUkeyOperation(paramSet, &common.ret) == HKS_SUCCESS) {
             common.ret = HksServiceOnUkeyUpdateSession(processInfo, handle, paramSet, inData, outData);
+            ReportUKeySessionEvent(HKS_EVENT_UKEY_UPDATE_SESSION, common.ret, handle, processInfo, paramSet);
             break;
         }
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", common.ret)
@@ -1808,6 +1836,7 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
         if (HksCheckIsUkeyOperation(paramSet, &common.ret) == HKS_SUCCESS) {
             common.ret = HksServiceOnUkeyFinishSession(processInfo, handle, paramSet, inData, outData);
+            ReportUKeySessionEvent(HKS_EVENT_UKEY_FINISH_SESSION, common.ret, handle, processInfo, paramSet);
             break;
         }
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", common.ret)
@@ -1865,6 +1894,7 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
         if (HksCheckIsUkeyOperation(paramSet, &common.ret) == HKS_SUCCESS) {
             common.ret = HksServiceOnUkeyAbortSession(processInfo, handle, paramSet);
+            ReportUKeySessionEvent(HKS_EVENT_UKEY_ABORT_SESSION, common.ret, handle, processInfo, paramSet);
             break;
         }
         HKS_IF_NOT_SUCC_LOGE_BREAK(common.ret, "HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", common.ret)
