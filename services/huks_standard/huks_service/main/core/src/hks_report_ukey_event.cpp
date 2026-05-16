@@ -287,32 +287,32 @@ bool GenericEventInfoEqual(const struct HksEventInfo *eventInfo1,
             HKS_IF_TRUE_RETURN(eventInfo1->ukeyInfo.resourceId == nullptr || 
                 eventInfo2->ukeyInfo.resourceId == nullptr, false)
             return strcmp(eventInfo1->ukeyInfo.resourceId, eventInfo2->ukeyInfo.resourceId) == 0;
-            
+
         case COMPARE_HANDLE:
-            HKS_IF_TRUE_RETURN(eventInfo1->ukeyInfo.extraData == nullptr || 
+            HKS_IF_TRUE_RETURN(eventInfo1->ukeyInfo.extraData == nullptr ||
                 eventInfo2->ukeyInfo.extraData == nullptr, false)
             return strcmp(eventInfo1->ukeyInfo.extraData, eventInfo2->ukeyInfo.extraData) == 0;
-            
+
         case COMPARE_PROPERTY_ID:
-            HKS_IF_TRUE_RETURN(eventInfo1->ukeyInfo.resourceId == nullptr || 
+            HKS_IF_TRUE_RETURN(eventInfo1->ukeyInfo.resourceId == nullptr ||
                 eventInfo2->ukeyInfo.resourceId == nullptr, false)
-            HKS_IF_TRUE_RETURN(eventInfo1->ukeyInfo.propertyId == nullptr || 
+            HKS_IF_TRUE_RETURN(eventInfo1->ukeyInfo.propertyId == nullptr ||
                 eventInfo2->ukeyInfo.propertyId == nullptr, false)
             return strcmp(eventInfo1->ukeyInfo.resourceId, eventInfo2->ukeyInfo.resourceId) == 0 &&
                 strcmp(eventInfo1->ukeyInfo.propertyId, eventInfo2->ukeyInfo.propertyId) == 0;
-                
+
         case COMPARE_PROVIDER_NAME:
-            HKS_IF_TRUE_RETURN(eventInfo1->ukeyInfo.providerName == nullptr || 
+            HKS_IF_TRUE_RETURN(eventInfo1->ukeyInfo.providerName == nullptr ||
                 eventInfo2->ukeyInfo.providerName == nullptr, false)
             return strcmp(eventInfo1->ukeyInfo.providerName, eventInfo2->ukeyInfo.providerName) == 0;
-            
+
         default:
             return false;
     }
 }
 
 // Generic EventInfoAdd function
-void GenericEventInfoAdd(struct HksEventInfo *dstEventInfo, 
+void GenericEventInfoAdd(struct HksEventInfo *dstEventInfo,
     const struct HksEventInfo *srcEventInfo, uint32_t eventId)
 {
     if (GenericEventInfoEqual(dstEventInfo, srcEventInfo, eventId)) {
@@ -377,327 +377,597 @@ int32_t GenericEventInfoToMap(const struct HksEventInfo *eventInfo,
 // Wrapper functions (non-inline to export symbols for HA Plugin)
 int32_t HksRegProviderParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo) {
     return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_REGISTER_PROVIDER); }
-bool HksRegProviderNeedReport(const struct HksEventInfo *eventInfo) {
-    return GenericNeedReport(eventInfo); }
-bool HksRegProviderEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2) {
-    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_REGISTER_PROVIDER); }
-void HksEventInfoAddForRegProvider(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo) {
-    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_REGISTER_PROVIDER); }
+bool HksRegProviderNeedReport(const struct HksEventInfo *eventInfo)
+{
+    return GenericNeedReport(eventInfo);
+}
+
+bool HksRegProviderEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
+{
+    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_REGISTER_PROVIDER);
+}
+
+void HksEventInfoAddForRegProvider(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
+{
+    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_REGISTER_PROVIDER);
+}
+
 int32_t HksRegProviderEventInfoToMap(const struct HksEventInfo *eventInfo,
-    std::unordered_map<std::string, std::string> &reportData) {
-        return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_REGISTER_PROVIDER); }
+    std::unordered_map<std::string, std::string> &reportData)
+{
+    return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_REGISTER_PROVIDER);
+}
 
-int32_t HksGetAuthPinStateParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo) {
-    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_GET_AUTH_PIN_STATE); }
-bool HksGetAuthPinStateNeedReport(const struct HksEventInfo *eventInfo) {
-    return GenericNeedReport(eventInfo); }
-bool HksGetAuthPinStateEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2) {
-    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_GET_AUTH_PIN_STATE); }
-void HksEventInfoAddForGetAuthPinState(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo) {
-    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_GET_AUTH_PIN_STATE); }
+int32_t HksGetAuthPinStateParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
+{
+    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_GET_AUTH_PIN_STATE);
+}
+
+bool HksGetAuthPinStateNeedReport(const struct HksEventInfo *eventInfo)
+{
+    return GenericNeedReport(eventInfo);
+}
+
+bool HksGetAuthPinStateEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
+{
+    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_GET_AUTH_PIN_STATE);
+}
+
+void HksEventInfoAddForGetAuthPinState(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
+{
+    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_GET_AUTH_PIN_STATE);
+}
+
 int32_t HksGetAuthPinStateEventInfoToMap(const struct HksEventInfo *eventInfo,
-    std::unordered_map<std::string, std::string> &reportData) {
-        return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_GET_AUTH_PIN_STATE); }
+    std::unordered_map<std::string, std::string> &reportData)
+{
+    return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_GET_AUTH_PIN_STATE);
+}
 
-int32_t HksAuthPinParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo) {
-    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_AUTH_PIN); }
-bool HksAuthPinNeedReport(const struct HksEventInfo *eventInfo) {
-    return GenericNeedReport(eventInfo); }
-bool HksAuthPinEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2) {
-    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_AUTH_PIN); }
-void HksEventInfoAddForAuthPin(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo) {
-    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_AUTH_PIN); }
+int32_t HksAuthPinParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
+{
+    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_AUTH_PIN);
+}
+
+bool HksAuthPinNeedReport(const struct HksEventInfo *eventInfo)
+{
+    return GenericNeedReport(eventInfo);
+}
+
+bool HksAuthPinEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
+{
+    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_AUTH_PIN);
+}
+
+void HksEventInfoAddForAuthPin(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
+{
+    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_AUTH_PIN);
+}
+
 int32_t HksAuthPinEventInfoToMap(const struct HksEventInfo *eventInfo,
-    std::unordered_map<std::string, std::string> &reportData) {
-        return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_AUTH_PIN); }
+    std::unordered_map<std::string, std::string> &reportData)
+{
+    return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_AUTH_PIN);
+}
 
-int32_t HksRemoteHandleParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo) {
-    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_OPERATE_REMOTE_HANDLE); }
-bool HksRemoteHandleNeedReport(const struct HksEventInfo *eventInfo) {
-    return GenericNeedReport(eventInfo); }
-bool HksRemoteHandleEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2) {
-    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_OPERATE_REMOTE_HANDLE); }
-void HksEventInfoAddForRemoteHandle(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo) {
-    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_OPERATE_REMOTE_HANDLE); }
+int32_t HksRemoteHandleParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
+{
+    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_OPERATE_REMOTE_HANDLE);
+}
+
+bool HksRemoteHandleNeedReport(const struct HksEventInfo *eventInfo)
+{
+    return GenericNeedReport(eventInfo);
+}
+
+bool HksRemoteHandleEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
+{
+    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_OPERATE_REMOTE_HANDLE);
+}
+
+void HksEventInfoAddForRemoteHandle(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
+{
+    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_OPERATE_REMOTE_HANDLE);
+}
+
 int32_t HksRemoteHandleEventInfoToMap(const struct HksEventInfo *eventInfo,
-    std::unordered_map<std::string, std::string> &reportData) {
-        return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_OPERATE_REMOTE_HANDLE); }
+    std::unordered_map<std::string, std::string> &reportData)
+{
+    return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_OPERATE_REMOTE_HANDLE);
+}
 
-int32_t HksExportProviderCertParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo) {
-    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_EXPORT_PROVIDER_CERT); }
-bool HksExportProviderCertNeedReport(const struct HksEventInfo *eventInfo) {
-    return GenericNeedReport(eventInfo); }
-bool HksExportProviderCertEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2) {
-    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_EXPORT_PROVIDER_CERT); }
-void HksEventInfoAddForExportProviderCert(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo) {
-    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_EXPORT_PROVIDER_CERT); }
+int32_t HksExportProviderCertParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
+{
+    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_EXPORT_PROVIDER_CERT);
+}
+
+bool HksExportProviderCertNeedReport(const struct HksEventInfo *eventInfo)
+{
+    return GenericNeedReport(eventInfo);
+}
+
+bool HksExportProviderCertEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
+{
+    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_EXPORT_PROVIDER_CERT);
+}
+
+void HksEventInfoAddForExportProviderCert(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
+{
+    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_EXPORT_PROVIDER_CERT);
+}
+
 int32_t HksExportProviderCertEventInfoToMap(const struct HksEventInfo *eventInfo,
-    std::unordered_map<std::string, std::string> &reportData) {
-        return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_EXPORT_PROVIDER_CERT); }
+    std::unordered_map<std::string, std::string> &reportData)
+{
+    return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_EXPORT_PROVIDER_CERT);
+}
 
-int32_t HksExportCertParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo) {
-    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_EXPORT_CERT); }
-bool HksExportCertNeedReport(const struct HksEventInfo *eventInfo) {
-    return GenericNeedReport(eventInfo); }
-bool HksExportCertEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2) {
-    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_EXPORT_CERT); }
-void HksEventInfoAddForExportCert(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo) {
-    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_EXPORT_CERT); }
+int32_t HksExportCertParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
+{
+    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_EXPORT_CERT);
+}
+
+bool HksExportCertNeedReport(const struct HksEventInfo *eventInfo)
+{
+    return GenericNeedReport(eventInfo);
+}
+
+bool HksExportCertEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
+{
+    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_EXPORT_CERT);
+}
+
+void HksEventInfoAddForExportCert(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
+{
+    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_EXPORT_CERT);
+}
+
 int32_t HksExportCertEventInfoToMap(const struct HksEventInfo *eventInfo,
-    std::unordered_map<std::string, std::string> &reportData) {
-        return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_EXPORT_CERT); }
+    std::unordered_map<std::string, std::string> &reportData)
+{
+    return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_EXPORT_CERT);
+}
 
-int32_t HksGetPropertyParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo) {
-    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKSY_GET_REMOTE_PROPERTY); }
-bool HksGetPropertyNeedReport(const struct HksEventInfo *eventInfo) {
-    return GenericNeedReport(eventInfo); }
-bool HksGetPropertyEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2) {
-    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKSY_GET_REMOTE_PROPERTY); }
-void HksEventInfoAddForGetProperty(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo) {
-    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKSY_GET_REMOTE_PROPERTY); }
+int32_t HksGetPropertyParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
+{
+    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKSY_GET_REMOTE_PROPERTY);
+}
+
+bool HksGetPropertyNeedReport(const struct HksEventInfo *eventInfo)
+{
+    return GenericNeedReport(eventInfo);
+}
+
+bool HksGetPropertyEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
+{
+    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKSY_GET_REMOTE_PROPERTY);
+}
+
+void HksEventInfoAddForGetProperty(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
+{
+    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKSY_GET_REMOTE_PROPERTY);
+}
+
 int32_t HksGetPropertyEventInfoToMap(const struct HksEventInfo *eventInfo,
-    std::unordered_map<std::string, std::string> &reportData) {
-        return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKSY_GET_REMOTE_PROPERTY); }
+    std::unordered_map<std::string, std::string> &reportData)
+{
+    return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKSY_GET_REMOTE_PROPERTY);
+}
 
-int32_t HksImportCertParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo) {
-    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_IMPORT_CERT); }
-bool HksImportCertNeedReport(const struct HksEventInfo *eventInfo) {
-    return GenericNeedReport(eventInfo); }
-bool HksImportCertEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2) {
-    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_IMPORT_CERT); }
-void HksEventInfoAddForImportCert(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo) {
-    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_IMPORT_CERT); }
+int32_t HksImportCertParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
+{
+    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_IMPORT_CERT);
+}
+
+bool HksImportCertNeedReport(const struct HksEventInfo *eventInfo)
+{
+    return GenericNeedReport(eventInfo);
+}
+
+bool HksImportCertEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
+{
+    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_IMPORT_CERT);
+}
+
+void HksEventInfoAddForImportCert(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
+{
+    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_IMPORT_CERT);
+}
+
 int32_t HksImportCertEventInfoToMap(const struct HksEventInfo *eventInfo,
-    std::unordered_map<std::string, std::string> &reportData) {
-        return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_IMPORT_CERT); }
+    std::unordered_map<std::string, std::string> &reportData)
+{
+    return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_IMPORT_CERT);
+}
 
-int32_t HksGetResourceIdParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo) {
-    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_GET_RESOURCE_ID); }
-bool HksGetResourceIdNeedReport(const struct HksEventInfo *eventInfo) {
-    return GenericNeedReport(eventInfo); }
-bool HksGetResourceIdEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2) {
-    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_GET_RESOURCE_ID); }
-void HksEventInfoAddForGetResourceId(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo) {
-    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_GET_RESOURCE_ID); }
+int32_t HksGetResourceIdParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
+{
+    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_GET_RESOURCE_ID);
+}
+
+bool HksGetResourceIdNeedReport(const struct HksEventInfo *eventInfo)
+{
+    return GenericNeedReport(eventInfo);
+}
+
+bool HksGetResourceIdEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
+{
+    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_GET_RESOURCE_ID);
+}
+
+void HksEventInfoAddForGetResourceId(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
+{
+    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_GET_RESOURCE_ID);
+}
+
 int32_t HksGetResourceIdEventInfoToMap(const struct HksEventInfo *eventInfo,
-    std::unordered_map<std::string, std::string> &reportData) {
-        return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_GET_RESOURCE_ID); }
+    std::unordered_map<std::string, std::string> &reportData)
+{
+    return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_GET_RESOURCE_ID);
+}
 
-int32_t HksClearPinStateParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo) {
-    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_CLEAR_PIN_STATE); }
-bool HksClearPinStateNeedReport(const struct HksEventInfo *eventInfo) {
-    return GenericNeedReport(eventInfo); }
-bool HksClearPinStateEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2) {
-    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_CLEAR_PIN_STATE); }
-void HksEventInfoAddForClearPinState(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo) {
-    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_CLEAR_PIN_STATE); }
+int32_t HksClearPinStateParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
+{
+    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_CLEAR_PIN_STATE);
+}
+
+bool HksClearPinStateNeedReport(const struct HksEventInfo *eventInfo)
+{
+    return GenericNeedReport(eventInfo);
+}
+
+bool HksClearPinStateEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
+{
+    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_CLEAR_PIN_STATE);
+}
+
+void HksEventInfoAddForClearPinState(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
+{
+    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_CLEAR_PIN_STATE);
+}
+
 int32_t HksClearPinStateEventInfoToMap(const struct HksEventInfo *eventInfo,
-    std::unordered_map<std::string, std::string> &reportData) {
-        return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_CLEAR_PIN_STATE); }
+    std::unordered_map<std::string, std::string> &reportData)
+{
+    return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_CLEAR_PIN_STATE);
+}
 
-int32_t HksInitSessionParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo) {
-    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_INIT_SESSION); }
-bool HksInitSessionNeedReport(const struct HksEventInfo *eventInfo) {
-    return GenericNeedReport(eventInfo); }
-bool HksInitSessionEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2) {
-    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_INIT_SESSION); }
-void HksEventInfoAddForInitSession(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo) {
-    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_INIT_SESSION); }
+int32_t HksInitSessionParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
+{
+    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_INIT_SESSION);
+}
+
+bool HksInitSessionNeedReport(const struct HksEventInfo *eventInfo)
+{
+    return GenericNeedReport(eventInfo);
+}
+
+bool HksInitSessionEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
+{
+    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_INIT_SESSION);
+}
+
+void HksEventInfoAddForInitSession(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
+{
+    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_INIT_SESSION);
+}
+
 int32_t HksInitSessionEventInfoToMap(const struct HksEventInfo *eventInfo,
-    std::unordered_map<std::string, std::string> &reportData) {
-        return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_INIT_SESSION); }
+    std::unordered_map<std::string, std::string> &reportData)
+{
+    return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_INIT_SESSION);
+}
 
-int32_t HksUpdateSessionParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo) {
-    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_UPDATE_SESSION); }
-bool HksUpdateSessionNeedReport(const struct HksEventInfo *eventInfo) {
-    return GenericNeedReport(eventInfo); }
-bool HksUpdateSessionEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2) {
-    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_UPDATE_SESSION); }
-void HksEventInfoAddForUpdateSession(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo) {
-    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_UPDATE_SESSION); }
+int32_t HksUpdateSessionParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
+{
+    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_UPDATE_SESSION);
+}
+
+bool HksUpdateSessionNeedReport(const struct HksEventInfo *eventInfo)
+{
+    return GenericNeedReport(eventInfo);
+}
+
+bool HksUpdateSessionEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
+{
+    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_UPDATE_SESSION);
+}
+
+void HksEventInfoAddForUpdateSession(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
+{
+    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_UPDATE_SESSION);
+}
+
 int32_t HksUpdateSessionEventInfoToMap(const struct HksEventInfo *eventInfo,
-    std::unordered_map<std::string, std::string> &reportData) {
-        return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_UPDATE_SESSION); }
+    std::unordered_map<std::string, std::string> &reportData)
+{
+    return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_UPDATE_SESSION);
+}
 
-int32_t HksFinishSessionParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo) {
-    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_FINISH_SESSION); }
-bool HksFinishSessionNeedReport(const struct HksEventInfo *eventInfo) {
-    return GenericNeedReport(eventInfo); }
-bool HksFinishSessionEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2) {
-    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_FINISH_SESSION); }
-void HksEventInfoAddForFinishSession(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo) {
-    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_FINISH_SESSION); }
+int32_t HksFinishSessionParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
+{
+    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_FINISH_SESSION);
+}
+
+bool HksFinishSessionNeedReport(const struct HksEventInfo *eventInfo)
+{
+    return GenericNeedReport(eventInfo);
+}
+
+bool HksFinishSessionEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
+{
+    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_FINISH_SESSION);
+}
+
+void HksEventInfoAddForFinishSession(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
+{
+    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_FINISH_SESSION);
+}
+
 int32_t HksFinishSessionEventInfoToMap(const struct HksEventInfo *eventInfo,
-    std::unordered_map<std::string, std::string> &reportData) {
-        return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_FINISH_SESSION); }
+    std::unordered_map<std::string, std::string> &reportData)
+{
+    return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_FINISH_SESSION);
+}
 
-int32_t HksAbortSessionParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo) {
-    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_ABORT_SESSION); }
-bool HksAbortSessionNeedReport(const struct HksEventInfo *eventInfo) {
-    return GenericNeedReport(eventInfo); }
-bool HksAbortSessionEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2) {
-    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_ABORT_SESSION); }
-void HksEventInfoAddForAbortSession(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo) {
-    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_ABORT_SESSION); }
+int32_t HksAbortSessionParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
+{
+    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_ABORT_SESSION);
+}
+
+bool HksAbortSessionNeedReport(const struct HksEventInfo *eventInfo)
+{
+    return GenericNeedReport(eventInfo);
+}
+
+bool HksAbortSessionEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
+{
+    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_ABORT_SESSION);
+}
+
+void HksEventInfoAddForAbortSession(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
+{
+    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_ABORT_SESSION);
+}
+
 int32_t HksAbortSessionEventInfoToMap(const struct HksEventInfo *eventInfo,
-    std::unordered_map<std::string, std::string> &reportData) {
-        return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_ABORT_SESSION); }
+    std::unordered_map<std::string, std::string> &reportData)
+{
+    return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_ABORT_SESSION);
+}
 
-int32_t HksGenerateKeyParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo) {
-    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_GENERATE_KEY); }
-bool HksGenerateKeyNeedReport(const struct HksEventInfo *eventInfo) {
-    return GenericNeedReport(eventInfo); }
-bool HksGenerateKeyEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2) {
-    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_GENERATE_KEY); }
-void HksEventInfoAddForGenerateKey(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo) {
-    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_GENERATE_KEY); }
+int32_t HksGenerateKeyParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
+{
+    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_GENERATE_KEY);
+}
+
+bool HksGenerateKeyNeedReport(const struct HksEventInfo *eventInfo)
+{
+    return GenericNeedReport(eventInfo);
+}
+
+bool HksGenerateKeyEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
+{
+    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_GENERATE_KEY);
+}
+
+void HksEventInfoAddForGenerateKey(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
+{
+    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_GENERATE_KEY);
+}
+
 int32_t HksGenerateKeyEventInfoToMap(const struct HksEventInfo *eventInfo,
-    std::unordered_map<std::string, std::string> &reportData) {
-        return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_GENERATE_KEY); }
+    std::unordered_map<std::string, std::string> &reportData)
+{
+    return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_GENERATE_KEY);
+}
 
-int32_t HksExportPublicKeyParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo) {
-    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_EXPORT_PUBLIC_KEY); }
-bool HksExportPublicKeyNeedReport(const struct HksEventInfo *eventInfo) {
-    return GenericNeedReport(eventInfo); }
-bool HksExportPublicKeyEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2) {
-    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_EXPORT_PUBLIC_KEY); }
-void HksEventInfoAddForExportPublicKey(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo) {
-    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_EXPORT_PUBLIC_KEY); }
+int32_t HksExportPublicKeyParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
+{
+    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_EXPORT_PUBLIC_KEY);
+}
+
+bool HksExportPublicKeyNeedReport(const struct HksEventInfo *eventInfo)
+{
+    return GenericNeedReport(eventInfo);
+}
+
+bool HksExportPublicKeyEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
+{
+    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_EXPORT_PUBLIC_KEY);
+}
+
+void HksEventInfoAddForExportPublicKey(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
+{
+    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_EXPORT_PUBLIC_KEY);
+}
+
 int32_t HksExportPublicKeyEventInfoToMap(const struct HksEventInfo *eventInfo,
-    std::unordered_map<std::string, std::string> &reportData) {
-        return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_EXPORT_PUBLIC_KEY); }
+    std::unordered_map<std::string, std::string> &reportData)
+{
+    return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_EXPORT_PUBLIC_KEY);
+}
 
-int32_t HksImportWrappedKeyParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo) {
-    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_IMPORT_WRAPPED_KEY); }
-bool HksImportWrappedKeyNeedReport(const struct HksEventInfo *eventInfo) {
-    return GenericNeedReport(eventInfo); }
-bool HksImportWrappedKeyEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2) {
-    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_IMPORT_WRAPPED_KEY); }
-void HksEventInfoAddForImportWrappedKey(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo) {
-    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_IMPORT_WRAPPED_KEY); }
+int32_t HksImportWrappedKeyParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
+{
+    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_IMPORT_WRAPPED_KEY);
+}
+
+bool HksImportWrappedKeyNeedReport(const struct HksEventInfo *eventInfo)
+{
+    return GenericNeedReport(eventInfo);
+}
+
+bool HksImportWrappedKeyEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
+{
+    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_IMPORT_WRAPPED_KEY);
+}
+
+void HksEventInfoAddForImportWrappedKey(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
+{
+    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_IMPORT_WRAPPED_KEY);
+}
+
 int32_t HksImportWrappedKeyEventInfoToMap(const struct HksEventInfo *eventInfo,
-    std::unordered_map<std::string, std::string> &reportData) {
-        return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_IMPORT_WRAPPED_KEY); }
+    std::unordered_map<std::string, std::string> &reportData)
+{
+    return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_IMPORT_WRAPPED_KEY);
+}
 
-int32_t HksSetPropertyParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo) {
-    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_SET_REMOTE_PROPERTY); }
-bool HksSetPropertyNeedReport(const struct HksEventInfo *eventInfo) {
-    return GenericNeedReport(eventInfo); }
-bool HksSetPropertyEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2) {
-    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_SET_REMOTE_PROPERTY); }
-void HksEventInfoAddForSetProperty(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo) {
-    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_SET_REMOTE_PROPERTY); }
+int32_t HksSetPropertyParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo)
+{
+    return GenericParamSetToEventInfo(paramSetIn, eventInfo, HKS_EVENT_UKEY_SET_REMOTE_PROPERTY);
+}
+
+bool HksSetPropertyNeedReport(const struct HksEventInfo *eventInfo)
+{
+    return GenericNeedReport(eventInfo);
+}
+
+bool HksSetPropertyEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
+{
+    return GenericEventInfoEqual(eventInfo1, eventInfo2, HKS_EVENT_UKEY_SET_REMOTE_PROPERTY);
+}
+
+void HksEventInfoAddForSetProperty(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
+{
+    GenericEventInfoAdd(dstEventInfo, srcEventInfo, HKS_EVENT_UKEY_SET_REMOTE_PROPERTY);
+}
+
 int32_t HksSetPropertyEventInfoToMap(const struct HksEventInfo *eventInfo,
-    std::unordered_map<std::string, std::string> &reportData) {
-        return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_SET_REMOTE_PROPERTY); }
+    std::unordered_map<std::string, std::string> &reportData)
+{
+    return GenericEventInfoToMap(eventInfo, reportData, HKS_EVENT_UKEY_SET_REMOTE_PROPERTY);
+}
 
 // ParamSet function array
 using UkeyAddParamFunc = int32_t(*)(const struct UKeyInfo*, const struct HksParamSet *, struct HksParamSet *);
 
-static int32_t AddUKeyRegProviderParamSet(const struct UKeyInfo* ukeyInfo, 
-    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet) {
+static int32_t AddUKeyRegProviderParamSet(const struct UKeyInfo* ukeyInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet)
+{
     (void)paramSet;
     return GenericAddUKeyParamSet(ukeyInfo, HKS_EVENT_UKEY_REGISTER_PROVIDER, reportParamSet);
 }
 
-static int32_t AddUKeyGetAuthPinStateParamSet(const struct UKeyInfo* ukeyInfo, 
-    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet) {
+static int32_t AddUKeyGetAuthPinStateParamSet(const struct UKeyInfo* ukeyInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet)
+{
     (void)paramSet;
     return GenericAddUKeyParamSet(ukeyInfo, HKS_EVENT_UKEY_GET_AUTH_PIN_STATE, reportParamSet);
 }
 
-static int32_t AddUKeyAuthPinParamSet(const struct UKeyInfo* ukeyInfo, 
-    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet) {
+static int32_t AddUKeyAuthPinParamSet(const struct UKeyInfo* ukeyInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet)
+{
     (void)paramSet;
     return GenericAddUKeyParamSet(ukeyInfo, HKS_EVENT_UKEY_AUTH_PIN, reportParamSet);
 }
 
-static int32_t AddUKeyRemoteHandleParamSet(const struct UKeyInfo* ukeyInfo, 
-    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet) {
+static int32_t AddUKeyRemoteHandleParamSet(const struct UKeyInfo* ukeyInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet)
+{
     (void)paramSet;
     return GenericAddUKeyParamSet(ukeyInfo, HKS_EVENT_UKEY_OPERATE_REMOTE_HANDLE, reportParamSet);
 }
 
-static int32_t AddUKeyExportProviderCertParamSet(const struct UKeyInfo* ukeyInfo, 
-    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet) {
+static int32_t AddUKeyExportProviderCertParamSet(const struct UKeyInfo* ukeyInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet)
+{
     (void)paramSet;
     return GenericAddUKeyParamSet(ukeyInfo, HKS_EVENT_UKEY_EXPORT_PROVIDER_CERT, reportParamSet);
 }
 
-static int32_t AddUKeyExportCertParamSet(const struct UKeyInfo* ukeyInfo, 
-    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet) {
+static int32_t AddUKeyExportCertParamSet(const struct UKeyInfo* ukeyInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet)
+{
     (void)paramSet;
     return GenericAddUKeyParamSet(ukeyInfo, HKS_EVENT_UKEY_EXPORT_CERT, reportParamSet);
 }
 
-static int32_t AddUKeyGetPropertyParamSet(const struct UKeyInfo* ukeyInfo, 
-    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet) {
+static int32_t AddUKeyGetPropertyParamSet(const struct UKeyInfo* ukeyInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet)
+{
     (void)paramSet;
     return GenericAddUKeyParamSet(ukeyInfo, HKS_EVENT_UKSY_GET_REMOTE_PROPERTY, reportParamSet);
 }
 
-static int32_t AddUKeyImportCertParamSet(const struct UKeyInfo* ukeyInfo, 
-    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet) {
+static int32_t AddUKeyImportCertParamSet(const struct UKeyInfo* ukeyInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet)
+{
     (void)paramSet;
     return GenericAddUKeyParamSet(ukeyInfo, HKS_EVENT_UKEY_IMPORT_CERT, reportParamSet);
 }
 
-static int32_t AddUKeyGetResourceIdParamSet(const struct UKeyInfo* ukeyInfo, 
-    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet) {
+static int32_t AddUKeyGetResourceIdParamSet(const struct UKeyInfo* ukeyInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet)
+{
     (void)paramSet;
     return GenericAddUKeyParamSet(ukeyInfo, HKS_EVENT_UKEY_GET_RESOURCE_ID, reportParamSet);
 }
 
-static int32_t AddUKeyClearPinStateParamSet(const struct UKeyInfo* ukeyInfo, 
-    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet) {
+static int32_t AddUKeyClearPinStateParamSet(const struct UKeyInfo* ukeyInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet)
+{
     (void)paramSet;
     return GenericAddUKeyParamSet(ukeyInfo, HKS_EVENT_UKEY_CLEAR_PIN_STATE, reportParamSet);
 }
 
-static int32_t AddUKeyInitSessionParamSet(const struct UKeyInfo* ukeyInfo, 
-    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet) {
+static int32_t AddUKeyInitSessionParamSet(const struct UKeyInfo* ukeyInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet)
+{
     (void)paramSet;
     return GenericAddUKeyParamSet(ukeyInfo, HKS_EVENT_UKEY_INIT_SESSION, reportParamSet);
 }
 
-static int32_t AddUKeyUpdateSessionParamSet(const struct UKeyInfo* ukeyInfo, 
-    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet) {
+static int32_t AddUKeyUpdateSessionParamSet(const struct UKeyInfo* ukeyInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet)
+{
     (void)paramSet;
     return GenericAddUKeyParamSet(ukeyInfo, HKS_EVENT_UKEY_UPDATE_SESSION, reportParamSet);
 }
 
-static int32_t AddUKeyFinishSessionParamSet(const struct UKeyInfo* ukeyInfo, 
-    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet) {
+static int32_t AddUKeyFinishSessionParamSet(const struct UKeyInfo* ukeyInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet)
+{
     (void)paramSet;
     return GenericAddUKeyParamSet(ukeyInfo, HKS_EVENT_UKEY_FINISH_SESSION, reportParamSet);
 }
 
-static int32_t AddUKeyAbortSessionParamSet(const struct UKeyInfo* ukeyInfo, 
-    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet) {
+static int32_t AddUKeyAbortSessionParamSet(const struct UKeyInfo* ukeyInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet)
+{
     (void)paramSet;
     return GenericAddUKeyParamSet(ukeyInfo, HKS_EVENT_UKEY_ABORT_SESSION, reportParamSet);
 }
 
-static int32_t AddUKeyGenerateKeyParamSet(const struct UKeyInfo* ukeyInfo, 
-    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet) {
+static int32_t AddUKeyGenerateKeyParamSet(const struct UKeyInfo* ukeyInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet)
+{
     (void)paramSet;
     return GenericAddUKeyParamSet(ukeyInfo, HKS_EVENT_UKEY_GENERATE_KEY, reportParamSet);
 }
 
-static int32_t AddUKeyExportPublicKeyParamSet(const struct UKeyInfo* ukeyInfo, 
-    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet) {
+static int32_t AddUKeyExportPublicKeyParamSet(const struct UKeyInfo* ukeyInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet)
+{
     (void)paramSet;
     return GenericAddUKeyParamSet(ukeyInfo, HKS_EVENT_UKEY_EXPORT_PUBLIC_KEY, reportParamSet);
 }
 
-static int32_t AddUKeyImportWrappedKeyParamSet(const struct UKeyInfo* ukeyInfo, 
-    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet) {
+static int32_t AddUKeyImportWrappedKeyParamSet(const struct UKeyInfo* ukeyInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet)
+{
     (void)paramSet;
     return GenericAddUKeyParamSet(ukeyInfo, HKS_EVENT_UKEY_IMPORT_WRAPPED_KEY, reportParamSet);
 }
 
-static int32_t AddUKeySetPropertyParamSet(const struct UKeyInfo* ukeyInfo, 
-    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet) {
+static int32_t AddUKeySetPropertyParamSet(const struct UKeyInfo* ukeyInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet *reportParamSet)
+{
+    (void)paramSet;
+    return GenericAddUKeyParamSet(ukeyInfo, HKS_EVENT_UKEY_SET_REMOTE_PROPERTY, reportParamSet);
+}
     (void)paramSet;
     return GenericAddUKeyParamSet(ukeyInfo, HKS_EVENT_UKEY_SET_REMOTE_PROPERTY, reportParamSet);
 }
@@ -728,8 +998,8 @@ static constexpr uint32_t GetUKeyReportIndex(uint32_t eventId)
     return eventId - HKS_EVENT_UKEY_REGISTER_PROVIDER;
 }
 
-int32_t ReportUKeyEvent(const struct UKeyInfo* ukeyInfo, const char *funcName, 
-    const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet, 
+int32_t ReportUKeyEvent(const struct UKeyInfo* ukeyInfo, const char *funcName,
+    const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     const struct UKeyCommonInfo *ukeyCommon)
 {
     if (ukeyInfo == nullptr || funcName == nullptr || processInfo == nullptr ||
@@ -742,7 +1012,7 @@ int32_t ReportUKeyEvent(const struct UKeyInfo* ukeyInfo, const char *funcName,
         return HKS_FAILURE;
     }
     struct HksParamSet *reportParamSet = nullptr;
-    
+
     std::unique_ptr<struct HksParamSet *, DeleteParamSet> commonEventInfo(&reportParamSet);
 
     int32_t ret = HksInitParamSet(&reportParamSet);
