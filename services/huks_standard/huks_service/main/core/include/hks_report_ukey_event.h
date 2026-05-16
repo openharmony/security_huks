@@ -277,31 +277,14 @@ int32_t HksSetPropertyEventInfoToMap(const struct HksEventInfo *eventInfo,
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-// Helper: Report ukey session event (Init/Update/Finish/Abort) - available in C and C++
-static inline void ReportUKeySessionEvent(uint32_t eventId, int32_t ret,
-    const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
-    const struct HksParamSet *paramSet)
-{
-    struct UKeyInfo ukeyInfo = { .eventId = eventId, .detailErrcode = ret };
-    if (handle != NULL && handle->size > 0) {
-        ukeyInfo.handle = *handle;
-    }
-    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret };
-    ReportUKeyEvent(&ukeyInfo, __func__, processInfo, paramSet, &ukeyCommon);
-}
-
-// Helper: Report ukey key operation event (Generate/Export/ImportWrapped) - available in C and C++
-static inline void ReportUKeyKeyEvent(uint32_t eventId, int32_t ret,
-    const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet)
-{
-    struct UKeyInfo ukeyInfo = { .eventId = eventId, .detailErrcode = ret };
-    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret };
-    ReportUKeyEvent(&ukeyInfo, __func__, processInfo, paramSet, &ukeyCommon);
-}
-
 int32_t ReportUKeyEvent(const struct UKeyInfo* ukeyInfo, const char *funcName, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct UKeyCommonInfo *ukeyCommon);
+
+void ReportUKeySessionEvent(uint32_t eventId, int32_t ret, const struct HksBlob *handle,
+    const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet);
+
+void ReportUKeyKeyEvent(uint32_t eventId, int32_t ret,
+    const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet)
 
 #ifdef __cplusplus
 }
