@@ -1005,9 +1005,6 @@ static int32_t AddUKeySetPropertyParamSet(const struct UKeyInfo* ukeyInfo,
     (void)paramSet;
     return GenericAddUKeyParamSet(ukeyInfo, HKS_EVENT_UKEY_SET_REMOTE_PROPERTY, reportParamSet);
 }
-    (void)paramSet;
-    return GenericAddUKeyParamSet(ukeyInfo, HKS_EVENT_UKEY_SET_REMOTE_PROPERTY, reportParamSet);
-}
 
 static constexpr UkeyAddParamFunc UKEY_ADD_PARAM_FUNC[] = {
     AddUKeyRegProviderParamSet,
