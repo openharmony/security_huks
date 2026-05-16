@@ -160,8 +160,6 @@ void HksIpcServiceQueryAbilityInfo(const struct HksBlob *srcData, const uint8_t 
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     struct HksBlob outBlob = { 0, NULL };
     int32_t ret;
-    uint64_t startTime = 0;
-    (void)HksElapsedRealTime(&startTime);
 
     do {
         ret = HksBlob3Unpack(srcData, &resourceId, &abilityInfo.bundleName, &abilityInfo.abilityName);
@@ -181,13 +179,7 @@ void HksIpcServiceQueryAbilityInfo(const struct HksBlob *srcData, const uint8_t 
     } while (0);
 
     HksSendResponse(context, ret, &outBlob);
-
-    struct UKeyInfo ukeyInfo = { .eventId = HKS_EVENT_UKEY_EXPORT_CERT, .operation = HKS_UKEY_REPORT_UNREGISTER,
-        .providerName = abilityInfo.abilityName };
-    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret, .startTime = startTime };
-    struct HksParamSet tmp;
-    ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, &tmp, &ukeyCommon);
-
+    
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(outBlob);
@@ -314,6 +306,11 @@ void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t
     } while (0);
 
     HksSendResponse(context, ret, NULL);
+
+    struct UKeyInfo ukeyInfo = { .eventId = HKS_EVENT_UKEY_CLEAR_PIN_STATE,
+        .resourceId = index, .detailErrcode = ret };
+    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret };
+    ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, NULL, &ukeyCommon);
 
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
@@ -510,8 +507,13 @@ void HksIpcServiceImportCertificate(const struct HksBlob *srcData, const uint8_t
         ret = HksIpcImportCertAdapter(&processInfo, &index, &certInfo, paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcImportCertAdapter fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
-    
-    HksSendResponse(context, ret, NULL);
+HksSendResponse(context, ret, NULL);
+
+    struct UKeyInfo ukeyInfo = { .eventId = HKS_EVENT_UKEY_IMPORT_CERT,
+        .resourceId = index, .detailErrcode = ret };
+    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret, .startTime = startTime };
+    ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, paramSet, &ukeyCommon);
+
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
 #else
@@ -532,6 +534,7 @@ void HksIpcServiceSetOrGetRemoteProperty(const struct HksBlob *srcData,
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     uint64_t startTime = 0;
     (void)HksElapsedRealTime(&startTime);
+
     do {
         ret = HksSetOrGetRemotePropertyUnpack(srcData, &operation, &resourceId, &propertyId, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSetOrGetRemotePropertyUnpack Ipc fail")
@@ -551,8 +554,9 @@ void HksIpcServiceSetOrGetRemoteProperty(const struct HksBlob *srcData,
         HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceSetOrGetRemoteProperty fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
-    struct UKeyInfo ukeyInfo = { .eventId = HKS_EVENT_UKSY_GET_REMOTE_PROPERTY, .resourceId = resourceId,
-        .propertyId = propertyId };
+    struct UKeyInfo ukeyInfo = { .eventId = (operation == HKS_EXT_PROPERTY_OPERATION_SET) ?
+        HKS_EVENT_UKEY_SET_REMOTE_PROPERTY : HKS_EVENT_UKSY_GET_REMOTE_PROPERTY,
+        .resourceId = resourceId, .propertyId = propertyId, .detailErrcode = ret };
     struct UKeyCommonInfo ukeyCommon = { .returnCode = ret, .startTime = startTime };
     ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, paramSet, &ukeyCommon);
 
@@ -588,6 +592,11 @@ void HksIpcServiceGetResourceId(const struct HksBlob *srcData, const uint8_t *co
     } while (0);
 
     HksSendResponse(context, ret, ret == HKS_SUCCESS && resourceId.size != 0 ? &resourceId : NULL);
+
+    struct UKeyInfo ukeyInfo = { .eventId = HKS_EVENT_UKEY_GET_RESOURCE_ID,
+        .resourceId = resourceId, .providerName = providerName, .detailErrcode = ret };
+    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret };
+    ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, paramSet, &ukeyCommon);
 
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);

@@ -38,6 +38,13 @@ typedef struct UKeyInfo {
     struct HksBlob providerName;
     struct HksBlob resourceId;
     struct HksBlob propertyId;
+    struct HksBlob abilityName;
+    struct HksBlob extBundleName;
+    uint32_t alg;
+    uint32_t purpose;
+    uint32_t detailErrcode;
+    struct HksBlob handle;
+    struct HksBlob extraData;
 } UKeyInfo;
 
 typedef struct UKeyCommonInfo {
@@ -112,6 +119,105 @@ bool HksGetPropertyEventInfoEqual(const struct HksEventInfo *eventInfo1, const s
 
 void HksEventInfoAddForGetProperty(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo);
 
+/* import cert */
+int32_t HksImportCertParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo);
+
+bool HksImportCertNeedReport(const struct HksEventInfo *eventInfo);
+
+bool HksImportCertEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2);
+
+void HksEventInfoAddForImportCert(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo);
+
+/* get resource id */
+int32_t HksGetResourceIdParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo);
+
+bool HksGetResourceIdNeedReport(const struct HksEventInfo *eventInfo);
+
+bool HksGetResourceIdEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2);
+
+void HksEventInfoAddForGetResourceId(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo);
+
+/* clear pin state */
+int32_t HksClearPinStateParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo);
+
+bool HksClearPinStateNeedReport(const struct HksEventInfo *eventInfo);
+
+bool HksClearPinStateEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2);
+
+void HksEventInfoAddForClearPinState(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo);
+
+/* init session */
+int32_t HksInitSessionParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo);
+
+bool HksInitSessionNeedReport(const struct HksEventInfo *eventInfo);
+
+bool HksInitSessionEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2);
+
+void HksEventInfoAddForInitSession(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo);
+
+/* update session */
+int32_t HksUpdateSessionParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo);
+
+bool HksUpdateSessionNeedReport(const struct HksEventInfo *eventInfo);
+
+bool HksUpdateSessionEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2);
+
+void HksEventInfoAddForUpdateSession(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo);
+
+/* finish session */
+int32_t HksFinishSessionParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo);
+
+bool HksFinishSessionNeedReport(const struct HksEventInfo *eventInfo);
+
+bool HksFinishSessionEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2);
+
+void HksEventInfoAddForFinishSession(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo);
+
+/* abort session */
+int32_t HksAbortSessionParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo);
+
+bool HksAbortSessionNeedReport(const struct HksEventInfo *eventInfo);
+
+bool HksAbortSessionEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2);
+
+void HksEventInfoAddForAbortSession(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo);
+
+/* generate key */
+int32_t HksGenerateKeyParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo);
+
+bool HksGenerateKeyNeedReport(const struct HksEventInfo *eventInfo);
+
+bool HksGenerateKeyEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2);
+
+void HksEventInfoAddForGenerateKey(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo);
+
+/* export public key */
+int32_t HksExportPublicKeyParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo);
+
+bool HksExportPublicKeyNeedReport(const struct HksEventInfo *eventInfo);
+
+bool HksExportPublicKeyEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2);
+
+void HksEventInfoAddForExportPublicKey(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo);
+
+/* import wrapped key */
+int32_t HksImportWrappedKeyParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo);
+
+bool HksImportWrappedKeyNeedReport(const struct HksEventInfo *eventInfo);
+
+bool HksImportWrappedKeyEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2);
+
+void HksEventInfoAddForImportWrappedKey(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo);
+
+/* set remote property */
+int32_t HksSetPropertyParamSetToEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo);
+
+bool HksSetPropertyNeedReport(const struct HksEventInfo *eventInfo);
+
+bool HksSetPropertyEventInfoEqual(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2);
+
+void HksEventInfoAddForSetProperty(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo);
+
 #ifdef __cplusplus
 int32_t HksGetAuthPinStateEventInfoToMap(const struct HksEventInfo *eventInfo,
     std::unordered_map<std::string, std::string> &reportData);
@@ -133,6 +239,39 @@ int32_t HksExportCertEventInfoToMap(const struct HksEventInfo *eventInfo,
 
 int32_t HksGetPropertyEventInfoToMap(const struct HksEventInfo *eventInfo,
     std::unordered_map<std::string, std::string> &reportData);
+
+int32_t HksImportCertEventInfoToMap(const struct HksEventInfo *eventInfo,
+    std::unordered_map<std::string, std::string> &reportData);
+
+int32_t HksGetResourceIdEventInfoToMap(const struct HksEventInfo *eventInfo,
+    std::unordered_map<std::string, std::string> &reportData);
+
+int32_t HksClearPinStateEventInfoToMap(const struct HksEventInfo *eventInfo,
+    std::unordered_map<std::string, std::string> &reportData);
+
+int32_t HksInitSessionEventInfoToMap(const struct HksEventInfo *eventInfo,
+    std::unordered_map<std::string, std::string> &reportData);
+
+int32_t HksUpdateSessionEventInfoToMap(const struct HksEventInfo *eventInfo,
+    std::unordered_map<std::string, std::string> &reportData);
+
+int32_t HksFinishSessionEventInfoToMap(const struct HksEventInfo *eventInfo,
+    std::unordered_map<std::string, std::string> &reportData);
+
+int32_t HksAbortSessionEventInfoToMap(const struct HksEventInfo *eventInfo,
+    std::unordered_map<std::string, std::string> &reportData);
+
+int32_t HksGenerateKeyEventInfoToMap(const struct HksEventInfo *eventInfo,
+    std::unordered_map<std::string, std::string> &reportData);
+
+int32_t HksExportPublicKeyEventInfoToMap(const struct HksEventInfo *eventInfo,
+    std::unordered_map<std::string, std::string> &reportData);
+
+int32_t HksImportWrappedKeyEventInfoToMap(const struct HksEventInfo *eventInfo,
+    std::unordered_map<std::string, std::string> &reportData);
+
+int32_t HksSetPropertyEventInfoToMap(const struct HksEventInfo *eventInfo,
+    std::unordered_map<std::string, std::string> &reportData);
 #endif
 
 #ifdef __cplusplus
@@ -140,6 +279,13 @@ extern "C" {
 #endif
 int32_t ReportUKeyEvent(const struct UKeyInfo* ukeyInfo, const char *funcName, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct UKeyCommonInfo *ukeyCommon);
+
+void ReportUKeySessionEvent(uint32_t eventId, int32_t ret, const struct HksBlob *handle,
+    const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet);
+
+void ReportUKeyKeyEvent(uint32_t eventId, int32_t ret,
+    const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet);
+
 #ifdef __cplusplus
 }
 #endif
