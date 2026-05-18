@@ -766,6 +766,53 @@ int32_t CallJsMethod(const std::string &funcName, AbilityRuntime::JsRuntime &jsR
     return param->errcode;
 }
 
+void GetErrorInfoParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
+{
+    napi_value napiErrInfo = nullptr;
+    std::string errMsg = "No error message was passed by the extension";
+    auto status = napi_get_named_property(env, funcResult, "errInfo", &napiErrInfo);
+    if (status != napi_ok || napiErrInfo == nullptr) {
+        LOGE("GetErrorInfoParams::errInfo not found in result");
+        resultParams.errInfo = HksCreateExternalErrorInfo(0, errMsg.c_str());
+        return;
+    }
+
+    napi_value napiErrno = nullptr;
+    status = napi_get_named_property(env, napiErrInfo, "errno", &napiErrno);
+    if (status != napi_ok || napiErrno == nullptr) {
+        LOGE("GetErrorInfoParams::napi_get_named_property errno failed, status:%d", status);
+        resultParams.errInfo = HksCreateExternalErrorInfo(0, errMsg.c_str());
+        return;
+    }
+
+    int32_t errnoValue = 0;
+    status = napi_get_value_int32(env, napiErrno, &errnoValue);
+    if (status != napi_ok) {
+        LOGE("GetErrorInfoParams::get errno value failed, status:%d", status);
+        return;
+    }
+
+    napi_value napiErrorDesc = nullptr;
+    status = napi_get_named_property(env, napiErrInfo, "errorDesc", &napiErrorDesc);
+    if (status != napi_ok || napiErrorDesc == nullptr) {
+        LOGE("GetErrorInfoParams::napi_get_named_property errorDesc failed, status:%d", status);
+        resultParams.errInfo = HksCreateExternalErrorInfo(0, errMsg.c_str());
+        return;
+    }
+
+    std::string errorDesc;
+    auto result = GetStringValue(env, napiErrorDesc, errorDesc);
+    if (result != HKS_SUCCESS) {
+        LOGE("GetErrorInfoParams::GetStringValue errorDesc failed, result:%d", result);
+        return;
+    }
+
+    resultParams.errInfo = HksCreateExternalErrorInfo(errnoValue, errorDesc.c_str());
+    if (resultParams.errInfo == nullptr) {
+        LOGE("GetErrorInfoParams::CreateExternalErrorInfo failed");
+    }
+}
+
 void GetOpenRemoteHandleParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
     napi_value napiHandle = nullptr;
@@ -816,6 +863,7 @@ void GetAuthUkeyPinParams(const napi_env &env, const napi_value &funcResult, Cry
     if (status != napi_ok) {
         LOGE("Convert js value retryCnt failed.status:%d", status);
     }
+    GetErrorInfoParams(env, funcResult, resultParams);
 }
 
 void GetUkeyPinAuthStateParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
@@ -1325,8 +1373,8 @@ int32_t JsHksCryptoExtAbility::CloseRemoteHandle(const std::string &handle, cons
     return dataParam->hksErrorCode;
 }
 
-int32_t JsHksCryptoExtAbility::AuthUkeyPin(const std::string &handle, const CppParamSet &params, int32_t &errcode,
-    int32_t &authState, uint32_t &retryCnt)
+int32_t JsHksCryptoExtAbility::AuthUkeyPin(const std::string &handle, const CppParamSet &params,
+    struct HksExternalErrorInfo **errInfo, int32_t &authState, uint32_t &retryCnt)
 {
     auto argParser = [handle, params](napi_env &env, napi_value *argv, size_t &argc) -> bool {
         struct HandleInfoParam param = {
@@ -1348,9 +1396,15 @@ int32_t JsHksCryptoExtAbility::AuthUkeyPin(const std::string &handle, const CppP
         LOGE("CallJsMethod error, code:%d", ret);
         return ret;
     }
+    int32_t errcode = 0;
     WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     authState = std::move(dataParam->authState);
     retryCnt = std::move(dataParam->retryCnt);
+
+    if (dataParam->errInfo != nullptr && errInfo != nullptr) {
+        *errInfo = dataParam->errInfo;
+        dataParam->errInfo = nullptr;
+    }
     return dataParam->hksErrorCode;
 }
 

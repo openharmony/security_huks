@@ -97,6 +97,7 @@ static napi_value HuksExternalCryptoRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("closeResource", HuksNapiCloseResource),
         DECLARE_NAPI_FUNCTION("clearUkeyPinAuthState", HuksNapiClearUkeyPinAuthState),
         DECLARE_NAPI_FUNCTION("getResourceId", HuksNapiGetResourceId),
+        DECLARE_NAPI_FUNCTION("getErrorInfo", HuksNapiGetErrorInfo),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, std::size(propDesc), propDesc));
     return exports;

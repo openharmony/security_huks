@@ -185,8 +185,9 @@ int32_t HksIpcImportCertAdapter(const struct HksProcessInfo *processInfo, const 
     return ret;
 }
 
-int32_t HksIpcAuthUkeyPinAdapter(const struct HksProcessInfo *processInfo,
-    const struct HksBlob *resourceId, const struct HksParamSet *paramSet, int32_t *outStatus, uint32_t *retryCount)
+int32_t HksIpcAuthUkeyPinAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
+    const struct HksParamSet *paramSet, struct HksExtAuthPinOutParam *authOutParam,
+    struct HksExternalErrorInfo **errInfo)
 {
     int32_t ret = HksIpcCheckBlob(resourceId, 1, HKS_EXT_MAX_RESOURCE_ID_LEN);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcAuthUkeyPinAdapter invalid resourceId blob")
@@ -194,7 +195,7 @@ int32_t HksIpcAuthUkeyPinAdapter(const struct HksProcessInfo *processInfo,
     std::string cppresourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
     CppParamSet cppParamSet(paramSet);
     return OHOS::Security::Huks::HksIpcServiceOnAuthUkeyPin(processInfo, cppresourceId, cppParamSet,
-        *outStatus, *retryCount);
+        *authOutParam, errInfo);
 }
 
 int32_t HksIpcGetUkeyPinAuthStateAdapter(const struct HksProcessInfo *processInfo,

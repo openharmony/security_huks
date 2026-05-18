@@ -19,8 +19,10 @@
 #include "hks_cpp_paramset.h"
 #include "hks_crypto_ext_ability.h"
 #include "hks_error_code.h"
+#include "hks_external_error_info.h"
 #include "js_runtime.h"
 #include "want.h"
+#include "hks_external_error_info.h"
 
 namespace OHOS {
 namespace Security {
@@ -54,7 +56,7 @@ typedef struct HksCertInfo {
     struct HksBlob certsArray {};
 } HksCertInfo;
 
-typedef struct CryptoResultParam {
+struct CryptoResultParam {
     int32_t hksErrorCode {HKS_ERROR_EXT_CALL_JS_TIME_OUT};
     int32_t errCode {HKS_ERROR_EXT_JS_METHOD_ERROR};
     int32_t authState {0};
@@ -64,12 +66,20 @@ typedef struct CryptoResultParam {
     std::vector<HksCertInfo> certs {};
     std::vector<uint8_t> outData {};
     CppParamSet paramSet {};
+    struct HksExternalErrorInfo *errInfo {nullptr};
 
     CryptoResultParamType paramType {};
     std::condition_variable callJsCon;
     std::atomic<bool> callJsExMethodDone {false};
     std::mutex callJsMutex{};
-} CryptoResultParam;
+
+    ~CryptoResultParam() {
+        if (errInfo != nullptr) {
+            HksFreeExternalErrorInfo(errInfo);
+            errInfo = nullptr;
+        }
+    }
+};
 
 struct CallJsParam {
     std::mutex CryptoOperateMutex;
@@ -105,7 +115,7 @@ public:
     int32_t OpenRemoteHandle(const std::string &index, const CppParamSet &params, std::string &handle,
         int32_t &errcode) override;
     int32_t CloseRemoteHandle(const std::string &handle, const CppParamSet &params, int32_t &errcode) override;
-    int32_t AuthUkeyPin(const std::string &handle, const CppParamSet &params, int32_t &errcode,
+    int32_t AuthUkeyPin(const std::string &handle, const CppParamSet &params, struct HksExternalErrorInfo **errInfo,
         int32_t &authState, uint32_t &retryCnt) override;
     int32_t GetUkeyPinAuthState(const std::string &handle, const CppParamSet &params,
         int32_t &authState, int32_t &errcode) override;

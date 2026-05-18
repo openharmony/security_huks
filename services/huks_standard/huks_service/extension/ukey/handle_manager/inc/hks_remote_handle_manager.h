@@ -30,6 +30,7 @@
 #include "hks_json_wrapper.h"
 #include "hks_ukey_common.h"
 #include "hks_ext_cert_info.h"
+#include "hks_external_error_info.h"
 namespace OHOS {
 namespace Security {
 namespace Huks {
@@ -217,7 +218,7 @@ public:
         const CppParamSet &paramSet);
     // ukey PIN manager
     int32_t RemoteVerifyPin(const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet,
-        int32_t &authState, uint32_t &retryCnt);
+        struct HksExtAuthPinOutParam &authOutParam, struct HksExternalErrorInfo **errInfo);
     int32_t RemoteVerifyPinStatus(const HksProcessInfo &processInfo,
         const std::string &index, const CppParamSet &paramSet, int32_t &state);
     int32_t RemoteClearPinStatus(const HksProcessInfo &processInfo, const std::string &index,

@@ -95,16 +95,17 @@ int32_t HksServiceExportCertificate(const struct HksProcessInfo *processInfo, co
 }
 
 int32_t HksServiceAuthUkeyPin(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn, int32_t *outStatus, uint32_t *retryCount)
+    const struct HksParamSet *paramSetIn, struct HksExtAuthPinOutParam *authOutParam,
+    struct HksExternalErrorInfo **errInfo)
 {
 #ifdef L2_STANDARD
-    return HksIpcAuthUkeyPinAdapter(processInfo, index, paramSetIn, outStatus, retryCount);
+    return HksIpcAuthUkeyPinAdapter(processInfo, index, paramSetIn, authOutParam, errInfo);
 #else
     (void)processInfo;
     (void)index;
     (void)paramSetIn;
-    (void)outStatus;
-    (void)retryCount;
+    (void)authOutParam;
+    (void)errInfo;
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }

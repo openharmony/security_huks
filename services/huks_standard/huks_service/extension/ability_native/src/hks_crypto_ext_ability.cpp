@@ -71,8 +71,8 @@ int32_t HksCryptoExtAbility::CloseRemoteHandle(const std::string &handle, const 
     return HKS_ERROR_EXT_UNDEFINED_OPERATION;
 }
 
-int32_t HksCryptoExtAbility::AuthUkeyPin(const std::string &handle, const CppParamSet &params, int32_t &errcode,
-    int32_t &authState, uint32_t &retryCnt)
+int32_t HksCryptoExtAbility::AuthUkeyPin(const std::string &handle, const CppParamSet &params,
+    struct HksExternalErrorInfo **errInfo, int32_t &authState, uint32_t &retryCnt)
 {
     LOGE("HksCryptoExtAbility::AuthUkeyPin Undefined operation");
     return HKS_ERROR_EXT_UNDEFINED_OPERATION;

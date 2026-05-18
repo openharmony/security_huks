@@ -181,10 +181,21 @@ struct HksEncapsulationResult {
 #define HKS_MAX_CERT_COUNT 2048
 #define HKS_MAX_KEY_ALIAS_COUNT 2048
 #define MAX_ERROR_MESSAGE_LEN 512
+#define MAX_EXT_ERROR_MESSAGE_LEN 256
 
 #define HKS_EXT_MAX_PROVIDER_NAME_LEN 128
 #define HKS_EXT_MAX_RESOURCE_ID_LEN 1024
 #define HKS_EXT_MAX_PROPERTY_ID_LEN 100
+struct HksExtAuthPinOutParam {
+    int32_t outStatus;
+    uint32_t retryCount;
+};
+
+struct HksExternalErrorInfo {
+ 	int32_t errVal;
+ 	char *errorDesc;
+ 	uint32_t errorDescLen; 
+};
 
 struct HksExtCertInfo {
     int32_t purpose;

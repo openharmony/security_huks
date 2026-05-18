@@ -48,7 +48,7 @@ int32_t HksIpcServiceOnCreateRemoteIndex(const std::string &providerName,
 int32_t HksIpcServiceOnGenerateUkeyKey(const struct HksProcessInfo *processInfo,
     const std::string &keyAlias, const std::string &resourceId, CppParamSet &paramSet);
 int32_t HksIpcServiceOnAuthUkeyPin(const struct HksProcessInfo *processInfo, const std::string &index,
-    CppParamSet &pinData, int32_t &authState, uint32_t &retryCnt);
+    CppParamSet &pinData, struct HksExtAuthPinOutParam &authOutParam, struct HksExternalErrorInfo **errInfo);
 int32_t HksIpcServiceOnGetVerifyPinStatus(const struct HksProcessInfo *processInfo, const std::string &index,
     const CppParamSet &paramSet, int32_t &state);
 int32_t HksIpcServiceOnClearUkeyPinAuthStatus(const struct HksProcessInfo *processInfo, const std::string &index);

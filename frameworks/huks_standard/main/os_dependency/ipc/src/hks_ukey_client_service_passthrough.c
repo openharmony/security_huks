@@ -133,7 +133,8 @@ int32_t HksClientOpenRemoteHandle(const struct HksBlob *resourceId,
 }
 
 
-int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, uint32_t *retryCount)
+int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, uint32_t *retryCount,
+    struct HksExternalErrorInfo **errInfo)
 {
     char *processName = NULL;
     char *userId = NULL;
@@ -149,7 +150,9 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
         0,
         0
     };
-    return HksServiceAuthUkeyPin(&processInfo, index, paramSetIn, &outStatus, retryCount);
+
+    struct HksExtAuthPinOutParam authOutParam = {outStatus, *retryCount};
+    return HksServiceAuthUkeyPin(&processInfo, index, paramSetIn, &authOutParam, errInfo);
 }
 
 int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, int32_t *status)

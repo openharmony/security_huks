@@ -33,6 +33,11 @@ if (os_level == "standard") {
     include_dirs = [
       "//base/security/huks/frameworks/huks_standard/main/crypto_engine/openssl/include",
       "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
+      "//base/security/huks/utils/mutex",
+    ]
+
+    deps = [
+      "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
     ]
 
     sources = [
@@ -47,6 +52,7 @@ if (os_level == "standard") {
       "src/hks_cpp_paramset.cpp",
       "src/hks_ukey_check.cpp",
       "src/hks_cpp_abilityinfo.cpp",
+      "src/hks_external_error_info.c",
     ]
 
     if (huks_enable_ukey_config == true) {

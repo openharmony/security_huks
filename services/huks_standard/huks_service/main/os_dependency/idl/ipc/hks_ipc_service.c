@@ -51,6 +51,7 @@
 #include "hks_util.h"
 #include "hks_report_ukey_event.h"
 #include "hks_report_common.h"
+#include "hks_external_error_info.h"
 
 #ifdef L2_STANDARD
 #include "hks_se_api_wrap.h"
@@ -199,6 +200,7 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
     int32_t status = 0;
     uint32_t retryCount = 0;
     struct HksBlob outBlob = { 0, NULL };
+    struct HksExternalErrorInfo *errInfo = NULL;
     int32_t ret;
     uint64_t startTime = 0;
     (void)HksElapsedRealTime(&startTime);
@@ -212,8 +214,13 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
         ret = CheckUkeyAuthPinType();
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: CheckUkeyAuthPinType fail ret=%" LOG_PUBLIC "d", ret);
 
-        ret = HksIpcAuthUkeyPinAdapter(&processInfo, &index, paramSet, &status, &retryCount);
-        HKS_IF_NOT_SUCC_LOGE(ret, "AuthUkeyPin: adapter ret=%" LOG_PUBLIC "d", ret);
+        struct HksExtAuthPinOutParam authOutParam = {status, retryCount};
+        ret = HksIpcAuthUkeyPinAdapter(&processInfo, &index, paramSet, &authOutParam, &errInfo);
+        HKS_IF_TRUE_BREAK(ret == HKS_SUCCESS)
+        HKS_LOG_E("AuthUkeyPin: adapter ret=%" LOG_PUBLIC "d", ret);
+        HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
+        HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
+        HksFreeExternalErrorInfo(errInfo);
     } while (0);
 
     outBlob.size = (sizeof(int32_t) + sizeof(int32_t) + sizeof(uint32_t));

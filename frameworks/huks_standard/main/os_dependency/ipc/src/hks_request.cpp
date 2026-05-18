@@ -26,6 +26,7 @@
 #include "hks_template.h"
 #include "hks_type.h"
 #include "huks_service_ipc_interface_code.h"
+#include "hks_external_error_info.h"
 
 using namespace OHOS;
 
@@ -84,8 +85,28 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
         HKS_IF_NULL_LOGE_RETURN(errMsg, ret, "[ipc error] read errorMsg")
         HksAppendThreadErrMsg(errMsg, errMsgLen);
     }
-#endif
 
+    int32_t errVal = 0;
+    if (!reply.ReadInt32(errVal)) {
+        HKS_LOG_E("ReadInt32 errVal failed");
+        return ret;
+    }
+    uint32_t descLen = 0;
+    if (!reply.ReadUint32(descLen)) {
+        HKS_LOG_E("ReadUint32 descLen failed");
+        return ret;
+    }
+    const char *errorDesc = "";
+    if (descLen != 0 && descLen < MAX_EXT_ERROR_MESSAGE_LEN) {
+        const uint8_t *buffer = reply.ReadBuffer(descLen);
+        if (buffer == nullptr) {
+            HKS_LOG_E("ReadBuffer errorDesc failed");
+            return ret;
+        }
+        errorDesc = (const char *)buffer;
+    }
+    HksAppendThreadExtErrMsg(errVal, errorDesc);
+#endif
     return ret;
 }
 

@@ -47,8 +47,8 @@ public:
         const CppParamSet &paramSet);
     int32_t OnCloseRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet);
-    int32_t OnAuthUkeyPin(const HksProcessInfo &processInfo,
-        const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t &retryCnt);
+    int32_t OnAuthUkeyPin(const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet,
+        struct HksExtAuthPinOutParam &authOutParam, struct HksExternalErrorInfo **errInfo);
     int32_t OnGetVerifyPinStatus(const HksProcessInfo &processInfo,
         const std::string &index, const CppParamSet &paramSet, int32_t &state);
     int32_t OnClearUkeyPinAuthStatus(const HksProcessInfo &processInfo, const std::string &index);

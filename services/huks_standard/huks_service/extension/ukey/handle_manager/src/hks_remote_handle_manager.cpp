@@ -37,6 +37,7 @@
 #include "tokenid_kit.h"
 #include "ipc_skeleton.h"
 #include "hks_json_wrapper.h"
+#include "hks_ext_error_info.h"
 namespace OHOS {
 namespace Security {
 namespace Huks {
@@ -225,8 +226,8 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t& retryCnt)
+int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, struct HksExtAuthPinOutParam &authOutParam, struct HksExternalErrorInfo **errInfo)
 {
     auto accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
     HKS_IF_NOT_TRUE_LOGE_RETURN(OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx),
@@ -247,9 +248,13 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
-    
-    auto ipccode = proxy->AuthUkeyPin(handle, paramSet, ret, authState, retryCnt);
+
+    HksExternalErrorInfoIdl newErrInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, ""};
+    auto ipccode = proxy->AuthUkeyPin(handle, paramSet, newErrInfo, authOutParam.outStatus, authOutParam.retryCount);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
+    HKS_IF_TRUE_EXCU(newErrInfo.errVal != EXTENSION_SUCCESS && errInfo != nullptr,
+        *errInfo = HksCreateExternalErrorInfo(newErrInfo.errVal, newErrInfo.errorDesc.c_str()));
+    ret = newErrInfo.errVal;
     ret = ConvertExtensionToHksErrorCode(ret, g_authPinErrCodeMapping);
     ClearMapByHandle(ret, handle);
     if (ret == HUKS_ERR_CODE_PIN_CODE_ERROR || ret == HUKS_ERR_CODE_PIN_LOCKED) {

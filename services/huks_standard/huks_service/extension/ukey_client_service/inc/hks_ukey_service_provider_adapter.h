@@ -46,8 +46,9 @@ int32_t HksIpcExportCertAdapter(const struct HksProcessInfo *processInfo, const 
 int32_t HksIpcImportCertAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksExtCertInfo *certInfo, const struct HksParamSet *paramSet);
 
-int32_t HksIpcAuthUkeyPinAdapter(const struct HksProcessInfo *processInfo,
-    const struct HksBlob *index, const struct HksParamSet *paramSet, int32_t *outStatus, uint32_t *retryCount);
+int32_t HksIpcAuthUkeyPinAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
+    const struct HksParamSet *paramSet, struct HksExtAuthPinOutParam *authOutParam,
+    struct HksExternalErrorInfo **errInfo);
 
 int32_t HksIpcGetUkeyPinAuthStateAdapter(const struct HksProcessInfo *processInfo,
     const struct HksBlob *index, const struct HksParamSet *paramSet, int32_t *outStatus);

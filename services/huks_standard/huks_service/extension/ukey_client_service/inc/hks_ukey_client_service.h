@@ -52,7 +52,8 @@ int32_t HksServiceExportCertificate(const struct HksProcessInfo *processInfo, co
     struct HksExtCertInfoSet *certSet);
 
 int32_t HksServiceAuthUkeyPin(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn, int32_t *outStatus, uint32_t *retryCount);
+    const struct HksParamSet *paramSetIn, struct HksExtAuthPinOutParam *authOutParam,
+    struct HksExternalErrorInfo **errInfo);
 
 int32_t HksServiceOpenRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn);

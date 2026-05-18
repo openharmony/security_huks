@@ -18,6 +18,7 @@
 
 #include "hks_ipc_serialization.h"
 #include "hks_type_inner.h"
+#include "hks_external_error_info.h"
 
 #ifdef __cplusplus
 extern "C" {

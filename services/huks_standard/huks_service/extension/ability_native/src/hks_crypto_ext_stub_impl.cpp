@@ -47,15 +47,29 @@ ErrCode HksCryptoExtStubImpl::CloseRemoteHandle(
 ErrCode HksCryptoExtStubImpl::AuthUkeyPin(
     const std::string& handle,
     const CppParamSet& params,
-    int32_t& errcode,
+    HksExternalErrorInfoIdl& errorInfoIdl,
     int32_t& authState,
     uint32_t& retryCnt)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
+        errorInfoIdl.errVal = HKS_ERROR_EXT_NULLPTR;
+        errorInfoIdl.errorDesc.assign("HUKS internal error");
         return HKS_ERROR_EXT_NULLPTR;
     }
-    return extension_->AuthUkeyPin(handle, params, errcode, authState, retryCnt);
+
+    struct HksExternalErrorInfo *errInfoC = nullptr;
+    int32_t ret = extension_->AuthUkeyPin(handle, params, &errInfoC, authState, retryCnt);
+    
+    if (errInfoC != nullptr) {
+        errorInfoIdl.errVal = errInfoC->errVal;
+        errorInfoIdl.errorDesc = errInfoC->errorDesc != nullptr ? errInfoC->errorDesc : "";
+        HksFreeExternalErrorInfo(errInfoC);
+        return ret;
+    }
+    errorInfoIdl.errVal = ret;
+    errorInfoIdl.errorDesc.assign("No error message was passed by the extension");
+    return ret;
 }
 
 ErrCode HksCryptoExtStubImpl::GetUkeyPinAuthState(

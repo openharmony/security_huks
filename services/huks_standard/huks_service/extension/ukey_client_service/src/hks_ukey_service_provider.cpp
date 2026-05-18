@@ -62,11 +62,11 @@ int32_t HksIpcServiceOnCloseRemoteKeyHandle(const struct HksProcessInfo *process
 }
 
 int32_t HksIpcServiceOnAuthUkeyPin(const struct HksProcessInfo *processInfo, const std::string &index,
-    CppParamSet &pinData, int32_t &authState, uint32_t &retryCnt)
+    CppParamSet &pinData, struct HksExtAuthPinOutParam &authOutParam, struct HksExternalErrorInfo **errInfo)
 {
     auto pluginManager = HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
-    return pluginManager->OnAuthUkeyPin(*processInfo, index, pinData, authState, retryCnt);
+    return pluginManager->OnAuthUkeyPin(*processInfo, index, pinData, authOutParam, errInfo);
 }
 
 int32_t HksIpcServiceOnGetVerifyPinStatus(const struct HksProcessInfo *processInfo,

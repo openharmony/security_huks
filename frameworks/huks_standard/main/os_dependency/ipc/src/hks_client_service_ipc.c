@@ -41,6 +41,8 @@
 #include "hks_type_inner.h"
 #include "huks_service_ipc_interface_code.h"
 #include "securec.h"
+#include "hks_external_error_info.h"
+#include "hks_ukey_global_errInfo.h"
 
 #ifdef HKS_L1_SMALL
 #include "hks_samgr_client.h"
@@ -420,12 +422,9 @@ int32_t HksClientImportCertificate(const struct HksBlob *resourceId,
     return ret;
 }
 
-int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
-    uint32_t *retryCount)
+int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, uint32_t *retryCount)
 {
-    if (retryCount == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(retryCount, HKS_ERROR_NULL_POINTER)
     /**
     *                +---------------------------+
     * outBlob:       | int32_t   | uint32_t     |
@@ -472,6 +471,12 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
             outBlob.data + sizeof(int32_t) + sizeof(int32_t), sizeof(uint32_t)), "memcpy_s retryCount failed")
     } while (0);
 
+    const struct HksExternalErrorInfo *threadError = HksGetThreadExtErrMsg();
+    if (ret != HKS_SUCCESS && threadError != NULL) {
+        HksSetUkeyGlobalInfoC(threadError->errVal, threadError->errorDesc);
+    }
+
+    HksClearThreadExtErrMsg();
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
     HKS_FREE_BLOB(outBlob);

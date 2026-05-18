@@ -20,6 +20,7 @@
 #include "want.h"
 #include "hks_cpp_paramset.h"
 #include "hks_ext_cert_info.h"
+#include "hks_external_error_info.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -44,8 +45,8 @@ public:
     virtual int OpenRemoteHandle(const std::string &index, const CppParamSet &params, std::string &handle,
         int32_t &errcode);
     virtual int CloseRemoteHandle(const std::string &handle, const CppParamSet &params, int32_t &errcode);
-    virtual int AuthUkeyPin(const std::string &handle, const CppParamSet &params, int32_t &errcode, int32_t &authState,
-        uint32_t &retryCnt);
+    virtual int AuthUkeyPin(const std::string &handle, const CppParamSet &params, struct HksExternalErrorInfo **errInfo,
+        int32_t &authState, uint32_t &retryCnt);
     virtual int GetUkeyPinAuthState(const std::string &handle, const CppParamSet &params, int32_t &authState,
         int32_t &errcode);
     virtual int ExportCertificate(const std::string &index, const CppParamSet &params, std::string &certJsonArr,

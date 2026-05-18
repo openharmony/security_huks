@@ -22,6 +22,7 @@
 #include "huks_access_ext_base_stub.h"
 #include "hks_crypto_ext_ability.h"
 #include "hks_ext_cert_info.h"
+#include "hks_ext_error_info.h"
 
 namespace OHOS {
 namespace Security {
@@ -47,7 +48,7 @@ public:
     ErrCode AuthUkeyPin(
         const std::string& handle,
         const CppParamSet& params,
-        int32_t& errcode,
+        HksExternalErrorInfoIdl& errorInfoIdl,
         int32_t& authState,
         uint32_t& retryCnt) override;
 

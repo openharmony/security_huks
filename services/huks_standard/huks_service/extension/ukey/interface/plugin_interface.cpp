@@ -144,7 +144,8 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnCloseRemoteHandle(
 }
 
 __attribute__((visibility("default"))) int32_t HksExtPluginOnAuthUkeyPin(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t &retryCnt)
+    const std::string &index, const CppParamSet &paramSet, struct HksExtAuthPinOutParam &authOutParam,
+    struct HksExternalErrorInfo **errInfo)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto uid = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
@@ -155,7 +156,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnAuthUkeyPin(const H
     }
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
-    auto ret = handleMgr->RemoteVerifyPin(processInfo, index, paramSet, authState, retryCnt);
+    auto ret = handleMgr->RemoteVerifyPin(processInfo, index, paramSet, authOutParam, errInfo);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }

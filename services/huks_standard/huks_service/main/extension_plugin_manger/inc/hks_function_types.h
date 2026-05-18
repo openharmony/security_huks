@@ -62,8 +62,8 @@ using OnCreateRemoteKeyHandleFunc = int32_t (*)(const HksProcessInfo &processInf
     const CppParamSet &paramSet);
 using OnCloseRemoteKeyHandleFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet);
-using OnAuthUkeyPinFunc = int32_t (*)(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, int32_t& authState, uint32_t& retryCnt);
+using OnAuthUkeyPinFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, struct HksExtAuthPinOutParam &authOutParam, struct HksExternalErrorInfo **errInfo);
 using OnGetVerifyPinStatusFunc = int32_t (*)(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, int32_t &state);
 using OnClearUkeyPinAuthStatusFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index);
