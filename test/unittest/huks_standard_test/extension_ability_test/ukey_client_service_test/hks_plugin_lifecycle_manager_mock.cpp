@@ -16,6 +16,7 @@
 #include "hks_plugin_lifecycle_manager.h"
 #include "hks_plugin_loader.h"
 #include "hks_log.h"
+#include "hks_external_error_info.h"
 
 namespace OHOS {
 namespace Security {
@@ -60,35 +61,41 @@ int32_t HuksPluginLifeCycleMgr::OnUnRegistProvider(const HksProcessInfo &process
 }
 
 int32_t HuksPluginLifeCycleMgr::OnCreateRemoteKeyHandle(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet)
+    const std::string &index, const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo)
 {
+    (void)errInfo;
     return HKS_SUCCESS;
 }
 
 int32_t HuksPluginLifeCycleMgr::OnCloseRemoteKeyHandle(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet)
+    const std::string &index, const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo)
 {
+    (void)errInfo;
     return HKS_SUCCESS;
 }
 
 int32_t HuksPluginLifeCycleMgr::OnAuthUkeyPin(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t &retryCnt)
+    const std::string &index, const CppParamSet &paramSet, struct HksExtAuthPinOutParam &authOutParam,
+    struct HksExternalErrorInfo **errInfo)
 {
-    authState = 1;
-    retryCnt = 0;
+    (void)errInfo;
+    authOutParam.authState = 1;
+    authOutParam.retryCnt = 0;
     return HKS_SUCCESS;
 }
 
 int32_t HuksPluginLifeCycleMgr::OnGetVerifyPinStatus(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, int32_t &state)
+    const std::string &index, const CppParamSet &paramSet, int32_t &state, struct HksExternalErrorInfo **errInfo)
 {
+    (void)errInfo;
     state = 1;
     return HKS_SUCCESS;
 }
 
 int32_t HuksPluginLifeCycleMgr::OnClearUkeyPinAuthStatus(const HksProcessInfo &processInfo,
-    const std::string &index)
+    const std::string &index, struct HksExternalErrorInfo **errInfo)
 {
+    (void)errInfo;
     return HKS_SUCCESS;
 }
 
@@ -100,22 +107,27 @@ int32_t HuksPluginLifeCycleMgr::OnSetOrGetRemoteProperty(const HksProcessInfo &p
 }
 
 int32_t HuksPluginLifeCycleMgr::OnExportCertificate(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, std::string &certsJson)
+    const std::string &index, const CppParamSet &paramSet, std::string &certsJson, struct HksExternalErrorInfo **errInfo)
 {
+    (void)errInfo;
     certsJson = "[{\"purpose\":1,\"index\":\"idx\",\"cert\":\"MIIB\"}]";
     return HKS_SUCCESS;
 }
 
 int32_t HuksPluginLifeCycleMgr::OnExportProviderAllCertificates(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr)
+    const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr,
+    struct HksExternalErrorInfo **errInfo)
 {
+    (void)errInfo;
     certsJsonArr = "[{\"purpose\":1,\"index\":\"idx\",\"cert\":\"MIIB\"}]";
     return HKS_SUCCESS;
 }
 
 int32_t HuksPluginLifeCycleMgr::OnImportCertificate(const HksProcessInfo &processInfo,
-    const std::string &index, const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet)
+    const std::string &index, const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet,
+    struct HksExternalErrorInfo **errInfo)
 {
+    (void)errInfo;
     return HKS_SUCCESS;
 }
 

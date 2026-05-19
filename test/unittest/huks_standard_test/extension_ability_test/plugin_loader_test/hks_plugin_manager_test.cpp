@@ -15,6 +15,7 @@
 
 #include "hks_plugin_manager_test.h"
 #include "hks_function_types.h"
+#include "hks_external_error_info.h"
 #include <unordered_map>
 #include <chrono>
 #include <thread>
@@ -64,22 +65,22 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest001, TestSize.Level0)
     EXPECT_EQ(ret, 0) << "fail: regist fail";
 
     std::string index = "";
-    ret = mgr->OnCreateRemoteKeyHandle(processInfo, index, paramSet);
+    struct HksExternalErrorInfo *errInfo = nullptr;
+    ret = mgr->OnCreateRemoteKeyHandle(processInfo, index, paramSet, &errInfo);
     EXPECT_EQ(ret, 0) << "fail: OnCreateRemoteKeyHandle fail";
 
-    ret = mgr->OnCloseRemoteKeyHandle(processInfo, index, paramSet);
+    ret = mgr->OnCloseRemoteKeyHandle(processInfo, index, paramSet, &errInfo);
     EXPECT_EQ(ret, 0) << "fail: OnCloseRemoteKeyHandle fail";
 
-    int32_t authState = 0;
-    uint32_t retryCnt = 0;
-    ret = mgr->OnAuthUkeyPin(processInfo, index, paramSet, authState, retryCnt);
+    struct HksExtAuthPinOutParam authOutParam = {};
+    ret = mgr->OnAuthUkeyPin(processInfo, index, paramSet, authOutParam, &errInfo);
     EXPECT_EQ(ret, 0) << "fail: OnAuthUkeyPin fail";
 
     int32_t state = 0;
-    ret = mgr->OnGetVerifyPinStatus(processInfo, index, paramSet, state);
+    ret = mgr->OnGetVerifyPinStatus(processInfo, index, paramSet, state, &errInfo);
     EXPECT_EQ(ret, 0) << "fail: OnGetVerifyPinStatus fail";
 
-    ret = mgr->OnClearUkeyPinAuthStatus(processInfo, index);
+    ret = mgr->OnClearUkeyPinAuthStatus(processInfo, index, &errInfo);
     EXPECT_EQ(ret, 0) << "fail: OnClearUkeyPinAuthStatus fail";
 
     bool isDeath = false;
@@ -136,16 +137,17 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest003, TestSize.Level0)
     std::string propertyId = "";
     CppParamSet outParams(g_genAesParams);
     const std::string index = "";
+    struct HksExternalErrorInfo *errInfo = nullptr;
     ret = mgr->OnSetOrGetRemoteProperty(processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
         index, propertyId, outParams);
     EXPECT_EQ(ret, 0) << "fail: OnSetOrGetRemoteProperty fail";
 
     std::string certsJson = "";
-    ret = mgr->OnExportCertificate(processInfo, index, paramSet, certsJson);
+    ret = mgr->OnExportCertificate(processInfo, index, paramSet, certsJson, &errInfo);
     EXPECT_EQ(ret, 0) << "fail: OnExportCertificate fail";
 
     std::string certsJsonArr = "";
-    ret = mgr->OnExportProviderAllCertificates(processInfo, TEST_PROVIDER, paramSet, certsJsonArr);
+    ret = mgr->OnExportProviderAllCertificates(processInfo, TEST_PROVIDER, paramSet, certsJsonArr, &errInfo);
     EXPECT_EQ(ret, 0) << "fail: OnExportProviderAllCertificates fail";
 
     uint32_t uhandle = 0;
@@ -214,7 +216,8 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest004, TestSize.Level0)
     certInfo.index.data = indexBuf;
     certInfo.cert.size = sizeof(certBuf);
     certInfo.cert.data = certBuf;
-    ret = mgr->OnImportCertificate(processInfo, index, certInfo, paramSet);
+    struct HksExternalErrorInfo *errInfo = nullptr;
+    ret = mgr->OnImportCertificate(processInfo, index, certInfo, paramSet, &errInfo);
     EXPECT_EQ(ret, 0) << "fail: OnImportCertificate fail";
 
     bool isDeath = false;
@@ -238,22 +241,22 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest005, TestSize.Level0)
     const std::string index = "testIndex";
 
     // 不调用RegisterProvider，m_pluginProviderMap为空，Find应失败
-    int ret = mgr->OnCreateRemoteKeyHandle(processInfo, index, paramSet);
+    struct HksExternalErrorInfo *errInfo = nullptr;
+    int ret = mgr->OnCreateRemoteKeyHandle(processInfo, index, paramSet, &errInfo);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
-    ret = mgr->OnCloseRemoteKeyHandle(processInfo, index, paramSet);
+    ret = mgr->OnCloseRemoteKeyHandle(processInfo, index, paramSet, &errInfo);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
-    int32_t authState = 0;
-    uint32_t retryCnt = 0;
-    ret = mgr->OnAuthUkeyPin(processInfo, index, paramSet, authState, retryCnt);
+    struct HksExtAuthPinOutParam authOutParam = {};
+    ret = mgr->OnAuthUkeyPin(processInfo, index, paramSet, authOutParam, &errInfo);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
     int32_t state = 0;
-    ret = mgr->OnGetVerifyPinStatus(processInfo, index, paramSet, state);
+    ret = mgr->OnGetVerifyPinStatus(processInfo, index, paramSet, state, &errInfo);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
-    ret = mgr->OnClearUkeyPinAuthStatus(processInfo, index);
+    ret = mgr->OnClearUkeyPinAuthStatus(processInfo, index, &errInfo);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
     CppParamSet outParams(tmpParams);
@@ -278,18 +281,19 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest006, TestSize.Level0)
     const std::string index = "testIndex";
 
     std::string certsJson;
-    int ret = mgr->OnExportCertificate(processInfo, index, paramSet, certsJson);
+    struct HksExternalErrorInfo *errInfo = nullptr;
+    int ret = mgr->OnExportCertificate(processInfo, index, paramSet, certsJson, &errInfo);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
     std::string certsJsonArr;
-    ret = mgr->OnExportProviderAllCertificates(processInfo, TEST_PROVIDER, paramSet, certsJsonArr);
+    ret = mgr->OnExportProviderAllCertificates(processInfo, TEST_PROVIDER, paramSet, certsJsonArr, &errInfo);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
     ret = mgr->OnGenerateKey(processInfo, index, paramSet);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
     struct HksExtCertInfo certInfo {};
-    ret = mgr->OnImportCertificate(processInfo, index, certInfo, paramSet);
+    ret = mgr->OnImportCertificate(processInfo, index, certInfo, paramSet, &errInfo);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
     uint32_t handle = 0;
@@ -382,7 +386,8 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest009, TestSize.Level0)
 
     // 注册后可以正常调用On方法
     const std::string index = "idx";
-    ret = mgr->OnCreateRemoteKeyHandle(processInfo, index, paramSet);
+    struct HksExternalErrorInfo *errInfo = nullptr;
+    ret = mgr->OnCreateRemoteKeyHandle(processInfo, index, paramSet, &errInfo);
     EXPECT_EQ(ret, 0) << "fail: OnCreateRemoteKeyHandle fail";
 
     // 解注册第一个，refCount从3到2，不应关闭动态库

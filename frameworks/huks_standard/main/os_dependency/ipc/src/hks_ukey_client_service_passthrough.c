@@ -76,7 +76,8 @@ int32_t HksClientUnregisterProvider(const struct HksBlob *name, const struct Hks
 }
 
 int32_t HksClientExportProviderCertificates(const struct HksBlob *providerName,
-    const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
+    const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet,
+    struct HksExternalErrorInfo **errInfo)
 {
     char *processName = NULL;
     char *userId = NULL;
@@ -91,11 +92,12 @@ int32_t HksClientExportProviderCertificates(const struct HksBlob *providerName,
         0,
         0
     };
-    return HksServiceExportProviderCertificates(&processInfo, providerName, paramSetIn, certSet);
+    return HksServiceExportProviderCertificates(&processInfo, providerName, paramSetIn, certSet, errInfo);
 }
 
 int32_t HksClientExportCertificate(const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
+    const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet,
+    struct HksExternalErrorInfo **errInfo)
 {
     char *processName = NULL;
     char *userId = NULL;
@@ -110,11 +112,11 @@ int32_t HksClientExportCertificate(const struct HksBlob *index,
         0,
         0
     };
-    return HksServiceExportCertificate(&processInfo, index, paramSetIn, certSet);
+    return HksServiceExportCertificate(&processInfo, index, paramSetIn, certSet, errInfo);
 }
 
 int32_t HksClientOpenRemoteHandle(const struct HksBlob *resourceId,
-    const struct HksParamSet *paramSetIn)
+    const struct HksParamSet *paramSetIn, struct HksExternalErrorInfo **errInfo)
 {
     char *processName = NULL;
     char *userId = NULL;
@@ -129,7 +131,7 @@ int32_t HksClientOpenRemoteHandle(const struct HksBlob *resourceId,
         0,
         0
     };
-    return HksServiceOpenRemoteHandle(&processInfo, resourceId, paramSetIn);
+    return HksServiceOpenRemoteHandle(&processInfo, resourceId, paramSetIn, errInfo);
 }
 
 
@@ -155,7 +157,8 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
     return HksServiceAuthUkeyPin(&processInfo, index, paramSetIn, &authOutParam, errInfo);
 }
 
-int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, int32_t *status)
+int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
+    int32_t *status, struct HksExternalErrorInfo **errInfo)
 {
     char *processName = NULL;
     char *userId = NULL;
@@ -170,10 +173,11 @@ int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct H
         0,
         0
     };
-    return HksServiceGetUkeyPinAuthState(&processInfo, index, paramSetIn, status);
+    return HksServiceGetUkeyPinAuthState(&processInfo, index, paramSetIn, status, errInfo);
 }
 
-int32_t HksClientCloseRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn)
+int32_t HksClientCloseRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn,
+    struct HksExternalErrorInfo **errInfo)
 {
     char *processName = NULL;
     char *userId = NULL;
@@ -188,20 +192,20 @@ int32_t HksClientCloseRemoteHandle(const struct HksBlob *resourceId, const struc
         0,
         0
     };
-    return HksServiceCloseRemoteHandle(&processInfo, resourceId, paramSetIn);
+    return HksServiceCloseRemoteHandle(&processInfo, resourceId, paramSetIn, errInfo);
 }
 
-int32_t HksClientClearPinAuthState(const struct HksBlob *index)
+int32_t HksClientClearPinAuthState(const struct HksBlob *index, struct HksExternalErrorInfo **errInfo)
 {
     struct HksProcessInfo processInfo = {
-        { 0, NULL }, // userId
-        { 0, NULL }, // processName
+        { 0, NULL },
+        { 0, NULL },
         0,
         0,
         0,
         0
     };
-    return HksServiceClearPinAuthState(&processInfo, index);
+    return HksServiceClearPinAuthState(&processInfo, index, errInfo);
 }
 
 int32_t HksClientSetOrGetRemoteProperty(enum HksExtPropertyOperation operation,
@@ -231,7 +235,7 @@ int32_t HksClientSetOrGetRemoteProperty(enum HksExtPropertyOperation operation,
 }
 
 int32_t HksClientGetResourceId(const struct HksBlob *providerName, const struct HksParamSet *paramSetIn,
-    struct HksBlob *resourceId)
+    struct HksBlob *resourceId, struct HksExternalErrorInfo **errInfo)
 {
     char *processName = NULL;
     char *userId = NULL;
@@ -246,5 +250,5 @@ int32_t HksClientGetResourceId(const struct HksBlob *providerName, const struct 
         0,
         0
     };
-    return HksServiceGetResourceId(&processInfo, providerName, paramSetIn, resourceId);
+    return HksServiceGetResourceId(&processInfo, providerName, paramSetIn, resourceId, errInfo);
 }

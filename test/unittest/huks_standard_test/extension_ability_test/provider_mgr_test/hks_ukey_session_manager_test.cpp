@@ -21,6 +21,7 @@
 #include "hks_remote_handle_manager.h"
 #include "hks_mock_common.h"
 #include "hks_type.h"
+#include "hks_external_error_info.h"
 #include "gtest/gtest.h"
 #include <vector>
 #include "hks_ukey_common.h"
@@ -103,7 +104,8 @@ static int32_t SetupFullTest(HksProcessInfo &processInfo, std::string &wrappedIn
     wrappedIndex = BuildWrappedIndex(TEST_PROVIDER_NAME, processInfo);
 
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
-    ret = handleMgr->CreateRemoteHandle(processInfo, wrappedIndex, regParamSet);
+    struct HksExternalErrorInfo *errInfo = nullptr;
+    ret = handleMgr->CreateRemoteHandle(processInfo, wrappedIndex, regParamSet, &errInfo);
     if (ret != HKS_SUCCESS) {
         int32_t deleteCount = 0;
         providerMgr->OnUnRegisterProvider(processInfo, TEST_PROVIDER_NAME, regParamSet, false, deleteCount);
@@ -122,7 +124,7 @@ static int32_t SetupFullTest(HksProcessInfo &processInfo, std::string &wrappedIn
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     ret = sessionMgr->ExtensionInitSession(processInfo, wrappedIndex, initPs, outHandle);
     if (ret != HKS_SUCCESS) {
-        handleMgr->CloseRemoteHandle(processInfo, wrappedIndex, regParamSet);
+        handleMgr->CloseRemoteHandle(processInfo, wrappedIndex, regParamSet, &errInfo);
         int32_t deleteCount = 0;
         providerMgr->OnUnRegisterProvider(processInfo, TEST_PROVIDER_NAME, regParamSet, false, deleteCount);
         HKS_FREE_BLOB(processInfo.userId);
@@ -140,7 +142,8 @@ static void CleanupFullTest(HksProcessInfo &processInfo, const std::string &wrap
     CppParamSet regParamSet(regParams);
 
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
-    (void)handleMgr->CloseRemoteHandle(processInfo, wrappedIndex, regParamSet);
+    struct HksExternalErrorInfo *errInfo = nullptr;
+    (void)handleMgr->CloseRemoteHandle(processInfo, wrappedIndex, regParamSet, &errInfo);
 
     auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
     int32_t deleteCount = 0;
@@ -252,12 +255,12 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest003, TestSize.Level0) {
 
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     EXPECT_NE(handleMgr, nullptr);
-    ret = handleMgr->CreateRemoteHandle(processInfo, wrappedIndex, paramSet);
+    struct HksExternalErrorInfo *errInfo = nullptr;
+    ret = handleMgr->CreateRemoteHandle(processInfo, wrappedIndex, paramSet, &errInfo);
     EXPECT_EQ(ret, HKS_SUCCESS) << "CreateRemoteHandle failed";
 
-    int32_t authState{1};
-    uint32_t retryCount{0};
-    ret = handleMgr->RemoteVerifyPin(processInfo, wrappedIndex, paramSet, authState, retryCount);
+    struct HksExtAuthPinOutParam authOutParam = {};
+    ret = handleMgr->RemoteVerifyPin(processInfo, wrappedIndex, paramSet, authOutParam, &errInfo);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "RemoteVerifyPin failed";
 
     ret = sessionMgr->ExtensionInitSession(processInfo, wrappedIndex, paramSet, handle);
@@ -761,7 +764,8 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest025, TestSize.Level0) {
     wrappedIndex = BuildWrappedIndex(TEST_PROVIDER_NAME, processInfo);
 
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
-    ret = handleMgr->CreateRemoteHandle(processInfo, wrappedIndex, regParamSet);
+    struct HksExternalErrorInfo *errInfo = nullptr;
+    ret = handleMgr->CreateRemoteHandle(processInfo, wrappedIndex, regParamSet, &errInfo);
     ASSERT_EQ(ret, HKS_SUCCESS) << "CreateRemoteHandle failed";
 
     std::vector<HksParam> noPurposeParams = {
@@ -875,7 +879,8 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest028, TestSize.Level0) {
     wrappedIndex = BuildWrappedIndex(TEST_PROVIDER_NAME, processInfo);
 
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
-    ret = handleMgr->CreateRemoteHandle(processInfo, wrappedIndex, regParamSet);
+    struct HksExternalErrorInfo *errInfo = nullptr;
+    ret = handleMgr->CreateRemoteHandle(processInfo, wrappedIndex, regParamSet, &errInfo);
     ASSERT_EQ(ret, HKS_SUCCESS) << "CreateRemoteHandle failed";
 
     CleanupFullTest(processInfo, wrappedIndex);
