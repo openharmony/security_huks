@@ -181,10 +181,16 @@ static int32_t HksExtSendAsyncMessage(MessageParcel &data, const struct HksParam
         timeout = val;
     }
 
-    auto [errCode, receivedData, receivedSize, receivedCode] = hksCallback->WaitForAsyncReply(timeout);
+    auto [errCode, receivedData, receivedSize, receivedCode, errInfo] = hksCallback->WaitForAsyncReply(timeout);
     if (errCode != HKS_SUCCESS || receivedData == nullptr || receivedSize == 0 || receivedCode != msgCode) {
         HKS_LOG_E("async fail errCode=%" LOG_PUBLIC "u size=%" LOG_PUBLIC "u code=%" LOG_PUBLIC "u",
             errCode, receivedSize, receivedCode);
+        if (errInfo != nullptr) {
+            if (errInfo->errVal != 0) {
+                HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
+            }
+            HksFreeExternalErrorInfo(errInfo);
+        }
         return HUKS_ERR_CODE_EXTERNAL_ERROR;
     }
 
@@ -196,6 +202,14 @@ static int32_t HksExtSendAsyncMessage(MessageParcel &data, const struct HksParam
         outBlob->size, receivedSize);
 
     outBlob->size = receivedSize;
+    
+    if (errInfo != nullptr) {
+        if (errInfo->errVal != 0) {
+            HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
+        }
+        HksFreeExternalErrorInfo(errInfo);
+    }
+    
     return HKS_SUCCESS;
 }
 

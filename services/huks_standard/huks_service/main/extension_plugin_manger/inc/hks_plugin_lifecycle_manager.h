@@ -53,7 +53,7 @@ public:
         const std::string &index, const CppParamSet &paramSet, int32_t &state, struct HksExternalErrorInfo **errInfo);
     int32_t OnClearUkeyPinAuthStatus(const HksProcessInfo &processInfo, const std::string &index,
         struct HksExternalErrorInfo **errInfo);
-    int32_t OnSetOrGetRemoteProperty(const HksProcessInfo &processInfo,
+    int32_t OnSetOrGetRemoteProperty(struct HksProcessWithErrorInfo &processAndError,
         enum HksExtPropertyOperation operation, const std::string &index,
         const std::string &propertyId, CppParamSet &paramSet);
     int32_t OnExportCertificate(const HksProcessInfo &processInfo, const std::string &index,

@@ -20,6 +20,7 @@
 #include "hks_cpp_abilityinfo.h"
 #include "hks_sa_interface.h"
 #include "hks_type.h"
+#include "hks_external_error_info.h"
 #include "securec.h"
 #include "hks_cpp_abilityinfo.h"
 
@@ -280,7 +281,8 @@ int32_t HksIpcServiceOnSetOrGetRemotePropertyAdapter(const struct HksProcessInfo
         reinterpret_cast<OHOS::IRemoteObject *>(const_cast<uint8_t *>(remoteObject)));
     HKS_IF_NULL_LOGE_RETURN(hksExtProxy, HKS_ERROR_NULL_POINTER, "hksExtProxy is null");
 
-    ret = OHOS::Security::Huks::HksIpcServiceOnSetOrGetRemoteProperty(processInfo,
+    struct HksProcessWithErrorInfo processAndError = { processInfo, nullptr };
+    ret = OHOS::Security::Huks::HksIpcServiceOnSetOrGetRemoteProperty(processAndError,
         propertyInfo->operation, resourceIdStr, propertyIdStr, cppParamSet);
     HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceOnSetOrGetRemoteProperty fail. ret = %" LOG_PUBLIC "d", ret);
     
@@ -289,7 +291,11 @@ int32_t HksIpcServiceOnSetOrGetRemotePropertyAdapter(const struct HksProcessInfo
     ret = RemotePropertyPack(cppParamSet, outData, outSize, ret);
     HKS_IF_NOT_SUCC_LOGE(ret, "PackRemoteProperty fail");
 
-    hksExtProxy->SendAsyncReply(HKS_SUCCESS, outData, outSize, HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY);
+    hksExtProxy->SendAsyncReply(HKS_SUCCESS, outData, outSize,
+        HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY, processAndError.errInfo);
+    if (processAndError.errInfo != nullptr) {
+        HksFreeExternalErrorInfo(processAndError.errInfo);
+    }
     return HKS_SUCCESS;
 }
 

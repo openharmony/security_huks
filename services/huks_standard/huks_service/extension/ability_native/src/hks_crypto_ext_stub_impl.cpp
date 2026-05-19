@@ -218,13 +218,24 @@ ErrCode HksCryptoExtStubImpl::SetOrGetProperty(
     const std::string& handle,
     const std::string& propertyId,
     CppParamSet& params,
-    int32_t& errcode)
+    HksExternalErrorInfoIdl& errorInfo)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
+        errorInfo.errVal = HKS_ERROR_EXT_NULLPTR;
+        errorInfo.errorDesc.assign("HUKS internal error");
         return HKS_ERROR_EXT_NULLPTR;
     }
-    return extension_->SetOrGetProperty(operation, handle, propertyId, params, errcode);
+    struct HksExternalErrorInfo *errInfoPtr = nullptr;
+    int32_t ret = extension_->SetOrGetProperty(operation, handle, propertyId, params, &errInfoPtr);
+    if (errInfoPtr != nullptr) {
+        errorInfo.errVal = errInfoPtr->errVal;
+        if (errInfoPtr->errorDesc != nullptr) {
+            errorInfo.errorDesc.assign(errInfoPtr->errorDesc);
+        }
+        HksFreeExternalErrorInfo(errInfoPtr);
+    }
+    return ret;
 }
 
 ErrCode HksCryptoExtStubImpl::ClearUkeyPinAuthState(

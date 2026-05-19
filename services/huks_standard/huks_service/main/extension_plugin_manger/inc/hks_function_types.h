@@ -68,7 +68,7 @@ using OnGetVerifyPinStatusFunc = int32_t (*)(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, int32_t &state, struct HksExternalErrorInfo **errInfo);
 using OnClearUkeyPinAuthStatusFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
     struct HksExternalErrorInfo **errInfo);
-using OnSetOrGetRemotePropertyFunc = int32_t (*)(const HksProcessInfo &processInfo,
+using OnSetOrGetRemotePropertyFunc = int32_t (*)(struct HksProcessWithErrorInfo &processAndError,
     enum HksExtPropertyOperation operation, const std::string &index, const std::string &propertyId,
     CppParamSet &paramSet);
 using OnListIndexCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo,

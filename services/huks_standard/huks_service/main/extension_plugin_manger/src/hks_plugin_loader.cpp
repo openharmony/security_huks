@@ -141,8 +141,8 @@ static void RegisterRemoteHandleMethodMaps(OHOS::SafeMap<PluginMethodEnum, std::
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetPP20HksExternalErrorInfo");
     map.Insert(PluginMethodEnum::FUNC_ON_SET_OR_GET_REMOTE_PROPERTY,
         "_ZN4OHOS8Security4Huks36HksExtPluginOnSetOrGetRemoteProperty"
-        "ERK14HksProcessInfo23HksExtPropertyOperationRKNSt3__h12basic_string"
-        "IcNS6_11char_traitsIcEENS6_9allocatorIcEEEESE_R11CppParamSet");
+        "ER23HksProcessWithErrorInfo23HksExtPropertyOperationRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEESD_R11CppParamSet");
 }
 
 static void RegisterSessionMethodMaps(OHOS::SafeMap<PluginMethodEnum, std::string> &map)

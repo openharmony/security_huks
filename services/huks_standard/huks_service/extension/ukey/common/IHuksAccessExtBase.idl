@@ -27,7 +27,7 @@ interface OHOS.Security.Huks.IHuksAccessExtBase {
     [ipccode 7] void InitSession([in] String index, [in] CppParamSet params, [out] String handle, [out] int errcode);
     [ipccode 8] void UpdateSession([in] String handle, [in] CppParamSet params, [in] unsigned char[] inData, [out] unsigned char[] outData, [out] int errcode);
     [ipccode 9] void FinishSession([in] String handle, [in] CppParamSet params, [in] unsigned char[] inData, [out] unsigned char[] outData, [out] int errcode);
-    [ipccode 10] void SetOrGetProperty([in] unsigned int operation, [in] String handle, [in] String propertyId, [inout] CppParamSet params, [out] int errcode);
+    [ipccode 10] void SetOrGetProperty([in] unsigned int operation, [in] String handle, [in] String propertyId, [inout] CppParamSet params, [out] HksExternalErrorInfoIdl errorInfo);
     [ipccode 11] void ClearUkeyPinAuthState([in] String handle, [in] CppParamSet params, [out] HksExternalErrorInfoIdl errorInfo);
     [ipccode 12] void ImportWrappedKey([in] String newIndex, [in] String newWrappingKeyIndex, [in] CppParamSet params, [in] unsigned char[]wrappedData, [out] int errcode);
     [ipccode 13] void ExportPublicKey([in] String newIndex, [in] CppParamSet params, [out] unsigned char[] wrappedData, [out] int errcode);

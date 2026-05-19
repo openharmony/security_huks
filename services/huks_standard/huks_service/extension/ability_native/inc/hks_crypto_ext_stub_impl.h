@@ -105,7 +105,7 @@ public:
         const std::string& handle,
         const std::string& propertyId,
         CppParamSet& params,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
     
     ErrCode ClearUkeyPinAuthState(
         const std::string& handle,

@@ -456,15 +456,15 @@ int32_t HksRemoteHandleManager::ImportRemoteCertificate(const HksProcessInfo &pr
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::SetOrGetRemoteProperty(const HksProcessInfo &processInfo,
+int32_t HksRemoteHandleManager::SetOrGetRemoteProperty(struct HksProcessWithErrorInfo &processAndError,
     enum HksExtPropertyOperation operation, const std::string &index,
     const std::string &propertyId, CppParamSet &paramSet)
 {
     CppParamSet newParamSet{};
-    int32_t ret = VerifyCallerAndAdjustUidParam(processInfo, paramSet, newParamSet);
+    int32_t ret = VerifyCallerAndAdjustUidParam(*(processAndError.processInfo), paramSet, newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "uid check in %" LOG_PUBLIC "s failed.", __PRETTY_FUNCTION__)
 
-    uint32_t uid = processInfo.uidInt;
+    uint32_t uid = processAndError.processInfo->uidInt;
     auto uidParam = newParamSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
     if (uidParam.first == HKS_SUCCESS) {
         uid = static_cast<uint32_t>(uidParam.second);
@@ -479,9 +479,13 @@ int32_t HksRemoteHandleManager::SetOrGetRemoteProperty(const HksProcessInfo &pro
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
-    auto ipccode = proxy->SetOrGetProperty(static_cast<uint32_t>(operation), handle, propertyId, newParamSet, ret);
+    HksExternalErrorInfoIdl errorInfo;
+    auto ipccode = proxy->SetOrGetProperty(static_cast<uint32_t>(operation), handle, propertyId,
+        newParamSet, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
-    ret = ConvertExtensionToHksErrorCode(ret, g_getPropertyErrCodeMapping);
+    HKS_IF_TRUE_EXCU(errorInfo.errVal != EXTENSION_SUCCESS,
+        processAndError.errInfo = HksCreateExternalErrorInfo(errorInfo.errVal, errorInfo.errorDesc.c_str()));
+    ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_getPropertyErrCodeMapping);
     ClearMapByHandle(ret, handle);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote SetOrGetProperty failed: %" LOG_PUBLIC "d", ret)
     if (operation == HKS_EXT_PROPERTY_OPERATION_GET) {

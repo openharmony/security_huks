@@ -135,9 +135,8 @@ int32_t HksCryptoExtAbility::FinishSession(const std::string &handle, const CppP
     return HKS_ERROR_EXT_UNDEFINED_OPERATION;
 }
 
-int32_t HksCryptoExtAbility::SetOrGetProperty(uint32_t operation,
-    const std::string &handle, const std::string &propertyId,
-    CppParamSet &params, int32_t &errcode)
+int32_t HksCryptoExtAbility::SetOrGetProperty(uint32_t operation, const std::string &handle,
+    const std::string &propertyId, CppParamSet &params, struct HksExternalErrorInfo **errInfo)
 {
     LOGE("HksCryptoExtAbility::SetOrGetProperty Undefined operation");
     return HKS_ERROR_EXT_UNDEFINED_OPERATION;
