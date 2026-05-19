@@ -40,31 +40,30 @@ int32_t HksIpcServiceProviderRegister(const struct HksProcessInfo *processInfo,
 int32_t HksIpcServiceProviderUnRegister(const struct HksProcessInfo *processInfo,
     std::string &name, CppParamSet &paramSet);
 int32_t HksIpcServiceOnCreateRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string &index,
-    CppParamSet &paramSet);
+    CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo);
 int32_t HksIpcServiceOnCloseRemoteKeyHandle(const struct HksProcessInfo *processInfo, std::string &index,
-    CppParamSet &paramSet);
-int32_t HksIpcServiceOnCreateRemoteIndex(const std::string &providerName,
-    const CppParamSet& paramSet, std::string &outIndex);
+    CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo);
 int32_t HksIpcServiceOnGenerateUkeyKey(const struct HksProcessInfo *processInfo,
     const std::string &keyAlias, const std::string &resourceId, CppParamSet &paramSet);
 int32_t HksIpcServiceOnAuthUkeyPin(const struct HksProcessInfo *processInfo, const std::string &index,
     CppParamSet &pinData, struct HksExtAuthPinOutParam &authOutParam, struct HksExternalErrorInfo **errInfo);
 int32_t HksIpcServiceOnGetVerifyPinStatus(const struct HksProcessInfo *processInfo, const std::string &index,
-    const CppParamSet &paramSet, int32_t &state);
-int32_t HksIpcServiceOnClearUkeyPinAuthStatus(const struct HksProcessInfo *processInfo, const std::string &index);
+    const CppParamSet &paramSet, int32_t &state, struct HksExternalErrorInfo **errInfo);
+int32_t HksIpcServiceOnClearUkeyPinAuthStatus(const struct HksProcessInfo *processInfo, const std::string &index,
+    struct HksExternalErrorInfo **errInfo);
 int32_t HksIpcServiceOnSetOrGetRemoteProperty(const HksProcessInfo *processInfo,
     enum HksExtPropertyOperation operation, const std::string &index,
     const std::string &propertyId, CppParamSet &paramSet);
 int32_t HksIpcServiceOnExportCertificate(const struct HksProcessInfo *processInfo, const std::string &index,
-    const CppParamSet &paramSet, std::string &certificatesOut);
+    const CppParamSet &paramSet, std::string &certificatesOut, struct HksExternalErrorInfo **errInfo);
 int32_t HksIpcServiceOnExportProviderAllCertificates(const struct HksProcessInfo *processInfo, const std::string &index,
-    const CppParamSet &paramSet, std::string &certificatesOut);
+    const CppParamSet &paramSet, std::string &certificatesOut, struct HksExternalErrorInfo **errInfo);
 int32_t HksIpcServiceQueryAbility(const struct HksProcessInfo *processInfo, std::string &resourceId,
     CppAbilityInfo &abilityInfo);
 int32_t HksIpcServiceOnImportCertificate(const struct HksProcessInfo *processInfo, const std::string &index,
-    const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet);
+    const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo);
 int32_t HksIpcServiceOnGetResourceId(const struct HksProcessInfo *processInfo, const std::string &providerName,
-    const CppParamSet &paramSet, std::string &resourceId);
+    const CppParamSet &paramSet, std::string &resourceId, struct HksExternalErrorInfo **errInfo);
 }
 }
 }

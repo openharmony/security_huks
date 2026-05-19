@@ -44,23 +44,24 @@ public:
     int32_t UnRegisterProvider(const struct HksProcessInfo &info, const std::string &AbilityName,
         const CppParamSet &paramSet, bool isdeath);
     int32_t OnCreateRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
-        const CppParamSet &paramSet);
+        const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo);
     int32_t OnCloseRemoteKeyHandle(const HksProcessInfo &processInfo, const std::string &index,
-        const CppParamSet &paramSet);
+        const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo);
     int32_t OnAuthUkeyPin(const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet,
         struct HksExtAuthPinOutParam &authOutParam, struct HksExternalErrorInfo **errInfo);
     int32_t OnGetVerifyPinStatus(const HksProcessInfo &processInfo,
-        const std::string &index, const CppParamSet &paramSet, int32_t &state);
-    int32_t OnClearUkeyPinAuthStatus(const HksProcessInfo &processInfo, const std::string &index);
-int32_t OnSetOrGetRemoteProperty(const HksProcessInfo &processInfo,
-    enum HksExtPropertyOperation operation, const std::string &index,
-    const std::string &propertyId, CppParamSet &paramSet);
-    int32_t OnExportCertificate(const HksProcessInfo &processInfo,
-        const std::string &index, const CppParamSet &paramSet, std::string &certsJson);
-    int32_t OnExportProviderAllCertificates(const HksProcessInfo &processInfo,
-        const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr);
+        const std::string &index, const CppParamSet &paramSet, int32_t &state, struct HksExternalErrorInfo **errInfo);
+    int32_t OnClearUkeyPinAuthStatus(const HksProcessInfo &processInfo, const std::string &index,
+        struct HksExternalErrorInfo **errInfo);
+    int32_t OnSetOrGetRemoteProperty(const HksProcessInfo &processInfo,
+        enum HksExtPropertyOperation operation, const std::string &index,
+        const std::string &propertyId, CppParamSet &paramSet);
+    int32_t OnExportCertificate(const HksProcessInfo &processInfo, const std::string &index,
+        const CppParamSet &paramSet, std::string &certsJson, struct HksExternalErrorInfo **errInfo);
+    int32_t OnExportProviderAllCertificates(const HksProcessInfo &processInfo, const std::string &providerName,
+        const CppParamSet &paramSet, std::string &certsJsonArr, struct HksExternalErrorInfo **errInfo);
     int32_t OnImportCertificate(const HksProcessInfo &processInfo, const std::string &index,
-        const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet);
+        const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo);
     int32_t OnGenerateKey(const HksProcessInfo &processInfo,
         const std::string &resourceId, const CppParamSet &paramSet);
     int32_t OnInitSession (const HksProcessInfo &processInfo, const std::string &index,
@@ -77,7 +78,7 @@ int32_t OnSetOrGetRemoteProperty(const HksProcessInfo &processInfo,
         const CppParamSet &paramSet, std::vector<uint8_t> &outData);
     int32_t OnQueryAbility(const HksProcessInfo &processInfo, std::string &resourceId, CppAbilityInfo &abilityInfo);
     int32_t OnGetResourceId(const HksProcessInfo &processInfo, const std::string &providerName,
-        const CppParamSet &paramSet, std::string &resourceId);
+        const CppParamSet &paramSet, std::string &resourceId, struct HksExternalErrorInfo **errInfo);
 
 private:
     std::atomic<int32_t> m_refCount{0};

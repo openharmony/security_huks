@@ -38,17 +38,17 @@ public:
         const std::string& index,
         const CppParamSet& params,
         std::string& handle,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode CloseRemoteHandle(
         const std::string& handle,
         const CppParamSet& params,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode AuthUkeyPin(
         const std::string& handle,
         const CppParamSet& params,
-        HksExternalErrorInfoIdl& errorInfoIdl,
+        HksExternalErrorInfoIdl& errorInfo,
         int32_t& authState,
         uint32_t& retryCnt) override;
 
@@ -56,24 +56,24 @@ public:
         const std::string& handle,
         const CppParamSet& params,
         int32_t& state,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode ExportCertificate(
         const std::string& index,
         const CppParamSet& params,
         std::string& certJsonArr,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode ExportProviderCertificates(
         const CppParamSet& params,
         std::string& certJsonArr,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode ImportCertificate(
         const std::string& index,
         const HksExtCertInfoIdl& certInfo,
         const CppParamSet& params,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode InitSession(
         const std::string& index,
@@ -110,7 +110,7 @@ public:
     ErrCode ClearUkeyPinAuthState(
         const std::string& handle,
         const CppParamSet& params,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode ImportWrappedKey(
         const std::string& index,
@@ -128,7 +128,7 @@ public:
     ErrCode GetResourceId(
         const CppParamSet &params,
         std::string &resourceId,
-        int32_t &errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 private:
     std::shared_ptr<HksCryptoExtAbility> extension_;
 };

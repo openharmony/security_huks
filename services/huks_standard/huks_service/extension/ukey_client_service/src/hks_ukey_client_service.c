@@ -67,29 +67,32 @@ int32_t HksServiceUnregisterProvider(const struct HksProcessInfo *processInfo, c
 }
 
 int32_t HksServiceExportProviderCertificates(const struct HksProcessInfo *processInfo,
-    const struct HksBlob *providerName, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
+    const struct HksBlob *providerName, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet,
+    struct HksExternalErrorInfo **errInfo)
 {
 #ifdef L2_STANDARD
-    return HksIpcExportProvCertsAdapter(processInfo, providerName, paramSetIn, certSet);
+    return HksIpcExportProvCertsAdapter(processInfo, providerName, paramSetIn, certSet, errInfo);
 #else
     (void)processInfo;
     (void)providerName;
     (void)paramSetIn;
     (void)certSet;
+    (void)errInfo;
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
 
 int32_t HksServiceExportCertificate(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
+    const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet, struct HksExternalErrorInfo **errInfo)
 {
 #ifdef L2_STANDARD
-    return HksIpcExportCertAdapter(processInfo, index, paramSetIn, certSet);
+    return HksIpcExportCertAdapter(processInfo, index, paramSetIn, certSet, errInfo);
 #else
     (void)processInfo;
     (void)index;
     (void)paramSetIn;
     (void)certSet;
+    (void)errInfo;
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
@@ -111,52 +114,57 @@ int32_t HksServiceAuthUkeyPin(const struct HksProcessInfo *processInfo, const st
 }
 
 int32_t HksServiceOpenRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn)
+    const struct HksParamSet *paramSetIn, struct HksExternalErrorInfo **errInfo)
 {
 #ifdef L2_STANDARD
-    return HksIpcCreateRemKeyHandleAdapter(processInfo, index, paramSetIn);
+    return HksIpcCreateRemKeyHandleAdapter(processInfo, index, paramSetIn, errInfo);
 #else
     (void)processInfo;
     (void)index;
     (void)paramSetIn;
+    (void)errInfo;
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
 
 int32_t HksServiceGetUkeyPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn, int32_t *status)
+    const struct HksParamSet *paramSetIn, int32_t *status, struct HksExternalErrorInfo **errInfo)
 {
 #ifdef L2_STANDARD
-    return HksIpcGetUkeyPinAuthStateAdapter(processInfo, index, paramSetIn, status);
+    return HksIpcGetUkeyPinAuthStateAdapter(processInfo, index, paramSetIn, status, errInfo);
 #else
     (void)processInfo;
     (void)index;
     (void)paramSetIn;
     (void)status;
+    (void)errInfo;
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
 
 int32_t HksServiceCloseRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn)
+    const struct HksParamSet *paramSetIn, struct HksExternalErrorInfo **errInfo)
 {
 #ifdef L2_STANDARD
-    return HksIpcCloseRemKeyHandleAdapter(processInfo, index, paramSetIn);
+    return HksIpcCloseRemKeyHandleAdapter(processInfo, index, paramSetIn, errInfo);
 #else
     (void)processInfo;
     (void)index;
     (void)paramSetIn;
+    (void)errInfo;
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
 
-int32_t HksServiceClearPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index)
+int32_t HksServiceClearPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
+    struct HksExternalErrorInfo **errInfo)
 {
 #ifdef L2_STANDARD
-    return HksIpcClearPinStatusAdapter(processInfo, index);
+    return HksIpcClearPinStatusAdapter(processInfo, index, errInfo);
 #else
     (void)processInfo;
     (void)index;
+    (void)errInfo;
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
@@ -177,15 +185,16 @@ int32_t HksServiceSetOrGetRemoteProperty(const struct HksProcessInfo *processInf
 }
 
 int32_t HksServiceGetResourceId(const struct HksProcessInfo *processInfo, const struct HksBlob *providerName,
-    const struct HksParamSet *paramSetIn, struct HksBlob *resourceId)
+    const struct HksParamSet *paramSetIn, struct HksBlob *resourceId, struct HksExternalErrorInfo **errInfo)
 {
 #ifdef L2_STANDARD
-    return HksIpcServiceOnGetResourceIdAdapter(processInfo, providerName, paramSetIn, resourceId);
+    return HksIpcServiceOnGetResourceIdAdapter(processInfo, providerName, paramSetIn, resourceId, errInfo);
 #else
     (void)processInfo;
     (void)providerName;
     (void)paramSetIn;
     (void)resourceId;
+    (void)errInfo;
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }

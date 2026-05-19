@@ -168,7 +168,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnUnRegistProvider(const HksProcessIn
 }
 
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnCreateRemoteKeyHandle(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet))
+    const std::string &index, const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo))
 {
     AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
@@ -176,14 +176,14 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnCreateRemoteKeyHandle(const HksProc
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
         "CreateRemoteKeyHandle method enum not found in plugin provider map.")
     
-    int32_t ret = (*reinterpret_cast<OnCreateRemoteKeyHandleFunc>(funcPtr))(processInfo, index, paramSet);
+    int32_t ret = (*reinterpret_cast<OnCreateRemoteKeyHandleFunc>(funcPtr))(processInfo, index, paramSet, errInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "CreateRemoteKeyHandle fail, ret = %{public}d", ret)
     HKS_LOG_I("create remote key handle success");
     return HKS_SUCCESS;
 }
 
-ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnCloseRemoteKeyHandle(
-    const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet))
+ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnCloseRemoteKeyHandle(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo))
 {
     AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
@@ -191,7 +191,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnCloseRemoteKeyHandle(
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
         "CloseRemoteKeyHandle method enum not found in plugin provider map.")
     
-    int32_t ret = (*reinterpret_cast<OnCloseRemoteKeyHandleFunc>(funcPtr))(processInfo, index, paramSet);
+    int32_t ret = (*reinterpret_cast<OnCloseRemoteKeyHandleFunc>(funcPtr))(processInfo, index, paramSet, errInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "CloseRemoteKeyHandle fail, ret = %{public}d", ret)
     HKS_LOG_I("close remote key handle success");
     return HKS_SUCCESS;
@@ -213,7 +213,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnAuthUkeyPin(const HksProcessInfo &p
 }
 
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnGetVerifyPinStatus(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, int32_t &state))
+    const std::string &index, const CppParamSet &paramSet, int32_t &state, struct HksExternalErrorInfo **errInfo))
 {
     AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
@@ -221,14 +221,14 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnGetVerifyPinStatus(const HksProcess
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
         "GetVerifyPinStatus method enum not found in plugin provider map.")
     
-    int32_t ret = (*reinterpret_cast<OnGetVerifyPinStatusFunc>(funcPtr))(processInfo, index, paramSet, state);
+    int32_t ret = (*reinterpret_cast<OnGetVerifyPinStatusFunc>(funcPtr))(processInfo, index, paramSet, state, errInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetVerifyPinStatus fail, ret = %{public}d", ret)
     HKS_LOG_I("get verify pin status success");
     return HKS_SUCCESS;
 }
 
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnClearUkeyPinAuthStatus(const HksProcessInfo &processInfo,
-    const std::string &index))
+    const std::string &index, struct HksExternalErrorInfo **errInfo))
 {
     AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
@@ -236,7 +236,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnClearUkeyPinAuthStatus(const HksPro
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
         "ClearPinStatus method enum not found in plugin provider map.")
     
-    int32_t ret = (*reinterpret_cast<OnClearUkeyPinAuthStatusFunc>(funcPtr))(processInfo, index);
+    int32_t ret = (*reinterpret_cast<OnClearUkeyPinAuthStatusFunc>(funcPtr))(processInfo, index, errInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ClearPinStatus fail, ret = %{public}d", ret)
     HKS_LOG_I("clear pin status success");
     return HKS_SUCCESS;
@@ -260,7 +260,8 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnSetOrGetRemoteProperty(
 }
 
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnExportCertificate(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, std::string &certsJson))
+    const std::string &index, const CppParamSet &paramSet, std::string &certsJson,
+    struct HksExternalErrorInfo **errInfo))
 {
     AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
@@ -268,14 +269,16 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnExportCertificate(const HksProcessI
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
         "FindProviderCertificate method enum not found in plugin provider map.")
     
-    int32_t ret = (*reinterpret_cast<OnListIndexCertificateFunc>(funcPtr))(processInfo, index, paramSet, certsJson);
+    int32_t ret = (*reinterpret_cast<OnListIndexCertificateFunc>(funcPtr))(processInfo, index, paramSet, certsJson,
+        errInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "FindProviderCertificate fail, ret = %{public}d", ret)
     HKS_LOG_I("list provider certificate success");
     return HKS_SUCCESS;
 }
 
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnExportProviderAllCertificates(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr))
+    const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr,
+    struct HksExternalErrorInfo **errInfo))
 {
     AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
@@ -284,14 +287,15 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnExportProviderAllCertificates(const
         "ListProviderAllCertificate method enum not found in plugin provider map.")
     
     int32_t ret = (*reinterpret_cast<OnListProviderAllCertificateFunc>(funcPtr))
-        (processInfo, providerName, paramSet, certsJsonArr);
+        (processInfo, providerName, paramSet, certsJsonArr, errInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ListProviderAllCertificate fail, ret = %{public}d", ret)
     HKS_LOG_I("list provider all certificate success");
     return HKS_SUCCESS;
 }
 
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnImportCertificate(const HksProcessInfo &processInfo,
-    const std::string &index, const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet))
+    const std::string &index, const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet,
+    struct HksExternalErrorInfo **errInfo))
 {
     AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
@@ -300,7 +304,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnImportCertificate(const HksProcessI
         "ImportCertificate method enum not found in plugin provider map.")
     
     int32_t ret = (*reinterpret_cast<OnImportCertificateFunc>(funcPtr))
-        (processInfo, index, certInfo, paramSet);
+        (processInfo, index, certInfo, paramSet, errInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ImportCertificate fail, ret = %{public}d", ret)
     HKS_LOG_I("import certificate success");
     return HKS_SUCCESS;
@@ -426,7 +430,8 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnExportPublicKey(const HksProcessInf
 }
 
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnGetResourceId(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet, std::string &resourceId))
+    const std::string &providerName, const CppParamSet &paramSet, std::string &resourceId,
+    struct HksExternalErrorInfo **errInfo))
 {
     AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
@@ -434,7 +439,8 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnGetResourceId(const HksProcessInfo 
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
         "GetResourceId method enum not found in plugin provider map.")
     
-    int32_t ret = (*reinterpret_cast<OnGetResourceIdFunc>(funcPtr))(processInfo, providerName, paramSet, resourceId);
+    int32_t ret = (*reinterpret_cast<OnGetResourceIdFunc>(funcPtr))(processInfo, providerName, paramSet, resourceId,
+        errInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetResourceId fail, ret = %" LOG_PUBLIC "d", ret)
     HKS_LOG_I("get resource id success");
     return HKS_SUCCESS;

@@ -259,6 +259,7 @@ void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     int32_t status = 0;
     struct HksBlob outBlob = { 0, NULL };
+    struct HksExternalErrorInfo *errInfo = NULL;
     int32_t ret;
     uint64_t startTime = 0;
     (void)HksElapsedRealTime(&startTime);
@@ -272,8 +273,14 @@ void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetUkeyPinAuthState: permission fail ret=%" LOG_PUBLIC "d", ret);
 
-        ret = HksIpcGetUkeyPinAuthStateAdapter(&processInfo, &index, paramSet, &status);
-        HKS_IF_NOT_SUCC_LOGE(ret, "GetUkeyPinAuthState: adapter ret=%" LOG_PUBLIC "d", ret);
+        ret = HksIpcGetUkeyPinAuthStateAdapter(&processInfo, &index, paramSet, &status, &errInfo);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("GetUkeyPinAuthState: adapter ret=%" LOG_PUBLIC "d", ret);
+            HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
+            HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
+            HksFreeExternalErrorInfo(errInfo);
+            break;
+        }
 
         outBlob.size = (uint32_t)sizeof(int32_t);
         outBlob.data = (uint8_t *)(&status);
@@ -300,6 +307,7 @@ void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t
     int32_t ret;
     struct HksBlob index = { 0, NULL };
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    struct HksExternalErrorInfo *errInfo = NULL;
 
     do {
         ret  = HksClearPinAuthStateUnpack(srcData, &index);
@@ -308,8 +316,12 @@ void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t
         ret = HksGetProcessInfoForIPC(NULL, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
 
-        ret = HksIpcClearPinStatusAdapter(&processInfo, &index);
-        HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcClearPinStatusAdapter ret = %" LOG_PUBLIC "d", ret);
+        ret = HksIpcClearPinStatusAdapter(&processInfo, &index, &errInfo);
+        HKS_IF_TRUE_BREAK(ret == HKS_SUCCESS)
+        HKS_LOG_E("HksIpcClearPinStatusAdapter ret = %" LOG_PUBLIC "d", ret);
+        HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
+        HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
+        HksFreeExternalErrorInfo(errInfo);
     } while (0);
 
     HksSendResponse(context, ret, NULL);
@@ -333,6 +345,7 @@ void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t 
     struct HksBlob resourceId = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    struct HksExternalErrorInfo *errInfo = NULL;
     int32_t ret;
     uint64_t startTime = 0;
     (void)HksElapsedRealTime(&startTime);
@@ -346,8 +359,12 @@ void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t 
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksIpcCreateRemKeyHandleAdapter(&processInfo, &resourceId, paramSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcCreateRemKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret)
+        ret = HksIpcCreateRemKeyHandleAdapter(&processInfo, &resourceId, paramSet, &errInfo);
+        HKS_IF_TRUE_BREAK(ret == HKS_SUCCESS)
+        HKS_LOG_E("HksIpcCreateRemKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret);
+        HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
+        HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
+        HksFreeExternalErrorInfo(errInfo);
     } while (0);
 
     HksSendResponse(context, ret, NULL);
@@ -371,6 +388,7 @@ void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t
     struct HksBlob resourceId = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    struct HksExternalErrorInfo *errInfo = NULL;
     int32_t ret;
     uint64_t startTime = 0;
     (void)HksElapsedRealTime(&startTime);
@@ -384,8 +402,12 @@ void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksIpcCloseRemKeyHandleAdapter(&processInfo, &resourceId, paramSet);
-        HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcCloseRemKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret)
+        ret = HksIpcCloseRemKeyHandleAdapter(&processInfo, &resourceId, paramSet, &errInfo);
+        HKS_IF_TRUE_BREAK(ret == HKS_SUCCESS)
+        HKS_LOG_E("HksIpcCloseRemKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret);
+        HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
+        HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
+        HksFreeExternalErrorInfo(errInfo);
     } while (0);
 
     HksSendResponse(context, ret, NULL);
@@ -410,6 +432,7 @@ void HksIpcServiceExportProviderCertificates(const struct HksBlob *srcData, cons
     struct HksParamSet *paramSet = NULL;
     struct HksExtCertInfoSet certInfoSet = {0, NULL};
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    struct HksExternalErrorInfo *errInfo = NULL;
     struct HksBlob certOut = { 0, NULL };
     int32_t ret;
     uint64_t startTime = 0;
@@ -424,8 +447,14 @@ void HksIpcServiceExportProviderCertificates(const struct HksBlob *srcData, cons
         ret = CheckUkeyCertCaller(&processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckUkeyCertCaller fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksIpcExportProvCertsAdapter(&processInfo, &providerName, paramSet, &certInfoSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcExportProvCertsAdapter fail, ret = %" LOG_PUBLIC "d", ret)
+        ret = HksIpcExportProvCertsAdapter(&processInfo, &providerName, paramSet, &certInfoSet, &errInfo);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksIpcExportProvCertsAdapter fail, ret = %" LOG_PUBLIC "d", ret);
+            HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
+            HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
+            HksFreeExternalErrorInfo(errInfo);
+            break;
+        }
 
         ret = HksCertificatesPackFromService(&certInfoSet, &certOut);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCertificatesPackFromService fail, ret = %" LOG_PUBLIC "d", ret)
@@ -454,6 +483,7 @@ void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t
     struct HksParamSet *paramSet = NULL;
     struct HksExtCertInfoSet certInfoSet = {0, NULL};
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    struct HksExternalErrorInfo *errInfo = NULL;
     struct HksBlob certOut = { 0, NULL };
     int32_t ret;
     uint64_t startTime = 0;
@@ -468,8 +498,14 @@ void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t
         ret = CheckUkeyCertCaller(&processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckUkeyCertCaller fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksIpcExportCertAdapter(&processInfo, &index, paramSet, &certInfoSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcExportCertAdapter fail, ret = %" LOG_PUBLIC "d", ret)
+        ret = HksIpcExportCertAdapter(&processInfo, &index, paramSet, &certInfoSet, &errInfo);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksIpcExportCertAdapter fail, ret = %" LOG_PUBLIC "d", ret);
+            HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
+            HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
+            HksFreeExternalErrorInfo(errInfo);
+            break;
+        }
 
         ret = HksCertificatesPackFromService(&certInfoSet, &certOut);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCertificatesPackFromService fail, ret = %" LOG_PUBLIC "d", ret)
@@ -498,6 +534,7 @@ void HksIpcServiceImportCertificate(const struct HksBlob *srcData, const uint8_t
     struct HksExtCertInfo certInfo = {0};
     struct HksParamSet *paramSet = NULL;
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    struct HksExternalErrorInfo *errInfo = NULL;
     int32_t ret;
     uint64_t startTime = 0;
     (void)HksElapsedRealTime(&startTime);
@@ -511,10 +548,14 @@ void HksIpcServiceImportCertificate(const struct HksBlob *srcData, const uint8_t
         ret = CheckUkeyCertCaller(&processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckUkeyCertCaller fail, ret = %" LOG_PUBLIC "d", ret)
         
-        ret = HksIpcImportCertAdapter(&processInfo, &index, &certInfo, paramSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcImportCertAdapter fail, ret = %" LOG_PUBLIC "d", ret)
+        ret = HksIpcImportCertAdapter(&processInfo, &index, &certInfo, paramSet, &errInfo);
+        HKS_IF_TRUE_BREAK(ret == HKS_SUCCESS)
+        HKS_LOG_E("HksIpcImportCertAdapter fail, ret = %" LOG_PUBLIC "d", ret);
+        HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
+        HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
+        HksFreeExternalErrorInfo(errInfo);
     } while (0);
-HksSendResponse(context, ret, NULL);
+    HksSendResponse(context, ret, NULL);
 
     struct UKeyInfo ukeyInfo = { .eventId = HKS_EVENT_UKEY_IMPORT_CERT,
         .resourceId = index, .detailErrcode = ret };
@@ -584,6 +625,7 @@ void HksIpcServiceGetResourceId(const struct HksBlob *srcData, const uint8_t *co
     struct HksBlob resourceId = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    struct HksExternalErrorInfo *errInfo = NULL;
     do {
         ret  = HksUKeyGeneralUnpack(srcData, &providerName, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksUKeyGeneralUnpack Ipc in HksIpcServiceGetResourceId fail")
@@ -594,8 +636,12 @@ void HksIpcServiceGetResourceId(const struct HksBlob *srcData, const uint8_t *co
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksIpcServiceOnGetResourceIdAdapter(&processInfo, &providerName, paramSet, &resourceId);
-        HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceOnGetResourceIdAdapter fail, ret = %" LOG_PUBLIC "d", ret)
+        ret = HksIpcServiceOnGetResourceIdAdapter(&processInfo, &providerName, paramSet, &resourceId, &errInfo);
+        HKS_IF_TRUE_BREAK(ret == HKS_SUCCESS)
+        HKS_LOG_E("HksIpcServiceOnGetResourceIdAdapter fail, ret = %" LOG_PUBLIC "d", ret);
+        HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
+        HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
+        HksFreeExternalErrorInfo(errInfo);
     } while (0);
 
     HksSendResponse(context, ret, ret == HKS_SUCCESS && resourceId.size != 0 ? &resourceId : NULL);

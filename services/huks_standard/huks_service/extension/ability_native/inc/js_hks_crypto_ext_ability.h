@@ -113,18 +113,19 @@ public:
     void OnDisconnect(const AAFwk::Want &want) override;
     sptr<IRemoteObject> OnConnect(const AAFwk::Want &want) override;
     int32_t OpenRemoteHandle(const std::string &index, const CppParamSet &params, std::string &handle,
-        int32_t &errcode) override;
-    int32_t CloseRemoteHandle(const std::string &handle, const CppParamSet &params, int32_t &errcode) override;
-    int32_t AuthUkeyPin(const std::string &handle, const CppParamSet &params, struct HksExternalErrorInfo **errInfo,
-        int32_t &authState, uint32_t &retryCnt) override;
+        struct HksExternalErrorInfo **errInfo) override;
+    int32_t CloseRemoteHandle(const std::string &handle, const CppParamSet &params,
+        struct HksExternalErrorInfo **errInfo) override;
+    int32_t AuthUkeyPin(const std::string &handle, const CppParamSet &params,
+        struct HksExternalErrorInfo **errInfo, int32_t &authState, uint32_t &retryCnt) override;
     int32_t GetUkeyPinAuthState(const std::string &handle, const CppParamSet &params,
-        int32_t &authState, int32_t &errcode) override;
+        int32_t &state, struct HksExternalErrorInfo **errInfo) override;
     int32_t ExportCertificate(const std::string &index, const CppParamSet &params,
-        std::string &certJsonArr, int32_t &errcode) override;
+        std::string &certJsonArr, struct HksExternalErrorInfo **errInfo) override;
     int32_t ExportProviderCertificates(const CppParamSet &params, std::string &certJsonArr,
-        int32_t &errcode) override;
+        struct HksExternalErrorInfo **errInfo) override;
     int32_t ImportCertificate(const std::string &index, const HksExtCertInfoIdl& certInfo, const CppParamSet &params,
-        int32_t &errcode) override;
+        struct HksExternalErrorInfo **errInfo) override;
     int32_t InitSession(const std::string &index, const CppParamSet &params, std::string &handle,
         int32_t &errcode) override;
     int32_t GenerateKey(const std::string &handle, const CppParamSet &params, int32_t &errcode) override;
@@ -134,12 +135,14 @@ public:
         std::vector<uint8_t> &outData, int32_t &errcode) override;
     int32_t SetOrGetProperty(uint32_t operation, const std::string &handle, const std::string &propertyId,
         CppParamSet &params, int32_t &errcode) override;
-    int32_t ClearUkeyPinAuthState(const std::string &handle, const CppParamSet &params, int32_t &errcode) override;
+    int32_t ClearUkeyPinAuthState(const std::string &handle, const CppParamSet &params,
+        struct HksExternalErrorInfo **errInfo) override;
     int32_t ImportWrappedKey(const std::string &index, const std::string &wrappingKeyIndex,
         const CppParamSet &params, const std::vector<uint8_t> &wrappedData, int32_t &errcode) override;
     int32_t ExportPublicKey(const std::string &index, const CppParamSet &params,
         std::vector<uint8_t> &outData, int32_t &errcode) override;
-    int32_t GetResourceId(const CppParamSet &params, std::string &resourceId, int32_t &errcode) override;
+    int32_t GetResourceId(const CppParamSet &params, std::string &resourceId,
+        struct HksExternalErrorInfo **errInfo) override;
 private:
     template <typename T>
     struct Value {
