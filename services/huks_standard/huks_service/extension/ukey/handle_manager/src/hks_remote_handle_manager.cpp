@@ -142,7 +142,7 @@ int32_t HksRemoteHandleManager::ParseAndValidateIndex(const std::string &index, 
     ProviderInfo &providerInfo, std::string &handle)
 {
     std::string newIndex;
-    int32_t ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
+    int32_t ret = GetProviderInfoAndIndex(index, providerInfo, newIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
         "Parse index and provider info failed: %" LOG_PUBLIC "d", ret)
     HKS_IF_TRUE_LOGE_RETURN(!uidIndexToHandle_.Find({uid, index}, handle), HKS_ERROR_NOT_EXIST,
@@ -159,7 +159,7 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &process
 
     ProviderInfo providerInfo{};
     std::string newIndex;
-    ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
+    ret = GetProviderInfoAndIndex(index, providerInfo, newIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
         "Parse index and provider info failed: %" LOG_PUBLIC "d", ret)
     providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
@@ -326,7 +326,7 @@ int32_t HksRemoteHandleManager::FindRemoteCertificate(const HksProcessInfo &proc
 
     ProviderInfo providerInfo = {"", "", ""};
     std::string newIndex;
-    ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
+    ret = GetProviderInfoAndIndex(index, providerInfo, newIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
         "Parse index and provider info failed: %" LOG_PUBLIC "d", ret)
     int32_t frontUserId;
@@ -401,7 +401,7 @@ int32_t HksRemoteHandleManager::ImportRemoteCertificate(const HksProcessInfo &pr
 
     ProviderInfo providerInfo = {"", "", ""};
     std::string newIndex;
-    ret = ParseIndexAndProviderInfo(index, providerInfo, newIndex);
+    ret = GetProviderInfoAndIndex(index, providerInfo, newIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
         "Parse index and provider info failed: %" LOG_PUBLIC "d", ret)
     int32_t frontUserId;
@@ -469,7 +469,7 @@ int32_t HksRemoteHandleManager::RemoteImportWrappedKey(const HksProcessInfo &pro
     std::string newIndex;
     ProviderInfo providerInfo{};
     ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, newIndex);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ParseIndexAndProviderInfo failed, ret = %" LOG_PUBLIC "d", ret)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetProviderInfoAndIndex failed, ret = %" LOG_PUBLIC "d", ret)
     providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
 
     std::string newWrappingKeyIndex;
@@ -505,7 +505,7 @@ int32_t HksRemoteHandleManager::RemoteExportPublicKey(const HksProcessInfo &proc
     std::string newIndex;
     ProviderInfo providerInfo;
     ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, newIndex);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ParseIndexAndProviderInfo failed, ret = %" LOG_PUBLIC "d", ret)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetProviderInfoAndIndex failed, ret = %" LOG_PUBLIC "d", ret)
     providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
 
     OHOS::sptr<IHuksAccessExtBase> proxy;
@@ -606,8 +606,8 @@ int32_t HksRemoteHandleManager::ClearUidIndexMap(const ProviderInfo &providerInf
     auto collectToRemoveFunc = [&](std::pair<uint32_t, std::string> key, std::string &value) {
         std::string newIndex;
         ProviderInfo tmpInfo{};
-        int32_t ret = ParseIndexAndProviderInfo(key.second, tmpInfo, newIndex);
-        HKS_IF_TRUE_LOGE(ret != HKS_SUCCESS, "ParseIndexAndProviderInfo failed: %" LOG_PUBLIC "d", ret)
+        int32_t ret = GetProviderInfoAndIndex(key.second, tmpInfo, newIndex);
+        HKS_IF_TRUE_LOGE(ret != HKS_SUCCESS, "GetProviderInfoAndIndex failed: %" LOG_PUBLIC "d", ret)
         if (providerInfo.m_userid == HksGetUserIdFromUid(key.first) &&
             tmpInfo.m_providerName == providerInfo.m_providerName &&
             tmpInfo.m_bundleName == providerInfo.m_bundleName) {
@@ -674,7 +674,7 @@ void HksRemoteHandleManager::ClearMapByHandle(const int32_t &ret, const std::str
     for (auto &key : keysToRemove) {
         std::string newIndex;
         ProviderInfo tmpInfo{};
-        (void)ParseIndexAndProviderInfo(key.second, tmpInfo, newIndex);
+        (void)GetProviderInfoAndIndex(key.second, tmpInfo, newIndex);
         tmpInfo.m_userid = HksGetUserIdFromUid(key.first);
         providerInfoToNum_.Erase(tmpInfo);
         uidIndexToHandle_.Erase(key);

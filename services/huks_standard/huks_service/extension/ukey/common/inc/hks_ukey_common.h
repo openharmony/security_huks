@@ -79,7 +79,6 @@ namespace Huks {
     };
     int32_t ParseAbilityInfoArrayFromJson(const std::string &jsonStr, std::vector<AbilityInfo> &abilityInfoArray);
     // 解析ResourceID json
-    int32_t ParseIndexAndProviderInfo(const std::string &index, ProviderInfo &providerInfo, std::string &newIndex);
     int32_t GetProviderInfoAndIndex(const std::string &index, ProviderInfo &providerInfo, std::string &newIndex);
 }
 }
