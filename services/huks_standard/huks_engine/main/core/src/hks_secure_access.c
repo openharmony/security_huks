@@ -553,7 +553,8 @@ static int32_t VerifyAuthTokenInfo(const struct HuksKeyNode *keyNode, const stru
     int32_t authRet = HksGetParam(keyBlobParamSet, HKS_TAG_USER_AUTH_TYPE, &userAuthType);
     struct HksParam *userAuthAtl = NULL;
     int32_t atlRet = HksGetParam(keyBlobParamSet, HKS_TAG_USER_AUTH_TYPE_ATL, &userAuthAtl);
-    HKS_IF_NOT_SUCC_LOGE_RETURN((authRet && atlRet), HKS_ERROR_BAD_STATE, "get userAuthType type failed!")
+    HKS_IF_TRUE_LOGE_RETURN((authRet != HKS_SUCCESS && atlRet != HKS_SUCCESS), HKS_ERROR_BAD_STATE,
+        "get userAuthType type failed!")
 
     struct HksParam *authAccessType = NULL;
     int32_t ret = HksGetParam(keyBlobParamSet, HKS_TAG_KEY_AUTH_ACCESS_TYPE, &authAccessType);

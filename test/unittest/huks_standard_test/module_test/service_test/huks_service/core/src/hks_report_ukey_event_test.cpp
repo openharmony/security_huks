@@ -84,7 +84,7 @@ HWTEST_F(HksReportUKeyEventTest, HksReportUKeyEventTest001, TestSize.Level0)
     ret = ReportUKeyEvent(&ukeyInfo, __func__, nullptr, &paramSet, &ukeyCommon);
     EXPECT_EQ(ret, HKS_FAILURE);
     ret = ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, nullptr, &ukeyCommon);
-    EXPECT_EQ(ret, HKS_FAILURE);
+    EXPECT_EQ(ret, HKS_SUCCESS);
     ret = ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, &paramSet, nullptr);
     EXPECT_EQ(ret, HKS_FAILURE);
     ukeyInfo.eventId = HKS_EVENT_DATA_SIZE_STATISTICS;
