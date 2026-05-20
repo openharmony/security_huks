@@ -604,8 +604,11 @@ napi_value GetHandleValue(napi_env env, napi_value object, struct HksBlob *&hand
         return nullptr;
     }
 
-    uint32_t handleTmp = 0;
-    napi_status status = napi_get_value_uint32(env, object, &handleTmp);
+    // Note: Use double instead of uint32 to support handle values larger than 32 bits.
+    // JavaScript/ArkTS 'number' type is IEEE 754 double, with 53-bit safe integer precision.
+    // Handle values must not exceed 2^53-1 to avoid precision loss.
+    double handleTmp = 0;
+    napi_status status = napi_get_value_double(env, object, &handleTmp);
     if (status != napi_ok) {
         HKS_LOG_E("Retrieve field failed");
         return nullptr;
@@ -824,12 +827,14 @@ static napi_value AddHandleOrChallenge(napi_env env, napi_value &object,
     napi_value addResult = nullptr;
 
     // add handle
+    // Note: Use double instead of uint32 to support handle values larger than 32 bits.
+    // JavaScript/ArkTS 'number' type is IEEE 754 double, with 53-bit safe integer precision.
+    // Handle values must not exceed 2^53-1 to avoid precision loss.
     if ((handle != nullptr) && (handle->data != nullptr) && (handle->size == sizeof(uint64_t))) {
         void *handleData = static_cast<void *>(handle->data);
         uint64_t tempHandle = *(static_cast<uint64_t *>(handleData));
-        uint32_t handleValue = static_cast<uint32_t>(tempHandle); /* Temporarily only use 32 bit handle */
         napi_value handlejs = nullptr;
-        NAPI_CALL(env, napi_create_uint32(env, handleValue, &handlejs));
+        NAPI_CALL(env, napi_create_double(env, static_cast<double>(tempHandle), &handlejs));
         NAPI_CALL(env, napi_set_named_property(env, object, HKS_HANDLE_PROPERTY_HANDLE.c_str(), handlejs));
         addResult = GetInt32(env, 0);
     }
