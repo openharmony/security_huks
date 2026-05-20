@@ -26,7 +26,7 @@
 #include "hks_plugin_def.h"
 
 #define HANDLE_SIZE              8
-#define HKS_SE_HANDLE_MASK_BIT   24
+#define HKS_SE_HANDLE_MASK_BIT   32
 #define DEFAULT_AUTH_TIMEOUT     5
 
 #define HKS_CIPHER_CCM_MODE_MAX_DATA_LEN (100 * 1024)
