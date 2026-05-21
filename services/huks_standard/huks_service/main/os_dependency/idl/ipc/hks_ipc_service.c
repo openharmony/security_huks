@@ -197,8 +197,7 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
     struct HksBlob index = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
-    int32_t status = 0;
-    uint32_t retryCount = 0;
+    struct HksExtAuthPinOutParam authOutParam = {0, 0};
     struct HksBlob outBlob = { 0, NULL };
     struct HksExternalErrorInfo *errInfo = NULL;
     int32_t ret;
@@ -207,33 +206,25 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
     do {
         ret = HksUKeyGeneralUnpack(srcData, &index, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: unpack fail");
-
+    
         ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: get process info fail ret=%" LOG_PUBLIC "d", ret);
-
+    
         ret = CheckUkeyAuthPinType();
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: CheckUkeyAuthPinType fail ret=%" LOG_PUBLIC "d", ret);
 
-        struct HksExtAuthPinOutParam authOutParam = {status, retryCount};
         ret = HksIpcAuthUkeyPinAdapter(&processInfo, &index, paramSet, &authOutParam, &errInfo);
-        HKS_IF_TRUE_BREAK(ret == HKS_SUCCESS)
-        HKS_LOG_E("AuthUkeyPin: adapter ret=%" LOG_PUBLIC "d", ret);
-        HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
-        HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
-        HksFreeExternalErrorInfo(errInfo);
-    } while (0);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksIpcAuthUkeyPinAdapter fail, ret = %" LOG_PUBLIC "d", ret);
+            HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
+            HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
+            HksFreeExternalErrorInfo(errInfo);
+            break;
+        }
 
-    outBlob.size = (sizeof(int32_t) + sizeof(int32_t) + sizeof(uint32_t));
-    outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
-    if (outBlob.data == NULL) {
-        ret = HKS_ERROR_MALLOC_FAIL;
-    } else if (memcpy_s(outBlob.data, outBlob.size, &ret, sizeof(int32_t)) != EOK ||
-        memcpy_s(outBlob.data + sizeof(int32_t), outBlob.size - sizeof(int32_t), &status, sizeof(int32_t)) != EOK ||
-        memcpy_s(outBlob.data + sizeof(int32_t) * RET_NUM, outBlob.size - sizeof(int32_t) * RET_NUM,
-            &retryCount, sizeof(uint32_t)) != EOK) {
-        ret = HKS_ERROR_BAD_STATE;
-        HKS_LOG_E("AuthUkeyPin: memcpy fail");
-    }
+        ret = PackAuthPinReply(&outBlob, ret, authOutParam.outStatus, authOutParam.retryCount);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "PackAuthPinReply fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
 
     HksSendResponse(context, (ret == HKS_ERROR_BAD_STATE || ret == HKS_ERROR_MALLOC_FAIL) ? ret : HKS_SUCCESS,
         (outBlob.data != NULL && outBlob.size == (sizeof(int32_t) * RET_NUM + sizeof(uint32_t))) ? &outBlob : NULL);

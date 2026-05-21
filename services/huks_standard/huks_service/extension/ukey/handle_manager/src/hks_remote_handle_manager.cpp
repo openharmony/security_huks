@@ -510,7 +510,8 @@ int32_t HksRemoteHandleManager::RemoteImportWrappedKey(struct HksProcessWithErro
 
     std::string newWrappingKeyIndex;
     ProviderInfo wrappingKeyProviderInfo;
-    ret = ParseAndValidateIndex(wrappingKeyIndex, processAndError.processInfo->uidInt, wrappingKeyProviderInfo, newWrappingKeyIndex);
+    ret = ParseAndValidateIndex(wrappingKeyIndex, processAndError.processInfo->uidInt,
+        wrappingKeyProviderInfo, newWrappingKeyIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
         "ParseAndValidateIndex for wrapping key failed, ret = %" LOG_PUBLIC "d", ret)
 

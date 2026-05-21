@@ -233,7 +233,8 @@ int HksExtStub::ProcessExtGetRemotePropertyReply(MessageParcel& data)
     return err;
 }
 
-std::tuple<uint32_t, std::unique_ptr<uint8_t[]>, uint32_t, uint32_t, struct HksExternalErrorInfo*> HksExtStub::WaitForAsyncReply(int timeout)
+std::tuple<uint32_t, std::unique_ptr<uint8_t[]>, uint32_t, uint32_t,
+    struct HksExternalErrorInfo*> HksExtStub::WaitForAsyncReply(int timeout)
 {
     std::unique_lock<std::mutex> lck(mMutex);
     if (received) {
@@ -302,14 +303,6 @@ void HksExtProxy::SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &s
     
     if (errCode != HKS_SUCCESS) {
         HKS_LOG_E("ukey callback fail errCode %" LOG_PUBLIC "u", errCode);
-        writeResult = data.WriteInt32(errVal);
-        HKS_IF_NOT_TRUE_LOGE(writeResult, "WriteInt32 errVal %" LOG_PUBLIC "d failed", errVal)
-        writeResult = data.WriteUint32(descLen);
-        HKS_IF_NOT_TRUE_LOGE(writeResult, "WriteUint32 descLen %" LOG_PUBLIC "u failed", descLen)
-        if (descLen > 0 && descLen < MAX_ERROR_MESSAGE_LEN) {
-            writeResult = data.WriteBuffer(errorDesc, descLen);
-            HKS_IF_NOT_TRUE_LOGE(writeResult, "WriteBuffer errorDesc failed")
-        }
         int res = Remote()->SendRequest(msgCode, data, reply, option);
         HKS_IF_TRUE_LOGE(res != ERR_OK, "send fail reply errCode failed %" LOG_PUBLIC "d", res)
         return;

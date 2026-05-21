@@ -246,15 +246,9 @@ ErrCode HksCryptoExtStubImpl::SetOrGetProperty(
         errorInfo.errorDesc.assign("HUKS internal error");
         return HKS_ERROR_EXT_NULLPTR;
     }
-    struct HksExternalErrorInfo *errInfoPtr = nullptr;
-    int32_t ret = extension_->SetOrGetProperty(operation, handle, propertyId, params, &errInfoPtr);
-    if (errInfoPtr != nullptr) {
-        errorInfo.errVal = errInfoPtr->errVal;
-        if (errInfoPtr->errorDesc != nullptr) {
-            errorInfo.errorDesc.assign(errInfoPtr->errorDesc);
-        }
-        HksFreeExternalErrorInfo(errInfoPtr);
-    }
+    struct HksExternalErrorInfo *errInfoC = nullptr;
+    int32_t ret = extension_->SetOrGetProperty(operation, handle, propertyId, params, &errInfoC);
+    SetErrorInfoFromC(errInfoC, ret, errorInfo);
     return ret;
 }
 

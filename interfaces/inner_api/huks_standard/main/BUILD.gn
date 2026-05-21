@@ -51,6 +51,7 @@ if (os_level == "standard") {
     sources = [
       "../source/hks_api.c",
       "../source/hks_api_adapter.c",
+      "//base/security/huks/frameworks/huks_standard/main/common/src/hks_ukey_global_errInfo.c",
     ]
 
     deps = [
@@ -90,10 +91,19 @@ if (os_level == "standard") {
 
     defines = [ "HKS_CHIPSET_API" ]
 
-    include_dirs = [ "../source" ]
-    sources = [ "../source/hks_api.c" ]
+    include_dirs = [
+      "../source",
+      "//base/security/huks/utils/mutex",
+    ]
+    sources = [
+      "../source/hks_api.c",
+      "//base/security/huks/frameworks/huks_standard/main/common/src/hks_ukey_global_errInfo.c",
+    ]
 
-    deps = [ "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks" ]
+    deps = [
+      "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
+      "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
+    ]
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",

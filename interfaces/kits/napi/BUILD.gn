@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/huks/build/config.gni")
 import("//build/ohos.gni")
 
 ohos_shared_library("huks") {
@@ -139,6 +140,7 @@ ohos_shared_library("huksexternalcrypto_napi") {
     "_HARDWARE_ROOT_KEY_",
     "_HUKS_LOG_ENABLE_",
     "HUKS_EXTERNAL_CRYPTO",
+    "HKS_UKEY_EXTENSION_CRYPTO",
   ]
   deps = [
     "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",

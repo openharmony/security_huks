@@ -41,6 +41,8 @@ int32_t HksUKeyGeneralUnpackWithCertInfo(const struct HksBlob *srcData, struct H
 
 int32_t HksBlob3Unpack(const struct HksBlob *srcData, struct HksBlob *blob1,
     struct HksBlob *blob2, struct HksBlob *blob3);
+
+int32_t PackAuthPinReply(struct HksBlob *outBlob, int32_t ret, int32_t status, uint32_t retryCount);
 #endif
 
 int32_t HksGenerateKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,

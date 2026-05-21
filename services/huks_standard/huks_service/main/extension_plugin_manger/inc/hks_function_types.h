@@ -71,8 +71,8 @@ using OnClearUkeyPinAuthStatusFunc = int32_t (*)(const HksProcessInfo &processIn
 using OnSetOrGetRemotePropertyFunc = int32_t (*)(struct HksProcessWithErrorInfo &processAndError,
     enum HksExtPropertyOperation operation, const std::string &index, const std::string &propertyId,
     CppParamSet &paramSet);
-using OnListIndexCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, std::string &certsJson, struct HksExternalErrorInfo **errInfo);
+using OnListIndexCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, std::string &certsJson, struct HksExternalErrorInfo **errInfo);
 using OnListProviderAllCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &providerName,
     const CppParamSet &paramSet, std::string &certsJsonArr, struct HksExternalErrorInfo **errInfo);
 using OnImportCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,

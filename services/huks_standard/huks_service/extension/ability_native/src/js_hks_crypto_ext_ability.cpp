@@ -1098,13 +1098,8 @@ int32_t ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
         case CryptoResultParamType::SET_OR_GET_PROPERTY:
             GetGetPropertyParams(env, funcResult, resultParams);
             break;
-        case CryptoResultParamType::CLOSE_REMOTE_HANDLE:
-        case CryptoResultParamType::CLEAR_UKEY_PIN_AUTH:
-        case CryptoResultParamType::GENERATE_KEY:
-        case CryptoResultParamType::IMPORT_WRAPPED_KEY:
-            GetErrorInfoParams(env, funcResult, resultParams);
-            break;
         default:
+            GetErrorInfoParams(env, funcResult, resultParams);
             break;
     }
     return HKS_SUCCESS;

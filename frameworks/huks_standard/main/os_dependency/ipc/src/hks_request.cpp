@@ -87,22 +87,13 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
     }
 
     int32_t errVal = 0;
-    if (!reply.ReadInt32(errVal)) {
-        HKS_LOG_E("ReadInt32 errVal failed");
-        return ret;
-    }
+    HKS_IF_NOT_TRUE_LOGE_RETURN(reply.ReadInt32(errVal), ret, "ReadInt32 errVal failed")
     uint32_t descLen = 0;
-    if (!reply.ReadUint32(descLen)) {
-        HKS_LOG_E("ReadUint32 descLen failed");
-        return ret;
-    }
+    HKS_IF_NOT_TRUE_LOGE_RETURN(reply.ReadUint32(descLen), ret, "ReadUint32 descLen failed")
     const char *errorDesc = "";
     if (descLen != 0 && descLen < MAX_EXT_ERROR_MESSAGE_LEN) {
         const uint8_t *buffer = reply.ReadBuffer(descLen);
-        if (buffer == nullptr) {
-            HKS_LOG_E("ReadBuffer errorDesc failed");
-            return ret;
-        }
+        HKS_IF_NULL_LOGE_RETURN(buffer, ret, "ReadBuffer errorDesc failed")
         errorDesc = (const char *)buffer;
     }
     HksAppendThreadExtErrMsg(errVal, errorDesc);
@@ -185,12 +176,6 @@ static int32_t HksExtSendAsyncMessage(MessageParcel &data, const struct HksParam
     if (errCode != HKS_SUCCESS || receivedData == nullptr || receivedSize == 0 || receivedCode != msgCode) {
         HKS_LOG_E("async fail errCode=%" LOG_PUBLIC "u size=%" LOG_PUBLIC "u code=%" LOG_PUBLIC "u",
             errCode, receivedSize, receivedCode);
-        if (errInfo != nullptr) {
-            if (errInfo->errVal != 0) {
-                HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
-            }
-            HksFreeExternalErrorInfo(errInfo);
-        }
         return HUKS_ERR_CODE_EXTERNAL_ERROR;
     }
 
@@ -202,14 +187,11 @@ static int32_t HksExtSendAsyncMessage(MessageParcel &data, const struct HksParam
         outBlob->size, receivedSize);
 
     outBlob->size = receivedSize;
-    
+
     if (errInfo != nullptr) {
-        if (errInfo->errVal != 0) {
-            HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
-        }
+        HKS_IF_TRUE_EXCU(errInfo->errVal != 0, HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
         HksFreeExternalErrorInfo(errInfo);
     }
-    
     return HKS_SUCCESS;
 }
 

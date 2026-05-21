@@ -53,7 +53,6 @@ if (os_level == "standard") {
       "src/hks_ukey_check.cpp",
       "src/hks_cpp_abilityinfo.cpp",
       "src/hks_external_error_info.c",
-      "src/hks_ukey_global_errInfo.c",
     ]
 
     if (huks_enable_ukey_config == true) {

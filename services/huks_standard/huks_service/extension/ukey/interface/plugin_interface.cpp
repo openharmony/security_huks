@@ -208,8 +208,8 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnExportProviderCerti
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnGenerateKey(struct HksProcessWithErrorInfo &processAndError,
-    const std::string &index, const CppParamSet &paramSet)
+__attribute__((visibility("default"))) int32_t HksExtPluginOnGenerateKey(
+    struct HksProcessWithErrorInfo &processAndError, const std::string &index, const CppParamSet &paramSet)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
@@ -219,8 +219,9 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnGenerateKey(struct 
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnInitSession(struct HksProcessWithErrorInfo &processAndError,
-    const std::string &index, const CppParamSet &paramSet, uint32_t &handle)
+__attribute__((visibility("default"))) int32_t HksExtPluginOnInitSession(
+    struct HksProcessWithErrorInfo &processAndError, const std::string &index,
+    const CppParamSet &paramSet, uint32_t &handle)
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
@@ -234,9 +235,9 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnInitSession(struct 
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnUpdateSession(struct HksProcessWithErrorInfo &processAndError,
-    const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
-    std::vector<uint8_t> &outData)
+__attribute__((visibility("default"))) int32_t HksExtPluginOnUpdateSession(
+    struct HksProcessWithErrorInfo &processAndError, const uint32_t &handle, const CppParamSet &paramSet,
+    const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData)
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
@@ -248,9 +249,9 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUpdateSession(struc
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnFinishSession(struct HksProcessWithErrorInfo &processAndError,
-    const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
-    std::vector<uint8_t> &outData)
+__attribute__((visibility("default"))) int32_t HksExtPluginOnFinishSession(
+    struct HksProcessWithErrorInfo &processAndError, const uint32_t &handle, const CppParamSet &paramSet,
+    const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData)
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
@@ -262,8 +263,8 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnFinishSession(struc
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnAbortSession(struct HksProcessWithErrorInfo &processAndError,
-    const uint32_t &handle, const CppParamSet &paramSet)
+__attribute__((visibility("default"))) int32_t HksExtPluginOnAbortSession(
+    struct HksProcessWithErrorInfo &processAndError, const uint32_t &handle, const CppParamSet &paramSet)
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
@@ -322,8 +323,9 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnImportWrappedKey(
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnExportPublicKey(struct HksProcessWithErrorInfo &processAndError,
-    const std::string &index, const CppParamSet &paramSet, std::vector<uint8_t> &outData)
+__attribute__((visibility("default"))) int32_t HksExtPluginOnExportPublicKey(
+    struct HksProcessWithErrorInfo &processAndError, const std::string &index, const CppParamSet &paramSet,
+    std::vector<uint8_t> &outData)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
