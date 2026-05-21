@@ -51,7 +51,6 @@ if (os_level == "standard") {
     sources = [
       "../source/hks_api.c",
       "../source/hks_api_adapter.c",
-      "//base/security/huks/frameworks/huks_standard/main/common/src/hks_ukey_global_errInfo.c",
     ]
 
     deps = [

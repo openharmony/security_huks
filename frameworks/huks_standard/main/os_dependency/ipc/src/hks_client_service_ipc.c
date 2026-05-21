@@ -799,6 +799,12 @@ int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksPar
         }
     } while (0);
 
+    const struct HksExternalErrorInfo *threadError = HksGetThreadExtErrMsg();
+ 	if (ret != HKS_SUCCESS && threadError != NULL) {
+ 	    HksSetUkeyGlobalInfoC(threadError->errVal, threadError->errorDesc);
+ 	}
+ 	HksClearThreadExtErrMsg();
+
     HKS_FREE_BLOB(inBlob);
     return ret;
 }
@@ -853,6 +859,11 @@ int32_t HksClientExportPublicKey(const struct HksBlob *keyAlias, const struct Hk
 
         ret = HksSendRequest(HKS_MSG_EXPORT_PUBLIC_KEY, &inBlob, key, newParamSet);
     } while (0);
+    const struct HksExternalErrorInfo *threadError = HksGetThreadExtErrMsg();
+ 	if (ret != HKS_SUCCESS && threadError != NULL) {
+ 	    HksSetUkeyGlobalInfoC(threadError->errVal, threadError->errorDesc);
+ 	}
+ 	HksClearThreadExtErrMsg();
 
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
@@ -879,6 +890,11 @@ int32_t HksClientImportWrappedKey(const struct HksBlob *keyAlias, const struct H
 
         ret = HksSendRequest(HKS_MSG_IMPORT_WRAPPED_KEY, &inBlob, NULL, paramSet);
     } while (0);
+    const struct HksExternalErrorInfo *threadError = HksGetThreadExtErrMsg();
+ 	if (ret != HKS_SUCCESS && threadError != NULL) {
+ 	    HksSetUkeyGlobalInfoC(threadError->errVal, threadError->errorDesc);
+ 	}
+ 	HksClearThreadExtErrMsg();
 
     HKS_FREE_BLOB(inBlob);
     return ret;
@@ -1376,6 +1392,11 @@ static int32_t ClientInit(const struct HksBlob *inData, const struct HksParamSet
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy token failed")
         }
     } while (0);
+    const struct HksExternalErrorInfo *threadError = HksGetThreadExtErrMsg();
+ 	if (ret != HKS_SUCCESS && threadError != NULL) {
+ 	    HksSetUkeyGlobalInfoC(threadError->errVal, threadError->errorDesc);
+ 	}
+ 	HksClearThreadExtErrMsg();
 
     HKS_FREE(tmpOut);
     return ret;
@@ -1429,6 +1450,12 @@ int32_t HksClientUpdate(const struct HksBlob *handle, const struct HksParamSet *
         .data = (uint8_t *)sendParamSet
     };
     ret = HksSendRequest(HKS_MSG_UPDATE, &parcelBlob, outData, paramSet);
+    const struct HksExternalErrorInfo *threadError = HksGetThreadExtErrMsg();
+ 	if (ret != HKS_SUCCESS && threadError != NULL) {
+ 	    HksSetUkeyGlobalInfoC(threadError->errVal, threadError->errorDesc);
+ 	}
+ 	HksClearThreadExtErrMsg();
+
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksParamSet send fail, ret = %" LOG_PUBLIC "d", ret);
         HksFreeParamSet(&sendParamSet);
@@ -1461,6 +1488,12 @@ int32_t HksClientFinish(const struct HksBlob *handle, const struct HksParamSet *
         .data = (uint8_t *)sendParamSet
     };
     ret = HksSendRequest(HKS_MSG_FINISH, &parcelBlob, outData, paramSet);
+    const struct HksExternalErrorInfo *threadError = HksGetThreadExtErrMsg();
+ 	if (ret != HKS_SUCCESS && threadError != NULL) {
+ 	    HksSetUkeyGlobalInfoC(threadError->errVal, threadError->errorDesc);
+ 	}
+ 	HksClearThreadExtErrMsg();
+
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksParamSet send fail, ret = %" LOG_PUBLIC "d", ret);
         HksFreeParamSet(&sendParamSet);
@@ -1490,6 +1523,12 @@ int32_t HksClientAbort(const struct HksBlob *handle, const struct HksParamSet *p
         .data = (uint8_t *)sendParamSet
     };
     ret = HksSendRequest(HKS_MSG_ABORT, &parcelBlob, NULL, paramSet);
+    const struct HksExternalErrorInfo *threadError = HksGetThreadExtErrMsg();
+ 	if (ret != HKS_SUCCESS && threadError != NULL) {
+ 	    HksSetUkeyGlobalInfoC(threadError->errVal, threadError->errorDesc);
+ 	}
+ 	HksClearThreadExtErrMsg();
+
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksParamSet send fail, ret = %" LOG_PUBLIC "d", ret);
         HksFreeParamSet(&sendParamSet);

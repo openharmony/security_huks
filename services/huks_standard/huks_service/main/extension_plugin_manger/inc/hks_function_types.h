@@ -77,20 +77,20 @@ using OnListProviderAllCertificateFunc = int32_t (*)(const HksProcessInfo &proce
     const CppParamSet &paramSet, std::string &certsJsonArr, struct HksExternalErrorInfo **errInfo);
 using OnImportCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
     const HksExtCertInfo &certInfo, const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo);
-using OnGenerateKeyFunc = int32_t (*)(const HksProcessInfo &processInfo,
+using OnGenerateKeyFunc = int32_t (*)(struct HksProcessWithErrorInfo &processAndError,
     const std::string &resourceId, const CppParamSet &paramSet);
-using OnInitSessionFunc = int32_t (*)(const HksProcessInfo &processInfo,
+using OnInitSessionFunc = int32_t (*)(struct HksProcessWithErrorInfo &processAndError,
     const std::string &index, const CppParamSet &paramSet, uint32_t &handle);
-using OnUpdateSessionFunc = int32_t (*)(const HksProcessInfo &processInfo, const uint32_t &handle,
+using OnUpdateSessionFunc = int32_t (*)(struct HksProcessWithErrorInfo &processAndError, const uint32_t &handle,
     const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
-using OnFinishSessionFunc = int32_t (*)(const HksProcessInfo &processInfo, const uint32_t &handle,
+using OnFinishSessionFunc = int32_t (*)(struct HksProcessWithErrorInfo &processAndError, const uint32_t &handle,
     const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
-using OnAbortSessionFunc = int32_t (*)(const HksProcessInfo &processInfo, const uint32_t &handle,
+using OnAbortSessionFunc = int32_t (*)(struct HksProcessWithErrorInfo &processAndError, const uint32_t &handle,
     const CppParamSet &paramSet);
 using OnUnregisterAllObserversFunc = int32_t (*)();
-using OnExportPublicKeyFunc = int32_t (*)(const HksProcessInfo &processInfo,
+using OnExportPublicKeyFunc = int32_t (*)(struct HksProcessWithErrorInfo &processAndError,
     const std::string &index, const CppParamSet &paramSet, std::vector<uint8_t> &outData);
-using OnImportWrappedKeyFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
+using OnImportWrappedKeyFunc = int32_t (*)(struct HksProcessWithErrorInfo &processAndError, const std::string &index,
     const std::string &wrappingKeyIndex, const CppParamSet &paramSet, const std::vector<uint8_t> &wrappedData);
 using OnQueryAbilityFunc = int32_t (*)(const struct HksProcessInfo &processInfo, std::string &resourceId,
     CppAbilityInfo &abilityInfo);

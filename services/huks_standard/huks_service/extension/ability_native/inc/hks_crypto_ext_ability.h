@@ -56,20 +56,22 @@ public:
         struct HksExternalErrorInfo **errInfo);
     virtual int ImportCertificate(const std::string &index, const HksExtCertInfoIdl& certInfo,
         const CppParamSet &params, struct HksExternalErrorInfo **errInfo);
-    virtual int InitSession(const std::string &index, const CppParamSet &params, std::string &handle, int32_t &errcode);
+    virtual int InitSession(const std::string &index, const CppParamSet &params, std::string &handle,
+        struct HksExternalErrorInfo **errInfo);
     virtual int UpdateSession(const std::string &handle, const CppParamSet &params, const std::vector<uint8_t> &inData,
-        std::vector<uint8_t> &outData, int32_t &errcode);
+        std::vector<uint8_t> &outData, struct HksExternalErrorInfo **errInfo);
     virtual int FinishSession(const std::string &handle, const CppParamSet &params, const std::vector<uint8_t> &inData,
-        std::vector<uint8_t> &outData, int32_t &errcode);
+        std::vector<uint8_t> &outData, struct HksExternalErrorInfo **errInfo);
     virtual int SetOrGetProperty(uint32_t operation, const std::string& handle, const std::string& propertyId,
         CppParamSet& params, struct HksExternalErrorInfo **errInfo);
     virtual int ClearUkeyPinAuthState(const std::string& handle, const CppParamSet& params,
         struct HksExternalErrorInfo **errInfo);
     virtual int ImportWrappedKey(const std::string& index, const std::string& wrappingKeyIndex,
-        const CppParamSet& params, const std::vector<uint8_t>& wrappedData, int32_t& errcode);
+        const CppParamSet& params, const std::vector<uint8_t>& wrappedData, struct HksExternalErrorInfo **errInfo);
     virtual int ExportPublicKey(const std::string& index, const CppParamSet& params,
-        std::vector<uint8_t>& outData, int32_t& errcode);
-    virtual int GenerateKey(const std::string &handle, const CppParamSet &params, int32_t &errcode);
+        std::vector<uint8_t>& outData, struct HksExternalErrorInfo **errInfo);
+    virtual int GenerateKey(const std::string &handle, const CppParamSet &params,
+        struct HksExternalErrorInfo **errInfo);
     virtual int GetResourceId(const CppParamSet &params, std::string &resourceId,
         struct HksExternalErrorInfo **errInfo);
 private:

@@ -108,28 +108,28 @@ int32_t HksCryptoExtAbility::ImportCertificate(const std::string &index, const H
 }
 
 int32_t HksCryptoExtAbility::GenerateKey(const std::string &handle,
-    const CppParamSet &params, int32_t &errcode)
+    const CppParamSet &params, struct HksExternalErrorInfo **errInfo)
 {
     LOGE("HksCryptoExtAbility::GenerateKey Undefined operation");
     return HKS_ERROR_EXT_UNDEFINED_OPERATION;
 }
 
 int32_t HksCryptoExtAbility::InitSession(const std::string &index, const CppParamSet &params, std::string &handle,
-    int32_t &errcode)
+    struct HksExternalErrorInfo **errInfo)
 {
     LOGE("HksCryptoExtAbility::InitSession Undefined operation");
     return HKS_ERROR_EXT_UNDEFINED_OPERATION;
 }
 
 int32_t HksCryptoExtAbility::UpdateSession(const std::string &handle, const CppParamSet &params,
-    const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData, int32_t &errcode)
+    const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData, struct HksExternalErrorInfo **errInfo)
 {
     LOGE("HksCryptoExtAbility::UpdateSession Undefined operation");
     return HKS_ERROR_EXT_UNDEFINED_OPERATION;
 }
 
 int32_t HksCryptoExtAbility::FinishSession(const std::string &handle, const CppParamSet &params,
-    const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData, int32_t &errcode)
+    const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData, struct HksExternalErrorInfo **errInfo)
 {
     LOGE("HksCryptoExtAbility::FinishSession Undefined operation");
     return HKS_ERROR_EXT_UNDEFINED_OPERATION;
@@ -150,14 +150,14 @@ int32_t HksCryptoExtAbility::ClearUkeyPinAuthState(const std::string &handle,
 }
 
 int32_t HksCryptoExtAbility::ImportWrappedKey(const std::string &index, const std::string &wrappingKeyIndex,
-    const CppParamSet &params, const std::vector<uint8_t> &wrappedData, int32_t &errcode)
+    const CppParamSet &params, const std::vector<uint8_t> &wrappedData, struct HksExternalErrorInfo **errInfo)
 {
     LOGE("HksCryptoExtAbility::ImportWrappedKey Undefined operation");
     return HKS_ERROR_EXT_UNDEFINED_OPERATION;
 }
 
 int32_t HksCryptoExtAbility::ExportPublicKey(const std::string &index, const CppParamSet &params,
-    std::vector<uint8_t> &outData, int32_t &errcode)
+    std::vector<uint8_t> &outData, struct HksExternalErrorInfo **errInfo)
 {
     LOGE("HksCryptoExtAbility::ExportPublicKey Undefined operation");
     return HKS_ERROR_EXT_UNDEFINED_OPERATION;

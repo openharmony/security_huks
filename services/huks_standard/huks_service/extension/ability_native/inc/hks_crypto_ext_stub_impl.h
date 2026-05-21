@@ -79,26 +79,26 @@ public:
         const std::string& index,
         const CppParamSet& params,
         std::string& handle,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode GenerateKey(
         const std::string& index,
         const CppParamSet& params,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode UpdateSession(
         const std::string& handle,
         const CppParamSet& params,
         const std::vector<uint8_t>& inData,
         std::vector<uint8_t>& outData,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode FinishSession(
         const std::string& handle,
         const CppParamSet& params,
         const std::vector<uint8_t>& inData,
         std::vector<uint8_t>& outData,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode SetOrGetProperty(
         uint32_t operation,
@@ -117,13 +117,13 @@ public:
         const std::string& wrappingKeyIndex,
         const CppParamSet& params,
         const std::vector<uint8_t>& wrappedData,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode ExportPublicKey(
         const std::string& index,
         const CppParamSet& params,
         std::vector<uint8_t>& outData,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode GetResourceId(
         const CppParamSet &params,

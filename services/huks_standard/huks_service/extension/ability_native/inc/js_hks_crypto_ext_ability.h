@@ -127,20 +127,22 @@ public:
     int32_t ImportCertificate(const std::string &index, const HksExtCertInfoIdl& certInfo, const CppParamSet &params,
         struct HksExternalErrorInfo **errInfo) override;
     int32_t InitSession(const std::string &index, const CppParamSet &params, std::string &handle,
-        int32_t &errcode) override;
-    int32_t GenerateKey(const std::string &handle, const CppParamSet &params, int32_t &errcode) override;
+        struct HksExternalErrorInfo **errInfo) override;
+    int32_t GenerateKey(const std::string &handle, const CppParamSet &params,
+        struct HksExternalErrorInfo **errInfo) override;
     int32_t UpdateSession(const std::string &handle, const CppParamSet &params, const std::vector<uint8_t> &inData,
-        std::vector<uint8_t> &outData, int32_t &errcode) override;
+        std::vector<uint8_t> &outData, struct HksExternalErrorInfo **errInfo) override;
     int32_t FinishSession(const std::string &handle, const CppParamSet &params, const std::vector<uint8_t> &inData,
-        std::vector<uint8_t> &outData, int32_t &errcode) override;
+        std::vector<uint8_t> &outData, struct HksExternalErrorInfo **errInfo) override;
     int32_t SetOrGetProperty(uint32_t operation, const std::string &handle, const std::string &propertyId,
         CppParamSet &params, struct HksExternalErrorInfo **errInfo) override;
     int32_t ClearUkeyPinAuthState(const std::string &handle, const CppParamSet &params,
         struct HksExternalErrorInfo **errInfo) override;
     int32_t ImportWrappedKey(const std::string &index, const std::string &wrappingKeyIndex,
-        const CppParamSet &params, const std::vector<uint8_t> &wrappedData, int32_t &errcode) override;
+        const CppParamSet &params, const std::vector<uint8_t> &wrappedData,
+        struct HksExternalErrorInfo **errInfo) override;
     int32_t ExportPublicKey(const std::string &index, const CppParamSet &params,
-        std::vector<uint8_t> &outData, int32_t &errcode) override;
+        std::vector<uint8_t> &outData, struct HksExternalErrorInfo **errInfo) override;
     int32_t GetResourceId(const CppParamSet &params, std::string &resourceId,
         struct HksExternalErrorInfo **errInfo) override;
 private:

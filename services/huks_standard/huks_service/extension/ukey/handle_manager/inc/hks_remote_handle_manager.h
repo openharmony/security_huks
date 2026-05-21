@@ -239,11 +239,11 @@ public:
     int32_t SetOrGetRemoteProperty(struct HksProcessWithErrorInfo &processAndError,
         enum HksExtPropertyOperation operation, const std::string &index, const std::string &propertyId,
         CppParamSet &paramSet);
-    int32_t RemoteExportPublicKey(const HksProcessInfo &processInfo, const std::string &index,
+    int32_t RemoteExportPublicKey(struct HksProcessWithErrorInfo &processAndError, const std::string &index,
         const CppParamSet &paramSet, std::vector<uint8_t> &outData);
-    int32_t RemoteImportWrappedKey(const HksProcessInfo &processInfo, const std::string &index,
+    int32_t RemoteImportWrappedKey(struct HksProcessWithErrorInfo &processAndError, const std::string &index,
         const std::string &wrappingKeyIndex, const CppParamSet &paramSet, const std::vector<uint8_t> &wrappedData);
-    int32_t ExtensionGenerateKey(const HksProcessInfo &processInfo, const std::string &index,
+    int32_t ExtensionGenerateKey(struct HksProcessWithErrorInfo &processAndError, const std::string &index,
         const CppParamSet &paramSet);
     
     int32_t GetResourceId(const HksProcessInfo &processInfo, const std::string &providerName,

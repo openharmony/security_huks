@@ -62,19 +62,19 @@ public:
         const CppParamSet &paramSet, std::string &certsJsonArr, struct HksExternalErrorInfo **errInfo);
     int32_t OnImportCertificate(const HksProcessInfo &processInfo, const std::string &index,
         const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo);
-    int32_t OnGenerateKey(const HksProcessInfo &processInfo,
+    int32_t OnGenerateKey(struct HksProcessWithErrorInfo &processAndError,
         const std::string &resourceId, const CppParamSet &paramSet);
-    int32_t OnInitSession (const HksProcessInfo &processInfo, const std::string &index,
+    int32_t OnInitSession (struct HksProcessWithErrorInfo &processAndError, const std::string &index,
         const CppParamSet &paramSet, uint32_t &handle);
-    int32_t OnUpdateSession (const HksProcessInfo &processInfo, const uint32_t &handle,
+    int32_t OnUpdateSession (struct HksProcessWithErrorInfo &processAndError, const uint32_t &handle,
         const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
-    int32_t OnFinishSession (const HksProcessInfo &processInfo, const uint32_t &handle,
+    int32_t OnFinishSession (struct HksProcessWithErrorInfo &processAndError, const uint32_t &handle,
         const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
-    int32_t OnAbortSession(const HksProcessInfo &processInfo, const uint32_t &handle,
+    int32_t OnAbortSession(struct HksProcessWithErrorInfo &processAndError, const uint32_t &handle,
         const CppParamSet &paramSet);
-    int32_t OnImportWrappedKey(const HksProcessInfo &processInfo, const std::string &index,
+    int32_t OnImportWrappedKey(struct HksProcessWithErrorInfo &processAndError, const std::string &index,
         const std::string &wrappingKeyIndex, const CppParamSet &paramSet, const std::vector<uint8_t> &wrappedData);
-    int32_t OnExportPublicKey(const HksProcessInfo &processInfo, const std::string &index,
+    int32_t OnExportPublicKey(struct HksProcessWithErrorInfo &processAndError, const std::string &index,
         const CppParamSet &paramSet, std::vector<uint8_t> &outData);
     int32_t OnQueryAbility(const HksProcessInfo &processInfo, std::string &resourceId, CppAbilityInfo &abilityInfo);
     int32_t OnGetResourceId(const HksProcessInfo &processInfo, const std::string &providerName,

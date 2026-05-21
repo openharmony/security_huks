@@ -310,8 +310,8 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnImportCertificate(const HksProcessI
     return HKS_SUCCESS;
 }
 
-ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnInitSession(const HksProcessInfo &processInfo, const std::string &index,
-    const CppParamSet &paramSet, uint32_t &handle))
+ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnInitSession(struct HksProcessWithErrorInfo &processAndError,
+    const std::string &index, const CppParamSet &paramSet, uint32_t &handle))
 {
     AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
@@ -319,14 +319,15 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnInitSession(const HksProcessInfo &p
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
         "InitSession method enum not found in plugin provider map.")
     
-    int32_t ret = (*reinterpret_cast<OnInitSessionFunc>(funcPtr))(processInfo, index, paramSet, handle);
+    int32_t ret = (*reinterpret_cast<OnInitSessionFunc>(funcPtr))(processAndError, index, paramSet, handle);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "InitSession fail, ret = %{public}d", ret)
     HKS_LOG_I("init session success");
     return HKS_SUCCESS;
 }
 
-ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnUpdateSession(const HksProcessInfo &processInfo, const uint32_t &handle,
-    const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData))
+ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnUpdateSession(struct HksProcessWithErrorInfo &processAndError,
+    const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
+    std::vector<uint8_t> &outData))
 {
     AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
@@ -334,14 +335,15 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnUpdateSession(const HksProcessInfo 
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
         "UpdateSession method enum not found in plugin provider map.")
     
-    int32_t ret = (*reinterpret_cast<OnUpdateSessionFunc>(funcPtr))(processInfo, handle, paramSet, inData, outData);
+    int32_t ret = (*reinterpret_cast<OnUpdateSessionFunc>(funcPtr))(processAndError, handle, paramSet, inData, outData);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "UpdateSession fail, ret = %{public}d", ret)
     HKS_LOG_I("update session success");
     return HKS_SUCCESS;
 }
 
-ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnFinishSession(const HksProcessInfo &processInfo, const uint32_t &handle,
-    const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData))
+ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnFinishSession(struct HksProcessWithErrorInfo &processAndError,
+    const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
+    std::vector<uint8_t> &outData))
 {
     AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
@@ -349,13 +351,13 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnFinishSession(const HksProcessInfo 
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
         "FinishSession method enum not found in plugin provider map.")
     
-    int32_t ret = (*reinterpret_cast<OnFinishSessionFunc>(funcPtr))(processInfo, handle, paramSet, inData, outData);
+    int32_t ret = (*reinterpret_cast<OnFinishSessionFunc>(funcPtr))(processAndError, handle, paramSet, inData, outData);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "FinishSession fail, ret = %{public}d", ret)
     HKS_LOG_I("finish session success");
     return HKS_SUCCESS;
 }
 
-ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnGenerateKey(const HksProcessInfo &processInfo,
+ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnGenerateKey(struct HksProcessWithErrorInfo &processAndError,
     const std::string &resourceId, const CppParamSet &paramSet))
 {
     AutoRefCount refCnt(m_refCount, soMutex);
@@ -364,14 +366,14 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnGenerateKey(const HksProcessInfo &p
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
         "GenerateKey method enum not found in plugin provider map.")
 
-    int32_t ret = (*reinterpret_cast<OnGenerateKeyFunc>(funcPtr))(processInfo, resourceId, paramSet);
+    int32_t ret = (*reinterpret_cast<OnGenerateKeyFunc>(funcPtr))(processAndError, resourceId, paramSet);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GenerateKey fail, ret = %{public}d", ret)
     HKS_LOG_I("generate key success");
     return HKS_SUCCESS;
 }
 
-ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnAbortSession(const HksProcessInfo &processInfo, const uint32_t &handle,
-    const CppParamSet &paramSet))
+ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnAbortSession(struct HksProcessWithErrorInfo &processAndError,
+    const uint32_t &handle, const CppParamSet &paramSet))
 {
     AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
@@ -379,7 +381,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnAbortSession(const HksProcessInfo &
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
         "AbortSession method enum not found in plugin provider map.")
     
-    int32_t ret = (*reinterpret_cast<OnAbortSessionFunc>(funcPtr))(processInfo, handle, paramSet);
+    int32_t ret = (*reinterpret_cast<OnAbortSessionFunc>(funcPtr))(processAndError, handle, paramSet);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "AbortSession fail, ret = %" LOG_PUBLIC "d", ret)
     HKS_LOG_I("abort session success");
     return HKS_SUCCESS;
@@ -397,7 +399,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnUnregisterAllObservers())
     return HKS_SUCCESS;
 }
 
-ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnImportWrappedKey(const HksProcessInfo &processInfo,
+ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnImportWrappedKey(struct HksProcessWithErrorInfo &processAndError,
     const std::string &index, const std::string &wrappingKeyIndex, const CppParamSet &paramSet,
     const std::vector<uint8_t> &wrappedData))
 {
@@ -408,13 +410,13 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnImportWrappedKey(const HksProcessIn
         "ImportWrappedKey method enum not found in plugin provider map.")
     
     int32_t ret = (*reinterpret_cast<OnImportWrappedKeyFunc>(funcPtr))
-        (processInfo, index, wrappingKeyIndex, paramSet, wrappedData);
+        (processAndError, index, wrappingKeyIndex, paramSet, wrappedData);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ImportWrappedKey fail, ret = %" LOG_PUBLIC "d", ret)
     HKS_LOG_I("import wrapped key success");
     return HKS_SUCCESS;
 }
 
-ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnExportPublicKey(const HksProcessInfo &processInfo,
+ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnExportPublicKey(struct HksProcessWithErrorInfo &processAndError,
     const std::string &index, const CppParamSet &paramSet, std::vector<uint8_t> &outData))
 {
     AutoRefCount refCnt(m_refCount, soMutex);
@@ -423,7 +425,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnExportPublicKey(const HksProcessInf
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
         "ExportPublicKey method enum not found in plugin provider map.")
     
-    int32_t ret = (*reinterpret_cast<OnExportPublicKeyFunc>(funcPtr))(processInfo, index, paramSet, outData);
+    int32_t ret = (*reinterpret_cast<OnExportPublicKeyFunc>(funcPtr))(processAndError, index, paramSet, outData);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ExportPublicKey fail, ret = %" LOG_PUBLIC "d", ret)
     HKS_LOG_I("export public key success");
     return HKS_SUCCESS;
