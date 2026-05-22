@@ -138,7 +138,8 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest003, TestSize.Level0)
     CppParamSet outParams(g_genAesParams);
     const std::string index = "";
     struct HksExternalErrorInfo *errInfo = nullptr;
-    ret = mgr->OnSetOrGetRemoteProperty(processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    ret = mgr->OnSetOrGetRemoteProperty(processAndError, HKS_EXT_PROPERTY_OPERATION_GET,
         index, propertyId, outParams);
     EXPECT_EQ(ret, 0) << "fail: OnSetOrGetRemoteProperty fail";
 
@@ -151,18 +152,18 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest003, TestSize.Level0)
     EXPECT_EQ(ret, 0) << "fail: OnExportProviderAllCertificates fail";
 
     uint32_t uhandle = 0;
-    ret = mgr->OnInitSession(processInfo, index, paramSet, uhandle);
+    ret = mgr->OnInitSession(processAndError, index, paramSet, uhandle);
     EXPECT_EQ(ret, 0) << "fail: OnInitSession fail";
 
     std::vector<uint8_t> inData;
     std::vector<uint8_t> outData;
-    ret = mgr->OnUpdateSession(processInfo, uhandle, paramSet, inData, outData);
+    ret = mgr->OnUpdateSession(processAndError, uhandle, paramSet, inData, outData);
     EXPECT_EQ(ret, 0) << "fail: OnUpdateSession fail";
 
-    ret = mgr->OnFinishSession(processInfo, uhandle, paramSet, inData, outData);
+    ret = mgr->OnFinishSession(processAndError, uhandle, paramSet, inData, outData);
     EXPECT_EQ(ret, 0) << "fail: OnUpdateSession fail";
 
-    ret = mgr->OnAbortSession(processInfo, uhandle, paramSet);
+    ret = mgr->OnAbortSession(processAndError, uhandle, paramSet);
     EXPECT_EQ(ret, 0) << "fail: OnAbortSession fail";
 
     bool isDeath = false;
@@ -192,19 +193,20 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest004, TestSize.Level0)
 
     const std::string index = "testIndex";
 
+    struct HksProcessWithErrorInfo processAndError = { &processInfo, nullptr };
     // OnGenerateKey
-    ret = mgr->OnGenerateKey(processInfo, index, paramSet);
+    ret = mgr->OnGenerateKey(processAndError, index, paramSet);
     EXPECT_EQ(ret, 0) << "fail: OnGenerateKey fail";
 
     // OnExportPublicKey
     std::vector<uint8_t> outData;
-    ret = mgr->OnExportPublicKey(processInfo, index, paramSet, outData);
+    ret = mgr->OnExportPublicKey(processAndError, index, paramSet, outData);
     EXPECT_EQ(ret, 0) << "fail: OnExportPublicKey fail";
 
     // OnImportWrappedKey
     const std::string wrappingKeyIndex = "wrappingKey";
     std::vector<uint8_t> wrappedData = {0x01, 0x02, 0x03};
-    ret = mgr->OnImportWrappedKey(processInfo, index, wrappingKeyIndex, paramSet, wrappedData);
+    ret = mgr->OnImportWrappedKey(processAndError, index, wrappingKeyIndex, paramSet, wrappedData);
     EXPECT_EQ(ret, 0) << "fail: OnImportWrappedKey fail";
 
     // OnImportCertificate
@@ -260,7 +262,8 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest005, TestSize.Level0)
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
     CppParamSet outParams(tmpParams);
-    ret = mgr->OnSetOrGetRemoteProperty(processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    ret = mgr->OnSetOrGetRemoteProperty(processAndError, HKS_EXT_PROPERTY_OPERATION_GET,
         index, "propId", outParams);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 }
@@ -280,16 +283,16 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest006, TestSize.Level0)
     CppParamSet paramSet(tmpParams);
     const std::string index = "testIndex";
 
-    std::string certsJson;
+    std::string certsJsonArr;
     struct HksExternalErrorInfo *errInfo = nullptr;
-    int ret = mgr->OnExportCertificate(processInfo, index, paramSet, certsJson, &errInfo);
+    struct HksProcessWithErrorInfo processAndError = { &processInfo, nullptr };
+    int ret = mgr->OnExportCertificate(processInfo, index, paramSet, certsJsonArr, &errInfo);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
-    std::string certsJsonArr;
     ret = mgr->OnExportProviderAllCertificates(processInfo, TEST_PROVIDER, paramSet, certsJsonArr, &errInfo);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
-    ret = mgr->OnGenerateKey(processInfo, index, paramSet);
+    ret = mgr->OnGenerateKey(processAndError, index, paramSet);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
     struct HksExtCertInfo certInfo {};
@@ -297,23 +300,23 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest006, TestSize.Level0)
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
     uint32_t handle = 0;
-    ret = mgr->OnInitSession(processInfo, index, paramSet, handle);
+    ret = mgr->OnInitSession(processAndError, index, paramSet, handle);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
     std::vector<uint8_t> inData, outData;
-    ret = mgr->OnUpdateSession(processInfo, handle, paramSet, inData, outData);
+    ret = mgr->OnUpdateSession(processAndError, handle, paramSet, inData, outData);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
-    ret = mgr->OnFinishSession(processInfo, handle, paramSet, inData, outData);
+    ret = mgr->OnFinishSession(processAndError, handle, paramSet, inData, outData);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
-    ret = mgr->OnAbortSession(processInfo, handle, paramSet);
+    ret = mgr->OnAbortSession(processAndError, handle, paramSet);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
-    ret = mgr->OnImportWrappedKey(processInfo, index, "wrapKey", paramSet, inData);
+    ret = mgr->OnImportWrappedKey(processAndError, index, "wrapKey", paramSet, inData);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
-    ret = mgr->OnExportPublicKey(processInfo, index, paramSet, outData);
+    ret = mgr->OnExportPublicKey(processAndError, index, paramSet, outData);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 }
 

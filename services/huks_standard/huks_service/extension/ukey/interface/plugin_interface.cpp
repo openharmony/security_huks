@@ -25,6 +25,7 @@
 #include "hks_ukey_common.h"
 #include <string>
 #include <vector>
+#include "hks_plugin_def.h"
 
 #include "app_observer.h"
 

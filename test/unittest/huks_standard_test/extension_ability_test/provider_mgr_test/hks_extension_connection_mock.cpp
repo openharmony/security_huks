@@ -19,6 +19,7 @@
 #include "huks_access_ext_base_stub.h"
 #include "iremote_object.h"
 #include "hks_ext_cert_info.h"
+#include "hks_ext_error_info.h"
 
 namespace OHOS {
 namespace Security {
@@ -33,16 +34,16 @@ public:
         const std::string& index,
         const CppParamSet& params,
         std::string& handle,
-        int32_t& errcode)
+        HksExternalErrorInfoIdl& errorInfo)
     {
         if (index.find("HksSessionMgrTest003") != std::string::npos) {
             handle = "HksSessionMgrTest003";
-            errcode = 0;
+            errorInfo.errVal = 0;
             return 0;
         }
         if (index.find("SessionMgrFullTest") != std::string::npos) {
             handle = "SessionMgrFullTest";
-            errcode = 0;
+            errorInfo.errVal = 0;
             return 0;
         }
         return -1;
@@ -51,10 +52,10 @@ public:
     ErrCode CloseRemoteHandle(
         const std::string& handle,
         const CppParamSet& params,
-        int32_t& errcode)
+        HksExternalErrorInfoIdl& errorInfo)
     {
         if (handle == "HksSessionMgrTest003" || handle == "SessionMgrFullTest") {
-            errcode = 0;
+            errorInfo.errVal = 0;
             return 0;
         }
         return -1;
@@ -63,13 +64,13 @@ public:
     ErrCode AuthUkeyPin(
         const std::string& handle,
         const CppParamSet& params,
-        int32_t& errcode,
+        HksExternalErrorInfoIdl& errorInfo,
         int32_t& authState,
         uint32_t& retryCnt)
     {
         if(handle == "HksSessionMgrTest003") {
             authState = 1;
-            errcode = 0;
+            errorInfo.errVal = 0;
             return 0;
         }
         return 0;
@@ -79,42 +80,42 @@ public:
         const std::string& handle,
         const CppParamSet& params,
         int32_t& state,
-        int32_t& errcode) { return -1; };
+        HksExternalErrorInfoIdl& errorInfo) { return -1; };
 
     ErrCode Sign(
         const std::string& handle,
         const CppParamSet& params,
         const std::vector<uint8_t>& inData,
         std::vector<uint8_t>& outData,
-        int32_t& errcode) { return -1; };
+        HksExternalErrorInfoIdl& errorInfo) { return -1; };
 
     ErrCode Verify(
         const std::string& handle,
         const CppParamSet& params,
         const std::vector<uint8_t>& plainText,
         const std::vector<uint8_t>& signature,
-        int32_t& errcode) { return -1; };
+        HksExternalErrorInfoIdl& errorInfo) { return -1; };
 
     ErrCode ExportCertificate(
         const std::string& index,
         const CppParamSet& params,
         std::string& certJsonArr,
-        int32_t& errcode) { return -1; };
+        HksExternalErrorInfoIdl& errorInfo) { return -1; };
 
     ErrCode ExportProviderCertificates(
         const CppParamSet& params,
         std::string& certJsonArr,
-        int32_t& errcode) { return -1; };
+        HksExternalErrorInfoIdl& errorInfo) { return -1; };
 
     ErrCode InitSession(
         const std::string& index,
         const CppParamSet& params,
         std::string& handle,
-        int32_t& errcode)
+        HksExternalErrorInfoIdl& errorInfo)
     {
         if (index == "HksSessionMgrTest003" || index == "SessionMgrFullTest") {
             handle = index;
-            errcode = 0;
+            errorInfo.errVal = 0;
             return 0;
         }
         return -1;
@@ -125,10 +126,10 @@ public:
         const CppParamSet& params,
         const std::vector<uint8_t>& inData,
         std::vector<uint8_t>& outData,
-        int32_t& errcode)
+        HksExternalErrorInfoIdl& errorInfo)
     {
         if (handle == "HksSessionMgrTest003" || handle == "SessionMgrFullTest") {
-            errcode = 0;
+            errorInfo.errVal = 0;
             return 0;
         }
         return -1;
@@ -139,10 +140,10 @@ public:
         const CppParamSet& params,
         const std::vector<uint8_t>& inData,
         std::vector<uint8_t>& outData,
-        int32_t& errcode)
+        HksExternalErrorInfoIdl& errorInfo)
     {
         if (handle == "HksSessionMgrTest003" || handle == "SessionMgrFullTest") {
-            errcode = 0;
+            errorInfo.errVal = 0;
             return 0;
         }
         return -1;
@@ -153,20 +154,20 @@ public:
         const std::string& handle,
         const std::string& propertyId,
         CppParamSet& params,
-        int32_t& errcode) { return -1; };
+        HksExternalErrorInfoIdl& errorInfo) { return -1; };
     
     ErrCode GetResourceId(
         const CppParamSet& params,
         std::string& resourceId,
-        int32_t& errcode) { return -1; };
+        HksExternalErrorInfoIdl& errorInfo) { return -1; };
     
     ErrCode ClearUkeyPinAuthState(
         const std::string& handle,
         const CppParamSet& params,
-        int32_t& errcode)
+        HksExternalErrorInfoIdl& errorInfo)
     {
         if (handle == "HksSessionMgrTest003" || handle == "SessionMgrFullTest") {
-            errcode = 0;
+            errorInfo.errVal = 0;
             return 0;
         }
         return -1;
@@ -177,24 +178,24 @@ public:
         const std::string& wrappingKeyIndex,
         const CppParamSet& params,
         const std::vector<uint8_t>& wrappedData,
-        int32_t& errcode) { return -1; };
+        HksExternalErrorInfoIdl& errorInfo) { return -1; };
 
     ErrCode ExportPublicKey(
         const std::string& index,
         const CppParamSet& params,
         std::vector<uint8_t>& outData,
-        int32_t& errcode) { return -1; };
+        HksExternalErrorInfoIdl& errorInfo) { return -1; };
     
     ErrCode ImportCertificate(
         const std::string& index,
         const HksExtCertInfoIdl& certInfo,
         const CppParamSet& params,
-        int32_t& errcode) { return -1; };
+        HksExternalErrorInfoIdl& errorInfo) { return -1; };
 
     ErrCode GenerateKey(
         const std::string& index,
         const CppParamSet& params,
-        int32_t& errcode) { return -1; };
+        HksExternalErrorInfoIdl& errorInfo) { return -1; };
 };
 
 void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementName &element,

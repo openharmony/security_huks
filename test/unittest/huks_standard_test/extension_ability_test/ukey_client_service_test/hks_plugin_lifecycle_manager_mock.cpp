@@ -79,8 +79,8 @@ int32_t HuksPluginLifeCycleMgr::OnAuthUkeyPin(const HksProcessInfo &processInfo,
     struct HksExternalErrorInfo **errInfo)
 {
     (void)errInfo;
-    authOutParam.authState = 1;
-    authOutParam.retryCnt = 0;
+    authOutParam.outStatus = 1;
+    authOutParam.retryCount = 0;
     return HKS_SUCCESS;
 }
 
@@ -99,7 +99,7 @@ int32_t HuksPluginLifeCycleMgr::OnClearUkeyPinAuthStatus(const HksProcessInfo &p
     return HKS_SUCCESS;
 }
 
-int32_t HuksPluginLifeCycleMgr::OnSetOrGetRemoteProperty(const HksProcessInfo &processInfo,
+int32_t HuksPluginLifeCycleMgr::OnSetOrGetRemoteProperty(struct HksProcessWithErrorInfo &processAndError,
     enum HksExtPropertyOperation operation, const std::string &index,
     const std::string &propertyId, CppParamSet &paramSet)
 {
@@ -131,19 +131,19 @@ int32_t HuksPluginLifeCycleMgr::OnImportCertificate(const HksProcessInfo &proces
     return HKS_SUCCESS;
 }
 
-int32_t HuksPluginLifeCycleMgr::OnGenerateKey(const HksProcessInfo &processInfo,
+int32_t HuksPluginLifeCycleMgr::OnGenerateKey(struct HksProcessWithErrorInfo &processAndError,
     const std::string &resourceId, const CppParamSet &paramSet)
 {
     return HKS_SUCCESS;
 }
 
-int32_t HuksPluginLifeCycleMgr::OnInitSession(const HksProcessInfo &processInfo,
+int32_t HuksPluginLifeCycleMgr::OnInitSession(struct HksProcessWithErrorInfo &processAndError,
     const std::string &index, const CppParamSet &paramSet, uint32_t &handle)
 {
     return HKS_SUCCESS;
 }
 
-int32_t HuksPluginLifeCycleMgr::OnUpdateSession(const HksProcessInfo &processInfo,
+int32_t HuksPluginLifeCycleMgr::OnUpdateSession(struct HksProcessWithErrorInfo &processAndError,
     const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
     std::vector<uint8_t> &outData)
 {
@@ -151,7 +151,7 @@ int32_t HuksPluginLifeCycleMgr::OnUpdateSession(const HksProcessInfo &processInf
     return HKS_SUCCESS;
 }
 
-int32_t HuksPluginLifeCycleMgr::OnFinishSession(const HksProcessInfo &processInfo,
+int32_t HuksPluginLifeCycleMgr::OnFinishSession(struct HksProcessWithErrorInfo &processAndError,
     const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
     std::vector<uint8_t> &outData)
 {
@@ -159,7 +159,7 @@ int32_t HuksPluginLifeCycleMgr::OnFinishSession(const HksProcessInfo &processInf
     return HKS_SUCCESS;
 }
 
-int32_t HuksPluginLifeCycleMgr::OnAbortSession(const HksProcessInfo &processInfo,
+int32_t HuksPluginLifeCycleMgr::OnAbortSession(struct HksProcessWithErrorInfo &processAndError,
     const uint32_t &handle, const CppParamSet &paramSet)
 {
     return HKS_SUCCESS;
@@ -170,14 +170,14 @@ int32_t HuksPluginLifeCycleMgr::OnUnregisterAllObservers()
     return HKS_SUCCESS;
 }
 
-int32_t HuksPluginLifeCycleMgr::OnImportWrappedKey(const HksProcessInfo &processInfo,
+int32_t HuksPluginLifeCycleMgr::OnImportWrappedKey(struct HksProcessWithErrorInfo &processAndError,
     const std::string &index, const std::string &wrappingKeyIndex, const CppParamSet &paramSet,
     const std::vector<uint8_t> &wrappedData)
 {
     return HKS_SUCCESS;
 }
 
-int32_t HuksPluginLifeCycleMgr::OnExportPublicKey(const HksProcessInfo &processInfo,
+int32_t HuksPluginLifeCycleMgr::OnExportPublicKey(struct HksProcessWithErrorInfo &processAndError,
     const std::string &index, const CppParamSet &paramSet, std::vector<uint8_t> &outData)
 {
     outData.assign(1, 0);

@@ -13,6 +13,7 @@
 #include <tuple>
 #include "hks_json_wrapper.h"
 #include "hks_ext_cert_info.h"
+#include "hks_external_error_info.h"
 namespace OHOS::Security::Huks {
 
 // ==================== HksCryptoExtStubImpl ====================
@@ -25,164 +26,171 @@ public:
         const std::string& index,
         const CppParamSet& params,
         std::string& handle,
-        int32_t& errcode) { errcode = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
 
     ErrCode CloseRemoteHandle(
         const std::string& handle,
         const CppParamSet& params,
-        int32_t& errcode) { errcode = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
 
     ErrCode AuthUkeyPin(
         const std::string& handle,
         const CppParamSet& params,
-        int32_t& errcode,
+        HksExternalErrorInfoIdl& errorInfo,
         int32_t& authState,
-        uint32_t& retryCnt) { errcode = HKS_SUCCESS; authState = 1; retryCnt = 0; return ERR_OK; }
+        uint32_t& retryCnt) { errorInfo.errVal = HKS_SUCCESS; authState = 1; retryCnt = 0; return ERR_OK; }
 
     ErrCode GetUkeyPinAuthState(
         const std::string& handle,
         const CppParamSet& params,
         int32_t& state,
-        int32_t& errcode) { state = 1; errcode = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { state = 1; errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
 
     ErrCode Sign(
         const std::string& handle,
         const CppParamSet& params,
         const std::vector<uint8_t>& inData,
         std::vector<uint8_t>& outData,
-        int32_t& errcode) { errcode = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
 
     ErrCode Verify(
         const std::string& handle,
         const CppParamSet& params,
         const std::vector<uint8_t>& plainText,
         const std::vector<uint8_t>& signature,
-        int32_t& errcode) { errcode = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
 
     ErrCode ExportCertificate(
-    const std::string& index,
-    const CppParamSet& params,
-    std::string& certJsonArr,
-    int32_t& errcode)
-{
-    CommJsonObject certArray = CommJsonObject::CreateArray();
-    if (certArray.IsNull()) {
-        errcode = HKS_ERROR_MALLOC_FAIL;
-        return ERR_OK;
-    }
-    CommJsonObject certObj = CommJsonObject::CreateObject();
-    if (certObj.IsNull()) {
-        errcode = HKS_ERROR_MALLOC_FAIL;
-        return ERR_OK;
-    }
-    if (!certObj.SetValue("purpose", 1) ||
-        !certObj.SetValue("index", std::string("mock_cert_index")) ||
-        !certObj.SetValue("cert", std::string("MIIBIjANBgkqh"))) {
-        errcode = HKS_ERROR_JSON_SERIALIZE_FAILED;
-        return ERR_OK;
-    }
-    if (!certArray.AppendElement(certObj)) {
-        errcode = HKS_ERROR_JSON_SERIALIZE_FAILED;
-        return ERR_OK;
-    }
-    certJsonArr = certArray.Serialize(false);
-    errcode = HKS_SUCCESS;
-    return ERR_OK;
-}
-
-ErrCode ExportProviderCertificates(
-    const CppParamSet& params,
-    std::string& certJsonArr,
-    int32_t& errcode)
-{
-    CommJsonObject certArray = CommJsonObject::CreateArray();
-    if (certArray.IsNull()) {
-        errcode = HKS_ERROR_MALLOC_FAIL;
-        return ERR_OK;
-    }
-    for (int i = 0; i < 2; i++) {
+        const std::string& index,
+        const CppParamSet& params,
+        std::string& certJsonArr,
+        HksExternalErrorInfoIdl& errorInfo)
+    {
+        CommJsonObject certArray = CommJsonObject::CreateArray();
+        if (certArray.IsNull()) {
+            errorInfo.errVal = HKS_ERROR_MALLOC_FAIL;
+            return ERR_OK;
+        }
         CommJsonObject certObj = CommJsonObject::CreateObject();
         if (certObj.IsNull()) {
-            errcode = HKS_ERROR_MALLOC_FAIL;
+            errorInfo.errVal = HKS_ERROR_MALLOC_FAIL;
             return ERR_OK;
         }
-        if (!certObj.SetValue("purpose", i + 1) ||
-            !certObj.SetValue("index", std::string("cert_") + std::to_string(i)) ||
-            !certObj.SetValue("cert", std::string("MIIBIjAN") + std::to_string(i))) {
-            errcode = HKS_ERROR_JSON_SERIALIZE_FAILED;
+        if (!certObj.SetValue("purpose", 1) ||
+            !certObj.SetValue("index", std::string("mock_cert_index")) ||
+            !certObj.SetValue("cert", std::string("MIIBIjANBgkqh"))) {
+            errorInfo.errVal = HKS_ERROR_JSON_SERIALIZE_FAILED;
             return ERR_OK;
         }
-        if (!certArray.AppendElement(certObj)) {
-            errcode = HKS_ERROR_JSON_SERIALIZE_FAILED;
+         if (!certArray.AppendElement(certObj)) {
+            errorInfo.errVal = HKS_ERROR_JSON_SERIALIZE_FAILED;
             return ERR_OK;
         }
+        certJsonArr = certArray.Serialize(false);
+        errorInfo.errVal = HKS_SUCCESS;
+        return ERR_OK;
     }
-    certJsonArr = certArray.Serialize(false);
-    errcode = HKS_SUCCESS;
-    return ERR_OK;
-}
+
+    ErrCode ExportProviderCertificates(
+        const CppParamSet& params,
+        std::string& certJsonArr,
+        HksExternalErrorInfoIdl& errorInfo)
+    {
+        CommJsonObject certArray = CommJsonObject::CreateArray();
+        if (certArray.IsNull()) {
+            errorInfo.errVal = HKS_ERROR_MALLOC_FAIL;
+            return ERR_OK;
+        }
+        for (int i = 0; i < 2; i++) {
+            CommJsonObject certObj = CommJsonObject::CreateObject();
+            if (certObj.IsNull()) {
+                errorInfo.errVal = HKS_ERROR_MALLOC_FAIL;
+                return ERR_OK;
+            }
+            for (int i = 0; i < 2; i++) {
+                CommJsonObject certObj = CommJsonObject::CreateObject();
+                if (certObj.IsNull()) {
+                    errorInfo.errVal = HKS_ERROR_MALLOC_FAIL;
+                    return ERR_OK;
+                }
+                if (!certObj.SetValue("purpose", i + 1) ||
+                    !certObj.SetValue("index", std::string("cert_") + std::to_string(i)) ||
+                    !certObj.SetValue("cert", std::string("MIIBIjAN") + std::to_string(i))) {
+                    errorInfo.errVal = HKS_ERROR_JSON_SERIALIZE_FAILED;
+                    return ERR_OK;
+                }
+                if (!certArray.AppendElement(certObj)) {
+                    errorInfo.errVal = HKS_ERROR_JSON_SERIALIZE_FAILED;
+                    return ERR_OK;
+                }
+            }
+        }
+        certJsonArr = certArray.Serialize(false);
+        errorInfo.errVal = HKS_SUCCESS;
+        return ERR_OK;
+    }
 
     ErrCode InitSession(
         const std::string& index,
         const CppParamSet& params,
         std::string& handle,
-        int32_t& errcode) { errcode = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
 
     ErrCode UpdateSession(
         const std::string& handle,
         const CppParamSet& params,
         const std::vector<uint8_t>& inData,
         std::vector<uint8_t>& outData,
-        int32_t& errcode) { errcode = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
 
     ErrCode FinishSession(
         const std::string& handle,
         const CppParamSet& params,
         const std::vector<uint8_t>& inData,
         std::vector<uint8_t>& outData,
-        int32_t& errcode) { errcode = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
 
     ErrCode SetOrGetProperty(
         uint32_t operation,
         const std::string& handle,
         const std::string& propertyId,
         CppParamSet& params,
-        int32_t& errcode) { errcode = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
 
     ErrCode GetResourceId(
         const CppParamSet& params,
         std::string& resourceId,
-        int32_t& errcode) { errcode = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
 
     ErrCode ClearUkeyPinAuthState(
         const std::string& handle,
         const CppParamSet& params,
-        int32_t& errcode) { errcode = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
 
     ErrCode ImportWrappedKey(
         const std::string& index,
         const std::string& wrappingKeyIndex,
         const CppParamSet& params,
         const std::vector<uint8_t>& wrappedData,
-        int32_t& errcode) { errcode = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
 
     ErrCode ExportPublicKey(
         const std::string& index,
         const CppParamSet& params,
         std::vector<uint8_t>& outData,
-        int32_t& errcode)
-        { outData = {0x01, 0x02, 0x03}; errcode = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo)
+        { outData = {0x01, 0x02, 0x03}; errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
 
     ErrCode ImportCertificate(
         const std::string& index,
         const HksExtCertInfoIdl& certInfo,
         const CppParamSet& params,
-        int32_t& errcode) { errcode = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
 
     ErrCode GenerateKey(
         const std::string& index,
         const CppParamSet& params,
-        int32_t& errcode) { errcode = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
 };
 
 // ==================== HksProviderLifeCycleManager mock ====================
@@ -271,34 +279,43 @@ void HksRemoteHandleManager::ReleaseInstance()
 }
 
 int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet)
+    const std::string &index, const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo)
 {
+    (void)errInfo;
     g_createRemoteHandleCalled = true;
     return HKS_SUCCESS;
 }
 
 int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet)
+    const std::string &index, const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo)
 {
+    (void)errInfo;
     g_closeRemoteHandleCalled = true;
     return HKS_SUCCESS;
 }
 
 int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t &retryCnt)
+    const std::string &index, const CppParamSet &paramSet, struct HksExtAuthPinOutParam &authOutParam,
+    struct HksExternalErrorInfo **errInfo)
 {
+    (void)errInfo;
+    authOutParam.outStatus = 1;
+    authOutParam.retryCount = 0;
     return HKS_SUCCESS;
 }
 
 int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, int32_t &state)
+    const std::string &index, const CppParamSet &paramSet, int32_t &state, struct HksExternalErrorInfo **errInfo)
 {
+    (void)errInfo;
+    state = 1;
     return HKS_SUCCESS;
 }
 
 int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet)
+    const std::string &index, const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo)
 {
+    (void)errInfo;
     return HKS_SUCCESS;
 }
 
@@ -308,20 +325,26 @@ int32_t HksRemoteHandleManager::CheckAuthStateIsOk(const HksProcessInfo &process
 }
 
 int32_t HksRemoteHandleManager::FindRemoteCertificate(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, std::string &certificatesOut)
+    const std::string &index, const CppParamSet &paramSet, std::string &certificatesOut,
+    struct HksExternalErrorInfo **errInfo)
 {
+    (void)errInfo;
     return HKS_SUCCESS;
 }
 
 int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet, std::string &certificatesOut)
+    const std::string &providerName, const CppParamSet &paramSet, std::string &certificatesOut,
+    struct HksExternalErrorInfo **errInfo)
 {
+    (void)errInfo;
     return HKS_SUCCESS;
 }
 
 int32_t HksRemoteHandleManager::ImportRemoteCertificate(const HksProcessInfo &processInfo,
-    const std::string &index, const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet)
+    const std::string &index, const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet,
+    struct HksExternalErrorInfo **errInfo)
 {
+    (void)errInfo;
     return HKS_SUCCESS;
 }
 
@@ -331,28 +354,28 @@ int32_t HksRemoteHandleManager::MergeProviderCertificates(const ProviderInfo &pr
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::SetOrGetRemoteProperty(const HksProcessInfo &processInfo,
+int32_t HksRemoteHandleManager::SetOrGetRemoteProperty(struct HksProcessWithErrorInfo &processAndError,
         enum HksExtPropertyOperation operation, const std::string &index,
         const std::string &propertyId, CppParamSet &paramSet)
     {
         return HKS_SUCCESS;
     }
 
-int32_t HksRemoteHandleManager::RemoteImportWrappedKey(const HksProcessInfo &processInfo,
+int32_t HksRemoteHandleManager::RemoteImportWrappedKey(struct HksProcessWithErrorInfo &processAndError,
     const std::string &index, const std::string &wrappingKeyIndex, const CppParamSet &paramSet,
     const std::vector<uint8_t> &wrappedData)
 {
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::RemoteExportPublicKey(const HksProcessInfo &processInfo,
+int32_t HksRemoteHandleManager::RemoteExportPublicKey(struct HksProcessWithErrorInfo &processAndError,
     const std::string &index, const CppParamSet &paramSet, std::vector<uint8_t> &outData)
 {
     outData = {0x01, 0x02, 0x03};
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::ExtensionGenerateKey(const HksProcessInfo &processInfo,
+int32_t HksRemoteHandleManager::ExtensionGenerateKey(struct HksProcessWithErrorInfo &processAndError,
     const std::string &index, const CppParamSet &paramSet)
 {
     return HKS_SUCCESS;
@@ -409,7 +432,7 @@ void HksSessionManager::ReleaseInstance()
     HksSessionManager::DestroyInstance();
 }
 
-int32_t HksSessionManager::ExtensionInitSession(const HksProcessInfo &processInfo,
+int32_t HksSessionManager::ExtensionInitSession(struct HksProcessWithErrorInfo &processAndError,
     const std::string &index, const CppParamSet &paramSet, uint32_t &handle)
 {
     g_initSessionCalled = true;
@@ -417,21 +440,21 @@ int32_t HksSessionManager::ExtensionInitSession(const HksProcessInfo &processInf
     return HKS_SUCCESS;
 }
 
-int32_t HksSessionManager::ExtensionUpdateSession(const HksProcessInfo &processInfo,
+int32_t HksSessionManager::ExtensionUpdateSession(struct HksProcessWithErrorInfo &processAndError,
     const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
     std::vector<uint8_t> &outData)
 {
     return HKS_SUCCESS;
 }
 
-int32_t HksSessionManager::ExtensionFinishSession(const HksProcessInfo &processInfo,
+int32_t HksSessionManager::ExtensionFinishSession(struct HksProcessWithErrorInfo &processAndError,
     const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
     std::vector<uint8_t> &outData)
 {
     return HKS_SUCCESS;
 }
 
-int32_t HksSessionManager::ExtensionAbortSession(const HksProcessInfo &processInfo,
+int32_t HksSessionManager::ExtensionAbortSession(struct HksProcessWithErrorInfo &processAndError,
     const uint32_t &handle, const CppParamSet &paramSet)
 {
     return HKS_SUCCESS;

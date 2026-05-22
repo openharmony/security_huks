@@ -23,6 +23,7 @@
 #include "ihuks_access_ext_base.h"
 #include "hks_plugin_def.h"
 #include "hks_ext_cert_info.h"
+#include "hks_ext_error_info.h"
 
 namespace OHOS {
 namespace Security {
@@ -31,52 +32,52 @@ namespace Huks {
 class MockIHuksAccessExtBase : public IHuksAccessExtBase {
 public:
     MOCK_METHOD(ErrCode, OpenRemoteHandle,
-        (const std::string &index, const CppParamSet &params, std::string &handle, int &errcode), (override));
+        (const std::string &index, const CppParamSet &params, std::string &handle, HksExternalErrorInfoIdl &errorInfo), (override));
 
     MOCK_METHOD(ErrCode, CloseRemoteHandle,
-        (const std::string &handle, const CppParamSet &params, int &errcode), (override));
+        (const std::string &handle, const CppParamSet &params, HksExternalErrorInfoIdl &errorInfo), (override));
 
     MOCK_METHOD(ErrCode, AuthUkeyPin, (const std::string &handle, const CppParamSet &params,
-        int &errcode, int &authState, unsigned int &retryCnt), (override));
+        HksExternalErrorInfoIdl &errorInfo, int32_t &authState, uint32_t &retryCnt), (override));
 
     MOCK_METHOD(ErrCode, GetUkeyPinAuthState,
-        (const std::string &handle, const CppParamSet &params, int &state, int &errcode), (override));
+        (const std::string &handle, const CppParamSet &params, int32_t &state, HksExternalErrorInfoIdl &errorInfo), (override));
 
     MOCK_METHOD(ErrCode, ExportCertificate,
-        (const std::string &index, const CppParamSet &params, std::string &certJsonArr, int &errcode), (override));
+        (const std::string &index, const CppParamSet &params, std::string &certJsonArr, HksExternalErrorInfoIdl &errorInfo), (override));
 
     MOCK_METHOD(ErrCode, ExportProviderCertificates,
-        (const CppParamSet &params, std::string &certJsonArr, int &errcode), (override));
+        (const CppParamSet &params, std::string &certJsonArr, HksExternalErrorInfoIdl &errorInfo), (override));
 
     MOCK_METHOD(ErrCode, InitSession,
-        (const std::string &index, const CppParamSet &params, std::string &handle, int &errcode), (override));
+        (const std::string &index, const CppParamSet &params, std::string &handle, HksExternalErrorInfoIdl &errorInfo), (override));
 
     MOCK_METHOD(ErrCode, UpdateSession, (const std::string &handle, const CppParamSet &params,
-        const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData, int &errcode), (override));
+        const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData, HksExternalErrorInfoIdl &errorInfo), (override));
 
     MOCK_METHOD(ErrCode, FinishSession, (const std::string &handle, const CppParamSet &params,
-        const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData, int &errcode), (override));
+        const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData, HksExternalErrorInfoIdl &errorInfo), (override));
 
     MOCK_METHOD(ErrCode, SetOrGetProperty, (uint32_t operation, const std::string &handle,
-        const std::string &propertyId, CppParamSet &params, int &errcode), (override));
+        const std::string &propertyId, CppParamSet &params, HksExternalErrorInfoIdl &errorInfo), (override));
 
     MOCK_METHOD(ErrCode, ClearUkeyPinAuthState,
-        (const std::string &handle, const CppParamSet &params, int &errcode), (override));
+        (const std::string &handle, const CppParamSet &params, HksExternalErrorInfoIdl &errorInfo), (override));
     
     MOCK_METHOD(ErrCode, ExportPublicKey, (const std::string& index, const CppParamSet& params,
-            std::vector<uint8_t>& outData, int &errcode), (override));
+            std::vector<uint8_t>& outData, HksExternalErrorInfoIdl &errorInfo), (override));
 
     MOCK_METHOD(ErrCode, ImportWrappedKey, (const std::string& index, const std::string& wrappingKeyIndex,
-        const CppParamSet& params, const std::vector<uint8_t>& wrappedData, int &errcode), (override));
+        const CppParamSet& params, const std::vector<uint8_t>& wrappedData, HksExternalErrorInfoIdl &errorInfo), (override));
     
     MOCK_METHOD(ErrCode, ImportCertificate, (const std::string& index, const HksExtCertInfoIdl& certInfo,
-        const CppParamSet& params, int &errcode), (override));
+        const CppParamSet& params, HksExternalErrorInfoIdl &errorInfo), (override));
 
     MOCK_METHOD(ErrCode, GenerateKey,
-        (const std::string& index, const CppParamSet& params, int &errcode), (override));
+        (const std::string& index, const CppParamSet& params, HksExternalErrorInfoIdl &errorInfo), (override));
 
     MOCK_METHOD(ErrCode, GetResourceId,
-        (const CppParamSet &params, std::string &resourceId, int &errcode), (override));
+        (const CppParamSet &params, std::string &resourceId, HksExternalErrorInfoIdl &errorInfo), (override));
 
     MOCK_METHOD(sptr<IRemoteObject>, AsObject, (), (override));
 };

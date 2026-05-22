@@ -198,3 +198,16 @@ int32_t HksServiceGetResourceId(const struct HksProcessInfo *processInfo, const 
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
+
+int32_t HksServiceQueryAbilityInfo(const struct HksProcessInfo *processInfo, struct HksBlob *resourceId,
+    struct HksAbilityInfo *abilityInfo)
+{
+#ifdef L2_STANDARD
+    return HksIpcQueryAbilityInfoAdapter(processInfo, resourceId, abilityInfo);
+#else
+    (void)processInfo;
+    (void)resourceId;
+    (void)abilityInfo;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}

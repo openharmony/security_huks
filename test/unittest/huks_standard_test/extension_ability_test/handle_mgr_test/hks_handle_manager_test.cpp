@@ -309,13 +309,14 @@ HWTEST_F(HksRemoteHandleManagerTest, PropertyTest, TestSize.Level0)
 
     // Test get property with valid property ID
     CppParamSet getPropertyParamSet = CreateTestParamSet();
-    ret = manager->SetOrGetRemoteProperty(processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    ret = manager->SetOrGetRemoteProperty(processAndError, HKS_EXT_PROPERTY_OPERATION_GET,
         index, "SKF_GetDevInfo", getPropertyParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     // Test set property
     CppParamSet setPropertyParamSet = CreateTestParamSet();
-    ret = manager->SetOrGetRemoteProperty(processInfo, HKS_EXT_PROPERTY_OPERATION_SET,
+    ret = manager->SetOrGetRemoteProperty(processAndError, HKS_EXT_PROPERTY_OPERATION_SET,
         index, "SKF_SetDevInfo", setPropertyParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
@@ -380,10 +381,11 @@ HWTEST_F(HksRemoteHandleManagerTest, ImportWrappedKeyTest, TestSize.Level0)
 
     // Test import wrapped key with valid data
     std::vector<uint8_t> wrappedData = {0x01, 0x02, 0x03, 0x04};
-    ret = manager->RemoteImportWrappedKey(processInfo, index, wrappingKeyIndex, paramSet, wrappedData);
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    ret = manager->RemoteImportWrappedKey(processAndError, index, wrappingKeyIndex, paramSet, wrappedData);
     EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST);
 
-    ret = manager->RemoteImportWrappedKey(processInfo, index, index, paramSet, wrappedData);
+    ret = manager->RemoteImportWrappedKey(processAndError, index, index, paramSet, wrappedData);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     // Cleanup
@@ -408,15 +410,16 @@ HWTEST_F(HksRemoteHandleManagerTest, ImportWrappedKeyWithInvalidIndexTest, TestS
     // Test with empty index
     std::string wrappingKeyIndex = CreateTestIndex();
     std::vector<uint8_t> wrappedData = {0x01, 0x02};
-    int32_t ret = manager->RemoteImportWrappedKey(processInfo, "", wrappingKeyIndex, paramSet, wrappedData);
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    int32_t ret = manager->RemoteImportWrappedKey(processAndError, "", wrappingKeyIndex, paramSet, wrappedData);
     EXPECT_NE(ret, HKS_SUCCESS);
 
     // Test with invalid JSON index
-    ret = manager->RemoteImportWrappedKey(processInfo, "invalid_json", wrappingKeyIndex, paramSet, wrappedData);
+    ret = manager->RemoteImportWrappedKey(processAndError, "invalid_json", wrappingKeyIndex, paramSet, wrappedData);
     EXPECT_NE(ret, HKS_SUCCESS);
 
     // Test with empty wrapping key index
-    ret = manager->RemoteImportWrappedKey(processInfo, CreateTestIndex(), "", paramSet, wrappedData);
+    ret = manager->RemoteImportWrappedKey(processAndError, CreateTestIndex(), "", paramSet, wrappedData);
     EXPECT_NE(ret, HKS_SUCCESS);
 
     HKS_FREE_BLOB(processInfo.userId);
@@ -444,7 +447,8 @@ HWTEST_F(HksRemoteHandleManagerTest, ExportPublicKeyTest, TestSize.Level0)
 
     // Test export public key
     std::vector<uint8_t> outData;
-    ret = manager->RemoteExportPublicKey(processInfo, index, paramSet, outData);
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    ret = manager->RemoteExportPublicKey(processAndError, index, paramSet, outData);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     // Cleanup
@@ -467,17 +471,19 @@ HWTEST_F(HksRemoteHandleManagerTest, ExportPublicKeyWithInvalidIndexTest, TestSi
     CppParamSet paramSet = CreateTestParamSet(processInfo.uidInt);
     std::vector<uint8_t> outData;
 
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+
     // Test with empty index
-    int32_t ret = manager->RemoteExportPublicKey(processInfo, "", paramSet, outData);
+    int32_t ret = manager->RemoteExportPublicKey(processAndError, "", paramSet, outData);
     EXPECT_NE(ret, HKS_SUCCESS);
 
     // Test with invalid JSON index
-    ret = manager->RemoteExportPublicKey(processInfo, "invalid_json_string", paramSet, outData);
+    ret = manager->RemoteExportPublicKey(processAndError, "invalid_json_string", paramSet, outData);
     EXPECT_NE(ret, HKS_SUCCESS);
 
     // Test with index that has no handle
     std::string noHandleIndex = CreateTestIndex("noHandleProvider", "noHandleAbility", "nobundle", "noHandleIndex");
-    ret = manager->RemoteExportPublicKey(processInfo, noHandleIndex, paramSet, outData);
+    ret = manager->RemoteExportPublicKey(processAndError, noHandleIndex, paramSet, outData);
     EXPECT_NE(ret, HKS_SUCCESS);
 
     HKS_FREE_BLOB(processInfo.userId);
@@ -504,7 +510,8 @@ HWTEST_F(HksRemoteHandleManagerTest, GenerateKeyTest, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     // Test generate key
-    ret = manager->ExtensionGenerateKey(processInfo, index, paramSet);
+    struct HksProcessWithErrorInfo processAndError = { &processInfo, nullptr };
+    ret = manager->ExtensionGenerateKey(processAndError, index, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     // Cleanup
@@ -526,17 +533,18 @@ HWTEST_F(HksRemoteHandleManagerTest, GenerateKeyWithInvalidIndexTest, TestSize.L
     HksProcessInfo processInfo = CreateTestProcessInfo();
     CppParamSet paramSet = CreateTestParamSet(processInfo.uidInt);
 
+    struct HksProcessWithErrorInfo processAndError = { &processInfo, nullptr };
     // Test with empty index
-    int32_t ret = manager->ExtensionGenerateKey(processInfo, "", paramSet);
+    int32_t ret = manager->ExtensionGenerateKey(processAndError, "", paramSet);
     EXPECT_NE(ret, HKS_SUCCESS);
 
     // Test with invalid JSON index
-    ret = manager->ExtensionGenerateKey(processInfo, "invalid_json_string", paramSet);
+    ret = manager->ExtensionGenerateKey(processAndError, "invalid_json_string", paramSet);
     EXPECT_NE(ret, HKS_SUCCESS);
 
     // Test with index that has no handle
     std::string noHandleIndex = CreateTestIndex("noHandleProvider", "noHandleAbility", "nobundle", "noHandleIndex");
-    ret = manager->ExtensionGenerateKey(processInfo, noHandleIndex, paramSet);
+    ret = manager->ExtensionGenerateKey(processAndError, noHandleIndex, paramSet);
     EXPECT_NE(ret, HKS_SUCCESS);
 
     HKS_FREE_BLOB(processInfo.userId);

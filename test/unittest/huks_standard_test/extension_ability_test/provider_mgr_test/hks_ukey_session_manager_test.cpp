@@ -122,7 +122,8 @@ static int32_t SetupFullTest(HksProcessInfo &processInfo, std::string &wrappedIn
     CppParamSet initPs(initParams);
 
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
-    ret = sessionMgr->ExtensionInitSession(processInfo, wrappedIndex, initPs, outHandle);
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    ret = sessionMgr->ExtensionInitSession(processAndError, wrappedIndex, initPs, outHandle);
     if (ret != HKS_SUCCESS) {
         handleMgr->CloseRemoteHandle(processInfo, wrappedIndex, regParamSet, &errInfo);
         int32_t deleteCount = 0;
@@ -205,7 +206,8 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest002, TestSize.Level0) {
     EXPECT_TRUE(root.SetValue("index", std::string("parse_original_index")));
     std::string wrappedIndex = root.Serialize(false);
 
-    ret = sessionMgr->ExtensionInitSession(processInfo, wrappedIndex, paramSet, handle);
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    ret = sessionMgr->ExtensionInitSession(processAndError, wrappedIndex, paramSet, handle);
     EXPECT_NE(ret, HKS_SUCCESS) << "ExtensionInitSession failed";
 
     int32_t deletecount = 0;
@@ -263,7 +265,8 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest003, TestSize.Level0) {
     ret = handleMgr->RemoteVerifyPin(processInfo, wrappedIndex, paramSet, authOutParam, &errInfo);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "RemoteVerifyPin failed";
 
-    ret = sessionMgr->ExtensionInitSession(processInfo, wrappedIndex, paramSet, handle);
+    struct HksProcessWithErrorInfo processAndError3 = {&processInfo, nullptr};
+    ret = sessionMgr->ExtensionInitSession(processAndError3, wrappedIndex, paramSet, handle);
     EXPECT_EQ(ret, HKS_ERROR_PIN_NO_AUTH) << "ExtensionInitSession failed";
 
     int32_t deletecount = 0;
@@ -290,7 +293,8 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest004, TestSize.Level0) {
     std::vector<uint8_t> inData, outData;
     uint32_t handle = 12345;
 
-    int32_t ret = sessionMgr->ExtensionUpdateSession(processInfo, handle, paramSet, inData, outData);
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    int32_t ret = sessionMgr->ExtensionUpdateSession(processAndError, handle, paramSet, inData, outData);
     EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST);
 }
 
@@ -309,7 +313,8 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest005, TestSize.Level0) {
     std::vector<uint8_t> inData, outData;
     uint32_t handle = 12345;
 
-    int32_t ret = sessionMgr->ExtensionFinishSession(processInfo, handle, paramSet, inData, outData);
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    int32_t ret = sessionMgr->ExtensionFinishSession(processAndError, handle, paramSet, inData, outData);
     EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST);
 }
 
@@ -327,7 +332,8 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest006, TestSize.Level0) {
     CppParamSet paramSet;
     uint32_t handle = 12345;
 
-    int32_t ret = sessionMgr->ExtensionAbortSession(processInfo, handle, paramSet);
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    int32_t ret = sessionMgr->ExtensionAbortSession(processAndError, handle, paramSet);
     EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST);
 }
 
@@ -373,7 +379,8 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest008, TestSize.Level0) {
     std::vector<uint8_t> inData = {0x01, 0x02, 0x03};
     std::vector<uint8_t> outData;
 
-    ret = sessionMgr->ExtensionUpdateSession(processInfo, outHandle, updatePs, inData, outData);
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    ret = sessionMgr->ExtensionUpdateSession(processAndError, outHandle, updatePs, inData, outData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExtensionUpdateSession failed";
 
     CleanupFullTest(processInfo, wrappedIndex);
@@ -402,7 +409,8 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest009, TestSize.Level0) {
     CppParamSet finishPs(finishParams);
     std::vector<uint8_t> inData, outData;
 
-    ret = sessionMgr->ExtensionFinishSession(processInfo, outHandle, finishPs, inData, outData);
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    ret = sessionMgr->ExtensionFinishSession(processAndError, outHandle, finishPs, inData, outData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExtensionFinishSession failed";
 
     CleanupFullTest(processInfo, wrappedIndex);
@@ -430,7 +438,8 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest010, TestSize.Level0) {
     };
     CppParamSet abortPs(abortParams);
 
-    ret = sessionMgr->ExtensionAbortSession(processInfo, outHandle, abortPs);
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    ret = sessionMgr->ExtensionAbortSession(processAndError, outHandle, abortPs);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExtensionAbortSession failed";
 
     CleanupFullTest(processInfo, wrappedIndex);
@@ -458,7 +467,8 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest011, TestSize.Level0) {
     CppParamSet updatePs;
     std::vector<uint8_t> inData, outData;
 
-    ret = sessionMgr->ExtensionUpdateSession(otherInfo, outHandle, updatePs, inData, outData);
+    struct HksProcessWithErrorInfo otherProcessAndError = {&otherInfo, nullptr};
+    ret = sessionMgr->ExtensionUpdateSession(otherProcessAndError, outHandle, updatePs, inData, outData);
     EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "uid mismatch should return NOT_EXIST";
 
     CleanupFullTest(processInfo, wrappedIndex);
@@ -503,7 +513,8 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest015, TestSize.Level0) {
 
     CppParamSet finishPs;
     std::vector<uint8_t> inData, outData;
-    ret = sessionMgr->ExtensionFinishSession(processInfo, outHandle, finishPs, inData, outData);
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    ret = sessionMgr->ExtensionFinishSession(processAndError, outHandle, finishPs, inData, outData);
     EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "handle should have been erased";
 
     CleanupFullTest(processInfo, wrappedIndex);
@@ -530,7 +541,8 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest016, TestSize.Level0) {
 
     CppParamSet finishPs;
     std::vector<uint8_t> inData, outData;
-    ret = sessionMgr->ExtensionFinishSession(processInfo, outHandle, finishPs, inData, outData);
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    ret = sessionMgr->ExtensionFinishSession(processAndError, outHandle, finishPs, inData, outData);
     EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "handle should have been erased";
 
     CleanupFullTest(processInfo, wrappedIndex);
@@ -559,7 +571,8 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest018, TestSize.Level0) {
 
     CppParamSet finishPs;
     std::vector<uint8_t> inData, outData;
-    ret = sessionMgr->ExtensionFinishSession(processInfo, outHandle, finishPs, inData, outData);
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    ret = sessionMgr->ExtensionFinishSession(processAndError, outHandle, finishPs, inData, outData);
     EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "handle should have been cleared";
 
     CleanupFullTest(processInfo, wrappedIndex);
@@ -591,7 +604,8 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest019, TestSize.Level0) {
 
     CppParamSet finishPs;
     std::vector<uint8_t> inData, outData;
-    ret = sessionMgr->ExtensionFinishSession(processInfo, outHandle, finishPs, inData, outData);
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    ret = sessionMgr->ExtensionFinishSession(processAndError, outHandle, finishPs, inData, outData);
     EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "handle should have been cleared";
 
     CleanupFullTest(processInfo, wrappedIndex);
@@ -646,7 +660,8 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest021, TestSize.Level0) {
 
     CppParamSet finishPs;
     std::vector<uint8_t> inData, outData;
-    ret = sessionMgr->ExtensionFinishSession(processInfo, outHandle, finishPs, inData, outData);
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    ret = sessionMgr->ExtensionFinishSession(processAndError, outHandle, finishPs, inData, outData);
     EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "handle should have been cleared by providerInfo";
 
     CleanupFullTest(processInfo, wrappedIndex);
@@ -678,7 +693,8 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest022, TestSize.Level0) {
 
     CppParamSet finishPs;
     std::vector<uint8_t> inData, outData;
-    ret = sessionMgr->ExtensionFinishSession(processInfo, outHandle, finishPs, inData, outData);
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    ret = sessionMgr->ExtensionFinishSession(processAndError, outHandle, finishPs, inData, outData);
     EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "handle should have been cleared";
 
     CleanupFullTest(processInfo, wrappedIndex);
@@ -707,7 +723,8 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest023, TestSize.Level0) {
 
     CppParamSet finishPs;
     std::vector<uint8_t> inData, outData;
-    ret = sessionMgr->ExtensionFinishSession(processInfo, outHandle, finishPs, inData, outData);
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    ret = sessionMgr->ExtensionFinishSession(processAndError, outHandle, finishPs, inData, outData);
     EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "handle should have been cleared";
 
     CleanupFullTest(processInfo, wrappedIndex);
@@ -776,7 +793,8 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest025, TestSize.Level0) {
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     ASSERT_NE(sessionMgr, nullptr);
 
-    ret = sessionMgr->ExtensionInitSession(processInfo, wrappedIndex, noPurposePs, outHandle);
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    ret = sessionMgr->ExtensionInitSession(processAndError, wrappedIndex, noPurposePs, outHandle);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "missing purpose tag should fail";
 
     CleanupFullTest(processInfo, wrappedIndex);
@@ -811,7 +829,8 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest026, TestSize.Level0) {
         {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob(TEST_ABILITY_NAME)},
     };
     CppParamSet abortPs(abortParams);
-    ret = sessionMgr->ExtensionAbortSession(processInfo, outHandle, abortPs);
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    ret = sessionMgr->ExtensionAbortSession(processAndError, outHandle, abortPs);
     EXPECT_EQ(ret, HKS_SUCCESS) << "handle should still exist after non-matching clear";
 
     CleanupFullTest(processInfo, wrappedIndex);
@@ -844,7 +863,8 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest027, TestSize.Level0) {
 
     CppParamSet finishPs;
     std::vector<uint8_t> inData, outData;
-    ret = sessionMgr->ExtensionFinishSession(processInfo, outHandle, finishPs, inData, outData);
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    ret = sessionMgr->ExtensionFinishSession(processAndError, outHandle, finishPs, inData, outData);
     EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "handle should have been cleared with empty abilityName";
 
     CleanupFullTest(processInfo, wrappedIndex);

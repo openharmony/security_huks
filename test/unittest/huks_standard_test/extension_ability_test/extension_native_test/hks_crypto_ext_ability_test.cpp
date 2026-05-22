@@ -24,6 +24,7 @@
 #include "hks_type_enum.h"
 #include "hks_crypto_ext_stub_impl.h"
 #include "hks_ext_cert_info.h"
+#include "hks_ext_error_info.h"
 #include "native_reference_mock.h"
 
 namespace OHOS::Security::Huks {
@@ -51,7 +52,7 @@ HWTEST_F(CryptoExtAbilityTest, HksCryptoExtAbilityTestAbilityTest_0000, testing:
     CppParamSet params;
     std::string handle;
     std::string certJsonArr;
-    int32_t errcode;
+    struct HksExternalErrorInfo *errInfo = nullptr;
     int32_t authState;
     uint32_t retryCnt;
     std::vector<uint8_t> inData;
@@ -59,17 +60,17 @@ HWTEST_F(CryptoExtAbilityTest, HksCryptoExtAbilityTestAbilityTest_0000, testing:
     CppParamSet outParams;
     std::string propertyId;
     HksCryptoExtAbility HksAbility;
-    EXPECT_EQ(HksAbility.OpenRemoteHandle(index, params, handle, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
-    EXPECT_EQ(HksAbility.CloseRemoteHandle(handle, params, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
-    EXPECT_EQ(HksAbility.AuthUkeyPin(handle, params, errcode, authState, retryCnt), HKS_ERROR_EXT_UNDEFINED_OPERATION);
-    EXPECT_EQ(HksAbility.GetUkeyPinAuthState(handle, params, authState, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
-    EXPECT_EQ(HksAbility.ExportCertificate(index, params, certJsonArr, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
-    EXPECT_EQ(HksAbility.ExportProviderCertificates(params, certJsonArr, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
-    EXPECT_EQ(HksAbility.InitSession(index, params, handle, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
-    EXPECT_EQ(HksAbility.UpdateSession(handle, params, inData, outData, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
-    EXPECT_EQ(HksAbility.FinishSession(handle, params, inData, outData, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
-    EXPECT_EQ(HksAbility.SetOrGetProperty(0, handle, propertyId, params, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
-    EXPECT_EQ(HksAbility.ClearUkeyPinAuthState(handle, params, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.OpenRemoteHandle(index, params, handle, &errInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.CloseRemoteHandle(handle, params, &errInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.AuthUkeyPin(handle, params, &errInfo, authState, retryCnt), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.GetUkeyPinAuthState(handle, params, authState, &errInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.ExportCertificate(index, params, certJsonArr, &errInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.ExportProviderCertificates(params, certJsonArr, &errInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.InitSession(index, params, handle, &errInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.UpdateSession(handle, params, inData, outData, &errInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.FinishSession(handle, params, inData, outData, &errInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.SetOrGetProperty(0, handle, propertyId, params, &errInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.ClearUkeyPinAuthState(handle, params, &errInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
 }
 
 HWTEST_F(CryptoExtAbilityTest, HksCryptoExtAbilityTestAbilityTest_0001, testing::ext::TestSize.Level0)
@@ -80,15 +81,15 @@ HWTEST_F(CryptoExtAbilityTest, HksCryptoExtAbilityTestAbilityTest_0001, testing:
     CppParamSet params;
     std::string handle;
     std::string certJsonArr;
-    int32_t errcode;
+    struct HksExternalErrorInfo *errInfo = nullptr;
     std::vector<uint8_t> inData;
     std::vector<uint8_t> outData;
     HksExtCertInfoIdl certInfo;
 
-    EXPECT_EQ(HksAbility.ImportCertificate(index, certInfo, params, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
-    EXPECT_EQ(HksAbility.ImportWrappedKey(index, wrappingKeyIndex, params, inData, errcode),
+    EXPECT_EQ(HksAbility.ImportCertificate(index, certInfo, params, &errInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.ImportWrappedKey(index, wrappingKeyIndex, params, inData, &errInfo),
         HKS_ERROR_EXT_UNDEFINED_OPERATION);
-    EXPECT_EQ(HksAbility.ExportPublicKey(index, params, outData, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
-    EXPECT_EQ(HksAbility.GenerateKey(handle, params, errcode), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.ExportPublicKey(index, params, outData, &errInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+    EXPECT_EQ(HksAbility.GenerateKey(handle, params, &errInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
 }
 }

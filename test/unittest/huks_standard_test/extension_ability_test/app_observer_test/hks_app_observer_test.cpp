@@ -564,7 +564,8 @@ HWTEST_F(HksAppObserverTest, PluginInterfaceTest007, TestSize.Level0)
     CppParamSet paramSet = CreateParamSetWithAbilityAndUid("TestCryptoAbility", 100);
     std::string index = CreateTestIndex();
 
-    int32_t ret = HksExtPluginOnGenerateKey(processInfo, index, paramSet);
+    struct HksProcessWithErrorInfo processAndError = { &processInfo, nullptr };
+    int32_t ret = HksExtPluginOnGenerateKey(processAndError, index, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     HKS_FREE_BLOB(processInfo.userId);
@@ -582,18 +583,19 @@ HWTEST_F(HksAppObserverTest, PluginInterfaceTest008, TestSize.Level0)
     CppParamSet paramSet = CreateSignParamSet();
     std::string index = CreateTestIndex();
 
+    struct HksProcessWithErrorInfo processAndError = { &processInfo, nullptr };
     uint32_t handle = 0;
-    int32_t ret = HksExtPluginOnInitSession(processInfo, index, paramSet, handle);
+    int32_t ret = HksExtPluginOnInitSession(processAndError, index, paramSet, handle);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     std::vector<uint8_t> outData;
-    ret = HksExtPluginOnUpdateSession(processInfo, handle, paramSet, {0x01, 0x02}, outData);
+    ret = HksExtPluginOnUpdateSession(processAndError, handle, paramSet, {0x01, 0x02}, outData);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    ret = HksExtPluginOnFinishSession(processInfo, handle, paramSet, {0x01}, outData);
+    ret = HksExtPluginOnFinishSession(processAndError, handle, paramSet, {0x01}, outData);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    ret = HksExtPluginOnAbortSession(processInfo, handle, paramSet);
+    ret = HksExtPluginOnAbortSession(processAndError, handle, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     HKS_FREE_BLOB(processInfo.userId);
@@ -617,7 +619,8 @@ HWTEST_F(HksAppObserverTest, PluginInterfaceTest009, TestSize.Level0)
     std::string index = CreateTestIndex();
     uint32_t handle = 0;
 
-    int32_t ret = HksExtPluginOnInitSession(processInfo, index, paramSet, handle);
+    struct HksProcessWithErrorInfo processAndError = { &processInfo, nullptr };
+    int32_t ret = HksExtPluginOnInitSession(processAndError, index, paramSet, handle);
     EXPECT_NE(ret, HKS_SUCCESS);
 
     HKS_FREE_BLOB(processInfo.userId);
@@ -639,7 +642,8 @@ HWTEST_F(HksAppObserverTest, PluginInterfaceTest010, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     CppParamSet paramSet = CreateParamSetWithAbilityAndUid("TestCryptoAbility", 100);
-    ret = HksExtPluginOnSetOrGetRemoteProperty(processInfo, HKS_EXT_PROPERTY_OPERATION_GET,
+    struct HksProcessWithErrorInfo processAndError = { &processInfo, nullptr };
+    ret = HksExtPluginOnSetOrGetRemoteProperty(processAndError, HKS_EXT_PROPERTY_OPERATION_GET,
         index, "SKF_GetDevInfo", paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
@@ -660,11 +664,12 @@ HWTEST_F(HksAppObserverTest, PluginInterfaceTest011, TestSize.Level0)
     std::string wrappingKeyIndex = CreateTestIndex();
 
     std::vector<uint8_t> wrappedData = {0x01, 0x02, 0x03, 0x04};
-    int32_t ret = HksExtPluginOnImportWrappedKey(processInfo, index, wrappingKeyIndex, paramSet, wrappedData);
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    int32_t ret = HksExtPluginOnImportWrappedKey(processAndError, index, wrappingKeyIndex, paramSet, wrappedData);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     std::vector<uint8_t> outData;
-    ret = HksExtPluginOnExportPublicKey(processInfo, index, paramSet, outData);
+    ret = HksExtPluginOnExportPublicKey(processAndError, index, paramSet, outData);
     EXPECT_EQ(ret, HKS_SUCCESS);
     EXPECT_FALSE(outData.empty());
 

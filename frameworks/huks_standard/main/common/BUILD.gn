@@ -33,11 +33,6 @@ if (os_level == "standard") {
     include_dirs = [
       "//base/security/huks/frameworks/huks_standard/main/crypto_engine/openssl/include",
       "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
-      "//base/security/huks/utils/mutex",
-    ]
-
-    deps = [
-      "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
     ]
 
     sources = [

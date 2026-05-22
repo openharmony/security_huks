@@ -24,6 +24,7 @@
 #include "hks_type_enum.h"
 #include "hks_crypto_ext_ability.h"
 #include "hks_ext_cert_info.h"
+#include "hks_ext_error_info.h"
 #include "js_hks_crypto_ext_ability.h"
 #include "native_reference_mock.h"
 #include "../../../../../services/huks_standard/huks_service/extension/ability_native/src/js_hks_crypto_ext_ability.cpp"
@@ -1444,21 +1445,21 @@ HWTEST_F(JsCryptoExtAbilityTest, abilityTest_0000, testing::ext::TestSize.Level0
     CppParamSet params;
     std::string handle;
     std::string certJsonArr;
-    int32_t errcode;
+    struct HksExternalErrorInfo *errInfo = nullptr;
     int32_t authState;
     uint32_t retryCnt;
 
-    EXPECT_EQ(ability->OpenRemoteHandle(index, params, handle, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+    EXPECT_EQ(ability->OpenRemoteHandle(index, params, handle, &errInfo), HKS_ERROR_EXT_SEND_EVENT_FAILED);
 
-    EXPECT_EQ(ability->CloseRemoteHandle(handle, params, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+    EXPECT_EQ(ability->CloseRemoteHandle(handle, params, &errInfo), HKS_ERROR_EXT_SEND_EVENT_FAILED);
 
-    EXPECT_EQ(ability->AuthUkeyPin(handle, params, errcode, authState, retryCnt), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+    EXPECT_EQ(ability->AuthUkeyPin(handle, params, &errInfo, authState, retryCnt), HKS_ERROR_EXT_SEND_EVENT_FAILED);
 
-    EXPECT_EQ(ability->GetUkeyPinAuthState(handle, params, authState, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+    EXPECT_EQ(ability->GetUkeyPinAuthState(handle, params, authState, &errInfo), HKS_ERROR_EXT_SEND_EVENT_FAILED);
 
-    EXPECT_EQ(ability->ExportCertificate(index, params, certJsonArr, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+    EXPECT_EQ(ability->ExportCertificate(index, params, certJsonArr, &errInfo), HKS_ERROR_EXT_SEND_EVENT_FAILED);
 
-    EXPECT_EQ(ability->ExportProviderCertificates(params, certJsonArr, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+    EXPECT_EQ(ability->ExportProviderCertificates(params, certJsonArr, &errInfo), HKS_ERROR_EXT_SEND_EVENT_FAILED);
 }
 
 HWTEST_F(JsCryptoExtAbilityTest, abilityTest_0001, testing::ext::TestSize.Level0)
@@ -1466,18 +1467,18 @@ HWTEST_F(JsCryptoExtAbilityTest, abilityTest_0001, testing::ext::TestSize.Level0
     std::string index;
     CppParamSet params;
     std::string handle;
-    int32_t errcode;
+    struct HksExternalErrorInfo *errInfo = nullptr;
     std::vector<uint8_t> inData;
     std::vector<uint8_t> outData;
     CppParamSet outParams;
     std::string propertyId;
-    EXPECT_EQ(ability->InitSession(index, params, handle, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
-    EXPECT_EQ(ability->UpdateSession(handle, params, inData, outData, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+    EXPECT_EQ(ability->InitSession(index, params, handle, &errInfo), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+    EXPECT_EQ(ability->UpdateSession(handle, params, inData, outData, &errInfo), HKS_ERROR_EXT_SEND_EVENT_FAILED);
 
-    EXPECT_EQ(ability->FinishSession(handle, params, inData, outData, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+    EXPECT_EQ(ability->FinishSession(handle, params, inData, outData, &errInfo), HKS_ERROR_EXT_SEND_EVENT_FAILED);
 
-    EXPECT_EQ(ability->SetOrGetProperty(0, handle, propertyId, params, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
-    EXPECT_EQ(ability->ClearUkeyPinAuthState(handle, params, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+    EXPECT_EQ(ability->SetOrGetProperty(0, handle, propertyId, params, &errInfo), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+    EXPECT_EQ(ability->ClearUkeyPinAuthState(handle, params, &errInfo), HKS_ERROR_EXT_SEND_EVENT_FAILED);
 }
 
 HWTEST_F(JsCryptoExtAbilityTest, ImportCertificate_0000, testing::ext::TestSize.Level0)
@@ -1486,8 +1487,8 @@ HWTEST_F(JsCryptoExtAbilityTest, ImportCertificate_0000, testing::ext::TestSize.
     std::string index;
     HksExtCertInfoIdl certInfo;
     CppParamSet params;
-    int32_t errcode;
-    EXPECT_EQ(ability->ImportCertificate(index, certInfo, params, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+    struct HksExternalErrorInfo *errInfo = nullptr;
+    EXPECT_EQ(ability->ImportCertificate(index, certInfo, params, &errInfo), HKS_ERROR_EXT_SEND_EVENT_FAILED);
 }
 
 HWTEST_F(JsCryptoExtAbilityTest, ImportCertificate_0001, testing::ext::TestSize.Level0)
@@ -1499,8 +1500,8 @@ HWTEST_F(JsCryptoExtAbilityTest, ImportCertificate_0001, testing::ext::TestSize.
     certInfo.index = { 'a', 'b', 'c' };
     certInfo.cert = { 0x30, 0x82 };
     CppParamSet params;
-    int32_t errcode;
-    EXPECT_EQ(ability->ImportCertificate(index, certInfo, params, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+    struct HksExternalErrorInfo *errInfo = nullptr;
+    EXPECT_EQ(ability->ImportCertificate(index, certInfo, params, &errInfo), HKS_ERROR_EXT_SEND_EVENT_FAILED);
 }
 
 HWTEST_F(JsCryptoExtAbilityTest, ImportCertificate_0002, testing::ext::TestSize.Level0)
@@ -1512,8 +1513,8 @@ HWTEST_F(JsCryptoExtAbilityTest, ImportCertificate_0002, testing::ext::TestSize.
     certInfo.index = { 'a', 'b', 'c' };
     certInfo.cert = { 0x30, 0x82 };
     CppParamSet params;
-    int32_t errcode;
-    EXPECT_EQ(ability->ImportCertificate(index, certInfo, params, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+    struct HksExternalErrorInfo *errInfo = nullptr;
+    EXPECT_EQ(ability->ImportCertificate(index, certInfo, params, &errInfo), HKS_ERROR_EXT_SEND_EVENT_FAILED);
 }
 
 HWTEST_F(JsCryptoExtAbilityTest, ImportCertificate_0003, testing::ext::TestSize.Level0)
@@ -1528,9 +1529,9 @@ HWTEST_F(JsCryptoExtAbilityTest, ImportCertificate_0003, testing::ext::TestSize.
     struct HksParam tmpParams = { .tag = HKS_TAG_TYPE_INT, .blob = { .size = 0, .data = nullptr } };
     paramsVec.emplace_back(tmpParams);
     CppParamSet params(paramsVec);
-    int32_t errcode;
+    struct HksExternalErrorInfo *errInfo = nullptr;
 
-    EXPECT_EQ(ability->ImportCertificate(index, certInfo, params, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+    EXPECT_EQ(ability->ImportCertificate(index, certInfo, params, &errInfo), HKS_ERROR_EXT_SEND_EVENT_FAILED);
 }
 
 HWTEST_F(JsCryptoExtAbilityTest, GenerateKey_0000, testing::ext::TestSize.Level0)
@@ -1538,8 +1539,8 @@ HWTEST_F(JsCryptoExtAbilityTest, GenerateKey_0000, testing::ext::TestSize.Level0
     EXPECT_NE(ability, nullptr);
     std::string handle = "testHandle";
     CppParamSet params;
-    int32_t errcode;
-    EXPECT_EQ(ability->GenerateKey(handle, params, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+    struct HksExternalErrorInfo *errInfo = nullptr;
+    EXPECT_EQ(ability->GenerateKey(handle, params, &errInfo), HKS_ERROR_EXT_SEND_EVENT_FAILED);
 }
 
 HWTEST_F(JsCryptoExtAbilityTest, ExportPublicKey_0000, testing::ext::TestSize.Level0)
@@ -1548,8 +1549,8 @@ HWTEST_F(JsCryptoExtAbilityTest, ExportPublicKey_0000, testing::ext::TestSize.Le
     std::string index = "testIdx";
     CppParamSet params;
     std::vector<uint8_t> outData;
-    int32_t errcode;
-    EXPECT_EQ(ability->ExportPublicKey(index, params, outData, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+    struct HksExternalErrorInfo *errInfo = nullptr;
+    EXPECT_EQ(ability->ExportPublicKey(index, params, outData, &errInfo), HKS_ERROR_EXT_SEND_EVENT_FAILED);
 }
 
 HWTEST_F(JsCryptoExtAbilityTest, ImportWrappedKey_0000, testing::ext::TestSize.Level0)
@@ -1559,8 +1560,8 @@ HWTEST_F(JsCryptoExtAbilityTest, ImportWrappedKey_0000, testing::ext::TestSize.L
     std::string wrappingKeyIndex;
     CppParamSet params;
     std::vector<uint8_t> wrappedData = { 0x01, 0x02 };
-    int32_t errcode;
-    EXPECT_EQ(ability->ImportWrappedKey(index, wrappingKeyIndex, params, wrappedData, errcode),
+    struct HksExternalErrorInfo *errInfo = nullptr;
+    EXPECT_EQ(ability->ImportWrappedKey(index, wrappingKeyIndex, params, wrappedData, &errInfo),
         HKS_ERROR_EXT_SEND_EVENT_FAILED);
 }
 
@@ -1571,8 +1572,8 @@ HWTEST_F(JsCryptoExtAbilityTest, ImportWrappedKey_0001, testing::ext::TestSize.L
     std::string wrappingKeyIndex = "wrapKey";
     CppParamSet params;
     std::vector<uint8_t> wrappedData = { 0x01, 0x02, 0x03 };
-    int32_t errcode;
-    EXPECT_EQ(ability->ImportWrappedKey(index, wrappingKeyIndex, params, wrappedData, errcode),
+    struct HksExternalErrorInfo *errInfo = nullptr;
+    EXPECT_EQ(ability->ImportWrappedKey(index, wrappingKeyIndex, params, wrappedData, &errInfo),
         HKS_ERROR_EXT_SEND_EVENT_FAILED);
 }
 
@@ -1581,8 +1582,8 @@ HWTEST_F(JsCryptoExtAbilityTest, ExportProviderCertificates_0000, testing::ext::
     EXPECT_NE(ability, nullptr);
     CppParamSet params;
     std::string certJsonArr;
-    int32_t errcode;
-    EXPECT_EQ(ability->ExportProviderCertificates(params, certJsonArr, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+    struct HksExternalErrorInfo *errInfo = nullptr;
+    EXPECT_EQ(ability->ExportProviderCertificates(params, certJsonArr, &errInfo), HKS_ERROR_EXT_SEND_EVENT_FAILED);
 }
 
 HWTEST_F(JsCryptoExtAbilityTest, ExportCertificate_0000, testing::ext::TestSize.Level0)
@@ -1591,9 +1592,9 @@ HWTEST_F(JsCryptoExtAbilityTest, ExportCertificate_0000, testing::ext::TestSize.
     std::string index;
     CppParamSet params;
     std::string certJsonArr;
-    int32_t errcode;
+    struct HksExternalErrorInfo *errInfo = nullptr;
 
-    EXPECT_EQ(ability->ExportCertificate(index, params, certJsonArr, errcode), HKS_ERROR_EXT_SEND_EVENT_FAILED);
+    EXPECT_EQ(ability->ExportCertificate(index, params, certJsonArr, &errInfo), HKS_ERROR_EXT_SEND_EVENT_FAILED);
 }
 
 HWTEST_F(JsCryptoExtAbilityTest, ConvertCertInfoIdlToJsObject_0000, testing::ext::TestSize.Level0)

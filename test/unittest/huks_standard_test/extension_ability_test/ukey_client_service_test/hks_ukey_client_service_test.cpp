@@ -328,25 +328,24 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest008, TestSize.Level0)
     HksParamSet *paramSet = nullptr;
     HksInitParamSet(&paramSet);
 
-    int32_t outStatus = 0;
-    uint32_t retryCount = 0;
     struct HksExternalErrorInfo *errInfo = nullptr;
+    struct HksExtAuthPinOutParam authOutParam = {0, 0};
 
-    EXPECT_EQ(HksIpcAuthUkeyPinAdapter(&processInfo, nullptr, paramSet, &outStatus, &retryCount, &errInfo),
+    EXPECT_EQ(HksIpcAuthUkeyPinAdapter(&processInfo, nullptr, paramSet, &authOutParam, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob nullDataBlob = { .size = 1, .data = nullptr };
-    EXPECT_EQ(HksIpcAuthUkeyPinAdapter(&processInfo, &nullDataBlob, paramSet, &outStatus, &retryCount, &errInfo),
+    EXPECT_EQ(HksIpcAuthUkeyPinAdapter(&processInfo, &nullDataBlob, paramSet, &authOutParam, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob emptyBlob = {};
-    EXPECT_EQ(HksIpcAuthUkeyPinAdapter(&processInfo, &emptyBlob, paramSet, &outStatus, &retryCount, &errInfo),
+    EXPECT_EQ(HksIpcAuthUkeyPinAdapter(&processInfo, &emptyBlob, paramSet, &authOutParam, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     std::string longId(1025, 'r');
     HksBlob longBlob = { .size = static_cast<uint32_t>(longId.size()),
         .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(longId.data())) };
-    EXPECT_EQ(HksIpcAuthUkeyPinAdapter(&processInfo, &longBlob, paramSet, &outStatus, &retryCount, &errInfo),
+    EXPECT_EQ(HksIpcAuthUkeyPinAdapter(&processInfo, &longBlob, paramSet, &authOutParam, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     HksFreeParamSet(&paramSet);
@@ -626,7 +625,8 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest017, TestSize.Level0)
 
     std::string index = "testIdx";
     std::string propertyId = "prop";
-    EXPECT_EQ(HksIpcServiceOnSetOrGetRemoteProperty(&processInfo,
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    EXPECT_EQ(HksIpcServiceOnSetOrGetRemoteProperty(processAndError,
         HKS_EXT_PROPERTY_OPERATION_GET, index, propertyId, cppParamSet), HKS_SUCCESS);
 
     std::string certsJson;

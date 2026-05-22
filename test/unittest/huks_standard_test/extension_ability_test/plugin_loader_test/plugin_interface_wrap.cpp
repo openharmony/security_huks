@@ -22,6 +22,7 @@
 #include "hks_plugin_def.h"
 #include "hks_cfi.h"
 #include "hks_external_error_info.h"
+#include "hks_cpp_abilityinfo.h"
 
 namespace OHOS {
 namespace Security {
@@ -90,27 +91,27 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnExp
 }
 
 ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnInitSession(
-    const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet, uint32_t &handle))
+    struct HksProcessWithErrorInfo &processAndError, const std::string &index, const CppParamSet &paramSet, uint32_t &handle))
 {
     return 0;
 }
 
 ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnUpdateSession(
-    const HksProcessInfo &processInfo, const uint32_t &handle, const CppParamSet &paramSet,
+    struct HksProcessWithErrorInfo &processAndError, const uint32_t &handle, const CppParamSet &paramSet,
     const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData))
 {
     return 0;
 }
 
 ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnFinishSession(
-    const HksProcessInfo &processInfo, const uint32_t &handle, const CppParamSet &paramSet,
+    struct HksProcessWithErrorInfo &processAndError, const uint32_t &handle, const CppParamSet &paramSet,
     const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData))
 {
     return 0;
 }
 
 ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnAbortSession(
-    const HksProcessInfo &processInfo, const uint32_t &handle, const CppParamSet &paramSet))
+    struct HksProcessWithErrorInfo &processAndError, const uint32_t &handle, const CppParamSet &paramSet))
 {
     return 0;
 }
@@ -123,7 +124,7 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnCle
 }
 
 ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnSetOrGetRemoteProperty(
-    const HksProcessInfo &processInfo, enum HksExtPropertyOperation operation,
+    struct HksProcessWithErrorInfo &processAndError, enum HksExtPropertyOperation operation,
     const std::string &index, const std::string &propertyId, CppParamSet &paramSet))
 {
     return 0;
@@ -144,20 +145,20 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnImp
 }
 
 ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnGenerateKey(
-    const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet))
+    struct HksProcessWithErrorInfo &processAndError, const std::string &index, const CppParamSet &paramSet))
 {
     return 0;
 }
 
 ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnImportWrappedKey(
-    const HksProcessInfo &processInfo, const std::string &index, const std::string &wrappingKeyIndex,
+    struct HksProcessWithErrorInfo &processAndError, const std::string &index, const std::string &wrappingKeyIndex,
     const CppParamSet &paramSet, const std::vector<uint8_t> &wrappedData))
 {
     return 0;
 }
 
 ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnExportPublicKey(
-    const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet, 
+    struct HksProcessWithErrorInfo &processAndError, const std::string &index, const CppParamSet &paramSet, 
     std::vector<uint8_t> &outData))
 {
     return 0;
@@ -174,6 +175,12 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnGet
 
 ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnQueryAbilityInfo(
     const HksProcessInfo &processInfo, std::string &resourceId, CppAbilityInfo &abilityInfo))
+{
+    return 0;
+}
+
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnQueryAbilityInfo(
+    const struct HksProcessInfo &processInfo, std::string &resourceId, CppAbilityInfo &abilityInfo))
 {
     return 0;
 }
@@ -211,51 +218,51 @@ extern "C" void *__wrap_dlsym(void* handle, const char* symbol)
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetR21HksExtAuthPinOutParamPP20HksExternalErrorInfo",
          (void*)Fake_HksExtPluginOnAuthUkeyPin},
          {"_ZN4OHOS8Security4Huks33HksExtPluginOnGetUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_string"
-        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRiPP20HksExternalErrorInfo",
+         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRiPP20HksExternalErrorInfo",
          (void*)Fake_HksExtPluginOnGetUkeyPinAuthState},
          {"_ZN4OHOS8Security4Huks35HksExtPluginOnClearUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_string"
-        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEEPP20HksExternalErrorInfo",
+         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEEPP20HksExternalErrorInfo",
          (void*)Fake_HksExtPluginOnClearUkeyPinAuthState},
-         {"_ZN4OHOS8Security4Huks36HksExtPluginOnSetOrGetRemotePropertyERK14HksProcessInfo23HksExtPropertyOperationRKNSt3__h12basic_string"
-        "IcNS6_11char_traitsIcEENS6_9allocatorIcEEEESE_R11CppParamSet",
-         (void*)Fake_HksExtPluginOnSetOrGetRemoteProperty},
          {"_ZN4OHOS8Security4Huks29HksExtPluginOnExportCerticateERK14HksProcessInfoRKNSt3__h12basic_string"
-        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_PP20HksExternalErrorInfo",
+         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_PP20HksExternalErrorInfo",
          (void*)Fake_HksExtPluginOnExportCertificate},
          {"_ZN4OHOS8Security4Huks38HksExtPluginOnExportProviderCerticatesERK14HksProcessInfo"
         "RKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_PP20HksExternalErrorInfo",
          (void*)Fake_HksExtPluginOnExportProviderCertificates},
-         {"_ZN4OHOS8Security4Huks25HksExtPluginOnInitSessionERK14HksProcessInfoRKNSt3__h12basic_string"
-        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRj",
+         {"_ZN4OHOS8Security4Huks25HksExtPluginOnInitSessionER23HksProcessWithErrorInfoRKNSt3__h12basic_string"
+         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRj",
          (void*)Fake_HksExtPluginOnInitSession},
-         {"_ZN4OHOS8Security4Huks27HksExtPluginOnUpdateSessionERK14HksProcessInfoRKjRK11CppParamSet"
-        "RKNSt3__h6vectorIhNSA_9allocatorIhEEEERSE_",
+         {"_ZN4OHOS8Security4Huks27HksExtPluginOnUpdateSessionER23HksProcessWithErrorInfoRKjRK11CppParamSet"
+         "RKNSt3__h6vectorIhNSA_9allocatorIhEEEERSE_",
          (void*)Fake_HksExtPluginOnUpdateSession},
-         {"_ZN4OHOS8Security4Huks27HksExtPluginOnFinishSessionERK14HksProcessInfoRKjRK11CppParamSet"
-        "RKNSt3__h6vectorIhNSA_9allocatorIhEEEERSE_",
+         {"_ZN4OHOS8Security4Huks27HksExtPluginOnFinishSessionER23HksProcessWithErrorInfoRKjRK11CppParamSet"
+         "RKNSt3__h6vectorIhNSA_9allocatorIhEEEERSE_",
          (void*)Fake_HksExtPluginOnFinishSession},
-         {"_ZN4OHOS8Security4Huks26HksExtPluginOnAbortSessionERK14HksProcessInfoRKjRK11CppParamSet",
+         {"_ZN4OHOS8Security4Huks26HksExtPluginOnAbortSessionER23HksProcessWithErrorInfoRKjRK11CppParamSet",
          (void*)Fake_HksExtPluginOnAbortSession},
          {"_ZN4OHOS8Security4Huks31HksExtPluginOnImportCertificateERK14HksProcessInfoRKNSt3__h12basic_string"
-        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK14HksExtCertInfoRK11CppParamSetPP20HksExternalErrorInfo",
+         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK14HksExtCertInfoRK11CppParamSetPP20HksExternalErrorInfo",
          (void*)Fake_HksExtPluginOnImportCertificate},
-         {"_ZN4OHOS8Security4Huks25HksExtPluginOnGenerateKeyERK14HksProcessInfoRKNSt3__h12basic_string"
-        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet",
+         {"_ZN4OHOS8Security4Huks25HksExtPluginOnGenerateKeyER23HksProcessWithErrorInfoRKNSt3__h12basic_string"
+         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSet",
          (void*)Fake_HksExtPluginOnGenerateKey},
-         {"_ZN4OHOS8Security4Huks30HksExtPluginOnImportWrappedKeyERK14HksProcessInfoRKNSt3__h12basic_string"
-        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEESD_RK11CppParamSetRKNS5_6vectorIhNS9_IhEEEE",
+         {"_ZN4OHOS8Security4Huks30HksExtPluginOnImportWrappedKeyER23HksProcessWithErrorInfoRKNSt3__h12basic_string"
+         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEESD_RK11CppParamSetRKNS5_6vectorIhNS9_IhEEEE",
          (void*)Fake_HksExtPluginOnImportWrappedKey},
-         {"_ZN4OHOS8Security4Huks29HksExtPluginOnExportPublicKeyERK14HksProcessInfoRKNSt3__h12basic_string"
-        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRNS5_6vectorIhNS9_IhEEEE",
+         {"_ZN4OHOS8Security4Huks29HksExtPluginOnExportPublicKeyER23HksProcessWithErrorInfoRKNSt3__h12basic_string"
+         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRNS5_6vectorIhNS9_IhEEEE",
          (void*)Fake_HksExtPluginOnExportPublicKey},
          {"_ZN4OHOS8Security4Huks27HksExtPluginOnGetResourceIdERK14HksProcessInfoRKNSt3__h12basic_string"
-        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_PP20HksExternalErrorInfo",
+         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_PP20HksExternalErrorInfo",
          (void*)Fake_HksExtPluginOnGetResourceId},
          {"_ZN4OHOS8Security4Huks30HksExtPluginOnQueryAbilityInfoERK14HksProcessInfoRNSt3__h12basic_stringIcNS5_11"
-        "char_traitsIcEENS5_9allocatorIcEEEER14CppAbilityInfo",
+         "char_traitsIcEENS5_9allocatorIcEEEER14CppAbilityInfo",
          (void*)Fake_HksExtPluginOnQueryAbilityInfo},
-         {"_ZN4OHOS8Security4Huks36HksExtPluginOnUnregisterAllObserversEv",
+         {"_ZN4OHOS8Security4Huks27HksExtPluginOnUnregisterAllObserversEv",
          (void*)Fake_HksExtPluginOnUnregisterAllObservers},
+         {"_ZN4OHOS8Security4Huks36HksExtPluginOnSetOrGetRemotePropertyER23HksProcessWithErrorInfo23HksExtPropertyOperationRKNSt3__h12basic_string"
+         "IcNS6_11char_traitsIcEENS6_9allocatorIcEEEESE_R11CppParamSet",
+         (void*)Fake_HksExtPluginOnSetOrGetRemoteProperty},
     };
 
     for (auto &item : kFakeSymbols) {
