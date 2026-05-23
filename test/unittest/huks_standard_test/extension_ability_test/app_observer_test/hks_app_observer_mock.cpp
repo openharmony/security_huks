@@ -61,72 +61,65 @@ public:
         HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
 
     ErrCode ExportCertificate(
-        const std::string& index,
+        const std::string& index, 
         const CppParamSet& params,
         std::string& certJsonArr,
-        HksExternalErrorInfoIdl& errorInfo)
+        int32_t& errcode)
     {
         CommJsonObject certArray = CommJsonObject::CreateArray();
         if (certArray.IsNull()) {
-            errorInfo.errVal = HKS_ERROR_MALLOC_FAIL;
+            errcode = HKS_ERROR_MALLOC_FAIL; 
             return ERR_OK;
         }
         CommJsonObject certObj = CommJsonObject::CreateObject();
         if (certObj.IsNull()) {
-            errorInfo.errVal = HKS_ERROR_MALLOC_FAIL;
+            errcode = HKS_ERROR_MALLOC_FAIL;
             return ERR_OK;
         }
         if (!certObj.SetValue("purpose", 1) ||
             !certObj.SetValue("index", std::string("mock_cert_index")) ||
             !certObj.SetValue("cert", std::string("MIIBIjANBgkqh"))) {
-            errorInfo.errVal = HKS_ERROR_JSON_SERIALIZE_FAILED;
+            errcode = HKS_ERROR_JSON_SERIALIZE_FAILED;
             return ERR_OK;
         }
-         if (!certArray.AppendElement(certObj)) {
-            errorInfo.errVal = HKS_ERROR_JSON_SERIALIZE_FAILED;
+        if (!certArray.AppendElement(certObj)) {
+            errcode = HKS_ERROR_JSON_SERIALIZE_FAILED;
             return ERR_OK;
         }
         certJsonArr = certArray.Serialize(false);
-        errorInfo.errVal = HKS_SUCCESS;
+        errcode = HKS_SUCCESS;
         return ERR_OK;
     }
 
     ErrCode ExportProviderCertificates(
         const CppParamSet& params,
         std::string& certJsonArr,
-        HksExternalErrorInfoIdl& errorInfo)
+        int32_t& errcode)
     {
         CommJsonObject certArray = CommJsonObject::CreateArray();
         if (certArray.IsNull()) {
-            errorInfo.errVal = HKS_ERROR_MALLOC_FAIL;
+            errcode = HKS_ERROR_MALLOC_FAIL;
             return ERR_OK;
         }
         for (int i = 0; i < 2; i++) {
             CommJsonObject certObj = CommJsonObject::CreateObject();
             if (certObj.IsNull()) {
-                errorInfo.errVal = HKS_ERROR_MALLOC_FAIL;
+                errcode = HKS_ERROR_MALLOC_FAIL;
                 return ERR_OK;
             }
-            for (int i = 0; i < 2; i++) {
-                CommJsonObject certObj = CommJsonObject::CreateObject();
-                if (certObj.IsNull()) {
-                    errorInfo.errVal = HKS_ERROR_MALLOC_FAIL;
-                    return ERR_OK;
-                }
-                if (!certObj.SetValue("purpose", i + 1) ||
-                    !certObj.SetValue("index", std::string("cert_") + std::to_string(i)) ||
-                    !certObj.SetValue("cert", std::string("MIIBIjAN") + std::to_string(i))) {
-                    errorInfo.errVal = HKS_ERROR_JSON_SERIALIZE_FAILED;
-                    return ERR_OK;
-                }
-                if (!certArray.AppendElement(certObj)) {
-                    errorInfo.errVal = HKS_ERROR_JSON_SERIALIZE_FAILED;
-                    return ERR_OK;
-                }
+            if (!certObj.SetValue("purpose", i + 1) ||
+                !certObj.SetValue("index", std::string("cert_") + std::to_string(i)) ||
+                !certObj.SetValue("cert", std::string("MIIBIjAN") + std::to_string(i))) {
+                errcode = HKS_ERROR_JSON_SERIALIZE_FAILED;
+                return ERR_OK;
+            }
+            if (!certArray.AppendElement(certObj)) {
+                errcode = HKS_ERROR_JSON_SERIALIZE_FAILED;
+                return ERR_OK;
             }
         }
         certJsonArr = certArray.Serialize(false);
-        errorInfo.errVal = HKS_SUCCESS;
+        errcode = HKS_SUCCESS;
         return ERR_OK;
     }
 
@@ -475,5 +468,4 @@ bool HksSessionManager::HksClearHandle(const HksProcessInfo &processInfo,
 }
 
 void HksSessionManager::ClearSessionMapByHandle(int32_t ret, uint32_t handle) {}
-
 } // namespace OHOS::Security::Huks
