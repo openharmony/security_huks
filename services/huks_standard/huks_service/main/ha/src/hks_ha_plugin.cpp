@@ -126,6 +126,17 @@ HksEventProcMap *HksHaPlugin::HksEventProcFind(uint32_t eventId)
     return nullptr;
 }
 
+static void AddAncoCallTagToEventMap(const struct HksParamSet *paramSet,
+    std::unordered_map<std::string, std::string> &eventMap)
+{
+    HKS_IF_NULL_LOGE_RETURN_VOID(paramSet, "AddAncoCallTagToEventMap: paramSet is null");
+    struct HksParam *ancoUidParam = nullptr;
+    if (HksGetParam(paramSet, HKS_TAG_ANCO_APP_UID, &ancoUidParam) == HKS_SUCCESS) {
+        HKS_LOG_I("AddAncoCallTagToEventMap: anco uid found, add anco_call=true to eventMap");
+        eventMap["anco_call"] = "true";
+    }
+}
+
 void HksHaPlugin::HandlerReport(HksEventQueueItem &item)
 {
     HKS_IF_NULL_LOGE_RETURN_VOID(item.paramSet, "HandlerReport: paramSet is"
@@ -153,6 +164,8 @@ void HksHaPlugin::HandlerReport(HksEventQueueItem &item)
     ret = procMap->eventInfoToMap(eventInfo, eventMap);
     HKS_IF_NOT_SUCC_LOGE(ret, "Failed to convert HksEventInfo to map"
         "for eventId %" LOG_PUBLIC "u", eventId);
+
+    AddAncoCallTagToEventMap(item.paramSet, eventMap);
     HandleFaultEvent(&eventInfo->common, eventMap);
 
     HksFreeEventInfo(&eventInfo);
