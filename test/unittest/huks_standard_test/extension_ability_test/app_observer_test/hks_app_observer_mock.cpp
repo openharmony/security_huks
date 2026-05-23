@@ -61,14 +61,14 @@ public:
         HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
 
     ErrCode ExportCertificate(
-        const std::string& index, 
+        const std::string& index,
         const CppParamSet& params,
         std::string& certJsonArr,
         int32_t& errcode)
     {
         CommJsonObject certArray = CommJsonObject::CreateArray();
         if (certArray.IsNull()) {
-            errcode = HKS_ERROR_MALLOC_FAIL; 
+            errcode = HKS_ERROR_MALLOC_FAIL;
             return ERR_OK;
         }
         CommJsonObject certObj = CommJsonObject::CreateObject();

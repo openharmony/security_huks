@@ -179,12 +179,6 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnQue
     return 0;
 }
 
-ENABLE_CFI(__attribute__((visibility("default"))) int32_t HksExtPluginOnQueryAbilityInfo(
-    const struct HksProcessInfo &processInfo, std::string &resourceId, CppAbilityInfo &abilityInfo))
-{
-    return 0;
-}
-
 extern "C" void *__wrap_dlopen(const char* filename, int flags)
 {
     static int fakeHandle = 1;
