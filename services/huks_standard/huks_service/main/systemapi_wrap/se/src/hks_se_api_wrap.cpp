@@ -38,10 +38,6 @@ static std::mutex g_seCallMutex{};
 
 int32_t HksSePermissionCheck(const struct HksProcessInfo *processInfo)
 {
-    // temp
-    HKS_LOG_I("skip Se Permission Check");
-    return HKS_SUCCESS;
-
     HKS_IF_TRUE_LOGE_RETURN(processInfo == nullptr, HKS_ERROR_NULL_POINTER, "processInfo is nullptr.")
 
     CheckSeCapabilityFunc checkSeCapability = nullptr;
