@@ -17,6 +17,8 @@
 
 #include <stdint.h>
 
+#define MAX_EXT_ERROR_DESC_LEN 256
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -83,6 +83,7 @@ struct HksExternalErrorInfo* HksCreateExternalErrorInfo(int32_t errVal, const ch
     }
 
     uint32_t descLen = strlen(errorDesc);
+    HKS_IF_TRUE_EXCU(descLen > MAX_EXT_ERROR_DESC_LEN, descLen = MAX_EXT_ERROR_DESC_LEN);
     errInfo->errorDesc = (char*)HksMalloc(descLen + 1);
     if (errInfo->errorDesc == NULL) {
         HKS_FREE(errInfo);

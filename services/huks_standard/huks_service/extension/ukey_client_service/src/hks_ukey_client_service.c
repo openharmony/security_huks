@@ -211,3 +211,18 @@ int32_t HksServiceQueryAbilityInfo(const struct HksProcessInfo *processInfo, str
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
+
+int32_t HksServiceImportCert(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
+    const struct HksExtCertInfo *certInfo, const struct HksParamSet *paramSet, struct HksExternalErrorInfo **errInfo)
+{
+#ifdef L2_STANDARD
+    return HksIpcImportCertAdapter(processInfo, index, certInfo, paramSet, errInfo);
+#else
+    (void)processInfo;
+    (void)index;
+    (void)certInfo;
+    (void)paramSet;
+    (void)errInfo;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}

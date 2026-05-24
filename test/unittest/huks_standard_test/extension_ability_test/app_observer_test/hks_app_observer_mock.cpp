@@ -64,62 +64,62 @@ public:
         const std::string& index,
         const CppParamSet& params,
         std::string& certJsonArr,
-        int32_t& errcode)
+        HksExternalErrorInfoIdl& errorInfo)
     {
         CommJsonObject certArray = CommJsonObject::CreateArray();
         if (certArray.IsNull()) {
-            errcode = HKS_ERROR_MALLOC_FAIL;
+            errorInfo.errVal = HKS_ERROR_MALLOC_FAIL;
             return ERR_OK;
         }
         CommJsonObject certObj = CommJsonObject::CreateObject();
         if (certObj.IsNull()) {
-            errcode = HKS_ERROR_MALLOC_FAIL;
+            errorInfo.errVal = HKS_ERROR_MALLOC_FAIL;
             return ERR_OK;
         }
         if (!certObj.SetValue("purpose", 1) ||
             !certObj.SetValue("index", std::string("mock_cert_index")) ||
             !certObj.SetValue("cert", std::string("MIIBIjANBgkqh"))) {
-            errcode = HKS_ERROR_JSON_SERIALIZE_FAILED;
+            errorInfo.errVal = HKS_ERROR_JSON_SERIALIZE_FAILED;
             return ERR_OK;
         }
         if (!certArray.AppendElement(certObj)) {
-            errcode = HKS_ERROR_JSON_SERIALIZE_FAILED;
+            errorInfo.errVal = HKS_ERROR_JSON_SERIALIZE_FAILED;
             return ERR_OK;
         }
         certJsonArr = certArray.Serialize(false);
-        errcode = HKS_SUCCESS;
+        errorInfo.errVal = HKS_SUCCESS;
         return ERR_OK;
     }
 
     ErrCode ExportProviderCertificates(
         const CppParamSet& params,
         std::string& certJsonArr,
-        int32_t& errcode)
+        HksExternalErrorInfoIdl& errorInfo)
     {
         CommJsonObject certArray = CommJsonObject::CreateArray();
         if (certArray.IsNull()) {
-            errcode = HKS_ERROR_MALLOC_FAIL;
+            errorInfo.errVal = HKS_ERROR_MALLOC_FAIL;
             return ERR_OK;
         }
         for (int i = 0; i < 2; i++) {
             CommJsonObject certObj = CommJsonObject::CreateObject();
             if (certObj.IsNull()) {
-                errcode = HKS_ERROR_MALLOC_FAIL;
+                errorInfo.errVal = HKS_ERROR_MALLOC_FAIL;
                 return ERR_OK;
             }
             if (!certObj.SetValue("purpose", i + 1) ||
                 !certObj.SetValue("index", std::string("cert_") + std::to_string(i)) ||
                 !certObj.SetValue("cert", std::string("MIIBIjAN") + std::to_string(i))) {
-                errcode = HKS_ERROR_JSON_SERIALIZE_FAILED;
+                errorInfo.errVal = HKS_ERROR_JSON_SERIALIZE_FAILED;
                 return ERR_OK;
             }
             if (!certArray.AppendElement(certObj)) {
-                errcode = HKS_ERROR_JSON_SERIALIZE_FAILED;
+                errorInfo.errVal = HKS_ERROR_JSON_SERIALIZE_FAILED;
                 return ERR_OK;
             }
         }
         certJsonArr = certArray.Serialize(false);
-        errcode = HKS_SUCCESS;
+        errorInfo.errVal = HKS_SUCCESS;
         return ERR_OK;
     }
 

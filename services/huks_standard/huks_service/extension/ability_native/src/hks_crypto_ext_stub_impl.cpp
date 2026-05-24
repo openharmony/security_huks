@@ -31,7 +31,7 @@ static void SetErrorInfoFromC(struct HksExternalErrorInfo *errInfoC, int32_t ret
         return;
     }
     errorInfo.errVal = ret;
-    errorInfo.errorDesc.assign("No error message was passed by the extension");
+    errorInfo.errorDesc.assign("");
 }
 
 ErrCode HksCryptoExtStubImpl::OpenRemoteHandle(

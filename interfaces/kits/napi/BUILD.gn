@@ -86,7 +86,7 @@ ohos_shared_library("huks") {
     "src/v9/huks_napi_update_finish_session.cpp",
   ]
 
-deps = [
+  deps = [
     "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
@@ -140,7 +140,6 @@ ohos_shared_library("huksexternalcrypto_napi") {
     "_HARDWARE_ROOT_KEY_",
     "_HUKS_LOG_ENABLE_",
     "HUKS_EXTERNAL_CRYPTO",
-    "HKS_UKEY_EXTENSION_CRYPTO",
   ]
   deps = [
     "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",

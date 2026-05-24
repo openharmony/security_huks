@@ -75,7 +75,6 @@ public:
     std::tuple<uint32_t, std::unique_ptr<uint8_t[]>, uint32_t, uint32_t,
         struct HksExternalErrorInfo*> WaitForAsyncReply(int timeout);
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
-    void WriteErrorInfoToParcel(MessageParcel &data, const struct HksExternalErrorInfo *errInfo);
 private:
     int ProcessExtGetRemotePropertyReply(MessageParcel& data);
     uint32_t mErrCode = 0;
@@ -94,6 +93,7 @@ public:
     ~HksExtProxy() = default;
     void SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &sendData, uint32_t sendSize,
         uint32_t msgCode, const struct HksExternalErrorInfo *errInfo) override;
+    void WriteErrorInfoToParcel(MessageParcel &data, const struct HksExternalErrorInfo *errInfo);
 private:
     static BrokerDelegator<HksExtProxy> delegator_;
 };

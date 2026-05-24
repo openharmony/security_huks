@@ -266,6 +266,24 @@ int32_t HksClientGetResourceId(const struct HksBlob *providerName, const struct 
 
 int32_t HksClientQueryAbilityInfo(struct HksBlob *resourceId, struct HksAbilityInfo *abilityInfo)
 {
+    struct HksProcessInfo processInfo = {
+        { 0, NULL },
+        { 0, NULL },
+        0,
+        0,
+        0,
+        0
+    };
+    int32_t ret = HksServiceQueryAbilityInfo(&processInfo, resourceId, abilityInfo);
+    return ret;
+}
+
+int32_t HksClientImportCertificate(const struct HksBlob *resourceId, const struct HksExtCertInfo *certInfo,
+    const struct HksParamSet *paramSetIn)
+{
+    char *processName = NULL;
+    char *userId = NULL;
+    struct HksExternalErrorInfo *errInfo = NULL;
     HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
@@ -277,6 +295,7 @@ int32_t HksClientQueryAbilityInfo(struct HksBlob *resourceId, struct HksAbilityI
         0,
         0
     };
-    int32_t ret = HksServiceQueryAbilityInfo(&processInfo, resourceId, abilityInfo);
+
+    int32_t ret = HksServiceImportCert(&processInfo, resourceId, certInfo, paramSetIn, &errInfo);
     return ret;
 }
