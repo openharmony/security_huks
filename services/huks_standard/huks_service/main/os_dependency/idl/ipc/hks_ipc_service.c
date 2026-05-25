@@ -808,6 +808,7 @@ void HksIpcServiceImportKey(const struct HksBlob *srcData, const uint8_t *contex
     struct HksBlob key = { 0, NULL };
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     int32_t ret;
+    bool isSeCalling = false;
 
     do {
         ret  = HksImportKeyUnpack(srcData, &keyAlias, &paramSet, &key);
@@ -819,11 +820,16 @@ void HksIpcServiceImportKey(const struct HksBlob *srcData, const uint8_t *contex
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
+        ret = CheckKeySecuritySe(&processInfo, paramSet, &isSeCalling);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckKeySecuritySe fail, ret = %" LOG_PUBLIC "d", ret)
+
         ret =  HksServiceImportKey(&processInfo, &keyAlias, paramSet, &key);
         HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceImportKey fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     HksSendResponse(context, ret, NULL);
+
+    DecrementSeCountByParamSet(isSeCalling);
 
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);

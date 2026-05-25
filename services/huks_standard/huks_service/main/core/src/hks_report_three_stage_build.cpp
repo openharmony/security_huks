@@ -134,6 +134,7 @@ void KeyInfoToMap(const HksEventKeyInfo *keyInfo, std::unordered_map<std::string
         { "purpose", std::to_string(keyInfo->purpose) },
         { "key_size", std::to_string(keyInfo->keySize) },
         { "key_flag", std::to_string(keyInfo->keyFlag) },
+        { "key_security_level", std::to_string(keyInfo->keySecurityLevel) },
         { "key_hash", std::to_string(keyInfo->keyHash) },
         { "batch_operation", std::to_string(keyInfo->isBatch) },
         { "batch_purpose", std::to_string(keyInfo->batchPur) },

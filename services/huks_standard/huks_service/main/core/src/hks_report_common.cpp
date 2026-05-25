@@ -415,6 +415,7 @@ int32_t GetEventKeyInfo(const struct HksParamSet *paramSetIn, struct HksEventKey
 {
     HKS_IF_NULL_LOGI_RETURN(paramSetIn, HKS_ERROR_NULL_POINTER, "GetEventKeyInfo paramSetIn is null")
     HKS_IF_NULL_LOGI_RETURN(keyInfo, HKS_ERROR_NULL_POINTER, "GetEventKeyInfo eventInfo is null")
+    keyInfo->keySecurityLevel = HKS_KEY_SECURITY_LEVEL_DEFAULT;
     struct HksParam *paramToEventInfo = nullptr;
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM4_UINT32, &paramToEventInfo) == HKS_SUCCESS) {
         keyInfo->aliasHash = paramToEventInfo->uint32Param;
@@ -442,6 +443,10 @@ int32_t GetEventKeyInfo(const struct HksParamSet *paramSetIn, struct HksEventKey
 
     if (HksGetParam(paramSetIn, HKS_TAG_KEY_FLAG, &paramToEventInfo) == HKS_SUCCESS) {
         keyInfo->keyFlag = paramToEventInfo->uint32Param;
+    }
+
+    if (HksGetParam(paramSetIn, HKS_TAG_KEY_SECURITY_LEVEL, &paramToEventInfo) == HKS_SUCCESS) {
+        keyInfo->keySecurityLevel = static_cast<int32_t>(paramToEventInfo->uint32Param);
     }
 
     if (HksGetParam(paramSetIn, HKS_TAG_PARAM5_UINT32, &paramToEventInfo) == HKS_SUCCESS) {
@@ -528,6 +533,9 @@ std::pair<std::unordered_map<std::string, std::string>::iterator, bool> EventInf
 
     ret = reportData.insert_or_assign("key_flag", std::to_string(eventKeyInfo->keyFlag));
     HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert keyFlag failed!");
+
+    ret = reportData.insert_or_assign("key_security_level", std::to_string(eventKeyInfo->keySecurityLevel));
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert key_security_level failed!");
 
     ret = reportData.insert_or_assign("key_hash", std::to_string(eventKeyInfo->keyHash));
     HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert key_hash failed!");

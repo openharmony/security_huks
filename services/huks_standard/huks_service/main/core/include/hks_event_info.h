@@ -22,6 +22,8 @@
 
 #include "hks_type_enum.h"
 
+#define HKS_KEY_SECURITY_LEVEL_DEFAULT (-1)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -105,6 +107,7 @@ typedef struct HksEventKeyInfo {
     uint32_t purpose;
     uint32_t keySize;
     uint32_t keyFlag;
+    int32_t keySecurityLevel;
     uint16_t keyHash;
     uint8_t aliasHash;
     bool isBatch;
