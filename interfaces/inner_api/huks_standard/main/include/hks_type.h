@@ -192,9 +192,9 @@ struct HksExtAuthPinOutParam {
 };
 
 struct HksExternalErrorInfo {
- 	int32_t errVal;
- 	char *errorDesc;
- 	uint32_t errorDescLen; 
+    int32_t errVal;
+    char *errorDesc;
+    uint32_t errorDescLen;
 };
 
 struct HksExtCertInfo {

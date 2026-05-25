@@ -73,7 +73,8 @@ struct CryptoResultParam {
     std::atomic<bool> callJsExMethodDone {false};
     std::mutex callJsMutex{};
 
-    ~CryptoResultParam() {
+    ~CryptoResultParam()
+    {
         if (errInfo != nullptr) {
             HksFreeExternalErrorInfo(errInfo);
             errInfo = nullptr;

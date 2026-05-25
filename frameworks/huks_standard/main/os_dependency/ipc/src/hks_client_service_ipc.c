@@ -107,7 +107,7 @@ static int32_t BuildParamSetNotNull(const struct HksParamSet *paramSetIn, struct
 static void UpdateUkeyGlobalErrorInfo()
 {
     const struct HksExternalErrorInfo *threadError = HksGetThreadExtErrMsg();
-    HKS_IF_TRUE_EXCU(threadError != NULL, HksSetUkeyGlobalInfoC(threadError->errVal, threadError->errorDesc));
+    HKS_IF_TRUE_EXCU(threadError != NULL, HKS_SET_UKEY_GLOBAL_INFO_C(threadError->errVal, threadError->errorDesc));
     HksClearThreadExtErrMsg();
 }
 

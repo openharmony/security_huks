@@ -37,10 +37,14 @@ void HksGetUkeyGlobalErrorDesc(char *buf, uint32_t bufLen);
 
 void HksClearUkeyGlobalInfo(void);
 
-#define HksSetUkeyGlobalInfoC HksSetUkeyGlobalInfo
-#define HksGetUkeyGlobalErrValC HksGetUkeyGlobalErrVal
-#define HksGetUkeyGlobalErrorDescC HksGetUkeyGlobalErrorDesc
-#define HksClearUkeyGlobalInfoC HksClearUkeyGlobalInfo
+// Alias for C API
+#define HKS_SET_UKEY_GLOBAL_INFO_C HksSetUkeyGlobalInfo
+
+#define HKS_GET_UKEY_GLOBAL_ERR_VAL_C HksGetUkeyGlobalErrVal
+
+#define HKS_GET_UKEY_GLOBAL_ERR_DESC_C HksGetUkeyGlobalErrorDesc
+
+#define HKS_CLEAR_UKEY_GLOBAL_INFO_C HksClearUkeyGlobalInfo
 
 #ifdef __cplusplus
 }

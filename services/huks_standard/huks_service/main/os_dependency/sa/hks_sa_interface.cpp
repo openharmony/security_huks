@@ -226,8 +226,8 @@ int HksExtStub::ProcessExtGetRemotePropertyReply(MessageParcel& data)
     return err;
 }
 
-std::tuple<uint32_t, std::unique_ptr<uint8_t[]>, uint32_t, uint32_t,
-    struct HksExternalErrorInfo*> HksExtStub::WaitForAsyncReply(int timeout)
+auto HksExtStub::WaitForAsyncReply(int timeout)
+    -> std::tuple<uint32_t, std::unique_ptr<uint8_t[]>, uint32_t, uint32_t, HksExternalErrorInfo*>
 {
     std::unique_lock<std::mutex> lck(mMutex);
     if (received) {

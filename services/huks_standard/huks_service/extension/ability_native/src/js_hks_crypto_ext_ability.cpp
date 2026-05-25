@@ -1350,6 +1350,14 @@ int32_t JsHksCryptoExtAbility::OpenRemoteHandle(const std::string &index, const 
         *errInfo = dataParam->errInfo;
         dataParam->errInfo = nullptr;
     }
+    if (errInfo != nullptr) {
+        if (dataParam->errInfo != nullptr) {
+            *errInfo = dataParam->errInfo;
+            dataParam->errInfo = nullptr;
+        } else {
+            *errInfo = HksCreateExternalErrorInfo(HKS_ERROR_EXT_CALL_JS_TIME_OUT, "");
+        }
+    }
     return dataParam->hksErrorCode;
 }
 
