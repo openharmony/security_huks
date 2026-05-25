@@ -38,6 +38,8 @@ int32_t HksPluginGetAncoUser(int *userId);
 
 int32_t HksPluginOnAccessWrapKey(uint32_t code, const void *data, void *reply);
 
+int32_t HksPluginCheck(void);
+
 int32_t HksPluginImportWrappedKey(const struct HksImportKeyStoreArgs *data, struct HksBlob *reply);
 
 #ifdef __cplusplus
