@@ -219,7 +219,6 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
             HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
             HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
             HksFreeExternalErrorInfo(errInfo);
-            break;
         }
 
         ret = PackAuthPinReply(&outBlob, ret, authOutParam.outStatus, authOutParam.retryCount);
