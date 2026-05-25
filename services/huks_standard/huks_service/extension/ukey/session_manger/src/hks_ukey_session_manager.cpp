@@ -96,21 +96,21 @@ int32_t HksSessionManager::CheckParmSetPurposeAndCheckAuth(const HksProcessInfo 
 }
 
 constexpr int32_t MAX_HANDLE_SIZE = 96;
-int32_t HksSessionManager::ExtensionInitSession(const HksProcessInfo &processInfo,
+int32_t HksSessionManager::ExtensionInitSession(struct HksProcessWithErrorInfo &processAndError,
     const std::string &index, const CppParamSet &paramSet, uint32_t &handle)
 {
-    HKS_IF_TRUE_LOGE_RETURN(!CheckSingleCallerCanInitSession(processInfo), HKS_ERROR_SESSION_REACHED_LIMIT,
-        "handle too many, please realse the old")
+    HKS_IF_TRUE_LOGE_RETURN(!CheckSingleCallerCanInitSession(*processAndError.processInfo),
+        HKS_ERROR_SESSION_REACHED_LIMIT, "handle too many, please realse the old")
     HKS_IF_TRUE_LOGE_RETURN(m_handlers.Size() >= MAX_HANDLE_SIZE, HKS_ERROR_SESSION_REACHED_LIMIT,
         "The handle maximum quantity has been reached")
-    int32_t ret = CheckParmSetPurposeAndCheckAuth(processInfo, index, paramSet);
+    int32_t ret = CheckParmSetPurposeAndCheckAuth(*processAndError.processInfo, index, paramSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CheckParmSetPurposeAndCheckAuth failed")
     ProviderInfo providerInfo;
     std::string newIndex;
     std::string sIndexHandle;
-    ret = HksRemoteHandleManager::GetInstanceWrapper()->ParseAndValidateIndex(index, processInfo.uidInt,
-        providerInfo, sIndexHandle);
-    providerInfo.m_userid = processInfo.userIdInt;
+    ret = HksRemoteHandleManager::GetInstanceWrapper()->ParseAndValidateIndex(index,
+        processAndError.processInfo->uidInt, providerInfo, sIndexHandle);
+    providerInfo.m_userid = processAndError.processInfo->userIdInt;
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ParseAndValidateIndex failed: %" LOG_PUBLIC "d", ret)
 
     std::string sessionHandle;
@@ -118,12 +118,15 @@ int32_t HksSessionManager::ExtensionInitSession(const HksProcessInfo &processInf
     ret = HksRemoteHandleManager::GetInstanceWrapper()->GetProviderProxy(providerInfo, proxy);
     HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NOT_EXIST, "GetProviderProxy proxy is null")
     CppParamSet newParamSet(paramSet);
-    HKS_IF_TRUE_LOGE_RETURN(!CheckAndAppendProcessInfo(newParamSet, processInfo), HKS_ERROR_INVALID_ARGUMENT,
-        "CheckAndAppendProcessInfo failed")
-    auto ipcCode = proxy->InitSession(sIndexHandle, newParamSet, sessionHandle, ret);
+    HKS_IF_TRUE_LOGE_RETURN(!CheckAndAppendProcessInfo(newParamSet, *processAndError.processInfo),
+        HKS_ERROR_INVALID_ARGUMENT, "CheckAndAppendProcessInfo failed")
+    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, ""};
+    auto ipcCode = proxy->InitSession(sIndexHandle, newParamSet, sessionHandle, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy InitSession ipcCode: %" LOG_PUBLIC "d",
         ipcCode)
-    ret = ConvertExtensionToHksErrorCode(ret, g_initSessionErrCodeMapping);
+    HKS_IF_TRUE_EXCU(errorInfo.errVal != EXTENSION_SUCCESS,
+        processAndError.errInfo = HksCreateExternalErrorInfo(errorInfo.errVal, errorInfo.errorDesc.c_str()));
+    ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_initSessionErrCodeMapping);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "proxy InitSession get handle failed: %" LOG_PUBLIC "d", ret)
 
     auto random = GenRandomUint32();
@@ -131,17 +134,17 @@ int32_t HksSessionManager::ExtensionInitSession(const HksProcessInfo &processInf
         "GenRandomUint32 failed. ret: %" LOG_PUBLIC "d", random.first)
 
     handle = random.second;
-    HandleInfo handleInfo{sessionHandle, providerInfo, processInfo.uidInt, index};
+    HandleInfo handleInfo{sessionHandle, providerInfo, processAndError.processInfo->uidInt, index};
     m_handlers.Insert(handle, handleInfo);
     return HKS_SUCCESS;
 }
-int32_t HksSessionManager::ExtensionUpdateSession(const HksProcessInfo &processInfo,
+int32_t HksSessionManager::ExtensionUpdateSession(struct HksProcessWithErrorInfo &processAndError,
     const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
     std::vector<uint8_t> &outData)
 {
     HandleInfo handleInfo;
     HKS_LOG_I("ExtensionUpdateSession handle: %" LOG_PUBLIC "u", handle);
-    int32_t ret = HksGetHandleInfo(processInfo, handle, handleInfo);
+    int32_t ret = HksGetHandleInfo(*processAndError.processInfo, handle, handleInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksGetHandleInfo ret = %" LOG_PUBLIC "d", ret)
 
     sptr<IHuksAccessExtBase> proxy{nullptr};
@@ -149,46 +152,52 @@ int32_t HksSessionManager::ExtensionUpdateSession(const HksProcessInfo &processI
         proxy);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetExtensionProxy failed: %" LOG_PUBLIC "d", ret)
     CppParamSet newParamSet(paramSet);
-    HKS_IF_TRUE_LOGE_RETURN(!CheckAndAppendProcessInfo(newParamSet, processInfo), HKS_ERROR_INVALID_ARGUMENT,
-        "CheckAndAppendProcessInfo failed")
-    auto ipcCode = proxy->UpdateSession(handleInfo.m_skfSessionHandle, newParamSet, inData, outData, ret);
+    HKS_IF_TRUE_LOGE_RETURN(!CheckAndAppendProcessInfo(newParamSet, *processAndError.processInfo),
+        HKS_ERROR_INVALID_ARGUMENT, "CheckAndAppendProcessInfo failed")
+    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, ""};
+    auto ipcCode = proxy->UpdateSession(handleInfo.m_skfSessionHandle, newParamSet, inData, outData, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy UpdateSession ipcCode: %" LOG_PUBLIC "d",
         ipcCode)
-    ret = ConvertExtensionToHksErrorCode(ret, g_updateSessionErrCodeMapping);
+    HKS_IF_TRUE_EXCU(errorInfo.errVal != EXTENSION_SUCCESS,
+        processAndError.errInfo = HksCreateExternalErrorInfo(errorInfo.errVal, errorInfo.errorDesc.c_str()));
+    ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_updateSessionErrCodeMapping);
     ClearSessionMapByHandle(ret, handle);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "proxy UpdateSession failed: %" LOG_PUBLIC "d", ret)
 
     return HKS_SUCCESS;
 }
-int32_t HksSessionManager::ExtensionFinishSession(const HksProcessInfo &processInfo,
+int32_t HksSessionManager::ExtensionFinishSession(struct HksProcessWithErrorInfo &processAndError,
     const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
     std::vector<uint8_t> &outData)
 {
     HandleInfo handleInfo;
-    int32_t ret = HksGetHandleInfo(processInfo, handle, handleInfo);
+    int32_t ret = HksGetHandleInfo(*processAndError.processInfo, handle, handleInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksGetHandleInfo ret = %" LOG_PUBLIC "d", ret)
 
     sptr<IHuksAccessExtBase> proxy{nullptr};
     ret = HksProviderLifeCycleManager::GetInstanceWrapper()->GetExtensionProxy(handleInfo.m_providerInfo, proxy);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetExtensionProxy failed: %" LOG_PUBLIC "d", ret)
     CppParamSet newParamSet(paramSet);
-    HKS_IF_TRUE_LOGE_RETURN(!CheckAndAppendProcessInfo(newParamSet, processInfo), HKS_ERROR_INVALID_ARGUMENT,
-        "CheckAndAppendProcessInfo failed")
-    auto ipcCode = proxy->FinishSession(handleInfo.m_skfSessionHandle, newParamSet, inData, outData, ret);
+    HKS_IF_TRUE_LOGE_RETURN(!CheckAndAppendProcessInfo(newParamSet, *processAndError.processInfo),
+        HKS_ERROR_INVALID_ARGUMENT, "CheckAndAppendProcessInfo failed")
+    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, ""};
+    auto ipcCode = proxy->FinishSession(handleInfo.m_skfSessionHandle, newParamSet, inData, outData, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy FinishSession ipcCode: %" LOG_PUBLIC "d",
         ipcCode)
-    ret = ConvertExtensionToHksErrorCode(ret, g_finishSessionErrCodeMapping);
+    HKS_IF_TRUE_EXCU(errorInfo.errVal != EXTENSION_SUCCESS,
+        processAndError.errInfo = HksCreateExternalErrorInfo(errorInfo.errVal, errorInfo.errorDesc.c_str()));
+    ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_finishSessionErrCodeMapping);
     ClearSessionMapByHandle(ret, handle);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "FinishSession failed: %" LOG_PUBLIC "d", ret)
     m_handlers.Erase(handle);
     return HKS_SUCCESS;
 }
 
-int32_t HksSessionManager::ExtensionAbortSession(const HksProcessInfo &processInfo,
+int32_t HksSessionManager::ExtensionAbortSession(struct HksProcessWithErrorInfo &processAndError,
     const uint32_t &handle, const CppParamSet &paramSet)
 {
     HandleInfo handleInfo;
-    int32_t ret = HksGetHandleInfo(processInfo, handle, handleInfo);
+    int32_t ret = HksGetHandleInfo(*processAndError.processInfo, handle, handleInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksGetHandleInfo ret = %" LOG_PUBLIC "d", ret)
 
     sptr<IHuksAccessExtBase> proxy{nullptr};
@@ -196,13 +205,16 @@ int32_t HksSessionManager::ExtensionAbortSession(const HksProcessInfo &processIn
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetExtensionProxy failed: %" LOG_PUBLIC "d", ret)
 
     CppParamSet newParamSet(paramSet);
-    HKS_IF_TRUE_LOGE_RETURN(!CheckAndAppendProcessInfo(newParamSet, processInfo), HKS_ERROR_INVALID_ARGUMENT,
-        "CheckAndAppendProcessInfo failed")
+    HKS_IF_TRUE_LOGE_RETURN(!CheckAndAppendProcessInfo(newParamSet, *processAndError.processInfo),
+        HKS_ERROR_INVALID_ARGUMENT, "CheckAndAppendProcessInfo failed")
     std::vector<uint8_t> tmpVec;
-    auto ipcCode = proxy->FinishSession(handleInfo.m_skfSessionHandle, newParamSet, tmpVec, tmpVec, ret);
+    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, ""};
+    auto ipcCode = proxy->FinishSession(handleInfo.m_skfSessionHandle, newParamSet, tmpVec, tmpVec, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL,
         "proxy use CloseRemoteHandle to abort ipcCode: %" LOG_PUBLIC "d", ipcCode)
-    ret = ConvertExtensionToHksErrorCode(ret, g_abortSessionErrCodeMapping);
+    HKS_IF_TRUE_EXCU(errorInfo.errVal != EXTENSION_SUCCESS,
+        processAndError.errInfo = HksCreateExternalErrorInfo(errorInfo.errVal, errorInfo.errorDesc.c_str()));
+    ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_abortSessionErrCodeMapping);
     ClearSessionMapByHandle(ret, handle);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "abort closeRemoteHandle failed: %" LOG_PUBLIC "d", ret)
     m_handlers.Erase(handle);
@@ -230,7 +242,8 @@ void HksSessionManager::ClearSessionHandleMap(std::vector<uint32_t> &toRemove)
         processInfo.uidInt = mInfo.m_uid;
         struct HksParam uid = {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(processInfo.uidInt)};
         CppParamSet paramSet = CppParamSet({uid});
-        (void)ExtensionFinishSession(processInfo, item, paramSet, tmpVec, tmpVec);
+        struct HksProcessWithErrorInfo processAndError = { &processInfo, nullptr };
+        (void)ExtensionFinishSession(processAndError, item, paramSet, tmpVec, tmpVec);
         m_handlers.Erase(item);
     }
 }

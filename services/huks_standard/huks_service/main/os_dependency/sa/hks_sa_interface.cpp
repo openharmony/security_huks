@@ -28,9 +28,12 @@
 #include <securec.h>
 
 #include "hks_dcm_callback_handler.h"
+#include "hks_external_error_info.h"
 #include "hks_log.h"
 #include "hks_template.h"
+#include "hks_type.h"
 #include "huks_service_ipc_interface_code.h"
+#include "hks_mem.h"
 
 namespace OHOS {
 namespace Security {
@@ -147,8 +150,16 @@ void HksProxy::SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &cert
         "Remote()->SendRequest HKS_MSG_ATTEST_KEY_ASYNC_REPLY failed %" LOG_PUBLIC "d", res)
 }
 
+HksExtStub::~HksExtStub()
+{
+    if (mErrInfo != nullptr) {
+        HksFreeExternalErrorInfo(mErrInfo);
+        mErrInfo = nullptr;
+    }
+}
+
 void HksExtStub::SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &sendData, uint32_t sendSize,
-    uint32_t msgCode)
+    uint32_t msgCode, const struct HksExternalErrorInfo *errInfo)
 {
     std::unique_lock<std::mutex> lck(mMutex);
     received = true;
@@ -156,6 +167,11 @@ void HksExtStub::SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &se
     mMsgCode = msgCode;
     mAsyncReply = std::move(sendData);
     mSize = sendSize;
+    if (mErrInfo != nullptr) {
+        HksFreeExternalErrorInfo(mErrInfo);
+        mErrInfo = nullptr;
+    }
+    HKS_IF_TRUE_EXCU(errInfo != nullptr, mErrInfo = HksCreateExternalErrorInfo(errInfo->errVal, errInfo->errorDesc));
     mCv.notify_all();
 }
 
@@ -165,7 +181,8 @@ int HksExtStub::ProcessExtGetRemotePropertyReply(MessageParcel& data)
     uint32_t errCode = 1;
     if (!data.ReadUint32(errCode) || errCode != HKS_SUCCESS) {
         HKS_LOG_E("ipc client read errCode %" LOG_PUBLIC "u", errCode);
-        SendAsyncReply(errCode, receivedData, 0, HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY);
+        struct HksExternalErrorInfo errInfo = {errCode, nullptr, 0};
+        SendAsyncReply(errCode, receivedData, 0, HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY, &errInfo);
         return ERR_INVALID_DATA;
     }
     uint32_t receivedSize = 0;
@@ -187,26 +204,53 @@ int HksExtStub::ProcessExtGetRemotePropertyReply(MessageParcel& data)
         receivedData = std::move(receivedPtr);
         receivedSize = size;
     } while (false);
-    SendAsyncReply(errCode, receivedData, receivedSize, HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY);
+
+    int32_t errVal = 0;
+    if (!data.ReadInt32(errVal)) {
+        HKS_LOG_E("ReadInt32 errVal failed");
+        errVal = errCode;
+    }
+    char *errorDesc = nullptr;
+    uint32_t descLen = 0;
+    if (data.ReadUint32(descLen) && descLen > 0 && descLen < MAX_ERROR_MESSAGE_LEN) {
+        const char *descPtr = reinterpret_cast<const char *>(data.ReadBuffer(descLen));
+        if (descPtr != nullptr) {
+            errorDesc = reinterpret_cast<char *>(HksMalloc(descLen + 1));
+            HKS_IF_TRUE_EXCU(errorDesc != nullptr && memcpy_s(errorDesc, descLen + 1, descPtr, descLen) == EOK,
+                errorDesc[descLen] = '\0');
+        }
+    }
+    struct HksExternalErrorInfo errInfo = {errVal, errorDesc, descLen};
+    SendAsyncReply(errCode, receivedData, receivedSize, HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY, &errInfo);
+    HKS_IF_TRUE_EXCU(errorDesc != nullptr, HKS_FREE(errorDesc));
     return err;
 }
 
-std::tuple<uint32_t, std::unique_ptr<uint8_t[]>, uint32_t, uint32_t> HksExtStub::WaitForAsyncReply(int timeout)
+auto HksExtStub::WaitForAsyncReply(int timeout)
+    -> std::tuple<uint32_t, std::unique_ptr<uint8_t[]>, uint32_t, uint32_t, HksExternalErrorInfo*>
 {
     std::unique_lock<std::mutex> lck(mMutex);
     if (received) {
-        return {mErrCode, std::move(mAsyncReply), mSize, mMsgCode};
+        struct HksExternalErrorInfo *errInfo = mErrInfo;
+        mErrInfo = nullptr;
+        return {mErrCode, std::move(mAsyncReply), mSize, mMsgCode, errInfo};
     }
     mAsyncReply = nullptr;
     mSize = 0;
     mMsgCode = 0;
     mErrCode = HKS_SUCCESS;
+    if (mErrInfo != nullptr) {
+        HksFreeExternalErrorInfo(mErrInfo);
+        mErrInfo = nullptr;
+    }
     HKS_LOG_I("begin wait for async reply");
     if (mCv.wait_for(lck, std::chrono::seconds(timeout)) == std::cv_status::timeout) {
         HKS_LOG_E("WaitForAsyncReply timeout! %" LOG_PUBLIC "u seconds", timeout);
-        return {HKS_ERROR_BAD_STATE, nullptr, 0, 0};
+        return {HKS_ERROR_BAD_STATE, nullptr, 0, 0, nullptr};
     }
-    return {mErrCode, std::move(mAsyncReply), mSize, mMsgCode};
+    struct HksExternalErrorInfo *errInfo = mErrInfo;
+    mErrInfo = nullptr;
+    return {mErrCode, std::move(mAsyncReply), mSize, mMsgCode, errInfo};
 }
 
 int HksExtStub::OnRemoteRequest(uint32_t code,
@@ -232,8 +276,24 @@ HksExtProxy::HksExtProxy(const sptr<IRemoteObject> &impl)
 {
 }
 
+void HksExtProxy::WriteErrorInfoToParcel(MessageParcel &data, const struct HksExternalErrorInfo *errInfo)
+{
+    int32_t errVal = (errInfo != nullptr) ? errInfo->errVal : 0;
+    uint32_t descLen = (errInfo != nullptr && errInfo->errorDesc != nullptr) ? errInfo->errorDescLen : 0;
+    const char *errorDesc = (errInfo != nullptr && errInfo->errorDesc != nullptr) ? errInfo->errorDesc : "";
+
+    bool writeResult = data.WriteInt32(errVal);
+    HKS_IF_NOT_TRUE_LOGE(writeResult, "WriteInt32 errVal %" LOG_PUBLIC "d failed", errVal)
+    writeResult = data.WriteUint32(descLen);
+    HKS_IF_NOT_TRUE_LOGE(writeResult, "WriteUint32 descLen %" LOG_PUBLIC "u failed", descLen)
+    if (descLen > 0 && descLen < MAX_ERROR_MESSAGE_LEN) {
+        writeResult = data.WriteBuffer(errorDesc, descLen);
+        HKS_IF_NOT_TRUE_LOGE(writeResult, "WriteBuffer errorDesc failed")
+    }
+}
+
 void HksExtProxy::SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &sendData, uint32_t sendSize,
-    uint32_t msgCode)
+    uint32_t msgCode, const struct HksExternalErrorInfo *errInfo)
 {
     HKS_IF_NULL_LOGE_RETURN_VOID(Remote(), "Remote() is nullptr! Would not SendRequest!")
     MessageParcel data;
@@ -245,6 +305,7 @@ void HksExtProxy::SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &s
     writeResult = data.WriteUint32(errCode);
     HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(writeResult, "WriteUint32 errCode %" LOG_PUBLIC "u failed %" LOG_PUBLIC "d",
         errCode, writeResult)
+
     if (errCode != HKS_SUCCESS) {
         HKS_LOG_E("ukey callback fail errCode %" LOG_PUBLIC "u", errCode);
         int res = Remote()->SendRequest(msgCode, data, reply, option);
@@ -256,17 +317,17 @@ void HksExtProxy::SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &s
         sendSize, writeResult)
     if (sendSize == 0 || sendData == nullptr) {
         HKS_LOG_E("ukey reply success but empty sendData %" LOG_PUBLIC "u", sendSize);
+        WriteErrorInfoToParcel(data, errInfo);
         int res = Remote()->SendRequest(msgCode, data, reply, option);
-        HKS_IF_TRUE_LOGE(res != ERR_OK,
-            "Remote()->SendRequest failed %" LOG_PUBLIC "d", res)
+        HKS_IF_TRUE_LOGE(res != ERR_OK, "Remote()->SendRequest failed %" LOG_PUBLIC "d", res)
         return;
     }
     writeResult = data.WriteBuffer(sendData.get(), sendSize);
     HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(writeResult, "WriteBuffer size %" LOG_PUBLIC "u failed %" LOG_PUBLIC "d",
         sendSize, writeResult)
+    WriteErrorInfoToParcel(data, errInfo);
     int res = Remote()->SendRequest(msgCode, data, reply, option);
-    HKS_IF_TRUE_LOGE(res != ERR_OK,
-        "Remote()->SendRequest failed %" LOG_PUBLIC "d", res)
+    HKS_IF_TRUE_LOGE(res != ERR_OK, "Remote()->SendRequest failed %" LOG_PUBLIC "d", res)
 }
 
 } // namespace Hks

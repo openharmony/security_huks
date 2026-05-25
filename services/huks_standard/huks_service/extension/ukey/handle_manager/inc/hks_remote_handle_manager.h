@@ -30,6 +30,7 @@
 #include "hks_json_wrapper.h"
 #include "hks_ukey_common.h"
 #include "hks_ext_cert_info.h"
+#include "hks_external_error_info.h"
 namespace OHOS {
 namespace Security {
 namespace Huks {
@@ -212,40 +213,41 @@ public:
     static void ReleaseInstance();
     // handle manager
     int32_t CreateRemoteHandle(const HksProcessInfo &processInfo, const std::string &index,
-        const CppParamSet &paramSet);
+        const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo);
     int32_t CloseRemoteHandle(const HksProcessInfo &processInfo, const std::string &index,
-        const CppParamSet &paramSet);
+        const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo);
     // ukey PIN manager
     int32_t RemoteVerifyPin(const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet,
-        int32_t &authState, uint32_t &retryCnt);
+        struct HksExtAuthPinOutParam &authOutParam, struct HksExternalErrorInfo **errInfo);
     int32_t RemoteVerifyPinStatus(const HksProcessInfo &processInfo,
-        const std::string &index, const CppParamSet &paramSet, int32_t &state);
+        const std::string &index, const CppParamSet &paramSet, int32_t &state, struct HksExternalErrorInfo **errInfo);
     int32_t RemoteClearPinStatus(const HksProcessInfo &processInfo, const std::string &index,
-        const CppParamSet &paramSet);
+        const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo);
     int32_t CheckAuthStateIsOk(const HksProcessInfo &processInfo, const std::string &index);
     //certificate query
     int32_t FindRemoteCertificate(const HksProcessInfo &processInfo, const std::string &index,
-        const CppParamSet &paramSet, std::string &certificatesOut);
+        const CppParamSet &paramSet, std::string &certificatesOut, struct HksExternalErrorInfo **errInfo);
     int32_t FindRemoteAllCertificate(const HksProcessInfo &processInfo,
-        const std::string &providerName, const CppParamSet &paramSet, std::string &certificatesOut);
+        const std::string &providerName, const CppParamSet &paramSet, std::string &certificatesOut,
+        struct HksExternalErrorInfo **errInfo);
     //certificate import
     int32_t ImportRemoteCertificate(const HksProcessInfo &processInfo, const std::string &index,
-        const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet);
+        const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo);
     int32_t MergeProviderCertificates(const ProviderInfo &providerInfo, const std::string &providerCertVec,
         CommJsonObject &combinedArray);
 
-    int32_t SetOrGetRemoteProperty(const HksProcessInfo &processInfo,
-        enum HksExtPropertyOperation operation, const std::string &index,
-        const std::string &propertyId, CppParamSet &paramSet);
-    int32_t RemoteExportPublicKey(const HksProcessInfo &processInfo, const std::string &index,
+    int32_t SetOrGetRemoteProperty(struct HksProcessWithErrorInfo &processAndError,
+        enum HksExtPropertyOperation operation, const std::string &index, const std::string &propertyId,
+        CppParamSet &paramSet);
+    int32_t RemoteExportPublicKey(struct HksProcessWithErrorInfo &processAndError, const std::string &index,
         const CppParamSet &paramSet, std::vector<uint8_t> &outData);
-    int32_t RemoteImportWrappedKey(const HksProcessInfo &processInfo, const std::string &index,
+    int32_t RemoteImportWrappedKey(struct HksProcessWithErrorInfo &processAndError, const std::string &index,
         const std::string &wrappingKeyIndex, const CppParamSet &paramSet, const std::vector<uint8_t> &wrappedData);
-    int32_t ExtensionGenerateKey(const HksProcessInfo &processInfo, const std::string &index,
+    int32_t ExtensionGenerateKey(struct HksProcessWithErrorInfo &processAndError, const std::string &index,
         const CppParamSet &paramSet);
     
     int32_t GetResourceId(const HksProcessInfo &processInfo, const std::string &providerName,
-        const CppParamSet &paramSet, std::string &resourceId);
+        const CppParamSet &paramSet, std::string &resourceId, struct HksExternalErrorInfo **errInfo);
 
     int32_t ClearUidIndexMap(const ProviderInfo &providerInfo);
     void ClearAuthState(const HksProcessInfo &processInfo);

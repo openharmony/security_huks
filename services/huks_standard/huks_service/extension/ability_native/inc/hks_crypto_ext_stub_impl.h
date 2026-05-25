@@ -22,6 +22,7 @@
 #include "huks_access_ext_base_stub.h"
 #include "hks_crypto_ext_ability.h"
 #include "hks_ext_cert_info.h"
+#include "hks_ext_error_info.h"
 
 namespace OHOS {
 namespace Security {
@@ -37,17 +38,17 @@ public:
         const std::string& index,
         const CppParamSet& params,
         std::string& handle,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode CloseRemoteHandle(
         const std::string& handle,
         const CppParamSet& params,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode AuthUkeyPin(
         const std::string& handle,
         const CppParamSet& params,
-        int32_t& errcode,
+        HksExternalErrorInfoIdl& errorInfo,
         int32_t& authState,
         uint32_t& retryCnt) override;
 
@@ -55,79 +56,79 @@ public:
         const std::string& handle,
         const CppParamSet& params,
         int32_t& state,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode ExportCertificate(
         const std::string& index,
         const CppParamSet& params,
         std::string& certJsonArr,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode ExportProviderCertificates(
         const CppParamSet& params,
         std::string& certJsonArr,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode ImportCertificate(
         const std::string& index,
         const HksExtCertInfoIdl& certInfo,
         const CppParamSet& params,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode InitSession(
         const std::string& index,
         const CppParamSet& params,
         std::string& handle,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode GenerateKey(
         const std::string& index,
         const CppParamSet& params,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode UpdateSession(
         const std::string& handle,
         const CppParamSet& params,
         const std::vector<uint8_t>& inData,
         std::vector<uint8_t>& outData,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode FinishSession(
         const std::string& handle,
         const CppParamSet& params,
         const std::vector<uint8_t>& inData,
         std::vector<uint8_t>& outData,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode SetOrGetProperty(
         uint32_t operation,
         const std::string& handle,
         const std::string& propertyId,
         CppParamSet& params,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
     
     ErrCode ClearUkeyPinAuthState(
         const std::string& handle,
         const CppParamSet& params,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode ImportWrappedKey(
         const std::string& index,
         const std::string& wrappingKeyIndex,
         const CppParamSet& params,
         const std::vector<uint8_t>& wrappedData,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode ExportPublicKey(
         const std::string& index,
         const CppParamSet& params,
         std::vector<uint8_t>& outData,
-        int32_t& errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 
     ErrCode GetResourceId(
         const CppParamSet &params,
         std::string &resourceId,
-        int32_t &errcode) override;
+        HksExternalErrorInfoIdl& errorInfo) override;
 private:
     std::shared_ptr<HksCryptoExtAbility> extension_;
 };

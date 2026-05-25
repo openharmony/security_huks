@@ -26,6 +26,7 @@
 #include "hks_template.h"
 #include "hks_type.h"
 #include "huks_service_ipc_interface_code.h"
+#include "hks_external_error_info.h"
 
 using namespace OHOS;
 
@@ -84,8 +85,19 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
         HKS_IF_NULL_LOGE_RETURN(errMsg, ret, "[ipc error] read errorMsg")
         HksAppendThreadErrMsg(errMsg, errMsgLen);
     }
-#endif
 
+    int32_t errVal = 0;
+    HKS_IF_NOT_TRUE_LOGE_RETURN(reply.ReadInt32(errVal), ret, "ReadInt32 errVal failed")
+    uint32_t descLen = 0;
+    HKS_IF_NOT_TRUE_LOGE_RETURN(reply.ReadUint32(descLen), ret, "ReadUint32 descLen failed")
+    const char *errorDesc = "";
+    if (descLen != 0 && descLen < MAX_EXT_ERROR_MESSAGE_LEN) {
+        const uint8_t *buffer = reply.ReadBuffer(descLen);
+        HKS_IF_NULL_LOGE_RETURN(buffer, ret, "ReadBuffer errorDesc failed")
+        errorDesc = (const char *)buffer;
+    }
+    HksAppendThreadExtErrMsg(errVal, errorDesc);
+#endif
     return ret;
 }
 
@@ -160,7 +172,7 @@ static int32_t HksExtSendAsyncMessage(MessageParcel &data, const struct HksParam
         timeout = val;
     }
 
-    auto [errCode, receivedData, receivedSize, receivedCode] = hksCallback->WaitForAsyncReply(timeout);
+    auto [errCode, receivedData, receivedSize, receivedCode, errInfo] = hksCallback->WaitForAsyncReply(timeout);
     if (errCode != HKS_SUCCESS || receivedData == nullptr || receivedSize == 0 || receivedCode != msgCode) {
         HKS_LOG_E("async fail errCode=%" LOG_PUBLIC "u size=%" LOG_PUBLIC "u code=%" LOG_PUBLIC "u",
             errCode, receivedSize, receivedCode);
@@ -175,6 +187,11 @@ static int32_t HksExtSendAsyncMessage(MessageParcel &data, const struct HksParam
         outBlob->size, receivedSize);
 
     outBlob->size = receivedSize;
+
+    if (errInfo != nullptr) {
+        HKS_IF_TRUE_EXCU(errInfo->errVal != 0, HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
+        HksFreeExternalErrorInfo(errInfo);
+    }
     return HKS_SUCCESS;
 }
 

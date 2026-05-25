@@ -15,124 +15,184 @@
 
 #include "hks_crypto_ext_stub_impl.h"
 #include "hks_cpp_paramset.h"
+#include "hks_external_error_info.h"
 #include "log_utils.h"
+
 namespace OHOS {
 namespace Security {
 namespace Huks {
+
+static void SetErrorInfoFromC(struct HksExternalErrorInfo *errInfoC, int32_t ret, HksExternalErrorInfoIdl& errorInfo)
+{
+    if (errInfoC != nullptr) {
+        errorInfo.errVal = errInfoC->errVal;
+        errorInfo.errorDesc = errInfoC->errorDesc != nullptr ? errInfoC->errorDesc : "";
+        HksFreeExternalErrorInfo(errInfoC);
+        return;
+    }
+    errorInfo.errVal = ret;
+    errorInfo.errorDesc.assign("");
+}
+
 ErrCode HksCryptoExtStubImpl::OpenRemoteHandle(
     const std::string& index,
     const CppParamSet& params,
     std::string& handle,
-    int32_t& errcode)
+    HksExternalErrorInfoIdl& errorInfo)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
+        errorInfo.errVal = HKS_ERROR_EXT_NULLPTR;
+        errorInfo.errorDesc.assign("HUKS internal error");
         return HKS_ERROR_EXT_NULLPTR;
     }
-    return extension_->OpenRemoteHandle(index, params, handle, errcode);
+    struct HksExternalErrorInfo *errInfoC = nullptr;
+    int32_t ret = extension_->OpenRemoteHandle(index, params, handle, &errInfoC);
+    SetErrorInfoFromC(errInfoC, ret, errorInfo);
+    return ret;
 }
 
 ErrCode HksCryptoExtStubImpl::CloseRemoteHandle(
     const std::string& handle,
     const CppParamSet& params,
-    int32_t& errcode)
+    HksExternalErrorInfoIdl& errorInfo)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
+        errorInfo.errVal = HKS_ERROR_EXT_NULLPTR;
+        errorInfo.errorDesc.assign("HUKS internal error");
         return HKS_ERROR_EXT_NULLPTR;
     }
-    return extension_->CloseRemoteHandle(handle, params, errcode);
+    struct HksExternalErrorInfo *errInfoC = nullptr;
+    int32_t ret = extension_->CloseRemoteHandle(handle, params, &errInfoC);
+    SetErrorInfoFromC(errInfoC, ret, errorInfo);
+    return ret;
 }
 
 ErrCode HksCryptoExtStubImpl::AuthUkeyPin(
     const std::string& handle,
     const CppParamSet& params,
-    int32_t& errcode,
+    HksExternalErrorInfoIdl& errorInfo,
     int32_t& authState,
     uint32_t& retryCnt)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
+        errorInfo.errVal = HKS_ERROR_EXT_NULLPTR;
+        errorInfo.errorDesc.assign("HUKS internal error");
         return HKS_ERROR_EXT_NULLPTR;
     }
-    return extension_->AuthUkeyPin(handle, params, errcode, authState, retryCnt);
+    struct HksExternalErrorInfo *errInfoC = nullptr;
+    int32_t ret = extension_->AuthUkeyPin(handle, params, &errInfoC, authState, retryCnt);
+    SetErrorInfoFromC(errInfoC, ret, errorInfo);
+    return ret;
 }
 
 ErrCode HksCryptoExtStubImpl::GetUkeyPinAuthState(
     const std::string& handle,
     const CppParamSet& params,
     int32_t& state,
-    int32_t& errcode)
+    HksExternalErrorInfoIdl& errorInfo)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
+        errorInfo.errVal = HKS_ERROR_EXT_NULLPTR;
+        errorInfo.errorDesc.assign("HUKS internal error");
         return HKS_ERROR_EXT_NULLPTR;
     }
     state = 0;
-    return extension_->GetUkeyPinAuthState(handle, params, state, errcode);
+    struct HksExternalErrorInfo *errInfoC = nullptr;
+    int32_t ret = extension_->GetUkeyPinAuthState(handle, params, state, &errInfoC);
+    SetErrorInfoFromC(errInfoC, ret, errorInfo);
+    return ret;
 }
 
 ErrCode HksCryptoExtStubImpl::ExportCertificate(
     const std::string& index,
     const CppParamSet& params,
     std::string& certJsonArr,
-    int32_t& errcode)
+    HksExternalErrorInfoIdl& errorInfo)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
+        errorInfo.errVal = HKS_ERROR_EXT_NULLPTR;
+        errorInfo.errorDesc.assign("HUKS internal error");
         return HKS_ERROR_EXT_NULLPTR;
     }
-    return extension_->ExportCertificate(index, params, certJsonArr, errcode);
+    struct HksExternalErrorInfo *errInfoC = nullptr;
+    int32_t ret = extension_->ExportCertificate(index, params, certJsonArr, &errInfoC);
+    SetErrorInfoFromC(errInfoC, ret, errorInfo);
+    return ret;
 }
 
 ErrCode HksCryptoExtStubImpl::ExportProviderCertificates(
     const CppParamSet& params,
     std::string& certJsonArr,
-    int32_t& errcode)
+    HksExternalErrorInfoIdl& errorInfo)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
+        errorInfo.errVal = HKS_ERROR_EXT_NULLPTR;
+        errorInfo.errorDesc.assign("HUKS internal error");
         return HKS_ERROR_EXT_NULLPTR;
     }
-    return extension_->ExportProviderCertificates(params, certJsonArr, errcode);
+    struct HksExternalErrorInfo *errInfoC = nullptr;
+    int32_t ret = extension_->ExportProviderCertificates(params, certJsonArr, &errInfoC);
+    SetErrorInfoFromC(errInfoC, ret, errorInfo);
+    return ret;
 }
 
 ErrCode HksCryptoExtStubImpl::ImportCertificate(
     const std::string& index,
     const HksExtCertInfoIdl& certInfo,
     const CppParamSet& params,
-    int32_t& errcode)
+    HksExternalErrorInfoIdl& errorInfo)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
+        errorInfo.errVal = HKS_ERROR_EXT_NULLPTR;
+        errorInfo.errorDesc.assign("HUKS internal error");
         return HKS_ERROR_EXT_NULLPTR;
     }
-    return extension_->ImportCertificate(index, certInfo, params, errcode);
+    struct HksExternalErrorInfo *errInfoC = nullptr;
+    int32_t ret = extension_->ImportCertificate(index, certInfo, params, &errInfoC);
+    SetErrorInfoFromC(errInfoC, ret, errorInfo);
+    return ret;
 }
 
 ErrCode HksCryptoExtStubImpl::InitSession(
     const std::string& index,
     const CppParamSet& params,
     std::string& handle,
-    int32_t& errcode)
+    HksExternalErrorInfoIdl& errorInfo)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
+        errorInfo.errVal = HKS_ERROR_EXT_NULLPTR;
+        errorInfo.errorDesc.assign("HUKS internal error");
         return HKS_ERROR_EXT_NULLPTR;
     }
-    return extension_->InitSession(index, params, handle, errcode);
+    struct HksExternalErrorInfo *errInfoC = nullptr;
+    int32_t ret = extension_->InitSession(index, params, handle, &errInfoC);
+    SetErrorInfoFromC(errInfoC, ret, errorInfo);
+    return ret;
 }
 
 ErrCode HksCryptoExtStubImpl::GenerateKey(
     const std::string& index,
     const CppParamSet& params,
-    int32_t& errcode)
+    HksExternalErrorInfoIdl& errorInfo)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
+        errorInfo.errVal = HKS_ERROR_EXT_NULLPTR;
+        errorInfo.errorDesc.assign("HUKS internal error");
         return HKS_ERROR_EXT_NULLPTR;
     }
-    return extension_->GenerateKey(index, params, errcode);
+    struct HksExternalErrorInfo *errInfoC = nullptr;
+    int32_t ret = extension_->GenerateKey(index, params, &errInfoC);
+    SetErrorInfoFromC(errInfoC, ret, errorInfo);
+    return ret;
 }
 
 ErrCode HksCryptoExtStubImpl::UpdateSession(
@@ -140,13 +200,18 @@ ErrCode HksCryptoExtStubImpl::UpdateSession(
     const CppParamSet& params,
     const std::vector<uint8_t>& inData,
     std::vector<uint8_t>& outData,
-    int32_t& errcode)
+    HksExternalErrorInfoIdl& errorInfo)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
+        errorInfo.errVal = HKS_ERROR_EXT_NULLPTR;
+        errorInfo.errorDesc.assign("HUKS internal error");
         return HKS_ERROR_EXT_NULLPTR;
     }
-    return extension_->UpdateSession(handle, params, inData, outData, errcode);
+    struct HksExternalErrorInfo *errInfoC = nullptr;
+    int32_t ret = extension_->UpdateSession(handle, params, inData, outData, &errInfoC);
+    SetErrorInfoFromC(errInfoC, ret, errorInfo);
+    return ret;
 }
 
 ErrCode HksCryptoExtStubImpl::FinishSession(
@@ -154,13 +219,18 @@ ErrCode HksCryptoExtStubImpl::FinishSession(
     const CppParamSet& params,
     const std::vector<uint8_t>& inData,
     std::vector<uint8_t>& outData,
-    int32_t& errcode)
+    HksExternalErrorInfoIdl& errorInfo)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
+        errorInfo.errVal = HKS_ERROR_EXT_NULLPTR;
+        errorInfo.errorDesc.assign("HUKS internal error");
         return HKS_ERROR_EXT_NULLPTR;
     }
-    return extension_->FinishSession(handle, params, inData, outData, errcode);
+    struct HksExternalErrorInfo *errInfoC = nullptr;
+    int32_t ret = extension_->FinishSession(handle, params, inData, outData, &errInfoC);
+    SetErrorInfoFromC(errInfoC, ret, errorInfo);
+    return ret;
 }
 
 ErrCode HksCryptoExtStubImpl::SetOrGetProperty(
@@ -168,25 +238,35 @@ ErrCode HksCryptoExtStubImpl::SetOrGetProperty(
     const std::string& handle,
     const std::string& propertyId,
     CppParamSet& params,
-    int32_t& errcode)
+    HksExternalErrorInfoIdl& errorInfo)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
+        errorInfo.errVal = HKS_ERROR_EXT_NULLPTR;
+        errorInfo.errorDesc.assign("HUKS internal error");
         return HKS_ERROR_EXT_NULLPTR;
     }
-    return extension_->SetOrGetProperty(operation, handle, propertyId, params, errcode);
+    struct HksExternalErrorInfo *errInfoC = nullptr;
+    int32_t ret = extension_->SetOrGetProperty(operation, handle, propertyId, params, &errInfoC);
+    SetErrorInfoFromC(errInfoC, ret, errorInfo);
+    return ret;
 }
 
 ErrCode HksCryptoExtStubImpl::ClearUkeyPinAuthState(
     const std::string& handle,
     const CppParamSet& params,
-    int32_t& errcode)
+    HksExternalErrorInfoIdl& errorInfo)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
+        errorInfo.errVal = HKS_ERROR_EXT_NULLPTR;
+        errorInfo.errorDesc.assign("HUKS internal error");
         return HKS_ERROR_EXT_NULLPTR;
     }
-    return extension_->ClearUkeyPinAuthState(handle, params, errcode);
+    struct HksExternalErrorInfo *errInfoC = nullptr;
+    int32_t ret = extension_->ClearUkeyPinAuthState(handle, params, &errInfoC);
+    SetErrorInfoFromC(errInfoC, ret, errorInfo);
+    return ret;
 }
 
 ErrCode HksCryptoExtStubImpl::ImportWrappedKey(
@@ -194,38 +274,53 @@ ErrCode HksCryptoExtStubImpl::ImportWrappedKey(
     const std::string& wrappingKeyIndex,
     const CppParamSet& params,
     const std::vector<uint8_t>& wrappedData,
-    int32_t& errcode)
+    HksExternalErrorInfoIdl& errorInfo)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
+        errorInfo.errVal = HKS_ERROR_EXT_NULLPTR;
+        errorInfo.errorDesc.assign("HUKS internal error");
         return HKS_ERROR_EXT_NULLPTR;
     }
-    return extension_->ImportWrappedKey(index, wrappingKeyIndex, params, wrappedData, errcode);
+    struct HksExternalErrorInfo *errInfoC = nullptr;
+    int32_t ret = extension_->ImportWrappedKey(index, wrappingKeyIndex, params, wrappedData, &errInfoC);
+    SetErrorInfoFromC(errInfoC, ret, errorInfo);
+    return ret;
 }
 
 ErrCode HksCryptoExtStubImpl::ExportPublicKey(
     const std::string& index,
     const CppParamSet& params,
     std::vector<uint8_t>& outData,
-    int32_t& errcode)
+    HksExternalErrorInfoIdl& errorInfo)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
+        errorInfo.errVal = HKS_ERROR_EXT_NULLPTR;
+        errorInfo.errorDesc.assign("HUKS internal error");
         return HKS_ERROR_EXT_NULLPTR;
     }
-    return extension_->ExportPublicKey(index, params, outData, errcode);
+    struct HksExternalErrorInfo *errInfoC = nullptr;
+    int32_t ret = extension_->ExportPublicKey(index, params, outData, &errInfoC);
+    SetErrorInfoFromC(errInfoC, ret, errorInfo);
+    return ret;
 }
 
 ErrCode HksCryptoExtStubImpl::GetResourceId(
     const CppParamSet &params,
     std::string &resourceId,
-    int32_t &errcode)
+    HksExternalErrorInfoIdl& errorInfo)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
+        errorInfo.errVal = HKS_ERROR_EXT_NULLPTR;
+        errorInfo.errorDesc.assign("HUKS internal error");
         return HKS_ERROR_EXT_NULLPTR;
     }
-    return extension_->GetResourceId(params, resourceId, errcode);
+    struct HksExternalErrorInfo *errInfoC = nullptr;
+    int32_t ret = extension_->GetResourceId(params, resourceId, &errInfoC);
+    SetErrorInfoFromC(errInfoC, ret, errorInfo);
+    return ret;
 }
 
 } // namespace Huks

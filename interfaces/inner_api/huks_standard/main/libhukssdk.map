@@ -82,5 +82,9 @@
     HksGetResourceId;
     HksEncapsulate;
     HksDecapsulate;
+    HksGetUkeyGlobalErrVal;
+    HksGetUkeyGlobalErrorDesc;
+    HksSetUkeyGlobalInfo;
+    HksClearUkeyGlobalInfo;
   local: *;
 };

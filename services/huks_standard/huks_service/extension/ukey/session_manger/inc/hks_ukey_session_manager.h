@@ -45,15 +45,15 @@ class HksSessionManager : private OHOS::DelayedSingleton<HksSessionManager> {
 public:
     static std::shared_ptr<HksSessionManager> GetInstanceWrapper();
     static void ReleaseInstance();
-    int32_t ExtensionInitSession(const HksProcessInfo &processInfo,
+    int32_t ExtensionInitSession(struct HksProcessWithErrorInfo &processAndError,
         const std::string &index, const CppParamSet &paramSet, uint32_t &handle);
-    int32_t ExtensionUpdateSession(const HksProcessInfo &processInfo,
+    int32_t ExtensionUpdateSession(struct HksProcessWithErrorInfo &processAndError,
         const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
         std::vector<uint8_t> &outData);
-    int32_t ExtensionFinishSession(const HksProcessInfo &processInfo,
+    int32_t ExtensionFinishSession(struct HksProcessWithErrorInfo &processAndError,
         const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
         std::vector<uint8_t> &outData);
-    int32_t ExtensionAbortSession(const HksProcessInfo &processInfo,
+    int32_t ExtensionAbortSession(struct HksProcessWithErrorInfo &processAndError,
         const uint32_t &handle, const CppParamSet &paramSet);
     bool HksClearHandle(const HksProcessInfo &processInfo, const CppParamSet &paramSet);
     void HksClearHandle(const ProviderInfo &providerInfo);

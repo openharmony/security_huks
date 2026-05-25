@@ -25,6 +25,8 @@
 #include "hks_type.h"
 #include "huks_napi_common_item.h"
 #include "hks_template.h"
+#include "hks_external_error_info.h"
+#include "hks_ukey_global_errInfo.h"
 
 namespace HuksNapiItem {
 namespace {
@@ -754,6 +756,52 @@ napi_value HuksNapiCloseResource(napi_env env, napi_callback_info info)
 {
     return HandleResourceOperation<ResourceContext>(
         env, info, CallHksResourceOp, __func__, false);
+}
+
+static napi_value CreateExtErrorInfoObject(napi_env env, int32_t errVal, const char *errorDesc)
+{
+    napi_value result = nullptr;
+    napi_status status = napi_create_object(env, &result);
+    if (status != napi_ok) {
+        HKS_LOG_E("Create ext error info object failed");
+        return nullptr;
+    }
+
+    napi_value errnoValue = nullptr;
+    status = napi_create_int32(env, errVal, &errnoValue);
+    if (status != napi_ok) {
+        HKS_LOG_E("Create errno value failed");
+        return nullptr;
+    }
+
+    status = napi_set_named_property(env, result, "errno", errnoValue);
+    if (status != napi_ok) {
+        HKS_LOG_E("Set errno property failed");
+        return nullptr;
+    }
+
+    const char *desc = (errorDesc != nullptr && errorDesc[0] != '\0') ? errorDesc : "";
+    napi_value errorDescValue = nullptr;
+    status = napi_create_string_utf8(env, desc, NAPI_AUTO_LENGTH, &errorDescValue);
+    if (status != napi_ok) {
+        HKS_LOG_E("Create errorDesc value failed");
+        return nullptr;
+    }
+    status = napi_set_named_property(env, result, "errorDesc", errorDescValue);
+    if (status != napi_ok) {
+        HKS_LOG_E("Set errorDesc property failed");
+        return nullptr;
+    }
+    HKS_LOG_I("HuksNapiGetExtErrorInfo: errno=%" LOG_PUBLIC "d, errorDesc=%s", errVal, desc);
+    return result;
+}
+
+napi_value HuksNapiGetErrorInfo(napi_env env, napi_callback_info info)
+{
+    int32_t errVal = HksGetUkeyGlobalErrVal();
+    char errorDesc[HKS_UKEY_ERROR_DESC_MAX_LEN] = {0};
+    HksGetUkeyGlobalErrorDesc(errorDesc, sizeof(errorDesc));
+    return CreateExtErrorInfoObject(env, errVal, errorDesc);
 }
 
 }  // namespace HuksNapiItem

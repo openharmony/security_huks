@@ -27,6 +27,7 @@
 #include <string>
 #include <vector>
 #include "hks_template.h"
+#include "hks_external_error_info.h"
 
 constexpr uint32_t MAX_SESSION_INDEX_SIZE = 1024;
 
@@ -45,9 +46,15 @@ int32_t HksServiceOnUkeyGenerateKey(const struct HksProcessInfo *processInfo,
 
     auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
-
-    ret = pluginManager->OnGenerateKey(*processInfo, cppResourceId, cppParamSet);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnGenerateKey fail. ret: %" LOG_PUBLIC "d", ret)
+    
+    struct HksProcessWithErrorInfo processAndError = { processInfo, nullptr };
+    ret = pluginManager->OnGenerateKey(processAndError, cppResourceId, cppParamSet);
+    HKS_IF_TRUE_RETURN(ret == HKS_SUCCESS, HKS_SUCCESS)
+    HKS_LOG_E("OnGenerateKey fail. ret: %" LOG_PUBLIC "d", ret);
+    if (processAndError.errInfo != nullptr) {
+        HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
+        HksFreeExternalErrorInfo(processAndError.errInfo);
+    }
 
     return ret;
 }
@@ -67,8 +74,16 @@ int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, co
     auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
 
-    ret = pluginManager->OnInitSession(*processInfo, cppIndex, cppParamSet, handleU32);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnInitSession fail")
+    struct HksProcessWithErrorInfo processAndError = { processInfo, nullptr };
+    ret = pluginManager->OnInitSession(processAndError, cppIndex, cppParamSet, handleU32);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("OnInitSession fail. ret: %" LOG_PUBLIC "d", ret);
+        if (processAndError.errInfo != nullptr) {
+            HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
+            HksFreeExternalErrorInfo(processAndError.errInfo);
+        }
+        return ret;
+    }
 
     uint64_t handleU64 = static_cast<uint64_t>(handleU32);
     if (handle->size < sizeof(uint64_t)) {
@@ -106,8 +121,16 @@ int32_t HksServiceOnUkeyUpdateSession(const struct HksProcessInfo *processInfo, 
     auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
 
-    int32_t ret = pluginManager->OnUpdateSession(*processInfo, handleU32, cppParamSet, indata, outdata);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnUpdateSession fail. ret: %" LOG_PUBLIC "d", ret)
+    struct HksProcessWithErrorInfo processAndError = { processInfo, nullptr };
+    int32_t ret = pluginManager->OnUpdateSession(processAndError, handleU32, cppParamSet, indata, outdata);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("OnUpdateSession fail. ret: %" LOG_PUBLIC "d", ret);
+        if (processAndError.errInfo != nullptr) {
+            HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
+            HksFreeExternalErrorInfo(processAndError.errInfo);
+        }
+        return ret;
+    }
 
     HKS_IF_TRUE_LOGI_RETURN(outData->size == 0, ret, "outData size is 0. ret: %" LOG_PUBLIC "d", ret);
     HKS_IF_TRUE_LOGI_RETURN(outData->data == nullptr, ret, "outData data is nullptr. ret: %" LOG_PUBLIC "d", ret);
@@ -146,8 +169,16 @@ int32_t HksServiceOnUkeyFinishSession(const struct HksProcessInfo *processInfo, 
     auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
 
-    int32_t ret = pluginManager->OnFinishSession(*processInfo, handleU32, cppParamSet, indata, outdata);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnFinishSession fail")
+    struct HksProcessWithErrorInfo processAndError = { processInfo, nullptr };
+    int32_t ret = pluginManager->OnFinishSession(processAndError, handleU32, cppParamSet, indata, outdata);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("OnFinishSession fail. ret: %" LOG_PUBLIC "d", ret);
+        if (processAndError.errInfo != nullptr) {
+            HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
+            HksFreeExternalErrorInfo(processAndError.errInfo);
+        }
+        return ret;
+    }
 
     HKS_IF_TRUE_LOGI_RETURN(outData->size == 0, ret, "outData size is 0. ret: %" LOG_PUBLIC "d", ret);
     HKS_IF_TRUE_LOGI_RETURN(outData->data == nullptr, ret, "outData data is nullptr. ret: %" LOG_PUBLIC "d", ret);
@@ -179,8 +210,16 @@ int32_t HksServiceOnUkeyAbortSession(const struct HksProcessInfo *processInfo, c
     auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
     CppParamSet cppParamSet(paramSet);
-    int32_t ret = pluginManager->OnAbortSession(*processInfo, handleU32, cppParamSet);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnAbortSession fail. ret = %" LOG_PUBLIC "d", ret)
+    struct HksProcessWithErrorInfo processAndError = { processInfo, nullptr };
+    int32_t ret = pluginManager->OnAbortSession(processAndError, handleU32, cppParamSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("OnAbortSession fail. ret: %" LOG_PUBLIC "d", ret);
+        if (processAndError.errInfo != nullptr) {
+            HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
+            HksFreeExternalErrorInfo(processAndError.errInfo);
+        }
+        return ret;
+    }
     ReportUKeySessionEvent(HKS_EVENT_UKEY_ABORT_SESSION, ret, handle, processInfo, paramSet);
     return ret;
 }
@@ -209,9 +248,16 @@ int32_t HksServiceOnUkeyImportWrappedKey(const struct HksProcessInfo *processInf
     auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
 
-    ret = pluginManager->OnImportWrappedKey(*processInfo, cppIndex, cppWrappingKeyIndex,
+    struct HksProcessWithErrorInfo processAndError = { processInfo, nullptr };
+    ret = pluginManager->OnImportWrappedKey(processAndError, cppIndex, cppWrappingKeyIndex,
         cppParamSet, wrappedData);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnImportWrappedKey fail. ret: %" LOG_PUBLIC "d", ret)
+    HKS_IF_TRUE_RETURN(ret == HKS_SUCCESS, HKS_SUCCESS)
+
+    HKS_LOG_E("OnImportWrappedKey fail. ret: %" LOG_PUBLIC "d", ret);
+    if (processAndError.errInfo != nullptr) {
+        HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
+        HksFreeExternalErrorInfo(processAndError.errInfo);
+    }
     
     return ret;
 }
@@ -234,8 +280,16 @@ int32_t HksServiceOnUkeyExportPublicKey(const struct HksProcessInfo *processInfo
     auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
 
-    ret = pluginManager->OnExportPublicKey(*processInfo, cppIndex, cppParamSet, outdata);
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnExportPublicKey fail. ret: %" LOG_PUBLIC "d", ret)
+    struct HksProcessWithErrorInfo processAndError = { processInfo, nullptr };
+    ret = pluginManager->OnExportPublicKey(processAndError, cppIndex, cppParamSet, outdata);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("OnExportPublicKey fail. ret: %" LOG_PUBLIC "d", ret);
+        if (processAndError.errInfo != nullptr) {
+            HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
+            HksFreeExternalErrorInfo(processAndError.errInfo);
+        }
+        return ret;
+    }
 
     if (key->size < outdata.size()) {
         HKS_LOG_E("exportPublicKey key size too small. size: %" LOG_PUBLIC "u. needSize: %" LOG_PUBLIC "zu",

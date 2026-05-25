@@ -56,6 +56,10 @@ enum LocalRequestCode {
     CODE_SA_UNWRAP_KEY = 5,
     CODE_IMPORT_KEY_STORE = 6,
 };
+struct HksProcessWithErrorInfo {
+    const struct HksProcessInfo *processInfo;
+    struct HksExternalErrorInfo *errInfo;
+};
 
 /**
  * @brief hks base ability interface

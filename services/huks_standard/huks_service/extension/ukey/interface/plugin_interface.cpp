@@ -25,6 +25,7 @@
 #include "hks_ukey_common.h"
 #include <string>
 #include <vector>
+#include "hks_plugin_def.h"
 
 #include "app_observer.h"
 
@@ -108,8 +109,8 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnOpenRemoteHandle(
-    const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet)
+__attribute__((visibility("default"))) int32_t HksExtPluginOnOpenRemoteHandle(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     CppParamSet paramSetWithUid(paramSet);
@@ -124,18 +125,18 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnOpenRemoteHandle(
     RegisterObserverForProcess(processInfo, paramSetWithUid);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
-    auto ret = handleMgr->CreateRemoteHandle(processInfo, index, paramSet);
+    auto ret = handleMgr->CreateRemoteHandle(processInfo, index, paramSet, errInfo);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnCloseRemoteHandle(
-    const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet)
+__attribute__((visibility("default"))) int32_t HksExtPluginOnCloseRemoteHandle(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
-    auto ret = handleMgr->CloseRemoteHandle(processInfo, index, paramSet);
+    auto ret = handleMgr->CloseRemoteHandle(processInfo, index, paramSet, errInfo);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null")
     (void)sessionMgr->HksClearHandle(processInfo, paramSet, index);
@@ -144,7 +145,8 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnCloseRemoteHandle(
 }
 
 __attribute__((visibility("default"))) int32_t HksExtPluginOnAuthUkeyPin(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, int32_t &authState, uint32_t &retryCnt)
+    const std::string &index, const CppParamSet &paramSet, struct HksExtAuthPinOutParam &authOutParam,
+    struct HksExternalErrorInfo **errInfo)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto uid = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
@@ -155,126 +157,128 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnAuthUkeyPin(const H
     }
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
-    auto ret = handleMgr->RemoteVerifyPin(processInfo, index, paramSet, authState, retryCnt);
+    auto ret = handleMgr->RemoteVerifyPin(processInfo, index, paramSet, authOutParam, errInfo);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnGetUkeyPinAuthState(
-    const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet, int32_t &state)
+__attribute__((visibility("default"))) int32_t HksExtPluginOnGetUkeyPinAuthState(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, int32_t &state, struct HksExternalErrorInfo **errInfo)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
-    auto ret = handleMgr->RemoteVerifyPinStatus(processInfo, index, paramSet, state);
+    auto ret = handleMgr->RemoteVerifyPinStatus(processInfo, index, paramSet, state, errInfo);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnExportCerticate(
-    const HksProcessInfo &processInfo, const std::string &index, const CppParamSet &paramSet, std::string &certsJson)
+__attribute__((visibility("default"))) int32_t HksExtPluginOnExportCerticate(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, std::string &certsJson,
+    struct HksExternalErrorInfo **errInfo)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
-    auto ret = handleMgr->FindRemoteCertificate(processInfo, index, paramSet, certsJson);
+    auto ret = handleMgr->FindRemoteCertificate(processInfo, index, paramSet, certsJson, errInfo);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnImportCertificate(
-    const HksProcessInfo &processInfo, const std::string &index,
-    const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet)
+__attribute__((visibility("default"))) int32_t HksExtPluginOnImportCertificate(const HksProcessInfo &processInfo,
+    const std::string &index, const struct HksExtCertInfo &certInfo, const CppParamSet &paramSet,
+    struct HksExternalErrorInfo **errInfo)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
-    auto ret = handleMgr->ImportRemoteCertificate(processInfo, index, certInfo, paramSet);
+    auto ret = handleMgr->ImportRemoteCertificate(processInfo, index, certInfo, paramSet, errInfo);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
 
 __attribute__((visibility("default"))) int32_t HksExtPluginOnExportProviderCerticates(
-    const HksProcessInfo &processInfo, const std::string &providerName,
-    const CppParamSet &paramSet, std::string &certsJsonArr)
+    const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet,
+    std::string &certsJsonArr, struct HksExternalErrorInfo **errInfo)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
-    auto ret = handleMgr->FindRemoteAllCertificate(processInfo, providerName, paramSet, certsJsonArr);
+    auto ret = handleMgr->FindRemoteAllCertificate(processInfo, providerName, paramSet, certsJsonArr, errInfo);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnGenerateKey(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet)
+__attribute__((visibility("default"))) int32_t HksExtPluginOnGenerateKey(
+    struct HksProcessWithErrorInfo &processAndError, const std::string &index, const CppParamSet &paramSet)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
-    auto ret = handleMgr->ExtensionGenerateKey(processInfo, index, paramSet);
+    auto ret = handleMgr->ExtensionGenerateKey(processAndError, index, paramSet);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnInitSession(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, uint32_t &handle)
+__attribute__((visibility("default"))) int32_t HksExtPluginOnInitSession(
+    struct HksProcessWithErrorInfo &processAndError, const std::string &index,
+    const CppParamSet &paramSet, uint32_t &handle)
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     HKS_IF_NOT_TRUE_LOGE_RETURN(CheckParamPurpose(paramSet), HKS_ERROR_INVALID_PURPOSE,
         "InitSession purpose check failed")
-    RegisterObserverForProcess(processInfo, paramSet);
+    RegisterObserverForProcess(*processAndError.processInfo, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null")
-    ret = sessionMgr->ExtensionInitSession(processInfo, index, paramSet, handle);
+    ret = sessionMgr->ExtensionInitSession(processAndError, index, paramSet, handle);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnUpdateSession(const HksProcessInfo &processInfo,
-    const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
-    std::vector<uint8_t> &outData)
+__attribute__((visibility("default"))) int32_t HksExtPluginOnUpdateSession(
+    struct HksProcessWithErrorInfo &processAndError, const uint32_t &handle, const CppParamSet &paramSet,
+    const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData)
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
-    RegisterObserverForProcess(processInfo, paramSet);
+    RegisterObserverForProcess(*processAndError.processInfo, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null")
-    ret = sessionMgr->ExtensionUpdateSession(processInfo, handle, paramSet, inData, outData);
+    ret = sessionMgr->ExtensionUpdateSession(processAndError, handle, paramSet, inData, outData);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnFinishSession(const HksProcessInfo &processInfo,
-    const uint32_t &handle, const CppParamSet &paramSet, const std::vector<uint8_t> &inData,
-    std::vector<uint8_t> &outData)
+__attribute__((visibility("default"))) int32_t HksExtPluginOnFinishSession(
+    struct HksProcessWithErrorInfo &processAndError, const uint32_t &handle, const CppParamSet &paramSet,
+    const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData)
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
-    RegisterObserverForProcess(processInfo, paramSet);
+    RegisterObserverForProcess(*processAndError.processInfo, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null")
-    ret = sessionMgr->ExtensionFinishSession(processInfo, handle, paramSet, inData, outData);
+    ret = sessionMgr->ExtensionFinishSession(processAndError, handle, paramSet, inData, outData);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnAbortSession(const HksProcessInfo &processInfo,
-    const uint32_t &handle, const CppParamSet &paramSet)
+__attribute__((visibility("default"))) int32_t HksExtPluginOnAbortSession(
+    struct HksProcessWithErrorInfo &processAndError, const uint32_t &handle, const CppParamSet &paramSet)
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
-    RegisterObserverForProcess(processInfo, paramSet);
+    RegisterObserverForProcess(*processAndError.processInfo, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null")
-    ret = sessionMgr->ExtensionAbortSession(processInfo, handle, paramSet);
+    ret = sessionMgr->ExtensionAbortSession(processAndError, handle, paramSet);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
 
 __attribute__((visibility("default"))) int32_t HksExtPluginOnClearUkeyPinAuthState(
-    const HksProcessInfo &processInfo, const std::string &index)
+    const HksProcessInfo &processInfo, const std::string &index, struct HksExternalErrorInfo **errInfo)
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
@@ -282,20 +286,20 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnClearUkeyPinAuthSta
     CppParamSet paramSet = CppParamSet({uid});
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
-    ret = handleMgr->RemoteClearPinStatus(processInfo, index, paramSet);
+    ret = handleMgr->RemoteClearPinStatus(processInfo, index, paramSet, errInfo);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
 
 __attribute__((visibility("default"))) int32_t HksExtPluginOnSetOrGetRemoteProperty(
-    const HksProcessInfo &processInfo, enum HksExtPropertyOperation operation,
-    const std::string &index, const std::string &propertyId, CppParamSet &paramSet)
+    struct HksProcessWithErrorInfo &processAndError, enum HksExtPropertyOperation operation, const std::string &index,
+    const std::string &propertyId, CppParamSet &paramSet)
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
-    ret = handleMgr->SetOrGetRemoteProperty(processInfo, operation, index, propertyId, paramSet);
+    ret = handleMgr->SetOrGetRemoteProperty(processAndError, operation, index, propertyId, paramSet);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
@@ -309,35 +313,37 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUnregisterAllObserv
 }
 
 __attribute__((visibility("default"))) int32_t HksExtPluginOnImportWrappedKey(
-    const HksProcessInfo &processInfo, const std::string &index, const std::string &wrappingKeyIndex,
+    struct HksProcessWithErrorInfo &processAndError, const std::string &index, const std::string &wrappingKeyIndex,
     const CppParamSet &paramSet, const std::vector<uint8_t> &wrappedData)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
-    auto ret = handleMgr->RemoteImportWrappedKey(processInfo, index, wrappingKeyIndex, paramSet, wrappedData);
+    auto ret = handleMgr->RemoteImportWrappedKey(processAndError, index, wrappingKeyIndex, paramSet, wrappedData);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnExportPublicKey(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, std::vector<uint8_t> &outData)
+__attribute__((visibility("default"))) int32_t HksExtPluginOnExportPublicKey(
+    struct HksProcessWithErrorInfo &processAndError, const std::string &index, const CppParamSet &paramSet,
+    std::vector<uint8_t> &outData)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
-    auto ret = handleMgr->RemoteExportPublicKey(processInfo, index, paramSet, outData);
+    auto ret = handleMgr->RemoteExportPublicKey(processAndError, index, paramSet, outData);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }
 
 __attribute__((visibility("default"))) int32_t HksExtPluginOnGetResourceId(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet, std::string &resourceId)
+    const std::string &providerName, const CppParamSet &paramSet, std::string &resourceId,
+    struct HksExternalErrorInfo **errInfo)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
-    auto ret = handleMgr->GetResourceId(processInfo, providerName, paramSet, resourceId);
+    auto ret = handleMgr->GetResourceId(processInfo, providerName, paramSet, resourceId, errInfo);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }

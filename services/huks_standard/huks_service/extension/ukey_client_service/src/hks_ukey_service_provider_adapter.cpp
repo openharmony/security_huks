@@ -20,6 +20,7 @@
 #include "hks_cpp_abilityinfo.h"
 #include "hks_sa_interface.h"
 #include "hks_type.h"
+#include "hks_external_error_info.h"
 #include "securec.h"
 #include "hks_cpp_abilityinfo.h"
 
@@ -98,7 +99,7 @@ int32_t HksIpcQueryAbilityInfoAdapter(const struct HksProcessInfo *processInfo, 
 }
 
 int32_t HksIpcCreateRemKeyHandleAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
-    const struct HksParamSet *paramSet)
+    const struct HksParamSet *paramSet, struct HksExternalErrorInfo **errInfo)
 {
     int32_t ret = HksIpcCheckBlob(resourceId, 1, HKS_EXT_MAX_RESOURCE_ID_LEN);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcCreateRemKeyHandleAdapter invalid resourceId blob")
@@ -107,13 +108,13 @@ int32_t HksIpcCreateRemKeyHandleAdapter(const struct HksProcessInfo *processInfo
     CppParamSet cppParamSet(paramSet);
 
     std::string remoteHandle;
-    ret = OHOS::Security::Huks::HksIpcServiceOnCreateRemoteKeyHandle(processInfo, cppresourceId, cppParamSet);
+    ret = OHOS::Security::Huks::HksIpcServiceOnCreateRemoteKeyHandle(processInfo, cppresourceId, cppParamSet, errInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnCreateRemoteKeyHandle fail")
     return ret;
 }
 
 int32_t HksIpcCloseRemKeyHandleAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
-    const struct HksParamSet *paramSet)
+    const struct HksParamSet *paramSet, struct HksExternalErrorInfo **errInfo)
 {
     int32_t ret = HksIpcCheckBlob(resourceId, 1, HKS_EXT_MAX_RESOURCE_ID_LEN);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcCloseRemKeyHandleAdapter invalid resourceId blob")
@@ -121,11 +122,11 @@ int32_t HksIpcCloseRemKeyHandleAdapter(const struct HksProcessInfo *processInfo,
     std::string cppresourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
     CppParamSet cppParamSet(paramSet);
 
-    return OHOS::Security::Huks::HksIpcServiceOnCloseRemoteKeyHandle(processInfo, cppresourceId, cppParamSet);
+    return OHOS::Security::Huks::HksIpcServiceOnCloseRemoteKeyHandle(processInfo, cppresourceId, cppParamSet, errInfo);
 }
 
 int32_t HksIpcExportProvCertsAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *providerName,
-    const struct HksParamSet *paramSet, struct HksExtCertInfoSet *certInfoSet)
+    const struct HksParamSet *paramSet, struct HksExtCertInfoSet *certInfoSet, struct HksExternalErrorInfo **errInfo)
 {
     int32_t ret = HksIpcCheckBlob(providerName, 1, HKS_EXT_MAX_PROVIDER_NAME_LEN);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcExportProvCertsAdapter invalid providerName blob")
@@ -135,7 +136,7 @@ int32_t HksIpcExportProvCertsAdapter(const struct HksProcessInfo *processInfo, c
     CppParamSet cppParamSet(paramSet);
 
     ret = OHOS::Security::Huks::HksIpcServiceOnExportProviderAllCertificates(processInfo, cppProviderName,
-        cppParamSet, certificates);
+        cppParamSet, certificates, errInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcExportProvCertsAdapter fail")
 
     ret = OHOS::Security::Huks::JsonArrayToCertInfoSet(certificates, *certInfoSet);
@@ -145,7 +146,7 @@ int32_t HksIpcExportProvCertsAdapter(const struct HksProcessInfo *processInfo, c
 }
 
 int32_t HksIpcExportCertAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
-    const struct HksParamSet *paramSet, struct HksExtCertInfoSet *certInfoSet)
+    const struct HksParamSet *paramSet, struct HksExtCertInfoSet *certInfoSet, struct HksExternalErrorInfo **errInfo)
 {
     int32_t ret = HksIpcCheckBlob(resourceId, 1, HKS_EXT_MAX_RESOURCE_ID_LEN);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcExportCertAdapter invalid resourceId blob")
@@ -154,7 +155,8 @@ int32_t HksIpcExportCertAdapter(const struct HksProcessInfo *processInfo, const 
     std::string certificates;
     CppParamSet cppParamSet(paramSet);
 
-    ret = OHOS::Security::Huks::HksIpcServiceOnExportCertificate(processInfo, cppresourceId, cppParamSet, certificates);
+    ret = OHOS::Security::Huks::HksIpcServiceOnExportCertificate(processInfo, cppresourceId, cppParamSet,
+        certificates, errInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnFindresourceIdCertificate fail")
 
     ret = OHOS::Security::Huks::JsonArrayToCertInfoSet(certificates, *certInfoSet);
@@ -164,12 +166,11 @@ int32_t HksIpcExportCertAdapter(const struct HksProcessInfo *processInfo, const 
 }
 
 int32_t HksIpcImportCertAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
-    const struct HksExtCertInfo *certInfo, const struct HksParamSet *paramSet)
+    const struct HksExtCertInfo *certInfo, const struct HksParamSet *paramSet, struct HksExternalErrorInfo **errInfo)
 {
     int32_t ret = HksIpcCheckBlob(resourceId, 1, HKS_EXT_MAX_RESOURCE_ID_LEN);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcImportCertAdapter invalid resourceId blob")
     
-    // 检查certInfo
     if (certInfo == nullptr || certInfo->index.data == nullptr || certInfo->cert.data == nullptr) {
         HKS_LOG_E("HksIpcImportCertAdapter invalid certInfo");
         return HKS_ERROR_NULL_POINTER;
@@ -178,15 +179,16 @@ int32_t HksIpcImportCertAdapter(const struct HksProcessInfo *processInfo, const 
     std::string cppresourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
     CppParamSet cppParamSet(paramSet);
     
-    // 调用实际的导入证书服务函数
-    ret = OHOS::Security::Huks::HksIpcServiceOnImportCertificate(processInfo, cppresourceId, *certInfo, cppParamSet);
+    ret = OHOS::Security::Huks::HksIpcServiceOnImportCertificate(processInfo, cppresourceId, *certInfo,
+        cppParamSet, errInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcServiceOnImportCertificate fail")
     
     return ret;
 }
 
-int32_t HksIpcAuthUkeyPinAdapter(const struct HksProcessInfo *processInfo,
-    const struct HksBlob *resourceId, const struct HksParamSet *paramSet, int32_t *outStatus, uint32_t *retryCount)
+int32_t HksIpcAuthUkeyPinAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
+    const struct HksParamSet *paramSet, struct HksExtAuthPinOutParam *authOutParam,
+    struct HksExternalErrorInfo **errInfo)
 {
     int32_t ret = HksIpcCheckBlob(resourceId, 1, HKS_EXT_MAX_RESOURCE_ID_LEN);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcAuthUkeyPinAdapter invalid resourceId blob")
@@ -194,27 +196,30 @@ int32_t HksIpcAuthUkeyPinAdapter(const struct HksProcessInfo *processInfo,
     std::string cppresourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
     CppParamSet cppParamSet(paramSet);
     return OHOS::Security::Huks::HksIpcServiceOnAuthUkeyPin(processInfo, cppresourceId, cppParamSet,
-        *outStatus, *retryCount);
+        *authOutParam, errInfo);
 }
 
 int32_t HksIpcGetUkeyPinAuthStateAdapter(const struct HksProcessInfo *processInfo,
-    const struct HksBlob *resourceId, const struct HksParamSet *paramSet, int32_t *outStatus)
+    const struct HksBlob *resourceId, const struct HksParamSet *paramSet, int32_t *outStatus,
+    struct HksExternalErrorInfo **errInfo)
 {
     int32_t ret = HksIpcCheckBlob(resourceId, 1, HKS_EXT_MAX_RESOURCE_ID_LEN);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcGetUkeyPinAuthStateAdapter invalid resourceId blob")
 
     std::string cppresourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
     CppParamSet cppParamSet(paramSet);
-    return OHOS::Security::Huks::HksIpcServiceOnGetVerifyPinStatus(processInfo, cppresourceId, cppParamSet, *outStatus);
+    return OHOS::Security::Huks::HksIpcServiceOnGetVerifyPinStatus(processInfo, cppresourceId, cppParamSet,
+        *outStatus, errInfo);
 }
 
-int32_t HksIpcClearPinStatusAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId)
+int32_t HksIpcClearPinStatusAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
+    struct HksExternalErrorInfo **errInfo)
 {
     int32_t ret = HksIpcCheckBlob(resourceId, 1, HKS_EXT_MAX_RESOURCE_ID_LEN);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcClearPinStatusAdapter invalid resourceId blob")
 
     std::string cppResourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
-    return OHOS::Security::Huks::HksIpcServiceOnClearUkeyPinAuthStatus(processInfo, cppResourceId);
+    return OHOS::Security::Huks::HksIpcServiceOnClearUkeyPinAuthStatus(processInfo, cppResourceId, errInfo);
 }
 
 static int32_t RemotePropertyPack(const CppParamSet &cppParamSet,
@@ -276,7 +281,8 @@ int32_t HksIpcServiceOnSetOrGetRemotePropertyAdapter(const struct HksProcessInfo
         reinterpret_cast<OHOS::IRemoteObject *>(const_cast<uint8_t *>(remoteObject)));
     HKS_IF_NULL_LOGE_RETURN(hksExtProxy, HKS_ERROR_NULL_POINTER, "hksExtProxy is null");
 
-    ret = OHOS::Security::Huks::HksIpcServiceOnSetOrGetRemoteProperty(processInfo,
+    struct HksProcessWithErrorInfo processAndError = { processInfo, nullptr };
+    ret = OHOS::Security::Huks::HksIpcServiceOnSetOrGetRemoteProperty(processAndError,
         propertyInfo->operation, resourceIdStr, propertyIdStr, cppParamSet);
     HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceOnSetOrGetRemoteProperty fail. ret = %" LOG_PUBLIC "d", ret);
     
@@ -285,12 +291,17 @@ int32_t HksIpcServiceOnSetOrGetRemotePropertyAdapter(const struct HksProcessInfo
     ret = RemotePropertyPack(cppParamSet, outData, outSize, ret);
     HKS_IF_NOT_SUCC_LOGE(ret, "PackRemoteProperty fail");
 
-    hksExtProxy->SendAsyncReply(HKS_SUCCESS, outData, outSize, HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY);
+    hksExtProxy->SendAsyncReply(HKS_SUCCESS, outData, outSize,
+        HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY, processAndError.errInfo);
+    if (processAndError.errInfo != nullptr) {
+        HksFreeExternalErrorInfo(processAndError.errInfo);
+    }
     return HKS_SUCCESS;
 }
 
 int32_t HksIpcServiceOnGetResourceIdAdapter(const struct HksProcessInfo *processInfo,
-    const struct HksBlob *providerName, const struct HksParamSet *paramSet, struct HksBlob *resourceId)
+    const struct HksBlob *providerName, const struct HksParamSet *paramSet, struct HksBlob *resourceId,
+    struct HksExternalErrorInfo **errInfo)
 {
     int32_t ret = HksIpcCheckBlob(providerName, 1, HKS_EXT_MAX_PROVIDER_NAME_LEN);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
@@ -300,7 +311,8 @@ int32_t HksIpcServiceOnGetResourceIdAdapter(const struct HksProcessInfo *process
     CppParamSet cppParamSet(paramSet);
 
     std::string cppResourceId;
-    ret = OHOS::Security::Huks::HksIpcServiceOnGetResourceId(processInfo, cppProviderName, cppParamSet, cppResourceId);
+    ret = OHOS::Security::Huks::HksIpcServiceOnGetResourceId(processInfo, cppProviderName, cppParamSet,
+        cppResourceId, errInfo);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksIpcServiceOnGetResourceId fail. ret = %" LOG_PUBLIC "d", ret);
 
     if (cppResourceId.size() > HKS_EXT_MAX_RESOURCE_ID_LEN) {

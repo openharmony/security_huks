@@ -23,6 +23,7 @@
 #include "hks_type.h"
 #include "hks_error_code.h"
 #include "hks_log.h"
+#include "hks_external_error_info.h"
 #include "gtest/gtest.h"
 
 #include <string>
@@ -134,19 +135,20 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest003, TestSize.Level0)
     HksGetProcessInfoForIPC(&processInfo);
     HksParamSet *paramSet = nullptr;
     HksInitParamSet(&paramSet);
+    struct HksExternalErrorInfo *errInfo = nullptr;
 
-    EXPECT_EQ(HksIpcCreateRemKeyHandleAdapter(&processInfo, nullptr, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksIpcCreateRemKeyHandleAdapter(&processInfo, nullptr, paramSet, &errInfo), HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob nullDataBlob = { .size = 1, .data = nullptr };
-    EXPECT_EQ(HksIpcCreateRemKeyHandleAdapter(&processInfo, &nullDataBlob, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksIpcCreateRemKeyHandleAdapter(&processInfo, &nullDataBlob, paramSet, &errInfo), HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob emptyBlob = {};
-    EXPECT_EQ(HksIpcCreateRemKeyHandleAdapter(&processInfo, &emptyBlob, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksIpcCreateRemKeyHandleAdapter(&processInfo, &emptyBlob, paramSet, &errInfo), HKS_ERROR_INVALID_ARGUMENT);
 
     std::string longId(1025, 'r');
     HksBlob longBlob = { .size = static_cast<uint32_t>(longId.size()),
         .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(longId.data())) };
-    EXPECT_EQ(HksIpcCreateRemKeyHandleAdapter(&processInfo, &longBlob, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksIpcCreateRemKeyHandleAdapter(&processInfo, &longBlob, paramSet, &errInfo), HKS_ERROR_INVALID_ARGUMENT);
 
     HksFreeParamSet(&paramSet);
     HKS_FREE_BLOB(processInfo.userId);
@@ -163,19 +165,20 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest004, TestSize.Level0)
     HksGetProcessInfoForIPC(&processInfo);
     HksParamSet *paramSet = nullptr;
     HksInitParamSet(&paramSet);
+    struct HksExternalErrorInfo *errInfo = nullptr;
 
-    EXPECT_EQ(HksIpcCloseRemKeyHandleAdapter(&processInfo, nullptr, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksIpcCloseRemKeyHandleAdapter(&processInfo, nullptr, paramSet, &errInfo), HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob nullDataBlob = { .size = 1, .data = nullptr };
-    EXPECT_EQ(HksIpcCloseRemKeyHandleAdapter(&processInfo, &nullDataBlob, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksIpcCloseRemKeyHandleAdapter(&processInfo, &nullDataBlob, paramSet, &errInfo), HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob emptyBlob = {};
-    EXPECT_EQ(HksIpcCloseRemKeyHandleAdapter(&processInfo, &emptyBlob, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksIpcCloseRemKeyHandleAdapter(&processInfo, &emptyBlob, paramSet, &errInfo), HKS_ERROR_INVALID_ARGUMENT);
 
     std::string longId(1025, 'r');
     HksBlob longBlob = { .size = static_cast<uint32_t>(longId.size()),
         .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(longId.data())) };
-    EXPECT_EQ(HksIpcCloseRemKeyHandleAdapter(&processInfo, &longBlob, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksIpcCloseRemKeyHandleAdapter(&processInfo, &longBlob, paramSet, &errInfo), HKS_ERROR_INVALID_ARGUMENT);
 
     HksFreeParamSet(&paramSet);
     HKS_FREE_BLOB(processInfo.userId);
@@ -193,22 +196,23 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest005, TestSize.Level0)
     HksParamSet *paramSet = nullptr;
     HksInitParamSet(&paramSet);
     HksExtCertInfoSet certSet = {};
+    struct HksExternalErrorInfo *errInfo = nullptr;
 
-    EXPECT_EQ(HksIpcExportProvCertsAdapter(&processInfo, nullptr, paramSet, &certSet),
+    EXPECT_EQ(HksIpcExportProvCertsAdapter(&processInfo, nullptr, paramSet, &certSet, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob nullDataBlob = { .size = 1, .data = nullptr };
-    EXPECT_EQ(HksIpcExportProvCertsAdapter(&processInfo, &nullDataBlob, paramSet, &certSet),
+    EXPECT_EQ(HksIpcExportProvCertsAdapter(&processInfo, &nullDataBlob, paramSet, &certSet, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob emptyBlob = {};
-    EXPECT_EQ(HksIpcExportProvCertsAdapter(&processInfo, &emptyBlob, paramSet, &certSet),
+    EXPECT_EQ(HksIpcExportProvCertsAdapter(&processInfo, &emptyBlob, paramSet, &certSet, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     std::string longName(129, 'n');
     HksBlob longBlob = { .size = static_cast<uint32_t>(longName.size()),
         .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(longName.data())) };
-    EXPECT_EQ(HksIpcExportProvCertsAdapter(&processInfo, &longBlob, paramSet, &certSet),
+    EXPECT_EQ(HksIpcExportProvCertsAdapter(&processInfo, &longBlob, paramSet, &certSet, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     HksFreeParamSet(&paramSet);
@@ -227,22 +231,23 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest006, TestSize.Level0)
     HksParamSet *paramSet = nullptr;
     HksInitParamSet(&paramSet);
     HksExtCertInfoSet certSet = {};
+    struct HksExternalErrorInfo *errInfo = nullptr;
 
-    EXPECT_EQ(HksIpcExportCertAdapter(&processInfo, nullptr, paramSet, &certSet),
+    EXPECT_EQ(HksIpcExportCertAdapter(&processInfo, nullptr, paramSet, &certSet, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob nullDataBlob = { .size = 1, .data = nullptr };
-    EXPECT_EQ(HksIpcExportCertAdapter(&processInfo, &nullDataBlob, paramSet, &certSet),
+    EXPECT_EQ(HksIpcExportCertAdapter(&processInfo, &nullDataBlob, paramSet, &certSet, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob emptyBlob = {};
-    EXPECT_EQ(HksIpcExportCertAdapter(&processInfo, &emptyBlob, paramSet, &certSet),
+    EXPECT_EQ(HksIpcExportCertAdapter(&processInfo, &emptyBlob, paramSet, &certSet, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     std::string longId(1025, 'r');
     HksBlob longBlob = { .size = static_cast<uint32_t>(longId.size()),
         .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(longId.data())) };
-    EXPECT_EQ(HksIpcExportCertAdapter(&processInfo, &longBlob, paramSet, &certSet),
+    EXPECT_EQ(HksIpcExportCertAdapter(&processInfo, &longBlob, paramSet, &certSet, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     HksFreeParamSet(&paramSet);
@@ -261,16 +266,17 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest007, TestSize.Level0)
     HksParamSet *paramSet = nullptr;
     HksInitParamSet(&paramSet);
     HksExtCertInfo certInfo = {};
+    struct HksExternalErrorInfo *errInfo = nullptr;
 
-    EXPECT_EQ(HksIpcImportCertAdapter(&processInfo, nullptr, &certInfo, paramSet),
+    EXPECT_EQ(HksIpcImportCertAdapter(&processInfo, nullptr, &certInfo, paramSet, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob nullDataBlob = { .size = 1, .data = nullptr };
-    EXPECT_EQ(HksIpcImportCertAdapter(&processInfo, &nullDataBlob, &certInfo, paramSet),
+    EXPECT_EQ(HksIpcImportCertAdapter(&processInfo, &nullDataBlob, &certInfo, paramSet, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob emptyBlob = {};
-    EXPECT_EQ(HksIpcImportCertAdapter(&processInfo, &emptyBlob, &certInfo, paramSet),
+    EXPECT_EQ(HksIpcImportCertAdapter(&processInfo, &emptyBlob, &certInfo, paramSet, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     std::string validStr = "testIndex";
@@ -278,7 +284,7 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest007, TestSize.Level0)
         .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(validStr.data())) };
 
     // null certInfo
-    EXPECT_EQ(HksIpcImportCertAdapter(&processInfo, &validBlob, nullptr, paramSet),
+    EXPECT_EQ(HksIpcImportCertAdapter(&processInfo, &validBlob, nullptr, paramSet, &errInfo),
         HKS_ERROR_NULL_POINTER);
 
     // certInfo with null index.data
@@ -287,7 +293,7 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest007, TestSize.Level0)
     nullIndexInfo.cert.size = 1;
     uint8_t tmpCert[] = {'c'};
     nullIndexInfo.cert.data = tmpCert;
-    EXPECT_EQ(HksIpcImportCertAdapter(&processInfo, &validBlob, &nullIndexInfo, paramSet),
+    EXPECT_EQ(HksIpcImportCertAdapter(&processInfo, &validBlob, &nullIndexInfo, paramSet, &errInfo),
         HKS_ERROR_NULL_POINTER);
 
     // certInfo with null cert.data
@@ -296,14 +302,14 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest007, TestSize.Level0)
     uint8_t tmpIdx[] = {'i'};
     nullCertInfo.index.data = tmpIdx;
     nullCertInfo.cert.size = 1;
-    EXPECT_EQ(HksIpcImportCertAdapter(&processInfo, &validBlob, &nullCertInfo, paramSet),
+    EXPECT_EQ(HksIpcImportCertAdapter(&processInfo, &validBlob, &nullCertInfo, paramSet, &errInfo),
         HKS_ERROR_NULL_POINTER);
 
     // oversized resourceId
     std::string longId(1025, 'r');
     HksBlob longBlob = { .size = static_cast<uint32_t>(longId.size()),
         .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(longId.data())) };
-    EXPECT_EQ(HksIpcImportCertAdapter(&processInfo, &longBlob, &certInfo, paramSet),
+    EXPECT_EQ(HksIpcImportCertAdapter(&processInfo, &longBlob, &certInfo, paramSet, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     HksFreeParamSet(&paramSet);
@@ -322,24 +328,24 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest008, TestSize.Level0)
     HksParamSet *paramSet = nullptr;
     HksInitParamSet(&paramSet);
 
-    int32_t outStatus = 0;
-    uint32_t retryCount = 0;
+    struct HksExternalErrorInfo *errInfo = nullptr;
+    struct HksExtAuthPinOutParam authOutParam = {0, 0};
 
-    EXPECT_EQ(HksIpcAuthUkeyPinAdapter(&processInfo, nullptr, paramSet, &outStatus, &retryCount),
+    EXPECT_EQ(HksIpcAuthUkeyPinAdapter(&processInfo, nullptr, paramSet, &authOutParam, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob nullDataBlob = { .size = 1, .data = nullptr };
-    EXPECT_EQ(HksIpcAuthUkeyPinAdapter(&processInfo, &nullDataBlob, paramSet, &outStatus, &retryCount),
+    EXPECT_EQ(HksIpcAuthUkeyPinAdapter(&processInfo, &nullDataBlob, paramSet, &authOutParam, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob emptyBlob = {};
-    EXPECT_EQ(HksIpcAuthUkeyPinAdapter(&processInfo, &emptyBlob, paramSet, &outStatus, &retryCount),
+    EXPECT_EQ(HksIpcAuthUkeyPinAdapter(&processInfo, &emptyBlob, paramSet, &authOutParam, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     std::string longId(1025, 'r');
     HksBlob longBlob = { .size = static_cast<uint32_t>(longId.size()),
         .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(longId.data())) };
-    EXPECT_EQ(HksIpcAuthUkeyPinAdapter(&processInfo, &longBlob, paramSet, &outStatus, &retryCount),
+    EXPECT_EQ(HksIpcAuthUkeyPinAdapter(&processInfo, &longBlob, paramSet, &authOutParam, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     HksFreeParamSet(&paramSet);
@@ -359,22 +365,23 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest009, TestSize.Level0)
     HksInitParamSet(&paramSet);
 
     int32_t outStatus = 0;
+    struct HksExternalErrorInfo *errInfo = nullptr;
 
-    EXPECT_EQ(HksIpcGetUkeyPinAuthStateAdapter(&processInfo, nullptr, paramSet, &outStatus),
+    EXPECT_EQ(HksIpcGetUkeyPinAuthStateAdapter(&processInfo, nullptr, paramSet, &outStatus, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob nullDataBlob = { .size = 1, .data = nullptr };
-    EXPECT_EQ(HksIpcGetUkeyPinAuthStateAdapter(&processInfo, &nullDataBlob, paramSet, &outStatus),
+    EXPECT_EQ(HksIpcGetUkeyPinAuthStateAdapter(&processInfo, &nullDataBlob, paramSet, &outStatus, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob emptyBlob = {};
-    EXPECT_EQ(HksIpcGetUkeyPinAuthStateAdapter(&processInfo, &emptyBlob, paramSet, &outStatus),
+    EXPECT_EQ(HksIpcGetUkeyPinAuthStateAdapter(&processInfo, &emptyBlob, paramSet, &outStatus, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     std::string longId(1025, 'r');
     HksBlob longBlob = { .size = static_cast<uint32_t>(longId.size()),
         .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(longId.data())) };
-    EXPECT_EQ(HksIpcGetUkeyPinAuthStateAdapter(&processInfo, &longBlob, paramSet, &outStatus),
+    EXPECT_EQ(HksIpcGetUkeyPinAuthStateAdapter(&processInfo, &longBlob, paramSet, &outStatus, &errInfo),
         HKS_ERROR_INVALID_ARGUMENT);
 
     HksFreeParamSet(&paramSet);
@@ -390,19 +397,20 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest009, TestSize.Level0)
 HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest010, TestSize.Level0) {
     HksProcessInfo processInfo{};
     HksGetProcessInfoForIPC(&processInfo);
+    struct HksExternalErrorInfo *errInfo = nullptr;
 
-    EXPECT_EQ(HksIpcClearPinStatusAdapter(&processInfo, nullptr), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksIpcClearPinStatusAdapter(&processInfo, nullptr, &errInfo), HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob nullDataBlob = { .size = 1, .data = nullptr };
-    EXPECT_EQ(HksIpcClearPinStatusAdapter(&processInfo, &nullDataBlob), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksIpcClearPinStatusAdapter(&processInfo, &nullDataBlob, &errInfo), HKS_ERROR_INVALID_ARGUMENT);
 
     HksBlob emptyBlob = {};
-    EXPECT_EQ(HksIpcClearPinStatusAdapter(&processInfo, &emptyBlob), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksIpcClearPinStatusAdapter(&processInfo, &emptyBlob, &errInfo), HKS_ERROR_INVALID_ARGUMENT);
 
     std::string longId(1025, 'r');
     HksBlob longBlob = { .size = static_cast<uint32_t>(longId.size()),
         .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(longId.data())) };
-    EXPECT_EQ(HksIpcClearPinStatusAdapter(&processInfo, &longBlob), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksIpcClearPinStatusAdapter(&processInfo, &longBlob, &errInfo), HKS_ERROR_INVALID_ARGUMENT);
 
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(processInfo.processName);
@@ -556,13 +564,14 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest015, TestSize.Level0)
     HksProcessInfo processInfo{};
     HksGetProcessInfoForIPC(&processInfo);
     CppParamSet cppParamSet({{.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA}});
+    struct HksExternalErrorInfo *errInfo = nullptr;
 
     std::string name = "HksUkeyClientServiceTest015";
     EXPECT_EQ(HksIpcServiceProviderRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
 
     std::string index = "testIdx";
-    EXPECT_EQ(HksIpcServiceOnCreateRemoteKeyHandle(&processInfo, index, cppParamSet), HKS_SUCCESS);
-    EXPECT_EQ(HksIpcServiceOnCloseRemoteKeyHandle(&processInfo, index, cppParamSet), HKS_SUCCESS);
+    EXPECT_EQ(HksIpcServiceOnCreateRemoteKeyHandle(&processInfo, index, cppParamSet, &errInfo), HKS_SUCCESS);
+    EXPECT_EQ(HksIpcServiceOnCloseRemoteKeyHandle(&processInfo, index, cppParamSet, &errInfo), HKS_SUCCESS);
 
     EXPECT_EQ(HksIpcServiceProviderUnRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
 
@@ -579,20 +588,20 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest016, TestSize.Level0)
     HksProcessInfo processInfo{};
     HksGetProcessInfoForIPC(&processInfo);
     CppParamSet cppParamSet({{.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA}});
+    struct HksExternalErrorInfo *errInfo = nullptr;
 
     std::string name = "HksUkeyClientServiceTest016";
     EXPECT_EQ(HksIpcServiceProviderRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
 
     std::string index = "testIdx";
 
-    int32_t authState = 0;
-    uint32_t retryCnt = 0;
-    EXPECT_EQ(HksIpcServiceOnAuthUkeyPin(&processInfo, index, cppParamSet, authState, retryCnt), HKS_SUCCESS);
+    HksExtAuthPinOutParam authOutParam = {};
+    EXPECT_EQ(HksIpcServiceOnAuthUkeyPin(&processInfo, index, cppParamSet, authOutParam, &errInfo), HKS_SUCCESS);
 
     int32_t state = 0;
-    EXPECT_EQ(HksIpcServiceOnGetVerifyPinStatus(&processInfo, index, cppParamSet, state), HKS_SUCCESS);
+    EXPECT_EQ(HksIpcServiceOnGetVerifyPinStatus(&processInfo, index, cppParamSet, state, &errInfo), HKS_SUCCESS);
 
-    EXPECT_EQ(HksIpcServiceOnClearUkeyPinAuthStatus(&processInfo, index), HKS_SUCCESS);
+    EXPECT_EQ(HksIpcServiceOnClearUkeyPinAuthStatus(&processInfo, index, &errInfo), HKS_SUCCESS);
 
     EXPECT_EQ(HksIpcServiceProviderUnRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
 
@@ -609,20 +618,22 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest017, TestSize.Level0)
     HksProcessInfo processInfo{};
     HksGetProcessInfoForIPC(&processInfo);
     CppParamSet cppParamSet({{.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA}});
+    struct HksExternalErrorInfo *errInfo = nullptr;
 
     std::string name = "HksUkeyClientServiceTest017";
     EXPECT_EQ(HksIpcServiceProviderRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
 
     std::string index = "testIdx";
     std::string propertyId = "prop";
-    EXPECT_EQ(HksIpcServiceOnSetOrGetRemoteProperty(&processInfo,
+    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
+    EXPECT_EQ(HksIpcServiceOnSetOrGetRemoteProperty(processAndError,
         HKS_EXT_PROPERTY_OPERATION_GET, index, propertyId, cppParamSet), HKS_SUCCESS);
 
     std::string certsJson;
-    EXPECT_EQ(HksIpcServiceOnExportCertificate(&processInfo, index, cppParamSet, certsJson), HKS_SUCCESS);
+    EXPECT_EQ(HksIpcServiceOnExportCertificate(&processInfo, index, cppParamSet, certsJson, &errInfo), HKS_SUCCESS);
 
     std::string allCertsJson;
-    EXPECT_EQ(HksIpcServiceOnExportProviderAllCertificates(&processInfo, name, cppParamSet, allCertsJson),
+    EXPECT_EQ(HksIpcServiceOnExportProviderAllCertificates(&processInfo, name, cppParamSet, allCertsJson, &errInfo),
         HKS_SUCCESS);
 
     EXPECT_EQ(HksIpcServiceProviderUnRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
@@ -640,6 +651,7 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest018, TestSize.Level0)
     HksProcessInfo processInfo{};
     HksGetProcessInfoForIPC(&processInfo);
     CppParamSet cppParamSet({{.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA}});
+    struct HksExternalErrorInfo *errInfo = nullptr;
 
     std::string name = "HksUkeyClientServiceTest018";
     EXPECT_EQ(HksIpcServiceProviderRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
@@ -649,7 +661,7 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest018, TestSize.Level0)
     certInfo.purpose = 1;
     certInfo.index = StringToBlob("idx");
     certInfo.cert = StringToBlob("cert");
-    EXPECT_EQ(HksIpcServiceOnImportCertificate(&processInfo, index, certInfo, cppParamSet), HKS_SUCCESS);
+    EXPECT_EQ(HksIpcServiceOnImportCertificate(&processInfo, index, certInfo, cppParamSet, &errInfo), HKS_SUCCESS);
 
     EXPECT_EQ(HksIpcServiceProviderUnRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
 

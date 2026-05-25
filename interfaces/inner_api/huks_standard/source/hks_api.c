@@ -362,8 +362,8 @@ HKS_API_EXPORT int32_t HksImportCertificate(const struct HksBlob *resourceId,
 #endif
 }
 
-HKS_API_EXPORT int32_t HksAuthUkeyPin(const struct HksBlob *resourceId,
-    const struct HksParamSet *paramSetIn, uint32_t *retryCount)
+HKS_API_EXPORT int32_t HksAuthUkeyPin(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn,
+    uint32_t *retryCount)
 {
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
     HKS_LOG_D("enter AuthUkeyPin");

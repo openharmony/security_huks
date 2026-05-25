@@ -20,6 +20,7 @@
 #include "want.h"
 #include "hks_cpp_paramset.h"
 #include "hks_ext_cert_info.h"
+#include "hks_external_error_info.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -42,31 +43,37 @@ public:
     static void SetCreator(const CreatorFunc &creator);
 
     virtual int OpenRemoteHandle(const std::string &index, const CppParamSet &params, std::string &handle,
-        int32_t &errcode);
-    virtual int CloseRemoteHandle(const std::string &handle, const CppParamSet &params, int32_t &errcode);
-    virtual int AuthUkeyPin(const std::string &handle, const CppParamSet &params, int32_t &errcode, int32_t &authState,
-        uint32_t &retryCnt);
-    virtual int GetUkeyPinAuthState(const std::string &handle, const CppParamSet &params, int32_t &authState,
-        int32_t &errcode);
-    virtual int ExportCertificate(const std::string &index, const CppParamSet &params, std::string &certJsonArr,
-        int32_t &errcode);
-    virtual int ExportProviderCertificates(const CppParamSet &params, std::string &certJsonArr, int32_t &errcode);
+        struct HksExternalErrorInfo **errInfo);
+    virtual int CloseRemoteHandle(const std::string &handle, const CppParamSet &params,
+        struct HksExternalErrorInfo **errInfo);
+    virtual int AuthUkeyPin(const std::string &handle, const CppParamSet &params,
+        struct HksExternalErrorInfo **errInfo, int32_t &authState, uint32_t &retryCnt);
+    virtual int GetUkeyPinAuthState(const std::string &handle, const CppParamSet &params,
+        int32_t &state, struct HksExternalErrorInfo **errInfo);
+    virtual int ExportCertificate(const std::string &index, const CppParamSet &params,
+        std::string &certJsonArr, struct HksExternalErrorInfo **errInfo);
+    virtual int ExportProviderCertificates(const CppParamSet &params, std::string &certJsonArr,
+        struct HksExternalErrorInfo **errInfo);
     virtual int ImportCertificate(const std::string &index, const HksExtCertInfoIdl& certInfo,
-        const CppParamSet &params, int32_t &errcode);
-    virtual int InitSession(const std::string &index, const CppParamSet &params, std::string &handle, int32_t &errcode);
+        const CppParamSet &params, struct HksExternalErrorInfo **errInfo);
+    virtual int InitSession(const std::string &index, const CppParamSet &params, std::string &handle,
+        struct HksExternalErrorInfo **errInfo);
     virtual int UpdateSession(const std::string &handle, const CppParamSet &params, const std::vector<uint8_t> &inData,
-        std::vector<uint8_t> &outData, int32_t &errcode);
+        std::vector<uint8_t> &outData, struct HksExternalErrorInfo **errInfo);
     virtual int FinishSession(const std::string &handle, const CppParamSet &params, const std::vector<uint8_t> &inData,
-        std::vector<uint8_t> &outData, int32_t &errcode);
+        std::vector<uint8_t> &outData, struct HksExternalErrorInfo **errInfo);
     virtual int SetOrGetProperty(uint32_t operation, const std::string& handle, const std::string& propertyId,
-        CppParamSet& params, int32_t& errcode);
-    virtual int ClearUkeyPinAuthState(const std::string& handle, const CppParamSet& params, int32_t& errcode);
+        CppParamSet& params, struct HksExternalErrorInfo **errInfo);
+    virtual int ClearUkeyPinAuthState(const std::string& handle, const CppParamSet& params,
+        struct HksExternalErrorInfo **errInfo);
     virtual int ImportWrappedKey(const std::string& index, const std::string& wrappingKeyIndex,
-        const CppParamSet& params, const std::vector<uint8_t>& wrappedData, int32_t& errcode);
+        const CppParamSet& params, const std::vector<uint8_t>& wrappedData, struct HksExternalErrorInfo **errInfo);
     virtual int ExportPublicKey(const std::string& index, const CppParamSet& params,
-        std::vector<uint8_t>& outData, int32_t& errcode);
-    virtual int GenerateKey(const std::string &handle, const CppParamSet &params, int32_t &errcode);
-    virtual int GetResourceId(const CppParamSet &params, std::string &resourceId, int32_t &errcode);
+        std::vector<uint8_t>& outData, struct HksExternalErrorInfo **errInfo);
+    virtual int GenerateKey(const std::string &handle, const CppParamSet &params,
+        struct HksExternalErrorInfo **errInfo);
+    virtual int GetResourceId(const CppParamSet &params, std::string &resourceId,
+        struct HksExternalErrorInfo **errInfo);
 private:
     static CreatorFunc creator_;
 };

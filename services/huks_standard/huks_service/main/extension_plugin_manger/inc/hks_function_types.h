@@ -59,43 +59,44 @@ using OnRegisterProviderFunc = int32_t (*)(const HksProcessInfo &processInfo, co
 using OnUnRegisterProviderFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &providerName,
     const CppParamSet &paramSet, bool isdeath, int32_t &deleteCount);
 using OnCreateRemoteKeyHandleFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
-    const CppParamSet &paramSet);
+    const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo);
 using OnCloseRemoteKeyHandleFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
-    const CppParamSet &paramSet);
-using OnAuthUkeyPinFunc = int32_t (*)(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, int32_t& authState, uint32_t& retryCnt);
+    const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo);
+using OnAuthUkeyPinFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, struct HksExtAuthPinOutParam &authOutParam, struct HksExternalErrorInfo **errInfo);
 using OnGetVerifyPinStatusFunc = int32_t (*)(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, int32_t &state);
-using OnClearUkeyPinAuthStatusFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index);
-using OnSetOrGetRemotePropertyFunc = int32_t (*)(const HksProcessInfo &processInfo,
+    const std::string &index, const CppParamSet &paramSet, int32_t &state, struct HksExternalErrorInfo **errInfo);
+using OnClearUkeyPinAuthStatusFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
+    struct HksExternalErrorInfo **errInfo);
+using OnSetOrGetRemotePropertyFunc = int32_t (*)(struct HksProcessWithErrorInfo &processAndError,
     enum HksExtPropertyOperation operation, const std::string &index, const std::string &propertyId,
     CppParamSet &paramSet);
-using OnListIndexCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo,
-    const std::string &index, const CppParamSet &paramSet, std::string &certsJson);
-using OnListProviderAllCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet, std::string &certsJsonArr);
-using OnImportCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo,
-    const std::string &index, const HksExtCertInfo &certInfo, const CppParamSet &paramSet);
-using OnGenerateKeyFunc = int32_t (*)(const HksProcessInfo &processInfo,
+using OnListIndexCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, std::string &certsJson, struct HksExternalErrorInfo **errInfo);
+using OnListProviderAllCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &providerName,
+    const CppParamSet &paramSet, std::string &certsJsonArr, struct HksExternalErrorInfo **errInfo);
+using OnImportCertificateFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
+    const HksExtCertInfo &certInfo, const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo);
+using OnGenerateKeyFunc = int32_t (*)(struct HksProcessWithErrorInfo &processAndError,
     const std::string &resourceId, const CppParamSet &paramSet);
-using OnInitSessionFunc = int32_t (*)(const HksProcessInfo &processInfo,
+using OnInitSessionFunc = int32_t (*)(struct HksProcessWithErrorInfo &processAndError,
     const std::string &index, const CppParamSet &paramSet, uint32_t &handle);
-using OnUpdateSessionFunc = int32_t (*)(const HksProcessInfo &processInfo, const uint32_t &handle,
+using OnUpdateSessionFunc = int32_t (*)(struct HksProcessWithErrorInfo &processAndError, const uint32_t &handle,
     const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
-using OnFinishSessionFunc = int32_t (*)(const HksProcessInfo &processInfo, const uint32_t &handle,
+using OnFinishSessionFunc = int32_t (*)(struct HksProcessWithErrorInfo &processAndError, const uint32_t &handle,
     const CppParamSet &paramSet, const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData);
-using OnAbortSessionFunc = int32_t (*)(const HksProcessInfo &processInfo, const uint32_t &handle,
+using OnAbortSessionFunc = int32_t (*)(struct HksProcessWithErrorInfo &processAndError, const uint32_t &handle,
     const CppParamSet &paramSet);
 using OnUnregisterAllObserversFunc = int32_t (*)();
-using OnExportPublicKeyFunc = int32_t (*)(const HksProcessInfo &processInfo,
+using OnExportPublicKeyFunc = int32_t (*)(struct HksProcessWithErrorInfo &processAndError,
     const std::string &index, const CppParamSet &paramSet, std::vector<uint8_t> &outData);
-using OnImportWrappedKeyFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &index,
+using OnImportWrappedKeyFunc = int32_t (*)(struct HksProcessWithErrorInfo &processAndError, const std::string &index,
     const std::string &wrappingKeyIndex, const CppParamSet &paramSet, const std::vector<uint8_t> &wrappedData);
 using OnQueryAbilityFunc = int32_t (*)(const struct HksProcessInfo &processInfo, std::string &resourceId,
     CppAbilityInfo &abilityInfo);
 }
-using OnGetResourceIdFunc = int32_t (*)(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet, std::string &resourceId);
+using OnGetResourceIdFunc = int32_t (*)(const HksProcessInfo &processInfo, const std::string &providerName,
+    const CppParamSet &paramSet, std::string &resourceId, struct HksExternalErrorInfo **errInfo);
 }
 }
 #endif

@@ -290,6 +290,20 @@ int32_t HksUKeyGeneralUnpackWithCertInfo(const struct HksBlob *srcData,
 
     return HKS_SUCCESS;
 }
+
+int32_t PackAuthPinReply(struct HksBlob *outBlob, int32_t ret, int32_t status, uint32_t retryCount)
+{
+    struct { int32_t retCode; int32_t status; uint32_t retryCount; } replyData = {ret, status, retryCount};
+    outBlob->size = sizeof(replyData);
+    outBlob->data = (uint8_t *)HksMalloc(outBlob->size);
+    HKS_IF_NULL_RETURN(outBlob->data, HKS_ERROR_MALLOC_FAIL)
+
+    if (memcpy_s(outBlob->data, outBlob->size, &replyData, sizeof(replyData)) != EOK) {
+        HKS_FREE_BLOB(*outBlob);
+        return HKS_ERROR_BAD_STATE;
+    }
+    return HKS_SUCCESS;
+}
 #endif
 
 int32_t HksGenerateKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,

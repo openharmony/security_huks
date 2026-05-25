@@ -20,6 +20,7 @@
 #include "hks_log.h"
 #include "hks_param.h"
 #include "hks_template.h"
+#include "hks_external_error_info.h"
 
 static int32_t GetProcessInfo(const struct HksParamSet *paramSet, char **processName, char **userId)
 {
@@ -75,11 +76,12 @@ int32_t HksClientUnregisterProvider(const struct HksBlob *name, const struct Hks
     return HksServiceUnregisterProvider(&processInfo, name, paramSetIn);
 }
 
-int32_t HksClientExportProviderCertificates(const struct HksBlob *providerName,
-    const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
+int32_t HksClientExportProviderCertificates(const struct HksBlob *providerName, const struct HksParamSet *paramSetIn,
+    struct HksExtCertInfoSet *certSet)
 {
     char *processName = NULL;
     char *userId = NULL;
+    struct HksExternalErrorInfo *errInfo = NULL;
     HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
@@ -91,14 +93,16 @@ int32_t HksClientExportProviderCertificates(const struct HksBlob *providerName,
         0,
         0
     };
-    return HksServiceExportProviderCertificates(&processInfo, providerName, paramSetIn, certSet);
+    int32_t ret = HksServiceExportProviderCertificates(&processInfo, providerName, paramSetIn, certSet, &errInfo);
+    return ret;
 }
 
-int32_t HksClientExportCertificate(const struct HksBlob *index,
-    const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet)
+int32_t HksClientExportCertificate(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
+    struct HksExtCertInfoSet *certSet)
 {
     char *processName = NULL;
     char *userId = NULL;
+    struct HksExternalErrorInfo *errInfo = NULL;
     HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
@@ -110,14 +114,15 @@ int32_t HksClientExportCertificate(const struct HksBlob *index,
         0,
         0
     };
-    return HksServiceExportCertificate(&processInfo, index, paramSetIn, certSet);
+    int32_t ret = HksServiceExportCertificate(&processInfo, index, paramSetIn, certSet, &errInfo);
+    return ret;
 }
 
-int32_t HksClientOpenRemoteHandle(const struct HksBlob *resourceId,
-    const struct HksParamSet *paramSetIn)
+int32_t HksClientOpenRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn)
 {
     char *processName = NULL;
     char *userId = NULL;
+    struct HksExternalErrorInfo *errInfo = NULL;
     HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
@@ -129,7 +134,8 @@ int32_t HksClientOpenRemoteHandle(const struct HksBlob *resourceId,
         0,
         0
     };
-    return HksServiceOpenRemoteHandle(&processInfo, resourceId, paramSetIn);
+    int32_t ret = HksServiceOpenRemoteHandle(&processInfo, resourceId, paramSetIn, &errInfo);
+    return ret;
 }
 
 
@@ -137,7 +143,8 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
 {
     char *processName = NULL;
     char *userId = NULL;
-    int32_t outStatus;
+    int32_t outStatus = 0;
+    struct HksExternalErrorInfo *errInfo = NULL;
     HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
@@ -149,13 +156,17 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
         0,
         0
     };
-    return HksServiceAuthUkeyPin(&processInfo, index, paramSetIn, &outStatus, retryCount);
+
+    struct HksExtAuthPinOutParam authOutParam = {outStatus, *retryCount};
+    return HksServiceAuthUkeyPin(&processInfo, index, paramSetIn, &authOutParam, &errInfo);
 }
 
-int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn, int32_t *status)
+int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
+    int32_t *status)
 {
     char *processName = NULL;
     char *userId = NULL;
+    struct HksExternalErrorInfo *errInfo = NULL;
     HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
@@ -167,13 +178,15 @@ int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct H
         0,
         0
     };
-    return HksServiceGetUkeyPinAuthState(&processInfo, index, paramSetIn, status);
+    int32_t ret = HksServiceGetUkeyPinAuthState(&processInfo, index, paramSetIn, status, &errInfo);
+    return ret;
 }
 
 int32_t HksClientCloseRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn)
 {
     char *processName = NULL;
     char *userId = NULL;
+    struct HksExternalErrorInfo *errInfo = NULL;
     HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
@@ -185,20 +198,23 @@ int32_t HksClientCloseRemoteHandle(const struct HksBlob *resourceId, const struc
         0,
         0
     };
-    return HksServiceCloseRemoteHandle(&processInfo, resourceId, paramSetIn);
+    int32_t ret = HksServiceCloseRemoteHandle(&processInfo, resourceId, paramSetIn, &errInfo);
+    return ret;
 }
 
 int32_t HksClientClearPinAuthState(const struct HksBlob *index)
 {
+    struct HksExternalErrorInfo *errInfo = NULL;
     struct HksProcessInfo processInfo = {
-        { 0, NULL }, // userId
-        { 0, NULL }, // processName
+        { 0, NULL },
+        { 0, NULL },
         0,
         0,
         0,
         0
     };
-    return HksServiceClearPinAuthState(&processInfo, index);
+    int32_t ret = HksServiceClearPinAuthState(&processInfo, index, &errInfo);
+    return ret;
 }
 
 int32_t HksClientSetOrGetRemoteProperty(enum HksExtPropertyOperation operation,
@@ -232,6 +248,7 @@ int32_t HksClientGetResourceId(const struct HksBlob *providerName, const struct 
 {
     char *processName = NULL;
     char *userId = NULL;
+    struct HksExternalErrorInfo *errInfo = NULL;
     HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
@@ -243,5 +260,42 @@ int32_t HksClientGetResourceId(const struct HksBlob *providerName, const struct 
         0,
         0
     };
-    return HksServiceGetResourceId(&processInfo, providerName, paramSetIn, resourceId);
+    int32_t ret = HksServiceGetResourceId(&processInfo, providerName, paramSetIn, resourceId, &errInfo);
+    return ret;
+}
+
+int32_t HksClientQueryAbilityInfo(struct HksBlob *resourceId, struct HksAbilityInfo *abilityInfo)
+{
+    struct HksProcessInfo processInfo = {
+        { 0, NULL },
+        { 0, NULL },
+        0,
+        0,
+        0,
+        0
+    };
+    int32_t ret = HksServiceQueryAbilityInfo(&processInfo, resourceId, abilityInfo);
+    return ret;
+}
+
+int32_t HksClientImportCertificate(const struct HksBlob *resourceId, const struct HksExtCertInfo *certInfo,
+    const struct HksParamSet *paramSetIn)
+{
+    char *processName = NULL;
+    char *userId = NULL;
+    struct HksExternalErrorInfo *errInfo = NULL;
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+        "get process info failed")
+
+    struct HksProcessInfo processInfo = {
+        { strlen(userId), (uint8_t *)userId },
+        { strlen(processName), (uint8_t *)processName },
+        0,
+        0,
+        0,
+        0
+    };
+
+    int32_t ret = HksServiceImportCert(&processInfo, resourceId, certInfo, paramSetIn, &errInfo);
+    return ret;
 }
