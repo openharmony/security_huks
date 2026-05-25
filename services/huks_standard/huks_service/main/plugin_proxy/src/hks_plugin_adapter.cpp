@@ -160,6 +160,12 @@ int32_t HksPluginOnAccessWrapKey(uint32_t code, const void *data, void *reply)
     return g_pluginProxy->hksPluginOnLocalRequest(code, data, reply);
 }
 
+int32_t HksPluginCheck(void)
+{
+    HKS_IF_NULL_LOGE_RETURN(g_pluginProxy, HKS_ERROR_API_NOT_SUPPORTED, "environment not supported")
+    return HKS_SUCCESS;
+}
+
 int32_t HksPluginImportWrappedKey(const struct HksImportKeyStoreArgs *data, struct HksBlob *reply)
 {
     HKS_IF_NULL_LOGE_RETURN(g_pluginProxy, HKS_ERROR_API_NOT_SUPPORTED, "import keystore not supported")

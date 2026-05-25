@@ -59,6 +59,12 @@ int32_t HksPluginOnAccessWrapKey(uint32_t code, const void *data, void *reply)
     return HKS_SUCCESS;
 }
 
+int32_t HksPluginCheck(void)
+{
+    HKS_LOG_I("Plugin Check");
+    return HKS_SUCCESS;
+}
+
 int32_t HksPluginImportWrappedKey(const struct HksImportKeyStoreArgs *data, struct HksBlob *reply)
 {
     (void)(data);
