@@ -17,6 +17,7 @@
 #define HKS_CLIENT_SERVICE_COMMON_H
 
 #include "hks_type.h"
+#include "hks_type_inner.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,6 +35,11 @@ bool HksGetScreenState(void);
 bool IsSeSecurityLevel(const struct HksParamSet *paramSet);
 
 bool IsSeHandle(const struct HksBlob *handle);
+
+int32_t CheckKeySecuritySeFromKeyFile(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *keyFromFile, bool *isSeCalling);
+
+void DecrementSeCountByService(bool isSeCalling);
 
 #ifdef __cplusplus
 }

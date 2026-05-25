@@ -153,6 +153,7 @@ static void GetKeyAccessInfo(const struct HksParamSet *paramSet, HksEventKeyAcce
 static void GetKeyInfo(const struct HksParamSet *paramSet, const struct HksBlob *keyAlias,
     const struct HksBlob *key, HksEventKeyInfo *keyInfo)
 {
+    keyInfo->keySecurityLevel = HKS_KEY_SECURITY_LEVEL_DEFAULT;
     struct HksParam *param = nullptr;
     if (HksGetParam(paramSet, HKS_TAG_AUTH_STORAGE_LEVEL, &param) == HKS_SUCCESS) {
         keyInfo->storageLevel = param->uint32Param;
@@ -172,6 +173,10 @@ static void GetKeyInfo(const struct HksParamSet *paramSet, const struct HksBlob 
 
     if (HksGetParam(paramSet, HKS_TAG_KEY_FLAG, &param) == HKS_SUCCESS) {
         keyInfo->keyFlag = param->uint32Param;
+    }
+
+    if (HksGetParam(paramSet, HKS_TAG_KEY_SECURITY_LEVEL, &param) == HKS_SUCCESS) {
+        keyInfo->keySecurityLevel = static_cast<int32_t>(param->uint32Param);
     }
 
     if (keyAlias != nullptr) {

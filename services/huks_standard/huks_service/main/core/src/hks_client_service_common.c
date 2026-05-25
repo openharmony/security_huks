@@ -23,8 +23,13 @@
 #include "hks_log.h"
 #include "hks_param.h"
 #include "hks_template.h"
+#include "hks_event_info.h"
 #include "hks_type_enum.h"
 #include "hks_type_inner.h"
+
+#ifdef L2_STANDARD
+#include "hks_se_api_wrap.h"
+#endif
 
 static volatile atomic_bool g_isScreenOn = false;
 
@@ -116,4 +121,47 @@ bool IsSeHandle(const struct HksBlob *handle)
     }
 
     return false;
+}
+
+int32_t CheckKeySecuritySeFromKeyFile(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *keyFromFile, bool *isSeCalling)
+{
+#ifdef L2_STANDARD
+    if (keyFromFile == NULL || keyFromFile->data == NULL || keyFromFile->size < sizeof(struct HksParamSet)) {
+        return HKS_SUCCESS;
+    }
+    const struct HksParamSet *keyParamSet = (const struct HksParamSet *)keyFromFile->data;
+    struct HksParam *securityLevelParam = NULL;
+    int32_t ret = HksGetParam(keyParamSet, HKS_TAG_KEY_SECURITY_LEVEL, &securityLevelParam);
+    HKS_IF_TRUE_RETURN(ret != HKS_SUCCESS, HKS_SUCCESS)
+
+    if (securityLevelParam->uint32Param == HKS_KEY_SECURITY_LEVEL_SE ||
+        securityLevelParam->uint32Param == HKS_KEY_SECURITY_LEVEL_INDEPENDENT_SE) {
+        ret = HksSePermissionCheck(processInfo);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Se permission check failed.")
+
+        ret = HksSeIncrementSeCount();
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Failed to increment SE call count.")
+
+        *isSeCalling = true;
+    }
+    return HKS_SUCCESS;
+#else
+    (void)processInfo;
+    (void)keyFromFile;
+    (void)isSeCalling;
+    return HKS_SUCCESS;
+#endif
+}
+
+void DecrementSeCountByService(bool isSeCalling)
+{
+#ifdef L2_STANDARD
+    if (isSeCalling) {
+        (void)HksSeDecrementSeCount();
+        return;
+    }
+#else
+    (void)isSeCalling;
+#endif
 }

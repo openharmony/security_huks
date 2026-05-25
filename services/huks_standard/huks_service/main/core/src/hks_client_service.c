@@ -73,6 +73,7 @@
 #include "hks_ha_event_report.h"
 #include "hks_ukey_three_stage_adapter.h"
 #include "hks_report_ukey_event.h"
+#include "hks_se_api_wrap.h"
 #endif
 
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
@@ -985,6 +986,28 @@ static int32_t GetAndImportKeystoreKey(const struct HksImportWrappedInnerArgs *a
     return ret;
 }
 
+#ifdef L2_STANDARD
+static bool IsSeFromKeyBlob(const struct HksBlob *keyFromFile)
+{
+    const struct HksParamSet *keyParamSet = (const struct HksParamSet *)keyFromFile->data;
+    if (HksCheckParamSet(keyParamSet, keyFromFile->size) != HKS_SUCCESS) {
+        return false;
+    }
+    return IsSeSecurityLevel(keyParamSet);
+}
+
+static int32_t CheckImportWrappedKeySeMatch(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *wrappingKeyFromFile, const struct HksParamSet *paramSet)
+{
+    (void)processInfo;
+    if (IsSeFromKeyBlob(wrappingKeyFromFile) != IsSeSecurityLevel(paramSet)) {
+        HKS_LOG_E("ImportWrappedKey: wrapping key and paramSet SE level mismatch");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    return HKS_SUCCESS;
+}
+#endif
+
 static int32_t GetAndImportWrappedKey(const struct HksImportWrappedInnerArgs *args,
     struct HksParamSet **newParamSet, struct HksBlob *keyOut)
 {
@@ -1002,6 +1025,11 @@ static int32_t GetAndImportWrappedKey(const struct HksImportWrappedInnerArgs *ar
         ret = GetKeyAndNewParamSetInForGenKeyInService(args->processInfo, args->wrappingKeyAlias, args->paramSet,
             &wrappingKeyFromFile, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get wrapping key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
+
+#ifdef L2_STANDARD
+        ret = CheckImportWrappedKeySeMatch(args->processInfo, &wrappingKeyFromFile, args->paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ImportWrappedKey SE level mismatch, ret = %" LOG_PUBLIC "d", ret)
+#endif
 
         ret = CheckKeyCondition(args->processInfo, args->keyAlias, *newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check condition failed, ret = %" LOG_PUBLIC "d", ret)
@@ -1061,12 +1089,24 @@ int32_t HksServiceImportWrappedKey(const struct HksProcessInfo *processInfo, con
     return ret;
 }
 
+#ifdef SUPPORT_STORAGE_BACKUP
+static int32_t CheckBakKeySecuritySeIfNeeded(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *keyFromFile, bool *isSeCalling)
+{
+    if (*isSeCalling) {
+        return HKS_SUCCESS;
+    }
+    return CheckKeySecuritySeFromKeyFile(processInfo, keyFromFile, isSeCalling);
+}
+#endif
+
 int32_t HksServiceExportPublicKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *key)
 {
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob keyFromFile = { 0, NULL };
+    bool isSeCalling = false;
 
     do {
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
@@ -1084,9 +1124,9 @@ int32_t HksServiceExportPublicKey(const struct HksProcessInfo *processInfo, cons
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check export public key params failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
-        HKS_IF_NOT_SUCC_LOGE(ret, "export public: get main key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
-
         if (ret == HKS_SUCCESS) {
+            ret = CheckKeySecuritySeFromKeyFile(processInfo, &keyFromFile, &isSeCalling);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckKeySecuritySeFromKeyFile fail, ret = %" LOG_PUBLIC "d", ret)
             ret = HuksAccessExportPublicKey(&keyFromFile, newParamSet, key);
             IfNotSuccAppendHdiErrorInfo(ret);
         }
@@ -1096,6 +1136,8 @@ int32_t HksServiceExportPublicKey(const struct HksProcessInfo *processInfo, cons
             ret = GetKeyData(processInfo, keyAlias, newParamSet, &keyFromFile, HKS_STORAGE_TYPE_BAK_KEY);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
                 "export public: get bak key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
+            ret = CheckBakKeySecuritySeIfNeeded(processInfo, &keyFromFile, &isSeCalling);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckBakKeySeIfNeeded fail, ret = %" LOG_PUBLIC "d", ret)
             ret = HuksAccessExportPublicKey(&keyFromFile, newParamSet, key);
             IfNotSuccAppendHdiErrorInfo(ret);
         }
@@ -1104,6 +1146,7 @@ int32_t HksServiceExportPublicKey(const struct HksProcessInfo *processInfo, cons
 
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
+    DecrementSeCountByService(isSeCalling);
 
 #ifdef L2_STANDARD
     HksReport(__func__, processInfo, NULL, ret);
@@ -1445,54 +1488,89 @@ static int32_t AccessAttestKey(struct HksBlob *keyFromFile, struct HksParamSet *
     return ret;
 }
 
+struct HksAttestKeyCtx {
+    const struct HksProcessInfo *processInfo;
+    const struct HksBlob *keyAlias;
+    const struct HksParamSet *paramSet;
+    struct HksBlob *certChain;
+    const uint8_t *remoteObject;
+    struct HksBlob keyFromFile;
+    struct HksParamSet *newParamSet;
+    struct HksParamSet *processInfoParamSet;
+    bool isSeCalling;
+    uint32_t certChainCapacity;
+    int32_t ret;
+};
+
+static void AttestKeyCoreOp(struct HksAttestKeyCtx *ctx)
+{
+    ctx->ret = HksCheckAttestKeyParams(&ctx->processInfo->processName, ctx->keyAlias, ctx->paramSet, ctx->certChain);
+    do {
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "check attest key param fail");
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+        ctx->ret = GetKeyAndNewParamSet(ctx->processInfo, ctx->keyAlias, ctx->paramSet,
+            &ctx->keyFromFile, &ctx->processInfoParamSet);
+        HKS_IF_NOT_SUCC_LOGE(ctx->ret, "GetKeyAndNewParamSet failed, ret = %" LOG_PUBLIC "d.", ctx->ret)
+#else
+        ctx->ret = GetKeyAndNewParamSet(ctx->processInfo, ctx->keyAlias, ctx->paramSet,
+            &ctx->keyFromFile, &ctx->newParamSet);
+        HKS_IF_NOT_SUCC_LOGE(ctx->ret, "GetKeyAndNewParamSet failed, ret = %" LOG_PUBLIC "d.", ctx->ret)
+#endif
+        if (ctx->ret == HKS_SUCCESS) {
+            ctx->ret = CheckKeySecuritySeFromKeyFile(ctx->processInfo, &ctx->keyFromFile, &ctx->isSeCalling);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "CheckKeySecuritySeFromKeyFile fail, ret = %" LOG_PUBLIC "d", ctx->ret)
+        }
+        ctx->certChainCapacity = ctx->certChain->size;
+        if (ctx->ret == HKS_SUCCESS) {
+            ctx->ret = AddAppInfoAndModelToParamSet(ctx->processInfo, ctx->processInfoParamSet, &ctx->newParamSet);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "AddAppInfoAndModelToParam failed, ret = %" LOG_PUBLIC "d.", ctx->ret)
+            ctx->ret = AccessAttestKey(&ctx->keyFromFile, ctx->newParamSet, ctx->certChain);
+        }
+#ifdef SUPPORT_STORAGE_BACKUP
+        if (ctx->ret == HKS_ERROR_CORRUPT_FILE || ctx->ret == HKS_ERROR_FILE_SIZE_FAIL ||
+            ctx->ret == HKS_ERROR_NOT_EXIST) {
+            HKS_FREE_BLOB(ctx->keyFromFile);
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+            HksFreeParamSet(&ctx->newParamSet);
+#endif
+            ctx->ret = AddAppInfoAndModelToParamSet(ctx->processInfo, ctx->processInfoParamSet, &ctx->newParamSet);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "AddAppInfoAndModelToParam failed, ret = %" LOG_PUBLIC "d.", ctx->ret)
+            ctx->ret = GetKeyData(ctx->processInfo, ctx->keyAlias, ctx->newParamSet, &ctx->keyFromFile,
+                HKS_STORAGE_TYPE_BAK_KEY);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "get bak key and new param failed, ret = %" LOG_PUBLIC "d", ctx->ret)
+            ctx->ret = CheckBakKeySecuritySeIfNeeded(ctx->processInfo, &ctx->keyFromFile, &ctx->isSeCalling);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "CheckBakKeySeIfNeeded fail, ret = %" LOG_PUBLIC "d", ctx->ret)
+            ctx->ret = AccessAttestKey(&ctx->keyFromFile, ctx->newParamSet, ctx->certChain);
+        }
+#endif
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "HuksAttestKey fail, ret = %" LOG_PUBLIC "d.", ctx->ret)
+        ctx->ret = DcmGenerateCertChainInAttestKey(ctx->processInfo, ctx->paramSet,
+            ctx->remoteObject, ctx->certChain, ctx->certChainCapacity);
+    } while (0);
+}
+
 int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *certChain, const uint8_t *remoteObject)
 {
     uint64_t startTime = 0;
     (void)HksElapsedRealTime(&startTime);
     struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
-    struct HksBlob keyFromFile = { 0, NULL };
-    struct HksParamSet *newParamSet = NULL;
-    struct HksParamSet *processInfoParamSet = NULL;
-    int32_t ret = HksCheckAttestKeyParams(&processInfo->processName, keyAlias, paramSet, certChain);
-    do {
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check attest key param fail");
-#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
-        ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &processInfoParamSet);
-        HKS_IF_NOT_SUCC_LOGE(ret, "GetKeyAndNewParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
-#else
-        ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
-        HKS_IF_NOT_SUCC_LOGE(ret, "GetKeyAndNewParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
-#endif
-        uint32_t certChainCapacity = certChain->size;
-        if (ret == HKS_SUCCESS) {
-            ret = AddAppInfoAndModelToParamSet(processInfo, processInfoParamSet, &newParamSet);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddAppInfoAndModelToParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
-            ret = AccessAttestKey(&keyFromFile, newParamSet, certChain);
-        }
-#ifdef SUPPORT_STORAGE_BACKUP
-        if (ret == HKS_ERROR_CORRUPT_FILE || ret == HKS_ERROR_FILE_SIZE_FAIL || ret == HKS_ERROR_NOT_EXIST) {
-            HKS_FREE_BLOB(keyFromFile);
-#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
-            HksFreeParamSet(&newParamSet);
-#endif
-            ret = AddAppInfoAndModelToParamSet(processInfo, processInfoParamSet, &newParamSet);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddAppInfoAndModelToParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
-            ret = GetKeyData(processInfo, keyAlias, newParamSet, &keyFromFile, HKS_STORAGE_TYPE_BAK_KEY);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get bak key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
-            ret = AccessAttestKey(&keyFromFile, newParamSet, certChain);
-        }
-#endif
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAttestKey fail, ret = %" LOG_PUBLIC "d.", ret)
-        ret = DcmGenerateCertChainInAttestKey(processInfo, paramSet, remoteObject, certChain, certChainCapacity);
-    } while (0);
+    struct HksAttestKeyCtx ctx = {
+        .processInfo = processInfo, .keyAlias = keyAlias,
+        .paramSet = paramSet, .certChain = certChain, .remoteObject = remoteObject,
+        .keyFromFile = { 0, NULL }, .newParamSet = NULL,
+        .processInfoParamSet = NULL, .isSeCalling = false,
+        .certChainCapacity = 0, .ret = 0
+    };
+    AttestKeyCoreOp(&ctx);
 #ifdef L2_STANDARD
-    HksOneStageReportInfo info = {ret, startTime, traceId.traceId.chainId, __func__, HKS_ONE_STAGE_ATTEST};
-    (void)HksOneStageEventReport(keyAlias, &keyFromFile, newParamSet, processInfo, &info);
+    HksOneStageReportInfo info = {ctx.ret, startTime, traceId.traceId.chainId, __func__, HKS_ONE_STAGE_ATTEST};
+    (void)HksOneStageEventReport(keyAlias, &ctx.keyFromFile, ctx.newParamSet, processInfo, &info);
 #endif
 
-    AttestFree(&keyFromFile, &newParamSet, &processInfoParamSet, &traceId);
-    return ret;
+    AttestFree(&ctx.keyFromFile, &ctx.newParamSet, &ctx.processInfoParamSet, &traceId);
+    DecrementSeCountByService(ctx.isSeCalling);
+    return ctx.ret;
 }
 #else // HKS_SUPPORT_API_ATTEST_KEY
 int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
@@ -1607,61 +1685,89 @@ static void MarkAndDeleteOperationByUnion(HksOperationUnion *unionOp, const stru
     }
 }
 
+struct HksInitCtx {
+    const struct HksProcessInfo *processInfo;
+    const struct HksBlob *keyAlias;
+    const struct HksParamSet *paramSet;
+    struct HksBlob *handle;
+    struct HksBlob *token;
+    struct HksBlob keyFromFile;
+    struct HksParamSet *newParamSet;
+    struct HksHitraceId traceId;
+    uint64_t startTime;
+    bool isSeCalling;
+    int32_t ret;
+};
+
+static void InitCoreOp(struct HksInitCtx *ctx)
+{
+    do {
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+        if (HksCheckIsUkeyOperation(ctx->paramSet, &ctx->ret) == HKS_SUCCESS) {
+            ctx->ret = HksServiceOnUkeyInitSession(ctx->processInfo, ctx->keyAlias, ctx->paramSet, ctx->handle);
+            break;
+        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", ctx->ret)
+#endif
+        ctx->ret = HksCheckServiceInitParams(&ctx->processInfo->processName, ctx->keyAlias, ctx->paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "check ServiceInit params failed, ret = %" LOG_PUBLIC "d", ctx->ret)
+        ctx->ret = GetKeyAndNewParamSet(ctx->processInfo, ctx->keyAlias, ctx->paramSet,
+            &ctx->keyFromFile, &ctx->newParamSet);
+        if (ctx->ret == HKS_SUCCESS) {
+            ctx->ret = CheckKeySecuritySeFromKeyFile(ctx->processInfo, &ctx->keyFromFile, &ctx->isSeCalling);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "CheckKeySecuritySeFromKeyFile fail, ret = %" LOG_PUBLIC "d", ctx->ret)
+            ctx->ret = HuksAccessInit(&ctx->keyFromFile, ctx->newParamSet, ctx->handle, ctx->token);
+            IfNotSuccAppendHdiErrorInfo(ctx->ret);
+        }
+#ifdef SUPPORT_STORAGE_BACKUP
+        if (ctx->ret == HKS_ERROR_CORRUPT_FILE || ctx->ret == HKS_ERROR_FILE_SIZE_FAIL ||
+            ctx->ret == HKS_ERROR_NOT_EXIST) {
+            HKS_FREE_BLOB(ctx->keyFromFile);
+            ctx->ret = GetKeyData(ctx->processInfo, ctx->keyAlias, ctx->newParamSet,
+                &ctx->keyFromFile, HKS_STORAGE_TYPE_BAK_KEY);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "get bak key and new param failed, ret = %" LOG_PUBLIC "d", ctx->ret)
+            ctx->ret = CheckBakKeySecuritySeIfNeeded(ctx->processInfo, &ctx->keyFromFile, &ctx->isSeCalling);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "CheckBakKeySeIfNeeded fail, ret = %" LOG_PUBLIC "d", ctx->ret)
+            ctx->ret = HuksAccessInit(&ctx->keyFromFile, ctx->newParamSet, ctx->handle, ctx->token);
+            IfNotSuccAppendHdiErrorInfo(ctx->ret);
+        }
+#endif
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "Huks Init failed, ret = %" LOG_PUBLIC "d", ctx->ret)
+        ctx->ret = CreateOperation(ctx->processInfo, ctx->paramSet, ctx->handle, true);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "create operation failed, ret = %" LOG_PUBLIC "d", ctx->ret)
+    } while (0);
+}
+
+static void InitCleanup(struct HksInitCtx *ctx)
+{
+    HKS_FREE_BLOB(ctx->keyFromFile);
+    HksFreeParamSet(&ctx->newParamSet);
+    DecrementSeCountByService(ctx->isSeCalling);
+    HksHitraceEnd(&ctx->traceId);
+}
+
 int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *handle, struct HksBlob *token)
 {
-    uint64_t startTime = 0;
-    (void)HksElapsedRealTime(&startTime);
-    int32_t ret;
-    struct HksParamSet *newParamSet = NULL;
-    struct HksBlob keyFromFile = { 0, NULL };
-    struct HksHitraceId traceId = {0};
-
+    struct HksInitCtx ctx = {
+        .processInfo = processInfo, .keyAlias = keyAlias,
+        .paramSet = paramSet, .handle = handle, .token = token,
+        .keyFromFile = { 0, NULL }, .newParamSet = NULL,
+        .traceId = {0}, .startTime = 0, .isSeCalling = false, .ret = 0
+    };
+    (void)HksElapsedRealTime(&ctx.startTime);
 #ifdef L2_STANDARD
-    traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
+    ctx.traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
 #endif
-
-    do {
-#ifdef HKS_UKEY_EXTENSION_CRYPTO
-        if (HksCheckIsUkeyOperation(paramSet, &ret) == HKS_SUCCESS) {
-            ret = HksServiceOnUkeyInitSession(processInfo, keyAlias, paramSet, handle);
-            break;
-        }
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", ret)
-#endif
-        ret = HksCheckServiceInitParams(&processInfo->processName, keyAlias, paramSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check ServiceInit params failed, ret = %" LOG_PUBLIC "d", ret)
-        ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
-        HKS_IF_NOT_SUCC_LOGE(ret, "GetKeyAndNewParamSet failed, ret = %" LOG_PUBLIC "d", ret)
-
-        if (ret == HKS_SUCCESS) {
-            ret = HuksAccessInit(&keyFromFile, newParamSet, handle, token);
-            IfNotSuccAppendHdiErrorInfo(ret);
-        }
-#ifdef SUPPORT_STORAGE_BACKUP
-        if (ret == HKS_ERROR_CORRUPT_FILE || ret == HKS_ERROR_FILE_SIZE_FAIL || ret == HKS_ERROR_NOT_EXIST) {
-            HKS_FREE_BLOB(keyFromFile);
-            ret = GetKeyData(processInfo, keyAlias, newParamSet, &keyFromFile, HKS_STORAGE_TYPE_BAK_KEY);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get bak key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
-            ret = HuksAccessInit(&keyFromFile, newParamSet, handle, token);
-            IfNotSuccAppendHdiErrorInfo(ret);
-        }
-#endif
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Huks Init failed, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = CreateOperation(processInfo, paramSet, handle, true);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "create operation failed, ret = %" LOG_PUBLIC "d", ret)
-    } while (0);
+    InitCoreOp(&ctx);
 #ifdef L2_STANDARD
     HksEventInfo eventInfo = { };
-    (void)HksGetInitEventInfo(keyAlias, &keyFromFile, paramSet, processInfo, &eventInfo);
-    HksThreeStageReportInfo info = { ret, 0, HKS_INIT, startTime, traceId.traceId.chainId, handle };
-    (void)HksServiceInitReport(__func__, processInfo, newParamSet, &info, &eventInfo);
+    (void)HksGetInitEventInfo(ctx.keyAlias, &ctx.keyFromFile, ctx.paramSet, ctx.processInfo, &eventInfo);
+    HksThreeStageReportInfo info = { ctx.ret, 0, HKS_INIT, ctx.startTime, ctx.traceId.traceId.chainId, ctx.handle };
+    (void)HksServiceInitReport(__func__, ctx.processInfo, ctx.newParamSet, &info, &eventInfo);
 #endif
-    HKS_FREE_BLOB(keyFromFile);
-    HksFreeParamSet(&newParamSet);
-    HksHitraceEnd(&traceId);
-    return ret;
+    InitCleanup(&ctx);
+    return ctx.ret;
 }
 
 static int32_t HksServiceCheckBatchUpdateTime(struct HksOperation *operation)
@@ -2271,6 +2377,7 @@ int32_t HksServiceWrapKey(const struct HksProcessInfo *processInfo, const struct
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob keyFromFile = { 0, NULL };
+    bool isSeCalling = false;
 
     do {
         ret = HksCheckWrapAndUnwrapKeyParams(&processInfo->processName, keyAlias, paramSet, wrappedKey);
@@ -2279,8 +2386,11 @@ int32_t HksServiceWrapKey(const struct HksProcessInfo *processInfo, const struct
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetKeyAndNewParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
 
+        ret = CheckKeySecuritySeFromKeyFile(processInfo, &keyFromFile, &isSeCalling);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckKeySecuritySeFromKeyFile fail, ret = %" LOG_PUBLIC "d", ret)
+
         ret = CheckWrapKeyType(newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check wrap type failed, ret = %" LOG_PUBLIC "d.", ret)
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check wrap type failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = AccessWrapKey(&keyFromFile, newParamSet, wrappedKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAccessWrapKey failed, ret = %" LOG_PUBLIC "d", ret)
@@ -2288,6 +2398,7 @@ int32_t HksServiceWrapKey(const struct HksProcessInfo *processInfo, const struct
 
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
+    DecrementSeCountByService(isSeCalling);
     return ret;
 }
 
