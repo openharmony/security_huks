@@ -1586,6 +1586,9 @@ void HksIpcWrapKey(const struct HksBlob *srcData, const uint8_t *context)
     int32_t ret;
 
     do {
+        ret = HksPluginCheck();
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "api not support")
+
         ret  = HksWrapKeyUnpack(srcData, &keyAlias, &paramSet, &wrappedKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "unpack data for Ipc fail")
 
@@ -1631,6 +1634,9 @@ void HksIpcUnwrapKey(const struct HksBlob *srcData, const uint8_t *context)
     bool isSeCalling = false;
 
     do {
+        ret = HksPluginCheck();
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "api not support")
+
         ret  = HksUnwrapKeyUnpack(srcData, &keyAlias, &paramSet, &wrappedKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "unpack data for Ipc fail")
 
