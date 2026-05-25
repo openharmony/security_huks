@@ -216,7 +216,7 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest011, TestSize.Level0)
     uint32_t sendSize = 100;
     uint32_t msgCode = HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY;
     
-    hksExtStub.SendAsyncReply(errCode, sendData, sendSize, msgCode);
+    hksExtStub.SendAsyncReply(errCode, sendData, sendSize, msgCode, nullptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest012, TestSize.Level0)
@@ -229,7 +229,7 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest012, TestSize.Level0)
     uint32_t sendSize = 0;
     uint32_t msgCode = HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY;
     
-    hksExtStub.SendAsyncReply(errCode, sendData, sendSize, msgCode);
+    hksExtStub.SendAsyncReply(errCode, sendData, sendSize, msgCode, nullptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest013, TestSize.Level0)
@@ -255,7 +255,7 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest014, TestSize.Level0)
     uint32_t sendSize = 50;
     uint32_t msgCode = HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY;
     
-    hksExtStub.SendAsyncReply(errCode, sendData, sendSize, msgCode);
+    hksExtStub.SendAsyncReply(errCode, sendData, sendSize, msgCode, nullptr);
     
     auto result = hksExtStub.WaitForAsyncReply(1);
     uint32_t retErrCode = std::get<0>(result);
@@ -392,7 +392,7 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest022, TestSize.Level0)
         uint32_t sendSize = i == 0 ? 50 : 0;
         uint32_t msgCode = HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY;
         
-        hksExtStub.SendAsyncReply(errCode, sendData, sendSize, msgCode);
+        hksExtStub.SendAsyncReply(errCode, sendData, sendSize, msgCode, nullptr);
         
         auto result = hksExtStub.WaitForAsyncReply(1);
         HKS_LOG_I("iteration %d: errCode %u, size %u", i, std::get<0>(result), std::get<2>(result));
