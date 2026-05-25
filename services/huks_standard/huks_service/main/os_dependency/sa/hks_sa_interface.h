@@ -74,6 +74,7 @@ public:
         uint32_t msgCode, const struct HksExternalErrorInfo *errInfo) override;
     auto WaitForAsyncReply(int timeout)
         -> std::tuple<uint32_t, std::unique_ptr<uint8_t[]>, uint32_t, uint32_t, HksExternalErrorInfo*>;
+
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 private:
     int ProcessExtGetRemotePropertyReply(MessageParcel& data);
