@@ -799,7 +799,7 @@ static napi_value CreateExtErrorInfoObject(napi_env env, int32_t errVal, const c
 napi_value HuksNapiGetErrorInfo(napi_env env, napi_callback_info info)
 {
     int32_t errVal = HksGetUkeyGlobalErrVal();
-    char errorDesc[HKS_UKEY_ERROR_DESC_MAX_LEN] = {0};
+    char errorDesc[HKS_UKEY_ERROR_DESC_MAX_LEN + 1] = {0};
     HksGetUkeyGlobalErrorDesc(errorDesc, sizeof(errorDesc));
     return CreateExtErrorInfoObject(env, errVal, errorDesc);
 }
