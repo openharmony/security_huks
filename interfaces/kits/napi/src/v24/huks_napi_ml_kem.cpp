@@ -19,6 +19,7 @@
 #include "securec.h"
 
 #include "hks_api.h"
+#include "hks_errcode_adapter.h"
 #include "hks_log.h"
 #include "hks_template.h"
 #include "hks_mem.h"
@@ -225,11 +226,7 @@ static napi_value MlKemEncapsulateAsyncWork(napi_env env, MlKemEncapsulateAsyncC
                 resultData.sharedSecret = &napiContext->encapResult->sharedSecret;
             }
 
-            if (napiContext->result == HKS_ERROR_INVALID_ARGUMENT ||
-                napiContext->result == HKS_ERROR_NULL_POINTER ||
-                napiContext->result == HKS_ERROR_PARAM_NOT_EXIST) {
-                napiContext->result = HKS_ERROR_NEW_INVALID_ARGUMENT;
-            }
+            napiContext->result = HksReplaceErrCodeIf401(napiContext->result);
 
             HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
             DeleteMlKemEncapsulateAsyncContext(env, napiContext);
@@ -433,12 +430,8 @@ static napi_value MlKemDecapsulateAsyncWork(napi_env env, MlKemDecapsulateAsyncC
                 resultData.sharedSecret = napiContext->encapOrsharedSecret;
             }
 
-            if (napiContext->result == HKS_ERROR_INVALID_ARGUMENT ||
-                napiContext->result == HKS_ERROR_NULL_POINTER ||
-                napiContext->result == HKS_ERROR_PARAM_NOT_EXIST) {
-                napiContext->result = HKS_ERROR_NEW_INVALID_ARGUMENT;
-            }
-
+            napiContext->result = HksReplaceErrCodeIf401(napiContext->result);
+            
             HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
             DeleteMlKemDecapsulateAsyncContext(env, napiContext);
         },

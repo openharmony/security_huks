@@ -2387,7 +2387,7 @@ int32_t HksServiceEncapsulate(const struct HksProcessInfo *processInfo, const st
             break;
         }
 
-        HksManageStoreKeyBlob(processInfo, newShareParamSet, &sharedKeyAlias->blob, &encapResult->sharedSecret,
+        ret = HksManageStoreKeyBlob(processInfo, newShareParamSet, &sharedKeyAlias->blob, &encapResult->sharedSecret,
             HKS_STORAGE_TYPE_KEY);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
         (void)memset_s(encapResult->sharedSecret.data, encapResult->sharedSecret.size, 0,
@@ -2448,7 +2448,7 @@ int32_t HksServiceDecapsulate(const struct HksProcessInfo *processInfo, const st
         ret = HksGetParam(newSharedKeyParamSet, HKS_TAG_KEY_ALIAS, &keyalias);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCoreDecapsulate get key alias fail")
 
-        HksManageStoreKeyBlob(processInfo, newSharedKeyParamSet, &keyalias->blob, &outData,
+        ret = HksManageStoreKeyBlob(processInfo, newSharedKeyParamSet, &keyalias->blob, &outData,
             HKS_STORAGE_TYPE_KEY);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
         (void)memset_s(outData.data, outData.size, 0, outData.size);

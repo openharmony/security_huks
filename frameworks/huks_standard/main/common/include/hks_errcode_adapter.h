@@ -44,6 +44,8 @@ extern "C" {
 
 struct HksResult HksConvertErrCode(int32_t ret);
 
+int32_t HksReplaceErrCodeIf401(int32_t ret);
+
 #ifdef __cplusplus
 }
 #endif
