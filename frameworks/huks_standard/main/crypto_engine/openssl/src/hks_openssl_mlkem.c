@@ -126,6 +126,7 @@ static int32_t MlKemEncapsulate(EVP_PKEY *pkey, struct HksEncapsulationResult *e
         HKS_FREE(encapResult->sharedSecret.data);
         encapResult->encapsulatedData.size = 0;
         encapResult->sharedSecret.size = 0;
+        ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     EVP_PKEY_CTX_free(ctx);
@@ -237,6 +238,7 @@ static int32_t MlKemDecapsulate(EVP_PKEY *pkey, const struct HksBlob *ciphertext
     if (ret != HKS_SUCCESS) {
         HKS_FREE(sharedSecret->data);
         sharedSecret->size = 0;
+        ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     EVP_PKEY_CTX_free(ctx);

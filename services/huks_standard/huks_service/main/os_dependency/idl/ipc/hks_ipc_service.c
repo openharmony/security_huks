@@ -744,6 +744,26 @@ static void DecrementSeCountByParamSet(bool isSeCalling)
 #endif
 }
 
+static int32_t HksGenKeyCheckMlControl(struct HksParamSet *paramSet)
+{
+    struct HksParam *alg = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &alg);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NEW_INVALID_ARGUMENT, "please check alg")
+
+    if (alg->uint32Param == HKS_ALG_ML_KEM) {
+        struct HksParam *authToken = NULL;
+        ret = HksGetParam(paramSet, HKS_TAG_KEY_AUTH_ACCESS_TYPE, &authToken);
+        HKS_IF_TRUE_LOGE_RETURN(ret == HKS_SUCCESS, HKS_ERROR_NEW_INVALID_ARGUMENT,
+            "MLKEM not support Authtoken")
+
+        ret = HksGetParam(paramSet, HKS_TAG_CHALLENGE_TYPE, &authToken);
+        HKS_IF_TRUE_LOGE_RETURN(ret == HKS_SUCCESS, HKS_ERROR_NEW_INVALID_ARGUMENT,
+            "MLKEM not support Authtoken")
+    }
+
+    return HKS_SUCCESS;
+}
+
 void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob keyAlias = { 0, NULL };
@@ -763,6 +783,9 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
             ret = HksAllocateMemForKey(inParamSet, &keyOut);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAllocateMemForKey fail, ret = %" LOG_PUBLIC "d", ret)
         }
+
+        ret = HksGenKeyCheckMlControl(inParamSet);
+        HKS_IF_NOT_SUCC_BREAK(ret, "MLKEM not support authtoken")
 
         ret = HksGetProcessInfoForIPC(inParamSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)

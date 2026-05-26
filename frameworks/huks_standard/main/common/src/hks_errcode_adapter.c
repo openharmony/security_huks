@@ -964,3 +964,12 @@ struct HksResult HksConvertErrCode(int32_t ret)
     return result;
 }
 
+int32_t HksReplaceErrCodeIf401(int32_t ret)
+{
+    struct HksResult result = HksConvertErrCode(ret);
+    if (result.errorCode == HUKS_ERR_CODE_ILLEGAL_ARGUMENT) {
+        return HKS_ERROR_NEW_INVALID_ARGUMENT;
+    }
+    return ret;
+}
+

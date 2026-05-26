@@ -456,7 +456,7 @@ int32_t HksCoreUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet
     return HKS_ERROR_NOT_SUPPORTED;
 }
 #endif
-
+#ifdef HKS_SUPPORT_ML_KEM
 static int32_t HksMlKemImportCheck(const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
     struct HksBlob *shareKey)
 {
@@ -464,6 +464,9 @@ static int32_t HksMlKemImportCheck(const struct HksBlob *sharedKeyAlias, const s
     struct HksParam *keySize = NULL;
     int32_t ret = HksGetParam(sharedKeyParamSet, HKS_TAG_KEY_SIZE, &keySize);
     HKS_IF_TRUE_RETURN(ret == HKS_ERROR_PARAM_NOT_EXIST, HKS_SUCCESS)
+
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckIfNeedIsDevicePasswordSet(sharedKeyParamSet), HKS_ERROR_DEVICE_PASSWORD_UNSET,
+        "a device password is required but not set yet!")
 
     outKey.data = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
     HKS_IF_NULL_RETURN(outKey.data, HKS_ERROR_MALLOC_FAIL)
@@ -474,6 +477,17 @@ static int32_t HksMlKemImportCheck(const struct HksBlob *sharedKeyAlias, const s
 
     HKS_MEMSET_FREE_BLOB(*shareKey);
     *shareKey = outKey;
+    return ret;
+}
+
+ static int32_t HksCheckKeyPurpose(const struct HksParamSet *paramSet, uint32_t purpose)
+{
+    struct HksParam *keyPurpose = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &keyPurpose);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "HksCheckKeyPurpose get key purpose failed")
+
+    HKS_IF_TRUE_LOGE_RETURN((keyPurpose->uint32Param & purpose) != purpose, HKS_ERROR_INVALID_PURPOSE,
+        "key purpose:%" LOG_PUBLIC "d, expect:%" LOG_PUBLIC "d", keyPurpose->uint32Param, purpose)
     return ret;
 }
 
@@ -490,6 +504,9 @@ int32_t HksCoreEncapsulate(const struct HksBlob *key, const struct HksParamSet *
         ret = HksProcessIdentityVerify(keyNode->paramSet, paramSet);
         HKS_IF_NOT_SUCC_BREAK(ret)
 
+        ret = HksCheckKeyPurpose(keyNode->paramSet, HKS_KEY_PURPOSE_WRAP);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "kem encaps key purpose check fail")
+
         ret = HksGetRawKey(keyNode->paramSet, &rawKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Encapsulate get raw key failed!")
 
@@ -497,7 +514,7 @@ int32_t HksCoreEncapsulate(const struct HksBlob *key, const struct HksParamSet *
         spec.algType = HKS_ALG_ML_KEM;
 
         struct HksParam *keySizeParam = NULL;
-        ret = HksGetParam(paramSet, HKS_TAG_KEY_SIZE, &keySizeParam);
+        ret = HksGetParam(keyNode->paramSet, HKS_TAG_KEY_SIZE, &keySizeParam);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key size param failed!")
         spec.keyLen = keySizeParam->uint32Param;
 
@@ -529,11 +546,14 @@ int32_t HksCoreDecapsulate(const struct HksBlob *key, const struct HksParamSet *
         ret = HksGetRawKey(keyNode->paramSet, &rawKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Decapsulate get raw key failed!")
 
+        ret = HksCheckKeyPurpose(keyNode->paramSet, HKS_KEY_PURPOSE_UNWRAP);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "kem encaps key purpose check fail")
+
         struct HksKeySpec spec = {0};
         spec.algType = HKS_ALG_ML_KEM;
 
         struct HksParam *keySizeParam = NULL;
-        ret = HksGetParam(paramSet, HKS_TAG_KEY_SIZE, &keySizeParam);
+        ret = HksGetParam(keyNode->paramSet, HKS_TAG_KEY_SIZE, &keySizeParam);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key size param failed!")
         spec.keyLen = keySizeParam->uint32Param;
 
@@ -552,5 +572,30 @@ int32_t HksCoreDecapsulate(const struct HksBlob *key, const struct HksParamSet *
     HKS_MEMSET_FREE_BLOB(rawKey);
     return ret;
 }
+#else
+int32_t HksCoreDecapsulate(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksParamSet *sharedKeyParamSet, const struct HksBlob *encaps,
+    struct HksBlob *sharedSecret)
+{
+    (void)key;
+    (void)paramSet;
+    (void)sharedKeyParamSet;
+    (void)encaps;
+    (void)sharedSecret;
+    return HKS_ERROR_NOT_SUPPORTED;
+}
+
+int32_t HksCoreEncapsulate(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksEncapsulationResult *encapResult)
+{
+    (void)key;
+    (void)sharedKeyAlias;
+    (void)paramSet;
+    (void)sharedKeyParamSet;
+    (void)encapResult;
+    return HKS_ERROR_NOT_SUPPORTED;
+}
+#endif
 
 #endif /* _CUT_AUTHENTICATE_ */
