@@ -747,7 +747,7 @@ static int32_t HksGenKeyCheckMlControl(struct HksParamSet *paramSet)
 {
     struct HksParam *alg = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &alg);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NEW_INVALID_ARGUMENT, "please check alg")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL, "please check alg")
 
     if (alg->uint32Param == HKS_ALG_ML_KEM) {
         struct HksParam *authToken = NULL;
