@@ -37,7 +37,11 @@ int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 }}}
 
 extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
-    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+    struct HksBlob providerName = { 12, reinterpret_cast<uint8_t *>(const_cast<char *>("fuzz_prov")) };
+    WrapParamSet unregPs = BuildFixedParamSet({});
+    int32_t ret = HksUnregisterProvider(&providerName, unregPs.s);
+    printf("fuzz_unregisterprovider init: HksUnregisterProvider ret=%d\n", ret);
+    return 0;
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)

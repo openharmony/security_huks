@@ -54,7 +54,23 @@ int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 }}}
 
 extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
-    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+    struct HksBlob wrapAlias = { 20, reinterpret_cast<uint8_t *>(const_cast<char *>("fuzz_wrapkey_wrapping")) };
+    struct HksBlob targetAlias = { 18, reinterpret_cast<uint8_t *>(const_cast<char *>("fuzz_wrapkey_target")) };
+    WrapParamSet genPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_WRAP | HKS_KEY_PURPOSE_UNWRAP },
+        { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 } });
+    int32_t ret = HksGenerateKey(&wrapAlias, genPs.s, nullptr);
+    printf("fuzz_importwrappedkey init: GenerateKey(wrapping) ret=%d\n", ret);
+
+    uint8_t wrappedBuf[512] = {0};
+    struct HksBlob wrappedData = { 512, wrappedBuf };
+    WrapParamSet importPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_WRAP } });
+    ret = HksImportWrappedKey(&targetAlias, &wrapAlias, importPs.s, &wrappedData);
+    printf("fuzz_importwrappedkey init: HksImportWrappedKey ret=%d\n", ret);
+    return 0;
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)

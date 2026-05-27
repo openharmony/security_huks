@@ -38,7 +38,22 @@ int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 }}}
 
 extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
-    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+    struct HksBlob delAlias = { 16, reinterpret_cast<uint8_t *>(const_cast<char *>("fuzz_delete_rsa1")) };
+    WrapParamSet genPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
+        { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
+        { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PSS } });
+    int32_t ret = HksGenerateKey(&delAlias, genPs.s, nullptr);
+    printf("fuzz_deletekey init: GenerateKey ret=%d\n", ret);
+
+    ret = HksDeleteKey(&delAlias, nullptr);
+    printf("fuzz_deletekey init: HksDeleteKey ret=%d\n", ret);
+
+    struct HksBlob persistAlias = { 17, reinterpret_cast<uint8_t *>(const_cast<char *>("fuzz_delete_rsa2")) };
+    ret = HksGenerateKey(&persistAlias, genPs.s, nullptr);
+    printf("fuzz_deletekey init: GenerateKey(persist) ret=%d\n", ret);
+    return 0;
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)

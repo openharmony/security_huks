@@ -79,7 +79,14 @@ int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 }}}
 
 extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
-    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+    struct HksBlob certBuf = { 4, reinterpret_cast<uint8_t *>(const_cast<char *>("cert")) };
+    struct HksCertChain certChain = { &certBuf, 1 };
+    uint8_t paramSetOutBuf[128] = {0};
+    struct HksParamSet *paramSetOut = reinterpret_cast<struct HksParamSet *>(paramSetOutBuf);
+    paramSetOut->paramSetSize = 128;
+    int32_t ret = HksValidateCertChain(&certChain, paramSetOut);
+    printf("fuzz_validatecertchain init: HksValidateCertChain ret=%d\n", ret);
+    return 0;
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)

@@ -49,7 +49,26 @@ int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 }}}
 
 extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
-    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+    struct HksBlob hmacAlias = { 14, reinterpret_cast<uint8_t *>(const_cast<char *>("fuzz_mac_hmac")) };
+    WrapParamSet genPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_HMAC },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = 256 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_MAC },
+        { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
+        { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = true } });
+    int32_t ret = HksGenerateKey(&hmacAlias, genPs.s, nullptr);
+    printf("fuzz_mac init: GenerateKey ret=%d\n", ret);
+
+    uint8_t srcBuf[] = { 't', 'e', 's', 't' };
+    struct HksBlob srcData = { 4, srcBuf };
+    uint8_t macBuf[64] = {0};
+    struct HksBlob macData = { 64, macBuf };
+    WrapParamSet macPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_HMAC },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_MAC },
+        { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
+        { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = true } });
+    ret = HksMac(&hmacAlias, macPs.s, &srcData, &macData);
+    printf("fuzz_mac init: HksMac ret=%d\n", ret);
+    return 0;
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)

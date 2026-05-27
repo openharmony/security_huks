@@ -52,7 +52,19 @@ int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 }}}
 
 extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
-    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+    uint8_t nBuf[64] = {0};
+    uint8_t aBuf[64] = {0};
+    uint8_t eBuf[4] = {1, 0, 0, 0};
+    uint8_t xBuf[64] = {0};
+    struct HksBlob n = { 64, nBuf };
+    struct HksBlob a = { 64, aBuf };
+    struct HksBlob e = { 4, eBuf };
+    struct HksBlob x = { 64, xBuf };
+    n.data[63] = 3;
+    a.data[0] = 2;
+    int32_t ret = HksBnExpMod(&x, &a, &e, &n);
+    printf("fuzz_bnexpmod init: HksBnExpMod ret=%d\n", ret);
+    return 0;
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)

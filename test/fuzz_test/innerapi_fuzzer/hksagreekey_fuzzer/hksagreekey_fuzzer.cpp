@@ -48,7 +48,30 @@ int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp) {
 }}}
 
 extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
-    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+    struct HksBlob alias1 = { 16, reinterpret_cast<uint8_t *>(const_cast<char *>("fuzz_agree_ecc1")) };
+    struct HksBlob alias2 = { 16, reinterpret_cast<uint8_t *>(const_cast<char *>("fuzz_agree_ecc2")) };
+    WrapParamSet genPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ECDH },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ECC_KEY_SIZE_256 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE } });
+    int32_t ret = HksGenerateKey(&alias1, genPs.s, nullptr);
+    printf("fuzz_agreekey init: GenerateKey1 ret=%d\n", ret);
+    ret = HksGenerateKey(&alias2, genPs.s, nullptr);
+    printf("fuzz_agreekey init: GenerateKey2 ret=%d\n", ret);
+
+    uint8_t pubKeyBuf[512] = {0};
+    struct HksBlob pubKey2 = { 512, pubKeyBuf };
+    WrapParamSet exportPs = BuildFixedParamSet({});
+    ret = HksExportPublicKey(&alias2, exportPs.s, &pubKey2);
+    printf("fuzz_agreekey init: ExportPublicKey ret=%d\n", ret);
+
+    uint8_t agreeBuf[256] = {0};
+    struct HksBlob agreedKey = { 256, agreeBuf };
+    WrapParamSet agreePs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ECDH },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ECC_KEY_SIZE_256 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE } });
+    ret = HksAgreeKey(agreePs.s, &alias1, &pubKey2, &agreedKey);
+    printf("fuzz_agreekey init: HksAgreeKey ret=%d\n", ret);
+    return 0;
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)

@@ -40,7 +40,13 @@ int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 }}}
 
 extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
-    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+    struct HksBlob providerName = { 12, reinterpret_cast<uint8_t *>(const_cast<char *>("fuzz_prov")) };
+    uint8_t resIdBuf[64] = {0};
+    struct HksBlob resourceId = { 64, resIdBuf };
+    WrapParamSet getPs = BuildFixedParamSet({});
+    int32_t ret = HksGetResourceId(&providerName, getPs.s, &resourceId);
+    printf("fuzz_getresourceid init: HksGetResourceId ret=%d\n", ret);
+    return 0;
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)

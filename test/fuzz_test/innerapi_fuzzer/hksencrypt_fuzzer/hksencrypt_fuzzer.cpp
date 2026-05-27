@@ -49,7 +49,28 @@ int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 }}}
 
 extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
-    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+    struct HksBlob aesAlias = { 16, reinterpret_cast<uint8_t *>(const_cast<char *>("fuzz_encrypt_aes")) };
+    WrapParamSet genPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_256 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+        { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
+        { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS7 },
+        { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = true } });
+    int32_t ret = HksGenerateKey(&aesAlias, genPs.s, nullptr);
+    printf("fuzz_encrypt init: GenerateKey ret=%d\n", ret);
+
+    uint8_t srcBuf[] = { 't', 'e', 's', 't' };
+    struct HksBlob srcData = { 4, srcBuf };
+    uint8_t cipherBuf[512] = {0};
+    struct HksBlob cipherText = { 512, cipherBuf };
+    WrapParamSet encPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT },
+        { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
+        { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS7 },
+        { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = true } });
+    ret = HksEncrypt(&aesAlias, encPs.s, &srcData, &cipherText);
+    printf("fuzz_encrypt init: HksEncrypt ret=%d\n", ret);
+    return 0;
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)

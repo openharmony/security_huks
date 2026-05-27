@@ -49,7 +49,26 @@ int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 }}}
 
 extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
-    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+    struct HksBlob rsaAlias = { 14, reinterpret_cast<uint8_t *>(const_cast<char *>("fuzz_sign_rsa")) };
+    WrapParamSet genPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
+        { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
+        { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PSS } });
+    int32_t ret = HksGenerateKey(&rsaAlias, genPs.s, nullptr);
+    printf("fuzz_sign init: GenerateKey ret=%d\n", ret);
+
+    uint8_t srcBuf[] = { 't', 'e', 's', 't' };
+    struct HksBlob srcData = { 4, srcBuf };
+    uint8_t sigBuf[512] = {0};
+    struct HksBlob signature = { 512, sigBuf };
+    WrapParamSet signPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN },
+        { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
+        { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PSS } });
+    ret = HksSign(&rsaAlias, signPs.s, &srcData, &signature);
+    printf("fuzz_sign init: HksSign ret=%d\n", ret);
+    return 0;
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)

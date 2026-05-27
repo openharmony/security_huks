@@ -40,7 +40,14 @@ int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 }}}
 
 extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
-    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+    uint8_t srcBuf[] = { 't', 'e', 's', 't' };
+    struct HksBlob srcData = { 4, srcBuf };
+    uint8_t hashBuf[64] = {0};
+    struct HksBlob hash = { 64, hashBuf };
+    WrapParamSet hashPs = BuildFixedParamSet({ { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 } });
+    int32_t ret = HksHash(hashPs.s, &srcData, &hash);
+    printf("fuzz_hash init: HksHash ret=%d\n", ret);
+    return 0;
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)

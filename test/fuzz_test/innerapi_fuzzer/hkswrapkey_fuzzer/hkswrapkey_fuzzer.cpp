@@ -52,7 +52,32 @@ int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 }}}
 
 extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
-    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+    struct HksBlob wrapAlias = { 17, reinterpret_cast<uint8_t *>(const_cast<char *>("fuzz_wrap_wrapping")) };
+    struct HksBlob targetAlias = { 15, reinterpret_cast<uint8_t *>(const_cast<char *>("fuzz_wrap_target")) };
+    WrapParamSet wrapGenPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_WRAP | HKS_KEY_PURPOSE_UNWRAP },
+        { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 } });
+    int32_t ret = HksGenerateKey(&wrapAlias, wrapGenPs.s, nullptr);
+    printf("fuzz_wrapkey init: GenerateKey(wrapping) ret=%d\n", ret);
+
+    WrapParamSet targetGenPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_256 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+        { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
+        { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS7 } });
+    ret = HksGenerateKey(&targetAlias, targetGenPs.s, nullptr);
+    printf("fuzz_wrapkey init: GenerateKey(target) ret=%d\n", ret);
+
+    uint8_t wrappedBuf[512] = {0};
+    struct HksBlob wrappedData = { 512, wrappedBuf };
+    WrapParamSet wrapPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_WRAP },
+        { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 } });
+    ret = HksWrapKey(&wrapAlias, &targetAlias, wrapPs.s, &wrappedData);
+    printf("fuzz_wrapkey init: HksWrapKey ret=%d\n", ret);
+    return 0;
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)

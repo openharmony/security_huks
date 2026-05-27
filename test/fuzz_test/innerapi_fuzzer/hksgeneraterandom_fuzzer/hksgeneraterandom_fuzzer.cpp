@@ -32,7 +32,12 @@ int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 }}}
 
 extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
-    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+    uint8_t randomBuf[32] = {0};
+    struct HksBlob random = { 32, randomBuf };
+    WrapParamSet randomPs = BuildFixedParamSet({});
+    int32_t ret = HksGenerateRandom(randomPs.s, &random);
+    printf("fuzz_generaterandom init: HksGenerateRandom ret=%d\n", ret);
+    return 0;
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)

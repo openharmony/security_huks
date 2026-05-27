@@ -38,7 +38,12 @@ int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 }}}
 
 extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
-    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+    struct HksBlob resourceId = { 8, reinterpret_cast<uint8_t *>(const_cast<char *>("fuzz_res")) };
+    WrapParamSet authPs = BuildFixedParamSet({});
+    uint32_t retryCount = 0;
+    int32_t ret = HksAuthUkeyPin(&resourceId, authPs.s, &retryCount);
+    printf("fuzz_authukeypin init: HksAuthUkeyPin ret=%d\n", ret);
+    return 0;
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)

@@ -48,7 +48,10 @@ inline ReadType ReadData(uint8_t *&data, size_t &size, uint32_t readSize)
 
 [[maybe_unused]] int32_t HksFuzzGenerateKey(FuzzedDataProvider &fdp, struct HksBlob &keyAlias);
 
-[[maybe_unused]] int HksFuzzInitWithGoldenPath();
+[[maybe_unused]] WrapParamSet BuildFixedParamSet(std::vector<struct HksParam> params);
 }}}
+
+using OHOS::Security::Hks::WrapParamSet;
+using OHOS::Security::Hks::BuildFixedParamSet;
 
 #endif // HKS_FUZZ_UTIL_H
