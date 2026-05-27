@@ -220,10 +220,9 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
             HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
             HksFreeExternalErrorInfo(errInfo);
         }
-
-        ret = PackAuthPinReply(&outBlob, ret, authOutParam.outStatus, authOutParam.retryCount);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "PackAuthPinReply fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
+    ret = PackAuthPinReply(&outBlob, ret, authOutParam.outStatus, authOutParam.retryCount);
+    HKS_IF_NOT_SUCC_LOGE(ret, "PackAuthPinReply fail, ret = %" LOG_PUBLIC "d", ret)
 
     HksSendResponse(context, (ret == HKS_ERROR_BAD_STATE || ret == HKS_ERROR_MALLOC_FAIL) ? ret : HKS_SUCCESS,
         (outBlob.data != NULL && outBlob.size == (sizeof(int32_t) * RET_NUM + sizeof(uint32_t))) ? &outBlob : NULL);
