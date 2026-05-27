@@ -27,24 +27,22 @@ namespace OHOS {
 namespace Security {
 namespace Hks {
 
-int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 {
-    if (data == nullptr || size < sizeof(uint32_t)) {
-        return -1;
-    }
+    uint32_t randomSize = fdp.ConsumeIntegralInRange(1, 100);
+    std::vector<uint8_t> randomBuf(randomSize);
+    struct HksBlob random = { static_cast<uint32_t>(randomBuf.size()), randomBuf.data() };
 
-    struct HksBlob random = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
-
-    WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
-
-    [[maybe_unused]] int ret = HksGenerateRandom(ps.s, &random);
-
-    return 0;
+    WrapParamSet ps = ConstructParamSetFromFdp(fdp);
+    return HksGenerateRandom(ps.s, &random);
 }
 }}}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    std::vector<uint8_t> v(data, data + size);
-    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
+    FuzzedDataProvider fdp(data, size);
+    int32_t ret = OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(fdp);
+
+    OHOS::Security::Hks::FuzzStatsRecord(ret);
+    return 0;
 }

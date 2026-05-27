@@ -23,32 +23,37 @@
 
 #include "hks_fuzz_util.h"
 
-constexpr int BN_SIZE = 10;
-constexpr int BN_COUNT = 4;
-
 namespace OHOS {
 namespace Security {
 namespace Hks {
 
-bool DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 {
-    if (data == nullptr || size < (BN_SIZE * BN_COUNT)) {
-        return -1;
-    }
+    uint32_t xSize = fdp.ConsumeIntegralInRange(32, 512);
+    std::vector<uint8_t> xBuf(xSize);
+    struct HksBlob x = { static_cast<uint32_t>(xBuf.size()), xBuf.data() };
 
-    struct HksBlob x = { BN_SIZE, ReadData<uint8_t *>(data, size, BN_SIZE) };
-    struct HksBlob a = { BN_SIZE, ReadData<uint8_t *>(data, size, BN_SIZE) };
-    struct HksBlob e = { BN_SIZE, ReadData<uint8_t *>(data, size, BN_SIZE) };
-    struct HksBlob n = { BN_SIZE, ReadData<uint8_t *>(data, size, BN_SIZE) };
+    uint32_t aSize = fdp.ConsumeIntegralInRange(32, 512);
+    std::vector<uint8_t> aVec = fdp.ConsumeBytes<uint8_t>(aSize);
+    struct HksBlob a = { static_cast<uint32_t>(aVec.size()), aVec.data() };
 
-    [[maybe_unused]] int ret = HksBnExpMod(&x, &a, &e, &n);
+    uint32_t eSize = fdp.ConsumeIntegralInRange(4, 64);
+    std::vector<uint8_t> eVec = fdp.ConsumeBytes<uint8_t>(eSize);
+    struct HksBlob e = { static_cast<uint32_t>(eVec.size()), eVec.data() };
 
-    return 0;
+    uint32_t nSize = fdp.ConsumeIntegralInRange(32, 512);
+    std::vector<uint8_t> nVec = fdp.ConsumeBytes<uint8_t>(nSize);
+    struct HksBlob n = { static_cast<uint32_t>(nVec.size()), nVec.data() };
+
+    return HksBnExpMod(&x, &a, &e, &n);
 }
 }}}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    std::vector<uint8_t> v(data, data + size);
-    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
+    FuzzedDataProvider fdp(data, size);
+    int32_t ret = OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(fdp);
+
+    OHOS::Security::Hks::FuzzStatsRecord(ret);
+    return 0;
 }

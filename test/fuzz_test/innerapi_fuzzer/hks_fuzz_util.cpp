@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,16 @@
  */
 
 #include "hks_fuzz_util.h"
+
+#include <vector>
+
+#include "base/security/huks/frameworks/huks_standard/main/common/include/hks_valid_tags.h"
+#include "hks_api.h"
 #include "hks_error_code.h"
 #include "hks_param.h"
 #include "hks_tag.h"
 #include "hks_type.h"
 #include "hks_type_enum.h"
-#include <vector>
 
 namespace OHOS {
 namespace Security {
@@ -63,23 +67,23 @@ WrapParamSet ConstructHksParamSetFromFuzz(uint8_t *&data, size_t &size)
     return ps;
 }
 
-static void AddParam(uint32_t tagType, uint32_t tag, FuzzedDataProvider &fdp, WrapParamSet &ps,
+static void AddParam(uint32_t tag, FuzzedDataProvider &fdp, WrapParamSet &ps,
     std::vector<std::vector<uint8_t>> &blobStorage)
 {
     HksParam param = { .tag = tag };
-    switch (tagType) {
+    switch (GetTagType((enum HksTag)tag)) {
         case HKS_TAG_TYPE_INT: {
-            param.int32Param = fdp.ConsumeIntegralInRange<int32_t>(0, 1024);
+            param.int32Param = fdp.ConsumeIntegralInRange<int32_t>(1, 1024);
             (void)HksAddParams(ps.s, &param, 1);
             break;
         }
         case HKS_TAG_TYPE_UINT: {
-            param.uint32Param = fdp.ConsumeIntegralInRange<uint32_t>(0, 1024);
+            param.uint32Param = fdp.ConsumeIntegralInRange<uint32_t>(1, 1024);
             (void)HksAddParams(ps.s, &param, 1);
             break;
         }
         case HKS_TAG_TYPE_ULONG: {
-            param.uint64Param = fdp.ConsumeIntegralInRange<uint64_t>(0, 1024);
+            param.uint64Param = fdp.ConsumeIntegralInRange<uint64_t>(1, 1024);
             (void)HksAddParams(ps.s, &param, 1);
             break;
         }
@@ -89,8 +93,11 @@ static void AddParam(uint32_t tagType, uint32_t tag, FuzzedDataProvider &fdp, Wr
             break;
         }
         case HKS_TAG_TYPE_BYTES: {
-            uint32_t size = fdp.ConsumeIntegralInRange<uint32_t>(0, fdp.remaining_bytes() / 2);
+            uint32_t size = fdp.ConsumeIntegralInRange<uint32_t>(1, 32);
             std::vector<uint8_t> data = fdp.ConsumeBytes<uint8_t>(size);
+            if (data.size() == 0) {
+                data = std::vector<uint8_t>(size, 0);
+            }
             blobStorage.push_back(std::move(data));
             param.blob = { blobStorage.back().size(), blobStorage.back().data() };
 
@@ -100,28 +107,6 @@ static void AddParam(uint32_t tagType, uint32_t tag, FuzzedDataProvider &fdp, Wr
         default:
             break;
     }
-}
-
-WrapParamSet ConstructParamSetFromFdp(FuzzedDataProvider &fdp)
-{
-    WrapParamSet ps{};
-    if (HksInitParamSet(&ps.s) != HKS_SUCCESS) {
-        return ps;
-    }
-
-    std::vector<std::vector<uint8_t>> blobStorage;
-    uint32_t numParams = fdp.ConsumeIntegralInRange<uint32_t>(0, 10);
-    for (uint32_t i = 0; i < numParams && (fdp.remaining_bytes() > sizeof(HksParam)); i++) {
-        uint32_t tagType = fdp.ConsumeIntegralInRange(1, 5);
-        tagType = tagType << 28;
-        uint32_t tagValue = fdp.ConsumeIntegralInRange(0, 1000);
-        HksTag tag = static_cast<HksTag>(tagType | tagValue);
-
-        AddParam(tagType, tag, fdp, ps, blobStorage);
-    }
-
-    (void)HksBuildParamSet(&ps.s);
-    return ps;
 }
 
 static uint32_t PickRandomHksAlg(FuzzedDataProvider &fdp) {
@@ -243,19 +228,19 @@ static void AddKeyParams(FuzzedDataProvider &fdp, WrapParamSet &ps, std::vector<
 {
     std::vector<struct HksParam> params;
 
-    if (fdp.ConsumeProbability<double>() < 0.9) {
+    if (fdp.ConsumeProbability<double>() < 0.999) {
         uint32_t alg = PickRandomHksAlg(fdp);
         params.push_back({ .tag = HKS_TAG_ALGORITHM, .uint32Param = alg });
     }
 
-    if (fdp.ConsumeProbability<double>() < 0.9) {
+    if (fdp.ConsumeProbability<double>() < 0.99) {
         uint32_t keySize = PickRandomHksKeySize(fdp);
         params.push_back({ .tag = HKS_TAG_KEY_SIZE, .uint32Param = keySize });
     }
 
-    if (fdp.ConsumeProbability<double>() < 0.9) {
+    if (fdp.ConsumeProbability<double>() < 0.99) {
         uint32_t purpose = PickRandomHksKeyPurpose(fdp);
-        if (fdp.ConsumeBool()) {
+        if (fdp.ConsumeProbability<double>() < 0.1) {
             purpose |= PickRandomHksKeyPurpose(fdp);
         }
         params.push_back({ .tag = HKS_TAG_PURPOSE, .uint32Param = purpose });
@@ -286,7 +271,7 @@ static void AddKeyParams(FuzzedDataProvider &fdp, WrapParamSet &ps, std::vector<
         params.push_back({ .tag = HKS_TAG_IS_ALLOWED_WRAP, .boolParam = val });
     }
 
-    if (fdp.ConsumeProbability<double>() < 0.1) {
+    if (fdp.ConsumeProbability<double>() < 0.01) {
         uint32_t groupSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 64);
         std::vector<uint8_t> groupData = fdp.ConsumeBytes<uint8_t>(groupSize);
         blobStorage.push_back(std::move(groupData));
@@ -304,6 +289,54 @@ static void AddKeyParams(FuzzedDataProvider &fdp, WrapParamSet &ps, std::vector<
     }
 }
 
+WrapParamSet ConstructParamSetFromFdp(FuzzedDataProvider &fdp)
+{
+    WrapParamSet ps{};
+    if (HksInitParamSet(&ps.s) != HKS_SUCCESS) {
+        return ps;
+    }
+
+    std::vector<std::vector<uint8_t>> blobStorage;
+
+    AddKeyParams(fdp, ps, blobStorage);
+
+    uint32_t numParams = fdp.ConsumeIntegralInRange<uint32_t>(1, 10);
+    for (uint32_t i = 0; i < numParams && (fdp.remaining_bytes() > sizeof(HksParam)); i++) {
+        uint32_t index = fdp.ConsumeIntegralInRange<uint32_t>(0, HKS_VALID_TAGS_COUNT - 1);
+        uint32_t tag = HKS_VALID_TAGS[index];
+
+        AddParam(tag, fdp, ps, blobStorage);
+    }
+
+    (void)HksBuildParamSet(&ps.s);
+    return ps;
+}
+
+WrapParamSet ConstructParamSetAddFuzzData(const WrapParamSet &p, FuzzedDataProvider &fdp)
+{
+    WrapParamSet ps{};
+    if (HksInitParamSet(&ps.s) != HKS_SUCCESS) {
+        return ps;
+    }
+
+    (void)HksAddParams(ps.s, p.s->params, p.s->paramsCnt);
+
+    std::vector<std::vector<uint8_t>> blobStorage;
+
+    AddKeyParams(fdp, ps, blobStorage);
+
+    uint32_t numParams = fdp.ConsumeIntegralInRange<uint32_t>(0, 9);
+    for (uint32_t i = 0; i < numParams && (fdp.remaining_bytes() > sizeof(HksParam)); i++) {
+        uint32_t index = fdp.ConsumeIntegralInRange<uint32_t>(0, HKS_VALID_TAGS_COUNT - 1);
+        uint32_t tag = HKS_VALID_TAGS[index];
+
+        AddParam(tag, fdp, ps, blobStorage);
+    }
+
+    (void)HksBuildParamSet(&ps.s);
+    return ps;
+}
+
 WrapParamSet ConstructGenKeyParamSetFromFdp(FuzzedDataProvider &fdp)
 {
     WrapParamSet ps{};
@@ -314,7 +347,23 @@ WrapParamSet ConstructGenKeyParamSetFromFdp(FuzzedDataProvider &fdp)
     std::vector<std::vector<uint8_t>> blobStorage;
     AddKeyParams(fdp, ps, blobStorage);
 
+    uint32_t numParams = fdp.ConsumeIntegralInRange<uint32_t>(0, 5);
+    for (uint32_t i = 0; i < numParams && (fdp.remaining_bytes() > sizeof(HksParam)); i++) {
+        uint32_t index = fdp.ConsumeIntegralInRange<uint32_t>(0, HKS_VALID_TAGS_COUNT - 1);
+        uint32_t tag = HKS_VALID_TAGS[index];
+
+        AddParam(tag, fdp, ps, blobStorage);
+    }
+
     (void)HksBuildParamSet(&ps.s);
     return ps;
+}
+
+int32_t HksFuzzGenerateKey(FuzzedDataProvider &fdp, struct HksBlob &keyAlias)
+{
+    WrapParamSet psIn = ConstructGenKeyParamSetFromFdp(fdp);
+    WrapParamSet psOut = {};
+
+    return HksGenerateKey(&keyAlias, psIn.s, psOut.s);
 }
 }}}

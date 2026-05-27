@@ -23,32 +23,37 @@
 
 #include "hks_fuzz_util.h"
 
-constexpr int BLOB_NUM = 3;
-
 namespace OHOS {
 namespace Security {
 namespace Hks {
 
-int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
-{
-    if (data == nullptr || size < (BLOB_NUM * sizeof(uint32_t))) {
-        return -1;
-    }
+int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp) {
+    WrapParamSet ps = ConstructParamSetFromFdp(fdp);
 
-    struct HksBlob privateKey = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
-    struct HksBlob peerPublicKey = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
-    struct HksBlob agreedKey = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
+    uint32_t privSize = fdp.ConsumeIntegralInRange(1, 32);
+    std::vector<uint8_t> priv = fdp.ConsumeBytes<uint8_t>(privSize);
+    struct HksBlob privateKey = { static_cast<uint32_t>(priv.size()), priv.data() };
 
-    WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
+    uint32_t pubSize = fdp.ConsumeIntegralInRange(8, 512);
+    std::vector<uint8_t> pub = fdp.ConsumeBytes<uint8_t>(pubSize);
+    struct HksBlob peerPublicKey = { static_cast<uint32_t>(pub.size()), pub.data() };
 
-    [[maybe_unused]] int ret = HksAgreeKey(ps.s, &privateKey, &peerPublicKey, &agreedKey);
+    uint32_t agreedSize = fdp.ConsumeIntegralInRange(16, 256);
+    std::vector<uint8_t> agreedBuf(agreedSize);
+    struct HksBlob agreedKey = { static_cast<uint32_t>(agreedBuf.size()), agreedBuf.data() };
 
-    return 0;
+    (void)HksFuzzGenerateKey(fdp, privateKey);
+
+    return HksAgreeKey(ps.s, &privateKey, &peerPublicKey, &agreedKey);
 }
 }}}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    std::vector<uint8_t> v(data, data + size);
-    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
+    FuzzedDataProvider fdp(data, size);
+    int32_t ret = OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(fdp);
+
+    OHOS::Security::Hks::FuzzStatsRecord(ret);
+
+    return 0;
 }

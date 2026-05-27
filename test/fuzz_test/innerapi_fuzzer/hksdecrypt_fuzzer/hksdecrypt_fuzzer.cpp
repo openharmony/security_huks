@@ -23,32 +23,37 @@
 
 #include "hks_fuzz_util.h"
 
-constexpr int BLOB_NUM = 3;
-
 namespace OHOS {
 namespace Security {
 namespace Hks {
 
-int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 {
-    if (data == nullptr || size < (BLOB_NUM * sizeof(uint32_t))) {
-        return -1;
-    }
+    uint32_t keySize = fdp.ConsumeIntegralInRange(1, 32);
+    std::vector<uint8_t> keyVec = fdp.ConsumeBytes<uint8_t>(keySize);
+    struct HksBlob key = { static_cast<uint32_t>(keyVec.size()), keyVec.data() };
 
-    struct HksBlob key = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
-    struct HksBlob cipherText = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
-    struct HksBlob plainText = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
+    (void)HksFuzzGenerateKey(fdp, key);
 
-    WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
+    uint32_t ctSize = fdp.ConsumeIntegralInRange(1, 32);
+    std::vector<uint8_t> ct = fdp.ConsumeBytes<uint8_t>(ctSize);
+    struct HksBlob cipherText = { static_cast<uint32_t>(ct.size()), ct.data() };
 
-    [[maybe_unused]] int ret = HksDecrypt(&key, ps.s, &cipherText, &plainText);
+    uint32_t ptSize = fdp.ConsumeIntegralInRange(1, 512);
+    std::vector<uint8_t> ptBuf(ptSize);
+    struct HksBlob plainText = { static_cast<uint32_t>(ptBuf.size()), ptBuf.data() };
 
-    return 0;
+    WrapParamSet ps = ConstructParamSetFromFdp(fdp);
+
+    return HksDecrypt(&key, ps.s, &cipherText, &plainText);
 }
 }}}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    std::vector<uint8_t> v(data, data + size);
-    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
+    FuzzedDataProvider fdp(data, size);
+    int32_t ret = OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(fdp);
+
+    OHOS::Security::Hks::FuzzStatsRecord(ret);
+    return 0;
 }

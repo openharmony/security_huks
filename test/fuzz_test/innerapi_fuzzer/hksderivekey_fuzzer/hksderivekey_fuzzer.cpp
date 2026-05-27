@@ -23,31 +23,33 @@
 
 #include "hks_fuzz_util.h"
 
-constexpr int BLOB_NUM = 2;
-
 namespace OHOS {
 namespace Security {
 namespace Hks {
 
-int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 {
-    if (data == nullptr || size < (BLOB_NUM * sizeof(uint32_t))) {
-        return -1;
-    }
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange(1, 32);
+    std::vector<uint8_t> alias = fdp.ConsumeBytes<uint8_t>(aliasSize);
+    struct HksBlob mainKey = { static_cast<uint32_t>(alias.size()), alias.data() };
 
-    struct HksBlob mainKey = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
-    struct HksBlob derivedKey = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
+    (void)HksFuzzGenerateKey(fdp, mainKey);
 
-    WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
+    uint32_t derivedKeySize = fdp.ConsumeIntegralInRange(1, 512);
+    std::vector<uint8_t> derivedKeyData(derivedKeySize);
+    struct HksBlob derivedKey = { static_cast<uint32_t>(derivedKeyData.size()), derivedKeyData.data() };
 
-    [[maybe_unused]] int ret = HksDeriveKey(ps.s, &mainKey, &derivedKey);
+    WrapParamSet ps = ConstructParamSetFromFdp(fdp);
 
-    return 0;
+    return HksDeriveKey(ps.s, &mainKey, &derivedKey);
 }
 }}}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    std::vector<uint8_t> v(data, data + size);
-    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
+    FuzzedDataProvider fdp(data, size);
+    int32_t ret = OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(fdp);
+
+    OHOS::Security::Hks::FuzzStatsRecord(ret);
+    return 0;
 }

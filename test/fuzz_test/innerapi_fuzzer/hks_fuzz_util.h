@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include <cstdio>
 
 #include <fuzzer/FuzzedDataProvider.h>
+#include "hks_fuzz_stats.h"
 
 // import WrapParamSet
 #include "base/security/huks/test/unittest/huks_standard_test/three_stage_test/include/hks_chipset_platform_test.h"
@@ -41,6 +42,10 @@ inline ReadType ReadData(uint8_t *&data, size_t &size, uint32_t readSize)
 [[maybe_unused]] WrapParamSet ConstructParamSetFromFdp(FuzzedDataProvider &fdp);
 
 [[maybe_unused]] WrapParamSet ConstructGenKeyParamSetFromFdp(FuzzedDataProvider &fdp);
+
+[[maybe_unused]] WrapParamSet ConstructParamSetAddFuzzData(const WrapParamSet &p, FuzzedDataProvider &fdp);
+
+[[maybe_unused]] int32_t HksFuzzGenerateKey(FuzzedDataProvider &fdp, struct HksBlob &keyAlias);
 }}}
 
 #endif // HKS_FUZZ_UTIL_H

@@ -24,7 +24,6 @@
 
 #include "hks_fuzz_util.h"
 
-constexpr int ALIAS_SIZE = 10;
 constexpr int CERT_SIZE = 4096;
 constexpr int CERT_COUNT = 4;
 
@@ -32,13 +31,16 @@ namespace OHOS {
 namespace Security {
 namespace Hks {
 
-int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 {
-    if (data == nullptr || size < ALIAS_SIZE) {
-        return -1;
-    }
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange(1, 64);
+    std::vector<uint8_t> alias = fdp.ConsumeBytes<uint8_t>(aliasSize);
+    struct HksBlob keyAlias = { static_cast<uint32_t>(alias.size()), alias.data() };
 
-    struct HksBlob keyAlias = { ALIAS_SIZE, ReadData<uint8_t *>(data, size, ALIAS_SIZE) };
+    (void)HksFuzzGenerateKey(fdp, keyAlias);
+
+    WrapParamSet ps = ConstructParamSetFromFdp(fdp);
+
     std::vector<uint8_t> certRootBuffer(CERT_SIZE);
     std::vector<uint8_t> certCaBuffer(CERT_SIZE);
     std::vector<uint8_t> certDeviceBuffer(CERT_SIZE);
@@ -54,18 +56,15 @@ int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
         .certsCount = CERT_COUNT
     };
 
-    WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
-
-    [[maybe_unused]] int ret = HksGetCertificateChain(&keyAlias, ps.s, &certChain);
-
-    return 0;
+    return HksGetCertificateChain(&keyAlias, ps.s, &certChain);
 }
 }}}
 
-/* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    std::vector<uint8_t> v(data, data + size);
-    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
-}
+    FuzzedDataProvider fdp(data, size);
+    int32_t ret = OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(fdp);
 
+    OHOS::Security::Hks::FuzzStatsRecord(ret);
+    return 0;
+}

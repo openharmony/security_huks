@@ -26,23 +26,26 @@
 namespace OHOS {
 namespace Security {
 namespace Hks {
-constexpr int ALIAS_SIZE = 10;
 
-int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 {
-    if (data == nullptr || size < ALIAS_SIZE) {
-        return -1;
-    }
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange(1, 32);
+    std::vector<uint8_t> alias = fdp.ConsumeBytes<uint8_t>(aliasSize);
+    struct HksBlob keyAlias = { static_cast<uint32_t>(alias.size()), alias.data() };
 
-    struct HksBlob keyAlias = { ALIAS_SIZE, ReadData<uint8_t *>(data, size, ALIAS_SIZE) };
-    WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
-    [[maybe_unused]] int ret = HksDeleteKey(&keyAlias, ps.s);
-    return 0;
+    (void)HksFuzzGenerateKey(fdp, keyAlias);
+
+    WrapParamSet ps = ConstructParamSetFromFdp(fdp);
+
+    return HksDeleteKey(&keyAlias, ps.s);
 }
 }}}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    std::vector<uint8_t> v(data, data + size);
-    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
+    FuzzedDataProvider fdp(data, size);
+    int32_t ret = OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(fdp);
+
+    OHOS::Security::Hks::FuzzStatsRecord(ret);
+    return 0;
 }

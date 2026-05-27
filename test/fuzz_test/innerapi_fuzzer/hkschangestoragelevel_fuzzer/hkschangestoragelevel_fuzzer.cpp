@@ -23,35 +23,79 @@
 #include "hks_type.h"
 
 #include "hks_fuzz_util.h"
-
-constexpr int ALIAS_SIZE = 10;
+#include "hks_type_enum.h"
 
 namespace OHOS {
 namespace Security {
 namespace Hks {
 
-int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+static uint32_t PickRandomAuthStorageLevel(FuzzedDataProvider &fdp) {
+    if (fdp.ConsumeBool()) {
+        return fdp.ConsumeIntegralInRange<int32_t>(1, 1024);
+    }
+    static const uint32_t kAuthStorageLevel[] = {
+        HKS_AUTH_STORAGE_LEVEL_DE,
+        HKS_AUTH_STORAGE_LEVEL_CE,
+        HKS_AUTH_STORAGE_LEVEL_ECE,
+    };
+    return fdp.PickValueInArray(kAuthStorageLevel);
+}
+
+static void AddSomeParams(FuzzedDataProvider &fdp, WrapParamSet &ps,
+    [[maybe_unused]] std::vector<std::vector<uint8_t>> &blobStorage)
 {
-    if (data == nullptr || size < ALIAS_SIZE) {
-        return -1;
+    std::vector<struct HksParam> params;
+
+    if (fdp.ConsumeProbability<double>() < 0.99) {
+        uint32_t storageLevel = PickRandomAuthStorageLevel(fdp);
+        params.push_back({ .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = storageLevel });
     }
 
-    struct HksBlob keyAlias = { ALIAS_SIZE, ReadData<uint8_t *>(data, size, ALIAS_SIZE) };
-    size_t inSize = size >> 1; // same as size / 2 to avoid magic number
-    WrapParamSet psSrc = ConstructHksParamSetFromFuzz(data, inSize);
-    size = size - ((size >> 1) - inSize);
+    if (fdp.ConsumeProbability<double>() < 0.99) {
+        uint32_t userId = fdp.ConsumeIntegralInRange<int32_t>(1, 1024);
+        params.push_back({ .tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = userId });
+    }
 
-    WrapParamSet psDes = ConstructHksParamSetFromFuzz(data, size);
+    if (!params.empty()) {
+        HksAddParams(ps.s, params.data(), params.size());
+    }
+}
 
-    [[maybe_unused]] int ret = HksChangeStorageLevel(&keyAlias, psSrc.s, psDes.s);
+WrapParamSet ConstructChangeStorageLevelParamSet(FuzzedDataProvider &fdp)
+{
+    WrapParamSet ps{};
+    if (HksInitParamSet(&ps.s) != HKS_SUCCESS) {
+        return ps;
+    }
 
-    return 0;
+    std::vector<std::vector<uint8_t>> blobStorage;
+    AddSomeParams(fdp, ps, blobStorage);
+
+    (void)HksBuildParamSet(&ps.s);
+    return ps;
+}
+
+int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
+{
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange(1, 32);
+    std::vector<uint8_t> alias = fdp.ConsumeBytes<uint8_t>(aliasSize);
+    struct HksBlob keyAlias = { static_cast<uint32_t>(alias.size()), alias.data() };
+
+    (void)HksFuzzGenerateKey(fdp, keyAlias);
+
+    WrapParamSet srcPs = ConstructParamSetAddFuzzData(ConstructChangeStorageLevelParamSet(fdp), fdp);
+    WrapParamSet destPs = ConstructParamSetAddFuzzData(ConstructChangeStorageLevelParamSet(fdp), fdp);
+
+    return HksChangeStorageLevel(&keyAlias, srcPs.s, destPs.s);
 }
 }}}
 
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    std::vector<uint8_t> v(data, data + size);
-    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
+    FuzzedDataProvider fdp(data, size);
+    int32_t ret = OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(fdp);
+
+    OHOS::Security::Hks::FuzzStatsRecord(ret);
+    return 0;
 }
 

@@ -55,7 +55,7 @@ static int32_t FuzzInitialize(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzGenerateKey(FuzzedDataProvider &fdp) {
-    uint32_t aliasSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> alias = fdp.ConsumeBytes<uint8_t>(aliasSize);
     struct HksBlob keyAlias = { static_cast<uint32_t>(alias.size()), alias.data() };
 
@@ -66,7 +66,7 @@ static int32_t FuzzGenerateKey(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzImportKey(FuzzedDataProvider &fdp) {
-    uint32_t aliasSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> alias = fdp.ConsumeBytes<uint8_t>(aliasSize);
     struct HksBlob keyAlias = { static_cast<uint32_t>(alias.size()), alias.data() };
 
@@ -80,7 +80,7 @@ static int32_t FuzzImportKey(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzExportPublicKey(FuzzedDataProvider &fdp) {
-    uint32_t aliasSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> alias = fdp.ConsumeBytes<uint8_t>(aliasSize);
     struct HksBlob keyAlias = { static_cast<uint32_t>(alias.size()), alias.data() };
 
@@ -100,11 +100,11 @@ static int32_t FuzzExportPublicKey(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzImportWrappedKey(FuzzedDataProvider &fdp) {
-    uint32_t aliasSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> alias = fdp.ConsumeBytes<uint8_t>(aliasSize);
     struct HksBlob keyAlias = { static_cast<uint32_t>(alias.size()), alias.data() };
 
-    uint32_t wrapAliasSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t wrapAliasSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> wrapAlias = fdp.ConsumeBytes<uint8_t>(wrapAliasSize);
     struct HksBlob wrappingKeyAlias = { static_cast<uint32_t>(wrapAlias.size()), wrapAlias.data() };
 
@@ -124,7 +124,7 @@ static int32_t FuzzImportWrappedKey(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzDeleteKey(FuzzedDataProvider &fdp) {
-    uint32_t aliasSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> alias = fdp.ConsumeBytes<uint8_t>(aliasSize);
     struct HksBlob keyAlias = { static_cast<uint32_t>(alias.size()), alias.data() };
 
@@ -140,7 +140,7 @@ static int32_t FuzzDeleteKey(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzGetKeyParamSet(FuzzedDataProvider &fdp) {
-    uint32_t aliasSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> alias = fdp.ConsumeBytes<uint8_t>(aliasSize);
     struct HksBlob keyAlias = { static_cast<uint32_t>(alias.size()), alias.data() };
 
@@ -157,7 +157,7 @@ static int32_t FuzzGetKeyParamSet(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzKeyExist(FuzzedDataProvider &fdp) {
-    uint32_t aliasSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> alias = fdp.ConsumeBytes<uint8_t>(aliasSize);
     struct HksBlob keyAlias = { static_cast<uint32_t>(alias.size()), alias.data() };
 
@@ -183,7 +183,7 @@ static int32_t FuzzGenerateRandom(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzEncrypt(FuzzedDataProvider &fdp) {
-    uint32_t keySize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t keySize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> keyVec = fdp.ConsumeBytes<uint8_t>(keySize);
     struct HksBlob key = { static_cast<uint32_t>(keyVec.size()), keyVec.data() };
 
@@ -195,11 +195,11 @@ static int32_t FuzzEncrypt(FuzzedDataProvider &fdp) {
 
     WrapParamSet ps = ConstructParamSetFromFdp(fdp);
 
-    uint32_t ptSize = fdp.ConsumeIntegralInRange(1, 512);
+    uint32_t ptSize = fdp.ConsumeIntegralInRange(1, 32);
     std::vector<uint8_t> pt = fdp.ConsumeBytes<uint8_t>(ptSize);
     struct HksBlob plainText = { static_cast<uint32_t>(pt.size()), pt.data() };
 
-    uint32_t ctSize = fdp.ConsumeIntegralInRange(32, 1024);
+    uint32_t ctSize = fdp.ConsumeIntegralInRange(1, 32);
     std::vector<uint8_t> ctBuf(ctSize);
     struct HksBlob cipherText = { static_cast<uint32_t>(ctBuf.size()), ctBuf.data() };
 
@@ -207,7 +207,7 @@ static int32_t FuzzEncrypt(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzDecrypt(FuzzedDataProvider &fdp) {
-    uint32_t keySize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t keySize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> keyVec = fdp.ConsumeBytes<uint8_t>(keySize);
     struct HksBlob key = { static_cast<uint32_t>(keyVec.size()), keyVec.data() };
 
@@ -219,11 +219,11 @@ static int32_t FuzzDecrypt(FuzzedDataProvider &fdp) {
 
     WrapParamSet ps = ConstructParamSetFromFdp(fdp);
 
-    uint32_t ctSize = fdp.ConsumeIntegralInRange(32, 1024);
+    uint32_t ctSize = fdp.ConsumeIntegralInRange(1, 32);
     std::vector<uint8_t> ct = fdp.ConsumeBytes<uint8_t>(ctSize);
     struct HksBlob cipherText = { static_cast<uint32_t>(ct.size()), ct.data() };
 
-    uint32_t ptSize = fdp.ConsumeIntegralInRange(1, 512);
+    uint32_t ptSize = fdp.ConsumeIntegralInRange(1, 32);
     std::vector<uint8_t> ptBuf(ptSize);
     struct HksBlob plainText = { static_cast<uint32_t>(ptBuf.size()), ptBuf.data() };
 
@@ -231,7 +231,7 @@ static int32_t FuzzDecrypt(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzInit(FuzzedDataProvider &fdp) {
-    uint32_t aliasSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> alias = fdp.ConsumeBytes<uint8_t>(aliasSize);
     struct HksBlob keyAlias = { static_cast<uint32_t>(alias.size()), alias.data() };
 
@@ -275,7 +275,7 @@ static int32_t FuzzFinish(FuzzedDataProvider &fdp) {
         (void)FuzzInit(fdp);
     }
 
-    for (uint32_t i = 0; i < static_cast<uint32_t>(fdp.ConsumeIntegralInRange(0, 20)); i++) {
+    for (uint32_t i = 0; i < static_cast<uint32_t>(fdp.ConsumeIntegralInRange(1, 20)); i++) {
         (void)FuzzUpdate(fdp);
     }
 
@@ -298,7 +298,7 @@ static int32_t FuzzAbort(FuzzedDataProvider &fdp) {
         (void)FuzzInit(fdp);
     }
 
-    for (uint32_t i = 0; i < static_cast<uint32_t>(fdp.ConsumeIntegralInRange(0, 5)); i++) {
+    for (uint32_t i = 0; i < static_cast<uint32_t>(fdp.ConsumeIntegralInRange(1, 5)); i++) {
         (void)FuzzUpdate(fdp);
     }
 
@@ -310,7 +310,7 @@ static int32_t FuzzAbort(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzSign(FuzzedDataProvider &fdp) {
-    uint32_t keySize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t keySize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> keyVec = fdp.ConsumeBytes<uint8_t>(keySize);
     struct HksBlob key = { static_cast<uint32_t>(keyVec.size()), keyVec.data() };
 
@@ -334,7 +334,7 @@ static int32_t FuzzSign(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzVerify(FuzzedDataProvider &fdp) {
-    uint32_t keySize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t keySize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> keyVec = fdp.ConsumeBytes<uint8_t>(keySize);
     struct HksBlob key = { static_cast<uint32_t>(keyVec.size()), keyVec.data() };
 
@@ -402,7 +402,7 @@ static int32_t FuzzDeriveKey(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzMac(FuzzedDataProvider &fdp) {
-    uint32_t keySize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t keySize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> keyVec = fdp.ConsumeBytes<uint8_t>(keySize);
     struct HksBlob key = { static_cast<uint32_t>(keyVec.size()), keyVec.data() };
 
@@ -449,7 +449,7 @@ static int32_t FuzzGetKeyInfoList(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzAttestKey(FuzzedDataProvider &fdp) {
-    uint32_t aliasSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> alias = fdp.ConsumeBytes<uint8_t>(aliasSize);
     struct HksBlob keyAlias = { static_cast<uint32_t>(alias.size()), alias.data() };
 
@@ -467,7 +467,7 @@ static int32_t FuzzAttestKey(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzAnonAttestKey(FuzzedDataProvider &fdp) {
-    uint32_t aliasSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> alias = fdp.ConsumeBytes<uint8_t>(aliasSize);
     struct HksBlob keyAlias = { static_cast<uint32_t>(alias.size()), alias.data() };
 
@@ -484,7 +484,7 @@ static int32_t FuzzAnonAttestKey(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzGetCertificateChain(FuzzedDataProvider &fdp) {
-    uint32_t aliasSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> alias = fdp.ConsumeBytes<uint8_t>(aliasSize);
     struct HksBlob keyAlias = { static_cast<uint32_t>(alias.size()), alias.data() };
 
@@ -501,7 +501,7 @@ static int32_t FuzzGetCertificateChain(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzWrapKey(FuzzedDataProvider &fdp) {
-    uint32_t keyAliasSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t keyAliasSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> keyAliasVec = fdp.ConsumeBytes<uint8_t>(keyAliasSize);
     struct HksBlob keyAlias = { static_cast<uint32_t>(keyAliasVec.size()), keyAliasVec.data() };
 
@@ -511,7 +511,7 @@ static int32_t FuzzWrapKey(FuzzedDataProvider &fdp) {
         (void)HksGenerateKey(&keyAlias, psIn.s, psOut.s);
     }
 
-    uint32_t targetAliasSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t targetAliasSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> targetAliasVec = fdp.ConsumeBytes<uint8_t>(targetAliasSize);
     struct HksBlob targetKeyAlias = { static_cast<uint32_t>(targetAliasVec.size()), targetAliasVec.data() };
 
@@ -525,7 +525,7 @@ static int32_t FuzzWrapKey(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzUnwrapKey(FuzzedDataProvider &fdp) {
-    uint32_t keyAliasSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t keyAliasSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> keyAliasVec = fdp.ConsumeBytes<uint8_t>(keyAliasSize);
     struct HksBlob keyAlias = { static_cast<uint32_t>(keyAliasVec.size()), keyAliasVec.data() };
 
@@ -535,7 +535,7 @@ static int32_t FuzzUnwrapKey(FuzzedDataProvider &fdp) {
         (void)HksGenerateKey(&keyAlias, psIn.s, psOut.s);
     }
 
-    uint32_t targetAliasSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t targetAliasSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> targetAliasVec = fdp.ConsumeBytes<uint8_t>(targetAliasSize);
     struct HksBlob targetKeyAlias = { static_cast<uint32_t>(targetAliasVec.size()), targetAliasVec.data() };
 
@@ -576,7 +576,7 @@ static int32_t FuzzValidateCertChain(FuzzedDataProvider &fdp) {
 
 static int32_t FuzzListAliases(FuzzedDataProvider &fdp) {
     if (fdp.ConsumeProbability<double>() < 0.99) {
-        uint32_t keyAliasSize = fdp.ConsumeIntegralInRange(0, 64);
+        uint32_t keyAliasSize = fdp.ConsumeIntegralInRange(1, 64);
         std::vector<uint8_t> keyAliasVec = fdp.ConsumeBytes<uint8_t>(keyAliasSize);
         struct HksBlob keyAlias = { static_cast<uint32_t>(keyAliasVec.size()), keyAliasVec.data() };
         WrapParamSet psIn = ConstructGenKeyParamSetFromFdp(fdp);
@@ -590,7 +590,7 @@ static int32_t FuzzListAliases(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzRenameKeyAlias(FuzzedDataProvider &fdp) {
-    uint32_t oldAliasSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t oldAliasSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> oldAlias = fdp.ConsumeBytes<uint8_t>(oldAliasSize);
     struct HksBlob oldKeyAlias = { static_cast<uint32_t>(oldAlias.size()), oldAlias.data() };
 
@@ -602,7 +602,7 @@ static int32_t FuzzRenameKeyAlias(FuzzedDataProvider &fdp) {
 
     WrapParamSet ps = ConstructParamSetFromFdp(fdp);
 
-    uint32_t newAliasSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t newAliasSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> newAlias = fdp.ConsumeBytes<uint8_t>(newAliasSize);
     struct HksBlob newKeyAlias = { static_cast<uint32_t>(newAlias.size()), newAlias.data() };
 
@@ -610,7 +610,7 @@ static int32_t FuzzRenameKeyAlias(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzChangeStorageLevel(FuzzedDataProvider &fdp) {
-    uint32_t aliasSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> alias = fdp.ConsumeBytes<uint8_t>(aliasSize);
     struct HksBlob keyAlias = { static_cast<uint32_t>(alias.size()), alias.data() };
 
@@ -632,7 +632,7 @@ static int32_t FuzzGetErrorMsg(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzExtRegister(FuzzedDataProvider &fdp) {
-    uint32_t nameSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t nameSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> nameVec = fdp.ConsumeBytes<uint8_t>(nameSize);
     struct HksBlob name = { static_cast<uint32_t>(nameVec.size()), nameVec.data() };
 
@@ -642,7 +642,7 @@ static int32_t FuzzExtRegister(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzExtUnregister(FuzzedDataProvider &fdp) {
-    uint32_t nameSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t nameSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> nameVec = fdp.ConsumeBytes<uint8_t>(nameSize);
     struct HksBlob name = { static_cast<uint32_t>(nameVec.size()), nameVec.data() };
 
@@ -652,7 +652,7 @@ static int32_t FuzzExtUnregister(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzExtAuthUkeyPin(FuzzedDataProvider &fdp) {
-    uint32_t resourceIdSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t resourceIdSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> resourceIdVec = fdp.ConsumeBytes<uint8_t>(resourceIdSize);
     struct HksBlob resourceId = { static_cast<uint32_t>(resourceIdVec.size()), resourceIdVec.data() };
 
@@ -664,7 +664,7 @@ static int32_t FuzzExtAuthUkeyPin(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzExtGetUkeyPinAuthState(FuzzedDataProvider &fdp) {
-    uint32_t nameSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t nameSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> nameVec = fdp.ConsumeBytes<uint8_t>(nameSize);
     struct HksBlob name = { static_cast<uint32_t>(nameVec.size()), nameVec.data() };
 
@@ -676,7 +676,7 @@ static int32_t FuzzExtGetUkeyPinAuthState(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzExtOpenRemoteHandle(FuzzedDataProvider &fdp) {
-    uint32_t resourceIdSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t resourceIdSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> resourceIdVec = fdp.ConsumeBytes<uint8_t>(resourceIdSize);
     struct HksBlob resourceId = { static_cast<uint32_t>(resourceIdVec.size()), resourceIdVec.data() };
 
@@ -691,7 +691,7 @@ static int32_t FuzzExtGetRemoteHandle(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzExtCloseRemoteHandle(FuzzedDataProvider &fdp) {
-    uint32_t resourceIdSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t resourceIdSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> resourceIdVec = fdp.ConsumeBytes<uint8_t>(resourceIdSize);
     struct HksBlob resourceId = { static_cast<uint32_t>(resourceIdVec.size()), resourceIdVec.data() };
 
@@ -709,7 +709,7 @@ static int32_t FuzzExtUkeyVerify(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzExtClearPinAuthState(FuzzedDataProvider &fdp) {
-    uint32_t resourceIdSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t resourceIdSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> resourceIdVec = fdp.ConsumeBytes<uint8_t>(resourceIdSize);
     struct HksBlob resourceId = { static_cast<uint32_t>(resourceIdVec.size()), resourceIdVec.data() };
 
@@ -717,7 +717,7 @@ static int32_t FuzzExtClearPinAuthState(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzExtExportProviderCertificates(FuzzedDataProvider &fdp) {
-    uint32_t providerNameSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t providerNameSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> providerNameVec = fdp.ConsumeBytes<uint8_t>(providerNameSize);
     struct HksBlob providerName = { static_cast<uint32_t>(providerNameVec.size()), providerNameVec.data() };
 
@@ -729,7 +729,7 @@ static int32_t FuzzExtExportProviderCertificates(FuzzedDataProvider &fdp) {
 }
 
 static int32_t FuzzExtExportCertificate(FuzzedDataProvider &fdp) {
-    uint32_t resourceIdSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t resourceIdSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> resourceIdVec = fdp.ConsumeBytes<uint8_t>(resourceIdSize);
     struct HksBlob resourceId = { static_cast<uint32_t>(resourceIdVec.size()), resourceIdVec.data() };
 
@@ -746,7 +746,7 @@ static int32_t FuzzExtGetRemoteProperty(FuzzedDataProvider &fdp) {
     std::vector<uint8_t> resourceIdVec = fdp.ConsumeBytes<uint8_t>(resourceIdSize);
     struct HksBlob resourceId = { static_cast<uint32_t>(resourceIdVec.size()), resourceIdVec.data() };
 
-    uint32_t propertyIdSize = fdp.ConsumeIntegralInRange(0, 64);
+    uint32_t propertyIdSize = fdp.ConsumeIntegralInRange(1, 64);
     std::vector<uint8_t> propertyIdVec = fdp.ConsumeBytes<uint8_t>(propertyIdSize);
     struct HksBlob propertyId = { static_cast<uint32_t>(propertyIdVec.size()), propertyIdVec.data() };
 
