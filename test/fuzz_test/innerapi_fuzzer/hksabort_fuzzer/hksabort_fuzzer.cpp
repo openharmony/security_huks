@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,14 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "hksabort_fuzzer.h"
-
-#include <securec.h>
-
-#include "hks_api.h"
-#include "hks_mem.h"
-#include "hks_type.h"
-#include "hks_param.h"
 
 #include "hks_fuzz_util.h"
 
@@ -27,24 +21,29 @@ namespace OHOS {
 namespace Security {
 namespace Hks {
 
-int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 {
-    if (data == nullptr || size < sizeof(uint64_t)) {
-        return -1;
+    std::vector<uint8_t> handleBytes = fdp.ConsumeBytes<uint8_t>(sizeof(uint64_t));
+    if (handleBytes.empty()) {
+        return 0;
     }
+    struct HksBlob handle = { static_cast<uint32_t>(handleBytes.size()), handleBytes.data() };
 
-    struct HksBlob handle = { sizeof(uint64_t), ReadData<uint8_t *>(data, size, sizeof(uint64_t)) };
-    WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
+    WrapParamSet ps = ConstructParamSetFromFdp(fdp);
 
-    [[maybe_unused]] int ret = HksAbort(&handle, ps.s);
-
-    return 0;
+    return HksAbort(&handle, ps.s);
 }
+
 }}}
+
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
+    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    std::vector<uint8_t> v(data, data + size);
-    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
+    FuzzedDataProvider fdp(data, size);
+    int32_t ret = OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(fdp);
+    OHOS::Security::Hks::FuzzStatsRecord(ret);
     return 0;
 }

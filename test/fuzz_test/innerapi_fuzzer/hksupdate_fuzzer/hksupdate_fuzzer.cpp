@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,44 +15,45 @@
 
 #include "hksupdate_fuzzer.h"
 
-#include <securec.h>
-
-#include "hks_api.h"
-#include "hks_mem.h"
-#include "hks_param.h"
-#include "hks_type.h"
-
 #include "hks_fuzz_util.h"
 
 namespace OHOS {
 namespace Security {
 namespace Hks {
 
-int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 {
-    if (data == nullptr || size < (sizeof(uint64_t) + sizeof(uint32_t))) {
-        return -1;
+    std::vector<uint8_t> handleBytes = fdp.ConsumeBytes<uint8_t>(sizeof(uint64_t));
+    if (handleBytes.empty()) {
+        return 0;
     }
+    struct HksBlob handle = { static_cast<uint32_t>(handleBytes.size()), handleBytes.data() };
 
-    struct HksBlob handle = { sizeof(uint64_t), ReadData<uint8_t *>(data, size, sizeof(uint64_t)) };
-    uint32_t inDataSize = *ReadData<uint32_t *>(data, size, sizeof(uint32_t));
-    if (size < inDataSize) {
-        return -1;
+    uint32_t inDataSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 64);
+    std::vector<uint8_t> inBuf = fdp.ConsumeBytes<uint8_t>(inDataSize);
+    if (inBuf.size() == 0) {
+        inBuf = std::vector<uint8_t>(1, 0);
     }
-    struct HksBlob inData = { inDataSize, ReadData<uint8_t *>(data, size, inDataSize) };
-    std::vector<uint8_t> outDataBuffer(inDataSize);
-    struct HksBlob outData = { outDataBuffer.size(), outDataBuffer.data() };
+    struct HksBlob inData = { static_cast<uint32_t>(inBuf.size()), inBuf.data() };
 
-    WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
+    std::vector<uint8_t> outBuf(inDataSize);
+    struct HksBlob outData = { static_cast<uint32_t>(outBuf.size()), outBuf.data() };
 
-    [[maybe_unused]] int ret = HksUpdate(&handle, ps.s, &inData, &outData);
+    WrapParamSet ps = ConstructParamSetFromFdp(fdp);
 
-    return 0;
+    return HksUpdate(&handle, ps.s, &inData, &outData);
 }
+
 }}}
+
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
+    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    std::vector<uint8_t> v(data, data + size);
-    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
+    FuzzedDataProvider fdp(data, size);
+    int32_t ret = OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(fdp);
+    OHOS::Security::Hks::FuzzStatsRecord(ret);
+    return 0;
 }

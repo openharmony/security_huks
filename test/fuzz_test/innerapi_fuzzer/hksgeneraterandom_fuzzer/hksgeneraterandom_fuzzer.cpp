@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,13 +14,6 @@
  */
 #include "hksgeneraterandom_fuzzer.h"
 
-#include <securec.h>
-
-#include "hks_api.h"
-#include "hks_mem.h"
-#include "hks_param.h"
-#include "hks_type.h"
-
 #include "hks_fuzz_util.h"
 
 namespace OHOS {
@@ -29,7 +22,7 @@ namespace Hks {
 
 int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 {
-    uint32_t randomSize = fdp.ConsumeIntegralInRange(1, 100);
+    uint32_t randomSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 100);
     std::vector<uint8_t> randomBuf(randomSize);
     struct HksBlob random = { static_cast<uint32_t>(randomBuf.size()), randomBuf.data() };
 
@@ -37,6 +30,10 @@ int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
     return HksGenerateRandom(ps.s, &random);
 }
 }}}
+
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
+    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {

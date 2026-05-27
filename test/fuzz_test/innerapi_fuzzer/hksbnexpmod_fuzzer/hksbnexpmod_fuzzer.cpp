@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,13 +14,6 @@
  */
 #include "hksbnexpmod_fuzzer.h"
 
-#include <securec.h>
-
-#include "hks_api.h"
-#include "hks_mem.h"
-#include "hks_param.h"
-#include "hks_type.h"
-
 #include "hks_fuzz_util.h"
 
 namespace OHOS {
@@ -29,25 +22,38 @@ namespace Hks {
 
 int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 {
-    uint32_t xSize = fdp.ConsumeIntegralInRange(32, 512);
+    uint32_t xSize = fdp.ConsumeIntegralInRange<uint32_t>(32, 512);
     std::vector<uint8_t> xBuf(xSize);
     struct HksBlob x = { static_cast<uint32_t>(xBuf.size()), xBuf.data() };
 
-    uint32_t aSize = fdp.ConsumeIntegralInRange(32, 512);
+    uint32_t aSize = fdp.ConsumeIntegralInRange<uint32_t>(32, 512);
     std::vector<uint8_t> aVec = fdp.ConsumeBytes<uint8_t>(aSize);
+    if (aVec.size() == 0) {
+        aVec = std::vector<uint8_t>(1, 0);
+    }
     struct HksBlob a = { static_cast<uint32_t>(aVec.size()), aVec.data() };
 
-    uint32_t eSize = fdp.ConsumeIntegralInRange(4, 64);
+    uint32_t eSize = fdp.ConsumeIntegralInRange<uint32_t>(4, 64);
     std::vector<uint8_t> eVec = fdp.ConsumeBytes<uint8_t>(eSize);
+    if (eVec.size() == 0) {
+        eVec = std::vector<uint8_t>(1, 0);
+    }
     struct HksBlob e = { static_cast<uint32_t>(eVec.size()), eVec.data() };
 
-    uint32_t nSize = fdp.ConsumeIntegralInRange(32, 512);
+    uint32_t nSize = fdp.ConsumeIntegralInRange<uint32_t>(32, 512);
     std::vector<uint8_t> nVec = fdp.ConsumeBytes<uint8_t>(nSize);
+    if (nVec.size() == 0) {
+        nVec = std::vector<uint8_t>(1, 0);
+    }
     struct HksBlob n = { static_cast<uint32_t>(nVec.size()), nVec.data() };
 
     return HksBnExpMod(&x, &a, &e, &n);
 }
 }}}
+
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
+    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {

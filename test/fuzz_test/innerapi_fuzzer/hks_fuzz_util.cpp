@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -365,5 +365,141 @@ int32_t HksFuzzGenerateKey(FuzzedDataProvider &fdp, struct HksBlob &keyAlias)
     WrapParamSet psOut = {};
 
     return HksGenerateKey(&keyAlias, psIn.s, psOut.s);
+}
+
+static WrapParamSet BuildFixedParamSet(std::vector<struct HksParam> params)
+{
+    WrapParamSet ps{};
+    if (HksInitParamSet(&ps.s) != HKS_SUCCESS) {
+        return ps;
+    }
+    if (!params.empty()) {
+        (void)HksAddParams(ps.s, params.data(), params.size());
+    }
+    (void)HksBuildParamSet(&ps.s);
+    return ps;
+}
+
+static void FuzzGoldenPathLocalEngine()
+{
+    struct HksBlob srcData = { 4, reinterpret_cast<uint8_t *>(const_cast<char *>("test")) };
+    struct HksBlob hash = { 64, static_cast<uint8_t *>(calloc(64, 1)) };
+    WrapParamSet hashPs = BuildFixedParamSet({ { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 } });
+    (void)HksHash(hashPs.s, &srcData, &hash);
+    free(hash.data);
+
+    uint8_t nBuf[64] = {0};
+    uint8_t aBuf[64] = {0};
+    uint8_t eBuf[4] = {1, 0, 0, 0};
+    uint8_t xBuf[64] = {0};
+    struct HksBlob n = { 64, nBuf };
+    struct HksBlob a = { 64, aBuf };
+    struct HksBlob e = { 4, eBuf };
+    struct HksBlob x = { 64, xBuf };
+    n.data[63] = 3;
+    a.data[0] = 2;
+    (void)HksBnExpMod(&x, &a, &e, &n);
+
+    struct HksBlob random = { 32, static_cast<uint8_t *>(calloc(32, 1)) };
+    WrapParamSet randomPs = BuildFixedParamSet({});
+    (void)HksGenerateRandom(randomPs.s, &random);
+    free(random.data);
+}
+
+static void FuzzGoldenPathIpc()
+{
+    struct HksBlob rsaAlias = { 7, reinterpret_cast<uint8_t *>(const_cast<char *>("fuz_rsa")) };
+    struct HksBlob eccAlias = { 7, reinterpret_cast<uint8_t *>(const_cast<char *>("fuz_ecc")) };
+    struct HksBlob aesAlias = { 7, reinterpret_cast<uint8_t *>(const_cast<char *>("fuz_aes")) };
+    struct HksBlob hmacAlias = { 8, reinterpret_cast<uint8_t *>(const_cast<char *>("fuz_hmac")) };
+
+    WrapParamSet rsaPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
+        { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
+        { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PSS } });
+    (void)HksGenerateKey(&rsaAlias, rsaPs.s, nullptr);
+
+    WrapParamSet eccPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ECC },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ECC_KEY_SIZE_256 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
+        { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 } });
+    (void)HksGenerateKey(&eccAlias, eccPs.s, nullptr);
+
+    WrapParamSet aesPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_256 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+        { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
+        { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS7 },
+        { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = true } });
+    (void)HksGenerateKey(&aesAlias, aesPs.s, nullptr);
+
+    WrapParamSet hmacPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_HMAC },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = 256 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_MAC },
+        { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
+        { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = true } });
+    (void)HksGenerateKey(&hmacAlias, hmacPs.s, nullptr);
+
+    struct HksBlob sigData = { 512, static_cast<uint8_t *>(calloc(512, 1)) };
+    struct HksBlob srcData = { 4, reinterpret_cast<uint8_t *>(const_cast<char *>("test")) };
+    WrapParamSet signPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN },
+        { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
+        { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PSS } });
+    (void)HksSign(&rsaAlias, signPs.s, &srcData, &sigData);
+
+    WrapParamSet verifyPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_VERIFY },
+        { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
+        { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PSS } });
+    (void)HksVerify(&rsaAlias, verifyPs.s, &srcData, &sigData);
+    free(sigData.data);
+
+    uint8_t pubKeyBuf[512] = {0};
+    struct HksBlob pubKey = { 512, pubKeyBuf };
+    WrapParamSet exportPs = BuildFixedParamSet({});
+    (void)HksExportPublicKey(&rsaAlias, exportPs.s, &pubKey);
+
+    (void)HksKeyExist(&rsaAlias, nullptr);
+
+    uint8_t paramSetOutBuf[512] = {0};
+    struct HksParamSet *paramSetOut = reinterpret_cast<struct HksParamSet *>(paramSetOutBuf);
+    paramSetOut->paramSetSize = 512;
+    WrapParamSet getKeyParamPs = BuildFixedParamSet({});
+    (void)HksGetKeyParamSet(&rsaAlias, getKeyParamPs.s, paramSetOut);
+
+    struct HksBlob cipherText = { 512, static_cast<uint8_t *>(calloc(512, 1)) };
+    WrapParamSet encPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT },
+        { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
+        { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS7 },
+        { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = true } });
+    (void)HksEncrypt(&aesAlias, encPs.s, &srcData, &cipherText);
+
+    struct HksBlob plainText = { 512, static_cast<uint8_t *>(calloc(512, 1)) };
+    WrapParamSet decPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_DECRYPT },
+        { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
+        { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS7 },
+        { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = true } });
+    (void)HksDecrypt(&aesAlias, decPs.s, &cipherText, &plainText);
+    free(cipherText.data);
+    free(plainText.data);
+
+    struct HksBlob macData = { 64, static_cast<uint8_t *>(calloc(64, 1)) };
+    WrapParamSet macPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_HMAC },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_MAC },
+        { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
+        { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = true } });
+    (void)HksMac(&hmacAlias, macPs.s, &srcData, &macData);
+    free(macData.data);
+}
+
+int HksFuzzInitWithGoldenPath()
+{
+    FuzzGoldenPathLocalEngine();
+    FuzzGoldenPathIpc();
+    return 0;
 }
 }}}

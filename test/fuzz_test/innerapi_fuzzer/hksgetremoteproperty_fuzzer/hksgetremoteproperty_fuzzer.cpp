@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,46 +12,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "hksgetremoteproperty_fuzzer.h"
 
-#include <securec.h>
-
-#include "hks_api.h"
-#include "hks_mem.h"
-#include "hks_param.h"
-#include "hks_type.h"
-#include "hks_type_enum.h"
-
 #include "hks_fuzz_util.h"
-
-constexpr int BLOB_NUM = 3;
+#include "hks_type_enum.h"
 
 namespace OHOS {
 namespace Security {
 namespace Hks {
 
-int DoSomethingInterestingWithHksSetOrGetRemoteProperty(uint8_t *data, size_t size)
+int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 {
-    if (data == nullptr || size < (BLOB_NUM * sizeof(uint32_t))) {
-        return -1;
+    enum HksExtPropertyOperation operation =
+        static_cast<enum HksExtPropertyOperation>(fdp.ConsumeIntegralInRange<int32_t>(0, 1));
+
+    uint32_t idSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 64);
+    std::vector<uint8_t> resIdBuf = fdp.ConsumeBytes<uint8_t>(idSize);
+    if (resIdBuf.size() == 0) {
+        resIdBuf = std::vector<uint8_t>(1, 0);
     }
+    struct HksBlob resourceId = { static_cast<uint32_t>(resIdBuf.size()), resIdBuf.data() };
 
-    uint32_t operation = *ReadData<uint32_t *>(data, size, sizeof(uint32_t));
-    struct HksBlob resourceId = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
-    struct HksBlob propertyId = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
-    WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
+    uint32_t propIdSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 64);
+    std::vector<uint8_t> propIdBuf = fdp.ConsumeBytes<uint8_t>(propIdSize);
+    if (propIdBuf.size() == 0) {
+        propIdBuf = std::vector<uint8_t>(1, 0);
+    }
+    struct HksBlob propertyId = { static_cast<uint32_t>(propIdBuf.size()), propIdBuf.data() };
+
+    WrapParamSet ps = ConstructParamSetFromFdp(fdp);
+
     HksParamSet *psOut = nullptr;
-    [[maybe_unused]] int ret = HksSetOrGetRemoteProperty(
-        static_cast<enum HksExtPropertyOperation>(operation % 2),
-        &resourceId, &propertyId, ps.s, &psOut);
-    return 0;
+    return HksSetOrGetRemoteProperty(operation, &resourceId, &propertyId, ps.s, &psOut);
 }
-
 }}}
+
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
+    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    std::vector<uint8_t> v(data, data + size);
-    (void)OHOS::Security::Hks::DoSomethingInterestingWithHksSetOrGetRemoteProperty(v.data(), v.size());
+    FuzzedDataProvider fdp(data, size);
+    int32_t ret = OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(fdp);
+    OHOS::Security::Hks::FuzzStatsRecord(ret);
     return 0;
 }

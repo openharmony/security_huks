@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,13 +14,6 @@
  */
 #include "hksencrypt_fuzzer.h"
 
-#include <securec.h>
-
-#include "hks_api.h"
-#include "hks_mem.h"
-#include "hks_param.h"
-#include "hks_type.h"
-
 #include "hks_fuzz_util.h"
 
 namespace OHOS {
@@ -29,15 +22,21 @@ namespace Hks {
 
 int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 {
-    uint32_t keySize = fdp.ConsumeIntegralInRange(1, 32);
+    uint32_t keySize = fdp.ConsumeIntegralInRange<uint32_t>(1, 32);
     std::vector<uint8_t> keyVec = fdp.ConsumeBytes<uint8_t>(keySize);
+    if (keyVec.size() == 0) {
+        keyVec = std::vector<uint8_t>(1, 0);
+    }
     struct HksBlob key = { static_cast<uint32_t>(keyVec.size()), keyVec.data() };
 
-    uint32_t ptSize = fdp.ConsumeIntegralInRange(1, 32);
+    uint32_t ptSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 32);
     std::vector<uint8_t> ptBuf = fdp.ConsumeBytes<uint8_t>(ptSize);
+    if (ptBuf.size() == 0) {
+        ptBuf = std::vector<uint8_t>(1, 0);
+    }
     struct HksBlob plainText = { static_cast<uint32_t>(ptBuf.size()), ptBuf.data() };
 
-    uint32_t ctSize = fdp.ConsumeIntegralInRange(1, 512);
+    uint32_t ctSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 512);
     std::vector<uint8_t> ct(ctSize);
     struct HksBlob cipherText = { static_cast<uint32_t>(ct.size()), ct.data() };
 
@@ -48,6 +47,10 @@ int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
     return HksEncrypt(&key, ps.s, &plainText, &cipherText);
 }
 }}}
+
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
+    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {

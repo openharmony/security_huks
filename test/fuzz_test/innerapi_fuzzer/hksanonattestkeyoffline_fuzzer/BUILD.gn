@@ -3,7 +3,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,12 +17,13 @@ import("//build/test.gni")
 ##############################fuzztest##########################################
 ohos_fuzztest("HksAnonAttestKeyOfflineFuzzTest") {
   module_out_path = fuzz_module_out_path
-  fuzz_config_file = "../hksanonattestkeyoffline_fuzzer"
+  fuzz_config_file =
+      "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksanonattestkeyoffline_fuzzer"
 
   include_dirs = [
     ".",
     "..",
-    "../../../../frameworks/huks_standard/main/common/include/",
+    "//base/security/huks/frameworks/huks_standard/main/common/include/",
   ]
   cflags = [
     "-g",
@@ -34,10 +35,13 @@ ohos_fuzztest("HksAnonAttestKeyOfflineFuzzTest") {
 
   deps = [
     "..:hks_fuzz_util",
-    "../../../../frameworks/huks_standard/main:huks_standard_frameworks",
-    "../../../../interfaces/inner_api/huks_standard/main:libhukssdk",
+    "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
   ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ###############################################################################

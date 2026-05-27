@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +15,6 @@
 
 #include "hkschangestoragelevel_fuzzer.h"
 
-#include <securec.h>
-
-#include "hks_api.h"
-#include "hks_mem.h"
-#include "hks_param.h"
-#include "hks_type.h"
-
 #include "hks_fuzz_util.h"
 #include "hks_type_enum.h"
 
@@ -31,7 +24,7 @@ namespace Hks {
 
 static uint32_t PickRandomAuthStorageLevel(FuzzedDataProvider &fdp) {
     if (fdp.ConsumeBool()) {
-        return fdp.ConsumeIntegralInRange<int32_t>(1, 1024);
+        return fdp.ConsumeIntegralInRange<uint32_t>(1, 1024);
     }
     static const uint32_t kAuthStorageLevel[] = {
         HKS_AUTH_STORAGE_LEVEL_DE,
@@ -52,7 +45,7 @@ static void AddSomeParams(FuzzedDataProvider &fdp, WrapParamSet &ps,
     }
 
     if (fdp.ConsumeProbability<double>() < 0.99) {
-        uint32_t userId = fdp.ConsumeIntegralInRange<int32_t>(1, 1024);
+        uint32_t userId = fdp.ConsumeIntegralInRange<uint32_t>(1, 1024);
         params.push_back({ .tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = userId });
     }
 
@@ -77,8 +70,11 @@ WrapParamSet ConstructChangeStorageLevelParamSet(FuzzedDataProvider &fdp)
 
 int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 {
-    uint32_t aliasSize = fdp.ConsumeIntegralInRange(1, 32);
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 32);
     std::vector<uint8_t> alias = fdp.ConsumeBytes<uint8_t>(aliasSize);
+    if (alias.size() == 0) {
+        alias = std::vector<uint8_t>(1, 0);
+    }
     struct HksBlob keyAlias = { static_cast<uint32_t>(alias.size()), alias.data() };
 
     (void)HksFuzzGenerateKey(fdp, keyAlias);
@@ -89,6 +85,10 @@ int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
     return HksChangeStorageLevel(&keyAlias, srcPs.s, destPs.s);
 }
 }}}
+
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
+    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {

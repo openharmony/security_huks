@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +15,6 @@
 
 #include "hksgeneratekey_fuzzer.h"
 
-#include <securec.h>
-
-#include "hks_api.h"
-#include "hks_mem.h"
-#include "hks_param.h"
-#include "hks_type.h"
-
 #include "hks_fuzz_util.h"
 
 namespace OHOS {
@@ -30,8 +23,11 @@ namespace Hks {
 
 int32_t FuzzGenerateKey(FuzzedDataProvider &fdp)
 {
-    uint32_t aliasSize = fdp.ConsumeIntegralInRange(1, 64);
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 64);
     std::vector<uint8_t> alias = fdp.ConsumeBytes<uint8_t>(aliasSize);
+    if (alias.size() == 0) {
+        alias = std::vector<uint8_t>(1, 0);
+    }
     struct HksBlob keyAlias = { static_cast<uint32_t>(alias.size()), alias.data() };
 
     WrapParamSet psIn = fdp.ConsumeBool() ? ConstructParamSetFromFdp(fdp) : ConstructGenKeyParamSetFromFdp(fdp);
@@ -40,6 +36,10 @@ int32_t FuzzGenerateKey(FuzzedDataProvider &fdp)
     return HksGenerateKey(&keyAlias, psIn.s, psOut.s);
 }
 }}}
+
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
+    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+}
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
