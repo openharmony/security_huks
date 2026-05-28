@@ -15,12 +15,17 @@
 
 #include "hksfiletransfer_fuzzer.h"
 
+#include <string>
+#include <vector>
+
 #include "hks_config_parser.h"
 #include "hks_file_transfer.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_type_inner.h"
+
+#include "hks_fuzz_util.h"
 
 #undef HUKS_SA_UPGRADE_CONFIG
 #undef HUKS_HAP_UPGRADE_CONFIG
@@ -479,27 +484,130 @@ static void HksFileTransferTest001()
     const uint32_t testUserId = 100;
     HksUpgradeFileTransferOnUserUnlock(testUserId);
 }
+
+// ========== FDP-driven fuzz functions (supplement existing hardcoded tests) ==========
+
+static const uint32_t g_fuzzAccessTokenTypes[3] = {
+    HKS_TOKEN_HAP,
+    HKS_TOKEN_NATIVE,
+    HKS_TOKEN_SHELL,
+};
+
+static int32_t FuzzParseConfig(FuzzedDataProvider &fdp)
+{
+    // Set global access token type and hap name for HksGetAtType/HksGetHapNameFromAccessToken mock
+    uint32_t tokenType = fdp.PickValueInArray(g_fuzzAccessTokenTypes);
+    g_accessTokenType = static_cast<HksAtType>(tokenType);
+
+    uint32_t hapNameSize = fdp.ConsumeIntegralInRange<uint32_t>(0, 64);
+    auto hapNameData = fdp.ConsumeBytes<uint8_t>(hapNameSize);
+    std::string hapNameStr(hapNameData.begin(), hapNameData.end());
+    // g_hapName must remain valid through HksParseConfig call
+    static thread_local std::string g_fuzzHapName;
+    g_fuzzHapName = std::move(hapNameStr);
+    g_hapName = g_fuzzHapName.empty() ? nullptr : const_cast<char *>(g_fuzzHapName.c_str());
+
+    // Build ParamSet with processName/userId/accessTokenId
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    if (ret != HKS_SUCCESS || paramSet == nullptr) {
+        return HKS_ERROR_INSUFFICIENT_DATA;
+    }
+
+    uint32_t uid = fdp.ConsumeIntegralInRange<uint32_t>(0, 999);
+    uint32_t userId = fdp.ConsumeIntegralInRange<uint32_t>(0, 999);
+    uint64_t accessTokenId = fdp.ConsumeIntegral<uint64_t>();
+
+    struct HksParam params[] = {
+        {
+            .tag = HKS_TAG_PROCESS_NAME,
+            .blob = {
+                .data = reinterpret_cast<uint8_t *>(&uid),
+                .size = sizeof(uint32_t)
+            }
+        }, {
+            .tag = HKS_TAG_USER_ID,
+            .uint32Param = userId
+        }, {
+            .tag = HKS_TAG_ACCESS_TOKEN_ID,
+            .uint64Param = accessTokenId
+        }
+    };
+    (void)HksAddParams(paramSet, params, HKS_ARRAY_SIZE(params));
+    (void)HksBuildParamSet(&paramSet);
+
+    struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet),
+        .size = paramSet->paramSetSize };
+    struct HksUpgradeFileTransferInfo info = { 0 };
+
+    // Fuzz alias parameter
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange<uint32_t>(0, 64);
+    auto aliasData = fdp.ConsumeBytes<uint8_t>(aliasSize);
+    std::string aliasStr(aliasData.begin(), aliasData.end());
+
+    ret = HksParseConfig(aliasStr.c_str(), &fileContent, &info);
+    HksFreeParamSet(&paramSet);
+    return ret;
+}
+
+static int32_t FuzzFileTransferOnUserUnlock(FuzzedDataProvider &fdp)
+{
+    uint32_t userId = fdp.ConsumeIntegralInRange<uint32_t>(0, 999);
+    return HksUpgradeFileTransferOnUserUnlock(userId);
+}
+
+using FuzzFunc = int32_t (*)(FuzzedDataProvider &);
+
+static const FuzzFunc g_fuzzFuncs[2] = {
+    FuzzParseConfig,
+    FuzzFileTransferOnUserUnlock,
+};
+
+// Existing hardcoded test function pointers for selective execution
+using HardcodedFunc = void (*)();
+static const HardcodedFunc g_hardcodedFuncs[14] = {
+    HksServiceUpgradeConfigParserTest001,
+    HksServiceUpgradeConfigParserTest002,
+    HksServiceUpgradeConfigParserTest003,
+    HksServiceUpgradeConfigParserTest004,
+    HksServiceUpgradeConfigParserTest005,
+    HksServiceUpgradeConfigParserTest006,
+    HksServiceUpgradeConfigParserTest007,
+    HksServiceUpgradeConfigParserTest008,
+    HksServiceUpgradeConfigParserTest009,
+    HksServiceUpgradeConfigParserTest010,
+    HksServiceUpgradeConfigParserTest011,
+    HksServiceUpgradeConfigParserTest012,
+    HksServiceUpgradeConfigParserTest013,
+    HksFileTransferTest001,
+};
+
+int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
+{
+    // Execute 1-3 hardcoded functions to preserve existing coverage
+    uint32_t hardcodedCount = fdp.ConsumeIntegralInRange<uint32_t>(1, 3);
+    for (uint32_t i = 0; i < hardcodedCount; i++) {
+        auto func = fdp.PickValueInArray(g_hardcodedFuncs);
+        func();
+    }
+
+    // Execute 1 FDP-driven function to explore new paths
+    auto fuzzFunc = fdp.PickValueInArray(g_fuzzFuncs);
+    return fuzzFunc(fdp);
+}
 }
 }
 }
 
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
+    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+}
+
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    (void)data;
-    (void)size;
-    OHOS::Security::Hks::HksServiceUpgradeConfigParserTest001();
-    OHOS::Security::Hks::HksServiceUpgradeConfigParserTest002();
-    OHOS::Security::Hks::HksServiceUpgradeConfigParserTest003();
-    OHOS::Security::Hks::HksServiceUpgradeConfigParserTest004();
-    OHOS::Security::Hks::HksServiceUpgradeConfigParserTest005();
-    OHOS::Security::Hks::HksServiceUpgradeConfigParserTest006();
-    OHOS::Security::Hks::HksServiceUpgradeConfigParserTest007();
-    OHOS::Security::Hks::HksServiceUpgradeConfigParserTest008();
-    OHOS::Security::Hks::HksServiceUpgradeConfigParserTest009();
-    OHOS::Security::Hks::HksServiceUpgradeConfigParserTest010();
-    OHOS::Security::Hks::HksServiceUpgradeConfigParserTest011();
-    OHOS::Security::Hks::HksServiceUpgradeConfigParserTest012();
-    OHOS::Security::Hks::HksServiceUpgradeConfigParserTest013();
-    OHOS::Security::Hks::HksFileTransferTest001();
+    FuzzedDataProvider fdp(data, size);
+    int32_t ret = OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(fdp);
+
+    OHOS::Security::Hks::FuzzStatsRecord(ret);
     return 0;
 }
