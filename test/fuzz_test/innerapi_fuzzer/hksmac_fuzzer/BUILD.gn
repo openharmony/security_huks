@@ -38,7 +38,10 @@ ohos_fuzztest("HksMacFuzzTest") {
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
   ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ###############################################################################

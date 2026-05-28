@@ -38,7 +38,10 @@ ohos_fuzztest("HksReportWrapperFuzzTest") {
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
   ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
   external_deps += [ "hilog:libhilog" ]
 }
 

@@ -15,6 +15,7 @@
 #define HUKS_DISABLE_LOG_AT_FILE_TO_REDUCE_ROM_SIZE
 
 #include "hks_param.h"
+#include "hks_valid_tags.h"
 
 #include <stddef.h>
 
@@ -25,7 +26,7 @@
 
 #include "securec.h"
 
-static uint32_t g_validTags[] = {
+const uint32_t HKS_VALID_TAGS[] = {
     HKS_TAG_ALGORITHM,
     HKS_TAG_PURPOSE,
     HKS_TAG_KEY_SIZE,
@@ -189,6 +190,8 @@ static uint32_t g_validTags[] = {
     HKS_TAG_PLAIN_TEXT
 };
 
+const uint32_t HKS_VALID_TAGS_COUNT = HKS_ARRAY_SIZE(HKS_VALID_TAGS);
+
 HKS_API_EXPORT enum HksTagType GetTagType(enum HksTag tag)
 {
     return (enum HksTagType)((uint32_t)tag & (uint32_t)HKS_TAG_TYPE_MASK);
@@ -196,9 +199,9 @@ HKS_API_EXPORT enum HksTagType GetTagType(enum HksTag tag)
 
 static bool IsValidTag(uint32_t tag)
 {
-    uint32_t tagSize = HKS_ARRAY_SIZE(g_validTags);
+    uint32_t tagSize = HKS_ARRAY_SIZE(HKS_VALID_TAGS);
     for (uint32_t i = 0; i < tagSize; ++i) {
-        if (tag == g_validTags[i]) {
+        if (tag == HKS_VALID_TAGS[i]) {
             return true;
         }
     }
