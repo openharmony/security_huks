@@ -16,6 +16,7 @@
 
 #include <cstring>
 #include <securec.h>
+#include <string>
 #include <vector>
 #include "message_parcel.h"
 
@@ -970,48 +971,284 @@ static void HksIpcServiceTest022()
     uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
     HksIpcServiceListAliases(&srcData, context);
 }
+
+// ========== FDP-driven fuzz functions (supplement existing hardcoded tests) ==========
+
+// Simple IPC service functions: (const HksBlob*, const uint8_t*)
+using SimpleIpcFunc = void (*)(const struct HksBlob *, const uint8_t *);
+
+static const SimpleIpcFunc g_simpleIpcFuncs[17] = {
+    HksIpcServiceGenerateKey,
+    HksIpcServiceImportKey,
+    HksIpcServiceImportWrappedKey,
+    HksIpcServiceExportPublicKey,
+    HksIpcServiceDeleteKey,
+    HksIpcServiceGetKeyParamSet,
+    HksIpcServiceKeyExist,
+    HksIpcServiceGenerateRandom,
+    HksIpcServiceSign,
+    HksIpcServiceVerify,
+    HksIpcServiceEncrypt,
+    HksIpcServiceDecrypt,
+    HksIpcServiceAgreeKey,
+    HksIpcServiceDeriveKey,
+    HksIpcServiceMac,
+    HksIpcServiceGetKeyInfoList,
+    HksIpcServiceListAliases,
+};
+
+// IPC service functions with outData: (const HksBlob*, HksBlob*, const uint8_t*)
+using OutDataIpcFunc = void (*)(const struct HksBlob *, struct HksBlob *, const uint8_t *);
+
+static const OutDataIpcFunc g_outDataIpcFuncs[4] = {
+    HksIpcServiceInit,
+    HksIpcServiceUpdate,
+    HksIpcServiceFinish,
+    HksIpcServiceAbort,
+};
+
+// FDP-driven: fuzz HksParamSetToParams with random tag types and values
+static int32_t FuzzParamSetToParams(FuzzedDataProvider &fdp)
+{
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    if (ret != HKS_SUCCESS || paramSet == nullptr) {
+        return HKS_ERROR_INSUFFICIENT_DATA;
+    }
+
+    // Pick a tag type to test
+    static const uint32_t g_tagTypes[5] = {
+        HKS_TAG_TYPE_INT,
+        HKS_TAG_TYPE_UINT,
+        HKS_TAG_TYPE_ULONG,
+        HKS_TAG_TYPE_BOOL,
+        HKS_TAG_TYPE_BYTES,
+    };
+    uint32_t tagType = fdp.PickValueInArray(g_tagTypes);
+
+    // Build param and output param based on tag type
+    struct HksParam param = {};
+    struct HksParamOut outParam = {};
+
+    if (tagType == HKS_TAG_TYPE_INT) {
+        static const uint32_t intTags[1] = { HKS_TAG_KEY_AUTH_RESULT };
+        uint32_t tag = fdp.PickValueInArray(intTags);
+        param.tag = tag;
+        param.int32Param = fdp.ConsumeIntegral<int32_t>();
+        int32_t outVal = 0;
+        outParam = { .tag = tag, .int32Param = &outVal };
+    } else if (tagType == HKS_TAG_TYPE_UINT) {
+        static const uint32_t uintTags[1] = { HKS_TAG_ACCESS_TIME };
+        uint32_t tag = fdp.PickValueInArray(uintTags);
+        param.tag = tag;
+        param.uint32Param = fdp.ConsumeIntegral<uint32_t>();
+        uint32_t outVal = 0;
+        outParam = { .tag = tag, .uint32Param = &outVal };
+    } else if (tagType == HKS_TAG_TYPE_ULONG) {
+        static const uint32_t ulongTags[1] = { HKS_TAG_KEY_ACCESS_TIME };
+        uint32_t tag = fdp.PickValueInArray(ulongTags);
+        param.tag = tag;
+        param.uint64Param = fdp.ConsumeIntegral<uint64_t>();
+        uint64_t outVal = 0;
+        outParam = { .tag = tag, .uint64Param = &outVal };
+    } else if (tagType == HKS_TAG_TYPE_BOOL) {
+        param.tag = HKS_TAG_IF_NEED_APPEND_AUTH_INFO;
+        param.boolParam = fdp.ConsumeBool();
+        bool outVal = false;
+        outParam = { .tag = HKS_TAG_IF_NEED_APPEND_AUTH_INFO, .boolParam = &outVal };
+    } else {
+        // Bytes type - also test with null interval (tag + HKS_PARAM_BUFFER_NULL_INTERVAL)
+        uint32_t blobSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 64);
+        auto blobData = fdp.ConsumeBytes<uint8_t>(blobSize);
+        static thread_local std::vector<uint8_t> blobBuf;
+        blobBuf = blobData;
+        if (blobBuf.empty()) {
+            HksFreeParamSet(&paramSet);
+            return HKS_ERROR_INSUFFICIENT_DATA;
+        }
+        struct HksBlob aliasBlob = { static_cast<uint32_t>(blobBuf.size()), blobBuf.data() };
+        if (fdp.ConsumeBool()) {
+            param.tag = HKS_TAG_ATTESTATION_ID_ALIAS + HKS_PARAM_BUFFER_NULL_INTERVAL;
+        } else {
+            param.tag = HKS_TAG_ATTESTATION_ID_ALIAS;
+        }
+        param.blob = aliasBlob;
+        outParam = { .tag = HKS_TAG_ATTESTATION_ID_ALIAS, .blob = &aliasBlob };
+    }
+
+    (void)HksAddParams(paramSet, &param, 1);
+    (void)HksBuildParamSet(&paramSet);
+    ret = HksParamSetToParams(paramSet, &outParam, 1);
+    HksFreeParamSet(&paramSet);
+    return ret;
+}
+
+// FDP-driven: fuzz GetBlobFromBuffer with random sizes and index
+static int32_t FuzzGetBlobFromBuffer(FuzzedDataProvider &fdp)
+{
+    uint32_t blobSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 256);
+    uint32_t srcBlobSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 256);
+    std::vector<uint8_t> blobData(blobSize, 0);
+    std::vector<uint8_t> srcBlobData(srcBlobSize, 0);
+
+    struct HksBlob blob = { blobSize, blobData.data() };
+    struct HksBlob srcBlob = { srcBlobSize, srcBlobData.data() };
+    uint32_t index = fdp.ConsumeIntegralInRange<uint32_t>(0, srcBlobSize + 16);
+
+    GetBlobFromBuffer(&blob, &srcBlob, &index);
+    return HKS_SUCCESS;
+}
+
+// FDP-driven: fuzz simple IPC service functions with random binary data
+static int32_t FuzzIpcServiceSimple(FuzzedDataProvider &fdp)
+{
+    uint32_t dataSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 512);
+    auto dataBuf = fdp.ConsumeBytes<uint8_t>(dataSize);
+    if (dataBuf.empty()) return HKS_ERROR_INSUFFICIENT_DATA;
+
+    struct HksBlob srcData = { static_cast<uint32_t>(dataBuf.size()), const_cast<uint8_t *>(dataBuf.data()) };
+    MessageParcel reply;
+    uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
+
+    auto func = fdp.PickValueInArray(g_simpleIpcFuncs);
+    func(&srcData, context);
+    return HKS_SUCCESS;
+}
+
+// FDP-driven: fuzz IPC service functions with outData parameter
+static int32_t FuzzIpcServiceWithOutData(FuzzedDataProvider &fdp)
+{
+    uint32_t dataSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 512);
+    auto dataBuf = fdp.ConsumeBytes<uint8_t>(dataSize);
+    if (dataBuf.empty()) return HKS_ERROR_INSUFFICIENT_DATA;
+
+    struct HksBlob srcData = { static_cast<uint32_t>(dataBuf.size()), const_cast<uint8_t *>(dataBuf.data()) };
+    uint32_t outSize = fdp.ConsumeIntegralInRange<uint32_t>(16, 2048);
+    std::vector<uint8_t> outBuf(outSize, 0);
+    struct HksBlob outData = { outSize, outBuf.data() };
+
+    MessageParcel reply;
+    uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
+
+    auto func = fdp.PickValueInArray(g_outDataIpcFuncs);
+    func(&srcData, &outData, context);
+    return HKS_SUCCESS;
+}
+
+// FDP-driven: fuzz HksIpcServiceAttestKey with random binary data
+static int32_t FuzzIpcServiceAttestKey(FuzzedDataProvider &fdp)
+{
+    uint32_t dataSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 512);
+    auto dataBuf = fdp.ConsumeBytes<uint8_t>(dataSize);
+    if (dataBuf.empty()) return HKS_ERROR_INSUFFICIENT_DATA;
+
+    struct HksBlob srcData = { static_cast<uint32_t>(dataBuf.size()), const_cast<uint8_t *>(dataBuf.data()) };
+    MessageParcel reply;
+    uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
+
+    HksIpcServiceAttestKey(&srcData, context, NULL);
+    return HKS_SUCCESS;
+}
+
+// FDP-driven: fuzz HksExtStub::OnRemoteRequest with random MessageParcel data
+static int32_t FuzzIpcExtStub(FuzzedDataProvider &fdp)
+{
+    MessageParcel data{};
+    MessageParcel reply{};
+    MessageOption option{};
+
+    data.WriteInterfaceToken(HksExtStub::GetDescriptor());
+    data.WriteUint32(fdp.ConsumeIntegral<uint32_t>());
+
+    uint32_t dataSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 256);
+    auto dataBuf = fdp.ConsumeBytes<uint8_t>(dataSize);
+    if (!dataBuf.empty()) {
+        data.WriteUint32(dataBuf.size());
+        data.WriteBuffer(dataBuf.data(), dataBuf.size());
+    }
+
+    HksExtStub stub;
+    uint32_t msgCode = fdp.ConsumeIntegralInRange<uint32_t>(0, 200);
+    (void)stub.OnRemoteRequest(msgCode, data, reply, option);
+    return HKS_SUCCESS;
+}
+
+using FuzzFunc = int32_t (*)(FuzzedDataProvider &);
+
+static const FuzzFunc g_fuzzFuncs[6] = {
+    FuzzParamSetToParams,
+    FuzzGetBlobFromBuffer,
+    FuzzIpcServiceSimple,
+    FuzzIpcServiceWithOutData,
+    FuzzIpcServiceAttestKey,
+    FuzzIpcExtStub,
+};
+
+// Existing hardcoded test function pointers for selective execution
+using HardcodedFunc = void (*)();
+static const HardcodedFunc g_hardcodedFuncs[34] = {
+    HksIpcSerializationTest001,
+    HksIpcSerializationTest002,
+    HksIpcSerializationTest003,
+    HksIpcSerializationTest004,
+    HksIpcSerializationTest005,
+    HksIpcSerializationTest006,
+    HksIpcSerializationTest007,
+    HksIpcSerializationTest008,
+    HksIpcSerializationTest009,
+    HksIpcSerializationTest010,
+    HksIpcSerializationTest011,
+    HksIpcServiceTest000,
+    HksIpcServiceTest001,
+    HksIpcServiceTest002,
+    HksIpcServiceTest003,
+    HksIpcServiceTest004,
+    HksIpcServiceTest005,
+    HksIpcServiceTest006,
+    HksIpcServiceTest007,
+    HksIpcServiceTest008,
+    HksIpcServiceTest009,
+    HksIpcServiceTest010,
+    HksIpcServiceTest011,
+    HksIpcServiceTest012,
+    HksIpcServiceTest013,
+    HksIpcServiceTest014,
+    HksIpcServiceTest015,
+    HksIpcServiceTest016,
+    HksIpcServiceTest017,
+    HksIpcServiceTest018,
+    HksIpcServiceTest019,
+    HksIpcServiceTest020,
+    HksIpcServiceTest021,
+    HksIpcServiceTest022,
+};
+
+int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
+{
+    // Execute 1-3 hardcoded functions to preserve existing coverage
+    uint32_t hardcodedCount = fdp.ConsumeIntegralInRange<uint32_t>(1, 3);
+    for (uint32_t i = 0; i < hardcodedCount; i++) {
+        auto func = fdp.PickValueInArray(g_hardcodedFuncs);
+        func();
+    }
+
+    // Execute 1 FDP-driven function to explore new paths
+    auto fuzzFunc = fdp.PickValueInArray(g_fuzzFuncs);
+    return fuzzFunc(fdp);
 }
 }
+}
+}
+
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
+    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    (void)data;
-    (void)size;
-    OHOS::Security::Hks::HksIpcSerializationTest001();
-    OHOS::Security::Hks::HksIpcSerializationTest002();
-    OHOS::Security::Hks::HksIpcSerializationTest003();
-    OHOS::Security::Hks::HksIpcSerializationTest004();
-    OHOS::Security::Hks::HksIpcSerializationTest005();
-    OHOS::Security::Hks::HksIpcSerializationTest006();
-    OHOS::Security::Hks::HksIpcSerializationTest007();
-    OHOS::Security::Hks::HksIpcSerializationTest008();
-    OHOS::Security::Hks::HksIpcSerializationTest009();
-    OHOS::Security::Hks::HksIpcSerializationTest010();
-    OHOS::Security::Hks::HksIpcSerializationTest011();
-    OHOS::Security::Hks::HksIpcServiceTest000();
-    OHOS::Security::Hks::HksIpcServiceTest001();
-    OHOS::Security::Hks::HksIpcServiceTest002();
-    OHOS::Security::Hks::HksIpcServiceTest003();
-    OHOS::Security::Hks::HksIpcServiceTest004();
-    OHOS::Security::Hks::HksIpcServiceTest005();
-    OHOS::Security::Hks::HksIpcServiceTest006();
-    OHOS::Security::Hks::HksIpcServiceTest007();
-    OHOS::Security::Hks::HksIpcServiceTest008();
-    OHOS::Security::Hks::HksIpcServiceTest009();
-    OHOS::Security::Hks::HksIpcServiceTest010();
-    OHOS::Security::Hks::HksIpcServiceTest011();
-    OHOS::Security::Hks::HksIpcServiceTest012();
-    OHOS::Security::Hks::HksIpcServiceTest013();
-    OHOS::Security::Hks::HksIpcServiceTest014();
-    OHOS::Security::Hks::HksIpcServiceTest015();
-    OHOS::Security::Hks::HksIpcServiceTest016();
-    OHOS::Security::Hks::HksIpcServiceTest017();
-    OHOS::Security::Hks::HksIpcServiceTest018();
-    OHOS::Security::Hks::HksIpcServiceTest019();
-    OHOS::Security::Hks::HksIpcServiceTest020();
-    OHOS::Security::Hks::HksIpcServiceTest021();
-    OHOS::Security::Hks::HksIpcServiceTest022();
+    FuzzedDataProvider fdp(data, size);
+    int32_t ret = OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(fdp);
 
+    OHOS::Security::Hks::FuzzStatsRecord(ret);
     return 0;
 }

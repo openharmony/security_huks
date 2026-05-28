@@ -142,6 +142,29 @@ PR 2102 的改造质量较好，主要完成了：
 |------|------|------|
 | `hksfiletransfer_fuzzer.cpp` | 保留14个硬编码 + 新增2个 FDP 函数 + PR 2102 模式 | ✅ 已修改 |
 
+### Batch 5：改造 hksipc_fuzzer（已完成 ✅）
+
+**修改原因**：原始 fuzzer 的34个测试函数全部硬编码参数（固定二进制数据/ParamSet/tag），`(void)data; (void)size;` 丢弃 fuzz 输入。
+
+**改造内容**：
+- 保留全部34个原始硬编码函数（SerializationTest001-011 + ServiceTest000-022），新增6个 FDP 驱动的 fuzz 函数：
+  1. `FuzzParamSetToParams` — FDP 选择 tag 类型（INT/UINT/ULONG/BOOL/BYTES），生成随机参数值，调用 HksParamSetToParams；Bytes 类型还随机测试 HKS_PARAM_BUFFER_NULL_INTERVAL
+  2. `FuzzGetBlobFromBuffer` — FDP 控制 blob/srcBlob 大小和 index，探索边界条件
+  3. `FuzzIpcServiceSimple` — FDP 生成随机二进制数据，PickValueInArray 选择17个简单 IPC 服务函数之一
+  4. `FuzzIpcServiceWithOutData` — FDP 生成 srcData + outData，PickValueInArray 选择 Init/Update/Finish/Abort
+  5. `FuzzIpcServiceAttestKey` — FDP 生成 srcData，调用 AttestKey（第3参数 NULL）
+  6. `FuzzIpcExtStub` — FDP 生成 MessageParcel 数据 + msgCode，调用 HksExtStub::OnRemoteRequest
+- 每次 DoSomethingInterestingWithMyAPI 执行：1-3个硬编码函数 + 1个 FDP 函数
+- 安全措施：
+  - `HksInitParamSet` 失败时提前返回
+  - Bytes 类型 blob 数据使用 `thread_local std::vector` 保持生命周期
+  - IPC service 函数使用 `const_cast` 确保 HksBlob.data 类型匹配
+- 使用 PR 2102 统一模式：`LLVMFuzzerInitialize` + `FuzzStatsRecord`
+
+| 文件 | 修改 | 状态 |
+|------|------|------|
+| `hksipc_fuzzer.cpp` | 保留34个硬编码 + 新增6个 FDP 函数 + PR 2102 模式 | ✅ 已修改 |
+
 ---
 
 ## 五、关键设计决策记录
