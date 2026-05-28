@@ -119,10 +119,7 @@ HksEventProcMap *HksHaPlugin::HksEventProcFind(uint32_t eventId)
         [eventId](const struct HksEventProcMap &item) {
             return item.eventId == eventId;
         });
-    if (it != eventProcList.end()) {
-        return &(*it); // eventProcList无删除操作，因此此处返回指针是安全的
-    }
-
+    HKS_IF_TRUE_RETURN(it != eventProcList.end(), &(*it)) // eventProcList无删除操作，因此此处返回指针是安全的
     return nullptr;
 }
 
@@ -131,10 +128,10 @@ static void AddAncoCallTagToEventMap(const struct HksParamSet *paramSet,
 {
     HKS_IF_NULL_LOGE_RETURN_VOID(paramSet, "AddAncoCallTagToEventMap: paramSet is null");
     struct HksParam *ancoUidParam = nullptr;
-    if (HksGetParam(paramSet, HKS_TAG_ANCO_APP_UID, &ancoUidParam) == HKS_SUCCESS) {
-        HKS_LOG_I("AddAncoCallTagToEventMap: anco uid found, add anco_call=true to eventMap");
-        eventMap["anco_call"] = "true";
-    }
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_ANCO_APP_UID, &ancoUidParam);
+    HKS_IF_NOT_SUCC_RETURN_VOID(ret)
+    HKS_LOG_I("AddAncoCallTagToEventMap: anco uid found, add anco_call=true to eventMap");
+    eventMap["anco_call"] = "true";
 }
 
 void HksHaPlugin::HandlerReport(HksEventQueueItem &item)
@@ -177,9 +174,7 @@ void HksHaPlugin::WorkerThread()
     while (!stopFlag) {
         HksEventQueueItem item;
         bool success = queue.Dequeue(item);
-        if (!success) {
-            continue;
-        }
+        HKS_IF_TRUE_CONTINUE(!success)
 
         HandlerReport(item);
         HksFreeParamSet(&item.paramSet);
@@ -245,11 +240,9 @@ int32_t HksHaPlugin::FillEventInfos(uint32_t reportCount, HksEventWithMap *event
             HKS_IF_NULL_LOGI_RETURN(procMap, HKS_ERROR_NULL_POINTER, "procMap is null");
 
             int32_t ret = procMap->eventInfoToMap(eventInfo, eventsWithMap[count].eventMap);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("FillEventInfos: Failed to convert HksEventInfo to map for eventId %" LOG_PUBLIC "u",
-                    eventsWithMap[count].common.eventId);
-                continue;
-            }
+            HKS_IF_TRUE_LOGE_CONTINUE(ret != HKS_SUCCESS,
+                "FillEventInfos: Failed to convert HksEventInfo to map for eventId %" LOG_PUBLIC "u",
+                eventsWithMap[count].common.eventId)
         }
         ++count;
     }
