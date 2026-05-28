@@ -165,6 +165,29 @@ PR 2102 的改造质量较好，主要完成了：
 |------|------|------|
 | `hksipc_fuzzer.cpp` | 保留34个硬编码 + 新增6个 FDP 函数 + PR 2102 模式 | ✅ 已修改 |
 
+### Batch 6：改造 hksrkc_fuzzer（已完成 ✅）
+
+**修改原因**：原始 fuzzer 仅1个测试函数（HksUpgradeRkcTest001），使用硬编码的 oldKsfFile/mkPlaintext，`(void)data; (void)size;` 丢弃 fuzz 输入。且使用 `#include .c` 编译方式。
+
+**改造内容**：
+- 保留原始1个硬编码函数（HksUpgradeRkcTest001），新增6个 FDP 驱动的 fuzz 函数：
+  1. `FuzzExtractKsfBufV1` — FDP 生成随机 ksf blob 数据，调用 RkcExtractKsfBufV1 解析 V1 格式
+  2. `FuzzExtractKsfBufRkc` — FDP 生成随机 ksf blob 数据，调用 ExtractKsfBufRkc 解析 RKC V2 格式
+  3. `FuzzExtractKsfBufMk` — FDP 生成随机 ksf blob 数据，调用 ExtractKsfBufMk 解析 MK V2 格式
+  4. `FuzzRkcMkCryptV1` — FDP 生成随机 blob → 先解析 V1 → 再用随机 encrypt/decrypt 调用 RkcMkCryptV1
+  5. `FuzzRkcMkCrypt` — FDP 生成随机 rkc+mk blob → 分别解析 → 调用 RkcMkCrypt (V2)
+  6. `FuzzFillKsfBufRoundTrip` — FDP 生成随机 MK 明文 → FillKsfDataRkcWithVer → RkcMkCrypt 加密 → FillKsfBufRkc/FillKsfBufMk
+- 每次 DoSomethingInterestingWithMyAPI 执行：1个硬编码函数 + 1个 FDP 函数
+- 安全措施：
+  - Extract 函数失败时提前返回，不进入后续加密/解密操作
+  - RkcMkCrypt 系列函数使用随机 bool 选择 encrypt/decrypt 方向
+  - FuzzFillKsfBufRoundTrip 中使用 `memcpy_s` 安全拷贝 fuzz 数据
+- 使用 PR 2102 统一模式：`LLVMFuzzerInitialize` + `FuzzStatsRecord`
+
+| 文件 | 修改 | 状态 |
+|------|------|------|
+| `hksrkc_fuzzer.cpp` | 保留1个硬编码 + 新增6个 FDP 函数 + PR 2102 模式 | ✅ 已修改 |
+
 ---
 
 ## 五、关键设计决策记录
