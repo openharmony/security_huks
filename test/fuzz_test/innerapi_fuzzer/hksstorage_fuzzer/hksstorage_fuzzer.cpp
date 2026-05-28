@@ -706,20 +706,20 @@ static void HksStorageUtilTest007()
 
 // ========== FDP-driven fuzz functions (supplement existing hardcoded tests) ==========
 
-static const uint32_t g_fuzzStorageTypes[] = {
+static const uint32_t g_fuzzStorageTypes[3] = {
     HKS_STORAGE_TYPE_KEY,
-    HKS_STORAGE_TYPE_CERTCHAIN,
+    HKS_STORAGE_TYPE_BAK_KEY,
     HKS_STORAGE_TYPE_ROOT_KEY,
 };
 
-static const uint32_t g_fuzzAuthStorageLevels[] = {
+static const uint32_t g_fuzzAuthStorageLevels[4] = {
     HKS_AUTH_STORAGE_LEVEL_DE,
     HKS_AUTH_STORAGE_LEVEL_CE,
     HKS_AUTH_STORAGE_LEVEL_ECE,
     HKS_AUTH_STORAGE_LEVEL_OLD_DE_TMP,
 };
 
-static const uint32_t g_fuzzPathTypes[] = {
+static const uint32_t g_fuzzPathTypes[6] = {
     DE_PATH,
     CE_PATH,
     ECE_PATH,
@@ -901,7 +901,7 @@ static int32_t FuzzGetFileInfo(FuzzedDataProvider &fdp)
 
 using FuzzFunc = int32_t (*)(FuzzedDataProvider &);
 
-static const FuzzFunc g_fuzzFuncs[] = {
+static const FuzzFunc g_fuzzFuncs[7] = {
     FuzzStoreKeyBlob,
     FuzzGetKeyBlob,
     FuzzDeleteKeyBlob,
@@ -913,7 +913,7 @@ static const FuzzFunc g_fuzzFuncs[] = {
 
 // Existing hardcoded test function pointers for selective execution
 using HardcodedFunc = void (*)();
-static const HardcodedFunc g_hardcodedFuncs[] = {
+static const HardcodedFunc g_hardcodedFuncs[26] = {
     HksStorageMultithreadTest001,
     HksStorageMultithreadTest002,
     HksStorageMultithreadTest003,
