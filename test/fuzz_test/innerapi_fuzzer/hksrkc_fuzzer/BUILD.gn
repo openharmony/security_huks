@@ -52,7 +52,6 @@ ohos_fuzztest("HksRkcFuzzTest") {
     "c_utils:utils",
     "hilog:libhilog",
   ]
-  external_deps += [ "hilog:libhilog" ]
 }
 
 ###############################################################################
