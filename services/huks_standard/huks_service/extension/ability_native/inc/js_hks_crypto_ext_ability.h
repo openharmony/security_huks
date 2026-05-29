@@ -23,7 +23,6 @@
 #include "js_runtime.h"
 #include "want.h"
 #include "hks_external_error_info.h"
-#include "log_utils.h"
 
 namespace OHOS {
 namespace Security {
@@ -32,16 +31,6 @@ namespace Huks {
 using InputArgsParser = std::function<bool(napi_env&, napi_value*, size_t&)>;
 using ResultValueParser = std::function<bool(napi_env&, napi_value)>;
 
-#define HKS_EXT_IF_TRUE_LOGE_RETURN(BOOL_FUNC, ERROR_CODE, LOG_MESSAGE, ...) \
-if (BOOL_FUNC) { \
-    LOGE(LOG_MESSAGE, ##__VA_ARGS__); \
-    return (ERROR_CODE); \
-}
-
-#define HKS_EXT_IF_TRUE_RETURN(BOOL_FUNC, ERROR_CODE) \
-if (BOOL_FUNC) { \
-    return (ERROR_CODE); \
-}
 typedef enum {
     OPEN_REMOTE_HANDLE = 0,
     CLOSE_REMOTE_HANDLE,
