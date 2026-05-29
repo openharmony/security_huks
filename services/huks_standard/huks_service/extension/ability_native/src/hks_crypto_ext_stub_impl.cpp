@@ -24,18 +24,18 @@ namespace Huks {
 
 #define HKS_EXT_STUB_CHECK_EXTENSION(errorInfo) \
     do { \
-        if (extension_ == nullptr) { \
+        if ((extension_) == nullptr) { \
             LOGE("extension is nullptr"); \
-            errorInfo.errVal = HKS_ERROR_EXT_NULLPTR; \
-            errorInfo.errorDesc.assign(""); \
+            (errorInfo).errVal = HKS_ERROR_EXT_NULLPTR; \
+            (errorInfo).errorDesc.assign(""); \
             return HKS_ERROR_EXT_NULLPTR; \
         } \
     } while (0)
 
 #define HKS_EXT_STUB_INIT_ERROR_INFO(errInfoC) \
     do { \
-        errInfoC = HksCreateExternalErrorInfo(HKS_ERROR_EXT_JS_METHOD_ERROR, ""); \
-        if (errInfoC == nullptr) { \
+        (errInfoC) = HksCreateExternalErrorInfo(HKS_ERROR_EXT_JS_METHOD_ERROR, ""); \
+        if ((errInfoC) == nullptr) { \
             LOGE("errInfoC: Default value not set."); \
         } \
     } while (0)
