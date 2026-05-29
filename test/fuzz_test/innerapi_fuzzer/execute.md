@@ -188,6 +188,37 @@ PR 2102 的改造质量较好，主要完成了：
 |------|------|------|
 | `hksrkc_fuzzer.cpp` | 保留1个硬编码 + 新增6个 FDP 函数 + PR 2102 模式 | ✅ 已修改 |
 
+### Batch 7：改造 hksreportwrapper_fuzzer（已完成 ✅）
+
+**修改原因**：原始 fuzzer 仅2个测试函数（Test001 传全 nullptr，Test002 硬编码 processInfo/paramSet），`(void)data; (void)size;` 丢弃 fuzz 输入。
+
+**改造内容**：
+- 保留全部2个原始硬编码函数（HksReportWrapperTest001/002），新增1个 FDP 驱动的 fuzz 函数：
+  1. `FuzzReportFaultEvent` — FDP 控制 processName/userId/uid/accessTokenId/funcName/errorCode，使用 `ConstructParamSetFromFdp` 生成随机 ParamSet，调用 `ReportFaultEvent`
+- 每次 DoSomethingInterestingWithMyAPI 执行：1个硬编码函数 + 1个 FDP 函数
+- 安全措施：
+  - processInfo 所有字段由 FDP 生成保证合法
+  - funcName 为空时传 nullptr（匹配 Test001 的 null 场景）
+  - ParamSet 使用 `WrapParamSet` RAII 包装，自动释放
+- 使用 PR 2102 统一模式：`LLVMFuzzerInitialize` + `FuzzStatsRecord`
+
+| 文件 | 修改 | 状态 |
+|------|------|------|
+| `hksreportwrapper_fuzzer.cpp` | 保留2个硬编码 + 新增1个 FDP 函数 + PR 2102 模式 | ✅ 已修改 |
+
+---
+
+## 六、改造总览
+
+| # | Fuzzer | 硬编码保留 | FDP新增 | 状态 |
+|---|--------|-----------|---------|------|
+| 1 | hksclientipcserialization_fuzzer | 0（已由 PR 2102 重写为7个 FDP 函数） | 7 | ✅ Batch 2 |
+| 2 | hksstorage_fuzzer | 26 | 7 | ✅ Batch 3 |
+| 3 | hksfiletransfer_fuzzer | 14 | 2 | ✅ Batch 4 |
+| 4 | hksipc_fuzzer | 34 | 6 | ✅ Batch 5 |
+| 5 | hksrkc_fuzzer | 1 | 6 | ✅ Batch 6 |
+| 6 | hksreportwrapper_fuzzer | 2 | 1 | ✅ Batch 7 |
+
 ---
 
 ## 五、关键设计决策记录

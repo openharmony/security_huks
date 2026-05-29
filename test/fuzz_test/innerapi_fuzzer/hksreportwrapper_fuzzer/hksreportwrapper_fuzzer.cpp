@@ -16,6 +16,7 @@
 #include "hksreportwrapper_fuzzer.h"
 
 #include <string>
+#include <vector>
 
 #include "hks_log.h"
 #include "hks_param.h"
@@ -24,6 +25,8 @@
 #include "hks_template.h"
 #include "hks_type.h"
 #include "hks_type_inner.h"
+
+#include "hks_fuzz_util.h"
 
 const std::string TEST_PROCESS_NAME = "test_process";
 const std::string TEST_USER_ID = "123465";
@@ -89,15 +92,78 @@ static void HksReportWrapperTest002()
     ReportFaultEvent(__func__, &hksProcessInfo, paramSet, HKS_FAILURE);
     HksFreeParamSet(&paramSet);
 }
+
+// ========== FDP-driven fuzz functions (supplement existing hardcoded tests) ==========
+
+static int32_t FuzzReportFaultEvent(FuzzedDataProvider &fdp)
+{
+    // Build processInfo from FDP
+    uint32_t nameSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 32);
+    auto nameData = fdp.ConsumeBytes<uint8_t>(nameSize);
+    std::string processNameStr(nameData.begin(), nameData.end());
+
+    uint32_t uidVal = fdp.ConsumeIntegralInRange<uint32_t>(0, 999);
+    std::string userIdStr = std::to_string(uidVal);
+
+    HksProcessInfo processInfo = {};
+    processInfo.processName = { static_cast<uint32_t>(processNameStr.size()),
+                                reinterpret_cast<uint8_t *>(processNameStr.data()) };
+    processInfo.userId = { static_cast<uint32_t>(userIdStr.size()),
+                           reinterpret_cast<uint8_t *>(userIdStr.data()) };
+    processInfo.userIdInt = uidVal;
+    processInfo.uidInt = fdp.ConsumeIntegralInRange<uint32_t>(0, 999);
+    processInfo.accessTokenId = fdp.ConsumeIntegralInRange<uint32_t>(0, 999);
+
+    // Build ParamSet from FDP
+    WrapParamSet ps = ConstructParamSetFromFdp(fdp);
+
+    // Fuzz funcName and errorCode
+    uint32_t funcNameSize = fdp.ConsumeIntegralInRange<uint32_t>(0, 64);
+    auto funcNameData = fdp.ConsumeBytes<uint8_t>(funcNameSize);
+    std::string funcNameStr(funcNameData.begin(), funcNameData.end());
+    const char *funcName = funcNameStr.empty() ? nullptr : funcNameStr.c_str();
+
+    int32_t errorCode = fdp.ConsumeIntegral<int32_t>();
+
+    return ReportFaultEvent(funcName, &processInfo, ps.s, errorCode);
+}
+
+using FuzzFunc = int32_t (*)(FuzzedDataProvider &);
+
+static const FuzzFunc g_fuzzFuncs[1] = {
+    FuzzReportFaultEvent,
+};
+
+// Existing hardcoded test function pointers for selective execution
+using HardcodedFunc = void (*)();
+static const HardcodedFunc g_hardcodedFuncs[2] = {
+    HksReportWrapperTest001,
+    HksReportWrapperTest002,
+};
+
+int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
+{
+    // Execute 1 hardcoded function to preserve existing coverage
+    auto func = fdp.PickValueInArray(g_hardcodedFuncs);
+    func();
+
+    // Execute 1 FDP-driven function to explore new paths
+    auto fuzzFunc = fdp.PickValueInArray(g_fuzzFuncs);
+    return fuzzFunc(fdp);
+}
 }
 }
 }
 
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
+    return OHOS::Security::Hks::HksFuzzInitWithGoldenPath();
+}
+
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    (void)data;
-    (void)size;
-    OHOS::Security::Hks::HksReportWrapperTest001();
-    OHOS::Security::Hks::HksReportWrapperTest002();
+    FuzzedDataProvider fdp(data, size);
+    int32_t ret = OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(fdp);
+
+    OHOS::Security::Hks::FuzzStatsRecord(ret);
     return 0;
 }
