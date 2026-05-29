@@ -150,10 +150,8 @@ int32_t HksProviderLifeCycleManager::GetExtensionProxy(const ProviderInfo &provi
     sptr<IHuksAccessExtBase> &proxy)
 {
     std::shared_ptr<HksExtAbilityConnectInfo> connectionInfo = nullptr;
-    if (!m_providerMap.Find(providerInfo, connectionInfo)) {
-        HKS_LOG_E("GetExtensionProxy failed, providerName: %" LOG_PUBLIC "s", providerInfo.m_providerName.c_str());
-        return HKS_ERROR_NOT_EXIST;
-    }
+    HKS_IF_NOT_TRUE_LOGE_RETURN(m_providerMap.Find(providerInfo, connectionInfo), HKS_ERROR_NOT_EXIST,
+        "GetExtensionProxy failed, providerName: %" LOG_PUBLIC "s", providerInfo.m_providerName.c_str())
     HKS_IF_TRUE_LOGE_RETURN(connectionInfo == nullptr, HKS_ERROR_NULL_POINTER, "connectionInfo is nullptr")
     HKS_IF_TRUE_LOGE_RETURN(connectionInfo->m_connection == nullptr, HKS_ERROR_NULL_POINTER, "m_connection is nullptr")
     proxy = connectionInfo->m_connection->GetExtConnectProxy();
@@ -167,10 +165,8 @@ int32_t HksProviderLifeCycleManager::HapGetAllConnectInfoByProviderName(const st
 {
     m_providerMap.Iterate([&](const ProviderInfo &providerInfo,
         std::shared_ptr<HksExtAbilityConnectInfo> &connectionInfo) {
-        if (providerInfo.m_bundleName == bundleName && providerInfo.m_providerName == providerName &&
-            providerInfo.m_userid == userid) {
-            providerInfos.emplace_back(providerInfo, connectionInfo);
-        }
+        HKS_IF_TRUE_EXCU(providerInfo.m_bundleName == bundleName && providerInfo.m_providerName == providerName &&
+            providerInfo.m_userid == userid, providerInfos.emplace_back(providerInfo, connectionInfo));
     });
     return HKS_SUCCESS;
 }
@@ -217,12 +213,9 @@ int32_t HksProviderLifeCycleManager::HksHapGetConnectInfos(const HksProcessInfo 
         HKS_LOG_I("HksHapGetConnectInfos abilityName: %" LOG_PUBLIC "s", abilityNameStr.c_str());
         m_providerMap.Iterate([&](const ProviderInfo &providerInfo,
             std::shared_ptr<HksExtAbilityConnectInfo> &connectionInfo) {
-            if (providerInfo.m_bundleName == bundleName &&
-                providerInfo.m_abilityName == abilityNameStr &&
-                providerInfo.m_providerName == providerName &&
-                providerInfo.m_userid == processInfo.userIdInt) {
-                connectionInfos.emplace_back(providerInfo, connectionInfo);
-            }
+            HKS_IF_TRUE_EXCU(providerInfo.m_bundleName == bundleName && providerInfo.m_abilityName == abilityNameStr &&
+                providerInfo.m_providerName == providerName && providerInfo.m_userid == processInfo.userIdInt,
+                connectionInfos.emplace_back(providerInfo, connectionInfo));
         });
         return HKS_SUCCESS;
     }
