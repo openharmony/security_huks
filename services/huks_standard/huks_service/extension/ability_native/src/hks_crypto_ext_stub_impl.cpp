@@ -22,7 +22,7 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 
-static void SetErrorInfoFromC(struct HksExternalErrorInfo *errInfoC, int32_t ret, HksExternalErrorInfoIdl& errorInfo)
+static void SetErrorInfoFromC(struct HksExternalErrorInfo *errInfoC, int32_t ret, HksExternalErrorInfoIdl &errorInfo)
 {
     if (errInfoC != nullptr) {
         errorInfo.errVal = errInfoC->errVal;
@@ -34,7 +34,7 @@ static void SetErrorInfoFromC(struct HksExternalErrorInfo *errInfoC, int32_t ret
     errorInfo.errorDesc.assign("");
 }
 
-int32_t HksCryptoExtStubImpl::HksExtStubCheckExtension(HksExternalErrorInfoIdl& errorInfo)
+int32_t HksCryptoExtStubImpl::HksExtStubCheckExtension(HksExternalErrorInfoIdl *errorInfo)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
@@ -45,7 +45,7 @@ int32_t HksCryptoExtStubImpl::HksExtStubCheckExtension(HksExternalErrorInfoIdl& 
     return HKS_SUCCESS;
 }
 
-void HksCryptoExtStubImpl::HksExtStubInitErrorInfo(struct HksExternalErrorInfo& errInfoC)
+void HksCryptoExtStubImpl::HksExtStubInitErrorInfo(struct HksExternalErrorInfo &errInfoC)
 {
     errInfoC = HksCreateExternalErrorInfo(HKS_ERROR_EXT_JS_METHOD_ERROR, "");
     if (errInfoC == nullptr) {

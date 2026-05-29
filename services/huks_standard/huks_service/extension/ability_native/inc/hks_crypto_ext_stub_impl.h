@@ -132,8 +132,8 @@ public:
 private:
     std::shared_ptr<HksCryptoExtAbility> extension_;
 
-    int32_t HksExtStubCheckExtension(HksExternalErrorInfoIdl& errorInfo);
-    void HksExtStubInitErrorInfo(struct HksExternalErrorInfo*& errInfoC);
+    int32_t HksExtStubCheckExtension(HksExternalErrorInfoIdl &errorInfo);
+    void HksExtStubInitErrorInfo(struct HksExternalErrorInfo *errInfoC);
 };
 } // namespace Huks
 } // namespace Security
