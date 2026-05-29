@@ -34,7 +34,7 @@ static void SetErrorInfoFromC(struct HksExternalErrorInfo *errInfoC, int32_t ret
     errorInfo.errorDesc.assign("");
 }
 
-static int32_t HksExtStubCheckExtension(HksExternalErrorInfoIdl& errorInfo)
+int32_t HksCryptoExtStubImpl::HksExtStubCheckExtension(HksExternalErrorInfoIdl& errorInfo)
 {
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
@@ -45,10 +45,10 @@ static int32_t HksExtStubCheckExtension(HksExternalErrorInfoIdl& errorInfo)
     return HKS_SUCCESS;
 }
 
-static void HksExtStubInitErrorInfo(struct HksExternalErrorInfo *errInfoC)
+void HksCryptoExtStubImpl::HksExtStubInitErrorInfo(struct HksExternalErrorInfo& errInfoC)
 {
     errInfoC = HksCreateExternalErrorInfo(HKS_ERROR_EXT_JS_METHOD_ERROR, "");
-    if ((errInfoC) == nullptr) {
+    if (errInfoC == nullptr) {
         LOGE("errInfoC: Default value not set.");
     }
 }
@@ -64,7 +64,7 @@ ErrCode HksCryptoExtStubImpl::OpenRemoteHandle(
 
     struct HksExternalErrorInfo *errInfoC = nullptr;
     HksExtStubInitErrorInfo(errInfoC);
-    int32_t ret = extension_->OpenRemoteHandle(index, params, handle, &errInfoC);
+    ret = extension_->OpenRemoteHandle(index, params, handle, &errInfoC);
     SetErrorInfoFromC(errInfoC, ret, errorInfo);
     return ret;
 }
@@ -78,7 +78,7 @@ ErrCode HksCryptoExtStubImpl::CloseRemoteHandle(
     HKS_EXT_IF_TRUE_RETURN(ret == HKS_SUCCESS, ret)
     struct HksExternalErrorInfo *errInfoC = nullptr;
     HksExtStubInitErrorInfo(errInfoC);
-    int32_t ret = extension_->CloseRemoteHandle(handle, params, &errInfoC);
+    ret = extension_->CloseRemoteHandle(handle, params, &errInfoC);
     SetErrorInfoFromC(errInfoC, ret, errorInfo);
     return ret;
 }
@@ -94,7 +94,7 @@ ErrCode HksCryptoExtStubImpl::AuthUkeyPin(
     HKS_EXT_IF_TRUE_RETURN(ret == HKS_SUCCESS, ret)
     struct HksExternalErrorInfo *errInfoC = nullptr;
     HksExtStubInitErrorInfo(errInfoC);
-    int32_t ret = extension_->AuthUkeyPin(handle, params, &errInfoC, authState, retryCnt);
+    ret = extension_->AuthUkeyPin(handle, params, &errInfoC, authState, retryCnt);
     SetErrorInfoFromC(errInfoC, ret, errorInfo);
     return ret;
 }
@@ -110,7 +110,7 @@ ErrCode HksCryptoExtStubImpl::GetUkeyPinAuthState(
     state = 0;
     struct HksExternalErrorInfo *errInfoC = nullptr;
     HksExtStubInitErrorInfo(errInfoC);
-    int32_t ret = extension_->GetUkeyPinAuthState(handle, params, state, &errInfoC);
+    ret = extension_->GetUkeyPinAuthState(handle, params, state, &errInfoC);
     SetErrorInfoFromC(errInfoC, ret, errorInfo);
     return ret;
 }
@@ -125,7 +125,7 @@ ErrCode HksCryptoExtStubImpl::ExportCertificate(
     HKS_EXT_IF_TRUE_RETURN(ret == HKS_SUCCESS, ret)
     struct HksExternalErrorInfo *errInfoC = nullptr;
     HksExtStubInitErrorInfo(errInfoC);
-    int32_t ret = extension_->ExportCertificate(index, params, certJsonArr, &errInfoC);
+    ret = extension_->ExportCertificate(index, params, certJsonArr, &errInfoC);
     SetErrorInfoFromC(errInfoC, ret, errorInfo);
     return ret;
 }
@@ -139,7 +139,7 @@ ErrCode HksCryptoExtStubImpl::ExportProviderCertificates(
     HKS_EXT_IF_TRUE_RETURN(ret == HKS_SUCCESS, ret)
     struct HksExternalErrorInfo *errInfoC = nullptr;
     HksExtStubInitErrorInfo(errInfoC);
-    int32_t ret = extension_->ExportProviderCertificates(params, certJsonArr, &errInfoC);
+    ret = extension_->ExportProviderCertificates(params, certJsonArr, &errInfoC);
     SetErrorInfoFromC(errInfoC, ret, errorInfo);
     return ret;
 }
@@ -154,7 +154,7 @@ ErrCode HksCryptoExtStubImpl::ImportCertificate(
     HKS_EXT_IF_TRUE_RETURN(ret == HKS_SUCCESS, ret)
     struct HksExternalErrorInfo *errInfoC = nullptr;
     HksExtStubInitErrorInfo(errInfoC);
-    int32_t ret = extension_->ImportCertificate(index, certInfo, params, &errInfoC);
+    ret = extension_->ImportCertificate(index, certInfo, params, &errInfoC);
     SetErrorInfoFromC(errInfoC, ret, errorInfo);
     return ret;
 }
@@ -169,7 +169,7 @@ ErrCode HksCryptoExtStubImpl::InitSession(
     HKS_EXT_IF_TRUE_RETURN(ret == HKS_SUCCESS, ret)
     struct HksExternalErrorInfo *errInfoC = nullptr;
     HksExtStubInitErrorInfo(errInfoC);
-    int32_t ret = extension_->InitSession(index, params, handle, &errInfoC);
+    ret = extension_->InitSession(index, params, handle, &errInfoC);
     SetErrorInfoFromC(errInfoC, ret, errorInfo);
     return ret;
 }
@@ -183,7 +183,7 @@ ErrCode HksCryptoExtStubImpl::GenerateKey(
     HKS_EXT_IF_TRUE_RETURN(ret == HKS_SUCCESS, ret)
     struct HksExternalErrorInfo *errInfoC = nullptr;
     HksExtStubInitErrorInfo(errInfoC);
-    int32_t ret = extension_->GenerateKey(index, params, &errInfoC);
+    ret = extension_->GenerateKey(index, params, &errInfoC);
     SetErrorInfoFromC(errInfoC, ret, errorInfo);
     return ret;
 }
@@ -199,7 +199,7 @@ ErrCode HksCryptoExtStubImpl::UpdateSession(
     HKS_EXT_IF_TRUE_RETURN(ret == HKS_SUCCESS, ret)
     struct HksExternalErrorInfo *errInfoC = nullptr;
     HksExtStubInitErrorInfo(errInfoC);
-    int32_t ret = extension_->UpdateSession(handle, params, inData, outData, &errInfoC);
+    ret = extension_->UpdateSession(handle, params, inData, outData, &errInfoC);
     SetErrorInfoFromC(errInfoC, ret, errorInfo);
     return ret;
 }
@@ -215,7 +215,7 @@ ErrCode HksCryptoExtStubImpl::FinishSession(
     HKS_EXT_IF_TRUE_RETURN(ret == HKS_SUCCESS, ret)
     struct HksExternalErrorInfo *errInfoC = nullptr;
     HksExtStubInitErrorInfo(errInfoC);
-    int32_t ret = extension_->FinishSession(handle, params, inData, outData, &errInfoC);
+    ret = extension_->FinishSession(handle, params, inData, outData, &errInfoC);
     SetErrorInfoFromC(errInfoC, ret, errorInfo);
     return ret;
 }
@@ -231,7 +231,7 @@ ErrCode HksCryptoExtStubImpl::SetOrGetProperty(
     HKS_EXT_IF_TRUE_RETURN(ret == HKS_SUCCESS, ret)
     struct HksExternalErrorInfo *errInfoC = nullptr;
     HksExtStubInitErrorInfo(errInfoC);
-    int32_t ret = extension_->SetOrGetProperty(operation, handle, propertyId, params, &errInfoC);
+    ret = extension_->SetOrGetProperty(operation, handle, propertyId, params, &errInfoC);
     SetErrorInfoFromC(errInfoC, ret, errorInfo);
     return ret;
 }
@@ -245,7 +245,7 @@ ErrCode HksCryptoExtStubImpl::ClearUkeyPinAuthState(
     HKS_EXT_IF_TRUE_RETURN(ret == HKS_SUCCESS, ret)
     struct HksExternalErrorInfo *errInfoC = nullptr;
     HksExtStubInitErrorInfo(errInfoC);
-    int32_t ret = extension_->ClearUkeyPinAuthState(handle, params, &errInfoC);
+    ret = extension_->ClearUkeyPinAuthState(handle, params, &errInfoC);
     SetErrorInfoFromC(errInfoC, ret, errorInfo);
     return ret;
 }
@@ -261,7 +261,7 @@ ErrCode HksCryptoExtStubImpl::ImportWrappedKey(
     HKS_EXT_IF_TRUE_RETURN(ret == HKS_SUCCESS, ret)
     struct HksExternalErrorInfo *errInfoC = nullptr;
     HksExtStubInitErrorInfo(errInfoC);
-    int32_t ret = extension_->ImportWrappedKey(index, wrappingKeyIndex, params, wrappedData, &errInfoC);
+    ret = extension_->ImportWrappedKey(index, wrappingKeyIndex, params, wrappedData, &errInfoC);
     SetErrorInfoFromC(errInfoC, ret, errorInfo);
     return ret;
 }
@@ -276,7 +276,7 @@ ErrCode HksCryptoExtStubImpl::ExportPublicKey(
     HKS_EXT_IF_TRUE_RETURN(ret == HKS_SUCCESS, ret)
     struct HksExternalErrorInfo *errInfoC = nullptr;
     HksExtStubInitErrorInfo(errInfoC);
-    int32_t ret = extension_->ExportPublicKey(index, params, outData, &errInfoC);
+    ret = extension_->ExportPublicKey(index, params, outData, &errInfoC);
     SetErrorInfoFromC(errInfoC, ret, errorInfo);
     return ret;
 }
@@ -290,7 +290,7 @@ ErrCode HksCryptoExtStubImpl::GetResourceId(
     HKS_EXT_IF_TRUE_RETURN(ret == HKS_SUCCESS, ret)
     struct HksExternalErrorInfo *errInfoC = nullptr;
     HksExtStubInitErrorInfo(errInfoC);
-    int32_t ret = extension_->GetResourceId(params, resourceId, &errInfoC);
+    ret = extension_->GetResourceId(params, resourceId, &errInfoC);
     SetErrorInfoFromC(errInfoC, ret, errorInfo);
     return ret;
 }
