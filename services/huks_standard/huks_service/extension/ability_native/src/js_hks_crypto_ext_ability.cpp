@@ -504,12 +504,12 @@ int32_t GetHksCertInfoValue(napi_env env, napi_value value, HksCertInfo &certInf
 
     napi_value napiIndex = nullptr;
     status = napi_get_named_property(env, value, "resourceId", &napiIndex);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, status
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, status,
         "napi_get_named_property failed, status %d", status)
     HKS_EXT_IF_TRUE_LOGE_RETURN(napiIndex == nullptr,
         napi_invalid_arg, "napi_get_named_property get napiIndex is nullptr.")
     auto result = GetStringValue(env, napiIndex, certInfo.index);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(result != HKS_SUCCESS, result
+    HKS_EXT_IF_TRUE_LOGE_RETURN(result != HKS_SUCCESS, result,
         "GetHksCertInfoValue js value napiIndex failed, result %d", result)
     
     napi_value napiCerts = nullptr;

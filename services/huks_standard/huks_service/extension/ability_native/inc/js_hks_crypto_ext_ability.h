@@ -23,6 +23,7 @@
 #include "js_runtime.h"
 #include "want.h"
 #include "hks_external_error_info.h"
+#include "log_utils.h"
 
 namespace OHOS {
 namespace Security {
