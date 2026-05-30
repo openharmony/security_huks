@@ -402,9 +402,8 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
         HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL,
             "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
         HKS_IF_TRUE_LOGE_CONTINUE(errorInfo.errVal != HKS_SUCCESS, "ExportProviderCertificates for provider failed")
-        if (errorInfo.errVal != EXTENSION_SUCCESS && firstErrorInfo.errVal == HKS_ERROR_EXT_JS_METHOD_ERROR) {
-            firstErrorInfo = errorInfo;
-        }
+        HKS_IF_TRUE_EXCU(errorInfo.errVal != EXTENSION_SUCCESS &&
+            firstErrorInfo.errVal == HKS_ERROR_EXT_JS_METHOD_ERROR, firstErrorInfo = errorInfo);
 
         ret = MergeProviderCertificates(providerInfo, tmpCertVec, combinedArray);
         HKS_IF_TRUE_LOGE_CONTINUE(ret != HKS_SUCCESS, "Merge certificates for provider failed")
@@ -466,9 +465,7 @@ int32_t HksRemoteHandleManager::SetOrGetRemoteProperty(struct HksProcessWithErro
 
     uint32_t uid = processAndError.processInfo->uidInt;
     auto uidParam = newParamSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
-    if (uidParam.first == HKS_SUCCESS) {
-        uid = static_cast<uint32_t>(uidParam.second);
-    }
+    HKS_IF_TRUE_EXCU(uidParam.first == HKS_SUCCESS, uid = static_cast<uint32_t>(uidParam.second));
     
     ProviderInfo providerInfo{};
     std::string handle;

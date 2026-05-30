@@ -21,6 +21,18 @@
 #include "hks_cpp_paramset.h"
 #include "hks_ext_cert_info.h"
 #include "hks_external_error_info.h"
+#include "log_utils.h"
+
+#define HKS_EXT_IF_TRUE_LOGE_RETURN(BOOL_FUNC, ERROR_CODE, LOG_MESSAGE, ...) \
+if (BOOL_FUNC) { \
+    LOGE(LOG_MESSAGE, ##__VA_ARGS__); \
+    return (ERROR_CODE); \
+}
+
+#define HKS_EXT_IF_TRUE_RETURN(BOOL_FUNC, ERROR_CODE) \
+if (BOOL_FUNC) { \
+    return (ERROR_CODE); \
+}
 
 namespace OHOS {
 namespace AbilityRuntime {
