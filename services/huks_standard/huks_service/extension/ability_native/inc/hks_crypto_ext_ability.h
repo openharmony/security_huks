@@ -24,15 +24,32 @@
 #include "log_utils.h"
 
 #define HKS_EXT_IF_TRUE_LOGE_RETURN(BOOL_FUNC, ERROR_CODE, LOG_MESSAGE, ...) \
-if (BOOL_FUNC) { \
+({ if (BOOL_FUNC) { \
     LOGE(LOG_MESSAGE, ##__VA_ARGS__); \
     return (ERROR_CODE); \
-}
+} })
 
 #define HKS_EXT_IF_TRUE_RETURN(BOOL_FUNC, ERROR_CODE) \
-if (BOOL_FUNC) { \
+({ if (BOOL_FUNC) { \
     return (ERROR_CODE); \
-}
+} })
+
+#define HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(BOOL_FUNC, LOG_MESSAGE, ...) \
+({ if ((BOOL_FUNC)) { \
+    LOGE(LOG_MESSAGE, ##__VA_ARGS__); \
+    return; \
+} })
+
+#define HKS_EXT_IF_TRUE_LOGE(BOOL_FUNC, LOG_MESSAGE, ...) \
+({ if (BOOL_FUNC) { \
+    LOGE(LOG_MESSAGE, ##__VA_ARGS__); \
+} })
+
+#define HKS_EXT_IF_TRUE_LOGE_BREAK(BOOL_FUNC, LOG_MESSAGE, ...) \
+({ if ((BOOL_FUNC)) { \
+    LOGE(LOG_MESSAGE, ##__VA_ARGS__); \
+    break; \
+} })
 
 namespace OHOS {
 namespace AbilityRuntime {
