@@ -50,6 +50,9 @@ ohos_unittest("service_ipc_test") {
     sources += [
       "src/hks_client_service_ipc_test.cpp",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_client_service_ipc.c",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ipc_check.c",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_request.cpp",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ipc_slice.c",
     ]
     defines += [ "HKS_UKEY_EXTENSION_CRYPTO" ]
   }
