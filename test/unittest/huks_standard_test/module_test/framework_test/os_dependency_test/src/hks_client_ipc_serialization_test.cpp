@@ -16,7 +16,10 @@
 #include <gtest/gtest.h>
 
 #include "hks_client_ipc_serialization.h"
+#include "hks_ipc_serialization.h"
 #include "hks_log.h"
+#include "hks_mem.h"
+#include "hks_param.h"
 
 using namespace testing::ext;
 namespace Unittest::HksClientIpcSerializationTest {
@@ -270,4 +273,937 @@ HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest009, TestSi
     int32_t ret = HksListAliasesUnpackFromService(&srcBlob, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS);
 }
+
+static int32_t BuildTestParamSet(struct HksParamSet **outParamSet)
+{
+    int32_t ret = HksInitParamSet(outParamSet);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = 256 },
+    };
+    ret = HksAddParams(*outParamSet, params, sizeof(params) / sizeof(params[0]));
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(outParamSet);
+        return ret;
+    }
+    ret = HksBuildParamSet(outParamSet);
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(outParamSet);
+    }
+    return ret;
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest010, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest010");
+
+    uint32_t offset = 0;
+    const uint32_t destBlobSize = 128;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    int32_t ret = CopyUint32ToBuffer(42, &destBlob, &offset);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_EQ(offset, sizeof(uint32_t));
+    EXPECT_EQ(*(uint32_t *)destBlobData, 42);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest011, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest011");
+
+    uint32_t offset = 0;
+    const uint32_t destBlobSize = 128;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    int32_t ret = CopyInt32ToBuffer(-7, &destBlob, &offset);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_EQ(offset, sizeof(int32_t));
+    EXPECT_EQ(*(int32_t *)destBlobData, -7);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest012, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest012");
+
+    const uint32_t destBlobSize = 2;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    uint32_t offset = 0;
+    int32_t ret = CopyInt32ToBuffer(42, &destBlob, &offset);
+    EXPECT_EQ(ret, HKS_ERROR_BUFFER_TOO_SMALL);
+
+    const uint32_t bigSize = 128;
+    uint8_t bigData[bigSize] = { 0 };
+    struct HksBlob bigBlob = { bigSize, bigData };
+    offset = 126;
+    ret = CopyInt32ToBuffer(42, &bigBlob, &offset);
+    EXPECT_EQ(ret, HKS_ERROR_BUFFER_TOO_SMALL);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest013, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest013");
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    uint32_t offset = 0;
+    const uint32_t destBlobSize = 1024;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    ret = CopyParamSetToBuffer(paramSet, &destBlob, &offset);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_EQ(offset, ALIGN_SIZE(paramSet->paramSetSize));
+
+    HksFreeParamSet(&paramSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest014, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest014");
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    uint32_t offset = 0;
+    const uint32_t destBlobSize = 4;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    ret = CopyParamSetToBuffer(paramSet, &destBlob, &offset);
+    EXPECT_EQ(ret, HKS_ERROR_BUFFER_TOO_SMALL);
+
+    HksFreeParamSet(&paramSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest015, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest015");
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t keyAliasSize = 4;
+    uint8_t keyAliasData[keyAliasSize] = { 0xAA };
+    struct HksBlob keyAlias = { keyAliasSize, keyAliasData };
+    const uint32_t keyOutSize = 256;
+    struct HksBlob keyOut = { keyOutSize, nullptr };
+
+    const uint32_t destBlobSize = 1024;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    ret = HksGenerateKeyPack(&destBlob, &keyAlias, paramSet, &keyOut);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest016, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest016");
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t keyAliasSize = 4;
+    uint8_t keyAliasData[keyAliasSize] = { 0xBB };
+    struct HksBlob keyAlias = { keyAliasSize, keyAliasData };
+    const uint32_t keySize = 8;
+    uint8_t keyData[keySize] = { 0xCC };
+    struct HksBlob key = { keySize, keyData };
+
+    const uint32_t destBlobSize = 1024;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    ret = HksImportKeyPack(&destBlob, &keyAlias, paramSet, &key);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest017, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest017");
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t keyAliasSize = 4;
+    uint8_t keyAliasData[keyAliasSize] = { 0xAA };
+    struct HksBlob keyAlias = { keyAliasSize, keyAliasData };
+    const uint32_t wrappingKeyAliasSize = 4;
+    uint8_t wrappingKeyAliasData[wrappingKeyAliasSize] = { 0xBB };
+    struct HksBlob wrappingKeyAlias = { wrappingKeyAliasSize, wrappingKeyAliasData };
+    const uint32_t wrappedKeyDataSize = 8;
+    uint8_t wrappedKeyDataBuf[wrappedKeyDataSize] = { 0xCC };
+    struct HksBlob wrappedKeyData = { wrappedKeyDataSize, wrappedKeyDataBuf };
+
+    const uint32_t destBlobSize = 1024;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    ret = HksImportWrappedKeyPack(&destBlob, &keyAlias, &wrappingKeyAlias, paramSet, &wrappedKeyData);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest018, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest018");
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t keyAliasSize = 4;
+    uint8_t keyAliasData[keyAliasSize] = { 0xAA };
+    struct HksBlob keyAlias = { keyAliasSize, keyAliasData };
+
+    const uint32_t destBlobSize = 1024;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    ret = HksDeleteKeyPack(&keyAlias, paramSet, &destBlob);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest019, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest019");
+
+    const uint32_t indexSize = 4;
+    uint8_t indexData[indexSize] = { 0xAA };
+    struct HksBlob index = { indexSize, indexData };
+
+    const uint32_t destBlobSize = 64;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    int32_t ret = HksClearPinAuthStatePack(&index, &destBlob);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest020, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest020");
+
+    const uint32_t indexSize = 4;
+    uint8_t indexData[indexSize] = { 0xAA };
+    struct HksBlob index = { indexSize, indexData };
+
+    const uint32_t destBlobSize = 2;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    int32_t ret = HksClearPinAuthStatePack(&index, &destBlob);
+    EXPECT_EQ(ret, HKS_ERROR_BUFFER_TOO_SMALL);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest021, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest021");
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t keyAliasSize = 4;
+    uint8_t keyAliasData[keyAliasSize] = { 0xAA };
+    struct HksBlob keyAlias = { keyAliasSize, keyAliasData };
+    const uint32_t keySize = 64;
+    struct HksBlob key = { keySize, nullptr };
+
+    const uint32_t destBlobSize = 1024;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    ret = HksExportPublicKeyPack(&keyAlias, paramSet, &key, &destBlob);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest022, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest022");
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t keyAliasSize = 4;
+    uint8_t keyAliasData[keyAliasSize] = { 0xAA };
+    struct HksBlob keyAlias = { keyAliasSize, keyAliasData };
+    const uint32_t keyOutSize = 256;
+    struct HksBlob keyOut = { keyOutSize, nullptr };
+
+    const uint32_t destBlobSize = 1024;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    ret = HksGetKeyParamSetPack(&keyAlias, paramSet, &keyOut, &destBlob);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest023, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest023");
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t keyAliasSize = 4;
+    uint8_t keyAliasData[keyAliasSize] = { 0xAA };
+    struct HksBlob keyAlias = { keyAliasSize, keyAliasData };
+
+    const uint32_t destBlobSize = 1024;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    ret = HksKeyExistPack(&keyAlias, paramSet, &destBlob);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest024, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest024");
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t keySize = 4;
+    uint8_t keyData[keySize] = { 0xAA };
+    struct HksBlob key = { keySize, keyData };
+
+    const uint32_t destBlobSize = 1024;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    uint32_t offset = 0;
+    ret = HksOnceParamPack(&destBlob, &key, paramSet, &offset);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_NE(offset, 0);
+
+    HksFreeParamSet(&paramSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest025, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest025");
+
+    const uint32_t inputDataSize = 4;
+    uint8_t inputDataBuf[inputDataSize] = { 0xAA };
+    struct HksBlob inputData = { inputDataSize, inputDataBuf };
+
+    const uint32_t destBlobSize = 1024;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    uint32_t offset = 0;
+    int32_t ret = HksOnceDataPack(&destBlob, &inputData, nullptr, nullptr, &offset);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest026, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest026");
+
+    const uint32_t inputDataSize = 4;
+    uint8_t inputDataBuf[inputDataSize] = { 0xAA };
+    struct HksBlob inputData = { inputDataSize, inputDataBuf };
+    const uint32_t rsvDataSize = 4;
+    uint8_t rsvDataBuf[rsvDataSize] = { 0xBB };
+    struct HksBlob rsvData = { rsvDataSize, rsvDataBuf };
+    const uint32_t outputDataSize = 32;
+    struct HksBlob outputData = { outputDataSize, nullptr };
+
+    const uint32_t destBlobSize = 1024;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    uint32_t offset = 0;
+    int32_t ret = HksOnceDataPack(&destBlob, &inputData, &rsvData, &outputData, &offset);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest027, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest027");
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t kdfKeySize = 4;
+    uint8_t kdfKeyData[kdfKeySize] = { 0xAA };
+    struct HksBlob kdfKey = { kdfKeySize, kdfKeyData };
+    const uint32_t derivedKeySize = 32;
+    struct HksBlob derivedKey = { derivedKeySize, nullptr };
+
+    const uint32_t destBlobSize = 1024;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    ret = HksDeriveKeyPack(&destBlob, paramSet, &kdfKey, &derivedKey);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest028, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest028");
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t keyAliasSize = 4;
+    uint8_t keyAliasData[keyAliasSize] = { 0xAA };
+    struct HksBlob keyAlias = { keyAliasSize, keyAliasData };
+    const uint32_t certChainBlobSize = 64;
+    struct HksBlob certChainBlob = { certChainBlobSize, nullptr };
+
+    const uint32_t destBlobSize = 1024;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    ret = HksCertificateChainPack(&destBlob, &keyAlias, paramSet, &certChainBlob);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest029, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest029");
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t destBlobSize = 1024;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    ret = HksListAliasesPack(paramSet, &destBlob);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest030, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest030");
+
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = 256 },
+    };
+    struct HksParamSet *outParamSet = nullptr;
+
+    int32_t ret = HksParamsToParamSet(params, sizeof(params) / sizeof(params[0]), &outParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_NE(outParamSet, nullptr);
+
+    HksFreeParamSet(&outParamSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest031, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest031");
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t oldAliasSize = 4;
+    uint8_t oldAliasData[oldAliasSize] = { 0xAA };
+    struct HksBlob oldKeyAlias = { oldAliasSize, oldAliasData };
+    const uint32_t newAliasSize = 4;
+    uint8_t newAliasData[newAliasSize] = { 0xBB };
+    struct HksBlob newKeyAlias = { newAliasSize, newAliasData };
+
+    const uint32_t destBlobSize = 1024;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    ret = HksRenameKeyAliasPack(&oldKeyAlias, &newKeyAlias, paramSet, &destBlob);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest032, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest032");
+
+    struct HksParamSet *srcParamSet = nullptr;
+    struct HksParamSet *destParamSet = nullptr;
+    int32_t ret = BuildTestParamSet(&srcParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    ret = BuildTestParamSet(&destParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t keyAliasSize = 4;
+    uint8_t keyAliasData[keyAliasSize] = { 0xAA };
+    struct HksBlob keyAlias = { keyAliasSize, keyAliasData };
+
+    const uint32_t destBlobSize = 2048;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    ret = HksChangeStorageLevelPack(&destBlob, &keyAlias, srcParamSet, destParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&srcParamSet);
+    HksFreeParamSet(&destParamSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest033, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest033");
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t keyAliasSize = 4;
+    uint8_t keyAliasData[keyAliasSize] = { 0xAA };
+    struct HksBlob keyAlias = { keyAliasSize, keyAliasData };
+    struct HksBlob wrappedKey = { 32, nullptr };
+
+    const uint32_t inBlobSize = 1024;
+    uint8_t inBlobData[inBlobSize] = { 0 };
+    struct HksBlob inBlob = { inBlobSize, inBlobData };
+
+    ret = HksWrapKeyPack(&inBlob, &keyAlias, paramSet, &wrappedKey);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest034, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest034");
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t keyAliasSize = 4;
+    uint8_t keyAliasData[keyAliasSize] = { 0xAA };
+    struct HksBlob keyAlias = { keyAliasSize, keyAliasData };
+    const uint32_t wrappedKeySize = 8;
+    uint8_t wrappedKeyData[wrappedKeySize] = { 0xBB };
+    struct HksBlob wrappedKey = { wrappedKeySize, wrappedKeyData };
+
+    const uint32_t inBlobSize = 1024;
+    uint8_t inBlobData[inBlobSize] = { 0 };
+    struct HksBlob inBlob = { inBlobSize, inBlobData };
+
+    ret = HksUnwrapKeyPack(&inBlob, &keyAlias, paramSet, &wrappedKey);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest035, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest035");
+
+    struct HksParamSet *paramSet = nullptr;
+    struct HksParamSet *sharedKeyParamSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    ret = BuildTestParamSet(&sharedKeyParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t keyAliasSize = 4;
+    uint8_t keyAliasData[keyAliasSize] = { 0xAA };
+    struct HksBlob keyAlias = { keyAliasSize, keyAliasData };
+    const uint32_t sharedKeyAliasSize = 4;
+    uint8_t sharedKeyAliasData[sharedKeyAliasSize] = { 0xBB };
+    struct HksBlob sharedKeyAlias = { sharedKeyAliasSize, sharedKeyAliasData };
+
+    const uint32_t destBlobSize = 2048;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    ret = HksEncapsulatePack(&destBlob, &keyAlias, paramSet, &sharedKeyAlias, sharedKeyParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&sharedKeyParamSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest036, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest036");
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t keyAliasSize = 4;
+    uint8_t keyAliasData[keyAliasSize] = { 0xAA };
+    struct HksBlob keyAlias = { keyAliasSize, keyAliasData };
+    const uint32_t sharedKeyAliasSize = 4;
+    uint8_t sharedKeyAliasData[sharedKeyAliasSize] = { 0xBB };
+    struct HksBlob sharedKeyAlias = { sharedKeyAliasSize, sharedKeyAliasData };
+
+    const uint32_t destBlobSize = 1024;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+    uint32_t offset = 0;
+
+    ret = HksDecapsulatePack(&destBlob, &keyAlias, paramSet, &sharedKeyAlias, &offset);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest037, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest037");
+
+    struct HksEncapsulationResult encapResult = { { 0, nullptr }, { 0, nullptr } };
+    struct HksBlob srcBlob = { 0, nullptr };
+
+    int32_t ret = HksEncapsulateUnpackFromService(&srcBlob, &encapResult);
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest038, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest038");
+
+    struct HksBlob sharedSecret = { 0, nullptr };
+    int32_t ret = HksDecapsulateUnpackFromService(nullptr, &sharedSecret);
+    EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER);
+
+    struct HksBlob srcBlob = { 4, nullptr };
+    ret = HksDecapsulateUnpackFromService(&srcBlob, nullptr);
+    EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER);
+}
+
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest039, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest039");
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t blobSize = 4;
+    uint8_t blobData[blobSize] = { 0xAA };
+    struct HksBlob blob = { blobSize, blobData };
+
+    const uint32_t destBlobSize = 1024;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    ret = HksUKeyGeneralPack(&blob, paramSet, &destBlob);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest040, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest040");
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t blob1Size = 4;
+    uint8_t blob1Data[blob1Size] = { 0xAA };
+    struct HksBlob blob1 = { blob1Size, blob1Data };
+    const uint32_t blob2Size = 4;
+    uint8_t blob2Data[blob2Size] = { 0xBB };
+    struct HksBlob blob2 = { blob2Size, blob2Data };
+
+    const uint32_t destBlobSize = 1024;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    ret = HksUkeyBlob2ParamSetPack(&blob1, &blob2, paramSet, &destBlob);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest041, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest041");
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t resourceIdSize = 4;
+    uint8_t resourceIdData[resourceIdSize] = { 0xAA };
+    struct HksBlob resourceId = { resourceIdSize, resourceIdData };
+    const uint32_t propertyIdSize = 4;
+    uint8_t propertyIdData[propertyIdSize] = { 0xBB };
+    struct HksBlob propertyId = { propertyIdSize, propertyIdData };
+
+    const uint32_t destBlobSize = 1024;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    ret = HksSetOrGetRemotePropertyPack(HKS_EXT_PROPERTY_OPERATION_GET,
+        &resourceId, &propertyId, paramSet, &destBlob);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest042, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest042");
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t blobSize = 4;
+    uint8_t blobData[blobSize] = { 0xAA };
+    struct HksBlob blob = { blobSize, blobData };
+
+    struct HksExtCertInfo certInfo;
+    certInfo.purpose = 1;
+    const uint32_t indexSize = 4;
+    uint8_t indexData[indexSize] = { 0xCC };
+    certInfo.index = { indexSize, indexData };
+    const uint32_t certSize = 8;
+    uint8_t certData[certSize] = { 0xDD };
+    certInfo.cert = { certSize, certData };
+
+    const uint32_t destBlobSize = 2048;
+    uint8_t destBlobData[destBlobSize] = { 0 };
+    struct HksBlob destBlob = { destBlobSize, destBlobData };
+
+    ret = HksUKeyGeneralPackWithCertInfo(&blob, &certInfo, paramSet, &destBlob);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest043, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest043");
+
+    int32_t ret = HksCertificatesUnpackFromService(nullptr, nullptr);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest044, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest044");
+
+    struct HksExtCertInfoSet destData = { 0, nullptr };
+    struct HksBlob srcBlob = { 0, nullptr };
+
+    int32_t ret = HksCertificatesUnpackFromService(&srcBlob, &destData);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_EQ(destData.count, 0);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest045, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest045");
+
+    uint32_t cnt = 1;
+    uint32_t offset = 0;
+    const uint32_t srcSize = 1024;
+    uint8_t srcData[srcSize] = { 0 };
+    struct HksBlob srcBlob = { srcSize, srcData };
+
+    int32_t ret = CopyUint32ToBuffer(cnt, &srcBlob, &offset);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    int32_t purpose = 1;
+    ret = CopyInt32ToBuffer(purpose, &srcBlob, &offset);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t indexBlobSize = 4;
+    uint8_t indexBlobData[indexBlobSize] = { 0xCC };
+    struct HksBlob indexBlob = { indexBlobSize, indexBlobData };
+    ret = CopyBlobToBuffer(&indexBlob, &srcBlob, &offset);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t certBlobSize = 8;
+    uint8_t certBlobData[certBlobSize] = { 0xDD };
+    struct HksBlob certBlob = { certBlobSize, certBlobData };
+    ret = CopyBlobToBuffer(&certBlob, &srcBlob, &offset);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    srcBlob.size = offset;
+    struct HksExtCertInfoSet destData = { 0, nullptr };
+    ret = HksCertificatesUnpackFromService(&srcBlob, &destData);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_EQ(destData.count, 1);
+    EXPECT_EQ(destData.certs[0].purpose, 1);
+
+    HksFreeExtCertSet(&destData);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest046, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest046");
+
+    struct HksParamSet *propertySetOut = nullptr;
+    const uint32_t srcSize = 128;
+    uint8_t srcData[srcSize] = { 0 };
+    uint32_t offset = 0;
+
+    int32_t ret = CopyInt32ToBuffer(HKS_SUCCESS, &(struct HksBlob){ srcSize, srcData }, &offset);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    struct HksBlob srcBlob = { offset, srcData };
+    ret = HksRemotePropertyUnpackFromService(&srcBlob, &propertySetOut);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_EQ(propertySetOut, nullptr);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest047, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest047");
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    const uint32_t srcSize = 512;
+    uint8_t srcData[srcSize] = { 0 };
+    uint32_t offset = 0;
+
+    ret = CopyInt32ToBuffer(HKS_SUCCESS, &(struct HksBlob){ srcSize, srcData }, &offset);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    ret = CopyParamSetToBuffer(paramSet, &(struct HksBlob){ srcSize, srcData }, &offset);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    struct HksBlob srcBlob = { offset, srcData };
+    struct HksParamSet *propertySetOut = nullptr;
+    ret = HksRemotePropertyUnpackFromService(&srcBlob, &propertySetOut);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_NE(propertySetOut, nullptr);
+
+    HksFreeParamSet(&propertySetOut);
+    HksFreeParamSet(&paramSet);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest048, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest048");
+
+    const uint32_t srcSize = 2;
+    uint8_t srcData[srcSize] = { 0 };
+
+    struct HksBlob srcBlob = { srcSize, srcData };
+    struct HksParamSet *propertySetOut = nullptr;
+    int32_t ret = HksRemotePropertyUnpackFromService(&srcBlob, &propertySetOut);
+    EXPECT_EQ(ret, HKS_ERROR_BUFFER_TOO_SMALL);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest049, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest049");
+
+    uint32_t offset = 0;
+    const uint32_t srcSize = 128;
+    uint8_t srcData[srcSize] = { 0 };
+    struct HksBlob srcBlob = { srcSize, srcData };
+
+    const uint32_t blobSize = 4;
+    uint8_t blobData[blobSize] = { 0xAA };
+    struct HksBlob packedBlob = { blobSize, blobData };
+
+    int32_t ret = CopyBlobToBuffer(&packedBlob, &srcBlob, &offset);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    uint32_t unpackOffset = 0;
+    struct HksBlob outBlob = { 0, nullptr };
+    ret = UnpackBlobFromBuffer(&srcBlob, &unpackOffset, &outBlob);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_EQ(outBlob.size, blobSize);
+    EXPECT_NE(outBlob.data, nullptr);
+
+    HKS_FREE(outBlob.data);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest050, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest050");
+
+    const uint32_t tinySize = 2;
+    uint8_t tinyData[tinySize] = { 0 };
+    struct HksBlob srcBlob = { tinySize, tinyData };
+    uint32_t offset = 0;
+    struct HksBlob outBlob = { 0, nullptr };
+
+    int32_t ret = UnpackBlobFromBuffer(&srcBlob, &offset, &outBlob);
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest051, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientIpcSerializationTest051");
+
+    const uint32_t resourceIdSize = 4;
+    uint8_t resourceIdData[resourceIdSize] = { 0xAA };
+    struct HksBlob resourceId = { resourceIdSize, resourceIdData };
+    const uint32_t bundleNameSize = 8;
+    uint8_t bundleNameData[bundleNameSize] = { 't', 'e', 's', 't' };
+    struct HksBlob bundleName = { bundleNameSize, bundleNameData };
+    const uint32_t abilityNameSize = 8;
+    uint8_t abilityNameData[abilityNameSize] = { 'a', 'b', 'c' };
+    struct HksBlob abilityName = { abilityNameSize, abilityNameData };
+
+    struct HksAbilityInfo abilityInfo = { bundleName, abilityName };
+    struct HksBlob outResourceId = { resourceIdSize, (uint8_t *)HksMalloc(resourceIdSize) };
+    struct HksAbilityInfo outAbilityInfo;
+    outAbilityInfo.bundleName = { bundleNameSize, (uint8_t *)HksMalloc(bundleNameSize) };
+    outAbilityInfo.abilityName = { abilityNameSize, (uint8_t *)HksMalloc(abilityNameSize) };
+
+    int32_t ret = HksQueryAbilityCopyResult(&resourceId, &abilityInfo, &outResourceId, &outAbilityInfo);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_EQ(outResourceId.size, resourceIdSize);
+    EXPECT_EQ(outAbilityInfo.bundleName.size, bundleNameSize);
+    EXPECT_EQ(outAbilityInfo.abilityName.size, abilityNameSize);
+
+    HKS_FREE(outResourceId.data);
+    HKS_FREE(outAbilityInfo.bundleName.data);
+    HKS_FREE(outAbilityInfo.abilityName.data);
+}
+
+#endif
 }

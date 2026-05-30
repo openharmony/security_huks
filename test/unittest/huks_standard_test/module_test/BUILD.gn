@@ -211,6 +211,7 @@ ohos_unittest("huks_module_test") {
     sources += [
       "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_report_ukey_event_test.cpp",
     ]
+    defines += [ "HKS_UKEY_EXTENSION_CRYPTO" ]
   }
 
   if (huks_security_level != "software") {
