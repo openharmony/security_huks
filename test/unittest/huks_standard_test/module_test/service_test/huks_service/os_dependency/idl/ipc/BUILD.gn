@@ -34,6 +34,7 @@ ohos_unittest("service_ipc_test") {
   include_dirs = [
     "//base/security/huks/frameworks/huks_standard/main/common/include",
     "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
+    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",
     "include",
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/include",
