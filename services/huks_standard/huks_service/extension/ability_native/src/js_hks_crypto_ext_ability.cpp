@@ -402,7 +402,7 @@ bool BuildPropertyData(const napi_env &env, const std::string &propertyId, const
         HKS_EXT_IF_TRUE_LOGE_RETURN(nativeCppParamSet == nullptr, false,
             "Create js NativeValue object failed, status:%d", status);
         nativeCppParamSet = GenerateHksParamArray(env, *param.params.GetParamSet());
-        HKS_EXT_IF_TRUE_RETURN(nativeCppParamSet == nullptr, false)
+        HKS_EXT_IF_TRUE_RETURN(nativeCppParamSet == nullptr, false);
     }
 
     argv[ARGC_ZERO] = nativeHandle;
@@ -638,7 +638,7 @@ void GetOpenRemoteHandleParams(const napi_env &env, const napi_value &funcResult
     napi_value napiHandle = nullptr;
     auto status = napi_get_named_property(env, funcResult, "handle", &napiHandle);
     HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(status != napi_ok || napiHandle == nullptr,
-        "GetOpenRemoteHandleParams::napi_get_named_property failed, status:%d", status)
+        "GetOpenRemoteHandleParams::napi_get_named_property failed, status:%d", status);
     auto result = GetStringValue(env, napiHandle, resultParams.handle);
     HKS_EXT_IF_TRUE_LOGE(result != HKS_SUCCESS,
         "GetOpenRemoteHandleParams::Convert js napiHandle fail.result:%d", result);
@@ -650,7 +650,7 @@ void GetResourceIdParams(const napi_env &env, const napi_value &funcResult, Cryp
     napi_value napiHandle = nullptr;
     auto status = napi_get_named_property(env, funcResult, "resourceId", &napiHandle);
     HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(status != napi_ok || napiHandle == nullptr,
-        "GetResourceIdParams::napi_get_named_property failed, status:%d", status)
+        "GetResourceIdParams::napi_get_named_property failed, status:%d", status);
     auto result = GetStringValue(env, napiHandle, resultParams.handle);
     HKS_EXT_IF_TRUE_LOGE(result != HKS_SUCCESS, "GetResourceIdParams::Convert js napiHandle fail.result:%d", result);
 }
@@ -669,7 +669,7 @@ void GetAuthUkeyPinParams(const napi_env &env, const napi_value &funcResult, Cry
     napi_value napiRetryCnt = nullptr;
     status = napi_get_named_property(env, funcResult, "retryCount", &napiRetryCnt);
     HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(status != napi_ok || napiRetryCnt == nullptr,
-        "napi_get_named_property failed, status:%d", status)
+        "napi_get_named_property failed, status:%d", status);
     status = napi_get_value_uint32(env, napiRetryCnt, &resultParams.retryCnt);
     HKS_EXT_IF_TRUE_LOGE(status != napi_ok, "Convert js value retryCnt failed.status:%d", status);
 }
@@ -680,7 +680,7 @@ void GetUkeyPinAuthStateParams(const napi_env &env, const napi_value &funcResult
     napi_value napiAuthState = nullptr;
     auto status = napi_get_named_property(env, funcResult, "authState", &napiAuthState);
     HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(status != napi_ok || napiAuthState == nullptr,
-        "napi_get_named_property failed, status:%d", status)
+        "napi_get_named_property failed, status:%d", status);
     status = napi_get_value_int32(env, napiAuthState, &resultParams.authState);
     HKS_EXT_IF_TRUE_LOGE(status != napi_ok, "napi_get_value_int32 failed.status:%d", status);
 }
@@ -694,7 +694,7 @@ void HksCertInfoToString(std::vector<HksCertInfo> &certInfoVec, std::string &jso
         auto certJsonObj = CommJsonObject::CreateObject();
         HKS_EXT_IF_TRUE_LOGE_BREAK(certJsonObj.IsNull(), "certJsonObj is null");
 
-        HKS_EXT_IF_TRUE_LOGE_BREAK(!certJsonObj.SetValue("purpose", certInfo.purpose), "set purpose value failed")
+        HKS_EXT_IF_TRUE_LOGE_BREAK(!certJsonObj.SetValue("purpose", certInfo.purpose), "set purpose value failed");
 
         HKS_EXT_IF_TRUE_LOGE_BREAK(!certJsonObj.SetValue("index", certInfo.index), "set index value failed");
 
@@ -704,7 +704,7 @@ void HksCertInfoToString(std::vector<HksCertInfo> &certInfoVec, std::string &jso
 
         HKS_EXT_IF_TRUE_LOGE_BREAK(!certJsonObj.SetValue("cert", certStr), "set index cert failed");
 
-        HKS_EXT_IF_TRUE_LOGE(!jsonObj.AppendElement(certJsonObj), "AppendElement error")
+        HKS_EXT_IF_TRUE_LOGE(!jsonObj.AppendElement(certJsonObj), "AppendElement error");
     }
     jsonStr = jsonObj.Serialize();
     HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(jsonStr.empty(), "jsonStr is empty");
