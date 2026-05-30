@@ -1084,7 +1084,8 @@ HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest046, TestSi
     uint8_t srcData[srcSize] = { 0 };
     uint32_t offset = 0;
 
-    int32_t ret = CopyInt32ToBuffer(HKS_SUCCESS, &(struct HksBlob){ srcSize, srcData }, &offset);
+    struct HksBlob destBlob = { srcSize, srcData };
+    int32_t ret = CopyInt32ToBuffer(HKS_SUCCESS, &destBlob, &offset);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     struct HksBlob srcBlob = { offset, srcData };
@@ -1105,10 +1106,11 @@ HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest047, TestSi
     uint8_t srcData[srcSize] = { 0 };
     uint32_t offset = 0;
 
-    ret = CopyInt32ToBuffer(HKS_SUCCESS, &(struct HksBlob){ srcSize, srcData }, &offset);
+    struct HksBlob destBlob = { srcSize, srcData };
+    ret = CopyInt32ToBuffer(HKS_SUCCESS, &destBlob, &offset);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    ret = CopyParamSetToBuffer(paramSet, &(struct HksBlob){ srcSize, srcData }, &offset);
+    ret = CopyParamSetToBuffer(paramSet, &destBlob, &offset);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     struct HksBlob srcBlob = { offset, srcData };

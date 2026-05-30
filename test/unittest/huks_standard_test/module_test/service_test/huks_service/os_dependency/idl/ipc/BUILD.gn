@@ -20,6 +20,7 @@ module_output_path = "huks/huks/service_ipc_test"
 
 ohos_unittest("service_ipc_test") {
   module_out_path = module_output_path
+  defines = []
 
   sources = [
     "src/huks_ipc_serialization_test.cpp",
