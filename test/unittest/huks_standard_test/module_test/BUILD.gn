@@ -196,6 +196,7 @@ ohos_unittest("huks_module_test") {
   # service test
   sources += [
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_client_check_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_mlkem_service_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_client_service_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_report_common_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_report_data_size_test.cpp",
