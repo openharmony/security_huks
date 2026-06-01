@@ -43,7 +43,7 @@ static int32_t FuzzCopyUint32ToBuffer(FuzzedDataProvider &fdp)
     return CopyUint32ToBuffer(value, &destBlob, &index);
 }
 
-// Fuzz HksOnceParamPack: fuzz controls destData size, optional key/paramSet, and index offset
+// Fuzz HksOnceParamPack: fuzz controls destData size, key blob, paramSet, and index offset
 static int32_t FuzzHksOnceParamPack(FuzzedDataProvider &fdp)
 {
     uint32_t destSize = fdp.ConsumeIntegralInRange<uint32_t>(sizeof(uint32_t), MAX_IPC_BUF_SIZE);
@@ -53,12 +53,23 @@ static int32_t FuzzHksOnceParamPack(FuzzedDataProvider &fdp)
     }
     struct HksBlob destBlob = { static_cast<uint32_t>(destData.size()), destData.data() };
 
+    // HksOnceParamPack calls CopyBlobToBuffer(key) — key must be valid
+    uint32_t keySize = fdp.ConsumeIntegralInRange<uint32_t>(1, 256);
+    auto keyData = fdp.ConsumeBytes<uint8_t>(keySize);
+    if (keyData.empty()) {
+        return HKS_ERROR_INSUFFICIENT_DATA;
+    }
+    struct HksBlob keyBlob = { static_cast<uint32_t>(keyData.size()), keyData.data() };
+
     WrapParamSet ps = ConstructParamSetFromFdp(fdp);
+    if (ps.s == nullptr) {
+        return HKS_ERROR_NULL_POINTER;
+    }
     uint32_t index = fdp.ConsumeIntegralInRange<uint32_t>(0, destBlob.size);
-    return HksOnceParamPack(&destBlob, nullptr, ps.s, &index);
+    return HksOnceParamPack(&destBlob, &keyBlob, ps.s, &index);
 }
 
-// Fuzz HksAgreeKeyPack: fuzz controls destData, paramSet, optional blobs
+// Fuzz HksAgreeKeyPack: fuzz controls destData, paramSet, and key blobs
 static int32_t FuzzHksAgreeKeyPack(FuzzedDataProvider &fdp)
 {
     uint32_t destSize = fdp.ConsumeIntegralInRange<uint32_t>(sizeof(uint32_t), MAX_IPC_BUF_SIZE);
@@ -69,7 +80,33 @@ static int32_t FuzzHksAgreeKeyPack(FuzzedDataProvider &fdp)
     struct HksBlob destBlob = { static_cast<uint32_t>(destData.size()), destData.data() };
 
     WrapParamSet ps = ConstructParamSetFromFdp(fdp);
-    return HksAgreeKeyPack(&destBlob, ps.s, nullptr, nullptr, nullptr);
+    if (ps.s == nullptr) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    // HksAgreeKeyPack calls CopyBlobToBuffer(privateKey/peerPublicKey) and agreedKey->size
+    uint32_t privKeySize = fdp.ConsumeIntegralInRange<uint32_t>(1, 256);
+    auto privKeyData = fdp.ConsumeBytes<uint8_t>(privKeySize);
+    if (privKeyData.empty()) {
+        return HKS_ERROR_INSUFFICIENT_DATA;
+    }
+    struct HksBlob privateKey = { static_cast<uint32_t>(privKeyData.size()), privKeyData.data() };
+
+    uint32_t peerPubKeySize = fdp.ConsumeIntegralInRange<uint32_t>(1, 256);
+    auto peerPubKeyData = fdp.ConsumeBytes<uint8_t>(peerPubKeySize);
+    if (peerPubKeyData.empty()) {
+        return HKS_ERROR_INSUFFICIENT_DATA;
+    }
+    struct HksBlob peerPublicKey = { static_cast<uint32_t>(peerPubKeyData.size()), peerPubKeyData.data() };
+
+    uint32_t agreedKeySize = fdp.ConsumeIntegralInRange<uint32_t>(1, 256);
+    auto agreedKeyData = fdp.ConsumeBytes<uint8_t>(agreedKeySize);
+    if (agreedKeyData.empty()) {
+        return HKS_ERROR_INSUFFICIENT_DATA;
+    }
+    struct HksBlob agreedKey = { static_cast<uint32_t>(agreedKeyData.size()), agreedKeyData.data() };
+
+    return HksAgreeKeyPack(&destBlob, ps.s, &privateKey, &peerPublicKey, &agreedKey);
 }
 
 // Fuzz HksGetKeyInfoListUnpackFromService: fuzz controls srcData content
@@ -81,7 +118,9 @@ static int32_t FuzzHksGetKeyInfoListUnpackFromService(FuzzedDataProvider &fdp)
         return HKS_ERROR_INSUFFICIENT_DATA;
     }
     struct HksBlob srcBlob = { static_cast<uint32_t>(srcData.size()), srcData.data() };
-    return HksGetKeyInfoListUnpackFromService(&srcBlob, nullptr, nullptr);
+    // HksGetKeyInfoListUnpackFromService dereferences listCount — must be valid
+    uint32_t listCount = 0;
+    return HksGetKeyInfoListUnpackFromService(&srcBlob, &listCount, nullptr);
 }
 
 // Fuzz HksCertificateChainUnpackFromService: fuzz controls srcData, needEncode, certsCount
@@ -94,7 +133,15 @@ static int32_t FuzzHksCertificateChainUnpackFromService(FuzzedDataProvider &fdp)
     }
     struct HksBlob srcBlob = { static_cast<uint32_t>(srcData.size()), srcData.data() };
     bool isDeviceCert = fdp.ConsumeBool();
-    struct HksCertChain certChain = { .certsCount = fdp.ConsumeIntegralInRange<uint32_t>(0, 8) };
+    // HksCertificateChainUnpackFromService dereferences certChain->certs[i].data
+    // when certsCount from buffer > 0 — must provide valid certs array
+    uint32_t certsCount = fdp.ConsumeIntegralInRange<uint32_t>(1, 4);
+    std::vector<std::vector<uint8_t>> certBuffers(certsCount, std::vector<uint8_t>(4096, 0));
+    std::vector<struct HksBlob> certs(certsCount);
+    for (uint32_t i = 0; i < certsCount; i++) {
+        certs[i] = { 4096, certBuffers[i].data() };
+    }
+    struct HksCertChain certChain = { certs.data(), certsCount };
     return HksCertificateChainUnpackFromService(&srcBlob, isDeviceCert, &certChain);
 }
 
