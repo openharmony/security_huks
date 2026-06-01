@@ -767,7 +767,7 @@ int32_t MbedtlsEd25519KeyToX25519(const struct HksBlob *ed25519NativeKey,
 
     ret = ConvertPrivateKey(ed25519NativeKey, x25519NativeKey);
 
-    return HKS_SUCCESS;
+    return ret;
 }
 
 void HksFreeKeyInfo(struct HksEd25519ToX25519Blob *key)
