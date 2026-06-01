@@ -16,6 +16,7 @@
 #include "hks_ipc_check_test.h"
 
 #include <gtest/gtest.h>
+#include <securec.h>
 
 #include "file_ex.h"
 #include "hks_ipc_check.h"
@@ -801,7 +802,7 @@ HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest027, TestSize.Level0)
 
     uint32_t outSize = 0;
     char longAlias[HKS_MAX_KEY_ALIAS_LEN + 2];
-    memset_s(longAlias, sizeof(longAlias), 'A', HKS_MAX_KEY_ALIAS_LEN + 1);
+    (void)memset_s(longAlias, sizeof(longAlias), 'A', HKS_MAX_KEY_ALIAS_LEN + 1);
     longAlias[HKS_MAX_KEY_ALIAS_LEN + 1] = '\0';
     struct HksBlob keyAlias = { .size = HKS_MAX_KEY_ALIAS_LEN + 1, .data = (uint8_t *)longAlias };
 
@@ -971,7 +972,7 @@ HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest032, TestSize.Level0)
     ASSERT_TRUE(ret == HKS_SUCCESS);
 
     char longAlias[HKS_MAX_KEY_ALIAS_LEN + 2];
-    memset_s(longAlias, sizeof(longAlias), 'B', HKS_MAX_KEY_ALIAS_LEN + 1);
+    (void)memset_s(longAlias, sizeof(longAlias), 'B', HKS_MAX_KEY_ALIAS_LEN + 1);
     longAlias[HKS_MAX_KEY_ALIAS_LEN + 1] = '\0';
     struct HksBlob keyAlias = { .size = HKS_MAX_KEY_ALIAS_LEN + 1, .data = (uint8_t *)longAlias };
 
@@ -1008,7 +1009,7 @@ HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest033, TestSize.Level0)
 
     const char *alias = "alias033";
     char longShared[HKS_MAX_KEY_ALIAS_LEN + 2];
-    memset_s(longShared, sizeof(longShared), 'C', HKS_MAX_KEY_ALIAS_LEN + 1);
+    (void)memset_s(longShared, sizeof(longShared), 'C', HKS_MAX_KEY_ALIAS_LEN + 1);
     longShared[HKS_MAX_KEY_ALIAS_LEN + 1] = '\0';
     struct HksBlob keyAlias = { .size = (uint32_t)strlen(alias), .data = (uint8_t *)alias };
     struct HksBlob sharedKeyAlias = { .size = HKS_MAX_KEY_ALIAS_LEN + 1, .data = (uint8_t *)longShared };
