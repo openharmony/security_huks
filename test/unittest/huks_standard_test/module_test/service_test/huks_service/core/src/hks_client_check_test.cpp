@@ -722,4 +722,148 @@ HWTEST_F(HksClientCheckTest, HksClientCheckTest027, TestSize.Level0)
     ASSERT_EQ(ret, HKS_ERROR_CHECK_GET_CHALLENGE_TYPE_FAILED);
     HksFreeParamSet(&paramSet);
 }
+
+/**
+ * @tc.name: HksClientCheckTest.HksClientCheckTest028
+ * @tc.desc: tdd HksCheckAndGetUserAuthInfo, HksGetParam USER_AUTH_TYPE non-PARAM_NOT_EXIST error
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientCheckTest, HksClientCheckTest028, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientCheckTest028");
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
+        { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_FINGERPRINT },
+    };
+    ret = HksAddParams(paramSet, params, sizeof(params) / sizeof(HksParam));
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(&paramSet);
+        return;
+    }
+    ret = HksBuildParamSet(&paramSet);
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(&paramSet);
+        return;
+    }
+    ret = HksCheckAndGetUserAuthInfo(paramSet, 0, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksClientCheckTest.HksClientCheckTest029
+ * @tc.desc: tdd HksCheckAndGetUserAuthInfo, HksGetParam ATL non-PARAM_NOT_EXIST error
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientCheckTest, HksClientCheckTest029, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientCheckTest029");
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_USER_AUTH_TYPE_ATL, .uint32Param = HKS_USER_AUTH_ATL3 },
+        { .tag = HKS_TAG_USER_AUTH_TYPE_ATL, .uint32Param = HKS_USER_AUTH_ATL1 },
+    };
+    ret = HksAddParams(paramSet, params, sizeof(params) / sizeof(HksParam));
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(&paramSet);
+        return;
+    }
+    ret = HksBuildParamSet(&paramSet);
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(&paramSet);
+        return;
+    }
+    ret = HksCheckAndGetUserAuthInfo(paramSet, 0, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksClientCheckTest.HksClientCheckTest030
+ * @tc.desc: tdd HksCheckAndGetUserAuthInfo, ATL-only with non-ALWAYS_VALID accessType
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientCheckTest, HksClientCheckTest030, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientCheckTest030");
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_USER_AUTH_TYPE_ATL, .uint32Param = HKS_USER_AUTH_ATL3 },
+        { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
+        { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NONE },
+    };
+    ret = HksAddParams(paramSet, params, sizeof(params) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    uint32_t userAuthType = 0;
+    uint32_t authAccessType = 0;
+    uint32_t userAuthAtl = 0;
+    ret = HksCheckAndGetUserAuthInfo(paramSet, 0, &userAuthType, &authAccessType, &userAuthAtl);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ASSERT_EQ(userAuthType, 0);
+    ASSERT_EQ(userAuthAtl, HKS_USER_AUTH_ATL3);
+    ASSERT_EQ(authAccessType, HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksClientCheckTest.HksClientCheckTest031
+ * @tc.desc: tdd HksCheckAndGetUserAuthInfo, invalid SECURE_SIGN_TYPE
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientCheckTest, HksClientCheckTest031, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientCheckTest031");
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
+        { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_ALWAYS_VALID },
+        { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NONE },
+        { .tag = HKS_TAG_KEY_SECURE_SIGN_TYPE, .uint32Param = 0xFF },
+    };
+    ret = HksAddParams(paramSet, params, sizeof(params) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksCheckAndGetUserAuthInfo(paramSet, 0, nullptr, nullptr, nullptr);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_SECURE_SIGN_TYPE);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksClientCheckTest.HksClientCheckTest032
+ * @tc.desc: tdd HksCheckAndGetUserAuthInfo, SECURE_SIGN_TYPE with non-SIGN purpose
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientCheckTest, HksClientCheckTest032, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientCheckTest032");
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
+        { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_ALWAYS_VALID },
+        { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NONE },
+        { .tag = HKS_TAG_KEY_SECURE_SIGN_TYPE, .uint32Param = HKS_SECURE_SIGN_WITH_AUTHINFO },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT },
+    };
+    ret = HksAddParams(paramSet, params, sizeof(params) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksCheckAndGetUserAuthInfo(paramSet, 0, nullptr, nullptr, nullptr);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
+    HksFreeParamSet(&paramSet);
+}
 }

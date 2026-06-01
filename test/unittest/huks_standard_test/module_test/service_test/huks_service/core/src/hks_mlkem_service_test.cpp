@@ -607,4 +607,276 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest012, TestSize.Level0)
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&sharedParamSet);
 }
+
+/**
+ * @tc.name: HksMlKemServiceTest.HksMlKemServiceTest013
+ * @tc.desc: tdd HksServiceDecapsulate, key not exist with sharedKeyParamSet containing KEY_SIZE only
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest013, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksMlKemServiceTest013");
+    const char *alias = "HksMlKemDecapsNotExistSize013";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ML_KEM },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ML_KEM_KEY_PARAM_SET_768 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_UNWRAP },
+    };
+    ret = HksAddParams(paramSet, params, sizeof(params) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *sharedParamSet = nullptr;
+    ret = HksInitParamSet(&sharedParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam sharedAliasParam = {
+        .tag = HKS_TAG_KEY_ALIAS, .blob = { strlen("sharedKey013"), (uint8_t *)"sharedKey013" }
+    };
+    ret = HksAddParams(sharedParamSet, &sharedAliasParam, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&sharedParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    uint8_t encapData[HKS_ML_KEM_MAX_CIPHERTEXT_LEN] = { 0 };
+    struct HksBlob encapOrSharedSecret = { HKS_ML_KEM_MAX_CIPHERTEXT_LEN, encapData };
+    ret = HksServiceDecapsulate(&g_processInfo, &keyAlias, paramSet, sharedParamSet, &encapOrSharedSecret);
+    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST);
+
+    HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&sharedParamSet);
+}
+
+/**
+ * @tc.name: HksMlKemServiceTest.HksMlKemServiceTest014
+ * @tc.desc: tdd HksServiceEncapsulate, null sharedKeyParamSet
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest014, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksMlKemServiceTest014");
+    const char *alias = "HksMlKemEncapsNullShared014";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ML_KEM },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ML_KEM_KEY_PARAM_SET_768 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_WRAP },
+    };
+    ret = HksAddParams(paramSet, params, sizeof(params) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksEncapsulationResult encapResult = { { 0, nullptr }, { 0, nullptr } };
+    ret = HksServiceEncapsulate(&g_processInfo, &keyAlias, paramSet, nullptr, &encapResult);
+    EXPECT_NE(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksMlKemServiceTest.HksMlKemServiceTest015
+ * @tc.desc: tdd HksServiceDecapsulate, null sharedKeyParamSet
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest015, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksMlKemServiceTest015");
+    const char *alias = "HksMlKemDecapsNullShared015";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ML_KEM },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ML_KEM_KEY_PARAM_SET_768 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_UNWRAP },
+    };
+    ret = HksAddParams(paramSet, params, sizeof(params) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    uint8_t encapData[HKS_ML_KEM_MAX_CIPHERTEXT_LEN] = { 0 };
+    struct HksBlob encapOrSharedSecret = { HKS_ML_KEM_MAX_CIPHERTEXT_LEN, encapData };
+    ret = HksServiceDecapsulate(&g_processInfo, &keyAlias, paramSet, nullptr, &encapOrSharedSecret);
+    EXPECT_NE(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksMlKemServiceTest.HksMlKemServiceTest016
+ * @tc.desc: tdd HksServiceEncapsulate, null encapResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest016, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksMlKemServiceTest016");
+    const char *alias = "HksMlKemEncapsNullResult016";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ML_KEM },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ML_KEM_KEY_PARAM_SET_768 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_WRAP },
+    };
+    ret = HksAddParams(paramSet, params, sizeof(params) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *sharedParamSet = nullptr;
+    ret = HksInitParamSet(&sharedParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&sharedParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksServiceEncapsulate(&g_processInfo, &keyAlias, paramSet, sharedParamSet, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&sharedParamSet);
+}
+
+/**
+ * @tc.name: HksMlKemServiceTest.HksMlKemServiceTest017
+ * @tc.desc: tdd HksServiceEncapsulate, ML-KEM-1024 key size
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest017, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksMlKemServiceTest017");
+    const char *keyAliasStr = "HksMlKemEncaps1024Test017";
+    struct HksBlob keyAlias = { strlen(keyAliasStr), (uint8_t *)keyAliasStr };
+
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = HksInitParamSet(&genParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam genParams[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ML_KEM },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ML_KEM_KEY_PARAM_SET_1024 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_WRAP },
+    };
+    ret = HksAddParams(genParamSet, genParams, sizeof(genParams) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&genParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksServiceGenerateKey(&g_processInfo, &keyAlias, genParamSet, nullptr);
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(&genParamSet);
+        return;
+    }
+
+    struct HksParamSet *paramSet = nullptr;
+    ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam opParams[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ML_KEM },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_WRAP },
+    };
+    ret = HksAddParams(paramSet, opParams, sizeof(opParams) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *sharedParamSet = nullptr;
+    ret = HksInitParamSet(&sharedParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam sharedAliasParam = {
+        .tag = HKS_TAG_KEY_ALIAS, .blob = { strlen("sharedKey017"), (uint8_t *)"sharedKey017" }
+    };
+    ret = HksAddParams(sharedParamSet, &sharedAliasParam, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&sharedParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksEncapsulationResult encapResult = { { 0, nullptr }, { 0, nullptr } };
+    ret = HksServiceEncapsulate(&g_processInfo, &keyAlias, paramSet, sharedParamSet, &encapResult);
+    if (ret == HKS_SUCCESS) {
+        EXPECT_NE(encapResult.encapsulatedData.data, nullptr);
+        EXPECT_NE(encapResult.sharedSecret.data, nullptr);
+        EXPECT_EQ(encapResult.encapsulatedData.size, HKS_ML_KEM_1024_CIPHERTEXT_LEN);
+        HKS_FREE(encapResult.encapsulatedData.data);
+        HKS_FREE(encapResult.sharedSecret.data);
+    }
+
+    HksServiceDeleteKey(&g_processInfo, &keyAlias, nullptr);
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&sharedParamSet);
+}
+
+/**
+ * @tc.name: HksMlKemServiceTest.HksMlKemServiceTest018
+ * @tc.desc: tdd HksServiceDecapsulate, ML-KEM-1024 purpose mismatch
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest018, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksMlKemServiceTest018");
+    const char *keyAliasStr = "HksMlKemDecaps1024NoWrap018";
+    struct HksBlob keyAlias = { strlen(keyAliasStr), (uint8_t *)keyAliasStr };
+
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = HksInitParamSet(&genParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam genParams[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ML_KEM },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ML_KEM_KEY_PARAM_SET_1024 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT },
+    };
+    ret = HksAddParams(genParamSet, genParams, sizeof(genParams) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&genParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksServiceGenerateKey(&g_processInfo, &keyAlias, genParamSet, nullptr);
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(&genParamSet);
+        return;
+    }
+
+    struct HksParamSet *paramSet = nullptr;
+    ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam opParams[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ML_KEM },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_UNWRAP },
+    };
+    ret = HksAddParams(paramSet, opParams, sizeof(opParams) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *sharedParamSet = nullptr;
+    ret = HksInitParamSet(&sharedParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&sharedParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    uint8_t encapData[HKS_ML_KEM_MAX_CIPHERTEXT_LEN] = { 0 };
+    struct HksBlob encapOrSharedSecret = { HKS_ML_KEM_MAX_CIPHERTEXT_LEN, encapData };
+    ret = HksServiceDecapsulate(&g_processInfo, &keyAlias, paramSet, sharedParamSet, &encapOrSharedSecret);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_PURPOSE);
+
+    HksServiceDeleteKey(&g_processInfo, &keyAlias, nullptr);
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&sharedParamSet);
+}
 }

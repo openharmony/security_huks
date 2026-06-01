@@ -29,5 +29,11 @@ int HksMlKemServiceTest009(void);
 int HksMlKemServiceTest010(void);
 int HksMlKemServiceTest011(void);
 int HksMlKemServiceTest012(void);
+int HksMlKemServiceTest013(void);
+int HksMlKemServiceTest014(void);
+int HksMlKemServiceTest015(void);
+int HksMlKemServiceTest016(void);
+int HksMlKemServiceTest017(void);
+int HksMlKemServiceTest018(void);
 }
 #endif
