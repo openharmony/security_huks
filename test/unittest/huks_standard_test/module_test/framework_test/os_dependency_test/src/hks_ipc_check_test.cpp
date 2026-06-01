@@ -1156,6 +1156,7 @@ HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest037, TestSize.Level0)
  * @tc.desc: test HksCheckAuthStateIsValid boundary values
  * @tc.type: FUNC
  */
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
 HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest038, TestSize.Level0)
 {
     HKS_LOG_I("enter HksFrameworkIpcCheckTest038");
@@ -1234,4 +1235,5 @@ HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest041, TestSize.Level0)
 
     HksFreeParamSet(&paramSet);
 }
+#endif
 }
