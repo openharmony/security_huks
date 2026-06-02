@@ -1033,13 +1033,10 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest019, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksClientServiceTest.HksClientServiceTest014
- * @tc.desc: tdd AppendNewInfoForGenKeyInService, ALWAYS_VALID authAccessType with USER_AUTH_TYPE
- * @tc.type: FUNC
- */
-HWTEST_F(HksClientServiceTest, HksClientServiceTest014, TestSize.Level0)
+ * @tc.name: HksClientServiceTest.HksClientServiceTest020
+ HWTEST_F(HksClientServiceTest, HksClientServiceTest020, TestSize.Level0)
 {
-    HKS_LOG_I("enter HksClientServiceTest014");
+    HKS_LOG_I("enter HksClientServiceTest020");
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = HksInitParamSet(&paramSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
@@ -1067,13 +1064,12 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest014, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksClientServiceTest.HksClientServiceTest015
- * @tc.desc: tdd AppendNewInfoForGenKeyInService, ATL-only with non-ALWAYS_VALID → userAuthType==0 → HKS_ERROR_INVALID_AUTH_TYPE
+ * @tc.name: HksClientServiceTest.HksClientServiceTest021 with non-ALWAYS_VALID → userAuthType==0 → HKS_ERROR_INVALID_AUTH_TYPE
  * @tc.type: FUNC
  */
-HWTEST_F(HksClientServiceTest, HksClientServiceTest015, TestSize.Level0)
+HWTEST_F(HksClientServiceTest, HksClientServiceTest021, TestSize.Level0)
 {
-    HKS_LOG_I("enter HksClientServiceTest015");
+    HKS_LOG_I("enter HksClientServiceTest021");
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = HksInitParamSet(&paramSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
@@ -1097,13 +1093,12 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest015, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksClientServiceTest.HksClientServiceTest016
- * @tc.desc: tdd AppendNewInfoForGenKeyInService, HksCheckAndGetUserAuthInfo returns other error
+ * @tc.name: HksClientServiceTest.HksClientServiceTest022 other error
  * @tc.type: FUNC
  */
-HWTEST_F(HksClientServiceTest, HksClientServiceTest016, TestSize.Level0)
+HWTEST_F(HksClientServiceTest, HksClientServiceTest022, TestSize.Level0)
 {
-    HKS_LOG_I("enter HksClientServiceTest016");
+    HKS_LOG_I("enter HksClientServiceTest022");
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = HksInitParamSet(&paramSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
@@ -1127,13 +1122,12 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest016, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksClientServiceTest.HksClientServiceTest017
- * @tc.desc: tdd AppendNewInfoForGenKeyInService, IS_ALLOWED_WRAP=true with auth access control
+ * @tc.name: HksClientServiceTest.HksClientServiceTest023=true with auth access control
  * @tc.type: FUNC
  */
-HWTEST_F(HksClientServiceTest, HksClientServiceTest017, TestSize.Level0)
+HWTEST_F(HksClientServiceTest, HksClientServiceTest023, TestSize.Level0)
 {
-    HKS_LOG_I("enter HksClientServiceTest017");
+    HKS_LOG_I("enter HksClientServiceTest023");
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = HksInitParamSet(&paramSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
@@ -1158,13 +1152,12 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest017, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksClientServiceTest.HksClientServiceTest018
- * @tc.desc: tdd AppendProcessInfoAndDefault, HKS_TAG_PROCESS_NAME present → HKS_ERROR_INVALID_ARGUMENT
+ * @tc.name: HksClientServiceTest.HksClientServiceTest024, HKS_TAG_PROCESS_NAME present → HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
  */
-HWTEST_F(HksClientServiceTest, HksClientServiceTest018, TestSize.Level0)
+HWTEST_F(HksClientServiceTest, HksClientServiceTest024, TestSize.Level0)
 {
-    HKS_LOG_I("enter HksClientServiceTest018");
+    HKS_LOG_I("enter HksClientServiceTest024");
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = HksInitParamSet(&paramSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
@@ -1188,14 +1181,13 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest018, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksClientServiceTest.HksClientServiceTest019
- * @tc.desc: tdd CheckKeyCondition, HKS_TAG_KEY_OVERRIDE=true with key already exist
+ * @tc.name: HksClientServiceTest.HksClientServiceTest025, HKS_TAG_KEY_OVERRIDE=true with key already exist
  * @tc.type: FUNC
  */
-HWTEST_F(HksClientServiceTest, HksClientServiceTest019, TestSize.Level0)
+HWTEST_F(HksClientServiceTest, HksClientServiceTest025, TestSize.Level0)
 {
-    HKS_LOG_I("enter HksClientServiceTest019");
-    const char *alias = "HksCheckKeyOverride019";
+    HKS_LOG_I("enter HksClientServiceTest025");
+    const char *alias = "HksCheckKeyOverride029";
     struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
 
     struct HksParamSet *genParamSet = nullptr;
@@ -1227,14 +1219,13 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest019, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksClientServiceTest.HksClientServiceTest020
- * @tc.desc: tdd CheckKeyCondition, HKS_TAG_KEY_OVERRIDE=false with key already exist
+ * @tc.name: HksClientServiceTest.HksClientServiceTest026, HKS_TAG_KEY_OVERRIDE=false with key already exist
  * @tc.type: FUNC
  */
-HWTEST_F(HksClientServiceTest, HksClientServiceTest020, TestSize.Level0)
+HWTEST_F(HksClientServiceTest, HksClientServiceTest026, TestSize.Level0)
 {
-    HKS_LOG_I("enter HksClientServiceTest020");
-    const char *alias = "HksCheckKeyOverride020";
+    HKS_LOG_I("enter HksClientServiceTest026");
+    const char *alias = "HksCheckKeyOverride030";
     struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
 
     struct HksParamSet *genParamSet = nullptr;
@@ -1266,13 +1257,13 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest020, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksClientServiceTest.HksClientServiceTest021
+ * @tc.name: HksClientServiceTest.HksClientServiceTest027
  * @tc.desc: tdd AppendNewInfoForGenKeyInService, ATL-only with ALWAYS_VALID authAccessType
  * @tc.type: FUNC
  */
-HWTEST_F(HksClientServiceTest, HksClientServiceTest021, TestSize.Level0)
+HWTEST_F(HksClientServiceTest, HksClientServiceTest027, TestSize.Level0)
 {
-    HKS_LOG_I("enter HksClientServiceTest021");
+    HKS_LOG_I("enter HksClientServiceTest027");
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = HksInitParamSet(&paramSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
@@ -1296,13 +1287,13 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest021, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksClientServiceTest.HksClientServiceTest022
+ * @tc.name: HksClientServiceTest.HksClientServiceTest028
  * @tc.desc: tdd AppendProcessInfoAndDefault, success path without injected process name
  * @tc.type: FUNC
  */
-HWTEST_F(HksClientServiceTest, HksClientServiceTest022, TestSize.Level0)
+HWTEST_F(HksClientServiceTest, HksClientServiceTest028, TestSize.Level0)
 {
-    HKS_LOG_I("enter HksClientServiceTest022");
+    HKS_LOG_I("enter HksClientServiceTest028");
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = HksInitParamSet(&paramSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
@@ -1323,13 +1314,13 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest022, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksClientServiceTest.HksClientServiceTest023
+ * @tc.name: HksClientServiceTest.HksClientServiceTest029
  * @tc.desc: tdd CheckProcessNameTagExist, tag present → true
  * @tc.type: FUNC
  */
-HWTEST_F(HksClientServiceTest, HksClientServiceTest023, TestSize.Level0)
+HWTEST_F(HksClientServiceTest, HksClientServiceTest029, TestSize.Level0)
 {
-    HKS_LOG_I("enter HksClientServiceTest023");
+    HKS_LOG_I("enter HksClientServiceTest029");
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = HksInitParamSet(&paramSet);
     ASSERT_EQ(ret, HKS_SUCCESS);

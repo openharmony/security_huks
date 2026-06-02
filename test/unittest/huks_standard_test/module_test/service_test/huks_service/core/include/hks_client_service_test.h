@@ -43,5 +43,11 @@ int HksClientServiceTest020(void);
 int HksClientServiceTest021(void);
 int HksClientServiceTest022(void);
 int HksClientServiceTest023(void);
+int HksClientServiceTest024(void);
+int HksClientServiceTest025(void);
+int HksClientServiceTest026(void);
+int HksClientServiceTest027(void);
+int HksClientServiceTest028(void);
+int HksClientServiceTest029(void);
 }
 #endif
