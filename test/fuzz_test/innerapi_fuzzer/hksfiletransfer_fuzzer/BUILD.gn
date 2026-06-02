@@ -46,7 +46,6 @@ ohos_fuzztest("HksFileTransferFuzzTest") {
     "c_utils:utils",
     "hilog:libhilog",
   ]
-  external_deps += [ "hilog:libhilog" ]
 }
 
 ###############################################################################

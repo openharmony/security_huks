@@ -28,6 +28,7 @@
 #include "hksstorage_fuzzer.h"
 
 #include <string>
+#include <vector>
 
 #include "hks_api.h"
 #include "hks_config.h"
@@ -40,6 +41,8 @@
 #include "hks_template.h"
 #include "hks_type.h"
 #include "hks_type_inner.h"
+
+#include "hks_fuzz_util.h"
 
 const std::string TEST_PROCESS_NAME = "test_process";
 const std::string TEST_USER_ID = "123465";
@@ -700,39 +703,270 @@ static void HksStorageUtilTest007()
     const char *expectPath = HKS_KEY_RKC_PATH "/hks_client/key";
     HksMemCmp(fileInfo.mainPath.path, expectPath, strlen(expectPath));
 }
+
+// ========== FDP-driven fuzz functions (supplement existing hardcoded tests) ==========
+
+static const uint32_t g_fuzzStorageTypes[3] = {
+    HKS_STORAGE_TYPE_KEY,
+    HKS_STORAGE_TYPE_BAK_KEY,
+    HKS_STORAGE_TYPE_ROOT_KEY,
+};
+
+static const uint32_t g_fuzzAuthStorageLevels[4] = {
+    HKS_AUTH_STORAGE_LEVEL_DE,
+    HKS_AUTH_STORAGE_LEVEL_CE,
+    HKS_AUTH_STORAGE_LEVEL_ECE,
+    HKS_AUTH_STORAGE_LEVEL_OLD_DE_TMP,
+};
+
+static const uint32_t g_fuzzPathTypes[6] = {
+    DE_PATH,
+    CE_PATH,
+    ECE_PATH,
+    TMP_PATH,
+    LITE_HAP_PATH,
+    RKC_IN_STANDARD_PATH,
+};
+
+static void BuildProcessInfoFromFdp(FuzzedDataProvider &fdp, HksProcessInfo &info,
+    std::string &processNameStr, std::string &userIdStr)
+{
+    uint32_t nameSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 32);
+    auto nameData = fdp.ConsumeBytes<uint8_t>(nameSize);
+    processNameStr = std::string(nameData.begin(), nameData.end());
+
+    uint32_t uidVal = fdp.ConsumeIntegralInRange<uint32_t>(0, 999);
+    userIdStr = std::to_string(uidVal);
+
+    info.processName = { static_cast<uint32_t>(processNameStr.size()),
+                         reinterpret_cast<uint8_t *>(processNameStr.data()) };
+    info.userId = { static_cast<uint32_t>(userIdStr.size()),
+                    reinterpret_cast<uint8_t *>(userIdStr.data()) };
+    info.userIdInt = uidVal;
+    info.uidInt = fdp.ConsumeIntegralInRange<uint32_t>(0, 999);
+    info.accessTokenId = fdp.ConsumeIntegralInRange<uint32_t>(0, 999);
 }
+
+static int32_t FuzzStoreKeyBlob(FuzzedDataProvider &fdp)
+{
+    std::string processNameStr, userIdStr;
+    HksProcessInfo processInfo = {};
+    BuildProcessInfoFromFdp(fdp, processInfo, processNameStr, userIdStr);
+
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 64);
+    auto aliasData = fdp.ConsumeBytes<uint8_t>(aliasSize);
+    if (aliasData.empty()) return HKS_ERROR_INSUFFICIENT_DATA;
+    HksBlob keyAlias = { static_cast<uint32_t>(aliasData.size()), aliasData.data() };
+
+    uint32_t blobSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 512);
+    std::vector<uint8_t> blobBuf(blobSize, 0);
+    HksBlob keyBlob = { static_cast<uint32_t>(blobBuf.size()), blobBuf.data() };
+
+    WrapParamSet ps = ConstructParamSetFromFdp(fdp);
+    uint32_t storageType = fdp.PickValueInArray(g_fuzzStorageTypes);
+    return HksManageStoreKeyBlob(&processInfo, ps.s, &keyAlias, &keyBlob, storageType);
 }
+
+static int32_t FuzzGetKeyBlob(FuzzedDataProvider &fdp)
+{
+    std::string processNameStr, userIdStr;
+    HksProcessInfo processInfo = {};
+    BuildProcessInfoFromFdp(fdp, processInfo, processNameStr, userIdStr);
+
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 64);
+    auto aliasData = fdp.ConsumeBytes<uint8_t>(aliasSize);
+    if (aliasData.empty()) return HKS_ERROR_INSUFFICIENT_DATA;
+    HksBlob keyAlias = { static_cast<uint32_t>(aliasData.size()), aliasData.data() };
+
+    uint32_t blobSize = fdp.ConsumeIntegralInRange<uint32_t>(16, 1024);
+    std::vector<uint8_t> blobBuf(blobSize, 0);
+    HksBlob keyBlob = { static_cast<uint32_t>(blobBuf.size()), blobBuf.data() };
+
+    WrapParamSet ps = ConstructParamSetFromFdp(fdp);
+    uint32_t storageType = fdp.PickValueInArray(g_fuzzStorageTypes);
+    return HksManageStoreGetKeyBlob(&processInfo, ps.s, &keyAlias, &keyBlob, storageType);
+}
+
+static int32_t FuzzDeleteKeyBlob(FuzzedDataProvider &fdp)
+{
+    std::string processNameStr, userIdStr;
+    HksProcessInfo processInfo = {};
+    BuildProcessInfoFromFdp(fdp, processInfo, processNameStr, userIdStr);
+
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 64);
+    auto aliasData = fdp.ConsumeBytes<uint8_t>(aliasSize);
+    if (aliasData.empty()) return HKS_ERROR_INSUFFICIENT_DATA;
+    HksBlob keyAlias = { static_cast<uint32_t>(aliasData.size()), aliasData.data() };
+
+    WrapParamSet ps = ConstructParamSetFromFdp(fdp);
+    uint32_t storageType = fdp.PickValueInArray(g_fuzzStorageTypes);
+    return HksManageStoreDeleteKeyBlob(&processInfo, ps.s, &keyAlias, storageType);
+}
+
+static int32_t FuzzStorageFileLock(FuzzedDataProvider &fdp)
+{
+    uint32_t pathSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 256);
+    auto pathData = fdp.ConsumeBytes<uint8_t>(pathSize);
+    std::string path(pathData.begin(), pathData.end());
+
+    HksStorageFileLock *lock = HksStorageFileLockCreate(path.c_str());
+    if (lock == nullptr) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    if (fdp.ConsumeBool()) {
+        HksStorageFileLockRead(lock);
+        HksStorageFileUnlockRead(lock);
+    }
+    if (fdp.ConsumeBool()) {
+        HksStorageFileLockWrite(lock);
+        HksStorageFileUnlockWrite(lock);
+    }
+
+    HksStorageFileLockRelease(lock);
+    return HKS_SUCCESS;
+}
+
+static int32_t FuzzResumeInvalidCharacter(FuzzedDataProvider &fdp)
+{
+    char input = fdp.ConsumeIntegral<char>();
+    char output = 0;
+    ResumeInvalidCharacter(input, &output);
+    return HKS_SUCCESS;
+}
+
+static int32_t FuzzInitStorageMaterial(FuzzedDataProvider &fdp)
+{
+    std::string processNameStr, userIdStr;
+    HksProcessInfo processInfo = {};
+    BuildProcessInfoFromFdp(fdp, processInfo, processNameStr, userIdStr);
+
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 64);
+    auto aliasData = fdp.ConsumeBytes<uint8_t>(aliasSize);
+    if (aliasData.empty()) return HKS_ERROR_INSUFFICIENT_DATA;
+    HksBlob keyAlias = { static_cast<uint32_t>(aliasData.size()), aliasData.data() };
+
+    uint32_t authLevel = fdp.PickValueInArray(g_fuzzAuthStorageLevels);
+    struct HksParam authParam = { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = authLevel };
+    struct HksParamSet *paramSet = nullptr;
+    HksInitParamSet(&paramSet);
+    if (paramSet != nullptr) {
+        HksAddParams(paramSet, &authParam, 1);
+        HksBuildParamSet(&paramSet);
+    }
+
+    uint32_t storageType = fdp.PickValueInArray(g_fuzzStorageTypes);
+    struct HksStoreMaterial material = {};
+    int32_t ret = InitStorageMaterial(&processInfo, paramSet, &keyAlias, storageType, &material);
+    if (ret == HKS_SUCCESS) {
+        FreeStorageMaterial(&material);
+    }
+    HksFreeParamSet(&paramSet);
+    return ret;
+}
+
+static int32_t FuzzGetFileInfo(FuzzedDataProvider &fdp)
+{
+    uint32_t pathType = fdp.PickValueInArray(g_fuzzPathTypes);
+
+    uint32_t uidSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 32);
+    auto uidData = fdp.ConsumeBytes<uint8_t>(uidSize);
+    std::string uidPath(uidData.begin(), uidData.end());
+
+    uint32_t userIdSize = fdp.ConsumeIntegralInRange<uint32_t>(0, 32);
+    auto userIdData = fdp.ConsumeBytes<uint8_t>(userIdSize);
+    std::string userIdPath(userIdData.begin(), userIdData.end());
+
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 64);
+    auto aliasData = fdp.ConsumeBytes<uint8_t>(aliasSize);
+    std::string keyAliasPath(aliasData.begin(), aliasData.end());
+
+    struct HksStoreMaterial material = {};
+    material.pathType = static_cast<HksPathType>(pathType);
+    material.ancoOperation = false;
+    material.keyAliasPath = const_cast<char *>(keyAliasPath.c_str());
+    material.storageTypePath = const_cast<char *>("key");
+    material.uidPath = const_cast<char *>(uidPath.c_str());
+    material.userIdPath = const_cast<char *>(userIdPath.c_str());
+    material.assetAccessGroup = nullptr;
+    material.developerId = nullptr;
+
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
+    return HksGetFileInfo(&material, &fileInfo);
+}
+
+using FuzzFunc = int32_t (*)(FuzzedDataProvider &);
+
+static const FuzzFunc g_fuzzFuncs[7] = {
+    FuzzStoreKeyBlob,
+    FuzzGetKeyBlob,
+    FuzzDeleteKeyBlob,
+    FuzzStorageFileLock,
+    FuzzResumeInvalidCharacter,
+    FuzzInitStorageMaterial,
+    FuzzGetFileInfo,
+};
+
+// Existing hardcoded test function pointers for selective execution
+using HardcodedFunc = void (*)();
+static const HardcodedFunc g_hardcodedFuncs[26] = {
+    HksStorageMultithreadTest001,
+    HksStorageMultithreadTest002,
+    HksStorageMultithreadTest003,
+    HksStorageFileLockTest001,
+    HksStorageFileLockTest002,
+    HksStorageFileLockTest003,
+    HksStorageFileLockTest004,
+    HksStorageTest001,
+    HksStorageTest002,
+    HksStorageTest003,
+    HksStorageTest004,
+    HksStorageTest005,
+    HksStorageTest006,
+    HksStorageManagerTest001,
+    HksStorageManagerTest002,
+    HksStorageManagerTest003,
+    HksStorageManagerTest004,
+    HksStorageManagerTest005,
+    HksStorageManagerTest006,
+    HksStorageUtilTest001,
+    HksStorageUtilTest002,
+    HksStorageUtilTest003,
+    HksStorageUtilTest004,
+    HksStorageUtilTest005,
+    HksStorageUtilTest006,
+    HksStorageUtilTest007,
+};
+
+int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
+{
+    // Execute 1-3 hardcoded functions to preserve existing coverage
+    uint32_t hardcodedCount = fdp.ConsumeIntegralInRange<uint32_t>(1, 3);
+    for (uint32_t i = 0; i < hardcodedCount; i++) {
+        auto func = fdp.PickValueInArray(g_hardcodedFuncs);
+        func();
+    }
+
+    // Execute 1 FDP-driven function to explore new paths
+    auto fuzzFunc = fdp.PickValueInArray(g_fuzzFuncs);
+    return fuzzFunc(fdp);
+}
+
+}}}
+
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
+    return 0;
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    (void)data;
-    (void)size;
-    OHOS::Security::Hks::HksStorageMultithreadTest001();
-    OHOS::Security::Hks::HksStorageMultithreadTest002();
-    OHOS::Security::Hks::HksStorageMultithreadTest003();
-    OHOS::Security::Hks::HksStorageFileLockTest001();
-    OHOS::Security::Hks::HksStorageFileLockTest002();
-    OHOS::Security::Hks::HksStorageFileLockTest003();
-    OHOS::Security::Hks::HksStorageFileLockTest004();
-    OHOS::Security::Hks::HksStorageTest001();
-    OHOS::Security::Hks::HksStorageTest002();
-    OHOS::Security::Hks::HksStorageTest003();
-    OHOS::Security::Hks::HksStorageTest004();
-    OHOS::Security::Hks::HksStorageTest005();
-    OHOS::Security::Hks::HksStorageTest006();
-    OHOS::Security::Hks::HksStorageManagerTest001();
-    OHOS::Security::Hks::HksStorageManagerTest002();
-    OHOS::Security::Hks::HksStorageManagerTest003();
-    OHOS::Security::Hks::HksStorageManagerTest004();
-    OHOS::Security::Hks::HksStorageManagerTest005();
-    OHOS::Security::Hks::HksStorageManagerTest006();
-    OHOS::Security::Hks::HksStorageUtilTest001();
-    OHOS::Security::Hks::HksStorageUtilTest002();
-    OHOS::Security::Hks::HksStorageUtilTest003();
-    OHOS::Security::Hks::HksStorageUtilTest004();
-    OHOS::Security::Hks::HksStorageUtilTest005();
-    OHOS::Security::Hks::HksStorageUtilTest006();
-    OHOS::Security::Hks::HksStorageUtilTest007();
+    FuzzedDataProvider fdp(data, size);
+    int32_t ret = OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(fdp);
+
+    OHOS::Security::Hks::FuzzStatsRecord(ret);
     return 0;
 }

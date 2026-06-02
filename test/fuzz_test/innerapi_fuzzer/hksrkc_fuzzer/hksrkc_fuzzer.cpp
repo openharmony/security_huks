@@ -26,8 +26,12 @@
 #include "hks_rkc_v1.c"
 
 #include "cstring"
+#include "string"
+#include "vector"
 #include "unistd.h"
 #include "securec.h"
+
+#include "hks_fuzz_util.h"
 
 namespace OHOS {
 namespace Security {
@@ -127,14 +131,169 @@ static void HksUpgradeRkcTest001()
 
     TestGetMkFromNewKsfFile(&rkcBlob, &mkBlob, mkPlaintext);
 }
+
+// ========== FDP-driven fuzz functions (supplement existing hardcoded tests) ==========
+
+// FDP-driven: fuzz RkcExtractKsfBufV1 with random ksf blob data
+static int32_t FuzzExtractKsfBufV1(FuzzedDataProvider &fdp)
+{
+    uint32_t dataSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 512);
+    auto dataBuf = fdp.ConsumeBytes<uint8_t>(dataSize);
+    if (dataBuf.empty()) return HKS_ERROR_INSUFFICIENT_DATA;
+
+    struct HksBlob ksfBlob = { static_cast<uint32_t>(dataBuf.size()), const_cast<uint8_t *>(dataBuf.data()) };
+    struct HksRkcKsfDataV1 ksfDataV1 = { 0 };
+    return RkcExtractKsfBufV1(&ksfBlob, &ksfDataV1);
+}
+
+// FDP-driven: fuzz ExtractKsfBufRkc with random ksf blob data
+static int32_t FuzzExtractKsfBufRkc(FuzzedDataProvider &fdp)
+{
+    uint32_t dataSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 512);
+    auto dataBuf = fdp.ConsumeBytes<uint8_t>(dataSize);
+    if (dataBuf.empty()) return HKS_ERROR_INSUFFICIENT_DATA;
+
+    struct HksBlob ksfBlob = { static_cast<uint32_t>(dataBuf.size()), const_cast<uint8_t *>(dataBuf.data()) };
+    struct HksKsfDataRkcWithVer ksfDataRkc = { 0 };
+    return ExtractKsfBufRkc(&ksfBlob, &ksfDataRkc);
+}
+
+// FDP-driven: fuzz ExtractKsfBufMk with random ksf blob data
+static int32_t FuzzExtractKsfBufMk(FuzzedDataProvider &fdp)
+{
+    uint32_t dataSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 512);
+    auto dataBuf = fdp.ConsumeBytes<uint8_t>(dataSize);
+    if (dataBuf.empty()) return HKS_ERROR_INSUFFICIENT_DATA;
+
+    struct HksBlob ksfBlob = { static_cast<uint32_t>(dataBuf.size()), const_cast<uint8_t *>(dataBuf.data()) };
+    struct HksKsfDataMkWithVer ksfDataMk = { 0 };
+    return ExtractKsfBufMk(&ksfBlob, &ksfDataMk);
+}
+
+// FDP-driven: fuzz RkcMkCryptV1 with random ksf data (extracted from V1 blob)
+static int32_t FuzzRkcMkCryptV1(FuzzedDataProvider &fdp)
+{
+    uint32_t dataSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 512);
+    auto dataBuf = fdp.ConsumeBytes<uint8_t>(dataSize);
+    if (dataBuf.empty()) return HKS_ERROR_INSUFFICIENT_DATA;
+
+    struct HksBlob ksfBlob = { static_cast<uint32_t>(dataBuf.size()), const_cast<uint8_t *>(dataBuf.data()) };
+    struct HksRkcKsfDataV1 ksfDataV1 = { 0 };
+    int32_t ret = RkcExtractKsfBufV1(&ksfBlob, &ksfDataV1);
+    if (ret != HKS_SUCCESS) return ret;
+
+    uint8_t mk[HKS_RKC_MK_LEN] = { 0 };
+    struct HksBlob tempMkBlob = { HKS_RKC_MK_LEN, mk };
+    struct HksBlob cipherTextBlob = { sizeof(ksfDataV1.ksfDataMk.mkCiphertext), ksfDataV1.ksfDataMk.mkCiphertext };
+    // Try decrypt (false) or encrypt (true) based on fuzz input
+    bool encrypt = fdp.ConsumeBool();
+    return RkcMkCryptV1(&ksfDataV1, &tempMkBlob, &cipherTextBlob, encrypt);
+}
+
+// FDP-driven: fuzz RkcMkCrypt (V2) with random ksf data
+static int32_t FuzzRkcMkCrypt(FuzzedDataProvider &fdp)
+{
+    // Generate random rkc data
+    uint32_t rkcSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 512);
+    auto rkcBuf = fdp.ConsumeBytes<uint8_t>(rkcSize);
+    if (rkcBuf.empty()) return HKS_ERROR_INSUFFICIENT_DATA;
+
+    struct HksBlob rkcBlob = { static_cast<uint32_t>(rkcBuf.size()), const_cast<uint8_t *>(rkcBuf.data()) };
+    struct HksKsfDataRkcWithVer ksfDataRkc = { 0 };
+    int32_t ret = ExtractKsfBufRkc(&rkcBlob, &ksfDataRkc);
+    if (ret != HKS_SUCCESS) return ret;
+
+    // Generate random mk data
+    uint32_t mkSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 512);
+    auto mkBuf = fdp.ConsumeBytes<uint8_t>(mkSize);
+    if (mkBuf.empty()) return HKS_ERROR_INSUFFICIENT_DATA;
+
+    struct HksBlob mkBlob = { static_cast<uint32_t>(mkBuf.size()), const_cast<uint8_t *>(mkBuf.data()) };
+    struct HksKsfDataMkWithVer ksfDataMk = { 0 };
+    ret = ExtractKsfBufMk(&mkBlob, &ksfDataMk);
+    if (ret != HKS_SUCCESS) return ret;
+
+    uint8_t mk[HKS_RKC_MK_LEN] = { 0 };
+    struct HksBlob tempMkBlob = { HKS_RKC_MK_LEN, mk };
+    struct HksBlob cipherTextBlob = { sizeof(ksfDataMk.ksfDataMk.mkCiphertext), ksfDataMk.ksfDataMk.mkCiphertext };
+    bool encrypt = fdp.ConsumeBool();
+    return RkcMkCrypt(&ksfDataRkc.ksfDataRkc, &ksfDataMk.ksfDataMk, &tempMkBlob, &cipherTextBlob, encrypt);
+}
+
+// FDP-driven: fuzz FillKsfBufRkc/FillKsfBufMk (round-trip: fill then extract)
+static int32_t FuzzFillKsfBufRoundTrip(FuzzedDataProvider &fdp)
+{
+    struct HksKsfDataRkcWithVer newRkc = { 0 };
+    int32_t ret = FillKsfDataRkcWithVer(&newRkc);
+    if (ret != HKS_SUCCESS) return ret;
+
+    struct HksKsfDataMkWithVer newMk = { 0 };
+    FillKsfDataMkWithVer(&newMk);
+
+    // Encrypt MK
+    uint8_t mkPlaintext[HKS_RKC_MK_LEN] = { 0 };
+    auto mkData = fdp.ConsumeBytes<uint8_t>(HKS_RKC_MK_LEN);
+    if (mkData.size() == HKS_RKC_MK_LEN) {
+        (void)memcpy_s(mkPlaintext, HKS_RKC_MK_LEN, mkData.data(), HKS_RKC_MK_LEN);
+    }
+
+    struct HksBlob tempMkBlob = { HKS_RKC_MK_LEN, mkPlaintext };
+    struct HksBlob cipherTextBlob = { sizeof(newMk.ksfDataMk.mkCiphertext), newMk.ksfDataMk.mkCiphertext };
+    ret = RkcMkCrypt(&newRkc.ksfDataRkc, &newMk.ksfDataMk, &tempMkBlob, &cipherTextBlob, true);
+    if (ret != HKS_SUCCESS) return ret;
+
+    // Fill to buffer
+    uint8_t rkcFile[HKS_KSF_BUF_LEN] = { 0 };
+    struct HksBlob rkcBlob = { HKS_KSF_BUF_LEN, rkcFile };
+    ret = FillKsfBufRkc(&newRkc, &rkcBlob);
+
+    uint8_t mkFile[HKS_KSF_BUF_LEN] = { 0 };
+    struct HksBlob mkBlob = { HKS_KSF_BUF_LEN, mkFile };
+    ret = FillKsfBufMk(&newMk, &mkBlob);
+
+    return ret;
+}
+
+using FuzzFunc = int32_t (*)(FuzzedDataProvider &);
+
+static const FuzzFunc g_fuzzFuncs[6] = {
+    FuzzExtractKsfBufV1,
+    FuzzExtractKsfBufRkc,
+    FuzzExtractKsfBufMk,
+    FuzzRkcMkCryptV1,
+    FuzzRkcMkCrypt,
+    FuzzFillKsfBufRoundTrip,
+};
+
+// Existing hardcoded test function pointers for selective execution
+using HardcodedFunc = void (*)();
+static const HardcodedFunc g_hardcodedFuncs[1] = {
+    HksUpgradeRkcTest001,
+};
+
+int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
+{
+    // Execute hardcoded function to preserve existing coverage
+    auto func = fdp.PickValueInArray(g_hardcodedFuncs);
+    func();
+
+    // Execute 1 FDP-driven function to explore new paths
+    auto fuzzFunc = fdp.PickValueInArray(g_fuzzFuncs);
+    return fuzzFunc(fdp);
+}
 }
 }
 }
 
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
+    return 0;
+}
+
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    (void)data;
-    (void)size;
-    OHOS::Security::Hks::HksUpgradeRkcTest001();
+    FuzzedDataProvider fdp(data, size);
+    int32_t ret = OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(fdp);
+
+    OHOS::Security::Hks::FuzzStatsRecord(ret);
     return 0;
 }
