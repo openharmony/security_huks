@@ -121,7 +121,7 @@ static int32_t FuzzReportFaultEvent(FuzzedDataProvider &fdp)
     uint32_t funcNameSize = fdp.ConsumeIntegralInRange<uint32_t>(0, 64);
     auto funcNameData = fdp.ConsumeBytes<uint8_t>(funcNameSize);
     std::string funcNameStr(funcNameData.begin(), funcNameData.end());
-    const char *funcName = funcNameStr.empty() ? nullptr : funcNameStr.c_str();
+    const char *funcName = funcNameStr.empty() ? "fuzz" : funcNameStr.c_str();
 
     int32_t errorCode = fdp.ConsumeIntegral<int32_t>();
 

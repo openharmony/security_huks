@@ -17,8 +17,11 @@
 
 #include <vector>
 
+#include <securec.h>
+
 #include "hks_client_ipc_serialization.h"
 #include "hks_log.h"
+#include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_type.h"
 #include "hks_type_inner.h"
@@ -118,9 +121,29 @@ static int32_t FuzzHksGetKeyInfoListUnpackFromService(FuzzedDataProvider &fdp)
         return HKS_ERROR_INSUFFICIENT_DATA;
     }
     struct HksBlob srcBlob = { static_cast<uint32_t>(srcData.size()), srcData.data() };
-    // HksGetKeyInfoListUnpackFromService dereferences listCount — must be valid
-    uint32_t listCount = 0;
-    return HksGetKeyInfoListUnpackFromService(&srcBlob, &listCount, nullptr);
+    uint32_t n = 1;
+    struct HksKeyInfo *keyInfoList = (struct HksKeyInfo *)HksMalloc(n * sizeof(struct HksKeyInfo));
+    if (keyInfoList == nullptr) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    (void)memset_s(keyInfoList, n * sizeof(struct HksKeyInfo), 0, n * sizeof(struct HksKeyInfo));
+    uint8_t *aliasBuf = (uint8_t *)HksMalloc(MAX_IPC_BUF_SIZE);
+    struct HksParamSet *ps = (struct HksParamSet *)HksMalloc(HKS_DEFAULT_PARAM_SET_SIZE);
+    if (aliasBuf == nullptr || ps == nullptr) {
+        HKS_FREE(aliasBuf);
+        HKS_FREE(ps);
+        HKS_FREE(keyInfoList);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    ps->paramSetSize = HKS_DEFAULT_PARAM_SET_SIZE;
+    ps->paramsCnt = 0;
+    keyInfoList[0].alias = { MAX_IPC_BUF_SIZE, aliasBuf };
+    keyInfoList[0].paramSet = ps;
+    int32_t ret = HksGetKeyInfoListUnpackFromService(&srcBlob, &n, keyInfoList);
+    HKS_FREE(aliasBuf);
+    HKS_FREE(ps);
+    HKS_FREE(keyInfoList);
+    return ret;
 }
 
 // Fuzz HksCertificateChainUnpackFromService: fuzz controls srcData, needEncode, certsCount
