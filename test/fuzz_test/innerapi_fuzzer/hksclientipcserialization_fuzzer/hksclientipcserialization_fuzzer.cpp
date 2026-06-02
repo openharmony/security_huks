@@ -197,19 +197,24 @@ static int32_t FuzzEncodeCertChain(FuzzedDataProvider &fdp)
 static int32_t FuzzHksListAliasesUnpackFromService(FuzzedDataProvider &fdp)
 {
     bool useEmpty = fdp.ConsumeBool();
+    struct HksKeyAliasSet *destData = nullptr;
+    int32_t ret;
     if (useEmpty) {
         struct HksBlob srcBlob = { 0, nullptr };
-        return HksListAliasesUnpackFromService(&srcBlob, nullptr);
+        ret = HksListAliasesUnpackFromService(&srcBlob, &destData);
+    } else {
+        uint32_t srcSize = fdp.ConsumeIntegralInRange<uint32_t>(1, MAX_IPC_BUF_SIZE);
+        auto srcData = fdp.ConsumeBytes<uint8_t>(srcSize);
+        if (srcData.empty()) {
+            struct HksBlob srcBlob = { 0, nullptr };
+            ret = HksListAliasesUnpackFromService(&srcBlob, &destData);
+        } else {
+            struct HksBlob srcBlob = { static_cast<uint32_t>(srcData.size()), srcData.data() };
+            ret = HksListAliasesUnpackFromService(&srcBlob, &destData);
+        }
     }
-
-    uint32_t srcSize = fdp.ConsumeIntegralInRange<uint32_t>(1, MAX_IPC_BUF_SIZE);
-    auto srcData = fdp.ConsumeBytes<uint8_t>(srcSize);
-    if (srcData.empty()) {
-        struct HksBlob srcBlob = { 0, nullptr };
-        return HksListAliasesUnpackFromService(&srcBlob, nullptr);
-    }
-    struct HksBlob srcBlob = { static_cast<uint32_t>(srcData.size()), srcData.data() };
-    return HksListAliasesUnpackFromService(&srcBlob, nullptr);
+    HksFreeKeyAliasSet(destData);
+    return ret;
 }
 
 using FuzzFunc = int32_t (*)(FuzzedDataProvider &);
