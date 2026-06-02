@@ -1034,11 +1034,15 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest019, TestSize.Level0)
 
 /**
  * @tc.name: HksClientServiceTest.HksClientServiceTest020
- HWTEST_F(HksClientServiceTest, HksClientServiceTest020, TestSize.Level0)
+ * @tc.type: FUNC 
+ * 
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest020, TestSize.Level0)
 {
     HKS_LOG_I("enter HksClientServiceTest020");
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = HksInitParamSet(&paramSet);
+    struct HksProcessInfo processInfo = { g_userId, g_processName, 100, 100, 100 };
     ASSERT_EQ(ret, HKS_SUCCESS);
     struct HksParam params[] = {
         { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
@@ -1055,7 +1059,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest019, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
 
     struct HksParamSet *outParamSet = nullptr;
-    ret = AppendNewInfoForGenKeyInService(&g_processInfo, paramSet, &outParamSet);
+    ret = AppendNewInfoForGenKeyInService(&processInfo, paramSet, &outParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
     if (ret == HKS_SUCCESS) {
         HksFreeParamSet(&outParamSet);
@@ -1065,12 +1069,14 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest019, TestSize.Level0)
 
 /**
  * @tc.name: HksClientServiceTest.HksClientServiceTest021 with non-ALWAYS_VALID → userAuthType==0 → HKS_ERROR_INVALID_AUTH_TYPE
- * @tc.type: FUNC
+ * @tc.type: FUNC 
+ * 
  */
 HWTEST_F(HksClientServiceTest, HksClientServiceTest021, TestSize.Level0)
 {
     HKS_LOG_I("enter HksClientServiceTest021");
     struct HksParamSet *paramSet = nullptr;
+    struct HksProcessInfo processInfo = { g_userId, g_processName, 100, 100, 100 };
     int32_t ret = HksInitParamSet(&paramSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
     struct HksParam params[] = {
@@ -1087,7 +1093,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest021, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
 
     struct HksParamSet *outParamSet = nullptr;
-    ret = AppendNewInfoForGenKeyInService(&g_processInfo, paramSet, &outParamSet);
+    ret = AppendNewInfoForGenKeyInService(&processInfo, paramSet, &outParamSet);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_AUTH_TYPE);
     HksFreeParamSet(&paramSet);
 }
@@ -1100,6 +1106,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest022, TestSize.Level0)
 {
     HKS_LOG_I("enter HksClientServiceTest022");
     struct HksParamSet *paramSet = nullptr;
+    struct HksProcessInfo processInfo = { g_userId, g_processName, 100, 100, 100 };
     int32_t ret = HksInitParamSet(&paramSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
     struct HksParam params[] = {
@@ -1116,7 +1123,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest022, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
 
     struct HksParamSet *outParamSet = nullptr;
-    ret = AppendNewInfoForGenKeyInService(&g_processInfo, paramSet, &outParamSet);
+    ret = AppendNewInfoForGenKeyInService(&processInfo, paramSet, &outParamSet);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_AUTH_TYPE);
     HksFreeParamSet(&paramSet);
 }
@@ -1129,6 +1136,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest023, TestSize.Level0)
 {
     HKS_LOG_I("enter HksClientServiceTest023");
     struct HksParamSet *paramSet = nullptr;
+    struct HksProcessInfo processInfo = { g_userId, g_processName, 100, 100, 100 };
     int32_t ret = HksInitParamSet(&paramSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
     struct HksParam params[] = {
@@ -1146,7 +1154,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest023, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
 
     struct HksParamSet *outParamSet = nullptr;
-    ret = AppendNewInfoForGenKeyInService(&g_processInfo, paramSet, &outParamSet);
+    ret = AppendNewInfoForGenKeyInService(&processInfo, paramSet, &outParamSet);
     EXPECT_EQ(ret, HKS_ERROR_KEY_NOT_ALLOW_WRAP);
     HksFreeParamSet(&paramSet);
 }
@@ -1159,6 +1167,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest024, TestSize.Level0)
 {
     HKS_LOG_I("enter HksClientServiceTest024");
     struct HksParamSet *paramSet = nullptr;
+    struct HksProcessInfo processInfo = { g_userId, g_processName, 100, 100, 100 };
     int32_t ret = HksInitParamSet(&paramSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
     const char *processNameStr = "injected_process";
@@ -1175,7 +1184,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest024, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
 
     struct HksParamSet *outParamSet = nullptr;
-    ret = AppendProcessInfoAndDefault(paramSet, &g_processInfo, nullptr, &outParamSet, true);
+    ret = AppendProcessInfoAndDefault(paramSet, &processInfo, nullptr, &outParamSet, true);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
     HksFreeParamSet(&paramSet);
 }
@@ -1265,6 +1274,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest027, TestSize.Level0)
 {
     HKS_LOG_I("enter HksClientServiceTest027");
     struct HksParamSet *paramSet = nullptr;
+    struct HksProcessInfo processInfo = { g_userId, g_processName, 100, 100, 100 };
     int32_t ret = HksInitParamSet(&paramSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
     struct HksParam params[] = {
@@ -1281,7 +1291,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest027, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
 
     struct HksParamSet *outParamSet = nullptr;
-    ret = AppendNewInfoForGenKeyInService(&g_processInfo, paramSet, &outParamSet);
+    ret = AppendNewInfoForGenKeyInService(&processInfo, paramSet, &outParamSet);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_AUTH_TYPE);
     HksFreeParamSet(&paramSet);
 }
