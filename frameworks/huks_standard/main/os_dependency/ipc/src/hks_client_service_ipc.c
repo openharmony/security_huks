@@ -437,10 +437,10 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
 {
     HKS_IF_NULL_RETURN(retryCount, HKS_ERROR_NULL_POINTER)
     /**
-    *                +---------------------------+
-    * outBlob:       | int32_t   | uint32_t     |
-    *                | outStatus  |  retryCount  |
-    *                +---------------------------+
+    *                +----------------------------------+
+    * outBlob:       | int32_t | int32_t   | uint32_t   |
+    *                | ret     | outStatus | retryCount |
+    *                +----------------------------------+
     */
     int32_t outStatus = 0;
     int32_t ret;
