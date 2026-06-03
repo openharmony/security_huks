@@ -16,6 +16,7 @@
 #include "hks_mutex.h"
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 #include "securec.h"
 #include <pthread.h>
 #include <string.h>
@@ -45,10 +46,7 @@ static HksMutex* GetUkeyGlobalMutex(void)
 void HksSetUkeyGlobalInfo(int32_t errVal, const char *errorDesc)
 {
     HksMutex *mutex = GetUkeyGlobalMutex();
-    if (mutex == NULL) {
-        HKS_LOG_E("HksSetUkeyGlobalInfo: mutex is null");
-        return;
-    }
+    HKS_IF_NULL_LOGE_RETURN_VOID(mutex, "mutex is null")
     
     HksMutexLock(mutex);
     g_ukeyGlobalInfo.errVal = errVal;
@@ -65,10 +63,7 @@ void HksSetUkeyGlobalInfo(int32_t errVal, const char *errorDesc)
 int32_t HksGetUkeyGlobalErrVal(void)
 {
     HksMutex *mutex = GetUkeyGlobalMutex();
-    if (mutex == NULL) {
-        HKS_LOG_E("HksGetUkeyGlobalErrVal: mutex is null");
-        return 0;
-    }
+    HKS_IF_NULL_LOGE_RETURN(mutex, 0, "mutex is null")
     
     HksMutexLock(mutex);
     int32_t errVal = g_ukeyGlobalInfo.errVal;
@@ -99,10 +94,7 @@ void HksGetUkeyGlobalErrorDesc(char *buf, uint32_t bufLen)
 void HksClearUkeyGlobalInfo(void)
 {
     HksMutex *mutex = GetUkeyGlobalMutex();
-    if (mutex == NULL) {
-        HKS_LOG_E("HksClearUkeyGlobalInfo: mutex is null");
-        return;
-    }
+    HKS_IF_NULL_LOGE_RETURN_VOID(mutex, "mutex is null")
     
     HksMutexLock(mutex);
     g_ukeyGlobalInfo.errVal = 0;

@@ -1654,13 +1654,18 @@ int32_t HksClientEncapsulate(const struct HksBlob *keyAlias, const struct HksPar
     int32_t ret = HksCheckIpcEncapsulate(keyAlias, paramSet, sharedKeyAlias, sharedKeyParamSet, &inSize);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckIpcEncapsulate fail.")
 
-    struct HksBlob inBlob = { inSize, NULL };
+    struct HksBlob inBlob = { 0, NULL };
     struct HksBlob outBlob = { 0, NULL };
-    inBlob.data = HksMalloc(inSize);
-    outBlob.data = HksMalloc(ALIGN_SIZE(HKS_ML_KEM_MAX_CIPHERTEXT_LEN) + ALIGN_SIZE(MAX_KEY_SIZE));
-    outBlob.size = ALIGN_SIZE(HKS_ML_KEM_MAX_CIPHERTEXT_LEN) + ALIGN_SIZE(MAX_KEY_SIZE);
-
     do {
+        inBlob.data = (uint8_t *)HksMalloc(inSize);
+        HKS_IF_NULL_LOGE_BREAK(inBlob.data, "malloc inBlob.data failed")
+        inBlob.size = inSize;
+
+        uint32_t outSize = ALIGN_SIZE(HKS_ML_KEM_MAX_CIPHERTEXT_LEN) + ALIGN_SIZE(MAX_KEY_SIZE);
+        outBlob.data = (uint8_t *)HksMalloc(outSize);
+        HKS_IF_NULL_LOGE_BREAK(outBlob.data, "malloc outBlob.data failed")
+        outBlob.size = outSize;
+
         ret = HksEncapsulatePack(&inBlob, keyAlias, paramSet, sharedKeyAlias, sharedKeyParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksEncapsulatePack fail.")
 
@@ -1692,13 +1697,16 @@ int32_t HksClientDecapsulate(const struct HksBlob *keyAlias, const struct HksPar
         ALIGN_SIZE(sharedKeyParamSet->paramSetSize) +
         sizeof(encapOrsharedSecret->size) + ALIGN_SIZE(encapOrsharedSecret->size);
 
-    inBlob.size = inSize;
-    inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-    HKS_IF_NULL_LOGE_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL, "malloc inblob data fail")
-    outBlob.size = MAX_KEY_SIZE;
-    outBlob.data = HksMalloc(MAX_KEY_SIZE);
-    uint32_t offset = 0;
     do {
+        inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
+        HKS_IF_NULL_LOGE_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL, "malloc inblob data fail")
+        inBlob.size = inSize;
+
+        outBlob.data = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
+        HKS_IF_NULL_LOGE_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL, "malloc outBlob data fail")
+        outBlob.size = MAX_KEY_SIZE;
+
+        uint32_t offset = 0;
         ret = HksDecapsulatePack(&inBlob, keyAlias, paramSet, sharedKeyAlias, &offset);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDecapsulatePack fail.")
 
