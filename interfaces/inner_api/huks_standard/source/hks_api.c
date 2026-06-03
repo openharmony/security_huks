@@ -1169,7 +1169,8 @@ static int32_t ConstructDummySharedKeyParams(struct HksBlob *dummyAlias, struct 
     }
 
     dummyAlias->size = 1;
-    dummyAlias->data = HksMalloc(dummyAlias->size);
+    dummyAlias->data = (uint8_t *)HksMalloc(dummyAlias->size);
+    HKS_IF_NULL_LOGE_RETURN(dummyAlias->data, HKS_ERROR_MALLOC_FAIL, "malloc dummyAlias->data failed")
 
     return HKS_SUCCESS;
 }
