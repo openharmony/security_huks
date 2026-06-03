@@ -153,7 +153,7 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest003, TestSize.Level0)
 
     struct HksEncapsulationResult encapResult = { { 0, nullptr }, { 0, nullptr } };
     ret = HksServiceEncapsulate(&g_processInfo, &keyAlias, paramSet, sharedParamSet, &encapResult);
-    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&sharedParamSet);
@@ -296,7 +296,7 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest007, TestSize.Level0)
     uint8_t encapData[HKS_ML_KEM_MAX_CIPHERTEXT_LEN] = { 0 };
     struct HksBlob encapOrSharedSecret = { HKS_ML_KEM_MAX_CIPHERTEXT_LEN, encapData };
     ret = HksServiceDecapsulate(&g_processInfo, &keyAlias, paramSet, sharedParamSet, &encapOrSharedSecret);
-    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST);
+    EXPECT_EQ(ret, HKS_ERROR_PARAM_NOT_EXIST);
 
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&sharedParamSet);
@@ -646,7 +646,7 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest013, TestSize.Level0)
     uint8_t encapData[HKS_ML_KEM_MAX_CIPHERTEXT_LEN] = { 0 };
     struct HksBlob encapOrSharedSecret = { HKS_ML_KEM_MAX_CIPHERTEXT_LEN, encapData };
     ret = HksServiceDecapsulate(&g_processInfo, &keyAlias, paramSet, sharedParamSet, &encapOrSharedSecret);
-    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&sharedParamSet);

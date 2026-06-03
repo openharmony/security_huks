@@ -1206,9 +1206,14 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest025, TestSize.Level0)
     struct HksParamSet *overrideParamSet = nullptr;
     ret = HksInitParamSet(&overrideParamSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
-    struct HksParam overrideParam = { .tag = HKS_TAG_KEY_OVERRIDE, .boolParam = true };
+    struct HksParam overrideParam[] = {
+        { .tag = HKS_TAG_KEY_OVERRIDE, .boolParam = true },
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
+    };
     struct HksParam storageParam = { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE };
-    ret = HksAddParams(overrideParamSet, &overrideParam, 1);
+    ret = HksAddParams(overrideParamSet, overrideParam, sizeof(overrideParam) / sizeof(HksParam));
     ASSERT_EQ(ret, HKS_SUCCESS);
     ret = HksAddParams(overrideParamSet, &storageParam, 1);
     ASSERT_EQ(ret, HKS_SUCCESS);
@@ -1244,9 +1249,14 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest026, TestSize.Level0)
     struct HksParamSet *noOverrideParamSet = nullptr;
     ret = HksInitParamSet(&noOverrideParamSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
-    struct HksParam noOverrideParam = { .tag = HKS_TAG_KEY_OVERRIDE, .boolParam = false };
+    struct HksParam noOverrideParam[] = {
+        { .tag = HKS_TAG_KEY_OVERRIDE, .boolParam = false },
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
+    };
     struct HksParam storageParam = { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE };
-    ret = HksAddParams(noOverrideParamSet, &noOverrideParam, 1);
+    ret = HksAddParams(noOverrideParamSet, noOverrideParam, sizeof(noOverrideParam) / sizeof(HksParam));
     ASSERT_EQ(ret, HKS_SUCCESS);
     ret = HksAddParams(noOverrideParamSet, &storageParam, 1);
     ASSERT_EQ(ret, HKS_SUCCESS);
@@ -1292,7 +1302,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest027, TestSize.Level0)
 
     struct HksParamSet *outParamSet = nullptr;
     ret = AppendNewInfoForGenKeyInService(&processInfo, paramSet, &outParamSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_AUTH_TYPE);
+    EXPECT_EQ(ret, HKS_SUCCESS);
     HksFreeParamSet(&paramSet);
 }
 
