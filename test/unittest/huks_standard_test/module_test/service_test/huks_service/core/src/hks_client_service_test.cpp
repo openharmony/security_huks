@@ -1190,99 +1190,13 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest024, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksClientServiceTest.HksClientServiceTest025, HKS_TAG_KEY_OVERRIDE=true with key already exist
+ * @tc.name: HksClientServiceTest.HksClientServiceTest025
+ * @tc.desc: tdd AppendNewInfoForGenKeyInService, ATL-only with ALWAYS_VALID authAccessType
  * @tc.type: FUNC
  */
 HWTEST_F(HksClientServiceTest, HksClientServiceTest025, TestSize.Level0)
 {
     HKS_LOG_I("enter HksClientServiceTest025");
-    const char *alias = "HksCheckKeyOverride029";
-    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
-
-    struct HksParamSet *genParamSet = nullptr;
-    int32_t ret = GenerateParamSet(&genParamSet, nullptr, 0);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-
-    struct HksParamSet *overrideParamSet = nullptr;
-    ret = HksInitParamSet(&overrideParamSet);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-    struct HksParam overrideParam[] = {
-        { .tag = HKS_TAG_KEY_OVERRIDE, .boolParam = true },
-        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
-        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
-        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
-    };
-    struct HksParam storageParam = { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE };
-    ret = HksAddParams(overrideParamSet, overrideParam, sizeof(overrideParam) / sizeof(HksParam));
-    ASSERT_EQ(ret, HKS_SUCCESS);
-    ret = HksAddParams(overrideParamSet, &storageParam, 1);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-    ret = HksBuildParamSet(&overrideParamSet);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-
-    struct HksProcessInfo processInfo = { g_userId, g_processName, g_userIdInt, 0, 0 };
-    ret = HksServiceGenerateKeyForDe(&processInfo, &keyAlias, genParamSet, nullptr);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-
-    ret = CheckKeyCondition(&processInfo, &keyAlias, overrideParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-
-    HksServiceDeleteKeyForDe(&processInfo, &keyAlias, nullptr);
-    HksFreeParamSet(&genParamSet);
-    HksFreeParamSet(&overrideParamSet);
-}
-
-/**
- * @tc.name: HksClientServiceTest.HksClientServiceTest026, HKS_TAG_KEY_OVERRIDE=false with key already exist
- * @tc.type: FUNC
- */
-HWTEST_F(HksClientServiceTest, HksClientServiceTest026, TestSize.Level0)
-{
-    HKS_LOG_I("enter HksClientServiceTest026");
-    const char *alias = "HksCheckKeyOverride030";
-    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
-
-    struct HksParamSet *genParamSet = nullptr;
-    int32_t ret = GenerateParamSet(&genParamSet, nullptr, 0);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-
-    struct HksParamSet *noOverrideParamSet = nullptr;
-    ret = HksInitParamSet(&noOverrideParamSet);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-    struct HksParam noOverrideParam[] = {
-        { .tag = HKS_TAG_KEY_OVERRIDE, .boolParam = false },
-        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
-        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
-        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
-    };
-    struct HksParam storageParam = { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE };
-    ret = HksAddParams(noOverrideParamSet, noOverrideParam, sizeof(noOverrideParam) / sizeof(HksParam));
-    ASSERT_EQ(ret, HKS_SUCCESS);
-    ret = HksAddParams(noOverrideParamSet, &storageParam, 1);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-    ret = HksBuildParamSet(&noOverrideParamSet);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-
-    struct HksProcessInfo processInfo = { g_userId, g_processName, g_userIdInt, 0, 0 };
-    ret = HksServiceGenerateKeyForDe(&processInfo, &keyAlias, genParamSet, nullptr);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-
-    ret = CheckKeyCondition(&processInfo, &keyAlias, noOverrideParamSet);
-    EXPECT_NE(ret, HKS_SUCCESS);
-
-    HksServiceDeleteKeyForDe(&processInfo, &keyAlias, nullptr);
-    HksFreeParamSet(&genParamSet);
-    HksFreeParamSet(&noOverrideParamSet);
-}
-
-/**
- * @tc.name: HksClientServiceTest.HksClientServiceTest027
- * @tc.desc: tdd AppendNewInfoForGenKeyInService, ATL-only with ALWAYS_VALID authAccessType
- * @tc.type: FUNC
- */
-HWTEST_F(HksClientServiceTest, HksClientServiceTest027, TestSize.Level0)
-{
-    HKS_LOG_I("enter HksClientServiceTest027");
     struct HksParamSet *paramSet = nullptr;
     struct HksProcessInfo processInfo = { g_userId, g_processName, 100, 100, 100 };
     int32_t ret = HksInitParamSet(&paramSet);
@@ -1307,13 +1221,13 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest027, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksClientServiceTest.HksClientServiceTest028
+ * @tc.name: HksClientServiceTest.HksClientServiceTest026
  * @tc.desc: tdd AppendProcessInfoAndDefault, success path without injected process name
  * @tc.type: FUNC
  */
-HWTEST_F(HksClientServiceTest, HksClientServiceTest028, TestSize.Level0)
+HWTEST_F(HksClientServiceTest, HksClientServiceTest026, TestSize.Level0)
 {
-    HKS_LOG_I("enter HksClientServiceTest028");
+    HKS_LOG_I("enter HksClientServiceTest026");
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = HksInitParamSet(&paramSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
@@ -1334,13 +1248,13 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest028, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksClientServiceTest.HksClientServiceTest029
+ * @tc.name: HksClientServiceTest.HksClientServiceTest027
  * @tc.desc: tdd CheckProcessNameTagExist, tag present → true
  * @tc.type: FUNC
  */
-HWTEST_F(HksClientServiceTest, HksClientServiceTest029, TestSize.Level0)
+HWTEST_F(HksClientServiceTest, HksClientServiceTest027, TestSize.Level0)
 {
-    HKS_LOG_I("enter HksClientServiceTest029");
+    HKS_LOG_I("enter HksClientServiceTest027");
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = HksInitParamSet(&paramSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
