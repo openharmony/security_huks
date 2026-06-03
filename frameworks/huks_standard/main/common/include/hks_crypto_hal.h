@@ -208,13 +208,13 @@ int32_t HksCryptoHalAddEntropy(const struct HksBlob *entropy);
 
 int32_t HksCryptoHalAgreeKey(const struct HksBlob *nativeKey, const struct HksBlob *pubKey,
     const struct HksKeySpec *spec, struct HksBlob *sharedKey);
-
+#ifdef HKS_SUPPORT_ML_KEM
 int32_t HksCryptoHalMlKemEncapsulate(const struct HksBlob *rawKey, const struct HksKeySpec *spec,
     struct HksEncapsulationResult *encapResult);
 
 int32_t HksCryptoHalMlKemDecapsulate(const struct HksBlob *rawKey, const struct HksKeySpec *spec,
     const struct HksBlob *ciphertext, struct HksBlob *sharedSecret);
-
+#endif
 int32_t HksCryptoHalSign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *signature);
 
