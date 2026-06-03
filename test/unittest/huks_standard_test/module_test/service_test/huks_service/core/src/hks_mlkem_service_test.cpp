@@ -87,7 +87,8 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest001, TestSize.Level0)
     struct HksEncapsulationResult encapResult = { { 0, nullptr }, { 0, nullptr } };
     ret = HksServiceEncapsulate(&g_processInfo, nullptr, paramSet, sharedParamSet, &encapResult);
     EXPECT_NE(ret, HKS_SUCCESS);
-
+      
+    HKS_FREE_ENCAPSULATION_RESULT(&encapResult);
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&sharedParamSet);
 }
@@ -113,6 +114,7 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest002, TestSize.Level0)
     ret = HksServiceEncapsulate(&g_processInfo, &keyAlias, nullptr, sharedParamSet, &encapResult);
     EXPECT_NE(ret, HKS_SUCCESS);
 
+    HKS_FREE_ENCAPSULATION_RESULT(&encapResult);
     HksFreeParamSet(&sharedParamSet);
 }
 
@@ -155,6 +157,7 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest003, TestSize.Level0)
     ret = HksServiceEncapsulate(&g_processInfo, &keyAlias, paramSet, sharedParamSet, &encapResult);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 
+    HKS_FREE_ENCAPSULATION_RESULT(&encapResult);
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&sharedParamSet);
 }
@@ -198,6 +201,7 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest004, TestSize.Level0)
     ret = HksServiceEncapsulate(&g_processInfo, &keyAlias, paramSet, sharedParamSet, &encapResult);
     EXPECT_NE(ret, HKS_SUCCESS);
 
+    HKS_FREE_ENCAPSULATION_RESULT(&encapResult);
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&sharedParamSet);
 }
@@ -234,6 +238,7 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest005, TestSize.Level0)
     ret = HksServiceDecapsulate(&g_processInfo, nullptr, paramSet, sharedParamSet, &encapOrSharedSecret);
     EXPECT_NE(ret, HKS_SUCCESS);
 
+    HKS_MEMSET_FREE_BLOB(encapOrSharedSecret);
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&sharedParamSet);
 }
@@ -260,6 +265,7 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest006, TestSize.Level0)
     ret = HksServiceDecapsulate(&g_processInfo, &keyAlias, nullptr, sharedParamSet, &encapOrSharedSecret);
     EXPECT_NE(ret, HKS_SUCCESS);
 
+    HKS_MEMSET_FREE_BLOB(encapOrSharedSecret);
     HksFreeParamSet(&sharedParamSet);
 }
 
@@ -298,6 +304,7 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest007, TestSize.Level0)
     ret = HksServiceDecapsulate(&g_processInfo, &keyAlias, paramSet, sharedParamSet, &encapOrSharedSecret);
     EXPECT_EQ(ret, HKS_ERROR_PARAM_NOT_EXIST);
 
+    HKS_MEMSET_FREE_BLOB(encapOrSharedSecret);
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&sharedParamSet);
 }
@@ -342,6 +349,7 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest008, TestSize.Level0)
     ret = HksServiceDecapsulate(&g_processInfo, &keyAlias, paramSet, sharedParamSet, &encapOrSharedSecret);
     EXPECT_NE(ret, HKS_SUCCESS);
 
+    HKS_MEMSET_FREE_BLOB(encapOrSharedSecret);
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&sharedParamSet);
 }
@@ -401,14 +409,9 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest009, TestSize.Level0)
 
     struct HksEncapsulationResult encapResult = { { 0, nullptr }, { 0, nullptr } };
     ret = HksServiceEncapsulate(&g_processInfo, &keyAlias, paramSet, sharedParamSet, &encapResult);
-    if (ret == HKS_SUCCESS) {
-        EXPECT_NE(encapResult.encapsulatedData.data, nullptr);
-        EXPECT_NE(encapResult.sharedSecret.data, nullptr);
-        HKS_FREE(encapResult.encapsulatedData.data);
-        HKS_FREE(encapResult.sharedSecret.data);
-    }
 
     HksServiceDeleteKey(&g_processInfo, &keyAlias, nullptr);
+    HKS_FREE_ENCAPSULATION_RESULT(&encapResult);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&sharedParamSet);
@@ -472,8 +475,7 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest010, TestSize.Level0)
     struct HksEncapsulationResult encapResult = { { 0, nullptr }, { 0, nullptr } };
     ret = HksServiceEncapsulate(&g_processInfo, &keyAlias, paramSet, sharedParamSet, &encapResult);
     if (ret == HKS_SUCCESS) {
-        EXPECT_NE(encapResult.encapsulatedData.data, nullptr);
-        HKS_FREE(encapResult.encapsulatedData.data);
+        HKS_FREE_ENCAPSULATION_RESULT(&encapResult);
         struct HksBlob sharedKeyAliasBlob = { strlen(sharedAliasStr), (uint8_t *)sharedAliasStr };
         ret = HksServiceKeyExist(&g_processInfo, &sharedKeyAliasBlob, nullptr);
         EXPECT_EQ(ret, HKS_SUCCESS);
@@ -481,6 +483,7 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest010, TestSize.Level0)
     }
 
     HksServiceDeleteKey(&g_processInfo, &keyAlias, nullptr);
+    HKS_FREE_ENCAPSULATION_RESULT(&encapResult);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&sharedParamSet);
@@ -544,6 +547,7 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest011, TestSize.Level0)
     EXPECT_EQ(ret, HKS_ERROR_INVALID_PURPOSE);
 
     HksServiceDeleteKey(&g_processInfo, &keyAlias, nullptr);
+    HKS_FREE_ENCAPSULATION_RESULT(&encapResult);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&sharedParamSet);
@@ -603,6 +607,7 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest012, TestSize.Level0)
     EXPECT_EQ(ret, HKS_ERROR_INVALID_PURPOSE);
 
     HksServiceDeleteKey(&g_processInfo, &keyAlias, nullptr);
+    HKS_MEMSET_FREE_BLOB(encapOrSharedSecret);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&sharedParamSet);
@@ -650,6 +655,7 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest013, TestSize.Level0)
 
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&sharedParamSet);
+    HKS_MEMSET_FREE_BLOB(encapOrSharedSecret);
 }
 
 /**
@@ -681,6 +687,7 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest014, TestSize.Level0)
     EXPECT_NE(ret, HKS_SUCCESS);
 
     HksFreeParamSet(&paramSet);
+    HKS_FREE_ENCAPSULATION_RESULT(&encapResult);
 }
 
 /**
@@ -713,6 +720,7 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest015, TestSize.Level0)
     EXPECT_NE(ret, HKS_SUCCESS);
 
     HksFreeParamSet(&paramSet);
+    HKS_MEMSET_FREE_BLOB(encapOrSharedSecret);
 }
 
 /**
@@ -808,14 +816,11 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest017, TestSize.Level0)
     struct HksEncapsulationResult encapResult = { { 0, nullptr }, { 0, nullptr } };
     ret = HksServiceEncapsulate(&g_processInfo, &keyAlias, paramSet, sharedParamSet, &encapResult);
     if (ret == HKS_SUCCESS) {
-        EXPECT_NE(encapResult.encapsulatedData.data, nullptr);
-        EXPECT_NE(encapResult.sharedSecret.data, nullptr);
-        EXPECT_EQ(encapResult.encapsulatedData.size, HKS_ML_KEM_1024_CIPHERTEXT_LEN);
-        HKS_FREE(encapResult.encapsulatedData.data);
-        HKS_FREE(encapResult.sharedSecret.data);
+        HKS_FREE_ENCAPSULATION_RESULT(&encapResult);
     }
 
     HksServiceDeleteKey(&g_processInfo, &keyAlias, nullptr);
+    HKS_FREE_ENCAPSULATION_RESULT(&encapResult);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&sharedParamSet);
@@ -875,6 +880,7 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest018, TestSize.Level0)
     EXPECT_EQ(ret, HKS_ERROR_INVALID_PURPOSE);
 
     HksServiceDeleteKey(&g_processInfo, &keyAlias, nullptr);
+    HKS_MEMSET_FREE_BLOB(encapOrSharedSecret);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&sharedParamSet);
