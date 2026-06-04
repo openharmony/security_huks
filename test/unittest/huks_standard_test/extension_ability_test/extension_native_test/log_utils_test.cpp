@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <string>
 #include "log_utils.h"
+#include "hks_mem.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -34,17 +35,29 @@ HWTEST_F(LogUtilsTest, LogPrint_0000, testing::ext::TestSize.Level0)
     LogPrint(LOG_LEVEL_INFO, "TestFunc", "test info message %s", "hello");
     LogPrint(LOG_LEVEL_WARN, "TestFunc", "test warn message");
     LogPrint(LOG_LEVEL_ERROR, "TestFunc", "test error message %d %s", 42, "world");
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(LogUtilsTest, LogPrint_0001, testing::ext::TestSize.Level0)
 {
     CryptogLevel invalidLevel = static_cast<CryptogLevel>(99);
     LogPrint(invalidLevel, "TestFunc", "invalid level message");
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(LogUtilsTest, LogPrint_0002, testing::ext::TestSize.Level0)
 {
     LogPrint(LOG_LEVEL_DEBUG, "TestFunc", "%s", std::string(900, 'A').c_str());
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(LogUtilsTest, LOGD_Test, testing::ext::TestSize.Level0)
@@ -53,4 +66,8 @@ HWTEST_F(LogUtilsTest, LOGD_Test, testing::ext::TestSize.Level0)
     LOGI("info macro test");
     LOGW("warn macro test %s", "param");
     LOGE("error macro test %d %d", 1, 2);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }

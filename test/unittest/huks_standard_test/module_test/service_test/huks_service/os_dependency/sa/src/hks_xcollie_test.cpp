@@ -17,6 +17,7 @@
 
 #include "hks_xcollie.h"
 #include "hks_log.h"
+#include "hks_mem.h"
 
 using namespace testing::ext;
 
@@ -56,6 +57,10 @@ HWTEST_F(HksXCollieTest, HksXCollieTest001, TestSize.Level0)
     uint32_t timeoutSeconds = 5;
     
     HksXCollie hksXCollie(tag, timeoutSeconds, nullptr, nullptr, 0);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksXCollieTest, HksXCollieTest002, TestSize.Level0)
@@ -67,6 +72,10 @@ HWTEST_F(HksXCollieTest, HksXCollieTest002, TestSize.Level0)
     HksXCollie hksXCollie(tag, timeoutSeconds, nullptr, nullptr, 0);
     hksXCollie.CancelHksXCollie();
     hksXCollie.CancelHksXCollie();
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksXCollieTest, HksXCollieTest003, TestSize.Level0)
@@ -80,6 +89,10 @@ HWTEST_F(HksXCollieTest, HksXCollieTest003, TestSize.Level0)
     };
     
     HksXCollie hksXCollie(tag, timeoutSeconds, callback, nullptr, 0);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksXCollieTest, HksXCollieTest004, TestSize.Level0)
@@ -93,6 +106,10 @@ HWTEST_F(HksXCollieTest, HksXCollieTest004, TestSize.Level0)
         HKS_LOG_I("HksXCollie created, will be destroyed on scope exit");
     }
     HKS_LOG_I("HksXCollie destroyed");
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksXCollieTest, HksXCollieTest005, TestSize.Level0)
@@ -102,6 +119,10 @@ HWTEST_F(HksXCollieTest, HksXCollieTest005, TestSize.Level0)
     uint32_t timeoutSeconds = 5;
     
     HksXCollie hksXCollie(tag, timeoutSeconds, nullptr, nullptr, 0);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksXCollieTest, HksXCollieTest006, TestSize.Level0)
@@ -111,6 +132,10 @@ HWTEST_F(HksXCollieTest, HksXCollieTest006, TestSize.Level0)
     uint32_t timeoutSeconds = 0;
     
     HksXCollie hksXCollie(tag, timeoutSeconds, nullptr, nullptr, 0);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksXCollieTest, HksXCollieTest007, TestSize.Level0)
@@ -120,6 +145,10 @@ HWTEST_F(HksXCollieTest, HksXCollieTest007, TestSize.Level0)
     uint32_t timeoutSeconds = 120;
     
     HksXCollie hksXCollie(tag, timeoutSeconds, nullptr, nullptr, 0);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksXCollieTest, HksXCollieTest008, TestSize.Level0)
@@ -137,6 +166,10 @@ HWTEST_F(HksXCollieTest, HksXCollieTest008, TestSize.Level0)
     };
     
     HksXCollie hksXCollie(tag, timeoutSeconds, callback, &testData, 0);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksXCollieTest, HksXCollieTest009, TestSize.Level0)
@@ -147,6 +180,10 @@ HWTEST_F(HksXCollieTest, HksXCollieTest009, TestSize.Level0)
     uint32_t flag = HiviewDFX::XCOLLIE_FLAG_LOG;
     
     HksXCollie hksXCollie(tag, timeoutSeconds, nullptr, nullptr, flag);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksXCollieTest, HksXCollieTest010, TestSize.Level0)
@@ -160,6 +197,10 @@ HWTEST_F(HksXCollieTest, HksXCollieTest010, TestSize.Level0)
     HksXCollie hksXCollie2(tag2, timeoutSeconds, nullptr, nullptr, 0);
     
     hksXCollie1.CancelHksXCollie();
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksXCollieTest, HksXCollieTest011, TestSize.Level0)
@@ -168,6 +209,10 @@ HWTEST_F(HksXCollieTest, HksXCollieTest011, TestSize.Level0)
     std::string tag = "test_tag_011";
     
     HksXCollie hksXCollie(tag);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksXCollieTest, HksXCollieTest012, TestSize.Level0)
@@ -179,6 +224,10 @@ HWTEST_F(HksXCollieTest, HksXCollieTest012, TestSize.Level0)
     HksXCollie *hksXCollie = new HksXCollie(tag, timeoutSeconds, nullptr, nullptr, 0);
     hksXCollie->CancelHksXCollie();
     delete hksXCollie;
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksXCollieTest, HksXCollieTest013, TestSize.Level0)
@@ -188,6 +237,10 @@ HWTEST_F(HksXCollieTest, HksXCollieTest013, TestSize.Level0)
     uint32_t timeoutSeconds = 5;
     
     HksXCollie hksXCollie(tag, timeoutSeconds, nullptr, nullptr, 0);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksXCollieTest, HksXCollieTest014, TestSize.Level0)
@@ -197,6 +250,10 @@ HWTEST_F(HksXCollieTest, HksXCollieTest014, TestSize.Level0)
     uint32_t timeoutSeconds = 5;
     
     HksXCollie hksXCollie(tag, timeoutSeconds, nullptr, nullptr, 0);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksXCollieTest, HksXCollieTest015, TestSize.Level0)
@@ -206,6 +263,10 @@ HWTEST_F(HksXCollieTest, HksXCollieTest015, TestSize.Level0)
         std::string tag = "test_tag_015_" + std::to_string(i);
         HksXCollie hksXCollie(tag, 1, nullptr, nullptr, 0);
     }
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 }

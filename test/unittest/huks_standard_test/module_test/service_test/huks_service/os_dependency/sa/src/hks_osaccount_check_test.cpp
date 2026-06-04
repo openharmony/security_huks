@@ -18,6 +18,7 @@
 #include "hks_osaccount_check.h"
 #include "hks_log.h"
 #include "hks_type.h"
+#include "hks_mem.h"
 
 using namespace testing::ext;
 
@@ -57,6 +58,10 @@ HWTEST_F(HksOsAccountCheckTest, HksOsAccountCheckTest001, TestSize.Level0)
     int32_t storeUserId = 100;
     
     HksTransferFileIfNeed(storageLevel, storeUserId);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksOsAccountCheckTest, HksOsAccountCheckTest002, TestSize.Level0)
@@ -66,6 +71,10 @@ HWTEST_F(HksOsAccountCheckTest, HksOsAccountCheckTest002, TestSize.Level0)
     int32_t storeUserId = 100;
     
     HksTransferFileIfNeed(storageLevel, storeUserId);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksOsAccountCheckTest, HksOsAccountCheckTest003, TestSize.Level0)
@@ -75,6 +84,10 @@ HWTEST_F(HksOsAccountCheckTest, HksOsAccountCheckTest003, TestSize.Level0)
     int32_t storeUserId = 100;
     
     HksTransferFileIfNeed(storageLevel, storeUserId);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksOsAccountCheckTest, HksOsAccountCheckTest004, TestSize.Level0)
@@ -84,6 +97,10 @@ HWTEST_F(HksOsAccountCheckTest, HksOsAccountCheckTest004, TestSize.Level0)
     int32_t storeUserId = 0;
     
     HksTransferFileIfNeed(storageLevel, storeUserId);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksOsAccountCheckTest, HksOsAccountCheckTest005, TestSize.Level0)
@@ -93,6 +110,10 @@ HWTEST_F(HksOsAccountCheckTest, HksOsAccountCheckTest005, TestSize.Level0)
     int32_t storeUserId = -1;
     
     HksTransferFileIfNeed(storageLevel, storeUserId);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksOsAccountCheckTest, HksOsAccountCheckTest006, TestSize.Level0)
@@ -104,6 +125,10 @@ HWTEST_F(HksOsAccountCheckTest, HksOsAccountCheckTest006, TestSize.Level0)
     HksTransferFileIfNeed(storageLevel, storeUserId);
     HksTransferFileIfNeed(storageLevel, storeUserId);
     HksTransferFileIfNeed(storageLevel, storeUserId);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksOsAccountCheckTest, HksOsAccountCheckTest007, TestSize.Level0)
@@ -114,6 +139,10 @@ HWTEST_F(HksOsAccountCheckTest, HksOsAccountCheckTest007, TestSize.Level0)
     HksTransferFileIfNeed(HKS_AUTH_STORAGE_LEVEL_CE, storeUserId);
     HksTransferFileIfNeed(HKS_AUTH_STORAGE_LEVEL_DE, storeUserId);
     HksTransferFileIfNeed(HKS_AUTH_STORAGE_LEVEL_ECE, storeUserId);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksOsAccountCheckTest, HksOsAccountCheckTest008, TestSize.Level0)
@@ -123,6 +152,10 @@ HWTEST_F(HksOsAccountCheckTest, HksOsAccountCheckTest008, TestSize.Level0)
     int32_t storeUserId = 1000000;
     
     HksTransferFileIfNeed(storageLevel, storeUserId);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksOsAccountCheckTest, HksOsAccountCheckTest009, TestSize.Level0)
@@ -132,6 +165,10 @@ HWTEST_F(HksOsAccountCheckTest, HksOsAccountCheckTest009, TestSize.Level0)
     int32_t storeUserId = 100;
     
     HksTransferFileIfNeed(storageLevel, storeUserId);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksOsAccountCheckTest, HksOsAccountCheckTest010, TestSize.Level0)
@@ -141,6 +178,10 @@ HWTEST_F(HksOsAccountCheckTest, HksOsAccountCheckTest010, TestSize.Level0)
     int32_t storeUserId = 100;
     
     HksTransferFileIfNeed(storageLevel, storeUserId);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksOsAccountCheckTest, HksOsAccountCheckTest011, TestSize.Level0)
@@ -151,6 +192,10 @@ HWTEST_F(HksOsAccountCheckTest, HksOsAccountCheckTest011, TestSize.Level0)
     for (int32_t userId = 0; userId < 5; userId++) {
         HksTransferFileIfNeed(storageLevel, userId);
     }
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 #endif // HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL

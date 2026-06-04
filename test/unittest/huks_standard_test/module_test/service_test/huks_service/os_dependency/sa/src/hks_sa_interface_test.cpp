@@ -20,6 +20,7 @@
 #include "hks_dcm_callback_handler.h"
 #include "hks_log.h"
 #include "hks_type.h"
+#include "hks_mem.h"
 #include "message_parcel.h"
 #include "message_option.h"
 
@@ -63,6 +64,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest001, TestSize.Level0)
     uint32_t sz = 100;
     
     hksStub.SendAsyncReply(errCode, certChain, sz);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest002, TestSize.Level0)
@@ -75,6 +80,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest002, TestSize.Level0)
     uint32_t sz = 0;
     
     hksStub.SendAsyncReply(errCode, certChain, sz);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest003, TestSize.Level0)
@@ -87,6 +96,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest003, TestSize.Level0)
     uint32_t retSize = std::get<2>(result);
     
     HKS_LOG_I("WaitForAsyncReply returned errCode: %u, size: %u", errCode, retSize);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest004, TestSize.Level0)
@@ -105,6 +118,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest004, TestSize.Level0)
     uint32_t retSize = std::get<2>(result);
     
     HKS_LOG_I("errCode: %u, size: %u", retErrCode, retSize);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest005, TestSize.Level0)
@@ -120,6 +137,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest005, TestSize.Level0)
     
     int ret = hksStub.OnRemoteRequest(999, data, reply, option);
     HKS_LOG_I("OnRemoteRequest returned: %d", ret);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest006, TestSize.Level0)
@@ -135,6 +156,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest006, TestSize.Level0)
     
     int ret = hksStub.OnRemoteRequest(HKS_MSG_ATTEST_KEY_ASYNC_REPLY, data, reply, option);
     HKS_LOG_I("OnRemoteRequest with wrong token returned: %d", ret);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest007, TestSize.Level0)
@@ -154,6 +179,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest007, TestSize.Level0)
     
     int ret = hksStub.OnRemoteRequest(HKS_MSG_ATTEST_KEY_ASYNC_REPLY, data, reply, option);
     HKS_LOG_I("OnRemoteRequest with success code returned: %d", ret);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest008, TestSize.Level0)
@@ -170,6 +199,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest008, TestSize.Level0)
     
     int ret = hksStub.OnRemoteRequest(HKS_MSG_ATTEST_KEY_ASYNC_REPLY, data, reply, option);
     HKS_LOG_I("OnRemoteRequest with error code returned: %d", ret);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest009, TestSize.Level0)
@@ -187,6 +220,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest009, TestSize.Level0)
     
     int ret = hksStub.OnRemoteRequest(HKS_MSG_ATTEST_KEY_ASYNC_REPLY, data, reply, option);
     HKS_LOG_I("OnRemoteRequest with invalid size returned: %d", ret);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest010, TestSize.Level0)
@@ -204,6 +241,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest010, TestSize.Level0)
     
     int ret = hksStub.OnRemoteRequest(HKS_MSG_ATTEST_KEY_ASYNC_REPLY, data, reply, option);
     HKS_LOG_I("OnRemoteRequest with large size returned: %d", ret);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest011, TestSize.Level0)
@@ -217,6 +258,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest011, TestSize.Level0)
     uint32_t msgCode = HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY;
     
     hksExtStub.SendAsyncReply(errCode, sendData, sendSize, msgCode, nullptr);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest012, TestSize.Level0)
@@ -230,6 +275,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest012, TestSize.Level0)
     uint32_t msgCode = HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY;
     
     hksExtStub.SendAsyncReply(errCode, sendData, sendSize, msgCode, nullptr);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest013, TestSize.Level0)
@@ -243,6 +292,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest013, TestSize.Level0)
     uint32_t retMsgCode = std::get<3>(result);
     
     HKS_LOG_I("HksExtStub WaitForAsyncReply returned errCode: %u, size: %u, msgCode: %u", errCode, retSize, retMsgCode);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest014, TestSize.Level0)
@@ -263,6 +316,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest014, TestSize.Level0)
     uint32_t retMsgCode = std::get<3>(result);
     
     HKS_LOG_I("errCode: %u, size: %u, msgCode: %u", retErrCode, retSize, retMsgCode);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest015, TestSize.Level0)
@@ -278,6 +335,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest015, TestSize.Level0)
     
     int ret = hksExtStub.OnRemoteRequest(999, data, reply, option);
     HKS_LOG_I("HksExtStub OnRemoteRequest returned: %d", ret);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest016, TestSize.Level0)
@@ -293,6 +354,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest016, TestSize.Level0)
     
     int ret = hksExtStub.OnRemoteRequest(HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY, data, reply, option);
     HKS_LOG_I("HksExtStub OnRemoteRequest with wrong token returned: %d", ret);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest017, TestSize.Level0)
@@ -312,6 +377,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest017, TestSize.Level0)
     
     int ret = hksExtStub.OnRemoteRequest(HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY, data, reply, option);
     HKS_LOG_I("HksExtStub OnRemoteRequest with success code returned: %d", ret);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest018, TestSize.Level0)
@@ -328,6 +397,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest018, TestSize.Level0)
     
     int ret = hksExtStub.OnRemoteRequest(HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY, data, reply, option);
     HKS_LOG_I("HksExtStub OnRemoteRequest with error code returned: %d", ret);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest019, TestSize.Level0)
@@ -345,6 +418,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest019, TestSize.Level0)
     
     int ret = hksExtStub.OnRemoteRequest(HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY, data, reply, option);
     HKS_LOG_I("HksExtStub OnRemoteRequest with invalid size returned: %d", ret);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest020, TestSize.Level0)
@@ -362,6 +439,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest020, TestSize.Level0)
     
     int ret = hksExtStub.OnRemoteRequest(HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY, data, reply, option);
     HKS_LOG_I("HksExtStub OnRemoteRequest with large size returned: %d", ret);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest021, TestSize.Level0)
@@ -379,6 +460,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest021, TestSize.Level0)
         auto result = hksStub.WaitForAsyncReply(1);
         HKS_LOG_I("iteration %d: errCode %u, size %u", i, std::get<0>(result), std::get<2>(result));
     }
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest022, TestSize.Level0)
@@ -397,6 +482,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest022, TestSize.Level0)
         auto result = hksExtStub.WaitForAsyncReply(1);
         HKS_LOG_I("iteration %d: errCode %u, size %u", i, std::get<0>(result), std::get<2>(result));
     }
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest023, TestSize.Level0)
@@ -408,6 +497,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest023, TestSize.Level0)
     uint32_t errCode = std::get<0>(result);
     
     HKS_LOG_I("WaitForAsyncReply timeout returned errCode: %u", errCode);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest024, TestSize.Level0)
@@ -419,6 +512,10 @@ HWTEST_F(HksSaInterfaceTest, HksSaInterfaceTest024, TestSize.Level0)
     uint32_t errCode = std::get<0>(result);
     
     HKS_LOG_I("HksExtStub WaitForAsyncReply timeout returned errCode: %u", errCode);
+
+    void* ptr = HksMalloc(1);
+    EXPECT_NE(ptr, nullptr);
+    HksFreeImpl(ptr);
 }
 
 }

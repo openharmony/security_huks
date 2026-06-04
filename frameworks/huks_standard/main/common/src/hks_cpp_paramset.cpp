@@ -21,22 +21,27 @@
 #include "hks_type.h"
 #include "securec.h"
 
+struct DeleteParamSet {
+    void operator()(struct HksParamSet **paramSet)
+    {
+        HksFreeParamSet(paramSet);
+    }
+};
+
 CppParamSet::CppParamSet(const HksParamSet *paramSetIn)
 {
     HKS_IF_TRUE_RETURN_VOID(paramSetIn == nullptr);
     int32_t ret = HksInitParamSet(&this->ptr_);
     HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS, "CppParamSet constructor, HksInitParamSet failed, ret = %d", ret);
-    do {
-        ret = HksAddParams(this->ptr_, paramSetIn->params, paramSetIn->paramsCnt);
-        HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS, "CppParamSet constructor, HksAddParams failed, ret = %d", ret);
 
-        ret = HksBuildParamSet(&this->ptr_);
-        HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS, "CppParamSet constructor, HksBuildParamSet failed, ret = %d", ret);
-    } while (0);
-    if (ret != HKS_SUCCESS) {
-        HksFreeParamSet(&this->ptr_);
-        return;
-    }
+    std::unique_ptr<struct HksParamSet *, DeleteParamSet> uniqueParamSet(&this->ptr_);
+    ret = HksAddParams(this->ptr_, paramSetIn->params, paramSetIn->paramsCnt);
+    HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS, "CppParamSet constructor, HksAddParams failed, ret = %d", ret);
+
+    ret = HksBuildParamSet(&this->ptr_);
+    HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS, "CppParamSet constructor, HksBuildParamSet failed, ret = %d", ret);
+
+    uniqueParamSet.release();
     HKS_LOG_D("CppParamSet constructor success. deep copy paramset.");
 }
 
@@ -45,17 +50,15 @@ CppParamSet::CppParamSet(const std::vector<HksParam> &params)
     HKS_IF_TRUE_RETURN_VOID(params.empty());
     int32_t ret = HksInitParamSet(&this->ptr_);
     HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS, "CppParamSet constructor, HksInitParamSet failed, ret = %d", ret);
-    do {
-        ret = HksAddParams(this->ptr_, params.data(), params.size());
-        HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS, "CppParamSet constructor, HksAddParams failed, ret = %d", ret);
 
-        ret = HksBuildParamSet(&this->ptr_);
-        HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS, "CppParamSet constructor, HksBuildParamSet failed, ret = %d", ret);
-    } while (0);
-    if (ret != HKS_SUCCESS) {
-        HksFreeParamSet(&this->ptr_);
-        return;
-    }
+    std::unique_ptr<struct HksParamSet *, DeleteParamSet> uniqueParamSet(&this->ptr_);
+    ret = HksAddParams(this->ptr_, params.data(), params.size());
+    HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS, "CppParamSet constructor, HksAddParams failed, ret = %d", ret);
+
+    ret = HksBuildParamSet(&this->ptr_);
+    HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS, "CppParamSet constructor, HksBuildParamSet failed, ret = %d", ret);
+
+    uniqueParamSet.release();
     HKS_LOG_D("CppParamSet constructor with params success");
 }
 
@@ -64,15 +67,15 @@ CppParamSet::CppParamSet(HksParamSet *&paramSetIn, bool takeOwnership)
     if (takeOwnership) {
         this->ptr_ = paramSetIn;
         paramSetIn = nullptr;
-    } else {
-        const HksParamSet *constInparamSet = paramSetIn;
-        CppParamSet copyOne(constInparamSet);
-        if (copyOne.ptr_ != nullptr) {
-            this->ptr_ = copyOne.ptr_;
-            copyOne.ptr_ = nullptr;
-        }
-        HKS_LOG_D("CppParamSet constructor copy takeOwnership success");
+        return;
     }
+
+    const HksParamSet *constInparamSet = paramSetIn;
+    CppParamSet copyOne(constInparamSet);
+    HKS_IF_NULL_LOGE_RETURN_VOID(copyOne.ptr_, "copyOne.ptr_ == nullptr")
+    this->ptr_ = copyOne.ptr_;
+    copyOne.ptr_ = nullptr;
+    HKS_LOG_D("CppParamSet constructor copy takeOwnership success");
 }
 
 CppParamSet::CppParamSet(const HksBlob &inBlob)
@@ -88,28 +91,27 @@ CppParamSet::CppParamSet(const HksParamSet *inPs, const std::vector<HksParam> &p
     HKS_IF_TRUE_RETURN_VOID(inPs == nullptr || params.empty());
     int32_t ret = HksInitParamSet(&this->ptr_);
     HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS, "CppParamSet constructor, HksInitParamSet failed, ret = %d", ret);
-    do {
-        ret = HksAddParams(this->ptr_, inPs->params, inPs->paramsCnt);
-        HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS, "CppParamSet constructor, add ptr paramset failed, ret = %d", ret);
-        ret = HksAddParams(this->ptr_, params.data(), params.size());
-        HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS, "CppParamSet constructor, add params failed, ret = %d", ret);
-        ret = HksBuildParamSet(&this->ptr_);
-        HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS, "CppParamSet constructor, HksBuildParamSet failed, ret = %d", ret);
-    } while (0);
-    if (ret != HKS_SUCCESS) {
-        HksFreeParamSet(&this->ptr_);
-        return;
-    }
+    
+    std::unique_ptr<struct HksParamSet *, DeleteParamSet> uniqueParamSet(&this->ptr_);
+    ret = HksAddParams(this->ptr_, inPs->params, inPs->paramsCnt);
+    HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS, "CppParamSet constructor, add ptr paramset failed, ret = %d", ret);
+
+    ret = HksAddParams(this->ptr_, params.data(), params.size());
+    HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS, "CppParamSet constructor, add params failed, ret = %d", ret);
+
+    ret = HksBuildParamSet(&this->ptr_);
+    HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS, "CppParamSet constructor, HksBuildParamSet failed, ret = %d", ret);
+
+    uniqueParamSet.release();
     HKS_LOG_D("CppParamSet constructor with paramset and params success");
 }
 
 CppParamSet::CppParamSet(const CppParamSet &inCppPs, const std::vector<HksParam> &params)
 {
     CppParamSet copyOne(inCppPs.ptr_, params);
-    if (copyOne.ptr_ != nullptr) {
-        this->ptr_ = copyOne.ptr_;
-        copyOne.ptr_ = nullptr;
-    }
+    HKS_IF_NULL_LOGE_RETURN_VOID(copyOne.ptr_, "copyOne.ptr_ == nullptr")
+    this->ptr_ = copyOne.ptr_;
+    copyOne.ptr_ = nullptr;
     HKS_LOG_D("CppParamSet constructor takeOwnership and add params success");
 }
 
@@ -134,11 +136,9 @@ CppParamSet::CppParamSet(const CppParamSet &inCppPs)
 {
     HKS_LOG_D("CppParamSet copy constructor");
     CppParamSet copyOne(inCppPs.ptr_);
-    HKS_IF_TRUE_LOGE(copyOne.ptr_ == nullptr, "CppParamSet copy constructor, but copyOne.ptr_ is nullptr");
-    if (copyOne.ptr_ != nullptr) {
-        this->ptr_ = copyOne.ptr_;
-        copyOne.ptr_ = nullptr;
-    }
+    HKS_IF_TRUE_LOGE_RETURN_VOID(copyOne.ptr_ == nullptr, "CppParamSet copy constructor, but copyOne.ptr_ is nullptr");
+    this->ptr_ = copyOne.ptr_;
+    copyOne.ptr_ = nullptr;
 }
 
 // copy assignment
@@ -180,19 +180,9 @@ CppParamSet &CppParamSet::operator=(CppParamSet &&inCppPs) noexcept
 
 bool CppParamSet::Marshalling(OHOS::Parcel &parcel) const
 {
-    if (ptr_ == nullptr) {
-        HKS_LOG_E("CppParamSet Marshalling nullptr");
-        return false;
-    }
-    if (!parcel.WriteUint32(ptr_->paramSetSize)) {
-        HKS_LOG_E("CppParamSet Marshalling paramSetSize failed");
-        return false;
-    }
-    HKS_LOG_I("CppParamSet WriteBuffer size: %" LOG_PUBLIC "d", ptr_->paramSetSize);
-    if (!parcel.WriteBuffer(ptr_, ptr_->paramSetSize)) {
-        HKS_LOG_E("CppParamSet Marshalling WriteBuffer failed");
-        return false;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(ptr_ == nullptr, false, "ptr_ is nullptr")
+    HKS_IF_TRUE_LOGE_RETURN(!parcel.WriteUint32(ptr_->paramSetSize), false, "paramSetSize failed")
+    HKS_IF_TRUE_LOGE_RETURN(!parcel.WriteBuffer(ptr_, ptr_->paramSetSize), false, "WriteBuffer failed")
     return true;
 }
 
@@ -200,37 +190,30 @@ constexpr uint32_t SIZE_OFFSET = 3;
 CppParamSet *CppParamSet::Unmarshalling(OHOS::Parcel &parcel)
 {
     auto *cppParamSet = new (std::nothrow) CppParamSet();
-    if (cppParamSet == nullptr) {
-        HKS_LOG_E("CppParamSet UnMarshalling cppParamSet == nullptr");
-        return nullptr;
-    }
+    HKS_IF_NULL_LOGE_RETURN(cppParamSet, nullptr, "cppParamSet == nullptr")
+
     uint32_t paramSetSize = parcel.ReadUint32();
-    if (paramSetSize == 0) {
-        HKS_LOG_E("CppParamSet UnMarshalling paramSetSize == 0");
+    HKS_IF_TRUE_LOGE_RETURN(paramSetSize == 0, cppParamSet, "paramSetSize == 0")
+
+    struct HksParamSet *paramSet = static_cast<HksParamSet*>(HksMalloc(paramSetSize));
+    do {
+        HKS_IF_NULL_LOGE_BREAK(paramSet, "paramSet == nullptr")
+
+        auto offset = ((paramSetSize + SIZE_OFFSET) & (~SIZE_OFFSET)) - paramSetSize;
+        HKS_LOG_I("CppParamSet ReadBuffer offset size: %" LOG_PUBLIC "d", offset);
+        const auto *bufferTemp = parcel.ReadBuffer(paramSetSize + offset);
+        HKS_IF_NULL_LOGE_BREAK(bufferTemp, "bufferTemp == nullptr")
+        HKS_IF_NOT_EOK_LOGE_BREAK(memcpy_s(paramSet, paramSetSize, bufferTemp, paramSetSize), "memcpy_s failed")
+
+        int32_t ret = HksFreshParamSet(paramSet, false);
+        HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS, "HksFreshParamSet failed")
+
+        cppParamSet->ptr_ = paramSet;
+        HKS_LOG_I("CppParamSet UnMarshalling success");
         return cppParamSet;
-    }
-    auto *paramSet = static_cast<HksParamSet*>(HksMalloc(paramSetSize));
-    if (paramSet == nullptr) {
-        HKS_LOG_E("CppParamSet UnMarshalling paramSetSize == nullptr");
-        delete cppParamSet;
-        return nullptr;
-    }
-    auto offset = ((paramSetSize + SIZE_OFFSET) & (~SIZE_OFFSET)) - paramSetSize;
-    HKS_LOG_I("CppParamSet ReadBuffer offset size: %" LOG_PUBLIC "d", offset);
-    const auto *bufferTemp = parcel.ReadBuffer(paramSetSize + offset);
-    if (memcpy_s(paramSet, paramSetSize, bufferTemp, paramSetSize) != EOK) {
-        HKS_LOG_E("memcpy_s failed");
-        HKS_FREE(paramSet);
-        delete cppParamSet;
-        return nullptr;
-    }
-    int32_t ret = HksFreshParamSet(paramSet, false);
-    if (ret != HKS_SUCCESS) {
-        HKS_FREE(paramSet);
-        delete cppParamSet;
-        return nullptr;
-    }
-    cppParamSet->ptr_ = paramSet;
-    HKS_LOG_I("CppParamSet UnMarshalling success");
-    return cppParamSet;
+    } while (0);
+
+    HKS_FREE(paramSet);
+    delete cppParamSet;
+    return nullptr;
 }

@@ -39,7 +39,7 @@ int32_t HksCheckIsUkeyOperation(const struct HksParamSet *paramSet, int32_t *out
             return HKS_ERROR_INVALID_ARGUMENT;
         }
         if (abilityName.second == HKS_KEY_CLASS_EXTENSION) {
-            HKS_LOG_I("HksCheckIsUkeyOperation: is ukey operation");
+            HKS_LOG_I("is ukey operation");
             return HKS_SUCCESS;
         }
     }

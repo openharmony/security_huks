@@ -45,7 +45,6 @@ if (os_level == "standard") {
       "src/hks_param.c",
       "src/hks_tags_type_manager.c",
       "src/hks_cpp_paramset.cpp",
-      "src/hks_ukey_check.cpp",
       "src/hks_cpp_abilityinfo.cpp",
       "src/hks_external_error_info.c",
     ]
@@ -53,6 +52,7 @@ if (os_level == "standard") {
     if (huks_enable_ukey_config == true) {
       sources += [
         "src/hks_json_wrapper.cpp",
+        "src/hks_ukey_check.cpp",
       ]
     }
 
