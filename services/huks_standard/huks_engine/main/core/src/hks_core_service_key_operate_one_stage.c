@@ -456,7 +456,7 @@ int32_t HksCoreUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet
     return HKS_ERROR_NOT_SUPPORTED;
 }
 #endif
-
+#ifdef HKS_SUPPORT_ML_KEM
 static int32_t HksMlKemImportCheck(const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
     struct HksBlob *shareKey)
 {
@@ -552,5 +552,29 @@ int32_t HksCoreDecapsulate(const struct HksBlob *key, const struct HksParamSet *
     HKS_MEMSET_FREE_BLOB(rawKey);
     return ret;
 }
+#else
+int32_t HksCoreDecapsulate(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksParamSet *sharedKeyParamSet, const struct HksBlob *encaps,
+    struct HksBlob *sharedSecret)
+{
+    (void)key;
+    (void)paramSet;
+    (void)sharedKeyParamSet;
+    (void)encaps;
+    (void)sharedSecret;
+    return HKS_ERROR_NOT_SUPPORTED;
+}
 
+int32_t HksCoreEncapsulate(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksEncapsulationResult *encapResult)
+{
+    (void)key;
+    (void)sharedKeyAlias;
+    (void)paramSet;
+    (void)sharedKeyParamSet;
+    (void)encapResult;
+    return HKS_ERROR_NOT_SUPPORTED;
+}
+#endif
 #endif /* _CUT_AUTHENTICATE_ */
