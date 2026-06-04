@@ -22,6 +22,7 @@
 #include "hks_client_service.h"
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "securec.h"
 #include "hks_param.h"
 #include "hks_type_inner.h"
 
