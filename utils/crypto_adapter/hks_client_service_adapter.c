@@ -35,13 +35,6 @@
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
 
-#ifdef ISOLATE_OHOS_SDK
-#include <bsl_err.h>
-#include <crypt_eal_codecs.h>
-#include <crypt_eal_pkey.h>
-#include <crypt_errno.h>
-#endif
-
 #include <stddef.h>
 #include <stdint.h>
 
@@ -59,7 +52,8 @@ typedef const BIGNUM* (*GetDsaInfoFunc)(const DSA *d);
 #endif
 
 #if defined(HKS_SUPPORT_RSA_C) || defined(HKS_SUPPORT_ECC_C) || defined(HKS_SUPPORT_DSA_C) || \
-    defined(HKS_SUPPORT_DH_C) || defined(HKS_SUPPORT_SM2_C)
+    defined(HKS_SUPPORT_DH_C) || defined(HKS_SUPPORT_SM2_C) || defined(HKS_SUPPORT_ML_DSA_C) || \
+    defined(HKS_SUPPORT_ML_KEM_C)
 static int32_t EvpKeyToX509Format(EVP_PKEY *pkey, struct HksBlob *x509Key)
 {
     int32_t length = i2d_PUBKEY(pkey, NULL);
@@ -383,43 +377,14 @@ static int32_t Curve25519ToX509PublicKey(const struct HksBlob *publicKey, struct
 #endif
 
 #if defined(HKS_SUPPORT_ML_DSA_C) && defined(HKS_SUPPORT_ML_DSA_GET_PUBLIC_KEY)
-#ifdef ISOLATE_OHOS_SDK
-// openhitls bsl/err/src/err.c Error information stack size #define SAL_MAX_ERROR_STACK 20
-#define OPENHITLS_ERROR_STACK_DEPTH  20
-
-static void ClearHitlsError()
-{
-    const char *file = NULL;
-    uint32_t line = 0;
-    int32_t err = 0;
-    for (uint32_t i = 0; i < OPENHITLS_ERROR_STACK_DEPTH + 1; i++) {
-        err = BSL_ERR_GetLastErrorFileLine(&file, &line);
-        if (err == 0) {
-            return;
-        }
-    }
-    HKS_LOG_E("clear openhitls error fail");
-}
-
-#define LOG_HITLS_ERROR(fmt, ...) ({ \
-    const char *file = NULL; \
-    uint32_t line = 0; \
-    int32_t err = 0; \
-    for (uint32_t i = 0; i < OPENHITLS_ERROR_STACK_DEPTH; i++) { \
-        err = BSL_ERR_GetLastErrorFileLine(&file, &line); \
-        if (err == 0) { break; } \
-        HKS_LOG_E("hitls error: [%" LOG_PUBLIC "s:%" LOG_PUBLIC "d] " fmt " \n", file, line, ##__VA_ARGS__); \
-    } \
-})
-
-static int32_t MlDsaGetParamId(uint32_t keyParamSetId, uint32_t *alg)
+static int32_t MlDsaGetAlgId(uint32_t keyParamSetId, uint32_t *alg)
 {
     if (keyParamSetId == HKS_ML_DSA_KEY_PARAM_SET_44) {
-        *alg = CRYPT_MLDSA_TYPE_MLDSA_44;
+        *alg = EVP_PKEY_ML_DSA_44;
     } else if (keyParamSetId == HKS_ML_DSA_KEY_PARAM_SET_65) {
-        *alg = CRYPT_MLDSA_TYPE_MLDSA_65;
+        *alg = EVP_PKEY_ML_DSA_65;
     } else if (keyParamSetId == HKS_ML_DSA_KEY_PARAM_SET_87) {
-        *alg = CRYPT_MLDSA_TYPE_MLDSA_87;
+        *alg = EVP_PKEY_ML_DSA_87;
     } else {
         HKS_LOG_E("invalid ml-dsa paramSet id");
         return HKS_ERROR_INVALID_KEY_SIZE;
@@ -430,156 +395,92 @@ static int32_t MlDsaGetParamId(uint32_t keyParamSetId, uint32_t *alg)
 
 static int32_t MlDsaPublicKeyToX509(const struct HksBlob *publicKey, struct HksBlob *x509Key)
 {
+    HKS_IF_TRUE_LOGE_RETURN(publicKey->size < sizeof(struct HksKeyMaterialMlDsa), HKS_ERROR_INVALID_ARGUMENT,
+        "invalid public key size %" LOG_PUBLIC "u", publicKey->size)
     struct HksKeyMaterialMlDsa *keyMaterial = (struct HksKeyMaterialMlDsa *)publicKey->data;
     uint32_t alg = 0;
-    int32_t ret = MlDsaGetParamId(keyMaterial->keyParamSet, &alg);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get ml-dsa param id fail")
+    int32_t ret = MlDsaGetAlgId(keyMaterial->keyParamSet, &alg);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get ml-dsa alg id fail")
 
-    ClearHitlsError();
-    CRYPT_EAL_PkeyCtx *ctx = CRYPT_EAL_PkeyNewCtx(CRYPT_PKEY_ML_DSA);
+    EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(alg, NULL);
     if (ctx == NULL) {
-        LOG_HITLS_ERROR("create ml-dsa ctx failed");
+        HKS_LOG_E("create ml-dsa ctx failed");
+        HksLogOpensslError();
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
+    EVP_PKEY *pkey = NULL;
     ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    BSL_Buffer pubBuff = { NULL, 0 };
     do {
-        ClearHitlsError();
-        int32_t hitlsRet = CRYPT_EAL_PkeySetParaById(ctx, alg);
-        if (hitlsRet != CRYPT_SUCCESS) {
-            LOG_HITLS_ERROR("set ml-dsa param failed, hitlsRet = %d", hitlsRet);
+        if (EVP_PKEY_fromdata_init(ctx) != HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("ml-dsa fromdata init failed");
+            HksLogOpensslError();
             break;
         }
 
-        CRYPT_EAL_PkeyPub pubKey = { 0 };
-        pubKey.id = CRYPT_PKEY_ML_DSA;
-        pubKey.key.mldsaPub.data = publicKey->data + sizeof(struct HksKeyMaterialMlDsa);
-        pubKey.key.mldsaPub.len = keyMaterial->pubKeySize;
+        OSSL_PARAM params[] = {
+            OSSL_PARAM_construct_octet_string(OSSL_PKEY_PARAM_PUB_KEY,
+                publicKey->data + sizeof(struct HksKeyMaterialMlDsa), keyMaterial->pubKeySize),
+            OSSL_PARAM_construct_end()};
 
-        ClearHitlsError();
-        hitlsRet = CRYPT_EAL_PkeySetPub(ctx, &pubKey);
-        if (hitlsRet != CRYPT_SUCCESS) {
-            LOG_HITLS_ERROR("set ml-dsa pubkey failed, hitlsRet = %d", hitlsRet);
+        if (EVP_PKEY_fromdata(ctx, &pkey, EVP_PKEY_PUBLIC_KEY, params) != HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("ml-dsa fromdata failed");
+            HksLogOpensslError();
             break;
         }
 
-        ClearHitlsError();
-        hitlsRet = CRYPT_EAL_EncodeBuffKey(ctx, NULL, BSL_FORMAT_ASN1, CRYPT_PUBKEY_SUBKEY, &pubBuff);
-        if (hitlsRet != CRYPT_SUCCESS) {
-            LOG_HITLS_ERROR("encode ml-dsa pubkey failed, hitlsRet = %d", hitlsRet);
-            break;
-        }
-
-        x509Key->data = (uint8_t *)HksMalloc(pubBuff.dataLen);
-        if (x509Key->data == NULL) {
-            HKS_LOG_E("ml-dsa to x509 public key malloc data failed");
-            ret = HKS_ERROR_MALLOC_FAIL;
-            break;
-        }
-
-        (void)memcpy_s(x509Key->data, pubBuff.dataLen, pubBuff.data, pubBuff.dataLen);
-        x509Key->size = pubBuff.dataLen;
-        ret = HKS_SUCCESS;
+        ret = EvpKeyToX509Format(pkey, x509Key);
     } while (0);
 
-    BSL_SAL_Free(pubBuff.data);
-    CRYPT_EAL_PkeyFreeCtx(ctx);
+    EVP_PKEY_free(pkey);
+    EVP_PKEY_CTX_free(ctx);
     return ret;
 }
-#else
-static int32_t MlDsaPublicKeyToX509(const struct HksBlob *publicKey, struct HksBlob *x509Key)
-{
-    (void)publicKey;
-    (void)x509Key;
-    return HKS_ERROR_NOT_SUPPORTED;
-}
-#endif
 #endif
 
 #if defined(HKS_SUPPORT_ML_KEM_C) && defined(HKS_SUPPORT_ML_KEM_GET_PUBLIC_KEY)
-#ifdef ISOLATE_OHOS_SDK
-static int32_t MlKemGetParamId(uint32_t keyParamSetId, uint32_t *alg)
-{
-    if (keyParamSetId == HKS_ML_KEM_KEY_PARAM_SET_768) {
-        *alg = CRYPT_KEM_TYPE_MLKEM_768;
-    } else if (keyParamSetId == HKS_ML_KEM_KEY_PARAM_SET_1024) {
-        *alg = CRYPT_KEM_TYPE_MLKEM_1024;
-    } else {
-        HKS_LOG_E("invalid ml-kem paramSet id");
-        return HKS_ERROR_INVALID_KEY_SIZE;
-    }
-
-    return HKS_SUCCESS;
-}
-
 static int32_t MlKemPublicKeyToX509(const struct HksBlob *publicKey, struct HksBlob *x509Key)
 {
+    HKS_IF_TRUE_LOGE_RETURN(publicKey->size < sizeof(struct HksKeyMaterialMlKem), HKS_ERROR_INVALID_ARGUMENT, \
+        "invalid public key size %" LOG_PUBLIC "u", publicKey->size)
     struct HksKeyMaterialMlKem *keyMaterial = (struct HksKeyMaterialMlKem *)publicKey->data;
-    uint32_t alg = 0;
-    int32_t ret = MlKemGetParamId(keyMaterial->keyParamSet, &alg);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get ml-kem param id fail")
+    const char *algName = HksOpensslMlKemGetAlgName(keyMaterial->keyParamSet);
+    HKS_IF_NULL_LOGE_RETURN(algName, HKS_ERROR_INVALID_KEY_SIZE, "get ml-kem alg name fail")
 
-    ClearHitlsError();
-    CRYPT_EAL_PkeyCtx *ctx = CRYPT_EAL_PkeyNewCtx(CRYPT_PKEY_ML_KEM);
+    EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_from_name(NULL, algName, NULL);
     if (ctx == NULL) {
-        LOG_HITLS_ERROR("create ml-kem ctx failed");
+        HKS_LOG_E("create ml-kem ctx failed");
+        HksLogOpensslError();
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
-    ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    BSL_Buffer pubBuff = { NULL, 0 };
+    EVP_PKEY *pkey = NULL;
+    int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     do {
-        ClearHitlsError();
-        int32_t hitlsRet = CRYPT_EAL_PkeySetParaById(ctx, alg);
-        if (hitlsRet != CRYPT_SUCCESS) {
-            LOG_HITLS_ERROR("set ml-kem param failed, hitlsRet = %d", hitlsRet);
+        if (EVP_PKEY_fromdata_init(ctx) != HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("ml-kem fromdata init failed");
+            HksLogOpensslError();
             break;
         }
 
-        CRYPT_EAL_PkeyPub pubKey = { 0 };
-        pubKey.id = CRYPT_PKEY_ML_KEM;
-        pubKey.key.kemEk.data = publicKey->data + sizeof(struct HksKeyMaterialMlKem);
-        pubKey.key.kemEk.len = keyMaterial->pubKeySize;
+        OSSL_PARAM params[] = {
+        OSSL_PARAM_construct_octet_string(OSSL_PKEY_PARAM_PUB_KEY,
+            publicKey->data + sizeof(struct HksKeyMaterialMlKem), keyMaterial->pubKeySize),
+        OSSL_PARAM_construct_end()};
 
-        ClearHitlsError();
-        hitlsRet = CRYPT_EAL_PkeySetPub(ctx, &pubKey);
-        if (hitlsRet != CRYPT_SUCCESS) {
-            LOG_HITLS_ERROR("set ml-kem pubkey failed, hitlsRet = %d", hitlsRet);
+        if (EVP_PKEY_fromdata(ctx, &pkey, EVP_PKEY_PUBLIC_KEY, params) != HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("ml-kem fromdata failed");
+            HksLogOpensslError();
             break;
         }
 
-        ClearHitlsError();
-        hitlsRet = CRYPT_EAL_EncodeBuffKey(ctx, NULL, BSL_FORMAT_ASN1, CRYPT_PUBKEY_SUBKEY, &pubBuff);
-        if (hitlsRet != CRYPT_SUCCESS) {
-            LOG_HITLS_ERROR("encode ml-kem pubkey failed, hitlsRet = %d", hitlsRet);
-            break;
-        }
-
-        x509Key->data = (uint8_t *)HksMalloc(pubBuff.dataLen);
-        if (x509Key->data == NULL) {
-            HKS_LOG_E("ml-kem to x509 public key malloc data failed");
-            ret = HKS_ERROR_MALLOC_FAIL;
-            break;
-        }
-
-        (void)memcpy_s(x509Key->data, pubBuff.dataLen, pubBuff.data, pubBuff.dataLen);
-        x509Key->size = pubBuff.dataLen;
-        ret = HKS_SUCCESS;
+        ret = EvpKeyToX509Format(pkey, x509Key);
     } while (0);
 
-    BSL_SAL_Free(pubBuff.data);
-    CRYPT_EAL_PkeyFreeCtx(ctx);
+    EVP_PKEY_free(pkey);
+    EVP_PKEY_CTX_free(ctx);
     return ret;
 }
-#else
-static int32_t MlKemPublicKeyToX509(const struct HksBlob *publicKey, struct HksBlob *x509Key)
-{
-    (void)publicKey;
-    (void)x509Key;
-    return HKS_ERROR_NOT_SUPPORTED;
-}
-#endif
 #endif
 
 static int32_t TranslateToX509PublicKeySwitchAlg(const struct HksPubKeyInfo *publicKeyInfo,
@@ -978,13 +879,10 @@ int32_t TranslateFromX509PublicKey(const uint32_t alg, const struct HksBlob *x50
     return ret;
 }
 
-#ifdef ISOLATE_OHOS_SDK
+#ifdef HKS_SUPPORT_ML_DSA_C
 #define HKS_ML_DSA_PUB_KEY_SIZE_1312  1312
 #define HKS_ML_DSA_PUB_KEY_SIZE_1952  1952
 #define HKS_ML_DSA_PUB_KEY_SIZE_2592  2592
-
-#define HKS_ML_KEM_PUB_KEY_SIZE_1184  1184
-#define HKS_ML_KEM_PUB_KEY_SIZE_1568  1568
 
 static int32_t MlDsaGetPubKeySize(uint32_t keyParamSetId, uint32_t *pubKeySize)
 {
@@ -1029,36 +927,34 @@ int32_t TranslateToInnerMlDsaFormat(const struct HksParamSet *paramSet, const st
     keyMaterial->priKeySize = 0;
     keyMaterial->reserved = 0;
 
-    CRYPT_EAL_PkeyCtx *ctx = NULL;
-    BSL_Buffer derBuffer = { .data = x509Key->data, .dataLen = x509Key->size };
-    int32_t hitlsRet = CRYPT_SUCCESS;
+    EVP_PKEY *pkey = NULL;
+    uint8_t *data = x509Key->data;
     do {
-        ClearHitlsError();
-        hitlsRet = CRYPT_EAL_DecodeBuffKey(BSL_FORMAT_ASN1, CRYPT_PUBKEY_SUBKEY, &derBuffer, NULL, 0, &ctx);
-        if (hitlsRet != CRYPT_SUCCESS) {
-            LOG_HITLS_ERROR("decode ml-dsa x509 public key fail, hitlsRet = %d", hitlsRet);
+        pkey = d2i_PUBKEY(NULL, (const unsigned char **)&data, x509Key->size);
+        if (pkey == NULL) {
+            HKS_LOG_E("decode ml-dsa x509 public key fail");
+            HksLogOpensslError();
+            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
         }
 
-        CRYPT_EAL_PkeyPub pubKey = { 0 };
-        pubKey.id = CRYPT_PKEY_ML_DSA;
-        pubKey.key.mldsaPub.len = pubKeySize;
-        pubKey.key.mldsaPub.data = keyBuffer + sizeof(struct HksKeyMaterialMlDsa);
-        ClearHitlsError();
-        hitlsRet = CRYPT_EAL_PkeyGetPub(ctx, &pubKey);
-        if (hitlsRet != CRYPT_SUCCESS) {
-            LOG_HITLS_ERROR("get ml-dsa x509 public key fail, hitlsRet = %d", hitlsRet);
+        size_t rawPubKeySize = pubKeySize;
+        if (EVP_PKEY_get_raw_public_key(pkey, keyBuffer + sizeof(struct HksKeyMaterialMlDsa),
+            &rawPubKeySize) != HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("get ml-dsa raw public key fail");
+            HksLogOpensslError();
+            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
         }
 
         publicKey->data = keyBuffer;
         publicKey->size = totalSize;
+        ret = HKS_SUCCESS;
     } while (0);
 
-    CRYPT_EAL_PkeyFreeCtx(ctx);
-    if (hitlsRet != CRYPT_SUCCESS) {
+    EVP_PKEY_free(pkey);
+    if (ret != HKS_SUCCESS) {
         HKS_FREE(keyBuffer);
-        ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     return ret;
 }
@@ -1075,7 +971,9 @@ int32_t TranslateToInnerMlDsaFormat(const struct HksParamSet *paramSet, const st
 #endif
 
 #ifdef HKS_SUPPORT_ML_KEM_C
-#ifdef ISOLATE_OHOS_SDK
+#define HKS_ML_KEM_PUB_KEY_SIZE_1184  1184
+#define HKS_ML_KEM_PUB_KEY_SIZE_1568  1568
+
 static int32_t MlKemGetPubKeySize(uint32_t keyParamSetId, uint32_t *pubKeySize)
 {
     if (pubKeySize == NULL) {
@@ -1117,49 +1015,37 @@ int32_t TranslateToInnerMlKemFormat(const struct HksParamSet *paramSet, const st
     keyMaterial->priKeySize = 0;
     keyMaterial->reserved = 0;
 
-    CRYPT_EAL_PkeyCtx *ctx = NULL;
-    BSL_Buffer derBuffer = { .data = x509Key->data, .dataLen = x509Key->size };
-    int32_t hitlsRet = CRYPT_SUCCESS;
+    EVP_PKEY *pkey = NULL;
+    uint8_t *data = x509Key->data;
     do {
-        ClearHitlsError();
-        hitlsRet = CRYPT_EAL_DecodeBuffKey(BSL_FORMAT_ASN1, CRYPT_PUBKEY_SUBKEY, &derBuffer, NULL, 0, &ctx);
-        if (hitlsRet != CRYPT_SUCCESS) {
-            LOG_HITLS_ERROR("decode ml-kem x509 public key fail, hitlsRet = %d", hitlsRet);
+        pkey = d2i_PUBKEY(NULL, (const unsigned char **)&data, x509Key->size);
+        if (pkey == NULL) {
+            HKS_LOG_E("decode ml-kem x509 public key fail");
+            HksLogOpensslError();
+            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
         }
 
-        CRYPT_EAL_PkeyPub pubKey = { 0 };
-        pubKey.id = CRYPT_PKEY_ML_KEM;
-        pubKey.key.kemEk.data = keyBuffer + sizeof(struct HksKeyMaterialMlKem);
-        pubKey.key.kemEk.len = pubKeySize;
-        ClearHitlsError();
-        hitlsRet = CRYPT_EAL_PkeyGetPub(ctx, &pubKey);
-        if (hitlsRet != CRYPT_SUCCESS) {
-            LOG_HITLS_ERROR("get ml-kem x509 public key fail, hitlsRet = %d", hitlsRet);
+        size_t rawPubKeySize = pubKeySize;
+        if (EVP_PKEY_get_raw_public_key(pkey, keyBuffer + sizeof(struct HksKeyMaterialMlKem),
+            &rawPubKeySize) != HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("get ml-kem raw public key fail");
+            HksLogOpensslError();
+            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
         }
 
         publicKey->data = keyBuffer;
         publicKey->size = totalSize;
+        ret = HKS_SUCCESS;
     } while (0);
 
-    CRYPT_EAL_PkeyFreeCtx(ctx);
-    if (hitlsRet != CRYPT_SUCCESS) {
+    EVP_PKEY_free(pkey);
+    if (ret != HKS_SUCCESS) {
         HKS_FREE(keyBuffer);
-        ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     return ret;
 }
-#else
-int32_t TranslateToInnerMlKemFormat(const struct HksParamSet *paramSet, const struct HksBlob *x509Key,
-    struct HksBlob *publicKey)
-{
-    (void)paramSet;
-    (void)x509Key;
-    (void)publicKey;
-    return HKS_ERROR_NOT_SUPPORTED;
-}
-#endif
 #else
 int32_t TranslateToInnerMlKemFormat(const struct HksParamSet *paramSet, const struct HksBlob *x509Key,
     struct HksBlob *publicKey)

@@ -158,6 +158,8 @@ int32_t HksOpensslMlDsaGenerateKey(const struct HksKeySpec *spec, struct HksBlob
 #ifdef HKS_SUPPORT_ML_DSA_GET_PUBLIC_KEY
 int32_t HksOpensslMlDsaGetPubKey(const struct HksBlob *keyIn, struct HksBlob *keyOut)
 {
+    HKS_IF_TRUE_LOGE_RETURN(keyIn->size < sizeof(struct HksKeyMaterialMlDsa), HKS_ERROR_INVALID_ARGUMENT,
+        "invalid keyIn size %" LOG_PUBLIC "u", keyIn->size)
     struct HksKeyMaterialMlDsa *keyMaterial = (struct HksKeyMaterialMlDsa *)keyIn->data;
     if (keyMaterial->pubKeySize == 0 || keyOut->size < sizeof(struct HksKeyMaterialMlDsa)) {
         HKS_LOG_E("get ml-dsa public key size or output size invalid");
@@ -185,6 +187,8 @@ int32_t HksOpensslMlDsaGetPubKey(const struct HksBlob *keyIn, struct HksBlob *ke
 #ifdef HKS_SUPPORT_ML_DSA_SIGN_VERIFY
 static int32_t MlDsaSignVerifyInitCtx(const struct HksBlob *key, const struct HksUsageSpec *usageSpec, EVP_PKEY **pkey)
 {
+    HKS_IF_TRUE_LOGE_RETURN(key->size < sizeof(struct HksKeyMaterialMlDsa), HKS_ERROR_INVALID_ARGUMENT,
+        "invalid key size %" LOG_PUBLIC "u", key->size)
     struct HksKeyMaterialMlDsa *keyMaterial = (struct HksKeyMaterialMlDsa *)key->data;
     uint32_t alg = 0;
     for (uint32_t i = 0; i < HKS_ARRAY_SIZE(g_validMlDsaParam); i++) {

@@ -592,3 +592,22 @@ int32_t GetBnBinpadFromPkey(const EVP_PKEY *pkey, const char *keyName, struct Hk
     SELF_FREE_PTR(bn, BN_free)
     return ret;
 }
+
+#ifdef HKS_SUPPORT_ML_KEM_C
+const char *HksOpensslMlKemGetAlgName(uint32_t keyParamSet)
+{
+    if (keyParamSet == HKS_ML_KEM_KEY_PARAM_SET_768) {
+        return HKS_ML_KEM_ALG_NAME_768;
+    } else if (keyParamSet == HKS_ML_KEM_KEY_PARAM_SET_1024) {
+        return HKS_ML_KEM_ALG_NAME_1024;
+    }
+    HKS_LOG_E("invalid ml-kem paramSet %" LOG_PUBLIC "u", keyParamSet);
+    return NULL;
+}
+#else
+const char *HksOpensslMlKemGetAlgName(uint32_t keyParamSet)
+{
+    (void) keyParamSet;
+    return HKS_ERROR_NOT_SUPPORTED;
+}
+#endif

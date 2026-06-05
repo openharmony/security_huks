@@ -63,14 +63,6 @@ if (os_level == "standard") {
       "openssl:libcrypto_shared",
     ]
     complete_static_lib = true
-
-    if (!build_ohos_sdk && support_jsapi) {
-      defines += [ "ISOLATE_OHOS_SDK" ]
-      external_deps += [
-        "openhitls:openhitls_bsl",
-        "openhitls:openhitls_crypto",
-      ]
-    }
   }
 } else {
   ohos_static_library("libhuks_utils_client_service_adapter_static") {
