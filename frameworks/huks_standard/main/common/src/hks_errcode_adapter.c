@@ -942,6 +942,13 @@ static struct HksError g_errCodeTable[] = {
             .errorMsg = "the security level in wrapping and paramset mismatch.",
             .data = NULL
         }
+    }, {
+        .innerErrCode = HKS_ERROR_UKEY_NOT_SYSTEM_APP,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "Non-system applications are not allowed to manually pass in UID.",
+            .data = NULL
+        }
     }
 };
 

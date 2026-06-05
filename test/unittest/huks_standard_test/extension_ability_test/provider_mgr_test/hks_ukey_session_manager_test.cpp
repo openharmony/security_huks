@@ -475,24 +475,6 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest011, TestSize.Level0) {
 }
 
 /**
-* @tc.name: HksSessionMgrTest.HksSessionMgrTest012
-* @tc.desc: CheckAndAppendProcessInfo - no UID tag in paramSet.
-* @tc.type: FUNC
-*/
-HWTEST_F(HksSessionMgrTest, HksSessionMgrTest012, TestSize.Level0) {
-    HksProcessInfo processInfo{};
-    processInfo.uidInt = 12345;
-
-    std::vector<HksParam> tmpParams = {
-        {.tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT},
-    };
-    CppParamSet paramSet(tmpParams);
-
-    bool result = CheckAndAppendProcessInfo(paramSet, processInfo);
-    EXPECT_TRUE(result) << "should succeed when UID tag is absent";
-}
-
-/**
 * @tc.name: HksSessionMgrTest.HksSessionMgrTest015
 * @tc.desc: ClearSessionMapByHandle - CRYPTO_FAIL erases handle.
 * @tc.type: FUNC

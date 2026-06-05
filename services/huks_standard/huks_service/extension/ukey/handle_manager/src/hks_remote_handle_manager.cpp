@@ -746,27 +746,6 @@ void HksRemoteHandleManager::ClearMapByUid(const uint32_t uid)
     }
 }
 
-int32_t HksRemoteHandleManager::VerifyCallerAndAdjustUidParam(const HksProcessInfo &processInfo,
-    const CppParamSet &paramSet, CppParamSet &newParamSet)
-{
-    auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
-    if (uidParam.first != HKS_SUCCESS) {
-        std::vector<HksParam> params = {
-            { .tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = static_cast<int32_t>(processInfo.uidInt)}
-        };
-        newParamSet = CppParamSet(paramSet, params);
-        HKS_IF_NULL_LOGE_RETURN(newParamSet.GetParamSet(), HKS_ERROR_NULL_POINTER, "new paramset fail.")
-        return HKS_SUCCESS;
-    }
-    
-    auto accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
-    HKS_IF_NOT_TRUE_LOGE_RETURN(OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx),
-        HKS_ERROR_NOT_SYSTEM_APP, "VerifyCallerAndAdjustUidParam: not system hap, check permission failed.");
-    
-    newParamSet = CppParamSet(paramSet);
-    return HKS_SUCCESS;
-}
-
 }
 }
 }
