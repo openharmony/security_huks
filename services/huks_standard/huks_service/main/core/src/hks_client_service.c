@@ -53,7 +53,9 @@
 #include "hks_template.h"
 #include "huks_access.h"
 #include "hks_util.h"
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
 #include "hks_ukey_check.h"
+#endif
 
 #include "hks_upgrade_key_accesser.h"
 #include "hks_upgrade_helper.h"

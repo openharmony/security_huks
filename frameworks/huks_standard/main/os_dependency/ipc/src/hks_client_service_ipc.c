@@ -1657,6 +1657,7 @@ int32_t HksClientEncapsulate(const struct HksBlob *keyAlias, const struct HksPar
     struct HksBlob inBlob = { 0, NULL };
     struct HksBlob outBlob = { 0, NULL };
     do {
+        ret = HKS_ERROR_MALLOC_FAIL;
         inBlob.data = (uint8_t *)HksMalloc(inSize);
         HKS_IF_NULL_LOGE_BREAK(inBlob.data, "malloc inBlob.data failed")
         inBlob.size = inSize;
@@ -1698,12 +1699,13 @@ int32_t HksClientDecapsulate(const struct HksBlob *keyAlias, const struct HksPar
         sizeof(encapOrsharedSecret->size) + ALIGN_SIZE(encapOrsharedSecret->size);
 
     do {
-        inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-        HKS_IF_NULL_LOGE_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL, "malloc inblob data fail")
+        ret = HKS_ERROR_MALLOC_FAIL;
+        inBlob.data = (uint8_t *)HksMalloc(inSize);
+        HKS_IF_NULL_LOGE_BREAK(inBlob.data, "malloc inblob data fail")
         inBlob.size = inSize;
 
         outBlob.data = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
-        HKS_IF_NULL_LOGE_RETURN(outBlob.data, HKS_ERROR_MALLOC_FAIL, "malloc outBlob data fail")
+        HKS_IF_NULL_LOGE_BREAK(outBlob.data, "malloc outBlob data fail")
         outBlob.size = MAX_KEY_SIZE;
 
         uint32_t offset = 0;

@@ -394,5 +394,32 @@ HWTEST_F(HksReportCommonTest, HksReportCommonTest010, TestSize.Level0)
     AddEventInfoCommon(&eventInfo1, &eventInfo2);
 }
 
+/**
+ * @tc.name: HksReportCommonTest.HksReportCommonTest011
+ * @tc.desc: test CppParamSet with takeOwnership
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksReportCommonTest, HksReportCommonTest011, TestSize.Level0)
+{
+    struct HksParam tmpParams[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = 0 },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = 0 },
+    };
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = GenerateParamSet(&paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    CppParamSet cppParamSet1(paramSet, false);
+    CppParamSet cppParamSet2(paramSet, true);
+
+    OHOS::Parcel parcel;
+    bool retBool = cppParamSet2.Marshalling(parcel);
+    EXPECT_EQ(retBool, true);
+
+    CppParamSet *retCpp = cppParamSet2.Unmarshalling(parcel);
+    EXPECT_NE(retCpp, nullptr);
+}
+
 }
  

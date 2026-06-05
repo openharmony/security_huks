@@ -37,8 +37,8 @@
 #include "hks_type_inner.h"
 #include "hks_util.h"
 #include "hks_ha_event_report.h"
-#include "hks_ukey_check.h"
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
+#include "hks_ukey_check.h"
 #include "hks_ukey_three_stage_adapter.h"
 #endif
 
