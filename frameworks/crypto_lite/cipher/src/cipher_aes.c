@@ -42,6 +42,9 @@ static int32_t PaddingPkcs5(char *data, size_t inSize)
 
 static int32_t UnpaddingPkcs5(char *data, int32_t dataLen)
 {
+    if (dataLen <= 0) {
+        return ERROR_CODE_GENERAL;
+    }
     int32_t padLen = data[dataLen - 1];
 
     if (padLen <= 0 || padLen >= AES_BLOCK_SIZE) {
