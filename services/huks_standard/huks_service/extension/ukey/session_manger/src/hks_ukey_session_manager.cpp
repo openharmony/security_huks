@@ -120,7 +120,7 @@ int32_t HksSessionManager::ExtensionInitSession(struct HksProcessWithErrorInfo &
     HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NOT_EXIST, "GetProviderProxy proxy is null")
 
     CppParamSet newParamSet{};
-    int32_t ret = VerifyCallerAndAdjustUidParam(*processAndError.processInfo, paramSet, newParamSet);
+    ret = VerifyCallerAndAdjustUidParam(*processAndError.processInfo, paramSet, newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "uid check in %" LOG_PUBLIC "s failed.", __PRETTY_FUNCTION__)
 
     HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, ""};
@@ -157,7 +157,7 @@ int32_t HksSessionManager::ExtensionUpdateSession(struct HksProcessWithErrorInfo
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetExtensionProxy failed: %" LOG_PUBLIC "d", ret)
 
     CppParamSet newParamSet{};
-    int32_t ret = VerifyCallerAndAdjustUidParam(*processAndError.processInfo, paramSet, newParamSet);
+    ret = VerifyCallerAndAdjustUidParam(*processAndError.processInfo, paramSet, newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "uid check in %" LOG_PUBLIC "s failed.", __PRETTY_FUNCTION__)
 
     HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, ""};
@@ -185,7 +185,7 @@ int32_t HksSessionManager::ExtensionFinishSession(struct HksProcessWithErrorInfo
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetExtensionProxy failed: %" LOG_PUBLIC "d", ret)
 
     CppParamSet newParamSet{};
-    int32_t ret = VerifyCallerAndAdjustUidParam(*processAndError.processInfo, paramSet, newParamSet);
+    ret = VerifyCallerAndAdjustUidParam(*processAndError.processInfo, paramSet, newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "uid check in %" LOG_PUBLIC "s failed.", __PRETTY_FUNCTION__)
 
     HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, ""};
@@ -213,7 +213,7 @@ int32_t HksSessionManager::ExtensionAbortSession(struct HksProcessWithErrorInfo 
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetExtensionProxy failed: %" LOG_PUBLIC "d", ret)
 
     CppParamSet newParamSet{};
-    int32_t ret = VerifyCallerAndAdjustUidParam(*processAndError.processInfo, paramSet, newParamSet);
+    ret = VerifyCallerAndAdjustUidParam(*processAndError.processInfo, paramSet, newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "uid check in %" LOG_PUBLIC "s failed.", __PRETTY_FUNCTION__)
 
     std::vector<uint8_t> tmpVec;
