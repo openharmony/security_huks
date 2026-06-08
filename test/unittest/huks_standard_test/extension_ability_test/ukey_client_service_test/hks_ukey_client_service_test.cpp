@@ -671,52 +671,6 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest018, TestSize.Level0)
     HKS_FREE_BLOB(processInfo.processName);
 }
 
-/**
-* @tc.name: HksUkeyClientServiceTest.HksUkeyClientServiceTest019
-* @tc.desc: HksIpcServiceOnGetResourceIdAdapter normal flow (lines 318-329)
-* @tc.type: FUNC
-*/
-HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest019, TestSize.Level0) {
-    HksProcessInfo processInfo{};
-    HksGetProcessInfoForIPC(&processInfo);
-
-    std::string providerName = "HksUkeyClientServiceTest019";
-    std::string abilityName = "testAbility";
-    std::string bundleName = "com.test.bundle";
-    std::string resourceInfo = "resource_info";
-
-    CppParamSet regParamSet({
-        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob(abilityName)},
-    });
-    EXPECT_EQ(HksIpcServiceProviderRegister(&processInfo, providerName, regParamSet), HKS_SUCCESS);
-
-    CppParamSet paramSet({
-        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob(abilityName)},
-        {.tag = HKS_EXT_CRYPTO_TAG_BUNDLE_NAME, .blob = StringToBlob(bundleName)},
-        {.tag = HKS_EXT_CRYPTO_TAG_RESOURCE_INFO, .blob = StringToBlob(resourceInfo)},
-    });
-
-    HksBlob providerNameBlob = { .size = static_cast<uint32_t>(providerName.size()),
-        .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(providerName.data())) };
-    HksBlob resourceId = {};
-    struct HksExternalErrorInfo *errInfo = nullptr;
-
-    int32_t ret = HksIpcServiceOnGetResourceIdAdapter(&processInfo, &providerNameBlob,
-        paramSet.GetParamSet(), &resourceId, &errInfo);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    EXPECT_TRUE(resourceId.data != nullptr);
-    EXPECT_TRUE(resourceId.size > 0);
-
-    if (resourceId.data != nullptr) {
-        HKS_FREE(resourceId.data);
-    }
-
-    EXPECT_EQ(HksIpcServiceProviderUnRegister(&processInfo, providerName, regParamSet), HKS_SUCCESS);
-
-    HKS_FREE_BLOB(processInfo.userId);
-    HKS_FREE_BLOB(processInfo.processName);
-}
-
 } // namespace Huks
 } // namespace Security
 } // namespace OHOS

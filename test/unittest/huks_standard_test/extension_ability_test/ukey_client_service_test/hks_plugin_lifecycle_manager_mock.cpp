@@ -184,18 +184,6 @@ int32_t HuksPluginLifeCycleMgr::OnExportPublicKey(struct HksProcessWithErrorInfo
     return HKS_SUCCESS;
 }
 
-int32_t HuksPluginLifeCycleMgr::OnGetResourceId(const HksProcessInfo &processInfo,
-    const std::string &providerName, const CppParamSet &paramSet, std::string &resourceId,
-    struct HksExternalErrorInfo **errInfo)
-{
-    (void)processInfo;
-    (void)providerName;
-    (void)paramSet;
-    (void)errInfo;
-    resourceId = "mock_resource_id";
-    return HKS_SUCCESS;
-}
-
 // ==================== HuksPluginLoader mock ====================
 
 HuksPluginLoader::HuksPluginLoader() {}
