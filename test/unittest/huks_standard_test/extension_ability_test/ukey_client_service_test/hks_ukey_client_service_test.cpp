@@ -671,6 +671,35 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest018, TestSize.Level0)
     HKS_FREE_BLOB(processInfo.processName);
 }
 
+/**
+* @tc.name: HksUkeyClientServiceTest.HksUkeyClientServiceTest019
+* @tc.desc: HksIpcServiceOnGetResourceIdAdapter — ResourceId too long and normal
+* @tc.type: FUNC
+*/
+HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest019, TestSize.Level0) {
+    HksProcessInfo processInfo{};
+    HksGetProcessInfoForIPC(&processInfo);
+    HksParamSet *paramSet = nullptr;
+    struct HksExternalErrorInfo *errInfo = nullptr;
+    std::string providerName = "TestProvider019";
+    HksBlob providerBlob = { .size = static_cast<uint32_t>(providerName.size()),
+        .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(providerName.data())) };
+    HksBlob resourceIdBlob = { .size = 0, .data = nullptr };
+
+    CppParamSet cppParamSet(paramSet);
+    int32_t ret = HksIpcServiceOnGetResourceIdAdapter(&processInfo, &providerBlob, paramSet, &resourceIdBlob, &errInfo);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    resourceIdBlob.size = HKS_EXT_MAX_RESOURCE_ID_LEN + 1;
+    ret = HksIpcServiceOnGetResourceIdAdapter(&processInfo, &providerBlob, paramSet, &resourceIdBlob, &errInfo);
+    EXPECT_EQ(ret, HKS_ERROR_INSUFFICIENT_DATA);
+
+    HksFreeExternalErrorInfo(errInfo);
+    HKS_FREE_BLOB(resourceIdBlob);
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
+}
+
 } // namespace Huks
 } // namespace Security
 } // namespace OHOS

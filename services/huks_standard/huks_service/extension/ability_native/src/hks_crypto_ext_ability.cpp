@@ -34,20 +34,13 @@ void HksCryptoExtAbility::SetCreator(const CreatorFunc &creator)
 
 HksCryptoExtAbility* HksCryptoExtAbility::Create(const std::unique_ptr<AbilityRuntime::Runtime> &runtime)
 {
-    if (runtime == nullptr) {
-        return new (std::nothrow) HksCryptoExtAbility();
-    }
+    HKS_EXT_IF_TRUE_RETURN(runtime == nullptr, new (std::nothrow) HksCryptoExtAbility());
 
-    if (creator_) {
-        return creator_(runtime);
-    }
+    HKS_EXT_IF_TRUE_RETURN(creator_, creator_(runtime));
 
-    switch (runtime->GetLanguage()) {
-        case AbilityRuntime::Runtime::Language::JS:
-            return JsHksCryptoExtAbility::Create(runtime);
-        default:
-            return new (std::nothrow) HksCryptoExtAbility();
-    }
+    HKS_EXT_IF_TRUE_RETURN(runtime->GetLanguage() == AbilityRuntime::Runtime::Language::JS,
+        JsHksCryptoExtAbility::Create(runtime));
+    return new (std::nothrow) HksCryptoExtAbility();
 }
 
 void HksCryptoExtAbility::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalRecord> &record,

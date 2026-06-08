@@ -48,9 +48,7 @@ int32_t HksCryptoExtStubImpl::HksExtStubCheckExtension(HksExternalErrorInfoIdl &
 void HksCryptoExtStubImpl::HksExtStubInitErrorInfo(struct HksExternalErrorInfo **errInfoC)
 {
     *errInfoC = HksCreateExternalErrorInfo(HKS_ERROR_EXT_JS_METHOD_ERROR, "");
-    if (*errInfoC == nullptr) {
-        LOGE("errInfoC: Default value not set.");
-    }
+    HKS_EXT_IF_TRUE_LOGE(*errInfoC == nullptr, "errInfoC: Default value not set.");
 }
 
 ErrCode HksCryptoExtStubImpl::OpenRemoteHandle(
