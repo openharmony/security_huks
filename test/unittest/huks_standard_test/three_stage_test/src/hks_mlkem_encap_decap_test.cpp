@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_mlkem_encap_test.h"
+#include "hks_mlkem_encap_decap_test.h"
 
 #include <gtest/gtest.h>
 

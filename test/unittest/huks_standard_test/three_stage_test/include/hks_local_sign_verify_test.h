@@ -22,10 +22,7 @@
 namespace Unittest::LocalSignVerify {
 static const std::string g_inData = "Hks_Local_Sign_Verify_Test_000000000000000000000000000000000000000000000"
                                     "0000000000000000000000000000000000000000000000000000000000000_string";
-const uint32_t COMMON_SIZE = 256;
-const uint32_t RSA_KEY_SIZE_2048 = 2048;
-const uint32_t ECC_KEY_SIZE_256 = 256;
-const uint32_t ED25519_KEY_SIZE_256 = 256;
+static const uint32_t COMMON_SIZE = 256;
 }
 
 #endif // HKS_LOCAL_SIGN_VERIFY_TEST_H

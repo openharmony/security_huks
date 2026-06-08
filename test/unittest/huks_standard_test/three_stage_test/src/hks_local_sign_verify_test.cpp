@@ -57,7 +57,7 @@ void HksLocalSignVerifyTest::TearDown()
 static struct HksParam g_rsaGenParams001[] = {
     { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
     { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
-    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = Unittest::LocalSignVerify::RSA_KEY_SIZE_2048 },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048 },
     { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PSS },
     { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
     { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
@@ -68,7 +68,7 @@ static struct HksParam g_rsaGenParams001[] = {
 static struct HksParam g_rsaSignParams001[] = {
     { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
     { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN },
-    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = Unittest::LocalSignVerify::RSA_KEY_SIZE_2048 },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048 },
     { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PSS },
     { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
     { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
@@ -78,7 +78,7 @@ static struct HksParam g_rsaSignParams001[] = {
 static struct HksParam g_rsaVerifyParams001[] = {
     { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
     { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_VERIFY },
-    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = Unittest::LocalSignVerify::RSA_KEY_SIZE_2048 },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048 },
     { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PSS },
     { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
     { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
@@ -88,7 +88,7 @@ static struct HksParam g_rsaVerifyParams001[] = {
 static struct HksParam g_eccGenParams002[] = {
     { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ECC },
     { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
-    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = Unittest::LocalSignVerify::ECC_KEY_SIZE_256 },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ECC_KEY_SIZE_256 },
     { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
     { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
     { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
@@ -98,7 +98,7 @@ static struct HksParam g_eccGenParams002[] = {
 static struct HksParam g_eccSignParams002[] = {
     { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ECC },
     { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN },
-    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = Unittest::LocalSignVerify::ECC_KEY_SIZE_256 },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ECC_KEY_SIZE_256 },
     { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
     { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
     { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
@@ -107,7 +107,7 @@ static struct HksParam g_eccSignParams002[] = {
 static struct HksParam g_eccVerifyParams002[] = {
     { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ECC },
     { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_VERIFY },
-    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = Unittest::LocalSignVerify::ECC_KEY_SIZE_256 },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ECC_KEY_SIZE_256 },
     { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
     { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
     { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
@@ -116,7 +116,7 @@ static struct HksParam g_eccVerifyParams002[] = {
 static struct HksParam g_ed25519GenParams003[] = {
     { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ED25519 },
     { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
-    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = Unittest::LocalSignVerify::ED25519_KEY_SIZE_256 },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_CURVE25519_KEY_SIZE_256 },
     { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
     { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
     { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
@@ -125,7 +125,7 @@ static struct HksParam g_ed25519GenParams003[] = {
 static struct HksParam g_ed25519SignParams003[] = {
     { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ED25519 },
     { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN },
-    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = Unittest::LocalSignVerify::ED25519_KEY_SIZE_256 },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_CURVE25519_KEY_SIZE_256 },
     { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
     { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
 };
@@ -133,7 +133,7 @@ static struct HksParam g_ed25519SignParams003[] = {
 static struct HksParam g_ed25519VerifyParams003[] = {
     { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ED25519 },
     { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_VERIFY },
-    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = Unittest::LocalSignVerify::ED25519_KEY_SIZE_256 },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_CURVE25519_KEY_SIZE_256 },
     { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
     { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
 };
@@ -237,7 +237,7 @@ HWTEST_F(HksLocalSignVerifyTest, HksLocalSignVerifyTest001, TestSize.Level0)
     int32_t ret = LocalSignVerify(g_rsaGenParams001, sizeof(g_rsaGenParams001) / sizeof(HksParam),
         g_rsaSignParams001, sizeof(g_rsaSignParams001) / sizeof(HksParam),
         g_rsaVerifyParams001, sizeof(g_rsaVerifyParams001) / sizeof(HksParam),
-        Unittest::LocalSignVerify::RSA_KEY_SIZE_2048 / HKS_BITS_PER_BYTE);
+        HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_2048));
     EXPECT_EQ(ret, HKS_SUCCESS);
 }
 
@@ -251,7 +251,7 @@ HWTEST_F(HksLocalSignVerifyTest, HksLocalSignVerifyTest002, TestSize.Level0)
     int32_t ret = LocalSignVerify(g_eccGenParams002, sizeof(g_eccGenParams002) / sizeof(HksParam),
         g_eccSignParams002, sizeof(g_eccSignParams002) / sizeof(HksParam),
         g_eccVerifyParams002, sizeof(g_eccVerifyParams002) / sizeof(HksParam),
-        Unittest::LocalSignVerify::COMMON_SIZE);
+        COMMON_SIZE);
     EXPECT_EQ(ret, HKS_SUCCESS);
 }
 
@@ -265,7 +265,7 @@ HWTEST_F(HksLocalSignVerifyTest, HksLocalSignVerifyTest003, TestSize.Level0)
     int32_t ret = LocalSignVerify(g_ed25519GenParams003, sizeof(g_ed25519GenParams003) / sizeof(HksParam),
         g_ed25519SignParams003, sizeof(g_ed25519SignParams003) / sizeof(HksParam),
         g_ed25519VerifyParams003, sizeof(g_ed25519VerifyParams003) / sizeof(HksParam),
-        Unittest::LocalSignVerify::COMMON_SIZE);
+        COMMON_SIZE);
     EXPECT_EQ(ret, HKS_SUCCESS);
 }
 
@@ -281,7 +281,7 @@ HWTEST_F(HksLocalSignVerifyTest, HksLocalSignVerifyTest004, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     struct HksBlob inData = { (uint32_t)g_inData.length(), (uint8_t *)g_inData.c_str() };
-    uint8_t signOutData[Unittest::LocalSignVerify::RSA_KEY_SIZE_2048 / HKS_BITS_PER_BYTE] = { 0 };
+    uint8_t signOutData[HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_2048)] = { 0 };
     struct HksBlob signature = { sizeof(signOutData), signOutData };
 
     ret = HksSign(nullptr, signParamSet, &inData, &signature);
@@ -317,7 +317,7 @@ HWTEST_F(HksLocalSignVerifyTest, HksLocalSignVerifyTest005, TestSize.Level0)
     (void)memcpy_s(privateKey.data, privateKey.size, priKeyParam->blob.data, priKeyParam->blob.size);
 
     struct HksBlob inData = { (uint32_t)g_inData.length(), (uint8_t *)g_inData.c_str() };
-    uint8_t signOutData[Unittest::LocalSignVerify::RSA_KEY_SIZE_2048 / HKS_BITS_PER_BYTE] = { 0 };
+    uint8_t signOutData[HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_2048)] = { 0 };
     struct HksBlob signature = { sizeof(signOutData), signOutData };
 
     ret = HksSign(&privateKey, nullptr, &inData, &signature);
@@ -415,7 +415,7 @@ HWTEST_F(HksLocalSignVerifyTest, HksLocalSignVerifyTest008, TestSize.Level0)
     ret = InitParamSet(&signParamSet, g_rsaSignParams001, sizeof(g_rsaSignParams001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    uint8_t signOutData[Unittest::LocalSignVerify::RSA_KEY_SIZE_2048 / HKS_BITS_PER_BYTE] = { 0 };
+    uint8_t signOutData[HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_2048)] = { 0 };
     struct HksBlob signature = { sizeof(signOutData), signOutData };
 
     ret = HksSign(&privateKey, signParamSet, nullptr, &signature);
@@ -501,7 +501,7 @@ HWTEST_F(HksLocalSignVerifyTest, HksLocalSignVerifyTest010, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     struct HksBlob inData = { (uint32_t)g_inData.length(), (uint8_t *)g_inData.c_str() };
-    uint8_t signOutData[Unittest::LocalSignVerify::RSA_KEY_SIZE_2048 / HKS_BITS_PER_BYTE] = { 0 };
+    uint8_t signOutData[HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_2048)] = { 0 };
     struct HksBlob signature = { sizeof(signOutData), signOutData };
 
     ret = HksSign(&privateKey, signParamSet, &inData, &signature);

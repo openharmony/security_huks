@@ -22,7 +22,6 @@
 namespace Unittest::MlKemEncap {
 static const std::string g_inData = "Hks_ML_KEM_Encap_Test_000000000000000000000000000000000000000000000"
                                     "0000000000000000000000000000000000000000000000000000000000000_string";
-const uint32_t ML_KEM_COMMON_SIZE = 4096;
 }
 
 #endif // HKS_MLKEM_ENCAP_DECAP_TEST_H
