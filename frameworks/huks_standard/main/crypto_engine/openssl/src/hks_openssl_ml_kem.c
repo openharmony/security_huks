@@ -30,16 +30,7 @@
 #include "hks_template.h"
 #include "hks_type.h"
 #include "hks_type_enum.h"
-
-static const char *GetMlKemAlgName(uint32_t paramSetId)
-{
-    if (paramSetId == HKS_ML_KEM_KEY_PARAM_SET_768) {
-        return "ML-KEM-768";
-    } else if (paramSetId == HKS_ML_KEM_KEY_PARAM_SET_1024) {
-        return "ML-KEM-1024";
-    }
-    return NULL;
-}
+#include "hks_openssl_mlkem.h"
 
 static int32_t GetMlKemKeySizes(uint32_t paramSetId, uint32_t *pubKeySize, uint32_t *priKeySize)
 {
@@ -107,7 +98,7 @@ static int32_t MlKemGetKeyMaterial(EVP_PKEY *pkey, uint32_t paramSetId, struct H
 
 int32_t HksOpensslMlKemGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
 {
-    const char *algName = GetMlKemAlgName(spec->keyLen);
+    const char *algName = HksOpensslMlKemGetAlgName(spec->keyLen);
     HKS_IF_NULL_LOGE_RETURN(algName, HKS_ERROR_INVALID_KEY_SIZE, "get ml-kem alg name failed");
 
     EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_from_name(NULL, algName, NULL);
@@ -141,6 +132,8 @@ int32_t HksOpensslMlKemGenerateKey(const struct HksKeySpec *spec, struct HksBlob
 #ifdef HKS_SUPPORT_ML_KEM_GET_PUBLIC_KEY
 int32_t HksOpensslMlKemGetPubKey(const struct HksBlob *keyIn, struct HksBlob *keyOut)
 {
+    HKS_IF_TRUE_LOGE_RETURN(keyIn->size < sizeof(struct HksKeyMaterialMlKem), HKS_ERROR_INVALID_ARGUMENT,
+        "invalid keyIn size %" LOG_PUBLIC "u", keyIn->size)
     struct HksKeyMaterialMlKem *keyMaterial = (struct HksKeyMaterialMlKem *)keyIn->data;
     if (keyMaterial->pubKeySize == 0 || keyOut->size < sizeof(struct HksKeyMaterialMlKem)) {
         HKS_LOG_E("get ml-kem public key size or output size invalid");

@@ -32,21 +32,12 @@
 
 #define HKS_OPENSSL_SUCCESS 1
 
-static const char *MlKemGetAlgName(uint32_t keyParamSet)
-{
-    if (keyParamSet == HKS_ML_KEM_KEY_PARAM_SET_768) {
-        return "ML-KEM-768";
-    } else if (keyParamSet == HKS_ML_KEM_KEY_PARAM_SET_1024) {
-        return "ML-KEM-1024";
-    }
-    HKS_LOG_E("invalid ml-kem paramSet %" LOG_PUBLIC "u", keyParamSet);
-    return NULL;
-}
-
 static int32_t MlKemEncapsulateInitCtx(const struct HksBlob *rawKey, EVP_PKEY **pkey)
 {
+    HKS_IF_TRUE_LOGE_RETURN(rawKey->size < sizeof(struct HksKeyMaterialMlKem), HKS_ERROR_INVALID_ARGUMENT,
+        "invalid raw key size %" LOG_PUBLIC "u", rawKey->size)
     struct HksKeyMaterialMlKem *keyMaterial = (struct HksKeyMaterialMlKem *)rawKey->data;
-    const char *algName = MlKemGetAlgName(keyMaterial->keyParamSet);
+    const char *algName = HksOpensslMlKemGetAlgName(keyMaterial->keyParamSet);
     HKS_IF_NULL_LOGE_RETURN(algName, HKS_ERROR_INVALID_KEY_SIZE, "get ml-kem alg name failed")
 
     EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_from_name(NULL, algName, NULL);
@@ -153,8 +144,10 @@ int32_t HksOpensslMlKemEncapsulate(const struct HksBlob *rawKey, const struct Hk
 
 static int32_t MlKemDecapsulateInitCtx(const struct HksBlob *rawKey, EVP_PKEY **pkey)
 {
+    HKS_IF_TRUE_LOGE_RETURN(rawKey->size < sizeof(struct HksKeyMaterialMlKem), HKS_ERROR_INVALID_ARGUMENT, \
+        "invalid raw key size %" LOG_PUBLIC "u", rawKey->size)
     struct HksKeyMaterialMlKem *keyMaterial = (struct HksKeyMaterialMlKem *)rawKey->data;
-    const char *algName = MlKemGetAlgName(keyMaterial->keyParamSet);
+    const char *algName = HksOpensslMlKemGetAlgName(keyMaterial->keyParamSet);
     HKS_IF_NULL_LOGE_RETURN(algName, HKS_ERROR_INVALID_KEY_SIZE, "get ml-kem alg name failed")
 
     EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_from_name(NULL, algName, NULL);
