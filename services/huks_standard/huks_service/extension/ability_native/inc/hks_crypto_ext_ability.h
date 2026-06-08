@@ -51,7 +51,6 @@
     break; \
 } })
 
-// 1
 #define HKS_EXT_IF_TRUE_EXCU(BOOL_FUNC, EXCU_FUNC) \
 ({ if (BOOL_FUNC) { \
     (EXCU_FUNC); \
