@@ -14,7 +14,7 @@
  */
 
 #include "hks_local_sign_verify_test.h"
-
+#include "hks_template.h"
 #include <gtest/gtest.h>
 
 #ifdef L2_STANDARD
@@ -199,7 +199,8 @@ static int32_t LocalSignVerify(const struct HksParam *genParams, uint32_t genPar
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(sign) failed.";
 
     struct HksBlob inData = { (uint32_t)g_inData.length(), (uint8_t *)g_inData.c_str() };
-    uint8_t signOutData[signOutMaxSize] = { 0 };
+    uint8_t *signOutData = (uint8_t *)HksMalloc(signOutMaxSize);
+    HKS_IF_NULL_RETURN(signOutData, HKS_ERROR_MALLOC_FAIL);
     struct HksBlob signature = { signOutMaxSize, signOutData };
 
     ret = HksSign(&privateKey, signParamSet, &inData, &signature);
