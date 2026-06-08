@@ -31,4 +31,10 @@ int32_t HksGetFrontUserId(int32_t &outId)
     return HKS_SUCCESS;
 }
 
+int32_t VerifyCallerAndAdjustUidParam(const HksProcessInfo &processInfo, const CppParamSet &paramSet,
+    CppParamSet &newParamSet)
+{
+    return HKS_SUCCESS;
+}
+
 }

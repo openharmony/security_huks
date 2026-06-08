@@ -16,6 +16,8 @@
 #ifndef HKS_UKEY_SYSTEM_ADAPTER_H
 #define HKS_UKEY_SYSTEM_ADAPTER_H
 
+#include "hks_plugin_def.h"
+#include "hks_cpp_paramset.h"
 #include <string>
 
 namespace OHOS {
@@ -24,6 +26,8 @@ namespace Huks {
 
     int32_t HksGetFrontUserId(int32_t &outId);
     int32_t HksGetBundleNameFromUid(uint32_t uid, std::string &bundleName);
+    int32_t VerifyCallerAndAdjustUidParam(const HksProcessInfo &processInfo, const CppParamSet &paramSet,
+        CppParamSet &newParamSet);
 
 }
 }
