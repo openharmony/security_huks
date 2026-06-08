@@ -44,5 +44,7 @@ int HksAPITest018(void);
 int HksAPITest019(void);
 int HksAPITest020(void);
 int HksAPITest021(void);
+int HksAPITest022(void);
+int HksAPITest023(void);
 }
 #endif

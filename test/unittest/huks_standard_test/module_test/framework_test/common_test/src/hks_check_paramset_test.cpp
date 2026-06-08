@@ -476,4 +476,189 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest015, TestSize.Level0)
     ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_INFO) << "HksCheckParamsetTest015 failed, ret = " << ret;
 }
 
+/**
+ * @tc.name: HksCheckParamsetTest.HksCheckParamsetTest016
+ * @tc.desc: tdd CheckMlDsaKeyLen and CheckMlKemKeyLen
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest016, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksCheckParamsetTest016");
+
+    /* --- CheckMlDsaKeyLen --- */
+    /* key too small */
+    uint8_t smallBuf[4] = {0};
+    HksBlob smallKey = { .size = sizeof(smallBuf), .data = smallBuf };
+    ParamsValues mldsaValues = {
+        {.needCheck = true, .value = HKS_ML_DSA_KEY_PARAM_SET_44, .isAbsent = false},
+        {0}, {0}, {0}, {0},
+    };
+    int32_t ret = CheckMlDsaKeyLen(HKS_ALG_ML_DSA, 0, &mldsaValues, &smallKey);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_INFO);
+
+    /* invalid keyAlg */
+    struct HksKeyMaterialMlDsa mldsaMat = {
+        .keyAlg = HKS_ALG_RSA, .keyParamSet = HKS_ML_DSA_KEY_PARAM_SET_44,
+        .pubKeySize = 0, .priKeySize = HKS_ML_DSA_PRI_KEY_SIZE_2560,
+    };
+    HksBlob mldsaKey = { .size = sizeof(mldsaMat), .data = reinterpret_cast<uint8_t *>(&mldsaMat) };
+    ret = CheckMlDsaKeyLen(HKS_ALG_ML_DSA, HKS_KEY_TYPE_PRIVATE_KEY, &mldsaValues, &mldsaKey);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_INFO);
+
+    /* invalid keyParamSet -> GetMlDsaExpectedSize fails */
+    mldsaMat.keyAlg = HKS_ALG_ML_DSA;
+    mldsaMat.keyParamSet = 999;
+    ret = CheckMlDsaKeyLen(HKS_ALG_ML_DSA, HKS_KEY_TYPE_PRIVATE_KEY, &mldsaValues, &mldsaKey);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_INFO);
+
+    /* private key with non-zero pubKeySize */
+    mldsaMat.keyParamSet = HKS_ML_DSA_KEY_PARAM_SET_44;
+    mldsaMat.pubKeySize = 1;
+    ret = CheckMlDsaKeyLen(HKS_ALG_ML_DSA, HKS_KEY_TYPE_PRIVATE_KEY, &mldsaValues, &mldsaKey);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_INFO);
+
+    /* private key success */
+    mldsaMat.pubKeySize = 0;
+    mldsaMat.priKeySize = HKS_ML_DSA_PRI_KEY_SIZE_2560;
+    ret = CheckMlDsaKeyLen(HKS_ALG_ML_DSA, HKS_KEY_TYPE_PRIVATE_KEY, &mldsaValues, &mldsaKey);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    /* key pair success (param set 65) */
+    mldsaMat.keyParamSet = HKS_ML_DSA_KEY_PARAM_SET_65;
+    mldsaMat.pubKeySize = HKS_ML_DSA_PUB_KEY_SIZE_1952;
+    mldsaMat.priKeySize = HKS_ML_DSA_PRI_KEY_SIZE_4032;
+    ParamsValues mldsaValues65 = {
+        {.needCheck = true, .value = HKS_ML_DSA_KEY_PARAM_SET_65, .isAbsent = false},
+        {0}, {0}, {0}, {0},
+    };
+    ret = CheckMlDsaKeyLen(HKS_ALG_ML_DSA, HKS_KEY_TYPE_KEY_PAIR, &mldsaValues65, &mldsaKey);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    /* key pair wrong pubKeySize */
+    mldsaMat.pubKeySize = 1;
+    ret = CheckMlDsaKeyLen(HKS_ALG_ML_DSA, HKS_KEY_TYPE_KEY_PAIR, &mldsaValues65, &mldsaKey);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_INFO);
+
+    /* key->size < keySize */
+    mldsaMat.pubKeySize = HKS_ML_DSA_PUB_KEY_SIZE_1952;
+    mldsaMat.priKeySize = HKS_ML_DSA_PRI_KEY_SIZE_4032;
+    HksBlob truncatedKey = { .size = sizeof(mldsaMat), .data = reinterpret_cast<uint8_t *>(&mldsaMat) };
+    ret = CheckMlDsaKeyLen(HKS_ALG_ML_DSA, HKS_KEY_TYPE_KEY_PAIR, &mldsaValues65, &truncatedKey);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_INFO);
+
+    /* --- CheckMlKemKeyLen --- */
+    /* key too small */
+    ret = CheckMlKemKeyLen(HKS_ALG_ML_KEM, 0, &mldsaValues, &smallKey);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_INFO);
+
+    /* invalid keyAlg */
+    struct HksKeyMaterialMlKem mlkemMat = {
+        .keyAlg = HKS_ALG_RSA, .keyParamSet = HKS_ML_KEM_KEY_PARAM_SET_768,
+        .pubKeySize = 0, .priKeySize = HKS_ML_KEM_PRI_KEY_SIZE_2400,
+    };
+    HksBlob mlkemKey = { .size = sizeof(mlkemMat), .data = reinterpret_cast<uint8_t *>(&mlkemMat) };
+    ParamsValues mlkemValues = {
+        {.needCheck = true, .value = HKS_ML_KEM_KEY_PARAM_SET_768, .isAbsent = false},
+        {0}, {0}, {0}, {0},
+    };
+    ret = CheckMlKemKeyLen(HKS_ALG_ML_KEM, HKS_KEY_TYPE_PRIVATE_KEY, &mlkemValues, &mlkemKey);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_INFO);
+
+    /* private key success */
+    mlkemMat.keyAlg = HKS_ALG_ML_KEM;
+    mlkemMat.pubKeySize = 0;
+    mlkemMat.priKeySize = HKS_ML_KEM_PRI_KEY_SIZE_2400;
+    ret = CheckMlKemKeyLen(HKS_ALG_ML_KEM, HKS_KEY_TYPE_PRIVATE_KEY, &mlkemValues, &mlkemKey);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    /* key pair success (param set 1024) */
+    mlkemMat.keyParamSet = HKS_ML_KEM_KEY_PARAM_SET_1024;
+    mlkemMat.pubKeySize = HKS_ML_KEM_PUB_KEY_SIZE_1568;
+    mlkemMat.priKeySize = HKS_ML_KEM_PRI_KEY_SIZE_3168;
+    ParamsValues mlkemValues1024 = {
+        {.needCheck = true, .value = HKS_ML_KEM_KEY_PARAM_SET_1024, .isAbsent = false},
+        {0}, {0}, {0}, {0},
+    };
+    ret = CheckMlKemKeyLen(HKS_ALG_ML_KEM, HKS_KEY_TYPE_KEY_PAIR, &mlkemValues1024, &mlkemKey);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    /* key pair wrong priKeySize */
+    mlkemMat.priKeySize = 1;
+    ret = CheckMlKemKeyLen(HKS_ALG_ML_KEM, HKS_KEY_TYPE_KEY_PAIR, &mlkemValues1024, &mlkemKey);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_INFO);
+}
+
+/**
+ * @tc.name: HksCheckParamsetTest.HksCheckParamsetTest017
+ * @tc.desc: tdd HandleKeyClassTag branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest017, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksCheckParamsetTest017");
+
+    /* no KEY_CLASS tag -> returns via HksGetParamSet */
+    struct HksParamSet *paramSetIn = nullptr;
+    struct HksParamSet *paramSetOut = nullptr;
+    int32_t ret = HksInitParamSet(&paramSetIn);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam algParam = { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES };
+    ret = HksAddParams(paramSetIn, &algParam, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSetIn);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = HandleKeyClassTag(paramSetIn, &paramSetOut);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksFreeParamSet(&paramSetOut);
+
+    /* KEY_CLASS_DEFAULT */
+    struct HksParamSet *paramSet2 = nullptr;
+    ret = HksInitParamSet(&paramSet2);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam classParam = { .tag = HKS_TAG_KEY_CLASS, .uint32Param = HKS_KEY_CLASS_DEFAULT };
+    ret = HksAddParams(paramSet2, &classParam, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet2);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *out2 = nullptr;
+    ret = HandleKeyClassTag(paramSet2, &out2);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksFreeParamSet(&out2);
+    HksFreeParamSet(&paramSet2);
+
+    /* KEY_CLASS_EXTENSION -> NOT_SUPPORTED */
+    struct HksParamSet *paramSet3 = nullptr;
+    ret = HksInitParamSet(&paramSet3);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam extParam = { .tag = HKS_TAG_KEY_CLASS, .uint32Param = HKS_KEY_CLASS_EXTENSION };
+    ret = HksAddParams(paramSet3, &extParam, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet3);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *out3 = nullptr;
+    ret = HandleKeyClassTag(paramSet3, &out3);
+    ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
+    HksFreeParamSet(&paramSet3);
+
+    /* invalid keyClass -> INVALID_ARGUMENT */
+    struct HksParamSet *paramSet4 = nullptr;
+    ret = HksInitParamSet(&paramSet4);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam invalidParam = { .tag = HKS_TAG_KEY_CLASS, .uint32Param = 99 };
+    ret = HksAddParams(paramSet4, &invalidParam, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet4);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *out4 = nullptr;
+    ret = HandleKeyClassTag(paramSet4, &out4);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
+    HksFreeParamSet(&paramSet4);
+
+    HksFreeParamSet(&paramSetIn);
+}
+
 }

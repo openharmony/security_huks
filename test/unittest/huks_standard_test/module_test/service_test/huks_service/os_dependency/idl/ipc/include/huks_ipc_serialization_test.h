@@ -28,5 +28,14 @@ int HksIpcSerializationTest008(void);
 int HksIpcSerializationTest009(void);
 int HksIpcSerializationTest010(void);
 int HksIpcSerializationTest011(void);
+int HksIpcSerializationTest018(void);
+int HksIpcSerializationTest019(void);
+int HksIpcSerializationTest020(void);
+int HksIpcSerializationTest021(void);
+int HksIpcSerializationTest022(void);
+int HksIpcSerializationTest023(void);
+int HksIpcSerializationTest024(void);
+int HksIpcSerializationTest025(void);
+int HksIpcSerializationTest026(void);
 }
 #endif
