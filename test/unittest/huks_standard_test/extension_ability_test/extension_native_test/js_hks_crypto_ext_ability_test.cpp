@@ -1300,12 +1300,14 @@ HWTEST_F(JsCryptoExtAbilityTest, BuildImportWrappedKeyParam_0000, testing::ext::
     EXPECT_FALSE(BuildImportWrappedKeyParam(env, param, argv, argc));
 
     /* first ok, second napi_create_string_utf8 fails */
+    testing::Mock::VerifyAndClearExpectations(insMoc.get());
     EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)))
         .WillOnce(Return(napi_invalid_arg));
     EXPECT_FALSE(BuildImportWrappedKeyParam(env, param, argv, argc));
 
     /* both strings ok, empty paramSet (GetParamSet null), MakeJsNativeVectorInData fails */
+    testing::Mock::VerifyAndClearExpectations(insMoc.get());
     EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)));
@@ -1313,6 +1315,7 @@ HWTEST_F(JsCryptoExtAbilityTest, BuildImportWrappedKeyParam_0000, testing::ext::
     EXPECT_FALSE(BuildImportWrappedKeyParam(env, param, argv, argc));
 
     /* all success with empty paramSet */
+    testing::Mock::VerifyAndClearExpectations(insMoc.get());
     uint8_t inDataBuf[2] = {0};
     void *inDataPtr = inDataBuf;
     EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _))
@@ -1339,15 +1342,17 @@ HWTEST_F(JsCryptoExtAbilityTest, BuildParam_0000, testing::ext::TestSize.Level0)
     EXPECT_EQ(argc, ARGC_ONE);
 
     /* paramSet with data, napi_create_object fails */
+    testing::Mock::VerifyAndClearExpectations(insMoc.get());
     std::vector<HksParam> paramsVec = {{ .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES }};
     CppParamSet paramSet(paramsVec);
     EXPECT_CALL(*insMoc, napi_create_object(_, _)).WillOnce(Return(napi_invalid_arg));
     EXPECT_FALSE(BuildParam(env, paramSet, &argv, argc));
 
     /* paramSet with data, napi_create_object ok, GenerateHksParamArray fails */
+    testing::Mock::VerifyAndClearExpectations(insMoc.get());
     EXPECT_CALL(*insMoc, napi_create_object(_, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(rslt), Return(napi_ok)));
-    EXPECT_CALL(*insMoc, napi_create_array_with_length(_, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(Return(napi_invalid_arg));
     EXPECT_FALSE(BuildParam(env, paramSet, &argv, argc));
 }
 
@@ -1364,16 +1369,18 @@ HWTEST_F(JsCryptoExtAbilityTest, ConvertFunctionResult_0000, testing::ext::TestS
 
     /* napi_get_named_property "resultCode" fails */
     {
+        testing::Mock::VerifyAndClearExpectations(insMoc.get());
         CryptoResultParam rp;
-        EXPECT_CALL(*insMoc, napi_get_named_property(_, _, StrEq("resultCode"), _))
+        EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
             .WillOnce(Return(napi_invalid_arg));
         EXPECT_EQ(ConvertFunctionResult(env, funcResult, rp), HKS_ERROR_EXT_GET_NAME_PROPERTY_FAILED);
     }
 
     /* resultCode ok, napi_get_value_int32 fails */
     {
+        testing::Mock::VerifyAndClearExpectations(insMoc.get());
         CryptoResultParam rp;
-        EXPECT_CALL(*insMoc, napi_get_named_property(_, _, StrEq("resultCode"), _))
+        EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
             .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)));
         EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _)).WillOnce(Return(napi_invalid_arg));
         EXPECT_EQ(ConvertFunctionResult(env, funcResult, rp), HKS_ERROR_EXT_GET_VALUE_FAILED);
@@ -1381,17 +1388,20 @@ HWTEST_F(JsCryptoExtAbilityTest, ConvertFunctionResult_0000, testing::ext::TestS
 
     /* resultCode ok, default paramType -> GetErrorInfoParams, errInfo not found */
     {
+        testing::Mock::VerifyAndClearExpectations(insMoc.get());
         CryptoResultParam rp;
         rp.paramType = CryptoResultParamType::CLEAR_UKEY_PIN_AUTH;
         EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
             .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)))  /* resultCode */
             .WillOnce(Return(napi_invalid_arg));  /* errInfo not found */
+        EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _)).WillOnce(Return(napi_ok));
         EXPECT_EQ(ConvertFunctionResult(env, funcResult, rp), HKS_SUCCESS);
         EXPECT_NE(rp.errInfo, nullptr);
     }
 
     /* OPEN_REMOTE_HANDLE: errInfo not found, handle ok */
     {
+        testing::Mock::VerifyAndClearExpectations(insMoc.get());
         CryptoResultParam rp;
         rp.paramType = CryptoResultParamType::OPEN_REMOTE_HANDLE;
         EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
@@ -1406,6 +1416,7 @@ HWTEST_F(JsCryptoExtAbilityTest, ConvertFunctionResult_0000, testing::ext::TestS
 
     /* GET_RESOURCE_ID: errInfo not found, resourceId ok */
     {
+        testing::Mock::VerifyAndClearExpectations(insMoc.get());
         CryptoResultParam rp;
         rp.paramType = CryptoResultParamType::GET_RESOURCE_ID;
         EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
@@ -1420,6 +1431,7 @@ HWTEST_F(JsCryptoExtAbilityTest, ConvertFunctionResult_0000, testing::ext::TestS
 
     /* AUTH_UKEY_PIN: errInfo not found, authState ok, retryCount ok */
     {
+        testing::Mock::VerifyAndClearExpectations(insMoc.get());
         CryptoResultParam rp;
         rp.paramType = CryptoResultParamType::AUTH_UKEY_PIN;
         EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
@@ -1436,6 +1448,7 @@ HWTEST_F(JsCryptoExtAbilityTest, ConvertFunctionResult_0000, testing::ext::TestS
 
     /* GET_UKEY_PIN_AUTH_STATE: errInfo not found, authState ok */
     {
+        testing::Mock::VerifyAndClearExpectations(insMoc.get());
         CryptoResultParam rp;
         rp.paramType = CryptoResultParamType::GET_UKEY_PIN_AUTH_STATE;
         EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
@@ -1450,6 +1463,7 @@ HWTEST_F(JsCryptoExtAbilityTest, ConvertFunctionResult_0000, testing::ext::TestS
 
     /* UPDATE_SESSION: errInfo not found, outData typedarray */
     {
+        testing::Mock::VerifyAndClearExpectations(insMoc.get());
         CryptoResultParam rp;
         rp.paramType = CryptoResultParamType::UPDATE_SESSION;
         EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
@@ -1465,6 +1479,7 @@ HWTEST_F(JsCryptoExtAbilityTest, ConvertFunctionResult_0000, testing::ext::TestS
 
     /* SET_OR_GET_PROPERTY: errInfo not found, property array empty */
     {
+        testing::Mock::VerifyAndClearExpectations(insMoc.get());
         CryptoResultParam rp;
         rp.paramType = CryptoResultParamType::SET_OR_GET_PROPERTY;
         EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
