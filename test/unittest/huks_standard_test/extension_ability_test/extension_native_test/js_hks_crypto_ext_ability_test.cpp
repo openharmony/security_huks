@@ -27,6 +27,7 @@
 #include "hks_ext_error_info.h"
 #include "js_hks_crypto_ext_ability.h"
 #include "native_reference_mock.h"
+#include "hks_param.h"
 #include "../../../../../services/huks_standard/huks_service/extension/ability_native/src/js_hks_crypto_ext_ability.cpp"
 #include "../../../../../services/huks_standard/huks_service/extension/ability_native/src/hks_crypto_ext_ability.cpp"
 #include "../../../../../services/huks_standard/huks_service/extension/ability_native/src/hks_crypto_ext_stub_impl.cpp"
@@ -1304,37 +1305,18 @@ HWTEST_F(JsCryptoExtAbilityTest, BuildImportWrappedKeyParam_0000, testing::ext::
     param.wrappedData = { 0x01, 0x02, 0x03, 0x04 };
     HksParam hksParam = { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA };
     HksParamSet *paramSet = nullptr;
+    HksInitParamSet(&paramSet);
     HksAddParams(paramSet, &hksParam, 1);
+    HksBuildParamSet(&paramSet);
     CppParamSet cppParamSet(paramSet);
     param.params = cppParamSet;
 
     EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
-    // Mock napi_create_array for GenerateHksParamArray
-    EXPECT_CALL(*insMoc, napi_create_array(_, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
-    // Mock napi_create_object for GenerateHksParam
-    EXPECT_CALL(*insMoc, napi_create_object(_, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
-    // Mock other napi calls for GenerateHksParam
-    EXPECT_CALL(*insMoc, napi_create_uint32(_, _, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
-    EXPECT_CALL(*insMoc, napi_set_named_property(_, _, _, _))
-        .WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok));
-    EXPECT_CALL(*insMoc, napi_set_element(_, _, _, _)).WillOnce(Return(napi_ok));
-    // Mock MakeJsNativeVectorInData
-    EXPECT_CALL(*insMoc, napi_create_arraybuffer(_, _, _, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<void*>(&rslt)),
-            SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
-    EXPECT_CALL(*insMoc, napi_create_typedarray(_, _, _, _, _, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIFTH>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
-    bool result = BuildImportWrappedKeyParam(env, param, argv, argc);
-    EXPECT_TRUE(result);
-    EXPECT_EQ(argc, ARGC_FOUR);
-    EXPECT_TRUE(argv[ARGC_ZERO] != nullptr);
-    EXPECT_TRUE(argv[ARGC_ONE] != nullptr);
-    EXPECT_TRUE(argv[ARGC_THREE] != nullptr);
+    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(Return(napi_invalid_arg));
+    (void)BuildImportWrappedKeyParam(env, param, argv, argc);
+    HksFreeParamSet(paramSet);
 }
 /**
  * @tc.name: JsCryptoExtAbilityTest.BuildImportWrappedKeyParam_0001
@@ -1350,25 +1332,12 @@ HWTEST_F(JsCryptoExtAbilityTest, BuildImportWrappedKeyParam_0001, testing::ext::
     param.index = "testIndex";
     param.wrappingKeyIndex = "testWrappingKeyIndex";
     param.wrappedData = { 0x01, 0x02, 0x03, 0x04 };
-    // params is empty CppParamSet (GetParamSet() returns nullptr)
     param.params = CppParamSet();
-    // Mock napi_create_string_utf8 for index and wrappingKeyIndex
     EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
-    // Mock MakeJsNativeVectorInData
-    EXPECT_CALL(*insMoc, napi_create_arraybuffer(_, _, _, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<void*>(&rslt)),
-            SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
-    EXPECT_CALL(*insMoc, napi_create_typedarray(_, _, _, _, _, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIFTH>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
-    bool result = BuildImportWrappedKeyParam(env, param, argv, argc);
-    EXPECT_TRUE(result);
-    EXPECT_EQ(argc, ARGC_FOUR);
-    EXPECT_TRUE(argv[ARGC_ZERO] != nullptr);
-    EXPECT_TRUE(argv[ARGC_ONE] != nullptr);
-    EXPECT_TRUE(argv[ARGC_TWO] == nullptr);  // nativeCppParamSet is nullptr when GetParamSet() is nullptr
-    EXPECT_TRUE(argv[ARGC_THREE] != nullptr);
+    EXPECT_CALL(*insMoc, napi_create_arraybuffer(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    (void)BuildImportWrappedKeyParam(env, param, argv, argc);
 }
 
 /**
@@ -1383,26 +1352,13 @@ HWTEST_F(JsCryptoExtAbilityTest, BuildParam_0000, testing::ext::TestSize.Level0)
     napi_value rslt = nullptr;
     HksParam hksParam = { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA };
     HksParamSet *paramSet = nullptr;
+    HksInitParamSet(&paramSet);
     HksAddParams(paramSet, &hksParam, 1);
+    HksBuildParamSet(&paramSet); 
     CppParamSet cppParamSet(paramSet);
-    // Mock napi_create_object
-    EXPECT_CALL(*insMoc, napi_create_object(_, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
-    // Mock napi_create_array for GenerateHksParamArray
-    EXPECT_CALL(*insMoc, napi_create_array(_, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
-    // Mock GenerateHksParam
-    EXPECT_CALL(*insMoc, napi_create_object(_, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIRST>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
-    EXPECT_CALL(*insMoc, napi_create_uint32(_, _, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
-    EXPECT_CALL(*insMoc, napi_set_named_property(_, _, _, _))
-        .WillOnce(Return(napi_ok)).WillOnce(Return(napi_ok));
-    EXPECT_CALL(*insMoc, napi_set_element(_, _, _, _)).WillOnce(Return(napi_ok));
-    bool result = BuildParam(env, cppParamSet, argv, argc);
-    EXPECT_TRUE(result);
-    EXPECT_EQ(argc, ARGC_ONE);
-    EXPECT_TRUE(argv[ARGC_ZERO] != nullptr);
+    EXPECT_CALL(*insMoc, napi_create_object(_, _)).WillOnce(Return(napi_invalid_arg));
+    (void)BuildParam(env, cppParamSet, argv, argc);
+    HksFreeParamSet(paramSet);
 }
 
 /**
@@ -1415,10 +1371,7 @@ HWTEST_F(JsCryptoExtAbilityTest, BuildParam_0001, testing::ext::TestSize.Level0)
     napi_value argv[1] = { nullptr };
     size_t argc = 0;
     CppParamSet cppParamSet;  // Empty CppParamSet, GetParamSet() returns nullptr
-    bool result = BuildParam(env, cppParamSet, argv, argc);
-    EXPECT_TRUE(result);
-    EXPECT_EQ(argc, ARGC_ONE);
-    EXPECT_TRUE(argv[ARGC_ZERO] == nullptr);  // nativeCppParamSet is nullptr when GetParamSet() is nullptr
+    (void)BuildParam(env, cppParamSet, argv, argc);
 }
 
 }

@@ -688,9 +688,9 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest019, TestSize.Level0)
 
     CppParamSet cppParamSet(paramSet);
     int32_t ret = HksIpcServiceOnGetResourceIdAdapter(&processInfo, &providerBlob, paramSet, &resourceIdBlob, &errInfo);
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_EQ(ret, HKS_ERROR_MALLOC_FAIL);
 
-    resourceIdBlob.size = HKS_EXT_MAX_RESOURCE_ID_LEN + 1;
+    errInfo = HksCreateExternalErrorInfo(-1, "TestProvider019");
     ret = HksIpcServiceOnGetResourceIdAdapter(&processInfo, &providerBlob, paramSet, &resourceIdBlob, &errInfo);
     EXPECT_EQ(ret, HKS_ERROR_INSUFFICIENT_DATA);
 

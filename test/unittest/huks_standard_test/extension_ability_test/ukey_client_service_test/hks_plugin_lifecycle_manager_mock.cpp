@@ -17,6 +17,7 @@
 #include "hks_plugin_loader.h"
 #include "hks_log.h"
 #include "hks_external_error_info.h"
+#include "hks_type.h"
 
 namespace OHOS {
 namespace Security {
@@ -188,6 +189,9 @@ int32_t HuksPluginLifeCycleMgr::OnGetResourceId(const HksProcessInfo &processInf
     const std::string &providerName, const CppParamSet &paramSet, std::string &resourceId,
     struct HksExternalErrorInfo **errInfo)
 {
+    if (*errInfo != nullptr && (*errInfo)->errVal == -1) {
+        resourceId = std::string(HKS_EXT_MAX_RESOURCE_ID_LEN + 1, 'A');
+    }
     return HKS_SUCCESS;
 }
 
