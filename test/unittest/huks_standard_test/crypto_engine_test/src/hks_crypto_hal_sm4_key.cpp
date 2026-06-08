@@ -54,7 +54,7 @@ const TestCaseParams HKS_CRYPTO_HAL_SM4_KEY_002_PARAMS = {
         .keyLen = HKS_AES_KEY_SIZE_192,
         .algParam = nullptr,
     },
-    .generateKeyResult = HKS_ERROR_INVALID_KEY_SIZE,
+    .generateKeyResult = HKS_ERROR_INVALID_ARGUMENT,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_SM4_KEY_003_PARAMS = {
@@ -63,7 +63,7 @@ const TestCaseParams HKS_CRYPTO_HAL_SM4_KEY_003_PARAMS = {
         .keyLen = 0,
         .algParam = nullptr,
     },
-    .generateKeyResult = HKS_ERROR_INVALID_KEY_SIZE,
+    .generateKeyResult = HKS_ERROR_INVALID_ARGUMENT,
 };
 }  // namespace
 

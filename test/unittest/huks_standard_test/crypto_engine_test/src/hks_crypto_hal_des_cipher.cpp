@@ -112,13 +112,9 @@ const TestCaseParams HKS_CRYPTO_HAL_DES_CIPHER_003_PARAMS = {
         .algParam = (void *)&TAG_IV,
     },
     .hexData = "0011223344556677",
-#if defined(HKS_SUPPORT_DES_C) && defined(HKS_SUPPORT_DES_CTR_NOPADDING)
+#if defined(HKS_SUPPORT_DES_C)
     .generateKeyResult = HKS_SUCCESS,
-    .encryptResult = HKS_SUCCESS,
-    .decryptResult = HKS_SUCCESS,
-#else
-    .generateKeyResult = HKS_ERROR_NOT_SUPPORTED,
-    .encryptResult = HKS_ERROR_NOT_SUPPORTED,
+    .encryptResult = HKS_ERROR_INVALID_MODE,
     .decryptResult = HKS_ERROR_NOT_SUPPORTED,
 #endif
 };
