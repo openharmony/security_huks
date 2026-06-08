@@ -69,6 +69,7 @@ ohos_unittest("huks_UT_test") {
     "src/hks_hmac_derive_part2_test.cpp",
     "src/hks_hmac_derive_test_common.cpp",
     "src/hks_hmac_test.cpp",
+    "src/hks_local_sign_verify_test.cpp",
     "src/hks_import_wrapped_ecdh_suite_test.cpp",
     "src/hks_import_wrapped_sm2_suite_test.cpp",
     "src/hks_import_wrapped_test_common.cpp",

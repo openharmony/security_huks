@@ -32,12 +32,17 @@ ohos_unittest("crypto_engine_unit_test") {
   ]
 
   sources = [
+    "./src/hks_crypto_hal_3des_cipher.cpp",
+    "./src/hks_crypto_hal_3des_key.cpp",
     "./src/hks_crypto_hal_aes_cipher.cpp",
     "./src/hks_crypto_hal_aes_decrypt.cpp",
     "./src/hks_crypto_hal_aes_encrypt.cpp",
     "./src/hks_crypto_hal_aes_key.cpp",
     "./src/hks_crypto_hal_common.cpp",
     "./src/hks_crypto_hal_common.h",
+    "./src/hks_crypto_hal_curve25519_key.cpp",
+    "./src/hks_crypto_hal_des_cipher.cpp",
+    "./src/hks_crypto_hal_des_key.cpp",
     "./src/hks_crypto_hal_dh.cpp",
     "./src/hks_crypto_hal_dh_agree.cpp",
     "./src/hks_crypto_hal_dsa_key.cpp",
@@ -45,6 +50,7 @@ ohos_unittest("crypto_engine_unit_test") {
     "./src/hks_crypto_hal_ecc_key.cpp",
     "./src/hks_crypto_hal_ecdh_agree.cpp",
     "./src/hks_crypto_hal_ecdsa_sign.cpp",
+    "./src/hks_crypto_hal_ed25519_sign.cpp",
     "./src/hks_crypto_hal_hmac_hmac.cpp",
     "./src/hks_crypto_hal_hmac_key.cpp",
     "./src/hks_crypto_hal_rsa_cipher.cpp",
@@ -54,7 +60,13 @@ ohos_unittest("crypto_engine_unit_test") {
     "./src/hks_crypto_hal_rsa_oaep_decrypt.cpp",
     "./src/hks_crypto_hal_rsa_oaep_encrypt.cpp",
     "./src/hks_crypto_hal_rsa_sign.cpp",
+    "./src/hks_crypto_hal_sm2_encrypt.cpp",
+    "./src/hks_crypto_hal_sm2_key.cpp",
+    "./src/hks_crypto_hal_sm2_sign.cpp",
     "./src/hks_crypto_hal_sm3_cipher.cpp",
+    "./src/hks_crypto_hal_sm4_cipher.cpp",
+    "./src/hks_crypto_hal_sm4_key.cpp",
+    "./src/hks_crypto_hal_x25519_agree.cpp",
   ]
   if (use_crypto_lib == "openssl") {
     sources += [ "./src/hks_crypto_hal_api_openssl.cpp" ]
