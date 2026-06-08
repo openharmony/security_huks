@@ -249,7 +249,7 @@ static int32_t RemotePropertyPack(const CppParamSet &cppParamSet,
         HKS_IF_NOT_EOK_LOGE_BREAK(ret, "memcpy_s returnResult failed")
 
         HKS_IF_TRUE_BREAK(hksParamSet != nullptr && memcpy_s(tmp.get() + resultSize, totalSize - resultSize,
-                hksParamSet, hksParamSet->paramSetSize) != EOK)
+            hksParamSet, hksParamSet->paramSetSize) != EOK)
 
         replySize = totalSize;
         replyData = std::move(tmp);
