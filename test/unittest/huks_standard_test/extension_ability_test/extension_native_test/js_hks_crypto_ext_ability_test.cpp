@@ -1410,7 +1410,7 @@ HWTEST_F(JsCryptoExtAbilityTest, ConvertFunctionResult_0000, testing::ext::TestS
             .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)));  /* handle */
         EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _)).WillOnce(Return(napi_ok));
         EXPECT_CALL(*insMoc, napi_get_value_string_utf8(_, _, _, _, _))
-            .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FOUR>(5), Return(napi_ok)));
+            .WillRepeatedly(DoAll(SetArgPointee<ARG_INDEX_FOUR>(5), Return(napi_ok)));
         EXPECT_EQ(ConvertFunctionResult(env, funcResult, rp), HKS_SUCCESS);
     }
 
@@ -1425,7 +1425,7 @@ HWTEST_F(JsCryptoExtAbilityTest, ConvertFunctionResult_0000, testing::ext::TestS
             .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)));  /* resourceId */
         EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _)).WillOnce(Return(napi_ok));
         EXPECT_CALL(*insMoc, napi_get_value_string_utf8(_, _, _, _, _))
-            .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FOUR>(5), Return(napi_ok)));
+            .WillRepeatedly(DoAll(SetArgPointee<ARG_INDEX_FOUR>(5), Return(napi_ok)));
         EXPECT_EQ(ConvertFunctionResult(env, funcResult, rp), HKS_SUCCESS);
     }
 
