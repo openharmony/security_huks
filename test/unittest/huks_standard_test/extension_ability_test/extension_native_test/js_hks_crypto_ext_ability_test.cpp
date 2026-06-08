@@ -1351,106 +1351,129 @@ HWTEST_F(JsCryptoExtAbilityTest, BuildParam_0000, testing::ext::TestSize.Level0)
 HWTEST_F(JsCryptoExtAbilityTest, ConvertFunctionResult_0000, testing::ext::TestSize.Level0)
 {
     napi_value rslt = reinterpret_cast<napi_value>(0x1);
-    CryptoResultParam resultParams;
+    napi_value funcResult = rslt;
 
     /* funcResult is nullptr */
-    EXPECT_EQ(ConvertFunctionResult(env, nullptr, resultParams), HKS_ERROR_EXT_NULLPTR);
+    {
+        CryptoResultParam rp;
+        EXPECT_EQ(ConvertFunctionResult(env, nullptr, rp), HKS_ERROR_EXT_NULLPTR);
+    }
 
     /* napi_get_named_property "resultCode" fails */
-    napi_value funcResult = rslt;
-    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, StrEq("resultCode"), _))
-        .WillOnce(Return(napi_invalid_arg));
-    EXPECT_EQ(ConvertFunctionResult(env, funcResult, resultParams), HKS_ERROR_EXT_GET_NAME_PROPERTY_FAILED);
+    {
+        CryptoResultParam rp;
+        EXPECT_CALL(*insMoc, napi_get_named_property(_, _, StrEq("resultCode"), _))
+            .WillOnce(Return(napi_invalid_arg));
+        EXPECT_EQ(ConvertFunctionResult(env, funcResult, rp), HKS_ERROR_EXT_GET_NAME_PROPERTY_FAILED);
+    }
 
     /* resultCode ok, napi_get_value_int32 fails */
-    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, StrEq("resultCode"), _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)));
-    EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _)).WillOnce(Return(napi_invalid_arg));
-    EXPECT_EQ(ConvertFunctionResult(env, funcResult, resultParams), HKS_ERROR_EXT_GET_VALUE_FAILED);
+    {
+        CryptoResultParam rp;
+        EXPECT_CALL(*insMoc, napi_get_named_property(_, _, StrEq("resultCode"), _))
+            .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)));
+        EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _)).WillOnce(Return(napi_invalid_arg));
+        EXPECT_EQ(ConvertFunctionResult(env, funcResult, rp), HKS_ERROR_EXT_GET_VALUE_FAILED);
+    }
 
     /* resultCode ok, default paramType -> GetErrorInfoParams, errInfo not found */
-    resultParams.paramType = CryptoResultParamType::CLEAR_UKEY_PIN_AUTH;
-    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)))  /* resultCode */
-        .WillOnce(Return(napi_invalid_arg));  /* errInfo not found */
-    EXPECT_EQ(ConvertFunctionResult(env, funcResult, resultParams), HKS_SUCCESS);
-    EXPECT_NE(resultParams.errInfo, nullptr);
+    {
+        CryptoResultParam rp;
+        rp.paramType = CryptoResultParamType::CLEAR_UKEY_PIN_AUTH;
+        EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+            .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)))  /* resultCode */
+            .WillOnce(Return(napi_invalid_arg));  /* errInfo not found */
+        EXPECT_EQ(ConvertFunctionResult(env, funcResult, rp), HKS_SUCCESS);
+        EXPECT_NE(rp.errInfo, nullptr);
+    }
 
-    /* OPEN_REMOTE_HANDLE: errInfo ok, handle ok */
-    resultParams = CryptoResultParam();
-    resultParams.paramType = CryptoResultParamType::OPEN_REMOTE_HANDLE;
-    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)))  /* resultCode */
-        .WillOnce(Return(napi_invalid_arg))  /* errInfo not found */
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)));  /* handle */
-    EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _)).WillOnce(Return(napi_ok));
-    EXPECT_CALL(*insMoc, napi_get_value_string_utf8(_, _, _, _, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FOUR>(5), Return(napi_ok)));
-    EXPECT_EQ(ConvertFunctionResult(env, funcResult, resultParams), HKS_SUCCESS);
+    /* OPEN_REMOTE_HANDLE: errInfo not found, handle ok */
+    {
+        CryptoResultParam rp;
+        rp.paramType = CryptoResultParamType::OPEN_REMOTE_HANDLE;
+        EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+            .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)))  /* resultCode */
+            .WillOnce(Return(napi_invalid_arg))  /* errInfo not found */
+            .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)));  /* handle */
+        EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _)).WillOnce(Return(napi_ok));
+        EXPECT_CALL(*insMoc, napi_get_value_string_utf8(_, _, _, _, _))
+            .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FOUR>(5), Return(napi_ok)));
+        EXPECT_EQ(ConvertFunctionResult(env, funcResult, rp), HKS_SUCCESS);
+    }
 
-    /* GET_RESOURCE_ID: errInfo ok, resourceId ok */
-    resultParams = CryptoResultParam();
-    resultParams.paramType = CryptoResultParamType::GET_RESOURCE_ID;
-    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)))  /* resultCode */
-        .WillOnce(Return(napi_invalid_arg))  /* errInfo not found */
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)));  /* resourceId */
-    EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _)).WillOnce(Return(napi_ok));
-    EXPECT_CALL(*insMoc, napi_get_value_string_utf8(_, _, _, _, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FOUR>(5), Return(napi_ok)));
-    EXPECT_EQ(ConvertFunctionResult(env, funcResult, resultParams), HKS_SUCCESS);
+    /* GET_RESOURCE_ID: errInfo not found, resourceId ok */
+    {
+        CryptoResultParam rp;
+        rp.paramType = CryptoResultParamType::GET_RESOURCE_ID;
+        EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+            .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)))  /* resultCode */
+            .WillOnce(Return(napi_invalid_arg))  /* errInfo not found */
+            .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)));  /* resourceId */
+        EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _)).WillOnce(Return(napi_ok));
+        EXPECT_CALL(*insMoc, napi_get_value_string_utf8(_, _, _, _, _))
+            .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FOUR>(5), Return(napi_ok)));
+        EXPECT_EQ(ConvertFunctionResult(env, funcResult, rp), HKS_SUCCESS);
+    }
 
-    /* AUTH_UKEY_PIN: errInfo ok, authState ok, retryCount ok */
-    resultParams = CryptoResultParam();
-    resultParams.paramType = CryptoResultParamType::AUTH_UKEY_PIN;
-    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)))  /* resultCode */
-        .WillOnce(Return(napi_invalid_arg))  /* errInfo not found */
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)))  /* authState */
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)));  /* retryCount */
-    EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _))
-        .WillOnce(Return(napi_ok))  /* resultCode */
-        .WillOnce(Return(napi_ok));  /* authState */
-    EXPECT_CALL(*insMoc, napi_get_value_uint32(_, _, _)).WillOnce(Return(napi_ok));
-    EXPECT_EQ(ConvertFunctionResult(env, funcResult, resultParams), HKS_SUCCESS);
+    /* AUTH_UKEY_PIN: errInfo not found, authState ok, retryCount ok */
+    {
+        CryptoResultParam rp;
+        rp.paramType = CryptoResultParamType::AUTH_UKEY_PIN;
+        EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+            .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)))  /* resultCode */
+            .WillOnce(Return(napi_invalid_arg))  /* errInfo not found */
+            .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)))  /* authState */
+            .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)));  /* retryCount */
+        EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _))
+            .WillOnce(Return(napi_ok))  /* resultCode */
+            .WillOnce(Return(napi_ok));  /* authState */
+        EXPECT_CALL(*insMoc, napi_get_value_uint32(_, _, _)).WillOnce(Return(napi_ok));
+        EXPECT_EQ(ConvertFunctionResult(env, funcResult, rp), HKS_SUCCESS);
+    }
 
-    /* GET_UKEY_PIN_AUTH_STATE: errInfo ok, authState ok */
-    resultParams = CryptoResultParam();
-    resultParams.paramType = CryptoResultParamType::GET_UKEY_PIN_AUTH_STATE;
-    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)))  /* resultCode */
-        .WillOnce(Return(napi_invalid_arg))  /* errInfo not found */
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)));  /* authState */
-    EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _))
-        .WillOnce(Return(napi_ok))  /* resultCode */
-        .WillOnce(Return(napi_ok));  /* authState */
-    EXPECT_EQ(ConvertFunctionResult(env, funcResult, resultParams), HKS_SUCCESS);
+    /* GET_UKEY_PIN_AUTH_STATE: errInfo not found, authState ok */
+    {
+        CryptoResultParam rp;
+        rp.paramType = CryptoResultParamType::GET_UKEY_PIN_AUTH_STATE;
+        EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+            .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)))  /* resultCode */
+            .WillOnce(Return(napi_invalid_arg))  /* errInfo not found */
+            .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)));  /* authState */
+        EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _))
+            .WillOnce(Return(napi_ok))  /* resultCode */
+            .WillOnce(Return(napi_ok));  /* authState */
+        EXPECT_EQ(ConvertFunctionResult(env, funcResult, rp), HKS_SUCCESS);
+    }
 
-    /* UPDATE_SESSION: errInfo ok, outData typedarray */
-    resultParams = CryptoResultParam();
-    resultParams.paramType = CryptoResultParamType::UPDATE_SESSION;
-    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)))  /* resultCode */
-        .WillOnce(Return(napi_invalid_arg))  /* errInfo not found */
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)));  /* outData */
-    EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _)).WillOnce(Return(napi_ok));
-    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(Return(napi_ok));
-    EXPECT_CALL(*insMoc, napi_get_typedarray_info(_, _, _, _, _, _, _)).WillOnce(Return(napi_ok));
-    EXPECT_CALL(*insMoc, napi_get_arraybuffer_info(_, _, _, _)).WillOnce(Return(napi_ok));
-    EXPECT_EQ(ConvertFunctionResult(env, funcResult, resultParams), HKS_SUCCESS);
+    /* UPDATE_SESSION: errInfo not found, outData typedarray */
+    {
+        CryptoResultParam rp;
+        rp.paramType = CryptoResultParamType::UPDATE_SESSION;
+        EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+            .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)))  /* resultCode */
+            .WillOnce(Return(napi_invalid_arg))  /* errInfo not found */
+            .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)));  /* outData */
+        EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _)).WillOnce(Return(napi_ok));
+        EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(Return(napi_ok));
+        EXPECT_CALL(*insMoc, napi_get_typedarray_info(_, _, _, _, _, _, _)).WillOnce(Return(napi_ok));
+        EXPECT_CALL(*insMoc, napi_get_arraybuffer_info(_, _, _, _)).WillOnce(Return(napi_ok));
+        EXPECT_EQ(ConvertFunctionResult(env, funcResult, rp), HKS_SUCCESS);
+    }
 
-    /* SET_OR_GET_PROPERTY: errInfo ok, property array empty */
-    resultParams = CryptoResultParam();
-    resultParams.paramType = CryptoResultParamType::SET_OR_GET_PROPERTY;
-    EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)))  /* resultCode */
-        .WillOnce(Return(napi_invalid_arg))  /* errInfo not found */
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)));  /* property */
-    EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _)).WillOnce(Return(napi_ok));
-    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(Return(napi_ok));
-    EXPECT_CALL(*insMoc, napi_get_array_length(_, _, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(0), Return(napi_ok)));
-    EXPECT_EQ(ConvertFunctionResult(env, funcResult, resultParams), HKS_SUCCESS);
+    /* SET_OR_GET_PROPERTY: errInfo not found, property array empty */
+    {
+        CryptoResultParam rp;
+        rp.paramType = CryptoResultParamType::SET_OR_GET_PROPERTY;
+        EXPECT_CALL(*insMoc, napi_get_named_property(_, _, _, _))
+            .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)))  /* resultCode */
+            .WillOnce(Return(napi_invalid_arg))  /* errInfo not found */
+            .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)));  /* property */
+        EXPECT_CALL(*insMoc, napi_get_value_int32(_, _, _)).WillOnce(Return(napi_ok));
+        EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(Return(napi_ok));
+        EXPECT_CALL(*insMoc, napi_get_array_length(_, _, _))
+            .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(0), Return(napi_ok)));
+        EXPECT_EQ(ConvertFunctionResult(env, funcResult, rp), HKS_SUCCESS);
+    }
 }
 
 }
