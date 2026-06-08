@@ -949,13 +949,10 @@ HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest038, TestSi
     EXPECT_EQ(memcmp(outSecret.data, secretData, sizeof(secretData)), 0);
 
     /* packed sharedSecret with size == 0 -> early return HKS_SUCCESS */
-    struct HksBlob emptyBlob = { 0, nullptr };
-    uint8_t emptyBuf[32] = { 0 };
-    struct HksBlob emptyPacked = { sizeof(emptyBuf), emptyBuf };
-    offset = 0;
-    ret = CopyBlobToBuffer(&emptyBlob, &emptyPacked, &offset);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-    emptyPacked.size = offset;
+    /* Manually construct: write size=0 as uint32_t, then 4 bytes alignment padding */
+    uint8_t emptyPackedBuf[8] = { 0 };
+    /* size field = 0 (already zeroed) */
+    struct HksBlob emptyPacked = { sizeof(uint32_t) + DEFAULT_ALIGN_MASK_SIZE, emptyPackedBuf };
 
     uint8_t outBuf2[32] = { 0 };
     struct HksBlob outSecret2 = { sizeof(outBuf2), outBuf2 };

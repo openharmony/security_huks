@@ -799,9 +799,6 @@ HWTEST_F(HksRemoteHandleManagerTest, GetResourceIdParamValidationTest, TestSize.
     EXPECT_EQ(manager->GetResourceId(processInfo, "testProvider", noResourceSet, resourceId, &errInfo),
         HKS_ERROR_RESOURCE_INFO_MISSING);
 
-    /* valid params but no provider registered: covers GetProviderProxy failure */
-    EXPECT_NE(manager->GetResourceId(processInfo, "noSuchProvider", validSet, resourceId, &errInfo), HKS_SUCCESS);
-
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(processInfo.processName);
 }

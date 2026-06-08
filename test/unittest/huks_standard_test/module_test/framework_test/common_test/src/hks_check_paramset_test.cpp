@@ -517,13 +517,16 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest016, TestSize.Level0)
     ret = CheckMlDsaKeyLen(HKS_ALG_ML_DSA, HKS_KEY_TYPE_PRIVATE_KEY, &mldsaValues, &mldsaKey);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_INFO);
 
-    /* private key success */
+    /* private key success: need buffer >= sizeof(struct) + 0 + priKeySize */
     mldsaMat.pubKeySize = 0;
     mldsaMat.priKeySize = HKS_ML_DSA_PRI_KEY_SIZE_2560;
-    ret = CheckMlDsaKeyLen(HKS_ALG_ML_DSA, HKS_KEY_TYPE_PRIVATE_KEY, &mldsaValues, &mldsaKey);
+    uint8_t priKeyBuf[sizeof(struct HksKeyMaterialMlDsa) + HKS_ML_DSA_PRI_KEY_SIZE_2560] = {0};
+    (void)memcpy_s(priKeyBuf, sizeof(priKeyBuf), &mldsaMat, sizeof(mldsaMat));
+    HksBlob priKeyBlob = { .size = sizeof(priKeyBuf), .data = priKeyBuf };
+    ret = CheckMlDsaKeyLen(HKS_ALG_ML_DSA, HKS_KEY_TYPE_PRIVATE_KEY, &mldsaValues, &priKeyBlob);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
-    /* key pair success (param set 65) */
+    /* key pair success (param set 65): need buffer >= sizeof(struct) + pubKeySize + priKeySize */
     mldsaMat.keyParamSet = HKS_ML_DSA_KEY_PARAM_SET_65;
     mldsaMat.pubKeySize = HKS_ML_DSA_PUB_KEY_SIZE_1952;
     mldsaMat.priKeySize = HKS_ML_DSA_PRI_KEY_SIZE_4032;
@@ -531,15 +534,20 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest016, TestSize.Level0)
         {.needCheck = true, .value = HKS_ML_DSA_KEY_PARAM_SET_65, .isAbsent = false},
         {0}, {0}, {0}, {0},
     };
-    ret = CheckMlDsaKeyLen(HKS_ALG_ML_DSA, HKS_KEY_TYPE_KEY_PAIR, &mldsaValues65, &mldsaKey);
+    uint8_t keyPairBuf[sizeof(struct HksKeyMaterialMlDsa) + HKS_ML_DSA_PUB_KEY_SIZE_1952 +
+        HKS_ML_DSA_PRI_KEY_SIZE_4032] = {0};
+    (void)memcpy_s(keyPairBuf, sizeof(keyPairBuf), &mldsaMat, sizeof(mldsaMat));
+    HksBlob keyPairBlob = { .size = sizeof(keyPairBuf), .data = keyPairBuf };
+    ret = CheckMlDsaKeyLen(HKS_ALG_ML_DSA, HKS_KEY_TYPE_KEY_PAIR, &mldsaValues65, &keyPairBlob);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
     /* key pair wrong pubKeySize */
     mldsaMat.pubKeySize = 1;
-    ret = CheckMlDsaKeyLen(HKS_ALG_ML_DSA, HKS_KEY_TYPE_KEY_PAIR, &mldsaValues65, &mldsaKey);
+    (void)memcpy_s(keyPairBuf, sizeof(keyPairBuf), &mldsaMat, sizeof(mldsaMat));
+    ret = CheckMlDsaKeyLen(HKS_ALG_ML_DSA, HKS_KEY_TYPE_KEY_PAIR, &mldsaValues65, &keyPairBlob);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_INFO);
 
-    /* key->size < keySize */
+    /* key->size < keySize: use struct-only blob with full sizes */
     mldsaMat.pubKeySize = HKS_ML_DSA_PUB_KEY_SIZE_1952;
     mldsaMat.priKeySize = HKS_ML_DSA_PRI_KEY_SIZE_4032;
     HksBlob truncatedKey = { .size = sizeof(mldsaMat), .data = reinterpret_cast<uint8_t *>(&mldsaMat) };
@@ -564,11 +572,14 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest016, TestSize.Level0)
     ret = CheckMlKemKeyLen(HKS_ALG_ML_KEM, HKS_KEY_TYPE_PRIVATE_KEY, &mlkemValues, &mlkemKey);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_INFO);
 
-    /* private key success */
+    /* private key success: need buffer >= sizeof(struct) + 0 + priKeySize */
     mlkemMat.keyAlg = HKS_ALG_ML_KEM;
     mlkemMat.pubKeySize = 0;
     mlkemMat.priKeySize = HKS_ML_KEM_PRI_KEY_SIZE_2400;
-    ret = CheckMlKemKeyLen(HKS_ALG_ML_KEM, HKS_KEY_TYPE_PRIVATE_KEY, &mlkemValues, &mlkemKey);
+    uint8_t kemPriBuf[sizeof(struct HksKeyMaterialMlKem) + HKS_ML_KEM_PRI_KEY_SIZE_2400] = {0};
+    (void)memcpy_s(kemPriBuf, sizeof(kemPriBuf), &mlkemMat, sizeof(mlkemMat));
+    HksBlob kemPriBlob = { .size = sizeof(kemPriBuf), .data = kemPriBuf };
+    ret = CheckMlKemKeyLen(HKS_ALG_ML_KEM, HKS_KEY_TYPE_PRIVATE_KEY, &mlkemValues, &kemPriBlob);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
     /* key pair success (param set 1024) */
@@ -579,7 +590,11 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest016, TestSize.Level0)
         {.needCheck = true, .value = HKS_ML_KEM_KEY_PARAM_SET_1024, .isAbsent = false},
         {0}, {0}, {0}, {0},
     };
-    ret = CheckMlKemKeyLen(HKS_ALG_ML_KEM, HKS_KEY_TYPE_KEY_PAIR, &mlkemValues1024, &mlkemKey);
+    uint8_t kemPairBuf[sizeof(struct HksKeyMaterialMlKem) + HKS_ML_KEM_PUB_KEY_SIZE_1568 +
+        HKS_ML_KEM_PRI_KEY_SIZE_3168] = {0};
+    (void)memcpy_s(kemPairBuf, sizeof(kemPairBuf), &mlkemMat, sizeof(mlkemMat));
+    HksBlob kemPairBlob = { .size = sizeof(kemPairBuf), .data = kemPairBuf };
+    ret = CheckMlKemKeyLen(HKS_ALG_ML_KEM, HKS_KEY_TYPE_KEY_PAIR, &mlkemValues1024, &kemPairBlob);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
     /* key pair wrong priKeySize */

@@ -1309,17 +1309,20 @@ HWTEST_F(JsCryptoExtAbilityTest, BuildImportWrappedKeyParam_0000, testing::ext::
     EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)));
-    EXPECT_CALL(*insMoc, napi_create_array_with_length(_, _, _)).WillOnce(Return(napi_invalid_arg));
+    EXPECT_CALL(*insMoc, napi_create_arraybuffer(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
     EXPECT_FALSE(BuildImportWrappedKeyParam(env, param, argv, argc));
 
     /* all success with empty paramSet */
+    uint8_t inDataBuf[2] = {0};
+    void *inDataPtr = inDataBuf;
     EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)));
-    EXPECT_CALL(*insMoc, napi_create_array_with_length(_, _, _))
-        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(rslt), Return(napi_ok)));
-    EXPECT_CALL(*insMoc, napi_create_uint32(_, _, _)).WillOnce(Return(napi_ok));
-    EXPECT_CALL(*insMoc, napi_set_element(_, _, _, _)).WillOnce(Return(napi_ok));
+    EXPECT_CALL(*insMoc, napi_create_arraybuffer(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(inDataPtr),
+            SetArgPointee<ARG_INDEX_THIRD>(rslt), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_typedarray(_, _, _, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_FIFTH>(rslt), Return(napi_ok)));
     EXPECT_TRUE(BuildImportWrappedKeyParam(env, param, argv, argc));
     EXPECT_EQ(argc, ARGC_FOUR);
 }
