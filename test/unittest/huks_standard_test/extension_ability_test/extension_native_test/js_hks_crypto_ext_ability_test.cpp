@@ -1404,6 +1404,7 @@ HWTEST_F(JsCryptoExtAbilityTest, BuildParam_0000, testing::ext::TestSize.Level0)
     EXPECT_EQ(argc, ARGC_ONE);
     EXPECT_TRUE(argv[ARGC_ZERO] != nullptr);
 }
+
 /**
  * @tc.name: JsCryptoExtAbilityTest.BuildParam_0001
  * @tc.desc: BuildParam with null param.GetParamSet() (skip branch)
