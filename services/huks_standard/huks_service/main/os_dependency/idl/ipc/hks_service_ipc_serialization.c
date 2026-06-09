@@ -62,8 +62,7 @@ static int32_t CopyExtCertInfoToBuffer(const struct HksExtCertInfo *certInfo, co
     return ret;
 }
 
-int32_t CopyBlobToBufferForEmptyData(const struct HksBlob *blob,
-    struct HksBlob *destBlob, uint32_t *destOffset)
+int32_t CopyBlobToBufferForEmptyData(const struct HksBlob *blob, struct HksBlob *destBlob, uint32_t *destOffset)
 {
     uint32_t needSize = sizeof(blob->size);
     if (blob->size > 0) {
@@ -75,11 +74,8 @@ int32_t CopyBlobToBufferForEmptyData(const struct HksBlob *blob,
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset,
-        &(blob->size), sizeof(blob->size)) != EOK) {
-        HKS_LOG_E("copy blob size failed");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset,
+        &(blob->size), sizeof(blob->size)), HKS_ERROR_INSUFFICIENT_MEMORY, "copy blob size failed")
     *destOffset += sizeof(blob->size);
 
     if (blob->size == 0) {
@@ -87,11 +83,8 @@ int32_t CopyBlobToBufferForEmptyData(const struct HksBlob *blob,
         return HKS_SUCCESS;
     }
 
-    if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset,
-        blob->data, blob->size) != EOK) {
-        HKS_LOG_E("copy blob data failed");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset,
+        blob->data, blob->size), HKS_ERROR_INSUFFICIENT_MEMORY, "copy blob data failed")
     *destOffset += ALIGN_SIZE(blob->size);
 
     return HKS_SUCCESS;

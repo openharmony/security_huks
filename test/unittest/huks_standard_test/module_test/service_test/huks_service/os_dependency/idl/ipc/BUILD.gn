@@ -45,13 +45,13 @@ ohos_unittest("service_ipc_test") {
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc/hks_service_ipc_serialization.c",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ipc_serialization.c",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_client_ipc_serialization.c",
+    "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ipc_check.c",
   ]
 
   if (huks_enable_ukey_config == true) {
     sources += [
       "src/hks_client_service_ipc_test.cpp",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_client_service_ipc.c",
-      "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ipc_check.c",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_request.cpp",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ipc_slice.c",
     ]
@@ -63,6 +63,7 @@ ohos_unittest("service_ipc_test") {
     "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency:libhuks_service_os_dependency_standard_static",
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl:libhuks_service_idl_standard_static",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/inner_kits_passthrough:libhukssdk_static",
   ]
 
   external_deps = [

@@ -271,7 +271,7 @@ static int32_t ExtractFieldFromParamSet(const struct HksParamSet *paramSetIn, st
 }
 
 // Generic ParamSetToEventInfo function (simplified to 20 lines)
-int32_t GenericParamSetToEventInfo(const struct HksParamSet *paramSetIn,
+static int32_t GenericParamSetToEventInfo(const struct HksParamSet *paramSetIn,
     struct HksEventInfo *eventInfo, uint32_t eventId)
 {
     HKS_IF_TRUE_LOGI_RETURN(paramSetIn == nullptr || eventInfo == nullptr, HKS_ERROR_NULL_POINTER,
@@ -295,7 +295,7 @@ int32_t GenericParamSetToEventInfo(const struct HksParamSet *paramSetIn,
 }
 
 // Generic NeedReport function
-bool GenericNeedReport(const struct HksEventInfo *eventInfo)
+static bool GenericNeedReport(const struct HksEventInfo *eventInfo)
 {
     if (eventInfo == nullptr) {
         return false;
@@ -304,7 +304,7 @@ bool GenericNeedReport(const struct HksEventInfo *eventInfo)
 }
 
 // Generic EventInfoEqual function
-bool GenericEventInfoEqual(const struct HksEventInfo *eventInfo1,
+static bool GenericEventInfoEqual(const struct HksEventInfo *eventInfo1,
     const struct HksEventInfo *eventInfo2, uint32_t eventId)
 {
     HKS_IF_TRUE_RETURN(eventInfo1 == nullptr || eventInfo2 == nullptr, false)
@@ -345,7 +345,7 @@ bool GenericEventInfoEqual(const struct HksEventInfo *eventInfo1,
 }
 
 // Generic EventInfoAdd function
-void GenericEventInfoAdd(struct HksEventInfo *dstEventInfo,
+static void GenericEventInfoAdd(struct HksEventInfo *dstEventInfo,
     const struct HksEventInfo *srcEventInfo, uint32_t eventId)
 {
     if (GenericEventInfoEqual(dstEventInfo, srcEventInfo, eventId)) {
@@ -387,7 +387,7 @@ static int32_t ConvertFieldToMap(const struct HksEventInfo *eventInfo,
 }
 
 // Generic EventInfoToMap function (simplified to 20 lines)
-int32_t GenericEventInfoToMap(const struct HksEventInfo *eventInfo,
+static int32_t GenericEventInfoToMap(const struct HksEventInfo *eventInfo,
     std::unordered_map<std::string, std::string> &reportData, uint32_t eventId)
 {
     HKS_IF_NULL_LOGI_RETURN(eventInfo, HKS_ERROR_NULL_POINTER, "eventInfo is null")

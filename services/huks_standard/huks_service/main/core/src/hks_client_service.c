@@ -2304,13 +2304,13 @@ int32_t HksServiceChangeStorageLevel(const struct HksProcessInfo *processInfo, c
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksManageStoreDeleteKeyBlob(processInfo, srcParamSet, keyAlias, HKS_STORAGE_TYPE_KEY);
-        if (ret != HKS_SUCCESS && ret != HKS_ERROR_NOT_EXIST) {
-            ret = HksManageStoreDeleteKeyBlob(processInfo, srcParamSet, keyAlias, HKS_STORAGE_TYPE_KEY);
-            if (ret != HKS_SUCCESS && ret != HKS_ERROR_NOT_EXIST) {
-                ret = HKS_ERROR_KEY_CLEAR_FAILED;
-                HKS_LOG_E("delete src key failed");
-            }
-        }
+        HKS_IF_TRUE_BREAK(ret == HKS_SUCCESS || ret == HKS_ERROR_NOT_EXIST)
+
+        ret = HksManageStoreDeleteKeyBlob(processInfo, srcParamSet, keyAlias, HKS_STORAGE_TYPE_KEY);
+        HKS_IF_TRUE_BREAK(ret == HKS_SUCCESS || ret == HKS_ERROR_NOT_EXIST)
+
+        ret = HKS_ERROR_KEY_CLEAR_FAILED;
+        HKS_LOG_E("delete src key failed");
     } while (0);
 
     HksFreeParamSet(&newParamSet);

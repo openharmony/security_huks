@@ -23,6 +23,7 @@
 #include "hks_mem.h"
 #include "hks_test_log.h"
 #include "hks_test_common.h"
+#include "hks_ukey_global_errInfo.h"
 #include "file_ex.h"
 
 using namespace testing::ext;
@@ -413,5 +414,18 @@ HWTEST_F(HksUkeyExtensionCryptoTest, HksGetResourceIdTest001, TestSize.Level0)
     HksFreeParamSet(&paramSet);
     HKS_TEST_LOG_I("HksGetResourceIdTest001 executed!");
     EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+HWTEST_F(HksUkeyExtensionCryptoTest, HksGetUkeyGlobalErrorTest001, TestSize.Level0)
+{
+    char testBuf[] = "this is a test err info";
+    (void)HksGetUkeyGlobalErrorDesc(nullptr, 0);
+    (void)HksGetUkeyGlobalErrorDesc(testBuf, 0);
+    (void)HksGetUkeyGlobalErrorDesc(nullptr, strlen(testBuf));
+    (void)HksGetUkeyGlobalErrorDesc(testBuf, strlen(testBuf));
+    (void)HksClearUkeyGlobalInfo();
+
+    int32_t ret = HksGetUkeyGlobalErrVal();
+    EXPECT_EQ(ret, 0);
 }
 }

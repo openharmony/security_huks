@@ -24,6 +24,7 @@
 #include "hks_client_ipc_serialization.h"
 #include "hks_type_enum.h"
 #include "hks_ipc_serialization.h"
+#include "hks_ipc_check.h"
 
 using namespace testing::ext;
 using namespace OHOS;
@@ -1794,4 +1795,45 @@ HWTEST_F(HksIpcServiceTest, HksIpcServiceTest048, TestSize.Level0)
     HksFreeParamSet(&paramSet);
     HKS_FREE(bufData);
 }
+
+HWTEST_F(HksIpcServiceTest, HksIpcServiceTest049, TestSize.Level0)
+{
+    struct HksBlob keyAlias1 = { .size = strlen("keyAlias1"), .data = (uint8_t *)"keyAlias1" };
+    struct HksBlob keyAlias2 = { .size = strlen("keyAlias2"), .data = (uint8_t *)"keyAlias2" };
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_KEY_SIZE,  .uint32Param = HKS_AES_KEY_SIZE_128 },
+        { .tag = HKS_TAG_PURPOSE,   .uint32Param = HKS_KEY_PURPOSE_ENCRYPT },
+    };
+
+    struct HksParamSet *paramSet1{ nullptr };
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&paramSet1));
+    EXPECT_EQ(HKS_SUCCESS, HksAddParams(paramSet1, params, sizeof(params)/sizeof(params[0])));
+    EXPECT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet1));
+
+    struct HksParamSet *paramSet2{ nullptr };
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&paramSet2));
+    EXPECT_EQ(HKS_SUCCESS, HksAddParams(paramSet2, params, sizeof(params)/sizeof(params[0])));
+    EXPECT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet2));
+
+    struct HksBlob inBlob = { 0, nullptr };
+    uint32_t inSize{};
+    int32_t ret = HksCheckIpcEncapsulate(&keyAlias1, paramSet1, &keyAlias2, paramSet2, &inSize);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    inBlob.data = (uint8_t *)HksMalloc(inSize);
+    EXPECT_NE(inBlob.data, nullptr);
+    inBlob.size = inSize;
+
+    ret = HksEncapsulatePack(&inBlob, &keyAlias1, paramSet1, &keyAlias2, paramSet2);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    MessageParcel reply;
+    uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
+    HksIpcServiceEncapsulate(&inBlob, context);
+
+    HKS_FREE_BLOB(inBlob);
+    HksFreeParamSet(&paramSet1);
+    HksFreeParamSet(&paramSet2);
+}
+
 }
