@@ -27,6 +27,7 @@
 #include "hks_ext_error_info.h"
 #include "js_hks_crypto_ext_ability.h"
 #include "native_reference_mock.h"
+#include "hks_param.h"
 #include "../../../../../services/huks_standard/huks_service/extension/ability_native/src/js_hks_crypto_ext_ability.cpp"
 #include "../../../../../services/huks_standard/huks_service/extension/ability_native/src/hks_crypto_ext_ability.cpp"
 #include "../../../../../services/huks_standard/huks_service/extension/ability_native/src/hks_crypto_ext_stub_impl.cpp"
@@ -1286,6 +1287,90 @@ HWTEST_F(JsCryptoExtAbilityTest, ConvertCertInfoIdlToJsObject_0004, testing::ext
             SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
     EXPECT_CALL(*insMoc, napi_create_typedarray(_, _, _, _, _, _)).WillOnce(Return(napi_invalid_arg));
     EXPECT_EQ(ConvertCertInfoIdlToJsObject(env, certInfo, certObj), HKS_ERROR_EXT_CREATE_VALUE_FAILED);
+}
+
+/**
+ * @tc.name: JsCryptoExtAbilityTest.BuildImportWrappedKeyParam_0000
+ * @tc.desc: BuildImportWrappedKeyParam with valid params.GetParamSet() (branch covered)
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsCryptoExtAbilityTest, BuildImportWrappedKeyParam_0000, testing::ext::TestSize.Level0)
+{
+    napi_value argv[4] = { nullptr };
+    size_t argc = 0;
+    napi_value rslt = nullptr;
+    ImportWrappedKeyParam param;
+    param.index = "testIndex";
+    param.wrappingKeyIndex = "testWrappingKeyIndex";
+    param.wrappedData = { 0x01, 0x02, 0x03, 0x04 };
+    HksParam hksParam = { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA };
+    HksParamSet *paramSet = nullptr;
+    HksInitParamSet(&paramSet);
+    HksAddParams(paramSet, &hksParam, 1);
+    HksBuildParamSet(&paramSet);
+    CppParamSet cppParamSet(paramSet);
+    param.params = cppParamSet;
+
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_array(_, _)).WillOnce(Return(napi_invalid_arg));
+    (void)BuildImportWrappedKeyParam(env, param, argv, argc);
+    HksFreeParamSet(&paramSet);
+}
+/**
+ * @tc.name: JsCryptoExtAbilityTest.BuildImportWrappedKeyParam_0001
+ * @tc.desc: BuildImportWrappedKeyParam with null params.GetParamSet() (skip branch)
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsCryptoExtAbilityTest, BuildImportWrappedKeyParam_0001, testing::ext::TestSize.Level0)
+{
+    napi_value argv[4] = { nullptr };
+    size_t argc = 0;
+    napi_value rslt = nullptr;
+    ImportWrappedKeyParam param;
+    param.index = "testIndex";
+    param.wrappingKeyIndex = "testWrappingKeyIndex";
+    param.wrappedData = { 0x01, 0x02, 0x03, 0x04 };
+    param.params = CppParamSet();
+    EXPECT_CALL(*insMoc, napi_create_string_utf8(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)))
+        .WillOnce(DoAll(SetArgPointee<ARG_INDEX_THIRD>(reinterpret_cast<napi_value>(&rslt)), Return(napi_ok)));
+    EXPECT_CALL(*insMoc, napi_create_arraybuffer(_, _, _, _)).WillOnce(Return(napi_invalid_arg));
+    (void)BuildImportWrappedKeyParam(env, param, argv, argc);
+}
+
+/**
+ * @tc.name: JsCryptoExtAbilityTest.BuildParam_0000
+ * @tc.desc: BuildParam with valid param.GetParamSet() (branch covered)
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsCryptoExtAbilityTest, BuildParam_0000, testing::ext::TestSize.Level0)
+{
+    napi_value argv[1] = { nullptr };
+    size_t argc = 0;
+    HksParam hksParam = { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA };
+    HksParamSet *paramSet = nullptr;
+    HksInitParamSet(&paramSet);
+    HksAddParams(paramSet, &hksParam, 1);
+    HksBuildParamSet(&paramSet); 
+    CppParamSet cppParamSet(paramSet);
+    EXPECT_CALL(*insMoc, napi_create_object(_, _)).WillOnce(Return(napi_invalid_arg));
+    (void)BuildParam(env, cppParamSet, argv, argc);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: JsCryptoExtAbilityTest.BuildParam_0001
+ * @tc.desc: BuildParam with null param.GetParamSet() (skip branch)
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsCryptoExtAbilityTest, BuildParam_0001, testing::ext::TestSize.Level0)
+{
+    napi_value argv[1] = { nullptr };
+    size_t argc = 0;
+    CppParamSet cppParamSet;  // Empty CppParamSet, GetParamSet() returns nullptr
+    (void)BuildParam(env, cppParamSet, argv, argc);
 }
 
 }

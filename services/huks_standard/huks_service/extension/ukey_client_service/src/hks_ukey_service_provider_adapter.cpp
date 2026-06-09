@@ -248,11 +248,8 @@ static int32_t RemotePropertyPack(const CppParamSet &cppParamSet,
         ret = memcpy_s(tmp.get(), totalSize, &returnResult, sizeof(returnResult));
         HKS_IF_NOT_EOK_LOGE_BREAK(ret, "memcpy_s returnResult failed")
 
-        if (hksParamSet != nullptr) {
-            ret = memcpy_s(tmp.get() + resultSize, totalSize - resultSize,
-                hksParamSet, hksParamSet->paramSetSize);
-            HKS_IF_NOT_EOK_LOGE_BREAK(ret, "memcpy_s hksParamSet failed")
-        }
+        HKS_IF_TRUE_BREAK(hksParamSet != nullptr && memcpy_s(tmp.get() + resultSize, totalSize - resultSize,
+            hksParamSet, hksParamSet->paramSetSize) != EOK)
 
         replySize = totalSize;
         replyData = std::move(tmp);
@@ -293,9 +290,8 @@ int32_t HksIpcServiceOnSetOrGetRemotePropertyAdapter(const struct HksProcessInfo
 
     hksExtProxy->SendAsyncReply(HKS_SUCCESS, outData, outSize,
         HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY, processAndError.errInfo);
-    if (processAndError.errInfo != nullptr) {
-        HksFreeExternalErrorInfo(processAndError.errInfo);
-    }
+    
+    HKS_IF_TRUE_EXCU(processAndError.errInfo != nullptr, HksFreeExternalErrorInfo(processAndError.errInfo));
     return HKS_SUCCESS;
 }
 

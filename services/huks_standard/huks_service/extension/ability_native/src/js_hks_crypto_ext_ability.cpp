@@ -584,9 +584,8 @@ int32_t CallJsMethod(const std::string &funcName, AbilityRuntime::JsRuntime &jsR
         HKS_ERROR_EXT_SEND_EVENT_FAILED, "failed to napi_send_event, ret:%d.", ret);
     const auto maxWaitTime = std::chrono::seconds(MAX_WAIT_TIME);
     std::unique_lock<std::mutex> lock(param->CryptoOperateMutex);
-    if (!param->isReady) {
-        param->CryptoOperateCondition.wait_for(lock, maxWaitTime, [param]() { return param->isReady; });
-    }
+    HKS_EXT_IF_TRUE_EXCU(!param->isReady,
+        param->CryptoOperateCondition.wait_for(lock, maxWaitTime, [param]() { return param->isReady; }));
     return param->errcode;
 }
 
@@ -595,39 +594,30 @@ void GetErrorInfoParams(const napi_env &env, const napi_value &funcResult, Crypt
     napi_value napiErrInfo = nullptr;
     std::string errMsg = "No error message.";
     auto status = napi_get_named_property(env, funcResult, "errInfo", &napiErrInfo);
-    if (status != napi_ok || napiErrInfo == nullptr) {
-        LOGE("GetErrorInfoParams::errInfo not found in result");
-        resultParams.errInfo = HksCreateExternalErrorInfo(resultParams.errCode, errMsg.c_str());
-        return;
-    }
+    HKS_EXT_IF_TRUE_LOGE_EXCU_RETURN_VOID(status != napi_ok || napiErrInfo == nullptr,
+        resultParams.errInfo = HksCreateExternalErrorInfo(resultParams.errCode, errMsg.c_str()),
+        "GetErrorInfoParams::errInfo not found in result");
+
     napi_value napiErrno = nullptr;
     status = napi_get_named_property(env, napiErrInfo, "errno", &napiErrno);
-    if (status != napi_ok || napiErrno == nullptr) {
-        LOGE("GetErrorInfoParams::napi_get_named_property errno failed, status:%d", status);
-        resultParams.errInfo = HksCreateExternalErrorInfo(resultParams.errCode, errMsg.c_str());
-        return;
-    }
+    HKS_EXT_IF_TRUE_LOGE_EXCU_RETURN_VOID(status != napi_ok || napiErrno == nullptr,
+        resultParams.errInfo = HksCreateExternalErrorInfo(resultParams.errCode, errMsg.c_str()),
+        "GetErrorInfoParams::napi_get_named_property errno failed, status:%d", status);
     int32_t errnoValue = 0;
     status = napi_get_value_int32(env, napiErrno, &errnoValue);
-    if (status != napi_ok) {
-        LOGE("GetErrorInfoParams::get errno value failed, status:%d", status);
-        resultParams.errInfo = HksCreateExternalErrorInfo(resultParams.errCode, errMsg.c_str());
-        return;
-    }
+    HKS_EXT_IF_TRUE_LOGE_EXCU_RETURN_VOID(status != napi_ok,
+        resultParams.errInfo = HksCreateExternalErrorInfo(resultParams.errCode, errMsg.c_str()),
+        "GetErrorInfoParams::get errno value failed, status:%d", status);
     napi_value napiErrorDesc = nullptr;
     status = napi_get_named_property(env, napiErrInfo, "errorDesc", &napiErrorDesc);
-    if (status != napi_ok || napiErrorDesc == nullptr) {
-        LOGE("GetErrorInfoParams::napi_get_named_property errorDesc failed, status:%d", status);
-        resultParams.errInfo = HksCreateExternalErrorInfo(resultParams.errCode, errMsg.c_str());
-        return;
-    }
+    HKS_EXT_IF_TRUE_LOGE_EXCU_RETURN_VOID(status != napi_ok || napiErrorDesc == nullptr,
+        resultParams.errInfo = HksCreateExternalErrorInfo(resultParams.errCode, errMsg.c_str()),
+        "GetErrorInfoParams::napi_get_named_property errorDesc failed, status:%d", status);
     std::string errorDesc;
     auto result = GetStringValue(env, napiErrorDesc, errorDesc);
-    if (result != HKS_SUCCESS) {
-        LOGE("GetErrorInfoParams::GetStringValue errorDesc failed, result:%d", result);
-        resultParams.errInfo = HksCreateExternalErrorInfo(resultParams.errCode, errMsg.c_str());
-        return;
-    }
+    HKS_EXT_IF_TRUE_LOGE_EXCU_RETURN_VOID(result != HKS_SUCCESS,
+        resultParams.errInfo = HksCreateExternalErrorInfo(resultParams.errCode, errMsg.c_str()),
+        "GetErrorInfoParams::GetStringValue errorDesc failed, result:%d", result);
     resultParams.errInfo = HksCreateExternalErrorInfo(errnoValue, errorDesc.c_str());
     HKS_EXT_IF_TRUE_LOGE(resultParams.errInfo == nullptr, "GetErrorInfoParams::CreateExternalErrorInfo failed");
 }
@@ -931,9 +921,8 @@ void JsHksCryptoExtAbility::GetSrcPath(std::string &srcPath)
     srcPath.append(abilityInfo_->moduleName + "/");
     srcPath.append(abilityInfo_->srcEntrance);
     auto dotPos = srcPath.rfind('.');
-    if (dotPos != std::string::npos) {
-        srcPath.erase(dotPos);
-    }
+    HKS_EXT_IF_TRUE_EXCU(dotPos != std::string::npos, srcPath.erase(dotPos));
+
     srcPath.append(".abc");
 }
 
@@ -1043,18 +1032,9 @@ int32_t JsHksCryptoExtAbility::OpenRemoteHandle(const std::string &index, const 
     
     WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     handle = std::move(dataParam->handle);
-    if (dataParam->errInfo != nullptr && errInfo != nullptr) {
-        *errInfo = dataParam->errInfo;
-        dataParam->errInfo = nullptr;
-    }
-    if (errInfo != nullptr) {
-        if (dataParam->errInfo != nullptr) {
-            *errInfo = dataParam->errInfo;
-            dataParam->errInfo = nullptr;
-        } else {
-            *errInfo = HksCreateExternalErrorInfo(HKS_ERROR_EXT_CALL_JS_TIME_OUT, "");
-        }
-    }
+    HKS_EXT_IF_TRUE_EXCU(dataParam->errInfo != nullptr && errInfo != nullptr, *errInfo = dataParam->errInfo);
+    dataParam->errInfo = nullptr;
+
     return dataParam->hksErrorCode;
 }
 
@@ -1080,10 +1060,8 @@ int32_t JsHksCryptoExtAbility::CloseRemoteHandle(const std::string &handle, cons
     HKS_EXT_IF_TRUE_LOGE_RETURN(ret != ERR_OK, ret, "CallJsMethod error, code:%d", ret);
     
     WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
-    if (dataParam->errInfo != nullptr && errInfo != nullptr) {
-        *errInfo = dataParam->errInfo;
-        dataParam->errInfo = nullptr;
-    }
+    HKS_EXT_IF_TRUE_EXCU(dataParam->errInfo != nullptr && errInfo != nullptr, *errInfo = dataParam->errInfo);
+    dataParam->errInfo = nullptr;
     return dataParam->hksErrorCode;
 }
 
@@ -1112,10 +1090,8 @@ int32_t JsHksCryptoExtAbility::AuthUkeyPin(const std::string &handle, const CppP
     authState = std::move(dataParam->authState);
     retryCnt = std::move(dataParam->retryCnt);
 
-    if (dataParam->errInfo != nullptr && errInfo != nullptr) {
-        *errInfo = dataParam->errInfo;
-        dataParam->errInfo = nullptr;
-    }
+    HKS_EXT_IF_TRUE_EXCU(dataParam->errInfo != nullptr && errInfo != nullptr, *errInfo = dataParam->errInfo);
+    dataParam->errInfo = nullptr;
     return dataParam->hksErrorCode;
 }
 
@@ -1142,10 +1118,8 @@ int32_t JsHksCryptoExtAbility::GetUkeyPinAuthState(const std::string &handle, co
     
     WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     state = std::move(dataParam->authState);
-    if (dataParam->errInfo != nullptr && errInfo != nullptr) {
-        *errInfo = dataParam->errInfo;
-        dataParam->errInfo = nullptr;
-    }
+    HKS_EXT_IF_TRUE_EXCU(dataParam->errInfo != nullptr && errInfo != nullptr, *errInfo = dataParam->errInfo);
+    dataParam->errInfo = nullptr;
     return dataParam->hksErrorCode;
 }
 
@@ -1172,10 +1146,8 @@ int32_t JsHksCryptoExtAbility::ExportCertificate(const std::string &index, const
     
     WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     HksCertInfoToString(dataParam->certs, certJsonArr);
-    if (dataParam->errInfo != nullptr && errInfo != nullptr) {
-        *errInfo = dataParam->errInfo;
-        dataParam->errInfo = nullptr;
-    }
+    HKS_EXT_IF_TRUE_EXCU(dataParam->errInfo != nullptr && errInfo != nullptr, *errInfo = dataParam->errInfo);
+    dataParam->errInfo = nullptr;
     return dataParam->hksErrorCode;
 }
 
@@ -1205,10 +1177,8 @@ int32_t JsHksCryptoExtAbility::ExportProviderCertificates(const CppParamSet &par
     
     WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     HksCertInfoToString(dataParam->certs, certJsonArr);
-    if (dataParam->errInfo != nullptr && errInfo != nullptr) {
-        *errInfo = dataParam->errInfo;
-        dataParam->errInfo = nullptr;
-    }
+    HKS_EXT_IF_TRUE_EXCU(dataParam->errInfo != nullptr && errInfo != nullptr, *errInfo = dataParam->errInfo);
+    dataParam->errInfo = nullptr;
     return dataParam->hksErrorCode;
 }
 
@@ -1252,10 +1222,8 @@ int32_t JsHksCryptoExtAbility::ImportCertificate(const std::string &index, const
     HKS_EXT_IF_TRUE_LOGE_RETURN(ret != ERR_OK, ret, "CallJsMethod error, code:%d", ret);
 
     WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
-    if (dataParam->errInfo != nullptr && errInfo != nullptr) {
-        *errInfo = dataParam->errInfo;
-        dataParam->errInfo = nullptr;
-    }
+    HKS_EXT_IF_TRUE_EXCU(dataParam->errInfo != nullptr && errInfo != nullptr, *errInfo = dataParam->errInfo);
+    dataParam->errInfo = nullptr;
     return dataParam->hksErrorCode;
 }
 
@@ -1282,10 +1250,8 @@ int32_t JsHksCryptoExtAbility::InitSession(const std::string &index, const CppPa
     
     WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     handle = std::move(dataParam->handle);
-    if (dataParam->errInfo != nullptr && errInfo != nullptr) {
-        *errInfo = dataParam->errInfo;
-        dataParam->errInfo = nullptr;
-    }
+    HKS_EXT_IF_TRUE_EXCU(dataParam->errInfo != nullptr && errInfo != nullptr, *errInfo = dataParam->errInfo);
+    dataParam->errInfo = nullptr;
     return dataParam->hksErrorCode;
 }
 
@@ -1311,10 +1277,8 @@ int32_t JsHksCryptoExtAbility::GenerateKey(const std::string &handle, const CppP
     HKS_EXT_IF_TRUE_LOGE_RETURN(ret != ERR_OK, ret, "CallJsMethod error, code:%d", ret);
     
     WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
-    if (dataParam->errInfo != nullptr && errInfo != nullptr) {
-        *errInfo = dataParam->errInfo;
-        dataParam->errInfo = nullptr;
-    }
+    HKS_EXT_IF_TRUE_EXCU(dataParam->errInfo != nullptr && errInfo != nullptr, *errInfo = dataParam->errInfo);
+    dataParam->errInfo = nullptr;
     return dataParam->hksErrorCode;
 }
 
@@ -1341,10 +1305,8 @@ int32_t JsHksCryptoExtAbility::UpdateSession(const std::string &handle, const Cp
     
     WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     outData = std::move(dataParam->outData);
-    if (dataParam->errInfo != nullptr && errInfo != nullptr) {
-        *errInfo = dataParam->errInfo;
-        dataParam->errInfo = nullptr;
-    }
+    HKS_EXT_IF_TRUE_EXCU(dataParam->errInfo != nullptr && errInfo != nullptr, *errInfo = dataParam->errInfo);
+    dataParam->errInfo = nullptr;
     return dataParam->hksErrorCode;
 }
 
@@ -1371,10 +1333,8 @@ int32_t JsHksCryptoExtAbility::FinishSession(const std::string &handle, const Cp
     
     WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     outData = std::move(dataParam->outData);
-    if (dataParam->errInfo != nullptr && errInfo != nullptr) {
-        *errInfo = dataParam->errInfo;
-        dataParam->errInfo = nullptr;
-    }
+    HKS_EXT_IF_TRUE_EXCU(dataParam->errInfo != nullptr && errInfo != nullptr, *errInfo = dataParam->errInfo);
+    dataParam->errInfo = nullptr;
     return dataParam->hksErrorCode;
 }
 
@@ -1408,10 +1368,8 @@ int32_t JsHksCryptoExtAbility::SetOrGetProperty(uint32_t operation, const std::s
     }
     params = std::move(dataParam->paramSet);
 
-    if (dataParam->errInfo != nullptr && errInfo != nullptr) {
-        *errInfo = dataParam->errInfo;
-        dataParam->errInfo = nullptr;
-    }
+    HKS_EXT_IF_TRUE_EXCU(dataParam->errInfo != nullptr && errInfo != nullptr, *errInfo = dataParam->errInfo);
+    dataParam->errInfo = nullptr;
     return dataParam->hksErrorCode;
 }
 
@@ -1436,10 +1394,8 @@ int32_t JsHksCryptoExtAbility::ClearUkeyPinAuthState(const std::string &handle, 
     HKS_EXT_IF_TRUE_LOGE_RETURN(ret != ERR_OK, ret, "CallJsMethod error, code:%d", ret);
     
     WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
-    if (dataParam->errInfo != nullptr && errInfo != nullptr) {
-        *errInfo = dataParam->errInfo;
-        dataParam->errInfo = nullptr;
-    }
+    HKS_EXT_IF_TRUE_EXCU(dataParam->errInfo != nullptr && errInfo != nullptr, *errInfo = dataParam->errInfo);
+    dataParam->errInfo = nullptr;
     return dataParam->hksErrorCode;
 }
 
@@ -1467,10 +1423,8 @@ int32_t JsHksCryptoExtAbility::ImportWrappedKey(const std::string &index, const 
     HKS_EXT_IF_TRUE_LOGE_RETURN(ret != ERR_OK, ret, "CallJsMethod error, code:%d", ret);
     
     WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
-    if (dataParam->errInfo != nullptr && errInfo != nullptr) {
-        *errInfo = dataParam->errInfo;
-        dataParam->errInfo = nullptr;
-    }
+    HKS_EXT_IF_TRUE_EXCU(dataParam->errInfo != nullptr && errInfo != nullptr, *errInfo = dataParam->errInfo);
+    dataParam->errInfo = nullptr;
     return dataParam->hksErrorCode;
 }
 
@@ -1498,10 +1452,8 @@ int32_t JsHksCryptoExtAbility::ExportPublicKey(const std::string &index, const C
     if (dataParam->hksErrorCode == HKS_SUCCESS) {
         outData = dataParam->outData;
     }
-    if (dataParam->errInfo != nullptr && errInfo != nullptr) {
-        *errInfo = dataParam->errInfo;
-        dataParam->errInfo = nullptr;
-    }
+    HKS_EXT_IF_TRUE_EXCU(dataParam->errInfo != nullptr && errInfo != nullptr, *errInfo = dataParam->errInfo);
+    dataParam->errInfo = nullptr;
     return dataParam->hksErrorCode;
 }
 
@@ -1522,13 +1474,9 @@ int32_t JsHksCryptoExtAbility::GetResourceId(const CppParamSet &params, std::str
     HKS_EXT_IF_TRUE_LOGE_RETURN(ret != ERR_OK, ret, "CallJsMethod error, code:%d", ret);
     
     WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
-    if (dataParam->hksErrorCode == HKS_SUCCESS) {
-        resourceId = dataParam->handle;
-    }
-    if (dataParam->errInfo != nullptr && errInfo != nullptr) {
-        *errInfo = dataParam->errInfo;
-        dataParam->errInfo = nullptr;
-    }
+    HKS_EXT_IF_TRUE_EXCU(dataParam->hksErrorCode == HKS_SUCCESS, resourceId = dataParam->handle);
+    HKS_EXT_IF_TRUE_EXCU(dataParam->errInfo != nullptr && errInfo != nullptr, *errInfo = dataParam->errInfo);
+    dataParam->errInfo = nullptr;
     return dataParam->hksErrorCode;
 }
 
