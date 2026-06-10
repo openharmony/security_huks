@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,17 +15,17 @@ import("//build/config/features.gni")
 import("//build/test.gni")
 
 ##############################fuzztest##########################################
-ohos_fuzztest("HksClientIpcSerializationFuzzTest") {
+ohos_fuzztest("HksServiceIpcSerializationFuzzTest") {
   module_out_path = fuzz_module_out_path
-  fuzz_config_file = "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksclientipcserialization_fuzzer"
+  fuzz_config_file = "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksserviceipcserialization_fuzzer"
 
   include_dirs = [
     ".",
     "..",
     "//base/security/huks/frameworks/huks_standard/main/common/include/",
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",
-    "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/include",
   ]
+
   cflags = [
     "-g",
     "-O0",
@@ -33,8 +33,8 @@ ohos_fuzztest("HksClientIpcSerializationFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [
-    "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_client_ipc_serialization.c",
-    "hksclientipcserialization_fuzzer.cpp",
+    "hksserviceipcserialization_fuzzer.cpp",
+    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc/hks_service_ipc_serialization.c",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ipc_serialization.c",
   ]
 
@@ -54,8 +54,7 @@ group("fuzztest") {
   testonly = true
   deps = []
   deps += [
-    # deps file
-    ":HksClientIpcSerializationFuzzTest",
+    ":HksServiceIpcSerializationFuzzTest",
   ]
 }
 ###############################################################################

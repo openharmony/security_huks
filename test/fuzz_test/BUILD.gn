@@ -67,6 +67,7 @@ group("fuzztest") {
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksrefreshkeyinfo_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksregisterprovider_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksrename_fuzzer:fuzztest",
+        "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksserviceipcserialization_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksreportwrapper_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksrkc_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hkssign_fuzzer:fuzztest",
