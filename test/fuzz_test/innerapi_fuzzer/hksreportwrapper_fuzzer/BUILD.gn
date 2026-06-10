@@ -23,6 +23,8 @@ ohos_fuzztest("HksReportWrapperFuzzTest") {
     ".",
     "..",
     "//base/security/huks/frameworks/huks_standard/main/common/include/",
+    "//base/security/huks/services/huks_standard/huks_service/main/core/include/",
+    "//base/security/huks/services/huks_standard/huks_service/main/ha/include/",
   ]
 
   cflags = [
@@ -36,6 +38,7 @@ ohos_fuzztest("HksReportWrapperFuzzTest") {
   deps = [
     "..:hks_fuzz_util",
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
+    "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
   ]
   external_deps = [

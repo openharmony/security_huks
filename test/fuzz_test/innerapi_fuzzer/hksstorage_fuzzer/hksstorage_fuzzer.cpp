@@ -899,9 +899,93 @@ static int32_t FuzzGetFileInfo(FuzzedDataProvider &fdp)
     return HksGetFileInfo(&material, &fileInfo);
 }
 
+/* ========== Fuzz ConstructBlob ========== */
+static int32_t FuzzConstructBlob(FuzzedDataProvider &fdp)
+{
+    uint32_t srcSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 128);
+    auto srcData = fdp.ConsumeBytes<uint8_t>(srcSize);
+    if (srcData.empty()) {
+        return HKS_ERROR_INSUFFICIENT_DATA;
+    }
+    std::string srcStr(srcData.begin(), srcData.end());
+
+    uint32_t blobBufSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 256);
+    std::vector<uint8_t> blobBuf(blobBufSize, 0);
+    struct HksBlob blob = { blobBufSize, blobBuf.data() };
+    return ConstructBlob(srcStr.c_str(), &blob);
+}
+
+/* ========== Fuzz GetPath ========== */
+static int32_t FuzzGetPath(FuzzedDataProvider &fdp)
+{
+    uint32_t pathSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 64);
+    auto pathData = fdp.ConsumeBytes<uint8_t>(pathSize);
+    std::string pathStr(pathData.begin(), pathData.end());
+
+    uint32_t nameSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 64);
+    auto nameData = fdp.ConsumeBytes<uint8_t>(nameSize);
+    std::string nameStr(nameData.begin(), nameData.end());
+
+    uint32_t targetLen = fdp.ConsumeIntegralInRange<uint32_t>(16, 512);
+    std::vector<char> targetPath(targetLen, 0);
+    uint32_t bakFlag = fdp.ConsumeBool() ? HKS_STORAGE_BAK_FLAG_TRUE : HKS_STORAGE_BAK_FLAG_FLASE;
+
+    return GetPath(pathStr.c_str(), nameStr.c_str(), targetPath.data(), targetLen, bakFlag);
+}
+
+/* ========== Fuzz FileNameListInit/Free ========== */
+static int32_t FuzzFileNameList(FuzzedDataProvider &fdp)
+{
+    uint32_t keyCount = fdp.ConsumeIntegralInRange<uint32_t>(0, 32);
+    struct HksFileEntry *fileNameList = nullptr;
+
+    int32_t ret = FileNameListInit(&fileNameList, keyCount);
+    if (ret == HKS_SUCCESS && fileNameList != nullptr) {
+        FileNameListFree(&fileNameList, keyCount);
+    }
+
+    // edge: keyCount == 0
+    (void)FileNameListInit(&fileNameList, 0);
+
+    return ret;
+}
+
+/* ========== Fuzz GetHashValueToChar ========== */
+static int32_t FuzzGetHashValueToChar(FuzzedDataProvider &fdp)
+{
+    uint32_t inputSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 64);
+    auto inputData = fdp.ConsumeBytes<uint8_t>(inputSize);
+    std::string inputStr(inputData.begin(), inputData.end());
+
+    char output[HKS_DIGEST_SHA256_HEX_STRING_LEN + 1] = {0};
+    int32_t ret = GetHashValueToChar(inputStr.c_str(), output);
+
+    // null inputs
+    (void)GetHashValueToChar(nullptr, output);
+    (void)GetHashValueToChar(inputStr.c_str(), nullptr);
+
+    return ret;
+}
+
+/* ========== Fuzz CheckSpecificUserIdAndStorageLevel ========== */
+static int32_t FuzzCheckSpecificUserIdAndStorageLevel(FuzzedDataProvider &fdp)
+{
+    std::string processNameStr, userIdStr;
+    HksProcessInfo processInfo = {};
+    BuildProcessInfoFromFdp(fdp, processInfo, processNameStr, userIdStr);
+
+    WrapParamSet ps = ConstructParamSetFromFdp(fdp);
+    int32_t ret = CheckSpecificUserIdAndStorageLevel(&processInfo, ps.s);
+
+    // null inputs
+    (void)CheckSpecificUserIdAndStorageLevel(&processInfo, nullptr);
+
+    return ret;
+}
+
 using FuzzFunc = int32_t (*)(FuzzedDataProvider &);
 
-static const FuzzFunc g_fuzzFuncs[7] = {
+static const FuzzFunc g_fuzzFuncs[] = {
     FuzzStoreKeyBlob,
     FuzzGetKeyBlob,
     FuzzDeleteKeyBlob,
@@ -909,6 +993,11 @@ static const FuzzFunc g_fuzzFuncs[7] = {
     FuzzResumeInvalidCharacter,
     FuzzInitStorageMaterial,
     FuzzGetFileInfo,
+    FuzzConstructBlob,
+    FuzzGetPath,
+    FuzzFileNameList,
+    FuzzGetHashValueToChar,
+    FuzzCheckSpecificUserIdAndStorageLevel,
 };
 
 // Existing hardcoded test function pointers for selective execution

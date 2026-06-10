@@ -36,6 +36,7 @@ ohos_fuzztest("HksClientIpcSerializationFuzzTest") {
     "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_client_ipc_serialization.c",
     "hksclientipcserialization_fuzzer.cpp",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ipc_serialization.c",
+    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc/hks_service_ipc_serialization.c",
   ]
 
   deps = [
