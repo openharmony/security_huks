@@ -83,7 +83,7 @@ static int32_t CheckIfContainAtlTag(struct HksParamSet *paramSetIn)
     struct HksParam tmpParam[] = {
         {
             .tag = HKS_TAG_USER_AUTH_TYPE_ATL,
-            .uint32Param = HKS_USER_AUTH_TYPE_ATL1,
+            .uint32Param = HKS_USER_AUTH_ATL1,
         }
     };
 
