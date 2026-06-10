@@ -27,6 +27,7 @@
 #include "hks_type_inner.h"
 
 #include "hks_fuzz_util.h"
+#define MAX_IPC_BUF_SIZE 0x10000
 
 namespace OHOS {
 namespace Security {

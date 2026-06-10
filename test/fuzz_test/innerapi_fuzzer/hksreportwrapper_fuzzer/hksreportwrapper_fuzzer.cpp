@@ -20,6 +20,8 @@
 #include <unordered_map>
 #include <cstring>
 
+#include <securec.h>
+
 #include "hks_log.h"
 #include "hks_param.h"
 
@@ -30,12 +32,19 @@
 #include "hks_report_import_key.h"
 #include "hks_report_list_aliases.h"
 #include "hks_event_info.h"
-#include "hks_ha_plugin.h"
 #include "hks_template.h"
 #include "hks_type.h"
 #include "hks_type_inner.h"
 
 #include "hks_fuzz_util.h"
+
+// Forward declarations for HA plugin functions (avoid including hks_ha_plugin.h
+// which has heavy dependencies on HksEventProcMap etc.)
+extern "C" {
+int32_t HksRegisterEventProcWrapper(const void *procMap);
+int32_t HksRegisterEventProcs(const void *procMaps, uint32_t count);
+int32_t HksEnqueueEventWrapper(uint32_t eventId, struct HksParamSet *paramSet);
+}
 
 const std::string TEST_PROCESS_NAME = "test_process";
 const std::string TEST_USER_ID = "123465";

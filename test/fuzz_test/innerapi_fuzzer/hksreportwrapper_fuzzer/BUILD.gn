@@ -24,7 +24,6 @@ ohos_fuzztest("HksReportWrapperFuzzTest") {
     "..",
     "//base/security/huks/frameworks/huks_standard/main/common/include/",
     "//base/security/huks/services/huks_standard/huks_service/main/core/include/",
-    "//base/security/huks/services/huks_standard/huks_service/main/ha/include/",
   ]
 
   cflags = [
