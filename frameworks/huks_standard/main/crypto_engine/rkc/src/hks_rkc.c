@@ -18,6 +18,10 @@
 
 #include "hks_rkc.h"
 
+#ifdef HKS_CIPHER_ROOT_KEY
+#include "huks_hdi_cipher.h"
+#endif
+
 #include "hks_crypto_hal.h"
 #include "hks_get_udid.h"
 #include "hks_log.h"
@@ -128,6 +132,37 @@ static int32_t ReadAllKsfMk(struct HksKsfDataMkWithVer *validKsfData)
 
 static int32_t RkcGetRmkRawKey(const struct HksKsfDataRkc *ksfDataRkc, struct HksBlob *rawKey)
 {
+#ifdef HKS_CIPHER_ROOT_KEY
+    int32_t ret;
+    uint8_t decryptKeyData[HKS_RKC_MATERIAL_LEN] = {0};
+    struct HksBlob decryptKey = { HKS_RKC_MATERIAL_LEN, decryptKeyData };
+    struct HksBlob mainKey = { HKS_RKC_MATERIAL_LEN, ((struct HksKsfDataRkc *)ksfDataRkc)->rkMaterial1 };
+    struct HksBlob KeyMaterial = { HKS_RKC_MATERIAL2_LEN, ((struct HksKsfDataRkc *)ksfDataRkc)->rkMaterial2 };
+
+    ret = HksCipherEncryptAndDecrypt(&mainKey, &KeyMaterial, false, &decryptKey);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Cipher Decrypt failed! ret = 0x%X", ret);
+        goto out;
+    }
+
+    ret = memcpy_s(rawKey->data, rawKey->size, decryptKey.data, decryptKey.size);
+    if (ret != EOK) {
+        HKS_LOG_E("Memcpy failed! ret = 0x%X", ret);
+        goto out;
+    }
+
+    /* XOR hardware UDID */
+    ret = HksGetHardwareUdid(rawKey->data, HKS_HARDWARE_UDID_LEN);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Get hardware udid failed! ret = 0x%X", ret);
+        goto out;
+    }
+
+out:
+    (void)memset_s(decryptKeyData, decryptKey.size, 0, decryptKey.size);
+    (void)memset_s(&decryptKey, sizeof(struct HksBlob), 0, sizeof(struct HksBlob));
+    return ret;
+#else
     uint8_t udid[HKS_HARDWARE_UDID_LEN] = {0};
     int32_t ret = HksGetHardwareUdid(udid, HKS_HARDWARE_UDID_LEN);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Get hardware udid failed! ret = 0x%" LOG_PUBLIC "X", ret)
@@ -139,6 +174,7 @@ static int32_t RkcGetRmkRawKey(const struct HksKsfDataRkc *ksfDataRkc, struct Hk
 
     (void)memset_s(udid, HKS_HARDWARE_UDID_LEN, 0, HKS_HARDWARE_UDID_LEN);
     return HKS_SUCCESS;
+#endif
 }
 
 uint32_t RkcDigestToHks(const uint32_t rkcDigest)
@@ -204,9 +240,60 @@ void RkcRecoverMkTime(struct HksTime createdTime, struct HksTime expiredTime)
     g_hksRkcMk.mkExpiredTime = expiredTime;
 }
 
+#ifdef HKS_CIPHER_ROOT_KEY
+static int32_t RkcMakeRandomMaterialWithRootKey(struct HksKsfDataRkc *ksfDataRkc)
+{
+    uint8_t random1Data[HKS_RKC_MATERIAL_LEN] = {0};
+    uint8_t encryptKeyData[HKS_RKC_MATERIAL_LEN] = {0};
+    uint8_t random2Data[HKS_RKC_MATERIAL2_LEN] = {0};
+    struct HksBlob random1 = { HKS_RKC_MATERIAL_LEN, random1Data };
+    struct HksBlob random2 = { HKS_RKC_MATERIAL2_LEN, random2Data };
+    struct HksBlob encryptKey = { HKS_RKC_MATERIAL_LEN, encryptKeyData };
+    struct HksBlob mainKey = { HKS_RKC_MATERIAL_LEN, ksfDataRkc->rkMaterial1 };
+    struct HksBlob KeyMaterial = { HKS_RKC_MATERIAL2_LEN, ksfDataRkc->rkMaterial2 };
+    int32_t ret;
+    ret = HksCryptoHalFillRandom(&random1);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Generate random1 failed! ret = 0x%X", ret);
+        goto err_exit;
+    }
+    ret = HksCryptoHalFillRandom(&random2);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Generate random2 failed! ret = 0x%X", ret);
+        goto err_exit;
+    }
+    ret = memcpy_s(ksfDataRkc->rkMaterial1, HKS_RKC_MATERIAL_LEN, random1.data, HKS_RKC_MATERIAL_LEN);
+    if (ret != EOK) {
+        HKS_LOG_E("Material1 memcpy failed!");
+        goto err_exit;
+    }
+    ret = memcpy_s(ksfDataRkc->rkMaterial2, HKS_RKC_MATERIAL2_LEN, random2.data, HKS_RKC_MATERIAL2_LEN);
+    if (ret != EOK) {
+        HKS_LOG_E("Material2 memcpy failed!");
+        goto err_exit;
+    }
+    ret = HksCipherEncryptAndDecrypt(&mainKey, &KeyMaterial, true, &encryptKey);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Encrypt material failed! ret = 0x%X", ret);
+    } else {
+        ret = memcpy_s(mainKey.data, HKS_RKC_MATERIAL_LEN, encryptKeyData, HKS_RKC_MATERIAL_LEN);
+        if (ret != EOK) {
+            HKS_LOG_E("Memcpy failed!");
+        }
+    }
+err_exit:
+    (void)memset_s(random1Data, HKS_RKC_MATERIAL_LEN, 0, HKS_RKC_MATERIAL_LEN);
+    (void)memset_s(encryptKeyData, HKS_RKC_MATERIAL_LEN, 0, HKS_RKC_MATERIAL_LEN);
+    (void)memset_s(random2Data, HKS_RKC_MATERIAL2_LEN, 0, HKS_RKC_MATERIAL2_LEN);
+    return ret;
+}
+#endif
+
 static int32_t RkcMakeRandomMaterial(struct HksKsfDataRkc *ksfDataRkc)
 {
-    /* two random number */
+#ifdef HKS_CIPHER_ROOT_KEY
+    return RkcMakeRandomMaterialWithRootKey(ksfDataRkc);
+#else
     struct HksBlob random1 = { HKS_RKC_MATERIAL_LEN, ksfDataRkc->rkMaterial1 };
     struct HksBlob random2 = { HKS_RKC_MATERIAL_LEN, ksfDataRkc->rkMaterial2 };
 
@@ -220,6 +307,7 @@ static int32_t RkcMakeRandomMaterial(struct HksKsfDataRkc *ksfDataRkc)
         (void)memset_s(random1.data, HKS_RKC_MATERIAL_LEN, 0, HKS_RKC_MATERIAL_LEN);
     }
     return ret;
+#endif
 }
 
 static int32_t InitMkCryptUsageSpec(uint8_t *iv, const uint32_t ivSize, struct HksUsageSpec *usageSpec)

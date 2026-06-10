@@ -21,7 +21,11 @@
 
 #define HKS_RKC_RMK_LEN 64                              /* the length of root main key */
 #define HKS_RKC_RMK_EK_LEN 32                           /* the encryption key length of root main key */
+#ifdef HKS_CIPHER_ROOT_KEY
+#define HKS_RKC_RAW_KEY_LEN 32
+#else
 #define HKS_RKC_RAW_KEY_LEN 64                          /* the raw key length of root key component */
+#endif                         /* the raw key length of root key component */
 #define HKS_HARDWARE_UDID_LEN 32                        /* the length of hardware UDID */
 #define HKS_RKC_MK_ADD_DATA_LEN 8                       /* the additional data length of main key */
 #define HKS_KSF_NAME_LEN_MAX 256                        /* the max length of rkc keystore filename */

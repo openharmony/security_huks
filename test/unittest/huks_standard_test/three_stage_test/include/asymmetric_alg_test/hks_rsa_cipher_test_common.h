@@ -55,11 +55,11 @@ static const std::string g_inData_512 = "RSA_512_ttttttttttttttttttttttttttttttt
                                         "tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt";
 
 static struct HksBlob inData_96 = {
-    g_inData_96.length(),
+    static_cast<uint32_t>(g_inData_96.length()),
     const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData_96.c_str()))
 };
 static struct HksBlob inData_192 = {
-    g_inData_192.length(),
+    static_cast<uint32_t>(g_inData_192.length()),
     const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData_192.c_str()))
 };
 

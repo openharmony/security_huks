@@ -27,6 +27,10 @@
 #include "hks_log.h"
 #include "hks_template.h"
 
+#ifdef HKS_CIPHER_ROOT_KEY
+#include "huks_hdi_cipher.h"
+#endif
+
 static int32_t EncryptCheckParam(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *cipherText)
 {
@@ -332,9 +336,18 @@ int32_t HksCryptoHalVerifyIsoIec97962(const struct HksBlob *key, const struct Hk
 
 int32_t HksCryptoHalFillRandom(struct HksBlob *randomData)
 {
+#ifdef HKS_CIPHER_ROOT_KEY
+    int32_t ret = HksCipherGenerateRandom(randomData);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("cipher_get_random failed! ret = 0x%X", ret);
+        return HKS_ERROR_BAD_STATE;
+    }
+    return HKS_SUCCESS;
+#else
     FillRandom func = (FillRandom)GetAbility(HKS_CRYPTO_ABILITY_FILL_RANDOM);
     HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
     return func(randomData);
+#endif /* HKS_CIPHER_ROOT_KEY */
 }
 
 int32_t HksCryptoHalFillPrivRandom(struct HksBlob *randomData)

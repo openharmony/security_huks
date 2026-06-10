@@ -83,6 +83,11 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/include",
       "//base/security/huks/frameworks/huks_standard/main/crypto_engine/rkc/include",
     ]
+
+    if(huks_enable_hisilicon_cipher_in_small) {
+      include_dirs += [ "//drivers/peripheral/huks/interfaces/include", ]
+      defines = [ "HKS_CIPHER_ROOT_KEY" ]
+    }
   }
 
   ohos_static_library("libhuks_mbedtls_small_static") {
@@ -153,5 +158,10 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/config/build:l1_small_common_config",
     ]
     external_deps = [ "hilog_lite:hilog_shared" ]
+
+    if (huks_enable_hisilicon_cipher_in_small) {
+      defines += [ "HKS_CIPHER_ROOT_KEY" ]
+      deps += [ "$ohos_board_adapter_dir/huks:huks_cipher_adapter" ]
+    }
   }
 }

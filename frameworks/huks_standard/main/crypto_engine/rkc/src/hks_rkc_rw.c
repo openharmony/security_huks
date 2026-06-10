@@ -29,7 +29,11 @@
 #include <securec.h>
 
 #define HKS_RKC_HASH_LEN 32         /* the hash value length of root key component */
-#define HKS_KSF_BUF_LEN 258         /* the length of rkc or mk keystore buffer */
+#ifdef HKS_CIPHER_ROOT_KEY
+#define HKS_KSF_BUF_LEN 290         /* the length of rkc or mk keystore buffer */
+#else
+#define HKS_KSF_BUF_LEN 258
+#endif
 #define USER_ID_ROOT_DEFAULT          "0"
 
 /* the flag of keystore file, used to identify files as HKS keystore file, don't modify. */

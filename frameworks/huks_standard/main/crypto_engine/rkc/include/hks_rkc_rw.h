@@ -20,7 +20,13 @@
 
 #define HKS_RKC_VER 2                                   /* the version of root key component */
 #define HKS_MK_VER 2                                    /* the version of main key */
+#ifdef HKS_CIPHER_ROOT_KEY
+#define HKS_RKC_RMK_ITER 10000                          /* the iterator number of times which derive Root Main Key */
+#define HKS_RKC_MATERIAL2_LEN 64                        /* the material2 length of root key component */
+#else
 #define HKS_RKC_RMK_ITER 1                              /* the iterator number of times which derive Root Main Key */
+#define HKS_RKC_MATERIAL2_LEN 32                        /* the material2 length of root key component */
+#endif
 #define HKS_RKC_RMK_HMAC_SHA256 1                       /* the hash algorithm which derive Root Main Key */
 #define HKS_RKC_MK_CRYPT_ALG_AES256_GCM 1               /* the encrypt algorithm of main key */
 #define HKS_RKC_CFG_RSV_LEN 32                          /* the reserve length of the system configuration */
@@ -70,7 +76,7 @@ struct HksKsfDataRkc {
     struct HksTime rkCreatedTime;                       /* the created time of root key */
     struct HksTime rkExpiredTime;                       /* the expired time of root key */
     uint8_t rkMaterial1[HKS_RKC_MATERIAL_LEN];          /* the first material of root key */
-    uint8_t rkMaterial2[HKS_RKC_MATERIAL_LEN];          /* the second material of root key */
+    uint8_t rkMaterial2[HKS_RKC_MATERIAL2_LEN];          /* the second material of root key */
     uint32_t rmkIter;                                   /* the iterator number of times which derive root main key */
     uint8_t rmkSalt[HKS_RKC_SALT_LEN];                  /* the salt which derive root main key */
     uint32_t rmkHashAlg;                                /* the hash algorithm which derive root main key */
