@@ -38,8 +38,6 @@
 
 #include "hks_fuzz_util.h"
 
-// Forward declarations for HA plugin functions (avoid including hks_ha_plugin.h
-// which has heavy dependencies on HksEventProcMap etc.)
 extern "C" {
 int32_t HksRegisterEventProcWrapper(const void *procMap);
 int32_t HksRegisterEventProcs(const void *procMaps, uint32_t count);
