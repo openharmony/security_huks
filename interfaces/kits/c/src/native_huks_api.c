@@ -14,7 +14,7 @@
  */
 
 #include "native_huks_api.h"
-
+#include "hks_param.h"
 #include "hks_api.h"
 #include "hks_errcode_adapter.h"
 #include "hks_error_code.h"
@@ -36,6 +36,21 @@ static struct OH_Huks_Result NewConvertApiResult(int32_t ret)
     return *((struct OH_Huks_Result *)(&result));
 }
 
+static int32_t CheckIfContainAtlTag(struct HksParamSet *paramSetIn)
+{
+    struct HksParam tmpParam[] = {
+        {
+            .tag = HKS_TAG_USER_AUTH_TYPE_ATL,
+            .uint32Param = HKS_USER_AUTH_TYPE_ATL1,
+        }
+    };
+
+    int32_t ret = HksCheckIsTagAlreadyExist(tmpParam, HKS_ARRAY_SIZE(tmpParam),
+        (const struct HksParamSet *) paramSetIn);
+    return ret;
+    
+}
+
 struct OH_Huks_Result OH_Huks_GetSdkVersion(struct OH_Huks_Blob *sdkVersion)
 {
     int32_t result = HksGetSdkVersion((struct HksBlob *) sdkVersion);
@@ -45,7 +60,11 @@ struct OH_Huks_Result OH_Huks_GetSdkVersion(struct OH_Huks_Blob *sdkVersion)
 struct OH_Huks_Result OH_Huks_GenerateKeyItem(const struct OH_Huks_Blob *keyAlias,
     const struct OH_Huks_ParamSet *paramSetIn, struct OH_Huks_ParamSet *paramSetOut)
 {
-    int32_t result = HksGenerateKey((const struct HksBlob *) keyAlias,
+    int32_t result = CheckIfContainAtlTag(paramSetIn);
+    if (result != HKS_SUCCESS) {
+        return ConvertApiResult(result);
+    }
+    result = HksGenerateKey((const struct HksBlob *) keyAlias,
         (const struct HksParamSet *) paramSetIn, (struct HksParamSet *) paramSetOut);
     return ConvertApiResult(result);
 }

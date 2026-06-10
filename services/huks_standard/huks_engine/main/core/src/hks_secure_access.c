@@ -124,7 +124,7 @@ static int32_t CheckAuthTypeValidity(const struct HksParamSet *keyBlobParamSet, 
     int32_t atlRet = HksGetParam(keyBlobParamSet, HKS_TAG_USER_AUTH_TYPE_ATL, &blobUserAuthAtl);
     if (ret == HKS_ERROR_PARAM_NOT_EXIST && atlRet == HKS_ERROR_PARAM_NOT_EXIST) {
         return HKS_ERROR_PARAM_NOT_EXIST;
-    } else if (ret != HKS_SUCCESS && ret != HKS_ERROR_NOT_EXIST) {
+    } else if (ret != HKS_SUCCESS && ret != HKS_ERROR_PARAM_NOT_EXIST) {
         HKS_LOG_E("get blob user auth type failed!");
         return ret;
     } else if (atlRet != HKS_SUCCESS && atlRet != HKS_ERROR_PARAM_NOT_EXIST) {
@@ -541,7 +541,8 @@ static int32_t VerifyAuthTypeOrTrustLevl(struct HksParam *userAuthType, struct H
         int32_t ret = HksCoreConvertToHksAuthTrustLevel(plainText->authTrustLevel, &authTokenAtlType);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NOT_SUPPORTED, "invalid user iam auth trust level:not support!")
         HKS_IF_NOT_TRUE_LOGE_RETURN((authTokenAtlType >= userAuthAtl->uint32Param),
-            HKS_ERROR_KEY_AUTH_VERIFY_FAILED, "current keyblob auth do not support current auth token atl!");
+            HKS_ERROR_KEY_AUTH_VERIFY_FAILED, "current authtoken ATL: %u is smaller than keyblob ATL: %u!",
+            authTokenAtlType, userAuthAtl->uint32Param);
     }
     return HKS_SUCCESS;
 }
@@ -569,8 +570,8 @@ static int32_t VerifyAuthTokenInfo(const struct HuksKeyNode *keyNode, const stru
         ret = VerifyFrontUserIdIfNeed(keyBlobParamSet, authToken);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "verify Front User Id failed!")
     } else {
-        HKS_IF_NULL_LOGE_RETURN(userAuthType, HKS_ERROR_NOT_SUPPORTED,
-            "current auth access type requires user auth type as input!")
+        // HKS_IF_NULL_LOGE_RETURN(userAuthType, HKS_ERROR_NOT_SUPPORTED,
+        //     "current auth access type requires user auth type as input!")
 
         ret = VerifySecureUidIfNeed(keyBlobParamSet, authToken, authAccessType->uint32Param);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "verify sec uid failed!")

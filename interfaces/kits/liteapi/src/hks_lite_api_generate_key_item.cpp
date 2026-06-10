@@ -36,6 +36,19 @@ static int32_t HksCallGenerateKey(const struct HksBlob *aliasBlob, const struct 
     return ret;
 }
 
+static int32_t CheckIfContainAtlTag(struct HksParamSet *paramSetIn)
+{
+    struct HksParam tmpParam[] = {
+        {
+            .tag = HKS_TAG_USER_AUTH_TYPE_ATL,
+            .uint32Param = HKS_USER_AUTH_TYPE_ATL1,
+        }
+    };
+
+    int32_t ret = HksCheckIsTagAlreadyExist(tmpParam, HKS_ARRAY_SIZE(tmpParam), paramSetIn);
+    return ret;
+}
+
 JSIValue HksLiteModule::generateKeyItem(const JSIValue thisVal, const JSIValue* args, uint8_t argsNum)
 {
     JSIValue undefValue = JSI::CreateUndefined();
@@ -54,6 +67,10 @@ JSIValue HksLiteModule::generateKeyItem(const JSIValue thisVal, const JSIValue* 
             break;
         }
         ret = HksParseParamSetWithAdd(args, ARGS_INDEX_1, &paramSet, nullptr, 0);
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
+        ret = CheckIfContainAtlTag(paramSet);
         if (ret != HKS_SUCCESS) {
             break;
         }
