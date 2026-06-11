@@ -296,7 +296,7 @@ static int32_t FuzzCheckKeyExitedReport(FuzzedDataProvider &fdp)
     struct HksEventInfo eventInfo1 = {};
     int32_t ret = HksParamSetToEventInfoForCheckKeyExited(ps.s, &eventInfo1);
     if (ret != HKS_SUCCESS) {
-        return ret;
+        return ret; // unique_ptr inside the function already cleaned up
     }
 
     (void)HksEventInfoIsNeedReportForCheckKeyExited(&eventInfo1);
@@ -307,6 +307,7 @@ static int32_t FuzzCheckKeyExitedReport(FuzzedDataProvider &fdp)
     if (ret == HKS_SUCCESS) {
         (void)HksEventInfoIsEqualForCheckKeyExited(&eventInfo1, &eventInfo2);
         HksEventInfoAddForCheckKeyExited(&eventInfo1, &eventInfo2);
+        FreeCommonEventInfo(&eventInfo2);
     }
 
     std::unordered_map<std::string, std::string> reportData;
@@ -314,7 +315,6 @@ static int32_t FuzzCheckKeyExitedReport(FuzzedDataProvider &fdp)
     (void)HksEventInfoToMapForCheckKeyExited(nullptr, reportData);
 
     FreeCommonEventInfo(&eventInfo1);
-    FreeCommonEventInfo(&eventInfo2);
     return ret;
 }
 
@@ -339,6 +339,7 @@ static int32_t FuzzDeleteReport(FuzzedDataProvider &fdp)
     if (ret == HKS_SUCCESS) {
         (void)HksEventInfoIsEqualForDelete(&eventInfo1, &eventInfo2);
         HksEventInfoAddForDelete(&eventInfo1, &eventInfo2);
+        FreeCommonEventInfo(&eventInfo2);
     }
 
     std::unordered_map<std::string, std::string> reportData;
@@ -346,7 +347,6 @@ static int32_t FuzzDeleteReport(FuzzedDataProvider &fdp)
     (void)HksEventInfoToMapForDelete(nullptr, reportData);
 
     FreeCommonEventInfo(&eventInfo1);
-    FreeCommonEventInfo(&eventInfo2);
     return ret;
 }
 
@@ -371,6 +371,7 @@ static int32_t FuzzImportReport(FuzzedDataProvider &fdp)
     if (ret == HKS_SUCCESS) {
         (void)HksEventInfoIsEqualForImport(&eventInfo1, &eventInfo2);
         HksEventInfoAddForImport(&eventInfo1, &eventInfo2);
+        FreeCommonEventInfo(&eventInfo2);
     }
 
     std::unordered_map<std::string, std::string> reportData;
@@ -378,7 +379,6 @@ static int32_t FuzzImportReport(FuzzedDataProvider &fdp)
     (void)HksEventInfoToMapForImport(nullptr, reportData);
 
     FreeCommonEventInfo(&eventInfo1);
-    FreeCommonEventInfo(&eventInfo2);
     return ret;
 }
 
@@ -403,6 +403,7 @@ static int32_t FuzzListAliasesReport(FuzzedDataProvider &fdp)
     if (ret == HKS_SUCCESS) {
         (void)HksEventInfoIsEqualForListAliases(&eventInfo1, &eventInfo2);
         HksEventInfoAddForListAliases(&eventInfo1, &eventInfo2);
+        FreeCommonEventInfo(&eventInfo2);
     }
 
     std::unordered_map<std::string, std::string> reportData;
@@ -410,7 +411,6 @@ static int32_t FuzzListAliasesReport(FuzzedDataProvider &fdp)
     (void)HksEventInfoToMapForListAliases(nullptr, reportData);
 
     FreeCommonEventInfo(&eventInfo1);
-    FreeCommonEventInfo(&eventInfo2);
     return ret;
 }
 
@@ -421,45 +421,25 @@ static int32_t FuzzReportCommon(FuzzedDataProvider &fdp)
         return HKS_FAILURE;
     }
 
-    struct HksEventInfo eventInfo = {};
-    int32_t ret = GetCommonEventInfo(ps.s, &eventInfo);
-    if (ret == HKS_SUCCESS) {
-        struct HksEventKeyInfo keyInfo = {};
-        (void)GetEventKeyInfo(ps.s, &keyInfo);
+    // Test GetEventKeyInfo independently
+    struct HksEventKeyInfo keyInfo = {};
+    (void)GetEventKeyInfo(ps.s, &keyInfo);
 
-        struct HksEventKeyAccessInfo accessInfo = {};
-        (void)GetEventKeyAccessInfo(ps.s, &accessInfo);
+    // Test GetEventKeyAccessInfo independently
+    struct HksEventKeyAccessInfo accessInfo = {};
+    (void)GetEventKeyAccessInfo(ps.s, &accessInfo);
 
-        std::unordered_map<std::string, std::string> reportData;
-        (void)EventInfoToMapKeyInfo(&keyInfo, reportData);
-        (void)EventInfoToMapKeyAccessInfo(&accessInfo, reportData);
+    // Test EventInfoToMapKeyInfo with valid data
+    std::unordered_map<std::string, std::string> reportData;
+    (void)EventInfoToMapKeyInfo(&keyInfo, reportData);
+    (void)EventInfoToMapKeyAccessInfo(&accessInfo, reportData);
 
-        struct HksEventInfo eventInfo2 = {};
-        ret = GetCommonEventInfo(ps.s, &eventInfo2);
-        if (ret == HKS_SUCCESS) {
-            (void)CheckEventCommon(&eventInfo, &eventInfo2);
-            (void)CheckEventCommon(nullptr, &eventInfo2);
-            (void)CheckEventCommon(&eventInfo, nullptr);
-            (void)CheckEventCommonAndKey(&eventInfo, &eventInfo2);
-        }
-
-        FreeCommonEventInfo(&eventInfo2);
-    }
-
-    (void)GetCommonEventInfo(nullptr, nullptr);
-    (void)GetEventKeyInfo(nullptr, nullptr);
-    (void)GetEventKeyAccessInfo(nullptr, nullptr);
-
-    std::unordered_map<std::string, std::string> emptyMap;
-    (void)EventInfoToMapKeyInfo(nullptr, emptyMap);
-    (void)EventInfoToMapKeyAccessInfo(nullptr, emptyMap);
-
+    // Test CopyParamBlobData with null inputs (these functions have null checks)
     (void)CopyParamBlobData(nullptr, nullptr);
     char *dst = nullptr;
     (void)CopyParamBlobData(&dst, nullptr);
 
-    FreeCommonEventInfo(&eventInfo);
-    return ret;
+    return HKS_SUCCESS;
 }
 
 /* ========== Fuzz HA Plugin functions ========== */

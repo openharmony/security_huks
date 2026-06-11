@@ -97,20 +97,28 @@ static int32_t FuzzFreeKeyAliasSet(FuzzedDataProvider &fdp)
     }
 
     uint32_t cnt = fdp.ConsumeIntegralInRange<uint32_t>(1, 10);
-    size_t structSize = sizeof(struct HksKeyAliasSet) + cnt * sizeof(struct HksBlob);
-    auto *aliasSet2 = static_cast<struct HksKeyAliasSet *>(malloc(structSize));
+    auto *aliasSet2 = static_cast<struct HksKeyAliasSet *>(malloc(sizeof(struct HksKeyAliasSet)));
     if (aliasSet2 != nullptr) {
         aliasSet2->aliasesCnt = cnt;
-        aliasSet2->aliases = reinterpret_cast<struct HksBlob *>(
-            reinterpret_cast<uint8_t *>(aliasSet2) + sizeof(struct HksKeyAliasSet));
+        // aliases array must be separately allocated since HksFreeKeyAliasSet frees it independently
+        aliasSet2->aliases = static_cast<struct HksBlob *>(malloc(cnt * sizeof(struct HksBlob)));
+        if (aliasSet2->aliases == nullptr) {
+            free(aliasSet2);
+            return HKS_ERROR_MALLOC_FAIL;
+        }
 
-        std::vector<std::vector<uint8_t>> storage;
         for (uint32_t i = 0; i < cnt; i++) {
             uint32_t blobSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 32);
             auto data = fdp.ConsumeBytes<uint8_t>(blobSize);
-            storage.push_back(std::move(data));
-            aliasSet2->aliases[i].size = static_cast<uint32_t>(storage.back().size());
-            aliasSet2->aliases[i].data = storage.back().data();
+            if (data.empty()) {
+                data = {0};
+            }
+            // blob data must be HksMalloc'd since HksFreeKeyAliasSet calls HKS_FREE on it
+            aliasSet2->aliases[i].size = static_cast<uint32_t>(data.size());
+            aliasSet2->aliases[i].data = static_cast<uint8_t *>(HksMalloc(data.size()));
+            if (aliasSet2->aliases[i].data != nullptr) {
+                (void)memcpy_s(aliasSet2->aliases[i].data, data.size(), data.data(), data.size());
+            }
         }
         HksFreeKeyAliasSet(aliasSet2);
     }

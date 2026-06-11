@@ -43,11 +43,7 @@ static int32_t FuzzHksRenameKeyAliasUnpack(FuzzedDataProvider &fdp)
     struct HksBlob oldKeyAlias = { 0, nullptr };
     struct HksBlob newKeyAlias = { 0, nullptr };
     struct HksParamSet *paramSet = nullptr;
-    int32_t ret = HksRenameKeyAliasUnpack(&srcBlob, &oldKeyAlias, &newKeyAlias, &paramSet);
-    HKS_FREE(oldKeyAlias.data);
-    HKS_FREE(newKeyAlias.data);
-    HksFreeParamSet(&paramSet);
-    return ret;
+    return HksRenameKeyAliasUnpack(&srcBlob, &oldKeyAlias, &newKeyAlias, &paramSet);
 }
 
 static int32_t FuzzHksChangeStorageLevelUnpack(FuzzedDataProvider &fdp)
@@ -60,11 +56,7 @@ static int32_t FuzzHksChangeStorageLevelUnpack(FuzzedDataProvider &fdp)
     struct HksBlob keyAlias = { 0, nullptr };
     struct HksParamSet *srcParamSet = nullptr;
     struct HksParamSet *destParamSet = nullptr;
-    int32_t ret = HksChangeStorageLevelUnpack(&srcBlob, &keyAlias, &srcParamSet, &destParamSet);
-    HKS_FREE(keyAlias.data);
-    HksFreeParamSet(&srcParamSet);
-    HksFreeParamSet(&destParamSet);
-    return ret;
+    return HksChangeStorageLevelUnpack(&srcBlob, &keyAlias, &srcParamSet, &destParamSet);
 }
 
 static int32_t FuzzHksWrapKeyUnpack(FuzzedDataProvider &fdp)
@@ -78,9 +70,7 @@ static int32_t FuzzHksWrapKeyUnpack(FuzzedDataProvider &fdp)
     struct HksParamSet *paramSet = nullptr;
     struct HksBlob wrappedKey = { 0, nullptr };
     int32_t ret = HksWrapKeyUnpack(&srcBlob, &keyAlias, &paramSet, &wrappedKey);
-    HKS_FREE(keyAlias.data);
     HKS_FREE(wrappedKey.data);
-    HksFreeParamSet(&paramSet);
     return ret;
 }
 
@@ -94,11 +84,7 @@ static int32_t FuzzHksUnwrapKeyUnpack(FuzzedDataProvider &fdp)
     struct HksBlob keyAlias = { 0, nullptr };
     struct HksParamSet *paramSet = nullptr;
     struct HksBlob wrappedKey = { 0, nullptr };
-    int32_t ret = HksUnwrapKeyUnpack(&srcBlob, &keyAlias, &paramSet, &wrappedKey);
-    HKS_FREE(keyAlias.data);
-    HKS_FREE(wrappedKey.data);
-    HksFreeParamSet(&paramSet);
-    return ret;
+    return HksUnwrapKeyUnpack(&srcBlob, &keyAlias, &paramSet, &wrappedKey);
 }
 
 static int32_t FuzzHksEncapsulateUnpack(FuzzedDataProvider &fdp)
@@ -112,12 +98,7 @@ static int32_t FuzzHksEncapsulateUnpack(FuzzedDataProvider &fdp)
     struct HksParamSet *paramSet = nullptr;
     struct HksBlob sharedKeyAlias = { 0, nullptr };
     struct HksParamSet *sharedKeyParamSet = nullptr;
-    int32_t ret = HksEncapsulateUnpack(&srcBlob, &keyAlias, &paramSet, &sharedKeyAlias, &sharedKeyParamSet);
-    HKS_FREE(keyAlias.data);
-    HKS_FREE(sharedKeyAlias.data);
-    HksFreeParamSet(&paramSet);
-    HksFreeParamSet(&sharedKeyParamSet);
-    return ret;
+    return HksEncapsulateUnpack(&srcBlob, &keyAlias, &paramSet, &sharedKeyAlias, &sharedKeyParamSet);
 }
 
 static int32_t FuzzHksDecapsulateUnpack(FuzzedDataProvider &fdp)
@@ -131,12 +112,8 @@ static int32_t FuzzHksDecapsulateUnpack(FuzzedDataProvider &fdp)
     struct HksParamSet *sharedKeyParamSet = nullptr;
     struct HksBlob encapOrsharedSecret = { 0, nullptr };
     uint32_t offset = 0;
-    int32_t ret = HksDecapsulateUnpack(&srcBlob, &sharedKeyAlias, &sharedKeyParamSet,
+    return HksDecapsulateUnpack(&srcBlob, &sharedKeyAlias, &sharedKeyParamSet,
         &encapOrsharedSecret, &offset);
-    HKS_FREE(sharedKeyAlias.data);
-    HKS_FREE(encapOrsharedSecret.data);
-    HksFreeParamSet(&sharedKeyParamSet);
-    return ret;
 }
 
 static int32_t FuzzHksEncapsulateResponsePack(FuzzedDataProvider &fdp)
@@ -161,18 +138,15 @@ static int32_t FuzzHksEncapsulateResponsePack(FuzzedDataProvider &fdp)
 
 static int32_t FuzzHksListAliasesPackFromService(FuzzedDataProvider &fdp)
 {
-    // null aliasSet
     struct HksBlob destData = { 0, nullptr };
     (void)HksListAliasesPackFromService(nullptr, &destData);
 
-    // empty aliasSet
     struct HksKeyAliasSet emptySet = {};
     emptySet.aliasesCnt = 0;
     emptySet.aliases = nullptr;
     struct HksBlob destData2 = { 0, nullptr };
     (void)HksListAliasesPackFromService(&emptySet, &destData2);
 
-    // with FDP-driven aliases
     uint32_t cnt = fdp.ConsumeIntegralInRange<uint32_t>(1, 8);
     std::vector<std::vector<uint8_t>> aliasStorage(cnt);
     std::vector<struct HksBlob> aliases(cnt);
@@ -193,11 +167,9 @@ static int32_t FuzzHksListAliasesPackFromService(FuzzedDataProvider &fdp)
 
 static int32_t FuzzHksCertificatesPackFromService(FuzzedDataProvider &fdp)
 {
-    // null certInfoSet
     struct HksBlob destData = { 0, nullptr };
     (void)HksCertificatesPackFromService(nullptr, &destData);
 
-    // with FDP-driven certs
     uint32_t cnt = fdp.ConsumeIntegralInRange<uint32_t>(1, 4);
     std::vector<std::vector<uint8_t>> indexStorage(cnt);
     std::vector<std::vector<uint8_t>> certStorage(cnt);
