@@ -288,16 +288,91 @@ static int32_t FuzzRkcWriteAllKsf(FuzzedDataProvider &fdp)
     return RkcWriteAllKsf(&ksfDataRkc, &ksfDataMk);
 }
 
-static int32_t FuzzRkcCreateKsf(FuzzedDataProvider &fdp)
-{
-    (void)fdp;
-    return RkcCreateKsf();
-}
-
 static int32_t FuzzUpgradeV1ToV2(FuzzedDataProvider &fdp)
 {
     (void)fdp;
     return UpgradeV1ToV2();
+}
+
+static int32_t FuzzRkcDigestToHks(FuzzedDataProvider &fdp)
+{
+    uint32_t digest = fdp.ConsumeIntegral<uint32_t>();
+    (void)RkcDigestToHks(digest);
+    return HKS_SUCCESS;
+}
+
+static int32_t FuzzRkcMaskMk(FuzzedDataProvider &fdp)
+{
+    uint8_t mkData[HKS_RKC_MK_LEN] = {0};
+    auto fuzzMk = fdp.ConsumeBytes<uint8_t>(HKS_RKC_MK_LEN);
+    if (fuzzMk.size() == HKS_RKC_MK_LEN) {
+        (void)memcpy_s(mkData, HKS_RKC_MK_LEN, fuzzMk.data(), HKS_RKC_MK_LEN);
+    }
+    struct HksBlob mk = { HKS_RKC_MK_LEN, mkData };
+    return RkcMaskMk(&mk);
+}
+
+static int32_t FuzzInitKsfAttr(FuzzedDataProvider &fdp)
+{
+    uint32_t nameSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 32);
+    auto name1Data = fdp.ConsumeBytes<uint8_t>(nameSize);
+    if (name1Data.empty()) return HKS_ERROR_INSUFFICIENT_DATA;
+    std::string name1(name1Data.begin(), name1Data.end());
+
+    auto name2Data = fdp.ConsumeBytes<uint8_t>(nameSize);
+    if (name2Data.empty()) return HKS_ERROR_INSUFFICIENT_DATA;
+    std::string name2(name2Data.begin(), name2Data.end());
+
+    struct HksKsfAttr ksfAttr = {};
+    ksfAttr.name[0] = const_cast<char *>(name1.c_str());
+    ksfAttr.name[1] = const_cast<char *>(name2.c_str());
+
+    uint8_t ksfType = fdp.ConsumeBool() ? HKS_KSF_TYPE_RKC : HKS_KSF_TYPE_MK;
+    return InitKsfAttr(&ksfAttr, ksfType);
+}
+
+static int32_t FuzzHksRkcGetMainKey(FuzzedDataProvider &fdp)
+{
+    (void)fdp;
+    uint8_t mkBuf[HKS_RKC_MK_LEN] = {0};
+    struct HksBlob mainKey = { HKS_RKC_MK_LEN, mkBuf };
+    return HksRkcGetMainKey(&mainKey);
+}
+
+static int32_t FuzzHksRkcBuildParamSet(FuzzedDataProvider &fdp)
+{
+    (void)fdp;
+    struct HksParamSet *paramSet = NULL;
+    int32_t ret = HksRkcBuildParamSet(&paramSet);
+    HksFreeParamSet(&paramSet);
+    return ret;
+}
+
+static int32_t FuzzKsfExist(FuzzedDataProvider &fdp)
+{
+    uint8_t ksfType = fdp.ConsumeBool() ? HKS_KSF_TYPE_RKC : HKS_KSF_TYPE_MK;
+    (void)KsfExist(ksfType);
+    return HKS_SUCCESS;
+}
+
+static int32_t FuzzGetProcessInfo(FuzzedDataProvider &fdp)
+{
+    (void)fdp;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    int32_t ret = GetProcessInfo(&processInfo);
+    if (ret == HKS_SUCCESS) {
+        HKS_FREE(processInfo.userId.data);
+        HKS_FREE(processInfo.processName.data);
+    }
+    return ret;
+}
+
+static int32_t FuzzHksCfgAndMkDestroy(FuzzedDataProvider &fdp)
+{
+    (void)fdp;
+    HksCfgDestroy();
+    HksMkDestroy();
+    return HKS_SUCCESS;
 }
 
 using FuzzFunc = int32_t (*)(FuzzedDataProvider &);
@@ -311,8 +386,15 @@ static const FuzzFunc g_fuzzFuncs[] = {
     FuzzFillKsfBufRoundTrip,
     FuzzHksWriteKsf,
     FuzzRkcWriteAllKsf,
-    FuzzRkcCreateKsf,
     FuzzUpgradeV1ToV2,
+    FuzzRkcDigestToHks,
+    FuzzRkcMaskMk,
+    FuzzInitKsfAttr,
+    FuzzHksRkcGetMainKey,
+    FuzzHksRkcBuildParamSet,
+    FuzzKsfExist,
+    FuzzGetProcessInfo,
+    FuzzHksCfgAndMkDestroy,
 };
 
 // Existing hardcoded test function pointers for selective execution
