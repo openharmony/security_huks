@@ -39,6 +39,7 @@ ohos_fuzztest("HksRkcFuzzTest") {
   sources = [
     "//base/security/huks/frameworks/huks_standard/main/crypto_engine/rkc/src/hks_rkc.c",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency/sysinfo/src/hks_get_udid.c",
+    "//base/security/huks/frameworks/huks_standard/main/os_dependency/sysinfo/src/hks_get_process_info_passthrough.c",
     "hksrkc_fuzzer.cpp",
   ]
 
