@@ -32,6 +32,7 @@
 
 #include "hks_api.h"
 #include "hks_config.h"
+#include "hks_file_operator.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
@@ -983,6 +984,40 @@ static int32_t FuzzCheckSpecificUserIdAndStorageLevel(FuzzedDataProvider &fdp)
     return ret;
 }
 
+static int32_t FuzzHksRemoveDir(FuzzedDataProvider &fdp)
+{
+    (void)HksRemoveDir(nullptr);
+
+    uint32_t pathSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 128);
+    auto pathData = fdp.ConsumeBytes<uint8_t>(pathSize);
+    if (pathData.empty()) return HKS_ERROR_INSUFFICIENT_DATA;
+    std::string pathStr(pathData.begin(), pathData.end());
+    return HksRemoveDir(pathStr.c_str());
+}
+
+static int32_t FuzzHksDeleteDir(FuzzedDataProvider &fdp)
+{
+    (void)HksDeleteDir(nullptr);
+
+    uint32_t pathSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 128);
+    auto pathData = fdp.ConsumeBytes<uint8_t>(pathSize);
+    if (pathData.empty()) return HKS_ERROR_INSUFFICIENT_DATA;
+    std::string pathStr(pathData.begin(), pathData.end());
+    return HksDeleteDir(pathStr.c_str());
+}
+
+static int32_t FuzzGetDeviceValidSize(FuzzedDataProvider &fdp)
+{
+    (void)GetDeviceValidSize(nullptr);
+
+    uint32_t pathSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 64);
+    auto pathData = fdp.ConsumeBytes<uint8_t>(pathSize);
+    if (pathData.empty()) return HKS_ERROR_INSUFFICIENT_DATA;
+    std::string pathStr(pathData.begin(), pathData.end());
+    (void)GetDeviceValidSize(pathStr.c_str());
+    return HKS_SUCCESS;
+}
+
 using FuzzFunc = int32_t (*)(FuzzedDataProvider &);
 
 static const FuzzFunc g_fuzzFuncs[] = {
@@ -998,6 +1033,9 @@ static const FuzzFunc g_fuzzFuncs[] = {
     FuzzFileNameList,
     FuzzGetHashValueToChar,
     FuzzCheckSpecificUserIdAndStorageLevel,
+    FuzzHksRemoveDir,
+    FuzzHksDeleteDir,
+    FuzzGetDeviceValidSize,
 };
 
 // Existing hardcoded test function pointers for selective execution
