@@ -254,6 +254,46 @@ static int32_t FuzzFillKsfBufRoundTrip(FuzzedDataProvider &fdp)
     return ret;
 }
 
+static int32_t FuzzHksWriteKsf(FuzzedDataProvider &fdp)
+{
+    struct HksKsfDataRkcWithVer ksfDataRkc = { 0 };
+    (void)FillKsfDataRkcWithVer(&ksfDataRkc);
+
+    struct HksKsfDataMkWithVer ksfDataMk = { 0 };
+    FillKsfDataMkWithVer(&ksfDataMk);
+
+    uint32_t nameSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 32);
+    auto nameData = fdp.ConsumeBytes<uint8_t>(nameSize);
+    if (nameData.empty()) return HKS_ERROR_INSUFFICIENT_DATA;
+    std::string nameStr(nameData.begin(), nameData.end());
+
+    bool chooseRkc = fdp.ConsumeBool();
+    if (chooseRkc) {
+        return HksWriteKsfRkc(nameStr.c_str(), &ksfDataRkc);
+    } else {
+        return HksWriteKsfMk(nameStr.c_str(), &ksfDataMk);
+    }
+}
+
+static int32_t FuzzRkcWriteAllKsf(FuzzedDataProvider &fdp)
+{
+    (void)fdp;
+    struct HksKsfDataRkcWithVer ksfDataRkc = { 0 };
+    int32_t ret = FillKsfDataRkcWithVer(&ksfDataRkc);
+    if (ret != HKS_SUCCESS) return ret;
+
+    struct HksKsfDataMkWithVer ksfDataMk = { 0 };
+    FillKsfDataMkWithVer(&ksfDataMk);
+
+    return RkcWriteAllKsf(&ksfDataRkc, &ksfDataMk);
+}
+
+static int32_t FuzzUpgradeV1ToV2(FuzzedDataProvider &fdp)
+{
+    (void)fdp;
+    return UpgradeV1ToV2();
+}
+
 static int32_t FuzzRkcDigestToHks(FuzzedDataProvider &fdp)
 {
     uint32_t digest = fdp.ConsumeIntegral<uint32_t>();
@@ -325,6 +365,9 @@ static const FuzzFunc g_fuzzFuncs[] = {
     FuzzRkcMkCryptV1,
     FuzzRkcMkCrypt,
     FuzzFillKsfBufRoundTrip,
+    FuzzHksWriteKsf,
+    FuzzRkcWriteAllKsf,
+    FuzzUpgradeV1ToV2,
     FuzzRkcDigestToHks,
     FuzzRkcMaskMk,
     FuzzInitKsfAttr,
