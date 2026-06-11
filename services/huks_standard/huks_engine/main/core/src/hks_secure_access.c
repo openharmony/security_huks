@@ -574,7 +574,7 @@ static int32_t VerifyAuthTokenInfo(const struct HuksKeyNode *keyNode, const stru
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "verify sec uid failed!")
     } else if (authAccessType->uint32Param == HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL) {
         HKS_IF_NULL_LOGE_RETURN(userAuthType, HKS_ERROR_NOT_SUPPORTED,
-           "current auth access type requires user auth type as input!")
+            "current auth access type requires user auth type as input!")
         ret = VerifyEnrolledIdInfoIfNeed(keyBlobParamSet, authToken, userAuthType->uint32Param,
             authAccessType->uint32Param, authTokenAuthType);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "verify enrolled id info failed!")
