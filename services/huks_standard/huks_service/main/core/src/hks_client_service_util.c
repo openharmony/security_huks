@@ -610,6 +610,7 @@ static int32_t CheckAndAppendUserAuthInfo(const struct HksProcessInfo *processIn
     HKS_IF_TRUE_LOGE_RETURN(HksCheckIsAllowedWrap(paramSet), HKS_ERROR_KEY_NOT_ALLOW_WRAP,
         "key with access control isn't allowed wrap!")
 
+    int32_t ret = HKS_SUCCESS;
     void *data = HksLockUserIdm();
     HKS_IF_NULL_LOGE_RETURN(data, HKS_ERROR_SESSION_REACHED_LIMIT, "HksLockUserIdm fail")
     do {

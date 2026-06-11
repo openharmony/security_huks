@@ -36,19 +36,19 @@ static struct OH_Huks_Result NewConvertApiResult(int32_t ret)
     return *((struct OH_Huks_Result *)(&result));
 }
 
-static int32_t CheckIfContainAtlTag(struct HksParamSet *paramSetIn)
+static int32_t CheckIfContainAtlTag(const struct OH_Huks_ParamSet *paramSetIn)
 {
     struct HksParam tmpParam[] = {
         {
             .tag = HKS_TAG_USER_AUTH_TYPE_ATL,
-            .uint32Param = HKS_USER_AUTH_TYPE_ATL1,
+            .uint32Param = HKS_USER_AUTH_ATL1,
         }
     };
 
     int32_t ret = HksCheckIsTagAlreadyExist(tmpParam, HKS_ARRAY_SIZE(tmpParam),
         (const struct HksParamSet *) paramSetIn);
     return ret;
-    
+
 }
 
 struct OH_Huks_Result OH_Huks_GetSdkVersion(struct OH_Huks_Blob *sdkVersion)
