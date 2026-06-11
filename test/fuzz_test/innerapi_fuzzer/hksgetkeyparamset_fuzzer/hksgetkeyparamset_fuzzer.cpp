@@ -16,8 +16,10 @@
 #include "hksgetkeyparamset_fuzzer.h"
 
 #include <cstring>
+#include <securec.h>
 
 #include "hks_fuzz_util.h"
+#include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_type_inner.h"
 
