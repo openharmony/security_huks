@@ -45,9 +45,8 @@ static int32_t CheckIfContainAtlTag(const struct OH_Huks_ParamSet *paramSetIn)
         }
     };
 
-    int32_t ret = HksCheckIsTagAlreadyExist(tmpParam, HKS_ARRAY_SIZE(tmpParam),
+    return HksCheckIsTagAlreadyExist(tmpParam, HKS_ARRAY_SIZE(tmpParam),
         (const struct HksParamSet *) paramSetIn);
-    return ret;
 }
 
 struct OH_Huks_Result OH_Huks_GetSdkVersion(struct OH_Huks_Blob *sdkVersion)

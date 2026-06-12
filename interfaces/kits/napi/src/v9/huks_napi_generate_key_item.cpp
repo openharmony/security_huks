@@ -87,8 +87,7 @@ static int32_t CheckIfContainAtlTag(struct HksParamSet *paramSetIn)
         }
     };
 
-    int32_t ret = HksCheckIsTagAlreadyExist(tmpParam, HKS_ARRAY_SIZE(tmpParam), paramSetIn);
-    return ret;
+    return HksCheckIsTagAlreadyExist(tmpParam, HKS_ARRAY_SIZE(tmpParam), paramSetIn);
 }
 
 napi_value GenerateKeyAsyncWork(napi_env env, GenerateKeyAsyncContext &context)
