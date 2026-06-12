@@ -589,21 +589,6 @@ static int32_t CheckIfUserIamSupportCurType(int32_t userId, uint32_t userAuthTyp
     return HKS_SUCCESS;
 }
 
-static int32_t CheckIfEnrollAnyAuthInfo(int32_t userId)
-{
-    const enum HksUserAuthType userAuthTypes[] = {
-        HKS_USER_AUTH_TYPE_FINGERPRINT,
-        HKS_USER_AUTH_TYPE_FACE,
-        HKS_USER_AUTH_TYPE_PIN
-    };
-    int32_t ret;
-    for (uint32_t i = 0; i < HKS_ARRAY_SIZE(userAuthTypes); ++i) {
-        ret = CheckIfEnrollAuthInfo(userId, userAuthTypes[i]); // callback
-        HKS_IF_TRUE_BREAK(ret == HKS_SUCCESS)
-    }
-    return ret;
-}
-
 static int32_t CheckAndAppendUserAuthInfo(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     uint32_t userAuthType, uint32_t authAccessType, struct HksParamSet **userAuthParamSet)
 {
