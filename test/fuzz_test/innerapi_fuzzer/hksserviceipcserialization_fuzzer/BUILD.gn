@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,15 +15,15 @@ import("//build/config/features.gni")
 import("//build/test.gni")
 
 ##############################fuzztest##########################################
-ohos_fuzztest("HksReportWrapperFuzzTest") {
+ohos_fuzztest("HksServiceIpcSerializationFuzzTest") {
   module_out_path = fuzz_module_out_path
-  fuzz_config_file = "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksreportwrapper_fuzzer"
+  fuzz_config_file = "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksserviceipcserialization_fuzzer"
 
   include_dirs = [
     ".",
     "..",
     "//base/security/huks/frameworks/huks_standard/main/common/include/",
-    "//base/security/huks/services/huks_standard/huks_service/main/core/include/",
+    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",
   ]
 
   cflags = [
@@ -32,20 +32,20 @@ ohos_fuzztest("HksReportWrapperFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "hksreportwrapper_fuzzer.cpp" ]
+  sources = [
+    "hksserviceipcserialization_fuzzer.cpp",
+    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc/hks_service_ipc_serialization.c",
+    "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ipc_serialization.c",
+  ]
 
   deps = [
     "..:hks_fuzz_util",
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
-    "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
-    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency:libhuks_service_os_dependency_standard_static",
-    "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
-    "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
   ]
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
-    "openssl:libcrypto_shared",
   ]
 }
 
@@ -54,8 +54,7 @@ group("fuzztest") {
   testonly = true
   deps = []
   deps += [
-    # deps file
-    ":HksReportWrapperFuzzTest",
+    ":HksServiceIpcSerializationFuzzTest",
   ]
 }
 ###############################################################################

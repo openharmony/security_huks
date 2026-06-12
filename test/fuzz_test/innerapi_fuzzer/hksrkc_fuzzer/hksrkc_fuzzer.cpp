@@ -254,15 +254,126 @@ static int32_t FuzzFillKsfBufRoundTrip(FuzzedDataProvider &fdp)
     return ret;
 }
 
+static int32_t FuzzHksWriteKsf(FuzzedDataProvider &fdp)
+{
+    struct HksKsfDataRkcWithVer ksfDataRkc = { 0 };
+    (void)FillKsfDataRkcWithVer(&ksfDataRkc);
+
+    struct HksKsfDataMkWithVer ksfDataMk = { 0 };
+    FillKsfDataMkWithVer(&ksfDataMk);
+
+    uint32_t nameSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 32);
+    auto nameData = fdp.ConsumeBytes<uint8_t>(nameSize);
+    if (nameData.empty()) return HKS_ERROR_INSUFFICIENT_DATA;
+    std::string nameStr(nameData.begin(), nameData.end());
+
+    bool chooseRkc = fdp.ConsumeBool();
+    if (chooseRkc) {
+        return HksWriteKsfRkc(nameStr.c_str(), &ksfDataRkc);
+    } else {
+        return HksWriteKsfMk(nameStr.c_str(), &ksfDataMk);
+    }
+}
+
+static int32_t FuzzRkcWriteAllKsf(FuzzedDataProvider &fdp)
+{
+    (void)fdp;
+    struct HksKsfDataRkcWithVer ksfDataRkc = { 0 };
+    int32_t ret = FillKsfDataRkcWithVer(&ksfDataRkc);
+    if (ret != HKS_SUCCESS) return ret;
+
+    struct HksKsfDataMkWithVer ksfDataMk = { 0 };
+    FillKsfDataMkWithVer(&ksfDataMk);
+
+    return RkcWriteAllKsf(&ksfDataRkc, &ksfDataMk);
+}
+
+static int32_t FuzzUpgradeV1ToV2(FuzzedDataProvider &fdp)
+{
+    (void)fdp;
+    return UpgradeV1ToV2();
+}
+
+static int32_t FuzzRkcDigestToHks(FuzzedDataProvider &fdp)
+{
+    uint32_t digest = fdp.ConsumeIntegral<uint32_t>();
+    (void)RkcDigestToHks(digest);
+    return HKS_SUCCESS;
+}
+
+static int32_t FuzzRkcMaskMk(FuzzedDataProvider &fdp)
+{
+    uint8_t mkData[HKS_RKC_MK_LEN] = {0};
+    auto fuzzMk = fdp.ConsumeBytes<uint8_t>(HKS_RKC_MK_LEN);
+    if (fuzzMk.size() == HKS_RKC_MK_LEN) {
+        (void)memcpy_s(mkData, HKS_RKC_MK_LEN, fuzzMk.data(), HKS_RKC_MK_LEN);
+    }
+    struct HksBlob mk = { HKS_RKC_MK_LEN, mkData };
+    return RkcMaskMk(&mk);
+}
+
+static int32_t FuzzInitKsfAttr(FuzzedDataProvider &fdp)
+{
+    uint32_t nameSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 32);
+    auto name1Data = fdp.ConsumeBytes<uint8_t>(nameSize);
+    if (name1Data.empty()) return HKS_ERROR_INSUFFICIENT_DATA;
+    std::string name1(name1Data.begin(), name1Data.end());
+
+    auto name2Data = fdp.ConsumeBytes<uint8_t>(nameSize);
+    if (name2Data.empty()) return HKS_ERROR_INSUFFICIENT_DATA;
+    std::string name2(name2Data.begin(), name2Data.end());
+
+    struct HksKsfAttr ksfAttr = {};
+    ksfAttr.name[0] = const_cast<char *>(name1.c_str());
+    ksfAttr.name[1] = const_cast<char *>(name2.c_str());
+
+    uint8_t ksfType = fdp.ConsumeBool() ? HKS_KSF_TYPE_RKC : HKS_KSF_TYPE_MK;
+    return InitKsfAttr(&ksfAttr, ksfType);
+}
+
+static int32_t FuzzHksRkcGetMainKey(FuzzedDataProvider &fdp)
+{
+    (void)fdp;
+    uint8_t mkBuf[HKS_RKC_MK_LEN] = {0};
+    struct HksBlob mainKey = { HKS_RKC_MK_LEN, mkBuf };
+    return HksRkcGetMainKey(&mainKey);
+}
+
+static int32_t FuzzHksRkcBuildParamSet(FuzzedDataProvider &fdp)
+{
+    (void)fdp;
+    struct HksParamSet *paramSet = NULL;
+    int32_t ret = HksRkcBuildParamSet(&paramSet);
+    HksFreeParamSet(&paramSet);
+    return ret;
+}
+
+static int32_t FuzzHksCfgAndMkDestroy(FuzzedDataProvider &fdp)
+{
+    (void)fdp;
+    HksCfgDestroy();
+    HksMkDestroy();
+    return HKS_SUCCESS;
+}
+
 using FuzzFunc = int32_t (*)(FuzzedDataProvider &);
 
-static const FuzzFunc g_fuzzFuncs[6] = {
+static const FuzzFunc g_fuzzFuncs[] = {
     FuzzExtractKsfBufV1,
     FuzzExtractKsfBufRkc,
     FuzzExtractKsfBufMk,
     FuzzRkcMkCryptV1,
     FuzzRkcMkCrypt,
     FuzzFillKsfBufRoundTrip,
+    FuzzHksWriteKsf,
+    FuzzRkcWriteAllKsf,
+    FuzzUpgradeV1ToV2,
+    FuzzRkcDigestToHks,
+    FuzzRkcMaskMk,
+    FuzzInitKsfAttr,
+    FuzzHksRkcGetMainKey,
+    FuzzHksRkcBuildParamSet,
+    FuzzHksCfgAndMkDestroy,
 };
 
 // Existing hardcoded test function pointers for selective execution
@@ -286,6 +397,9 @@ int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 }
 
 extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
+    (void)argc;
+    (void)argv;
+    (void)HksRkcInit();
     return 0;
 }
 

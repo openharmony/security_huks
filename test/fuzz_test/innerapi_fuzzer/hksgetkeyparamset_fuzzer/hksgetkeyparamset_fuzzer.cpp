@@ -15,13 +15,264 @@
 
 #include "hksgetkeyparamset_fuzzer.h"
 
+#include <cstring>
+#include <securec.h>
+
 #include "hks_fuzz_util.h"
+#include "hks_mem.h"
+#include "hks_param.h"
+#include "hks_type_inner.h"
 
 namespace OHOS {
 namespace Security {
 namespace Hks {
 
-int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
+/* ========== Fuzz HksAddParamsWithFilter ========== */
+static int32_t FuzzAddParamsWithFilter(FuzzedDataProvider &fdp)
+{
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    uint32_t paramCnt = fdp.ConsumeIntegralInRange<uint32_t>(0, 20);
+    std::vector<struct HksParam> params(paramCnt);
+    std::vector<std::vector<uint8_t>> blobStorage;
+
+    for (uint32_t i = 0; i < paramCnt; i++) {
+        uint32_t tagChoice = fdp.ConsumeIntegralInRange<uint32_t>(0, 4);
+        switch (tagChoice) {
+            case 0:
+                params[i].tag = HKS_TAG_KEY_OVERRIDE;
+                params[i].boolParam = fdp.ConsumeBool();
+                break;
+            case 1:
+                params[i].tag = HKS_TAG_ALGORITHM;
+                params[i].uint32Param = fdp.ConsumeIntegral<uint32_t>();
+                break;
+            case 2:
+                params[i].tag = HKS_TAG_KEY_SIZE;
+                params[i].uint32Param = fdp.ConsumeIntegral<uint32_t>();
+                break;
+            case 3: {
+                params[i].tag = HKS_TAG_KEY_ALIAS;
+                uint32_t size = fdp.ConsumeIntegralInRange<uint32_t>(1, 32);
+                auto data = fdp.ConsumeBytes<uint8_t>(size);
+                blobStorage.push_back(std::move(data));
+                params[i].blob = { static_cast<uint32_t>(blobStorage.back().size()), blobStorage.back().data() };
+                break;
+            }
+            default:
+                params[i].tag = fdp.ConsumeIntegral<uint32_t>();
+                params[i].uint32Param = fdp.ConsumeIntegral<uint32_t>();
+                break;
+        }
+    }
+
+    if (paramCnt > 0) {
+        ret = HksAddParamsWithFilter(paramSet, params.data(), paramCnt);
+    }
+
+    if (paramCnt > 1) {
+        struct HksParamSet *paramSet2 = nullptr;
+        if (HksInitParamSet(&paramSet2) == HKS_SUCCESS) {
+            (void)HksAddParamsWithFilter(paramSet2, params.data(), paramCnt / 2);
+            HksFreeParamSet(&paramSet2);
+        }
+    }
+
+    HksFreeParamSet(&paramSet);
+    return ret;
+}
+
+/* ========== Fuzz HksFreeKeyAliasSet ========== */
+static int32_t FuzzFreeKeyAliasSet(FuzzedDataProvider &fdp)
+{
+    HksFreeKeyAliasSet(nullptr);
+
+    auto *aliasSet1 = static_cast<struct HksKeyAliasSet *>(malloc(sizeof(struct HksKeyAliasSet)));
+    if (aliasSet1 != nullptr) {
+        aliasSet1->aliasesCnt = 0;
+        aliasSet1->aliases = nullptr;
+        HksFreeKeyAliasSet(aliasSet1);
+    }
+
+    uint32_t cnt = fdp.ConsumeIntegralInRange<uint32_t>(1, 10);
+    auto *aliasSet2 = static_cast<struct HksKeyAliasSet *>(malloc(sizeof(struct HksKeyAliasSet)));
+    if (aliasSet2 != nullptr) {
+        aliasSet2->aliasesCnt = cnt;
+        // aliases array must be separately allocated since HksFreeKeyAliasSet frees it independently
+        aliasSet2->aliases = static_cast<struct HksBlob *>(malloc(cnt * sizeof(struct HksBlob)));
+        if (aliasSet2->aliases == nullptr) {
+            free(aliasSet2);
+            return HKS_ERROR_MALLOC_FAIL;
+        }
+
+        for (uint32_t i = 0; i < cnt; i++) {
+            uint32_t blobSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 32);
+            auto data = fdp.ConsumeBytes<uint8_t>(blobSize);
+            if (data.empty()) {
+                data = {0};
+            }
+            // blob data must be HksMalloc'd since HksFreeKeyAliasSet calls HKS_FREE on it
+            aliasSet2->aliases[i].size = static_cast<uint32_t>(data.size());
+            aliasSet2->aliases[i].data = static_cast<uint8_t *>(HksMalloc(data.size()));
+            if (aliasSet2->aliases[i].data != nullptr) {
+                (void)memcpy_s(aliasSet2->aliases[i].data, data.size(), data.data(), data.size());
+            }
+        }
+        HksFreeKeyAliasSet(aliasSet2);
+    }
+
+    return HKS_SUCCESS;
+}
+
+/* ========== Fuzz HksGetParam ========== */
+static int32_t FuzzGetParam(FuzzedDataProvider &fdp)
+{
+    struct HksParam *param = nullptr;
+    (void)HksGetParam(nullptr, 0, &param);
+    (void)HksGetParam(nullptr, 0, nullptr);
+
+    WrapParamSet ps = ConstructParamSetFromFdp(fdp);
+    if (ps.s == nullptr) {
+        return HKS_FAILURE;
+    }
+
+    uint32_t tagsToTry[] = {
+        HKS_TAG_ALGORITHM, HKS_TAG_KEY_SIZE, HKS_TAG_PURPOSE,
+        HKS_TAG_DIGEST, HKS_TAG_PADDING, HKS_TAG_BLOCK_MODE,
+        fdp.ConsumeIntegral<uint32_t>(),
+    };
+
+    for (auto tag : tagsToTry) {
+        struct HksParam *outParam = nullptr;
+        (void)HksGetParam(ps.s, tag, &outParam);
+    }
+
+    return HKS_SUCCESS;
+}
+
+/* ========== Fuzz HksCheckParamMatch ========== */
+static int32_t FuzzCheckParamMatch(FuzzedDataProvider &fdp)
+{
+    (void)HksCheckParamMatch(nullptr, nullptr);
+    struct HksParam p = { .tag = HKS_TAG_ALGORITHM, .uint32Param = 1 };
+    (void)HksCheckParamMatch(&p, nullptr);
+    (void)HksCheckParamMatch(nullptr, &p);
+
+    std::vector<std::vector<uint8_t>> storage;
+    auto makeParam = [&fdp, &storage](uint32_t tag) -> struct HksParam {
+        struct HksParam param = {};
+        param.tag = tag;
+        switch (GetTagType((enum HksTag)tag)) {
+            case HKS_TAG_TYPE_INT:
+                param.int32Param = fdp.ConsumeIntegral<int32_t>();
+                break;
+            case HKS_TAG_TYPE_UINT:
+                param.uint32Param = fdp.ConsumeIntegral<uint32_t>();
+                break;
+            case HKS_TAG_TYPE_ULONG:
+                param.uint64Param = fdp.ConsumeIntegral<uint64_t>();
+                break;
+            case HKS_TAG_TYPE_BOOL:
+                param.boolParam = fdp.ConsumeBool();
+                break;
+            case HKS_TAG_TYPE_BYTES: {
+                uint32_t size = fdp.ConsumeIntegralInRange<uint32_t>(1, 16);
+                auto data = fdp.ConsumeBytes<uint8_t>(size);
+                storage.push_back(std::move(data));
+                param.blob = { static_cast<uint32_t>(storage.back().size()), storage.back().data() };
+                break;
+            }
+            default:
+                param.uint32Param = fdp.ConsumeIntegral<uint32_t>();
+                break;
+        }
+        return param;
+    };
+
+    uint32_t numPairs = fdp.ConsumeIntegralInRange<uint32_t>(1, 8);
+    for (uint32_t i = 0; i < numPairs; i++) {
+        uint32_t tag = fdp.ConsumeIntegral<uint32_t>();
+        struct HksParam param1 = makeParam(tag);
+        struct HksParam param2 = makeParam(tag);
+        (void)HksCheckParamMatch(&param1, &param2);
+
+        uint32_t tag2 = fdp.ConsumeIntegral<uint32_t>();
+        struct HksParam param3 = makeParam(tag2);
+        (void)HksCheckParamMatch(&param1, &param3);
+    }
+
+    return HKS_SUCCESS;
+}
+
+/* ========== Fuzz HksCheckIsTagAlreadyExist ========== */
+static int32_t FuzzCheckIsTagAlreadyExist(FuzzedDataProvider &fdp)
+{
+    (void)HksCheckIsTagAlreadyExist(nullptr, 0, nullptr);
+
+    WrapParamSet ps = ConstructParamSetFromFdp(fdp);
+    if (ps.s == nullptr) {
+        return HKS_FAILURE;
+    }
+
+    uint32_t numTags = fdp.ConsumeIntegralInRange<uint32_t>(1, 10);
+    std::vector<struct HksParam> checkParams(numTags);
+    for (uint32_t i = 0; i < numTags; i++) {
+        checkParams[i].tag = fdp.ConsumeIntegral<uint32_t>();
+        checkParams[i].uint32Param = 0;
+    }
+
+    (void)HksCheckIsTagAlreadyExist(checkParams.data(), numTags, ps.s);
+
+    struct HksParam existCheck[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = 0 },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = 0 },
+    };
+    (void)HksCheckIsTagAlreadyExist(existCheck, HKS_ARRAY_SIZE(existCheck), ps.s);
+
+    return HKS_SUCCESS;
+}
+
+/* ========== Fuzz HksDeleteTagsFromParamSet ========== */
+static int32_t FuzzDeleteTagsFromParamSet(FuzzedDataProvider &fdp)
+{
+    struct HksParamSet *outParamSet = nullptr;
+    uint32_t tag = HKS_TAG_ALGORITHM;
+    (void)HksDeleteTagsFromParamSet(nullptr, 0, nullptr, nullptr);
+    (void)HksDeleteTagsFromParamSet(&tag, 1, nullptr, &outParamSet);
+
+    WrapParamSet ps = ConstructParamSetFromFdp(fdp);
+    if (ps.s == nullptr) {
+        return HKS_FAILURE;
+    }
+
+    uint32_t numTags = fdp.ConsumeIntegralInRange<uint32_t>(1, 5);
+    std::vector<uint32_t> tagsToDelete(numTags);
+    for (uint32_t i = 0; i < numTags; i++) {
+        tagsToDelete[i] = fdp.ConsumeIntegral<uint32_t>();
+    }
+
+    struct HksParamSet *result = nullptr;
+    int32_t ret = HksDeleteTagsFromParamSet(tagsToDelete.data(), numTags, ps.s, &result);
+    if (ret == HKS_SUCCESS && result != nullptr) {
+        HksFreeParamSet(&result);
+    }
+
+    uint32_t commonTags[] = { HKS_TAG_ALGORITHM, HKS_TAG_KEY_SIZE, HKS_TAG_PURPOSE };
+    struct HksParamSet *result2 = nullptr;
+    ret = HksDeleteTagsFromParamSet(commonTags, HKS_ARRAY_SIZE(commonTags), ps.s, &result2);
+    if (ret == HKS_SUCCESS && result2 != nullptr) {
+        HksFreeParamSet(&result2);
+    }
+
+    return ret;
+}
+
+/* ========== Original HksGetKeyParamSet fuzz ========== */
+static int32_t FuzzGetKeyParamSet(FuzzedDataProvider &fdp)
 {
     uint32_t aliasSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 32);
     std::vector<uint8_t> aliasBuf = fdp.ConsumeBytes<uint8_t>(aliasSize);
@@ -42,6 +293,23 @@ int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
     paramSetOut->paramSetSize = static_cast<uint32_t>(outBuf.size());
 
     return HksGetKeyParamSet(&keyAlias, psIn.s, paramSetOut);
+}
+
+using FuzzFunc = int32_t (*)(FuzzedDataProvider &);
+static const FuzzFunc g_fuzzFuncs[] = {
+    FuzzGetKeyParamSet,
+    FuzzAddParamsWithFilter,
+    FuzzFreeKeyAliasSet,
+    FuzzGetParam,
+    FuzzCheckParamMatch,
+    FuzzCheckIsTagAlreadyExist,
+    FuzzDeleteTagsFromParamSet,
+};
+
+int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
+{
+    auto fuzzFunc = fdp.PickValueInArray(g_fuzzFuncs);
+    return fuzzFunc(fdp);
 }
 
 }}}
