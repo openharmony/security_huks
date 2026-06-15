@@ -608,6 +608,7 @@ const char *HksOpensslMlKemGetAlgName(uint32_t keyParamSet)
 const char *HksOpensslMlKemGetAlgName(uint32_t keyParamSet)
 {
     (void) keyParamSet;
-    return HKS_ERROR_NOT_SUPPORTED;
+    HKS_LOG_E("current device not support ml-kem");
+    return NULL;
 }
 #endif
