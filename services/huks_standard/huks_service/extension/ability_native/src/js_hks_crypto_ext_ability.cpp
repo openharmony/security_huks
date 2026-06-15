@@ -731,9 +731,7 @@ void GetSessionParams(const napi_env &env, const napi_value &funcResult, CryptoR
 {
     GetErrorInfoParams(env, funcResult, resultParams);
     napi_value napiOutData = nullptr;
-    auto status = napi_create_array(env, &napiOutData);
-    HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(status != napi_ok, "create_array failed, status:%d", status);
-    status = napi_get_named_property(env, funcResult, "outData", &napiOutData);
+    auto status = napi_get_named_property(env, funcResult, "outData", &napiOutData);
     HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(napiOutData == nullptr || status != napi_ok,
         "Convert js array object fail, status:%d", status);
 
@@ -741,14 +739,9 @@ void GetSessionParams(const napi_env &env, const napi_value &funcResult, CryptoR
     napi_value nativeArray;
     size_t byte_offset;
     size_t length;
-    status = napi_get_typedarray_info(env, napiOutData, &type, &length, nullptr, &nativeArray, &byte_offset);
+    void *data = nullptr;
+    status = napi_get_typedarray_info(env, napiOutData, &type, &length, &data, &nativeArray, &byte_offset);
     HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(status != napi_ok, "get typedarray info failed, status:%d", status);
-
-    void *data;
-    size_t byte_length;
-    status = napi_get_arraybuffer_info(env, nativeArray, &data, &byte_length);
-    HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(status != napi_ok || data == nullptr,
-        "get arraybuffer info failed, status:%d", status);
 
     if (type == napi_uint8_array) {
         uint8_t *data_bytes = (uint8_t *)(data);
