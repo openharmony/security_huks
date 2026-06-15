@@ -580,7 +580,7 @@ int32_t HksRemoteHandleManager::ExtensionGenerateKey(struct HksProcessWithErrorI
     HKS_IF_NULL_RETURN(proxy, ret)
 
     HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, ""};
-    auto ipccode = proxy->GenerateKey(handle, paramSet, errorInfo);
+    auto ipccode = proxy->GenerateKey(handle, newParamSet, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL,
         "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     HKS_IF_TRUE_EXCU(errorInfo.errVal != EXTENSION_SUCCESS,
