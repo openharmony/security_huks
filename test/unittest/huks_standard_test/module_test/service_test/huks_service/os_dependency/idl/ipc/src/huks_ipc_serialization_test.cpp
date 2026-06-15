@@ -25,6 +25,7 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_type_inner.h"
+#include <securec.h>
 
 using namespace testing::ext;
 namespace Unittest::HksIpcSerializationTest {
