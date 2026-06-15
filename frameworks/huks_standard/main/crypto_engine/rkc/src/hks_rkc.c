@@ -482,7 +482,6 @@ void FillKsfDataMkWithVer(struct HksKsfDataMkWithVer *ksfDataMkWithVer)
 int32_t RkcWriteAllKsf(const struct HksKsfDataRkcWithVer *ksfDataRkcWithVer,
     const struct HksKsfDataMkWithVer *ksfDataMkWithVer)
 {
-    bool isSuccess = false;
     int32_t ret;
     for (uint32_t i = 0; i < HKS_KSF_NUM; ++i) {
         ret = HksWriteKsfRkc(g_hksRkcCfg.ksfAttrRkc.name[i], ksfDataRkcWithVer);
@@ -490,13 +489,10 @@ int32_t RkcWriteAllKsf(const struct HksKsfDataRkcWithVer *ksfDataRkcWithVer,
     }
     for (uint32_t i = 0; i < HKS_KSF_NUM; ++i) {
         ret = HksWriteKsfMk(g_hksRkcCfg.ksfAttrMk.name[i], ksfDataMkWithVer);
-        if (ret == HKS_SUCCESS) {
-            isSuccess = true;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_WRITE_FILE_FAIL, "make mk failed! ret = 0x%" LOG_PUBLIC "X", ret)
     }
 
-    /* If all keystore file were written fail, return error code, otherwise, return success code. */
-    return (isSuccess ? HKS_SUCCESS : HKS_ERROR_WRITE_FILE_FAIL);
+    return HKS_SUCCESS;
 }
 
 static int32_t RkcCreateKsf(void)
