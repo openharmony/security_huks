@@ -890,17 +890,38 @@ HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest037, TestSi
 {
     HKS_LOG_I("enter HksClientIpcSerializationTest037");
 
-    struct HksEncapsulationResult encapResult = { { 0, nullptr }, { 0, nullptr } };
-    struct HksBlob srcBlob = { 0, nullptr };
+    /* construct valid packed data: encapsulatedData blob + sharedSecret blob */
+    uint8_t encapData[] = { 0x01, 0x02, 0x03, 0x04 };
+    struct HksBlob encapBlob = { sizeof(encapData), encapData };
+    uint8_t secretData[] = { 0xAA, 0xBB, 0xCC, 0xDD };
+    struct HksBlob secretBlob = { sizeof(secretData), secretData };
 
-    int32_t ret = HksEncapsulateUnpackFromService(&srcBlob, &encapResult);
-    EXPECT_NE(ret, HKS_SUCCESS);
+    const uint32_t bufSize = 256;
+    uint8_t bufData[bufSize] = { 0 };
+    struct HksBlob srcBlob = { bufSize, bufData };
+    uint32_t offset = 0;
+    int32_t ret = CopyBlobToBuffer(&encapBlob, &srcBlob, &offset);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = CopyBlobToBuffer(&secretBlob, &srcBlob, &offset);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    srcBlob.size = offset;
+
+    struct HksEncapsulationResult encapResult = { { 0, nullptr }, { 0, nullptr } };
+    ret = HksEncapsulateUnpackFromService(&srcBlob, &encapResult);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_EQ(encapResult.encapsulatedData.size, sizeof(encapData));
+    EXPECT_EQ(memcmp(encapResult.encapsulatedData.data, encapData, sizeof(encapData)), 0);
+    EXPECT_EQ(encapResult.sharedSecret.size, sizeof(secretData));
+    EXPECT_EQ(memcmp(encapResult.sharedSecret.data, secretData, sizeof(secretData)), 0);
+    HKS_FREE(encapResult.encapsulatedData.data);
+    HKS_FREE(encapResult.sharedSecret.data);
 }
 
 HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest038, TestSize.Level0)
 {
     HKS_LOG_I("enter HksClientIpcSerializationTest038");
 
+    /* null pointer checks */
     struct HksBlob sharedSecret = { 0, nullptr };
     int32_t ret = HksDecapsulateUnpackFromService(nullptr, &sharedSecret);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER);
@@ -908,6 +929,35 @@ HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest038, TestSi
     struct HksBlob srcBlob = { 4, nullptr };
     ret = HksDecapsulateUnpackFromService(&srcBlob, nullptr);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER);
+
+    /* valid packed sharedSecret with data > 0 */
+    uint8_t secretData[] = { 0x11, 0x22, 0x33, 0x44 };
+    struct HksBlob secretBlob = { sizeof(secretData), secretData };
+    const uint32_t bufSize = 64;
+    uint8_t bufData[bufSize] = { 0 };
+    struct HksBlob packedBlob = { bufSize, bufData };
+    uint32_t offset = 0;
+    ret = CopyBlobToBuffer(&secretBlob, &packedBlob, &offset);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    packedBlob.size = offset;
+
+    uint8_t outBuf[32] = { 0 };
+    struct HksBlob outSecret = { sizeof(outBuf), outBuf };
+    ret = HksDecapsulateUnpackFromService(&packedBlob, &outSecret);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_EQ(outSecret.size, sizeof(secretData));
+    EXPECT_EQ(memcmp(outSecret.data, secretData, sizeof(secretData)), 0);
+
+    /* packed sharedSecret with size == 0 -> early return HKS_SUCCESS */
+    /* Manually construct: write size=0 as uint32_t, then 4 bytes alignment padding */
+    uint8_t emptyPackedBuf[8] = { 0 };
+    /* size field = 0 (already zeroed) */
+    struct HksBlob emptyPacked = { sizeof(uint32_t) + DEFAULT_ALIGN_MASK_SIZE, emptyPackedBuf };
+
+    uint8_t outBuf2[32] = { 0 };
+    struct HksBlob outSecret2 = { sizeof(outBuf2), outBuf2 };
+    ret = HksDecapsulateUnpackFromService(&emptyPacked, &outSecret2);
+    EXPECT_EQ(ret, HKS_SUCCESS);
 }
 
 #ifdef HKS_UKEY_EXTENSION_CRYPTO

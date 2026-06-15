@@ -25,6 +25,7 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_type_inner.h"
+#include <securec.h>
 
 using namespace testing::ext;
 namespace Unittest::HksIpcSerializationTest {
@@ -450,5 +451,243 @@ HWTEST_F(HksIpcSerializationTest, HksIpcSerializationTest017, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
     ASSERT_TRUE(inBlob.data != nullptr);
     HKS_FREE_BLOB(inBlob);
+}
+
+/**
+ * @tc.name: HksIpcSerializationTest.HksIpcSerializationTest018
+ * @tc.desc: tdd CopyBlobToBufferForEmptyData with non-empty blob, expect HKS_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksIpcSerializationTest, HksIpcSerializationTest018, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksIpcSerializationTest018");
+    uint8_t srcData[] = "test_data";
+    struct HksBlob blob = { .size = sizeof(srcData), .data = srcData };
+
+    const uint32_t destSize = 256;
+    uint8_t destData[destSize] = { 0 };
+    struct HksBlob destBlob = { .size = destSize, .data = destData };
+    uint32_t offset = 0;
+
+    int32_t ret = CopyBlobToBufferForEmptyData(&blob, &destBlob, &offset);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    /* offset should be sizeof(uint32_t) + ALIGN_SIZE(sizeof(srcData)) */
+    ASSERT_EQ(offset, sizeof(uint32_t) + ALIGN_SIZE(sizeof(srcData)));
+
+    /* verify the size field was written correctly */
+    uint32_t writtenSize = 0;
+    (void)memcpy_s(&writtenSize, sizeof(writtenSize), destData, sizeof(uint32_t));
+    ASSERT_EQ(writtenSize, sizeof(srcData));
+
+    /* verify the data was written correctly */
+    ASSERT_EQ(memcmp(destData + sizeof(uint32_t), srcData, sizeof(srcData)), 0);
+}
+
+/**
+ * @tc.name: HksIpcSerializationTest.HksIpcSerializationTest019
+ * @tc.desc: tdd CopyBlobToBufferForEmptyData with empty blob (size=0), expect HKS_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksIpcSerializationTest, HksIpcSerializationTest019, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksIpcSerializationTest019");
+    struct HksBlob blob = { .size = 0, .data = nullptr };
+
+    const uint32_t destSize = 256;
+    uint8_t destData[destSize] = { 0 };
+    struct HksBlob destBlob = { .size = destSize, .data = destData };
+    uint32_t offset = 0;
+
+    int32_t ret = CopyBlobToBufferForEmptyData(&blob, &destBlob, &offset);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    /* offset should be sizeof(uint32_t) + DEFAULT_ALIGN_MASK_SIZE when blob->size == 0 */
+    ASSERT_EQ(offset, (uint32_t)(sizeof(uint32_t) + DEFAULT_ALIGN_MASK_SIZE));
+
+    /* verify the size field is 0 */
+    uint32_t writtenSize = 0xFFFFFFFF;
+    (void)memcpy_s(&writtenSize, sizeof(writtenSize), destData, sizeof(uint32_t));
+    ASSERT_EQ(writtenSize, (uint32_t)0);
+}
+
+/**
+ * @tc.name: HksIpcSerializationTest.HksIpcSerializationTest020
+ * @tc.desc: tdd CopyBlobToBufferForEmptyData with destOffset > destBlob->size, expect HKS_ERROR_BUFFER_TOO_SMALL
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksIpcSerializationTest, HksIpcSerializationTest020, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksIpcSerializationTest020");
+    uint8_t srcData[] = "test";
+    struct HksBlob blob = { .size = sizeof(srcData), .data = srcData };
+
+    const uint32_t destSize = 4;
+    uint8_t destData[destSize] = { 0 };
+    struct HksBlob destBlob = { .size = destSize, .data = destData };
+    uint32_t offset = destSize + 1;
+
+    int32_t ret = CopyBlobToBufferForEmptyData(&blob, &destBlob, &offset);
+    ASSERT_EQ(ret, HKS_ERROR_BUFFER_TOO_SMALL);
+}
+
+/**
+ * @tc.name: HksIpcSerializationTest.HksIpcSerializationTest021
+ * @tc.desc: tdd CopyBlobToBufferForEmptyData with insufficient remaining buffer, expect HKS_ERROR_BUFFER_TOO_SMALL
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksIpcSerializationTest, HksIpcSerializationTest021, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksIpcSerializationTest021");
+    uint8_t srcData[] = "test_data_long";
+    struct HksBlob blob = { .size = sizeof(srcData), .data = srcData };
+
+    const uint32_t destSize = 8;
+    uint8_t destData[destSize] = { 0 };
+    struct HksBlob destBlob = { .size = destSize, .data = destData };
+    uint32_t offset = 0;
+
+    /* needSize = sizeof(uint32_t) + ALIGN_SIZE(sizeof(srcData)) > destSize */
+    int32_t ret = CopyBlobToBufferForEmptyData(&blob, &destBlob, &offset);
+    ASSERT_EQ(ret, HKS_ERROR_BUFFER_TOO_SMALL);
+}
+
+/**
+ * @tc.name: HksIpcSerializationTest.HksIpcSerializationTest022
+ * @tc.desc: tdd HksCertificatesPackFromService with valid certInfoSet, expect HKS_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksIpcSerializationTest, HksIpcSerializationTest022, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksIpcSerializationTest022");
+    uint8_t indexData[] = "index1";
+    uint8_t certData[] = "cert_data_1";
+    struct HksExtCertInfo certInfo = {
+        .purpose = 1,
+        .index = { .size = sizeof(indexData), .data = indexData },
+        .cert = { .size = sizeof(certData), .data = certData }
+    };
+    struct HksExtCertInfoSet certInfoSet = { .count = 1, .certs = &certInfo };
+
+    struct HksBlob destData = { .size = 0, .data = nullptr };
+    int32_t ret = HksCertificatesPackFromService(&certInfoSet, &destData);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ASSERT_TRUE(destData.data != nullptr);
+    ASSERT_TRUE(destData.size > 0);
+
+    /* verify count field */
+    uint32_t count = 0;
+    (void)memcpy_s(&count, sizeof(count), destData.data, sizeof(uint32_t));
+    ASSERT_EQ(count, (uint32_t)1);
+
+    HKS_FREE_BLOB(destData);
+}
+
+/**
+ * @tc.name: HksIpcSerializationTest.HksIpcSerializationTest023
+ * @tc.desc: tdd HksCertificatesPackFromService with null certInfoSet, expect HKS_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksIpcSerializationTest, HksIpcSerializationTest023, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksIpcSerializationTest023");
+    struct HksBlob destData = { .size = 0, .data = nullptr };
+
+    int32_t ret = HksCertificatesPackFromService(nullptr, &destData);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksIpcSerializationTest.HksIpcSerializationTest024
+ * @tc.desc: tdd HksCertificatesPackFromService with null destData, expect HKS_ERROR_INVALID_ARGUMENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksIpcSerializationTest, HksIpcSerializationTest024, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksIpcSerializationTest024");
+    uint8_t indexData[] = "idx";
+    uint8_t certData[] = "cert";
+    struct HksExtCertInfo certInfo = {
+        .purpose = 0,
+        .index = { .size = sizeof(indexData), .data = indexData },
+        .cert = { .size = sizeof(certData), .data = certData }
+    };
+    struct HksExtCertInfoSet certInfoSet = { .count = 1, .certs = &certInfo };
+
+    int32_t ret = HksCertificatesPackFromService(&certInfoSet, nullptr);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
+}
+
+/**
+ * @tc.name: HksIpcSerializationTest.HksIpcSerializationTest025
+ * @tc.desc: tdd HksCertificatesPackFromService with multiple certs, expect HKS_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksIpcSerializationTest, HksIpcSerializationTest025, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksIpcSerializationTest025");
+    uint8_t index1[] = "idx1";
+    uint8_t cert1[] = "cert1";
+    uint8_t index2[] = "idx2_longer";
+    uint8_t cert2[] = "cert2_longer_data";
+    struct HksExtCertInfo certs[2] = {
+        { .purpose = 1, .index = { .size = sizeof(index1), .data = index1 },
+          .cert = { .size = sizeof(cert1), .data = cert1 } },
+        { .purpose = 2, .index = { .size = sizeof(index2), .data = index2 },
+          .cert = { .size = sizeof(cert2), .data = cert2 } }
+    };
+    struct HksExtCertInfoSet certInfoSet = { .count = 2, .certs = certs };
+
+    struct HksBlob destData = { .size = 0, .data = nullptr };
+    int32_t ret = HksCertificatesPackFromService(&certInfoSet, &destData);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ASSERT_TRUE(destData.data != nullptr);
+    ASSERT_TRUE(destData.size > 0);
+
+    /* verify count field */
+    uint32_t count = 0;
+    (void)memcpy_s(&count, sizeof(count), destData.data, sizeof(uint32_t));
+    ASSERT_EQ(count, (uint32_t)2);
+
+    HKS_FREE_BLOB(destData);
+}
+
+/**
+ * @tc.name: HksIpcSerializationTest.HksIpcSerializationTest026
+ * @tc.desc: tdd HksEncapsulateResponsePack with non-empty data, expect HKS_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksIpcSerializationTest, HksIpcSerializationTest026, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksIpcSerializationTest026");
+    uint8_t encapData[] = "encap_data";
+    uint8_t secretData[] = "secret";
+    struct HksEncapsulationResult encapResult = {
+        .encapsulatedData = { .size = sizeof(encapData), .data = encapData },
+        .sharedSecret = { .size = sizeof(secretData), .data = secretData }
+    };
+
+    struct HksBlob responseBlob = { .size = 0, .data = nullptr };
+    int32_t ret = HksEncapsulateResponsePack(&encapResult, &responseBlob);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ASSERT_TRUE(responseBlob.data != nullptr);
+    ASSERT_TRUE(responseBlob.size > 0);
+
+    /* verify encapsulatedData size field */
+    uint32_t encapSize = 0;
+    (void)memcpy_s(&encapSize, sizeof(encapSize), responseBlob.data, sizeof(uint32_t));
+    ASSERT_EQ(encapSize, sizeof(encapData));
+
+    /* verify encapsulatedData content */
+    ASSERT_EQ(memcmp(responseBlob.data + sizeof(uint32_t), encapData, sizeof(encapData)), 0);
+
+    /* verify sharedSecret size field (after encapsulatedData) */
+    uint32_t secretOffset = sizeof(uint32_t) + ALIGN_SIZE(sizeof(encapData));
+    uint32_t secretSize = 0;
+    (void)memcpy_s(&secretSize, sizeof(secretSize), responseBlob.data + secretOffset, sizeof(uint32_t));
+    ASSERT_EQ(secretSize, sizeof(secretData));
+
+    /* verify sharedSecret content */
+    ASSERT_EQ(memcmp(responseBlob.data + secretOffset + sizeof(uint32_t), secretData, sizeof(secretData)), 0);
+
+    HKS_FREE_BLOB(responseBlob);
 }
 }

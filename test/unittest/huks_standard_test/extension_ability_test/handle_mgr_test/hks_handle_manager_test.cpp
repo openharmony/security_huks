@@ -702,6 +702,107 @@ HWTEST_F(HksRemoteHandleManagerTest, ClearMapByUidTest, TestSize.Level0)
     HKS_FREE_BLOB(processInfo.processName);
 }
 
+/**
+ * @tc.name: HksRemoteHandleManagerTest.GenerateResourceIdTest
+ * @tc.desc: Cover GenerateResourceId and WrapIndexWithProviderInfo branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksRemoteHandleManagerTest, GenerateResourceIdTest, TestSize.Level0)
+{
+    ProviderInfo providerInfo{"testProvider", "testAbility", "com.test.bundle", 100};
+
+    /* normal path: covers WrapIndexWithProviderInfo success */
+    std::string resourceId;
+    int32_t ret = GenerateResourceId("short_index", providerInfo, resourceId);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    EXPECT_FALSE(resourceId.empty());
+
+    /* index too long: covers the early return branch */
+    std::string longIndex(MAX_INDEX_SIZE + 1, 'a');
+    std::string resourceId2;
+    ret = GenerateResourceId(longIndex, providerInfo, resourceId2);
+    EXPECT_EQ(ret, HKS_ERROR_NEW_INVALID_ARGUMENT);
+}
+
+/**
+ * @tc.name: HksRemoteHandleManagerTest.GetResourceIdParamValidationTest
+ * @tc.desc: Cover GetResourceId parameter validation branches (lines 604-620)
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksRemoteHandleManagerTest, GetResourceIdParamValidationTest, TestSize.Level0)
+{
+    auto manager = HksRemoteHandleManager::GetInstanceWrapper();
+    EXPECT_NE(manager, nullptr);
+
+    HksProcessInfo processInfo = CreateTestProcessInfo();
+    std::string resourceId;
+    struct HksExternalErrorInfo *errInfo = nullptr;
+
+    std::string abilityName = "testAbility";
+    std::string bundleName = "com.test.bundle";
+    std::string resourceInfo = "resource_info";
+
+    /* empty providerName */
+    std::vector<HksParam> validParams = {
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob(abilityName)},
+        {.tag = HKS_EXT_CRYPTO_TAG_BUNDLE_NAME, .blob = StringToBlob(bundleName)},
+        {.tag = HKS_EXT_CRYPTO_TAG_RESOURCE_INFO, .blob = StringToBlob(resourceInfo)},
+    };
+    CppParamSet validSet(validParams);
+    EXPECT_EQ(manager->GetResourceId(processInfo, "", validSet, resourceId, &errInfo), HKS_ERROR_INVALID_ARGUMENT);
+
+    /* missing abilityName */
+    std::vector<HksParam> noAbilityParams = {
+        {.tag = HKS_EXT_CRYPTO_TAG_BUNDLE_NAME, .blob = StringToBlob(bundleName)},
+        {.tag = HKS_EXT_CRYPTO_TAG_RESOURCE_INFO, .blob = StringToBlob(resourceInfo)},
+    };
+    CppParamSet noAbilitySet(noAbilityParams);
+    EXPECT_EQ(manager->GetResourceId(processInfo, "testProvider", noAbilitySet, resourceId, &errInfo),
+        HKS_ERROR_ABILITY_NAME_MISSING);
+
+    /* abilityName too long */
+    std::string longAbilityName(MAX_ABILITY_NAME_LEN, 'a');
+    std::vector<HksParam> longAbilityParams = {
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob(longAbilityName)},
+        {.tag = HKS_EXT_CRYPTO_TAG_BUNDLE_NAME, .blob = StringToBlob(bundleName)},
+        {.tag = HKS_EXT_CRYPTO_TAG_RESOURCE_INFO, .blob = StringToBlob(resourceInfo)},
+    };
+    CppParamSet longAbilitySet(longAbilityParams);
+    EXPECT_EQ(manager->GetResourceId(processInfo, "testProvider", longAbilitySet, resourceId, &errInfo),
+        HKS_ERROR_INVALID_ARGUMENT);
+
+    /* missing bundleName */
+    std::vector<HksParam> noBundleParams = {
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob(abilityName)},
+        {.tag = HKS_EXT_CRYPTO_TAG_RESOURCE_INFO, .blob = StringToBlob(resourceInfo)},
+    };
+    CppParamSet noBundleSet(noBundleParams);
+    EXPECT_EQ(manager->GetResourceId(processInfo, "testProvider", noBundleSet, resourceId, &errInfo),
+        HKS_ERROR_BUNDLE_NAME_MISSING);
+
+    /* bundleName too short */
+    std::vector<HksParam> shortBundleParams = {
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob(abilityName)},
+        {.tag = HKS_EXT_CRYPTO_TAG_BUNDLE_NAME, .blob = StringToBlob("ab")},
+        {.tag = HKS_EXT_CRYPTO_TAG_RESOURCE_INFO, .blob = StringToBlob(resourceInfo)},
+    };
+    CppParamSet shortBundleSet(shortBundleParams);
+    EXPECT_EQ(manager->GetResourceId(processInfo, "testProvider", shortBundleSet, resourceId, &errInfo),
+        HKS_ERROR_INVALID_ARGUMENT);
+
+    /* missing resourceInfo */
+    std::vector<HksParam> noResourceParams = {
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob(abilityName)},
+        {.tag = HKS_EXT_CRYPTO_TAG_BUNDLE_NAME, .blob = StringToBlob(bundleName)},
+    };
+    CppParamSet noResourceSet(noResourceParams);
+    EXPECT_EQ(manager->GetResourceId(processInfo, "testProvider", noResourceSet, resourceId, &errInfo),
+        HKS_ERROR_RESOURCE_INFO_MISSING);
+
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
+}
+
 } // namespace Huks
 } // namespace Security
 } // namespace OHOS

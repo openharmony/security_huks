@@ -439,4 +439,117 @@ HWTEST_F(HksAPITest, HksAPITest021, TestSize.Level0)
     int32_t ret = HksGenerateKeyForDe(nullptr, nullptr, nullptr);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksGenerateKey failed, ret = " << ret;
 }
+
+extern "C" void FreeHksEncapsulationResult(struct HksEncapsulationResult *encapResult);
+
+/**
+ * @tc.name: HksAPITest.HksAPITest022
+ * @tc.desc: tdd HksEncapsulate/HksDecapsulate/FreeHksEncapsulationResult null pointer and param validation
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksAPITest, HksAPITest022, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksAPITest022");
+
+    /* HksEncapsulate NULL pointer checks */
+    struct HksBlob alias = { .size = 4, .data = (uint8_t *)"test" };
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksEncapsulationResult encapResult = {};
+
+    EXPECT_EQ(HksEncapsulate(nullptr, paramSet, nullptr, nullptr, &encapResult), HKS_ERROR_NULL_POINTER);
+    EXPECT_EQ(HksEncapsulate(&alias, nullptr, nullptr, nullptr, &encapResult), HKS_ERROR_NULL_POINTER);
+    EXPECT_EQ(HksEncapsulate(&alias, paramSet, nullptr, nullptr, nullptr), HKS_ERROR_NULL_POINTER);
+
+    /* HksEncapsulate: sharedKeyParamSet without HKS_TAG_KEY_SIZE -> fail at HksGetParam */
+    struct HksBlob sharedAlias = { .size = 4, .data = (uint8_t *)"shrd" };
+    struct HksParamSet *sharedParamSet = nullptr;
+    ret = HksInitParamSet(&sharedParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam algParam = { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES };
+    ret = HksAddParams(sharedParamSet, &algParam, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&sharedParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    EXPECT_NE(HksEncapsulate(&alias, paramSet, &sharedAlias, sharedParamSet, &encapResult), HKS_SUCCESS);
+    HksFreeParamSet(&sharedParamSet);
+
+    /* HksDecapsulate NULL pointer checks */
+    struct HksBlob decapOut = {};
+    EXPECT_EQ(HksDecapsulate(nullptr, paramSet, nullptr, nullptr, &decapOut), HKS_ERROR_NULL_POINTER);
+    EXPECT_EQ(HksDecapsulate(&alias, nullptr, nullptr, nullptr, &decapOut), HKS_ERROR_NULL_POINTER);
+    EXPECT_EQ(HksDecapsulate(&alias, paramSet, nullptr, nullptr, nullptr), HKS_ERROR_NULL_POINTER);
+
+    /* HksDecapsulate: sharedKeyParamSet without HKS_TAG_KEY_SIZE -> fail */
+    struct HksParamSet *sharedParamSet2 = nullptr;
+    ret = HksInitParamSet(&sharedParamSet2);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksAddParams(sharedParamSet2, &algParam, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&sharedParamSet2);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    EXPECT_NE(HksDecapsulate(&alias, paramSet, &sharedAlias, sharedParamSet2, &decapOut), HKS_SUCCESS);
+    HksFreeParamSet(&sharedParamSet2);
+
+    /* FreeHksEncapsulationResult: NULL -> no crash */
+    FreeHksEncapsulationResult(nullptr);
+
+    /* FreeHksEncapsulationResult: with allocated data */
+    struct HksEncapsulationResult result = {};
+    result.encapsulatedData.data = (uint8_t *)HksMalloc(16);
+    result.encapsulatedData.size = 16;
+    result.sharedSecret.data = (uint8_t *)HksMalloc(8);
+    result.sharedSecret.size = 8;
+    FreeHksEncapsulationResult(&result);
+    EXPECT_EQ(result.encapsulatedData.size, (uint32_t)0);
+    EXPECT_EQ(result.sharedSecret.size, (uint32_t)0);
+
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksAPITest.HksAPITest023
+ * @tc.desc: tdd HksExportPublicKey null pointer check
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksAPITest, HksAPITest023, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksAPITest023");
+
+    /* NULL keyAlias */
+    struct HksBlob key = { .size = 64, .data = nullptr };
+    int32_t ret = HksExportPublicKey(nullptr, nullptr, &key);
+    EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER);
+
+    /* NULL key */
+    struct HksBlob alias = { .size = 4, .data = (uint8_t *)"test" };
+    struct HksParamSet *paramSet = nullptr;
+    ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksExportPublicKey(&alias, paramSet, nullptr);
+    EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER);
+    HksFreeParamSet(&paramSet);
+
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    /* ukey path: HksCheckIsUkeyOperation succeeds, HksClientExportPublicKey fails -> line 107 */
+    struct HksParamSet *ukeyParamSet = nullptr;
+    ret = HksInitParamSet(&ukeyParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam classParam = { .tag = HKS_TAG_KEY_CLASS, .uint32Param = HKS_KEY_CLASS_EXTENSION };
+    ret = HksAddParams(ukeyParamSet, &classParam, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&ukeyParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    uint8_t keyBuf[64] = {0};
+    struct HksBlob keyOut = { .size = sizeof(keyBuf), .data = keyBuf };
+    ret = HksExportPublicKey(&alias, ukeyParamSet, &keyOut);
+    EXPECT_NE(ret, HKS_SUCCESS);
+    HksFreeParamSet(&ukeyParamSet);
+#endif
+}
 }

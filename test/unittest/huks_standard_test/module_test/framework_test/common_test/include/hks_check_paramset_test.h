@@ -32,5 +32,7 @@ void HksCheckParamsetTest012(void);
 void HksCheckParamsetTest013(void);
 void HksCheckParamsetTest014(void);
 void HksCheckParamsetTest015(void);
+void HksCheckParamsetTest016(void);
+void HksCheckParamsetTest017(void);
 }
 #endif // HKS_CHECK_PARAMSET_TEST_H
