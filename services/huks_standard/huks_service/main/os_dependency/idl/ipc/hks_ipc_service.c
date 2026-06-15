@@ -747,7 +747,7 @@ static int32_t HksGenKeyCheckMlControl(struct HksParamSet *paramSet)
 {
     struct HksParam *alg = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &alg);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL, "please check alg")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_SUCCESS, "Ukey func")
 
     if (alg->uint32Param == HKS_ALG_ML_KEM) {
         struct HksParam *authToken = NULL;
@@ -834,6 +834,9 @@ void HksIpcServiceImportKey(const struct HksBlob *srcData, const uint8_t *contex
     do {
         ret  = HksImportKeyUnpack(srcData, &keyAlias, &paramSet, &key);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksImportKeyUnpack Ipc fail")
+
+        ret = HksGenKeyCheckMlControl(paramSet);
+        HKS_IF_NOT_SUCC_BREAK(ret, "MLKEM not support authtoken")
 
         ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)

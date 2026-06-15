@@ -440,11 +440,9 @@ HWTEST_F(HksAPITest, HksAPITest021, TestSize.Level0)
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksGenerateKey failed, ret = " << ret;
 }
 
-extern "C" void FreeHksEncapsulationResult(struct HksEncapsulationResult *encapResult);
-
 /**
  * @tc.name: HksAPITest.HksAPITest022
- * @tc.desc: tdd HksEncapsulate/HksDecapsulate/FreeHksEncapsulationResult null pointer and param validation
+ * @tc.desc: tdd HksEncapsulate/HksDecapsulate/HKS_FREE_ENCAPSULATION_RESULT null pointer and param validation
  * @tc.type: FUNC
  */
 HWTEST_F(HksAPITest, HksAPITest022, TestSize.Level0)
@@ -494,16 +492,17 @@ HWTEST_F(HksAPITest, HksAPITest022, TestSize.Level0)
     EXPECT_NE(HksDecapsulate(&alias, paramSet, &sharedAlias, sharedParamSet2, &decapOut), HKS_SUCCESS);
     HksFreeParamSet(&sharedParamSet2);
 
-    /* FreeHksEncapsulationResult: NULL -> no crash */
-    FreeHksEncapsulationResult(nullptr);
+    /* HKS_FREE_ENCAPSULATION_RESULT: NULL -> no crash */
+    struct HksEncapsulationResult *tmp = nullptr;
+    HKS_FREE_ENCAPSULATION_RESULT(tmp);
 
-    /* FreeHksEncapsulationResult: with allocated data */
+    /* HKS_FREE_ENCAPSULATION_RESULT: with allocated data */
     struct HksEncapsulationResult result = {};
     result.encapsulatedData.data = (uint8_t *)HksMalloc(16);
     result.encapsulatedData.size = 16;
     result.sharedSecret.data = (uint8_t *)HksMalloc(8);
     result.sharedSecret.size = 8;
-    FreeHksEncapsulationResult(&result);
+    HKS_FREE_ENCAPSULATION_RESULT(&result);
     EXPECT_EQ(result.encapsulatedData.size, (uint32_t)0);
     EXPECT_EQ(result.sharedSecret.size, (uint32_t)0);
 

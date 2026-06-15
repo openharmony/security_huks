@@ -32,6 +32,47 @@ constexpr int HUKS_NAPI_ML_KEM_ENCAPSULATE_MAX_ARGS = 4;
 
 constexpr int HUKS_NAPI_ML_KEM_DECAPSULATE_MIN_ARGS = 3;
 constexpr int HUKS_NAPI_ML_KEM_DECAPSULATE_MAX_ARGS = 5;
+constexpr int HKS_MAX_DATA_LEN_ML_KEM = 0x6400000;
+
+static NapiRes MlKemGetUint8Array(napi_env env, napi_value object, HksBlob &arrayBlob)
+{
+    napi_typedarray_type arrayType {};
+    napi_value arrayBuffer = nullptr;
+    size_t length = 0;
+    size_t offset = 0;
+    void *rawData = nullptr;
+
+    napi_status status = napi_get_typedarray_info(env, object, &arrayType, &length,
+        &rawData, &arrayBuffer, &offset);
+    if (status != napi_ok) {
+        HKS_LOG_E("get typedarray info failed, status = %" LOG_PUBLIC "d", status);
+        return {HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "get typedarray info failed"};
+    }
+
+    if (arrayType != napi_uint8_array) {
+        HKS_LOG_E("the type of data is not Uint8Array");
+        return {HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "the type of data is not Uint8Array"};
+    }
+
+    if (length > HKS_MAX_DATA_LEN_ML_KEM) {
+        HKS_LOG_E("data len is too large, len = %" LOG_PUBLIC "zu", length);
+        return {HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "the length of data is too long"};
+    }
+
+    if (length == 0) {
+        arrayBlob.data = static_cast<uint8_t *>(HksMalloc(1));
+    } else {
+        arrayBlob.data = static_cast<uint8_t *>(HksMalloc(length));
+    }
+    if (arrayBlob.data == nullptr) {
+        HKS_LOG_E("could not alloc memory");
+        return {HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "Insufficient memory."};
+    }
+
+    (void)memcpy_s(arrayBlob.data, length, rawData, length);
+    arrayBlob.size = static_cast<uint32_t>(length);
+    return NapiRes::Ok();
+}
 
 static NapiRes HuksParseKeyAlias(napi_env env, napi_value object, HksBlob *&alias)
 {
@@ -127,6 +168,7 @@ static void DeleteMlKemEncapsulateAsyncContext(napi_env env, MlKemEncapsulateAsy
 
     if (context->encapResult != nullptr) {
         HKS_FREE_ENCAPSULATION_RESULT(context->encapResult);
+        HKS_FREE(context->encapResult);
     }
 
     HKS_FREE(context);
@@ -165,12 +207,6 @@ static napi_value ParseMlKemEncapsulateParams(napi_env env, napi_callback_info i
     // Optional: sharedKeyAlias and sharedKeyParamSet
     index++;
     if (index >= argc) {
-        return GetInt32(env, 0);
-    }
-
-    napi_valuetype valueType = napi_valuetype::napi_undefined;
-    napi_status status = napi_typeof(env, argv[index], &valueType);
-    if (status != napi_ok || valueType != napi_valuetype::napi_string) {
         return GetInt32(env, 0);
     }
 
@@ -224,6 +260,10 @@ static napi_value MlKemEncapsulateAsyncWork(napi_env env, MlKemEncapsulateAsyncC
             if (napiContext->encapResult != nullptr) {
                 resultData.outData = &napiContext->encapResult->encapsulatedData;
                 resultData.sharedSecret = &napiContext->encapResult->sharedSecret;
+            }
+
+            if (napiContext->sharedKeyAlias != nullptr) {
+                resultData.forceReturnObject = true;
             }
 
             napiContext->result = HksReplaceErrCodeIf401(napiContext->result);
@@ -305,11 +345,8 @@ static void DeleteMlKemDecapsulateAsyncContext(napi_env env, MlKemDecapsulateAsy
 
     HksFreeParamSet(&context->paramSet);
 
-    // encapOrsharedSecret: 总是释放内存
-    // - 用户输入密文时分配的 blob 结构体
-    // - HUKS 输出共享密钥时分配的数据（如果 sharedKeyAlias == NULL）
     if (context->encapOrsharedSecret != nullptr) {
-        HKS_FREE_BLOB(*context->encapOrsharedSecret);
+        HKS_MEMSET_FREE_BLOB(*context->encapOrsharedSecret);
         HKS_FREE(context->encapOrsharedSecret);
     }
 
@@ -328,12 +365,6 @@ static napi_value ParseOptionalSharedKeyParams(napi_env env, size_t argc, napi_v
     size_t index, MlKemDecapsulateAsyncContext context)
 {
     if (index >= argc) {
-        return GetInt32(env, 0);
-    }
-
-    napi_valuetype valueType = napi_valuetype::napi_undefined;
-    napi_status status = napi_typeof(env, argv[index], &valueType);
-    if (status != napi_ok || valueType != napi_valuetype::napi_string) {
         return GetInt32(env, 0);
     }
 
@@ -393,9 +424,9 @@ static napi_value ParseMlKemDecapsulateParams(napi_env env, napi_callback_info i
         HKS_LOG_E("could not alloc encapOrsharedSecret blob");
         return nullptr;
     }
-    result = GetUint8Array(env, argv[index], *context->encapOrsharedSecret);
-    if (result == nullptr) {
-        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get encapsulatedData");
+    NapiRes resArray = MlKemGetUint8Array(env, argv[index], *context->encapOrsharedSecret);
+    if (resArray.code != HKS_SUCCESS) {
+        HksNapiThrow(env, resArray.code, resArray.errMsg.data());
         HKS_LOG_E("could not get encapsulatedData");
         return nullptr;
     }
@@ -428,6 +459,10 @@ static napi_value MlKemDecapsulateAsyncWork(napi_env env, MlKemDecapsulateAsyncC
 
             if (napiContext->sharedKeyAlias == nullptr && napiContext->encapOrsharedSecret != nullptr) {
                 resultData.sharedSecret = napiContext->encapOrsharedSecret;
+            }
+
+            if (napiContext->sharedKeyAlias != nullptr) {
+                resultData.forceReturnObject = true;
             }
 
             napiContext->result = HksReplaceErrCodeIf401(napiContext->result);

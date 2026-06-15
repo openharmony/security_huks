@@ -20,10 +20,9 @@
 #include "hks_crypto_hal.h"
 #include "hks_openssl_engine.h"
 
-int32_t HksOpensslMlKemEncapsulate(const struct HksBlob *rawKey, const struct HksKeySpec *spec,
-    struct HksEncapsulationResult *encapResult);
+int32_t HksOpensslMlKemEncapsulate(const struct HksBlob *rawKey, struct HksEncapsulationResult *encapResult);
 
-int32_t HksOpensslMlKemDecapsulate(const struct HksBlob *rawKey, const struct HksKeySpec *spec,
-    const struct HksBlob *ciphertext, struct HksBlob *sharedSecret);
+int32_t HksOpensslMlKemDecapsulate(const struct HksBlob *rawKey, const struct HksBlob *ciphertext,
+    struct HksBlob *sharedSecret);
 
 #endif /* HKS_OPENSSL_MLKEM_H */

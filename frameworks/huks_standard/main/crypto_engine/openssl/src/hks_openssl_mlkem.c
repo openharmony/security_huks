@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "hks_error_code.h"
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
 #else
@@ -76,9 +77,10 @@ static int32_t MlKemEncapsulate(EVP_PKEY *pkey, struct HksEncapsulationResult *e
     HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_CRYPTO_ENGINE_ERROR, "EVP_PKEY_CTX_new failed")
 
     int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    int32_t sslRet = HKS_OPENSSL_SUCCESS;
     do {
-        ret = EVP_PKEY_encapsulate_init(ctx, NULL);
-        if (ret != HKS_OPENSSL_SUCCESS) {
+        sslRet = EVP_PKEY_encapsulate_init(ctx, NULL);
+        if (sslRet != HKS_OPENSSL_SUCCESS) {
             HKS_LOG_E("EVP_PKEY_encapsulate_init failed");
             HksLogOpensslError();
             break;
@@ -86,13 +88,13 @@ static int32_t MlKemEncapsulate(EVP_PKEY *pkey, struct HksEncapsulationResult *e
 
         size_t ciphertextLen = 0;
         size_t sharedSecretLen = 0;
-        ret = EVP_PKEY_encapsulate(ctx, NULL, &ciphertextLen, NULL, &sharedSecretLen);
-        if (ret != HKS_OPENSSL_SUCCESS) {
+        sslRet = EVP_PKEY_encapsulate(ctx, NULL, &ciphertextLen, NULL, &sharedSecretLen);
+        if (sslRet != HKS_OPENSSL_SUCCESS) {
             HKS_LOG_E("EVP_PKEY_encapsulate get length failed");
             HksLogOpensslError();
             break;
         }
-
+        ret = HKS_ERROR_MALLOC_FAIL;
         encapResult->encapsulatedData.size = ciphertextLen;
         encapResult->encapsulatedData.data = (uint8_t *)HksMalloc(ciphertextLen);
         HKS_IF_NULL_LOGE_BREAK(encapResult->encapsulatedData.data, "malloc ciphertext failed")
@@ -101,33 +103,30 @@ static int32_t MlKemEncapsulate(EVP_PKEY *pkey, struct HksEncapsulationResult *e
         encapResult->sharedSecret.data = (uint8_t *)HksMalloc(sharedSecretLen);
         HKS_IF_NULL_LOGE_BREAK(encapResult->sharedSecret.data, "malloc sharedSecret failed")
 
-        ret = EVP_PKEY_encapsulate(ctx, encapResult->encapsulatedData.data, &ciphertextLen,
+        sslRet = EVP_PKEY_encapsulate(ctx, encapResult->encapsulatedData.data, &ciphertextLen,
             encapResult->sharedSecret.data, &sharedSecretLen);
-        if (ret != HKS_OPENSSL_SUCCESS) {
+        if (sslRet != HKS_OPENSSL_SUCCESS) {
             HKS_LOG_E("EVP_PKEY_encapsulate failed");
             HksLogOpensslError();
             break;
         }
-
         ret = HKS_SUCCESS;
     } while (0);
 
-    if (ret != HKS_SUCCESS) {
+    EVP_PKEY_CTX_free(ctx);
+    if (sslRet != HKS_OPENSSL_SUCCESS) {
         HKS_FREE(encapResult->encapsulatedData.data);
         HKS_FREE(encapResult->sharedSecret.data);
         encapResult->encapsulatedData.size = 0;
         encapResult->sharedSecret.size = 0;
-        ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
-
-    EVP_PKEY_CTX_free(ctx);
     return ret;
 }
 
-int32_t HksOpensslMlKemEncapsulate(const struct HksBlob *rawKey, const struct HksKeySpec *spec,
-    struct HksEncapsulationResult *encapResult)
+int32_t HksOpensslMlKemEncapsulate(const struct HksBlob *rawKey, struct HksEncapsulationResult *encapResult)
 {
-    if (rawKey == NULL || spec == NULL || encapResult == NULL) {
+    if (rawKey == NULL || encapResult == NULL) {
         HKS_LOG_E("invalid params");
         return HKS_ERROR_NULL_POINTER;
     }
@@ -192,9 +191,10 @@ static int32_t MlKemDecapsulate(EVP_PKEY *pkey, const struct HksBlob *ciphertext
     HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_CRYPTO_ENGINE_ERROR, "EVP_PKEY_CTX_new failed")
 
     int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    int32_t sslRet = HKS_OPENSSL_SUCCESS;
     do {
-        ret = EVP_PKEY_decapsulate_init(ctx, NULL);
-        if (ret != HKS_OPENSSL_SUCCESS) {
+        sslRet = EVP_PKEY_decapsulate_init(ctx, NULL);
+        if (sslRet != HKS_OPENSSL_SUCCESS) {
             HKS_LOG_E("EVP_PKEY_decapsulate_init failed");
             HksLogOpensslError();
             break;
@@ -202,8 +202,8 @@ static int32_t MlKemDecapsulate(EVP_PKEY *pkey, const struct HksBlob *ciphertext
 
         size_t sharedSecretLen = HKS_ML_KEM_SHARED_SECRET_LEN;
         size_t ciphertextSize = ciphertext->size;
-        ret = EVP_PKEY_decapsulate(ctx, NULL, &sharedSecretLen, ciphertext->data, ciphertextSize);
-        if (ret != HKS_OPENSSL_SUCCESS) {
+        sslRet = EVP_PKEY_decapsulate(ctx, NULL, &sharedSecretLen, ciphertext->data, ciphertextSize);
+        if (sslRet != HKS_OPENSSL_SUCCESS) {
             HKS_LOG_E("EVP_PKEY_decapsulate get length failed");
             HksLogOpensslError();
             break;
@@ -217,31 +217,30 @@ static int32_t MlKemDecapsulate(EVP_PKEY *pkey, const struct HksBlob *ciphertext
             break;
         }
 
-        ret = EVP_PKEY_decapsulate(ctx, sharedSecret->data, &sharedSecretLen,
+        sslRet = EVP_PKEY_decapsulate(ctx, sharedSecret->data, &sharedSecretLen,
             ciphertext->data, ciphertextSize);
-        if (ret != HKS_OPENSSL_SUCCESS) {
+        if (sslRet != HKS_OPENSSL_SUCCESS) {
             HKS_LOG_E("EVP_PKEY_decapsulate failed");
             HksLogOpensslError();
             break;
         }
-
         ret = HKS_SUCCESS;
     } while (0);
 
-    if (ret != HKS_SUCCESS) {
+    EVP_PKEY_CTX_free(ctx);
+    if (sslRet != HKS_OPENSSL_SUCCESS) {
         HKS_FREE(sharedSecret->data);
         sharedSecret->size = 0;
-        ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
-    EVP_PKEY_CTX_free(ctx);
     return ret;
 }
 
-int32_t HksOpensslMlKemDecapsulate(const struct HksBlob *rawKey, const struct HksKeySpec *spec,
-    const struct HksBlob *ciphertext, struct HksBlob *sharedSecret)
+int32_t HksOpensslMlKemDecapsulate(const struct HksBlob *rawKey, const struct HksBlob *ciphertext,
+    struct HksBlob *sharedSecret)
 {
-    if (rawKey == NULL || spec == NULL || ciphertext == NULL || sharedSecret == NULL) {
+    if (rawKey == NULL || ciphertext == NULL || sharedSecret == NULL) {
         HKS_LOG_E("invalid params");
         return HKS_ERROR_NULL_POINTER;
     }

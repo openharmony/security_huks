@@ -921,6 +921,16 @@ int32_t CheckImportMutableParams(uint32_t alg, const struct ParamsValues *params
         return HKS_ERROR_INVALID_PURPOSE;
     }
 
+    if (alg == HKS_ALG_ML_KEM) {
+#ifdef HKS_SUPPORT_ML_KEM
+        if (params->purpose.value != HKS_KEY_PURPOSE_WRAP) {
+            HKS_LOG_E("MLKEM Import key check purpose failed.");
+            return HKS_ERROR_INVALID_PURPOSE;
+        }
+#else
+        return HKS_ERROR_NOT_SUPPORTED;
+#endif
+    }
     if (alg == HKS_ALG_RSA) {
 #ifdef HKS_SUPPORT_RSA_C
         if (params->padding.isAbsent) {

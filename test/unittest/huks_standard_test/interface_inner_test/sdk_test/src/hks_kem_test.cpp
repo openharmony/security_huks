@@ -586,7 +586,7 @@ HWTEST_F(HksKemTest, HksEncapsulate_SharedKeyParam_002, TestSize.Level0)
     (void)memset_s(&encapResult, sizeof(encapResult), 0, sizeof(encapResult));
 
     ret = HksEncapsulate(&keyAlias, paramSet, &sharedKeyAlias, sharedKeyParamSet, &encapResult);
-    EXPECT_EQ(ret, HKS_ERROR_PARAM_NOT_EXIST);
+    EXPECT_EQ(ret, HKS_ERROR_CHECK_GET_KEY_SIZE_FAIL);
 
     HKS_FREE_ENCAPSULATION_RESULT(&encapResult);
     (void)HksDeleteKey(&keyAlias, nullptr);
@@ -770,7 +770,7 @@ HWTEST_F(HksKemTest, HksDecapsulate_SharedKeyParam_003, TestSize.Level0)
     ASSERT_NE(sharedSecret.data, nullptr);
 
     ret = HksDecapsulate(&keyAlias, paramSet, &sharedKeyAlias, sharedKeyParamSet, &encapResult.encapsulatedData);
-    EXPECT_EQ(ret, HKS_ERROR_PARAM_NOT_EXIST);
+    EXPECT_EQ(ret, HKS_ERROR_CHECK_GET_KEY_SIZE_FAIL);
 
     HKS_FREE(sharedSecret.data);
     HKS_FREE_ENCAPSULATION_RESULT(&encapResult);

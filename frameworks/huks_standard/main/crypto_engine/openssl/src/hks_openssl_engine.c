@@ -20,7 +20,7 @@
 #endif
 
 #include "hks_openssl_engine.h"
-
+#include "hks_type_enum.h"
 #include <openssl/err.h>
 #include <openssl/evp.h>
 #include <stdbool.h>
@@ -344,35 +344,31 @@ int32_t HksCryptoHalAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
 }
 
 #ifdef HKS_SUPPORT_ML_KEM
-typedef int32_t (*MlKemEncapsulate)(const struct HksBlob *rawKey, const struct HksKeySpec *spec,
-    struct HksEncapsulationResult *encapResult);
+typedef int32_t (*MlKemEncapsulate)(const struct HksBlob *rawKey, struct HksEncapsulationResult *encapResult);
 
-int32_t HksCryptoHalMlKemEncapsulate(const struct HksBlob *rawKey, const struct HksKeySpec *spec,
-    struct HksEncapsulationResult *encapResult)
+int32_t HksCryptoHalMlKemEncapsulate(const struct HksBlob *rawKey, struct HksEncapsulationResult *encapResult)
 {
     HKS_IF_NULL_LOGE_RETURN(rawKey, HKS_ERROR_INVALID_ARGUMENT, "rawKey is null!")
-    HKS_IF_NULL_LOGE_RETURN(spec, HKS_ERROR_INVALID_ARGUMENT, "spec is null!")
     HKS_IF_NULL_LOGE_RETURN(encapResult, HKS_ERROR_INVALID_ARGUMENT, "encapResult is null!")
 
-    MlKemEncapsulate func = (MlKemEncapsulate)GetAbility(HKS_CRYPTO_ABILITY_ENCAPSULATE(spec->algType));
+    MlKemEncapsulate func = (MlKemEncapsulate)GetAbility(HKS_CRYPTO_ABILITY_ENCAPSULATE(HKS_ALG_ML_KEM));
     HKS_IF_NULL_LOGE_RETURN(func, HKS_ERROR_INVALID_ARGUMENT, "MlKemEncapsulate func is null!")
-    return func(rawKey, spec, encapResult);
+    return func(rawKey, encapResult);
 }
 
-typedef int32_t (*MlKemDecapsulate)(const struct HksBlob *rawKey, const struct HksKeySpec *spec,
-    const struct HksBlob *ciphertext, struct HksBlob *sharedSecret);
+typedef int32_t (*MlKemDecapsulate)(const struct HksBlob *rawKey, const struct HksBlob *ciphertext,
+    struct HksBlob *sharedSecret);
 
-int32_t HksCryptoHalMlKemDecapsulate(const struct HksBlob *rawKey, const struct HksKeySpec *spec,
-    const struct HksBlob *ciphertext, struct HksBlob *sharedSecret)
+int32_t HksCryptoHalMlKemDecapsulate(const struct HksBlob *rawKey, const struct HksBlob *ciphertext,
+    struct HksBlob *sharedSecret)
 {
     HKS_IF_NULL_LOGE_RETURN(rawKey, HKS_ERROR_INVALID_ARGUMENT, "rawKey is null!")
-    HKS_IF_NULL_LOGE_RETURN(spec, HKS_ERROR_INVALID_ARGUMENT, "spec is null!")
     HKS_IF_NULL_LOGE_RETURN(ciphertext, HKS_ERROR_INVALID_ARGUMENT, "ciphertext is null!")
     HKS_IF_NULL_LOGE_RETURN(sharedSecret, HKS_ERROR_INVALID_ARGUMENT, "sharedSecret is null!")
 
-    MlKemDecapsulate func = (MlKemDecapsulate)GetAbility(HKS_CRYPTO_ABILITY_DECAPSULATE(spec->algType));
+    MlKemDecapsulate func = (MlKemDecapsulate)GetAbility(HKS_CRYPTO_ABILITY_DECAPSULATE(HKS_ALG_ML_KEM));
     HKS_IF_NULL_LOGE_RETURN(func, HKS_ERROR_INVALID_ARGUMENT, "MlKemDecapsulate func is null!")
-    return func(rawKey, spec, ciphertext, sharedSecret);
+    return func(rawKey, ciphertext, sharedSecret);
 }
 #endif
 
@@ -608,6 +604,6 @@ const char *HksOpensslMlKemGetAlgName(uint32_t keyParamSet)
 const char *HksOpensslMlKemGetAlgName(uint32_t keyParamSet)
 {
     (void) keyParamSet;
-    return HKS_ERROR_NOT_SUPPORTED;
+    return NULL;
 }
 #endif

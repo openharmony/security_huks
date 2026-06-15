@@ -940,6 +940,9 @@ static napi_value GenerateResult(napi_env env, const struct HksSuccessReturnResu
     napi_value status2 = AddOutDataParamSetOrCertChain(env, result,
         resultData.outData, resultData.paramSet, resultData.certChain, resultData.sharedSecret);
     if (status1 == nullptr && status2 == nullptr) {
+        if (resultData.forceReturnObject) {
+            return result;
+        }
         return GetNull(env);
     }
 
@@ -1094,6 +1097,7 @@ void SuccessReturnResultInit(struct HksSuccessReturnResult &resultData)
 
     // ML-KEM encapsulation
     resultData.sharedSecret = nullptr;
+    resultData.forceReturnObject = false;
 }
 
 void SuccessListAliasesReturnResultInit(struct HksSuccessListAliasesResult &resultData)
