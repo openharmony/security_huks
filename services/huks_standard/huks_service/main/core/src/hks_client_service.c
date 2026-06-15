@@ -456,14 +456,11 @@ static int32_t AppendGroupKeyInfo(const struct HksProcessInfo *processInfo, stru
     HKS_IF_TRUE_RETURN(ret == HKS_ERROR_PARAM_NOT_EXIST, HKS_SUCCESS)
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "groupid is invalid")
 
-    struct HksParam *param = NULL;
-    ret = HksGetParam(*outParamSet, HKS_TAG_DEVELOPER_ID, &param);
-    HKS_IF_TRUE_LOGE_RETURN(ret == HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
-        "developer id is not allowed to be passed in from external")
-
     struct HksParamSet *paramSet = *outParamSet;
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob developerId = { 0, NULL };
+    struct HksParam *existingDevIdParam = NULL;
+    int32_t existingDevIdRet = HksGetParam(*outParamSet, HKS_TAG_DEVELOPER_ID, &existingDevIdParam);
     do {
         if (paramSet != NULL) {
             ret = AppendToNewParamSet(paramSet, &newParamSet);
@@ -474,6 +471,21 @@ static int32_t AppendGroupKeyInfo(const struct HksProcessInfo *processInfo, stru
 
         ret = HksGetDeveloperId(processInfo, &developerId);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get developerId failed")
+
+        if (existingDevIdRet == HKS_SUCCESS) {
+            if (existingDevIdParam->blob.size == developerId.size &&
+                HksMemCmp(existingDevIdParam->blob.data, developerId.data, developerId.size) == 0) {
+                ret = HksBuildParamSet(&newParamSet);
+                HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build paramset failed")
+                HksFreeParamSet(outParamSet);
+                *outParamSet = newParamSet;
+                HKS_FREE_BLOB(developerId);
+                return HKS_SUCCESS;
+            }
+            HKS_LOG_E("developer id is not allowed to be passed in from external!");
+            ret = HKS_ERROR_INVALID_ARGUMENT;
+            break;
+        }
 
         struct HksParam paramArr[] = {
             { .tag = HKS_TAG_DEVELOPER_ID, .blob = developerId },
