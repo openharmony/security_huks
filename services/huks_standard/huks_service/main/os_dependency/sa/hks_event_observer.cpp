@@ -156,7 +156,7 @@ static void DealAllSystemEvent(const OHOS::EventFwk::CommonEventData &data)
         int uid = want.GetIntParam(UID, -1);
         int userId = -1;
         int32_t ret = HKS_FAILURE;
-        bool anco = want.GetBoolParam(IS_BMS_EXTENSION_UNINSTALLED, false);
+        bool anco = want.GetBoolParam(IS_BMS_EXTENSION_UNINSTALLED, true);
         if (!anco) {
             ret = GetOsAccountIdFromUid(uid, userId);
             HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(ret, "get local user if failed")
@@ -165,7 +165,8 @@ static void DealAllSystemEvent(const OHOS::EventFwk::CommonEventData &data)
             HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(ret, "can not get anco user id")
         }
 
-        HKS_LOG_I("HksService package removed: uid is %" LOG_PUBLIC "d userId is %" LOG_PUBLIC "d", uid, userId);
+        HKS_LOG_I("package removed: uid: %" LOG_PUBLIC "d userId: %" LOG_PUBLIC "d, anco: %" LOG_PUBLIC "d",
+            uid, userId, anco);
 
         ret = GetProcessInfo(userId, uid, &processInfo);
         HKS_IF_TRUE_EXCU(ret == HKS_SUCCESS, HksServiceDeleteProcessInfo(&processInfo, anco));

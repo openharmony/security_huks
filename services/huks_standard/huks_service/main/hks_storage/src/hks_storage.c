@@ -744,14 +744,14 @@ void HksServiceDeleteAncoUIDKeyFile(const struct HksProcessInfo *processInfo)
         userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
         HKS_IF_NULL_LOGE_BREAK(userData, "malloc user data failed")
 
-        ret = ConstructName(&processInfo->userId, userData, HKS_MAX_FILE_NAME_LEN);
+        ret = ConstructPlainName(&processInfo->userId, userData, HKS_MAX_FILE_NAME_LEN);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "construct user id name failed, ret = %" LOG_PUBLIC "d", ret)
         
         ret = HKS_ERROR_MALLOC_FAIL;
         uidData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
         HKS_IF_NULL_LOGE_BREAK(uidData, "malloc uid data failed");
 
-        ret = ConstructName(&processInfo->processName, uidData, HKS_MAX_FILE_NAME_LEN);
+        ret = ConstructPlainName(&processInfo->processName, uidData, HKS_MAX_FILE_NAME_LEN);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "construct uid id name failed, ret = %" LOG_PUBLIC "d", ret)
 
         (void)DeleteUserAncoCePath(userData, uidData, HKS_STORE_SERVICE_PATH);
