@@ -335,6 +335,11 @@ static int32_t AppendDeveloperId(const struct HksProcessInfo *processInfo, struc
     HKS_IF_TRUE_RETURN(ret == HKS_ERROR_PARAM_NOT_EXIST, HKS_SUCCESS)
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "groupid is invalid")
 
+    struct HksParam *param = NULL;
+    ret = HksGetParam(outParamSet, HKS_TAG_DEVELOPER_ID, &param);
+    HKS_IF_TRUE_LOGE_RETURN(ret == HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
+        "developer id is not allowed to be passed in from external!")
+
     do {
         ret = HksGetDeveloperId(processInfo, developerId);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get developerId failed")
