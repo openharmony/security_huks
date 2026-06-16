@@ -335,9 +335,22 @@ static int32_t AppendDeveloperId(const struct HksProcessInfo *processInfo, struc
     HKS_IF_TRUE_RETURN(ret == HKS_ERROR_PARAM_NOT_EXIST, HKS_SUCCESS)
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "groupid is invalid")
 
+    struct HksParam *existingDevIdParam = NULL;
+    int32_t existingDevIdRet = HksGetParam(outParamSet, HKS_TAG_DEVELOPER_ID, &existingDevIdParam);
+
     do {
         ret = HksGetDeveloperId(processInfo, developerId);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get developerId failed")
+
+        if (existingDevIdRet == HKS_SUCCESS) {
+            if (existingDevIdParam->blob.size == developerId->size &&
+                HksMemCmp(existingDevIdParam->blob.data, developerId->data, developerId->size) == 0) {
+                return HKS_SUCCESS;
+            }
+            HKS_LOG_E("developer id is not allowed to be passed in from external!");
+            ret = HKS_ERROR_INVALID_ARGUMENT;
+            break;
+        }
 
         struct HksParam paramArr[] = {
             { .tag = HKS_TAG_DEVELOPER_ID, .blob = *developerId },
