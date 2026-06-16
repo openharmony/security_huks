@@ -613,19 +613,6 @@ static int32_t CheckAndAppendUserAuthInfo(const struct HksProcessInfo *processIn
     return HKS_SUCCESS;
 }
 
-static int32_t CheckIfEnrollAuthInfoForRecoveryKey(int32_t userId, struct HksParamSet *userAuthParamSet)
-{
-    struct HksParam *secUid = NULL;
-    int32_t ret = HksGetParam(userAuthParamSet, HKS_TAG_USER_AUTH_SECURE_UID, &secUid);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_GET_USERIAM_SECINFO_FAILED, "get secure uid failed")
-
-    if (*(secUid->blob.data) == userId) {
-        HKS_LOG_E("recovery key is used, but auth info is not enrolled");
-        return HKS_ERROR_CREDENTIAL_NOT_EXIST;
-    }
-    return HKS_SUCCESS;
-}
-
 // callback
 int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
@@ -657,17 +644,26 @@ int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo
             HKS_LOG_I("authAccessType is always vaild, CheckIfUserIamSupportCurType pass.");
             ret = BuildUserAuthParamSet(paramSet, &userAuthParamSet);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Build UserAuthParamSet failed!")
-        } else if (authAccessType == HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD) {
-            ret = CheckAndAppendUserAuthInfo(processInfo, paramSet, userAuthType, authAccessType, &userAuthParamSet);
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CheckAndAppendUserAuthInfo failed!")
+        } else { 
+            HKS_IF_TRUE_LOGE_RETURN(HksCheckIsAllowedWrap(paramSet), HKS_ERROR_KEY_NOT_ALLOW_WRAP,
+                "key with access control isn't allowed wrap!")
+            
+            HKS_IF_TRUE_LOGE_RETURN((userAuthType == 0 && authAccessType == HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL),
+                HKS_ERROR_INVALID_AUTH_TYPE, "invalid user auth type")
 
-            ret = CheckIfEnrollAuthInfoForRecoveryKey(processInfo->userIdInt, userAuthParamSet);
-            HKS_IF_TRUE_LOGE_RETURN((userAuthType == 0 && ret != HKS_SUCCESS), ret,
-                "CheckIfEnrollAuthInfoForRecoveryKey failed!")
-        } else if (authAccessType == HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL) {
-            HKS_IF_TRUE_LOGE_RETURN((userAuthType == 0), HKS_ERROR_INVALID_AUTH_TYPE, "invalid user auth type");
-            ret = CheckAndAppendUserAuthInfo(processInfo, paramSet, userAuthType, authAccessType, &userAuthParamSet);
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CheckAndAppendUserAuthInfo failed!")
+            void *data = HksLockUserIdm();
+            HKS_IF_NULL_LOGE_RETURN(data, HKS_ERROR_SESSION_REACHED_LIMIT, "HksLockUserIdm fail")
+            do {
+                ret = CheckIfUserIamSupportCurType(processInfo->userIdInt, userAuthType); // callback
+                HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+                    "UserIAM do not support current user auth or not enrolled cur auth info")
+
+                // callback
+                ret = AppendUserAuthInfo(paramSet, processInfo->userIdInt, authAccessType, &userAuthParamSet);
+                HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append secure access info failed!")
+            } while (false);
+            HksUnlockUserIdm(data);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CheckIfUserIamSupportCurType or AppendUserAuthInfo fail")
         }
         struct HksParamSet *newInfoParamSet = NULL;
         ret = AppendProcessInfoAndDefault(userAuthParamSet, processInfo, NULL, &newInfoParamSet, true);
