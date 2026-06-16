@@ -2472,15 +2472,29 @@ static int32_t HksCheckAndBuildShareParam(const struct HksProcessInfo *processIn
     int32_t ret = HksCheckParamSetValidity(paramSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check sharedKeyParamSet failed, ret = %" LOG_PUBLIC "d", ret)
 
-    struct HksParam *sharedKeyAlias = NULL;
-    ret = HksGetParam(paramSet, HKS_TAG_KEY_ALIAS, &sharedKeyAlias);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckAndBuildShareParam get shared key alias fail")
-
     ret = AppendNewInfoForGenKeyInService(processInfo, paramSet, newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Encaps AppendNewInfoForGenKeyInService fail")
 
-    ret = CheckKeyCondition(processInfo, &sharedKeyAlias->blob, *newParamSet);
+    return ret;
+}
+
+static int32_t HksKemStoreKey(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+    struct HksBlob *keyBlob)
+{
+    struct HksParam *sharedKeyAlias = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_ALIAS, &sharedKeyAlias);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckAndBuildShareParam get shared key alias fail")
+
+    ret = CheckKeyCondition(processInfo, &sharedKeyAlias->blob, paramSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "encaps check key condition fail")
+
+    do {
+        ret = HksManageStoreKeyBlob(processInfo, paramSet, &sharedKeyAlias->blob, keyBlob,
+            HKS_STORAGE_TYPE_KEY);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+    (void)memset_s(keyBlob->data, keyBlob->size, 0, keyBlob->size);
+    keyBlob->size = 0;
 
     return ret;
 }
@@ -2523,12 +2537,8 @@ int32_t HksServiceEncapsulate(const struct HksProcessInfo *processInfo, const st
             break;
         }
 
-        ret = HksManageStoreKeyBlob(processInfo, newShareParamSet, &sharedKeyAlias->blob, &encapResult->sharedSecret,
-            HKS_STORAGE_TYPE_KEY);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
-        (void)memset_s(encapResult->sharedSecret.data, encapResult->sharedSecret.size, 0,
-            encapResult->sharedSecret.size);
-        encapResult->sharedSecret.size = 0;
+        ret = HksKemStoreKey(processInfo, newShareParamSet, &encapResult->sharedSecret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "encapsulate HksKemStoreKey faile ret:%" LOG_PUBLIC "d", ret)
     } while (0);
 
 #ifdef L2_STANDARD
@@ -2580,15 +2590,8 @@ int32_t HksServiceDecapsulate(const struct HksProcessInfo *processInfo, const st
             break;
         }
 
-        struct HksParam *keyalias = NULL;
-        ret = HksGetParam(newSharedKeyParamSet, HKS_TAG_KEY_ALIAS, &keyalias);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCoreDecapsulate get key alias fail")
-
-        ret = HksManageStoreKeyBlob(processInfo, newSharedKeyParamSet, &keyalias->blob, &outData,
-            HKS_STORAGE_TYPE_KEY);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
-        (void)memset_s(outData.data, outData.size, 0, outData.size);
-        outData.size = 0;
+        ret = HksKemStoreKey(processInfo, newSharedKeyParamSet, &outData);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "decapsulate HksKemStoreKey faile ret:%" LOG_PUBLIC "d", ret)
     } while (0);
 
 #ifdef L2_STANDARD

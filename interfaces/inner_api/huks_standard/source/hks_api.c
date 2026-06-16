@@ -1175,6 +1175,19 @@ static int32_t ConstructDummySharedKeyParams(struct HksBlob *dummyAlias, struct 
     return HKS_SUCCESS;
 }
 
+static int32_t HksKemCheckShareParam(const struct HksParamSet *sharedKeyParamSet)
+{
+    int32_t ret = HksCheckParamSetValidity(sharedKeyParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check sharedKeyParamSet validity fail");
+
+    struct HksParam *keySizeParam = NULL;
+    ret = HksGetParam(sharedKeyParamSet, HKS_TAG_KEY_SIZE, &keySizeParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_KEY_SIZE_FAIL,
+        "sharedKeyParamSet must contain HKS_TAG_KEY_SIZE for storage")
+    
+    return ret;
+}
+
 HKS_API_EXPORT int32_t HksEncapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
     struct HksEncapsulationResult *encapResult)
@@ -1198,13 +1211,8 @@ HKS_API_EXPORT int32_t HksEncapsulate(const struct HksBlob *keyAlias, const stru
             actualAlias = &dummyAlias;
             actualParamSet = dummyParamSet;
         } else if (sharedKeyParamSet != NULL) {
-            ret = HksCheckParamSetValidity(sharedKeyParamSet);
+            ret = HksKemCheckShareParam(sharedKeyParamSet);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check sharedKeyParamSet validity fail")
-
-            struct HksParam *keySizeParam = NULL;
-            ret = HksGetParam(sharedKeyParamSet, HKS_TAG_KEY_SIZE, &keySizeParam);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
-                "HksEncapsulate sharedKeyParamSet must contain HKS_TAG_KEY_SIZE for storage")
         }
 
         ret = HksClientEncapsulate(keyAlias, paramSet, actualAlias, actualParamSet, encapResult);
@@ -1215,17 +1223,6 @@ HKS_API_EXPORT int32_t HksEncapsulate(const struct HksBlob *keyAlias, const stru
     HKS_FREE_BLOB(dummyAlias);
     HKS_IF_NOT_SUCC_LOGE(ret, "leave Encapsulate, result = %" LOG_PUBLIC "d", ret);
     return ret;
-}
-
-HKS_API_EXPORT void FreeHksEncapsulationResult(struct HksEncapsulationResult *encapResult)
-{
-    if (encapResult == NULL) {
-        return;
-    }
-    HKS_FREE(encapResult->encapsulatedData.data);
-    HKS_FREE(encapResult->sharedSecret.data);
-    encapResult->encapsulatedData.size = 0;
-    encapResult->sharedSecret.size = 0;
 }
 
 HKS_API_EXPORT int32_t HksDecapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
@@ -1251,13 +1248,8 @@ HKS_API_EXPORT int32_t HksDecapsulate(const struct HksBlob *keyAlias, const stru
             actualAlias = &dummyAlias;
             actualParamSet = dummyParamSet;
         } else if (sharedKeyParamSet != NULL) {
-            ret = HksCheckParamSetValidity(sharedKeyParamSet);
+            ret = HksKemCheckShareParam(sharedKeyParamSet);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check sharedKeyParamSet validity fail")
-
-            struct HksParam *keySizeParam = NULL;
-            ret = HksGetParam(sharedKeyParamSet, HKS_TAG_KEY_SIZE, &keySizeParam);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
-                "HksDecapsulate sharedKeyParamSet must contain HKS_TAG_KEY_SIZE for storage")
         }
 
         ret = HksClientDecapsulate(keyAlias, paramSet, actualAlias, actualParamSet, encapOrsharedSecret);

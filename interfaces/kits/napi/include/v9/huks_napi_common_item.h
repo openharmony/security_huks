@@ -65,6 +65,7 @@ struct HksSuccessReturnResult {
 
     // ML-KEM encapsulation result
     struct HksBlob *sharedSecret;
+    bool forceReturnObject;
 };
 
 struct HksSuccessListAliasesResult {

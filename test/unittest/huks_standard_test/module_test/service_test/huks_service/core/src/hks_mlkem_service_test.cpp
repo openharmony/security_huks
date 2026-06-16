@@ -20,6 +20,7 @@
 
 #include "file_ex.h"
 #include "hks_client_service.h"
+#include "hks_error_code.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "securec.h"
@@ -303,7 +304,7 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest007, TestSize.Level0)
     uint8_t encapData[HKS_ML_KEM_MAX_CIPHERTEXT_LEN] = { 0 };
     struct HksBlob encapOrSharedSecret = { HKS_ML_KEM_MAX_CIPHERTEXT_LEN, encapData };
     ret = HksServiceDecapsulate(&g_processInfo, &keyAlias, paramSet, sharedParamSet, &encapOrSharedSecret);
-    EXPECT_EQ(ret, HKS_ERROR_PARAM_NOT_EXIST);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 
     HKS_MEMSET_FREE_BLOB(encapOrSharedSecret);
     HksFreeParamSet(&paramSet);
