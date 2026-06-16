@@ -188,6 +188,7 @@ static int32_t HksExtSendAsyncMessage(MessageParcel &data, const struct HksParam
 
     outBlob->size = receivedSize;
 
+    HksClearThreadExtErrMsg();
     if (errInfo != nullptr) {
         HKS_IF_TRUE_EXCU(errInfo->errVal != 0, HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
         HksFreeExternalErrorInfo(errInfo);

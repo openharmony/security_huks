@@ -104,10 +104,23 @@ static int32_t BuildParamSetNotNull(const struct HksParamSet *paramSetIn, struct
 }
 
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
-static void UpdateUkeyGlobalErrorInfo()
+static void UpdateUkeyGlobalErrorInfo(int32_t ret)
 {
+    if (ret == HKS_SUCCESS) {
+        HKS_CLEAR_UKEY_GLOBAL_INFO_C();
+        HksClearThreadExtErrMsg();
+        return;
+    }
+    
     const struct HksExternalErrorInfo *threadError = HksGetThreadExtErrMsg();
-    HKS_IF_TRUE_EXCU(threadError != NULL, HKS_SET_UKEY_GLOBAL_INFO_C(threadError->errVal, threadError->errorDesc));
+    if (threadError == NULL || threadError->errVal == HKS_ERROR_EXT_CALL_JS_TIME_OUT ||
+        threadError->errVal == HKS_ERROR_EXT_JS_METHOD_ERROR) {
+        HKS_CLEAR_UKEY_GLOBAL_INFO_C();
+        HksClearThreadExtErrMsg();
+        return;
+    }
+
+    HKS_SET_UKEY_GLOBAL_INFO_C(threadError->errVal, threadError->errorDesc);
     HksClearThreadExtErrMsg();
 }
 
@@ -335,7 +348,7 @@ int32_t HksClientExportProviderCertificates(const struct HksBlob *providerName,
 
     HKS_IF_NOT_SUCC_LOGE(ret, "HksClientExportProviderCertificates fail, ret = %" LOG_PUBLIC "d", ret);
 
-    HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, UpdateUkeyGlobalErrorInfo());
+    UpdateUkeyGlobalErrorInfo(ret);
 
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
@@ -381,10 +394,8 @@ int32_t HksClientExportCertificate(const struct HksBlob *index,
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Unpack certs fail, ret=%" LOG_PUBLIC "d", ret);
     } while (0);
 
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksClientExportCertificate fail, ret=%" LOG_PUBLIC "d", ret);
-        UpdateUkeyGlobalErrorInfo();
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "HksClientExportCertificate fail, ret=%" LOG_PUBLIC "d", ret);
+    UpdateUkeyGlobalErrorInfo(ret);
 
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
@@ -422,10 +433,8 @@ int32_t HksClientImportCertificate(const struct HksBlob *resourceId,
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "SendRequest fail, ret=%" LOG_PUBLIC "d", ret);
     } while (0);
 
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksClientImportCertificate fail, ret=%" LOG_PUBLIC "d", ret);
-        UpdateUkeyGlobalErrorInfo();
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "HksClientImportCertificate fail, ret=%" LOG_PUBLIC "d", ret);
+    UpdateUkeyGlobalErrorInfo(ret);
 
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
@@ -482,7 +491,7 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
             outBlob.data + sizeof(int32_t) + sizeof(int32_t), sizeof(uint32_t)), "memcpy_s retryCount failed")
     } while (0);
 
-    HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, UpdateUkeyGlobalErrorInfo());
+    UpdateUkeyGlobalErrorInfo(ret);
 
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
@@ -533,7 +542,7 @@ int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index,
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetUkeyPinAuthState: check auth state fail. ret = %" LOG_PUBLIC "d", ret);
     } while (0);
 
-    HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, UpdateUkeyGlobalErrorInfo());
+    UpdateUkeyGlobalErrorInfo(ret);
 
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
@@ -569,7 +578,7 @@ int32_t HksClientOpenRemoteHandle(const struct HksBlob *resourceId, const struct
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret);
     } while (0);
 
-    HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, UpdateUkeyGlobalErrorInfo());
+    UpdateUkeyGlobalErrorInfo(ret);
 
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
@@ -599,7 +608,7 @@ int32_t HksClientCloseRemoteHandle(const struct HksBlob *resourceId, const struc
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
-    HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, UpdateUkeyGlobalErrorInfo());
+    UpdateUkeyGlobalErrorInfo(ret);
 
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
@@ -648,7 +657,7 @@ int32_t HksClientSetOrGetRemoteProperty(enum HksExtPropertyOperation operation,
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRemotePropertyUnpackFromService fail")
     } while (0);
 
-    HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, UpdateUkeyGlobalErrorInfo());
+    UpdateUkeyGlobalErrorInfo(ret);
 
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
@@ -674,7 +683,7 @@ int32_t HksClientClearPinAuthState(const struct HksBlob *index)
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
-    HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, UpdateUkeyGlobalErrorInfo());
+    UpdateUkeyGlobalErrorInfo(ret);
 
     HKS_FREE_BLOB(inBlob);
     return ret;
@@ -725,7 +734,7 @@ int32_t HksClientGetResourceId(const struct HksBlob *providerName, const struct 
         }
     } while (0);
 
-    HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, UpdateUkeyGlobalErrorInfo());
+    UpdateUkeyGlobalErrorInfo(ret);
 
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
@@ -765,7 +774,7 @@ int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksPar
     } while (0);
 
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
-    HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, UpdateUkeyGlobalErrorInfo());
+    UpdateUkeyGlobalErrorInfo(ret);
 #endif
 
     HKS_FREE_BLOB(inBlob);
@@ -824,7 +833,7 @@ int32_t HksClientExportPublicKey(const struct HksBlob *keyAlias, const struct Hk
     } while (0);
 
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
-    HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, UpdateUkeyGlobalErrorInfo());
+    UpdateUkeyGlobalErrorInfo(ret);
 #endif
 
     HksFreeParamSet(&newParamSet);
@@ -854,7 +863,7 @@ int32_t HksClientImportWrappedKey(const struct HksBlob *keyAlias, const struct H
     } while (0);
 
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
-    HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, UpdateUkeyGlobalErrorInfo());
+    UpdateUkeyGlobalErrorInfo(ret);
 #endif
 
     HKS_FREE_BLOB(inBlob);
@@ -1355,7 +1364,7 @@ static int32_t ClientInit(const struct HksBlob *inData, const struct HksParamSet
     } while (0);
 
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
-    HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, UpdateUkeyGlobalErrorInfo());
+    UpdateUkeyGlobalErrorInfo(ret);
 #endif
 
     HKS_FREE(tmpOut);
@@ -1412,7 +1421,7 @@ int32_t HksClientUpdate(const struct HksBlob *handle, const struct HksParamSet *
     ret = HksSendRequest(HKS_MSG_UPDATE, &parcelBlob, outData, paramSet);
 
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
-    HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, UpdateUkeyGlobalErrorInfo());
+    UpdateUkeyGlobalErrorInfo(ret);
 #endif
 
     if (ret != HKS_SUCCESS) {
@@ -1449,7 +1458,7 @@ int32_t HksClientFinish(const struct HksBlob *handle, const struct HksParamSet *
     ret = HksSendRequest(HKS_MSG_FINISH, &parcelBlob, outData, paramSet);
 
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
-    HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, UpdateUkeyGlobalErrorInfo());
+    UpdateUkeyGlobalErrorInfo(ret);
 #endif
 
     if (ret != HKS_SUCCESS) {
@@ -1483,7 +1492,7 @@ int32_t HksClientAbort(const struct HksBlob *handle, const struct HksParamSet *p
     ret = HksSendRequest(HKS_MSG_ABORT, &parcelBlob, NULL, paramSet);
 
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
-    HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, UpdateUkeyGlobalErrorInfo());
+    UpdateUkeyGlobalErrorInfo(ret);
 #endif
 
     if (ret != HKS_SUCCESS) {

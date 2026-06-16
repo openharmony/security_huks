@@ -216,6 +216,7 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
         ret = HksIpcAuthUkeyPinAdapter(&processInfo, &index, paramSet, &authOutParam, &errInfo);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksIpcAuthUkeyPinAdapter fail, ret = %" LOG_PUBLIC "d", ret);
+            HksClearThreadExtErrMsg();
             HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
             HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
             HksFreeExternalErrorInfo(errInfo);
@@ -265,6 +266,7 @@ void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8
         ret = HksIpcGetUkeyPinAuthStateAdapter(&processInfo, &index, paramSet, &status, &errInfo);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("GetUkeyPinAuthState: adapter ret=%" LOG_PUBLIC "d", ret);
+            HksClearThreadExtErrMsg();
             HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
             HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
             HksFreeExternalErrorInfo(errInfo);
@@ -308,6 +310,7 @@ void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t
         ret = HksIpcClearPinStatusAdapter(&processInfo, &index, &errInfo);
         HKS_IF_TRUE_BREAK(ret == HKS_SUCCESS)
         HKS_LOG_E("HksIpcClearPinStatusAdapter ret = %" LOG_PUBLIC "d", ret);
+        HksClearThreadExtErrMsg();
         HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
         HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
         HksFreeExternalErrorInfo(errInfo);
@@ -351,6 +354,7 @@ void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t 
         ret = HksIpcCreateRemKeyHandleAdapter(&processInfo, &resourceId, paramSet, &errInfo);
         HKS_IF_TRUE_BREAK(ret == HKS_SUCCESS)
         HKS_LOG_E("HksIpcCreateRemKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret);
+        HksClearThreadExtErrMsg();
         HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
         HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
         HksFreeExternalErrorInfo(errInfo);
@@ -394,6 +398,7 @@ void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t
         ret = HksIpcCloseRemKeyHandleAdapter(&processInfo, &resourceId, paramSet, &errInfo);
         HKS_IF_TRUE_BREAK(ret == HKS_SUCCESS)
         HKS_LOG_E("HksIpcCloseRemKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret);
+        HksClearThreadExtErrMsg();
         HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
         HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
         HksFreeExternalErrorInfo(errInfo);
@@ -439,6 +444,7 @@ void HksIpcServiceExportProviderCertificates(const struct HksBlob *srcData, cons
         ret = HksIpcExportProvCertsAdapter(&processInfo, &providerName, paramSet, &certInfoSet, &errInfo);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksIpcExportProvCertsAdapter fail, ret = %" LOG_PUBLIC "d", ret);
+            HksClearThreadExtErrMsg();
             HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
             HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
             HksFreeExternalErrorInfo(errInfo);
@@ -490,6 +496,7 @@ void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t
         ret = HksIpcExportCertAdapter(&processInfo, &index, paramSet, &certInfoSet, &errInfo);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksIpcExportCertAdapter fail, ret = %" LOG_PUBLIC "d", ret);
+            HksClearThreadExtErrMsg();
             HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
             HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
             HksFreeExternalErrorInfo(errInfo);
@@ -540,6 +547,7 @@ void HksIpcServiceImportCertificate(const struct HksBlob *srcData, const uint8_t
         ret = HksIpcImportCertAdapter(&processInfo, &index, &certInfo, paramSet, &errInfo);
         HKS_IF_TRUE_BREAK(ret == HKS_SUCCESS)
         HKS_LOG_E("HksIpcImportCertAdapter fail, ret = %" LOG_PUBLIC "d", ret);
+        HksClearThreadExtErrMsg();
         HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
         HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
         HksFreeExternalErrorInfo(errInfo);
@@ -628,6 +636,7 @@ void HksIpcServiceGetResourceId(const struct HksBlob *srcData, const uint8_t *co
         ret = HksIpcServiceOnGetResourceIdAdapter(&processInfo, &providerName, paramSet, &resourceId, &errInfo);
         HKS_IF_TRUE_BREAK(ret == HKS_SUCCESS)
         HKS_LOG_E("HksIpcServiceOnGetResourceIdAdapter fail, ret = %" LOG_PUBLIC "d", ret);
+        HksClearThreadExtErrMsg();
         HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
         HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
         HksFreeExternalErrorInfo(errInfo);
