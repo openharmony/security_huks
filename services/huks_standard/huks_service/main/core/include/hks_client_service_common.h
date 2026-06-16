@@ -41,6 +41,15 @@ int32_t CheckKeySecuritySeFromKeyFile(const struct HksProcessInfo *processInfo,
 
 void DecrementSeCountByService(bool isSeCalling);
 
+int32_t CheckKeySecuritySeFromParamSet(const struct HksProcessInfo *processInfo,
+    struct HksParamSet *newParamSet, bool *isSeCalling);
+
+int32_t CheckSeSessionCallInService(const struct HksProcessInfo *processInfo, bool *isSeCalling);
+
+int32_t CheckWrappedKeySeVersionInService(const struct HksBlob *wrappedData, bool *isSeWrappedKey);
+
+int32_t RejectSeSecurityLevel(const struct HksParamSet *paramSetIn);
+
 #ifdef __cplusplus
 }
 #endif

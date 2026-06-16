@@ -671,78 +671,6 @@ static int32_t HksAllocateMemForKey(const struct HksParamSet *paramSet, struct H
     return HKS_SUCCESS;
 }
 
-static int32_t CheckKeySecuritySe(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
-    bool *isSeCalling)
-{
-#ifdef L2_STANDARD
-    struct HksParam *securityLevelParam = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_SECURITY_LEVEL, &securityLevelParam);
-    HKS_IF_TRUE_RETURN(ret != HKS_SUCCESS, HKS_SUCCESS)
-
-    HKS_IF_TRUE_LOGE_RETURN(
-        securityLevelParam->uint32Param != HKS_KEY_SECURITY_LEVEL_TEE &&
-        securityLevelParam->uint32Param != HKS_KEY_SECURITY_LEVEL_SE,
-        HKS_ERROR_INVALID_ARGUMENT,
-        "Invalid key security level: %" LOG_PUBLIC "u", securityLevelParam->uint32Param)
-
-    if (securityLevelParam->uint32Param == HKS_KEY_SECURITY_LEVEL_SE) {
-        ret = HksSePermissionCheck(processInfo);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Se permission check failed.")
-
-        ret = HksSeIncrementSeCount();
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Failed to increment SE call count.")
-
-        *isSeCalling = true;
-
-        // temp
-        securityLevelParam->uint32Param = HKS_KEY_SECURITY_LEVEL_INDEPENDENT_SE;
-
-        struct HksParam *userAuthTypeParam = NULL;
-        if (HksGetParam(paramSet, HKS_TAG_USER_AUTH_TYPE, &userAuthTypeParam) == HKS_SUCCESS &&
-            (userAuthTypeParam->uint32Param & HKS_USER_AUTH_TYPE_TUI_PIN) != 0) {
-            securityLevelParam->uint32Param = HKS_KEY_SECURITY_LEVEL_INDEPENDENT_SE;
-        }
-    }
-
-    return HKS_SUCCESS;
-#else
-    (void)processInfo;
-    (void)paramSet;
-    (void)isSeCalling;
-    return HKS_SUCCESS;
-#endif
-}
-
-static int32_t CheckSeSessionCall(const struct HksProcessInfo *processInfo, bool *isSeCalling)
-{
-#ifdef L2_STANDARD
-    int32_t ret = HksSePermissionCheck(processInfo);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Se permission check failed.")
-
-    ret = HksSeIncrementSeCount();
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Failed to increment SE call count.")
-
-    *isSeCalling = true;
-    return HKS_SUCCESS;
-#else
-    (void)processInfo;
-    (void)isSeCalling;
-    return HKS_SUCCESS;
-#endif
-}
-
-static void DecrementSeCountByParamSet(bool isSeCalling)
-{
-#ifdef L2_STANDARD
-    if (isSeCalling) {
-        (void)HksSeDecrementSeCount();
-        return;
-    }
-#else
-    (void)isSeCalling;
-#endif
-}
-
 static int32_t HksGenKeyCheckMlControl(struct HksParamSet *paramSet)
 {
     struct HksParam *alg = NULL;
@@ -771,7 +699,6 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     int32_t ret;
     bool isNoneResponse = false;
-    bool isSeCalling = false;
 
     do {
         ret = HksGenerateKeyUnpack(srcData, &keyAlias, &inParamSet, &keyOut);
@@ -791,9 +718,6 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
 
         ret = HksCheckAcrossAccountsPermission(inParamSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = CheckKeySecuritySe(&processInfo, inParamSet, &isSeCalling);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckKeySecuritySe fail, ret = %" LOG_PUBLIC "d", ret)
 
         struct HksParam *accessTypeParam = NULL;
         ret = HksGetParam(inParamSet, HKS_TAG_KEY_AUTH_ACCESS_TYPE, &accessTypeParam);
@@ -815,8 +739,6 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
 
     HksSendResponse(context, ret, isNoneResponse ? NULL : &keyOut);
 
-    DecrementSeCountByParamSet(isSeCalling);
-
     HKS_FREE_BLOB(keyOut);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
@@ -829,7 +751,6 @@ void HksIpcServiceImportKey(const struct HksBlob *srcData, const uint8_t *contex
     struct HksBlob key = { 0, NULL };
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     int32_t ret;
-    bool isSeCalling = false;
 
     do {
         ret  = HksImportKeyUnpack(srcData, &keyAlias, &paramSet, &key);
@@ -841,16 +762,11 @@ void HksIpcServiceImportKey(const struct HksBlob *srcData, const uint8_t *contex
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = CheckKeySecuritySe(&processInfo, paramSet, &isSeCalling);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckKeySecuritySe fail, ret = %" LOG_PUBLIC "d", ret)
-
         ret =  HksServiceImportKey(&processInfo, &keyAlias, paramSet, &key);
         HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceImportKey fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     HksSendResponse(context, ret, NULL);
-
-    DecrementSeCountByParamSet(isSeCalling);
 
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
@@ -864,7 +780,6 @@ void HksIpcServiceImportWrappedKey(const struct HksBlob *srcData, const uint8_t 
     struct HksBlob wrappedKeyData = { 0, NULL };
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     int32_t ret;
-    bool isSeCalling = false;
 
     do {
         ret  = HksImportWrappedKeyUnpack(srcData, &keyAlias, &wrappingKeyAlias, &paramSet, &wrappedKeyData);
@@ -876,16 +791,11 @@ void HksIpcServiceImportWrappedKey(const struct HksBlob *srcData, const uint8_t 
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = CheckKeySecuritySe(&processInfo, paramSet, &isSeCalling);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckKeySecuritySe fail, ret = %" LOG_PUBLIC "d", ret)
-
         ret =  HksServiceImportWrappedKey(&processInfo, &keyAlias, &wrappingKeyAlias, paramSet, &wrappedKeyData);
         HKS_IF_NOT_SUCC_LOGE(ret, "do import wrapped key fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     HksSendResponse(context, ret, NULL);
-
-    DecrementSeCountByParamSet(isSeCalling);
 
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
@@ -1449,7 +1359,6 @@ void HksIpcServiceUpdOrFin(const struct HksBlob *paramSetBlob, struct HksBlob *o
     const uint8_t *context, bool isUpdate)
 {
     int32_t ret;
-    bool isSeCalling = false;
     struct HksParamSet *inParamSet = NULL;
     struct HksParamSet *paramSet = NULL;
     struct HksBlob paramsBlob = { 0, NULL };
@@ -1475,11 +1384,6 @@ void HksIpcServiceUpdOrFin(const struct HksBlob *paramSetBlob, struct HksBlob *o
         ret = HksGetProcessInfoForIPC(inParamSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
-        if (IsSeHandle(&handle)) {
-            ret = CheckSeSessionCall(&processInfo, &isSeCalling);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckSeSessionCall fail, ret = %" LOG_PUBLIC "d", ret)
-        }
-
         ret = isUpdate ? HksServiceUpdate(&handle, &processInfo, inParamSet, &inData, outData) :
             HksServiceFinish(&handle, &processInfo, inParamSet, &inData, outData);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "%" LOG_PUBLIC "s fail, ret = %" LOG_PUBLIC "d",
@@ -1487,8 +1391,6 @@ void HksIpcServiceUpdOrFin(const struct HksBlob *paramSetBlob, struct HksBlob *o
     } while (0);
 
     HksSendResponse(context, ret, (ret == HKS_SUCCESS && outData->size > 0) ? outData : NULL);
-
-    DecrementSeCountByParamSet(isSeCalling);
 
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&inParamSet);
@@ -1510,7 +1412,6 @@ void HksIpcServiceAbort(const struct HksBlob *paramSetBlob, struct HksBlob *outD
 {
     (void)outData;
     int32_t ret;
-    bool isSeCalling = false;
     struct HksParamSet *inParamSet = NULL;
     struct HksParamSet *paramSet   = NULL;
     struct HksBlob handle          = { 0, NULL };
@@ -1539,18 +1440,11 @@ void HksIpcServiceAbort(const struct HksBlob *paramSetBlob, struct HksBlob *outD
         ret = HksGetProcessInfoForIPC(inParamSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
-        if (IsSeHandle(&handle)) {
-            ret = CheckSeSessionCall(&processInfo, &isSeCalling);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckSeSessionCall fail, ret = %" LOG_PUBLIC "d", ret)
-        }
-
         ret = HksServiceAbort(&handle, &processInfo, inParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceAbort fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     HksSendResponse(context, ret, NULL);
-
-    DecrementSeCountByParamSet(isSeCalling);
 
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&inParamSet);
@@ -1689,21 +1583,6 @@ void HksIpcWrapKey(const struct HksBlob *srcData, const uint8_t *context)
     HKS_FREE_BLOB(processInfo.userId);
 }
 
-static int32_t CheckWrappedKeySeVersion(const struct HksBlob *wrappedData, bool *isSeWrappedKey)
-{
-    HKS_IF_TRUE_LOGE_RETURN(wrappedData->size < sizeof(uint32_t), HKS_ERROR_BUFFER_TOO_SMALL,
-        "invalid wrapped key size: %" LOG_PUBLIC "u", wrappedData->size);
-
-    uint32_t version = *(uint32_t *)wrappedData->data;
-    if (version == HKS_WRAP_KEY_BY_HUK_VERSION_SE) {
-        *isSeWrappedKey = true;
-    } else if (version == HKS_WRAP_KEY_BY_HUK_VERSION_INDEPENDENT_SE) {
-        *isSeWrappedKey = true;
-    }
-
-    return HKS_SUCCESS;
-}
-
 void HksIpcUnwrapKey(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob keyAlias = { 0, NULL };
@@ -1711,7 +1590,6 @@ void HksIpcUnwrapKey(const struct HksBlob *srcData, const uint8_t *context)
     struct HksBlob wrappedKey = { 0, NULL };
     struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
     int32_t ret;
-    bool isSeCalling = false;
 
     do {
         ret = HksPluginCheck();
@@ -1726,22 +1604,11 @@ void HksIpcUnwrapKey(const struct HksBlob *srcData, const uint8_t *context)
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
 
-        bool isSeWrappedKey = false;
-        ret = CheckWrappedKeySeVersion(&wrappedKey, &isSeWrappedKey);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckWrappedKeySeVersion fail, ret = %" LOG_PUBLIC "d", ret)
-
-        if (isSeWrappedKey) {
-            ret = CheckSeSessionCall(&processInfo, &isSeCalling);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckSeSessionCall fail, ret = %" LOG_PUBLIC "d", ret)
-        }
-
         ret = HksServiceUnwrapKey(&processInfo, &keyAlias, paramSet, &wrappedKey);
         HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceUnwrapKey, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     HksSendResponse(context, ret, NULL);
-
-    DecrementSeCountByParamSet(isSeCalling);
 
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);

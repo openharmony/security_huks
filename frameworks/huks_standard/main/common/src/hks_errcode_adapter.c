@@ -915,7 +915,7 @@ static struct HksError g_errCodeTable[] = {
             .data = NULL
        }
     }, {
-        .innerErrCode = HKS_ERROR_SE_ALG_NOT_SUPPORT,
+        .innerErrCode = HKS_ERROR_SE_NOT_SUPPORTED,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED,
             .errorMsg = "the alg not supported in secure environment.",
@@ -924,8 +924,8 @@ static struct HksError g_errCodeTable[] = {
     }, {
         .innerErrCode = HKS_ERROR_SE_COUNT_EXCEED_LIMIT,
         .hksResult = {
-            .errorCode = HUKS_ERR_CODE_BUSY,
-            .errorMsg = "the se calling is too busy.",
+            .errorCode = HUKS_ERR_CODE_SESSION_LIMIT,
+            .errorMsg = "the se calling has reached the limit.",
             .data = NULL
         }
     }, {
@@ -947,6 +947,152 @@ static struct HksError g_errCodeTable[] = {
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
             .errorMsg = "Non-system applications are not allowed to manually pass in UID.",
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_NOT_FOUND,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_ITEM_NOT_EXIST,
+            .errorMsg = "se not found.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_MSIMATCH,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se mismatch.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_INVALID_ALGORITHM,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_CRYPTO_ALG_ARGUMENT,
+            .errorMsg = "invalid se algorithm.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_PARAM_NOT_EXIST,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se param not exist.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_CHECK_PURPOSE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_CRYPTO_ALG_ARGUMENT,
+            .errorMsg = "se check purpose fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_CHECK_DIGEST,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_CRYPTO_ALG_ARGUMENT,
+            .errorMsg = "se check digest fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_CHECK_MODE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_CRYPTO_ALG_ARGUMENT,
+            .errorMsg = "se check mode fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_CHECK_AUTH_TOKEN_VERSION,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se check auth token version fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_CHECK_AUTH_TOKEN_CHALLENGE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se check auth token challenge fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_CHECK_AUTH_TOKEN_USER_TYPE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se check auth token user type fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_GET_PURPOSE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se get purpose fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_GET_ALGORITHM,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se get algorithm fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_GET_KEY_ACCESS_GROUP,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se get key access group fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_GET_DEVELOPER_ID,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se get developer id fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_GET_AUTH_TOKEN,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se get auth token fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_GET_CHALLENGE_TYPE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se get challenge type fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_GET_AUTH_TIMEOUT,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se get auth timeout fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_GET_USER_AUTH_TYPE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se get user auth type fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_GET_KEY_AUTH_PURPOSE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se get key auth purpose fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_GET_USER_AUTH_ACCESS,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se get user auth access fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_GET_DIGEST,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se get digest fail.",
             .data = NULL
         }
     }
