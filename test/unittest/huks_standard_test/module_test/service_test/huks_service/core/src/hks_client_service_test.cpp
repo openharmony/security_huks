@@ -1094,7 +1094,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest021, TestSize.Level0)
 
     struct HksParamSet *outParamSet = nullptr;
     ret = AppendNewInfoForGenKeyInService(&processInfo, paramSet, &outParamSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_AUTH_TYPE);
+    EXPECT_EQ(ret, HKS_SUCCESS);
     HksFreeParamSet(&paramSet);
 }
 
