@@ -753,33 +753,37 @@ void GetSessionParams(const napi_env &env, const napi_value &funcResult, CryptoR
     }
 }
 
-void GetGetPropertyParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
+int32_t GetGetPropertyParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
     GetErrorInfoParams(env, funcResult, resultParams);
     napi_value nativeArray = nullptr;
     auto status = napi_create_array(env, &nativeArray);
-    HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(status != napi_ok, "create_array failed, status:%d", status);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_SUCCESS, "create_array failed, status:%d", status);
     status = napi_get_named_property(env, funcResult, "property", &nativeArray);
-    HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(nativeArray == nullptr || status != napi_ok,
+    HKS_EXT_IF_TRUE_LOGE_RETURN(nativeArray == nullptr || status != napi_ok, HKS_SUCCESS,
         "Convert js array object fail.status:%d", status);
 
     uint32_t length = 0;
     status = napi_get_array_length(env, nativeArray, &length);
-    HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(status != napi_ok, "Get nativeArray length fail.status:%d", status);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_SUCCESS, "Get nativeArray length fail.status:%d", status);
     std::vector<HksParam> paramVec {};
     for (uint32_t i = 0; i < length; ++i) {
         napi_value queryResult = nullptr;
         status = napi_get_element(env, nativeArray, i, &queryResult);
-        HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(queryResult == nullptr,
+        HKS_EXT_IF_TRUE_LOGE_RETURN(queryResult == nullptr, HKS_SUCCESS,
             "Get native queryResult fail.status:%d", status);
 
         HksParam param;
         status = GetHksParamsfromValue(env, queryResult, param);
-        HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(status != napi_ok, "Convert js param fail.status:%d", status);
+        HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_RETURN_VALUE_INCRECT,
+            "Convert js param fail.status:%d", status);
         paramVec.emplace_back(std::move(param));
     }
     CppParamSet cppParamSetTemp(paramVec);
+    int32_t ret = HksCheckParamSetTag(cppParamSetTemp.GetParamSet());
+    HKS_EXT_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_EXT_RETURN_VALUE_INCRECT, "HksCheckParamSetTag failed");
     resultParams.paramSet = std::move(cppParamSetTemp);
+    return HKS_SUCCESS;
 }
 
 int32_t ConvertFunctionResult(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
@@ -817,7 +821,7 @@ int32_t ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
             GetSessionParams(env, funcResult, resultParams);
             break;
         case CryptoResultParamType::SET_OR_GET_PROPERTY:
-            GetGetPropertyParams(env, funcResult, resultParams);
+            return GetGetPropertyParams(env, funcResult, resultParams);
             break;
         default:
             GetErrorInfoParams(env, funcResult, resultParams);
@@ -839,7 +843,7 @@ napi_value PromiseCallback(napi_env env, napi_callback_info info)
     auto *callbackInfo = static_cast<PromiseCallbackInfo *>(data);
     HKS_EXT_IF_TRUE_LOGE_RETURN(callbackInfo == nullptr, nullptr, "PromiseCallback, invalid callbackInfo");
     auto dataParam = callbackInfo->GetJsCallBackParam();
-    dataParam->hksErrorCode = ConvertFunctionResult(env, argv[ARGC_ZERO], *dataParam);
+    dataParam->errInfo->errVal = ConvertFunctionResult(env, argv[ARGC_ZERO], *dataParam);
 
     PromiseCallbackInfo::Destroy(callbackInfo);
     dataParam->callJsCon.notify_one();
