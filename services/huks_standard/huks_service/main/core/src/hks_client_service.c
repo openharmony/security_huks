@@ -1535,7 +1535,8 @@ static int32_t DcmGenerateCertChainInAttestKey(
 #endif
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "DcmGenerateCertChain fail, ret = %" LOG_PUBLIC "d.", ret)
 
-    (void)memset_s(certChainInfo->certChain->data, certChainInfo->certChainCapacity, 0, certChainInfo->certChainCapacity);
+    (void)memset_s(certChainInfo->certChain->data, certChainInfo->certChainCapacity, 0,
+        certChainInfo->certChainCapacity);
     certChainInfo->certChain->size = certChainInfo->certChainCapacity;
 #endif
     return ret;
