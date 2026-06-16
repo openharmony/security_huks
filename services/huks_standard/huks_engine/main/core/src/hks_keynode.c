@@ -313,6 +313,9 @@ static void DeleteFirstTimeOutBatchKeyNode(void)
         if (keyNode->batchOperationTimestamp >= curTime) {
             continue;
         }
+        if (keyNode->isInUse) {
+            continue;
+        }
         HKS_LOG_E("Batch operation timeout, delete keyNode!");
         DeleteKeyNodeFree(keyNode); // IAR iccarm can not compile `return DeleteKeyNodeFree(keyNode)`
         return; // IAR iccarm will report `a void function may not return a value`
@@ -335,6 +338,9 @@ static bool DeleteFirstKeyNodeForTokenId(uint32_t tokenId)
     struct HuksKeyNode *keyNode = NULL;
     HKS_DLIST_ITER(keyNode, &g_keyNodeList) {
         if (keyNode == NULL) {
+            continue;
+        }
+        if (keyNode->isInUse) {
             continue;
         }
         if (GetTokenIdFromParamSet(keyNode->runtimeParamSet) != tokenId) {
@@ -374,6 +380,9 @@ static bool DeleteFirstKeyNode(void)
 {
     struct HuksKeyNode *keyNode = NULL;
     HKS_DLIST_ITER(keyNode, &g_keyNodeList) {
+        if (keyNode->isInUse) {
+            continue;
+        }
         HKS_LOG_E("DeleteFirstKeyNode delete old not using key node!");
         DeleteKeyNodeFree(keyNode);
         return true;
