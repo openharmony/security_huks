@@ -326,13 +326,14 @@ static int32_t AesExcute(AesAsyncContext *asyncContext)
     if (ret != ERROR_SUCCESS) {
         CIPHER_LOG_E("AesCrypt fail, ret is %d", ret);
     }
-    asyncContext->textOut = static_cast<char *>(malloc(strlen(aes.data.text) + 1));
+    asyncContext->textOut = static_cast<char *>(malloc(aes.data.textLen + 1));
     if (asyncContext->textOut == nullptr) {
         DeinitAesCryptData(&aes);
         return ERROR_CODE_GENERAL;
     }
-    (void)memset_s(asyncContext->textOut, strlen(aes.data.text) + 1, 0, strlen(aes.data.text) + 1);
-    (void)memcpy_s(asyncContext->textOut, strlen(aes.data.text) + 1, aes.data.text, strlen(aes.data.text));
+    (void)memset_s(asyncContext->textOut, aes.data.textLen + 1, 0, aes.data.textLen + 1);
+    (void)memcpy_s(asyncContext->textOut, aes.data.textLen + 1, aes.data.text, aes.data.textLen);
+    asyncContext->textOut[aes.data.textLen] = '\0';
     DeinitAesCryptData(&aes);
 
     return ret;
