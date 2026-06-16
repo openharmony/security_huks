@@ -21,6 +21,7 @@
       "syscap": [
           "SystemCapability.Security.Huks.Extension",
           "SystemCapability.Security.Huks.Core",
+          "SystemCapability.Security.Cipher",
           "SystemCapability.Security.Huks.CryptoExtension = false"
       ],
       "features": [
