@@ -24,6 +24,7 @@
 #include "securec.h"
 
 #define  AES_BYTE_SIZE  256
+#define  IV_BASE64_MAX_LEN 64
 
 static int32_t PaddingPkcs5(char *data, size_t inSize)
 {
@@ -162,6 +163,10 @@ static int32_t InitAesCryptContext(const char *key, const AesIvMode *iv, AesCryp
 
     if (iv->ivBuf != NULL) {
         size_t ivBufLen = strlen((const char *)(uintptr_t)iv->ivBuf);
+        if (ivBufLen == 0 || ivBufLen > IV_BASE64_MAX_LEN) {
+            CIPHER_LOG_E("ivBuf base64 length:%zu invalid, max is %d.", ivBufLen, IV_BASE64_MAX_LEN);
+            return ERROR_CODE_GENERAL;
+        }
         char* ivBuf = MallocDecodeData(iv->ivBuf, &ivBufLen);
         if (ivBuf == NULL) {
             CIPHER_LOG_E("base64 decode failed.");
