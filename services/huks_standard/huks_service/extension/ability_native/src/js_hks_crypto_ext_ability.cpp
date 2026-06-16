@@ -843,6 +843,8 @@ napi_value PromiseCallback(napi_env env, napi_callback_info info)
     auto *callbackInfo = static_cast<PromiseCallbackInfo *>(data);
     HKS_EXT_IF_TRUE_LOGE_RETURN(callbackInfo == nullptr, nullptr, "PromiseCallback, invalid callbackInfo");
     auto dataParam = callbackInfo->GetJsCallBackParam();
+    HKS_EXT_IF_TRUE_LOGE_RETURN(dataParam == nullptr || dataParam->errInfo == nullptr, nullptr,
+        "PromiseCallback, invalid dataParam");
     dataParam->errInfo->errVal = ConvertFunctionResult(env, argv[ARGC_ZERO], *dataParam);
 
     PromiseCallbackInfo::Destroy(callbackInfo);
