@@ -190,7 +190,8 @@ static int32_t HksExtSendAsyncMessage(MessageParcel &data, const struct HksParam
 
     HksClearThreadExtErrMsg();
     if (errInfo != nullptr) {
-        HKS_IF_TRUE_EXCU(errInfo->errVal != 0, HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
+        HKS_IF_TRUE_EXCU(errInfo->errVal != 0 && strcmp(errInfo->errorDesc, HKS_DEFAULT_ERROR_DESC) != 0,
+            HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
         HksFreeExternalErrorInfo(errInfo);
     }
     return HKS_SUCCESS;

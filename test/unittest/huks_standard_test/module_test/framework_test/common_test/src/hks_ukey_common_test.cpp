@@ -85,36 +85,50 @@ HWTEST_F(HksUkeyCommonTest, HksUkeyCommonTest001, TestSize.Level0)
 
 /**
  * @tc.name: HksUkeyCommonTest.HksUkeyCommonTest002
- * @tc.desc: tdd HksGetUkeyGlobalErrVal, HksGetUkeyGlobalErrorDesc, HksClearUkeyGlobalInfo (lines 63-103)
+ * @tc.desc: tdd HksSetUkeyGlobalInfo, HksGetUkeyGlobalInfo, HksClearUkeyGlobalInfo
  * @tc.type: FUNC
  */
 HWTEST_F(HksUkeyCommonTest, HksUkeyCommonTest002, TestSize.Level0)
 {
     HKS_LOG_I("enter HksUkeyCommonTest002");
 
-    /* set and get */
+    int32_t errVal = 0;
+    char buf[256] = {0};
+
+    /* set with desc and get */
     HksSetUkeyGlobalInfo(-100, "test error desc");
-    EXPECT_EQ(HksGetUkeyGlobalErrVal(), -100);
+    HksGetUkeyGlobalInfo(&errVal, buf, sizeof(buf));
+    EXPECT_EQ(errVal, -100);
+    EXPECT_STREQ(buf, "CryptoExtensionError: test error desc");
 
-    char buf[64] = {0};
-    HksGetUkeyGlobalErrorDesc(buf, sizeof(buf));
-    EXPECT_STREQ(buf, "test error desc");
+    /* set with null desc -> only prefix */
+    HksSetUkeyGlobalInfo(-200, NULL);
+    HksGetUkeyGlobalInfo(&errVal, buf, sizeof(buf));
+    EXPECT_EQ(errVal, 0);
+    EXPECT_STREQ(buf, "CryptoExtensionError: ");
 
-    /* null/zero buf -> early return, no crash */
-    HksGetUkeyGlobalErrorDesc(NULL, 0);
-    HksGetUkeyGlobalErrorDesc(buf, 0);
+    /* set with empty desc -> only prefix */
+    HksSetUkeyGlobalInfo(-300, "");
+    HksGetUkeyGlobalInfo(&errVal, buf, sizeof(buf));
+    EXPECT_EQ(errVal, 0);
+    EXPECT_STREQ(buf, "CryptoExtensionError: ");
 
-    /* bufLen smaller than desc length -> truncated copy */
-    char smallBuf[4] = {0};
-    HksGetUkeyGlobalErrorDesc(smallBuf, sizeof(smallBuf));
-    EXPECT_EQ(strlen(smallBuf), 3u);
+    /* null params -> early return, no crash */
+    HksGetUkeyGlobalInfo(NULL, buf, sizeof(buf));
+    HksGetUkeyGlobalInfo(&errVal, NULL, sizeof(buf));
+    HksGetUkeyGlobalInfo(&errVal, buf, 0);
+
+    /* bufLen smaller than prefix -> empty string */
+    char smallBuf[10] = {0};
+    HksSetUkeyGlobalInfo(-400, "long error description");
+    HksGetUkeyGlobalInfo(&errVal, smallBuf, sizeof(smallBuf));
+    EXPECT_EQ(strlen(smallBuf), 9u);
 
     /* clear */
     HksClearUkeyGlobalInfo();
-    EXPECT_EQ(HksGetUkeyGlobalErrVal(), 0);
-    char clearBuf[64] = {0};
-    HksGetUkeyGlobalErrorDesc(clearBuf, sizeof(clearBuf));
-    EXPECT_STREQ(clearBuf, "");
+    HksGetUkeyGlobalInfo(&errVal, buf, sizeof(buf));
+    EXPECT_EQ(errVal, 0);
+    EXPECT_STREQ(buf, "");
 }
 
 /**

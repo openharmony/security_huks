@@ -22,8 +22,8 @@ extern "C" {
 #endif
 
 #define HKS_UKEY_ERROR_DESC_MAX_LEN 256
-#define HKS_UKEY_ERROR_PREFIX "CryptoExtensionError："
-#define HKS_UKEY_ERROR_PREFIX_LEN 20
+#define HKS_UKEY_ERROR_PREFIX "CryptoExtensionError: "
+#define HKS_UKEY_ERROR_PREFIX_LEN 22
 #define HKS_UKEY_ERROR_BUFFER_SIZE (HKS_UKEY_ERROR_DESC_MAX_LEN + HKS_UKEY_ERROR_PREFIX_LEN + 1)
 
 extern struct HksUkeyGlobalInfo g_ukeyGlobalInfo;

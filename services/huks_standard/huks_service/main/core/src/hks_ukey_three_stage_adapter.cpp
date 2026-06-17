@@ -52,10 +52,10 @@ int32_t HksServiceOnUkeyGenerateKey(const struct HksProcessInfo *processInfo,
     HKS_IF_TRUE_RETURN(ret == HKS_SUCCESS, HKS_SUCCESS)
     HKS_LOG_E("OnGenerateKey fail. ret: %" LOG_PUBLIC "d", ret);
     HksClearThreadExtErrMsg();
-    if (processAndError.errInfo != nullptr) {
-        HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
-        HksFreeExternalErrorInfo(processAndError.errInfo);
-    }
+    HKS_IF_TRUE_EXCU(strcmp(processAndError.errInfo->errorDesc, HKS_DEFAULT_ERROR_DESC) != 0 &&
+        processAndError.errInfo != nullptr,
+        HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc));
+    HksFreeExternalErrorInfo(processAndError.errInfo);
 
     return ret;
 }
@@ -80,10 +80,10 @@ int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, co
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("OnInitSession fail. ret: %" LOG_PUBLIC "d", ret);
         HksClearThreadExtErrMsg();
-        if (processAndError.errInfo != nullptr) {
-            HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
-            HksFreeExternalErrorInfo(processAndError.errInfo);
-        }
+        HKS_IF_TRUE_EXCU(strcmp(processAndError.errInfo->errorDesc, HKS_DEFAULT_ERROR_DESC) != 0 &&
+            processAndError.errInfo != nullptr,
+            HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc));
+        HksFreeExternalErrorInfo(processAndError.errInfo);
         return ret;
     }
 
@@ -128,10 +128,10 @@ int32_t HksServiceOnUkeyUpdateSession(const struct HksProcessInfo *processInfo, 
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("OnUpdateSession fail. ret: %" LOG_PUBLIC "d", ret);
         HksClearThreadExtErrMsg();
-        if (processAndError.errInfo != nullptr) {
-            HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
-            HksFreeExternalErrorInfo(processAndError.errInfo);
-        }
+        HKS_IF_TRUE_EXCU(strcmp(processAndError.errInfo->errorDesc, HKS_DEFAULT_ERROR_DESC) != 0 &&
+            processAndError.errInfo != nullptr,
+            HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc));
+        HksFreeExternalErrorInfo(processAndError.errInfo);
         return ret;
     }
 
@@ -177,10 +177,10 @@ int32_t HksServiceOnUkeyFinishSession(const struct HksProcessInfo *processInfo, 
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("OnFinishSession fail. ret: %" LOG_PUBLIC "d", ret);
         HksClearThreadExtErrMsg();
-        if (processAndError.errInfo != nullptr) {
-            HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
-            HksFreeExternalErrorInfo(processAndError.errInfo);
-        }
+        HKS_IF_TRUE_EXCU(strcmp(processAndError.errInfo->errorDesc, HKS_DEFAULT_ERROR_DESC) != 0 &&
+            processAndError.errInfo != nullptr,
+            HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc));
+        HksFreeExternalErrorInfo(processAndError.errInfo);
         return ret;
     }
 
@@ -219,10 +219,10 @@ int32_t HksServiceOnUkeyAbortSession(const struct HksProcessInfo *processInfo, c
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("OnAbortSession fail. ret: %" LOG_PUBLIC "d", ret);
         HksClearThreadExtErrMsg();
-        if (processAndError.errInfo != nullptr) {
-            HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
-            HksFreeExternalErrorInfo(processAndError.errInfo);
-        }
+        HKS_IF_TRUE_EXCU(strcmp(processAndError.errInfo->errorDesc, HKS_DEFAULT_ERROR_DESC) != 0 &&
+            processAndError.errInfo != nullptr,
+            HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc));
+        HksFreeExternalErrorInfo(processAndError.errInfo);
         return ret;
     }
     ReportUKeySessionEvent(HKS_EVENT_UKEY_ABORT_SESSION, ret, handle, processInfo, paramSet);
@@ -260,11 +260,10 @@ int32_t HksServiceOnUkeyImportWrappedKey(const struct HksProcessInfo *processInf
 
     HKS_LOG_E("OnImportWrappedKey fail. ret: %" LOG_PUBLIC "d", ret);
     HksClearThreadExtErrMsg();
-    if (processAndError.errInfo != nullptr) {
-        HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
-        HksFreeExternalErrorInfo(processAndError.errInfo);
-    }
-    
+    HKS_IF_TRUE_EXCU(strcmp(processAndError.errInfo->errorDesc, HKS_DEFAULT_ERROR_DESC) != 0 &&
+        processAndError.errInfo != nullptr,
+        HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc));
+    HksFreeExternalErrorInfo(processAndError.errInfo);
     return ret;
 }
 
@@ -291,10 +290,10 @@ int32_t HksServiceOnUkeyExportPublicKey(const struct HksProcessInfo *processInfo
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("OnExportPublicKey fail. ret: %" LOG_PUBLIC "d", ret);
         HksClearThreadExtErrMsg();
-        if (processAndError.errInfo != nullptr) {
-            HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
-            HksFreeExternalErrorInfo(processAndError.errInfo);
-        }
+        HKS_IF_TRUE_EXCU(strcmp(processAndError.errInfo->errorDesc, HKS_DEFAULT_ERROR_DESC) != 0 &&
+            processAndError.errInfo != nullptr,
+            HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc));
+        HksFreeExternalErrorInfo(processAndError.errInfo);
         return ret;
     }
 

@@ -18,6 +18,7 @@
 #include <stdint.h>
 
 #define MAX_EXT_ERROR_DESC_LEN 256
+#define HKS_DEFAULT_ERROR_DESC "HUKS DEFAULT ERROR"
 
 #ifdef __cplusplus
 extern "C" {

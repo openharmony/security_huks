@@ -114,7 +114,8 @@ static void UpdateUkeyGlobalErrorInfo(int32_t ret)
     
     const struct HksExternalErrorInfo *threadError = HksGetThreadExtErrMsg();
     if (threadError == NULL || threadError->errVal == HKS_ERROR_EXT_CALL_JS_TIME_OUT ||
-        threadError->errVal == HKS_ERROR_EXT_JS_METHOD_ERROR) {
+        threadError->errVal == HKS_ERROR_EXT_JS_METHOD_ERROR ||
+        threadError->errVal == HKS_ERROR_EXT_PARSE_FUNC_FAILED) {
         HKS_CLEAR_UKEY_GLOBAL_INFO_C();
         HksClearThreadExtErrMsg();
         return;
