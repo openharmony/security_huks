@@ -622,57 +622,69 @@ void GetErrorInfoParams(const napi_env &env, const napi_value &funcResult, Crypt
     HKS_EXT_IF_TRUE_LOGE(resultParams.errInfo == nullptr, "GetErrorInfoParams::CreateExternalErrorInfo failed");
 }
 
-void GetOpenRemoteHandleParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
+int32_t GetOpenRemoteHandleParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
     GetErrorInfoParams(env, funcResult, resultParams);
     napi_value napiHandle = nullptr;
     auto status = napi_get_named_property(env, funcResult, "handle", &napiHandle);
-    HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(status != napi_ok || napiHandle == nullptr,
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok || napiHandle == nullptr,
+        HKS_ERROR_EXT_NAPI_FAILED,
         "GetOpenRemoteHandleParams::napi_get_named_property failed, status:%d", status);
     auto result = GetStringValue(env, napiHandle, resultParams.handle);
-    HKS_EXT_IF_TRUE_LOGE(result != HKS_SUCCESS,
+    HKS_EXT_IF_TRUE_LOGE_RETURN(result != HKS_SUCCESS, HKS_ERROR_EXT_RETURN_VALUE_INCRECT,
         "GetOpenRemoteHandleParams::Convert js napiHandle fail.result:%d", result);
+    return HKS_SUCCESS;
 }
 
-void GetResourceIdParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
+int32_t GetResourceIdParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
     GetErrorInfoParams(env, funcResult, resultParams);
     napi_value napiHandle = nullptr;
     auto status = napi_get_named_property(env, funcResult, "resourceId", &napiHandle);
-    HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(status != napi_ok || napiHandle == nullptr,
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok || napiHandle == nullptr,
+        HKS_ERROR_EXT_NAPI_FAILED,
         "GetResourceIdParams::napi_get_named_property failed, status:%d", status);
     auto result = GetStringValue(env, napiHandle, resultParams.handle);
-    HKS_EXT_IF_TRUE_LOGE(result != HKS_SUCCESS, "GetResourceIdParams::Convert js napiHandle fail.result:%d", result);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(result != HKS_SUCCESS, HKS_ERROR_EXT_RETURN_VALUE_INCRECT,
+        "GetResourceIdParams::Convert js napiHandle fail.result:%d", result);
+    return HKS_SUCCESS;
 }
 
-void GetAuthUkeyPinParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
+int32_t GetAuthUkeyPinParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
     GetErrorInfoParams(env, funcResult, resultParams);
     napi_value napiAuthState = nullptr;
     auto status = napi_get_named_property(env, funcResult, "authState", &napiAuthState);
     if (status == napi_ok && napiAuthState != nullptr) {
         status = napi_get_value_int32(env, napiAuthState, &resultParams.authState);
-        HKS_EXT_IF_TRUE_LOGE(status != napi_ok, "Convert js value authState failed, status:%d", status);
+        HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_NAPI_FAILED,
+            "Convert js value authState failed, status:%d", status);
     } else {
         LOGE("napi_get_named_property failed, status:%d", status);
     }
     napi_value napiRetryCnt = nullptr;
     status = napi_get_named_property(env, funcResult, "retryCount", &napiRetryCnt);
-    HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(status != napi_ok || napiRetryCnt == nullptr,
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok || napiRetryCnt == nullptr,
+        HKS_ERROR_EXT_NAPI_FAILED,
         "napi_get_named_property failed, status:%d", status);
     status = napi_get_value_uint32(env, napiRetryCnt, &resultParams.retryCnt);
-    HKS_EXT_IF_TRUE_LOGE(status != napi_ok, "Convert js value retryCnt failed.status:%d", status);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_NAPI_FAILED,
+        "Convert js value retryCnt failed.status:%d", status);
+    return HKS_SUCCESS;
 }
 
-void GetUkeyPinAuthStateParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
+int32_t GetUkeyPinAuthStateParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
     GetErrorInfoParams(env, funcResult, resultParams);
     napi_value napiAuthState = nullptr;
     auto status = napi_get_named_property(env, funcResult, "authState", &napiAuthState);
-    HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(status != napi_ok || napiAuthState == nullptr,
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok || napiAuthState == nullptr,
+        HKS_ERROR_EXT_NAPI_FAILED,
         "napi_get_named_property failed, status:%d", status);
     status = napi_get_value_int32(env, napiAuthState, &resultParams.authState);
-    HKS_EXT_IF_TRUE_LOGE(status != napi_ok, "napi_get_value_int32 failed.status:%d", status);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_NAPI_FAILED,
+        "napi_get_value_int32 failed.status:%d", status);
+    return HKS_SUCCESS;
 }
 
 void HksCertInfoToString(std::vector<HksCertInfo> &certInfoVec, std::string &jsonStr)
@@ -700,39 +712,45 @@ void HksCertInfoToString(std::vector<HksCertInfo> &certInfoVec, std::string &jso
     HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(jsonStr.empty(), "jsonStr is empty");
 }
 
-void GetExportCertificateParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
+int32_t GetExportCertificateParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
     GetErrorInfoParams(env, funcResult, resultParams);
     napi_value nativeArray = nullptr;
     auto status = napi_create_array(env, &nativeArray);
-    HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(status != napi_ok, "create_array failed, status %d", status);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_NAPI_FAILED,
+        "create_array failed, status %d", status);
 
     status = napi_get_named_property(env, funcResult, "certs", &nativeArray);
-    HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(nativeArray == nullptr || status != napi_ok,
+    HKS_EXT_IF_TRUE_LOGE_RETURN(nativeArray == nullptr || status != napi_ok,
+        HKS_ERROR_EXT_NAPI_FAILED,
         "napi_get_named_property failed. status:%d", status);
 
     uint32_t length = 0;
     status = napi_get_array_length(env, nativeArray, &length);
-    HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(status != napi_ok, "Get nativeArray length fail. status:%d", status);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_NAPI_FAILED,
+        "Get nativeArray length fail. status:%d", status);
     for (uint32_t i = 0; i < length; i++) {
         napi_value queryResult = nullptr;
         status = napi_get_element(env, nativeArray, i, &queryResult);
-        HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(queryResult == nullptr,
+        HKS_EXT_IF_TRUE_LOGE_RETURN(queryResult == nullptr, HKS_ERROR_EXT_NAPI_FAILED,
             "Get native queryResult fail. status:%d", status);
 
         HksCertInfo certInfo;
         auto result = GetHksCertInfoValue(env, queryResult, certInfo);
-        HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(result != napi_ok, "Convert js certInfo fail. result:%d", result);
+        HKS_EXT_IF_TRUE_LOGE_RETURN(result != napi_ok, HKS_ERROR_EXT_RETURN_VALUE_INCRECT,
+            "Convert js certInfo fail. result:%d", result);
         resultParams.certs.emplace_back(std::move(certInfo));
     }
+    return HKS_SUCCESS;
 }
 
-void GetSessionParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
+int32_t GetSessionParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
     GetErrorInfoParams(env, funcResult, resultParams);
     napi_value napiOutData = nullptr;
     auto status = napi_get_named_property(env, funcResult, "outData", &napiOutData);
-    HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(napiOutData == nullptr || status != napi_ok,
+    HKS_EXT_IF_TRUE_LOGE_RETURN(napiOutData == nullptr || status != napi_ok,
+        HKS_ERROR_EXT_NAPI_FAILED,
         "Convert js array object fail, status:%d", status);
 
     napi_typedarray_type type;
@@ -741,7 +759,8 @@ void GetSessionParams(const napi_env &env, const napi_value &funcResult, CryptoR
     size_t length;
     void *data = nullptr;
     status = napi_get_typedarray_info(env, napiOutData, &type, &length, &data, &nativeArray, &byte_offset);
-    HKS_EXT_IF_TRUE_LOGE_RETURN_VOID(status != napi_ok, "get typedarray info failed, status:%d", status);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_NAPI_FAILED,
+        "get typedarray info failed, status:%d", status);
 
     if (type == napi_uint8_array) {
         uint8_t *data_bytes = (uint8_t *)(data);
@@ -751,6 +770,7 @@ void GetSessionParams(const napi_env &env, const napi_value &funcResult, CryptoR
             resultParams.outData.push_back(*((uint8_t *)(data_bytes) + i));
         }
     }
+    return HKS_SUCCESS;
 }
 
 int32_t GetGetPropertyParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
@@ -758,19 +778,21 @@ int32_t GetGetPropertyParams(const napi_env &env, const napi_value &funcResult, 
     GetErrorInfoParams(env, funcResult, resultParams);
     napi_value nativeArray = nullptr;
     auto status = napi_create_array(env, &nativeArray);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_SUCCESS, "create_array failed, status:%d", status);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_NAPI_FAILED,
+        "create_array failed, status:%d", status);
     status = napi_get_named_property(env, funcResult, "property", &nativeArray);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(nativeArray == nullptr || status != napi_ok, HKS_SUCCESS,
+    HKS_EXT_IF_TRUE_LOGE_RETURN(nativeArray == nullptr || status != napi_ok, HKS_ERROR_EXT_NAPI_FAILED,
         "Convert js array object fail.status:%d", status);
 
     uint32_t length = 0;
     status = napi_get_array_length(env, nativeArray, &length);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_SUCCESS, "Get nativeArray length fail.status:%d", status);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_NAPI_FAILED,
+        "Get nativeArray length fail.status:%d", status);
     std::vector<HksParam> paramVec {};
     for (uint32_t i = 0; i < length; ++i) {
         napi_value queryResult = nullptr;
         status = napi_get_element(env, nativeArray, i, &queryResult);
-        HKS_EXT_IF_TRUE_LOGE_RETURN(queryResult == nullptr, HKS_SUCCESS,
+        HKS_EXT_IF_TRUE_LOGE_RETURN(queryResult == nullptr, HKS_ERROR_EXT_NAPI_FAILED,
             "Get native queryResult fail.status:%d", status);
 
         HksParam param;
@@ -800,29 +822,22 @@ int32_t ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
     switch (resultParams.paramType) {
         case CryptoResultParamType::OPEN_REMOTE_HANDLE:
         case CryptoResultParamType::INIT_SESSION:
-            GetOpenRemoteHandleParams(env, funcResult, resultParams);
-            break;
+            return GetOpenRemoteHandleParams(env, funcResult, resultParams);
         case CryptoResultParamType::GET_RESOURCE_ID:
-            GetResourceIdParams(env, funcResult, resultParams);
-            break;
+            return GetResourceIdParams(env, funcResult, resultParams);
         case CryptoResultParamType::AUTH_UKEY_PIN:
-            GetAuthUkeyPinParams(env, funcResult, resultParams);
-            break;
+            return GetAuthUkeyPinParams(env, funcResult, resultParams);
         case CryptoResultParamType::GET_UKEY_PIN_AUTH_STATE:
-            GetUkeyPinAuthStateParams(env, funcResult, resultParams);
-            break;
+            return GetUkeyPinAuthStateParams(env, funcResult, resultParams);
         case CryptoResultParamType::EXPORT_CERTIFICATE:
         case CryptoResultParamType::EXPORT_PROVIDER_CERTIFICATES:
-            GetExportCertificateParams(env, funcResult, resultParams);
-            break;
+            return GetExportCertificateParams(env, funcResult, resultParams);
         case CryptoResultParamType::UPDATE_SESSION:
         case CryptoResultParamType::FINISH_SESSION:
         case CryptoResultParamType::EXPORT_PUBLIC_KEY:
-            GetSessionParams(env, funcResult, resultParams);
-            break;
+            return GetSessionParams(env, funcResult, resultParams);
         case CryptoResultParamType::SET_OR_GET_PROPERTY:
             return GetGetPropertyParams(env, funcResult, resultParams);
-            break;
         default:
             GetErrorInfoParams(env, funcResult, resultParams);
             break;
