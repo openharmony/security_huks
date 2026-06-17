@@ -549,11 +549,9 @@ static int32_t CheckSignVerifyParams(const struct HuksKeyNode *keyNode, const st
 
 static int32_t HksFillUsageSpecWithContext(const struct HksParamSet *paramset, struct HksUsageSpec *usageSpec)
 {
-    struct HksBlob context = { 0, NULL };
     struct HksParam *ctxParam = NULL;
     int32_t ret = HksGetParam(paramset, HKS_TAG_CONTEXT, &ctxParam);
     if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
-        usageSpec->algParam = (void *)&context;
         return HKS_SUCCESS;
     } else if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get context from keyNode runtimeParamSet failed, ret = %d", ret);
@@ -580,6 +578,9 @@ static int32_t CoreSignVerify(const struct HuksKeyNode *keyNode, const struct Hk
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "SignVerify get raw key failed!")
 
     struct HksUsageSpec usageSpec;
+    struct HksBlob context = { 0, NULL };
+    usageSpec.algParam = (void *)&context;
+
     (void)memset_s(&usageSpec, sizeof(struct HksUsageSpec), 0, sizeof(struct HksUsageSpec));
     HksFillUsageSpec(keyNode->runtimeParamSet, &usageSpec);
     SetRsaPssSaltLenType(keyNode->runtimeParamSet, &usageSpec);
