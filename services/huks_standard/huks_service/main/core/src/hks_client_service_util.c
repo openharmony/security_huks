@@ -644,7 +644,7 @@ int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo
             HKS_LOG_I("authAccessType is always vaild, CheckIfUserIamSupportCurType pass.");
             ret = BuildUserAuthParamSet(paramSet, &userAuthParamSet);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Build UserAuthParamSet failed!")
-        } else { 
+        } else {
             HKS_IF_TRUE_LOGE_RETURN(HksCheckIsAllowedWrap(paramSet), HKS_ERROR_KEY_NOT_ALLOW_WRAP,
                 "key with access control isn't allowed wrap!")
             
