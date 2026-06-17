@@ -589,30 +589,6 @@ static int32_t CheckIfUserIamSupportCurType(int32_t userId, uint32_t userAuthTyp
     return HKS_SUCCESS;
 }
 
-static int32_t CheckAndAppendUserAuthInfo(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
-    uint32_t userAuthType, uint32_t authAccessType, struct HksParamSet **userAuthParamSet)
-{
-    HKS_IF_TRUE_LOGE_RETURN(HksCheckIsAllowedWrap(paramSet), HKS_ERROR_KEY_NOT_ALLOW_WRAP,
-        "key with access control isn't allowed wrap!")
-
-    int32_t ret = HKS_SUCCESS;
-    void *data = HksLockUserIdm();
-    HKS_IF_NULL_LOGE_RETURN(data, HKS_ERROR_SESSION_REACHED_LIMIT, "HksLockUserIdm fail")
-    do {
-        ret = CheckIfUserIamSupportCurType(processInfo->userIdInt, userAuthType); // callback
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
-                "UserIAM do not support current user auth or not enrolled cur auth info")
-
-        // callback
-        ret = AppendUserAuthInfo(paramSet, processInfo->userIdInt, authAccessType, userAuthParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append secure access info failed!")
-    } while (false);
-    HksUnlockUserIdm(data);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CheckIfUserIamSupportCurType or AppendUserAuthInfo fail")
-
-    return HKS_SUCCESS;
-}
-
 // callback
 int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
@@ -647,9 +623,9 @@ int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo
         } else {
             HKS_IF_TRUE_LOGE_RETURN(HksCheckIsAllowedWrap(paramSet), HKS_ERROR_KEY_NOT_ALLOW_WRAP,
                 "key with access control isn't allowed wrap!")
-            
+
             HKS_IF_TRUE_LOGE_RETURN((userAuthType == 0 && authAccessType == HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL),
-                HKS_ERROR_INVALID_AUTH_TYPE, "invalid user auth type")
+                HKS_ERROR_NOT_SUPPORTED, "invalid user auth type for new bio enroll!")
 
             void *data = HksLockUserIdm();
             HKS_IF_NULL_LOGE_RETURN(data, HKS_ERROR_SESSION_REACHED_LIMIT, "HksLockUserIdm fail")
@@ -670,7 +646,7 @@ int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo
         HksFreeParamSet(&userAuthParamSet);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
             "append process info and default strategy failed, ret = %" LOG_PUBLIC "d", ret)
-        
+
         *outParamSet = newInfoParamSet;
         return HKS_SUCCESS;
     }
