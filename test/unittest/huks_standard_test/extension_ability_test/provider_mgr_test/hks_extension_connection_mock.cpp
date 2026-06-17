@@ -39,13 +39,16 @@ public:
         if (index.find("HksSessionMgrTest003") != std::string::npos) {
             handle = "HksSessionMgrTest003";
             errorInfo.errVal = 0;
+            errorInfo.hasErrorInfo = false;
             return 0;
         }
         if (index.find("SessionMgrFullTest") != std::string::npos) {
             handle = "SessionMgrFullTest";
             errorInfo.errVal = 0;
+            errorInfo.hasErrorInfo = false;
             return 0;
         }
+        errorInfo.hasErrorInfo = false;
         return -1;
     };
 
@@ -56,8 +59,10 @@ public:
     {
         if (handle == "HksSessionMgrTest003" || handle == "SessionMgrFullTest") {
             errorInfo.errVal = 0;
+            errorInfo.hasErrorInfo = false;
             return 0;
         }
+        errorInfo.hasErrorInfo = false;
         return -1;
     };
 
@@ -71,8 +76,10 @@ public:
         if(handle == "HksSessionMgrTest003") {
             authState = 1;
             errorInfo.errVal = 0;
+            errorInfo.hasErrorInfo = false;
             return 0;
         }
+        errorInfo.hasErrorInfo = false;
         return 0;
     };
 
@@ -80,32 +87,32 @@ public:
         const std::string& handle,
         const CppParamSet& params,
         int32_t& state,
-        HksExternalErrorInfoIdl& errorInfo) { return -1; };
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.hasErrorInfo = false; return -1; };
 
     ErrCode Sign(
         const std::string& handle,
         const CppParamSet& params,
         const std::vector<uint8_t>& inData,
         std::vector<uint8_t>& outData,
-        HksExternalErrorInfoIdl& errorInfo) { return -1; };
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.hasErrorInfo = false; return -1; };
 
     ErrCode Verify(
         const std::string& handle,
         const CppParamSet& params,
         const std::vector<uint8_t>& plainText,
         const std::vector<uint8_t>& signature,
-        HksExternalErrorInfoIdl& errorInfo) { return -1; };
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.hasErrorInfo = false; return -1; };
 
     ErrCode ExportCertificate(
         const std::string& index,
         const CppParamSet& params,
         std::string& certJsonArr,
-        HksExternalErrorInfoIdl& errorInfo) { return -1; };
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.hasErrorInfo = false; return -1; };
 
     ErrCode ExportProviderCertificates(
         const CppParamSet& params,
         std::string& certJsonArr,
-        HksExternalErrorInfoIdl& errorInfo) { return -1; };
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.hasErrorInfo = false; return -1; };
 
     ErrCode InitSession(
         const std::string& index,
@@ -116,8 +123,10 @@ public:
         if (index == "HksSessionMgrTest003" || index == "SessionMgrFullTest") {
             handle = index;
             errorInfo.errVal = 0;
+            errorInfo.hasErrorInfo = false;
             return 0;
         }
+        errorInfo.hasErrorInfo = false;
         return -1;
     };
 
@@ -130,8 +139,10 @@ public:
     {
         if (handle == "HksSessionMgrTest003" || handle == "SessionMgrFullTest") {
             errorInfo.errVal = 0;
+            errorInfo.hasErrorInfo = false;
             return 0;
         }
+        errorInfo.hasErrorInfo = false;
         return -1;
     };
 
@@ -144,8 +155,10 @@ public:
     {
         if (handle == "HksSessionMgrTest003" || handle == "SessionMgrFullTest") {
             errorInfo.errVal = 0;
+            errorInfo.hasErrorInfo = false;
             return 0;
         }
+        errorInfo.hasErrorInfo = false;
         return -1;
     };
 
@@ -154,12 +167,12 @@ public:
         const std::string& handle,
         const std::string& propertyId,
         CppParamSet& params,
-        HksExternalErrorInfoIdl& errorInfo) { return -1; };
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.hasErrorInfo = false; return -1; };
     
     ErrCode GetResourceId(
         const CppParamSet& params,
         std::string& resourceId,
-        HksExternalErrorInfoIdl& errorInfo) { return -1; };
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.hasErrorInfo = false; return -1; };
     
     ErrCode ClearUkeyPinAuthState(
         const std::string& handle,
@@ -168,8 +181,10 @@ public:
     {
         if (handle == "HksSessionMgrTest003" || handle == "SessionMgrFullTest") {
             errorInfo.errVal = 0;
+            errorInfo.hasErrorInfo = false;
             return 0;
         }
+        errorInfo.hasErrorInfo = false;
         return -1;
     };
     
@@ -178,24 +193,24 @@ public:
         const std::string& wrappingKeyIndex,
         const CppParamSet& params,
         const std::vector<uint8_t>& wrappedData,
-        HksExternalErrorInfoIdl& errorInfo) { return -1; };
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.hasErrorInfo = false; return -1; };
 
     ErrCode ExportPublicKey(
         const std::string& index,
         const CppParamSet& params,
         std::vector<uint8_t>& outData,
-        HksExternalErrorInfoIdl& errorInfo) { return -1; };
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.hasErrorInfo = false; return -1; };
     
     ErrCode ImportCertificate(
         const std::string& index,
         const HksExtCertInfoIdl& certInfo,
         const CppParamSet& params,
-        HksExternalErrorInfoIdl& errorInfo) { return -1; };
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.hasErrorInfo = false; return -1; };
 
     ErrCode GenerateKey(
         const std::string& index,
         const CppParamSet& params,
-        HksExternalErrorInfoIdl& errorInfo) { return -1; };
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.hasErrorInfo = false; return -1; };
 };
 
 void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementName &element,

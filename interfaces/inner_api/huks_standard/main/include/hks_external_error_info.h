@@ -16,6 +16,7 @@
 #define HKS_EXTERNAL_ERROR_INFO_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #define MAX_EXT_ERROR_DESC_LEN 256
 #define HKS_DEFAULT_ERROR_DESC "HUKS DEFAULT ERROR"
@@ -32,7 +33,7 @@ struct HksExternalErrorInfo* HksGetAndClearThreadExtErrMsg(void);
 
 void HksClearThreadExtErrMsg(void);
 
-struct HksExternalErrorInfo* HksCreateExternalErrorInfo(int32_t errVal, const char *errorDesc);
+struct HksExternalErrorInfo* HksCreateExternalErrorInfoWithFlag(int32_t errVal, const char *errorDesc, bool hasErrorInfo);
 
 void HksFreeExternalErrorInfo(struct HksExternalErrorInfo *errInfo);
 

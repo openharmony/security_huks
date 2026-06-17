@@ -169,11 +169,12 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &process
     HKS_IF_NULL_RETURN(proxy, ret)
     
     std::string handle;
-    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, HKS_DEFAULT_ERROR_DESC};
+    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, "", false};
     auto ipccode = proxy->OpenRemoteHandle(newIndex, newParamSet, handle, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     HKS_IF_TRUE_EXCU(errorInfo.errVal != EXTENSION_SUCCESS && errInfo != nullptr,
-        *errInfo = HksCreateExternalErrorInfo(errorInfo.errVal, errorInfo.errorDesc.c_str()));
+        *errInfo = HksCreateExternalErrorInfoWithFlag(errorInfo.errVal,
+            errorInfo.errorDesc.c_str(), errorInfo.hasErrorInfo));
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_openResourceErrCodeMapping);
     ClearMapByHandle(ret, handle);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Create remote handle failed: %" LOG_PUBLIC "d", ret)
@@ -208,11 +209,12 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, HKS_SUCCESS)
 
-    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, HKS_DEFAULT_ERROR_DESC};
+    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, "", false};
     auto ipccode = proxy->CloseRemoteHandle(handle, newParamSet, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     HKS_IF_TRUE_EXCU(errorInfo.errVal != EXTENSION_SUCCESS && errInfo != nullptr,
-        *errInfo = HksCreateExternalErrorInfo(errorInfo.errVal, errorInfo.errorDesc.c_str()));
+        *errInfo = HksCreateExternalErrorInfoWithFlag(errorInfo.errVal,
+            errorInfo.errorDesc.c_str(), errorInfo.hasErrorInfo));
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_closeResourceErrCodeMapping);
     ClearMapByHandle(ret, handle);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Close remote handle failed: %" LOG_PUBLIC "d", ret)
@@ -255,11 +257,12 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
-    HksExternalErrorInfoIdl newErrInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, HKS_DEFAULT_ERROR_DESC};
+    HksExternalErrorInfoIdl newErrInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, "", false};
     auto ipccode = proxy->AuthUkeyPin(handle, paramSet, newErrInfo, authOutParam.outStatus, authOutParam.retryCount);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     HKS_IF_TRUE_EXCU(newErrInfo.errVal != EXTENSION_SUCCESS && errInfo != nullptr,
-        *errInfo = HksCreateExternalErrorInfo(newErrInfo.errVal, newErrInfo.errorDesc.c_str()));
+        *errInfo = HksCreateExternalErrorInfoWithFlag(newErrInfo.errVal,
+            newErrInfo.errorDesc.c_str(), newErrInfo.hasErrorInfo));
     ret = newErrInfo.errVal;
     ret = ConvertExtensionToHksErrorCode(ret, g_authPinErrCodeMapping);
     ClearMapByHandle(ret, handle);
@@ -294,11 +297,12 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
-    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, HKS_DEFAULT_ERROR_DESC};
+    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, "", false};
     auto ipccode = proxy->GetUkeyPinAuthState(handle, newParamSet, state, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     HKS_IF_TRUE_EXCU(errorInfo.errVal != EXTENSION_SUCCESS && errInfo != nullptr,
-        *errInfo = HksCreateExternalErrorInfo(errorInfo.errVal, errorInfo.errorDesc.c_str()));
+        *errInfo = HksCreateExternalErrorInfoWithFlag(errorInfo.errVal,
+            errorInfo.errorDesc.c_str(), errorInfo.hasErrorInfo));
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_getPinAuthStateErrCodeMapping);
     ClearMapByHandle(ret, handle);
     uidIndexToAuthState_.EnsureInsert({uid, index}, state);
@@ -323,11 +327,12 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &proce
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
-    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, HKS_DEFAULT_ERROR_DESC};
+    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, "", false};
     auto ipccode = proxy->ClearUkeyPinAuthState(handle, newParamSet, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     HKS_IF_TRUE_EXCU(errorInfo.errVal != EXTENSION_SUCCESS && errInfo != nullptr,
-        *errInfo = HksCreateExternalErrorInfo(errorInfo.errVal, errorInfo.errorDesc.c_str()));
+        *errInfo = HksCreateExternalErrorInfoWithFlag(errorInfo.errVal,
+            errorInfo.errorDesc.c_str(), errorInfo.hasErrorInfo));
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_clearPinStateErrCodeMapping);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote clear pin status failed")
     uidIndexToAuthState_.EnsureInsert(std::make_pair(processInfo.uidInt, index), 0);
@@ -354,11 +359,12 @@ int32_t HksRemoteHandleManager::FindRemoteCertificate(const HksProcessInfo &proc
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
-    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, HKS_DEFAULT_ERROR_DESC};
+    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, "", false};
     auto ipccode = proxy->ExportCertificate(newIndex, newParamSet, cert, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     HKS_IF_TRUE_EXCU(errorInfo.errVal != EXTENSION_SUCCESS && errInfo != nullptr,
-        *errInfo = HksCreateExternalErrorInfo(errorInfo.errVal, errorInfo.errorDesc.c_str()));
+        *errInfo = HksCreateExternalErrorInfoWithFlag(errorInfo.errVal,
+            errorInfo.errorDesc.c_str(), errorInfo.hasErrorInfo));
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_exportCertErrCodeMapping);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote ExportCertificate failed: %" LOG_PUBLIC "d", ret)
     
@@ -389,7 +395,7 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
     CommJsonObject combinedArray = CommJsonObject::CreateArray();
     HKS_IF_TRUE_LOGE_RETURN(combinedArray.IsNull(), HKS_ERROR_JSON_SERIALIZE_FAILED, "Create combined array failed")
     uint32_t failNum = 0;
-    HksExternalErrorInfoIdl firstErrorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, HKS_DEFAULT_ERROR_DESC};
+    HksExternalErrorInfoIdl firstErrorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, "", false};
     for (const auto &providerInfo : infos) {
         HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, ++failNum);
         OHOS::sptr<IHuksAccessExtBase> proxy;
@@ -397,7 +403,7 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
         HKS_IF_TRUE_LOGE_CONTINUE(ret != HKS_SUCCESS || proxy == nullptr,
             "Get proxy for provider failed, skipping")
         std::string tmpCertVec = "";
-        HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, HKS_DEFAULT_ERROR_DESC};
+        HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, "", false};
         auto ipccode = proxy->ExportProviderCertificates(newParamSet, tmpCertVec, errorInfo);
         HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL,
             "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
@@ -412,7 +418,8 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
     HKS_IF_TRUE_LOGE_RETURN(failNum == static_cast<uint32_t>(infos.size()), HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
         "get cert from all provider failed")
     HKS_IF_TRUE_EXCU(firstErrorInfo.errVal != EXTENSION_SUCCESS && errInfo != nullptr,
-        *errInfo = HksCreateExternalErrorInfo(firstErrorInfo.errVal, firstErrorInfo.errorDesc.c_str()));
+        *errInfo = HksCreateExternalErrorInfoWithFlag(firstErrorInfo.errVal,
+            firstErrorInfo.errorDesc.c_str(), firstErrorInfo.hasErrorInfo));
     certVec = combinedArray.Serialize(false);
     HKS_IF_TRUE_LOGE_RETURN(certVec.empty(), HKS_ERROR_JSON_SERIALIZE_FAILED, "Serialize certificate array failed")
     
@@ -443,11 +450,12 @@ int32_t HksRemoteHandleManager::ImportRemoteCertificate(const HksProcessInfo &pr
     HksExtCertInfoIdl certInfoIdl;
     ConvertCertInfoToIdl(certInfo, certInfoIdl);
 
-    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, HKS_DEFAULT_ERROR_DESC};
+    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, "", false};
     auto ipccode = proxy->ImportCertificate(newIndex, certInfoIdl, newParamSet, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     HKS_IF_TRUE_EXCU(errorInfo.errVal != EXTENSION_SUCCESS && errInfo != nullptr,
-        *errInfo = HksCreateExternalErrorInfo(errorInfo.errVal, errorInfo.errorDesc.c_str()));
+        *errInfo = HksCreateExternalErrorInfoWithFlag(errorInfo.errVal,
+            errorInfo.errorDesc.c_str(), errorInfo.hasErrorInfo));
     
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_importCertErrCodeMapping);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote ImportCertificate failed: %" LOG_PUBLIC "d", ret)
@@ -476,12 +484,13 @@ int32_t HksRemoteHandleManager::SetOrGetRemoteProperty(struct HksProcessWithErro
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
-    HksExternalErrorInfoIdl errorInfo;
+    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, "", false};
     auto ipccode = proxy->SetOrGetProperty(static_cast<uint32_t>(operation), handle, propertyId,
         newParamSet, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     HKS_IF_TRUE_EXCU(errorInfo.errVal != EXTENSION_SUCCESS,
-        processAndError.errInfo = HksCreateExternalErrorInfo(errorInfo.errVal, errorInfo.errorDesc.c_str()));
+        processAndError.errInfo = HksCreateExternalErrorInfoWithFlag(errorInfo.errVal,
+            errorInfo.errorDesc.c_str(), errorInfo.hasErrorInfo));
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_getPropertyErrCodeMapping);
     ClearMapByHandle(ret, handle);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote SetOrGetProperty failed: %" LOG_PUBLIC "d", ret)
@@ -521,11 +530,12 @@ int32_t HksRemoteHandleManager::RemoteImportWrappedKey(struct HksProcessWithErro
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
-    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, HKS_DEFAULT_ERROR_DESC};
+    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, "", false};
     auto ipccode = proxy->ImportWrappedKey(newIndex, newWrappingKeyIndex, newParamSet, wrappedData, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     HKS_IF_TRUE_EXCU(errorInfo.errVal != EXTENSION_SUCCESS,
-        processAndError.errInfo = HksCreateExternalErrorInfo(errorInfo.errVal, errorInfo.errorDesc.c_str()));
+        processAndError.errInfo = HksCreateExternalErrorInfoWithFlag(errorInfo.errVal,
+            errorInfo.errorDesc.c_str(), errorInfo.hasErrorInfo));
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_importWrappedKeyErrCodeMapping);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote ImportWrappedKey failed: %" LOG_PUBLIC "d", ret)
 
@@ -549,12 +559,13 @@ int32_t HksRemoteHandleManager::RemoteExportPublicKey(struct HksProcessWithError
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
-    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, HKS_DEFAULT_ERROR_DESC};
+    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, "", false};
     auto ipccode = proxy->ExportPublicKey(newIndex, newParamSet, outData, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK,
         HKS_ERROR_IPC_MSG_FAIL, "ExportPublicKey failed, ret = %" LOG_PUBLIC "d", ipccode)
     HKS_IF_TRUE_EXCU(errorInfo.errVal != EXTENSION_SUCCESS,
-        processAndError.errInfo = HksCreateExternalErrorInfo(errorInfo.errVal, errorInfo.errorDesc.c_str()));
+        processAndError.errInfo = HksCreateExternalErrorInfoWithFlag(errorInfo.errVal,
+            errorInfo.errorDesc.c_str(), errorInfo.hasErrorInfo));
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_exportPublicKeyErrCodeMapping);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ExportPublicKey failed, ret = %" LOG_PUBLIC "d", ret)
 
@@ -579,12 +590,13 @@ int32_t HksRemoteHandleManager::ExtensionGenerateKey(struct HksProcessWithErrorI
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
 
-    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, HKS_DEFAULT_ERROR_DESC};
+    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, "", false};
     auto ipccode = proxy->GenerateKey(handle, newParamSet, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL,
         "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     HKS_IF_TRUE_EXCU(errorInfo.errVal != EXTENSION_SUCCESS,
-        processAndError.errInfo = HksCreateExternalErrorInfo(errorInfo.errVal, errorInfo.errorDesc.c_str()));
+        processAndError.errInfo = HksCreateExternalErrorInfoWithFlag(errorInfo.errVal,
+            errorInfo.errorDesc.c_str(), errorInfo.hasErrorInfo));
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_generateKeyErrCodeMapping);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ExtensionGenerateKey failed, ret = %" LOG_PUBLIC "d", ret)
     HKS_LOG_I("leave HksRemoteHandleManager::GenerateKey, ret = %" LOG_PUBLIC "d", ret);
@@ -630,11 +642,12 @@ int32_t HksRemoteHandleManager::GetResourceId(const HksProcessInfo &processInfo,
     HKS_IF_NULL_RETURN(proxy, ret)
 
     std::string resourceResult;
-    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, HKS_DEFAULT_ERROR_DESC};
+    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, "", false};
     auto ipccode = proxy->GetResourceId(newParamSet, resourceResult, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     HKS_IF_TRUE_EXCU(errorInfo.errVal != EXTENSION_SUCCESS && errInfo != nullptr,
-        *errInfo = HksCreateExternalErrorInfo(errorInfo.errVal, errorInfo.errorDesc.c_str()));
+        *errInfo = HksCreateExternalErrorInfoWithFlag(errorInfo.errVal,
+            errorInfo.errorDesc.c_str(), errorInfo.hasErrorInfo));
     
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_getResourceIdErrCodeMapping);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetResourceId failed, ret = %" LOG_PUBLIC "d", ret)

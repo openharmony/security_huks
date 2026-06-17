@@ -218,8 +218,7 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
             HKS_LOG_E("HksIpcAuthUkeyPinAdapter fail, ret = %" LOG_PUBLIC "d", ret);
             HksClearThreadExtErrMsg();
             HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
-            HKS_IF_TRUE_EXCU(strcmp(errInfo->errorDesc, HKS_DEFAULT_ERROR_DESC) != 0,
-                HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
+            HKS_IF_TRUE_EXCU(errInfo->hasErrorInfo, HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
             HksFreeExternalErrorInfo(errInfo);
         }
     } while (0);
@@ -269,8 +268,7 @@ void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8
             HKS_LOG_E("GetUkeyPinAuthState: adapter ret=%" LOG_PUBLIC "d", ret);
             HksClearThreadExtErrMsg();
             HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
-            HKS_IF_TRUE_EXCU(strcmp(errInfo->errorDesc, HKS_DEFAULT_ERROR_DESC) != 0,
-                HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
+            HKS_IF_TRUE_EXCU(errInfo->hasErrorInfo, HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
             HksFreeExternalErrorInfo(errInfo);
             break;
         }
@@ -314,8 +312,7 @@ void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t
         HKS_LOG_E("HksIpcClearPinStatusAdapter ret = %" LOG_PUBLIC "d", ret);
         HksClearThreadExtErrMsg();
         HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
-        HKS_IF_TRUE_EXCU(strcmp(errInfo->errorDesc, HKS_DEFAULT_ERROR_DESC) != 0,
-            HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
+        HKS_IF_TRUE_EXCU(errInfo->hasErrorInfo, HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
         HksFreeExternalErrorInfo(errInfo);
     } while (0);
 
@@ -359,8 +356,7 @@ void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t 
         HKS_LOG_E("HksIpcCreateRemKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret);
         HksClearThreadExtErrMsg();
         HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
-        HKS_IF_TRUE_EXCU(strcmp(errInfo->errorDesc, HKS_DEFAULT_ERROR_DESC) != 0,
-            HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
+        HKS_IF_TRUE_EXCU(errInfo->hasErrorInfo, HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
         HksFreeExternalErrorInfo(errInfo);
     } while (0);
 
@@ -404,8 +400,7 @@ void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t
         HKS_LOG_E("HksIpcCloseRemKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret);
         HksClearThreadExtErrMsg();
         HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
-        HKS_IF_TRUE_EXCU(strcmp(errInfo->errorDesc, HKS_DEFAULT_ERROR_DESC) != 0,
-            HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
+        HKS_IF_TRUE_EXCU(errInfo->hasErrorInfo, HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
         HksFreeExternalErrorInfo(errInfo);
     } while (0);
 
@@ -451,8 +446,7 @@ void HksIpcServiceExportProviderCertificates(const struct HksBlob *srcData, cons
             HKS_LOG_E("HksIpcExportProvCertsAdapter fail, ret = %" LOG_PUBLIC "d", ret);
             HksClearThreadExtErrMsg();
             HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
-            HKS_IF_TRUE_EXCU(strcmp(errInfo->errorDesc, HKS_DEFAULT_ERROR_DESC) != 0,
-                HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
+            HKS_IF_TRUE_EXCU(errInfo->hasErrorInfo, HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
             HksFreeExternalErrorInfo(errInfo);
             break;
         }
@@ -504,8 +498,7 @@ void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t
             HKS_LOG_E("HksIpcExportCertAdapter fail, ret = %" LOG_PUBLIC "d", ret);
             HksClearThreadExtErrMsg();
             HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
-            HKS_IF_TRUE_EXCU(strcmp(errInfo->errorDesc, HKS_DEFAULT_ERROR_DESC) != 0,
-                HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
+            HKS_IF_TRUE_EXCU(errInfo->hasErrorInfo, HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
             HksFreeExternalErrorInfo(errInfo);
             break;
         }
@@ -556,8 +549,7 @@ void HksIpcServiceImportCertificate(const struct HksBlob *srcData, const uint8_t
         HKS_LOG_E("HksIpcImportCertAdapter fail, ret = %" LOG_PUBLIC "d", ret);
         HksClearThreadExtErrMsg();
         HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
-        HKS_IF_TRUE_EXCU(strcmp(errInfo->errorDesc, HKS_DEFAULT_ERROR_DESC) != 0,
-            HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
+        HKS_IF_TRUE_EXCU(errInfo->hasErrorInfo, HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
         HksFreeExternalErrorInfo(errInfo);
     } while (0);
     HksSendResponse(context, ret, NULL);
@@ -646,8 +638,7 @@ void HksIpcServiceGetResourceId(const struct HksBlob *srcData, const uint8_t *co
         HKS_LOG_E("HksIpcServiceOnGetResourceIdAdapter fail, ret = %" LOG_PUBLIC "d", ret);
         HksClearThreadExtErrMsg();
         HKS_IF_NULL_LOGE_BREAK(errInfo, "errInfo is nullptr")
-        HKS_IF_TRUE_EXCU(strcmp(errInfo->errorDesc, HKS_DEFAULT_ERROR_DESC) != 0,
-            HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
+        HKS_IF_TRUE_EXCU(errInfo->hasErrorInfo, HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
         HksFreeExternalErrorInfo(errInfo);
     } while (0);
 

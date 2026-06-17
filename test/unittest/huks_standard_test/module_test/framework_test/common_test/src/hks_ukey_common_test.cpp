@@ -141,46 +141,66 @@ HWTEST_F(HksUkeyCommonTest, HksUkeyCommonTest003, TestSize.Level0)
 {
     HKS_LOG_I("enter HksUkeyCommonTest003");
 
-    /* HksCreateExternalErrorInfo with normal desc */
+    /* HksCreateExternalErrorInfo with normal desc -> hasErrorInfo=false (default) */
     struct HksExternalErrorInfo *info = HksCreateExternalErrorInfo(-1, "normal error");
     ASSERT_NE(info, nullptr);
     EXPECT_EQ(info->errVal, -1);
     EXPECT_STREQ(info->errorDesc, "normal error");
     EXPECT_EQ(info->errorDescLen, 12u);
+    EXPECT_EQ(info->hasErrorInfo, false);
+    HksFreeExternalErrorInfo(info);
+
+    /* HksCreateExternalErrorInfoWithFlag with hasErrorInfo=true */
+    info = HksCreateExternalErrorInfoWithFlag(-1, "with flag", true);
+    ASSERT_NE(info, nullptr);
+    EXPECT_EQ(info->errVal, -1);
+    EXPECT_STREQ(info->errorDesc, "with flag");
+    EXPECT_EQ(info->hasErrorInfo, true);
+    HksFreeExternalErrorInfo(info);
+
+    /* HksCreateExternalErrorInfoWithFlag with hasErrorInfo=false */
+    info = HksCreateExternalErrorInfoWithFlag(-1, "no flag", false);
+    ASSERT_NE(info, nullptr);
+    EXPECT_EQ(info->hasErrorInfo, false);
     HksFreeExternalErrorInfo(info);
 
     /* HksCreateExternalErrorInfo with NULL desc */
     info = HksCreateExternalErrorInfo(-2, NULL);
     ASSERT_NE(info, nullptr);
     EXPECT_STREQ(info->errorDesc, "");
+    EXPECT_EQ(info->hasErrorInfo, false);
     HksFreeExternalErrorInfo(info);
 
     /* HksCreateExternalErrorInfo with empty desc */
     info = HksCreateExternalErrorInfo(-3, "");
     ASSERT_NE(info, nullptr);
     EXPECT_STREQ(info->errorDesc, "");
+    EXPECT_EQ(info->hasErrorInfo, false);
     HksFreeExternalErrorInfo(info);
 
     /* HksFreeExternalErrorInfo with NULL -> no crash */
     HksFreeExternalErrorInfo(NULL);
 
-    /* HksAppendThreadExtErrMsg + HksGetThreadExtErrMsg */
+    /* HksAppendThreadExtErrMsg -> hasErrorInfo=true (always) */
     HksAppendThreadExtErrMsg(-10, "thread error");
     const struct HksExternalErrorInfo *threadInfo = HksGetThreadExtErrMsg();
     ASSERT_NE(threadInfo, nullptr);
     EXPECT_EQ(threadInfo->errVal, -10);
     EXPECT_STREQ(threadInfo->errorDesc, "thread error");
+    EXPECT_EQ(threadInfo->hasErrorInfo, true);
 
-    /* HksAppendThreadExtErrMsg with NULL desc -> uses empty string */
+    /* HksAppendThreadExtErrMsg with NULL desc -> uses empty string, hasErrorInfo=true */
     HksAppendThreadExtErrMsg(-20, NULL);
     threadInfo = HksGetThreadExtErrMsg();
     ASSERT_NE(threadInfo, nullptr);
     EXPECT_EQ(threadInfo->errVal, -20);
+    EXPECT_EQ(threadInfo->hasErrorInfo, true);
 
     /* HksGetAndClearThreadExtErrMsg -> returns and clears */
     struct HksExternalErrorInfo *cleared = HksGetAndClearThreadExtErrMsg();
     ASSERT_NE(cleared, nullptr);
     EXPECT_EQ(cleared->errVal, -20);
+    EXPECT_EQ(cleared->hasErrorInfo, true);
     EXPECT_EQ(HksGetThreadExtErrMsg(), nullptr);
     HksFreeExternalErrorInfo(cleared);
 

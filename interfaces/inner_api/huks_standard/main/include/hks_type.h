@@ -195,6 +195,7 @@ struct HksExternalErrorInfo {
     int32_t errVal;
     char *errorDesc;
     uint32_t errorDescLen;
+    bool hasErrorInfo;
 };
 
 struct HksExtCertInfo {

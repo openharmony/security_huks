@@ -18,4 +18,5 @@ package OHOS.Security.Huks;
 struct HksExternalErrorInfoIdl {
     int errVal;
     String errorDesc;
+    boolean hasErrorInfo;
 };

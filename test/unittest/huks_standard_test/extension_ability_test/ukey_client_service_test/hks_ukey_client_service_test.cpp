@@ -690,7 +690,6 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest019, TestSize.Level0)
     int32_t ret = HksIpcServiceOnGetResourceIdAdapter(&processInfo, &providerBlob, paramSet, &resourceIdBlob, &errInfo);
     EXPECT_EQ(ret, HKS_ERROR_MALLOC_FAIL);
 
-    errInfo = HksCreateExternalErrorInfo(-1, "TestProvider019");
     ret = HksIpcServiceOnGetResourceIdAdapter(&processInfo, &providerBlob, paramSet, &resourceIdBlob, &errInfo);
     EXPECT_EQ(ret, HKS_ERROR_INSUFFICIENT_DATA);
 

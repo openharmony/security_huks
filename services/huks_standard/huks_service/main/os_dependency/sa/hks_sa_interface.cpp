@@ -171,7 +171,8 @@ void HksExtStub::SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &se
         HksFreeExternalErrorInfo(mErrInfo);
         mErrInfo = nullptr;
     }
-    HKS_IF_TRUE_EXCU(errInfo != nullptr, mErrInfo = HksCreateExternalErrorInfo(errInfo->errVal, errInfo->errorDesc));
+    HKS_IF_TRUE_EXCU(errInfo != nullptr, 
+        mErrInfo = HksCreateExternalErrorInfoWithFlag(errInfo->errVal, errInfo->errorDesc, errInfo->hasErrorInfo));
     mCv.notify_all();
 }
 
