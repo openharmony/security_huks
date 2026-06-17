@@ -78,6 +78,18 @@ static napi_value GenerateKeyParseParams(napi_env env, napi_callback_info info, 
     return GetInt32(env, 0);
 }
 
+static int32_t CheckIfContainAtlTag(struct HksParamSet *paramSetIn)
+{
+    struct HksParam tmpParam[] = {
+        {
+            .tag = HKS_TAG_USER_AUTH_TYPE_ATL,
+            .uint32Param = HKS_USER_AUTH_ATL1,
+        }
+    };
+
+    return HksCheckIsTagAlreadyExist(tmpParam, HKS_ARRAY_SIZE(tmpParam), paramSetIn);
+}
+
 napi_value GenerateKeyAsyncWork(napi_env env, GenerateKeyAsyncContext &context)
 {
     napi_value promise = nullptr;
@@ -92,6 +104,13 @@ napi_value GenerateKeyAsyncWork(napi_env env, GenerateKeyAsyncContext &context)
         [](napi_env env, void *data) {
             HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             GenerateKeyAsyncContext napiContext = static_cast<GenerateKeyAsyncContext>(data);
+
+            // inner tag HKS_TAG_USER_AUTH_TYPE_ATL is not openning to outside
+            int32_t ret = CheckIfContainAtlTag(napiContext->paramSetIn);
+            if (ret != HKS_SUCCESS) {
+                napiContext->result = ret;
+                return;
+            }
 
             napiContext->result = HksGenerateKey(napiContext->keyAlias,
                 napiContext->paramSetIn, napiContext->paramSetOut);

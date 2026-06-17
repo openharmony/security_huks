@@ -624,11 +624,12 @@ int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo
             HKS_IF_TRUE_LOGE_RETURN(HksCheckIsAllowedWrap(paramSet), HKS_ERROR_KEY_NOT_ALLOW_WRAP,
                 "key with access control isn't allowed wrap!")
 
+            HKS_IF_TRUE_LOGE_RETURN((userAuthType == 0 && authAccessType == HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL),
+                HKS_ERROR_NOT_SUPPORTED, "invalid user auth type for new bio enroll!")
+
             void *data = HksLockUserIdm();
             HKS_IF_NULL_LOGE_RETURN(data, HKS_ERROR_SESSION_REACHED_LIMIT, "HksLockUserIdm fail")
             do {
-                ret = HKS_ERROR_INVALID_AUTH_TYPE;
-                HKS_IF_TRUE_LOGE_BREAK((userAuthType == 0), "invalid user auth type");
                 ret = CheckIfUserIamSupportCurType(processInfo->userIdInt, userAuthType); // callback
                 HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
                     "UserIAM do not support current user auth or not enrolled cur auth info")
@@ -645,7 +646,7 @@ int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo
         HksFreeParamSet(&userAuthParamSet);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
             "append process info and default strategy failed, ret = %" LOG_PUBLIC "d", ret)
-        
+
         *outParamSet = newInfoParamSet;
         return HKS_SUCCESS;
     }
