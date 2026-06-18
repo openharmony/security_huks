@@ -90,13 +90,15 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
     HKS_IF_NOT_TRUE_LOGE_RETURN(reply.ReadInt32(errVal), ret, "ReadInt32 errVal failed")
     uint32_t descLen = 0;
     HKS_IF_NOT_TRUE_LOGE_RETURN(reply.ReadUint32(descLen), ret, "ReadUint32 descLen failed")
+    bool hasErrorInfo = false;
+    HKS_IF_NOT_TRUE_LOGE_RETURN(reply.ReadBool(hasErrorInfo), ret, "ReadBool hasErrorInfo failed")
     const char *errorDesc = "";
     if (descLen != 0 && descLen < MAX_EXT_ERROR_MESSAGE_LEN) {
         const uint8_t *buffer = reply.ReadBuffer(descLen);
         HKS_IF_NULL_LOGE_RETURN(buffer, ret, "ReadBuffer errorDesc failed")
         errorDesc = (const char *)buffer;
     }
-    HksAppendThreadExtErrMsg(errVal, errorDesc);
+    HKS_IF_TRUE_EXCU(hasErrorInfo, HksAppendThreadExtErrMsg(errVal, errorDesc));
 #endif
     return ret;
 }

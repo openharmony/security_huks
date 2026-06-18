@@ -102,6 +102,8 @@ void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlo
     HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(reply->WriteInt32(errVal), "WriteInt32 errVal failed");
     uint32_t descLen = (errInfo != nullptr && errInfo->errorDesc != nullptr) ? errInfo->errorDescLen + 1 : 0;
     HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(reply->WriteUint32(descLen), "WriteUint32 descLen failed");
+    bool hasErrorInfo = (errInfo != nullptr) ? errInfo->hasErrorInfo : false;
+    HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(reply->WriteBool(hasErrorInfo), "WriteBool hasErrorInfo failed");
     if (descLen != 0 && errInfo->errorDesc != nullptr) {
         if (!reply->WriteBuffer(errInfo->errorDesc, descLen)) {
             HKS_LOG_E("WriteBuffer errorDesc failed");
