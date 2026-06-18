@@ -27,7 +27,11 @@ static void SetErrorInfoFromC(struct HksExternalErrorInfo *errInfoC, int32_t ret
     if (errInfoC != nullptr) {
         errorInfo.errVal = errInfoC->errVal;
         errorInfo.hasErrorInfo = errInfoC->hasErrorInfo;
-        errInfoC->errorDesc = (errInfoC->errorDesc != nullptr) ? errInfoC->errorDesc : "";
+        if (errInfoC->errorDesc != nullptr) {
+            errorInfo.errorDesc.assign(errInfoC->errorDesc);
+        } else {
+            errorInfo.errorDesc.assign("");
+        }
         HksFreeExternalErrorInfo(errInfoC);
         return;
     }
