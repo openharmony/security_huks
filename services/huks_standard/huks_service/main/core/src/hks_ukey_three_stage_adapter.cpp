@@ -256,7 +256,7 @@ int32_t HksServiceOnUkeyImportWrappedKey(const struct HksProcessInfo *processInf
     HKS_LOG_E("OnImportWrappedKey fail. ret: %" LOG_PUBLIC "d", ret);
     HksClearThreadExtErrMsg();
     HKS_IF_TRUE_EXCU(processAndError.errInfo != nullptr && processAndError.errInfo->hasErrorInfo,
-            HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc));
+        HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc));
     HksFreeExternalErrorInfo(processAndError.errInfo);
     return ret;
 }

@@ -104,13 +104,13 @@ HWTEST_F(HksUkeyCommonTest, HksUkeyCommonTest002, TestSize.Level0)
     /* set with null desc -> only prefix */
     HksSetUkeyGlobalInfo(-200, NULL);
     HksGetUkeyGlobalInfo(&errVal, buf, sizeof(buf));
-    EXPECT_EQ(errVal, 0);
+    EXPECT_EQ(errVal, -200);
     EXPECT_STREQ(buf, "CryptoExtensionError: ");
 
     /* set with empty desc -> only prefix */
     HksSetUkeyGlobalInfo(-300, "");
     HksGetUkeyGlobalInfo(&errVal, buf, sizeof(buf));
-    EXPECT_EQ(errVal, 0);
+    EXPECT_EQ(errVal, -300);
     EXPECT_STREQ(buf, "CryptoExtensionError: ");
 
     /* null params -> early return, no crash */
