@@ -984,7 +984,8 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest018, TestSize.Level0)
 
     uint8_t remoteObject[] = {1, 2, 3, 4, 5};
     struct HksProcessInfo processInfo{};
-    ret = DcmGenerateCertChainInAttestKey(&processInfo, newParamSet, remoteObject, certChain, 0);
+    struct HksCertChainInfo certChainInfo = { certChain, 0 };
+    ret = DcmGenerateCertChainInAttestKey(&processInfo, newParamSet, remoteObject, &certChainInfo, false);
     ASSERT_EQ(ret, HKS_SUCCESS);
     ret = AccessAttestKey(certChain, newParamSet, certChain);
     ASSERT_NE(ret, HKS_SUCCESS);

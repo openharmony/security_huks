@@ -1673,7 +1673,6 @@ HWTEST_F(HksIpcServiceTest, HksIpcServiceTest045, TestSize.Level0)
 /**
  * @tc.name: HksIpcServiceTest.HksIpcServiceTest046
  * @tc.desc: tdd HksIpcServiceGenerateKey with TEE security level, expect HKS_SUCCESS
- *           Cover CheckKeySecuritySe branch: securityLevelParam == HKS_KEY_SECURITY_LEVEL_TEE
  * @tc.type: FUNC
  */
 HWTEST_F(HksIpcServiceTest, HksIpcServiceTest046, TestSize.Level0)
@@ -1715,7 +1714,6 @@ HWTEST_F(HksIpcServiceTest, HksIpcServiceTest046, TestSize.Level0)
 /**
  * @tc.name: HksIpcServiceTest.HksIpcServiceTest047
  * @tc.desc: tdd HksIpcServiceGenerateKey with SE security level, expect HKS_SUCCESS
- *           Cover CheckKeySecuritySe branch: securityLevelParam == HKS_KEY_SECURITY_LEVEL_SE
  * @tc.type: FUNC
  */
 HWTEST_F(HksIpcServiceTest, HksIpcServiceTest047, TestSize.Level0)
@@ -1757,7 +1755,6 @@ HWTEST_F(HksIpcServiceTest, HksIpcServiceTest047, TestSize.Level0)
 /**
  * @tc.name: HksIpcServiceTest.HksIpcServiceTest048
  * @tc.desc: tdd HksIpcServiceGenerateKey with invalid security level, expect error
- *           Cover CheckKeySecuritySe branch: invalid security level
  * @tc.type: FUNC
  */
 HWTEST_F(HksIpcServiceTest, HksIpcServiceTest048, TestSize.Level0)

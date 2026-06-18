@@ -135,6 +135,13 @@ int32_t CheckKeySecuritySeFromKeyFile(const struct HksProcessInfo *processInfo,
     int32_t ret = HksGetParam(keyParamSet, HKS_TAG_KEY_SECURITY_LEVEL, &securityLevelParam);
     HKS_IF_TRUE_RETURN(ret != HKS_SUCCESS, HKS_SUCCESS)
 
+    HKS_IF_TRUE_LOGE_RETURN(
+        securityLevelParam->uint32Param != HKS_KEY_SECURITY_LEVEL_TEE &&
+        securityLevelParam->uint32Param != HKS_KEY_SECURITY_LEVEL_SE &&
+        securityLevelParam->uint32Param != HKS_KEY_SECURITY_LEVEL_INDEPENDENT_SE,
+        HKS_ERROR_INVALID_ARGUMENT,
+        "Invalid key security level from key file: %" LOG_PUBLIC "u", securityLevelParam->uint32Param)
+
     if (securityLevelParam->uint32Param == HKS_KEY_SECURITY_LEVEL_SE ||
         securityLevelParam->uint32Param == HKS_KEY_SECURITY_LEVEL_INDEPENDENT_SE) {
         ret = HksSePermissionCheck(processInfo);
@@ -164,4 +171,90 @@ void DecrementSeCountByService(bool isSeCalling)
 #else
     (void)isSeCalling;
 #endif
+}
+
+int32_t CheckKeySecuritySeFromParamSet(const struct HksProcessInfo *processInfo,
+    struct HksParamSet *newParamSet, bool *isSeCalling)
+{
+#ifdef L2_STANDARD
+    struct HksParam *securityLevelParam = NULL;
+    int32_t ret = HksGetParam(newParamSet, HKS_TAG_KEY_SECURITY_LEVEL, &securityLevelParam);
+    HKS_IF_TRUE_RETURN(ret != HKS_SUCCESS, HKS_SUCCESS)
+
+    HKS_IF_TRUE_LOGE_RETURN(
+        securityLevelParam->uint32Param != HKS_KEY_SECURITY_LEVEL_TEE &&
+        securityLevelParam->uint32Param != HKS_KEY_SECURITY_LEVEL_SE,
+        HKS_ERROR_INVALID_ARGUMENT,
+        "Invalid key security level: %" LOG_PUBLIC "u", securityLevelParam->uint32Param)
+
+    if (securityLevelParam->uint32Param == HKS_KEY_SECURITY_LEVEL_SE) {
+        ret = HksSePermissionCheck(processInfo);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Se permission check failed.")
+
+        ret = HksSeIncrementSeCount();
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Failed to increment SE call count.")
+
+        *isSeCalling = true;
+
+        struct HksParam *userAuthTypeParam = NULL;
+        if (HksGetParam(newParamSet, HKS_TAG_USER_AUTH_TYPE, &userAuthTypeParam) == HKS_SUCCESS &&
+            (userAuthTypeParam->uint32Param & HKS_USER_AUTH_TYPE_TUI_PIN) != 0) {
+            securityLevelParam->uint32Param = HKS_KEY_SECURITY_LEVEL_INDEPENDENT_SE;
+        }
+    }
+
+    return HKS_SUCCESS;
+#else
+    (void)processInfo;
+    (void)newParamSet;
+    (void)isSeCalling;
+    return HKS_SUCCESS;
+#endif
+}
+
+int32_t CheckSeSessionCallInService(const struct HksProcessInfo *processInfo, bool *isSeCalling)
+{
+#ifdef L2_STANDARD
+    int32_t ret = HksSePermissionCheck(processInfo);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Se permission check failed.")
+
+    ret = HksSeIncrementSeCount();
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Failed to increment SE call count.")
+
+    *isSeCalling = true;
+    return HKS_SUCCESS;
+#else
+    (void)processInfo;
+    (void)isSeCalling;
+    return HKS_SUCCESS;
+#endif
+}
+
+int32_t CheckWrappedKeySeVersionInService(const struct HksBlob *wrappedData, bool *isSeWrappedKey)
+{
+    HKS_IF_TRUE_LOGE_RETURN(wrappedData->size < sizeof(uint32_t), HKS_ERROR_BUFFER_TOO_SMALL,
+        "invalid wrapped key size: %" LOG_PUBLIC "u", wrappedData->size);
+
+    uint32_t version = *(uint32_t *)wrappedData->data;
+    if (version == HKS_WRAP_KEY_BY_HUK_VERSION_SE) {
+        *isSeWrappedKey = true;
+    } else if (version == HKS_WRAP_KEY_BY_HUK_VERSION_INDEPENDENT_SE) {
+        *isSeWrappedKey = true;
+    }
+
+    return HKS_SUCCESS;
+}
+
+int32_t RejectSeSecurityLevel(const struct HksParamSet *paramSetIn)
+{
+    struct HksParam *securityLevelParam = NULL;
+    int32_t ret = HksGetParam(paramSetIn, HKS_TAG_KEY_SECURITY_LEVEL, &securityLevelParam);
+    HKS_IF_TRUE_RETURN(ret != HKS_SUCCESS, HKS_SUCCESS)
+
+    HKS_IF_TRUE_LOGE_RETURN(
+        securityLevelParam->uint32Param != HKS_KEY_SECURITY_LEVEL_TEE,
+        HKS_ERROR_NOT_SUPPORTED,
+        "SE security level is not supported for this operation")
+
+    return HKS_SUCCESS;
 }
