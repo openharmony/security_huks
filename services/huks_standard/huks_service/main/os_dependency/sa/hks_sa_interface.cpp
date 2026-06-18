@@ -207,10 +207,7 @@ int HksExtStub::ProcessExtGetRemotePropertyReply(MessageParcel& data)
     } while (false);
 
     int32_t errVal = 0;
-    if (!data.ReadInt32(errVal)) {
-        HKS_LOG_E("ReadInt32 errVal failed");
-        errVal = static_cast<int32_t>(errCode);
-    }
+    HKS_IF_TRUE_EXCU(!data.ReadInt32(errVal), errVal = static_cast<int32_t>(errCode));
     uint32_t descLen = 0;
     bool hasErrorInfo = false;
     HKS_IF_TRUE_EXCU(!data.ReadUint32(descLen), descLen = 0);

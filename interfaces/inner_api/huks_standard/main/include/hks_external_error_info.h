@@ -33,7 +33,8 @@ struct HksExternalErrorInfo* HksGetAndClearThreadExtErrMsg(void);
 
 void HksClearThreadExtErrMsg(void);
 
-struct HksExternalErrorInfo* HksCreateExternalErrorInfoWithFlag(int32_t errVal, const char *errorDesc, bool hasErrorInfo);
+struct HksExternalErrorInfo* HksCreateExternalErrorInfoWithFlag(int32_t errVal,
+    const char *errorDesc, bool hasErrorInfo);
 
 void HksFreeExternalErrorInfo(struct HksExternalErrorInfo *errInfo);
 

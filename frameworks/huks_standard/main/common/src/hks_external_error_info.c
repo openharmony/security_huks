@@ -63,7 +63,8 @@ void HksClearThreadExtErrMsg(void)
     }
 }
 
-struct HksExternalErrorInfo* HksCreateExternalErrorInfoWithFlag(int32_t errVal, const char *errorDesc, bool hasErrorInfo)
+struct HksExternalErrorInfo* HksCreateExternalErrorInfoWithFlag(int32_t errVal,
+    const char *errorDesc, bool hasErrorInfo)
 {
     struct HksExternalErrorInfo *errInfo = (struct HksExternalErrorInfo*)HksMalloc(sizeof(struct HksExternalErrorInfo));
     HKS_IF_NULL_RETURN(errInfo, NULL)
