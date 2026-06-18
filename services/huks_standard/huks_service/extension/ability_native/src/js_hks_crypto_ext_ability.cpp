@@ -595,7 +595,9 @@ void GetErrorInfoParams(const napi_env &env, const napi_value &funcResult, Crypt
     napi_value napiErrInfo = nullptr;
     std::string errMsg = "";
     auto status = napi_get_named_property(env, funcResult, "errInfo", &napiErrInfo);
-    HKS_EXT_IF_TRUE_LOGE_EXCU_RETURN_VOID(status != napi_ok || napiErrInfo == nullptr,
+    napi_valuetype valueType;
+    status = napi_typeof(env, napiErrInfo, &valueType);
+    HKS_EXT_IF_TRUE_LOGE_EXCU_RETURN_VOID(status != napi_ok || valueType == napi_undefined,
         resultParams.errInfo = HksCreateExternalErrorInfoWithFlag(resultParams.errCode, errMsg.c_str(), false),
         "GetErrorInfoParams::errInfo not found in result");
 

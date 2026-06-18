@@ -141,8 +141,8 @@ HWTEST_F(HksUkeyCommonTest, HksUkeyCommonTest003, TestSize.Level0)
 {
     HKS_LOG_I("enter HksUkeyCommonTest003");
 
-    /* HksCreateExternalErrorInfo with normal desc -> hasErrorInfo=false (default) */
-    struct HksExternalErrorInfo *info = HksCreateExternalErrorInfo(-1, "normal error");
+    /* HksCreateExternalErrorInfoWithFlag with normal desc, hasErrorInfo=false */
+    struct HksExternalErrorInfo *info = HksCreateExternalErrorInfoWithFlag(-1, "normal error", false);
     ASSERT_NE(info, nullptr);
     EXPECT_EQ(info->errVal, -1);
     EXPECT_STREQ(info->errorDesc, "normal error");
@@ -158,21 +158,15 @@ HWTEST_F(HksUkeyCommonTest, HksUkeyCommonTest003, TestSize.Level0)
     EXPECT_EQ(info->hasErrorInfo, true);
     HksFreeExternalErrorInfo(info);
 
-    /* HksCreateExternalErrorInfoWithFlag with hasErrorInfo=false */
-    info = HksCreateExternalErrorInfoWithFlag(-1, "no flag", false);
-    ASSERT_NE(info, nullptr);
-    EXPECT_EQ(info->hasErrorInfo, false);
-    HksFreeExternalErrorInfo(info);
-
-    /* HksCreateExternalErrorInfo with NULL desc */
-    info = HksCreateExternalErrorInfo(-2, NULL);
+    /* HksCreateExternalErrorInfoWithFlag with NULL desc */
+    info = HksCreateExternalErrorInfoWithFlag(-2, NULL, false);
     ASSERT_NE(info, nullptr);
     EXPECT_STREQ(info->errorDesc, "");
     EXPECT_EQ(info->hasErrorInfo, false);
     HksFreeExternalErrorInfo(info);
 
-    /* HksCreateExternalErrorInfo with empty desc */
-    info = HksCreateExternalErrorInfo(-3, "");
+    /* HksCreateExternalErrorInfoWithFlag with empty desc */
+    info = HksCreateExternalErrorInfoWithFlag(-3, "", false);
     ASSERT_NE(info, nullptr);
     EXPECT_STREQ(info->errorDesc, "");
     EXPECT_EQ(info->hasErrorInfo, false);
