@@ -55,12 +55,13 @@ void HksSetUkeyGlobalInfo(int32_t errVal, const char *errorDesc)
 
     g_ukeyGlobalInfo.errVal = errVal;
     descLen = (descLen > HKS_UKEY_ERROR_DESC_MAX_LEN) ? HKS_UKEY_ERROR_DESC_MAX_LEN : descLen;
-    
-    (void)memcpy_s(g_ukeyGlobalInfo.errorDesc, HKS_UKEY_ERROR_BUFFER_SIZE,
-        HKS_UKEY_ERROR_PREFIX, HKS_UKEY_ERROR_PREFIX_LEN);
-        
-    (void)memcpy_s(g_ukeyGlobalInfo.errorDesc + HKS_UKEY_ERROR_PREFIX_LEN,
-        HKS_UKEY_ERROR_BUFFER_SIZE - HKS_UKEY_ERROR_PREFIX_LEN, desc, descLen);
+
+    HKS_IF_TRUE_EXCU(memcpy_s(g_ukeyGlobalInfo.errorDesc, HKS_UKEY_ERROR_BUFFER_SIZE,
+        HKS_UKEY_ERROR_PREFIX, HKS_UKEY_ERROR_PREFIX_LEN) != EOK, HKS_LOG_E("copy UkeyErrorPrefix failed!"));
+
+    HKS_IF_TRUE_EXCU(memcpy_s(g_ukeyGlobalInfo.errorDesc + HKS_UKEY_ERROR_PREFIX_LEN,
+        HKS_UKEY_ERROR_BUFFER_SIZE - HKS_UKEY_ERROR_PREFIX_LEN, desc, descLen) != EOK,
+        HKS_LOG_E("copy error description failed!"));
     g_ukeyGlobalInfo.errorDesc[HKS_UKEY_ERROR_PREFIX_LEN + descLen] = '\0';
     
     HksMutexUnlock(mutex);
