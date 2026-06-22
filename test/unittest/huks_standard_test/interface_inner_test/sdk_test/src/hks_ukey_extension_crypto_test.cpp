@@ -420,7 +420,7 @@ HWTEST_F(HksUkeyExtensionCryptoTest, HksGetUkeyGlobalErrorTest001, TestSize.Leve
 {
     char testBuf[] = "this is a test err info";
     int32_t errVal = 0;
-    (void)HksGetUkeyGlobalInfo(errVal, testBuf, 0);
+    (void)HksGetUkeyGlobalInfo(&errVal, testBuf, 0);
     (void)HksClearUkeyGlobalInfo();
 }
 }
