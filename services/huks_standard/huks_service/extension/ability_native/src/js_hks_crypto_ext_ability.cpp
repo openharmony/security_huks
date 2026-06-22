@@ -37,6 +37,7 @@
 #include "hks_template.h"
 #include "hks_ukey_common.h"
 #include "hks_mem.h"
+#include "hks_external_error_info.h"
 
 #define WAIT_FOR_CALL_JS_METHOD(dataParam, waitTime) do { \
     const auto maxWaitTime = std::chrono::seconds((waitTime)); \
@@ -592,33 +593,35 @@ int32_t CallJsMethod(const std::string &funcName, AbilityRuntime::JsRuntime &jsR
 void GetErrorInfoParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
     napi_value napiErrInfo = nullptr;
-    std::string errMsg = "No error message.";
+    std::string errMsg = "";
     auto status = napi_get_named_property(env, funcResult, "errInfo", &napiErrInfo);
-    HKS_EXT_IF_TRUE_LOGE_EXCU_RETURN_VOID(status != napi_ok || napiErrInfo == nullptr,
-        resultParams.errInfo = HksCreateExternalErrorInfo(resultParams.errCode, errMsg.c_str()),
+    napi_valuetype valueType;
+    status = napi_typeof(env, napiErrInfo, &valueType);
+    HKS_EXT_IF_TRUE_LOGE_EXCU_RETURN_VOID(status != napi_ok || valueType == napi_undefined,
+        resultParams.errInfo = HksCreateExternalErrorInfoWithFlag(resultParams.errCode, errMsg.c_str(), false),
         "GetErrorInfoParams::errInfo not found in result");
 
     napi_value napiErrno = nullptr;
     status = napi_get_named_property(env, napiErrInfo, "errno", &napiErrno);
     HKS_EXT_IF_TRUE_LOGE_EXCU_RETURN_VOID(status != napi_ok || napiErrno == nullptr,
-        resultParams.errInfo = HksCreateExternalErrorInfo(resultParams.errCode, errMsg.c_str()),
+        resultParams.errInfo = HksCreateExternalErrorInfoWithFlag(resultParams.errCode, errMsg.c_str(), true),
         "GetErrorInfoParams::napi_get_named_property errno failed, status:%d", status);
     int32_t errnoValue = 0;
     status = napi_get_value_int32(env, napiErrno, &errnoValue);
     HKS_EXT_IF_TRUE_LOGE_EXCU_RETURN_VOID(status != napi_ok,
-        resultParams.errInfo = HksCreateExternalErrorInfo(resultParams.errCode, errMsg.c_str()),
+        resultParams.errInfo = HksCreateExternalErrorInfoWithFlag(resultParams.errCode, errMsg.c_str(), true),
         "GetErrorInfoParams::get errno value failed, status:%d", status);
     napi_value napiErrorDesc = nullptr;
     status = napi_get_named_property(env, napiErrInfo, "errorDesc", &napiErrorDesc);
     HKS_EXT_IF_TRUE_LOGE_EXCU_RETURN_VOID(status != napi_ok || napiErrorDesc == nullptr,
-        resultParams.errInfo = HksCreateExternalErrorInfo(resultParams.errCode, errMsg.c_str()),
+        resultParams.errInfo = HksCreateExternalErrorInfoWithFlag(resultParams.errCode, errMsg.c_str(), true),
         "GetErrorInfoParams::napi_get_named_property errorDesc failed, status:%d", status);
     std::string errorDesc;
     auto result = GetStringValue(env, napiErrorDesc, errorDesc);
     HKS_EXT_IF_TRUE_LOGE_EXCU_RETURN_VOID(result != HKS_SUCCESS,
-        resultParams.errInfo = HksCreateExternalErrorInfo(resultParams.errCode, errMsg.c_str()),
+        resultParams.errInfo = HksCreateExternalErrorInfoWithFlag(resultParams.errCode, errMsg.c_str(), true),
         "GetErrorInfoParams::GetStringValue errorDesc failed, result:%d", result);
-    resultParams.errInfo = HksCreateExternalErrorInfo(errnoValue, errorDesc.c_str());
+    resultParams.errInfo = HksCreateExternalErrorInfoWithFlag(errnoValue, errorDesc.c_str(), true);
     HKS_EXT_IF_TRUE_LOGE(resultParams.errInfo == nullptr, "GetErrorInfoParams::CreateExternalErrorInfo failed");
 }
 

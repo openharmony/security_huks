@@ -26,12 +26,18 @@ static void SetErrorInfoFromC(struct HksExternalErrorInfo *errInfoC, int32_t ret
 {
     if (errInfoC != nullptr) {
         errorInfo.errVal = errInfoC->errVal;
-        errorInfo.errorDesc = errInfoC->errorDesc != nullptr ? errInfoC->errorDesc : "";
+        errorInfo.hasErrorInfo = errInfoC->hasErrorInfo;
+        if (errInfoC->errorDesc != nullptr) {
+            errorInfo.errorDesc.assign(errInfoC->errorDesc);
+        } else {
+            errorInfo.errorDesc.assign("");
+        }
         HksFreeExternalErrorInfo(errInfoC);
         return;
     }
     errorInfo.errVal = ret;
-    errorInfo.errorDesc.assign("");
+    errorInfo.hasErrorInfo = false;
+    errorInfo.errorDesc.assign(HKS_DEFAULT_ERROR_DESC);
 }
 
 int32_t HksCryptoExtStubImpl::HksExtStubCheckExtension(HksExternalErrorInfoIdl &errorInfo)
@@ -39,7 +45,8 @@ int32_t HksCryptoExtStubImpl::HksExtStubCheckExtension(HksExternalErrorInfoIdl &
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
         errorInfo.errVal = HKS_ERROR_EXT_NULLPTR;
-        errorInfo.errorDesc.assign("");
+        errorInfo.hasErrorInfo = false;
+        errorInfo.errorDesc.assign(HKS_DEFAULT_ERROR_DESC);
         return HKS_ERROR_EXT_NULLPTR;
     }
     return HKS_SUCCESS;
@@ -47,7 +54,7 @@ int32_t HksCryptoExtStubImpl::HksExtStubCheckExtension(HksExternalErrorInfoIdl &
 
 void HksCryptoExtStubImpl::HksExtStubInitErrorInfo(struct HksExternalErrorInfo **errInfoC)
 {
-    *errInfoC = HksCreateExternalErrorInfo(HKS_ERROR_EXT_JS_METHOD_ERROR, "");
+    *errInfoC = HksCreateExternalErrorInfoWithFlag(HKS_ERROR_EXT_JS_METHOD_ERROR, "", false);
     HKS_EXT_IF_TRUE_LOGE(*errInfoC == nullptr, "errInfoC: Default value not set.");
 }
 

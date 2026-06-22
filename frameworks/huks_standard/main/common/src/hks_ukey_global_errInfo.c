@@ -49,45 +49,46 @@ void HksSetUkeyGlobalInfo(int32_t errVal, const char *errorDesc)
     HKS_IF_NULL_LOGE_RETURN_VOID(mutex, "mutex is null")
     
     HksMutexLock(mutex);
-    g_ukeyGlobalInfo.errVal = errVal;
-    const char *desc = (errorDesc != NULL) ? errorDesc : "";
-    uint32_t len = strlen(desc);
-    if (len >= HKS_UKEY_ERROR_DESC_MAX_LEN) {
-        len = HKS_UKEY_ERROR_DESC_MAX_LEN - 1;
-    }
-    (void)memcpy_s(g_ukeyGlobalInfo.errorDesc, HKS_UKEY_ERROR_DESC_MAX_LEN, desc, len);
-    g_ukeyGlobalInfo.errorDesc[len] = '\0';
-    HksMutexUnlock(mutex);
-}
-
-int32_t HksGetUkeyGlobalErrVal(void)
-{
-    HksMutex *mutex = GetUkeyGlobalMutex();
-    HKS_IF_NULL_LOGE_RETURN(mutex, 0, "mutex is null")
     
-    HksMutexLock(mutex);
-    int32_t errVal = g_ukeyGlobalInfo.errVal;
+    const char *desc = (errorDesc != NULL) ? errorDesc : "";
+    uint32_t descLen = strlen(desc);
+
+    g_ukeyGlobalInfo.errVal = errVal;
+    descLen = (descLen > HKS_UKEY_ERROR_DESC_MAX_LEN) ? HKS_UKEY_ERROR_DESC_MAX_LEN : descLen;
+
+    if (memcpy_s(g_ukeyGlobalInfo.errorDesc, HKS_UKEY_ERROR_BUFFER_SIZE, HKS_UKEY_ERROR_PREFIX,
+        HKS_UKEY_ERROR_PREFIX_LEN) != EOK) {
+        HKS_LOG_E("copy UkeyErrorPrefix failed!");
+    }
+
+    if (memcpy_s(g_ukeyGlobalInfo.errorDesc + HKS_UKEY_ERROR_PREFIX_LEN,
+        HKS_UKEY_ERROR_BUFFER_SIZE - HKS_UKEY_ERROR_PREFIX_LEN, desc, descLen) != EOK) {
+        HKS_LOG_E("copy error description failed!");
+    }
+    g_ukeyGlobalInfo.errorDesc[HKS_UKEY_ERROR_PREFIX_LEN + descLen] = '\0';
+    
     HksMutexUnlock(mutex);
-    return errVal;
 }
 
-void HksGetUkeyGlobalErrorDesc(char *buf, uint32_t bufLen)
+void HksGetUkeyGlobalInfo(int32_t *errVal, char *errorDesc, uint32_t descLen)
 {
-    if (buf == NULL || bufLen == 0) {
-        return;
-    }
+    HKS_IF_TRUE_RETURN_VOID(errVal == NULL || errorDesc == NULL || descLen == 0)
+    
     HksMutex *mutex = GetUkeyGlobalMutex();
     if (mutex == NULL) {
-        HKS_LOG_E("HksGetUkeyGlobalErrorDesc: mutex is null");
-        buf[0] = '\0';
+        *errVal = 0;
+        errorDesc[0] = '\0';
         return;
     }
     
     HksMutexLock(mutex);
+
+    *errVal = g_ukeyGlobalInfo.errVal;
     uint32_t len = strlen(g_ukeyGlobalInfo.errorDesc);
-    uint32_t copyLen = (len < bufLen - 1) ? len : bufLen - 1;
-    (void)memcpy_s(buf, bufLen, g_ukeyGlobalInfo.errorDesc, copyLen);
-    buf[copyLen] = '\0';
+    uint32_t copyLen = (len < descLen - 1) ? len : descLen - 1;
+    (void)memcpy_s(errorDesc, descLen, g_ukeyGlobalInfo.errorDesc, copyLen);
+    errorDesc[copyLen] = '\0';
+    
     HksMutexUnlock(mutex);
 }
 

@@ -792,15 +792,15 @@ static napi_value CreateExtErrorInfoObject(napi_env env, int32_t errVal, const c
         HKS_LOG_E("Set errorDesc property failed");
         return nullptr;
     }
-    HKS_LOG_I("HuksNapiGetExtErrorInfo: errno=%" LOG_PUBLIC "d, errorDesc=%s", errVal, desc);
+    HKS_LOG_I("HuksNapiGetExtErrorInfo: errno = %" LOG_PUBLIC "d, errorDesc = %" LOG_PUBLIC "s", errVal, desc);
     return result;
 }
 
 napi_value HuksNapiGetErrorInfo(napi_env env, napi_callback_info info)
 {
-    int32_t errVal = HksGetUkeyGlobalErrVal();
+    int32_t errVal = 0;
     char errorDesc[HKS_UKEY_ERROR_DESC_MAX_LEN + 1] = {0};
-    HksGetUkeyGlobalErrorDesc(errorDesc, sizeof(errorDesc));
+    HksGetUkeyGlobalInfo(&errVal, errorDesc, sizeof(errorDesc));
     return CreateExtErrorInfoObject(env, errVal, errorDesc);
 }
 

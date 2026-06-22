@@ -26,39 +26,39 @@ public:
         const std::string& index,
         const CppParamSet& params,
         std::string& handle,
-        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; errorInfo.hasErrorInfo = false; return ERR_OK; }
 
     ErrCode CloseRemoteHandle(
         const std::string& handle,
         const CppParamSet& params,
-        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; errorInfo.hasErrorInfo = false; return ERR_OK; }
 
     ErrCode AuthUkeyPin(
         const std::string& handle,
         const CppParamSet& params,
         HksExternalErrorInfoIdl& errorInfo,
         int32_t& authState,
-        uint32_t& retryCnt) { errorInfo.errVal = HKS_SUCCESS; authState = 1; retryCnt = 0; return ERR_OK; }
+        uint32_t& retryCnt) { errorInfo.errVal = HKS_SUCCESS; errorInfo.hasErrorInfo = false; authState = 1; retryCnt = 0; return ERR_OK; }
 
     ErrCode GetUkeyPinAuthState(
         const std::string& handle,
         const CppParamSet& params,
         int32_t& state,
-        HksExternalErrorInfoIdl& errorInfo) { state = 1; errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { state = 1; errorInfo.errVal = HKS_SUCCESS; errorInfo.hasErrorInfo = false; return ERR_OK; }
 
     ErrCode Sign(
         const std::string& handle,
         const CppParamSet& params,
         const std::vector<uint8_t>& inData,
         std::vector<uint8_t>& outData,
-        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; errorInfo.hasErrorInfo = false; return ERR_OK; }
 
     ErrCode Verify(
         const std::string& handle,
         const CppParamSet& params,
         const std::vector<uint8_t>& plainText,
         const std::vector<uint8_t>& signature,
-        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; errorInfo.hasErrorInfo = false; return ERR_OK; }
 
     ErrCode ExportCertificate(
         const std::string& index,
@@ -69,25 +69,30 @@ public:
         CommJsonObject certArray = CommJsonObject::CreateArray();
         if (certArray.IsNull()) {
             errorInfo.errVal = HKS_ERROR_MALLOC_FAIL;
+            errorInfo.hasErrorInfo = false;
             return ERR_OK;
         }
         CommJsonObject certObj = CommJsonObject::CreateObject();
         if (certObj.IsNull()) {
             errorInfo.errVal = HKS_ERROR_MALLOC_FAIL;
+            errorInfo.hasErrorInfo = false;
             return ERR_OK;
         }
         if (!certObj.SetValue("purpose", 1) ||
             !certObj.SetValue("index", std::string("mock_cert_index")) ||
             !certObj.SetValue("cert", std::string("MIIBIjANBgkqh"))) {
             errorInfo.errVal = HKS_ERROR_JSON_SERIALIZE_FAILED;
+            errorInfo.hasErrorInfo = false;
             return ERR_OK;
         }
         if (!certArray.AppendElement(certObj)) {
             errorInfo.errVal = HKS_ERROR_JSON_SERIALIZE_FAILED;
+            errorInfo.hasErrorInfo = false;
             return ERR_OK;
         }
         certJsonArr = certArray.Serialize(false);
         errorInfo.errVal = HKS_SUCCESS;
+        errorInfo.hasErrorInfo = false;
         return ERR_OK;
     }
 
@@ -99,27 +104,32 @@ public:
         CommJsonObject certArray = CommJsonObject::CreateArray();
         if (certArray.IsNull()) {
             errorInfo.errVal = HKS_ERROR_MALLOC_FAIL;
+            errorInfo.hasErrorInfo = false;
             return ERR_OK;
         }
         for (int i = 0; i < 2; i++) {
             CommJsonObject certObj = CommJsonObject::CreateObject();
             if (certObj.IsNull()) {
                 errorInfo.errVal = HKS_ERROR_MALLOC_FAIL;
+                errorInfo.hasErrorInfo = false;
                 return ERR_OK;
             }
             if (!certObj.SetValue("purpose", i + 1) ||
                 !certObj.SetValue("index", std::string("cert_") + std::to_string(i)) ||
                 !certObj.SetValue("cert", std::string("MIIBIjAN") + std::to_string(i))) {
                 errorInfo.errVal = HKS_ERROR_JSON_SERIALIZE_FAILED;
+                errorInfo.hasErrorInfo = false;
                 return ERR_OK;
             }
             if (!certArray.AppendElement(certObj)) {
                 errorInfo.errVal = HKS_ERROR_JSON_SERIALIZE_FAILED;
+                errorInfo.hasErrorInfo = false;
                 return ERR_OK;
             }
         }
         certJsonArr = certArray.Serialize(false);
         errorInfo.errVal = HKS_SUCCESS;
+        errorInfo.hasErrorInfo = false;
         return ERR_OK;
     }
 
@@ -127,63 +137,63 @@ public:
         const std::string& index,
         const CppParamSet& params,
         std::string& handle,
-        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; errorInfo.hasErrorInfo = false; return ERR_OK; }
 
     ErrCode UpdateSession(
         const std::string& handle,
         const CppParamSet& params,
         const std::vector<uint8_t>& inData,
         std::vector<uint8_t>& outData,
-        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; errorInfo.hasErrorInfo = false; return ERR_OK; }
 
     ErrCode FinishSession(
         const std::string& handle,
         const CppParamSet& params,
         const std::vector<uint8_t>& inData,
         std::vector<uint8_t>& outData,
-        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; errorInfo.hasErrorInfo = false; return ERR_OK; }
 
     ErrCode SetOrGetProperty(
         uint32_t operation,
         const std::string& handle,
         const std::string& propertyId,
         CppParamSet& params,
-        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; errorInfo.hasErrorInfo = false; return ERR_OK; }
 
     ErrCode GetResourceId(
         const CppParamSet& params,
         std::string& resourceId,
-        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; errorInfo.hasErrorInfo = false; return ERR_OK; }
 
     ErrCode ClearUkeyPinAuthState(
         const std::string& handle,
         const CppParamSet& params,
-        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; errorInfo.hasErrorInfo = false; return ERR_OK; }
 
     ErrCode ImportWrappedKey(
         const std::string& index,
         const std::string& wrappingKeyIndex,
         const CppParamSet& params,
         const std::vector<uint8_t>& wrappedData,
-        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; errorInfo.hasErrorInfo = false; return ERR_OK; }
 
     ErrCode ExportPublicKey(
         const std::string& index,
         const CppParamSet& params,
         std::vector<uint8_t>& outData,
         HksExternalErrorInfoIdl& errorInfo)
-        { outData = {0x01, 0x02, 0x03}; errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
+        { outData = {0x01, 0x02, 0x03}; errorInfo.errVal = HKS_SUCCESS; errorInfo.hasErrorInfo = false; return ERR_OK; }
 
     ErrCode ImportCertificate(
         const std::string& index,
         const HksExtCertInfoIdl& certInfo,
         const CppParamSet& params,
-        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; errorInfo.hasErrorInfo = false; return ERR_OK; }
 
     ErrCode GenerateKey(
         const std::string& index,
         const CppParamSet& params,
-        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; return ERR_OK; }
+        HksExternalErrorInfoIdl& errorInfo) { errorInfo.errVal = HKS_SUCCESS; errorInfo.hasErrorInfo = false; return ERR_OK; }
 };
 
 // ==================== HksProviderLifeCycleManager mock ====================

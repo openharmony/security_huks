@@ -419,13 +419,8 @@ HWTEST_F(HksUkeyExtensionCryptoTest, HksGetResourceIdTest001, TestSize.Level0)
 HWTEST_F(HksUkeyExtensionCryptoTest, HksGetUkeyGlobalErrorTest001, TestSize.Level0)
 {
     char testBuf[] = "this is a test err info";
-    (void)HksGetUkeyGlobalErrorDesc(nullptr, 0);
-    (void)HksGetUkeyGlobalErrorDesc(testBuf, 0);
-    (void)HksGetUkeyGlobalErrorDesc(nullptr, strlen(testBuf));
-    (void)HksGetUkeyGlobalErrorDesc(testBuf, strlen(testBuf));
+    int32_t errVal = 0;
+    (void)HksGetUkeyGlobalInfo(&errVal, testBuf, 0);
     (void)HksClearUkeyGlobalInfo();
-
-    int32_t ret = HksGetUkeyGlobalErrVal();
-    EXPECT_EQ(ret, 0);
 }
 }

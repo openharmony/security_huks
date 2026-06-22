@@ -85,36 +85,50 @@ HWTEST_F(HksUkeyCommonTest, HksUkeyCommonTest001, TestSize.Level0)
 
 /**
  * @tc.name: HksUkeyCommonTest.HksUkeyCommonTest002
- * @tc.desc: tdd HksGetUkeyGlobalErrVal, HksGetUkeyGlobalErrorDesc, HksClearUkeyGlobalInfo (lines 63-103)
+ * @tc.desc: tdd HksSetUkeyGlobalInfo, HksGetUkeyGlobalInfo, HksClearUkeyGlobalInfo
  * @tc.type: FUNC
  */
 HWTEST_F(HksUkeyCommonTest, HksUkeyCommonTest002, TestSize.Level0)
 {
     HKS_LOG_I("enter HksUkeyCommonTest002");
 
-    /* set and get */
+    int32_t errVal = 0;
+    char buf[256] = {0};
+
+    /* set with desc and get */
     HksSetUkeyGlobalInfo(-100, "test error desc");
-    EXPECT_EQ(HksGetUkeyGlobalErrVal(), -100);
+    HksGetUkeyGlobalInfo(&errVal, buf, sizeof(buf));
+    EXPECT_EQ(errVal, -100);
+    EXPECT_STREQ(buf, "CryptoExtensionError: test error desc");
 
-    char buf[64] = {0};
-    HksGetUkeyGlobalErrorDesc(buf, sizeof(buf));
-    EXPECT_STREQ(buf, "test error desc");
+    /* set with null desc -> only prefix */
+    HksSetUkeyGlobalInfo(-200, NULL);
+    HksGetUkeyGlobalInfo(&errVal, buf, sizeof(buf));
+    EXPECT_EQ(errVal, -200);
+    EXPECT_STREQ(buf, "CryptoExtensionError: ");
 
-    /* null/zero buf -> early return, no crash */
-    HksGetUkeyGlobalErrorDesc(NULL, 0);
-    HksGetUkeyGlobalErrorDesc(buf, 0);
+    /* set with empty desc -> only prefix */
+    HksSetUkeyGlobalInfo(-300, "");
+    HksGetUkeyGlobalInfo(&errVal, buf, sizeof(buf));
+    EXPECT_EQ(errVal, -300);
+    EXPECT_STREQ(buf, "CryptoExtensionError: ");
 
-    /* bufLen smaller than desc length -> truncated copy */
-    char smallBuf[4] = {0};
-    HksGetUkeyGlobalErrorDesc(smallBuf, sizeof(smallBuf));
-    EXPECT_EQ(strlen(smallBuf), 3u);
+    /* null params -> early return, no crash */
+    HksGetUkeyGlobalInfo(NULL, buf, sizeof(buf));
+    HksGetUkeyGlobalInfo(&errVal, NULL, sizeof(buf));
+    HksGetUkeyGlobalInfo(&errVal, buf, 0);
+
+    /* bufLen smaller than prefix -> empty string */
+    char smallBuf[10] = {0};
+    HksSetUkeyGlobalInfo(-400, "long error description");
+    HksGetUkeyGlobalInfo(&errVal, smallBuf, sizeof(smallBuf));
+    EXPECT_EQ(strlen(smallBuf), 9u);
 
     /* clear */
     HksClearUkeyGlobalInfo();
-    EXPECT_EQ(HksGetUkeyGlobalErrVal(), 0);
-    char clearBuf[64] = {0};
-    HksGetUkeyGlobalErrorDesc(clearBuf, sizeof(clearBuf));
-    EXPECT_STREQ(clearBuf, "");
+    HksGetUkeyGlobalInfo(&errVal, buf, sizeof(buf));
+    EXPECT_EQ(errVal, 0);
+    EXPECT_STREQ(buf, "");
 }
 
 /**
@@ -127,46 +141,60 @@ HWTEST_F(HksUkeyCommonTest, HksUkeyCommonTest003, TestSize.Level0)
 {
     HKS_LOG_I("enter HksUkeyCommonTest003");
 
-    /* HksCreateExternalErrorInfo with normal desc */
-    struct HksExternalErrorInfo *info = HksCreateExternalErrorInfo(-1, "normal error");
+    /* HksCreateExternalErrorInfoWithFlag with normal desc, hasErrorInfo=false */
+    struct HksExternalErrorInfo *info = HksCreateExternalErrorInfoWithFlag(-1, "normal error", false);
     ASSERT_NE(info, nullptr);
     EXPECT_EQ(info->errVal, -1);
     EXPECT_STREQ(info->errorDesc, "normal error");
     EXPECT_EQ(info->errorDescLen, 12u);
+    EXPECT_EQ(info->hasErrorInfo, false);
     HksFreeExternalErrorInfo(info);
 
-    /* HksCreateExternalErrorInfo with NULL desc */
-    info = HksCreateExternalErrorInfo(-2, NULL);
+    /* HksCreateExternalErrorInfoWithFlag with hasErrorInfo=true */
+    info = HksCreateExternalErrorInfoWithFlag(-1, "with flag", true);
     ASSERT_NE(info, nullptr);
-    EXPECT_STREQ(info->errorDesc, "");
+    EXPECT_EQ(info->errVal, -1);
+    EXPECT_STREQ(info->errorDesc, "with flag");
+    EXPECT_EQ(info->hasErrorInfo, true);
     HksFreeExternalErrorInfo(info);
 
-    /* HksCreateExternalErrorInfo with empty desc */
-    info = HksCreateExternalErrorInfo(-3, "");
+    /* HksCreateExternalErrorInfoWithFlag with NULL desc */
+    info = HksCreateExternalErrorInfoWithFlag(-2, NULL, false);
     ASSERT_NE(info, nullptr);
     EXPECT_STREQ(info->errorDesc, "");
+    EXPECT_EQ(info->hasErrorInfo, false);
+    HksFreeExternalErrorInfo(info);
+
+    /* HksCreateExternalErrorInfoWithFlag with empty desc */
+    info = HksCreateExternalErrorInfoWithFlag(-3, "", false);
+    ASSERT_NE(info, nullptr);
+    EXPECT_STREQ(info->errorDesc, "");
+    EXPECT_EQ(info->hasErrorInfo, false);
     HksFreeExternalErrorInfo(info);
 
     /* HksFreeExternalErrorInfo with NULL -> no crash */
     HksFreeExternalErrorInfo(NULL);
 
-    /* HksAppendThreadExtErrMsg + HksGetThreadExtErrMsg */
+    /* HksAppendThreadExtErrMsg -> hasErrorInfo=true (always) */
     HksAppendThreadExtErrMsg(-10, "thread error");
     const struct HksExternalErrorInfo *threadInfo = HksGetThreadExtErrMsg();
     ASSERT_NE(threadInfo, nullptr);
     EXPECT_EQ(threadInfo->errVal, -10);
     EXPECT_STREQ(threadInfo->errorDesc, "thread error");
+    EXPECT_EQ(threadInfo->hasErrorInfo, true);
 
-    /* HksAppendThreadExtErrMsg with NULL desc -> uses empty string */
+    /* HksAppendThreadExtErrMsg with NULL desc -> uses empty string, hasErrorInfo=true */
     HksAppendThreadExtErrMsg(-20, NULL);
     threadInfo = HksGetThreadExtErrMsg();
     ASSERT_NE(threadInfo, nullptr);
     EXPECT_EQ(threadInfo->errVal, -20);
+    EXPECT_EQ(threadInfo->hasErrorInfo, true);
 
     /* HksGetAndClearThreadExtErrMsg -> returns and clears */
     struct HksExternalErrorInfo *cleared = HksGetAndClearThreadExtErrMsg();
     ASSERT_NE(cleared, nullptr);
     EXPECT_EQ(cleared->errVal, -20);
+    EXPECT_EQ(cleared->hasErrorInfo, true);
     EXPECT_EQ(HksGetThreadExtErrMsg(), nullptr);
     HksFreeExternalErrorInfo(cleared);
 

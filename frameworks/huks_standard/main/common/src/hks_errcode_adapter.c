@@ -768,6 +768,13 @@ static struct HksError g_errCodeTable[] = {
             .data = NULL
         }
     }, {
+        .innerErrCode = HUKS_ERR_CODE_PIN_NO_AUTH,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_PIN_NO_AUTH,
+            .errorMsg = "the Ukey PIN not authenticated.",
+            .data = NULL
+        }
+    }, {
         .innerErrCode = HUKS_ERR_CODE_PIN_LOCKED,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_PIN_LOCKED,

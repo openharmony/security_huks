@@ -51,7 +51,7 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0000, testing
     std::string index;
     CppParamSet params;
     std::string handle;
-    HksExternalErrorInfoIdl errorInfo;
+    HksExternalErrorInfoIdl errorInfo = {0, "", false};
     EXPECT_EQ(hksCryptoExtStubImpl.OpenRemoteHandle(index, params, handle, errorInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
     HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
     EXPECT_EQ(hksCryptoExtStubImplNullptr.OpenRemoteHandle(index, params, handle, errorInfo), HKS_ERROR_EXT_NULLPTR);
@@ -63,7 +63,7 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0001, testing
     HksCryptoExtStubImpl hksCryptoExtStubImpl(extension);
     std::string handle;
     CppParamSet params;
-    HksExternalErrorInfoIdl errorInfo;
+    HksExternalErrorInfoIdl errorInfo = {0, "", false};
     EXPECT_EQ(hksCryptoExtStubImpl.CloseRemoteHandle(handle, params, errorInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
     HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
     EXPECT_EQ(hksCryptoExtStubImplNullptr.CloseRemoteHandle(handle, params, errorInfo), HKS_ERROR_EXT_NULLPTR);
@@ -76,7 +76,7 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0002, testing
     std::string index;
     CppParamSet params;
     std::string handle;
-    HksExternalErrorInfoIdl errorInfo;
+    HksExternalErrorInfoIdl errorInfo = {0, "", false};
     int32_t authState;
     uint32_t retryCnt;
     EXPECT_EQ(hksCryptoExtStubImpl.AuthUkeyPin(
@@ -93,7 +93,7 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0003, testing
     CppParamSet params;
     std::string handle;
     int32_t state;
-    HksExternalErrorInfoIdl errorInfo;
+    HksExternalErrorInfoIdl errorInfo = {0, "", false};
     EXPECT_EQ(hksCryptoExtStubImpl.GetUkeyPinAuthState(handle, params, state, errorInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
     HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
     EXPECT_EQ(hksCryptoExtStubImplNullptr.GetUkeyPinAuthState(handle, params, state, errorInfo), HKS_ERROR_EXT_NULLPTR);
@@ -106,7 +106,7 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0004, testing
     std::string index;
     CppParamSet params;
     std::string certJsonArr;
-    HksExternalErrorInfoIdl errorInfo;
+    HksExternalErrorInfoIdl errorInfo = {0, "", false};
     EXPECT_EQ(hksCryptoExtStubImpl.ExportCertificate(
         index, params, certJsonArr, errorInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
     HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
@@ -119,7 +119,7 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0005, testing
     HksCryptoExtStubImpl hksCryptoExtStubImpl(extension);
     CppParamSet params;
     std::string certJsonArr;
-    HksExternalErrorInfoIdl errorInfo;
+    HksExternalErrorInfoIdl errorInfo = {0, "", false};
     EXPECT_EQ(hksCryptoExtStubImpl.ExportProviderCertificates(
         params, certJsonArr, errorInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
     HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
@@ -134,7 +134,7 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0006, testing
     std::string index;
     CppParamSet params;
     std::string handle;
-    HksExternalErrorInfoIdl errorInfo;
+    HksExternalErrorInfoIdl errorInfo = {0, "", false};
     EXPECT_EQ(hksCryptoExtStubImpl.InitSession(index, params, handle, errorInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
     HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
     EXPECT_EQ(hksCryptoExtStubImplNullptr.InitSession(index, params, handle, errorInfo), HKS_ERROR_EXT_NULLPTR);
@@ -146,7 +146,7 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0007, testing
     HksCryptoExtStubImpl hksCryptoExtStubImpl(extension);
     CppParamSet params;
     std::string handle;
-    HksExternalErrorInfoIdl errorInfo;
+    HksExternalErrorInfoIdl errorInfo = {0, "", false};
     std::vector<uint8_t> inData;
     std::vector<uint8_t> outData;
     EXPECT_EQ(hksCryptoExtStubImpl.UpdateSession(
@@ -164,7 +164,7 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0008, testing
     std::string handle;
     std::vector<uint8_t> inData;
     std::vector<uint8_t> outData;
-    HksExternalErrorInfoIdl errorInfo;
+    HksExternalErrorInfoIdl errorInfo = {0, "", false};
     EXPECT_EQ(hksCryptoExtStubImpl.FinishSession(
         handle, params, inData, outData, errorInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
     HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
@@ -179,7 +179,7 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0009, testing
     CppParamSet params;
     std::string handle;
     std::string propertyId;
-    HksExternalErrorInfoIdl errorInfo;
+    HksExternalErrorInfoIdl errorInfo = {0, "", false};
     EXPECT_EQ(hksCryptoExtStubImpl.SetOrGetProperty(
         0, handle, propertyId, params, errorInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
     HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
@@ -193,7 +193,7 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0010, testing
     HksCryptoExtStubImpl hksCryptoExtStubImpl(extension);
     CppParamSet params;
     std::string handle;
-    HksExternalErrorInfoIdl errorInfo;
+    HksExternalErrorInfoIdl errorInfo = {0, "", false};
     EXPECT_EQ(hksCryptoExtStubImpl.ClearUkeyPinAuthState(handle, params, errorInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
     HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
     EXPECT_EQ(hksCryptoExtStubImplNullptr.ClearUkeyPinAuthState(handle, params, errorInfo), HKS_ERROR_EXT_NULLPTR);
@@ -205,7 +205,7 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0011, testing
     HksCryptoExtStubImpl hksCryptoExtStubImpl(extension);
     std::string index;
     CppParamSet params;
-    HksExternalErrorInfoIdl errorInfo;
+    HksExternalErrorInfoIdl errorInfo = {0, "", false};
     HksExtCertInfoIdl certInfo;
     EXPECT_EQ(hksCryptoExtStubImpl.ImportCertificate(
         index, certInfo, params, errorInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
@@ -220,7 +220,7 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0012, testing
     HksCryptoExtStubImpl hksCryptoExtStubImpl(extension);
     std::string index;
     CppParamSet params;
-    HksExternalErrorInfoIdl errorInfo;
+    HksExternalErrorInfoIdl errorInfo = {0, "", false};
     EXPECT_EQ(hksCryptoExtStubImpl.GenerateKey(index, params, errorInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
     HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
     EXPECT_EQ(hksCryptoExtStubImplNullptr.GenerateKey(index, params, errorInfo), HKS_ERROR_EXT_NULLPTR);
@@ -234,7 +234,7 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0013, testing
     std::string wrappingKeyIndex;
     CppParamSet params;
     std::vector<uint8_t> wrappedData;
-    HksExternalErrorInfoIdl errorInfo;
+    HksExternalErrorInfoIdl errorInfo = {0, "", false};
     EXPECT_EQ(hksCryptoExtStubImpl.ImportWrappedKey(
         index, wrappingKeyIndex, params, wrappedData, errorInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
     HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);
@@ -249,7 +249,7 @@ HWTEST_F(CryptoExtAbilityStubTest, HksCryptoExtStubTestAbilityTest_0014, testing
     std::string index;
     CppParamSet params;
     std::vector<uint8_t> outData;
-    HksExternalErrorInfoIdl errorInfo;
+    HksExternalErrorInfoIdl errorInfo = {0, "", false};
     EXPECT_EQ(hksCryptoExtStubImpl.ExportPublicKey(
         index, params, outData, errorInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
     HksCryptoExtStubImpl hksCryptoExtStubImplNullptr(nullptr);

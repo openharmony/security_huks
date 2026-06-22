@@ -171,7 +171,8 @@ void HksExtStub::SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &se
         HksFreeExternalErrorInfo(mErrInfo);
         mErrInfo = nullptr;
     }
-    HKS_IF_TRUE_EXCU(errInfo != nullptr, mErrInfo = HksCreateExternalErrorInfo(errInfo->errVal, errInfo->errorDesc));
+    HKS_IF_TRUE_EXCU(errInfo != nullptr,
+        mErrInfo = HksCreateExternalErrorInfoWithFlag(errInfo->errVal, errInfo->errorDesc, errInfo->hasErrorInfo));
     mCv.notify_all();
 }
 
@@ -181,7 +182,7 @@ int HksExtStub::ProcessExtGetRemotePropertyReply(MessageParcel& data)
     uint32_t errCode = 1;
     if (!data.ReadUint32(errCode) || errCode != HKS_SUCCESS) {
         HKS_LOG_E("ipc client read errCode %" LOG_PUBLIC "u", errCode);
-        struct HksExternalErrorInfo errInfo = {errCode, nullptr, 0};
+        struct HksExternalErrorInfo errInfo = {errCode, nullptr, 0, false};
         SendAsyncReply(errCode, receivedData, 0, HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY_REPLY, &errInfo);
         return ERR_INVALID_DATA;
     }
@@ -206,13 +207,13 @@ int HksExtStub::ProcessExtGetRemotePropertyReply(MessageParcel& data)
     } while (false);
 
     int32_t errVal = 0;
-    if (!data.ReadInt32(errVal)) {
-        HKS_LOG_E("ReadInt32 errVal failed");
-        errVal = static_cast<int32_t>(errCode);
-    }
-    char *errorDesc = nullptr;
+    HKS_IF_TRUE_EXCU(!data.ReadInt32(errVal), errVal = static_cast<int32_t>(errCode));
     uint32_t descLen = 0;
-    if (data.ReadUint32(descLen) && descLen > 0 && descLen < MAX_ERROR_MESSAGE_LEN) {
+    bool hasErrorInfo = false;
+    HKS_IF_TRUE_EXCU(!data.ReadUint32(descLen), descLen = 0);
+    HKS_IF_TRUE_EXCU(!data.ReadBool(hasErrorInfo), hasErrorInfo = false);
+    char *errorDesc = nullptr;
+    if (descLen > 0 && descLen < MAX_ERROR_MESSAGE_LEN) {
         const char *descPtr = reinterpret_cast<const char *>(data.ReadBuffer(descLen));
         if (descPtr != nullptr) {
             errorDesc = reinterpret_cast<char *>(HksMalloc(descLen + 1));
@@ -220,7 +221,7 @@ int HksExtStub::ProcessExtGetRemotePropertyReply(MessageParcel& data)
                 errorDesc[descLen] = '\0');
         }
     }
-    struct HksExternalErrorInfo errInfo = {errVal, errorDesc, descLen};
+    struct HksExternalErrorInfo errInfo = {errVal, errorDesc, descLen, hasErrorInfo};
     SendAsyncReply(errCode, receivedData, receivedSize, HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY, &errInfo);
     HKS_IF_TRUE_EXCU(errorDesc != nullptr, HKS_FREE(errorDesc));
     return err;
@@ -281,11 +282,14 @@ void HksExtProxy::WriteErrorInfoToParcel(MessageParcel &data, const struct HksEx
     int32_t errVal = (errInfo != nullptr) ? errInfo->errVal : 0;
     uint32_t descLen = (errInfo != nullptr && errInfo->errorDesc != nullptr) ? errInfo->errorDescLen : 0;
     const char *errorDesc = (errInfo != nullptr && errInfo->errorDesc != nullptr) ? errInfo->errorDesc : "";
+    bool hasErrorInfo = (errInfo != nullptr) ? errInfo->hasErrorInfo : false;
 
     bool writeResult = data.WriteInt32(errVal);
     HKS_IF_NOT_TRUE_LOGE(writeResult, "WriteInt32 errVal %" LOG_PUBLIC "d failed", errVal)
     writeResult = data.WriteUint32(descLen);
     HKS_IF_NOT_TRUE_LOGE(writeResult, "WriteUint32 descLen %" LOG_PUBLIC "u failed", descLen)
+    writeResult = data.WriteBool(hasErrorInfo);
+    HKS_IF_NOT_TRUE_LOGE(writeResult, "WriteBool hasErrorInfo failed")
     if (descLen > 0 && descLen < MAX_ERROR_MESSAGE_LEN) {
         writeResult = data.WriteBuffer(errorDesc, descLen);
         HKS_IF_NOT_TRUE_LOGE(writeResult, "WriteBuffer errorDesc failed")

@@ -33,11 +33,11 @@ void HksAppendThreadExtErrMsg(int32_t errVal, const char *errorDesc)
     }
 
     if (errorDesc == NULL || strlen(errorDesc) == 0) {
-        g_threadUkeyExtErrInfo = HksCreateExternalErrorInfo(errVal, "");
+        g_threadUkeyExtErrInfo = HksCreateExternalErrorInfoWithFlag(errVal, "", true);
         return;
     }
 
-    g_threadUkeyExtErrInfo = HksCreateExternalErrorInfo(errVal, errorDesc);
+    g_threadUkeyExtErrInfo = HksCreateExternalErrorInfoWithFlag(errVal, errorDesc, true);
     if (g_threadUkeyExtErrInfo == NULL) {
         HKS_LOG_E("HksAppendThreadExtErrMsg: create errInfo failed");
     }
@@ -63,7 +63,8 @@ void HksClearThreadExtErrMsg(void)
     }
 }
 
-struct HksExternalErrorInfo* HksCreateExternalErrorInfo(int32_t errVal, const char *errorDesc)
+struct HksExternalErrorInfo* HksCreateExternalErrorInfoWithFlag(int32_t errVal,
+    const char *errorDesc, bool hasErrorInfo)
 {
     struct HksExternalErrorInfo *errInfo = (struct HksExternalErrorInfo*)HksMalloc(sizeof(struct HksExternalErrorInfo));
     HKS_IF_NULL_RETURN(errInfo, NULL)
@@ -71,6 +72,7 @@ struct HksExternalErrorInfo* HksCreateExternalErrorInfo(int32_t errVal, const ch
     errInfo->errVal = errVal;
     errInfo->errorDesc = NULL;
     errInfo->errorDescLen = 0;
+    errInfo->hasErrorInfo = hasErrorInfo;
 
     if (errorDesc == NULL || strlen(errorDesc) == 0) {
         errInfo->errorDesc = (char*)HksMalloc(1);

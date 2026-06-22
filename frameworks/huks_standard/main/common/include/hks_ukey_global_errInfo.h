@@ -22,27 +22,26 @@ extern "C" {
 #endif
 
 #define HKS_UKEY_ERROR_DESC_MAX_LEN 256
+#define HKS_UKEY_ERROR_PREFIX "CryptoExtensionError: "
+#define HKS_UKEY_ERROR_PREFIX_LEN 22
+#define HKS_UKEY_ERROR_BUFFER_SIZE (HKS_UKEY_ERROR_DESC_MAX_LEN + HKS_UKEY_ERROR_PREFIX_LEN + 1)
 
 extern struct HksUkeyGlobalInfo g_ukeyGlobalInfo;
 struct HksUkeyGlobalInfo {
     int32_t errVal;
-    char errorDesc[HKS_UKEY_ERROR_DESC_MAX_LEN];
+    char errorDesc[HKS_UKEY_ERROR_BUFFER_SIZE];
 };
 
 void HksSetUkeyGlobalInfo(int32_t errVal, const char *errorDesc);
 
-int32_t HksGetUkeyGlobalErrVal(void);
-
-void HksGetUkeyGlobalErrorDesc(char *buf, uint32_t bufLen);
+void HksGetUkeyGlobalInfo(int32_t *errVal, char *errorDesc, uint32_t descLen);
 
 void HksClearUkeyGlobalInfo(void);
 
 // Alias for C API
 #define HKS_SET_UKEY_GLOBAL_INFO_C HksSetUkeyGlobalInfo
 
-#define HKS_GET_UKEY_GLOBAL_ERR_VAL_C HksGetUkeyGlobalErrVal
-
-#define HKS_GET_UKEY_GLOBAL_ERR_DESC_C HksGetUkeyGlobalErrorDesc
+#define HKS_GET_UKEY_GLOBAL_INFO_C HksGetUkeyGlobalInfo
 
 #define HKS_CLEAR_UKEY_GLOBAL_INFO_C HksClearUkeyGlobalInfo
 

@@ -40,6 +40,7 @@ public:
         HksExternalErrorInfoIdl& errorInfo)
     {
         errorInfo.errVal = HKS_SUCCESS;
+        errorInfo.hasErrorInfo = false;
         errorInfo.errorDesc.assign("");
         return HKS_SUCCESS;
     }
@@ -50,6 +51,7 @@ public:
         HksExternalErrorInfoIdl& errorInfo)
     {
         errorInfo.errVal = HKS_SUCCESS;
+        errorInfo.hasErrorInfo = false;
         errorInfo.errorDesc.assign("");
         return HKS_SUCCESS;
     }
@@ -62,6 +64,7 @@ public:
         uint32_t& retryCnt)
     {
         errorInfo.errVal = HKS_SUCCESS;
+        errorInfo.hasErrorInfo = false;
         errorInfo.errorDesc.assign("");
         return HKS_SUCCESS;
     }
@@ -73,6 +76,7 @@ public:
         HksExternalErrorInfoIdl& errorInfo)
     {
         errorInfo.errVal = HKS_SUCCESS;
+        errorInfo.hasErrorInfo = false;
         errorInfo.errorDesc.assign("");
         return HKS_SUCCESS;
     }
@@ -85,6 +89,7 @@ public:
         HksExternalErrorInfoIdl& errorInfo)
     {
         errorInfo.errVal = HKS_SUCCESS;
+        errorInfo.hasErrorInfo = false;
         errorInfo.errorDesc.assign("");
         return HKS_SUCCESS;
     }
@@ -97,6 +102,7 @@ public:
         HksExternalErrorInfoIdl& errorInfo)
     {
         errorInfo.errVal = HKS_SUCCESS;
+        errorInfo.hasErrorInfo = false;
         errorInfo.errorDesc.assign("");
         return HKS_SUCCESS;
     }
@@ -110,12 +116,14 @@ public:
         CommJsonObject certArray = CommJsonObject::CreateArray();
         if (certArray.IsNull()) {
             errorInfo.errVal = HKS_ERROR_MALLOC_FAIL;
+            errorInfo.hasErrorInfo = false;
             return ERR_OK;
         }
 
         CommJsonObject certObj = CommJsonObject::CreateObject();
         if (certObj.IsNull()) {
             errorInfo.errVal = HKS_ERROR_MALLOC_FAIL;
+            errorInfo.hasErrorInfo = false;
             return ERR_OK;
         }
 
@@ -123,16 +131,19 @@ public:
             !certObj.SetValue("index", std::string("test_cert_index")) ||
             !certObj.SetValue("cert", std::string("MIIBIjANBgkqh"))) {
             errorInfo.errVal = HKS_ERROR_JSON_SERIALIZE_FAILED;
+            errorInfo.hasErrorInfo = false;
             return ERR_OK;
         }
 
         if (!certArray.AppendElement(certObj)) {
             errorInfo.errVal = HKS_ERROR_JSON_SERIALIZE_FAILED;
+            errorInfo.hasErrorInfo = false;
             return ERR_OK;
         }
 
         certJsonArr = certArray.Serialize(false);
         errorInfo.errVal = HKS_SUCCESS;
+        errorInfo.hasErrorInfo = false;
         return ERR_OK; 
     };
 
@@ -144,12 +155,14 @@ public:
         CommJsonObject certArray = CommJsonObject::CreateArray();
         if (certArray.IsNull()) {
             errorInfo.errVal = HKS_ERROR_MALLOC_FAIL;
+            errorInfo.hasErrorInfo = false;
             return ERR_OK;
         }
         for (int i = 0; i < 3; i++) {
             CommJsonObject certObj = CommJsonObject::CreateObject();
             if (certObj.IsNull()) {
                 errorInfo.errVal = HKS_ERROR_MALLOC_FAIL;
+                errorInfo.hasErrorInfo = false;
                 return ERR_OK;
             }
 
@@ -160,15 +173,18 @@ public:
                 !certObj.SetValue("index", indexStr) ||
                 !certObj.SetValue("cert", certData)) {
                 errorInfo.errVal = HKS_ERROR_JSON_SERIALIZE_FAILED;
+                errorInfo.hasErrorInfo = false;
                 return ERR_OK;
             }
             if (!certArray.AppendElement(certObj)) {
                 errorInfo.errVal = HKS_ERROR_JSON_SERIALIZE_FAILED;
+                errorInfo.hasErrorInfo = false;
                 return ERR_OK;
             }
         }
         certJsonArr = certArray.Serialize(false);
         errorInfo.errVal = HKS_SUCCESS;
+        errorInfo.hasErrorInfo = false;
         return ERR_OK; 
     };
 
@@ -179,6 +195,7 @@ public:
         HksExternalErrorInfoIdl& errorInfo)
     {
         errorInfo.errVal = HKS_SUCCESS;
+        errorInfo.hasErrorInfo = false;
         errorInfo.errorDesc.assign("");
         return HKS_SUCCESS;
     }
@@ -191,6 +208,7 @@ public:
         HksExternalErrorInfoIdl& errorInfo)
     {
         errorInfo.errVal = HKS_SUCCESS;
+        errorInfo.hasErrorInfo = false;
         errorInfo.errorDesc.assign("");
         return HKS_SUCCESS;
     }
@@ -203,6 +221,7 @@ public:
         HksExternalErrorInfoIdl& errorInfo)
     {
         errorInfo.errVal = HKS_SUCCESS;
+        errorInfo.hasErrorInfo = false;
         errorInfo.errorDesc.assign("");
         return HKS_SUCCESS;
     }
@@ -215,6 +234,7 @@ public:
         HksExternalErrorInfoIdl& errorInfo)
     {
         errorInfo.errVal = HKS_SUCCESS;
+        errorInfo.hasErrorInfo = false;
         errorInfo.errorDesc.assign("");
         return HKS_SUCCESS;
     }
@@ -225,6 +245,7 @@ public:
         HksExternalErrorInfoIdl& errorInfo)
     {
         errorInfo.errVal = HKS_SUCCESS;
+        errorInfo.hasErrorInfo = false;
         errorInfo.errorDesc.assign("");
         return HKS_SUCCESS;
     }
@@ -235,6 +256,7 @@ public:
         HksExternalErrorInfoIdl& errorInfo)
     {
         errorInfo.errVal = HKS_SUCCESS;
+        errorInfo.hasErrorInfo = false;
         errorInfo.errorDesc.assign("");
         return HKS_SUCCESS;
     }
@@ -247,6 +269,7 @@ public:
         HksExternalErrorInfoIdl& errorInfo)
     {
         errorInfo.errVal = HKS_SUCCESS;
+        errorInfo.hasErrorInfo = false;
         errorInfo.errorDesc.assign("");
         return HKS_SUCCESS;
     }
@@ -258,6 +281,7 @@ public:
         HksExternalErrorInfoIdl& errorInfo)
     {
         errorInfo.errVal = HKS_SUCCESS;
+        errorInfo.hasErrorInfo = false;
         errorInfo.errorDesc.assign("");
         return HKS_SUCCESS;
     }
@@ -269,6 +293,7 @@ public:
         HksExternalErrorInfoIdl& errorInfo)
     {
         errorInfo.errVal = HKS_SUCCESS;
+        errorInfo.hasErrorInfo = false;
         errorInfo.errorDesc.assign("");
         return HKS_SUCCESS;
     }
@@ -279,6 +304,7 @@ public:
         HksExternalErrorInfoIdl& errorInfo)
     {
         errorInfo.errVal = HKS_SUCCESS;
+        errorInfo.hasErrorInfo = false;
         errorInfo.errorDesc.assign("");
         return HKS_SUCCESS;
     }
