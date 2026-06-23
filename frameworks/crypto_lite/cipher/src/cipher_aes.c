@@ -118,8 +118,7 @@ static int32_t SetIv(const char *ivBuf, int32_t ivBufLen, AesCryptContext *ctx)
         return ERROR_CODE_GENERAL;
     }
 
-    if ((ctx->iv.ivOffset > (INT32_MAX - ctx->iv.ivLen)) || (ivBufLen < (ctx->iv.ivOffset + ctx->iv.ivLen))
-        || (ctx->iv.ivOffset < 0) || (ctx->iv.ivLen <= 0)) {
+    if ((ivBufLen < (ctx->iv.ivOffset + ctx->iv.ivLen)) || (ctx->iv.ivOffset < 0) || (ctx->iv.ivLen <= 0)) {
         CIPHER_LOG_E("ivLen or ivOffset err.");
         return ERROR_CODE_GENERAL;
     }
