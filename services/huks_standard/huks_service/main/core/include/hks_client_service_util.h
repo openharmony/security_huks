@@ -68,6 +68,8 @@ int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct HksBlo
 int32_t CheckKeyCondition(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet);
 
+int32_t AppendKeyBlobToParamSet(const struct HksParamSet *paramSet, const struct HksBlob *keyBlob,
+    struct HksParamSet **outParamSet);
 #ifdef __cplusplus
 }
 #endif

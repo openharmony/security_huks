@@ -513,17 +513,20 @@ static int32_t HksMlKemImport(const struct HksParamSet *sharedKeyParamSet, struc
     return ret;
 }
 
-int32_t HksCoreEncapsulate(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+int32_t HksCoreEncapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParamSet,
     struct HksEncapsulationResult *encapResult)
 {
+    struct HksParam *keyParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY, &keyParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "HksCoreEncapsulate get key param fail")
+
     struct HksParam *keyalg;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &keyalg);
+    ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &keyalg);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL, "HksCoreEncapsulate get key alg failed")
     HKS_IF_TRUE_LOGE_RETURN((keyalg->uint32Param != HKS_ALG_ML_KEM), HKS_ERROR_INVALID_ALGORITHM,
         "encaps alg is not ml-kem")
     
-    struct HksKeyNode *keyNode = HksGenerateKeyNode(key);
+    struct HksKeyNode *keyNode = HksGenerateKeyNode(&keyParam->blob);
     HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_CORRUPT_FILE, "Encapsulate generate keynode failed")
 
     struct HksEncapsulationResult tmp = {{0, NULL}, {0, NULL}};
@@ -573,18 +576,21 @@ int32_t HksCoreEncapsulate(const struct HksBlob *key, const struct HksParamSet *
     return ret;
 }
 
-int32_t HksCoreDecapsulate(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    const struct HksParamSet *sharedKeyParamSet, const struct HksBlob *encaps,
-    struct HksBlob *sharedSecret)
+int32_t HksCoreDecapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParamSet,
+    const struct HksBlob *encaps, struct HksBlob *sharedSecret)
 {
+    struct HksParam *keyParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY, &keyParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "HksCoreDecapsulate get key param fail")
+
     struct HksParam *keyalg;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &keyalg);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL, "HksCoreEncapsulate get key alg failed")
+    ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &keyalg);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL, "HksCoreDecapsulate get key alg failed")
     HKS_IF_TRUE_LOGE_RETURN((keyalg->uint32Param != HKS_ALG_ML_KEM), HKS_ERROR_INVALID_ALGORITHM,
         "decaps alg is not ml-kem")
 
     struct HksBlob outKey = { 0, NULL };
-    struct HksKeyNode *keyNode = HksGenerateKeyNode(key);
+    struct HksKeyNode *keyNode = HksGenerateKeyNode(&keyParam->blob);
     HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_CORRUPT_FILE, "Decapsulate generate keynode failed")
     struct HksBlob rawKey = { 0, NULL };
 
@@ -616,11 +622,9 @@ int32_t HksCoreDecapsulate(const struct HksBlob *key, const struct HksParamSet *
     return ret;
 }
 #else
-int32_t HksCoreDecapsulate(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    const struct HksParamSet *sharedKeyParamSet, const struct HksBlob *encaps,
-    struct HksBlob *sharedSecret)
+int32_t HksCoreDecapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParamSet,
+    const struct HksBlob *encaps, struct HksBlob *sharedSecret)
 {
-    (void)key;
     (void)paramSet;
     (void)sharedKeyParamSet;
     (void)encaps;
@@ -628,12 +632,9 @@ int32_t HksCoreDecapsulate(const struct HksBlob *key, const struct HksParamSet *
     return HKS_ERROR_NOT_SUPPORTED;
 }
 
-int32_t HksCoreEncapsulate(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+int32_t HksCoreEncapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParamSet,
     struct HksEncapsulationResult *encapResult)
 {
-    (void)key;
-    (void)sharedKeyAlias;
     (void)paramSet;
     (void)sharedKeyParamSet;
     (void)encapResult;
