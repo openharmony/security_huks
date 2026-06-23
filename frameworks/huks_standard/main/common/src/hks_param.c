@@ -240,8 +240,7 @@ static int32_t CheckBeforeAddParams(const struct HksParamSet *paramSet, const st
     }
 
     for (uint32_t i = 0; i < paramCnt; i++) {
-        if ((GetTagType((enum HksTag)(params[i].tag)) == HKS_TAG_TYPE_BYTES) &&
-            (params[i].blob.data == NULL || params[i].blob.size == 0)) {
+        if ((GetTagType((enum HksTag)(params[i].tag)) == HKS_TAG_TYPE_BYTES) && (params[i].blob.data == NULL)) {
             HKS_LOG_E("invalid blob param!");
             return HKS_ERROR_INVALID_ARGUMENT;
         }
