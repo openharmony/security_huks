@@ -578,12 +578,11 @@ static int32_t CoreSignVerify(const struct HuksKeyNode *keyNode, const struct Hk
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "SignVerify get raw key failed!")
 
     struct HksUsageSpec usageSpec;
-    struct HksBlob context = { 0, NULL };
-    usageSpec.algParam = (void *)&context;
-
     (void)memset_s(&usageSpec, sizeof(struct HksUsageSpec), 0, sizeof(struct HksUsageSpec));
     HksFillUsageSpec(keyNode->runtimeParamSet, &usageSpec);
     SetRsaPssSaltLenType(keyNode->runtimeParamSet, &usageSpec);
+    struct HksBlob context = { 0, NULL };
+    usageSpec.algParam = (void *)&context;
 
     if ((usageSpec.algType == HKS_ALG_RSA) && (usageSpec.padding == HKS_PADDING_ISO_IEC_9796_2)) {
 #ifdef HKS_SUPPORT_RSA_ISO_IEC_9796_2
