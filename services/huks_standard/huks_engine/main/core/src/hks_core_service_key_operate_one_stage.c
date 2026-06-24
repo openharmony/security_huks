@@ -473,6 +473,9 @@ static int32_t HksMlKemImport(const struct HksParamSet *sharedKeyParamSet, struc
         return HKS_SUCCESS;
     }
 
+    HKS_IF_TRUE_LOGE_RETURN((keySize != NULL && HKS_KEY_BYTES(keySize->uint32Param) != HKS_ML_KEM_SHARED_SECRET_LEN),
+        HKS_ERROR_INVALID_KEY_SIZE, "kem shared key size not equals to 256!")
+
     struct HksParam *sharedKeyAlias = NULL;
     ret = HksGetParam(sharedKeyParamSet, HKS_TAG_KEY_ALIAS, &sharedKeyAlias);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "can not get key alias");
