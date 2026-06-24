@@ -81,6 +81,7 @@
           "hilog_lite",
           "ipc",
           "napi",
+          "node",
           "os_account",
           "safwk",
           "samgr",

@@ -36,6 +36,7 @@ ohos_shared_library("cipher_napi") {
     "bounds_checking_function:libsec_shared",
     "hilog:libhilog",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 
   cflags_cc = [
