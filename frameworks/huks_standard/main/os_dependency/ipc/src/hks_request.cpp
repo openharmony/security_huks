@@ -93,7 +93,7 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
     bool hasErrorInfo = false;
     HKS_IF_NOT_TRUE_LOGE_RETURN(reply.ReadBool(hasErrorInfo), ret, "ReadBool hasErrorInfo failed")
     const char *errorDesc = "";
-    if (descLen != 0 && descLen < MAX_EXT_ERROR_MESSAGE_LEN) {
+    if (descLen != 0) {
         const uint8_t *buffer = reply.ReadBuffer(descLen);
         HKS_IF_NULL_LOGE_RETURN(buffer, ret, "ReadBuffer errorDesc failed")
         errorDesc = (const char *)buffer;
