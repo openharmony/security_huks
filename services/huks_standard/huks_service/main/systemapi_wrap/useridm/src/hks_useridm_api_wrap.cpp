@@ -219,7 +219,7 @@ int32_t HksUserIdmGetSecInfo(int32_t userId, struct SecInfoWrap **outSecInfo) //
         HKS_ERROR_GET_USERIAM_SECINFO_FAILED,
         "GetSecUserInfo fail ret %" LOG_PUBLIC "d isCallbacked %" LOG_PUBLIC "d", ret, mCallback->isCallbacked);
 
-    HKS_IF_TRUE_LOGE_RETURN(((**outSecInfo).secureUid == userId), HKS_ERROR_CREDENTIAL_NOT_EXIST,
+    HKS_IF_TRUE_LOGE_RETURN(((**outSecInfo).secureUid == static_cast<uint64_t>(userId)), HKS_ERROR_CREDENTIAL_NOT_EXIST,
         "no credential enrolled for userId %" LOG_PUBLIC "d", userId);
     HKS_LOG_I("GetSecUserInfo succ! ret %" LOG_PUBLIC "d", ret);
     return HKS_SUCCESS;

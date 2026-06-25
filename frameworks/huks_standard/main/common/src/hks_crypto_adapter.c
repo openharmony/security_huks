@@ -544,7 +544,9 @@ static int32_t FormatDsaKey(const struct HksBlob *keyIn, struct HksParamSet *par
     struct KeyMaterialDsa *keyMaterial = (struct KeyMaterialDsa *)keyIn->data;
     uint32_t publicKeySize = sizeof(struct KeyMaterialDsa) + keyMaterial->ySize + keyMaterial->pSize +
                              keyMaterial->qSize + keyMaterial->gSize;
-    if (keyIn->size < publicKeySize) {
+    // publicKeySize not includes the xSize, but keyIn->size contain the xSize
+    // the size has already been verified in the previous process: DsaSaveKeyMaterial, integer overflow will not occured
+    if (keyIn->size < publicKeySize + keyMaterial->xSize) {
         HKS_LOG_E("invalid key info.");
         return HKS_ERROR_INVALID_KEY_INFO;
     }

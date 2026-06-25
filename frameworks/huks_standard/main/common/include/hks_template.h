@@ -29,6 +29,11 @@
 #define HKS_NULL_POINTER NULL
 #endif
 
+/*
+ * Align to 4-tuple
+ */
+#define ALIGN_SIZE(size) ((size) > 0xfffffffc ? 0xffffffff : ((((uint32_t)(size) + 3) >> 2) << 2))
+
 #define HKS_IF_NOT_SUCC_LOGE_RETURN(RESULT, ERROR_CODE, LOG_MESSAGE, ...) \
 if ((RESULT) != HKS_SUCCESS) { \
     HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \

@@ -25,6 +25,7 @@
 #include "hks_type_enum.h"
 #include "hks_ipc_serialization.h"
 #include "hks_ipc_check.h"
+#include "hks_template.h"
 
 using namespace testing::ext;
 using namespace OHOS;

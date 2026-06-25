@@ -100,13 +100,15 @@ static int32_t AppendFilePath(const char *path, const char *fileName, struct Hks
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "re-alloc old file info list failed.")
     }
     struct HksReadFileInfo *info = &infos->infos[infos->occu]; // the (infos->occu + 1)th info
+    size_t pathLen = strlen(path) + 1;
+    size_t fileNameLen = strlen(fileName) + 1;
     do {
-        info->path = (char *)HksMalloc(strlen(path) + 1);
+        info->path = (char *)HksMalloc(pathLen);
         HKS_IF_NULL_BREAK(info->path)
-        info->fileName = (char *)HksMalloc(strlen(fileName) + 1);
+        info->fileName = (char *)HksMalloc(fileNameLen);
         HKS_IF_NULL_BREAK(info->fileName)
-        (void)memcpy_s(info->path, strlen(path), path, strlen(path));
-        (void)memcpy_s(info->fileName, strlen(fileName), fileName, strlen(fileName));
+        (void)memcpy_s(info->path, pathLen, path, pathLen);
+        (void)memcpy_s(info->fileName, fileNameLen, fileName, fileNameLen);
         infos->occu += 1;
 
         return HKS_SUCCESS;
