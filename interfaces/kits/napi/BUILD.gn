@@ -96,6 +96,7 @@ ohos_shared_library("huks") {
     "c_utils:utils",
     "hilog:libhilog",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 
   cflags_cc = [
@@ -150,6 +151,7 @@ ohos_shared_library("huksexternalcrypto_napi") {
     "c_utils:utils",
     "hilog:libhilog",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
   cflags_cc = [
     "-Wall",

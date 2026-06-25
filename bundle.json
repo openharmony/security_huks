@@ -93,7 +93,8 @@
           "mbedtls",
           "cJSON",
           "init",
-          "ets_frontend"
+          "ets_frontend",
+          "libuv"
         ]
       },
       "build": {
