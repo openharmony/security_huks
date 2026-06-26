@@ -98,13 +98,11 @@ int32_t HuksAccessGetErrorInfo(struct HksBlob *errorInfo);
 
 int32_t HuksAccessGetStatInfo(struct HksBlob *statInfo);
 
-int32_t HuksAccessEncapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+int32_t HuksAccessEncapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParam,
     struct HksEncapsulationResult *encapResult);
 
-int32_t HuksAccessDecapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    const struct HksParamSet *sharedKeyParamSet, struct HksBlob *encapsData, struct HksBlob *hdiSharedSecret);
-
+int32_t HuksAccessDecapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParam,
+    struct HksBlob *encapsData, struct HksBlob *hdiSharedSecret);
 #ifdef __cplusplus
 }
 #endif

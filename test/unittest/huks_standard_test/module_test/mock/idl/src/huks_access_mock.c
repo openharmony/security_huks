@@ -198,16 +198,15 @@ ENABLE_CFI(int32_t HuksAccessGetStatInfo(struct HksBlob *statInfo))
 }
 
 #ifndef _CUT_AUTHENTICATE_
-ENABLE_CFI(int32_t HuksAccessEncapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+ENABLE_CFI(int32_t HuksAccessEncapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParam,
     struct HksEncapsulationResult *encapResult))
 {
-    return HksCoreEncapsulate(keyAlias, paramSet, sharedKeyAlias, sharedKeyParamSet, encapResult);
+    return HksCoreEncapsulate(paramSet, sharedKeyParam, encapResult);
 }
 
-ENABLE_CFI(int32_t HuksAccessDecapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    const struct HksParamSet *sharedKeyParamSet, struct HksBlob *encapsulatedData, struct HksBlob *sharedSecret))
+ENABLE_CFI(int32_t HuksAccessDecapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParam,
+    struct HksBlob *encapsData, struct HksBlob *hdiSharedSecret))
 {
-    return HksCoreDecapsulate(keyAlias, paramSet, sharedKeyParamSet, encapsulatedData, sharedSecret);
+    return HksCoreDecapsulate(paramSet, sharedKeyParam, encapsData, hdiSharedSecret);
 }
 #endif

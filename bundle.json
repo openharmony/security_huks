@@ -67,6 +67,7 @@
       "ram": "4828KByte",
       "deps": {
         "components": [
+          "hdf_core",
           "ability_base",
           "ability_runtime",
           "access_token",
@@ -89,6 +90,7 @@
           "drivers_interface_user_auth",
           "drivers_interface_huks",
           "openssl",
+          "openhitls",
           "bounds_checking_function",
           "mbedtls",
           "cJSON",

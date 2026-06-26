@@ -14,6 +14,7 @@
  */
 
 #include "hks_error_code.h"
+#include "hks_openssl_engine.h"
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
 #else
@@ -114,12 +115,12 @@ static int32_t MlKemEncapsulate(EVP_PKEY *pkey, struct HksEncapsulationResult *e
     } while (0);
 
     EVP_PKEY_CTX_free(ctx);
-    if (sslRet != HKS_OPENSSL_SUCCESS) {
+    if (ret != HKS_SUCCESS) {
         HKS_FREE(encapResult->encapsulatedData.data);
         HKS_FREE(encapResult->sharedSecret.data);
         encapResult->encapsulatedData.size = 0;
         encapResult->sharedSecret.size = 0;
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+        HKS_IF_TRUE_LOGE_RETURN((sslRet != HKS_OPENSSL_SUCCESS), HKS_ERROR_CRYPTO_ENGINE_ERROR, "kem fail")
     }
     return ret;
 }
@@ -228,10 +229,10 @@ static int32_t MlKemDecapsulate(EVP_PKEY *pkey, const struct HksBlob *ciphertext
     } while (0);
 
     EVP_PKEY_CTX_free(ctx);
-    if (sslRet != HKS_OPENSSL_SUCCESS) {
+    if (ret != HKS_SUCCESS) {
         HKS_FREE(sharedSecret->data);
         sharedSecret->size = 0;
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+        HKS_IF_TRUE_LOGE_RETURN((sslRet != HKS_OPENSSL_SUCCESS), HKS_ERROR_CRYPTO_ENGINE_ERROR, "kem fail");
     }
 
     return ret;

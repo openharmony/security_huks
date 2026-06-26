@@ -2635,6 +2635,7 @@ int32_t HksServiceEncapsulate(const struct HksProcessInfo *processInfo, const st
     (void)HksElapsedRealTime(&startTime);
     struct HksParamSet *newParamSet = NULL;
     struct HksParamSet *newShareParamSet = NULL;
+    struct HksParamSet *finalParamSet = NULL;
     struct HksBlob keyFromFile = { 0, NULL };
     struct HksHitraceId traceId = {0};
 
@@ -2649,11 +2650,10 @@ int32_t HksServiceEncapsulate(const struct HksProcessInfo *processInfo, const st
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "encapsulate: get key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
 
-        struct HksParam *sharedKeyAlias = NULL;
-        ret = HksGetParam(newShareParamSet, HKS_TAG_KEY_ALIAS, &sharedKeyAlias);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceEncapsulate get shared key alias fail")
-        ret = HuksAccessEncapsulate(&keyFromFile, newParamSet, &sharedKeyAlias->blob,
-            newShareParamSet, encapResult);
+        ret = AppendKeyBlobToParamSet(newParamSet, &keyFromFile, &finalParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "encapsulate: appennd key blob to paramSet failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HuksAccessEncapsulate(finalParamSet, newShareParamSet, encapResult);
         IfNotSuccAppendHdiErrorInfo(ret);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAccessEncapsulate fail")
 
@@ -2688,6 +2688,7 @@ int32_t HksServiceDecapsulate(const struct HksProcessInfo *processInfo, const st
     (void)HksElapsedRealTime(&startTime);
     struct HksParamSet *newParamSet = NULL;
     struct HksParamSet *newSharedKeyParamSet = NULL;
+    struct HksParamSet *finalParamSet = NULL;
     struct HksBlob keyFromFile = { 0, NULL };
     struct HksHitraceId traceId = {0};
     struct HksBlob outData = { 0, NULL };
@@ -2706,7 +2707,10 @@ int32_t HksServiceDecapsulate(const struct HksProcessInfo *processInfo, const st
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "decapsulate: get key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HuksAccessDecapsulate(&keyFromFile, newParamSet, newSharedKeyParamSet, encapOrsharedSecret, &outData);
+        ret = AppendKeyBlobToParamSet(newParamSet, &keyFromFile, &finalParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "decapsulate: appennd key blob to paramSet failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HuksAccessDecapsulate(finalParamSet, newSharedKeyParamSet, encapOrsharedSecret, &outData);
         IfNotSuccAppendHdiErrorInfo(ret);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAccessEncapsulate fail")
 
