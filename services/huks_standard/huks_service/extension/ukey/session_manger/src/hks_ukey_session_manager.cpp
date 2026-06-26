@@ -127,10 +127,9 @@ int32_t HksSessionManager::ExtensionInitSession(struct HksProcessWithErrorInfo &
     auto ipcCode = proxy->InitSession(sIndexHandle, newParamSet, sessionHandle, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy InitSession ipcCode: %" LOG_PUBLIC "d",
         ipcCode)
-    HKS_IF_TRUE_EXCU(errorInfo.errVal != EXTENSION_SUCCESS,
-        processAndError.errInfo = HksCreateExternalErrorInfoWithFlag(errorInfo.errVal,
-            errorInfo.errorDesc.c_str(), errorInfo.hasErrorInfo));
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_initSessionErrCodeMapping);
+    HksExtRecordErrInfo(errorInfo, errInfo);
+    
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "proxy InitSession get handle failed: %" LOG_PUBLIC "d", ret)
 
     auto random = GenRandomUint32();
@@ -165,10 +164,9 @@ int32_t HksSessionManager::ExtensionUpdateSession(struct HksProcessWithErrorInfo
     auto ipcCode = proxy->UpdateSession(handleInfo.m_skfSessionHandle, newParamSet, inData, outData, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy UpdateSession ipcCode: %" LOG_PUBLIC "d",
         ipcCode)
-    HKS_IF_TRUE_EXCU(errorInfo.errVal != EXTENSION_SUCCESS,
-        processAndError.errInfo = HksCreateExternalErrorInfoWithFlag(errorInfo.errVal,
-            errorInfo.errorDesc.c_str(), errorInfo.hasErrorInfo));
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_updateSessionErrCodeMapping);
+    HksExtRecordErrInfo(errorInfo, errInfo);
+    
     ClearSessionMapByHandle(ret, handle);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "proxy UpdateSession failed: %" LOG_PUBLIC "d", ret)
 
@@ -194,10 +192,9 @@ int32_t HksSessionManager::ExtensionFinishSession(struct HksProcessWithErrorInfo
     auto ipcCode = proxy->FinishSession(handleInfo.m_skfSessionHandle, newParamSet, inData, outData, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy FinishSession ipcCode: %" LOG_PUBLIC "d",
         ipcCode)
-    HKS_IF_TRUE_EXCU(errorInfo.errVal != EXTENSION_SUCCESS,
-        processAndError.errInfo = HksCreateExternalErrorInfoWithFlag(errorInfo.errVal,
-            errorInfo.errorDesc.c_str(), errorInfo.hasErrorInfo));
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_finishSessionErrCodeMapping);
+    HksExtRecordErrInfo(errorInfo, errInfo);
+    
     ClearSessionMapByHandle(ret, handle);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "FinishSession failed: %" LOG_PUBLIC "d", ret)
     m_handlers.Erase(handle);
@@ -224,10 +221,9 @@ int32_t HksSessionManager::ExtensionAbortSession(struct HksProcessWithErrorInfo 
     auto ipcCode = proxy->FinishSession(handleInfo.m_skfSessionHandle, newParamSet, tmpVec, tmpVec, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL,
         "proxy use CloseRemoteHandle to abort ipcCode: %" LOG_PUBLIC "d", ipcCode)
-    HKS_IF_TRUE_EXCU(errorInfo.errVal != EXTENSION_SUCCESS,
-        processAndError.errInfo = HksCreateExternalErrorInfoWithFlag(errorInfo.errVal,
-            errorInfo.errorDesc.c_str(), errorInfo.hasErrorInfo));
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_abortSessionErrCodeMapping);
+    HksExtRecordErrInfo(errorInfo, errInfo);
+    
     ClearSessionMapByHandle(ret, handle);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "abort closeRemoteHandle failed: %" LOG_PUBLIC "d", ret)
     m_handlers.Erase(handle);

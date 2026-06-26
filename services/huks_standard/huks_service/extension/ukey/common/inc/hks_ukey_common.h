@@ -73,6 +73,8 @@ namespace Huks {
         const std::map<int32_t, int32_t> &errorMapping);
     int32_t HksGetUserIdFromUid(const uint32_t &uid);
 
+    void HksExtRecordErrInfo(HksExternalErrorInfoIdl &errorInfo, struct HksExternalErrorInfo **errInfo);
+
     struct AbilityInfo {
         std::string abilityName{};
         std::string index{};
