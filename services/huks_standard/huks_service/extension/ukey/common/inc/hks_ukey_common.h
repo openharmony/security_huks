@@ -21,6 +21,8 @@
 #include <vector>
 #include <map>
 #include <hks_type.h>
+#include "hks_external_error_info.h"
+#include "hks_ext_error_info.h"
 
 namespace OHOS {
 namespace Security {

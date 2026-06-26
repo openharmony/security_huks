@@ -128,7 +128,7 @@ int32_t HksSessionManager::ExtensionInitSession(struct HksProcessWithErrorInfo &
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy InitSession ipcCode: %" LOG_PUBLIC "d",
         ipcCode)
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_initSessionErrCodeMapping);
-    HksExtRecordErrInfo(errorInfo, errInfo);
+    HksExtRecordErrInfo(errorInfo, &processAndError.errInfo);
     
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "proxy InitSession get handle failed: %" LOG_PUBLIC "d", ret)
 
@@ -165,7 +165,7 @@ int32_t HksSessionManager::ExtensionUpdateSession(struct HksProcessWithErrorInfo
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy UpdateSession ipcCode: %" LOG_PUBLIC "d",
         ipcCode)
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_updateSessionErrCodeMapping);
-    HksExtRecordErrInfo(errorInfo, errInfo);
+    HksExtRecordErrInfo(errorInfo, &processAndError.errInfo);
     
     ClearSessionMapByHandle(ret, handle);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "proxy UpdateSession failed: %" LOG_PUBLIC "d", ret)
@@ -193,7 +193,7 @@ int32_t HksSessionManager::ExtensionFinishSession(struct HksProcessWithErrorInfo
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy FinishSession ipcCode: %" LOG_PUBLIC "d",
         ipcCode)
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_finishSessionErrCodeMapping);
-    HksExtRecordErrInfo(errorInfo, errInfo);
+    HksExtRecordErrInfo(errorInfo, &processAndError.errInfo);
     
     ClearSessionMapByHandle(ret, handle);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "FinishSession failed: %" LOG_PUBLIC "d", ret)
@@ -222,7 +222,7 @@ int32_t HksSessionManager::ExtensionAbortSession(struct HksProcessWithErrorInfo 
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL,
         "proxy use CloseRemoteHandle to abort ipcCode: %" LOG_PUBLIC "d", ipcCode)
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_abortSessionErrCodeMapping);
-    HksExtRecordErrInfo(errorInfo, errInfo);
+    HksExtRecordErrInfo(errorInfo, &processAndError.errInfo);
     
     ClearSessionMapByHandle(ret, handle);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "abort closeRemoteHandle failed: %" LOG_PUBLIC "d", ret)

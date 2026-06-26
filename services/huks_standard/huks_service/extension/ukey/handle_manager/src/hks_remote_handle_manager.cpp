@@ -256,7 +256,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     HKS_IF_NULL_RETURN(proxy, ret)
 
     HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, "", false};
-    auto ipccode = proxy->AuthUkeyPin(handle, paramSet, newErrInfo, authOutParam.outStatus, authOutParam.retryCount);
+    auto ipccode = proxy->AuthUkeyPin(handle, paramSet, errorInfo, authOutParam.outStatus, authOutParam.retryCount);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_authPinErrCodeMapping);
     HksExtRecordErrInfo(errorInfo, errInfo);
@@ -389,9 +389,6 @@ int32_t HksRemoteHandleManager::FindRemoteAllCertificate(const HksProcessInfo &p
     HKS_IF_TRUE_LOGE_RETURN(combinedArray.IsNull(), HKS_ERROR_JSON_SERIALIZE_FAILED, "Create combined array failed")
     uint32_t failNum = 0;
 
-    HksExtRecordErrInfo(errorInfo, errInfo);
-
-
     HksExternalErrorInfoIdl firstErrorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, "", false};
     for (const auto &providerInfo : infos) {
         HKS_IF_TRUE_EXCU(ret != HKS_SUCCESS, ++failNum);
@@ -483,7 +480,7 @@ int32_t HksRemoteHandleManager::SetOrGetRemoteProperty(struct HksProcessWithErro
         newParamSet, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_getPropertyErrCodeMapping);
-    HksExtRecordErrInfo(errorInfo, errInfo);
+    HksExtRecordErrInfo(errorInfo, &processAndError.errInfo);
     
     ClearMapByHandle(ret, handle);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote SetOrGetProperty failed: %" LOG_PUBLIC "d", ret)
@@ -527,7 +524,7 @@ int32_t HksRemoteHandleManager::RemoteImportWrappedKey(struct HksProcessWithErro
     auto ipccode = proxy->ImportWrappedKey(newIndex, newWrappingKeyIndex, newParamSet, wrappedData, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_importWrappedKeyErrCodeMapping);
-    HksExtRecordErrInfo(errorInfo, errInfo);
+    HksExtRecordErrInfo(errorInfo, &processAndError.errInfo);
     
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote ImportWrappedKey failed: %" LOG_PUBLIC "d", ret)
 
@@ -556,7 +553,7 @@ int32_t HksRemoteHandleManager::RemoteExportPublicKey(struct HksProcessWithError
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK,
         HKS_ERROR_IPC_MSG_FAIL, "ExportPublicKey failed, ret = %" LOG_PUBLIC "d", ipccode)
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_exportPublicKeyErrCodeMapping);
-    HksExtRecordErrInfo(errorInfo, errInfo);
+    HksExtRecordErrInfo(errorInfo, &processAndError.errInfo);
     
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ExportPublicKey failed, ret = %" LOG_PUBLIC "d", ret)
 
@@ -585,7 +582,7 @@ int32_t HksRemoteHandleManager::ExtensionGenerateKey(struct HksProcessWithErrorI
     auto ipccode = proxy->GenerateKey(handle, newParamSet, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipccode != ERR_OK, HKS_ERROR_IPC_MSG_FAIL, "remote ipc failed: %" LOG_PUBLIC "d", ipccode)
     ret = ConvertExtensionToHksErrorCode(errorInfo.errVal, g_generateKeyErrCodeMapping);
-    HksExtRecordErrInfo(errorInfo, errInfo);
+    HksExtRecordErrInfo(errorInfo, &processAndError.errInfo);
     
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ExtensionGenerateKey failed, ret = %" LOG_PUBLIC "d", ret)
     HKS_LOG_I("leave HksRemoteHandleManager::GenerateKey, ret = %" LOG_PUBLIC "d", ret);
