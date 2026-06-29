@@ -30,6 +30,7 @@
 #include "hks_log.h"
 #include "hks_param.h"
 #include "hks_report_common.h"
+#include "hks_se_session_manager.h"
 #include "hks_session_manager.h"
 #include "hks_template.h"
 #include "hks_type.h"
@@ -153,7 +154,6 @@ static void GetKeyAccessInfo(const struct HksParamSet *paramSet, HksEventKeyAcce
 static void GetKeyInfo(const struct HksParamSet *paramSet, const struct HksBlob *keyAlias,
     const struct HksBlob *key, HksEventKeyInfo *keyInfo)
 {
-    keyInfo->keySecurityLevel = HKS_KEY_SECURITY_LEVEL_DEFAULT;
     struct HksParam *param = nullptr;
     if (HksGetParam(paramSet, HKS_TAG_AUTH_STORAGE_LEVEL, &param) == HKS_SUCCESS) {
         keyInfo->storageLevel = param->uint32Param;
@@ -394,26 +394,30 @@ static int32_t HandleSuccessStage(const HksThreeStageReportInfo *info, struct Hk
     return CopyErrorMsgToBlob(&operation->errMsgBlob, HksGetThreadErrorMsg());
 }
 
+static int32_t HandleSeSuccessStage(const HksThreeStageReportInfo *info, struct HksSeOperation *seOperation)
+{
+    HKS_IF_NULL_LOGI_RETURN(seOperation, HKS_ERROR_NOT_EXIST, "se operation is not exist or busy in init report")
+    return CopyErrorMsgToBlob(&seOperation->errMsgBlob, HksGetThreadErrorMsg());
+}
+
 static uint32_t CalculateTimeDifferenceMs(uint64_t startTimeMs, uint64_t curTimeMs)
 {
     return static_cast<uint32_t>(curTimeMs - startTimeMs);
 }
 
-static int32_t HandleThreeStageOperation(const HksThreeStageReportInfo *info, HksEventInfo *eventInfo,
-    struct HksBlob *errMsg)
+static int32_t HandleThreeStageOpCommon(struct HksBlob *errMsgBlob,
+    uint64_t startTime, HksEventInfo *eventInfo, struct HksBlob *errMsg)
 {
-    HKS_IF_NULL_LOGI_RETURN(info->operation, HKS_ERROR_NOT_EXIST, "operation is null")
-    HKS_IF_NOT_SUCC_RETURN(CheckBlob(&(info->operation->errMsgBlob)), HKS_ERROR_INVALID_ARGUMENT)
+    HKS_IF_NOT_SUCC_RETURN(CheckBlob(errMsgBlob), HKS_ERROR_INVALID_ARGUMENT)
 
-    errMsg->size = info->operation->errMsgBlob.size;
+    errMsg->size = errMsgBlob->size;
     errMsg->data = static_cast<uint8_t *>(HksMalloc(errMsg->size));
     if (errMsg->data == nullptr) {
         errMsg->size = 0;
         return HKS_ERROR_MALLOC_FAIL;
     }
 
-    if (memcpy_s(errMsg->data, errMsg->size, info->operation->errMsgBlob.data,
-        info->operation->errMsgBlob.size) != EOK) {
+    if (memcpy_s(errMsg->data, errMsg->size, errMsgBlob->data, errMsgBlob->size) != EOK) {
         HKS_LOG_E("memcpy_s fail");
         HKS_FREE(errMsg->data);
         return HKS_ERROR_INTERNAL_ERROR;
@@ -421,8 +425,7 @@ static int32_t HandleThreeStageOperation(const HksThreeStageReportInfo *info, Hk
 
     uint64_t curTime = 0;
     (void)HksElapsedRealTime(&curTime);
-    eventInfo->common.statInfo.saCost = CalculateTimeDifferenceMs(info->operation->startTime, curTime);
-
+    eventInfo->common.statInfo.saCost = CalculateTimeDifferenceMs(startTime, curTime);
     return HKS_SUCCESS;
 }
 
@@ -430,7 +433,14 @@ static int32_t GetErrorMessageData(const HksThreeStageReportInfo *info, HksEvent
     struct HksBlob *errMsg)
 {
     if (IsThreeStage(info->stage)) {
-        return HandleThreeStageOperation(info, eventInfo, errMsg);
+        void *op = info->unionOp.isSe ? static_cast<void*>(info->unionOp.op.seOperation)
+                                       : static_cast<void*>(info->unionOp.op.operation);
+        HKS_IF_NULL_LOGI_RETURN(op, HKS_ERROR_NOT_EXIST, "operation is null")
+        struct HksBlob *errMsgBlob = info->unionOp.isSe ? &info->unionOp.op.seOperation->errMsgBlob
+                                                         : &info->unionOp.op.operation->errMsgBlob;
+        uint64_t startTime = info->unionOp.isSe ? info->unionOp.op.seOperation->startTime
+                                                 : info->unionOp.op.operation->startTime;
+        return HandleThreeStageOpCommon(errMsgBlob, startTime, eventInfo, errMsg);
     }
 
     const char *errorMsg = HksGetThreadErrorMsg();
@@ -449,18 +459,9 @@ static int32_t GetErrorMessageData(const HksThreeStageReportInfo *info, HksEvent
     return HKS_SUCCESS;
 }
 
-static int32_t HksFreshAndReport(const char *funcName, const struct HksProcessInfo *processInfo,
+static int32_t BuildAndSendReport(const char *funcName, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const HksThreeStageReportInfo *info, HksEventInfo *eventInfo)
 {
-    if (IsThreeStage(info->stage)) {
-        FreshEventInfo(paramSet, eventInfo);
-    }
-    FreshStatInfo(&(eventInfo->common.statInfo), info->inDataSize, info->stage, info->startTime);
-
-    if (info->errCode == HKS_SUCCESS && (info->stage == HKS_INIT || info->stage == HKS_UPDATE)) {
-        return HandleSuccessStage(info, info->operation);
-    }
-
     struct timespec curTime;
     (void)timespec_get(&curTime, TIME_UTC);
 
@@ -506,8 +507,26 @@ static int32_t HksFreshAndReport(const char *funcName, const struct HksProcessIn
     } while (0);
 
     HksFreeParamSet(&reportParamSet);
-    HKS_FREE(errMsg.data);
+    HKS_FREE_BLOB(errMsg);
     return ret;
+}
+
+static int32_t HksFreshAndReport(const char *funcName, const struct HksProcessInfo *processInfo,
+    const struct HksParamSet *paramSet, const HksThreeStageReportInfo *info, HksEventInfo *eventInfo)
+{
+    if (IsThreeStage(info->stage)) {
+        FreshEventInfo(paramSet, eventInfo);
+    }
+    FreshStatInfo(&(eventInfo->common.statInfo), info->inDataSize, info->stage, info->startTime);
+
+    if (info->errCode == HKS_SUCCESS && (info->stage == HKS_INIT || info->stage == HKS_UPDATE)) {
+        if (info->unionOp.isSe) {
+            return HandleSeSuccessStage(info, info->unionOp.op.seOperation);
+        }
+        return HandleSuccessStage(info, info->unionOp.op.operation);
+    }
+
+    return BuildAndSendReport(funcName, processInfo, paramSet, info, eventInfo);
 }
 
 int32_t HksOneStageEventReport(const struct HksBlob *keyAlias, const struct HksBlob *key,
@@ -517,6 +536,7 @@ int32_t HksOneStageEventReport(const struct HksBlob *keyAlias, const struct HksB
         HKS_ERROR_NULL_POINTER, "keyAlias or paramset or processInfo or info is null")
 
     HksEventInfo eventInfo = {};
+    eventInfo.keyInfo.keySecurityLevel = HKS_KEY_SECURITY_LEVEL_DEFAULT;
     int32_t ret = GetOneStageEventId(info->stage, &eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "get one stage event id fail")
 
@@ -556,7 +576,8 @@ int32_t HksOneStageEventReport(const struct HksBlob *keyAlias, const struct HksB
             return HKS_ERROR_NOT_SUPPORTED;
     }
 
-    HksThreeStageReportInfo reportInfo = { info->errCode, 0, HKS_ONE_STAGE, info->startTime, 0, nullptr };
+    HksThreeStageReportInfo reportInfo = { info->errCode, 0, HKS_ONE_STAGE, info->startTime, 0, nullptr,
+        {false, {NULL}} };
     (void)HksFreshAndReport(info->funcName, processInfo, paramSet, &reportInfo, &eventInfo);
     return HKS_SUCCESS;
 }
@@ -567,6 +588,7 @@ int32_t HksGetInitEventInfo(const struct HksBlob *keyAlias, const struct HksBlob
     HKS_IF_TRUE_LOGI_RETURN(keyAlias == nullptr || paramSet == nullptr || processInfo == nullptr ||
         eventInfo == nullptr, HKS_ERROR_NULL_POINTER, "keyAlias or paramset or processInfo or eventInfo is null")
 
+    eventInfo->keyInfo.keySecurityLevel = HKS_KEY_SECURITY_LEVEL_DEFAULT;
     int32_t ret = GetEventId(paramSet, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "get event id fail")
     eventInfo->common.callerInfo.uid = processInfo->uidInt;
@@ -605,6 +627,17 @@ int32_t HksServiceInitReport(const char *funcName, const struct HksProcessInfo *
         HKS_ERROR_NULL_POINTER, "paramset or info or processInfo or eventInfo is null")
 
     if (info->errCode == HKS_SUCCESS) {
+        if (info->unionOp.isSe) {
+            struct HksSeOperation *seOperation = HksQuerySeOperationAndMarkInUse(processInfo, info->handle);
+            HKS_IF_NULL_LOGI_RETURN(seOperation, HKS_ERROR_NOT_EXIST, "seoperation is not exist or busy in init report")
+
+            FreshStatInfo(&(eventInfo->common.statInfo), info->inDataSize, info->stage, info->startTime);
+            seOperation->eventInfo = *eventInfo;
+            seOperation->startTime = info->startTime;
+            int32_t ret = CopyErrorMsgToBlob(&seOperation->errMsgBlob, HksGetThreadErrorMsg());
+            HksMarkSeOperationUnUse(seOperation);
+            return ret;
+        }
         struct HksOperation *operation = QueryOperationAndMarkInUse(processInfo, info->handle);
         HKS_IF_NULL_LOGI_RETURN(operation, HKS_ERROR_NOT_EXIST, "operation is not exist or busy in init report")
 
@@ -635,20 +668,36 @@ int32_t HksThreeStageReport(const char *funcName, const struct HksProcessInfo *p
     HKS_IF_TRUE_LOGI_RETURN(paramSet == nullptr || info == nullptr || processInfo == nullptr, HKS_ERROR_NULL_POINTER,
         "paramset or info or processInfo is null")
 
-    struct HksOperation *operation = info->operation;
-    if (operation != nullptr) {
-        uint32_t eventId = operation->eventInfo.common.eventId;
-        HKS_IF_TRUE_LOGI_RETURN(!IsThreeStageEvent(eventId), HKS_FAILURE, "eventid is not support")
+    if (info->unionOp.isSe) {
+        struct HksSeOperation *seOperation = info->unionOp.op.seOperation;
+        if (seOperation != nullptr) {
+            uint32_t eventId = seOperation->eventInfo.common.eventId;
+            HKS_IF_TRUE_LOGI_RETURN(!IsThreeStageEvent(eventId), HKS_FAILURE, "eventid is not support")
 
-        if (info->errCode == HKS_SUCCESS && (info->stage == HKS_INIT || info->stage == HKS_UPDATE)) {
-            return HandleSuccessStage(info, operation);
+            if (info->errCode == HKS_SUCCESS && (info->stage == HKS_INIT || info->stage == HKS_UPDATE)) {
+                return HandleSeSuccessStage(info, seOperation);
+            }
+
+            (void)HksFreshAndReport(funcName, processInfo, paramSet, info, &seOperation->eventInfo);
+            return HKS_SUCCESS;
         }
+    } else {
+        struct HksOperation *operation = info->unionOp.op.operation;
+        if (operation != nullptr) {
+            uint32_t eventId = operation->eventInfo.common.eventId;
+            HKS_IF_TRUE_LOGI_RETURN(!IsThreeStageEvent(eventId), HKS_FAILURE, "eventid is not support")
 
-        (void)HksFreshAndReport(funcName, processInfo, paramSet, info, &operation->eventInfo);
-        return HKS_SUCCESS;
+            if (info->errCode == HKS_SUCCESS && (info->stage == HKS_INIT || info->stage == HKS_UPDATE)) {
+                return HandleSuccessStage(info, operation);
+            }
+
+            (void)HksFreshAndReport(funcName, processInfo, paramSet, info, &operation->eventInfo);
+            return HKS_SUCCESS;
+        }
     }
 
     HksEventInfo eventInfo {};
+    eventInfo.keyInfo.keySecurityLevel = HKS_KEY_SECURITY_LEVEL_DEFAULT;
     int32_t ret = GetEventId(paramSet, &eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "get event id fail")
     eventInfo.common.callerInfo.uid = processInfo->uidInt;
