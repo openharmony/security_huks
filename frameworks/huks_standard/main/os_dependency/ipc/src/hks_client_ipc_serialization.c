@@ -922,16 +922,13 @@ int32_t HksEncapsulateUnpackFromService(const struct HksBlob *srcData, struct Hk
     } while (0);
 
     if (ret != HKS_SUCCESS) {
-        HKS_FREE(encapResult->encapsulatedData.data);
-        HKS_FREE(encapResult->sharedSecret.data);
-        encapResult->encapsulatedData.size = 0;
-        encapResult->sharedSecret.size = 0;
+        HKS_FREE_ENCAPSULATION_RESULT(encapResult);
     }
 
     return ret;
 }
 
-int32_t HksDecapsulateUnpackFromService(const struct HksBlob *srcData, struct HksBlob *sharedSecret)
+int32_t  HksDecapsulateUnpackFromService(const struct HksBlob *srcData, struct HksBlob *sharedSecret)
 {
     if (srcData == NULL || sharedSecret == NULL) {
         return HKS_ERROR_NULL_POINTER;

@@ -1686,7 +1686,7 @@ int32_t HksClientEncapsulate(const struct HksBlob *keyAlias, const struct HksPar
     } while (0);
 
     HKS_FREE_BLOB(inBlob);
-    HKS_FREE_BLOB(outBlob);
+    HKS_MEMSET_FREE_BLOB(outBlob);
     return ret;
 }
 
@@ -1733,6 +1733,6 @@ int32_t HksClientDecapsulate(const struct HksBlob *keyAlias, const struct HksPar
     } while (0);
 
     HKS_FREE_BLOB(inBlob);
-    HKS_FREE_BLOB(outBlob);
+    HKS_MEMSET_FREE_BLOB(outBlob);
     return ret;
 }
