@@ -22,7 +22,11 @@
 #include "hks_log.h"
 #include "hks_type.h"
 
-static const char *g_convertErrMsg = "HUKS operation failed.";
+#define CONVERT_ERR_MSG "HUKS operation failed."
+#define SE_FAULT_ERR_MSG "SE environment fault."
+
+#define HKS_SE_ERROR_CODE_MAX (-700)
+#define HKS_SE_ERROR_CODE_MIN (-799)
 
 static struct HksError g_errCodeTable[] = {
     {
@@ -906,21 +910,70 @@ static struct HksError g_errCodeTable[] = {
             .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
             .errorMsg = "the dcm callback fail.",
             .data = NULL
-       }
+        }
     }, {
         .innerErrCode = HKS_ERROR_SE_BASIC_NOT_AVAILABLE,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_SE_FAULT,
             .errorMsg = "the se basic not available.",
             .data = NULL
-       }
+        }
     }, {
         .innerErrCode = HKS_ERROR_SE_NOT_AVAILABLE,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_SE_FAULT,
             .errorMsg = "the secure environment not available.",
             .data = NULL
-       }
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_CMD_CALL_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_SE_FAULT,
+            .errorMsg = "se cmd call fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_BASIC_OUTPUT_LEN,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_SE_FAULT,
+            .errorMsg = "se basic output length error.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_SHARED_MEM_WRITE_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_SE_FAULT,
+            .errorMsg = "se shared memory write fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_SHARED_MEM_READ_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_SE_FAULT,
+            .errorMsg = "se shared memory read fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_INVALID_MSPC_OUTPUT,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_SE_FAULT,
+            .errorMsg = "se invalid mspc output.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_INVALID_HANDLE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se invalid handle.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_INVALID_SECURITY_LEVEL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se invalid security level.",
+            .data = NULL
+        }
     }, {
         .innerErrCode = HKS_ERROR_SE_NOT_SUPPORTED,
         .hksResult = {
@@ -931,14 +984,14 @@ static struct HksError g_errCodeTable[] = {
     }, {
         .innerErrCode = HKS_ERROR_SE_COUNT_EXCEED_LIMIT,
         .hksResult = {
-            .errorCode = HUKS_ERR_CODE_SESSION_LIMIT,
+            .errorCode = HUKS_ERR_CODE_BUSY,
             .errorMsg = "the se calling has reached the limit.",
             .data = NULL
         }
     }, {
         .innerErrCode = HKS_ERROR_SE_SESSION_EXCEED_LIMIT,
         .hksResult = {
-            .errorCode = HUKS_ERR_CODE_BUSY,
+            .errorCode = HUKS_ERR_CODE_SESSION_LIMIT,
             .errorMsg = "the se session is too busy.",
             .data = NULL
         }
@@ -1102,6 +1155,13 @@ static struct HksError g_errCodeTable[] = {
             .errorMsg = "se get digest fail.",
             .data = NULL
         }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_UNSUPPORT,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED,
+            .errorMsg = "SE feature is not supported.",
+            .data = NULL
+        }
     }
 };
 
@@ -1112,13 +1172,18 @@ static struct HksError g_errCodeTable[] = {
  */
 struct HksResult HksConvertErrCode(int32_t ret)
 {
-    struct HksResult result = {HUKS_ERR_CODE_EXTERNAL_ERROR, g_convertErrMsg, NULL};
+    struct HksResult result = {HUKS_ERR_CODE_EXTERNAL_ERROR, CONVERT_ERR_MSG, NULL};
     uint32_t i = 0;
     uint32_t uErrCodeCount = sizeof(g_errCodeTable) / sizeof(g_errCodeTable[0]);
     for (; i < uErrCodeCount; ++i) {
         if (ret == g_errCodeTable[i].innerErrCode) {
             return g_errCodeTable[i].hksResult;
         }
+    }
+    if (ret <= HKS_SE_ERROR_CODE_MAX && ret >= HKS_SE_ERROR_CODE_MIN) {
+        HKS_LOG_E("convert SE error code %" LOG_PUBLIC "d to SE_FAULT by default!", ret);
+        struct HksResult seResult = {HUKS_ERR_CODE_SE_FAULT, SE_FAULT_ERR_MSG, NULL};
+        return seResult;
     }
     HKS_LOG_E("convert error code form %" LOG_PUBLIC "d failed!", ret);
     return result;

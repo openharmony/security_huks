@@ -647,6 +647,9 @@ int32_t HksServiceSign(const struct HksProcessInfo *processInfo, const struct Hk
         ret = HksCheckAllParams(&processInfo->processName, keyAlias, paramSet, srcData, signature);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check sign params failed, ret = %" LOG_PUBLIC "d", ret)
 
+        ret = RejectSeSecurityLevel(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "reject se security level, ret = %" LOG_PUBLIC "d", ret)
+
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE(ret, "sign: get main key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
 
@@ -694,6 +697,9 @@ int32_t HksServiceVerify(const struct HksProcessInfo *processInfo, const struct 
         ret = HksCheckAllParams(&processInfo->processName, keyAlias, paramSet, srcData, signature);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check verify params failed, ret = %" LOG_PUBLIC "d", ret)
 
+        ret = RejectSeSecurityLevel(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "reject se security level, ret = %" LOG_PUBLIC "d", ret)
+
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE(ret, "verify: get main key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
 
@@ -735,6 +741,9 @@ int32_t HksServiceEncrypt(const struct HksProcessInfo *processInfo, const struct
     do {
         ret = HksCheckAllParams(&processInfo->processName, keyAlias, paramSet, plainText, cipherText);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check encrypt failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = RejectSeSecurityLevel(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "reject se security level, ret = %" LOG_PUBLIC "d", ret)
 
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE(ret, "encrypt: get main key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
@@ -781,6 +790,9 @@ int32_t HksServiceDecrypt(const struct HksProcessInfo *processInfo, const struct
     do {
         ret = HksCheckAllParams(&processInfo->processName, keyAlias, paramSet, cipherText, plainText);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check decrypt failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = RejectSeSecurityLevel(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "reject se security level, ret = %" LOG_PUBLIC "d", ret)
 
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE(ret, "decrypt: get main key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
@@ -915,6 +927,9 @@ int32_t HksServiceGetKeyParamSet(const struct HksProcessInfo *processInfo, const
         ret = HksCheckGetKeyParamSetParams(&processInfo->processName, keyAlias, paramSetOut);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check get key paramSet params failed, ret = %" LOG_PUBLIC "d", ret)
 
+        ret = RejectSeSecurityLevel(paramSetIn);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "reject se security level, ret = %" LOG_PUBLIC "d", ret)
+
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSetIn, &keyFromFile, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE(ret,
             "get key paramSet: get key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
@@ -968,7 +983,7 @@ int32_t HksServiceImportKey(const struct HksProcessInfo *processInfo, const stru
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check import key params failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = RejectSeSecurityLevel(paramSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "reject se security level for import key failed, ret = %" LOG_PUBLIC "d", ret)
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "reject se security level, ret = %" LOG_PUBLIC "d", ret)
 
         ret = AppendNewInfoForGenKeyInService(processInfo, paramSet, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append processName tag failed, ret = %" LOG_PUBLIC "d", ret)
@@ -1188,6 +1203,9 @@ int32_t HksServiceExportPublicKey(const struct HksProcessInfo *processInfo, cons
         ret = HksCheckExportPublicKeyParams(&processInfo->processName, keyAlias, key);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check export public key params failed, ret = %" LOG_PUBLIC "d", ret)
 
+        ret = RejectSeSecurityLevel(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "reject se security level, ret = %" LOG_PUBLIC "d", ret)
+
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
         if (ret == HKS_SUCCESS) {
             ret = CheckKeySecuritySeFromKeyFile(processInfo, &keyFromFile, &isSeCalling);
@@ -1238,6 +1256,9 @@ int32_t HksServiceAgreeKey(const struct HksProcessInfo *processInfo, const struc
         ret = HksCheckAllParams(&processInfo->processName, privateKey, paramSet, peerPublicKey, agreedKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check agree key params failed, ret = %" LOG_PUBLIC "d", ret)
 
+        ret = RejectSeSecurityLevel(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "reject se security level, ret = %" LOG_PUBLIC "d", ret)
+
         ret = GetKeyAndNewParamSet(processInfo, privateKey, paramSet, &keyFromFile, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE(ret, "agree: get main key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
 
@@ -1284,6 +1305,9 @@ int32_t HksServiceDeriveKey(const struct HksProcessInfo *processInfo, const stru
         ret = HksCheckDeriveKeyParams(&processInfo->processName, paramSet, mainKey, derivedKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check derive key params failed, ret = %" LOG_PUBLIC "d", ret)
 
+        ret = RejectSeSecurityLevel(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "reject se security level, ret = %" LOG_PUBLIC "d", ret)
+
         ret = GetKeyAndNewParamSet(processInfo, mainKey, paramSet, &keyFromFile, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE(ret, "derive: get main key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
 
@@ -1329,6 +1353,9 @@ int32_t HksServiceMac(const struct HksProcessInfo *processInfo, const struct Hks
     do {
         ret = HksCheckAllParams(&processInfo->processName, key, paramSet, srcData, mac);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check mac params failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = RejectSeSecurityLevel(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "reject se security level, ret = %" LOG_PUBLIC "d", ret)
 
         ret = GetKeyAndNewParamSet(processInfo, key, paramSet, &keyFromFile, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE(ret, "mac: get main key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
@@ -1578,6 +1605,8 @@ static void AttestKeyCoreOp(struct HksAttestKeyCtx *ctx)
     ctx->ret = HksCheckAttestKeyParams(&ctx->processInfo->processName, ctx->keyAlias, ctx->paramSet, ctx->certChain);
     do {
         HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "check attest key param fail");
+        ctx->ret = RejectSeSecurityLevel(ctx->paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "reject se security level, ret = %" LOG_PUBLIC "d", ctx->ret)
 #ifdef HKS_SUPPORT_GET_BUNDLE_INFO
         ctx->ret = GetKeyAndNewParamSet(ctx->processInfo, ctx->keyAlias, ctx->paramSet,
             &ctx->keyFromFile, &ctx->processInfoParamSet);
@@ -1666,14 +1695,6 @@ static int32_t CreateOperation(const struct HksProcessInfo *processInfo, const s
 
     return HksCreateOperation(processInfo, paramSet, handle, abortable);
 }
-
-typedef struct {
-    bool isSe;
-    union {
-        struct HksOperation *operation;
-        struct HksSeOperation *seOperation;
-    } op;
-} HksOperationUnion;
 
 static int32_t QueryOperationWrapper(const struct HksProcessInfo *processInfo,
     const struct HksBlob *handle, HksOperationUnion *unionOp)
@@ -1783,6 +1804,8 @@ static void ServiceInitCore(struct HksServiceInitCtx *ctx)
 #endif
         ctx->ret = HksCheckServiceInitParams(&ctx->processInfo->processName, ctx->keyAlias, ctx->paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "check ServiceInit params failed, ret = %" LOG_PUBLIC "d", ctx->ret)
+        ctx->ret = RejectSeSecurityLevel(ctx->paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "reject se security level, ret = %" LOG_PUBLIC "d", ctx->ret)
         ctx->ret = GetKeyAndNewParamSet(ctx->processInfo, ctx->keyAlias, ctx->paramSet,
             &ctx->keyFromFile, &ctx->newParamSet);
         if (ctx->ret == HKS_SUCCESS) {
@@ -1835,7 +1858,8 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
 #ifdef L2_STANDARD
     HksEventInfo eventInfo = { };
     (void)HksGetInitEventInfo(ctx.keyAlias, &ctx.keyFromFile, ctx.paramSet, ctx.processInfo, &eventInfo);
-    HksThreeStageReportInfo info = { ctx.ret, 0, HKS_INIT, ctx.startTime, ctx.traceId.traceId.chainId, ctx.handle };
+    HksThreeStageReportInfo info = { ctx.ret, 0, HKS_INIT, ctx.startTime, ctx.traceId.traceId.chainId, ctx.handle,
+        {ctx.isSeCalling, {NULL}} };
     (void)HksServiceInitReport(__func__, ctx.processInfo, ctx.newParamSet, &info, &eventInfo);
 #endif
     ServiceInitCleanup(&ctx);
@@ -1911,6 +1935,9 @@ static void ServiceUpdateCore(struct HksServiceUpdateCtx *ctx)
         ctx->ret = QueryOperationWrapper(ctx->processInfo, ctx->handle, &ctx->unionOp);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "QueryOperationWrapper fail")
 
+        ctx->ret = RejectSeSecurityLevel(ctx->paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "reject se security level, ret = %" LOG_PUBLIC "d", ctx->ret)
+
         ctx->ret = CheckAccessTokenWrapper(&ctx->unionOp, ctx->processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "CheckAccessTokenWrapper fail")
 
@@ -1957,8 +1984,7 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
     ServiceUpdateCore(&ctx);
 #ifdef L2_STANDARD
     HksThreeStageReportInfo info = { ctx.ret, inData->size, HKS_UPDATE, startTime,
-        traceId.traceId.chainId, handle,
-        ctx.unionOp.isSe ? NULL : ctx.unionOp.op.operation };
+        traceId.traceId.chainId, handle, ctx.unionOp };
     (void)HksThreeStageReport(__func__, processInfo, ctx.newParamSet, &info);
 #endif
     UpdateEnd(&ctx.unionOp, &traceId);
@@ -2015,6 +2041,9 @@ static void ServiceFinishCore(struct HksServiceFinishCtx *ctx)
         ctx->ret = QueryAndCheckAccessToken(ctx->processInfo, ctx->handle, &ctx->unionOp);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "QueryAndCheckAccessToken fail")
 
+        ctx->ret = RejectSeSecurityLevel(ctx->paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "reject se security level, ret = %" LOG_PUBLIC "d", ctx->ret)
+
         if (IsSeHandle(ctx->handle)) {
             ctx->ret = CheckSeSessionCallInService(ctx->processInfo, &ctx->isSeCalling);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "CheckSeSessionCallInService fail, ret = %" LOG_PUBLIC "d", ctx->ret)
@@ -2064,8 +2093,7 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
     HKS_FREE_BLOB(ctx.output);
 #ifdef L2_STANDARD
     HksThreeStageReportInfo info = { ctx.ret, inData->size, HKS_FINISH, startTime,
-        traceId.traceId.chainId, handle,
-        ctx.unionOp.isSe ? NULL : ctx.unionOp.op.operation };
+        traceId.traceId.chainId, handle, ctx.unionOp };
     (void)HksThreeStageReport(__func__, processInfo, ctx.newParamSet, &info);
 #endif
     MarkAndDeleteOperationByUnion(&ctx.unionOp, handle);
@@ -2098,6 +2126,8 @@ static void ServiceAbortCore(struct HksServiceAbortCtx *ctx)
         }
         HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "HksCheckIsUkeyOperation failed, ret = %" LOG_PUBLIC "d", ctx->ret)
 #endif
+        ctx->ret = RejectSeSecurityLevel(ctx->paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "reject se security level, ret = %" LOG_PUBLIC "d", ctx->ret)
         if (!IsOperationExist(ctx->processInfo, ctx->handle, &ctx->unionOp)) {
             ctx->ret = HKS_SUCCESS;
             break;
@@ -2119,8 +2149,7 @@ static void ServiceAbortCore(struct HksServiceAbortCtx *ctx)
         HKS_IF_NOT_SUCC_LOGE(ctx->ret, "HuksAccessAbort fail, ret = %" LOG_PUBLIC "d", ctx->ret)
 #ifdef L2_STANDARD
         HksThreeStageReportInfo info = { ctx->ret, 0, HKS_ABORT, ctx->startTime,
-            ctx->traceId.traceId.chainId, ctx->handle,
-            ctx->unionOp.isSe ? NULL : ctx->unionOp.op.operation };
+            ctx->traceId.traceId.chainId, ctx->handle, ctx->unionOp };
         (void)HksThreeStageReport(ctx->funcName, ctx->processInfo, ctx->newParamSet, &info);
 #endif
         MarkAndDeleteOperationByUnion(&ctx->unionOp, ctx->handle);
@@ -2523,6 +2552,9 @@ int32_t HksServiceWrapKey(const struct HksProcessInfo *processInfo, const struct
     do {
         ret = HksCheckWrapAndUnwrapKeyParams(&processInfo->processName, keyAlias, paramSet, wrappedKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check wrap params failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = RejectSeSecurityLevel(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "reject se security level, ret = %" LOG_PUBLIC "d", ret)
 
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetKeyAndNewParamSet failed, ret = %" LOG_PUBLIC "d.", ret)

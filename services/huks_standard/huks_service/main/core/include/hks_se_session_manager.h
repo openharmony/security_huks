@@ -19,6 +19,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "hks_double_list.h"
+#include "hks_event_info.h"
 #include "hks_type_inner.h"
 
 #ifdef __cplusplus
@@ -31,6 +32,8 @@ struct HksSeOperation {
     bool isInUse;
     uint64_t startTime;
     struct HksProcessInfo processInfo;
+    HksEventInfo eventInfo;
+    struct HksBlob errMsgBlob;
 };
 
 int32_t HksCreateSeOperation(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,

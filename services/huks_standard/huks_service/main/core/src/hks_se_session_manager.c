@@ -68,6 +68,7 @@ static void FreeSeOperation(struct HksSeOperation **operation)
     RemoveDoubleListNode(&(*operation)->listHead);
     HKS_FREE_BLOB((*operation)->processInfo.userId);
     HKS_FREE_BLOB((*operation)->processInfo.processName);
+    HKS_FREE_BLOB((*operation)->errMsgBlob);
     HKS_FREE(*operation);
 }
 
@@ -144,6 +145,7 @@ int32_t HksCreateSeOperation(const struct HksProcessInfo *processInfo, const str
 
     struct HksSeOperation *operation = (struct HksSeOperation *)HksMalloc(sizeof(struct HksSeOperation));
     HKS_IF_NULL_LOGE_RETURN(operation, HKS_ERROR_MALLOC_FAIL, "malloc hks se operation failed")
+    (void)memset_s(operation, sizeof(struct HksSeOperation), 0, sizeof(struct HksSeOperation));
 
     int32_t ret = InitSeOperationProcessInfo(processInfo, operation);
     if (ret != HKS_SUCCESS) {
@@ -156,6 +158,7 @@ int32_t HksCreateSeOperation(const struct HksProcessInfo *processInfo, const str
         HKS_LOG_E("HksElapsedRealTime failed");
         HKS_FREE_BLOB(operation->processInfo.userId);
         HKS_FREE_BLOB(operation->processInfo.processName);
+        HKS_FREE_BLOB(operation->errMsgBlob);
         HKS_FREE(operation);
         return HKS_ERROR_INTERNAL_ERROR;
     }
@@ -179,6 +182,7 @@ int32_t HksCreateSeOperation(const struct HksProcessInfo *processInfo, const str
 
     HKS_FREE_BLOB(operation->processInfo.userId);
     HKS_FREE_BLOB(operation->processInfo.processName);
+    HKS_FREE_BLOB(operation->errMsgBlob);
     HKS_FREE(operation);
     return ret;
 }

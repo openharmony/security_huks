@@ -93,11 +93,15 @@ static void BuildProcessInfo(struct HksProcessInfo *processInfo, uint32_t userId
     processInfo->userId.data = (uint8_t *)HksMalloc(sizeof(userIdData));
     if (processInfo->userId.data != nullptr) {
         (void)memcpy_s(processInfo->userId.data, sizeof(userIdData), userIdData, sizeof(userIdData));
+    } else {
+        processInfo->userId.size = 0;
     }
     processInfo->processName.size = sizeof(processNameData);
     processInfo->processName.data = (uint8_t *)HksMalloc(sizeof(processNameData));
     if (processInfo->processName.data != nullptr) {
         (void)memcpy_s(processInfo->processName.data, sizeof(processNameData), processNameData, sizeof(processNameData));
+    } else {
+        processInfo->processName.size = 0;
     }
     processInfo->accessTokenId = 0;
     processInfo->pid = 0;
@@ -1705,6 +1709,66 @@ HWTEST_F(HksSeSessionManagerTest, HksSeSessionManagerMultipleHandlesSameProcess,
     }
     HksDeleteSeOperation(&operationHandles[1]);
 
+    HksFreeParamSet(&paramSet);
+    FreeProcessInfo(&processInfo);
+}
+
+HWTEST_F(HksSeSessionManagerTest, HksCreateSeOperationEventInfoAndErrMsgBlobInit, TestSize.Level0)
+{
+    struct HksProcessInfo processInfo;
+    BuildProcessInfo(&processInfo, 100, 200);
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildParamSet(&paramSet, nullptr, 0);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    uint64_t handleValue = BuildSeHandle(12345);
+    struct HksBlob operationHandle = { sizeof(uint64_t), (uint8_t *)&handleValue };
+
+    ret = HksCreateSeOperation(&processInfo, paramSet, &operationHandle);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksSeOperation *operation = HksQuerySeOperationAndMarkInUse(&processInfo, &operationHandle);
+    EXPECT_NE(operation, nullptr);
+    if (operation != nullptr) {
+        EXPECT_EQ(operation->errMsgBlob.size, 0);
+        EXPECT_EQ(operation->errMsgBlob.data, nullptr);
+        EXPECT_EQ(operation->eventInfo.common.eventId, 0);
+        HksMarkSeOperationUnUse(operation);
+    }
+
+    HksDeleteSeOperation(&operationHandle);
+    HksFreeParamSet(&paramSet);
+    FreeProcessInfo(&processInfo);
+}
+
+HWTEST_F(HksSeSessionManagerTest, HksSeOperationErrMsgBlobWriteAndFree, TestSize.Level0)
+{
+    struct HksProcessInfo processInfo;
+    BuildProcessInfo(&processInfo, 100, 200);
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildParamSet(&paramSet, nullptr, 0);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    uint64_t handleValue = BuildSeHandle(12345);
+    struct HksBlob operationHandle = { sizeof(uint64_t), (uint8_t *)&handleValue };
+
+    ret = HksCreateSeOperation(&processInfo, paramSet, &operationHandle);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksSeOperation *operation = HksQuerySeOperationAndMarkInUse(&processInfo, &operationHandle);
+    EXPECT_NE(operation, nullptr);
+    if (operation != nullptr) {
+        operation->errMsgBlob.data = (uint8_t *)HksMalloc(4);
+        operation->errMsgBlob.size = 4;
+        if (operation->errMsgBlob.data != nullptr) {
+            (void)memcpy_s(operation->errMsgBlob.data, 4, "test", 4);
+        }
+        HksMarkSeOperationUnUse(operation);
+    }
+
+    HksDeleteSeOperation(&operationHandle);
     HksFreeParamSet(&paramSet);
     FreeProcessInfo(&processInfo);
 }
