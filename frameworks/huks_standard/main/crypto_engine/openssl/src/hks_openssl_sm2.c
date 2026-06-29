@@ -192,8 +192,8 @@ static int32_t PushPubKeyToParam(const struct KeyMaterialEcc *material,
     // NOTICE! x size and y size are smaller than or equal to HKS_KEY_BYTES(material->keySize)
     // e.g. assuming that HKS_KEY_BYTES(material->keySize) is 32, x size might be 32, 31, 30, etc.
     uncompressedPublicKey[0] = POINT_CONVERSION_UNCOMPRESSED;
-    errno_t memRet = memcpy_s(
-        uncompressedPublicKey + 1 + HKS_KEY_BYTES(material->keySize) - material->xSize, material->xSize,
+    uint32_t offset = 1 + HKS_KEY_BYTES(material->keySize) - material->xSize;
+    errno_t memRet = memcpy_s(uncompressedPublicKey + offset, fullSize - offset,
         (const uint8_t *)(material) + sizeof(struct KeyMaterialEcc), material->xSize);
     if (memRet != EOK) {
         HKS_LOG_E("copy x fail");

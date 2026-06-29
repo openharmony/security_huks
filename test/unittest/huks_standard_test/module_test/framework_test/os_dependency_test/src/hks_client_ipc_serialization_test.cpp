@@ -20,6 +20,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_template.h"
 
 using namespace testing::ext;
 namespace Unittest::HksClientIpcSerializationTest {

@@ -510,7 +510,8 @@ static int32_t VerifyEnrolledIdInfoIfNeed(const struct HksParamSet *keyBlobParam
     (void)memcpy_s(&enrolledIdNum, sizeof(uint32_t), enrolledIdInfoBlob.data, sizeof(uint32_t));
     uint32_t index = sizeof(uint32_t);
 
-    for (uint32_t i = 0; i < enrolledIdNum && index < enrolledIdInfoBlob.size; ++i) {
+    uint32_t lengthPerEnrollId = sizeof(uint32_t) + sizeof(uint64_t);
+    for (uint32_t i = 0; i < enrolledIdNum && index + lengthPerEnrollId < enrolledIdInfoBlob.size; ++i) {
         uint32_t authType = 0;
         (void)memcpy_s(&authType, sizeof(uint32_t), enrolledIdInfoBlob.data + index, sizeof(uint32_t));
         index += sizeof(uint32_t);
@@ -518,6 +519,7 @@ static int32_t VerifyEnrolledIdInfoIfNeed(const struct HksParamSet *keyBlobParam
         uint64_t enrolledId = 0;
         (void)memcpy_s(&enrolledId, sizeof(uint64_t), enrolledIdInfoBlob.data + index, sizeof(uint64_t));
         index += sizeof(uint64_t);
+
         if (authType == authTokenAuthType && enrolledId == authToken->ciphertextData.enrolledId) {
             return HKS_SUCCESS;
         }
