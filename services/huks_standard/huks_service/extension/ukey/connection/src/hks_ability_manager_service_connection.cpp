@@ -16,7 +16,6 @@
 #include "hks_ability_manager_service_connection.h"
 #include "ability_manager_client.h"
 #include "hks_template.h"
-#include "huks_access_ext_base_proxy.h"
 
 namespace OHOS {
 namespace Security {
@@ -35,11 +34,6 @@ void AMSDisconnectAbility(const sptr<ExtensionConnection> &connect)
     HKS_IF_TRUE_LOGE_RETURN_VOID(ret != HKS_SUCCESS,
         "disconnect ability by Ability Manager Service fail, ret = %" LOG_PUBLIC "d", ret)
     return;
-}
-
-sptr<IHuksAccessExtBase> CastToHuksAccessExtBaseProxy(const sptr<IRemoteObject>& remoteObject)
-{
-    return iface_cast<HuksAccessExtBaseProxy>(remoteObject);
 }
 
 }

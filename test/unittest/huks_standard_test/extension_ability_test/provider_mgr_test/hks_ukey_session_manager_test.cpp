@@ -29,11 +29,15 @@
 #include "token_setproc.h"
 #include "hks_json_wrapper.h"
 #include "hks_provider_life_cycle_manager.h"
+#include "iremote_object.h"
+
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Security {
 namespace Huks {
+
+sptr<IRemoteObject> CreateMockRemoteObject();
 
 static const std::string TEST_BUNDLE_NAME = "com.huawei.extensionhap.test";
 static const std::string TEST_ABILITY_NAME = "HiTaiCryptoAbility";
@@ -77,6 +81,19 @@ static std::string BuildWrappedIndex(const std::string &providerName, const HksP
     return root.Serialize(false);
 }
 
+static int32_t SetupProvider(std::shared_ptr<HksProviderLifeCycleManager> providerMgr,
+    const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet,
+    std::function<void(HksProcessInfo)> callback)
+{
+    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet, callback);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    sptr<IRemoteObject> remoteObj = CreateMockRemoteObject();
+    ret = providerMgr->OnSetExtensionProxy(processInfo, providerName, paramSet, remoteObj);
+    return ret;
+}
+
 static int32_t SetupFullTest(HksProcessInfo &processInfo, std::string &wrappedIndex,
     uint32_t &outHandle, std::shared_ptr<HksMockHapToken> &mockToken)
 {
@@ -93,7 +110,7 @@ static int32_t SetupFullTest(HksProcessInfo &processInfo, std::string &wrappedIn
     CppParamSet regParamSet(regParams);
 
     auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
-    int32_t ret = providerMgr->OnRegisterProvider(processInfo, TEST_PROVIDER_NAME, regParamSet,
+    int32_t ret = SetupProvider(providerMgr, processInfo, TEST_PROVIDER_NAME, regParamSet,
         [](HksProcessInfo) {});
     if (ret != HKS_SUCCESS) {
         HKS_FREE_BLOB(processInfo.userId);
@@ -187,13 +204,13 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest002, TestSize.Level0) {
     };
     CppParamSet paramSet(params);
     std::string providerName = "HksSessionMgrTest002";
-    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
+    auto ret = SetupProvider(providerMgr, processInfo, providerName, paramSet,
         [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
         HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
         int32_t deleteCount = 0;
         providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
     });
-    EXPECT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
+    EXPECT_EQ(ret, HKS_SUCCESS) << "SetupProvider failed";
 
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     EXPECT_NE(sessionMgr, nullptr);
@@ -236,13 +253,13 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest003, TestSize.Level0) {
     };
     CppParamSet paramSet(params);
     std::string providerName = "HksSessionMgrTest003";
-    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
+    auto ret = SetupProvider(providerMgr, processInfo, providerName, paramSet,
         [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
         HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
         int32_t deleteCount = 0;
         providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
     });
-    EXPECT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
+    EXPECT_EQ(ret, HKS_SUCCESS) << "SetupProvider failed";
 
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     EXPECT_NE(sessionMgr, nullptr);
@@ -756,9 +773,9 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest025, TestSize.Level0) {
     CppParamSet regParamSet(regParams);
 
     auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
-    int32_t ret = providerMgr->OnRegisterProvider(processInfo, TEST_PROVIDER_NAME, regParamSet,
+    int32_t ret = SetupProvider(providerMgr, processInfo, TEST_PROVIDER_NAME, regParamSet,
         [](HksProcessInfo) {});
-    ASSERT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
+    ASSERT_EQ(ret, HKS_SUCCESS) << "SetupProvider failed";
 
     wrappedIndex = BuildWrappedIndex(TEST_PROVIDER_NAME, processInfo);
 
@@ -874,9 +891,9 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest028, TestSize.Level0) {
     CppParamSet regParamSet(regParams);
 
     auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
-    int32_t ret = providerMgr->OnRegisterProvider(processInfo, TEST_PROVIDER_NAME, regParamSet,
+    int32_t ret = SetupProvider(providerMgr, processInfo, TEST_PROVIDER_NAME, regParamSet,
         [](HksProcessInfo) {});
-    ASSERT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
+    ASSERT_EQ(ret, HKS_SUCCESS) << "SetupProvider failed";
 
     wrappedIndex = BuildWrappedIndex(TEST_PROVIDER_NAME, processInfo);
 

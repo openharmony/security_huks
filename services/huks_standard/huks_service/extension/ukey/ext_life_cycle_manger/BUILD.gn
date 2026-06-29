@@ -26,7 +26,7 @@ if (os_level == "standard") {
 
     include_dirs = [
       "inc",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common/inc",
     ]
 
     sources = [
@@ -36,7 +36,6 @@ if (os_level == "standard") {
     defines = [ "L2_STANDARD" ]
     deps = [
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection:libhuks_extension_connection_static",
     ]
     complete_static_lib = true
     cflags = []
@@ -54,7 +53,6 @@ if (os_level == "standard") {
 
     external_deps = [
       "ability_runtime:app_manager",
-      "ability_runtime:ability_connect_callback_stub",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "c_utils:utils",

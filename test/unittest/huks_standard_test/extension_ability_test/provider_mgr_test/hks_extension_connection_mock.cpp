@@ -213,6 +213,11 @@ public:
         HksExternalErrorInfoIdl& errorInfo) { errorInfo.hasErrorInfo = false; return -1; };
 };
 
+sptr<IRemoteObject> CreateMockRemoteObject()
+{
+    return sptr<HuksAccessExtBaseStub>(new HksCryptoExtStubImpl());
+}
+
 void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementName &element,
     const sptr<IRemoteObject> &remoteObject, int resultCode)
 {
@@ -234,7 +239,7 @@ void ExtensionConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName&
     return;
 }
 
-sptr<IHuksAccessExtBase> ExtensionConnection::GetExtConnectProxy()
+sptr<IRemoteObject> ExtensionConnection::GetRemoteObject()
 {
     return sptr<HuksAccessExtBaseStub>(new HksCryptoExtStubImpl());
 }

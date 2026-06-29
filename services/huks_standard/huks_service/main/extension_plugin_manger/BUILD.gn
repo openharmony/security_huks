@@ -15,7 +15,9 @@ import("//base/security/huks/build/config.gni")
 import("//build/ohos.gni")
 
 config("huks_ext_plugin_manager_config") {
-  include_dirs = [ "inc" ]
+  include_dirs = [
+    "inc",
+  ]
 }
 
 if (os_level == "standard") {
@@ -28,16 +30,30 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]
 
-    include_dirs = [ "inc" ]
+    include_dirs = [
+      "inc",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common/inc",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger/inc",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager/inc",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/session_manger/inc",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/app_observer",
+    ]
     public_configs = [ ":huks_ext_plugin_manager_config" ]
     sources = [
       "src/hks_plugin_lifecycle_manager.cpp",
       "src/hks_plugin_loader.cpp",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/src/hks_extension_connection.cpp",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/src/hks_ability_manager_service_connection.cpp",
     ]
 
     deps = [
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger:libhuks_provider_life_cycle_manager_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager:libhuks_remote_handle_manager_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/session_manger:libhuks_session_manager_static",
     ]
 
     cflags = []
@@ -53,6 +69,8 @@ if (os_level == "standard") {
       ubsan = true
     }
     external_deps = [
+      "ability_runtime:ability_connect_callback_stub",
+      "ability_runtime:ability_manager",
       "c_utils:utils",
       "hilog:libhilog",
       "ipc:ipc_core",

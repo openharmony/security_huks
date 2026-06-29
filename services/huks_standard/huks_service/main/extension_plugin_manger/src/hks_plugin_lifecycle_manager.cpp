@@ -16,6 +16,10 @@
 #include "hks_plugin_lifecycle_manager.h"
 #include "hks_plugin_loader.h"
 #include "hks_cfi.h"
+#include "hks_ability_manager_service_connection.h"
+#include "hks_extension_connection.h"
+#include "hks_ukey_common.h"
+#include "hks_ukey_system_adapter.h"
 #include <thread>
 
 #define NO_EXTENSION 0
@@ -23,6 +27,14 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
+
+static SafeMap<ProviderInfo, sptr<ExtensionConnection>> g_extensionConnectionMap;
+static int32_t ComputeProviderInfo(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet, ProviderInfo &providerInfo);
+static void DisconnectExtensionConnections(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet);
+static int32_t EnsureExtensionConnection(const HksProcessInfo &info, const ProviderInfo &providerInfo,
+    sptr<IRemoteObject> &remoteObject);
 
 std::shared_ptr<HuksPluginLifeCycleMgr> HuksPluginLifeCycleMgr::GetInstanceWrapper()
 {
@@ -35,6 +47,59 @@ void HuksPluginLifeCycleMgr::ReleaseInstance()
 }
 
 constexpr int WAIT_CALlBACK = 20;
+
+static std::function<void(HksProcessInfo)> MakeDeathCallback(
+    std::shared_ptr<HuksPluginLifeCycleMgr> plugin,
+    const std::string &providerName, const CppParamSet &paramSet)
+{
+    return [plugin, providerName, paramSet](const HksProcessInfo &processInfo) mutable {
+        std::thread([plugin, providerName_ = providerName, paramSet_ = paramSet, processInfo]() mutable {
+            std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long long>(WAIT_CALlBACK)));
+            HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
+            plugin->UnRegisterProvider(processInfo, providerName_, paramSet_, true);
+        }).detach();
+    };
+}
+
+static int32_t CreateNewConnection(const HksProcessInfo &info, const ProviderInfo &providerInfo,
+    const std::string &providerName, const CppParamSet &paramSet, sptr<IRemoteObject> &remoteObject)
+{
+    auto connection = sptr<ExtensionConnection>(new (std::nothrow) ExtensionConnection(info));
+    HKS_IF_TRUE_LOGE_RETURN(connection == nullptr, HKS_ERROR_NULL_POINTER, "Failed to create ExtensionConnection")
+
+    connection->callBackFromPlugin(MakeDeathCallback(HuksPluginLifeCycleMgr::GetInstanceWrapper(),
+        providerName, paramSet));
+
+    AAFwk::Want want{};
+    want.SetElementName(providerInfo.m_bundleName, providerInfo.m_abilityName);
+    int32_t ret = connection->OnConnection(want, connection, info.userIdInt);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "AMSConnectAbility failed")
+
+    remoteObject = connection->GetRemoteObject();
+    HKS_IF_TRUE_LOGE_RETURN(remoteObject == nullptr, HKS_ERROR_NULL_POINTER,
+        "remoteObject is nullptr after connect")
+
+    g_extensionConnectionMap.Insert(providerInfo, connection);
+    return HKS_SUCCESS;
+}
+
+static int32_t EnsureExtensionConnection(const HksProcessInfo &info, const ProviderInfo &providerInfo,
+    sptr<IRemoteObject> &remoteObject)
+{
+    sptr<ExtensionConnection> existingConn{nullptr};
+    bool connExists = g_extensionConnectionMap.Find(providerInfo, existingConn);
+
+    if (connExists && existingConn != nullptr && existingConn->IsConnected()) {
+        HKS_LOG_I("Reusing existing connection for provider: %" LOG_PUBLIC "s, ability: %" LOG_PUBLIC "s",
+            providerInfo.m_providerName.c_str(), providerInfo.m_abilityName.c_str());
+        remoteObject = existingConn->GetRemoteObject();
+        HKS_IF_TRUE_LOGE_RETURN(remoteObject == nullptr, HKS_ERROR_NULL_POINTER,
+            "existing connection has null remoteObject")
+        return HKS_SUCCESS;
+    }
+    return HKS_ERROR_NOT_EXIST;
+}
+
 int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &info,
     const std::string &providerName, const CppParamSet &paramSet)
 {
@@ -47,18 +112,26 @@ int32_t HuksPluginLifeCycleMgr::RegisterProvider(const struct HksProcessInfo &in
         HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "regist provider failed!")
     }
 
-    ret = OnRegistProvider(info, providerName, paramSet, [plugin = GetInstanceWrapper(), providerName, paramSet]
-        (const HksProcessInfo &processInfo) mutable {
-            std::thread([plugin, providerName_ = providerName, paramSet_ = paramSet, processInfo]() mutable {
-                std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long long>(WAIT_CALlBACK)));
-                HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
-                plugin->UnRegisterProvider(processInfo, providerName_, paramSet_, true);
-            }).detach();
-    });
-
+    auto deathCallback = MakeDeathCallback(GetInstanceWrapper(), providerName, paramSet);
+    ret = OnRegistProvider(info, providerName, paramSet, deathCallback);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "regist provider method in plugin loader is fail")
-    m_refCount.fetch_add(1, std::memory_order_acq_rel);
 
+    ProviderInfo providerInfo{};
+    ret = ComputeProviderInfo(info, providerName, paramSet, providerInfo);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ComputeProviderInfo failed")
+
+    sptr<IRemoteObject> remoteObject;
+    ret = EnsureExtensionConnection(info, providerInfo, remoteObject);
+    if (ret != HKS_SUCCESS) {
+        ret = CreateNewConnection(info, providerInfo, providerName, paramSet, remoteObject);
+        HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "CreateNewConnection failed")
+    }
+
+    void *remoteObjectRaw = static_cast<void*>(remoteObject.GetRefPtr());
+    ret = OnSetExtProxy(info, providerName, paramSet, remoteObjectRaw);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnSetExtProxy failed")
+
+    m_refCount.fetch_add(1, std::memory_order_acq_rel);
     return ret;
 }
 
@@ -74,6 +147,8 @@ int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &
     int32_t ret = HKS_SUCCESS;
     int32_t deleteCount = 1;
     do {
+        DisconnectExtensionConnections(info, providerName, paramSet);
+
         ret = OnUnRegistProvider(info, providerName, paramSet, isdeath, deleteCount);
         HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS, "unregist provider failed! ret = %{public}d", ret)
 
@@ -446,6 +521,116 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnGetResourceId(const HksProcessInfo 
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetResourceId fail, ret = %" LOG_PUBLIC "d", ret)
     HKS_LOG_I("get resource id success");
     return HKS_SUCCESS;
+}
+
+ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnSetExtProxy(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet, void *remoteObjectRaw))
+{
+    void *funcPtr = nullptr;
+    bool isFind = m_pluginProviderMap.Find(PluginMethodEnum::FUNC_ON_SET_EXTENSION_PROXY, funcPtr);
+    HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        "OnSetExtProxy method enum not found in plugin provider map.")
+
+    int32_t ret = (*reinterpret_cast<OnSetExtensionProxyFunc>(funcPtr))(processInfo, providerName, paramSet,
+        remoteObjectRaw);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "OnSetExtProxy fail, ret = %{public}d", ret)
+    HKS_LOG_I("set extension proxy success");
+    return HKS_SUCCESS;
+}
+
+static int32_t ComputeProviderInfo(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet, ProviderInfo &providerInfo)
+{
+    int32_t ret = HksGetBundleNameFromUid(processInfo.uidInt, providerInfo.m_bundleName);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksGetBundleNameFromUid failed")
+    providerInfo.m_providerName = providerName;
+    auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
+    HKS_IF_TRUE_LOGE_RETURN(abilityName.first != HKS_SUCCESS, HKS_ERROR_ABILITY_NAME_MISSING,
+        "abilityName missing")
+    providerInfo.m_abilityName = std::string(abilityName.second.begin(), abilityName.second.end());
+    providerInfo.m_userid = processInfo.userIdInt;
+    return HKS_SUCCESS;
+}
+
+static bool IsConnectionShared(const sptr<ExtensionConnection> &connection)
+{
+    bool shared = false;
+    g_extensionConnectionMap.Iterate([&](const ProviderInfo &, sptr<ExtensionConnection> &otherConn) {
+        if (otherConn == connection) {
+            shared = true;
+        }
+    });
+    return shared;
+}
+
+static void WaitAmsReleaseStub(const sptr<ExtensionConnection> &connection)
+{
+    constexpr int WAIT_TIME_MS = 5;
+    constexpr int WAIT_ITERATION = 6;
+
+    uint8_t waitIteration = WAIT_ITERATION;
+    HKS_LOG_I("stub refcount: %{public}d", connection->GetSptrRefCount());
+    while ((connection->GetSptrRefCount() > 1) && (waitIteration > 0)) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_TIME_MS));
+        HKS_LOG_I("iter stub refcount: %{public}d", connection->GetSptrRefCount());
+        waitIteration--;
+        if (waitIteration == 0) {
+            HKS_LOG_E("waitIteration is 0, but stub refcount is not 1.");
+        }
+    }
+}
+
+static void DisconnectAndCleanup(sptr<ExtensionConnection> &connection, const ProviderInfo &providerInfo)
+{
+    if (IsConnectionShared(connection)) {
+        HKS_LOG_I("Connection still in use, skip disconnect for: %" LOG_PUBLIC "s",
+            providerInfo.m_providerName.c_str());
+        return;
+    }
+    connection->OnDisconnect(connection);
+    WaitAmsReleaseStub(connection);
+}
+
+static std::vector<ProviderInfo> FindMatchingProviders(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet)
+{
+    std::string bundleName;
+    if (HksGetBundleNameFromUid(processInfo.uidInt, bundleName) != HKS_SUCCESS) {
+        return {};
+    }
+
+    auto abilityName = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_NAME>();
+    bool hasAbilityName = abilityName.first == HKS_SUCCESS && abilityName.second.size() < MAX_ABILITY_NAME_LEN;
+    std::string abilityNameStr{};
+    if (hasAbilityName) {
+        abilityNameStr = std::string(abilityName.second.begin(), abilityName.second.end());
+    }
+
+    std::vector<ProviderInfo> result{};
+    g_extensionConnectionMap.Iterate([&](const ProviderInfo &providerInfo, sptr<ExtensionConnection> &) {
+        if (providerInfo.m_bundleName == bundleName && providerInfo.m_providerName == providerName &&
+            providerInfo.m_userid == processInfo.userIdInt &&
+            (!hasAbilityName || providerInfo.m_abilityName == abilityNameStr)) {
+            result.push_back(providerInfo);
+        }
+    });
+    return result;
+}
+
+static void DisconnectExtensionConnections(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet)
+{
+    auto toDisconnect = FindMatchingProviders(processInfo, providerName, paramSet);
+
+    for (const auto &providerInfo : toDisconnect) {
+        sptr<ExtensionConnection> connection{};
+        g_extensionConnectionMap.Find(providerInfo, connection);
+        g_extensionConnectionMap.Erase(providerInfo);
+
+        if (connection != nullptr) {
+            DisconnectAndCleanup(connection, providerInfo);
+        }
+    }
 }
 
 }
