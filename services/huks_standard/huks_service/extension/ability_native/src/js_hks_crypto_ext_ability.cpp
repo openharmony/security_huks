@@ -869,8 +869,8 @@ napi_value PromiseCallback(napi_env env, napi_callback_info info)
     HKS_EXT_IF_TRUE_LOGE_RETURN(dataParam == nullptr, nullptr, "PromiseCallback, invalid dataParam");
     auto result = ConvertFunctionResult(env, argv[ARGC_ZERO], *dataParam);
     dataParam->hksErrorCode = result;
-    if(dataParam->errInfo != nullptr) {
-        if(result != HKS_SUCCESS) {
+    if (dataParam->errInfo != nullptr) {
+        if (result != HKS_SUCCESS) {
             dataParam->errInfo->errVal = result;
         }
     }

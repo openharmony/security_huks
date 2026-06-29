@@ -47,16 +47,18 @@ void HuksPluginLifeCycleMgr::ReleaseInstance()
 }
 
 constexpr int WAIT_CALlBACK = 20;
+constexpr int WAIT_TIME_MS = 5;
+constexpr int WAIT_ITERATION = 6;
 
 static std::function<void(HksProcessInfo)> MakeDeathCallback(
     std::shared_ptr<HuksPluginLifeCycleMgr> plugin,
     const std::string &providerName, const CppParamSet &paramSet)
 {
     return [plugin, providerName, paramSet](const HksProcessInfo &processInfo) mutable {
-        std::thread([plugin, providerName_ = providerName, paramSet_ = paramSet, processInfo]() mutable {
+        std::thread([plugin, pdrName = providerName, paramSet_ = paramSet, processInfo]() mutable {
             std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long long>(WAIT_CALlBACK)));
             HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
-            plugin->UnRegisterProvider(processInfo, providerName_, paramSet_, true);
+            plugin->UnRegisterProvider(processInfo, pdrName, paramSet_, true);
         }).detach();
     };
 }
@@ -88,7 +90,6 @@ static int32_t EnsureExtensionConnection(const HksProcessInfo &info, const Provi
 {
     sptr<ExtensionConnection> existingConn{nullptr};
     bool connExists = g_extensionConnectionMap.Find(providerInfo, existingConn);
-
     if (connExists && existingConn != nullptr && existingConn->IsConnected()) {
         HKS_LOG_I("Reusing existing connection for provider: %" LOG_PUBLIC "s, ability: %" LOG_PUBLIC "s",
             providerInfo.m_providerName.c_str(), providerInfo.m_abilityName.c_str());
@@ -565,9 +566,6 @@ static bool IsConnectionShared(const sptr<ExtensionConnection> &connection)
 
 static void WaitAmsReleaseStub(const sptr<ExtensionConnection> &connection)
 {
-    constexpr int WAIT_TIME_MS = 5;
-    constexpr int WAIT_ITERATION = 6;
-
     uint8_t waitIteration = WAIT_ITERATION;
     HKS_LOG_I("stub refcount: %{public}d", connection->GetSptrRefCount());
     while ((connection->GetSptrRefCount() > 1) && (waitIteration > 0)) {

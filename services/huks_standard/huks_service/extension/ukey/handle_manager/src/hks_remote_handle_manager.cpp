@@ -229,8 +229,6 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
             providerInfoToNum_.EnsureInsert(providerInfo, num - 1);
         }
     }
-    HKS_LOG_I("auth map_ is %" LOG_PUBLIC "u,and%" LOG_PUBLIC "u", uidIndexToHandle_.Size(),uidIndexToHandle_.Size());
-    HKS_LOG_I("providerInfoToNum_ is %" LOG_PUBLIC "u", providerInfoToNum_.Size());
     return HKS_SUCCESS;
 }
 
@@ -685,7 +683,7 @@ int32_t HksRemoteHandleManager::CheckAuthStateIsOk(const HksProcessInfo &process
 {
     int32_t state = 0;
     HKS_IF_NOT_TRUE_RETURN(uidIndexToAuthState_.Find(std::make_pair(processInfo.uidInt, index), state),
-       HKS_ERROR_NOT_EXIST)
+        HKS_ERROR_NOT_EXIST)
     HKS_IF_NOT_TRUE_RETURN(state == 1, HKS_ERROR_PIN_NO_AUTH)
     return HKS_SUCCESS;
 }
