@@ -38,6 +38,8 @@ config("IHuks_Access_Ext_Base_config") {
 }
 
 ohos_source_set("huks_access_ext_base_include") {
+  branch_protector_ret = "pac_ret"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true
