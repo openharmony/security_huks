@@ -261,7 +261,7 @@ void HksExtRecordErrInfo(HksExternalErrorInfoIdl &errorInfo, struct HksExternalE
         errorInfo.errorDesc = "";
         errorInfo.errVal = 0;
     }
-    HKS_IF_TRUE_EXCU(errorInfo.hasErrorInfo && errInfo != nullptr, 
+    HKS_IF_TRUE_EXCU(errorInfo.hasErrorInfo && errInfo != nullptr,
         *errInfo = HksCreateExternalErrorInfoWithFlag(errorInfo.errVal,
         errorInfo.errorDesc.c_str(), errorInfo.hasErrorInfo));
 }
