@@ -778,34 +778,5 @@ int32_t CheckKeyCondition(const struct HksProcessInfo *processInfo, const struct
 
     return ret;
 }
-
-int32_t AppendKeyBlobToParamSet(const struct HksParamSet *paramSet, const struct HksBlob *keyBlob,
-    struct HksParamSet **outParamSet)
-{
-    struct HksParamSet *newParamSet = NULL;
-    int32_t ret = HksInitParamSet(&newParamSet);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "init paramSet fail")
-    
-    do {
-        ret = HksAddParams(newParamSet, paramSet->params, paramSet->paramsCnt);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AppendKeyBlobToParamSet add params fail")
-
-        struct HksParam keyParam = {
-            .tag = HKS_TAG_KEY,
-            .blob = *keyBlob,
-        };
-        ret = HksAddParams(newParamSet, &keyParam, 1);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AppendKeyBlobToParamSet add key param fail")
-
-        ret = HksBuildParamSet(&newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AppendKeyBlobToParamSet build paramSet fail")
-
-        *outParamSet = newParamSet;
-        return HKS_SUCCESS;
-    } while (0);
-
-    HksFreeParamSet(&newParamSet);
-    return ret;
-}
 #endif
 #endif /* _CUT_AUTHENTICATE_ */

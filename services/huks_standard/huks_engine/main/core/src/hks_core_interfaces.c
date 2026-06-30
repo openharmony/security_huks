@@ -176,16 +176,18 @@ int32_t HuksHdiGetStatInfo(struct HksBlob *statInfo)
     (void)statInfo;
     return HKS_ERROR_API_NOT_SUPPORTED;
 }
-int32_t HuksHdiEncapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParamSet,
+int32_t HuksHdiEncapsulate(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
     struct HksEncapsulationResult *encapResult)
 {
-    return HksCoreEncapsulate(paramSet, sharedKeyParamSet, encapResult);
+    return HksCoreEncapsulate(key, paramSet, sharedKeyAlias, sharedKeyParamSet, encapResult);
 }
 
-int32_t HuksHdiDecapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParamSet,
-    const struct HksBlob *encapsulatedData, struct HksBlob *sharedSecret)
+int32_t HuksHdiDecapsulate(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksParamSet *sharedKeyParamSet, const struct HksBlob *encapsulatedData,
+    struct HksBlob *sharedSecret)
 {
-    return HksCoreDecapsulate(paramSet, sharedKeyParamSet, encapsulatedData, sharedSecret);
+    return HksCoreDecapsulate(key, paramSet, sharedKeyParamSet, encapsulatedData, sharedSecret);
 }
 #ifdef _STORAGE_LITE_
 int32_t HuksHdiCalcMacHeader(const struct HksParamSet *paramSet, const struct HksBlob *salt,
@@ -228,8 +230,6 @@ struct HuksHdi *HuksCreateHdiDevicePtr(void)
     hdiDevicePtr->HuksHdiUpgradeKey       = HuksHdiUpgradeKey;
     hdiDevicePtr->HuksHdiGetErrorInfo     = HuksHdiGetErrorInfo;
     hdiDevicePtr->HuksHdiGetStatInfo      = HuksHdiGetStatInfo;
-    hdiDevicePtr->HuksHdiEncapsulate      = HuksHdiEncapsulate;
-    hdiDevicePtr->HuksHdiDecapsulate      = HuksHdiDecapsulate;
 #ifdef _STORAGE_LITE_
     hdiDevicePtr->HuksHdiCalcMacHeader    = HuksHdiCalcMacHeader;
 #endif

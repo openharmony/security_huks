@@ -277,37 +277,6 @@
                  HDI_ADAPTER_PARAM(agreedKey, &agreedKeyCore));  \
     HDI_CONVERTER_PARAM_OUT_BLOB(agreedKeyCore, agreedKey)
 
-#define HDI_CONVERTER_FUNC_ENCAPSULATE(paramSet, sharedKeyParamSet, encapResult, ret, func) \
-    struct HuksParamSet paramSetCore = {0}; \
-    struct HuksParamSet sharedKeyParamSetCore = {0}; \
-    struct HuksEncapsulationResult encapResultCore = {0}; \
-    HDI_CONVERTER_PARAM_IN_PARAMSET(paramSet, paramSetCore) \
-    HDI_CONVERTER_PARAM_IN_PARAMSET(sharedKeyParamSet, sharedKeyParamSetCore) \
-    (ret) = (func)(HDI_ADAPTER_PARAM(paramSet, &paramSetCore), \
-                HDI_ADAPTER_PARAM(sharedKeyParamSet, &sharedKeyParamSetCore), \
-                HDI_ADAPTER_PARAM(encapResult, &encapResultCore)); \
-    if (encapResult != NULL) { \
-        encapResult->encapsulatedData.data = encapResultCore.encapsulatedData.data; \
-        encapResult->encapsulatedData.size = encapResultCore.encapsulatedData.dataLen; \
-        encapResult->sharedSecret.data = encapResultCore.sharedSecret.data; \
-        encapResult->sharedSecret.size = encapResultCore.sharedSecret.dataLen; \
-    }
-
-#define HDI_CONVERTER_FUNC_DECAPSULATE(paramSet, sharedKeyParamSet, encapsData, hdiSharedSecret, ret, func) \
-    struct HuksParamSet paramSetCore = {0}; \
-    struct HuksParamSet sharedKeyParamSetCore = {0}; \
-    struct HuksBlob encapsDataCore = {0}; \
-    struct HuksBlob hdiSharedSecretCore = {0}; \
-    HDI_CONVERTER_PARAM_IN_PARAMSET(paramSet, paramSetCore) \
-    HDI_CONVERTER_PARAM_IN_PARAMSET(sharedKeyParamSet, sharedKeyParamSetCore) \
-    HDI_CONVERTER_PARAM_IN_BLOB(encapsData, encapsDataCore) \
-    HDI_CONVERTER_PARAM_IN_BLOB(hdiSharedSecret, hdiSharedSecretCore) \
-    (ret) = (func)(HDI_ADAPTER_PARAM(paramSet, &paramSetCore), \
-                HDI_ADAPTER_PARAM(sharedKeyParamSet, &sharedKeyParamSetCore), \
-                HDI_ADAPTER_PARAM(encapsData, &encapsDataCore), \
-                HDI_ADAPTER_PARAM(hdiSharedSecret, &hdiSharedSecretCore)); \
-    HDI_CONVERTER_PARAM_OUT_BLOB(hdiSharedSecretCore, hdiSharedSecret)
-
 #define HDI_CONVERTER_FUNC_DERIVEKEY(paramSet, kdfKey, derivedKey, ret, func)  \
     struct HuksParamSet paramSetCore = {0};  \
     struct HuksBlob kdfKeyCore = {0};  \
@@ -620,28 +589,6 @@ struct HuksHdi {
      * @return error code, see hks_type.h
      */
     int32_t (*HuksHdiGetStatInfo)(struct HksBlob *statInfo);
-
-    /**
-    * @brief ML-KEM encapsulation operation.
-    * @param paramSet required parameter set
-    * @param sharedKeyParamSet shared key parameter set
-    * @param encapResult encapsulation result
-    * @return error code, see hks_type.h
-    */
-    int32_t (*HuksHdiEncapsulate)(const struct HksParamSet *paramSet,
-        const struct HksParamSet *sharedKeyParamSet, struct HksEncapsulationResult *encapResult);
-
-    /**
-    * @brief ML-KEM decapsulation operation.
-    * @param paramSet required parameter set for decapsulation
-    * @param sharedKeyParamSet parameter set for the output shared secret
-    * @param encapsulatedData ciphertext to decapsulate
-    * @param sharedSecret output shared secret
-    * @return error code, see hks_type.h
-    */
-    int32_t (*HuksHdiDecapsulate)(const struct HksParamSet *paramSet,
-        const struct HksParamSet *sharedKeyParamSet, const struct HksBlob *encapsulatedData,
-        struct HksBlob *sharedSecret);
 };
 
 #endif /* HUKS_HDI_H */

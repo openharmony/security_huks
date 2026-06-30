@@ -38,7 +38,6 @@ if (os_level == "standard") {
     subsystem_name = "security"
     part_name = "huks"
     public_configs = [ ":huks_config", ":idl_export_core_includes" ]
-    deps = []
 
     include_dirs = [
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough",
@@ -60,10 +59,7 @@ if (os_level == "standard") {
     if (huks_enable_hdi_in_standard) {
       sources += [
         "passthrough/huks_hdi_access.c",
-      ]
-      deps += [
-        "passthrough/wrapper:huks_hdi_wrapper_v1_1",
-        "passthrough/wrapper:huks_hdi_wrapper_v1_2",
+        "passthrough/huks_hdi_v1_1_adapter.cpp",
       ]
     } else {
       sources += [
@@ -72,10 +68,11 @@ if (os_level == "standard") {
       ]
     }
 
-    deps += [
+    deps = [
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
       "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/at_wrapper:libhuks_at_systemapi_wrap_static",
+      "//base/security/huks/services/huks_standard/huks_engine/main/core:huks_engine_core_standard",
     ]
 
     if (huks_enable_ukey_config == true) {
@@ -102,7 +99,6 @@ if (os_level == "standard") {
     }
 
     external_deps = [
-      "hdf_core:libhdf_utils",
       "access_token:libaccesstoken_sdk",
       "access_token:libtokenid_sdk",
       "c_utils:utils",
@@ -122,9 +118,7 @@ if (os_level == "standard") {
     external_deps += [ "hilog:libhilog" ]
 
     if (huks_enable_hdi_in_standard) {
-      external_deps += [ 
-        "drivers_interface_huks:huks_idl_headers_1.2",
-      ]
+      external_deps += [ "drivers_interface_huks:libhuks_proxy_1.1" ]
     }
   }
 } else {
