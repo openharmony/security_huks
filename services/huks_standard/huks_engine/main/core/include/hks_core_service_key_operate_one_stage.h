@@ -53,11 +53,13 @@ int32_t HksCoreMac(const struct HksBlob *key, const struct HksParamSet *paramSet
 int32_t HksCoreUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet,
     struct HksBlob *newKey);
 
-int32_t HksCoreEncapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParamSet,
+int32_t HksCoreEncapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
     struct HksEncapsulationResult *encapResult);
 
-int32_t HksCoreDecapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParamSet,
-    const struct HksBlob *encaps, struct HksBlob *sharedSecret);
+int32_t HksCoreDecapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksParamSet *sharedKeyParamSet, const struct HksBlob *encapsulatedData,
+    struct HksBlob *sharedSecret);
 #ifdef __cplusplus
 }
 #endif

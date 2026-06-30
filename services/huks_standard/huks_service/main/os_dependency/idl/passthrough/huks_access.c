@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "hks_error_code.h"
 #include "securec.h"
 #include <stdint.h>
 #define HUKS_DISABLE_LOG_AT_FILE_TO_REDUCE_ROM_SIZE
@@ -394,47 +393,30 @@ ENABLE_CFI(int32_t HuksAccessAttestKey(const struct HksBlob *key, const struct H
     return ret;
 }
 #endif
-#ifdef HKS_SUPPORT_ML_KEM_C
-ENABLE_CFI(int32_t HuksAccessEncapsulate(const struct HksParamSet *paramSet,
-    const struct HksParamSet *sharedKeyParamSet, struct HksEncapsulationResult *encapResult))
-{
-    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiEncapsulate, HKS_ERROR_NULL_POINTER,
-        "Encapsulate functon is null pointer")
-    return g_hksHalDevicePtr->HuksHdiEncapsulate(paramSet, sharedKeyParamSet, encapResult);
-}
-
-ENABLE_CFI(int32_t HuksAccessDecapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParam,
-    struct HksBlob *encapsData, struct HksBlob *hdiSharedSecret))
+ENABLE_CFI(int32_t HuksAccessEncapsulate(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksEncapsulationResult *encapResult))
 {
-    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
-
-    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiDecapsulate, HKS_ERROR_NULL_POINTER,
-        "Decapsulate functon is null pointer")
-    return g_hksHalDevicePtr->HuksHdiDecapsulate(paramSet, sharedKeyParam, encapsData, hdiSharedSecret);
-}
-#else
-ENABLE_CFI(int32_t HuksAccessEncapsulate(const struct HksParamSet *paramSet,
-    const struct HksParamSet *sharedKeyParamSet, struct HksEncapsulationResult *encapResult))
-{
+    (void)key;
     (void)paramSet;
+    (void)sharedKeyAlias;
     (void)sharedKeyParamSet;
     (void)encapResult;
     return HKS_ERROR_NOT_SUPPORTED;
 }
 
-ENABLE_CFI(int32_t HuksAccessDecapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParam,
-    struct HksBlob *encapsData, struct HksBlob *hdiSharedSecret))
+ENABLE_CFI(int32_t HuksAccessDecapsulate(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksParamSet *sharedKeyParamSet, struct HksBlob *encapsData, struct HksBlob *hdiSharedSecret))
 {
+    (void)key;
     (void)paramSet;
-    (void)sharedKeyParam;
+    (void)sharedKeyParamSet;
     (void)encapsData;
     (void)hdiSharedSecret;
     return HKS_ERROR_NOT_SUPPORTED;
 }
 
-#endif /* HKS_SUPPORT_ML_KEM */
 #endif /* _CUT_AUTHENTICATE_ */
 
 ENABLE_CFI(int32_t HuksAccessGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob *random))
