@@ -42,6 +42,34 @@ sptr<IRemoteObject> GetAbilityManagerRemote()
     }
     return remote;
 }
+
+bool WriteConnectAbilityData(MessageParcel &data, const AAFwk::Want &want,
+    const sptr<ExtensionConnection> &connect, int32_t userid)
+{
+    if (!data.WriteInterfaceToken(u"ohos.aafwk.AbilityManager")) {
+        return false;
+    }
+    if (!data.WriteParcelable(&want)) {
+        return false;
+    }
+    bool hasConnect = connect->AsObject() != nullptr;
+    if (!data.WriteBool(hasConnect) || (hasConnect && !data.WriteRemoteObject(connect->AsObject()))) {
+        return false;
+    }
+    if (!data.WriteBool(false)) { // no callerToken
+        return false;
+    }
+    if (!data.WriteInt32(userid) || !data.WriteInt32(EXTENSION_ABILITY_TYPE_SERVICE)) {
+        return false;
+    }
+    if (!data.WriteBool(false) || !data.WriteUint64(0) || !data.WriteInt32(0)) { // isQuery/false/timeout
+        return false;
+    }
+    if (!data.WriteParcelable(nullptr)) { // indirectCallerInfo
+        return false;
+    }
+    return true;
+}
 }
 
 int32_t AMSConnectAbility(const AAFwk::Want &want, const sptr<ExtensionConnection> &connect, int32_t userid)
@@ -52,53 +80,8 @@ int32_t AMSConnectAbility(const AAFwk::Want &want, const sptr<ExtensionConnectio
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-
-    if (!data.WriteInterfaceToken(u"ohos.aafwk.AbilityManager")) {
-        HKS_LOG_E("write interface token failed");
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
-    }
-    if (!data.WriteParcelable(&want)) {
-        HKS_LOG_E("write want failed");
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
-    }
-    if (connect->AsObject() != nullptr) {
-        if (!data.WriteBool(true) || !data.WriteRemoteObject(connect->AsObject())) {
-            HKS_LOG_E("write connect failed");
-            return HKS_ERROR_REMOTE_OPERATION_FAILED;
-        }
-    } else {
-        if (!data.WriteBool(false)) {
-            HKS_LOG_E("write connect bool failed");
-            return HKS_ERROR_REMOTE_OPERATION_FAILED;
-        }
-    }
-    // no callerToken
-    if (!data.WriteBool(false)) {
-        HKS_LOG_E("write callerToken bool failed");
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
-    }
-    if (!data.WriteInt32(userid)) {
-        HKS_LOG_E("write userId failed");
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
-    }
-    if (!data.WriteInt32(EXTENSION_ABILITY_TYPE_SERVICE)) {
-        HKS_LOG_E("write extensionType failed");
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
-    }
-    if (!data.WriteBool(false)) { // isQueryExtensionOnly
-        HKS_LOG_E("write isQueryExtensionOnly failed");
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
-    }
-    if (!data.WriteUint64(0)) { // specifiedFullTokenId
-        HKS_LOG_E("write specifiedFullTokenId failed");
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
-    }
-    if (!data.WriteInt32(0)) { // loadTimeout
-        HKS_LOG_E("write loadTimeout failed");
-        return HKS_ERROR_REMOTE_OPERATION_FAILED;
-    }
-    if (!data.WriteParcelable(nullptr)) { // indirectCallerInfo
-        HKS_LOG_E("write indirectCallerInfo failed");
+    if (!WriteConnectAbilityData(data, want, connect, userid)) {
+        HKS_LOG_E("write connect ability parcel failed");
         return HKS_ERROR_REMOTE_OPERATION_FAILED;
     }
 
