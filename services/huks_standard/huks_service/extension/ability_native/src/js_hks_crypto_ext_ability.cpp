@@ -593,14 +593,19 @@ int32_t CallJsMethod(const std::string &funcName, AbilityRuntime::JsRuntime &jsR
 void GetErrorInfoParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
     napi_value napiErrInfo = nullptr;
-    std::string errMsg = "";
+    std::string errMsg = HKS_DEFAULT_ERROR_DESC;
+    bool isFailed = false;
     auto status = napi_get_named_property(env, funcResult, "errInfo", &napiErrInfo);
     napi_valuetype valueType;
     status = napi_typeof(env, napiErrInfo, &valueType);
+    if (resultParams.errCode != 0) {
+        isFailed = true;
+    }
     HKS_EXT_IF_TRUE_LOGE_EXCU_RETURN_VOID(status != napi_ok || valueType == napi_undefined,
-        resultParams.errInfo = HksCreateExternalErrorInfoWithFlag(resultParams.errCode, errMsg.c_str(), false),
+        resultParams.errInfo = HksCreateExternalErrorInfoWithFlag(resultParams.errCode, errMsg.c_str(), isFailed),
         "GetErrorInfoParams::errInfo not found in result");
 
+    errMsg = "";
     napi_value napiErrno = nullptr;
     status = napi_get_named_property(env, napiErrInfo, "errno", &napiErrno);
     HKS_EXT_IF_TRUE_LOGE_EXCU_RETURN_VOID(status != napi_ok || napiErrno == nullptr,

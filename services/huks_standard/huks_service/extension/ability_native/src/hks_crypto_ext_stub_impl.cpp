@@ -42,11 +42,11 @@ static void SetErrorInfoFromC(struct HksExternalErrorInfo *errInfoC, int32_t ret
 
 int32_t HksCryptoExtStubImpl::HksExtStubCheckExtension(HksExternalErrorInfoIdl &errorInfo)
 {
+    errorInfo.errVal = HKS_ERROR_EXT_NULLPTR;
+    errorInfo.hasErrorInfo = false;
+    errorInfo.errorDesc.assign(HKS_DEFAULT_ERROR_DESC);
     if (extension_ == nullptr) {
         LOGE("extension is nullptr");
-        errorInfo.errVal = HKS_ERROR_EXT_NULLPTR;
-        errorInfo.hasErrorInfo = false;
-        errorInfo.errorDesc.assign(HKS_DEFAULT_ERROR_DESC);
         return HKS_ERROR_EXT_NULLPTR;
     }
     return HKS_SUCCESS;

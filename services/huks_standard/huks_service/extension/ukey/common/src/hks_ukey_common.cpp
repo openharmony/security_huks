@@ -255,4 +255,15 @@ int32_t ParseAbilityInfoArrayFromJson(const std::string &jsonStr, std::vector<Ab
     return HKS_SUCCESS;
 }
 
+void HksExtRecordErrInfo(HksExternalErrorInfoIdl &errorInfo, struct HksExternalErrorInfo **errInfo)
+{
+    if (errorInfo.errorDesc == HKS_DEFAULT_ERROR_DESC) {
+        errorInfo.errorDesc = "";
+        errorInfo.errVal = 0;
+    }
+    HKS_IF_TRUE_EXCU(errorInfo.hasErrorInfo && errInfo != nullptr,
+        *errInfo = HksCreateExternalErrorInfoWithFlag(errorInfo.errVal,
+        errorInfo.errorDesc.c_str(), errorInfo.hasErrorInfo));
+}
+
 }
