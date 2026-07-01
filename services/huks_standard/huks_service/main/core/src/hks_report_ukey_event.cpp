@@ -1063,22 +1063,22 @@ int32_t ReportUKeyEvent(const struct UKeyInfo* ukeyInfo, const char *funcName,
     return HKS_SUCCESS;
 }
 
-void ReportUKeySessionEvent(uint32_t eventId, int32_t ret,
+void ReportUKeySessionEvent(uint32_t eventId, int32_t ret, int32_t errVal,
     const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet)
 {
-    struct UKeyInfo ukeyInfo = { .eventId = eventId, .detailErrcode = ret };
-    if (handle != nullptr && handle->size > 0) {
+    struct UKeyInfo ukeyInfo = { .eventId = eventId, .detailErrcode = errVal };
+    if (handle != nullptr) {
         ukeyInfo.handle = *handle;
     }
     struct UKeyCommonInfo ukeyCommon = { .returnCode = ret };
     (void)ReportUKeyEvent(&ukeyInfo, __func__, processInfo, paramSet, &ukeyCommon);
 }
 
-void ReportUKeyKeyEvent(uint32_t eventId, int32_t ret,
+void ReportUKeyKeyEvent(uint32_t eventId, int32_t ret, int32_t errVal,
     const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet)
 {
-    struct UKeyInfo ukeyInfo = { .eventId = eventId, .detailErrcode = ret };
+    struct UKeyInfo ukeyInfo = { .eventId = eventId, .detailErrcode = errVal };
     struct UKeyCommonInfo ukeyCommon = { .returnCode = ret };
     (void)ReportUKeyEvent(&ukeyInfo, __func__, processInfo, paramSet, &ukeyCommon);
 }

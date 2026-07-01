@@ -280,10 +280,10 @@ extern "C" {
 int32_t ReportUKeyEvent(const struct UKeyInfo* ukeyInfo, const char *funcName, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct UKeyCommonInfo *ukeyCommon);
 
-void ReportUKeySessionEvent(uint32_t eventId, int32_t ret, const struct HksBlob *handle,
+void ReportUKeySessionEvent(uint32_t eventId, int32_t ret, int32_t errVal, const struct HksBlob *handle,
     const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet);
 
-void ReportUKeyKeyEvent(uint32_t eventId, int32_t ret,
+void ReportUKeyKeyEvent(uint32_t eventId, int32_t ret, int32_t errVal,
     const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet);
 
 #ifdef __cplusplus
