@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #endif
 
 #include "hks_openssl_mlkem.h"
+#include "securec.h"
 
 #include <openssl/evp.h>
 #include <openssl/err.h>
@@ -40,7 +41,7 @@ static int32_t MlKemEncapsulateInitCtx(const struct HksBlob *rawKey, EVP_PKEY **
         "invalid raw key size %" LOG_PUBLIC "u", rawKey->size)
     struct HksKeyMaterialMlKem *keyMaterial = (struct HksKeyMaterialMlKem *)rawKey->data;
     const char *algName = HksOpensslMlKemGetAlgName(keyMaterial->keyParamSet);
-    HKS_IF_NULL_LOGE_RETURN(algName, HKS_ERROR_INVALID_KEY_SIZE, "get ml-kem alg name failed")
+    HKS_IF_NULL_LOGE_RETURN(algName, HKS_ERROR_INVALID_ALGORITHM, "get ml-kem alg name failed")
 
     EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_from_name(NULL, algName, NULL);
     HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_CRYPTO_ENGINE_ERROR, "EVP_PKEY_CTX_new_from_name failed")
@@ -116,10 +117,7 @@ static int32_t MlKemEncapsulate(EVP_PKEY *pkey, struct HksEncapsulationResult *e
 
     EVP_PKEY_CTX_free(ctx);
     if (ret != HKS_SUCCESS) {
-        HKS_FREE(encapResult->encapsulatedData.data);
-        HKS_FREE(encapResult->sharedSecret.data);
-        encapResult->encapsulatedData.size = 0;
-        encapResult->sharedSecret.size = 0;
+        HKS_FREE_ENCAPSULATION_RESULT(encapResult);
         HKS_IF_TRUE_LOGE_RETURN((sslRet != HKS_OPENSSL_SUCCESS), HKS_ERROR_CRYPTO_ENGINE_ERROR, "kem fail")
     }
     return ret;
@@ -230,7 +228,7 @@ static int32_t MlKemDecapsulate(EVP_PKEY *pkey, const struct HksBlob *ciphertext
 
     EVP_PKEY_CTX_free(ctx);
     if (ret != HKS_SUCCESS) {
-        HKS_FREE(sharedSecret->data);
+        HKS_MEMSET_FREE_PTR(sharedSecret->data, sharedSecret->size);
         sharedSecret->size = 0;
         HKS_IF_TRUE_LOGE_RETURN((sslRet != HKS_OPENSSL_SUCCESS), HKS_ERROR_CRYPTO_ENGINE_ERROR, "kem fail");
     }
