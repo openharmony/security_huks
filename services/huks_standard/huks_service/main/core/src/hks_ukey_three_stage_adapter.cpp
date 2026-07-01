@@ -58,7 +58,8 @@ int32_t HksServiceOnUkeyGenerateKey(const struct HksProcessInfo *processInfo,
         HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
     }
     HksFreeExternalErrorInfo(processAndError.errInfo);
-    ReportUKeyKeyEvent(HKS_EVENT_UKEY_GENERATE_KEY, ret, errVal, processInfo, paramSet);
+    struct UKeyReportErrInfo reportErr = { ret, errVal };
+    ReportUKeyKeyEvent(HKS_EVENT_UKEY_GENERATE_KEY, &reportErr, processInfo, paramSet);
 
     return ret;
 }
@@ -89,7 +90,8 @@ int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, co
             HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
         }
         HksFreeExternalErrorInfo(processAndError.errInfo);
-        ReportUKeySessionEvent(HKS_EVENT_UKEY_INIT_SESSION, ret, errVal, handle, processInfo, inParamSet);
+        struct UKeyReportErrInfo reportErr = { ret, errVal };
+        ReportUKeySessionEvent(HKS_EVENT_UKEY_INIT_SESSION, &reportErr, handle, processInfo, inParamSet);
         return ret;
     }
 
@@ -104,7 +106,8 @@ int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, co
         return HKS_ERROR_COPY_FAIL;
     }
     handle->size = sizeof(uint64_t);
-    ReportUKeySessionEvent(HKS_EVENT_UKEY_INIT_SESSION, ret, 0, handle, processInfo, inParamSet);
+    struct UKeyReportErrInfo reportErr = { ret, 0 };
+    ReportUKeySessionEvent(HKS_EVENT_UKEY_INIT_SESSION, &reportErr, handle, processInfo, inParamSet);
     return ret;
 }
 
@@ -140,7 +143,8 @@ int32_t HksServiceOnUkeyUpdateSession(const struct HksProcessInfo *processInfo, 
             HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
         }
         HksFreeExternalErrorInfo(processAndError.errInfo);
-        ReportUKeySessionEvent(HKS_EVENT_UKEY_UPDATE_SESSION, ret, errVal, handle, processInfo, paramSet);
+        struct UKeyReportErrInfo reportErr = { ret, errVal };
+        ReportUKeySessionEvent(HKS_EVENT_UKEY_UPDATE_SESSION, &reportErr, handle, processInfo, paramSet);
         return ret;
     }
 
@@ -157,7 +161,8 @@ int32_t HksServiceOnUkeyUpdateSession(const struct HksProcessInfo *processInfo, 
         return HKS_ERROR_COPY_FAIL;
     }
     outData->size = static_cast<uint32_t>(outdata.size());
-    ReportUKeySessionEvent(HKS_EVENT_UKEY_UPDATE_SESSION, ret, 0, handle, processInfo, paramSet);
+    struct UKeyReportErrInfo reportErr = { ret, 0 };
+    ReportUKeySessionEvent(HKS_EVENT_UKEY_UPDATE_SESSION, &reportErr, handle, processInfo, paramSet);
     return ret;
 }
 
@@ -192,7 +197,8 @@ int32_t HksServiceOnUkeyFinishSession(const struct HksProcessInfo *processInfo, 
             HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
         }
         HksFreeExternalErrorInfo(processAndError.errInfo);
-        ReportUKeySessionEvent(HKS_EVENT_UKEY_FINISH_SESSION, ret, errVal, handle, processInfo, paramSet);
+        struct UKeyReportErrInfo reportErr = { ret, errVal };
+        ReportUKeySessionEvent(HKS_EVENT_UKEY_FINISH_SESSION, &reportErr, handle, processInfo, paramSet);
         return ret;
     }
 
@@ -209,7 +215,8 @@ int32_t HksServiceOnUkeyFinishSession(const struct HksProcessInfo *processInfo, 
         return HKS_ERROR_COPY_FAIL;
     }
     outData->size = static_cast<uint32_t>(outdata.size());
-    ReportUKeySessionEvent(HKS_EVENT_UKEY_FINISH_SESSION, ret, 0, handle, processInfo, paramSet);
+    struct UKeyReportErrInfo reportErr = { ret, 0 };
+    ReportUKeySessionEvent(HKS_EVENT_UKEY_FINISH_SESSION, &reportErr, handle, processInfo, paramSet);
     return ret;
 }
 
@@ -237,10 +244,12 @@ int32_t HksServiceOnUkeyAbortSession(const struct HksProcessInfo *processInfo, c
             HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
         }
         HksFreeExternalErrorInfo(processAndError.errInfo);
-        ReportUKeySessionEvent(HKS_EVENT_UKEY_ABORT_SESSION, ret, errVal, handle, processInfo, paramSet);
+        struct UKeyReportErrInfo reportErr = { ret, errVal };
+        ReportUKeySessionEvent(HKS_EVENT_UKEY_ABORT_SESSION, &reportErr, handle, processInfo, paramSet);
         return ret;
     }
-    ReportUKeySessionEvent(HKS_EVENT_UKEY_ABORT_SESSION, ret, 0, handle, processInfo, paramSet);
+    struct UKeyReportErrInfo reportErr = { ret, 0 };
+    ReportUKeySessionEvent(HKS_EVENT_UKEY_ABORT_SESSION, &reportErr, handle, processInfo, paramSet);
     return ret;
 }
 
@@ -281,7 +290,8 @@ int32_t HksServiceOnUkeyImportWrappedKey(const struct HksProcessInfo *processInf
         HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
     }
     HksFreeExternalErrorInfo(processAndError.errInfo);
-    ReportUKeyKeyEvent(HKS_EVENT_UKEY_IMPORT_WRAPPED_KEY, ret, errVal, processInfo, paramSet);
+    struct UKeyReportErrInfo reportErr = { ret, errVal };
+    ReportUKeyKeyEvent(HKS_EVENT_UKEY_IMPORT_WRAPPED_KEY, &reportErr, processInfo, paramSet);
     return ret;
 }
 
@@ -314,7 +324,8 @@ int32_t HksServiceOnUkeyExportPublicKey(const struct HksProcessInfo *processInfo
             HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
         }
         HksFreeExternalErrorInfo(processAndError.errInfo);
-        ReportUKeyKeyEvent(HKS_EVENT_UKEY_EXPORT_PUBLIC_KEY, ret, errVal, processInfo, paramSet);
+        struct UKeyReportErrInfo reportErr = { ret, errVal };
+        ReportUKeyKeyEvent(HKS_EVENT_UKEY_EXPORT_PUBLIC_KEY, &reportErr, processInfo, paramSet);
         return ret;
     }
 

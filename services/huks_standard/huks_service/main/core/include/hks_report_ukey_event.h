@@ -280,10 +280,16 @@ extern "C" {
 int32_t ReportUKeyEvent(const struct UKeyInfo* ukeyInfo, const char *funcName, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct UKeyCommonInfo *ukeyCommon);
 
-void ReportUKeySessionEvent(uint32_t eventId, int32_t ret, int32_t errVal, const struct HksBlob *handle,
-    const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet);
+typedef struct UKeyReportErrInfo {
+    int32_t ret;
+    int32_t errVal;
+} UKeyReportErrInfo;
 
-void ReportUKeyKeyEvent(uint32_t eventId, int32_t ret, int32_t errVal,
+void ReportUKeySessionEvent(uint32_t eventId, const struct UKeyReportErrInfo *errInfo,
+    const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
+    const struct HksParamSet *paramSet);
+
+void ReportUKeyKeyEvent(uint32_t eventId, const struct UKeyReportErrInfo *errInfo,
     const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet);
 
 #ifdef __cplusplus

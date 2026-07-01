@@ -74,8 +74,8 @@
 #ifdef L2_STANDARD
 #include "hks_ha_event_report.h"
 #include "hks_ukey_three_stage_adapter.h"
-#include "hks_report_ukey_event.h"
 #include "hks_se_api_wrap.h"
+#include "hks_report_ukey_event.h"
 #endif
 
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
@@ -2680,8 +2680,11 @@ int32_t HksServiceEncapsulate(const struct HksProcessInfo *processInfo, const st
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "encapsulate: get key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = AppendKeyBlobToParamSet(newParamSet, &keyFromFile, &finalParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "encapsulate: appennd key blob to paramSet failed, ret = %" LOG_PUBLIC "d", ret)
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "encapsulate: append key blob to paramSet failed, ret = %" LOG_PUBLIC "d", ret)
 
+        struct HksParam *sharedKeyAlias = NULL;
+        ret = HksGetParam(newShareParamSet, HKS_TAG_KEY_ALIAS, &sharedKeyAlias);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceEncapsulate get shared key alias fail")
         ret = HuksAccessEncapsulate(finalParamSet, newShareParamSet, encapResult);
         IfNotSuccAppendHdiErrorInfo(ret);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAccessEncapsulate fail")
@@ -2705,6 +2708,7 @@ int32_t HksServiceEncapsulate(const struct HksProcessInfo *processInfo, const st
     HKS_MEMSET_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
     HksFreeParamSet(&newShareParamSet);
+    HksFreeParamSet(&finalParamSet);
     return ret;
 }
 
@@ -2737,11 +2741,11 @@ int32_t HksServiceDecapsulate(const struct HksProcessInfo *processInfo, const st
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "decapsulate: get key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = AppendKeyBlobToParamSet(newParamSet, &keyFromFile, &finalParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "decapsulate: appennd key blob to paramSet failed, ret = %" LOG_PUBLIC "d", ret)
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "decapsulate: append key blob to paramSet failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HuksAccessDecapsulate(finalParamSet, newSharedKeyParamSet, encapOrsharedSecret, &outData);
         IfNotSuccAppendHdiErrorInfo(ret);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAccessEncapsulate fail")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAccessDecapsulate fail")
 
         struct HksParam *keySize = NULL;
         ret = HksGetParam(newSharedKeyParamSet, HKS_TAG_KEY_SIZE, &keySize);
@@ -2763,5 +2767,6 @@ int32_t HksServiceDecapsulate(const struct HksProcessInfo *processInfo, const st
     HKS_MEMSET_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
     HksFreeParamSet(&newSharedKeyParamSet);
+    HksFreeParamSet(&finalParamSet);
     return ret;
 }
