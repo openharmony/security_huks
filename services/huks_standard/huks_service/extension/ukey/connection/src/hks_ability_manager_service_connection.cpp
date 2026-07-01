@@ -24,8 +24,8 @@ namespace Huks {
 
 namespace {
 constexpr int32_t EXTENSION_ABILITY_TYPE_SERVICE = 3;
-constexpr uint32_t AMS_CONNECT_ABILITY_MSG_CODE = 1034;   // CONNECT_ABILITY_WITH_TYPE
-constexpr uint32_t AMS_DISCONNECT_ABILITY_MSG_CODE = 1003; // DISCONNECT_ABILITY
+constexpr uint32_t CONNECT_ABILITY_MSG_CODE = 1034;   // CONNECT_ABILITY_WITH_TYPE
+constexpr uint32_t DISCONNECT_ABILITY_MSG_CODE = 1003; // DISCONNECT_ABILITY
 constexpr int32_t ABILITY_MANAGER_SA_ID = ABILITY_MGR_SERVICE_ID; // 180
 
 sptr<IRemoteObject> GetAbilityManagerRemote()
@@ -85,7 +85,7 @@ int32_t AMSConnectAbility(const AAFwk::Want &want, const sptr<ExtensionConnectio
         return HKS_ERROR_REMOTE_OPERATION_FAILED;
     }
 
-    int32_t ret = remote->SendRequest(AMS_CONNECT_ABILITY_MSG_CODE, data, reply, option);
+    int32_t ret = remote->SendRequest(CONNECT_ABILITY_MSG_CODE, data, reply, option);
     HKS_IF_TRUE_LOGE_RETURN(ret != NO_ERROR, HKS_ERROR_REMOTE_OPERATION_FAILED,
         "SendRequest connect ability failed, ret = %" LOG_PUBLIC "d", ret)
     return reply.ReadInt32();
@@ -109,7 +109,7 @@ void AMSDisconnectAbility(const sptr<ExtensionConnection> &connect)
         return;
     }
 
-    int32_t ret = remote->SendRequest(AMS_DISCONNECT_ABILITY_MSG_CODE, data, reply, option);
+    int32_t ret = remote->SendRequest(DISCONNECT_ABILITY_MSG_CODE, data, reply, option);
     HKS_IF_TRUE_LOGE_RETURN_VOID(ret != NO_ERROR,
         "SendRequest disconnect ability failed, ret = %" LOG_PUBLIC "d", ret)
 }
