@@ -1068,9 +1068,6 @@ void ReportUKeySessionEvent(uint32_t eventId, int32_t ret,
     const struct HksParamSet *paramSet)
 {
     struct UKeyInfo ukeyInfo = { .eventId = eventId, .detailErrcode = ret };
-    if (handle != nullptr && handle->size > 0) {
-        ukeyInfo.handle = *handle;
-    }
     struct UKeyCommonInfo ukeyCommon = { .returnCode = ret };
     (void)ReportUKeyEvent(&ukeyInfo, __func__, processInfo, paramSet, &ukeyCommon);
 }

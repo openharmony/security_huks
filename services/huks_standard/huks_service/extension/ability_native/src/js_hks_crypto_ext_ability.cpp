@@ -636,10 +636,10 @@ int32_t GetOpenRemoteHandleParams(const napi_env &env, const napi_value &funcRes
     napi_value napiHandle = nullptr;
     auto status = napi_get_named_property(env, funcResult, "handle", &napiHandle);
     HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok || napiHandle == nullptr,
-        HKS_ERROR_EXT_NAPI_FAILED,
+        HKS_SUCCESS,
         "GetOpenRemoteHandleParams::napi_get_named_property failed, status:%d", status);
     auto result = GetStringValue(env, napiHandle, resultParams.handle);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(result != HKS_SUCCESS, HKS_ERROR_EXT_RETURN_VALUE_INCRECT,
+    HKS_EXT_IF_TRUE_LOGE_RETURN(result != HKS_SUCCESS, HKS_SUCCESS,
         "GetOpenRemoteHandleParams::Convert js napiHandle fail.result:%d", result);
     return HKS_SUCCESS;
 }
@@ -650,10 +650,10 @@ int32_t GetResourceIdParams(const napi_env &env, const napi_value &funcResult, C
     napi_value napiHandle = nullptr;
     auto status = napi_get_named_property(env, funcResult, "resourceId", &napiHandle);
     HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok || napiHandle == nullptr,
-        HKS_ERROR_EXT_NAPI_FAILED,
+        HKS_SUCCESS,
         "GetResourceIdParams::napi_get_named_property failed, status:%d", status);
     auto result = GetStringValue(env, napiHandle, resultParams.handle);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(result != HKS_SUCCESS, HKS_ERROR_EXT_RETURN_VALUE_INCRECT,
+    HKS_EXT_IF_TRUE_LOGE_RETURN(result != HKS_SUCCESS, HKS_SUCCESS,
         "GetResourceIdParams::Convert js napiHandle fail.result:%d", result);
     return HKS_SUCCESS;
 }
@@ -665,7 +665,7 @@ int32_t GetAuthUkeyPinParams(const napi_env &env, const napi_value &funcResult, 
     auto status = napi_get_named_property(env, funcResult, "authState", &napiAuthState);
     if (status == napi_ok && napiAuthState != nullptr) {
         status = napi_get_value_int32(env, napiAuthState, &resultParams.authState);
-        HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_NAPI_FAILED,
+        HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_SUCCESS,
             "Convert js value authState failed, status:%d", status);
     } else {
         LOGE("napi_get_named_property failed, status:%d", status);
@@ -673,10 +673,10 @@ int32_t GetAuthUkeyPinParams(const napi_env &env, const napi_value &funcResult, 
     napi_value napiRetryCnt = nullptr;
     status = napi_get_named_property(env, funcResult, "retryCount", &napiRetryCnt);
     HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok || napiRetryCnt == nullptr,
-        HKS_ERROR_EXT_NAPI_FAILED,
+        HKS_SUCCESS,
         "napi_get_named_property failed, status:%d", status);
     status = napi_get_value_uint32(env, napiRetryCnt, &resultParams.retryCnt);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_NAPI_FAILED,
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_SUCCESS,
         "Convert js value retryCnt failed.status:%d", status);
     return HKS_SUCCESS;
 }
@@ -687,10 +687,10 @@ int32_t GetUkeyPinAuthStateParams(const napi_env &env, const napi_value &funcRes
     napi_value napiAuthState = nullptr;
     auto status = napi_get_named_property(env, funcResult, "authState", &napiAuthState);
     HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok || napiAuthState == nullptr,
-        HKS_ERROR_EXT_NAPI_FAILED,
+        HKS_SUCCESS,
         "napi_get_named_property failed, status:%d", status);
     status = napi_get_value_int32(env, napiAuthState, &resultParams.authState);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_NAPI_FAILED,
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_SUCCESS,
         "napi_get_value_int32 failed.status:%d", status);
     return HKS_SUCCESS;
 }
@@ -758,7 +758,7 @@ int32_t GetSessionParams(const napi_env &env, const napi_value &funcResult, Cryp
     napi_value napiOutData = nullptr;
     auto status = napi_get_named_property(env, funcResult, "outData", &napiOutData);
     HKS_EXT_IF_TRUE_LOGE_RETURN(napiOutData == nullptr || status != napi_ok,
-        HKS_ERROR_EXT_NAPI_FAILED,
+        HKS_SUCCESS,
         "Convert js array object fail, status:%d", status);
 
     napi_typedarray_type type;
@@ -767,7 +767,7 @@ int32_t GetSessionParams(const napi_env &env, const napi_value &funcResult, Cryp
     size_t length;
     void *data = nullptr;
     status = napi_get_typedarray_info(env, napiOutData, &type, &length, &data, &nativeArray, &byte_offset);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_NAPI_FAILED,
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_SUCCESS,
         "get typedarray info failed, status:%d", status);
 
     if (type == napi_uint8_array) {
@@ -789,12 +789,12 @@ int32_t GetGetPropertyParams(const napi_env &env, const napi_value &funcResult, 
     HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_NAPI_FAILED,
         "create_array failed, status:%d", status);
     status = napi_get_named_property(env, funcResult, "property", &nativeArray);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(nativeArray == nullptr || status != napi_ok, HKS_ERROR_EXT_NAPI_FAILED,
+    HKS_EXT_IF_TRUE_LOGE_RETURN(nativeArray == nullptr || status != napi_ok, HKS_SUCCESS,
         "Convert js array object fail.status:%d", status);
 
     uint32_t length = 0;
     status = napi_get_array_length(env, nativeArray, &length);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_NAPI_FAILED,
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_SUCCESS,
         "Get nativeArray length fail.status:%d", status);
     std::vector<HksParam> paramVec {};
     for (uint32_t i = 0; i < length; ++i) {
@@ -866,9 +866,14 @@ napi_value PromiseCallback(napi_env env, napi_callback_info info)
     auto *callbackInfo = static_cast<PromiseCallbackInfo *>(data);
     HKS_EXT_IF_TRUE_LOGE_RETURN(callbackInfo == nullptr, nullptr, "PromiseCallback, invalid callbackInfo");
     auto dataParam = callbackInfo->GetJsCallBackParam();
-    HKS_EXT_IF_TRUE_LOGE_RETURN(dataParam == nullptr || dataParam->errInfo == nullptr, nullptr,
-        "PromiseCallback, invalid dataParam");
-    dataParam->errInfo->errVal = ConvertFunctionResult(env, argv[ARGC_ZERO], *dataParam);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(dataParam == nullptr, nullptr, "PromiseCallback, invalid dataParam");
+    auto result = ConvertFunctionResult(env, argv[ARGC_ZERO], *dataParam);
+    dataParam->hksErrorCode = result;
+    if (dataParam->errInfo != nullptr) {
+        if (result != HKS_SUCCESS) {
+            dataParam->errInfo->errVal = result;
+        }
+    }
 
     PromiseCallbackInfo::Destroy(callbackInfo);
     dataParam->callJsCon.notify_one();
@@ -1054,6 +1059,7 @@ int32_t JsHksCryptoExtAbility::OpenRemoteHandle(const std::string &index, const 
     
     WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     handle = std::move(dataParam->handle);
+
     HKS_EXT_IF_TRUE_EXCU(dataParam->errInfo != nullptr && errInfo != nullptr, *errInfo = dataParam->errInfo);
     dataParam->errInfo = nullptr;
 

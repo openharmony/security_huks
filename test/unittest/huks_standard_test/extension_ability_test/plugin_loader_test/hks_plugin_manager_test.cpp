@@ -16,6 +16,7 @@
 #include "hks_plugin_manager_test.h"
 #include "hks_function_types.h"
 #include "hks_external_error_info.h"
+#include "hks_ukey_common.h"
 #include <unordered_map>
 #include <chrono>
 #include <thread>
@@ -58,6 +59,7 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest001, TestSize.Level0)
     HksProcessInfo processInfo {};
     std::vector<HksParam> g_genAesParams = {
         {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob("TestAbility")},
     };
     CppParamSet paramSet(g_genAesParams);
 
@@ -99,9 +101,10 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest002, TestSize.Level0)
     HksProcessInfo processInfo {};
     std::vector<HksParam> g_genAesParams = {
         {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob("TestAbility")},
     };
     CppParamSet paramSet(g_genAesParams);
-    
+
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, 0) << "fail: regist fail";
 
@@ -128,6 +131,7 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest003, TestSize.Level0)
     HksProcessInfo processInfo {};
     std::vector<HksParam> g_genAesParams = {
         {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob("TestAbility")},
     };
     CppParamSet paramSet(g_genAesParams);
 
@@ -185,6 +189,7 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest004, TestSize.Level0)
     HksProcessInfo processInfo {};
     std::vector<HksParam> tmpParams = {
         {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob("TestAbility")},
     };
     CppParamSet paramSet(tmpParams);
 
@@ -375,6 +380,7 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest009, TestSize.Level0)
     HksProcessInfo processInfo {};
     std::vector<HksParam> tmpParams = {
         {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob("TestAbility")},
     };
     CppParamSet paramSet(tmpParams);
 
@@ -422,6 +428,7 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest010, TestSize.Level0)
     HksProcessInfo processInfo {};
     std::vector<HksParam> tmpParams = {
         {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
+        {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob("TestAbility")},
     };
     CppParamSet paramSet(tmpParams);
 

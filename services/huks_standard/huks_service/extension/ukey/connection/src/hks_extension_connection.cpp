@@ -15,10 +15,8 @@
 
 #include "hks_extension_connection.h"
 #include "hks_ability_manager_service_connection.h"
-#include "ability_manager_client.h"
 #include "hks_log.h"
 #include "hks_template.h"
-#include "huks_access_ext_base_proxy.h"
 
 namespace OHOS {
 namespace Security {
@@ -32,10 +30,8 @@ void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementNa
     HKS_IF_TRUE_RETURN_VOID(remoteObject == nullptr)
 
     std::lock_guard<std::mutex> lock(proxyMutex_);
-    extConnectProxy = CastToHuksAccessExtBaseProxy(remoteObject);
-    HKS_IF_TRUE_LOGE_RETURN_VOID(extConnectProxy == nullptr, "iface_cast fail in OnAbilityConnectDone")
-
-    AddExtDeathRecipient(extConnectProxy->AsObject());
+    extRemoteObject = remoteObject;
+    AddExtDeathRecipient(extRemoteObject);
     isConnected_.store(true);
     proxyConv_.notify_all();
 }
@@ -47,7 +43,7 @@ int32_t ExtensionConnection::OnConnection(const AAFwk::Want &want, sptr<Extensio
     
     std::unique_lock<std::mutex> lock(proxyMutex_);
     if (!proxyConv_.wait_for(lock, std::chrono::seconds(WAIT_TIME), [this] {
-        return extConnectProxy != nullptr;
+        return extRemoteObject != nullptr;
     })) {
         HKS_LOG_E("wait connected timeout");
         return HKS_ERROR_REMOTE_OPERATION_FAILED;
@@ -58,33 +54,33 @@ int32_t ExtensionConnection::OnConnection(const AAFwk::Want &want, sptr<Extensio
 void ExtensionConnection::OnDisconnect(sptr<ExtensionConnection> &connect)
 {
     std::unique_lock<std::mutex> lock(proxyMutex_);
-    if (extConnectProxy != nullptr) {
-        RemoveExtDeathRecipient(extConnectProxy->AsObject());
+    if (extRemoteObject != nullptr) {
+        RemoveExtDeathRecipient(extRemoteObject);
     }
 
     AMSDisconnectAbility(connect);
     if (!disConnectConv_.wait_for(lock, std::chrono::seconds(WAIT_TIME), [connect] {
-        HKS_IF_TRUE_LOGE(connect->extConnectProxy == nullptr, "proxy is null, not need to wait!")
-        return connect->extConnectProxy == nullptr;
+        HKS_IF_TRUE_LOGE(connect->extRemoteObject == nullptr, "remoteObject is null, not need to wait!")
+        return connect->extRemoteObject == nullptr;
     })) {
         HKS_LOG_E("wait disconnected timeout, or not need to wait");
     };
-    extConnectProxy = nullptr;
+    extRemoteObject = nullptr;
     isConnected_.store(false);
 }
 
 void ExtensionConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode)
 {
     std::lock_guard<std::mutex> lock(proxyMutex_);
-    extConnectProxy = nullptr;
+    extRemoteObject = nullptr;
     isConnected_.store(false);
     disConnectConv_.notify_all();
 }
 
-sptr<IHuksAccessExtBase> ExtensionConnection::GetExtConnectProxy()
+sptr<IRemoteObject> ExtensionConnection::GetRemoteObject()
 {
     std::lock_guard<std::mutex> lock(proxyMutex_);
-    return extConnectProxy;
+    return extRemoteObject;
 }
 
 bool ExtensionConnection::IsConnected()
@@ -125,8 +121,8 @@ void ExtensionConnection::OnRemoteDied(const wptr<IRemoteObject> &remote)
         object = nullptr;
     }
     isConnected_.store(false);
-    if (extConnectProxy) {
-        extConnectProxy = nullptr;
+    if (extRemoteObject) {
+        extRemoteObject = nullptr;
     }
 
     isDeathRemoted = true;

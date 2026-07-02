@@ -35,7 +35,6 @@
 #include "iremote_proxy.h"
 #include "iremote_stub.h"
 #include "want.h"
-#include "hks_extension_connection.h"
 #include "ihuks_access_ext_base.h"
 #include "hks_ukey_common.h"
 
@@ -55,11 +54,11 @@ struct ProviderIndexKey {
 
 class HksExtAbilityConnectInfo {
 public:
-    HksExtAbilityConnectInfo(const AAFwk::Want &want, const sptr<ExtensionConnection> &connection)
-        : m_want(want), m_connection(connection) {};
+    HksExtAbilityConnectInfo(const AAFwk::Want &want, const sptr<IHuksAccessExtBase> &proxy)
+        : m_want(want), m_proxy(proxy) {};
     ~HksExtAbilityConnectInfo() = default;
     AAFwk::Want m_want{};
-    sptr<ExtensionConnection> m_connection{nullptr};
+    sptr<IHuksAccessExtBase> m_proxy{nullptr};
 };
 
 constexpr int32_t HKS_PROVIDER_CAN_REMOVE_REF_COUNT = 2;
@@ -72,6 +71,8 @@ public:
     static void ReleaseInstance();
     int32_t OnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName,
         const CppParamSet &paramSet, std::function<void(HksProcessInfo)> callback);
+    int32_t OnSetExtensionProxy(const HksProcessInfo &processInfo, const std::string &providerName,
+        const CppParamSet &paramSet, const sptr<IRemoteObject> &remoteObject);
     int32_t OnUnRegisterProvider(const HksProcessInfo &processInfo, const std::string &providerName,
         const CppParamSet &paramSet, bool isdeath, int32_t &deleteCount);
     int32_t GetAllProviderInfosByProviderName(const std::string &providerName, const int32_t &userid,

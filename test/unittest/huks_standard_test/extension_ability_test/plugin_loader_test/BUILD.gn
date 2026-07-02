@@ -11,6 +11,8 @@ if (huks_enable_ukey_config == true) {
     include_dirs = [
       ".",
       "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger/inc",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common/inc",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc",
     ]
 
     sources = [
@@ -25,12 +27,17 @@ if (huks_enable_ukey_config == true) {
     deps = [
       "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:huks_access_ext_base_include",
     ]
     external_deps = [
+      "ability_runtime:ability_connect_callback_stub",
+      "ability_runtime:ability_manager",
       "c_utils:utils",
       "googletest:gmock",
       "googletest:gtest",
       "hilog:libhilog",
+      "ipc:ipc_core",
+      "ipc:ipc_single",
     ]
 
     cflags = [

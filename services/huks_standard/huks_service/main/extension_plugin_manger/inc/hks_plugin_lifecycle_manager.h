@@ -34,6 +34,7 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
+
 class __attribute__((visibility("default"))) HuksPluginLifeCycleMgr :
     private OHOS::DelayedSingleton<HuksPluginLifeCycleMgr> {
 public:
@@ -89,6 +90,8 @@ private:
         const std::string &providerName, const CppParamSet &paramSet, std::function<void(HksProcessInfo)> callback);
     int32_t OnUnRegistProvider(const HksProcessInfo &processInfo,
         const std::string &providerName, const CppParamSet &paramSet, bool isdeath, int32_t &deleteCount);
+    int32_t OnSetExtProxy(const HksProcessInfo &processInfo,
+        const std::string &providerName, const CppParamSet &paramSet, void *remoteObjectRaw);
 };
 
 }

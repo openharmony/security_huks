@@ -24,12 +24,28 @@
 #include "hks_ukey_common.h"
 #include "hks_log.h"
 #include "token_setproc.h"
+#include "iremote_object.h"
+
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Security {
 namespace Huks {
+sptr<IRemoteObject> CreateMockRemoteObject();
 static uint64_t g_shellTokenId = 0;
+static int32_t SetupProvider(std::shared_ptr<HksProviderLifeCycleManager> providerMgr,
+    const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet,
+    std::function<void(HksProcessInfo)> callback)
+{
+    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet, callback);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    sptr<IRemoteObject> remoteObj = CreateMockRemoteObject();
+    ret = providerMgr->OnSetExtensionProxy(processInfo, providerName, paramSet, remoteObj);
+    return ret;
+}
+
 class HksProviderMgrTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -88,13 +104,13 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest002, TestSize.Level0) {
     };
     CppParamSet paramSet{params};
     std::string providerName = "HksProviderMgrTest002";
-    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
+    auto ret = SetupProvider(providerMgr, processInfo, providerName, paramSet,
         [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
         HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
         int32_t deleteCount = 0;
         providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
     });
-    EXPECT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
+    EXPECT_EQ(ret, HKS_SUCCESS) << "SetupProvider failed";
 
     ProviderInfo providerInfo{};
     ret = HksGetProviderInfo(processInfo, providerName, paramSet, providerInfo);
@@ -129,13 +145,13 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest003, TestSize.Level0) {
     };
     CppParamSet paramSet{params};
     std::string providerName = "HksProviderMgrTest003";
-    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
+    auto ret = SetupProvider(providerMgr, processInfo, providerName, paramSet,
         [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
         HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
         int32_t deleteCount = 0;
         providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
     });
-    EXPECT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
+    EXPECT_EQ(ret, HKS_SUCCESS) << "SetupProvider failed";
 
     int32_t deletecount = 0;
     ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, false, deletecount);
@@ -162,13 +178,13 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest004, TestSize.Level0) {
     };
     CppParamSet paramSet{params};
     std::string providerName = "HksProviderMgrTest004";
-    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
+    auto ret = SetupProvider(providerMgr, processInfo, providerName, paramSet,
         [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
         HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
         int32_t deleteCount = 0;
         providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
     });
-    EXPECT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
+    EXPECT_EQ(ret, HKS_SUCCESS) << "SetupProvider failed";
 
     CppParamSet emptyParamSet{};
     int32_t deletecount = 0;
@@ -196,13 +212,13 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest005, TestSize.Level0) {
     };
     CppParamSet paramSet{params};
     std::string providerName = "HksProviderMgrTest005";
-    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
+    auto ret = SetupProvider(providerMgr, processInfo, providerName, paramSet,
         [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
         HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
         int32_t deleteCount = 0;
         providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
     });
-    EXPECT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
+    EXPECT_EQ(ret, HKS_SUCCESS) << "SetupProvider failed";
 
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(processInfo.processName);
@@ -229,13 +245,13 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest006, TestSize.Level0) {
     };
     CppParamSet paramSet{params};
     std::string providerName = "HksProviderMgrTest006";
-    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
+    auto ret = SetupProvider(providerMgr, processInfo, providerName, paramSet,
         [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
         HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
         int32_t deleteCount = 0;
         providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
     });
-    ASSERT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
+    ASSERT_EQ(ret, HKS_SUCCESS) << "SetupProvider failed";
 
     std::vector<ProviderInfo> providerInfos;
     ret = providerMgr->GetAllProviderInfosByProviderName(providerName, 100, providerInfos);
@@ -270,12 +286,12 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest007, TestSize.Level0) {
     };
     CppParamSet paramSet{params};
     std::string providerName = "HksProviderMgrTest007";
-    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
+    auto ret = SetupProvider(providerMgr, processInfo, providerName, paramSet,
         [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
         int32_t deleteCount = 0;
         providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
     });
-    ASSERT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
+    ASSERT_EQ(ret, HKS_SUCCESS) << "SetupProvider failed";
 
     std::vector<ProviderInfo> providerInfos;
     ret = providerMgr->GetAllProviderInfosByProviderName("NonExistentProvider", 100, providerInfos);
@@ -310,12 +326,12 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest008, TestSize.Level0) {
     };
     CppParamSet paramSet{params};
     std::string providerName = "HksProviderMgrTest008";
-    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
+    auto ret = SetupProvider(providerMgr, processInfo, providerName, paramSet,
         [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
         int32_t deleteCount = 0;
         providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
     });
-    ASSERT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
+    ASSERT_EQ(ret, HKS_SUCCESS) << "SetupProvider failed";
 
     std::vector<ProviderInfo> providerInfos;
     ret = providerMgr->GetAllProviderInfosByProviderName("HksInnerNullProviderName", 100, providerInfos);
@@ -350,12 +366,12 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest009, TestSize.Level0) {
     };
     CppParamSet paramSet{params};
     std::string providerName = "HksProviderMgrTest009";
-    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
+    auto ret = SetupProvider(providerMgr, processInfo, providerName, paramSet,
         [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
         int32_t deleteCount = 0;
         providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
     });
-    ASSERT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
+    ASSERT_EQ(ret, HKS_SUCCESS) << "SetupProvider failed";
 
     // Note: GetAllProviderInfosByProviderName ignores the userid parameter,
     // it always calls HksGetFrontUserId() internally (mock returns 100).
@@ -396,13 +412,13 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest010, TestSize.Level0) {
     };
     CppParamSet paramSet{params};
     std::string providerName = "HksProviderMgrTest006";
-    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
+    auto ret = SetupProvider(providerMgr, processInfo, providerName, paramSet,
         [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
             HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
             int32_t deleteCount = 0;
             providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
         });
-    EXPECT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
+    EXPECT_EQ(ret, HKS_SUCCESS) << "SetupProvider failed";
 
     std::string resourceId = "{\"providerName\":\"HksProviderMgrTest006\",\"abilityName\":\"HiTaiCryptoAbility\""
         ",\"bundleName\":\"com.huawei.extensionhap.test\",\"index\":\"key1\"}";
@@ -446,13 +462,13 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest011, TestSize.Level0) {
     CppParamSet paramSet{params};
     std::string providerName = "HksProviderMgrTest007";
     
-    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
+    auto ret = SetupProvider(providerMgr, processInfo, providerName, paramSet,
         [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
             HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
             int32_t deleteCount = 0;
             providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
         });
-    EXPECT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
+    EXPECT_EQ(ret, HKS_SUCCESS) << "SetupProvider failed";
 
     int32_t deleteCount = 0;
     ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, false, deleteCount);
@@ -498,13 +514,13 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest012, TestSize.Level0) {
     CppParamSet paramSet{params};
     std::string providerName = "HksProviderMgrTest008";
     
-    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
+    auto ret = SetupProvider(providerMgr, processInfo, providerName, paramSet,
         [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
             HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
             int32_t deleteCount = 0;
             providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
         });
-    EXPECT_NE(ret, HKS_SUCCESS) << "OnRegisterProvider should fail with 11 UI extensions";
+    EXPECT_NE(ret, HKS_SUCCESS) << "SetupProvider should fail with 11 UI extensions";
 
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(processInfo.processName);
@@ -538,13 +554,13 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest013, TestSize.Level0) {
     CppParamSet paramSet{params};
     std::string providerName = "HksProviderMgrTest009";
     
-    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
+    auto ret = SetupProvider(providerMgr, processInfo, providerName, paramSet,
         [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
             HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
             int32_t deleteCount = 0;
             providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
         });
-    EXPECT_NE(ret, HKS_SUCCESS) << "OnRegisterProvider should fail with key length > 1024";
+    EXPECT_NE(ret, HKS_SUCCESS) << "SetupProvider should fail with key length > 1024";
 
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(processInfo.processName);
@@ -580,13 +596,13 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest014, TestSize.Level0) {
     CppParamSet paramSet{params};
     std::string providerName = "HksProviderMgrTest010";
     
-    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
+    auto ret = SetupProvider(providerMgr, processInfo, providerName, paramSet,
         [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
             HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
             int32_t deleteCount = 0;
             providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
         });
-    EXPECT_EQ(ret, HKS_ERROR_PROVIDER_HAS_REGISTERED) << "OnRegisterProvider10 failed";
+    EXPECT_EQ(ret, HKS_ERROR_PROVIDER_HAS_REGISTERED) << "SetupProvider failed";
 
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(processInfo.processName);
@@ -616,13 +632,13 @@ HWTEST_F(HksProviderMgrTest, HksProviderMgrTest015, TestSize.Level0) {
     };
     CppParamSet paramSet{params};
     std::string providerName = "HksProviderMgrTest011";
-    auto ret = providerMgr->OnRegisterProvider(processInfo, providerName, paramSet,
+    auto ret = SetupProvider(providerMgr, processInfo, providerName, paramSet,
         [providerMgr, processInfo, providerName, paramSet](HksProcessInfo proInfo) {
             HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
             int32_t deleteCount = 0;
             providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, true, deleteCount);
         });
-    EXPECT_EQ(ret, HKS_SUCCESS) << "OnRegisterProvider failed";
+    EXPECT_EQ(ret, HKS_SUCCESS) << "SetupProvider failed";
 
     std::string resourceId = "{\"providerName\":\"HksProviderMgrTest011\",\"abilityName\":\"HiTaiCryptoAbility\""
         ",\"bundleName\":\"com.huawei.extensionhap.test\",\"index\":\"key1\"}";

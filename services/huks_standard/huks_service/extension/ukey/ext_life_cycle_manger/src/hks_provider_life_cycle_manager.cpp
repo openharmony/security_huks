@@ -18,6 +18,7 @@
 #include "bundle_mgr_client.h"
 #include "bundle_mgr_interface.h"
 #include "bundle_info.h"
+#include "ihuks_access_ext_base.h"
 #include "hks_ukey_system_adapter.h"
 #include "hks_error_code.h"
 #include "hks_log.h"
@@ -90,31 +91,44 @@ int32_t HksProviderLifeCycleManager::OnRegisterProvider(const HksProcessInfo &pr
         this->PrintRegisterProviders();
         HKS_IF_TRUE_LOGE_RETURN(m_providerMap.Find(providerInfo, connectInfo),
             HKS_ERROR_PROVIDER_HAS_REGISTERED, "OnRegisterProvider failed, providerName: %" LOG_PUBLIC "s,"
-            "bundleName: %" LOG_PUBLIC "s, abilityName: %" LOG_PUBLIC "s, already exist", providerName.c_str(),
+            "bundleName: %" LOG_PUBLIC "s, abilityName: %" LOG_PUBLIC "s, already exist",
+            providerInfo.m_providerName.c_str(),
             providerInfo.m_bundleName.c_str(), providerInfo.m_abilityName.c_str())
-        AAFwk::Want want{};
-        want.SetElementName(providerInfo.m_bundleName, providerInfo.m_abilityName);
-        sptr<ExtensionConnection> connect(new (std::nothrow) ExtensionConnection(processInfo));
-        HKS_IF_TRUE_LOGE_RETURN(connect == nullptr, HKS_ERROR_NULL_POINTER, "new ExtensionConnection failed");
-        connect->callBackFromPlugin(callback);
-        if (!connect->IsConnected()) {
-            HKS_LOG_I("First time connect to Extension Ability. "
-                "m_bundleName: %" LOG_PUBLIC "s, m_abilityName: %" LOG_PUBLIC "s",
-                providerInfo.m_bundleName.c_str(), providerInfo.m_abilityName.c_str());
-            ret = connect->OnConnection(want, connect, processInfo.userIdInt);
-            HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "Connect extAbility failed. ret: %" LOG_PUBLIC "d", ret)
-        }
-
-        auto proxy = connect->GetExtConnectProxy();
-        HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NULL_POINTER, "connected, but getExtConnectProxy failed.");
-
-        connectInfo = std::make_shared<HksExtAbilityConnectInfo>(want, connect);
-        m_providerMap.Insert(providerInfo, connectInfo);
-        HKS_LOG_I("OnRegisterProvider Success! providerName: %" LOG_PUBLIC "s", providerName.c_str());
     }
     
+    return HKS_SUCCESS;
+}
+
+int32_t HksProviderLifeCycleManager::OnSetExtensionProxy(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet, const sptr<IRemoteObject> &remoteObject)
+{
+    HKS_LOG_I("OnSetExtensionProxy providerName: %" LOG_PUBLIC "s", providerName.c_str());
+    HKS_IF_TRUE_LOGE_RETURN(remoteObject == nullptr, HKS_ERROR_NULL_POINTER, "remoteObject is nullptr")
+
+    ProviderInfo providerInfo{};
+    int32_t ret = HksGetProviderInfo(processInfo, providerName, paramSet, providerInfo);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "OnSetExtensionProxy: Fail to get provider info. ret: %" LOG_PUBLIC "d", ret)
+
+    auto proxy = iface_cast<IHuksAccessExtBase>(remoteObject);
+    HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NULL_POINTER, "iface_cast to IHuksAccessExtBase failed")
+
+    AAFwk::Want want{};
+    want.SetElementName(providerInfo.m_bundleName, providerInfo.m_abilityName);
+
+    auto connectInfo = std::make_shared<HksExtAbilityConnectInfo>(want, proxy);
+
+    {
+        std::lock_guard<std::mutex> lock(m_registerMutex);
+        std::shared_ptr<HksExtAbilityConnectInfo> existingInfo{nullptr};
+        HKS_IF_TRUE_LOGE_RETURN(m_providerMap.Find(providerInfo, existingInfo),
+            HKS_ERROR_PROVIDER_HAS_REGISTERED, "OnSetExtensionProxy: provider already exist")
+        m_providerMap.Insert(providerInfo, connectInfo);
+    }
+    HKS_LOG_I("OnSetExtensionProxy Success! providerName: %" LOG_PUBLIC "s", providerName.c_str());
+
     auto abilityInfoTag = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_ABILITY_INFO>();
-    HKS_IF_TRUE_LOGI_RETURN(abilityInfoTag.first != HKS_SUCCESS, ret, "there is no UiAbility")
+    HKS_IF_TRUE_LOGI_RETURN(abilityInfoTag.first != HKS_SUCCESS, HKS_SUCCESS, "there is no UiAbility")
 
     std::string jsonStr = std::string(abilityInfoTag.second.begin(), abilityInfoTag.second.end());
     ret = RegisterUiAbility(processInfo, providerName, paramSet, jsonStr);
@@ -153,9 +167,9 @@ int32_t HksProviderLifeCycleManager::GetExtensionProxy(const ProviderInfo &provi
     HKS_IF_NOT_TRUE_LOGE_RETURN(m_providerMap.Find(providerInfo, connectionInfo), HKS_ERROR_NOT_EXIST,
         "GetExtensionProxy failed, providerName: %" LOG_PUBLIC "s", providerInfo.m_providerName.c_str())
     HKS_IF_TRUE_LOGE_RETURN(connectionInfo == nullptr, HKS_ERROR_NULL_POINTER, "connectionInfo is nullptr")
-    HKS_IF_TRUE_LOGE_RETURN(connectionInfo->m_connection == nullptr, HKS_ERROR_NULL_POINTER, "m_connection is nullptr")
-    proxy = connectionInfo->m_connection->GetExtConnectProxy();
-    HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NULL_POINTER, "GetExtConnectProxy failed. proxy is nullptr")
+    HKS_IF_TRUE_LOGE_RETURN(connectionInfo->m_proxy == nullptr, HKS_ERROR_NULL_POINTER, "m_proxy is nullptr")
+    proxy = connectionInfo->m_proxy;
+    HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NULL_POINTER, "proxy is nullptr")
     return HKS_SUCCESS;
 }
 
@@ -252,8 +266,6 @@ int32_t HksProviderLifeCycleManager::UnregisterAllUiExtensionsByProviderInfo(
     return HKS_SUCCESS;
 }
 
-constexpr int WAIT_TIME_MS = 5;
-constexpr int WAIT_ITERATION = 6;
 int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &processInfo,
     const std::string &providerName, [[maybe_unused]] const CppParamSet &paramSet, bool isdeath, int32_t &deleteCount)
 {
@@ -270,36 +282,9 @@ int32_t HksProviderLifeCycleManager::OnUnRegisterProvider(const HksProcessInfo &
     int32_t deletecount = 0;
     for (auto &connectionInfo : connectionInfos) {
         HKS_IF_TRUE_LOGE_RETURN(connectionInfo.second == nullptr, HKS_ERROR_NULL_POINTER, "connectionInfo is nullptr")
-        HKS_IF_TRUE_LOGE_RETURN(connectionInfo.second->m_connection == nullptr, HKS_ERROR_NULL_POINTER,
-            "m_connection is nullptr")
-        auto proxy = connectionInfo.second->m_connection->GetExtConnectProxy();
-        if (proxy == nullptr) {
-            HKS_LOG_E("OnUnRegisterProvider proxy is nullptr. providerName: %" LOG_PUBLIC "s", providerName.c_str());
-            m_providerMap.Erase(connectionInfo.first);
-            UnregisterAllUiExtensionsByProviderInfo(connectionInfo.first);
-            deletecount++;
-            continue;
-        }
-        int32_t refCount = proxy->GetSptrRefCount();
-        HKS_LOG_I("OnUnRegisterProvider connection want abilityName: %" LOG_PUBLIC "s",
-            connectionInfo.second->m_want.GetElement().GetAbilityName().c_str());
-        HKS_LOG_I("OnUnRegisterProvider refCount: %" LOG_PUBLIC "d", refCount);
-        HKS_IF_TRUE_LOGE_RETURN(refCount > HKS_PROVIDER_CAN_REMOVE_REF_COUNT, HKS_ERROR_PROVIDER_IN_USE,
-            "OnUnRegisterProvider failed, refCount is more than 2, maybe in use.")
-        HKS_IF_NOT_TRUE_EXCU(isdeath,
-            connectionInfo.second->m_connection->OnDisconnect(connectionInfo.second->m_connection));
         m_providerMap.Erase(connectionInfo.first);
         UnregisterAllUiExtensionsByProviderInfo(connectionInfo.first);
         deletecount++;
-        auto &stub = connectionInfo.second->m_connection;
-        uint8_t waitIteration = WAIT_ITERATION;
-        HKS_LOG_I("stub refcount: %" LOG_PUBLIC "d", stub->GetSptrRefCount());
-        while ((stub->GetSptrRefCount() > 1) && (waitIteration > 0)) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long long>(WAIT_TIME_MS)));
-            HKS_LOG_I("iter stub refcount: %" LOG_PUBLIC "d", stub->GetSptrRefCount());
-            waitIteration--;
-            HKS_IF_TRUE_LOGE(waitIteration == 0, "waitIteration is 0, but stub refcount is not 1.")
-        }
     }
     deleteCount = deletecount;
     HKS_LOG_I("OnUnRegisterProvider Success! providerName: %" LOG_PUBLIC "s", providerName.c_str());

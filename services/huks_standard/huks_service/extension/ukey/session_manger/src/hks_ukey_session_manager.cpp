@@ -123,7 +123,7 @@ int32_t HksSessionManager::ExtensionInitSession(struct HksProcessWithErrorInfo &
     ret = VerifyCallerAndAdjustUidParam(*processAndError.processInfo, paramSet, newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "uid check in %" LOG_PUBLIC "s failed.", __PRETTY_FUNCTION__)
 
-    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, HKS_DEFAULT_ERROR_DESC, false};
+    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, "", false};
     auto ipcCode = proxy->InitSession(sIndexHandle, newParamSet, sessionHandle, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy InitSession ipcCode: %" LOG_PUBLIC "d",
         ipcCode)
@@ -131,7 +131,6 @@ int32_t HksSessionManager::ExtensionInitSession(struct HksProcessWithErrorInfo &
     HksExtRecordErrInfo(errorInfo, &processAndError.errInfo);
     
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "proxy InitSession get handle failed: %" LOG_PUBLIC "d", ret)
-
     auto random = GenRandomUint32();
     HKS_IF_TRUE_LOGE_RETURN(random.first != HKS_SUCCESS, random.first,
         "GenRandomUint32 failed. ret: %" LOG_PUBLIC "d", random.first)
@@ -160,7 +159,7 @@ int32_t HksSessionManager::ExtensionUpdateSession(struct HksProcessWithErrorInfo
     ret = VerifyCallerAndAdjustUidParam(*processAndError.processInfo, paramSet, newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "uid check in %" LOG_PUBLIC "s failed.", __PRETTY_FUNCTION__)
 
-    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, HKS_DEFAULT_ERROR_DESC, false};
+    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, "", false};
     auto ipcCode = proxy->UpdateSession(handleInfo.m_skfSessionHandle, newParamSet, inData, outData, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy UpdateSession ipcCode: %" LOG_PUBLIC "d",
         ipcCode)
@@ -188,7 +187,7 @@ int32_t HksSessionManager::ExtensionFinishSession(struct HksProcessWithErrorInfo
     ret = VerifyCallerAndAdjustUidParam(*processAndError.processInfo, paramSet, newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "uid check in %" LOG_PUBLIC "s failed.", __PRETTY_FUNCTION__)
 
-    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, HKS_DEFAULT_ERROR_DESC, false};
+    HksExternalErrorInfoIdl errorInfo = {HKS_ERROR_EXT_JS_METHOD_ERROR, "", false};
     auto ipcCode = proxy->FinishSession(handleInfo.m_skfSessionHandle, newParamSet, inData, outData, errorInfo);
     HKS_IF_TRUE_LOGE_RETURN(ipcCode != EOK, HKS_ERROR_IPC_MSG_FAIL, "proxy FinishSession ipcCode: %" LOG_PUBLIC "d",
         ipcCode)

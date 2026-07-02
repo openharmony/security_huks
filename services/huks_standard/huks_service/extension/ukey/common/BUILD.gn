@@ -81,6 +81,7 @@ if (os_level == "standard") {
 
     deps = [
       ":IHuks_Access_Ext_Base",
+      ":huks_access_ext_base_include",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
     ]
     complete_static_lib = true
