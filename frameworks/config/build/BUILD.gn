@@ -88,6 +88,10 @@ config("l1_small_common_config") {
     cflags += [ "-DHKS_CONFIG_FILE=\"${huks_config_file}\"" ]
   }
 
+  if (huks_enable_hisilicon_cipher_in_small) {
+    cflags += [ "-DHKS_CIPHER_ROOT_KEY" ]
+  }
+
   cflags += [ "-DGET_DEV_UDID_ENABLE" ]
 
   defines = [
