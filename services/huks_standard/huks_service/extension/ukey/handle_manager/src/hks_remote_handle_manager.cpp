@@ -677,11 +677,10 @@ int32_t HksRemoteHandleManager::ClearUidIndexMap(const ProviderInfo &providerInf
 void HksRemoteHandleManager::ClearAuthState(const HksProcessInfo &processInfo)
 {
     std::vector<std::pair<uint32_t, std::string>> keysToRemove;
-    auto iterFunc = [&](std::pair<uint32_t, std::string> key, int32_t &value) {
-        if (key.first == processInfo.uidInt) {
-            keysToRemove.push_back(key);
-        }
+    auto iterFunc = [&](std::pair<uint32_t, std::string> key, std::string &handle) {
+        HKS_IF_TRUE_EXCU(key.first == processInfo.uidInt, keysToRemove.push_back(key));
     };
+    uidIndexToHandle_.Iterate(iterFunc);
     struct HksParam uid = {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = processInfo.uidInt};
     CppParamSet paramSet = CppParamSet({uid});
     
