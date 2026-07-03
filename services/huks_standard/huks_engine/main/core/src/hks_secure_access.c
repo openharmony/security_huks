@@ -464,6 +464,25 @@ static int32_t VerifyFrontUserIdIfNeed(const struct HksParamSet *keyBlobParamSet
     return HKS_SUCCESS;
 }
 
+static int32_t VerifySpecificUserIdIfNeed(const struct HksParamSet *keyBlobParamSet,
+    const struct HksUserAuthToken *authToken)
+{
+    struct HksParam *specificUserIdParam = NULL;
+    int32_t ret = HksGetParam(keyBlobParamSet, HKS_TAG_SPECIFIC_USER_ID, &specificUserIdParam);
+    HKS_IF_TRUE_RETURN(ret == HKS_ERROR_PARAM_NOT_EXIST, HKS_ERROR_PARAM_NOT_EXIST)
+
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get specific User Id failed!")
+
+    HKS_LOG_I("Verify SpecificUserId:  specificUserId = %" LOG_PUBLIC "d; UserId in authToken = %" LOG_PUBLIC "d",
+        specificUserIdParam->int32Param, authToken->ciphertextData.userId);
+
+    if (specificUserIdParam->int32Param != authToken->ciphertextData.userId) {
+        HKS_LOG_E("check userId failed!");
+        return HKS_ERROR_KEY_AUTH_PERMANENTLY_INVALIDATED;
+    }
+    return HKS_SUCCESS;
+}
+
 static int32_t VerifySecureUidIfNeed(const struct HksParamSet *keyBlobParamSet,
     const struct HksUserAuthToken *authToken, uint32_t authAccessType)
 {
@@ -568,8 +587,11 @@ static int32_t VerifyAuthTokenInfo(const struct HuksKeyNode *keyNode, const stru
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     if (authAccessType->uint32Param == HKS_AUTH_ACCESS_ALWAYS_VALID) {
-        ret = VerifyFrontUserIdIfNeed(keyBlobParamSet, authToken);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "verify Front User Id failed!")
+        ret = VerifySpecificUserIdIfNeed(keyBlobParamSet, authToken);
+        if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+            ret = VerifyFrontUserIdIfNeed(keyBlobParamSet, authToken);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "verify Front User Id failed!")
+        }
     } else if (authAccessType->uint32Param == HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD) {
         ret = VerifySecureUidIfNeed(keyBlobParamSet, authToken, authAccessType->uint32Param);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "verify sec uid failed!")
