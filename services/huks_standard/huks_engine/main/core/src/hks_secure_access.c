@@ -509,9 +509,8 @@ static int32_t VerifyEnrolledIdInfoIfNeed(const struct HksParamSet *keyBlobParam
     uint32_t enrolledIdNum = 0;
     (void)memcpy_s(&enrolledIdNum, sizeof(uint32_t), enrolledIdInfoBlob.data, sizeof(uint32_t));
     uint32_t index = sizeof(uint32_t);
-
     uint32_t lengthPerEnrollId = sizeof(uint32_t) + sizeof(uint64_t);
-    for (uint32_t i = 0; i < enrolledIdNum && index + lengthPerEnrollId < enrolledIdInfoBlob.size; ++i) {
+    for (uint32_t i = 0; i < enrolledIdNum && index + lengthPerEnrollId <= enrolledIdInfoBlob.size; ++i) {
         uint32_t authType = 0;
         (void)memcpy_s(&authType, sizeof(uint32_t), enrolledIdInfoBlob.data + index, sizeof(uint32_t));
         index += sizeof(uint32_t);
