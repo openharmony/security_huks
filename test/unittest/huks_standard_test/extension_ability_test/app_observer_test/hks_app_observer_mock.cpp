@@ -322,11 +322,6 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &proce
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::CheckAuthStateIsOk(const HksProcessInfo &processInfo, const std::string &index)
-{
-    return HKS_SUCCESS;
-}
-
 int32_t HksRemoteHandleManager::FindRemoteCertificate(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, std::string &certificatesOut,
     struct HksExternalErrorInfo **errInfo)

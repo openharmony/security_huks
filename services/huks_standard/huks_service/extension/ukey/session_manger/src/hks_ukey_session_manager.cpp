@@ -91,7 +91,6 @@ int32_t HksSessionManager::CheckParmSetPurposeAndCheckAuth(const HksProcessInfo 
         auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
         HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
         HKS_LOG_I("CheckParmSetPurposeAndCheckAuth uid: %" LOG_PUBLIC "d", processInfo.uidInt);
-        return handleMgr->CheckAuthStateIsOk(processInfo, index);
     }
     return HKS_SUCCESS;
 }

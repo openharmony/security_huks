@@ -221,7 +221,6 @@ public:
         const std::string &index, const CppParamSet &paramSet, int32_t &state, struct HksExternalErrorInfo **errInfo);
     int32_t RemoteClearPinStatus(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo);
-    int32_t CheckAuthStateIsOk(const HksProcessInfo &processInfo, const std::string &index);
     //certificate query
     int32_t FindRemoteCertificate(const HksProcessInfo &processInfo, const std::string &index,
         const CppParamSet &paramSet, std::string &certificatesOut, struct HksExternalErrorInfo **errInfo);
@@ -259,7 +258,6 @@ private:
     bool IsProviderNumExceedLimit(const ProviderInfo &providerInfo);
 
     OHOS::SafeMap<std::pair<uint32_t, std::string>, std::string> uidIndexToHandle_;
-    OHOS::SafeMap<std::pair<uint32_t, std::string>, int32_t> uidIndexToAuthState_;
     OHOS::SafeMap<ProviderInfo, int32_t> providerInfoToNum_;
 };
 }

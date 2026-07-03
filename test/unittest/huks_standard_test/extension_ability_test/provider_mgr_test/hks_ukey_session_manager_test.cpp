@@ -263,7 +263,6 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest003, TestSize.Level0) {
 
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     EXPECT_NE(sessionMgr, nullptr);
-    uint32_t handle = 0;
     CommJsonObject root = CommJsonObject::CreateObject();
     EXPECT_TRUE(root.SetValue("providerName", std::string("HksSessionMgrTest003")));
     EXPECT_TRUE(root.SetValue("abilityName", std::string("HiTaiCryptoAbility")));
@@ -281,10 +280,6 @@ HWTEST_F(HksSessionMgrTest, HksSessionMgrTest003, TestSize.Level0) {
     struct HksExtAuthPinOutParam authOutParam = {};
     ret = handleMgr->RemoteVerifyPin(processInfo, wrappedIndex, paramSet, authOutParam, &errInfo);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "RemoteVerifyPin failed";
-
-    struct HksProcessWithErrorInfo processAndError3 = {&processInfo, nullptr};
-    ret = sessionMgr->ExtensionInitSession(processAndError3, wrappedIndex, paramSet, handle);
-    EXPECT_EQ(ret, HKS_ERROR_PIN_NO_AUTH) << "ExtensionInitSession failed";
 
     int32_t deletecount = 0;
     ret = providerMgr->OnUnRegisterProvider(processInfo, providerName, paramSet, false, deletecount);

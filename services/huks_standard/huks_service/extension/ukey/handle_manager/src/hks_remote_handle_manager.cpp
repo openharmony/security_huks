@@ -189,7 +189,6 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &process
         providerInfoToNum_.EnsureInsert(providerInfo, num);
         return HKS_ERROR_CODE_KEY_ALREADY_EXIST;
     }
-    uidIndexToAuthState_.EnsureInsert(std::make_pair(processInfo.uidInt, index), 0);
     return HKS_SUCCESS;
 }
 
@@ -219,7 +218,8 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
     ClearMapByHandle(ret, handle);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Close remote handle failed: %" LOG_PUBLIC "d", ret)
     HKS_LOG_I("uidIndexToHandle_ is %" LOG_PUBLIC "u,%" LOG_PUBLIC "s", processInfo.uidInt, index.c_str());
-    uidIndexToAuthState_.Erase({processInfo.uidInt, index});
+    HKS_IF_NOT_SUCC_LOGE(RemoteClearPinStatus(processInfo, index, newParamSet, nullptr),
+        "Remote clear pin status failed: %" LOG_PUBLIC "u", processInfo.uidInt)
     uidIndexToHandle_.Erase({processInfo.uidInt, index});
     int32_t num = 0;
     if (providerInfoToNum_.Find(providerInfo, num)) {
@@ -263,12 +263,10 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     
     ClearMapByHandle(ret, handle);
     if (ret == HUKS_ERR_CODE_PIN_CODE_ERROR || ret == HUKS_ERR_CODE_PIN_LOCKED) {
-        uidIndexToAuthState_.EnsureInsert(std::make_pair(static_cast<uint32_t>(uid.second), index), 0);
         HKS_LOG_E("AuthUkeyPin failed: %" LOG_PUBLIC "d", ret);
         return ret;
     }
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote verify pin failed: %" LOG_PUBLIC "d", ret)
-    uidIndexToAuthState_.EnsureInsert(std::make_pair(static_cast<uint32_t>(uid.second), index), 1);
     return ret;
 }
 
@@ -300,7 +298,6 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     HksExtRecordErrInfo(errorInfo, errInfo);
 
     ClearMapByHandle(ret, handle);
-    uidIndexToAuthState_.EnsureInsert({uid, index}, state);
     HKS_IF_TRUE_RETURN(ret == HUKS_ERR_CODE_PIN_LOCKED || ret == HKS_SUCCESS, ret)
     HKS_LOG_E("Remote verify pin status failed: %" LOG_PUBLIC "d", ret);
     return ret;
@@ -328,7 +325,6 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &proce
     HksExtRecordErrInfo(errorInfo, errInfo);
     
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Remote clear pin status failed")
-    uidIndexToAuthState_.EnsureInsert(std::make_pair(processInfo.uidInt, index), 0);
     return HKS_SUCCESS;
 }
 
@@ -671,7 +667,6 @@ int32_t HksRemoteHandleManager::ClearUidIndexMap(const ProviderInfo &providerInf
     uidIndexToHandle_.Iterate(collectToRemoveFunc);
     for (auto &key : indicesToRemove) {
         uidIndexToHandle_.Erase(key);
-        uidIndexToAuthState_.Erase(key);
     };
     for (ProviderInfo tmpInfo : providersToRemove) {
         providerInfoToNum_.Erase(tmpInfo);
@@ -679,24 +674,13 @@ int32_t HksRemoteHandleManager::ClearUidIndexMap(const ProviderInfo &providerInf
     return HKS_SUCCESS;
 }
 
-int32_t HksRemoteHandleManager::CheckAuthStateIsOk(const HksProcessInfo &processInfo, const std::string &index)
-{
-    int32_t state = 0;
-    HKS_IF_NOT_TRUE_RETURN(uidIndexToAuthState_.Find(std::make_pair(processInfo.uidInt, index), state),
-        HKS_ERROR_NOT_EXIST)
-    HKS_IF_NOT_TRUE_RETURN(state == 1, HKS_ERROR_PIN_NO_AUTH)
-    return HKS_SUCCESS;
-}
-
 void HksRemoteHandleManager::ClearAuthState(const HksProcessInfo &processInfo)
 {
     std::vector<std::pair<uint32_t, std::string>> keysToRemove;
-    auto iterFunc = [&](std::pair<uint32_t, std::string> key, int32_t &value) {
-        if (key.first == processInfo.uidInt) {
-            keysToRemove.push_back(key);
-        }
+    auto iterFunc = [&](std::pair<uint32_t, std::string> key, std::string &handle) {
+        HKS_IF_TRUE_EXCU(key.first == processInfo.uidInt, keysToRemove.push_back(key));
     };
-    uidIndexToAuthState_.Iterate(iterFunc);
+    uidIndexToHandle_.Iterate(iterFunc);
     struct HksParam uid = {.tag = HKS_EXT_CRYPTO_TAG_UID, .int32Param = processInfo.uidInt};
     CppParamSet paramSet = CppParamSet({uid});
     
@@ -734,7 +718,6 @@ void HksRemoteHandleManager::ClearMapByHandle(const int32_t &ret, const std::str
         tmpInfo.m_userid = HksGetUserIdFromUid(key.first);
         providerInfoToNum_.Erase(tmpInfo);
         uidIndexToHandle_.Erase(key);
-        uidIndexToAuthState_.Erase(key);
     }
 }
 
