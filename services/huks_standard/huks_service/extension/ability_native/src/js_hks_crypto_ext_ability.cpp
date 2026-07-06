@@ -1014,6 +1014,13 @@ sptr<IRemoteObject> JsHksCryptoExtAbility::OnConnect(const AAFwk::Want &want)
     return remoteObject->AsObject();
 }
 
+void JsHksCryptoExtAbility::OnStop()
+{
+    Extension::OnStop();
+    AbilityRuntime::HandleScope handleScope(jsRuntime_);
+    CallObjectMethod("onDestroy", nullptr, 0);
+}
+
 napi_value JsHksCryptoExtAbility::CallObjectMethod(const char *name, napi_value const *argv, size_t argc)
 {
     HKS_EXT_IF_TRUE_LOGE_RETURN(!jsObj_, nullptr, "CallObjectMethod jsObj Not found HksCryptoExtAbility.js");
