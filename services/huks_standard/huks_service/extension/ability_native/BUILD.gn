@@ -65,6 +65,7 @@ if (os_level == "standard") {
       "hilog:libhilog",
       "ipc:ipc_core",
       "ipc:ipc_napi",
+      "jsoncpp:jsoncpp",
       "napi:ace_napi",
       "samgr:samgr_proxy",
     ]

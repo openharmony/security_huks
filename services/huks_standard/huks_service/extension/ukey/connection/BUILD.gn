@@ -55,6 +55,7 @@ if (os_level == "standard") {
       "hilog:libhilog",
       "ipc:ipc_core",
       "samgr:samgr_proxy",
+      "jsoncpp:jsoncpp",
     ]
   }
 }
