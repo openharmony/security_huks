@@ -80,17 +80,25 @@ int32_t HksIpcQueryAbilityInfoAdapter(const struct HksProcessInfo *processInfo, 
     ret = OHOS::Security::Huks::HksIpcServiceQueryAbility(processInfo, cppResourceId, cppAbilityInfo);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksIpcServiceQueryAbility fail")
     
+    HKS_IF_TRUE_LOGE_RETURN(abilityInfo->abilityName.size < cppAbilityInfo.abilityName.size(),
+        HKS_ERROR_INSUFFICIENT_MEMORY,
+        "cppAbilityInfo.abilityName is too long, size: %" LOG_PUBLIC "zu", cppAbilityInfo.abilityName.size())
     ret = memcpy_s(abilityInfo->abilityName.data, abilityInfo->abilityName.size,
         cppAbilityInfo.abilityName.data(), cppAbilityInfo.abilityName.size());
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INSUFFICIENT_MEMORY, "copy ability name fail")
     abilityInfo->abilityName.size = cppAbilityInfo.abilityName.size();
 
+    HKS_IF_TRUE_LOGE_RETURN(abilityInfo->bundleName.size < cppAbilityInfo.bundleName.size(),
+        HKS_ERROR_INSUFFICIENT_MEMORY,
+        "cppAbilityInfo.bundleName is too long, size: %" LOG_PUBLIC "zu", cppAbilityInfo.bundleName.size())
     ret = memcpy_s(abilityInfo->bundleName.data, abilityInfo->bundleName.size,
         cppAbilityInfo.bundleName.data(), cppAbilityInfo.bundleName.size());
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INSUFFICIENT_MEMORY, "copy bundle name fail")
     abilityInfo->bundleName.size = cppAbilityInfo.bundleName.size();
 
     (void)memset_s(resourceId->data, resourceId->size, 0, resourceId->size);
+    HKS_IF_TRUE_LOGE_RETURN(resourceId->size < cppResourceId.size(), HKS_ERROR_INSUFFICIENT_MEMORY,
+        "cppResourceId is too long, size: %" LOG_PUBLIC "zu", cppResourceId.size())
     ret = memcpy_s(resourceId->data, resourceId->size, cppResourceId.data(), cppResourceId.size());
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INSUFFICIENT_MEMORY, "copy resourceId fail")
     resourceId->size = cppResourceId.size();
