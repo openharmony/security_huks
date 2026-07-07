@@ -253,7 +253,7 @@ int32_t RejectSeSecurityLevel(const struct HksParamSet *paramSetIn)
 
     HKS_IF_TRUE_LOGE_RETURN(
         securityLevelParam->uint32Param != HKS_KEY_SECURITY_LEVEL_TEE,
-        HKS_ERROR_NOT_SUPPORTED,
+        HKS_ERROR_INVALID_ARGUMENT,
         "SE security level is not supported for this operation")
 
     return HKS_SUCCESS;

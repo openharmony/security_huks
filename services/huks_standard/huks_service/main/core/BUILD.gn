@@ -149,6 +149,7 @@ if (os_level == "standard") {
 
     if (enable_bundle_framework) {
       deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms:libhuks_bms_systemapi_wrap_static" ]
+      include_dirs += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms/include" ]
     }
 
     deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/se:libhuks_se_systemapi_wrap_static" ]
