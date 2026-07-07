@@ -330,10 +330,15 @@ HKS_API_EXPORT int32_t HksAddParamsWithFilter(struct HksParamSet *paramSet,
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     for (uint32_t i = 0; i < paramCnt; i++) {
+        bool isForbidden = false;
         for (uint32_t j = 0; j < sizeof(g_dropTags) / sizeof(g_dropTags[0]); j++) {
             if (params[i].tag == g_dropTags[j]) {
-                continue;
+                isForbidden = true;
+                break;
             }
+        }
+        if (isForbidden) {
+            continue;
         }
         paramSet->paramSetSize += sizeof(struct HksParam);
         if (GetTagType((enum HksTag)(params[i].tag)) == HKS_TAG_TYPE_BYTES) {
