@@ -96,7 +96,8 @@
           "cJSON",
           "init",
           "ets_frontend",
-          "jsoncpp"
+          "jsoncpp",
+          "libuv"
         ]
       },
       "build": {
