@@ -413,4 +413,17 @@ int32_t HksGetDeleteGroups(const struct HksProcessInfo *processInfo, const std::
 
     return HKS_SUCCESS;
 }
+
+int32_t HksGetBundleNameByUid(int32_t uid, std::string &bundleName)
+{
+    sptr<AppExecFwk::IBundleMgr> bundleMgrProxy = GetBundleMgr();
+    HKS_IF_NULL_LOGE_RETURN(bundleMgrProxy, HKS_ERROR_BAD_STATE, "HksGetBundleNameByUid failed to get bundleMgrProxy")
+
+    int32_t appIndex = 0;
+    auto ret = bundleMgrProxy->GetNameAndIndexForUid(uid, bundleName, appIndex);
+    HKS_IF_TRUE_LOGE_RETURN(ret != ERR_OK, HKS_FAILURE, "HksGetBundleNameByUid GetNameAndIndexForUid failed,"
+        " uid=%" LOG_PUBLIC "d, ret=%" LOG_PUBLIC "d", uid, ret)
+
+    return HKS_SUCCESS;
+}
 #endif

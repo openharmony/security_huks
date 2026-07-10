@@ -48,6 +48,8 @@ enum HksCallerType HksGetCallerType(void);
 #ifdef __cplusplus
 int32_t HksGetDeleteGroups(const struct HksProcessInfo *processInfo, const std::string &developerId,
     const std::vector<std::string> &thisGroups, std::vector<std::string> &deleteGroups);
+
+int32_t HksGetBundleNameByUid(int32_t uid, std::string &bundleName);
 #endif
 
 int32_t HksGetDeveloperId(const struct HksProcessInfo *processInfo, struct HksBlob *developerId);
