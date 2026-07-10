@@ -16,13 +16,13 @@
 #ifndef HKS_SE_API_WRAP_H
 #define HKS_SE_API_WRAP_H
 
-#include "hks_type_inner.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t HksSePermissionCheck(const struct HksProcessInfo *processInfo);
+int32_t HksSePermissionCheck(void);
 
 int32_t HksSeIncrementSeCount(void);
 
