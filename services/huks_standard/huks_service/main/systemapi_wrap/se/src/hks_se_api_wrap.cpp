@@ -15,70 +15,38 @@
 
 #include "hks_se_api_wrap.h"
 
-#include <dlfcn.h>
-#include <cstring>
 #include <string>
 #include <mutex>
 
 #include "hks_log.h"
-#include "hks_mem.h"
 #include "hks_error_code.h"
 #include "hks_template.h"
 
-typedef int32_t (*CheckSeCapabilityFunc)(int32_t uid, bool &hasCapability);
-
-static void *g_seHandle = nullptr;
-static CheckSeCapabilityFunc g_checkSeCapability = nullptr;
-static std::atomic_int32_t g_seRefCount = 0;
-static std::mutex g_seMutex{};
+#ifdef L2_STANDARD
+#ifdef HKS_SUPPORT_ACCESS_TOKEN
+#include "hks_permission_check.h"
+#endif
+#endif
 
 static int32_t g_seCallCount = 0;
 constexpr static int32_t MAX_SE_CALL_COUNT = 4;
 static std::mutex g_seCallMutex{};
 
-int32_t HksSePermissionCheck(const struct HksProcessInfo *processInfo)
+int32_t HksSePermissionCheck(void)
 {
-    HKS_IF_TRUE_LOGE_RETURN(processInfo == nullptr, HKS_ERROR_NULL_POINTER, "processInfo is nullptr.")
-
-    CheckSeCapabilityFunc checkSeCapability = nullptr;
-    {
-        std::lock_guard<std::mutex> lock(g_seMutex);
-        if (g_seRefCount == 0) {
-            g_seHandle = dlopen("libtrusted_auth_ext.so", RTLD_LAZY);
-            if (g_seHandle == nullptr) {
-                HKS_LOG_E("Failed to load se library: %" LOG_PUBLIC "s", dlerror());
-                return HKS_ERROR_BAD_STATE;
-            }
-            g_checkSeCapability = reinterpret_cast<CheckSeCapabilityFunc>(
-                dlsym(g_seHandle, "CheckAccessSeCapability"));
-            if (g_checkSeCapability == nullptr) {
-                HKS_LOG_E("Failed to get se check permission function: %" LOG_PUBLIC "s", dlerror());
-                dlclose(g_seHandle);
-                g_seHandle = nullptr;
-                return HKS_ERROR_BAD_STATE;
-            }
-        }
-        g_seRefCount++;
-        checkSeCapability = g_checkSeCapability;
-    }
-
-    bool hasCapability = false;
-    int32_t result = checkSeCapability(processInfo->uidInt, hasCapability);
-
-    {
-        std::lock_guard<std::mutex> lock(g_seMutex);
-        g_seRefCount--;
-        if (g_seRefCount == 0) {
-            dlclose(g_seHandle);
-            g_seHandle = nullptr;
-            g_checkSeCapability = nullptr;
-        }
-    }
-
-    HKS_IF_TRUE_LOGE_RETURN((result != 0 || !hasCapability), HKS_ERROR_NO_PERMISSION,
-        "Se permission check failed, ret = 0x%" LOG_PUBLIC "x", result)
-
+#ifdef L2_STANDARD
+#ifdef HKS_SUPPORT_ACCESS_TOKEN
+    int32_t ret = SensitivePermissionCheck("ohos.permission.ACCESS_SE_KEY");
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Se permission check failed.")
     return HKS_SUCCESS;
+#else
+    HKS_LOG_E("HKS_SUPPORT_ACCESS_TOKEN is not enabled, Se permission check not supported.");
+    return HKS_ERROR_NOT_SUPPORTED;
+#endif
+#else
+    HKS_LOG_E("L2_STANDARD is not enabled, Se permission check not supported.");
+    return HKS_ERROR_NOT_SUPPORTED;
+#endif
 }
 
 int32_t HksSeIncrementSeCount(void)
