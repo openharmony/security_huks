@@ -53,6 +53,7 @@ if (os_level == "standard") {
       "ipc:ipc_napi",
       "ipc:ipc_single",
       "napi:ace_napi",
+      "node:node_header_notice",
     ]
 
     relative_install_dir = "extensionability/"

@@ -67,6 +67,7 @@ if (os_level == "standard") {
       "ipc:ipc_napi",
       "jsoncpp:jsoncpp",
       "napi:ace_napi",
+      "node:node_header_notice",
       "samgr:samgr_proxy",
     ]
 
