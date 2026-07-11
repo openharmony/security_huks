@@ -146,6 +146,10 @@ int32_t HksParamSetToEventInfoForDataSize(const struct HksParamSet *paramSetIn, 
         return HKS_SUCCESS;
     }
 
+    HKS_FREE(eventInfo->dataSizeInfo.component);
+    HKS_FREE(eventInfo->dataSizeInfo.partition);
+    HKS_FREE(eventInfo->dataSizeInfo.foldPath);
+    HKS_FREE(eventInfo->dataSizeInfo.foldSize);
     return ret;
 }
 
