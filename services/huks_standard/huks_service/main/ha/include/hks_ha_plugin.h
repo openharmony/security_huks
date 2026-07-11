@@ -417,7 +417,8 @@ private:
 
     void HandleFaultEvent(struct HksEventCommonInfo *eventInfo, std::unordered_map<std::string, std::string> &eventMap);
 
-    void HandleStatisticEvent(struct HksEventInfo *eventInfo, uint32_t eventId, HksEventProcMap *procMap, bool isAncoCall);
+    void HandleStatisticEvent(struct HksEventInfo *eventInfo, uint32_t eventId, HksEventProcMap *procMap,
+        bool isAncoCall);
 
     HksEventProcMap* HksEventProcFind(uint32_t eventId);
 
