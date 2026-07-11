@@ -35,12 +35,7 @@
 #include "hks_util.h"
 #include "accesstoken_kit.h"
 #include "hap_token_info.h"
-
-#ifdef __cplusplus
-extern "C" {
-int32_t HksGetBundleNameByUid(int32_t uid, std::string &bundleName);
-}
-#endif
+#include "hks_bms_api_wrap.h"
 
 using namespace OHOS;
 /*
@@ -213,32 +208,13 @@ static int32_t AddCommonInfo(const char *funcName, const struct HksProcessInfo *
     return ret;
 }
 
-static enum HksCallerType HksGetCallerType(void)
-{
-    auto callingTokenId = OHOS::IPCSkeleton::GetCallingTokenID();
-    switch (OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callingTokenId)) {
-        case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_HAP:
-            return HKS_HAP_TYPE;
-        case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE:
-        case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL:
-            return HKS_SA_TYPE;
-        default:
-            HKS_LOG_I("Error token type, callerTokenId: %" LOG_PUBLIC "u", callingTokenId);
-            return HKS_UNIFIED_TYPE;
-    }
-}
-
-static constexpr int HKS_ANCO_BROKER_UID = 5557;
-
 int32_t ReportGetCallerName(const struct HksProcessInfo *processInfo, std::string &callerName)
 {
     auto callingUid = OHOS::IPCSkeleton::GetCallingUid();
     if (callingUid == HKS_ANCO_BROKER_UID && processInfo != nullptr) {
-        std::string bundleName;
         // Failed to get the real bundle name, fall back to reporting the broker identity for caller tracing
-        int32_t ret = HksGetBundleNameByUid(static_cast<int32_t>(processInfo->uidInt), bundleName);
-        if (ret == HKS_SUCCESS && !bundleName.empty()) {
-            callerName = bundleName;
+        int32_t ret = HksGetBundleNameByUid(static_cast<int32_t>(processInfo->uidInt), callerName);
+        if (ret == HKS_SUCCESS && !callerName.empty()) {
             return HKS_SUCCESS;
         }
     }

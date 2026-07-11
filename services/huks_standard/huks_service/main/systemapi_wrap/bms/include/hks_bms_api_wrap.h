@@ -45,13 +45,6 @@ int32_t GetCallerName(const struct HksProcessInfo *processInfo, struct HksBlob *
 enum HksCallerType HksGetCallerType(void);
 
 #ifdef L2_STANDARD
-#ifdef __cplusplus
-int32_t HksGetDeleteGroups(const struct HksProcessInfo *processInfo, const std::string &developerId,
-    const std::vector<std::string> &thisGroups, std::vector<std::string> &deleteGroups);
-
-int32_t HksGetBundleNameByUid(int32_t uid, std::string &bundleName);
-#endif
-
 int32_t HksGetDeveloperId(const struct HksProcessInfo *processInfo, struct HksBlob *developerId);
 
 int32_t HksCheckAssetAccessGroup(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet);
@@ -60,5 +53,14 @@ int32_t HksCheckAssetAccessGroup(const struct HksProcessInfo *processInfo, const
 #ifdef __cplusplus
 }
 #endif
+
+#ifdef L2_STANDARD
+#ifdef __cplusplus
+int32_t HksGetDeleteGroups(const struct HksProcessInfo *processInfo, const std::string &developerId,
+    const std::vector<std::string> &thisGroups, std::vector<std::string> &deleteGroups);
+
+int32_t HksGetBundleNameByUid(int32_t uid, std::string &bundleName);
+#endif // __cplusplus
+#endif // L2_STANDARD
 
 #endif // HKS_BMS_API_WRAP_H

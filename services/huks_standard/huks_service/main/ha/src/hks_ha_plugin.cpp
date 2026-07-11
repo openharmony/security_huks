@@ -208,14 +208,19 @@ uint32_t HksHaPlugin::GetCacheSizeByEventId(uint32_t eventId) const
 {
     switch (eventId) {
         case HKS_EVENT_CRYPTO:
-        case HKS_EVENT_SIGN_VERIFY:
+        case HKS_EVENT_MAC:
             return CACHE_SIZE_HIGH;
+        case HKS_EVENT_SIGN_VERIFY:
         case HKS_EVENT_DERIVE:
         case HKS_EVENT_AGREE:
         case HKS_EVENT_GENERATE_KEY:
-        case HKS_EVENT_CHECK_KEY_EXISTED:
+        case HKS_EVENT_ATTEST:
         case HKS_EVENT_DELETE_KEY:
+        case HKS_EVENT_IMPORT_KEY:
             return CACHE_SIZE_MID;
+        case HKS_EVENT_CHECK_KEY_EXISTED:
+        case HKS_EVENT_LIST_ALIASES:
+            return CACHE_SIZE_LOW;
         case HKS_EVENT_DATA_SIZE_STATISTICS:
             return CACHE_SIZE_SYSTEM;
         default:

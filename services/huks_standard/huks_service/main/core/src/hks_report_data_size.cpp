@@ -115,35 +115,41 @@ int32_t HksParamSetToEventInfoForDataSize(const struct HksParamSet *paramSetIn, 
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
     struct HksParam *paramToEventInfo = nullptr;
-    if (HksGetParam(paramSetIn, HKS_TAG_COMPONENT_NAME, &paramToEventInfo) == HKS_SUCCESS) {
-        ret = CopyParamBlobData(&eventInfo->dataSizeInfo.component, paramToEventInfo);
-        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy component failed")
+    do {
+        if (HksGetParam(paramSetIn, HKS_TAG_COMPONENT_NAME, &paramToEventInfo) == HKS_SUCCESS) {
+            ret = CopyParamBlobData(&eventInfo->dataSizeInfo.component, paramToEventInfo);
+            HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "Copy component failed")
+        }
+
+        if (HksGetParam(paramSetIn, HKS_TAG_PARTITION_NAME, &paramToEventInfo) == HKS_SUCCESS) {
+            ret = CopyParamBlobData(&eventInfo->dataSizeInfo.partition, paramToEventInfo);
+            HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "Copy partition failed")
+        }
+
+        if (HksGetParam(paramSetIn, HKS_TAG_FILE_OF_FOLDER_PATH, &paramToEventInfo) == HKS_SUCCESS) {
+            ret = CopyParamBlobData(&eventInfo->dataSizeInfo.foldPath, paramToEventInfo);
+            HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "Copy foldPath failed")
+        }
+
+        if (HksGetParam(paramSetIn, HKS_TAG_FILE_OF_FOLDER_SIZE, &paramToEventInfo) == HKS_SUCCESS) {
+            ret = CopyParamBlobData(&eventInfo->dataSizeInfo.foldSize, paramToEventInfo);
+            HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "Copy foldSize failed")
+        }
+
+        if (HksGetParam(paramSetIn, HKS_TAG_REMAIN_PARTITION_SIZE, &paramToEventInfo) == HKS_SUCCESS) {
+            eventInfo->dataSizeInfo.partitionRemain = paramToEventInfo->uint64Param;
+        }
+    } while (0);
+
+    if (ret == HKS_SUCCESS) {
+        (void)commEventInfo.release();
+        return HKS_SUCCESS;
     }
 
-    if (HksGetParam(paramSetIn, HKS_TAG_PARTITION_NAME, &paramToEventInfo) == HKS_SUCCESS) {
-        ret = CopyParamBlobData(&eventInfo->dataSizeInfo.partition, paramToEventInfo);
-        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy partition failed")
-    }
-
-    if (HksGetParam(paramSetIn, HKS_TAG_FILE_OF_FOLDER_PATH, &paramToEventInfo) == HKS_SUCCESS) {
-        ret = CopyParamBlobData(&eventInfo->dataSizeInfo.foldPath, paramToEventInfo);
-        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy foldPath failed")
-    }
-
-    if (HksGetParam(paramSetIn, HKS_TAG_FILE_OF_FOLDER_SIZE, &paramToEventInfo) == HKS_SUCCESS) {
-        ret = CopyParamBlobData(&eventInfo->dataSizeInfo.foldSize, paramToEventInfo);
-        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy foldSize failed")
-    }
-
-    if (HksGetParam(paramSetIn, HKS_TAG_REMAIN_PARTITION_SIZE, &paramToEventInfo) == HKS_SUCCESS) {
-        eventInfo->dataSizeInfo.partitionRemain = paramToEventInfo->uint64Param;
-    }
-
-    (void)commEventInfo.release();
-    return HKS_SUCCESS;
+    return ret;
 }
 
-bool HksEventInfoIsNeedReportForDataSize([[maybe_unused]] const struct HksEventInfo *eventInfo)
+bool HksEventInfoIsNeedReportForDataSize(const struct HksEventInfo *eventInfo)
 {
     HKS_IF_NULL_LOGI_RETURN(eventInfo, false, "eventInfo is null")
     return eventInfo->common.result.code != HKS_SUCCESS;

@@ -45,11 +45,12 @@
 #include <ctime>
 #include <singleton.h>
 
-// Tiered cache sizes by event frequency
-constexpr uint32_t CACHE_SIZE_HIGH = 50;   // Cipher/SignVerify
-constexpr uint32_t CACHE_SIZE_MID = 30;    // KeyExist/GenerateKey/DeleteKey/Agree/Derive
-constexpr uint32_t CACHE_SIZE_LOW = 15;    // Other events (Mac/Attest/ImportKey/RenameKey/ListAliases)
-constexpr uint32_t CACHE_SIZE_SYSTEM = 5;  // DataSize
+// Tiered cache sizes by event frequency and aggregation cardinality
+// Total max memory: 2*50 + 7*20 + 5*10 + 1*2 = 292
+constexpr uint32_t CACHE_SIZE_HIGH = 50;   // Cipher/Mac (eventId 1,5): billions of calls, many unique caller combos
+constexpr uint32_t CACHE_SIZE_MID = 20;    // SignVerify/GenerateKey/Attest/DeleteKey/ImportKey/DeriveKey/AgreeKey (eventId 2,3,4,6,7,9,10)
+constexpr uint32_t CACHE_SIZE_LOW = 10;     // KeyExist/ListKeyAliases/RenameKey/GetProperties/KeyLevelChange (eventId 8,11-14)
+constexpr uint32_t CACHE_SIZE_SYSTEM = 2;  // DataSize (eventId 30): single aggregated entry
 constexpr time_t MAX_CACHE_DURATION = 3600; // Unit: seconds
 
 typedef struct {
