@@ -240,10 +240,10 @@ uint32_t HksHaPlugin::GetCacheSizeByEventId(uint32_t eventId) const
     uint32_t weight = GetCacheWeightByEventId(eventId);
     uint32_t totalWeight = GetTotalCacheWeight();
     if (totalWeight == 0) {
-        return 2; // minimum
+        return CACHE_SIZE_MIN;
     }
     uint32_t size = CACHE_SIZE_TOTAL * weight / totalWeight;
-    return (size < 2) ? 2 : size; // minimum 2 entries per bucket
+    return (size < CACHE_SIZE_MIN) ? CACHE_SIZE_MIN : size;
 }
 
 void HksHaPlugin::HandleStatisticEvent(struct HksEventInfo *eventInfo, uint32_t eventId,

@@ -46,9 +46,10 @@
 #include <singleton.h>
 
 // Cache size budget: total entries across all event buckets capped at this value.
-// Each event's bucket size = WEIGHT / TOTAL_WEIGHT * CACHE_SIZE_TOTAL (min 2).
+// Each event's bucket size = WEIGHT / TOTAL_WEIGHT * CACHE_SIZE_TOTAL (min CACHE_SIZE_MIN).
 // Adding new events only redistributes the budget — total never exceeds this cap.
 constexpr uint32_t CACHE_SIZE_TOTAL = 300;
+constexpr uint32_t CACHE_SIZE_MIN   = 2;    // minimum entries per bucket (also used when totalWeight == 0)
 constexpr uint32_t CACHE_WEIGHT_HIGH   = 5;  // Cipher/Mac: high-frequency, many unique caller combos
 constexpr uint32_t CACHE_WEIGHT_MID    = 2;  // SignVerify/GenerateKey/Attest/DeleteKey/ImportKey/Derive/Agree
 constexpr uint32_t CACHE_WEIGHT_LOW    = 1;  // KeyExist/ListAliases/RenameKey/GetProperties
