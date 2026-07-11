@@ -204,12 +204,12 @@ static uint32_t GetCurrentTimestamp()
     return static_cast<uint32_t>(time(nullptr));
 }
 
-uint32_t HksHaPlugin::GetCacheSizeByEventId(uint32_t eventId) const
+uint32_t HksHaPlugin::GetCacheWeightByEventId(uint32_t eventId) const
 {
     switch (eventId) {
         case HKS_EVENT_CRYPTO:
         case HKS_EVENT_MAC:
-            return CACHE_SIZE_HIGH;
+            return CACHE_WEIGHT_HIGH;
         case HKS_EVENT_SIGN_VERIFY:
         case HKS_EVENT_DERIVE:
         case HKS_EVENT_AGREE:
@@ -217,15 +217,33 @@ uint32_t HksHaPlugin::GetCacheSizeByEventId(uint32_t eventId) const
         case HKS_EVENT_ATTEST:
         case HKS_EVENT_DELETE_KEY:
         case HKS_EVENT_IMPORT_KEY:
-            return CACHE_SIZE_MID;
-        case HKS_EVENT_CHECK_KEY_EXISTED:
-        case HKS_EVENT_LIST_ALIASES:
-            return CACHE_SIZE_LOW;
+            return CACHE_WEIGHT_MID;
         case HKS_EVENT_DATA_SIZE_STATISTICS:
-            return CACHE_SIZE_SYSTEM;
+            return CACHE_WEIGHT_SYSTEM;
         default:
-            return CACHE_SIZE_LOW;
+            return CACHE_WEIGHT_LOW;
     }
+}
+
+uint32_t HksHaPlugin::GetTotalCacheWeight() const
+{
+    uint32_t totalWeight = 0;
+    std::lock_guard<std::mutex> lock(eventProcMutex);
+    for (const auto &item : eventProcList) {
+        totalWeight += GetCacheWeightByEventId(item.eventId);
+    }
+    return totalWeight;
+}
+
+uint32_t HksHaPlugin::GetCacheSizeByEventId(uint32_t eventId) const
+{
+    uint32_t weight = GetCacheWeightByEventId(eventId);
+    uint32_t totalWeight = GetTotalCacheWeight();
+    if (totalWeight == 0) {
+        return 2; // minimum
+    }
+    uint32_t size = CACHE_SIZE_TOTAL * weight / totalWeight;
+    return (size < 2) ? 2 : size; // minimum 2 entries per bucket
 }
 
 void HksHaPlugin::HandleStatisticEvent(struct HksEventInfo *eventInfo, uint32_t eventId,

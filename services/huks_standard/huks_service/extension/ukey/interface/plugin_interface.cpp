@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_error_code.h"
+#include "hks_bms_api_wrap.h"
 #include "hks_log.h"
 #include "hks_ukey_system_adapter.h"
 #include "hks_provider_life_cycle_manager.h"
@@ -21,14 +21,11 @@
 #include "hks_ukey_session_manager.h"
 #include "hks_cpp_paramset.h"
 #include "hks_template.h"
-#include "app_observer.h"
 #include "hks_ukey_common.h"
 #include <string>
 #include <vector>
 #include "hks_plugin_def.h"
 #include "iremote_object.h"
-
-#include "app_observer.h"
 
 namespace OHOS::Security::Huks {
 

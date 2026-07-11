@@ -59,7 +59,7 @@ int32_t HksCheckAssetAccessGroup(const struct HksProcessInfo *processInfo, const
 int32_t HksGetDeleteGroups(const struct HksProcessInfo *processInfo, const std::string &developerId,
     const std::vector<std::string> &thisGroups, std::vector<std::string> &deleteGroups);
 
-int32_t HksGetBundleNameByUid(int32_t uid, std::string &bundleName);
+int32_t HksGetBundleNameFromUid(uint32_t uid, std::string &bundleName);
 #endif // __cplusplus
 #endif // L2_STANDARD
 

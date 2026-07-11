@@ -45,13 +45,15 @@
 #include <ctime>
 #include <singleton.h>
 
-// Tiered cache sizes by event frequency and aggregation cardinality
-// Total max memory: 2*50 + 7*20 + 5*10 + 1*2 = 292
-constexpr uint32_t CACHE_SIZE_HIGH = 50;   // Cipher/Mac: billions of calls, many unique caller combos
-constexpr uint32_t CACHE_SIZE_MID = 20;    // SignVerify/GenerateKey/Attest/DeleteKey/ImportKey/DeriveKey/AgreeKey
-constexpr uint32_t CACHE_SIZE_LOW = 10;     // KeyExist/ListKeyAliases/RenameKey/GetProperties/KeyLevelChange
-constexpr uint32_t CACHE_SIZE_SYSTEM = 2;  // DataSize: single aggregated entry
-constexpr time_t MAX_CACHE_DURATION = 3600; // Unit: seconds
+// Cache size budget: total entries across all event buckets capped at this value.
+// Each event's bucket size = WEIGHT / TOTAL_WEIGHT * CACHE_SIZE_TOTAL (min 2).
+// Adding new events only redistributes the budget — total never exceeds this cap.
+constexpr uint32_t CACHE_SIZE_TOTAL = 300;
+constexpr uint32_t CACHE_WEIGHT_HIGH   = 5;  // Cipher/Mac: high-frequency, many unique caller combos
+constexpr uint32_t CACHE_WEIGHT_MID    = 2;  // SignVerify/GenerateKey/Attest/DeleteKey/ImportKey/Derive/Agree
+constexpr uint32_t CACHE_WEIGHT_LOW    = 1;  // KeyExist/ListAliases/RenameKey/GetProperties
+constexpr uint32_t CACHE_WEIGHT_SYSTEM = 1;  // DataSize: single aggregated entry
+constexpr time_t MAX_CACHE_DURATION = 3600;  // Unit: seconds
 
 typedef struct {
     struct HksEventCommonInfo common;
@@ -427,6 +429,10 @@ private:
     bool IsValidEventProcMap(const struct HksEventProcMap *procMap) const;
 
     uint32_t GetCacheSizeByEventId(uint32_t eventId) const;
+
+    uint32_t GetCacheWeightByEventId(uint32_t eventId) const;
+
+    uint32_t GetTotalCacheWeight() const;
 };
 
 #ifdef __cplusplus

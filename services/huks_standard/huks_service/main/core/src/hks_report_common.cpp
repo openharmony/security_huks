@@ -20,8 +20,9 @@
 #include <cstdint>
 #include <string>
 #include <sys/stat.h>
+#include "accesstoken_kit.h"
 #include "hilog/log_c.h"
-#include "hks_error_code.h"
+#include "hks_bms_api_wrap.h"
 #include "hks_event_info.h"
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -30,12 +31,10 @@
 #include "hks_type.h"
 #include "hks_type_enum.h"
 #include "hks_type_inner.h"
+#include "hks_util.h"
+#include "hap_token_info.h"
 #include "ipc_skeleton.h"
 #include "securec.h"
-#include "hks_util.h"
-#include "accesstoken_kit.h"
-#include "hap_token_info.h"
-#include "hks_bms_api_wrap.h"
 
 using namespace OHOS;
 /*
@@ -212,11 +211,13 @@ int32_t ReportGetCallerName(const struct HksProcessInfo *processInfo, std::strin
 {
     auto callingUid = OHOS::IPCSkeleton::GetCallingUid();
     if (callingUid == HKS_ANCO_BROKER_UID && processInfo != nullptr) {
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
         // Failed to get the real bundle name, fall back to reporting the broker identity for caller tracing
-        int32_t ret = HksGetBundleNameByUid(static_cast<int32_t>(processInfo->uidInt), callerName);
+        int32_t ret = HksGetBundleNameFromUid(processInfo->uidInt, callerName);
         if (ret == HKS_SUCCESS && !callerName.empty()) {
             return HKS_SUCCESS;
         }
+#endif
     }
 
     auto callingTokenId = OHOS::IPCSkeleton::GetCallingTokenID();

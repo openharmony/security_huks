@@ -27,6 +27,7 @@ if (os_level == "standard") {
     include_dirs = [
       "inc",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common/inc",
+      "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms/include",
     ]
 
     sources = [
@@ -36,6 +37,7 @@ if (os_level == "standard") {
     defines = [ "L2_STANDARD" ]
     deps = [
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
+      "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms:libhuks_bms_systemapi_wrap_static",
     ]
     complete_static_lib = true
     cflags = []
