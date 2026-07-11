@@ -22,7 +22,7 @@
 #include <sys/stat.h>
 #include "accesstoken_kit.h"
 #include "hilog/log_c.h"
-#ifdef L2_STANDARD
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
 #include "hks_bms_api_wrap.h"
 #endif
 #include "hks_event_info.h"
@@ -209,7 +209,7 @@ static int32_t AddCommonInfo(const char *funcName, const struct HksProcessInfo *
     return ret;
 }
 
-#ifndef L2_STANDARD
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
 static enum HksCallerType HksGetCallerType(void)
 {
     auto callingTokenId = OHOS::IPCSkeleton::GetCallingTokenID();
