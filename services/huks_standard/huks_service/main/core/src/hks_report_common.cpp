@@ -209,8 +209,7 @@ static int32_t AddCommonInfo(const char *funcName, const struct HksProcessInfo *
     return ret;
 }
 
-#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
-static enum HksCallerType HksGetCallerType(void)
+static enum HksCallerType GetCallerType(void)
 {
     auto callingTokenId = OHOS::IPCSkeleton::GetCallingTokenID();
     switch (OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callingTokenId)) {
@@ -223,7 +222,6 @@ static enum HksCallerType HksGetCallerType(void)
             return HKS_UNIFIED_TYPE;
     }
 }
-#endif
 
 int32_t ReportGetCallerName(const struct HksProcessInfo *processInfo, std::string &callerName)
 {
@@ -239,7 +237,7 @@ int32_t ReportGetCallerName(const struct HksProcessInfo *processInfo, std::strin
     }
 
     auto callingTokenId = OHOS::IPCSkeleton::GetCallingTokenID();
-    switch (HksGetCallerType()) {
+    switch (GetCallerType()) {
         case HKS_HAP_TYPE: {
             OHOS::Security::AccessToken::HapTokenInfo hapTokenInfo;
             int32_t accessTokenRet = OHOS::Security::AccessToken::AccessTokenKit::GetHapTokenInfo(callingTokenId,
