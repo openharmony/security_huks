@@ -696,7 +696,7 @@ int32_t CheckKeyCondition(const struct HksProcessInfo *processInfo, const struct
 static int32_t CheckAndUpgradeKeyIfNeed(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *key)
 {
-     // check version and upgrade key if need
+    // check version and upgrade key if need
     struct HksParam *keyVersion = NULL;
     int32_t ret = HksGetParam((const struct HksParamSet *)key->data, HKS_TAG_KEY_VERSION, &keyVersion);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CORRUPT_FILE, "get param key version failed!")
@@ -748,7 +748,7 @@ int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct HksBlo
     }
 #endif
     ret = GetKeyFileData(processInfo, paramSet, keyAlias, key, mode);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key fail data failed!")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetKeyFileData failed!")
 
 #ifdef HKS_ENABLE_UPGRADE_KEY
     // check version and upgrade key if need

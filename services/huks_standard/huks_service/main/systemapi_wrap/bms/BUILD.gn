@@ -33,12 +33,11 @@ ohos_static_library("libhuks_bms_systemapi_wrap_static") {
   subsystem_name = "security"
   part_name = "huks"
   public_configs = [ ":huks_config" ]
-  include_dirs = []
-  configs =
-      [ "../../../../../../frameworks/config/build:l2_standard_common_config" ]
+  include_dirs = [ "//base/security/huks/frameworks/huks_standard/main/common/include" ]
+  configs = [ "//base/security/huks/frameworks/config/build:l2_standard_common_config" ]
 
   sources = [ "src/hks_bms_api_wrap.cpp" ]
-  deps = [ "../../../../../../frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
+  deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
 
   external_deps = [
     "access_token:libaccesstoken_sdk",

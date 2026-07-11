@@ -60,6 +60,11 @@ int32_t HksGetKeyCountByProcessName(const struct HksStoreFileInfo *fileInfo, uin
 int32_t HksStorageWriteFile(
     const char *path, const char *fileName, const uint8_t *buf, uint32_t len, bool isOverride);
 
+int32_t HksStorageFileSize(const char *path, const char *fileName);
+
+int32_t HksStorageReadFile(
+    const char *path, const char *fileName, uint32_t offset, struct HksBlob *blob, uint32_t *size);
+
 #endif // _STORAGE_LITE_
 #endif // _CUT_AUTHENTICATE_
 

@@ -39,6 +39,7 @@
 #include "hks_param.h"
 #include "hks_template.h"
 #include "hks_type_enum.h"
+#include "hks_json_wrapper.h"
 
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
@@ -54,41 +55,34 @@ const int32_t HKS_MAIN_APPLICATION = 0;
 
 using namespace OHOS;
 using namespace Security::AccessToken;
+using namespace OHOS::Security::Huks;
 
 static int32_t ConvertCallerInfoToJson(struct HksCallerInfo *callerInfo, struct HksBlob *outInfo)
 {
-    cJSON *jsonObj = cJSON_CreateObject();
-    HKS_IF_NULL_LOGE_RETURN(jsonObj, HKS_ERROR_NULL_POINTER, "create cjson object failed.")
+    auto jsonObj = CommJsonObject::CreateObject();
+    HKS_IF_TRUE_LOGE_RETURN(jsonObj.IsNull(), HKS_ERROR_NULL_POINTER, "jsonObj is null");
 
-    const char *jsonKeyId = callerInfo->isHap ? "appId" : "processName";
-    const char *jsonKeyExtend = callerInfo->isHap ? "bundleName" : "APL";
-    if ((cJSON_AddStringToObject(jsonObj, jsonKeyId, callerInfo->id.c_str()) == nullptr) ||
-        (cJSON_AddStringToObject(jsonObj, jsonKeyExtend, callerInfo->extend.c_str()) == nullptr)) {
-        HKS_LOG_E("add id and extend info to json object is failed.");
-        cJSON_Delete(jsonObj);
-        return HKS_ERROR_NULL_POINTER;
-    }
+    std::string jsonKeyId = callerInfo->isHap ? "appId" : "processName";
+    std::string jsonKeyExtend = callerInfo->isHap ? "bundleName" : "APL";
+    HKS_IF_TRUE_LOGE_RETURN(!jsonObj.SetValue(jsonKeyId, callerInfo->id),
+        HKS_ERROR_NULL_POINTER, "add id failed")
+    HKS_IF_TRUE_LOGE_RETURN(!jsonObj.SetValue(jsonKeyExtend, callerInfo->extend),
+        HKS_ERROR_NULL_POINTER, "add extend failed")
 
-    const char *jsonKeyIdentifier = "appIdentifier";
-    const char *jsonKeyMode = "appMode";
-    if (callerInfo->isHap &&
-        (cJSON_AddStringToObject(jsonObj, jsonKeyIdentifier, callerInfo->appIdentifier.c_str()) == nullptr ||
-        cJSON_AddStringToObject(jsonObj, jsonKeyMode, callerInfo->appMode.c_str()) == nullptr)) {
-        HKS_LOG_E("add appIdentifier and appMode to json object is failed.");
-        cJSON_Delete(jsonObj);
-        return HKS_ERROR_NULL_POINTER;
-    }
+    std::string jsonKeyIdentifier = "appIdentifier";
+    std::string jsonKeyMode = "appMode";
+    HKS_IF_TRUE_LOGE_RETURN(callerInfo->isHap &&
+        (!jsonObj.SetValue(jsonKeyIdentifier, callerInfo->appIdentifier) ||
+        !jsonObj.SetValue(jsonKeyMode, callerInfo->appMode)),
+        HKS_ERROR_NULL_POINTER, "add appIdentifier and appMode failed")
 
-    char *jsonStr = cJSON_PrintUnformatted(jsonObj);
-    if (jsonStr == nullptr) {
-        HKS_LOG_E("cJSON_PrintUnformatted failed.");
-        cJSON_Delete(jsonObj);
-        return HKS_ERROR_NULL_POINTER;
-    }
+    std::string jsonStr = jsonObj.Serialize();
+    HKS_IF_TRUE_LOGE_RETURN(jsonStr.empty(), HKS_ERROR_NULL_POINTER, "serialize jsonObj failed")
 
-    outInfo->size = strlen(jsonStr);
-    outInfo->data = static_cast<uint8_t *>(static_cast<void*>(jsonStr));
-    cJSON_Delete(jsonObj);
+    outInfo->data = static_cast<uint8_t *>(HksMalloc(jsonStr.size()));
+    HKS_IF_NULL_LOGE_RETURN(outInfo->data, HKS_ERROR_MALLOC_FAIL, "malloc outInfo->data failed")
+    outInfo->size = jsonStr.size();
+    (void)memcpy_s(outInfo->data, jsonStr.size(), jsonStr.c_str(), jsonStr.size());
     return HKS_SUCCESS;
 }
 
@@ -174,10 +168,7 @@ static int32_t HksGetApplicationInfoV9(const std::string &bundleName, int32_t us
 
     uint32_t flag = static_cast<uint32_t>(AppExecFwk::GetApplicationFlag::GET_APPLICATION_INFO_DEFAULT);
     auto ret = bundleMgrProxy->GetApplicationInfoV9(bundleName, flag, userId, applicationInfo);
-    if (ret != ERR_OK) {
-        HKS_LOG_E("get applicationInfo failed");
-        return HKS_FAILURE;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(ret != ERR_OK, HKS_FAILURE, "get applicationInfo failed")
 
     return HKS_SUCCESS;
 }
@@ -371,9 +362,9 @@ int32_t HksCheckAssetAccessGroup(const struct HksProcessInfo *processInfo, const
 
     for (auto &groupId : assetAccessGroups) {
         HKS_IF_TRUE_CONTINUE(groupId.size() != accessGroupParam->blob.size)
-        if (HksMemCmp(accessGroupParam->blob.data, groupId.c_str(), accessGroupParam->blob.size) == 0) {
-            return HKS_SUCCESS;
-        }
+        HKS_IF_TRUE_RETURN(
+            HksMemCmp(accessGroupParam->blob.data, groupId.c_str(), accessGroupParam->blob.size) == 0,
+            HKS_SUCCESS)
     }
 
     return HKS_ERROR_INVALID_ACCESS_GROUP;
@@ -384,10 +375,8 @@ static bool IsThisGroupExistApp(const std::string &group, const std::vector<AppE
     for (auto &bundleInfo : bundleInfos) {
         HKS_LOG_I("app bundlename: %" LOG_PUBLIC "s", bundleInfo.applicationInfo.bundleName.c_str());
         for (auto &assetAccessGroup : bundleInfo.applicationInfo.assetAccessGroups) {
-            if (assetAccessGroup == group) {
-                HKS_LOG_I("group is still exist: %" LOG_PUBLIC "s", group.c_str());
-                return true;
-            }
+            HKS_IF_TRUE_LOGI_RETURN(assetAccessGroup == group, true,
+                "group is still exist: %" LOG_PUBLIC "s", group.c_str())
         }
     }
     return false;
