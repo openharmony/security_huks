@@ -22,7 +22,9 @@
 #include <sys/stat.h>
 #include "accesstoken_kit.h"
 #include "hilog/log_c.h"
+#ifdef L2_STANDARD
 #include "hks_bms_api_wrap.h"
+#endif
 #include "hks_event_info.h"
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -206,6 +208,22 @@ static int32_t AddCommonInfo(const char *funcName, const struct HksProcessInfo *
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add error message to params failed")
     return ret;
 }
+
+#ifndef L2_STANDARD
+static enum HksCallerType HksGetCallerType(void)
+{
+    auto callingTokenId = OHOS::IPCSkeleton::GetCallingTokenID();
+    switch (OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callingTokenId)) {
+        case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_HAP:
+            return HKS_HAP_TYPE;
+        case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE:
+        case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL:
+            return HKS_SA_TYPE;
+        default:
+            return HKS_UNIFIED_TYPE;
+    }
+}
+#endif
 
 int32_t ReportGetCallerName(const struct HksProcessInfo *processInfo, std::string &callerName)
 {
