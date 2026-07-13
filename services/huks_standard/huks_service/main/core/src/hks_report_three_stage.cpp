@@ -19,6 +19,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "hks_error_code.h"
 #include "hks_event_info.h"
 #include "hks_report_common.h"
 #include "hks_report_three_stage_build.h"
@@ -29,12 +30,37 @@
 static bool NeedReportCommon(const HksEventInfo *eventInfo)
 {
     HKS_IF_NULL_LOGI_RETURN(eventInfo, false, "paramset or eventInfo is null")
-    return eventInfo->common.result.code != HKS_SUCCESS;
+    int32_t code = eventInfo->common.result.code;
+    if (code == HKS_ERROR_NOT_EXIST || code == HKS_ERROR_INVALID_ARGUMENT) {
+        return false;
+    }
+    return code != HKS_SUCCESS;
 }
 
 static bool CryptoInfoIsEqual(const HksEventInfo *info1, const HksEventInfo *info2)
 {
-    HKS_IF_NOT_TRUE_RETURN(CheckEventCommon(info1, info2), false);
+    HKS_IF_TRUE_RETURN(info1 == nullptr || info2 == nullptr, false)
+    HKS_IF_TRUE_RETURN(info1->common.eventId != info2->common.eventId, false)
+    HKS_IF_TRUE_RETURN(info1->common.result.code != info2->common.result.code, false)
+
+    int32_t code = info1->common.result.code;
+    if (code == HKS_ERROR_NOT_EXIST) {
+        // -13: key not exist, aggregate by alg + operation (no callerInfo, no aliasHash)
+        return (info1->cryptoInfo.keyInfo.alg == info2->cryptoInfo.keyInfo.alg) &&
+            (info1->common.operation == info2->common.operation);
+    }
+    if (code == HKS_ERROR_INVALID_ARGUMENT) {
+        // -3: aggregate by same caller + same key (callerInfo + aliasHash + alg)
+        HKS_IF_TRUE_RETURN(info1->common.callerInfo.name == nullptr ||
+            info2->common.callerInfo.name == nullptr, false)
+        HKS_IF_TRUE_RETURN(strcmp(info1->common.callerInfo.name, info2->common.callerInfo.name) != 0, false)
+        return (info1->cryptoInfo.keyInfo.alg == info2->cryptoInfo.keyInfo.alg) &&
+            (info1->cryptoInfo.keyInfo.aliasHash == info2->cryptoInfo.keyInfo.aliasHash);
+    }
+    // Other errors: keep callerInfo + alg + operation
+    HKS_IF_TRUE_RETURN(info1->common.callerInfo.name == nullptr ||
+        info2->common.callerInfo.name == nullptr, false)
+    HKS_IF_TRUE_RETURN(strcmp(info1->common.callerInfo.name, info2->common.callerInfo.name) != 0, false)
     return (info1->cryptoInfo.keyInfo.alg == info2->cryptoInfo.keyInfo.alg) &&
         (info1->common.operation == info2->common.operation);
 }
@@ -136,6 +162,10 @@ int32_t HksParamSetToEventInfoAttest(const struct HksParamSet *paramSet, HksEven
 
 bool HksEventInfoNeedReportAttest(const HksEventInfo *eventInfo)
 {
+    HKS_IF_NULL_LOGI_RETURN(eventInfo, false, "eventInfo is null")
+    if (eventInfo->common.result.code == HUKS_ERR_CODE_EXTERNAL_ERROR) {
+        return false;
+    }
     return NeedReportCommon(eventInfo);
 }
 

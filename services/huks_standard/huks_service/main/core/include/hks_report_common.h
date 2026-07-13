@@ -103,7 +103,7 @@ static inline uint32_t HksGetHash(const struct HksBlob *blob)
     return static_cast<uint32_t>(hasher(data));
 }
 
-int32_t ReportGetCallerName(std::string &callerName);
+int32_t ReportGetCallerName(const struct HksProcessInfo *processInfo, std::string &callerName);
 
 int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo);
 

@@ -26,18 +26,19 @@
 #include "hks_extension_connection.h"
 #include "huks_access_ext_base_stub.h"
 
-namespace OHOS {
-namespace Security {
-namespace Huks {
-
-// Mock system adapter functions to avoid calling real BMS/OSAccount services in tests.
-// These override the real implementations from libhuks_ukey_common_static.
+// Mock HksGetBundleNameFromUid in global namespace (matches hks_bms_api_wrap.h declaration).
 int32_t HksGetBundleNameFromUid(uint32_t uid, std::string &bundleName)
 {
     bundleName = "com.huawei.extensionhap.test";
     return HKS_SUCCESS;
 }
 
+namespace OHOS {
+namespace Security {
+namespace Huks {
+
+// Mock system adapter functions to avoid calling real BMS/OSAccount services in tests.
+// These override the real implementations from libhuks_ukey_common_static.
 int32_t HksGetFrontUserId(int32_t &outId)
 {
     outId = 100;

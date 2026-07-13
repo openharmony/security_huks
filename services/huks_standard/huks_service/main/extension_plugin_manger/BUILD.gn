@@ -38,6 +38,7 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager/inc",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/session_manger/inc",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/app_observer",
+      "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms/include",
     ]
     public_configs = [ ":huks_ext_plugin_manager_config" ]
     sources = [
@@ -54,6 +55,7 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger:libhuks_provider_life_cycle_manager_static",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager:libhuks_remote_handle_manager_static",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/session_manger:libhuks_session_manager_static",
+      "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms:libhuks_bms_systemapi_wrap_static",
     ]
 
     cflags = []

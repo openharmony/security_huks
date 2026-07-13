@@ -115,47 +115,73 @@ int32_t HksParamSetToEventInfoForDataSize(const struct HksParamSet *paramSetIn, 
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
     struct HksParam *paramToEventInfo = nullptr;
-    if (HksGetParam(paramSetIn, HKS_TAG_COMPONENT_NAME, &paramToEventInfo) == HKS_SUCCESS) {
-        eventInfo->dataSizeInfo.component = reinterpret_cast<char *>(paramToEventInfo->blob.data);
+    do {
+        if (HksGetParam(paramSetIn, HKS_TAG_COMPONENT_NAME, &paramToEventInfo) == HKS_SUCCESS) {
+            ret = CopyParamBlobData(&eventInfo->dataSizeInfo.component, paramToEventInfo);
+            HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "Copy component failed")
+        }
+
+        if (HksGetParam(paramSetIn, HKS_TAG_PARTITION_NAME, &paramToEventInfo) == HKS_SUCCESS) {
+            ret = CopyParamBlobData(&eventInfo->dataSizeInfo.partition, paramToEventInfo);
+            HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "Copy partition failed")
+        }
+
+        if (HksGetParam(paramSetIn, HKS_TAG_FILE_OF_FOLDER_PATH, &paramToEventInfo) == HKS_SUCCESS) {
+            ret = CopyParamBlobData(&eventInfo->dataSizeInfo.foldPath, paramToEventInfo);
+            HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "Copy foldPath failed")
+        }
+
+        if (HksGetParam(paramSetIn, HKS_TAG_FILE_OF_FOLDER_SIZE, &paramToEventInfo) == HKS_SUCCESS) {
+            ret = CopyParamBlobData(&eventInfo->dataSizeInfo.foldSize, paramToEventInfo);
+            HKS_IF_NOT_SUCC_LOGI_BREAK(ret, "Copy foldSize failed")
+        }
+
+        if (HksGetParam(paramSetIn, HKS_TAG_REMAIN_PARTITION_SIZE, &paramToEventInfo) == HKS_SUCCESS) {
+            eventInfo->dataSizeInfo.partitionRemain = paramToEventInfo->uint64Param;
+        }
+    } while (0);
+
+    if (ret == HKS_SUCCESS) {
+        (void)commEventInfo.release();
+        return HKS_SUCCESS;
     }
 
-    if (HksGetParam(paramSetIn, HKS_TAG_PARTITION_NAME, &paramToEventInfo) == HKS_SUCCESS) {
-        eventInfo->dataSizeInfo.partition = reinterpret_cast<char *>(paramToEventInfo->blob.data);
-    }
-
-    if (HksGetParam(paramSetIn, HKS_TAG_FILE_OF_FOLDER_PATH, &paramToEventInfo) == HKS_SUCCESS) {
-        eventInfo->dataSizeInfo.foldPath = reinterpret_cast<char *>(paramToEventInfo->blob.data);
-    }
-
-    if (HksGetParam(paramSetIn, HKS_TAG_FILE_OF_FOLDER_SIZE, &paramToEventInfo) == HKS_SUCCESS) {
-        eventInfo->dataSizeInfo.foldSize = reinterpret_cast<char *>(paramToEventInfo->blob.data);
-    }
-
-    if (HksGetParam(paramSetIn, HKS_TAG_REMAIN_PARTITION_SIZE, &paramToEventInfo) == HKS_SUCCESS) {
-        eventInfo->dataSizeInfo.partitionRemain = paramToEventInfo->uint64Param;
-    }
-
-    (void)commEventInfo.release();
-    return HKS_SUCCESS;
+    HKS_FREE(eventInfo->dataSizeInfo.component);
+    HKS_FREE(eventInfo->dataSizeInfo.partition);
+    HKS_FREE(eventInfo->dataSizeInfo.foldPath);
+    HKS_FREE(eventInfo->dataSizeInfo.foldSize);
+    return ret;
 }
 
-bool HksEventInfoIsNeedReportForDataSize([[maybe_unused]] const struct HksEventInfo *eventInfo)
+bool HksEventInfoIsNeedReportForDataSize(const struct HksEventInfo *eventInfo)
 {
-    return true;
+    HKS_IF_NULL_LOGI_RETURN(eventInfo, false, "eventInfo is null")
+    return eventInfo->common.result.code != HKS_SUCCESS;
 }
 
-bool HksEventInfoIsEqualForDataSize([[maybe_unused]] const struct HksEventInfo *eventInfo1,
-    [[maybe_unused]] const struct HksEventInfo *eventInfo2)
+bool HksEventInfoIsEqualForDataSize(const struct HksEventInfo *eventInfo1,
+    const struct HksEventInfo *eventInfo2)
 {
-    /* data size event is not a statistic event */
-    return false;
+    return CheckEventCommon(eventInfo1, eventInfo2);
 }
 
 void HksEventInfoAddForDataSize(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
 {
-    if (HksEventInfoIsEqualForDataSize(dstEventInfo, srcEventInfo)) {
-        dstEventInfo->common.count++;
+    if (!HksEventInfoIsEqualForDataSize(dstEventInfo, srcEventInfo)) {
+        return;
     }
+    dstEventInfo->common.count++;
+    dstEventInfo->common.time = srcEventInfo->common.time;
+    if (srcEventInfo->dataSizeInfo.foldSize != nullptr) {
+        uint32_t len = strlen(srcEventInfo->dataSizeInfo.foldSize) + 1;
+        char *newFoldSize = static_cast<char *>(HksMalloc(len));
+        if (newFoldSize != nullptr) {
+            (void)memcpy_s(newFoldSize, len, srcEventInfo->dataSizeInfo.foldSize, len);
+            HKS_FREE(dstEventInfo->dataSizeInfo.foldSize);
+            dstEventInfo->dataSizeInfo.foldSize = newFoldSize;
+        }
+    }
+    dstEventInfo->dataSizeInfo.partitionRemain = srcEventInfo->dataSizeInfo.partitionRemain;
 }
 
 int32_t HksEventInfoToMapForDataSize(const struct HksEventInfo *eventInfo,
