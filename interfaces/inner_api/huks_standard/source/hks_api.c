@@ -1257,6 +1257,7 @@ HKS_API_EXPORT int32_t HksDecapsulate(const struct HksBlob *keyAlias, const stru
     } while (false);
 
     HksFreeParamSet(&dummyParamSet);
+    HKS_FREE_BLOB(dummyAlias);
     HKS_IF_NOT_SUCC_LOGE(ret, "leave Decapsulate, result = %" LOG_PUBLIC "d", ret);
     return ret;
 }
