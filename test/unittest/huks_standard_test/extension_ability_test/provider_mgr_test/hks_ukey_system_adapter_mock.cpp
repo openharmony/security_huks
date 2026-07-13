@@ -31,4 +31,10 @@ int32_t VerifyCallerAndAdjustUidParam(const HksProcessInfo &processInfo, const C
     return HKS_SUCCESS;
 }
 
+} // namespace OHOS::Security::Huks
+
+int32_t HksGetBundleNameFromUid(uint32_t uid, std::string &bundleName)
+{
+    bundleName = "com.huawei.extensionhap.test";
+    return HKS_SUCCESS;
 }

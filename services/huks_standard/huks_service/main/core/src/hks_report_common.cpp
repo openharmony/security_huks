@@ -22,9 +22,7 @@
 #include <sys/stat.h>
 #include "accesstoken_kit.h"
 #include "hilog/log_c.h"
-#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
-#include "hks_bms_api_wrap.h"
-#endif
+#include "hap_token_info.h"
 #include "hks_event_info.h"
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -34,9 +32,11 @@
 #include "hks_type_enum.h"
 #include "hks_type_inner.h"
 #include "hks_util.h"
-#include "hap_token_info.h"
 #include "ipc_skeleton.h"
 #include "securec.h"
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+#include "hks_bms_api_wrap.h"
+#endif
 
 using namespace OHOS;
 /*
