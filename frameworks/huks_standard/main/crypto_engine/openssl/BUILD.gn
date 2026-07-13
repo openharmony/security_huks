@@ -99,6 +99,11 @@ if (os_level == "standard") {
         defines += [ "HKS_ENABLE_UPGRADE_RKC_DERIVE_ALG" ]
         sources += [ "../rkc/src/hks_rkc_v1.c" ]
       }
+
+      if (enable_bundle_framework) {
+        deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms:libhuks_bms_systemapi_wrap_static" ]
+        include_dirs += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms/include" ]
+      }
     }
 
     deps += [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
