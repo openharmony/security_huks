@@ -33,12 +33,14 @@ ohos_static_library("libhuks_se_systemapi_wrap_static") {
   subsystem_name = "security"
   part_name = "huks"
   public_configs = [ ":huks_config" ]
-  include_dirs = []
+  include_dirs = [
+    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",
+  ]
   configs =
-      [ "../../../../../../frameworks/config/build:l2_standard_common_config" ]
+      [ "//base/security/huks/frameworks/config/build:l2_standard_common_config" ]
 
   sources = [ "src/hks_se_api_wrap.cpp" ]
-  deps = [ "../../../../../../frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
+  deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
 
   external_deps = [
     "bounds_checking_function:libsec_shared",

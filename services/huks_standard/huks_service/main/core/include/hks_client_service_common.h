@@ -36,15 +36,15 @@ bool IsSeSecurityLevel(const struct HksParamSet *paramSet);
 
 bool IsSeHandle(const struct HksBlob *handle);
 
-int32_t CheckKeySecuritySeFromKeyFile(const struct HksProcessInfo *processInfo,
-    const struct HksBlob *keyFromFile, bool *isSeCalling);
+int32_t CheckKeySecuritySeFromKeyFile(const struct HksBlob *keyFromFile, bool *isSeCalling);
+
+int32_t CheckSePermissionBeforeDeleteKey(const struct HksBlob *keyFromFile);
 
 void DecrementSeCountByService(bool isSeCalling);
 
-int32_t CheckKeySecuritySeFromParamSet(const struct HksProcessInfo *processInfo,
-    struct HksParamSet *newParamSet, bool *isSeCalling);
+int32_t CheckKeySecuritySeFromParamSet(struct HksParamSet *newParamSet, bool *isSeCalling);
 
-int32_t CheckSeSessionCallInService(const struct HksProcessInfo *processInfo, bool *isSeCalling);
+int32_t CheckSeSessionCallInService(bool *isSeCalling);
 
 int32_t CheckWrappedKeySeVersionInService(const struct HksBlob *wrappedData, bool *isSeWrappedKey);
 
