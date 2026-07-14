@@ -25,6 +25,8 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 
+#include <securec.h>
+
 #include <cstring>
 
 using namespace testing::ext;
