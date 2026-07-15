@@ -290,10 +290,9 @@ void HksExtProxy::WriteErrorInfoToParcel(MessageParcel &data, const struct HksEx
     HKS_IF_NOT_TRUE_LOGE(writeResult, "WriteUint32 descLen %" LOG_PUBLIC "u failed", descLen)
     writeResult = data.WriteBool(hasErrorInfo);
     HKS_IF_NOT_TRUE_LOGE(writeResult, "WriteBool hasErrorInfo failed")
-    if (descLen > 0 && descLen < MAX_ERROR_MESSAGE_LEN) {
-        writeResult = data.WriteBuffer(errorDesc, descLen);
-        HKS_IF_NOT_TRUE_LOGE(writeResult, "WriteBuffer errorDesc failed")
-    }
+    HKS_IF_TRUE_RETURN_VOID(descLen <= 0 || descLen >= MAX_ERROR_MESSAGE_LEN)
+    writeResult = data.WriteBuffer(errorDesc, descLen);
+    HKS_IF_NOT_TRUE_LOGE(writeResult, "WriteBuffer errorDesc failed")
 }
 
 void HksExtProxy::SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &sendData, uint32_t sendSize,
@@ -303,32 +302,26 @@ void HksExtProxy::SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &s
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = MessageOption::TF_ASYNC;
-    bool writeResult = data.WriteInterfaceToken(GetDescriptor());
-    HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(writeResult,
-        "WriteInterfaceToken errCode %" LOG_PUBLIC "u failed %" LOG_PUBLIC "d", errCode, writeResult)
-    writeResult = data.WriteUint32(errCode);
-    HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(writeResult, "WriteUint32 errCode %" LOG_PUBLIC "u failed %" LOG_PUBLIC "d",
-        errCode, writeResult)
+    do {
+        bool writeResult = data.WriteInterfaceToken(GetDescriptor());
+        HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(writeResult,
+            "WriteInterfaceToken errCode %" LOG_PUBLIC "u failed %" LOG_PUBLIC "d", errCode, writeResult)
+        writeResult = data.WriteUint32(errCode);
+        HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(writeResult, "WriteUint32 errCode %" LOG_PUBLIC "u failed %" LOG_PUBLIC "d",
+            errCode, writeResult)
 
-    if (errCode != HKS_SUCCESS) {
-        HKS_LOG_E("ukey callback fail errCode %" LOG_PUBLIC "u", errCode);
-        int res = Remote()->SendRequest(msgCode, data, reply, option);
-        HKS_IF_TRUE_LOGE(res != ERR_OK, "send fail reply errCode failed %" LOG_PUBLIC "d", res)
-        return;
-    }
-    writeResult = data.WriteUint32(sendSize);
-    HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(writeResult, "WriteUint32 sendSize %" LOG_PUBLIC "u failed %" LOG_PUBLIC "d",
-        sendSize, writeResult)
-    if (sendSize == 0 || sendData == nullptr) {
-        HKS_LOG_E("ukey reply success but empty sendData %" LOG_PUBLIC "u", sendSize);
-        WriteErrorInfoToParcel(data, errInfo);
-        int res = Remote()->SendRequest(msgCode, data, reply, option);
-        HKS_IF_TRUE_LOGE(res != ERR_OK, "Remote()->SendRequest failed %" LOG_PUBLIC "d", res)
-        return;
-    }
-    writeResult = data.WriteBuffer(sendData.get(), sendSize);
-    HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(writeResult, "WriteBuffer size %" LOG_PUBLIC "u failed %" LOG_PUBLIC "d",
-        sendSize, writeResult)
+        HKS_IF_TRUE_LOGE_BREAK(errCode != HKS_SUCCESS, "ukey callback fail errCode %" LOG_PUBLIC "u", errCode)
+        writeResult = data.WriteUint32(sendSize);
+        HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(writeResult, "WriteUint32 sendSize %" LOG_PUBLIC "u failed %" LOG_PUBLIC "d",
+            sendSize, writeResult)
+
+        HKS_IF_TRUE_LOGE_BREAK(sendSize == 0 || sendData == nullptr,
+            "ukey reply success but empty sendData %" LOG_PUBLIC "u", sendSize)
+        writeResult = data.WriteBuffer(sendData.get(), sendSize);
+        HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(writeResult, "WriteBuffer size %" LOG_PUBLIC "u failed %" LOG_PUBLIC "d",
+            sendSize, writeResult)
+    } while (0);
+
     WriteErrorInfoToParcel(data, errInfo);
     int res = Remote()->SendRequest(msgCode, data, reply, option);
     HKS_IF_TRUE_LOGE(res != ERR_OK, "Remote()->SendRequest failed %" LOG_PUBLIC "d", res)

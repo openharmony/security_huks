@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
 
-#include "hks_file_operator.h"
+#include "hks_storage.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_template.h"
@@ -194,7 +194,7 @@ int32_t HksReadFileWithIterativeReader(struct HksIterativeReader *reader, struct
 
     int32_t ret = HKS_SUCCESS;
     do {
-        uint32_t size = HksFileSize(reader->fileLists->infos[reader->curIndex].path,
+        uint32_t size = HksStorageFileSize(reader->fileLists->infos[reader->curIndex].path,
             reader->fileLists->infos[reader->curIndex].fileName);
         if (size == 0) {
             ret = HKS_ERROR_FILE_SIZE_FAIL;
@@ -226,7 +226,7 @@ int32_t HksReadFileWithIterativeReader(struct HksIterativeReader *reader, struct
         path->size = strlen(reader->fileLists->infos[reader->curIndex].path) + 1;
         (void)memcpy_s(path->data, strlen(reader->fileLists->infos[reader->curIndex].path),
             reader->fileLists->infos[reader->curIndex].path, strlen(reader->fileLists->infos[reader->curIndex].path));
-        ret = HksFileRead(reader->fileLists->infos[reader->curIndex].path,
+        ret = HksStorageReadFile(reader->fileLists->infos[reader->curIndex].path,
             reader->fileLists->infos[reader->curIndex].fileName, 0, fileContent, &fileContent->size);
         reader->curIndex++;
         return ret;
