@@ -21,8 +21,16 @@ config("huks_config") {
     "sysinfo/include",
   ]
 
+  defines = []
   if (huks_enable_ukey_config == true) {
-    defines = [ "HKS_UKEY_EXTENSION_CRYPTO" ]
+    defines += [ "HKS_UKEY_EXTENSION_CRYPTO" ]
+  }
+
+  if (huks_enable_hisilicon_cipher_in_small) {
+    include_dirs += [
+      "//drivers/peripheral/huks/interfaces/include",
+    ]
+    defines += [ "HKS_CIPHER_ROOT_KEY" ]
   }
 }
 
@@ -163,5 +171,9 @@ if (os_level == "standard") {
       "hilog_lite:hilog_shared",
       "init:libbegetutil",
     ]
+
+    if (huks_enable_hisilicon_cipher_in_small) {
+      deps += [ "$ohos_board_adapter_dir/huks:huks_cipher_adapter" ]
+    }
   }
 }

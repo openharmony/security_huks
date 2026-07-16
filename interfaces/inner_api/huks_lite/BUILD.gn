@@ -106,6 +106,10 @@ config("soft_huks_config") {
     "-DHKS_CONFIG_KEY_STORE_PATH=\"${huks_key_store_path}\"",
     "-DHKS_KEY_VERSION=${huks_key_version}",
   ]
+
+  if (huks_enable_hisilicon_cipher_in_small) {
+    cflags += [ "-DHKS_CIPHER_ROOT_KEY" ]
+  }
 }
 
 config("public_huks_config") {

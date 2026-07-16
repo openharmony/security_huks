@@ -108,4 +108,7 @@ declare_args() {
 
   # whether enable huks ukey in PC
   huks_enable_ukey_config = false
+
+  # whether enable huks hisilicon cipher in system in small
+  huks_enable_hisilicon_cipher_in_small = false
 }

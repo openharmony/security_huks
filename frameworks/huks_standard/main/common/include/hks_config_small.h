@@ -16,6 +16,9 @@
 #ifndef HKS_CONFIG_H
 #define HKS_CONFIG_H
 
+#ifdef HKS_CIPHER_ROOT_KEY
+#define HKS_ENABLE_EVENT_DELETE
+#endif
 #define HKS_SUPPORT_POSIX
 
 #ifndef __LINUX__

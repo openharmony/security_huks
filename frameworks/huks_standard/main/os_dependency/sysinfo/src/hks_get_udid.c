@@ -22,6 +22,10 @@
 #include "hks_template.h"
 #include "hks_type.h"
 
+#ifdef HKS_CIPHER_ROOT_KEY
+#include "huks_hdi_cipher.h"
+#endif
+
 #define HKS_HARDWARE_UDID_LEN 32
 
 #ifndef _CUT_AUTHENTICATE_
@@ -32,7 +36,11 @@
 
 #define HKS_HARDWARE_UDID_STRING_LEN    (HKS_HARDWARE_UDID_LEN * 2 + 1)
 
+#ifdef HKS_CIPHER_ROOT_KEY
+static int32_t ComputeHash(uint32_t *data, uint32_t len, struct HksBlob *hash)
+#else
 static int32_t ComputeHash(const char *data, uint32_t len, struct HksBlob *hash)
+#endif /* HKS_CIPHER_ROOT_KEY */
 {
     struct HksBlob srcData = { len, (uint8_t *)data };
     return HksCryptoHalHash(HKS_DIGEST_SHA256, &srcData, hash);
@@ -42,7 +50,22 @@ static int32_t ComputeHash(const char *data, uint32_t len, struct HksBlob *hash)
 
 int32_t HksGetHardwareUdid(uint8_t *udid, uint32_t udidLen)
 {
+    if (udid == NULL) {
+        return HKS_ERROR_BAD_STATE;
+    }
 #ifdef GET_DEV_UDID_ENABLE
+#ifdef HKS_CIPHER_ROOT_KEY
+    uint8_t devDieidString[HKS_HARDWARE_UDID_LEN] = { 0 };
+    int32_t ret = GetDevDieid(devDieidString, sizeof(devDieidString));
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Get uniqueid error, ret = 0x%x", ret);
+        return HKS_ERROR_NO_PERMISSION;
+    }
+
+    uint8_t devUdid[HKS_HARDWARE_UDID_LEN] = {0};
+    struct HksBlob hashData = { HKS_HARDWARE_UDID_LEN, devUdid };
+    ret = ComputeHash((uint32_t *)devDieidString, sizeof(devDieidString), &hashData);
+#else
     char devUdidString[HKS_HARDWARE_UDID_STRING_LEN] = {0};
     int32_t ret = GetDevUdid(devUdidString, sizeof(devUdidString));
     if (ret != 0) {
@@ -53,6 +76,7 @@ int32_t HksGetHardwareUdid(uint8_t *udid, uint32_t udidLen)
     uint8_t devUdid[HKS_HARDWARE_UDID_LEN] = {0};
     struct HksBlob hashData = { HKS_HARDWARE_UDID_LEN, devUdid };
     ret = ComputeHash(devUdidString, sizeof(devUdidString), &hashData);
+#endif /* HKS_CIPHER_ROOT_KEY */
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "compute udid hash failed")
 #else
     /* simulation implementation */
@@ -64,10 +88,16 @@ int32_t HksGetHardwareUdid(uint8_t *udid, uint32_t udidLen)
     };
 #endif
 
+#ifdef HKS_CIPHER_ROOT_KEY
+    for (uint32_t i = 0; i < udidLen; ++i) {
+        udid[i] = udid[i] ^ devUdid[i];
+    }
+#else
     if (memcpy_s(udid, udidLen, devUdid, HKS_HARDWARE_UDID_LEN) != EOK) {
         HKS_LOG_E("Memcpy udid failed!");
         return HKS_ERROR_BAD_STATE;
     }
+#endif /* HKS_CIPHER_ROOT_KEY */
 
     return HKS_SUCCESS;
 }
