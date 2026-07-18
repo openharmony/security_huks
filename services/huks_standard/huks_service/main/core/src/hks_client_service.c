@@ -567,6 +567,24 @@ static void HksReportEvent(const char *funcName, const struct HksHitraceId *trac
 #endif
 }
 #if defined(L2_STANDARD) && defined(HKS_SUPPORT_GET_BUNDLE_INFO)
+static int32_t CheckExistingDeveloperId(const struct HksParamSet *paramSet, const struct HksBlob *developerId,
+    bool *needAdd)
+{
+    *needAdd = true;
+    struct HksParam *existingDevIdParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_DEVELOPER_ID, &existingDevIdParam);
+    if (ret != HKS_SUCCESS) {
+        return HKS_SUCCESS;
+    }
+    *needAdd = false;
+    if (existingDevIdParam->blob.size == developerId->size &&
+        HksMemCmp(existingDevIdParam->blob.data, developerId->data, developerId->size) == 0) {
+        return HKS_SUCCESS;
+    }
+    HKS_LOG_E("developer id is not allowed to be passed in from external!");
+    return HKS_ERROR_INVALID_ARGUMENT;
+}
+
 static int32_t AppendGroupKeyInfo(const struct HksProcessInfo *processInfo, struct HksParamSet **outParamSet)
 {
     int32_t ret = HksCheckAssetAccessGroup(processInfo, *outParamSet);
@@ -587,12 +605,17 @@ static int32_t AppendGroupKeyInfo(const struct HksProcessInfo *processInfo, stru
         ret = HksGetDeveloperId(processInfo, &developerId);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get developerId failed")
 
-        struct HksParam paramArr[] = {
-            { .tag = HKS_TAG_DEVELOPER_ID, .blob = developerId },
-        };
+        bool needAdd = true;
+        ret = CheckExistingDeveloperId(*outParamSet, &developerId, &needAdd);
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
-        ret = HksAddParams(newParamSet, paramArr, HKS_ARRAY_SIZE(paramArr));
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add developerInfo failed")
+        if (needAdd) {
+            struct HksParam paramArr[] = {
+                { .tag = HKS_TAG_DEVELOPER_ID, .blob = developerId },
+            };
+            ret = HksAddParams(newParamSet, paramArr, HKS_ARRAY_SIZE(paramArr));
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add developerInfo failed")
+        }
 
         ret = HksBuildParamSet(&newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build paramset failed")
