@@ -51,6 +51,26 @@
 #define RET_NUM    2
 #define UKEY_PERMISSION_REGISTER "ohos.permission.CRYPTO_EXTENSION_REGISTER"
 
+static const uint32_t FORBIDDEN_TAGS[] = {
+    HKS_TAG_DEVELOPER_ID,
+};
+
+static int32_t HksIpcCheckParamSetBlacklist(const struct HksParamSet *paramSet)
+{
+    if (paramSet == NULL) {
+        return HKS_SUCCESS;
+    }
+    for (uint32_t i = 0; i < paramSet->paramsCnt; i++) {
+        for (uint32_t j = 0; j < sizeof(FORBIDDEN_TAGS) / sizeof(FORBIDDEN_TAGS[0]); j++) {
+            if (paramSet->params[i].tag == FORBIDDEN_TAGS[j]) {
+                HKS_LOG_E("paramSet contains forbidden tag! 0x%" LOG_PUBLIC "x", paramSet->params[i].tag);
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+        }
+    }
+    return HKS_SUCCESS;
+}
+
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
 static enum HksTag g_idList[] = {
     HKS_TAG_ATTESTATION_ID_BRAND,
@@ -484,6 +504,9 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
         ret = HksGenerateKeyUnpack(srcData, &keyAlias, &inParamSet, &keyOut);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGenerateKeyUnpack Ipc fail")
 
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
         if (keyOut.data == NULL) {
             isNoneResponse = true;
             keyOut.data = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
@@ -538,6 +561,9 @@ void HksIpcServiceImportKey(const struct HksBlob *srcData, const uint8_t *contex
         ret  = HksImportKeyUnpack(srcData, &keyAlias, &paramSet, &key);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksImportKeyUnpack Ipc fail")
 
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
@@ -567,6 +593,9 @@ void HksIpcServiceImportWrappedKey(const struct HksBlob *srcData, const uint8_t 
         ret  = HksImportWrappedKeyUnpack(srcData, &keyAlias, &wrappingKeyAlias, &paramSet, &wrappedKeyData);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "unpack data for Ipc fail")
 
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get process info fail, ret = %" LOG_PUBLIC "d", ret)
 
@@ -595,6 +624,9 @@ void HksIpcServiceExportPublicKey(const struct HksBlob *srcData, const uint8_t *
         ret  = HksExportPublicKeyUnpack(srcData, &keyAlias, &paramSet, &key);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksExportKeyUnpack Ipc fail")
 
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
@@ -621,6 +653,9 @@ void HksIpcServiceDeleteKey(const struct HksBlob *srcData, const uint8_t *contex
     do {
         ret  = HksDeleteKeyUnpack(srcData, &keyAlias, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDeleteKeyUnpack Ipc fail")
+
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
@@ -650,6 +685,9 @@ void HksIpcServiceGetKeyParamSet(const struct HksBlob *srcData, const uint8_t *c
     do {
         ret = HksGetKeyParamSetUnpack(srcData, &keyAlias, &paramSetIn, &paramSetOut);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGenerateKeyUnpack Ipc fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcCheckParamSetBlacklist(paramSetIn);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
@@ -681,6 +719,9 @@ void HksIpcServiceKeyExist(const struct HksBlob *srcData, const uint8_t *context
     do {
         ret  = HksKeyExistUnpack(srcData, &keyAlias, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDeleteKeyUnpack Ipc fail")
+
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
@@ -745,6 +786,9 @@ void HksIpcServiceSign(const struct HksBlob *srcData, const uint8_t *context)
         ret = HksSignUnpack(srcData, &keyAlias, &inParamSet, &unsignedData, &signature);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSignUnpack Ipc fail")
 
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
@@ -775,6 +819,9 @@ void HksIpcServiceVerify(const struct HksBlob *srcData, const uint8_t *context)
         ret = HksVerifyUnpack(srcData, &keyAlias, &inParamSet, &unsignedData, &signature);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksVerifyUnpack Ipc fail")
 
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
@@ -803,6 +850,9 @@ void HksIpcServiceEncrypt(const struct HksBlob *srcData, const uint8_t *context)
     do {
         ret = HksEncryptDecryptUnpack(srcData, &keyAlias, &inParamSet, &plainText, &cipherText);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksEncryptDecryptUnpack Ipc fail")
+
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
@@ -834,6 +884,9 @@ void HksIpcServiceDecrypt(const struct HksBlob *srcData, const uint8_t *context)
         ret = HksEncryptDecryptUnpack(srcData, &keyAlias, &inParamSet, &cipherText, &plainText);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksEncryptDecryptUnpack Ipc fail")
 
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
@@ -864,6 +917,9 @@ void HksIpcServiceAgreeKey(const struct HksBlob *srcData, const uint8_t *context
         ret = HksAgreeKeyUnpack(srcData, &inParamSet, &privateKey, &peerPublicKey, &agreedKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAgreeKeyUnpack Ipc fail")
 
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
@@ -892,6 +948,9 @@ void HksIpcServiceDeriveKey(const struct HksBlob *srcData, const uint8_t *contex
     do {
         ret = HksDeriveKeyUnpack(srcData, &inParamSet, &masterKey, &derivedKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDeriveKeyUnpack Ipc fail")
+
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
@@ -922,6 +981,9 @@ void HksIpcServiceMac(const struct HksBlob *srcData, const uint8_t *context)
     do {
         ret = HksHmacUnpack(srcData, &key, &inParamSet, &inputData, &mac);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksHmacUnpack Ipc fail")
+
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
@@ -971,6 +1033,9 @@ void HksIpcServiceGetKeyInfoList(const struct HksBlob *srcData, const uint8_t *c
     do {
         ret = HksGetKeyInfoListUnpack(srcData, &paramSet, &inputCount, &keyInfoList);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetKeyInfoListUnpack Ipc fail")
+
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
@@ -1036,6 +1101,9 @@ void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *contex
     do {
         ret = HksCertificateChainUnpack(srcData, &keyAlias, &inParamSet, &certChainBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCertificateChainUnpack Ipc fail")
+
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
@@ -1103,6 +1171,9 @@ void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outDa
         ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetParamSet fail, ret = %" LOG_PUBLIC "d", ret)
 
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
         struct HksParamOut params[] = {
             {
                 .tag = HKS_TAG_PARAM0_BUFFER,
@@ -1118,6 +1189,9 @@ void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outDa
 
         ret = HksGetParamSet((struct HksParamSet *)paramsBlob.data, paramsBlob.size, &inParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetParamSet fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "inParamSet contains forbidden tag")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
@@ -1152,6 +1226,9 @@ void HksIpcServiceUpdOrFin(const struct HksBlob *paramSetBlob, struct HksBlob *o
         ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetParamSet fail, ret = %" LOG_PUBLIC "d", ret)
 
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
         struct HksParamOut params[] = {
             {
                 .tag = HKS_TAG_PARAM0_BUFFER,
@@ -1170,6 +1247,9 @@ void HksIpcServiceUpdOrFin(const struct HksBlob *paramSetBlob, struct HksBlob *o
 
         ret = HksGetParamSet((struct HksParamSet *)paramsBlob.data, paramsBlob.size, &inParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetParamSet fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "inParamSet contains forbidden tag")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
@@ -1212,6 +1292,9 @@ void HksIpcServiceAbort(const struct HksBlob *paramSetBlob, struct HksBlob *outD
         ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetParamSet fail, ret = %" LOG_PUBLIC "d", ret)
 
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
         struct HksParamOut params[] = {
             {
                 .tag = HKS_TAG_PARAM0_BUFFER,
@@ -1226,6 +1309,9 @@ void HksIpcServiceAbort(const struct HksBlob *paramSetBlob, struct HksBlob *outD
 
         ret = HksGetParamSet((struct HksParamSet *)paramsBlob.data, paramsBlob.size, &inParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetParamSet fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "inParamSet contains forbidden tag")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
@@ -1257,6 +1343,9 @@ void HksIpcServiceListAliases(const struct HksBlob *srcData, const uint8_t *cont
     do {
         ret = HksListAliasesUnpack(srcData, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksListAliasesUnpack fail")
+
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
@@ -1291,6 +1380,9 @@ void HksIpcServiceRenameKeyAlias(const struct HksBlob *srcData, const uint8_t *c
         ret  = HksRenameKeyAliasUnpack(srcData, &oldKeyAlias, &newKeyAlias, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRenameKeyAliasUnpack Ipc fail")
 
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
@@ -1318,6 +1410,12 @@ void HksIpcChangeStorageLevel(const struct HksBlob *srcData, const uint8_t *cont
     do {
         ret = HksChangeStorageLevelUnpack(srcData, &keyAlias, &srcParamSet, &destParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksChangeStorageLevelUnpack Ipc fail")
+
+        ret = HksIpcCheckParamSetBlacklist(srcParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "srcParamSet contains forbidden tag")
+
+        ret = HksIpcCheckParamSetBlacklist(destParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "destParamSet contains forbidden tag")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
