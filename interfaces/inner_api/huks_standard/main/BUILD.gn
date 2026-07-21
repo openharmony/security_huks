@@ -60,6 +60,7 @@ if (os_level == "standard") {
       "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
     ]
     external_deps = [
+      "bounds_checking_function:libsec_shared",
       "c_utils:utils",
       "hilog:libhilog",
     ]
@@ -105,6 +106,7 @@ if (os_level == "standard") {
       "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
     ]
     external_deps = [
+      "bounds_checking_function:libsec_shared",
       "c_utils:utils",
       "hilog:libhilog",
     ]

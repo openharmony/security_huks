@@ -1035,7 +1035,9 @@ HKS_API_EXPORT int32_t HksUnwrapKey(const struct HksBlob *keyAlias, const struct
     if (keyAlias == NULL || paramSet == NULL || wrappedData == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
-    int32_t ret = HksClientUnwrapKey(keyAlias, paramSet, wrappedData);
+    int32_t ret = CheckifNeedOverrideKey(keyAlias, paramSet);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    ret = HksClientUnwrapKey(keyAlias, paramSet, wrappedData);
     HKS_LOG_D("leave UnwrapKey, result = %" LOG_PUBLIC "d", ret);
     return ret;
 #else
