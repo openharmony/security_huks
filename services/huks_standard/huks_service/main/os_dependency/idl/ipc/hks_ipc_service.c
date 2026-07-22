@@ -758,7 +758,7 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
         if (ret == HKS_SUCCESS && accessTypeParam != NULL &&
             accessTypeParam->uint32Param == HKS_AUTH_ACCESS_ALWAYS_VALID) {
             int32_t activeFrontUserId;
-            ret = HksGetRelatedFrontUserId(inParamSet, processInfo.userIdInt, &activeFrontUserId);
+            ret = HksGetFrontUserId(&activeFrontUserId);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetFrontUserId fail! ret=%" LOG_PUBLIC "d", ret);
             struct HksParamSet *newParamSet = NULL;
             ret = BuildFrontUserIdParamSet(inParamSet, &newParamSet, activeFrontUserId);
@@ -798,9 +798,6 @@ void HksIpcServiceImportKey(const struct HksBlob *srcData, const uint8_t *contex
 
         ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = HksGenKeyCheckMlControl(paramSet);
-        HKS_IF_NOT_SUCC_BREAK(ret, "MLKEM not support authtoken")
 
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
