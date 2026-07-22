@@ -35,6 +35,9 @@
 #include "hks_storage_manager.h"
 #include "hks_template.h"
 #include "hks_type_inner.h"
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+#include "hks_bms_api_wrap.h"
+#endif
 #include "securec.h"
 
 #ifdef L2_STANDARD
@@ -273,23 +276,38 @@ static int32_t GetAssetAccessGroupPath(const struct HksParamSet *paramSet, struc
     return HKS_SUCCESS;
 }
 
-static int32_t GetDeveloperIdPath(const struct HksParamSet *paramSet,  struct HksStoreMaterial *outMaterial)
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+static int32_t GetDeveloperIdPath(const struct HksProcessInfo *processInfo, struct HksStoreMaterial *outMaterial)
 {
-    struct HksParam *developerParam = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_DEVELOPER_ID, &developerParam);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret);
+    struct HksBlob developerIdBlob = { 0, NULL };
+    int32_t ret = HksGetDeveloperId(processInfo, &developerIdBlob);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksGetDeveloperId fail, ret = %" LOG_PUBLIC "d", ret)
 
-    uint32_t blobSize = developerParam->blob.size;
-    HKS_IF_TRUE_LOGE_RETURN(blobSize > HKS_MAX_DEVELOPER_ID_LEN, HKS_FAILURE,
-        "developId len %" LOG_PUBLIC "u is invalid", blobSize)
+    uint32_t blobSize = developerIdBlob.size;
+    if (blobSize > HKS_MAX_DEVELOPER_ID_LEN) {
+        HKS_LOG_E("developId len %" LOG_PUBLIC "u is invalid", blobSize);
+        HKS_FREE_BLOB(developerIdBlob);
+        return HKS_FAILURE;
+    }
 
     outMaterial->developerId = (char *)HksMalloc(blobSize + 1);
-    HKS_IF_NULL_LOGE_RETURN(outMaterial->developerId, HKS_ERROR_MALLOC_FAIL, "malloc developerId failed")
-    (void)memcpy_s(outMaterial->developerId, blobSize + 1, developerParam->blob.data, blobSize);
+    if (outMaterial->developerId == NULL) {
+        HKS_LOG_E("malloc developerId failed");
+        HKS_FREE_BLOB(developerIdBlob);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    if (memcpy_s(outMaterial->developerId, blobSize + 1, developerIdBlob.data, blobSize) != EOK) {
+        HKS_LOG_E("memcpy_s developerId failed");
+        HKS_FREE(outMaterial->developerId);
+        HKS_FREE_BLOB(developerIdBlob);
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
     outMaterial->developerId[blobSize] = '\0';
 
+    HKS_FREE_BLOB(developerIdBlob);
     return HKS_SUCCESS;
 }
+#endif
 #endif
 
 static int32_t InitStorageMaterial(const struct HksProcessInfo *processInfo,
@@ -321,8 +339,13 @@ static int32_t InitStorageMaterial(const struct HksProcessInfo *processInfo,
 #ifdef L2_STANDARD
         ret = GetAssetAccessGroupPath(paramSet, &material);
         if (ret == HKS_SUCCESS) {
-            ret = GetDeveloperIdPath(paramSet, &material);
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+            ret = HksCheckAssetAccessGroup(processInfo, paramSet);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check asset access group failed.")
+
+            ret = GetDeveloperIdPath(processInfo, &material);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get developerId failed.")
+#endif
         }
         HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS && ret != HKS_ERROR_PARAM_NOT_EXIST, "get group failed.")
 #endif

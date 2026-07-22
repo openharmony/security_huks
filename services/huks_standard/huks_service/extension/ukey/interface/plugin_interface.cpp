@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_error_code.h"
+#include "hks_bms_api_wrap.h"
 #include "hks_log.h"
 #include "hks_ukey_system_adapter.h"
 #include "hks_provider_life_cycle_manager.h"
@@ -21,13 +21,11 @@
 #include "hks_ukey_session_manager.h"
 #include "hks_cpp_paramset.h"
 #include "hks_template.h"
-#include "app_observer.h"
 #include "hks_ukey_common.h"
 #include <string>
 #include <vector>
 #include "hks_plugin_def.h"
-
-#include "app_observer.h"
+#include "iremote_object.h"
 
 namespace OHOS::Security::Huks {
 
@@ -37,13 +35,6 @@ static bool CheckParamPurpose(const CppParamSet &paramSet)
     HKS_IF_NOT_TRUE_RETURN(paramPurpose.first == HKS_SUCCESS, false);
     uint32_t purpose = paramPurpose.second;
     return purpose > 0 && (purpose & (purpose - 1)) == 0 && (purpose & ~0x1FF) == 0;
-}
-
-static void RegisterObserverForProcess(const HksProcessInfo &processInfo, const CppParamSet &paramSet)
-{
-    int32_t ret = OHOS::Security::Huks::HksAppObserverManager::GetInstance().RegisterObserver(processInfo, paramSet);
-    HKS_IF_NOT_SUCC_LOGE(ret, "Failed to register observer for uid: %{public}u, ret=%{public}d",
-        processInfo.uidInt, ret);
 }
 
 static int32_t GetProviderInfo(const HksProcessInfo &processInfo, const std::string &providerName,
@@ -122,7 +113,6 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnOpenRemoteHandle(co
         HKS_IF_TRUE_LOGE_RETURN(!paramSetWithUid.AddParams({uid}), HKS_ERROR_INVALID_ARGUMENT,
             "AddUidToParamset fail")
     }
-    RegisterObserverForProcess(processInfo, paramSetWithUid);
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
     auto ret = handleMgr->CreateRemoteHandle(processInfo, index, paramSet, errInfo);
@@ -149,12 +139,6 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnAuthUkeyPin(const H
     struct HksExternalErrorInfo **errInfo)
 {
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
-    auto uid = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
-    if (uid.first == HKS_SUCCESS) {
-        HksProcessInfo processInfoTmp = {};
-        processInfoTmp.uidInt = static_cast<uint32_t>(uid.second);
-        RegisterObserverForProcess(processInfoTmp, paramSet);
-    }
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
     auto ret = handleMgr->RemoteVerifyPin(processInfo, index, paramSet, authOutParam, errInfo);
@@ -228,7 +212,6 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnInitSession(
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
     HKS_IF_NOT_TRUE_LOGE_RETURN(CheckParamPurpose(paramSet), HKS_ERROR_INVALID_PURPOSE,
         "InitSession purpose check failed")
-    RegisterObserverForProcess(*processAndError.processInfo, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null")
     ret = sessionMgr->ExtensionInitSession(processAndError, index, paramSet, handle);
@@ -242,7 +225,6 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUpdateSession(
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
-    RegisterObserverForProcess(*processAndError.processInfo, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null")
     ret = sessionMgr->ExtensionUpdateSession(processAndError, handle, paramSet, inData, outData);
@@ -256,7 +238,6 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnFinishSession(
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
-    RegisterObserverForProcess(*processAndError.processInfo, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null")
     ret = sessionMgr->ExtensionFinishSession(processAndError, handle, paramSet, inData, outData);
@@ -269,7 +250,6 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnAbortSession(
 {
     int32_t ret = HKS_SUCCESS;
     HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
-    RegisterObserverForProcess(*processAndError.processInfo, paramSet);
     auto sessionMgr = HksSessionManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(sessionMgr == nullptr, HKS_ERROR_NULL_POINTER, "sessionMgr is null")
     ret = sessionMgr->ExtensionAbortSession(processAndError, handle, paramSet);
@@ -344,6 +324,19 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnGetResourceId(const
     auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null")
     auto ret = handleMgr->GetResourceId(processInfo, providerName, paramSet, resourceId, errInfo);
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
+    return ret;
+}
+
+__attribute__((visibility("default"))) int32_t HksExtPluginOnSetExtensionProxy(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet, void *remoteObjectRaw)
+{
+    HKS_LOG_I("enter %" LOG_PUBLIC "s", __PRETTY_FUNCTION__);
+    auto remoteObject = sptr<IRemoteObject>(static_cast<IRemoteObject*>(remoteObjectRaw));
+    HKS_IF_TRUE_LOGE_RETURN(remoteObject == nullptr, HKS_ERROR_NULL_POINTER, "remoteObject is nullptr")
+    auto providerMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(providerMgr == nullptr, HKS_ERROR_NULL_POINTER, "providerMgr is null");
+    auto ret = providerMgr->OnSetExtensionProxy(processInfo, providerName, paramSet, remoteObject);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, ret = %" LOG_PUBLIC "d", __FUNCTION__, ret);
     return ret;
 }

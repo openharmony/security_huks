@@ -21,7 +21,6 @@
 #include <securec.h>
 #include "ability_connect_callback_stub.h"
 #include "iremote_object.h"
-#include "ihuks_access_ext_base.h"
 #include "want.h"
 #include "functional"
 #include "hks_plugin_def.h"
@@ -40,7 +39,7 @@ public:
     void OnDisconnect(sptr<ExtensionConnection> &connect);
     void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) override;
     bool IsConnected();
-    sptr<IHuksAccessExtBase> GetExtConnectProxy();
+    sptr<IRemoteObject> GetRemoteObject();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
     bool isDeathRemoted = false;
     std::function<void(HksProcessInfo)> callBackPlugin;
@@ -52,7 +51,7 @@ private:
     std::mutex proxyMutex_{};
     std::atomic<bool> isConnected_ = {false};
     sptr<IRemoteObject::DeathRecipient> callerDeathRecipient_{nullptr};
-    sptr<IHuksAccessExtBase> extConnectProxy{};
+    sptr<IRemoteObject> extRemoteObject{};
     void AddExtDeathRecipient(const wptr<IRemoteObject>& token);
     void RemoveExtDeathRecipient(const wptr<IRemoteObject>& token);
 };

@@ -14,6 +14,7 @@ if (huks_enable_ukey_config == true) {
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/session_manger/inc",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager/inc",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/connection/inc",
+      "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms/include",
       "//base/security/huks/test/unittest/huks_common_test/hks_mock_common",
       "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     ]
@@ -36,7 +37,6 @@ if (huks_enable_ukey_config == true) {
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_util_standard_static",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:huks_access_ext_base_include",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager:libhuks_remote_handle_manager_static",
     ]

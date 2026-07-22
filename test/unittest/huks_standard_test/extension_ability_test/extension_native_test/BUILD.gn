@@ -71,6 +71,8 @@ if (huks_enable_ukey_config == true) {
       "ipc:ipc_napi",
       "napi:ace_napi",
       "os_account:os_account_innerkits",
+      "node:node_header_notice",
+      "libuv:uv",
     ]
 
     defines = [ "private=public" ]

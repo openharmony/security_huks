@@ -54,6 +54,8 @@ if (os_level == "standard") {
       "c_utils:utils",
       "hilog:libhilog",
       "ipc:ipc_core",
+      "samgr:samgr_proxy",
+      "jsoncpp:jsoncpp",
     ]
   }
 }

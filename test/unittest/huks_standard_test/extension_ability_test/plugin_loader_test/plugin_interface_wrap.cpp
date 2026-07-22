@@ -18,15 +18,133 @@
 #include <cstdio>
 #include <string>
 #include "hks_cpp_paramset.h"
-#include "hks_cpp_abilityinfo.h"
 #include "hks_plugin_def.h"
 #include "hks_cfi.h"
 #include "hks_external_error_info.h"
 #include "hks_cpp_abilityinfo.h"
+#include "hks_error_code.h"
+#include "hks_extension_connection.h"
+#include "huks_access_ext_base_stub.h"
+
+// Mock HksGetBundleNameFromUid in global namespace (matches hks_bms_api_wrap.h declaration).
+int32_t HksGetBundleNameFromUid(uint32_t uid, std::string &bundleName)
+{
+    bundleName = "com.huawei.extensionhap.test";
+    return HKS_SUCCESS;
+}
 
 namespace OHOS {
 namespace Security {
 namespace Huks {
+
+// Mock system adapter functions to avoid calling real BMS/OSAccount services in tests.
+// These override the real implementations from libhuks_ukey_common_static.
+int32_t HksGetFrontUserId(int32_t &outId)
+{
+    outId = 100;
+    return HKS_SUCCESS;
+}
+
+int32_t VerifyCallerAndAdjustUidParam(const HksProcessInfo &processInfo, const CppParamSet &paramSet,
+    CppParamSet &newParamSet)
+{
+    return HKS_SUCCESS;
+}
+
+// Mock ExtensionConnection to avoid calling real Ability Manager Service in tests.
+// These override the real implementations from libhuks_ukey_plugin_extesnion_static.
+class HksCryptoExtStubImpl : public HuksAccessExtBaseStub {
+public:
+    explicit HksCryptoExtStubImpl() = default;
+    ~HksCryptoExtStubImpl() {}
+
+    ErrCode OpenRemoteHandle(const std::string&, const CppParamSet&, std::string&, HksExternalErrorInfoIdl&) { return 0; }
+    ErrCode CloseRemoteHandle(const std::string&, const CppParamSet&, HksExternalErrorInfoIdl&) { return 0; }
+    ErrCode AuthUkeyPin(const std::string&, const CppParamSet&, HksExternalErrorInfoIdl&, int32_t&, uint32_t&) { return 0; }
+    ErrCode GetUkeyPinAuthState(const std::string&, const CppParamSet&, int32_t&, HksExternalErrorInfoIdl&) { return 0; }
+    ErrCode ExportCertificate(const std::string&, const CppParamSet&, std::string&, HksExternalErrorInfoIdl&) { return 0; }
+    ErrCode ExportProviderCertificates(const CppParamSet&, std::string&, HksExternalErrorInfoIdl&) { return 0; }
+    ErrCode InitSession(const std::string&, const CppParamSet&, std::string&, HksExternalErrorInfoIdl&) { return 0; }
+    ErrCode UpdateSession(const std::string&, const CppParamSet&, const std::vector<uint8_t>&, std::vector<uint8_t>&, HksExternalErrorInfoIdl&) { return 0; }
+    ErrCode FinishSession(const std::string&, const CppParamSet&, const std::vector<uint8_t>&, std::vector<uint8_t>&, HksExternalErrorInfoIdl&) { return 0; }
+    ErrCode SetOrGetProperty(uint32_t, const std::string&, const std::string&, CppParamSet&, HksExternalErrorInfoIdl&) { return 0; }
+    ErrCode GetResourceId(const CppParamSet&, std::string&, HksExternalErrorInfoIdl&) { return 0; }
+    ErrCode ClearUkeyPinAuthState(const std::string&, const CppParamSet&, HksExternalErrorInfoIdl&) { return 0; }
+    ErrCode ImportWrappedKey(const std::string&, const std::string&, const CppParamSet&, const std::vector<uint8_t>&, HksExternalErrorInfoIdl&) { return 0; }
+    ErrCode ExportPublicKey(const std::string&, const CppParamSet&, std::vector<uint8_t>&, HksExternalErrorInfoIdl&) { return 0; }
+    ErrCode ImportCertificate(const std::string&, const HksExtCertInfoIdl&, const CppParamSet&, HksExternalErrorInfoIdl&) { return 0; }
+    ErrCode GenerateKey(const std::string&, const CppParamSet&, HksExternalErrorInfoIdl&) { return 0; }
+};
+
+void ExtensionConnection::OnAbilityConnectDone(const OHOS::AppExecFwk::ElementName &element,
+    const sptr<IRemoteObject> &remoteObject, int resultCode)
+{
+    return;
+}
+
+int32_t ExtensionConnection::OnConnection(const AAFwk::Want &want, sptr<ExtensionConnection> &connect, int32_t userid)
+{
+    return HKS_SUCCESS;
+}
+
+void ExtensionConnection::OnDisconnect(sptr<ExtensionConnection> &connect)
+{
+    return;
+}
+
+void ExtensionConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode)
+{
+    return;
+}
+
+sptr<IRemoteObject> ExtensionConnection::GetRemoteObject()
+{
+    return sptr<HuksAccessExtBaseStub>(new HksCryptoExtStubImpl());
+}
+
+bool ExtensionConnection::IsConnected()
+{
+    return isConnected_.load();
+}
+
+void ExtensionConnection::AddExtDeathRecipient(const wptr<IRemoteObject>& token)
+{
+    return;
+}
+
+void ExtensionConnection::RemoveExtDeathRecipient(const wptr<IRemoteObject>& token)
+{
+    return;
+}
+
+void ExtensionConnection::OnRemoteDied(const wptr<IRemoteObject> &remote)
+{
+    return;
+}
+
+ExtensionConnection::ExtensionConnection(const HksProcessInfo& processInfo)
+{
+    return;
+}
+
+void ExtensionConnection::callBackFromPlugin(std::function<void(HksProcessInfo)> callback)
+{
+    return;
+}
+
+ExtensionDeathRecipient::ExtensionDeathRecipient(RemoteDiedHandler handler) : handler_(handler)
+{
+}
+
+ExtensionDeathRecipient::~ExtensionDeathRecipient()
+{
+}
+
+void ExtensionDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
+{
+    return;
+}
+
 ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnRegisterProvider(
     const HksProcessInfo &processInfo, const std::string &providerName,
     const CppParamSet &paramSet, std::function<void(HksProcessInfo)> callback))
@@ -179,6 +297,13 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnQue
     return 0;
 }
 
+ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnSetExtensionProxy(
+    const HksProcessInfo &processInfo, const std::string &providerName,
+    const CppParamSet &paramSet, void *remoteObjectRaw))
+{
+    return 0;
+}
+
 extern "C" void *__wrap_dlopen(const char* filename, int flags)
 {
     static int fakeHandle = 1;
@@ -257,6 +382,9 @@ extern "C" void *__wrap_dlsym(void* handle, const char* symbol)
          {"_ZN4OHOS8Security4Huks36HksExtPluginOnSetOrGetRemotePropertyER23HksProcessWithErrorInfo"
          "23HksExtPropertyOperationRKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEESD_R11CppParamSet",
          (void*)Fake_HksExtPluginOnSetOrGetRemoteProperty},
+         {"_ZN4OHOS8Security4Huks31HksExtPluginOnSetExtensionProxyERK14HksProcessInfoRKNSt3__h12basic_string"
+         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetPv",
+         (void*)Fake_HksExtPluginOnSetExtensionProxy},
     };
 
     for (auto &item : kFakeSymbols) {

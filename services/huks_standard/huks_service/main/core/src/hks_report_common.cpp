@@ -20,8 +20,9 @@
 #include <cstdint>
 #include <string>
 #include <sys/stat.h>
+#include "accesstoken_kit.h"
 #include "hilog/log_c.h"
-#include "hks_error_code.h"
+#include "hap_token_info.h"
 #include "hks_event_info.h"
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -30,12 +31,14 @@
 #include "hks_type.h"
 #include "hks_type_enum.h"
 #include "hks_type_inner.h"
+#include "hks_util.h"
 #include "ipc_skeleton.h"
 #include "securec.h"
-#include "hks_util.h"
-#include "accesstoken_kit.h"
-#include "hap_token_info.h"
-#include "ipc_skeleton.h"
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+#include "hks_bms_api_wrap.h"
+#endif
+
+using namespace OHOS;
 /*
 HKS_TAG_PARAM0_UINT32 -> eventId
 HKS_TAG_PARAM0_BUFFER -> function
@@ -206,7 +209,7 @@ static int32_t AddCommonInfo(const char *funcName, const struct HksProcessInfo *
     return ret;
 }
 
-static enum HksCallerType HksGetCallerType(void)
+static enum HksCallerType GetCallerType(void)
 {
     auto callingTokenId = OHOS::IPCSkeleton::GetCallingTokenID();
     switch (OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callingTokenId)) {
@@ -216,15 +219,25 @@ static enum HksCallerType HksGetCallerType(void)
         case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL:
             return HKS_SA_TYPE;
         default:
-            HKS_LOG_I("Error token type, callerTokenId: %" LOG_PUBLIC "u", callingTokenId);
             return HKS_UNIFIED_TYPE;
     }
 }
 
-int32_t ReportGetCallerName(std::string &callerName)
+int32_t ReportGetCallerName(const struct HksProcessInfo *processInfo, std::string &callerName)
 {
+    auto callingUid = OHOS::IPCSkeleton::GetCallingUid();
+    if (callingUid == HKS_ANCO_BROKER_UID && processInfo != nullptr) {
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+        // Failed to get the real bundle name, fall back to reporting the broker identity for caller tracing
+        int32_t ret = HksGetBundleNameFromUid(processInfo->uidInt, callerName);
+        if (ret == HKS_SUCCESS && !callerName.empty()) {
+            return HKS_SUCCESS;
+        }
+#endif
+    }
+
     auto callingTokenId = OHOS::IPCSkeleton::GetCallingTokenID();
-    switch (HksGetCallerType()) {
+    switch (GetCallerType()) {
         case HKS_HAP_TYPE: {
             OHOS::Security::AccessToken::HapTokenInfo hapTokenInfo;
             int32_t accessTokenRet = OHOS::Security::AccessToken::AccessTokenKit::GetHapTokenInfo(callingTokenId,
@@ -270,7 +283,7 @@ int32_t ConstructReportParamSet(const char *funcName, const struct HksProcessInf
     struct timespec time;
     (void)timespec_get(&time, TIME_UTC);
     std::string callerName = "Invalid caller name";
-    ret = ReportGetCallerName(callerName);
+    ret = ReportGetCallerName(processInfo, callerName);
     HKS_IF_NOT_SUCC_LOGI(ret, "ReportGetCallerName failed")
     struct HksParam params[] = {
         {

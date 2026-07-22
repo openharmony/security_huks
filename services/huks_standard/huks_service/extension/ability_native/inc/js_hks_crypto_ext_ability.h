@@ -113,6 +113,7 @@ public:
     void OnStart(const AAFwk::Want &want) override;
     void OnDisconnect(const AAFwk::Want &want) override;
     sptr<IRemoteObject> OnConnect(const AAFwk::Want &want) override;
+    void OnStop() override;
     int32_t OpenRemoteHandle(const std::string &index, const CppParamSet &params, std::string &handle,
         struct HksExternalErrorInfo **errInfo) override;
     int32_t CloseRemoteHandle(const std::string &handle, const CppParamSet &params,

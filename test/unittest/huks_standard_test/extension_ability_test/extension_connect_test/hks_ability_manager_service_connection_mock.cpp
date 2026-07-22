@@ -29,12 +29,6 @@ void AMSDisconnectAbility(const sptr<ExtensionConnection> &connect)
     return;
 }
 
-sptr<IHuksAccessExtBase> CastToHuksAccessExtBaseProxy(const sptr<IRemoteObject>& remoteObject)
-{
-    sptr<IHuksAccessExtBase> extConnectProxy = new MockIHuksAccessExtBase();
-    return extConnectProxy;
-}
-
 }
 }
 }

@@ -195,6 +195,12 @@ int32_t HuksPluginLifeCycleMgr::OnGetResourceId(const HksProcessInfo &processInf
     return HKS_SUCCESS;
 }
 
+int32_t HuksPluginLifeCycleMgr::OnSetExtProxy(const HksProcessInfo &processInfo,
+    const std::string &providerName, const CppParamSet &paramSet, void *remoteObjectRaw)
+{
+    return HKS_SUCCESS;
+}
+
 // ==================== HuksPluginLoader mock ====================
 
 HuksPluginLoader::HuksPluginLoader() {}

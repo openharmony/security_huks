@@ -323,6 +323,7 @@ ohos_unittest("huks_module_test") {
 
   external_deps = [
     "access_token:libaccesstoken_sdk",
+    "bounds_checking_function:libsec_shared",
     "c_utils:utils",
     "hilog:libhilog",
     "hitrace:libhitracechain",

@@ -25,8 +25,6 @@ namespace Huks {
 int32_t AMSConnectAbility(const AAFwk::Want &want, const sptr<ExtensionConnection> &connect, int32_t userid);
 
 void AMSDisconnectAbility(const sptr<ExtensionConnection> &connect);
-
-sptr<IHuksAccessExtBase> CastToHuksAccessExtBaseProxy(const sptr<IRemoteObject>& remoteObject);
 }
 }
 }

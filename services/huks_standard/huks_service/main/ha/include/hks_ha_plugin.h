@@ -45,8 +45,16 @@
 #include <ctime>
 #include <singleton.h>
 
-constexpr uint32_t MAX_CACHE_SIZE = 50;
-constexpr time_t MAX_CACHE_DURATION = 3600; // Unit: seconds
+// Cache size budget: total entries across all event buckets capped at this value.
+// Each event's bucket size = WEIGHT / TOTAL_WEIGHT * CACHE_SIZE_TOTAL (min CACHE_SIZE_MIN).
+// Adding new events only redistributes the budget — total never exceeds this cap.
+constexpr uint32_t CACHE_SIZE_TOTAL = 300;
+constexpr uint32_t CACHE_SIZE_MIN   = 2;    // minimum entries per bucket (also used when totalWeight == 0)
+constexpr uint32_t CACHE_WEIGHT_HIGH   = 5;  // Cipher/Mac: high-frequency, many unique caller combos
+constexpr uint32_t CACHE_WEIGHT_MID    = 2;  // SignVerify/GenerateKey/Attest/DeleteKey/ImportKey/Derive/Agree
+constexpr uint32_t CACHE_WEIGHT_LOW    = 1;  // KeyExist/ListAliases/RenameKey/GetProperties
+constexpr uint32_t CACHE_WEIGHT_SYSTEM = 1;  // DataSize: single aggregated entry
+constexpr time_t MAX_CACHE_DURATION = 3600;  // Unit: seconds
 
 typedef struct {
     struct HksEventCommonInfo common;
@@ -57,6 +65,7 @@ typedef struct {
     uint32_t eventId;
     time_t timestamp;
     struct HksEventInfo *data;
+    bool isAncoCall;
 } HksEventCacheNode;
 
 class HksEventCacheList {
@@ -99,6 +108,12 @@ public:
                     HKS_FREE(it->data->ukeyInfo.resourceId);
                     HKS_FREE(it->data->ukeyInfo.propertyId);
                 }
+                if (it->data->common.eventId == HKS_EVENT_DATA_SIZE_STATISTICS) {
+                    HKS_FREE(it->data->dataSizeInfo.component);
+                    HKS_FREE(it->data->dataSizeInfo.partition);
+                    HKS_FREE(it->data->dataSizeInfo.foldPath);
+                    HKS_FREE(it->data->dataSizeInfo.foldSize);
+                }
                 HKS_FREE(it->data);
             }
         }
@@ -134,7 +149,7 @@ private:
     HksEventQueue queue{};
     std::thread workerThread{};
     std::atomic<bool> stopFlag{};
-    HksEventCacheList eventCacheList{};
+    std::unordered_map<uint32_t, HksEventCacheList> businessCacheMap{};
 
     std::vector<HksEventProcMap> eventProcList = {
         {
@@ -393,25 +408,32 @@ private:
 
     void WorkerThread();
 
-    void AddEventCache(uint32_t eventId, struct HksEventInfo *eventInfo);
+    void AddEventCache(uint32_t eventId, struct HksEventInfo *eventInfo, bool isAncoCall);
 
-    int32_t FillEventInfos(uint32_t reportCount, HksEventWithMap *eventsWithMap);
+    int32_t FillEventInfos(uint32_t eventId, uint32_t reportCount, HksEventWithMap *eventsWithMap);
 
     int32_t CallBatchReport(uint32_t reportCount, HksEventWithMap *eventsWithMap);
 
-    void RemoveReportedEvents(uint32_t reportCount);
+    void RemoveReportedEvents(uint32_t eventId, uint32_t reportCount);
 
-    int32_t BatchReportEvents(uint32_t reportCount);
+    int32_t BatchReportEvents(uint32_t eventId, uint32_t reportCount);
 
     void HandleFaultEvent(struct HksEventCommonInfo *eventInfo, std::unordered_map<std::string, std::string> &eventMap);
 
-    void HandleStatisticEvent(struct HksEventInfo *eventInfo, uint32_t eventId, HksEventProcMap *procMap);
+    void HandleStatisticEvent(struct HksEventInfo *eventInfo, uint32_t eventId, HksEventProcMap *procMap,
+        bool isAncoCall);
 
     HksEventProcMap* HksEventProcFind(uint32_t eventId);
 
     void HandlerReport(HksEventQueueItem &item);
 
     bool IsValidEventProcMap(const struct HksEventProcMap *procMap) const;
+
+    uint32_t GetCacheSizeByEventId(uint32_t eventId) const;
+
+    uint32_t GetCacheWeightByEventId(uint32_t eventId) const;
+
+    uint32_t GetTotalCacheWeight() const;
 };
 
 #ifdef __cplusplus

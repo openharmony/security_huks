@@ -123,8 +123,7 @@ bool IsSeHandle(const struct HksBlob *handle)
     return false;
 }
 
-int32_t CheckKeySecuritySeFromKeyFile(const struct HksProcessInfo *processInfo,
-    const struct HksBlob *keyFromFile, bool *isSeCalling)
+int32_t CheckKeySecuritySeFromKeyFile(const struct HksBlob *keyFromFile, bool *isSeCalling)
 {
 #ifdef L2_STANDARD
     if (keyFromFile == NULL || keyFromFile->data == NULL || keyFromFile->size < sizeof(struct HksParamSet)) {
@@ -144,7 +143,7 @@ int32_t CheckKeySecuritySeFromKeyFile(const struct HksProcessInfo *processInfo,
 
     if (securityLevelParam->uint32Param == HKS_KEY_SECURITY_LEVEL_SE ||
         securityLevelParam->uint32Param == HKS_KEY_SECURITY_LEVEL_INDEPENDENT_SE) {
-        ret = HksSePermissionCheck(processInfo);
+        ret = HksSePermissionCheck();
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Se permission check failed.")
 
         ret = HksSeIncrementSeCount();
@@ -154,9 +153,30 @@ int32_t CheckKeySecuritySeFromKeyFile(const struct HksProcessInfo *processInfo,
     }
     return HKS_SUCCESS;
 #else
-    (void)processInfo;
     (void)keyFromFile;
     (void)isSeCalling;
+    return HKS_SUCCESS;
+#endif
+}
+
+int32_t CheckSePermissionBeforeDeleteKey(const struct HksBlob *keyFromFile)
+{
+#ifdef L2_STANDARD
+    if (keyFromFile == NULL || keyFromFile->data == NULL || keyFromFile->size < sizeof(struct HksParamSet)) {
+        return HKS_SUCCESS;
+    }
+    const struct HksParamSet *keyParamSet = (const struct HksParamSet *)keyFromFile->data;
+    struct HksParam *securityLevelParam = NULL;
+    int32_t ret = HksGetParam(keyParamSet, HKS_TAG_KEY_SECURITY_LEVEL, &securityLevelParam);
+    if (ret == HKS_SUCCESS &&
+        (securityLevelParam->uint32Param == HKS_KEY_SECURITY_LEVEL_SE ||
+         securityLevelParam->uint32Param == HKS_KEY_SECURITY_LEVEL_INDEPENDENT_SE)) {
+        ret = HksSePermissionCheck();
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Se permission check failed.")
+    }
+    return HKS_SUCCESS;
+#else
+    (void)keyFromFile;
     return HKS_SUCCESS;
 #endif
 }
@@ -173,8 +193,7 @@ void DecrementSeCountByService(bool isSeCalling)
 #endif
 }
 
-int32_t CheckKeySecuritySeFromParamSet(const struct HksProcessInfo *processInfo,
-    struct HksParamSet *newParamSet, bool *isSeCalling)
+int32_t CheckKeySecuritySeFromParamSet(struct HksParamSet *newParamSet, bool *isSeCalling)
 {
 #ifdef L2_STANDARD
     struct HksParam *securityLevelParam = NULL;
@@ -188,7 +207,7 @@ int32_t CheckKeySecuritySeFromParamSet(const struct HksProcessInfo *processInfo,
         "Invalid key security level: %" LOG_PUBLIC "u", securityLevelParam->uint32Param)
 
     if (securityLevelParam->uint32Param == HKS_KEY_SECURITY_LEVEL_SE) {
-        ret = HksSePermissionCheck(processInfo);
+        ret = HksSePermissionCheck();
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Se permission check failed.")
 
         ret = HksSeIncrementSeCount();
@@ -205,17 +224,16 @@ int32_t CheckKeySecuritySeFromParamSet(const struct HksProcessInfo *processInfo,
 
     return HKS_SUCCESS;
 #else
-    (void)processInfo;
     (void)newParamSet;
     (void)isSeCalling;
     return HKS_SUCCESS;
 #endif
 }
 
-int32_t CheckSeSessionCallInService(const struct HksProcessInfo *processInfo, bool *isSeCalling)
+int32_t CheckSeSessionCallInService(bool *isSeCalling)
 {
 #ifdef L2_STANDARD
-    int32_t ret = HksSePermissionCheck(processInfo);
+    int32_t ret = HksSePermissionCheck();
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Se permission check failed.")
 
     ret = HksSeIncrementSeCount();
@@ -224,7 +242,6 @@ int32_t CheckSeSessionCallInService(const struct HksProcessInfo *processInfo, bo
     *isSeCalling = true;
     return HKS_SUCCESS;
 #else
-    (void)processInfo;
     (void)isSeCalling;
     return HKS_SUCCESS;
 #endif
@@ -253,7 +270,7 @@ int32_t RejectSeSecurityLevel(const struct HksParamSet *paramSetIn)
 
     HKS_IF_TRUE_LOGE_RETURN(
         securityLevelParam->uint32Param != HKS_KEY_SECURITY_LEVEL_TEE,
-        HKS_ERROR_NOT_SUPPORTED,
+        HKS_ERROR_INVALID_ARGUMENT,
         "SE security level is not supported for this operation")
 
     return HKS_SUCCESS;

@@ -95,8 +95,7 @@ static NapiRes HuksParseKeyAlias(napi_env env, napi_value object, HksBlob *&alia
         return {HUKS_ERR_CODE_INVALID_ARGUMENT, "could not get string length"};
     }
 
-    constexpr int HKS_MAX_DATA_LEN = 0x6400000;
-    if (length > HKS_MAX_DATA_LEN) {
+    if (length > HKS_MAX_KEY_ALIAS_LEN) {
         HKS_LOG_E("input key alias length %" LOG_PUBLIC "zu too large", length);
         return {HUKS_ERR_CODE_INVALID_ARGUMENT, "the length of alias is too long"};
     }

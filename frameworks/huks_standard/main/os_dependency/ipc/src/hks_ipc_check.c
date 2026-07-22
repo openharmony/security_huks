@@ -453,7 +453,7 @@ int32_t HksCheckIpcEncapsulate(const struct HksBlob *keyAlias, const struct HksP
     uint32_t totalSize = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) +
         ALIGN_SIZE(paramSet->paramSetSize) + sizeof(uint32_t);
 
-    HKS_IF_TRUE_LOGE_RETURN(keyAlias->size > HKS_MAX_KEY_ALIAS_LEN, HKS_ERROR_NEW_INVALID_ARGUMENT,
+    HKS_IF_TRUE_LOGE_RETURN(sharedKeyAlias->size > HKS_MAX_KEY_ALIAS_LEN, HKS_ERROR_NEW_INVALID_ARGUMENT,
         "sharedKeyAlias size %" LOG_PUBLIC "d is out of range", keyAlias->size)
 
     ret = HksCheckParamSetValidity(sharedKeyParamSet);
