@@ -61,6 +61,7 @@
 
 #define MAX_KEY_SIZE         2048
 
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
 static int32_t HksUkeyConsumeErrInfo(struct HksExternalErrorInfo *errInfo)
 {
     int32_t errVal = 0;
@@ -72,6 +73,7 @@ static int32_t HksUkeyConsumeErrInfo(struct HksExternalErrorInfo *errInfo)
     HksFreeExternalErrorInfo(errInfo);
     return errVal;
 }
+#endif
 
 #define RET_NUM    2
 #define UKEY_PERMISSION_REGISTER "ohos.permission.CRYPTO_EXTENSION_REGISTER"
