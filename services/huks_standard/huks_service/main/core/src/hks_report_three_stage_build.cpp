@@ -96,6 +96,8 @@ void HksFreeEventInfo(HksEventInfo **eventInfo)
         HKS_FREE((*eventInfo)->ukeyInfo.abilityName);
         HKS_FREE((*eventInfo)->ukeyInfo.resourceId);
         HKS_FREE((*eventInfo)->ukeyInfo.propertyId);
+        HKS_FREE((*eventInfo)->ukeyInfo.extBundleName);
+        HKS_FREE((*eventInfo)->ukeyInfo.extraData);
     }
     if ((*eventInfo)->common.eventId == HKS_EVENT_DATA_SIZE_STATISTICS) {
         HKS_FREE((*eventInfo)->dataSizeInfo.component);
