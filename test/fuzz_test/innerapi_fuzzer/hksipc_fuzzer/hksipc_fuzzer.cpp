@@ -1029,44 +1029,46 @@ static int32_t FuzzParamSetToParams(FuzzedDataProvider &fdp)
     // Build param and output param based on tag type
     struct HksParam param = {};
     struct HksParamOut outParam = {};
-
+    // Output variables must be at function scope to avoid stack-use-after-scope
+    int32_t outValInt = 0;
+    uint32_t outValUint = 0;
+    uint64_t outValUlong = 0;
+    bool outValBool = false;
+    static thread_local std::vector<uint8_t> blobBuf;
+    struct HksBlob aliasBlob = { 0, nullptr };
+ 
     if (tagType == HKS_TAG_TYPE_INT) {
         static const uint32_t intTags[1] = { HKS_TAG_KEY_AUTH_RESULT };
         uint32_t tag = fdp.PickValueInArray(intTags);
         param.tag = tag;
         param.int32Param = fdp.ConsumeIntegral<int32_t>();
-        int32_t outVal = 0;
-        outParam = { .tag = tag, .int32Param = &outVal };
+        outParam = { .tag = tag, .int32Param = &outValInt };
     } else if (tagType == HKS_TAG_TYPE_UINT) {
         static const uint32_t uintTags[1] = { HKS_TAG_ACCESS_TIME };
         uint32_t tag = fdp.PickValueInArray(uintTags);
         param.tag = tag;
         param.uint32Param = fdp.ConsumeIntegral<uint32_t>();
-        uint32_t outVal = 0;
-        outParam = { .tag = tag, .uint32Param = &outVal };
+        outParam = { .tag = tag, .uint32Param = &outValUint };
     } else if (tagType == HKS_TAG_TYPE_ULONG) {
         static const uint32_t ulongTags[1] = { HKS_TAG_KEY_ACCESS_TIME };
         uint32_t tag = fdp.PickValueInArray(ulongTags);
         param.tag = tag;
         param.uint64Param = fdp.ConsumeIntegral<uint64_t>();
-        uint64_t outVal = 0;
-        outParam = { .tag = tag, .uint64Param = &outVal };
+        outParam = { .tag = tag, .uint64Param = &outValUlong };
     } else if (tagType == HKS_TAG_TYPE_BOOL) {
         param.tag = HKS_TAG_IF_NEED_APPEND_AUTH_INFO;
         param.boolParam = fdp.ConsumeBool();
-        bool outVal = false;
-        outParam = { .tag = HKS_TAG_IF_NEED_APPEND_AUTH_INFO, .boolParam = &outVal };
+        outParam = { .tag = HKS_TAG_IF_NEED_APPEND_AUTH_INFO, .boolParam = &outValBool };
     } else {
         // Bytes type - also test with null interval (tag + HKS_PARAM_BUFFER_NULL_INTERVAL)
         uint32_t blobSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 64);
         auto blobData = fdp.ConsumeBytes<uint8_t>(blobSize);
-        static thread_local std::vector<uint8_t> blobBuf;
         blobBuf = blobData;
         if (blobBuf.empty()) {
             HksFreeParamSet(&paramSet);
             return HKS_ERROR_INSUFFICIENT_DATA;
         }
-        struct HksBlob aliasBlob = { static_cast<uint32_t>(blobBuf.size()), blobBuf.data() };
+        aliasBlob = { static_cast<uint32_t>(blobBuf.size()), blobBuf.data() };
         if (fdp.ConsumeBool()) {
             param.tag = HKS_TAG_ATTESTATION_ID_ALIAS + HKS_PARAM_BUFFER_NULL_INTERVAL;
         } else {
