@@ -73,10 +73,12 @@ if (os_level == "standard") {
     include_dirs = [
       "inc",
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms/include",
+      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger/inc",
     ]
 
     sources = [
       "src/hks_ukey_common.cpp",
+      "src/hks_ukey_err_code_mapper.cpp",
       "src/hks_ukey_system_adapter.cpp",
     ]
 

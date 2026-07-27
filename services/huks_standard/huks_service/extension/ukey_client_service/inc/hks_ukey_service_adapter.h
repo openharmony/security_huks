@@ -13,62 +13,64 @@
  * limitations under the License.
  */
 
-#ifndef HKS_IPC_SERVICE_PROVIDER_ADAPTER_H
-#define HKS_IPC_SERVICE_PROVIDER_ADAPTER_H
+#ifndef HKS_UKEY_SERVICE_ADAPTER_H
+#define HKS_UKEY_SERVICE_ADAPTER_H
 
 #include "hks_type.h"
+#include "hks_plugin_def.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// 注册注销
-int32_t HksIpcProviderRegAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *name,
+int32_t HksIpcProviderRegAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *name,
     const struct HksParamSet *paramSet);
-int32_t HksIpcProviderUnregAdapter(const struct HksProcessInfo *processInfo,  const struct HksBlob *name,
+int32_t HksIpcProviderUnregAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *name,
     const struct HksParamSet *paramSet);
-
-int32_t HksIpcGenerateUkeyKeyAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    const struct HksBlob *resourceId, const struct HksParamSet *paramSet);
-
+int32_t HksIpcQueryAbilityInfoAdapter(const struct HksProcessInfo *processInfo, struct HksBlob *resourceId,
+    struct HksAbilityInfo *abilityInfo);
 int32_t HksIpcCreateRemKeyHandleAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
     const struct HksParamSet *paramSet, struct HksExternalErrorInfo **errInfo);
-
 int32_t HksIpcCloseRemKeyHandleAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
     const struct HksParamSet *paramSet, struct HksExternalErrorInfo **errInfo);
-
 int32_t HksIpcExportProvCertsAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *providerName,
     const struct HksParamSet *paramSet, struct HksExtCertInfoSet *certInfoSet, struct HksExternalErrorInfo **errInfo);
-
 int32_t HksIpcExportCertAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSet, struct HksExtCertInfoSet *certInfoSet, struct HksExternalErrorInfo **errInfo);
-
 int32_t HksIpcImportCertAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksExtCertInfo *certInfo, const struct HksParamSet *paramSet, struct HksExternalErrorInfo **errInfo);
-
 int32_t HksIpcAuthUkeyPinAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSet, struct HksExtAuthPinOutParam *authOutParam,
     struct HksExternalErrorInfo **errInfo);
-
 int32_t HksIpcGetUkeyPinAuthStateAdapter(const struct HksProcessInfo *processInfo,
     const struct HksBlob *index, const struct HksParamSet *paramSet, int32_t *outStatus,
     struct HksExternalErrorInfo **errInfo);
-
 int32_t HksIpcClearPinStatusAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     struct HksExternalErrorInfo **errInfo);
-
 int32_t HksIpcServiceOnSetOrGetRemotePropertyAdapter(const struct HksProcessInfo *processInfo,
     const struct HksExtPropertyOperationInfo *propertyInfo, const struct HksParamSet *paramSet,
     const uint8_t *remoteObject);
-
-int32_t HksIpcQueryAbilityInfoAdapter(const struct HksProcessInfo *processInfo, struct HksBlob *resourceId,
-    struct HksAbilityInfo *abilityInfo);
-
 int32_t HksIpcServiceOnGetResourceIdAdapter(const struct HksProcessInfo *processInfo,
     const struct HksBlob *providerName, const struct HksParamSet *paramSet, struct HksBlob *resourceId,
     struct HksExternalErrorInfo **errInfo);
+
+int32_t HksServiceOnUkeyGenerateKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet);
+int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *handle);
+int32_t HksServiceOnUkeyUpdateSession(const struct HksProcessInfo *processInfo, const struct HksBlob *handle,
+    const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData);
+int32_t HksServiceOnUkeyFinishSession(const struct HksProcessInfo *processInfo, const struct HksBlob *handle,
+    const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData);
+int32_t HksServiceOnUkeyAbortSession(const struct HksProcessInfo *processInfo, const struct HksBlob *handle,
+    const struct HksParamSet *paramSet);
+int32_t HksServiceOnUkeyImportWrappedKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksBlob *wrappingKeyAlias, const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData);
+int32_t HksServiceOnUkeyExportPublicKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *key);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif // HKS_IPC_SERVICE_PROVIDER_ADAPTER_H
+#endif // HKS_UKEY_SERVICE_ADAPTER_H

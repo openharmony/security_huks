@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_ukey_three_stage_adapter.h"
+#include "hks_ukey_service_adapter.h"
 #include "hks_mock_common.h"
 #include "hks_plugin_lifecycle_manager.h"
 #include "hks_type.h"

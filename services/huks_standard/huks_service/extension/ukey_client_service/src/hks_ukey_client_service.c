@@ -33,8 +33,7 @@
 
 #ifdef L2_STANDARD
 #include "hks_ha_event_report.h"
-#include "hks_ukey_three_stage_adapter.h"
-#include "hks_ukey_service_provider_adapter.h"
+#include "hks_ukey_service_adapter.h"
 #endif
 
 #include "securec.h"

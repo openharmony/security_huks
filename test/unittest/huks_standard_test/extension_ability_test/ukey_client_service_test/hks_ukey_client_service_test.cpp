@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_ukey_service_provider_adapter.h"
-#include "hks_ukey_service_provider.h"
+#include "hks_ukey_service_adapter.h"
 #include "hks_cpp_paramset.h"
 #include "hks_mock_common.h"
 #include "hks_ukey_common.h"
@@ -539,134 +538,162 @@ HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest013, TestSize.Level0)
 
 /**
 * @tc.name: HksUkeyClientServiceTest.HksUkeyClientServiceTest014
-* @tc.desc: HksIpcServiceProviderRegister/UnRegister normal flow
+* @tc.desc: HksIpcProviderRegAdapter/UnregAdapter normal flow
 * @tc.type: FUNC
 */
 HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest014, TestSize.Level0) {
     HksProcessInfo processInfo{};
     HksGetProcessInfoForIPC(&processInfo);
-    CppParamSet cppParamSet({{.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA}});
+    HksParamSet *paramSet = nullptr;
+    EXPECT_EQ(HksInitParamSet(&paramSet), HKS_SUCCESS);
 
     std::string name = "HksUkeyClientServiceTest014";
-    EXPECT_EQ(HksIpcServiceProviderRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
-    EXPECT_EQ(HksIpcServiceProviderUnRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
+    HksBlob nameBlob = { .size = static_cast<uint32_t>(name.size()),
+        .data = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(name.data())) };
+    EXPECT_EQ(HksIpcProviderRegAdapter(&processInfo, &nameBlob, paramSet), HKS_SUCCESS);
+    EXPECT_EQ(HksIpcProviderUnregAdapter(&processInfo, &nameBlob, paramSet), HKS_SUCCESS);
 
+    HksFreeParamSet(&paramSet);
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(processInfo.processName);
 }
 
 /**
 * @tc.name: HksUkeyClientServiceTest.HksUkeyClientServiceTest015
-* @tc.desc: OnCreateRemoteKeyHandle/OnCloseRemoteKeyHandle normal flow
+* @tc.desc: HksIpcCreateRemKeyHandleAdapter/CloseRemKeyHandleAdapter normal flow
 * @tc.type: FUNC
 */
 HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest015, TestSize.Level0) {
     HksProcessInfo processInfo{};
     HksGetProcessInfoForIPC(&processInfo);
-    CppParamSet cppParamSet({{.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA}});
+    HksParamSet *paramSet = nullptr;
+    EXPECT_EQ(HksInitParamSet(&paramSet), HKS_SUCCESS);
     struct HksExternalErrorInfo *errInfo = nullptr;
 
     std::string name = "HksUkeyClientServiceTest015";
-    EXPECT_EQ(HksIpcServiceProviderRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
+    HksBlob nameBlob = { .size = static_cast<uint32_t>(name.size()),
+        .data = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(name.data())) };
+    EXPECT_EQ(HksIpcProviderRegAdapter(&processInfo, &nameBlob, paramSet), HKS_SUCCESS);
 
     std::string index = "testIdx";
-    EXPECT_EQ(HksIpcServiceOnCreateRemoteKeyHandle(&processInfo, index, cppParamSet, &errInfo), HKS_SUCCESS);
-    EXPECT_EQ(HksIpcServiceOnCloseRemoteKeyHandle(&processInfo, index, cppParamSet, &errInfo), HKS_SUCCESS);
+    HksBlob indexBlob = { .size = static_cast<uint32_t>(index.size()),
+        .data = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(index.data())) };
+    EXPECT_EQ(HksIpcCreateRemKeyHandleAdapter(&processInfo, &indexBlob, paramSet, &errInfo), HKS_SUCCESS);
+    EXPECT_EQ(HksIpcCloseRemKeyHandleAdapter(&processInfo, &indexBlob, paramSet, &errInfo), HKS_SUCCESS);
 
-    EXPECT_EQ(HksIpcServiceProviderUnRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
+    EXPECT_EQ(HksIpcProviderUnregAdapter(&processInfo, &nameBlob, paramSet), HKS_SUCCESS);
 
+    HksFreeParamSet(&paramSet);
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(processInfo.processName);
 }
 
 /**
 * @tc.name: HksUkeyClientServiceTest.HksUkeyClientServiceTest016
-* @tc.desc: OnAuthUkeyPin/OnGetVerifyPinStatus/OnClearUkeyPinAuthStatus normal flow
+* @tc.desc: HksIpcAuthUkeyPinAdapter/GetUkeyPinAuthStateAdapter/ClearPinStatusAdapter normal flow
 * @tc.type: FUNC
 */
 HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest016, TestSize.Level0) {
     HksProcessInfo processInfo{};
     HksGetProcessInfoForIPC(&processInfo);
-    CppParamSet cppParamSet({{.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA}});
+    HksParamSet *paramSet = nullptr;
+    EXPECT_EQ(HksInitParamSet(&paramSet), HKS_SUCCESS);
     struct HksExternalErrorInfo *errInfo = nullptr;
 
     std::string name = "HksUkeyClientServiceTest016";
-    EXPECT_EQ(HksIpcServiceProviderRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
+    HksBlob nameBlob = { .size = static_cast<uint32_t>(name.size()),
+        .data = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(name.data())) };
+    EXPECT_EQ(HksIpcProviderRegAdapter(&processInfo, &nameBlob, paramSet), HKS_SUCCESS);
 
     std::string index = "testIdx";
+    HksBlob indexBlob = { .size = static_cast<uint32_t>(index.size()),
+        .data = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(index.data())) };
 
     HksExtAuthPinOutParam authOutParam = {};
-    EXPECT_EQ(HksIpcServiceOnAuthUkeyPin(&processInfo, index, cppParamSet, authOutParam, &errInfo), HKS_SUCCESS);
+    EXPECT_EQ(HksIpcAuthUkeyPinAdapter(&processInfo, &indexBlob, paramSet, &authOutParam, &errInfo), HKS_SUCCESS);
 
     int32_t state = 0;
-    EXPECT_EQ(HksIpcServiceOnGetVerifyPinStatus(&processInfo, index, cppParamSet, state, &errInfo), HKS_SUCCESS);
+    EXPECT_EQ(HksIpcGetUkeyPinAuthStateAdapter(&processInfo, &indexBlob, paramSet, &state, &errInfo), HKS_SUCCESS);
 
-    EXPECT_EQ(HksIpcServiceOnClearUkeyPinAuthStatus(&processInfo, index, &errInfo), HKS_SUCCESS);
+    EXPECT_EQ(HksIpcClearPinStatusAdapter(&processInfo, &indexBlob, &errInfo), HKS_SUCCESS);
 
-    EXPECT_EQ(HksIpcServiceProviderUnRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
+    EXPECT_EQ(HksIpcProviderUnregAdapter(&processInfo, &nameBlob, paramSet), HKS_SUCCESS);
 
+    HksFreeParamSet(&paramSet);
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(processInfo.processName);
 }
 
 /**
 * @tc.name: HksUkeyClientServiceTest.HksUkeyClientServiceTest017
-* @tc.desc: OnSetOrGetRemoteProperty/OnExportCertificate/OnExportProviderAllCertificates normal flow
+* @tc.desc: HksIpcExportCertAdapter/ExportProvCertsAdapter normal flow
 * @tc.type: FUNC
 */
 HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest017, TestSize.Level0) {
     HksProcessInfo processInfo{};
     HksGetProcessInfoForIPC(&processInfo);
-    CppParamSet cppParamSet({{.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA}});
+    HksParamSet *paramSet = nullptr;
+    EXPECT_EQ(HksInitParamSet(&paramSet), HKS_SUCCESS);
     struct HksExternalErrorInfo *errInfo = nullptr;
 
     std::string name = "HksUkeyClientServiceTest017";
-    EXPECT_EQ(HksIpcServiceProviderRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
+    HksBlob nameBlob = { .size = static_cast<uint32_t>(name.size()),
+        .data = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(name.data())) };
+    EXPECT_EQ(HksIpcProviderRegAdapter(&processInfo, &nameBlob, paramSet), HKS_SUCCESS);
 
     std::string index = "testIdx";
-    std::string propertyId = "prop";
-    struct HksProcessWithErrorInfo processAndError = {&processInfo, nullptr};
-    EXPECT_EQ(HksIpcServiceOnSetOrGetRemoteProperty(processAndError,
-        HKS_EXT_PROPERTY_OPERATION_GET, index, propertyId, cppParamSet), HKS_SUCCESS);
+    HksBlob indexBlob = { .size = static_cast<uint32_t>(index.size()),
+        .data = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(index.data())) };
 
-    std::string certsJson;
-    EXPECT_EQ(HksIpcServiceOnExportCertificate(&processInfo, index, cppParamSet, certsJson, &errInfo), HKS_SUCCESS);
+    HksExtCertInfoSet certInfoSet = {};
+    EXPECT_EQ(HksIpcExportCertAdapter(&processInfo, &indexBlob, paramSet, &certInfoSet, &errInfo), HKS_SUCCESS);
 
-    std::string allCertsJson;
-    EXPECT_EQ(HksIpcServiceOnExportProviderAllCertificates(&processInfo, name, cppParamSet, allCertsJson, &errInfo),
+    HksExtCertInfoSet allCertsInfoSet = {};
+    EXPECT_EQ(HksIpcExportProvCertsAdapter(&processInfo, &nameBlob, paramSet, &allCertsInfoSet, &errInfo),
         HKS_SUCCESS);
 
-    EXPECT_EQ(HksIpcServiceProviderUnRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
+    EXPECT_EQ(HksIpcProviderUnregAdapter(&processInfo, &nameBlob, paramSet), HKS_SUCCESS);
 
+    HksFreeExtCertSet(&certInfoSet);
+    HksFreeExtCertSet(&allCertsInfoSet);
+    HksFreeParamSet(&paramSet);
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(processInfo.processName);
 }
 
 /**
 * @tc.name: HksUkeyClientServiceTest.HksUkeyClientServiceTest018
-* @tc.desc: OnImportCertificate normal flow
+* @tc.desc: HksIpcImportCertAdapter normal flow
 * @tc.type: FUNC
 */
 HWTEST_F(HksUkeyClientServiceTest, HksUkeyClientServiceTest018, TestSize.Level0) {
     HksProcessInfo processInfo{};
     HksGetProcessInfoForIPC(&processInfo);
-    CppParamSet cppParamSet({{.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA}});
+    HksParamSet *paramSet = nullptr;
+    EXPECT_EQ(HksInitParamSet(&paramSet), HKS_SUCCESS);
     struct HksExternalErrorInfo *errInfo = nullptr;
 
     std::string name = "HksUkeyClientServiceTest018";
-    EXPECT_EQ(HksIpcServiceProviderRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
+    HksBlob nameBlob = { .size = static_cast<uint32_t>(name.size()),
+        .data = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(name.data())) };
+    EXPECT_EQ(HksIpcProviderRegAdapter(&processInfo, &nameBlob, paramSet), HKS_SUCCESS);
 
     std::string index = "testIdx";
+    HksBlob indexBlob = { .size = static_cast<uint32_t>(index.size()),
+        .data = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(index.data())) };
     HksExtCertInfo certInfo = {};
     certInfo.purpose = 1;
-    certInfo.index = StringToBlob("idx");
-    certInfo.cert = StringToBlob("cert");
-    EXPECT_EQ(HksIpcServiceOnImportCertificate(&processInfo, index, certInfo, cppParamSet, &errInfo), HKS_SUCCESS);
+    std::string idx = "idx";
+    certInfo.index = { .size = static_cast<uint32_t>(idx.size()),
+        .data = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(idx.data())) };
+    std::string cert = "cert";
+    certInfo.cert = { .size = static_cast<uint32_t>(cert.size()),
+        .data = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(cert.data())) };
+    EXPECT_EQ(HksIpcImportCertAdapter(&processInfo, &indexBlob, &certInfo, paramSet, &errInfo), HKS_SUCCESS);
 
-    EXPECT_EQ(HksIpcServiceProviderUnRegister(&processInfo, name, cppParamSet), HKS_SUCCESS);
+    EXPECT_EQ(HksIpcProviderUnregAdapter(&processInfo, &nameBlob, paramSet), HKS_SUCCESS);
 
-    HKS_FREE_BLOB(certInfo.index);
-    HKS_FREE_BLOB(certInfo.cert);
+    HksFreeParamSet(&paramSet);
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(processInfo.processName);
 }

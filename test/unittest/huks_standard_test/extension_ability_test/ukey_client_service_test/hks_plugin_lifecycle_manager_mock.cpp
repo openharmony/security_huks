@@ -232,3 +232,29 @@ int32_t HuksPluginLoader::UnLoadPlugins(const struct HksProcessInfo &info, const
 } // namespace Huks
 } // namespace Security
 } // namespace OHOS
+
+
+// ==================== ReportUkey mock ====================
+extern "C" {
+
+void ReportUKeyKeyEvent(uint32_t eventId, const struct UKeyReportErrInfo *errInfo,
+    const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet)
+{
+    (void)eventId;
+    (void)errInfo;
+    (void)processInfo;
+    (void)paramSet;
+}
+
+void ReportUKeySessionEvent(uint32_t eventId, const struct UKeyReportErrInfo *errInfo,
+    const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
+    const struct HksParamSet *paramSet)
+{
+    (void)eventId;
+    (void)errInfo;
+    (void)handle;
+    (void)processInfo;
+    (void)paramSet;
+}
+
+} // extern "C" 

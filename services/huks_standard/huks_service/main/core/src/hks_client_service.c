@@ -73,7 +73,7 @@
 
 #ifdef L2_STANDARD
 #include "hks_ha_event_report.h"
-#include "hks_ukey_three_stage_adapter.h"
+#include "hks_ukey_service_adapter.h"
 #include "hks_se_api_wrap.h"
 #include "hks_report_ukey_event.h"
 #endif

@@ -18,7 +18,7 @@
 
 #include "hks_type_inner.h"
 #ifdef L2_STANDARD
-#include "hks_ukey_service_provider_adapter.h"
+#include "hks_ukey_service_adapter.h"
 #endif
 
 #ifdef __cplusplus

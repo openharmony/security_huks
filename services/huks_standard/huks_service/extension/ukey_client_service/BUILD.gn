@@ -38,8 +38,7 @@ if (os_level == "standard") {
 
     sources = [
       "src/hks_ukey_client_service.c",
-      "src/hks_ukey_service_provider.cpp",
-      "src/hks_ukey_service_provider_adapter.cpp",
+      "src/hks_ukey_service_adapter.cpp",
     ]
 
     defines = [ "HKS_ENABLE_CLEAN_FILE" ]

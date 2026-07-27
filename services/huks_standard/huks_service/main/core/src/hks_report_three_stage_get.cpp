@@ -40,7 +40,7 @@
 #include "hks_ha_event_report.h"
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
 #include "hks_ukey_check.h"
-#include "hks_ukey_three_stage_adapter.h"
+#include "hks_ukey_service_adapter.h"
 #endif
 
 static uint32_t g_threeStageEvent[] = {
