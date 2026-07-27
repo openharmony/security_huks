@@ -78,7 +78,6 @@ if (os_level == "standard") {
 
     sources = [
       "src/hks_ukey_common.cpp",
-      "src/hks_ukey_err_code_mapper.cpp",
       "src/hks_ukey_system_adapter.cpp",
     ]
 
