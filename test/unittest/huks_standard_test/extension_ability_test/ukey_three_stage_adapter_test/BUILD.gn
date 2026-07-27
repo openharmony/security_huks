@@ -16,7 +16,7 @@ if (huks_enable_ukey_config == true) {
       "//base/security/huks/frameworks/huks_standard/main/common/include",
       "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
       "//base/security/huks/test/unittest/huks_common_test/hks_mock_common",
-      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common/inc,
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common/inc",
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",
     ]
 
