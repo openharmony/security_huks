@@ -72,7 +72,7 @@ int32_t HuksHdiExportPublicKey(const struct HksBlob *key, const struct HksParamS
 
 int32_t HuksHdiWrapKey(const struct HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *wrappedKey)
 {
-    return HksCoreWrapkey(NULL, key, paramSet, wrappedKey);
+    return HksCoreWrapKey(NULL, key, paramSet, wrappedKey);
 }
 
 int32_t HuksHdiUnwrapKey(const struct HksParamSet *paramSet, const struct HksBlob *wrappedKey, struct HksBlob *keyOut)
