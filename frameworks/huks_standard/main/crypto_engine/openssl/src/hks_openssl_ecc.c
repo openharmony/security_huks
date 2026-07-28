@@ -290,6 +290,10 @@ static int32_t EccInitPublicKey(EC_KEY *eccKey, const uint8_t *keyPair, uint32_t
 static EC_KEY *EccInitKey(const struct HksBlob *keyBlob, bool private)
 {
     /* get ecc pubX,pubY,pri */
+    if (keyBlob->size < sizeof(struct KeyMaterialEcc)) {
+        HKS_LOG_E("ecc key blob size too small");
+        return NULL;
+    }
     uint8_t *keyPair = keyBlob->data;
     uint32_t publicXSize;
     uint32_t publicYSize;
