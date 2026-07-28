@@ -100,3 +100,20 @@ int32_t HksGetFrontUserId(int32_t *outId)
     HKS_LOG_I("QueryActiveOsFrontUserIds, no os account part, set FrontUserId= -1");
     return HKS_SUCCESS;
 }
+
+int32_t HksGetRelatedFrontUserId(const struct HksParamSet *paramSet, int32_t ipcCallerUserId, int32_t *outId)
+{
+    (void)paramSet;
+    (void)ipcCallerUserId;
+    *outId = -1;
+    HKS_LOG_I("QueryActiveOsAccountIds, no os account part, set FrontUserId= -1");
+    return HKS_SUCCESS;
+}
+
+int32_t HksCheckIsFrontUser(int32_t userId, bool *isFrontUser)
+{
+    (void)userId;
+    *isFrontUser = false;
+    HKS_LOG_I("IsOsAccountForeground, no os account part, set isFrontUser= false");
+    return HKS_SUCCESS;
+}
