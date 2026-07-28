@@ -1,0 +1,91 @@
+/*
+ * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef HKS_UKEY_COMMON_H
+#define HKS_UKEY_COMMON_H
+
+#include <iostream>
+#include <utility>
+#include <vector>
+#include <map>
+#include <hks_type.h>
+#include "hks_external_error_info.h"
+#include "hks_ext_error_info.h"
+
+namespace OHOS {
+namespace Security {
+namespace Huks {
+    class ProviderInfo {
+    public:
+        std::string m_providerName{};
+        std::string m_abilityName{};
+        std::string m_bundleName{};
+        int32_t m_userid = 0;
+
+        bool operator==(const ProviderInfo &other) const;
+        bool operator<(const ProviderInfo &other) const;
+    };
+    constexpr const char *PROVIDER_NAME_KEY = "providerName";
+    constexpr const char *ABILITY_NAME_KEY = "abilityName";
+    constexpr const char *BUNDLE_NAME_KEY = "bundleName";
+    constexpr const char *INDEX_NAME_KEY = "index";
+    constexpr const char *INDEX_KEY_NAME_KEY = "key";
+    constexpr const char *USERID_KEY = "userid";
+
+    constexpr int32_t HKS_MAX_PROVIDER_NUM = 10;
+    constexpr int32_t MAX_ABILITY_NAME_LEN = 128;
+    constexpr int32_t MAX_PROVIDER_NAME_LEN = 128;
+    constexpr int32_t MAX_INDEX_LEN = 512;
+    constexpr int32_t MAX_BUNDLE_NAME_LEN = 128;
+    constexpr int32_t MIN_BUNDLE_NAME_LEN = 7;
+
+    enum ExtensionErrCode {
+        EXTENSION_SUCCESS = 0,
+        EXTENSION_ERRCODE_OPERATION_FAIL = 34800000,
+        EXTENSION_ERRCODE_UKEY_NOT_EXIST = 34800001,
+        EXTENSION_ERRCODE_UKEY_FAIL = 34800002,
+        EXTENSION_ERRCODE_PIN_NOT_AUTH = 34800003,
+        EXTENSION_ERRCODE_HANDLE_NOT_EXIST = 34800004,
+        EXTENSION_ERRCODE_HANDLE_FAIL = 34800005,
+        EXTENSION_ERRCODE_PIN_CODE_ERROR = 34800006,
+        EXTENSION_ERRCODE_PIN_LOCKED = 34800007,
+    };
+
+    bool CheckStringParamLenIsOk(const std::string &str, uint32_t min, uint32_t max);
+    bool IsHksExtCertInfoSetEmpty(const struct HksExtCertInfoSet& certSet);
+    HksBlob Base64StringToBlob(const std::string &inStr);
+    std::string BlobToBase64String(const struct HksBlob &strBlob);
+    HksBlob StringToBlob(const std::string &inStr);
+    std::string BlobToString(const HksBlob &strBlob);
+    int32_t CertInfoToString(const struct HksExtCertInfo& certInfo, std::string& jsonStr);
+    int32_t JsonArrayToCertInfoSet(const std::string &certJsonArr, struct HksExtCertInfoSet& certSet);
+    int32_t ConvertExtensionToHksErrorCode(const int32_t extensionErrorCode,
+        const std::map<int32_t, int32_t> &errorMapping);
+    int32_t HksGetUserIdFromUid(const uint32_t &uid);
+
+    void HksExtRecordErrInfo(HksExternalErrorInfoIdl &errorInfo, struct HksExternalErrorInfo **errInfo);
+
+    struct AbilityInfo {
+        std::string abilityName{};
+        std::string index{};
+    };
+    int32_t ParseAbilityInfoArrayFromJson(const std::string &jsonStr, std::vector<AbilityInfo> &abilityInfoArray);
+    // 解析ResourceID json
+    int32_t GetProviderInfoAndIndex(const std::string &index, ProviderInfo &providerInfo, std::string &newIndex);
+}
+}
+}
+
+#endif

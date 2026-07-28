@@ -103,4 +103,154 @@ HWTEST_F(HksEventObserverTest, HksEventObserverTest002, TestSize.Level0)
     int32_t ret = HksInitialize();
     ASSERT_TRUE(ret == HKS_SUCCESS);
 }
+
+HWTEST_F(HksEventObserverTest, HksEventObserverTest003, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksEventObserverTest003 - USER_UNLOCKED event");
+    Want want;
+    want.SetAction(OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
+
+    CommonEventData data;
+    data.SetWant(want);
+    data.SetCode(100);
+
+    CommonEventSubscribeInfo subscribeInfo;
+    SystemEventSubscriber eventSubscriber(subscribeInfo);
+    eventSubscriber.OnReceiveEvent(data);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+}
+
+HWTEST_F(HksEventObserverTest, HksEventObserverTest004, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksEventObserverTest004 - SCREEN_OFF event");
+    Want want;
+    want.SetAction(OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
+
+    CommonEventData data;
+    data.SetWant(want);
+
+    CommonEventSubscribeInfo subscribeInfo;
+    SystemEventSubscriber eventSubscriber(subscribeInfo);
+    eventSubscriber.OnReceiveEvent(data);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+}
+
+HWTEST_F(HksEventObserverTest, HksEventObserverTest005, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksEventObserverTest005 - SCREEN_ON event");
+    Want want;
+    want.SetAction(OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
+
+    CommonEventData data;
+    data.SetWant(want);
+
+    CommonEventSubscribeInfo subscribeInfo;
+    SystemEventSubscriber eventSubscriber(subscribeInfo);
+    eventSubscriber.OnReceiveEvent(data);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+}
+
+HWTEST_F(HksEventObserverTest, HksEventObserverTest006, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksEventObserverTest006 - SCREEN_UNLOCKED event");
+    Want want;
+    want.SetAction(OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED);
+
+    CommonEventData data;
+    data.SetWant(want);
+    data.SetCode(100);
+
+    CommonEventSubscribeInfo subscribeInfo;
+    SystemEventSubscriber eventSubscriber(subscribeInfo);
+    eventSubscriber.OnReceiveEvent(data);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+}
+
+HWTEST_F(HksEventObserverTest, HksEventObserverTest007, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksEventObserverTest007 - SANDBOX_PACKAGE_REMOVED event");
+    Want want;
+    want.SetAction(OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_SANDBOX_PACKAGE_REMOVED);
+
+    CommonEventData data;
+    data.SetWant(want);
+
+    CommonEventSubscribeInfo subscribeInfo;
+    SystemEventSubscriber eventSubscriber(subscribeInfo);
+    eventSubscriber.OnReceiveEvent(data);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+}
+
+HWTEST_F(HksEventObserverTest, HksEventObserverTest008, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksEventObserverTest008 - PACKAGE_REMOVED with uid param");
+    Want want;
+    want.SetAction(OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
+    want.SetParam("uid", 1000);
+
+    CommonEventData data;
+    data.SetWant(want);
+
+    CommonEventSubscribeInfo subscribeInfo;
+    SystemEventSubscriber eventSubscriber(subscribeInfo);
+    eventSubscriber.OnReceiveEvent(data);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+}
+
+HWTEST_F(HksEventObserverTest, HksEventObserverTest009, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksEventObserverTest009 - PACKAGE_REMOVED with anco param");
+    Want want;
+    want.SetAction(OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
+    want.SetParam("uid", 1000);
+    want.SetParam("isBmsExtensionUninstalled", true);
+
+    CommonEventData data;
+    data.SetWant(want);
+
+    CommonEventSubscribeInfo subscribeInfo;
+    SystemEventSubscriber eventSubscriber(subscribeInfo);
+    eventSubscriber.OnReceiveEvent(data);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+}
+
+HWTEST_F(HksEventObserverTest, HksEventObserverTest010, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksEventObserverTest010 - unknown action");
+    Want want;
+    want.SetAction("unknown.action");
+
+    CommonEventData data;
+    data.SetWant(want);
+
+    CommonEventSubscribeInfo subscribeInfo;
+    SystemEventSubscriber eventSubscriber(subscribeInfo);
+    eventSubscriber.OnReceiveEvent(data);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+}
+
+HWTEST_F(HksEventObserverTest, HksEventObserverTest011, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksEventObserverTest011 - SystemEventObserver constructor/destructor");
+    SystemEventObserver observer;
+    SystemEventObserver *observer2 = new SystemEventObserver();
+    delete observer2;
+}
+
+HWTEST_F(HksEventObserverTest, HksEventObserverTest012, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksEventObserverTest012 - SystemEventSubscriber constructor");
+    OHOS::EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
+    OHOS::EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    SystemEventSubscriber subscriber(subscribeInfo);
+}
 }

@@ -20,8 +20,17 @@
 
 #include "hks_event_info.h"
 #include "hks_plugin_def.h"
+#include "hks_se_session_manager.h"
 #include "hks_session_manager.h"
 #include "hks_type.h"
+
+typedef struct {
+    bool isSe;
+    union {
+        struct HksOperation *operation;
+        struct HksSeOperation *seOperation;
+    } op;
+} HksOperationUnion;
 
 typedef struct HksThreeStageReportInfo {
     int32_t errCode;
@@ -30,7 +39,7 @@ typedef struct HksThreeStageReportInfo {
     uint64_t startTime;
     uint64_t traceId;
     const struct HksBlob *handle;
-    struct HksOperation *operation;
+    HksOperationUnion unionOp;
 } HksThreeStageReportInfo;
 
 typedef struct HksOneStageReportInfo {

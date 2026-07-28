@@ -16,6 +16,7 @@
 #include "hks_ipc_check.h"
 
 #include <stddef.h>
+#include <stdint.h>
 
 #include "hks_common_check.h"
 #include "hks_client_ipc_serialization.h"
@@ -27,6 +28,100 @@
 
 #define MIN_CERT_COUNT 3
 #define MAX_CERT_COUNT 4
+
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+int32_t HksCheckAuthStateIsValid(const int32_t state)
+{
+    if (state == HKS_EXT_CRYPTO_PIN_NO_AUTH || state == HKS_EXT_CRYPTO_PIN_AUTH_SUCCEEDED ||
+        state == HKS_EXT_CRYPTO_PIN_LOCKED) {
+        return HKS_SUCCESS;
+    }
+    return HKS_ERROR_EXT_RETURN_VALUE_INCRECT;
+}
+
+int32_t HksCheckIpcBlobAndParamSet(const struct HksBlob *blob, const struct HksParamSet *paramSet, uint32_t maxSize)
+{
+    int32_t ret = HksCheckBlobAndParamSet(blob, paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check blob or paramSet failed")
+
+    if (blob->size > maxSize) {
+        HKS_LOG_E("check size failed. blob size: %" LOG_PUBLIC "d, maxSize: %" LOG_PUBLIC "d", blob->size, maxSize);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    if (((sizeof(blob->size) + ALIGN_SIZE(blob->size) +
+        ALIGN_SIZE(paramSet->paramSetSize)) > MAX_PROCESS_SIZE)) {
+        HKS_LOG_E("ipc blob and paramSet check size failed");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    return HKS_SUCCESS;
+}
+
+int32_t HksCheckIpcTwoBlobsParamSet(const struct HksBlob *blob1, const struct HksBlob *blob2,
+    const struct HksParamSet *paramSet, uint32_t maxSize1, uint32_t maxSize2)
+{
+    int32_t ret = HksCheckBlob2AndParamSet(blob1, blob2, paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check keyAlias or paramSet failed")
+
+    if (blob1->size > maxSize1 || blob2->size > maxSize2) {
+        HKS_LOG_E("ipc blob check size failed");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    if ((sizeof(blob1->size) + ALIGN_SIZE(blob1->size) +
+        sizeof(blob2->size) + ALIGN_SIZE(blob2->size) + ALIGN_SIZE(paramSet->paramSetSize)) > MAX_PROCESS_SIZE) {
+        HKS_LOG_E("ipc blob and paramSet check size failed");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    return HKS_SUCCESS;
+}
+
+int32_t HksCheckIpcBlob(const struct HksBlob *blob, uint32_t maxSize)
+{
+    int32_t ret = CheckBlob(blob);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check blob or paramSet failed")
+
+    if ((blob->size > maxSize) || (sizeof(blob->size) + ALIGN_SIZE(blob->size) > MAX_PROCESS_SIZE)) {
+        HKS_LOG_E("ipc blob check size failed");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    return HKS_SUCCESS;
+}
+
+int32_t HksCheckIpcBlobAndCertInfo(const struct HksBlob *blob, const struct HksExtCertInfo *certInfo,
+    const struct HksParamSet *paramSet, uint32_t blobMaxSize)
+{
+    if (blob == NULL || certInfo == NULL || paramSet == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksCheckBlobAndParamSet(blob, paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check blob or paramSet failed")
+    if ((certInfo->index.size == 0) || (certInfo->index.data == NULL) ||
+        (certInfo->cert.size == 0) || (certInfo->cert.data == NULL)) {
+        HKS_LOG_E("certInfo index or cert invalid");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    if (blob->size > blobMaxSize) {
+        HKS_LOG_E("blob size exceeds max, size: %" LOG_PUBLIC "u, max: %" LOG_PUBLIC "u",
+            blob->size, blobMaxSize);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    if (ALIGN_SIZE(blob->size) > MAX_PROCESS_SIZE ||
+        ALIGN_SIZE(certInfo->index.size) > MAX_PROCESS_SIZE ||
+        ALIGN_SIZE(certInfo->cert.size) > MAX_PROCESS_SIZE) {
+        HKS_LOG_E("single field size exceeds MAX_PROCESS_SIZE");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    uint32_t total = sizeof(blob->size) + ALIGN_SIZE(blob->size) +
+        sizeof(int32_t) + sizeof(certInfo->index.size) + ALIGN_SIZE(certInfo->index.size) +
+        sizeof(certInfo->cert.size) + ALIGN_SIZE(certInfo->cert.size) + ALIGN_SIZE(paramSet->paramSetSize);
+    if (total > MAX_PROCESS_SIZE) {
+        HKS_LOG_E("ipc blob + certInfo + paramSet total size exceeds MAX_PROCESS_SIZE");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    return HKS_SUCCESS;
+}
+#endif
 
 int32_t HksCheckIpcGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn)
 {
@@ -237,7 +332,7 @@ int32_t HksCheckIpcCertificateChain(const struct HksBlob *keyAlias, const struct
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     HKS_IF_NOT_SUCC_RETURN(HksCheckParamSet(paramSet, paramSet->paramSetSize), HKS_ERROR_INVALID_ARGUMENT)
-    if ((keyAlias->size > MAX_PROCESS_SIZE) ||
+    if ((keyAlias->data == NULL) || (keyAlias->size > MAX_PROCESS_SIZE) ||
         ((sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) +
         ALIGN_SIZE(paramSet->paramSetSize)) > MAX_PROCESS_SIZE)) {
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -277,8 +372,13 @@ int32_t HksCheckIpcRenameKeyAlias(const struct HksBlob *oldKeyAlias, const struc
     int32_t ret = HksCheckBlob2AndParamSet(oldKeyAlias, newKeyAlias, paramSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check keyAlias or paramSet failed")
 
-    if ((MAX_PROCESS_SIZE - sizeof(oldKeyAlias->size) - ALIGN_SIZE(oldKeyAlias->size) -
-        sizeof(newKeyAlias->size) - ALIGN_SIZE(newKeyAlias->size) < ALIGN_SIZE(paramSet->paramSetSize))) {
+    if (oldKeyAlias->size > MAX_PROCESS_SIZE || newKeyAlias->size > MAX_PROCESS_SIZE) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    
+    if ((sizeof(oldKeyAlias->size) + ALIGN_SIZE(oldKeyAlias->size) +
+        sizeof(newKeyAlias->size) + ALIGN_SIZE(newKeyAlias->size) + ALIGN_SIZE(paramSet->paramSetSize)) >
+        MAX_PROCESS_SIZE) {
         HKS_LOG_E("ipc rename key alias check size failed");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -335,5 +435,66 @@ int32_t HksCheckIpcUnwrapKey(const struct HksBlob *keyAlias, const struct HksPar
         sizeof(wrappedKey->size) + ALIGN_SIZE(keyAlias->size)) > MAX_PROCESS_SIZE) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
+    return HKS_SUCCESS;
+}
+
+int32_t HksCheckIpcEncapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet, uint32_t *outSize)
+{
+    int32_t ret = HksCheckParamSetValidity(paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NEW_INVALID_ARGUMENT, "check paramSet failed")
+
+    ret = HksCheckBlob2(keyAlias, sharedKeyAlias);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NEW_INVALID_ARGUMENT, "check keyAlias failed")
+
+    HKS_IF_TRUE_LOGE_RETURN(keyAlias->size > HKS_MAX_KEY_ALIAS_LEN, HKS_ERROR_NEW_INVALID_ARGUMENT,
+        "keyAlias size %" LOG_PUBLIC "d is out of range", keyAlias->size)
+
+    uint32_t totalSize = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) +
+        ALIGN_SIZE(paramSet->paramSetSize) + sizeof(uint32_t);
+
+    HKS_IF_TRUE_LOGE_RETURN(sharedKeyAlias->size > HKS_MAX_KEY_ALIAS_LEN, HKS_ERROR_NEW_INVALID_ARGUMENT,
+        "sharedKeyAlias size %" LOG_PUBLIC "d is out of range", keyAlias->size)
+
+    ret = HksCheckParamSetValidity(sharedKeyParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NEW_INVALID_ARGUMENT, "check sharedKeyParamSet failed")
+
+    totalSize += sizeof(sharedKeyAlias->size) + ALIGN_SIZE(sharedKeyAlias->size) +
+        ALIGN_SIZE(sharedKeyParamSet->paramSetSize);
+    HKS_IF_TRUE_LOGE_RETURN(totalSize > MAX_PROCESS_SIZE, HKS_ERROR_NEW_INVALID_ARGUMENT,
+        "HksCheckIpcEncapsulate fail")
+    
+    *outSize = totalSize;
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksCheckIpcDecapsulateConcret(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksBlob *encapOrsharedSecret)
+{
+    int32_t ret = HksCheckParamSetValidity(paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NEW_INVALID_ARGUMENT, "check paramSet failed")
+
+    ret = HksCheckBlob3(keyAlias, sharedKeyAlias, encapOrsharedSecret);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NEW_INVALID_ARGUMENT, "Decapsulate check blob failed")
+
+    HKS_IF_TRUE_LOGE_RETURN(keyAlias->size > HKS_MAX_KEY_ALIAS_LEN, HKS_ERROR_NEW_INVALID_ARGUMENT,
+        "keyAlias size %" LOG_PUBLIC "d is out of range", keyAlias->size)
+
+    HKS_IF_TRUE_LOGE_RETURN(sharedKeyAlias->size > HKS_MAX_KEY_ALIAS_LEN, HKS_ERROR_NEW_INVALID_ARGUMENT,
+        "sharedKeyAlias size %" LOG_PUBLIC "d is out of range", sharedKeyAlias->size)
+
+    ret = HksCheckParamSetValidity(sharedKeyParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NEW_INVALID_ARGUMENT, "check sharedKeyParamSet failed")
+
+    uint32_t totalSize = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) +
+        ALIGN_SIZE(paramSet->paramSetSize) +
+        sizeof(sharedKeyAlias->size) + ALIGN_SIZE(sharedKeyAlias->size) +
+        ALIGN_SIZE(sharedKeyParamSet->paramSetSize) +
+        sizeof(encapOrsharedSecret->size) + ALIGN_SIZE(encapOrsharedSecret->size);
+    HKS_IF_TRUE_LOGE_RETURN(totalSize > MAX_PROCESS_SIZE, HKS_ERROR_NEW_INVALID_ARGUMENT,
+        "HksCheckIpcDecapsulateConcret fail")
+
     return HKS_SUCCESS;
 }

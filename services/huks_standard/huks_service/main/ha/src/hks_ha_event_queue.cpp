@@ -59,13 +59,3 @@ void HksEventQueue::Stop()
     stopped_ = true;
     notEmpty.notify_all();
 }
-
-uint32_t HksEventQueue::Size() const
-{
-    return queueItem_.size();
-}
-
-bool HksEventQueue::IsEmpty() const
-{
-    return queueItem_.empty();
-}

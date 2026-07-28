@@ -25,8 +25,13 @@
 #define HKS_PLUGIN_DEF_H
 
 #define HKS_PROCESS_INFO_INIT_VALUE { {0, NULL}, {0, NULL}, 0, 0, 0, 0 }
+#define HKS_ANCO_BROKER_UID 5557
 
 #include "hks_type.h"
+
+#ifdef __cplusplus
+#include "hks_event_types.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,6 +55,11 @@ enum LocalRequestCode {
     CODE_STATISTICS_METRICS = 3,
     CODE_SA_WRAP_KEY = 4,
     CODE_SA_UNWRAP_KEY = 5,
+    CODE_IMPORT_KEY_STORE = 6,
+};
+struct HksProcessWithErrorInfo {
+    const struct HksProcessInfo *processInfo;
+    struct HksExternalErrorInfo *errInfo;
 };
 
 /**
@@ -70,13 +80,18 @@ struct HksBasicInterface {
     int32_t (*hksManageGetKeyCountByProcessName)(const struct HksProcessInfo *processInfo,
         const struct HksParamSet *paramSet, uint32_t *fileCount);
 
-    int32_t (*hksGetProcessInfoForIPC)(const uint8_t *context, struct HksProcessInfo *processInfo);
+    int32_t (*hksGetProcessInfoForIPC)(const struct HksParamSet *paramSet,
+        const uint8_t *context, struct HksProcessInfo *processInfo);
 
     int32_t (*appendStorageParamsForGen)(const struct HksProcessInfo *processInfo,
         const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
     int32_t (*appendStorageParamsForUse)(const struct HksParamSet *paramSet,
         const struct HksProcessInfo *processInfo, struct HksParamSet **outParamSet);
     int32_t (*appendStorageParamsForQuery)(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
+
+    int32_t (*hksRegisterEventProc)(const void *procMap);
+    int32_t (*hksRegisterEventProcs)(const void *procMaps, uint32_t count);
+    int32_t (*hksEnqueueEvent)(uint32_t eventId, struct HksParamSet *paramSet);
 };
 
 /**
@@ -88,6 +103,8 @@ struct HksPluginProxy {
     int32_t (*hksPluginOnRemoteRequest)(uint32_t code, void *data, void *reply, void *option);
     int32_t (*hksPluginOnLocalRequest)(uint32_t code, const void *data, void *reply);
     void (*hksPluginOnReceiveEvent)(const void *eventData);
+    void (*hksPluginSubSystemEvent)(void *matchingSkills);
+    int32_t (*hksPluginGetAncoUser)(int *userId);
 };
 
 #ifdef __cplusplus

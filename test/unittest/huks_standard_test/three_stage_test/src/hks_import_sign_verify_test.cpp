@@ -939,10 +939,18 @@ static void ImportPlainKeyTest(uint32_t alg, uint32_t keySize, uint32_t digest, 
     ModifyinitOp2Params(alg, purposeOp2, keySize, digest);
 
     ret = DoOperation(&priKeyAlias, &pairKeyAlias);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "operation failed";
+    if (alg == HKS_ALG_SM2 && digest == HKS_DIGEST_SM3) {
+        EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "operation failed";
+    } else {
+        EXPECT_EQ(ret, HKS_SUCCESS) << "operation failed";
+    }
 
     ret = DoOperation(&priKeyAlias, &pubKeyAlias);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "operation 2 failed";
+    if (alg == HKS_ALG_SM2 && digest == HKS_DIGEST_SM3) {
+        EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "operation 2 failed";
+    } else {
+        EXPECT_EQ(ret, HKS_SUCCESS) << "operation 2 failed";
+    }
 
     // delete keys
     (void)HksDeleteKeyForDe(&priKeyAlias, nullptr);

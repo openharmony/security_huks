@@ -235,7 +235,7 @@ int32_t HksGetBlobFromWrappedData(const struct HksBlob *wrappedData, uint32_t bl
     uint32_t dataSize = wrappedData->size;
     uint32_t partDataLength = 0;
 
-    for (uint32_t index = 0, offset = 0; index < totalBlobs && offset < dataSize; index++) {
+    for (uint32_t index = 0, offset = 0; index < totalBlobs && offset + sizeof(uint32_t) < dataSize; index++) {
         partDataLength = 0;
         (void)memcpy_s((uint8_t *)&partDataLength, sizeof(uint32_t), data + offset, sizeof(uint32_t));
         offset += sizeof(uint32_t);

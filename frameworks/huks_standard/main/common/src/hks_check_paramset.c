@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "hks_type_enum.h"
 #define HUKS_DISABLE_LOG_AT_FILE_TO_REDUCE_ROM_SIZE
 
 #ifdef HKS_CONFIG_FILE
@@ -31,9 +32,12 @@
 #include "hks_base_check.h"
 #include "hks_common_check.h"
 #include "hks_crypto_hal.h"
+#include "hks_error_code.h"
 #include "hks_log.h"
 #include "hks_param.h"
 #include "hks_template.h"
+#include "hks_cmd_id.h"
+#include "hks_mem.h"
 #include "securec.h"
 
 #ifdef _CUT_AUTHENTICATE_
@@ -96,6 +100,12 @@ static uint32_t g_genKeyAlg[] = {
 #ifdef HKS_SUPPORT_SM4_C
     HKS_ALG_SM4,
 #endif
+#ifdef HKS_SUPPORT_ML_DSA_C
+    HKS_ALG_ML_DSA,
+#endif
+#ifdef HKS_SUPPORT_ML_KEM_C
+    HKS_ALG_ML_KEM,
+#endif
 };
 
 static uint32_t g_importKeyAlg[] = {
@@ -141,6 +151,12 @@ static uint32_t g_importKeyAlg[] = {
 #ifdef HKS_SUPPORT_SM4_C
     HKS_ALG_SM4,
 #endif
+#ifdef HKS_SUPPORT_ML_DSA_C
+    HKS_ALG_ML_DSA,
+#endif
+#ifdef HKS_SUPPORT_ML_KEM_C
+    HKS_ALG_ML_KEM,
+#endif
 };
 
 static uint32_t g_cipherAlg[] = {
@@ -180,6 +196,9 @@ static uint32_t g_signAlg[] = {
 #ifdef HKS_SUPPORT_SM2_C
     HKS_ALG_SM2,
 #endif
+#ifdef HKS_SUPPORT_ML_DSA_C
+    HKS_ALG_ML_DSA,
+#endif
 };
 #endif
 
@@ -216,7 +235,8 @@ static uint32_t g_unwrapSuite[] = {
 #endif
 #if defined(HKS_SUPPORT_SM2_C) && defined(HKS_SUPPORT_SM4_C)
     HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7_WITH_VERIFY_DIG_SM3,
-    HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7
+    HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7,
+    HKS_UNWRAP_SUITE_SM2_SM4_ECB_NOPADDING,
 #endif
 };
 #endif /* _CUT_AUTHENTICATE_ */
@@ -322,6 +342,17 @@ static uint32_t g_symmetricAlgorithm[] = {
     HKS_ALG_SM4,
 #endif
 };
+
+#ifdef L2_STANDARD
+/*
+ * AES-CCM mode supported aead length
+ */
+static const uint32_t g_ccmSupportLen[] = {4, 6, 8, 10, 12, 14, 16};
+/*
+ * AES-GCM mode supported aead length
+ */
+static const uint32_t g_gcmSupportLen[] = {16};
+#endif
 
 static int32_t CheckAndGetAlgorithm(
     const struct HksParamSet *paramSet, const uint32_t *expectAlg, uint32_t expectCnt, uint32_t *alg)
@@ -566,6 +597,8 @@ static int32_t CheckImportKeySize(uint32_t alg, const struct ParamsValues *param
         case HKS_ALG_X25519:
         case HKS_ALG_RSA:
         case HKS_ALG_ECC:
+        case HKS_ALG_ML_DSA:
+        case HKS_ALG_ML_KEM:
         case HKS_ALG_SM2:
         case HKS_ALG_DH: {
             if (key->size < sizeof(struct HksPubKeyInfo)) {
@@ -737,6 +770,60 @@ static int32_t CheckEccKeyLen(uint32_t alg, uint32_t keyType, const struct Param
     return HKS_SUCCESS;
 }
 
+static int32_t GetMlDsaExpectedSize(uint32_t keyParamSet, uint32_t *pubKeySize, uint32_t *priKeySize)
+{
+    if (keyParamSet == HKS_ML_DSA_KEY_PARAM_SET_44) {
+        *pubKeySize = HKS_ML_DSA_PUB_KEY_SIZE_1312;
+        *priKeySize = HKS_ML_DSA_PRI_KEY_SIZE_2560;
+    } else if (keyParamSet == HKS_ML_DSA_KEY_PARAM_SET_65) {
+        *pubKeySize = HKS_ML_DSA_PUB_KEY_SIZE_1952;
+        *priKeySize = HKS_ML_DSA_PRI_KEY_SIZE_4032;
+    } else if (keyParamSet == HKS_ML_DSA_KEY_PARAM_SET_87) {
+        *pubKeySize = HKS_ML_DSA_PUB_KEY_SIZE_2592;
+        *priKeySize = HKS_ML_DSA_PRI_KEY_SIZE_4896;
+    } else {
+        HKS_LOG_E("invalid ml-dsa key param set: %u", keyParamSet);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+    return HKS_SUCCESS;
+}
+
+static int32_t CheckMlDsaKeyLen(uint32_t alg, uint32_t keyType, const struct ParamsValues *params,
+    const struct HksBlob *key)
+{
+    if (key->size < sizeof(struct HksKeyMaterialMlDsa)) {
+        HKS_LOG_E("invalid import ml-dsa key size: %u", key->size);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+    struct HksKeyMaterialMlDsa *keyMaterial = (struct HksKeyMaterialMlDsa *)(key->data);
+    if ((keyMaterial->keyAlg != alg) || (keyMaterial->keyParamSet != params->keyLen.value)) {
+        HKS_LOG_E("invalid import ml-dsa key material");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+    uint32_t expectedPubKeySize = 0;
+    uint32_t expectedPriKeySize = 0;
+    HKS_IF_NOT_SUCC_RETURN(GetMlDsaExpectedSize(keyMaterial->keyParamSet, &expectedPubKeySize,
+        &expectedPriKeySize), HKS_ERROR_INVALID_KEY_INFO)
+
+    if (keyType == HKS_KEY_TYPE_PRIVATE_KEY) {
+        HKS_IF_TRUE_LOGE_RETURN(keyMaterial->pubKeySize != 0, HKS_ERROR_INVALID_KEY_INFO,
+            "import ml-dsa private key with non-zero pubKeySize")
+        HKS_IF_TRUE_LOGE_RETURN(keyMaterial->priKeySize != expectedPriKeySize, HKS_ERROR_INVALID_KEY_INFO,
+            "invalid import ml-dsa private key size")
+    } else if (keyType == HKS_KEY_TYPE_KEY_PAIR) {
+        HKS_IF_TRUE_LOGE_RETURN(keyMaterial->pubKeySize != expectedPubKeySize, HKS_ERROR_INVALID_KEY_INFO,
+            "invalid import ml-dsa key pair pubKeySize")
+        HKS_IF_TRUE_LOGE_RETURN(keyMaterial->priKeySize != expectedPriKeySize, HKS_ERROR_INVALID_KEY_INFO,
+            "invalid import ml-dsa key pair priKeySize")
+    }
+    uint32_t keySize = sizeof(struct HksKeyMaterialMlDsa) + keyMaterial->pubKeySize + keyMaterial->priKeySize;
+    if (key->size < keySize) {
+        HKS_LOG_E("import ml-dsa key size[%u] smaller than keySize[%u]", key->size, keySize);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+    return HKS_SUCCESS;
+}
+
 static int32_t CheckDsaKeyLen(uint32_t alg, uint32_t keyType, const struct ParamsValues *params,
     const struct HksBlob *key)
 {
@@ -856,6 +943,58 @@ static int32_t CheckDHKeyLen(uint32_t alg, uint32_t keyType, const struct Params
     return HKS_SUCCESS;
 }
 
+static int32_t GetMlKemExpectedSize(uint32_t keyParamSet, uint32_t *pubKeySize, uint32_t *priKeySize)
+{
+    if (keyParamSet == HKS_ML_KEM_KEY_PARAM_SET_768) {
+        *pubKeySize = HKS_ML_KEM_PUB_KEY_SIZE_1184;
+        *priKeySize = HKS_ML_KEM_PRI_KEY_SIZE_2400;
+    } else if (keyParamSet == HKS_ML_KEM_KEY_PARAM_SET_1024) {
+        *pubKeySize = HKS_ML_KEM_PUB_KEY_SIZE_1568;
+        *priKeySize = HKS_ML_KEM_PRI_KEY_SIZE_3168;
+    } else {
+        HKS_LOG_E("invalid ml-kem key param set: %u", keyParamSet);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+    return HKS_SUCCESS;
+}
+
+static int32_t CheckMlKemKeyLen(uint32_t alg, uint32_t keyType, const struct ParamsValues *params,
+    const struct HksBlob *key)
+{
+    if (key->size < sizeof(struct HksKeyMaterialMlKem)) {
+        HKS_LOG_E("invalid import ml-kem key size: %u", key->size);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+    struct HksKeyMaterialMlKem *keyMaterial = (struct HksKeyMaterialMlKem *)(key->data);
+    if ((keyMaterial->keyAlg != alg) || (keyMaterial->keyParamSet != params->keyLen.value)) {
+        HKS_LOG_E("invalid import ml-kem key material");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+    uint32_t expectedPubKeySize = 0;
+    uint32_t expectedPriKeySize = 0;
+    HKS_IF_NOT_SUCC_RETURN(GetMlKemExpectedSize(keyMaterial->keyParamSet, &expectedPubKeySize,
+        &expectedPriKeySize), HKS_ERROR_INVALID_KEY_INFO)
+
+    if (keyType == HKS_KEY_TYPE_PRIVATE_KEY) {
+        HKS_IF_TRUE_LOGE_RETURN(keyMaterial->pubKeySize != 0, HKS_ERROR_INVALID_KEY_INFO,
+            "import ml-kem private key with non-zero pubKeySize")
+        HKS_IF_TRUE_LOGE_RETURN(keyMaterial->priKeySize != expectedPriKeySize, HKS_ERROR_INVALID_KEY_INFO,
+            "invalid import ml-kem private key size")
+    } else if (keyType == HKS_KEY_TYPE_KEY_PAIR) {
+        HKS_IF_TRUE_LOGE_RETURN(keyMaterial->pubKeySize != expectedPubKeySize, HKS_ERROR_INVALID_KEY_INFO,
+            "invalid import ml-kem key pair pubKeySize")
+        HKS_IF_TRUE_LOGE_RETURN(keyMaterial->priKeySize != expectedPriKeySize, HKS_ERROR_INVALID_KEY_INFO,
+            "invalid import ml-kem key pair priKeySize")
+    }
+    uint32_t keySize = sizeof(struct HksKeyMaterialMlKem) + keyMaterial->pubKeySize + keyMaterial->priKeySize;
+    if (key->size < keySize) {
+        HKS_LOG_E("import ml-kem key size[%" LOG_PUBLIC "u] smaller than keySize[" LOG_PUBLIC "%u]",
+            key->size, keySize);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+    return HKS_SUCCESS;
+}
+
 static int32_t CheckKeyLen(uint32_t alg, uint32_t keyType, const struct ParamsValues *params,
     const struct HksBlob *key)
 {
@@ -865,6 +1004,10 @@ static int32_t CheckKeyLen(uint32_t alg, uint32_t keyType, const struct ParamsVa
         case HKS_ALG_ECC:
         case HKS_ALG_SM2:
             return CheckEccKeyLen(alg, keyType, params, key);
+        case HKS_ALG_ML_DSA:
+            return CheckMlDsaKeyLen(alg, keyType, params, key);
+        case HKS_ALG_ML_KEM:
+            return CheckMlKemKeyLen(alg, keyType, params, key);
         case HKS_ALG_DSA:
             return CheckDsaKeyLen(alg, keyType, params, key);
         case HKS_ALG_X25519:
@@ -900,9 +1043,16 @@ static int32_t CheckMutableParams(uint32_t alg, uint32_t keyType, const struct P
             return HKS_SUCCESS;
         case HKS_ALG_SM2:
         case HKS_ALG_DSA:
+        case HKS_ALG_ML_DSA:
         case HKS_ALG_ED25519:
             if (params->purpose.value != HKS_KEY_PURPOSE_SIGN) {
                 HKS_LOG_E("Import sm2 or dsa or ed25519 private key check purpose failed.");
+                return HKS_ERROR_INVALID_PURPOSE;
+            }
+            return HKS_SUCCESS;
+        case HKS_ALG_ML_KEM:
+            if (params->purpose.value != HKS_KEY_PURPOSE_UNWRAP) {
+                HKS_LOG_E("Import MLKEM private key check purpose failed.");
                 return HKS_ERROR_INVALID_PURPOSE;
             }
             return HKS_SUCCESS;
@@ -1116,6 +1266,41 @@ int32_t HksCoreCheckAgreeKeyParams(const struct HksParamSet *paramSet, const str
     return HKS_SUCCESS;
 }
 
+static int32_t CheckAesAeCipherData(uint32_t cmdId, const struct HksBlob *inData, const struct HksBlob *outData,
+    uint32_t aeadTagLen)
+{
+    /*
+     * encrypt: inSize greater than 0(has been checked),
+     *          outSize no less than inSize + tagLen (in: plain; out: cipher)
+     * decrypt: inSize greater than tagLen, outSize no less than inSize - tagLen
+     * decryptFinal: inSize greater than 0(has been checked), outSize no less than inSize (in: cipher; out: plain)
+     */
+    switch (cmdId) {
+        case HKS_CMD_ID_ENCRYPT:
+            if (inData->size > (UINT32_MAX - aeadTagLen)) {
+                HKS_LOG_E("encrypt, invalid inSize: %" LOG_PUBLIC "u", inData->size);
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+            if (outData->size < (inData->size + aeadTagLen)) {
+                HKS_LOG_E("encrypt, out buffer too small size: %" LOG_PUBLIC "u, inSize: %" LOG_PUBLIC "u",
+                    outData->size, inData->size);
+                return HKS_ERROR_BUFFER_TOO_SMALL;
+            }
+            break;
+        case HKS_CMD_ID_DECRYPT:
+            if ((inData->size < aeadTagLen) || (outData->size < inData->size - aeadTagLen)) {
+                HKS_LOG_E("decryptfinal, out buffer too small size: %" LOG_PUBLIC "u, inSize: %" LOG_PUBLIC "u",
+                    outData->size, inData->size);
+                return HKS_ERROR_BUFFER_TOO_SMALL;
+            }
+            break;
+        default:
+            return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    return HKS_SUCCESS;
+}
+
 int32_t HksCoreCheckCipherParams(uint32_t cmdId, const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, const struct HksBlob *outData)
 {
@@ -1136,6 +1321,13 @@ int32_t HksCoreCheckCipherParams(uint32_t cmdId, const struct HksBlob *key, cons
 
     ret = CheckCipherParamsByAlg(cmdId, alg, paramSet, &params);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "cipher check params failed, ret = %" LOG_PUBLIC "d", ret)
+
+    if (alg == HKS_ALG_AES && (params.mode.value == HKS_MODE_GCM || params.mode.value == HKS_MODE_CCM)) {
+        uint32_t aeadTagLen = HKS_AE_TAG_LEN;
+        ret = HksGetAeadTagLength(paramSet, params.mode.value, &aeadTagLen);
+        HKS_IF_NOT_SUCC_RETURN(ret, ret);
+        return CheckAesAeCipherData(cmdId, inData, outData, aeadTagLen);
+    }
 
     ret = HksCheckCipherData(cmdId, alg, &params, inData, outData);
     HKS_IF_NOT_SUCC_LOGE(ret, "cipher check input or output data failed, ret = %" LOG_PUBLIC "d", ret)
@@ -1187,6 +1379,13 @@ int32_t HksLocalCheckCipherParams(uint32_t cmdId, uint32_t keySize, const struct
 
     ret = CheckCipherParamsByAlg(cmdId, alg, paramSet, &params);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "local cipher check params failed, ret = %" LOG_PUBLIC "d", ret)
+
+    if (alg == HKS_ALG_AES && (params.mode.value == HKS_MODE_GCM || params.mode.value == HKS_MODE_CCM)) {
+        uint32_t aeadTagLen = HKS_AE_TAG_LEN;
+        ret = HksGetAeadTagLength(paramSet, params.mode.value, &aeadTagLen);
+        HKS_IF_NOT_SUCC_RETURN(ret, ret);
+        return CheckAesAeCipherData(cmdId, inData, outData, aeadTagLen);
+    }
 
     ret = HksCheckCipherData(cmdId, alg, &params, inData, outData);
     HKS_IF_NOT_SUCC_LOGE(ret, "local cipher check input or output data failed, ret = %" LOG_PUBLIC "d", ret)
@@ -1311,4 +1510,117 @@ int32_t HksCoreCheckAgreeDeriveFinishParams(const struct HksBlob *key, const str
     }
 
     return HKS_SUCCESS;
+}
+
+#ifdef L2_STANDARD
+static int32_t IsValidCcmTagLen(uint32_t aeadTagLen)
+{
+    for (uint32_t i = 0; i < HKS_ARRAY_SIZE(g_ccmSupportLen); ++i) {
+        if (g_ccmSupportLen[i] == aeadTagLen) {
+            return HKS_SUCCESS;
+        }
+    }
+    HKS_LOG_E("ccm tag len %" LOG_PUBLIC "u invalid", aeadTagLen);
+    return HKS_ERROR_CODE_AEAD_TAG_LEN_INVALID;
+}
+
+static int32_t IsValidGcmTagLen(uint32_t aeadTagLen)
+{
+    for (uint32_t i = 0; i < HKS_ARRAY_SIZE(g_gcmSupportLen); ++i) {
+        if (g_gcmSupportLen[i] == aeadTagLen) {
+            return HKS_SUCCESS;
+        }
+    }
+    HKS_LOG_E("gcm tag len %" LOG_PUBLIC "u invalid", aeadTagLen);
+    return HKS_ERROR_CODE_AEAD_TAG_LEN_INVALID;
+}
+
+static int32_t IsValidAeadTagLen(uint32_t mode, uint32_t aeadTagLen)
+{
+    if (mode == HKS_MODE_CCM) {
+        return IsValidCcmTagLen(aeadTagLen);
+    } else if (mode == HKS_MODE_GCM) {
+        return IsValidGcmTagLen(aeadTagLen);
+    } else {
+        HKS_LOG_E("not support aead tag for mode %" LOG_PUBLIC "u", mode);
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+    return HKS_SUCCESS;
+}
+#endif
+
+int32_t HksGetAeadTagLength(const struct HksParamSet *paramSet, const uint32_t mode, uint32_t *aeadTagLen)
+{
+#ifdef L2_STANDARD
+    *aeadTagLen = HKS_AE_TAG_LEN;
+    struct HksParam *aeadParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_AE_TAG_LEN, &aeadParam);
+    HKS_IF_TRUE_RETURN(ret == HKS_ERROR_PARAM_NOT_EXIST, HKS_SUCCESS);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret);
+    ret = IsValidAeadTagLen(mode, aeadParam->uint32Param);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret);
+    *aeadTagLen = aeadParam->uint32Param;
+#else
+    (void)paramSet;
+    (void)mode;
+    *aeadTagLen = HKS_AE_TAG_LEN;
+#endif
+    return HKS_SUCCESS;
+}
+
+int32_t HksGetAeadTagLengthWithoutMode(const struct HksParamSet *paramSet, uint32_t *aeadTagLen)
+{
+    struct HksParam *modeParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_BLOCK_MODE, &modeParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_MODE_FAIL, "get mode failed!");
+
+    return HksGetAeadTagLength(paramSet, modeParam->uint32Param, aeadTagLen);
+}
+
+int32_t HksCheckBlobParamIsEqual(const struct HksParamSet *paramSet, const struct HksParamSet *keyBlobParamSet,
+    enum HksTag tag)
+{
+    struct HksParam *param1 = NULL;
+    int32_t ret = HksGetParam(paramSet, tag, &param1);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    struct HksParam *param2 = NULL;
+    ret = HksGetParam(keyBlobParamSet, tag, &param2);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get param2 failed")
+
+    HKS_IF_TRUE_LOGE_RETURN(param1->blob.size != param2->blob.size, HKS_ERROR_INVALID_ARGUMENT,
+        "param1 size: %" LOG_PUBLIC "u != param2 size: %" LOG_PUBLIC "u", param1->blob.size, param2->blob.size)
+
+    HKS_IF_TRUE_LOGE_RETURN(HksMemCmp(param1->blob.data, param2->blob.data, param1->blob.size) != 0,
+        HKS_ERROR_INVALID_ARGUMENT, "compare tag %" LOG_PUBLIC "u failed", (uint32_t)tag)
+
+    return HKS_SUCCESS;
+}
+
+static const uint32_t TA_NOT_SUPPORT_TAG[] = {
+    HKS_TAG_KEY_CLASS
+};
+
+int32_t HandleKeyClassTag(const struct HksParamSet *paramSetIn, struct HksParamSet **paramSetOut)
+{
+    struct HksParam *keyClassParam = NULL;
+    int32_t ret = HksGetParam(paramSetIn, HKS_TAG_KEY_CLASS, &keyClassParam);
+    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+        return HksGetParamSet(paramSetIn, paramSetIn->paramSetSize, paramSetOut);
+    }
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    const uint32_t keyClassType = keyClassParam->uint32Param;
+    switch (keyClassType) {
+        case HKS_KEY_CLASS_DEFAULT:
+            return HksDeleteTagsFromParamSet(TA_NOT_SUPPORT_TAG,
+                HKS_ARRAY_SIZE(TA_NOT_SUPPORT_TAG), paramSetIn, paramSetOut);
+        case HKS_KEY_CLASS_EXTENSION:
+            HKS_LOG_E("keyClass == EXTENSION, but feature ta disabled");
+            return HKS_ERROR_NOT_SUPPORTED;
+        default:
+            HKS_LOG_E("keyClass = %" LOG_PUBLIC "u invalid", keyClassType);
+            return HKS_ERROR_INVALID_ARGUMENT;
+    }
 }

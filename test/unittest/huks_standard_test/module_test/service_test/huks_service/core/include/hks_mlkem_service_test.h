@@ -1,0 +1,39 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef HKS_MLKEM_SERVICE_TEST_H
+#define HKS_MLKEM_SERVICE_TEST_H
+
+namespace Unittest::HksMlKemServiceTest {
+int HksMlKemServiceTest001(void);
+int HksMlKemServiceTest002(void);
+int HksMlKemServiceTest003(void);
+int HksMlKemServiceTest004(void);
+int HksMlKemServiceTest005(void);
+int HksMlKemServiceTest006(void);
+int HksMlKemServiceTest007(void);
+int HksMlKemServiceTest008(void);
+int HksMlKemServiceTest009(void);
+int HksMlKemServiceTest010(void);
+int HksMlKemServiceTest011(void);
+int HksMlKemServiceTest012(void);
+int HksMlKemServiceTest013(void);
+int HksMlKemServiceTest014(void);
+int HksMlKemServiceTest015(void);
+int HksMlKemServiceTest016(void);
+int HksMlKemServiceTest017(void);
+int HksMlKemServiceTest018(void);
+}
+#endif

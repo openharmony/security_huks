@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_plugin_def.h"
 #include "hks_session_manager.h"
 #include "hks_type_inner.h"
 
@@ -299,27 +300,27 @@ static int32_t TestGenerateKeyWithProcessInfo(const struct HksBlob *keyAlias, co
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = HksInitParamSet(&paramSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksServiceDeleteProcessInfo HksInitParamSet failed");
+        HKS_LOG_E("HksInitParamSet failed");
         return ret;
     }
 
     ret = HksAddParams(paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksServiceDeleteProcessInfo HksAddParams failed");
+        HKS_LOG_E("HksAddParams failed");
         HksFreeParamSet(&paramSet);
         return ret;
     }
 
     ret = HksBuildParamSet(&paramSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksServiceDeleteProcessInfo HksBuildParamSet failed");
+        HKS_LOG_E("HksBuildParamSet failed");
         HksFreeParamSet(&paramSet);
         return ret;
     }
 
     ret = HksServiceGenerateKeyForDe(processInfo, keyAlias, paramSet, nullptr);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksServiceDeleteProcessInfo HksGenerateKey failed");
+        HKS_LOG_E("HksGenerateKey failed");
     }
     HksFreeParamSet(&paramSet);
     return ret;
@@ -347,8 +348,8 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest001, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest001 HksServiceDeleteProcessInfo failed, ret = " << ret;
     uint64_t handle = 111;
     struct HksBlob operationHandle = { .size = sizeof(uint64_t), .data = (uint8_t *)&handle };
-    CreateOperation(&processInfo, NULL, &operationHandle, true);
-    HksServiceDeleteProcessInfo(&processInfo);
+    HksCreateOperation(&processInfo, NULL, &operationHandle, true);
+    HksServiceDeleteProcessInfo(&processInfo, false);
     ret = HksServiceKeyExistForDe(&processInfo, &keyAlias, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "HksClientServiceTest001 HksServiceDeleteProcessInfo failed, ret = " << ret;
 }
@@ -372,8 +373,8 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest009, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest009 HksServiceDeleteProcessInfo failed, ret = " << ret;
     uint64_t handle = 111;
     struct HksBlob operationHandle = { .size = sizeof(uint64_t), .data = (uint8_t *)&handle };
-    CreateOperation(&processInfo, NULL, &operationHandle, true);
-    HksServiceDeleteProcessInfo(&processInfo);
+    HksCreateOperation(&processInfo, NULL, &operationHandle, true);
+    HksServiceDeleteProcessInfo(&processInfo, false);
     ret = HksServiceKeyExistForDe(&processInfo, &keyAlias, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "HksClientServiceTest009 HksServiceDeleteProcessInfo failed, ret = " << ret;
 }
@@ -398,7 +399,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest002, TestSize.Level0)
 
     struct HksBlob processName2 = { 0, nullptr };
     struct HksProcessInfo processInfo2 = { g_userId, processName2, g_userIdInt, 0, 0 };
-    HksServiceDeleteProcessInfo(&processInfo2);
+    HksServiceDeleteProcessInfo(&processInfo2, false);
     ret = HksServiceKeyExistForDe(&processInfo, &keyAlias, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "HksClientServiceTest002 HksServiceDeleteProcessInfo failed, ret = " << ret;
     HksChangeOldKeyOwner(HKS_CONFIG_KEY_STORE_PATH "/maindata", HUKS_UID);
@@ -873,5 +874,403 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest014, TestSize.Level0)
     HKS_LOG_I("enter HksClientServiceTest014");
     int32_t ret = HksServiceAbortByPid(0);
     ASSERT_EQ(ret, HKS_ERROR_NOT_EXIST);
+}
+
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest015
+ * @tc.desc: tdd DksAppendKeyAliasAndNewParamSet
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest015, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest015");
+    const char *alias = "HksClientServiceTest015_alias";
+    const struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    struct HksParamSet *outParamSet;
+    int32_t ret = DksAppendKeyAliasAndNewParamSet(nullptr, &keyAlias, &outParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *newParamSet = NULL;
+    ret = HksInitParamSet(&newParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam paramArray[] = {
+        { .tag = DKS_TAG_IS_USE_DISTRIBUTED_KEY, .boolParam = true },
+    };
+    ret = HksAddParams(newParamSet, paramArray, HKS_ARRAY_SIZE(paramArray));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&newParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksProcessInfo processInfo = { g_userId, g_processName, g_userIdInt, 0, 0 };
+    ret = GetKeyAndNewParamSet(&processInfo, &keyAlias, newParamSet, nullptr, &outParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksFreeParamSet(&newParamSet);
+}
+
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest016
+ * @tc.desc: tdd AppendGroupKeyInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest016, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest016");
+    struct HksParamSet *outParamSet;
+    struct HksProcessInfo processInfo = { g_userId, g_processName, 100, 100, 100 };
+    int32_t ret = HKS_SUCCESS;
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+    struct HksParamSet *newParamSet = NULL;
+    ret = HksInitParamSet(&newParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam paramArray[] = {
+        { .tag = HKS_TAG_KEY_ACCESS_GROUP, .blob = g_secInfo },
+    };
+    ret = HksAddParams(newParamSet, paramArray, HKS_ARRAY_SIZE(paramArray));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&newParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = AppendGroupKeyInfo(&processInfo, &outParamSet);
+    HksFreeParamSet(&newParamSet);
+#endif
+}
+
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest017
+ * @tc.desc: tdd HksServiceRenameKeyAlias
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest017, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest017");
+    const char *alias = "HksClientServiceTest017_alias";
+    const struct HksBlob oldAlias = { strlen(alias), (uint8_t *)alias };
+    const struct HksBlob newAlias = { strlen(alias), (uint8_t *)alias };
+    const char *alias2 = "HksClientServiceTest017_alias2";
+    const struct HksBlob newAlias2 = { strlen(alias2), (uint8_t *)alias2 };
+    struct HksProcessInfo processInfo = { g_userId, g_processName, 100, 100, 100 };
+    struct HksParamSet *newParamSet = NULL;
+    int32_t ret = HksInitParamSet(&newParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam paramArray[] = {
+        { .tag = HKS_TAG_KEY_ACCESS_GROUP, .blob = g_secInfo },
+    };
+    ret = HksAddParams(newParamSet, paramArray, HKS_ARRAY_SIZE(paramArray));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&newParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksServiceRenameKeyAlias(&processInfo, &oldAlias, newParamSet, &newAlias);
+    ASSERT_NE(ret, HKS_SUCCESS);
+    ret = HksServiceRenameKeyAlias(&processInfo, &oldAlias, newParamSet, &newAlias2);
+    ASSERT_NE(ret, HKS_SUCCESS);
+
+    struct HksKeyAliasSet *outData = NULL;
+    ret = HksServiceListAliases(&processInfo, newParamSet, &outData);
+    ASSERT_NE(ret, HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest018
+ * @tc.desc: tdd DcmGenerateCertChainInAttestKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest018, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest018");
+    struct HksBlob *certChain = nullptr;
+    int32_t ret = ConstructCertChainBlob(&certChain);
+    struct HksParamSet *newParamSet = NULL;
+    ret = BuildAbortParamSet(&newParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    uint8_t remoteObject[] = {1, 2, 3, 4, 5};
+    struct HksProcessInfo processInfo{};
+    struct HksCertChainInfo certChainInfo = { certChain, 0 };
+    ret = DcmGenerateCertChainInAttestKey(&processInfo, newParamSet, remoteObject, &certChainInfo, false);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = AccessAttestKey(certChain, newParamSet, certChain);
+    ASSERT_NE(ret, HKS_SUCCESS);
+    FreeCertChainBlob(certChain);
+    HksFreeParamSet(&newParamSet);
+}
+
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest019
+ * @tc.desc: tdd AppendChangeStorageLevelInfoInService
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest019, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest019");
+    const char *alias = "HksClientServiceTest017_alias";
+    struct HksBlob oldAlias = { strlen(alias), (uint8_t *)alias };
+    struct HksParamSet *outParamSet;
+    struct HksProcessInfo processInfo = { g_userId, g_processName, 100, 100, 100 };
+
+    struct HksParamSet *newParamSet = NULL;
+    int32_t ret = HksInitParamSet(&newParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam paramArray[] = {
+        { .tag = DKS_TAG_IS_USE_DISTRIBUTED_KEY, .boolParam = true },
+    };
+    ret = HksAddParams(newParamSet, paramArray, HKS_ARRAY_SIZE(paramArray));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = AddModelToParamSet(newParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&newParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = AppendChangeStorageLevelInfoInService(&processInfo, newParamSet, &outParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    bool *isSkipUpdate = nullptr;
+    ret = HksCheckSrcKeyAndDestKeyCondition(&processInfo, &oldAlias, newParamSet, newParamSet, isSkipUpdate);
+
+    ret = HksMallocNewKey(&oldAlias);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksServiceChangeStorageLevel(&processInfo, &oldAlias, newParamSet, newParamSet);
+    ASSERT_NE(ret, HKS_SUCCESS);
+
+    HksFreeParamSet(&newParamSet);
+}
+
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest020
+ * @tc.type: FUNC 
+ * 
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest020, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest020");
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    struct HksProcessInfo processInfo = { g_userId, g_processName, 100, 100, 100 };
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
+        { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
+        { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_ALWAYS_VALID },
+        { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NONE },
+        { .tag = HKS_TAG_KEY_AUTH_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT },
+    };
+    ret = HksAddParams(paramSet, params, sizeof(params) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *outParamSet = nullptr;
+    ret = AppendNewInfoForGenKeyInService(&processInfo, paramSet, &outParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    if (ret == HKS_SUCCESS) {
+        HksFreeParamSet(&outParamSet);
+    }
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest021 with non-ALWAYS_VALID → userAuthType==0 → HKS_ERROR_INVALID_AUTH_TYPE
+ * @tc.type: FUNC 
+ * 
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest021, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest021");
+    struct HksParamSet *paramSet = nullptr;
+    struct HksProcessInfo processInfo = { g_userId, g_processName, 100, 100, 100 };
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
+        { .tag = HKS_TAG_USER_AUTH_TYPE_ATL, .uint32Param = HKS_USER_AUTH_ATL3 },
+        { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
+        { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NONE },
+    };
+    ret = HksAddParams(paramSet, params, sizeof(params) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *outParamSet = nullptr;
+    ret = AppendNewInfoForGenKeyInService(&processInfo, paramSet, &outParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest022 other error
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest022, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest022");
+    struct HksParamSet *paramSet = nullptr;
+    struct HksProcessInfo processInfo = { g_userId, g_processName, 100, 100, 100 };
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
+        { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = 0xFF },
+        { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_ALWAYS_VALID },
+        { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NONE },
+    };
+    ret = HksAddParams(paramSet, params, sizeof(params) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *outParamSet = nullptr;
+    ret = AppendNewInfoForGenKeyInService(&processInfo, paramSet, &outParamSet);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_AUTH_TYPE);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest023=true with auth access control
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest023, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest023");
+    struct HksParamSet *paramSet = nullptr;
+    struct HksProcessInfo processInfo = { g_userId, g_processName, 100, 100, 100 };
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
+        { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
+        { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
+        { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NONE },
+        { .tag = HKS_TAG_IS_ALLOWED_WRAP, .boolParam = true },
+    };
+    ret = HksAddParams(paramSet, params, sizeof(params) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *outParamSet = nullptr;
+    ret = AppendNewInfoForGenKeyInService(&processInfo, paramSet, &outParamSet);
+    EXPECT_EQ(ret, HKS_ERROR_KEY_NOT_ALLOW_WRAP);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest024, HKS_TAG_PROCESS_NAME present → HKS_ERROR_INVALID_ARGUMENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest024, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest024");
+    struct HksParamSet *paramSet = nullptr;
+    struct HksProcessInfo processInfo = { g_userId, g_processName, 100, 100, 100 };
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    const char *processNameStr = "injected_process";
+    struct HksParam injectedParam = {
+        .tag = HKS_TAG_PROCESS_NAME,
+        .blob = { strlen(processNameStr), (uint8_t *)processNameStr }
+    };
+    ret = HksAddParams(paramSet, &injectedParam, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam storageParam = { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE };
+    ret = HksAddParams(paramSet, &storageParam, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *outParamSet = nullptr;
+    ret = AppendProcessInfoAndDefault(paramSet, &processInfo, nullptr, &outParamSet, true);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest025
+ * @tc.desc: tdd AppendNewInfoForGenKeyInService, ATL-only with ALWAYS_VALID authAccessType
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest025, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest025");
+    struct HksParamSet *paramSet = nullptr;
+    struct HksProcessInfo processInfo = { g_userId, g_processName, 100, 100, 100 };
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
+        { .tag = HKS_TAG_USER_AUTH_TYPE_ATL, .uint32Param = HKS_USER_AUTH_ATL3 },
+        { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_ALWAYS_VALID },
+        { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NONE },
+    };
+    ret = HksAddParams(paramSet, params, sizeof(params) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *outParamSet = nullptr;
+    ret = AppendNewInfoForGenKeyInService(&processInfo, paramSet, &outParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest026
+ * @tc.desc: tdd AppendProcessInfoAndDefault, success path without injected process name
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest026, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest026");
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+    };
+    ret = HksAddParams(paramSet, params, sizeof(params) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *outParamSet = nullptr;
+    struct HksProcessInfo processInfo = { g_userId, g_processName, g_userIdInt, 0, 0 };
+    ret = AppendProcessInfoAndDefault(paramSet, &processInfo, nullptr, &outParamSet, true);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksFreeParamSet(&outParamSet);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest027
+ * @tc.desc: tdd CheckProcessNameTagExist, tag present → true
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest027, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest027");
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    const char *processNameStr = "test_process";
+    struct HksParam param = {
+        .tag = HKS_TAG_PROCESS_NAME,
+        .blob = { strlen(processNameStr), (uint8_t *)processNameStr }
+    };
+    ret = HksAddParams(paramSet, &param, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    bool result = CheckProcessNameTagExist(paramSet);
+    EXPECT_EQ(result, true);
+    HksFreeParamSet(&paramSet);
 }
 }

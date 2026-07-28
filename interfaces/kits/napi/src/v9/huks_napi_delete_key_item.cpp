@@ -23,6 +23,7 @@
 #include "hks_param.h"
 #include "hks_type.h"
 #include "huks_napi_common_item.h"
+#include "hks_template.h"
 
 namespace HuksNapiItem {
 namespace {
@@ -91,11 +92,13 @@ napi_value DeleteKeyAsyncWork(napi_env env, DeleteKeyAsyncContext &context)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             DeleteKeyAsyncContext napiContext = static_cast<DeleteKeyAsyncContext>(data);
 
             napiContext->result = HksDeleteKey(napiContext->keyAlias, napiContext->paramSet);
         },
         [](napi_env env, napi_status status, void *data) {
+            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             DeleteKeyAsyncContext napiContext = static_cast<DeleteKeyAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);

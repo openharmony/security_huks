@@ -534,7 +534,14 @@ static int32_t ParseImportedKeyDecryptParams(const struct HksBlob *wrappedKeyDat
 
     uint32_t keyMaterialSize = 0;
     (void)memcpy_s((uint8_t *)&keyMaterialSize, sizeof(uint32_t), keyMatLenBlobPart.data, keyMatLenBlobPart.size);
-    if ((keyMaterialSize == 0) || (keyMaterialSize > MAX_KEY_SIZE)) {
+    uint32_t maxSize = MAX_KEY_SIZE;
+#ifdef HKS_SUPPORT_ML_DSA_C
+    maxSize = (maxSize < ML_DSA_MAX_KEY_SIZE) ? ML_DSA_MAX_KEY_SIZE : maxSize;
+#endif
+#ifdef HKS_SUPPORT_ML_KEM_C
+    maxSize = (maxSize < ML_KEM_MAX_KEY_SIZE) ? ML_KEM_MAX_KEY_SIZE : maxSize;
+#endif
+    if ((keyMaterialSize == 0) || (keyMaterialSize > maxSize)) {
         HKS_LOG_E("key material size is invalid!");
         return HKS_ERROR_INVALID_WRAPPED_FORMAT;
     }
@@ -695,14 +702,31 @@ static int32_t GetRsaPrivateOrPairInnerFormat(uint32_t keyType, const struct Hks
         return AppendRsaPublicExponent(key, outKey);
     }
 
-    return CopyToInnerKey(key, outKey);
+    return CopyToInnerKey(key, HKS_ALG_RSA, outKey);
+}
+
+static int32_t CopyToMlKemInnerKey(const struct HksBlob *key, struct HksBlob *outKey)
+{
+    if ((key->size == 0) || (key->size > ML_KEM_MAX_KEY_SIZE)) {
+        HKS_LOG_E("invalid input key size: %u", key->size);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    uint8_t *outData = (uint8_t *)HksMalloc(key->size);
+    HKS_IF_NULL_LOGE_RETURN(outData, HKS_ERROR_MALLOC_FAIL, "ml-kem key malloc failed")
+
+    (void)memcpy_s(outData, key->size, key->data, key->size);
+    outKey->data = outData;
+    outKey->size = key->size;
+
+    return HKS_SUCCESS;
 }
 
 static int32_t GetCurve25519PrivateOrPairInnerFormat(uint8_t alg, uint32_t keyType,
     const struct HksBlob *key, struct HksBlob *outKey)
 {
     if (keyType == HKS_KEY_TYPE_KEY_PAIR) {
-        return CopyToInnerKey(key, outKey);
+        return CopyToInnerKey(key, alg, outKey);
     }
 
     if (key->size != HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)) {
@@ -728,6 +752,23 @@ static int32_t GetCurve25519PrivateOrPairInnerFormat(uint8_t alg, uint32_t keyTy
     return HKS_SUCCESS;
 }
 
+static int32_t CopyToMlDsaInnerKey(const struct HksBlob *key, struct HksBlob *outKey)
+{
+    if ((key->size == 0) || (key->size > ML_DSA_MAX_KEY_SIZE)) {
+        HKS_LOG_E("invalid input key size: %u", key->size);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    uint8_t *outData = (uint8_t *)HksMalloc(key->size);
+    HKS_IF_NULL_LOGE_RETURN(outData, HKS_ERROR_MALLOC_FAIL, "ml-dsa key malloc failed")
+
+    (void)memcpy_s(outData, key->size, key->data, key->size);
+    outKey->data = outData;
+    outKey->size = key->size;
+
+    return HKS_SUCCESS;
+}
+
 static int32_t GetPrivateOrPairInnerFormat(uint32_t keyType, const struct HksBlob *key,
     const struct HksParamSet *paramSet, struct HksBlob *outKey)
 {
@@ -748,7 +789,11 @@ static int32_t GetPrivateOrPairInnerFormat(uint32_t keyType, const struct HksBlo
         case HKS_ALG_SM3:
         case HKS_ALG_SM4:
         case HKS_ALG_AES:
-            return CopyToInnerKey(key, outKey);
+            return CopyToInnerKey(key, algParam->uint32Param, outKey);
+        case HKS_ALG_ML_DSA:
+            return CopyToMlDsaInnerKey(key, outKey);
+        case HKS_ALG_ML_KEM:
+            return CopyToMlKemInnerKey(key, outKey);
         case HKS_ALG_ED25519:
         case HKS_ALG_X25519:
             return GetCurve25519PrivateOrPairInnerFormat(algParam->uint32Param, keyType, key, outKey);
@@ -768,7 +813,13 @@ int32_t HksCoreImportKey(const struct HksBlob *keyAlias, const struct HksBlob *k
         (importKeyTypeParam->uint32Param == HKS_KEY_TYPE_KEY_PAIR))) {
         ret = GetPrivateOrPairInnerFormat(importKeyTypeParam->uint32Param, key, paramSet, &innerKey);
     } else {
-        ret = CopyToInnerKey(key, &innerKey);
+        uint32_t alg = 0;
+        struct HksParam *algParam = NULL;
+        ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
+        if (ret == HKS_SUCCESS) {
+            alg = algParam->uint32Param;
+        }
+        ret = CopyToInnerKey(key, alg, &innerKey);
     }
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "translate key to inner format failed, ret = %" LOG_PUBLIC "d", ret)
 
@@ -790,6 +841,12 @@ int32_t HksCoreImportWrappedKey(const struct HksBlob *keyAlias, const struct Hks
     uint32_t unwrapSuite = 0;
     int32_t ret = HksCoreCheckImportWrappedKeyParams(wrappingKey, wrappedKeyData, paramSet, keyOut, &unwrapSuite);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check import wrapped key params failed!")
+
+#ifdef L2_STANDARD
+    if (unwrapSuite == HKS_UNWRAP_SUITE_SM2_SM4_ECB_NOPADDING) {
+        return HksEnvelopImportWrapedKey(keyAlias, wrappingKey, wrappedKeyData, paramSet, keyOut);
+    }
+#endif
 
     if ((unwrapSuite == HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7_WITH_VERIFY_DIG_SM3) ||
         (unwrapSuite == HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7)) {

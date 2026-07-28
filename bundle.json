@@ -12,8 +12,8 @@
       "install": "DEST_PATH=${DEP_BUNDLE_BASE}/base/security/huks && mkdir -p $DEST_PATH && cp -r ./* $DEST_PATH"
     },
     "author": {},
-    "homePage": "https://gitee.com/openharmony",
-    "repository": "https://gitee.com/openharmony/security_huks",
+    "homePage": "https://gitcode.com/openharmony",
+    "repository": "https://gitcode.com/openharmony/security_huks",
     "supplier": "Organization: OpenHarmony",
     "component": {
       "name": "huks",
@@ -21,8 +21,9 @@
       "syscap": [
           "SystemCapability.Security.Huks.Extension",
           "SystemCapability.Security.Huks.Core",
-          "SystemCapability.Security.Cipher"
-          ],
+          "SystemCapability.Security.Cipher",
+          "SystemCapability.Security.Huks.CryptoExtension = false"
+      ],
       "features": [
         "huks_enabled",
         "huks_use_mbedtls",
@@ -51,7 +52,8 @@
         "huks_enable_skip_upgrade_key_storage_secure_level",
         "huks_sa_skip_upgrade_config",
         "huks_hap_skip_upgrade_config",
-        "huks_enable_hdi_in_standard"
+        "huks_enable_hdi_in_standard",
+        "huks_enable_ukey_config"
       ],
       "adapted_system_type": [
           "standard",
@@ -65,7 +67,9 @@
       "ram": "4828KByte",
       "deps": {
         "components": [
+          "hdf_core",
           "ability_base",
+          "ability_runtime",
           "access_token",
           "bundle_framework",
           "c_utils",
@@ -78,6 +82,7 @@
           "hilog_lite",
           "ipc",
           "napi",
+          "node",
           "os_account",
           "safwk",
           "samgr",
@@ -85,10 +90,14 @@
           "drivers_interface_user_auth",
           "drivers_interface_huks",
           "openssl",
+          "openhitls",
           "bounds_checking_function",
           "mbedtls",
           "cJSON",
-          "init"
+          "init",
+          "ets_frontend",
+          "jsoncpp",
+          "libuv"
         ]
       },
       "build": {
@@ -102,9 +111,20 @@
             "//base/security/huks:service_group"
           ]
         },
-        "inner_api": [
+        "inner_kits": [
           {
             "name": "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
+            "header": {
+              "header_files": [
+                "hks_api.h",
+                "hks_param.h",
+                "hks_type.h"
+              ],
+              "header_base": "//base/security/huks/interfaces/inner_api/huks_standard/main/include"
+            }
+          },
+          {
+            "name": "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukschipsetsdk",
             "header": {
               "header_files": [
                 "hks_api.h",

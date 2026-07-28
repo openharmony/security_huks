@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,43 +15,100 @@
 
 #include "hkschangestoragelevel_fuzzer.h"
 
-#include <securec.h>
-
-#include "hks_api.h"
-#include "hks_mem.h"
-#include "hks_param.h"
-#include "hks_type.h"
-
 #include "hks_fuzz_util.h"
-
-constexpr int ALIAS_SIZE = 10;
+#include "hks_type_enum.h"
 
 namespace OHOS {
 namespace Security {
 namespace Hks {
 
-int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+static uint32_t PickRandomAuthStorageLevel(FuzzedDataProvider &fdp) {
+    if (fdp.ConsumeBool()) {
+        return fdp.ConsumeIntegralInRange<uint32_t>(1, 1024);
+    }
+    static const uint32_t kAuthStorageLevel[] = {
+        HKS_AUTH_STORAGE_LEVEL_DE,
+        HKS_AUTH_STORAGE_LEVEL_CE,
+        HKS_AUTH_STORAGE_LEVEL_ECE,
+    };
+    return fdp.PickValueInArray(kAuthStorageLevel);
+}
+
+static void AddSomeParams(FuzzedDataProvider &fdp, WrapParamSet &ps,
+    [[maybe_unused]] std::vector<std::vector<uint8_t>> &blobStorage)
 {
-    if (data == nullptr || size < ALIAS_SIZE) {
-        return -1;
+    std::vector<struct HksParam> params;
+
+    if (fdp.ConsumeProbability<double>() < 0.99) {
+        uint32_t storageLevel = PickRandomAuthStorageLevel(fdp);
+        params.push_back({ .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = storageLevel });
     }
 
-    struct HksBlob keyAlias = { ALIAS_SIZE, ReadData<uint8_t *>(data, size, ALIAS_SIZE) };
-    size_t inSize = size >> 1; // same as size / 2 to avoid magic number
-    WrapParamSet psSrc = ConstructHksParamSetFromFuzz(data, inSize);
-    size = size - ((size >> 1) - inSize);
+    if (fdp.ConsumeProbability<double>() < 0.99) {
+        uint32_t userId = fdp.ConsumeIntegralInRange<uint32_t>(1, 1024);
+        params.push_back({ .tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = userId });
+    }
 
-    WrapParamSet psDes = ConstructHksParamSetFromFuzz(data, size);
+    if (!params.empty()) {
+        HksAddParams(ps.s, params.data(), params.size());
+    }
+}
 
-    [[maybe_unused]] int ret = HksChangeStorageLevel(&keyAlias, psSrc.s, psDes.s);
+WrapParamSet ConstructChangeStorageLevelParamSet(FuzzedDataProvider &fdp)
+{
+    WrapParamSet ps{};
+    if (HksInitParamSet(&ps.s) != HKS_SUCCESS) {
+        return ps;
+    }
 
-    return 0;
+    std::vector<std::vector<uint8_t>> blobStorage;
+    AddSomeParams(fdp, ps, blobStorage);
+
+    (void)HksBuildParamSet(&ps.s);
+    return ps;
+}
+
+int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
+{
+    uint32_t aliasSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 32);
+    std::vector<uint8_t> alias = fdp.ConsumeBytes<uint8_t>(aliasSize);
+    if (alias.size() == 0) {
+        alias = std::vector<uint8_t>(1, 0);
+    }
+    struct HksBlob keyAlias = { static_cast<uint32_t>(alias.size()), alias.data() };
+
+    (void)HksFuzzGenerateKey(fdp, keyAlias);
+
+    WrapParamSet srcPs = ConstructParamSetAddFuzzData(ConstructChangeStorageLevelParamSet(fdp), fdp);
+    WrapParamSet destPs = ConstructParamSetAddFuzzData(ConstructChangeStorageLevelParamSet(fdp), fdp);
+
+    return HksChangeStorageLevel(&keyAlias, srcPs.s, destPs.s);
 }
 }}}
 
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
+    struct HksBlob rsaAlias = { 21, reinterpret_cast<uint8_t *>(const_cast<char *>("fuzz_chglevel_rsa")) };
+    WrapParamSet genPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
+        { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
+        { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PSS } });
+    int32_t ret = HksGenerateKey(&rsaAlias, genPs.s, nullptr);
+    printf("fuzz_changestoragelevel init: GenerateKey ret=%d\n", ret);
+
+    WrapParamSet srcPs = BuildFixedParamSet({ { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT } });
+    WrapParamSet destPs = BuildFixedParamSet({ { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP } });
+    ret = HksChangeStorageLevel(&rsaAlias, srcPs.s, destPs.s);
+    printf("fuzz_changestoragelevel init: HksChangeStorageLevel ret=%d\n", ret);
+    return 0;
+}
+
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    std::vector<uint8_t> v(data, data + size);
-    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
+    FuzzedDataProvider fdp(data, size);
+    int32_t ret = OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(fdp);
+
+    OHOS::Security::Hks::FuzzStatsRecord(ret);
+    return 0;
 }
 

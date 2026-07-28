@@ -24,6 +24,7 @@
 #include "securec.h"
 
 #define  AES_BYTE_SIZE  256
+#define  IV_BASE64_MAX_LEN 64
 
 static int32_t PaddingPkcs5(char *data, size_t inSize)
 {
@@ -42,6 +43,9 @@ static int32_t PaddingPkcs5(char *data, size_t inSize)
 
 static int32_t UnpaddingPkcs5(char *data, int32_t dataLen)
 {
+    if (dataLen <= 0) {
+        return ERROR_CODE_GENERAL;
+    }
     int32_t padLen = data[dataLen - 1];
 
     if (padLen <= 0 || padLen >= AES_BLOCK_SIZE) {
@@ -114,7 +118,8 @@ static int32_t SetIv(const char *ivBuf, int32_t ivBufLen, AesCryptContext *ctx)
         return ERROR_CODE_GENERAL;
     }
 
-    if ((ivBufLen < (ctx->iv.ivOffset + ctx->iv.ivLen)) || (ctx->iv.ivOffset < 0) || (ctx->iv.ivLen <= 0)) {
+    if ((ctx->iv.ivOffset > (INT32_MAX - ctx->iv.ivLen)) || (ivBufLen < (ctx->iv.ivOffset + ctx->iv.ivLen))
+        || (ctx->iv.ivOffset < 0) || (ctx->iv.ivLen <= 0)) {
         CIPHER_LOG_E("ivLen or ivOffset err.");
         return ERROR_CODE_GENERAL;
     }
@@ -159,6 +164,10 @@ static int32_t InitAesCryptContext(const char *key, const AesIvMode *iv, AesCryp
 
     if (iv->ivBuf != NULL) {
         size_t ivBufLen = strlen((const char *)(uintptr_t)iv->ivBuf);
+        if (ivBufLen == 0 || ivBufLen > IV_BASE64_MAX_LEN) {
+            CIPHER_LOG_E("ivBuf base64 length:%zu invalid, max is %d.", ivBufLen, IV_BASE64_MAX_LEN);
+            return ERROR_CODE_GENERAL;
+        }
         char* ivBuf = MallocDecodeData(iv->ivBuf, &ivBufLen);
         if (ivBuf == NULL) {
             CIPHER_LOG_E("base64 decode failed.");

@@ -41,5 +41,6 @@
     OH_Huks_FreeKeyAliasSet;
     OH_Huks_WrapKey;
     OH_Huks_UnwrapKey;
+    OH_Huks_FreeCertSet;
   local: *;
 };

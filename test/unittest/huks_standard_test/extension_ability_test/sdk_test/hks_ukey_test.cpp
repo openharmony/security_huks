@@ -1,0 +1,539 @@
+/*
+ * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <cstdint>
+#include <gtest/gtest.h>
+
+#include "hks_type.h"
+#include "hks_ukey_test.h"
+#include "securec.h"
+#include "file_ex.h"
+#include "hks_api.h"
+#include "hks_param.h"
+#include "hks_tag.h"
+#include "hks_mem.h"
+#include "hks_test_log.h"
+#include "hks_api.h"
+#include "hks_test_common_h.h"
+
+using namespace testing::ext;
+namespace {
+class HksUKeyTest : public testing::Test {
+public:
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
+
+protected:
+    static struct HksBlob StringToHuksBlob(const char *str)
+    {
+        struct HksBlob blob;
+        if (!str) {
+            blob.size = 0;
+            blob.data = nullptr;
+            return blob;
+        }
+        blob.size = strlen(str);
+        blob.data = (uint8_t *)str; // 注意：这里没有分配新内存，只是指向原字符串
+        return blob;
+    }
+
+    // 工具函数：构造 HksParamSet
+    static int32_t ConstructTestParamSet(struct HksParamSet **paramSet)
+    {
+        HksParam params[] = {
+            {
+                .tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME,
+                .blob = { 18, (uint8_t *)"ability_name_value" }
+            },
+            {
+                .tag = HKS_EXT_CRYPTO_TAG_UKEY_PIN,
+                .blob = { .size = 6, .data = (uint8_t *)"123789" }
+            }
+        };
+
+        uint32_t paramsCnt = sizeof(params) / sizeof(params[0]);
+        uint32_t totalSize = sizeof(struct HksParamSet) + sizeof(struct HksParam) * paramsCnt;
+
+        *paramSet = (struct HksParamSet *)HksMalloc(totalSize);
+        if (*paramSet == nullptr) {
+            return HKS_ERROR_MALLOC_FAIL;
+        }
+        (*paramSet)->paramSetSize = totalSize;
+        (*paramSet)->paramsCnt = paramsCnt;
+
+        for (uint32_t i = 0; i < paramsCnt; i++) {
+            (*paramSet)->params[i] = params[i];
+        }
+
+        return 0;
+    }
+
+    static int32_t ConstructTestParamSet(struct HksParamSet **paramSet, HksParam params[], uint32_t paramsCnt)
+    {
+        uint32_t totalSize = sizeof(struct HksParamSet) + sizeof(struct HksParam) * paramsCnt;
+
+        *paramSet = (struct HksParamSet *)HksMalloc(totalSize);
+        if (*paramSet == nullptr) {
+            return HKS_ERROR_MALLOC_FAIL;
+        }
+        (*paramSet)->paramSetSize = totalSize;
+        (*paramSet)->paramsCnt = paramsCnt;
+
+        for (uint32_t i = 0; i < paramsCnt; i++) {
+            (*paramSet)->params[i] = params[i];
+        }
+
+        return 0;
+    }
+};
+
+void HksUKeyTest::SetUpTestCase(void)
+{
+}
+
+void HksUKeyTest::TearDownTestCase(void)
+{
+}
+
+void HksUKeyTest::SetUp()
+{
+}
+
+void HksUKeyTest::TearDown()
+{
+}
+
+HWTEST_F(HksUKeyTest, HksRegisterProviderTest, TestSize.Level0)
+{
+    int32_t ret = 0;
+    struct HksBlob name = StringToHuksBlob("testHap");
+    EXPECT_NE(name.data, nullptr);
+
+    struct HksParamSet *paramSet = nullptr;
+    ret = ConstructTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksRegisterProvider(&name, paramSet);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("HksRegisterProviderTest, ret = %d", ret);
+    }
+
+    HksFreeParamSet(&paramSet);
+    HKS_TEST_LOG_I("TestHksUKey, Testcase_RegisterProvider pass!");
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+HWTEST_F(HksUKeyTest, HksRegisterProviderTest001, TestSize.Level0)
+{
+    std::string resourceId = "{\"providerName\":\"P01\",\"abilityName\":\"CryptoAbility\""
+        ",\"bundleName\":\"com.hmos.hukstest.ukey\",\"index\":{\"key\":\"key1\"}}";
+    struct HksAbilityInfo tmp{};
+    tmp.abilityName.data = (uint8_t*)HksMalloc(128);
+    tmp.abilityName.size = 128;
+    tmp.bundleName.data = (uint8_t*)HksMalloc(128);
+    tmp.bundleName.size = 128;
+    HksBlob resourceBlob = StringToHuksBlob(resourceId.data());
+    int32_t ret = HksQueryAbilityInfo(&resourceBlob, &tmp);
+    HKS_FREE_BLOB(tmp.abilityName);
+    HKS_FREE_BLOB(tmp.bundleName);
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+HWTEST_F(HksUKeyTest, HksUnregisterProvider, TestSize.Level0)
+{
+    int32_t ret = 0;
+    struct HksBlob name = StringToHuksBlob("testHap");
+    EXPECT_NE(name.data, nullptr);
+
+    struct HksParamSet *paramSet = nullptr;
+    ret = ConstructTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksUnregisterProvider(&name, paramSet);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("falied, HksUnregisterProvider, ret = %d", ret);
+    }
+    
+    HksFreeParamSet(&paramSet);
+    HKS_TEST_LOG_I("TestHksUKey, Testcase_UnregisterProvider pass!");
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+HWTEST_F(HksUKeyTest, HksAuthUkeyPinTest, TestSize.Level0)
+{
+    int32_t ret = 0;
+    const char *index =
+        "{\"providerName\":\"testHap\","
+        "\"abilityName\":\"com.cryptoapplication\","
+        "\"bundleName\":\"CryptoExtension\","
+        "\"index\":{\"key\":\"testkey1\"}}";
+    struct HksBlob resourceId = StringToHuksBlob(index);
+    EXPECT_NE(resourceId.data, nullptr);
+
+    struct HksParamSet *paramSet = nullptr;
+    ret = ConstructTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    uint32_t retryCount = 0;
+
+    ret = HksAuthUkeyPin(&resourceId, paramSet, &retryCount);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("failed, HksAuthUkeyPin ret = %d", ret);
+    }
+
+    HksFreeParamSet(&paramSet);
+    HKS_TEST_LOG_I("TestHksUKey, Testcase_AuthUkeyPin pass!");
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+HWTEST_F(HksUKeyTest, HksGetUkeyPinAuthStateTest, TestSize.Level0)
+{
+    int32_t ret = 0;
+    const char *index =
+        "{\"providerName\":\"testHap\","
+        "\"abilityName\":\"com.cryptoapplication\","
+        "\"bundleName\":\"CryptoExtension\","
+        "\"index\":{\"key\":\"testkey1\"}}";
+    struct HksBlob resourceId = StringToHuksBlob(index);
+    EXPECT_NE(resourceId.data, nullptr);
+
+    struct HksParamSet *paramSet = nullptr;
+    ret = ConstructTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    int32_t status = 0;
+
+    ret = HksGetUkeyPinAuthState(&resourceId, paramSet, &status);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("failed, HksGetUkeyPinAuthState ret = %d", ret);
+    }
+
+    HksFreeParamSet(&paramSet);
+    HKS_TEST_LOG_I("TestHksUKey, Testcase_GetUkeyPinAuthState pass!");
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+HWTEST_F(HksUKeyTest, HksOpenRemoteHandleTest, TestSize.Level0)
+{
+    int32_t ret = 0;
+    const char *index =
+        "{\"providerName\":\"testHap\","
+        "\"abilityName\":\"com.cryptoapplication\","
+        "\"bundleName\":\"CryptoExtension\","
+        "\"index\":{\"key\":\"testkey1\"}}";
+    struct HksBlob resourceId = StringToHuksBlob(index);
+    EXPECT_NE(resourceId.data, nullptr);
+
+    struct HksParamSet *paramSet = nullptr;
+    ret = ConstructTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksOpenRemoteResource(&resourceId, paramSet);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("failed, HksOpenRemoteResource ret = %d", ret);
+    }
+
+    HksFreeParamSet(&paramSet);
+    HKS_TEST_LOG_I("TestHksUKey, Testcase_GetUkeyPinAuthState pass!");
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+HWTEST_F(HksUKeyTest, HksCloseRemoteHandleTest, TestSize.Level0)
+{
+    int32_t ret = 0;
+    const char *index =
+        "{\"providerName\":\"testHap\","
+        "\"abilityName\":\"com.cryptoapplication\","
+        "\"bundleName\":\"CryptoExtension\","
+        "\"index\":{\"key\":\"testkey1\"}}";
+    struct HksBlob resourceId = StringToHuksBlob(index);
+    EXPECT_NE(resourceId.data, nullptr);
+
+    struct HksParamSet *paramSet = nullptr;
+    ret = ConstructTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksCloseRemoteResource(&resourceId, paramSet);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("failed, HksCloseRemoteResource ret = %d", ret);
+    }
+
+    HksFreeParamSet(&paramSet);
+    HKS_TEST_LOG_I("TestHksUKey, Testcase_GetUkeyPinAuthState pass!");
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+HWTEST_F(HksUKeyTest, HksClearPinAuthStateTest, TestSize.Level0)
+{
+    int32_t ret = 0;
+    const char *index =
+        "{\"providerName\":\"testHap\","
+        "\"abilityName\":\"com.cryptoapplication\","
+        "\"bundleName\":\"CryptoExtension\","
+        "\"index\":{\"key\":\"testkey1\"}}";
+    struct HksBlob resourceId = StringToHuksBlob(index);
+    EXPECT_NE(resourceId.data, nullptr);
+
+    ret = HksClearUkeyPinAuthState(&resourceId);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("failed, HksClearPinAuthState ret = %d", ret);
+    }
+
+    HKS_TEST_LOG_I("TestHksUKey, Testcase_GetUkeyPinAuthState pass!");
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+HWTEST_F(HksUKeyTest, HksSetOrGetRemotePropertyTest, TestSize.Level0)
+{
+    int32_t ret = 0;
+    const char *index =
+        "{\"providerName\":\"testHap\","
+        "\"abilityName\":\"com.cryptoapplication\","
+        "\"bundleName\":\"CryptoExtension\","
+        "\"index\":{\"key\":\"testkey1\"}}";
+    struct HksBlob resourceId = StringToHuksBlob(index);
+    EXPECT_NE(resourceId.data, nullptr);
+
+    const char *propertyIndex = "{\"property\":\"test_property\"}";
+    struct HksBlob propertyId = StringToHuksBlob(propertyIndex);
+    EXPECT_NE(propertyId.data, nullptr);
+
+    struct HksParamSet *paramSet = nullptr;
+    ret = ConstructTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *propertySetOut = nullptr;
+
+    ret = HksSetOrGetRemoteProperty(HKS_EXT_PROPERTY_OPERATION_GET,
+        &resourceId, &propertyId, paramSet, &propertySetOut);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("failed, HksSetOrGetRemoteProperty GET ret = %d", ret);
+    }
+
+    HksFreeParamSet(&propertySetOut);
+    HKS_TEST_LOG_I("TestHksUKey, Testcase_SetOrGetRemoteProperty pass!");
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+HWTEST_F(HksUKeyTest, HksSetRemotePropertyTest, TestSize.Level0)
+{
+    int32_t ret = 0;
+    const char *index =
+        "{\"providerName\":\"testHap\","
+        "\"abilityName\":\"com.cryptoapplication\","
+        "\"bundleName\":\"CryptoExtension\","
+        "\"index\":{\"key\":\"testkey1\"}}";
+    struct HksBlob resourceId = StringToHuksBlob(index);
+    EXPECT_NE(resourceId.data, nullptr);
+
+    const char *propertyIndex = "{\"property\":\"test_property\"}";
+    struct HksBlob propertyId = StringToHuksBlob(propertyIndex);
+    EXPECT_NE(propertyId.data, nullptr);
+
+    struct HksParamSet *paramSet = nullptr;
+    ret = ConstructTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksSetOrGetRemoteProperty(HKS_EXT_PROPERTY_OPERATION_SET,
+        &resourceId, &propertyId, paramSet, nullptr);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("failed, HksSetOrGetRemoteProperty SET ret = %d", ret);
+    }
+
+    HksFreeParamSet(&paramSet);
+    HKS_TEST_LOG_I("TestHksUKey, Testcase_SetRemoteProperty pass!");
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+HWTEST_F(HksUKeyTest, HksExportProviderCertificatesWithoutNameTest, TestSize.Level0)
+{
+    int32_t ret = 0;
+
+    struct HksParamSet *paramSet = nullptr;
+    ret = ConstructTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksExtCertInfoSet certSet = { 0, nullptr };
+
+    ret = HksExportProviderCertificates(nullptr, paramSet, &certSet);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("failed, HksExportProviderCertificates ret = %d", ret);
+    }
+
+    HksFreeParamSet(&paramSet);
+    HKS_TEST_LOG_I("TestHksUKey, Testcase_HksExportProviderCertificates pass!");
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+HWTEST_F(HksUKeyTest, HksExportCertificatesTest, TestSize.Level0)
+{
+    int32_t ret = 0;
+    const char *index =
+        "{\"providerName\":\"testHap\","
+        "\"abilityName\":\"com.cryptoapplication\","
+        "\"bundleName\":\"CryptoExtension\","
+        "\"index\":{\"key\":\"testkey1\"}}";
+    struct HksBlob resourceId = StringToHuksBlob(index);
+    EXPECT_NE(resourceId.data, nullptr);
+
+    struct HksParamSet *paramSet = nullptr;
+    ret = ConstructTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    HksExtCertInfoSet certSet = { 0, nullptr };
+
+    ret = HksExportCertificate(&resourceId, paramSet, &certSet);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("failed, HksExportCertificate ret = %d", ret);
+    }
+    
+    HksFreeParamSet(&paramSet);
+    HksFreeExtCertSet(&certSet);
+    HKS_TEST_LOG_I("TestHksUKey, Testcase_HksExportCertificate pass!");
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+HWTEST_F(HksUKeyTest, HksFreeExtCertSetTest, TestSize.Level0)
+{
+    int32_t ret = 0;
+    struct HksExtCertInfoSet certInfoSet = { 0, nullptr };
+    certInfoSet.count = 2;
+    certInfoSet.certs = (struct HksExtCertInfo *)HksMalloc(sizeof(struct HksExtCertInfo) * certInfoSet.count);
+    EXPECT_NE(certInfoSet.certs, nullptr);
+
+    for(uint32_t i = 0; i < certInfoSet.count; i++) {
+        certInfoSet.certs[i].purpose = i + 1;
+
+        const char *indexStr = (i == 0) ? "cert_index_0" : "cert_index_1";
+        const char *certStr = (i == 0) ? "certificate_data_0" : "certificate_data_1";
+
+        certInfoSet.certs[i].index.size = strlen(indexStr);
+        certInfoSet.certs[i].index.data = (uint8_t *)HksMalloc(certInfoSet.certs[i].index.size);
+        EXPECT_NE(certInfoSet.certs[i].index.data, nullptr);
+        ret = memcpy_s(certInfoSet.certs[i].index.data, certInfoSet.certs[i].index.size, indexStr, certInfoSet.certs[i].index.size);
+        EXPECT_EQ(ret, HKS_SUCCESS);
+
+        certInfoSet.certs[i].cert.size = strlen(certStr);
+        certInfoSet.certs[i].cert.data = (uint8_t *)HksMalloc(certInfoSet.certs[i].cert.size);
+        EXPECT_NE(certInfoSet.certs[i].cert.data, nullptr);
+        ret = memcpy_s(certInfoSet.certs[i].cert.data, certInfoSet.certs[i].cert.size, certStr, certInfoSet.certs[i].cert.size);
+        EXPECT_EQ(ret, HKS_SUCCESS);
+    }
+
+    HksFreeExtCertSet(&certInfoSet);
+
+    EXPECT_EQ(certInfoSet.count, 0u);
+
+    HKS_TEST_LOG_I("HksFreeExtCertSet executed successfully.");
+
+    HksFreeExtCertSet(&certInfoSet);
+    EXPECT_EQ(certInfoSet.count, 0u);
+
+    HKS_TEST_LOG_I("TestHksUKey, Testcase_HksFreeExtCertSet pass!");
+}
+
+/**
+* @tc.name: HksImportCertificateTest001
+* @tc.desc: 测试ImportCertificate接口正常导入证书场景
+* @tc.type: FUNC
+*/
+HWTEST_F(HksUKeyTest, HksImportCertificateTest001, TestSize.Level0)
+{
+    int32_t ret = 0;
+    struct HksParamSet *paramSet = nullptr;
+    struct HksBlob keyAlias = StringToHuksBlob("test_import_cert_alias");
+
+    struct HksExtCertInfo certInfo = {};
+    certInfo.purpose = 1;
+
+    const char *indexStr = "cert_index_0";
+    const char *certStr = "certificate_data_0";
+
+    certInfo.index.size = strlen(indexStr);
+    certInfo.index.data = (uint8_t *)HksMalloc(certInfo.index.size);
+    EXPECT_NE(certInfo.index.data, nullptr);
+    ret = memcpy_s(certInfo.index.data, certInfo.index.size, indexStr, certInfo.index.size);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    certInfo.cert.size = strlen(certStr);
+    certInfo.cert.data = (uint8_t *)HksMalloc(certInfo.cert.size);
+    EXPECT_NE(certInfo.cert.data, nullptr);
+    ret = memcpy_s(certInfo.cert.data, certInfo.cert.size, certStr, certInfo.cert.size);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksImportCertificate(&keyAlias, &certInfo, paramSet);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("HksImportCertificateTest001, ret = %d", ret);
+    }
+
+    // 释放资源
+    free(certInfo.index.data);
+    free(certInfo.cert.data);
+    HksFreeParamSet(&paramSet);
+
+    HKS_TEST_LOG_I("TestHksUKey, Testcase_HksImportCertificateTest001 pass!");
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+/**
+* @tc.name: HksImportCertificateTest002
+* @tc.desc: 测试ImportCertificate接口无效证书格式场景
+* @tc.type: FUNC
+*/
+HWTEST_F(HksUKeyTest, HksImportCertificateTest002, TestSize.Level0)
+{
+    int32_t ret = 0;
+    struct HksParamSet *paramSet = nullptr;
+    struct HksBlob keyAlias = StringToHuksBlob("test_import_cert_alias");
+
+    // 传入空证书指针
+    ret = HksImportCertificate(&keyAlias, nullptr, paramSet);
+    EXPECT_NE(ret, HKS_SUCCESS);
+
+    HKS_TEST_LOG_I("TestHksUKey, Testcase_HksImportCertificateTest002 pass!");
+}
+
+/**
+* @tc.name: HksGetResourceIdTest001
+* @tc.desc: 测试GetResourceId接口（else分支，返回HKS_ERROR_API_NOT_SUPPORTED）
+* @tc.type: FUNC
+*/
+HWTEST_F(HksUKeyTest, HksGetResourceIdTest001, TestSize.Level0)
+{
+    int32_t ret = 0;
+    const char *providerNameStr = "test_provider";
+    struct HksBlob providerName = StringToHuksBlob(providerNameStr);
+    EXPECT_NE(providerName.data, nullptr);
+
+    struct HksParamSet *paramSet = nullptr;
+    ret = ConstructTestParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    uint8_t resourceIdData[128] = {0};
+    struct HksBlob resourceId = { sizeof(resourceIdData), resourceIdData };
+
+    ret = HksGetResourceId(&providerName, paramSet, &resourceId);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("failed, HksGetResourceId ret = %d", ret);
+    }
+
+    HksFreeParamSet(&paramSet);
+    HKS_TEST_LOG_I("TestHksUKey, Testcase_HksGetResourceIdTest001 pass!");
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+}// namespace

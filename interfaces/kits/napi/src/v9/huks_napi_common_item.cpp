@@ -17,18 +17,39 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 
 #include "hks_errcode_adapter.h"
+#include "hks_error_code.h"
 #include "hks_log.h"
 #include "hks_param.h"
+#include "hks_tag.h"
 #include "hks_type.h"
+#include "hks_type_enum.h"
+#include "js_native_api_types.h"
 #include "securec.h"
 
 namespace HuksNapiItem {
 namespace {
 constexpr int HKS_MAX_DATA_LEN = 0x6400000; // The maximum length is 100M
 constexpr size_t ASYNCCALLBACK_ARGC = 2;
+constexpr size_t ASYNCCALLBACKVOID_ARGC = 1;
+static int32_t g_pinRetryCount = 0; //ukey retry count
 }  // namespace
+
+napi_value NapiCreateError(napi_env env, int32_t errCode, const char *errMsg)
+{
+    napi_value code = nullptr;
+    NAPI_CALL(env, napi_create_int32(env, errCode, &code));
+
+    napi_value msg = nullptr;
+    NAPI_CALL(env, napi_create_string_utf8(env, errMsg, strlen(errMsg), &msg));
+
+    napi_value result = nullptr;
+    NAPI_CALL(env, napi_create_error(env, code, msg, &result));
+
+    return result;
+}
 
 napi_value ParseKeyAlias(napi_env env, napi_value object, HksBlob *&alias)
 {
@@ -109,7 +130,6 @@ napi_value GetUint8Array(napi_env env, napi_value object, HksBlob &arrayBlob)
         return nullptr;
     }
     if (length == 0) {
-        HKS_LOG_I("the created memory length just 1 Byte");
         // the created memory length just 1 Byte
         arrayBlob.data = static_cast<uint8_t *>(HksMalloc(1));
     } else {
@@ -242,6 +262,10 @@ napi_value ParseParams(napi_env env, napi_value object, std::vector<HksParam> &p
     bool hasNextElement = false;
     napi_value result = nullptr;
     size_t index = 0;
+    HksParam oldAadParam = { .tag = HKS_TAG_ASSOCIATED_DATA, .blob = {0} };
+    HksParam newAadParam = { .tag = HKS_TAG_ASSOCIATED_DATA, .blob = {0} };
+    bool hasOldAad = false;
+    bool hasNewAad = false;
     while ((napi_has_element(env, object, index, &hasNextElement) == napi_ok) && hasNextElement) {
         napi_value element = nullptr;
         NAPI_CALL(env, napi_get_element(env, object, index, &element));
@@ -253,10 +277,29 @@ napi_value ParseParams(napi_env env, napi_value object, std::vector<HksParam> &p
             HKS_LOG_E("get param failed when parse input params.");
             return nullptr;
         }
-
-        params.push_back(param);
         index++;
+
+        if (param.tag == HKS_TAG_ASSOCIATED_DATA) {
+            oldAadParam.blob.size = param.blob.size;
+            oldAadParam.blob.data = param.blob.data;
+            hasOldAad = true;
+            continue;
+        } else if (param.tag == HKS_TAG_AAD) {
+            newAadParam.blob.size = param.blob.size;
+            newAadParam.blob.data = param.blob.data;
+            hasNewAad = true;
+            continue;
+        }
+        params.push_back(param);
     }
+
+    // new aad param will be used if two aad params exist
+    if (hasNewAad) {
+        params.push_back(newAadParam);
+    } else if (hasOldAad) {
+        params.push_back(oldAadParam);
+    }
+
     return GetInt32(env, 0);
 }
 
@@ -371,6 +414,81 @@ static napi_value GenerateArrayBuffer(napi_env env, uint8_t *data, uint32_t size
     return outBuffer;
 }
 
+napi_value HksExtGenerateArrayBuffer(const napi_env &env, uint8_t *data, uint32_t size)
+{
+    napi_value buffer{};
+    void *bufferPtr = nullptr;
+    NAPI_THROW(env, napi_create_arraybuffer(env, size * sizeof(uint8_t), &bufferPtr, &buffer) != napi_ok,
+        napi_generic_failure, "create arraybuffer failed");
+
+    napi_value outBuffer{};
+    NAPI_THROW(env, napi_create_typedarray(env, napi_uint8_array, size, buffer, 0, &outBuffer) != napi_ok,
+        napi_generic_failure, "create typedarray failed");
+
+    auto *outPutBytes = static_cast<uint8_t *>(bufferPtr);
+    for (uint32_t i = 0; i < size; ++i) {
+        outPutBytes[i] = data[i];
+    }
+    return outBuffer;
+}
+
+static napi_value HksExtGenerateHksParam(napi_env env, const HksParam &param)
+{
+    napi_value hksParam = nullptr;
+    NAPI_THROW(env, napi_create_object(env, &hksParam) != napi_ok, napi_generic_failure, "create object failed");
+
+    napi_value tag = nullptr;
+    NAPI_THROW(env, napi_create_uint32(env, param.tag, &tag) != napi_ok, napi_generic_failure, "create uint32 failed");
+    NAPI_THROW(env, napi_set_named_property(env, hksParam, HKS_PARAM_PROPERTY_TAG.c_str(), tag) != napi_ok,
+        napi_generic_failure, "set named property failed");
+
+    napi_value value = nullptr;
+    switch (param.tag & HKS_TAG_TYPE_MASK) {
+        case HKS_TAG_TYPE_INT:
+            NAPI_THROW(env, napi_create_int32(env, param.int32Param, &value), napi_generic_failure,
+                "create int32 failed");
+            break;
+        case HKS_TAG_TYPE_UINT:
+            NAPI_THROW(env, napi_create_uint32(env, param.uint32Param, &value) != napi_ok, napi_generic_failure,
+                "create uint32 failed");
+            break;
+        case HKS_TAG_TYPE_ULONG:
+            NAPI_THROW(env, napi_create_int64(env, param.uint64Param, &value) != napi_ok, napi_generic_failure,
+                "create int64 failed");
+            break;
+        case HKS_TAG_TYPE_BOOL:
+            NAPI_THROW(env, napi_get_boolean(env, param.boolParam, &value) != napi_ok, napi_generic_failure,
+                "get boolean failed");
+            break;
+        case HKS_TAG_TYPE_BYTES:
+            value = HksExtGenerateArrayBuffer(env, param.blob.data, param.blob.size);
+            break;
+        default:
+            value = GetNull(env);
+            break;
+    }
+    NAPI_THROW(env, napi_set_named_property(env, hksParam, HKS_PARAM_PROPERTY_VALUE.c_str(), value) != napi_ok,
+        napi_generic_failure, "set named property failed");
+
+    return hksParam;
+}
+
+static napi_value HksExtGenerateHksParamArray(napi_env env, const HksParamSet &paramSet)
+{
+    napi_value paramArray = nullptr;
+    NAPI_THROW(env, napi_create_array(env, &paramArray) != napi_ok,
+        napi_generic_failure, "create array failed");
+
+    for (uint32_t i = 0; i < paramSet.paramsCnt; i++) {
+        napi_value element = nullptr;
+        element = HksExtGenerateHksParam(env, paramSet.params[i]);
+        NAPI_THROW(env, napi_set_element(env, paramArray, i, element) != napi_ok,
+            napi_generic_failure, "set element failed");
+    }
+
+    return paramArray;
+}
+
 static napi_value GenerateHksParam(napi_env env, const HksParam &param)
 {
     napi_value hksParam = nullptr;
@@ -406,7 +524,7 @@ static napi_value GenerateHksParam(napi_env env, const HksParam &param)
     return hksParam;
 }
 
-static napi_value GenerateHksParamArray(napi_env env, const HksParamSet &paramSet)
+napi_value GenerateHksParamArray(napi_env env, const HksParamSet &paramSet)
 {
     napi_value paramArray = nullptr;
     NAPI_CALL(env, napi_create_array(env, &paramArray));
@@ -486,8 +604,11 @@ napi_value GetHandleValue(napi_env env, napi_value object, struct HksBlob *&hand
         return nullptr;
     }
 
-    uint32_t handleTmp = 0;
-    napi_status status = napi_get_value_uint32(env, object, &handleTmp);
+    // Note: Use double instead of uint32 to support handle values larger than 32 bits.
+    // JavaScript/ArkTS 'number' type is IEEE 754 double, with 53-bit safe integer precision.
+    // Handle values must not exceed 2^53-1 to avoid precision loss.
+    double handleTmp = 0;
+    napi_status status = napi_get_value_double(env, object, &handleTmp);
     if (status != napi_ok) {
         HKS_LOG_E("Retrieve field failed");
         return nullptr;
@@ -706,12 +827,14 @@ static napi_value AddHandleOrChallenge(napi_env env, napi_value &object,
     napi_value addResult = nullptr;
 
     // add handle
+    // Note: Use double instead of uint32 to support handle values larger than 32 bits.
+    // JavaScript/ArkTS 'number' type is IEEE 754 double, with 53-bit safe integer precision.
+    // Handle values must not exceed 2^53-1 to avoid precision loss.
     if ((handle != nullptr) && (handle->data != nullptr) && (handle->size == sizeof(uint64_t))) {
         void *handleData = static_cast<void *>(handle->data);
         uint64_t tempHandle = *(static_cast<uint64_t *>(handleData));
-        uint32_t handleValue = static_cast<uint32_t>(tempHandle); /* Temporarily only use 32 bit handle */
         napi_value handlejs = nullptr;
-        NAPI_CALL(env, napi_create_uint32(env, handleValue, &handlejs));
+        NAPI_CALL(env, napi_create_double(env, static_cast<double>(tempHandle), &handlejs));
         NAPI_CALL(env, napi_set_named_property(env, object, HKS_HANDLE_PROPERTY_HANDLE.c_str(), handlejs));
         addResult = GetInt32(env, 0);
     }
@@ -734,7 +857,8 @@ static napi_value AddHandleOrChallenge(napi_env env, napi_value &object,
 }
 
 static napi_value AddOutDataParamSetOrCertChain(napi_env env, napi_value &object,
-    const struct HksBlob *outData, const HksParamSet *paramSet, const struct HksCertChain *certChain)
+    const struct HksBlob *outData, const HksParamSet *paramSet, const struct HksCertChain *certChain,
+    const struct HksBlob *sharedSecret = nullptr)
 {
     napi_value addResult = nullptr;
 
@@ -774,6 +898,20 @@ static napi_value AddOutDataParamSetOrCertChain(napi_env env, napi_value &object
         addResult = GetInt32(env, 0);
     }
 
+    // add sharedSecret (ML-KEM encapsulation result)
+    if ((sharedSecret != nullptr) && (sharedSecret->data != nullptr) && (sharedSecret->size != 0)) {
+        napi_value sharedSecretJs = nullptr;
+        napi_value sharedSecretBuffer = GenerateArrayBuffer(env, sharedSecret->data, sharedSecret->size);
+        if (sharedSecretBuffer == nullptr) {
+            HKS_LOG_E("add sharedSecret failed");
+            return nullptr;
+        }
+        NAPI_CALL(env, napi_create_typedarray(env, napi_uint8_array, sharedSecret->size, sharedSecretBuffer,
+            0, &sharedSecretJs));
+        NAPI_CALL(env, napi_set_named_property(env, object, HKS_RESULT_PROPERTY_SHAREDSECRET.c_str(), sharedSecretJs));
+        addResult = GetInt32(env, 0);
+    }
+
     return addResult;
 }
 
@@ -787,6 +925,12 @@ static napi_value GenerateResult(napi_env env, const struct HksSuccessReturnResu
         }
         return result;
     }
+    if (resultData.outStatus != -1) {
+        if (napi_create_int32(env, resultData.outStatus, &result) != napi_ok) {
+            return GetNull(env);
+        }
+        return result;
+    }
 
     if (napi_create_object(env, &result) != napi_ok) {
         return GetNull(env);
@@ -794,12 +938,21 @@ static napi_value GenerateResult(napi_env env, const struct HksSuccessReturnResu
 
     napi_value status1 = AddHandleOrChallenge(env, result, resultData.handle, resultData.challenge);
     napi_value status2 = AddOutDataParamSetOrCertChain(env, result,
-        resultData.outData, resultData.paramSet, resultData.certChain);
+        resultData.outData, resultData.paramSet, resultData.certChain, resultData.sharedSecret);
     if (status1 == nullptr && status2 == nullptr) {
+        if (resultData.forceReturnObject) {
+            return result;
+        }
         return GetNull(env);
     }
 
     return result;
+}
+
+// napi层将retryCount传递到这里
+void SetRetryCount(const int32_t retryCount)
+{
+    g_pinRetryCount = retryCount; // 错误时需打印
 }
 
 static napi_value GenerateBusinessError(napi_env env, int32_t errorCode)
@@ -844,6 +997,12 @@ static napi_value GenerateBusinessError(napi_env env, int32_t errorCode)
 
     // add errorData
     napi_value data = GetNull(env);
+    // ukey报错时需要在此处需要拼接 retryCount 上报给上层
+    if (errInfo.errorCode == HUKS_ERR_CODE_PIN_CODE_ERROR) {
+        if (napi_create_int32(env, g_pinRetryCount, &data) != napi_ok) {
+            data = GetNull(env);
+        }
+    }
     status = napi_set_named_property(env, businessError, BUSINESS_ERROR_PROPERTY_DATA.c_str(), data);
     if (status != napi_ok) {
         HKS_LOG_E("set errorData failed");
@@ -883,6 +1042,18 @@ static void CallbackResultSuccess(napi_env env, napi_ref callback, const struct 
     NAPI_CALL_RETURN_VOID(env, napi_call_function(env, recv, func, ASYNCCALLBACK_ARGC, params, &result));
 }
 
+static void CallbackVoidSuccess(napi_env env, napi_ref callback)
+{
+    napi_value params[ASYNCCALLBACKVOID_ARGC] = { GetNull(env) };
+    napi_value func = nullptr;
+    NAPI_CALL_RETURN_VOID(env, napi_get_reference_value(env, callback, &func));
+
+    napi_value recv = nullptr;
+    napi_value result = nullptr;
+    NAPI_CALL_RETURN_VOID(env, napi_get_undefined(env, &recv));
+    NAPI_CALL_RETURN_VOID(env, napi_call_function(env, recv, func, ASYNCCALLBACKVOID_ARGC, params, &result));
+}
+
 static void PromiseResultFailure(napi_env env, napi_deferred deferred, int32_t error)
 {
     if (error == HKS_SUCCESS) {
@@ -902,6 +1073,13 @@ static void PromiseResultSuccess(napi_env env, napi_deferred deferred,
     napi_resolve_deferred(env, deferred, result);
 }
 
+static void PromiseVoidSuccess(napi_env env, napi_deferred deferred)
+{
+    napi_value result = nullptr;
+    NAPI_CALL_RETURN_VOID(env, napi_get_undefined(env, &result));
+    napi_resolve_deferred(env, deferred, result);
+}
+
 void SuccessReturnResultInit(struct HksSuccessReturnResult &resultData)
 {
     resultData.isOnlyReturnBoolResult = false;
@@ -911,6 +1089,15 @@ void SuccessReturnResultInit(struct HksSuccessReturnResult &resultData)
     resultData.outData = nullptr;
     resultData.paramSet = nullptr;
     resultData.certChain = nullptr;
+
+    // ukey feature
+    resultData.index = nullptr;
+    resultData.retryCount = 0;
+    resultData.outStatus = -1;
+
+    // ML-KEM encapsulation
+    resultData.sharedSecret = nullptr;
+    resultData.forceReturnObject = false;
 }
 
 void SuccessListAliasesReturnResultInit(struct HksSuccessListAliasesResult &resultData)
@@ -930,6 +1117,23 @@ void HksReturnNapiResult(napi_env env, napi_ref callback, napi_deferred deferred
     } else {
         if (errorCode == HKS_SUCCESS) {
             CallbackResultSuccess(env, callback, resultData);
+        } else {
+            CallbackResultFailure(env, callback, errorCode);
+        }
+    }
+}
+
+void HksReturnNapiUndefined(napi_env env, napi_ref callback, napi_deferred deferred, int32_t errorCode)
+{
+    if (callback == nullptr) {
+        if (errorCode == HKS_SUCCESS) {
+            PromiseVoidSuccess(env, deferred);
+        } else {
+            PromiseResultFailure(env, deferred, errorCode);
+        }
+    } else {
+        if (errorCode == HKS_SUCCESS) {
+            CallbackVoidSuccess(env, callback);
         } else {
             CallbackResultFailure(env, callback, errorCode);
         }
@@ -1012,4 +1216,104 @@ void HksReturnListAliasesResult(napi_env env, napi_ref callback, napi_deferred d
         }
     }
 }
+
+static void PromiseParamSetResultSuccess(napi_env env, napi_deferred deferred, const struct HksParamSet *paramSetOut)
+{
+    napi_value propertiesRet = nullptr;
+    if (paramSetOut != nullptr) {
+        propertiesRet = HksExtGenerateHksParamArray(env, *paramSetOut);
+        if (propertiesRet == nullptr) {
+            HKS_LOG_E("add paramSet failed");
+        }
+    }
+    napi_resolve_deferred(env, deferred, propertiesRet);
+}
+
+void HksReturnNapiArrExtParamsResult(napi_env env, napi_deferred deferred, int32_t errorCode,
+    const struct HksParamSet *paramSetOut)
+{
+    if (errorCode == HKS_SUCCESS) {
+        PromiseParamSetResultSuccess(env, deferred, paramSetOut);
+    } else {
+        PromiseResultFailure(env, deferred, errorCode);
+    }
+}
+
+bool HksCheckIsAllowAsUserApi(struct HksParamSet *paramSet)
+{
+    struct HksParam *param = nullptr;
+    if (HksGetParam(paramSet, HKS_TAG_KEY_ACCESS_GROUP, &param) == HKS_SUCCESS) {
+        HKS_LOG_E("group key not allow as user api");
+        return false;
+    }
+
+    if (HksGetParam(paramSet, HKS_TAG_KEY_CLASS, &param) == HKS_SUCCESS &&
+        param->uint32Param == HKS_KEY_CLASS_EXTENSION) {
+        HKS_LOG_E("ukey not allow as user api");
+        return false;
+    }
+
+    return true;
+}
+
+napi_value ParseHuksParams(napi_env env, napi_value object, const std::vector<HksParam> &addParams,
+    HksParamSet *&paramSet)
+{
+    if (paramSet != nullptr) {
+        HKS_LOG_E("param input invalid");
+        return nullptr;
+    }
+
+    napi_valuetype valueType = napi_valuetype::napi_undefined;
+    napi_typeof(env, object, &valueType);
+
+    if (valueType != napi_valuetype::napi_object) {
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "the type of param is not object");
+        HKS_LOG_E("param not object");
+        return nullptr;
+    }
+
+    std::vector<HksParam> params{};
+    HksParamSet *outParamSet = nullptr;
+    do {
+        if (HksInitParamSet(&outParamSet) != HKS_SUCCESS) {
+            napi_throw_error(env, NULL, "native error");
+            HKS_LOG_E("paramset init failed");
+            break;
+        }
+
+        if (ParseParams(env, object, params) == nullptr) {
+            HKS_LOG_E("parse params failed");
+            break;
+        }
+
+        if (!params.empty()) {
+            if (HksAddParams(outParamSet, params.data(), params.size()) != HKS_SUCCESS) {
+                HKS_LOG_E("add params failed");
+                break;
+            }
+        }
+
+        if (!addParams.empty()) {
+            if (HksAddParams(outParamSet, addParams.data(), addParams.size()) != HKS_SUCCESS) {
+                HKS_LOG_E("add params failed");
+                break;
+            }
+        }
+
+        if (HksBuildParamSet(&outParamSet) != HKS_SUCCESS) {
+            HKS_LOG_E("HksBuildParamSet failed");
+            break;
+        }
+
+        FreeParsedParams(params);
+        paramSet = outParamSet;
+        return GetInt32(env, 0);
+    } while (0);
+
+    HksFreeParamSet(&outParamSet);
+    FreeParsedParams(params);
+    return nullptr;
+}
+
 }  // namespace HuksNapiItem

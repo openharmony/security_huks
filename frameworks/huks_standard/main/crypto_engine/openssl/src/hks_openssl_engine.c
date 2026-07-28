@@ -20,7 +20,7 @@
 #endif
 
 #include "hks_openssl_engine.h"
-
+#include "hks_type_enum.h"
 #include <openssl/err.h>
 #include <openssl/evp.h>
 #include <stdbool.h>
@@ -343,6 +343,35 @@ int32_t HksCryptoHalAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
     return func(nativeKey, pubKey, spec, sharedKey);
 }
 
+#ifdef HKS_SUPPORT_ML_KEM
+typedef int32_t (*MlKemEncapsulate)(const struct HksBlob *rawKey, struct HksEncapsulationResult *encapResult);
+
+int32_t HksCryptoHalMlKemEncapsulate(const struct HksBlob *rawKey, struct HksEncapsulationResult *encapResult)
+{
+    HKS_IF_NULL_LOGE_RETURN(rawKey, HKS_ERROR_INVALID_ARGUMENT, "rawKey is null!")
+    HKS_IF_NULL_LOGE_RETURN(encapResult, HKS_ERROR_INVALID_ARGUMENT, "encapResult is null!")
+
+    MlKemEncapsulate func = (MlKemEncapsulate)GetAbility(HKS_CRYPTO_ABILITY_ENCAPSULATE(HKS_ALG_ML_KEM));
+    HKS_IF_NULL_LOGE_RETURN(func, HKS_ERROR_INVALID_ARGUMENT, "MlKemEncapsulate func is null!")
+    return func(rawKey, encapResult);
+}
+
+typedef int32_t (*MlKemDecapsulate)(const struct HksBlob *rawKey, const struct HksBlob *ciphertext,
+    struct HksBlob *sharedSecret);
+
+int32_t HksCryptoHalMlKemDecapsulate(const struct HksBlob *rawKey, const struct HksBlob *ciphertext,
+    struct HksBlob *sharedSecret)
+{
+    HKS_IF_NULL_LOGE_RETURN(rawKey, HKS_ERROR_INVALID_ARGUMENT, "rawKey is null!")
+    HKS_IF_NULL_LOGE_RETURN(ciphertext, HKS_ERROR_INVALID_ARGUMENT, "ciphertext is null!")
+    HKS_IF_NULL_LOGE_RETURN(sharedSecret, HKS_ERROR_INVALID_ARGUMENT, "sharedSecret is null!")
+
+    MlKemDecapsulate func = (MlKemDecapsulate)GetAbility(HKS_CRYPTO_ABILITY_DECAPSULATE(HKS_ALG_ML_KEM));
+    HKS_IF_NULL_LOGE_RETURN(func, HKS_ERROR_INVALID_ARGUMENT, "MlKemDecapsulate func is null!")
+    return func(rawKey, ciphertext, sharedSecret);
+}
+#endif
+
 int32_t HksCryptoHalSign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *signature)
 {
@@ -559,3 +588,23 @@ int32_t GetBnBinpadFromPkey(const EVP_PKEY *pkey, const char *keyName, struct Hk
     SELF_FREE_PTR(bn, BN_free)
     return ret;
 }
+
+#ifdef HKS_SUPPORT_ML_KEM_C
+const char *HksOpensslMlKemGetAlgName(uint32_t keyParamSet)
+{
+    if (keyParamSet == HKS_ML_KEM_KEY_PARAM_SET_768) {
+        return HKS_ML_KEM_ALG_NAME_768;
+    } else if (keyParamSet == HKS_ML_KEM_KEY_PARAM_SET_1024) {
+        return HKS_ML_KEM_ALG_NAME_1024;
+    }
+    HKS_LOG_E("invalid ml-kem paramSet %" LOG_PUBLIC "u", keyParamSet);
+    return NULL;
+}
+#else
+const char *HksOpensslMlKemGetAlgName(uint32_t keyParamSet)
+{
+    (void) keyParamSet;
+    HKS_LOG_E("current device not support ml-kem");
+    return NULL;
+}
+#endif

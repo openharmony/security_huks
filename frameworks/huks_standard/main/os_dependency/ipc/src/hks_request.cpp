@@ -26,6 +26,7 @@
 #include "hks_template.h"
 #include "hks_type.h"
 #include "huks_service_ipc_interface_code.h"
+#include "hks_external_error_info.h"
 
 using namespace OHOS;
 
@@ -33,6 +34,7 @@ namespace {
 constexpr int SA_ID_KEYSTORE_SERVICE = 3510;
 const std::u16string SA_KEYSTORE_SERVICE_DESCRIPTOR = u"ohos.security.hks.service";
 static volatile std::atomic_bool g_isInitBundleDead = false;
+constexpr uint32_t DEFAULT_TIME = 2;
 sptr<Security::Hks::HksStub> g_hks_callback;
 }
 
@@ -83,8 +85,21 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
         HKS_IF_NULL_LOGE_RETURN(errMsg, ret, "[ipc error] read errorMsg")
         HksAppendThreadErrMsg(errMsg, errMsgLen);
     }
-#endif
 
+    int32_t errVal = 0;
+    HKS_IF_NOT_TRUE_LOGE_RETURN(reply.ReadInt32(errVal), ret, "ReadInt32 errVal failed")
+    uint32_t descLen = 0;
+    HKS_IF_NOT_TRUE_LOGE_RETURN(reply.ReadUint32(descLen), ret, "ReadUint32 descLen failed")
+    bool hasErrorInfo = false;
+    HKS_IF_NOT_TRUE_LOGE_RETURN(reply.ReadBool(hasErrorInfo), ret, "ReadBool hasErrorInfo failed")
+    const char *errorDesc = "";
+    if (descLen != 0) {
+        const uint8_t *buffer = reply.ReadBuffer(descLen);
+        HKS_IF_NULL_LOGE_RETURN(buffer, ret, "ReadBuffer errorDesc failed")
+        errorDesc = (const char *)buffer;
+    }
+    HKS_IF_TRUE_EXCU(hasErrorInfo, HksAppendThreadExtErrMsg(errVal, errorDesc));
+#endif
     return ret;
 }
 
@@ -106,9 +121,14 @@ static int32_t HksSendAnonAttestRequestAndWaitAsyncReply(MessageParcel &data, co
 #ifndef HKS_UNTRUSTED_RUNNING_ENV
     int timeout = 10; // seconds
     auto [errCode, packedCerts, packedSize] = hksCallback->WaitForAsyncReply(timeout);
-    if (errCode != HKS_SUCCESS || packedCerts == nullptr || packedSize == 0) {
+    if (errCode != HKS_SUCCESS) {
         HKS_LOG_E("errCode %" LOG_PUBLIC "u fail or packedCerts empty or size %" LOG_PUBLIC "u 0", errCode, packedSize);
-        return HUKS_ERR_CODE_EXTERNAL_ERROR;
+        return errCode;
+    }
+
+    if (packedCerts == nullptr || packedSize == 0) {
+        HKS_LOG_E("dcm callback fail or packedCerts empty or size %" LOG_PUBLIC "u 0", packedSize);
+        return HKS_ERROR_BAD_STATE;
     }
 
     if (outBlob->size < packedSize) {
@@ -128,64 +148,124 @@ static int32_t HksSendAnonAttestRequestAndWaitAsyncReply(MessageParcel &data, co
 #endif
 }
 
+static int32_t HksExtSendAsyncMessage(MessageParcel &data, const struct HksParamSet *paramSet,
+    sptr<IRemoteObject> &proxy, struct HksBlob *outBlob, enum HksIpcInterfaceCode msgCode)
+{
+    auto hksCallback = sptr<Security::Hks::HksExtStub>(new (std::nothrow) Security::Hks::HksExtStub());
+    HKS_IF_NULL_LOGE_RETURN(hksCallback, HKS_ERROR_INSUFFICIENT_MEMORY, "new HksExtStub failed");
+    HKS_IF_NOT_TRUE_LOGE_RETURN(data.WriteRemoteObject(hksCallback), HKS_ERROR_IPC_MSG_FAIL,
+        "WriteRemoteObject fail");
+
+    MessageParcel reply {};
+    MessageOption option = MessageOption::TF_SYNC;
+    int32_t ret = proxy->SendRequest(msgCode, data, reply, option);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_IPC_MSG_FAIL, "SendRequest failed %" LOG_PUBLIC "d", ret);
+
+    uint32_t timeout = DEFAULT_TIME; // default seconds
+    struct HksParam *timeoutParam = nullptr;
+    if (HksGetParam(paramSet, HKS_EXT_CRYPTO_TAG_TIMEOUT, &timeoutParam) == HKS_SUCCESS) {
+        HKS_IF_TRUE_LOGE_RETURN(GetTagType((enum HksTag)timeoutParam->tag) != HKS_TAG_TYPE_UINT,
+            HKS_ERROR_INVALID_ARGUMENT, "timeout tag type invalid");
+
+        uint32_t val = timeoutParam->uint32Param;
+        HKS_IF_TRUE_LOGE_RETURN(val > 3 || val == 0, HKS_ERROR_INVALID_ARGUMENT,
+            "timeout %" LOG_PUBLIC "u not supported, must between 0 - 3", val);
+
+        timeout = val;
+    }
+
+    auto [errCode, receivedData, receivedSize, receivedCode, errInfo] = hksCallback->WaitForAsyncReply(timeout);
+    if (errCode != HKS_SUCCESS || receivedData == nullptr || receivedSize == 0 || receivedCode != msgCode) {
+        HKS_LOG_E("async fail errCode=%" LOG_PUBLIC "u size=%" LOG_PUBLIC "u code=%" LOG_PUBLIC "u",
+            errCode, receivedSize, receivedCode);
+        return HUKS_ERR_CODE_EXTERNAL_ERROR;
+    }
+
+    HKS_IF_TRUE_LOGE_RETURN(outBlob->size < receivedSize, HKS_ERROR_BUFFER_TOO_SMALL,
+        "outBlob too small %" LOG_PUBLIC "u < %" LOG_PUBLIC "u", outBlob->size, receivedSize);
+
+    HKS_IF_NOT_EOK_LOGE_RETURN(memcpy_s(outBlob->data, outBlob->size, receivedData.get(), receivedSize),
+        HKS_ERROR_INSUFFICIENT_MEMORY, "memcpy_s failed destMax %" LOG_PUBLIC "u count %" LOG_PUBLIC "u",
+        outBlob->size, receivedSize);
+
+    outBlob->size = receivedSize;
+
+    HksClearThreadExtErrMsg();
+    if (errInfo != nullptr) {
+        HKS_IF_TRUE_EXCU(errInfo->hasErrorInfo, HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc));
+        HksFreeExternalErrorInfo(errInfo);
+    }
+    return HKS_SUCCESS;
+}
+
+static int32_t WriteCommonRequestData(MessageParcel &data,
+    const struct HksBlob *inBlob, const struct HksBlob *outBlob)
+{
+    HKS_IF_NOT_TRUE_RETURN(data.WriteInterfaceToken(SA_KEYSTORE_SERVICE_DESCRIPTOR), HKS_ERROR_BAD_STATE);
+    if (outBlob == nullptr) {
+        HKS_IF_NOT_TRUE_RETURN(data.WriteUint32(0), HKS_ERROR_BAD_STATE);
+    } else {
+        HKS_IF_NOT_TRUE_LOGE_RETURN(data.WriteUint32(outBlob->size), HKS_ERROR_BAD_STATE, "WriteUint32 fail");
+    }
+    HKS_IF_NOT_TRUE_RETURN(data.WriteUint32(inBlob->size), HKS_ERROR_BAD_STATE);
+    HKS_IF_NOT_TRUE_RETURN(data.WriteBuffer(inBlob->data, static_cast<size_t>(inBlob->size)), HKS_ERROR_BAD_STATE);
+    return HKS_SUCCESS;
+}
+
+static int32_t HandleSpecialAsyncTypes(enum HksIpcInterfaceCode type, MessageParcel &data,
+    const struct HksParamSet *paramSet, sptr<IRemoteObject> &proxy, struct HksBlob *outBlob)
+{
+    if (type == HKS_MSG_ATTEST_KEY_ASYNC_REPLY) {
+        auto hksCallback = sptr<Security::Hks::HksStub>(new (std::nothrow) Security::Hks::HksStub());
+        HKS_IF_NULL_LOGE_RETURN(hksCallback, HKS_ERROR_INSUFFICIENT_MEMORY, "new HksStub failed");
+        HKS_IF_NOT_TRUE_LOGE_RETURN(data.WriteRemoteObject(hksCallback), HKS_ERROR_IPC_MSG_FAIL,
+            "WriteRemoteObject fail");
+        return HksSendAnonAttestRequestAndWaitAsyncReply(data, paramSet, proxy, hksCallback, outBlob);
+    }
+    if (type == HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY) {
+        return HksExtSendAsyncMessage(data, paramSet, proxy, outBlob, HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY);
+    }
+    return HKS_SUCCESS;
+}
+
 int32_t HksSendRequest(enum HksIpcInterfaceCode type, const struct HksBlob *inBlob,
     struct HksBlob *outBlob, const struct HksParamSet *paramSet)
 {
 #ifdef L2_STANDARD
     HksClearThreadErrorMsg();
 #endif
-    enum HksSendType sendType = HKS_SEND_TYPE_SYNC;
     struct HksParam *sendTypeParam = nullptr;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_ASYNCHRONIZED, &sendTypeParam);
-    if (ret == HKS_SUCCESS) {
-        sendType = static_cast<enum HksSendType>(sendTypeParam->uint32Param);
-    }
+    enum HksSendType sendType = (ret == HKS_SUCCESS) ? static_cast<enum HksSendType>(sendTypeParam->uint32Param)
+        : HKS_SEND_TYPE_SYNC;
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
-    if (sendType == HKS_SEND_TYPE_SYNC) {
-        option = MessageOption::TF_SYNC;
-    } else {
-        option = MessageOption::TF_ASYNC;
+    MessageOption option((sendType == HKS_SEND_TYPE_SYNC) ? MessageOption::TF_SYNC : MessageOption::TF_ASYNC);
+    ret = WriteCommonRequestData(data, inBlob, outBlob);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("WriteCommonRequestData failed %" LOG_PUBLIC "d", ret);
+        return ret;
     }
-    HKS_IF_NOT_TRUE_RETURN(data.WriteInterfaceToken(SA_KEYSTORE_SERVICE_DESCRIPTOR), HKS_ERROR_BAD_STATE);
 
-    if (outBlob == nullptr) {
-        HKS_IF_NOT_TRUE_RETURN(data.WriteUint32(0), HKS_ERROR_BAD_STATE);
-    } else {
-        HKS_IF_NOT_TRUE_LOGE_RETURN(data.WriteUint32(outBlob->size), HKS_ERROR_BAD_STATE, "WriteUint32 fail")
-    }
-    HKS_IF_NOT_TRUE_RETURN(data.WriteUint32(inBlob->size), HKS_ERROR_BAD_STATE);
-    HKS_IF_NOT_TRUE_RETURN(data.WriteBuffer(inBlob->data, static_cast<size_t>(inBlob->size)), HKS_ERROR_BAD_STATE);
-
-    sptr<IRemoteObject> hksProxy = GetHksProxy();
-    HKS_IF_NULL_LOGE_RETURN(hksProxy, HKS_ERROR_BAD_STATE, "GetHksProxy registry is null")
+    sptr<IRemoteObject> proxy = GetHksProxy();
+    HKS_IF_NULL_LOGE_RETURN(proxy, HKS_ERROR_BAD_STATE, "GetHksProxy null");
 
     bool flag = false;
     if (type == HKS_MSG_INIT && std::atomic_compare_exchange_strong(&g_isInitBundleDead, &flag, true)) {
         g_hks_callback = new (std::nothrow) Security::Hks::HksStub();
-        HKS_IF_NULL_LOGE_RETURN(g_hks_callback, HKS_ERROR_INSUFFICIENT_MEMORY, "new HksStub failed")
-
-        bool result = data.WriteRemoteObject(g_hks_callback);
-        HKS_IF_NOT_TRUE_LOGE_RETURN(result, HKS_ERROR_IPC_MSG_FAIL,
-            "WriteRemoteObject hksCallback failed %" LOG_PUBLIC "d", result)
-    }
-    if (type == HKS_MSG_ATTEST_KEY_ASYNC_REPLY) {
-        sptr<Security::Hks::HksStub> hksCallback = new (std::nothrow) Security::Hks::HksStub();
-        HKS_IF_NULL_LOGE_RETURN(hksCallback, HKS_ERROR_INSUFFICIENT_MEMORY, "new HksStub failed")
-        // We write a HksStub instance if type == HKS_MSG_ATTEST_KEY_ASYNC_REPLY,
-        // then we can read it in the server side if type == HKS_MSG_ATTEST_KEY_ASYNC_REPLY.
-        bool result = data.WriteRemoteObject(hksCallback);
-        HKS_IF_NOT_TRUE_LOGE_RETURN(result, HKS_ERROR_IPC_MSG_FAIL,
-            "WriteRemoteObject hksCallback failed %" LOG_PUBLIC "d", result)
-        return HksSendAnonAttestRequestAndWaitAsyncReply(data, paramSet, hksProxy, hksCallback, outBlob);
-        // If the mode is non-anonymous attest, we write a HksStub instance here, then go back and process as normal.
+        HKS_IF_NULL_LOGE_RETURN(g_hks_callback, HKS_ERROR_INSUFFICIENT_MEMORY, "new HksStub failed");
+        HKS_IF_NOT_TRUE_LOGE_RETURN(data.WriteRemoteObject(g_hks_callback), HKS_ERROR_IPC_MSG_FAIL,
+            "WriteRemoteObject fail");
     }
 
-    int error = hksProxy->SendRequest(type, data, reply, option);
-    HKS_IF_TRUE_LOGE_RETURN(error != 0, HKS_ERROR_IPC_MSG_FAIL, "hksProxy->SendRequest failed %" LOG_PUBLIC "d", error)
+    ret = HandleSpecialAsyncTypes(type, data, paramSet, proxy, outBlob);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    if (type == HKS_MSG_ATTEST_KEY_ASYNC_REPLY || type == HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY) {
+        return ret;
+    }
 
+    int32_t errorCode = proxy->SendRequest(type, data, reply, option);
+    HKS_IF_TRUE_LOGE_RETURN(errorCode != 0, HKS_ERROR_IPC_MSG_FAIL, "SendRequest failed %" LOG_PUBLIC "d", errorCode);
     return HksReadRequestReply(reply, outBlob);
 }
- 

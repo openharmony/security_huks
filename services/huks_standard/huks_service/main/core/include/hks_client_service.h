@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,36 @@ extern "C" {
 int32_t HksServiceInitialize(void);
 
 int32_t HksServiceRefreshKeyInfo(const struct HksBlob *processName);
+
+int32_t HksServiceRegisterProvider(const struct HksProcessInfo *processInfo, const struct HksBlob *name,
+    const struct HksParamSet *paramSetIn);
+
+int32_t HksServiceUnregisterProvider(const struct HksProcessInfo *processInfo, const struct HksBlob *name,
+    const struct HksParamSet *paramSetIn);
+
+int32_t HksServiceExportProviderCertificates(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *providerName, const struct HksParamSet *paramSetIn, struct HksExtCertInfoSet *certSet);
+
+int32_t HksServiceExportCertificate(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
+    const struct HksParamSet *paramSetIn,
+    struct HksExtCertInfoSet *certSet);
+
+int32_t HksServiceAuthUkeyPin(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
+    const struct HksParamSet *paramSetIn, int32_t *outStatus, uint32_t *retryCount);
+
+int32_t HksServiceOpenRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
+    const struct HksParamSet *paramSetIn);
+
+int32_t HksServiceGetUkeyPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
+    const struct HksParamSet *paramSetIn, int32_t *status);
+
+int32_t HksServiceCloseRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
+    const struct HksParamSet *paramSetIn);
+
+int32_t HksServiceClearPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index);
+
+int32_t HksServiceGetRemoteProperty(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
+    const struct HksBlob *propertyId, const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut);
 
 int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, struct HksBlob *keyOut);
@@ -102,7 +132,7 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
 
 int32_t HksServiceAbortByPid(int32_t pid);
 
-void HksServiceDeleteProcessInfo(const struct HksProcessInfo *processInfo);
+void HksServiceDeleteProcessInfo(const struct HksProcessInfo *processInfo, bool anco);
 
 int32_t HksServiceListAliases(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     struct HksKeyAliasSet **outData);
@@ -113,9 +143,19 @@ int32_t HksServiceRenameKeyAlias(const struct HksProcessInfo *processInfo, const
 int32_t HksServiceChangeStorageLevel(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *srcParamSet, const struct HksParamSet *destParamSet);
 
-int32_t HksServiceWrapKey(const struct HksBlob *srcData, const uint8_t *context);
+int32_t HksServiceWrapKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *wrappedKey);
 
-int32_t HksServiceUnwrapKey(const struct HksBlob *srcData, const uint8_t *context);
+int32_t HksServiceUnwrapKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, const struct HksBlob *wrappedKey);
+
+int32_t HksServiceEncapsulate(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParamSet,
+    struct HksEncapsulationResult *encapResult);
+
+int32_t HksServiceDecapsulate(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParamSet,
+    struct HksBlob *encapOrsharedSecret);
 
 #ifdef __cplusplus
 }

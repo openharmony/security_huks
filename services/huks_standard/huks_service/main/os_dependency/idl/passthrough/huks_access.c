@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "hks_error_code.h"
+#include "securec.h"
+#include <stdint.h>
 #define HUKS_DISABLE_LOG_AT_FILE_TO_REDUCE_ROM_SIZE
 
 #ifdef HKS_CONFIG_FILE
@@ -28,7 +31,8 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_template.h"
-
+#include "hks_param.h"
+#include "hks_check_paramset.h"
 static struct HuksHdi *g_hksHalDevicePtr = NULL;
 
 #ifndef _CUT_AUTHENTICATE_
@@ -69,8 +73,12 @@ ENABLE_CFI(int32_t HuksAccessGenerateKey(const struct HksBlob *keyAlias, const s
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiGenerateKey, HKS_ERROR_NULL_POINTER,
         "GenerateKey function is null pointer")
-
-    return g_hksHalDevicePtr->HuksHdiGenerateKey(keyAlias, paramSetIn, keyIn, keyOut);
+    struct HksParamSet *paramSetInNew = NULL;
+    int32_t ret = HandleKeyClassTag(paramSetIn, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = g_hksHalDevicePtr->HuksHdiGenerateKey(keyAlias, paramSetInNew, keyIn, keyOut);
+    HksFreeParamSet(&paramSetInNew);
+    return ret;
 }
 
 ENABLE_CFI(int32_t HuksAccessImportKey(const struct HksBlob *keyAlias, const struct HksBlob *key,
@@ -80,8 +88,12 @@ ENABLE_CFI(int32_t HuksAccessImportKey(const struct HksBlob *keyAlias, const str
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiImportKey, HKS_ERROR_NULL_POINTER,
         "ImportKey function is null pointer")
-
-    return g_hksHalDevicePtr->HuksHdiImportKey(keyAlias, key, paramSet, keyOut);
+    struct HksParamSet *paramSetInNew = NULL;
+    int32_t ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = g_hksHalDevicePtr->HuksHdiImportKey(keyAlias, key, paramSetInNew, keyOut);
+    HksFreeParamSet(&paramSetInNew);
+    return ret;
 }
 
 ENABLE_CFI(int32_t HuksAccessImportWrappedKey(const struct HksBlob *wrappingKeyAlias, const struct HksBlob *key,
@@ -91,8 +103,12 @@ ENABLE_CFI(int32_t HuksAccessImportWrappedKey(const struct HksBlob *wrappingKeyA
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiImportWrappedKey, HKS_ERROR_NULL_POINTER,
         "ImportWrappedKey function is null pointer")
-
-    return g_hksHalDevicePtr->HuksHdiImportWrappedKey(wrappingKeyAlias, key, wrappedKeyData, paramSet, keyOut);
+    struct HksParamSet *paramSetInNew = NULL;
+    int32_t ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = g_hksHalDevicePtr->HuksHdiImportWrappedKey(wrappingKeyAlias, key, wrappedKeyData, paramSetInNew, keyOut);
+    HksFreeParamSet(&paramSetInNew);
+    return ret;
 }
 
 ENABLE_CFI(int32_t HuksAccessExportPublicKey(const struct HksBlob *key, const struct HksParamSet *paramSet,
@@ -102,8 +118,12 @@ ENABLE_CFI(int32_t HuksAccessExportPublicKey(const struct HksBlob *key, const st
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiExportPublicKey, HKS_ERROR_NULL_POINTER,
         "ExportPublicKey function is null pointer")
-
-    return g_hksHalDevicePtr->HuksHdiExportPublicKey(key, paramSet, keyOut);
+    struct HksParamSet *paramSetInNew = NULL;
+    int32_t ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = g_hksHalDevicePtr->HuksHdiExportPublicKey(key, paramSetInNew, keyOut);
+    HksFreeParamSet(&paramSetInNew);
+    return ret;
 }
 
 ENABLE_CFI(int32_t HuksAccessInit(const struct  HksBlob *key, const struct HksParamSet *paramSet,
@@ -113,8 +133,12 @@ ENABLE_CFI(int32_t HuksAccessInit(const struct  HksBlob *key, const struct HksPa
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiInit, HKS_ERROR_NULL_POINTER,
         "Init function is null pointer")
-
-    return g_hksHalDevicePtr->HuksHdiInit(key, paramSet, handle, token);
+    struct HksParamSet *paramSetInNew = NULL;
+    int32_t ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = g_hksHalDevicePtr->HuksHdiInit(key, paramSetInNew, handle, token);
+    HksFreeParamSet(&paramSetInNew);
+    return ret;
 }
 
 ENABLE_CFI(int32_t HuksAccessUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet,
@@ -124,8 +148,12 @@ ENABLE_CFI(int32_t HuksAccessUpdate(const struct HksBlob *handle, const struct H
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiUpdate, HKS_ERROR_NULL_POINTER,
         "Update function is null pointer")
-
-    return g_hksHalDevicePtr->HuksHdiUpdate(handle, paramSet, inData, outData);
+    struct HksParamSet *paramSetInNew = NULL;
+    int32_t ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = g_hksHalDevicePtr->HuksHdiUpdate(handle, paramSetInNew, inData, outData);
+    HksFreeParamSet(&paramSetInNew);
+    return ret;
 }
 
 ENABLE_CFI(int32_t HuksAccessFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
@@ -135,8 +163,12 @@ ENABLE_CFI(int32_t HuksAccessFinish(const struct HksBlob *handle, const struct H
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiFinish, HKS_ERROR_NULL_POINTER,
         "Finish function is null pointer")
-
-    return g_hksHalDevicePtr->HuksHdiFinish(handle, paramSet, inData, outData);
+    struct HksParamSet *paramSetInNew = NULL;
+    int32_t ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = g_hksHalDevicePtr->HuksHdiFinish(handle, paramSetInNew, inData, outData);
+    HksFreeParamSet(&paramSetInNew);
+    return ret;
 }
 
 ENABLE_CFI(int32_t HuksAccessAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet))
@@ -145,8 +177,12 @@ ENABLE_CFI(int32_t HuksAccessAbort(const struct HksBlob *handle, const struct Hk
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiAbort, HKS_ERROR_NULL_POINTER,
         "Abort function is null pointer")
-
-    return g_hksHalDevicePtr->HuksHdiAbort(handle, paramSet);
+    struct HksParamSet *paramSetInNew = NULL;
+    int32_t ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = g_hksHalDevicePtr->HuksHdiAbort(handle, paramSetInNew);
+    HksFreeParamSet(&paramSetInNew);
+    return ret;
 }
 
 ENABLE_CFI(int32_t HuksAccessGetKeyProperties(const struct HksParamSet *paramSet, const struct HksBlob *key))
@@ -155,8 +191,12 @@ ENABLE_CFI(int32_t HuksAccessGetKeyProperties(const struct HksParamSet *paramSet
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiGetKeyProperties, HKS_ERROR_NULL_POINTER,
         "GetKeyProperties function is null pointer")
-
-    return g_hksHalDevicePtr->HuksHdiGetKeyProperties(paramSet, key);
+    struct HksParamSet *paramSetInNew = NULL;
+    int32_t ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = g_hksHalDevicePtr->HuksHdiGetKeyProperties(paramSetInNew, key);
+    HksFreeParamSet(&paramSetInNew);
+    return ret;
 }
 
 ENABLE_CFI(int32_t HuksAccessGetAbility(int funcType))
@@ -186,8 +226,12 @@ ENABLE_CFI(int32_t HuksAccessSign(const struct HksBlob *key, const struct HksPar
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiSign, HKS_ERROR_NULL_POINTER,
         "Sign function is null pointer")
-
-    return g_hksHalDevicePtr->HuksHdiSign(key, paramSet, srcData, signature);
+    struct HksParamSet *paramSetInNew = NULL;
+    int32_t ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = g_hksHalDevicePtr->HuksHdiSign(key, paramSetInNew, srcData, signature);
+    HksFreeParamSet(&paramSetInNew);
+    return ret;
 }
 
 ENABLE_CFI(int32_t HuksAccessVerify(const struct HksBlob *key, const struct HksParamSet *paramSet,
@@ -197,8 +241,12 @@ ENABLE_CFI(int32_t HuksAccessVerify(const struct HksBlob *key, const struct HksP
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiVerify, HKS_ERROR_NULL_POINTER,
         "Verify function is null pointer")
-
-    return g_hksHalDevicePtr->HuksHdiVerify(key, paramSet, srcData, signature);
+    struct HksParamSet *paramSetInNew = NULL;
+    int32_t ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = g_hksHalDevicePtr->HuksHdiVerify(key, paramSetInNew, srcData, signature);
+    HksFreeParamSet(&paramSetInNew);
+    return ret;
 }
 
 ENABLE_CFI(int32_t HuksAccessEncrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
@@ -208,8 +256,12 @@ ENABLE_CFI(int32_t HuksAccessEncrypt(const struct HksBlob *key, const struct Hks
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiEncrypt, HKS_ERROR_NULL_POINTER,
         "Encrypt function is null pointer")
-
-    return g_hksHalDevicePtr->HuksHdiEncrypt(key, paramSet, plainText, cipherText);
+    struct HksParamSet *paramSetInNew = NULL;
+    int32_t ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = g_hksHalDevicePtr->HuksHdiEncrypt(key, paramSetInNew, plainText, cipherText);
+    HksFreeParamSet(&paramSetInNew);
+    return ret;
 }
 
 ENABLE_CFI(int32_t HuksAccessDecrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
@@ -219,8 +271,12 @@ ENABLE_CFI(int32_t HuksAccessDecrypt(const struct HksBlob *key, const struct Hks
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiDecrypt, HKS_ERROR_NULL_POINTER,
         "Decrypt function is null pointer")
-
-    return g_hksHalDevicePtr->HuksHdiDecrypt(key, paramSet, cipherText, plainText);
+    struct HksParamSet *paramSetInNew = NULL;
+    int32_t ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = g_hksHalDevicePtr->HuksHdiDecrypt(key, paramSetInNew, cipherText, plainText);
+    HksFreeParamSet(&paramSetInNew);
+    return ret;
 }
 
 ENABLE_CFI(int32_t HuksAccessAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob *privateKey,
@@ -230,8 +286,12 @@ ENABLE_CFI(int32_t HuksAccessAgreeKey(const struct HksParamSet *paramSet, const 
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiAgreeKey, HKS_ERROR_NULL_POINTER,
         "AgreeKey function is null pointer")
-
-    return g_hksHalDevicePtr->HuksHdiAgreeKey(paramSet, privateKey, peerPublicKey, agreedKey);
+    struct HksParamSet *paramSetInNew = NULL;
+    int32_t ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = g_hksHalDevicePtr->HuksHdiAgreeKey(paramSetInNew, privateKey, peerPublicKey, agreedKey);
+    HksFreeParamSet(&paramSetInNew);
+    return ret;
 }
 
 ENABLE_CFI(int32_t HuksAccessDeriveKey(const struct HksParamSet *paramSet, const struct HksBlob *kdfKey,
@@ -241,8 +301,12 @@ ENABLE_CFI(int32_t HuksAccessDeriveKey(const struct HksParamSet *paramSet, const
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiDeriveKey, HKS_ERROR_NULL_POINTER,
         "DeriveKey function is null pointer")
-
-    return g_hksHalDevicePtr->HuksHdiDeriveKey(paramSet, kdfKey, derivedKey);
+    struct HksParamSet *paramSetInNew = NULL;
+    int32_t ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = g_hksHalDevicePtr->HuksHdiDeriveKey(paramSetInNew, kdfKey, derivedKey);
+    HksFreeParamSet(&paramSetInNew);
+    return ret;
 }
 
 ENABLE_CFI(int32_t HuksAccessMac(const struct HksBlob *key, const struct HksParamSet *paramSet,
@@ -252,8 +316,12 @@ ENABLE_CFI(int32_t HuksAccessMac(const struct HksBlob *key, const struct HksPara
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiMac, HKS_ERROR_NULL_POINTER,
         "Mac function is null pointer")
-
-    return g_hksHalDevicePtr->HuksHdiMac(key, paramSet, srcData, mac);
+    struct HksParamSet *paramSetInNew = NULL;
+    int32_t ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = g_hksHalDevicePtr->HuksHdiMac(key, paramSetInNew, srcData, mac);
+    HksFreeParamSet(&paramSetInNew);
+    return ret;
 }
 
 ENABLE_CFI(int32_t HuksAccessGetErrorInfo(struct HksBlob *errorInfo))
@@ -284,8 +352,12 @@ ENABLE_CFI(int32_t HuksAccessUpgradeKey(const struct HksBlob *oldKey, const stru
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiUpgradeKey, HKS_ERROR_NULL_POINTER,
         "Change key owner function is null pointer")
-
-    return g_hksHalDevicePtr->HuksHdiUpgradeKey(oldKey, paramSet, newKey);
+    struct HksParamSet *paramSetInNew = NULL;
+    int32_t ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = g_hksHalDevicePtr->HuksHdiUpgradeKey(oldKey, paramSetInNew, newKey);
+    HksFreeParamSet(&paramSetInNew);
+    return ret;
 }
 #endif
 
@@ -297,8 +369,12 @@ ENABLE_CFI(int32_t HuksAccessCalcHeaderMac(const struct HksParamSet *paramSet, c
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiCalcMacHeader, HKS_ERROR_NULL_POINTER,
         "CalcMacHeader function is null pointer")
-
-    return g_hksHalDevicePtr->HuksHdiCalcMacHeader(paramSet, salt, srcData, mac);
+    struct HksParamSet *paramSetInNew = NULL;
+    int32_t ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = g_hksHalDevicePtr->HuksHdiCalcMacHeader(paramSetInNew, salt, srcData, mac);
+    HksFreeParamSet(&paramSetInNew);
+    return ret;
 }
 #endif
 
@@ -310,11 +386,55 @@ ENABLE_CFI(int32_t HuksAccessAttestKey(const struct HksBlob *key, const struct H
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiAttestKey, HKS_ERROR_NULL_POINTER,
         "AttestKey function is null pointer")
-
-    return g_hksHalDevicePtr->HuksHdiAttestKey(key, paramSet, certChain);
+    struct HksParamSet *paramSetInNew = NULL;
+    int32_t ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = g_hksHalDevicePtr->HuksHdiAttestKey(key, paramSetInNew, certChain);
+    HksFreeParamSet(&paramSetInNew);
+    return ret;
 }
 #endif
+#ifdef HKS_SUPPORT_ML_KEM_C
+ENABLE_CFI(int32_t HuksAccessEncapsulate(const struct HksParamSet *paramSet,
+    const struct HksParamSet *sharedKeyParamSet, struct HksEncapsulationResult *encapResult))
+{
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiEncapsulate, HKS_ERROR_NULL_POINTER,
+        "Encapsulate functon is null pointer")
+    return g_hksHalDevicePtr->HuksHdiEncapsulate(paramSet, sharedKeyParamSet, encapResult);
+}
+
+ENABLE_CFI(int32_t HuksAccessDecapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParam,
+    struct HksBlob *encapsData, struct HksBlob *hdiSharedSecret))
+{
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiDecapsulate, HKS_ERROR_NULL_POINTER,
+        "Decapsulate functon is null pointer")
+    return g_hksHalDevicePtr->HuksHdiDecapsulate(paramSet, sharedKeyParam, encapsData, hdiSharedSecret);
+}
+#else
+ENABLE_CFI(int32_t HuksAccessEncapsulate(const struct HksParamSet *paramSet,
+    const struct HksParamSet *sharedKeyParamSet, struct HksEncapsulationResult *encapResult))
+{
+    (void)paramSet;
+    (void)sharedKeyParamSet;
+    (void)encapResult;
+    return HKS_ERROR_NOT_SUPPORTED;
+}
+
+ENABLE_CFI(int32_t HuksAccessDecapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParam,
+    struct HksBlob *encapsData, struct HksBlob *hdiSharedSecret))
+{
+    (void)paramSet;
+    (void)sharedKeyParam;
+    (void)encapsData;
+    (void)hdiSharedSecret;
+    return HKS_ERROR_NOT_SUPPORTED;
+}
+
+#endif /* HKS_SUPPORT_ML_KEM */
 #endif /* _CUT_AUTHENTICATE_ */
 
 ENABLE_CFI(int32_t HuksAccessGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob *random))

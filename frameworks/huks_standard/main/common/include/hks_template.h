@@ -29,6 +29,11 @@
 #define HKS_NULL_POINTER NULL
 #endif
 
+/*
+ * Align to 4-tuple
+ */
+#define ALIGN_SIZE(size) ((size) > 0xfffffffc ? 0xffffffff : ((((uint32_t)(size) + 3) >> 2) << 2))
+
 #define HKS_IF_NOT_SUCC_LOGE_RETURN(RESULT, ERROR_CODE, LOG_MESSAGE, ...) \
 if ((RESULT) != HKS_SUCCESS) { \
     HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
@@ -138,6 +143,12 @@ if (BOOL_FUNC) { \
 if (BOOL_FUNC) { \
     continue; \
 }
+
+#define HKS_IF_TRUE_EXCU_CONTINUE(BOOL_FUNC, EXCU_FUNC) \
+({ if (BOOL_FUNC) { \
+    (EXCU_FUNC); \
+    continue; \
+} })
 
 #define HKS_IF_TRUE_RETURN_VOID(BOOL_FUNC) \
 if ((BOOL_FUNC)) { \
@@ -273,5 +284,15 @@ if (!(RESULT)) { \
     HKS_LOG_I(LOG_MESSAGE, ##__VA_ARGS__); \
     return (ERROR_CODE); \
 }
+
+#define HKS_IF_NOT_TRUE_EXCU(BOOL_FUNC, EXCU_FUNC) \
+({ if (!(BOOL_FUNC)) { \
+    (EXCU_FUNC); \
+} })
+
+#define HKS_IF_TRUE_EXCU(BOOL_FUNC, EXCU_FUNC) \
+({ if (BOOL_FUNC) { \
+    (EXCU_FUNC); \
+} })
 
 #endif /* HKS_TEMPLATE_H */

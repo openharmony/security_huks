@@ -19,7 +19,9 @@
 #include <ctime>
 #include <unordered_map>
 
+#include "hks_error_code.h"
 #include "hks_event_info.h"
+#include "hks_report_common.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
@@ -41,10 +43,10 @@ static int32_t ThreeStageBuildCommonInfo(const struct HksParamSet *paramSet, str
         return HKS_FAILURE;
     }
 
+    int32_t ret = HKS_FAILURE;
     if (HksGetParam(paramSet, HKS_TAG_PARAM0_BUFFER, &param) == HKS_SUCCESS) {
-        eventInfo->common.function = static_cast<char *>(HksMalloc(param->blob.size));
-        HKS_IF_NULL_LOGI_RETURN(eventInfo->common.function, HKS_ERROR_MALLOC_FAIL, "malloc funcname fail")
-        (void)memcpy_s(eventInfo->common.function, param->blob.size, param->blob.data, param->blob.size);
+        ret = CopyParamBlobData(&eventInfo->common.function, param);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy funcname failed")
     }
 
     if (HksGetParam(paramSet, HKS_TAG_PARAM1_BUFFER, &param) == HKS_SUCCESS) {
@@ -54,19 +56,31 @@ static int32_t ThreeStageBuildCommonInfo(const struct HksParamSet *paramSet, str
     }
 
     if (HksGetParam(paramSet, HKS_TAG_PARAM2_BUFFER, &param) == HKS_SUCCESS) {
-        eventInfo->common.callerInfo.name = static_cast<char *>(HksMalloc(param->blob.size));
-        HKS_IF_NULL_LOGI_RETURN(eventInfo->common.callerInfo.name, HKS_ERROR_MALLOC_FAIL, "malloc processname fail")
-        (void)memcpy_s(eventInfo->common.callerInfo.name, param->blob.size, param->blob.data, param->blob.size);
+        ret = CopyParamBlobData(&eventInfo->common.callerInfo.name, param);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy caller name failed")
     }
 
     if (HksGetParam(paramSet, HKS_TAG_PARAM0_NULL, &param) == HKS_SUCCESS) {
-        eventInfo->common.result.errMsg = static_cast<char *>(HksMalloc(param->blob.size));
-        HKS_IF_NULL_LOGI_RETURN(eventInfo->common.result.errMsg, HKS_ERROR_MALLOC_FAIL, "malloc error msg fail")
-        (void)memcpy_s((char *)eventInfo->common.result.errMsg, param->blob.size, param->blob.data, param->blob.size);
+        ret = CopyParamBlobData(&eventInfo->common.result.errMsg, param);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy errMsg failed")
+    }
+
+    if (HksGetParam(paramSet, HKS_TAG_PARAM1_NULL, &param) == HKS_SUCCESS) {
+        ret = CopyParamBlobData(&eventInfo->common.accessGroup, param);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy accessGroup failed")
+    }
+
+    if (HksGetParam(paramSet, HKS_TAG_PARAM2_NULL, &param) == HKS_SUCCESS) {
+        ret = CopyParamBlobData(&eventInfo->common.developerId, param);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "Copy developerId failed")
     }
 
     if (HksGetParam(paramSet, HKS_TAG_TRACE_ID, &param) == HKS_SUCCESS) {
         eventInfo->common.traceId = param->uint64Param;
+    }
+
+    if (HksGetParam(paramSet, HKS_TAG_PARAM1_UINT32, &param) == HKS_SUCCESS) {
+        eventInfo->common.operation = param->uint32Param;
     }
 
     eventInfo->common.count = 1;
@@ -76,9 +90,15 @@ static int32_t ThreeStageBuildCommonInfo(const struct HksParamSet *paramSet, str
 void HksFreeEventInfo(HksEventInfo **eventInfo)
 {
     HKS_IF_TRUE_LOGI_RETURN_VOID(eventInfo == nullptr || (*eventInfo) == nullptr, "eventInfo is nullptr");
-    HKS_FREE((*eventInfo)->common.function);
-    HKS_FREE((*eventInfo)->common.callerInfo.name);
-    HKS_FREE((*eventInfo)->common.result.errMsg);
+    FreeCommonEventInfo(*eventInfo);
+    if (IF_UKEY_EVENT((*eventInfo)->common.eventId)) {
+        HKS_FREE((*eventInfo)->ukeyInfo.providerName);
+        HKS_FREE((*eventInfo)->ukeyInfo.abilityName);
+        HKS_FREE((*eventInfo)->ukeyInfo.resourceId);
+        HKS_FREE((*eventInfo)->ukeyInfo.propertyId);
+        HKS_FREE((*eventInfo)->ukeyInfo.extBundleName);
+        HKS_FREE((*eventInfo)->ukeyInfo.extraData);
+    }
     if ((*eventInfo)->common.eventId == HKS_EVENT_DATA_SIZE_STATISTICS) {
         HKS_FREE((*eventInfo)->dataSizeInfo.component);
         HKS_FREE((*eventInfo)->dataSizeInfo.partition);
@@ -93,7 +113,7 @@ int32_t BuildCommonInfo(const struct HksParamSet *paramSet, struct HksEventInfo 
         "paramset or eventInfo is null")
     int32_t ret = ThreeStageBuildCommonInfo(paramSet, eventInfo);
     if (ret != HKS_SUCCESS) {
-        HksFreeEventInfo(&eventInfo);
+        FreeCommonEventInfo(eventInfo);
     }
     return ret;
 }
@@ -122,6 +142,7 @@ void KeyInfoToMap(const HksEventKeyInfo *keyInfo, std::unordered_map<std::string
         { "purpose", std::to_string(keyInfo->purpose) },
         { "key_size", std::to_string(keyInfo->keySize) },
         { "key_flag", std::to_string(keyInfo->keyFlag) },
+        { "key_security_level", std::to_string(keyInfo->keySecurityLevel) },
         { "key_hash", std::to_string(keyInfo->keyHash) },
         { "batch_operation", std::to_string(keyInfo->isBatch) },
         { "batch_purpose", std::to_string(keyInfo->batchPur) },

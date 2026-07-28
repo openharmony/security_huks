@@ -482,10 +482,6 @@ static int32_t CheckRsaCipherData(uint32_t cmdId, const struct ParamsValues *inp
 #endif
 #endif
 
-#ifdef HKS_SUPPORT_AES_C
-static int32_t CheckAesAeCipherData(uint32_t cmdId, const struct HksBlob *inData, const struct HksBlob *outData);
-#endif
-
 #if defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_DES_C) || defined(HKS_SUPPORT_3DES_C) || \
     defined(HKS_SUPPORT_SM4_C)
 static int32_t CheckBlockCbcCipherData(uint32_t mode, uint32_t cmdId, uint32_t padding,
@@ -550,8 +546,6 @@ static int32_t CheckBlockCipherData(uint32_t cmdId, const struct ParamsValues *i
         if (mode == HKS_MODE_CBC || mode == HKS_MODE_CTR || mode == HKS_MODE_ECB) {
             uint32_t padding = inputParams->padding.value;
             return CheckBlockCbcCipherData(mode, cmdId, padding, inData, outData);
-        } else if (mode == HKS_MODE_GCM || mode == HKS_MODE_CCM) {
-            return CheckAesAeCipherData(cmdId, inData, outData);
         }
     }
 #endif
@@ -626,40 +620,6 @@ static int32_t CheckAesPadding(const struct ParamsValues *inputParams)
 
     if ((mode == HKS_MODE_GCM) || (mode == HKS_MODE_CCM)) {
         return HksCheckValue(padding, g_aesAeadPadding, HKS_ARRAY_SIZE(g_aesAeadPadding));
-    }
-
-    return HKS_SUCCESS;
-}
-
-static int32_t CheckAesAeCipherData(uint32_t cmdId, const struct HksBlob *inData, const struct HksBlob *outData)
-{
-    /*
-     * encrypt: inSize greater than 0(has been checked),
-     *          outSize no less than inSize + 16(tagLen) (in: plain; out: cipher)
-     * decrypt: inSize greater than 16(tagLen), outSize no less than inSize - 16(tagLen)
-     * decryptFinal: inSize greater than 0(has been checked), outSize no less than inSize (in: cipher; out: plain)
-     */
-    switch (cmdId) {
-        case HKS_CMD_ID_ENCRYPT:
-            if (inData->size > (UINT32_MAX - HKS_AE_TAG_LEN)) {
-                HKS_LOG_E("encrypt, invalid inSize: %" LOG_PUBLIC "u", inData->size);
-                return HKS_ERROR_INVALID_ARGUMENT;
-            }
-            if (outData->size < (inData->size + HKS_AE_TAG_LEN)) {
-                HKS_LOG_E("encrypt, out buffer too small size: %" LOG_PUBLIC "u, inSize: %" LOG_PUBLIC "u",
-                    outData->size, inData->size);
-                return HKS_ERROR_BUFFER_TOO_SMALL;
-            }
-            break;
-        case HKS_CMD_ID_DECRYPT:
-            if ((inData->size < HKS_AE_TAG_LEN) || (outData->size < inData->size - HKS_AE_TAG_LEN)) {
-                HKS_LOG_E("decryptfinal, out buffer too small size: %" LOG_PUBLIC "u, inSize: %" LOG_PUBLIC "u",
-                    outData->size, inData->size);
-                return HKS_ERROR_BUFFER_TOO_SMALL;
-            }
-            break;
-        default:
-            return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     return HKS_SUCCESS;
@@ -961,6 +921,16 @@ int32_t CheckImportMutableParams(uint32_t alg, const struct ParamsValues *params
         return HKS_ERROR_INVALID_PURPOSE;
     }
 
+    if (alg == HKS_ALG_ML_KEM) {
+#ifdef HKS_SUPPORT_ML_KEM
+        if (params->purpose.value != HKS_KEY_PURPOSE_WRAP) {
+            HKS_LOG_E("MLKEM Import key check purpose failed.");
+            return HKS_ERROR_INVALID_PURPOSE;
+        }
+#else
+        return HKS_ERROR_NOT_SUPPORTED;
+#endif
+    }
     if (alg == HKS_ALG_RSA) {
 #ifdef HKS_SUPPORT_RSA_C
         if (params->padding.isAbsent) {
@@ -1017,6 +987,14 @@ int32_t HksCheckSignature(uint32_t cmdId, uint32_t alg, uint32_t keySize, const 
             HKS_IF_NOT_SUCC_LOGE_RETURN(HksCheckValue(keySize, g_sm2KeySize, HKS_ARRAY_SIZE(g_sm2KeySize)),
                 HKS_ERROR_INVALID_ARGUMENT, "check key size: key size value %" LOG_PUBLIC "u not expected", keySize)
             return CheckEccSignature(cmdId, keySize, signature);
+#endif
+#if defined(HKS_SUPPORT_ML_DSA_C) && defined(HKS_SUPPORT_ML_DSA_SIGN_VERIFY)
+        case HKS_ALG_ML_DSA:
+            if (HksCheckValue(keySize, g_mlDsaParamSetId, HKS_ARRAY_SIZE(g_mlDsaParamSetId)) != HKS_SUCCESS) {
+                HKS_LOG_E("check key param set id: value %u not expected", keySize);
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+            return HKS_SUCCESS;
 #endif
         default:
             return ret;
@@ -1234,9 +1212,12 @@ static int32_t CheckTuiPinAccessType(uint32_t authAccessType)
     return HKS_SUCCESS;
 }
 
-static int32_t HksCheckAuthAccessTypeByUserAuthType(uint32_t userAuthType, uint32_t authAccessType)
+static int32_t HksCheckAuthAccessTypeByUserAuthType(struct HksParam *userAuthTypeParam, uint32_t authAccessType)
 {
-    if ((userAuthType & HKS_USER_AUTH_TYPE_TUI_PIN) != 0) {
+    if (userAuthTypeParam == NULL) {
+        return HKS_SUCCESS;
+    }
+    if ((userAuthTypeParam->uint32Param & HKS_USER_AUTH_TYPE_TUI_PIN) != 0) {
         return CheckTuiPinAccessType(authAccessType);
     }
     uint32_t valuesCnt = HKS_ARRAY_SIZE(g_expectAuthAccessParams);
@@ -1244,7 +1225,7 @@ static int32_t HksCheckAuthAccessTypeByUserAuthType(uint32_t userAuthType, uint3
     uint32_t tempType = 0;
     for (uint32_t i = 0; i < valuesCnt; i++) {
         struct AuthAccessTypeChecker checker = g_expectAuthAccessParams[i];
-        if ((checker.userAuthType & userAuthType) != 0 &&
+        if ((checker.userAuthType & userAuthTypeParam->uint32Param) != 0 &&
             HasValidAuthAccessType(checker.allowAuthAccessTypes, authAccessType, &tempType) == HKS_SUCCESS) {
             validAuthAccessType |= tempType;
         }
@@ -1261,20 +1242,31 @@ static int32_t HksCheckAuthAccessTypeByUserAuthType(uint32_t userAuthType, uint3
 }
 #endif
 
-int32_t HksCheckUserAuthParams(uint32_t userAuthType, uint32_t authAccessType, uint32_t challengeType)
+int32_t HksCheckUserAuthParams(struct HksParam *userAuthTypeParam, uint32_t authAccessType, uint32_t challengeType,
+    struct HksParam *userAuthTypeAtlParam)
 {
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
-    int32_t ret = HksCheckValue(userAuthType, g_supportUserAuthTypes, HKS_ARRAY_SIZE(g_supportUserAuthTypes));
-    HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_INVALID_AUTH_TYPE)
+    int32_t ret = HKS_SUCCESS;
+    if (userAuthTypeParam != NULL) {
+        ret = HksCheckValue(userAuthTypeParam->uint32Param, g_supportUserAuthTypes,
+            HKS_ARRAY_SIZE(g_supportUserAuthTypes));
+        HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_INVALID_AUTH_TYPE)
+    }
+    if (userAuthTypeAtlParam != NULL) {
+        ret = HksCheckValue(userAuthTypeAtlParam->uint32Param, g_supportUserAuthAtlTypes,
+            HKS_ARRAY_SIZE(g_supportUserAuthAtlTypes));
+        HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_INVALID_AUTH_TYPE)
+    }
 
     ret = HksCheckValue(challengeType, g_userAuthChallengeType, HKS_ARRAY_SIZE(g_userAuthChallengeType));
     HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_INVALID_CHALLENGE_TYPE)
 
-    return HksCheckAuthAccessTypeByUserAuthType(userAuthType, authAccessType);
+    return HksCheckAuthAccessTypeByUserAuthType(userAuthTypeParam, authAccessType);
 #else
-    (void)userAuthType;
+    (void)userAuthTypeParam;
     (void)authAccessType;
     (void)challengeType;
+    (void)userAuthTypeAtlParam;
     return HKS_SUCCESS;
 #endif
 }
@@ -1289,12 +1281,13 @@ int32_t HksCheckSecureSignParams(uint32_t secureSignType)
 #endif
 }
 
-/* If the algorithm is ed25519, the plaintext is directly cached, and if the digest is HKS_DIGEST_NONE, the
-   hash value has been passed in by the user. So the hash value does not need to be free.
+/* If the algorithm is ed25519, ml-dsa or sm2, the plaintext is directly cached, and if the digest is HKS_DIGEST_NONE,
+   the hash value has been passed in by the user. So the hash value does not need to be free.
 */
 int32_t HksCheckNeedCache(uint32_t alg, uint32_t digest)
 {
-    if ((alg == HKS_ALG_ED25519) || (digest == HKS_DIGEST_NONE)) {
+    if ((alg == HKS_ALG_ED25519) || (alg == HKS_ALG_ML_DSA) || (alg == HKS_ALG_ML_KEM) ||
+        (alg == HKS_ALG_SM2) || (digest == HKS_DIGEST_NONE)) {
         HKS_LOG_I("need to cache the data");
         return HKS_SUCCESS;
     }

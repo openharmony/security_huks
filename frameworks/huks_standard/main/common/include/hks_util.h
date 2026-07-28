@@ -29,6 +29,8 @@ extern "C" {
 
 int32_t HksElapsedRealTime(uint64_t *timestampMs);
 
+int32_t HksGetCurTime(uint64_t *timeStampSe);
+
 #ifdef __cplusplus
 }
 #endif

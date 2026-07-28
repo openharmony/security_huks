@@ -31,9 +31,19 @@
 #include "hks_template.h"
 #include "securec.h"
 
-int32_t CopyToInnerKey(const struct HksBlob *key, struct HksBlob *outKey)
+#define HUKS_ENVELOP_LEN_SIZE 16
+#define HUKS_BITE_TO_BYTE 8
+
+int32_t CopyToInnerKey(const struct HksBlob *key, uint32_t alg, struct HksBlob *outKey)
 {
-    if ((key->size == 0) || (key->size > MAX_KEY_SIZE)) {
+    uint32_t maxSize = MAX_KEY_SIZE;
+    if (alg == HKS_ALG_ML_DSA) {
+        maxSize = ML_DSA_MAX_KEY_SIZE;
+    } else if (alg == HKS_ALG_ML_KEM) {
+        maxSize = ML_KEM_MAX_KEY_SIZE;
+    }
+    
+    if ((key->size == 0) || (key->size > maxSize)) {
         HKS_LOG_E("invalid input key size: %" LOG_PUBLIC "u", key->size);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -105,7 +115,7 @@ static int32_t HksSymmetricKeySizeCheck(
             return HKS_ERROR_INVALID_ALGORITHM;
     }
 
-    return CopyToInnerKey(key, outKey);
+    return CopyToInnerKey(key, algParam->uint32Param, outKey);
 }
 
 
@@ -131,7 +141,7 @@ int32_t GetHksPubKeyInnerFormat(const struct HksParamSet *paramSet,
         case HKS_ALG_HMAC:
         case HKS_ALG_SM3:
         case HKS_ALG_SM4:
-            return CopyToInnerKey(key, outKey);
+            return CopyToInnerKey(key, algParam->uint32Param, outKey);
 #endif
 #if defined(HKS_SUPPORT_X25519_C) || defined(HKS_SUPPORT_ED25519_C)
         case HKS_ALG_ED25519:
@@ -148,8 +158,83 @@ int32_t GetHksPubKeyInnerFormat(const struct HksParamSet *paramSet,
         case HKS_ALG_SM2:
             return TranslateFromX509PublicKey(algParam->uint32Param, key, outKey);
 #endif
+#if defined(HKS_SUPPORT_ML_DSA_C)
+        case HKS_ALG_ML_DSA:
+            return TranslateToInnerMlDsaFormat(paramSet, key, outKey);
+#endif
+#if defined(HKS_SUPPORT_ML_KEM_C)
+        case HKS_ALG_ML_KEM:
+            return TranslateToInnerMlKemFormat(paramSet, key, outKey);
+#endif
         default:
             return HKS_ERROR_INVALID_ALGORITHM;
     }
 }
 
+#ifdef HKS_SUPPORT_API_IMPORT_WRAPPED_KEY
+static int32_t GetAndTransPK(const struct HksParamSet *paramSet, struct HksBlob *innerKey,
+    struct HksParamSet *paramSetOut)
+{
+    struct HksParam *unwrapItem = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &unwrapItem);
+    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+        ret = HksAddParams(paramSetOut, paramSet->params, paramSet->paramsCnt);
+        HKS_IF_NOT_SUCC_LOGE(ret, "add param fail")
+        return ret;
+    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add param fail")
+
+    ret = GetHksPubKeyInnerFormat(paramSet, &unwrapItem->blob, innerKey);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Envelop Pubkey to Inner Fail!!")
+    struct HksParam newParm = {
+        .tag = HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA,
+        .blob = *innerKey
+    };
+    for (uint32_t i = 0; i < paramSet->paramsCnt; i++) {
+        if (paramSet->params[i].tag != HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA) {
+            ret = HksAddParams(paramSetOut, &paramSet->params[i], 1);
+            HKS_IF_NOT_SUCC_BREAK(ret, "Envelop PubKey AddParams Fail!!");
+        } else {
+            ret = HksAddParams(paramSetOut, &newParm, 1);
+            HKS_IF_NOT_SUCC_BREAK(ret, "Envelop NewKey AddParams Fail!!");
+        }
+    }
+    return ret;
+}
+
+int32_t HksCheckEnvelopKeySize(const struct HksParamSet *paramSet)
+{
+    struct HksParam *unwrapItem = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_SIZE, &unwrapItem);
+    HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_CHECK_GET_KEY_SIZE_FAIL)
+    uint32_t keySize = unwrapItem->uint32Param / HUKS_BITE_TO_BYTE;
+    bool isSatify = (keySize % HUKS_ENVELOP_LEN_SIZE == 0);
+    HKS_IF_NOT_TRUE_RETURN(isSatify, HKS_ERROR_INVALID_KEY_SIZE)
+    return HKS_SUCCESS;
+}
+
+int32_t HksGetEnvelopParamSet(const struct HksParamSet *paramSet, struct HksParamSet **newParamSet)
+{
+    int32_t ret = HksCheckEnvelopKeySize(paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Check key size failed!")
+
+    struct HksBlob innerFormatPK = {0, NULL};
+    struct HksParamSet *tempParamSet = NULL;
+    do {
+        ret = HksInitParamSet(&tempParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Client Envelop Param Init Fail!!")
+
+        ret = GetAndTransPK(paramSet, &innerFormatPK, tempParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Client Envelop TransPubKey to Inner Fail")
+
+        ret = HksBuildParamSet(&tempParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Client Envelop BuildParam Fail!!")
+
+        *newParamSet = tempParamSet;
+        tempParamSet = NULL;
+    } while (0);
+    HKS_FREE_BLOB(innerFormatPK);
+    HksFreeParamSet(&tempParamSet);
+    return ret;
+}
+#endif

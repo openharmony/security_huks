@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,8 @@
 #ifdef L2_STANDARD
 static const uint32_t CHANGE_STORAGE_LEVEL_CFG_LIST[] = HUKS_CHANGE_STORAGE_LEVEL_CONFIG;
 #endif
+
+#define ASSET_UID 6226
 
 #ifndef _CUT_AUTHENTICATE_
 static int32_t CheckProcessNameAndKeyAliasSize(uint32_t processNameSize, uint32_t keyAliasSize)
@@ -70,6 +72,18 @@ int32_t HksCheckImportWrappedKeyParams(const struct HksBlob *processName, const 
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     return CheckProcessNameAndKeyAliasSize(processName->size, wrappingKeyAlias->size);
+}
+
+int32_t HksCheckWrapAndUnwrapKeyParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSetIn, const struct HksBlob *wrappedKey)
+{
+    int32_t ret = HksCheckBlob3AndParamSet(processName, keyAlias, wrappedKey, paramSetIn);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+ 
+    ret = CheckProcessNameAndKeyAliasSize(processName->size, keyAlias->size);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    return HKS_SUCCESS;
 }
 
 int32_t HksCheckAllParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
@@ -172,18 +186,20 @@ static int32_t CheckAuthAccessLevel(const struct HksParamSet *paramSet)
     return HKS_SUCCESS;
 }
 
-static int32_t CheckUserAuthParamsValidity(const struct HksParamSet *paramSet, uint32_t userAuthType,
-    uint32_t authAccessType, uint32_t challengeType)
+static int32_t CheckUserAuthParamsValidity(const struct HksParamSet *paramSet, uint32_t uid, uint32_t challengeType)
 {
-    int32_t ret = HksCheckUserAuthParams(userAuthType, authAccessType, challengeType);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check user auth params failed")
-
+    int32_t ret;
     if (challengeType == HKS_CHALLENGE_TYPE_NONE) {
         struct HksParam *authTimeout = NULL;
         ret = HksGetParam(paramSet, HKS_TAG_AUTH_TIMEOUT, &authTimeout);
         if (ret == HKS_SUCCESS) {
-            HKS_IF_TRUE_LOGE_RETURN(authTimeout->uint32Param > MAX_AUTH_TIMEOUT_SECOND ||
-                authTimeout->uint32Param == 0, HKS_ERROR_INVALID_TIME_OUT, "invalid auth timeout param")
+            if (uid == ASSET_UID) {
+                HKS_IF_TRUE_LOGE_RETURN(authTimeout->uint32Param > ASSET_MAX_AUTH_TIMEOUT_SECOND ||
+                    authTimeout->uint32Param == 0, HKS_ERROR_INVALID_TIME_OUT, "invalid auth timeout param")
+            } else {
+                HKS_IF_TRUE_LOGE_RETURN(authTimeout->uint32Param > MAX_AUTH_TIMEOUT_SECOND_INNER ||
+                    authTimeout->uint32Param == 0, HKS_ERROR_INVALID_TIME_OUT, "invalid auth timeout param")
+            }
         }
     }
 
@@ -206,8 +222,8 @@ static int32_t CheckUserAuthParamsValidity(const struct HksParamSet *paramSet, u
 }
 #endif
 
-int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t *userAuthType,
-    uint32_t *authAccessType)
+int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t uid, uint32_t *userAuthType,
+    uint32_t *authAccessType, uint32_t *userAuthTypeAtl)
 {
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
     HKS_IF_NULL_LOGE_RETURN(paramSet, HKS_ERROR_NOT_SUPPORTED, "null init paramSet: not support user auth!")
@@ -221,7 +237,17 @@ int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t 
 
     struct HksParam *userAuthTypeParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_USER_AUTH_TYPE, &userAuthTypeParam);
-    HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_NOT_SUPPORTED)
+    struct HksParam *userAuthTypeAtlParam = NULL;
+    int32_t retAtl = HksGetParam(paramSet, HKS_TAG_USER_AUTH_TYPE_ATL, &userAuthTypeAtlParam);
+    if (ret == HKS_ERROR_PARAM_NOT_EXIST && retAtl == HKS_ERROR_PARAM_NOT_EXIST) {
+        return HKS_ERROR_NOT_SUPPORTED;
+    } else if (ret != HKS_SUCCESS && ret != HKS_ERROR_PARAM_NOT_EXIST) {
+        HKS_LOG_E("get user auth type failed!");
+        return ret;
+    } else if (retAtl != HKS_SUCCESS && retAtl != HKS_ERROR_PARAM_NOT_EXIST) {
+        HKS_LOG_E("get user auth trust level failed!");
+        return retAtl;
+    }
 
     struct HksParam *accessTypeParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_KEY_AUTH_ACCESS_TYPE, &accessTypeParam);
@@ -231,17 +257,23 @@ int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t 
     ret = HksGetParam(paramSet, HKS_TAG_CHALLENGE_TYPE, &challengeTypeParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_CHALLENGE_TYPE_FAILED, "get challenge type param failed")
 
-    ret = CheckUserAuthParamsValidity(paramSet, userAuthTypeParam->uint32Param, accessTypeParam->uint32Param,
-        challengeTypeParam->uint32Param);
+    ret = HksCheckUserAuthParams(userAuthTypeParam, accessTypeParam->uint32Param, challengeTypeParam->uint32Param,
+        userAuthTypeAtlParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check user auth params failed")
+
+    ret = CheckUserAuthParamsValidity(paramSet, uid, challengeTypeParam->uint32Param);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check user auth params validity failed")
 
-    *userAuthType = userAuthTypeParam->uint32Param;
+    *userAuthType = (userAuthTypeParam != NULL) ? userAuthTypeParam->uint32Param : 0;
     *authAccessType = accessTypeParam->uint32Param;
+    *userAuthTypeAtl = (userAuthTypeAtlParam != NULL) ? userAuthTypeAtlParam->uint32Param : 0;
     return HKS_SUCCESS;
 #else
     (void)paramSet;
+    (void)uid;
     (void)userAuthType;
     (void)authAccessType;
+    (void)userAuthTypeAtl;
     return HKS_SUCCESS;
 #endif
 }

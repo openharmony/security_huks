@@ -172,6 +172,9 @@ static struct HksParam g_decCcmParams[] = {
             .size = AEAD_SIZE,
             .data = (uint8_t *)CCM_AEAD
         }
+    }, {
+        .tag = HKS_TAG_AE_TAG_LEN,
+        .uint32Param = HKS_AE_TAG_LEN
     }
 };
 
@@ -290,6 +293,9 @@ static struct HksParam g_decCcmParamsNoAad[] = {
             .size = AEAD_SIZE,
             .data = (uint8_t *)CCM_AEAD
         }
+    }, {
+        .tag = HKS_TAG_AE_TAG_LEN,
+        .uint32Param = HKS_AE_TAG_LEN
     }
 };
 
@@ -449,6 +455,18 @@ static int32_t HksAesSetAeadLen(HksParam *param, uint32_t cnt, uint32_t len, con
             if (aead != NULL) {
                 (void)memcpy_s(param[i].blob.data, len, aead, len);
             }
+            return HKS_SUCCESS;
+        }
+    }
+
+    return HKS_FAILURE;
+}
+
+static int32_t HksAesSetAeadTagLen(HksParam *param, uint32_t cnt, uint32_t len)
+{
+    for (uint32_t i = 0; i < cnt; i++) {
+        if (param[i].tag == HKS_TAG_AE_TAG_LEN) {
+            param[i].uint32Param = len;
             return HKS_SUCCESS;
         }
     }
@@ -1280,14 +1298,14 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest013, TestSize.Level0)
 #ifdef HKS_UNTRUSTED_RUNNING_ENV
     EXPECT_EQ(ret, HKS_ERROR_CRYPTO_ENGINE_ERROR) << "not HKS_ERROR_CRYPTO_ENGINE_ERROR error code.";
 #else
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "not HKS_ERROR_INVALID_ARGUMENT error code.";
+    EXPECT_EQ(ret, HKS_FAILURE) << "not HKS_FAILURE error code.";
 #endif
     inData.size = CCM_MAX_DATA_LEN_FOR_MAX_NONCE + AEAD_SIZE + 1;
     ret = HksAesCcmCipherTestDecrypt(&keyAlias, decParamSet, &inData, &cipherText, &inData, AEAD_SIZE);
 #ifdef HKS_UNTRUSTED_RUNNING_ENV
     EXPECT_EQ(ret, HKS_ERROR_CRYPTO_ENGINE_ERROR) << "not HKS_ERROR_CRYPTO_ENGINE_ERROR error code.";
 #else
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "not HKS_ERROR_INVALID_ARGUMENT error code.";
+    EXPECT_EQ(ret, HKS_FAILURE) << "not HKS_FAILURE error code.";
 #endif
     
     EXPECT_EQ(HksDeleteKeyForDe(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
@@ -1484,6 +1502,8 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest017, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "set dec nonce len failed.";
     ret = HksAesSetAeadLen(g_decCcmParamsNoAad, sizeof(g_decCcmParamsNoAad) / sizeof(HksParam), 8, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "set dec aead len failed.";
+    ret = HksAesSetAeadTagLen(g_decCcmParamsNoAad, sizeof(g_decCcmParamsNoAad) / sizeof(HksParam), 8);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "set dec aead tag len failed.";
 
     ret = InitParamSet(&decParamSet, g_decCcmParamsNoAad, sizeof(g_decCcmParamsNoAad) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
@@ -1503,6 +1523,8 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest017, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "set dec aad len failed.";
     ret = HksAesSetAeadLen(g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam), 8, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "set dec aead len failed.";
+    ret = HksAesSetAeadTagLen(g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam), 8);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "set dec aead tag len failed.";
     ret = InitParamSet(&decParamSet, g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
@@ -1547,7 +1569,9 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest018, TestSize.Level0)
         sizeof(g_testAad), g_testAad);
     EXPECT_EQ(ret, HKS_SUCCESS) << "set dec nonce len failed.";
     ret = HksAesSetAeadLen(g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam), CCM_MIN_AEAD_SIZE, NULL);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "set dec nonce len failed.";
+    EXPECT_EQ(ret, HKS_SUCCESS) << "set dec aead len failed.";
+    ret = HksAesSetAeadTagLen(g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam), CCM_MIN_AEAD_SIZE);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "set dec aead tag len failed.";
     struct HksParamSet *decParamSet = nullptr;
     ret = InitParamSet(&decParamSet, g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
@@ -1560,7 +1584,9 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest018, TestSize.Level0)
     cipherText.data = g_testCipherTextAead16Nonce7Aad20;
     cipherText.size = sizeof(g_testCipherTextAead16Nonce7Aad20);
     ret = HksAesSetAeadLen(g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam), CCM_MAX_AEAD_SIZE, NULL);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "set dec nonce len failed.";
+    EXPECT_EQ(ret, HKS_SUCCESS) << "set dec aead len failed.";
+    ret = HksAesSetAeadTagLen(g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam), CCM_MAX_AEAD_SIZE);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "set dec aead tag len failed.";
     ret = InitParamSet(&decParamSet, g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
@@ -1570,6 +1596,14 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest018, TestSize.Level0)
 
     EXPECT_EQ(HksDeleteKeyForDe(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
     HksFreeParamSet(&genParamSet);
+}
+
+static void SetAead(uint32_t len)
+{
+    int32_t ret = HksAesSetAeadLen(g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam), len, NULL);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "set dec aead len failed.";
+    ret = HksAesSetAeadTagLen(g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam), len);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "set dec aead tag len failed.";
 }
 
 /**
@@ -1607,34 +1641,24 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest019, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "set dec nonce len failed.";
 
     // aead len 2
-    ret = HksAesSetAeadLen(g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam), CCM_MIN_AEAD_SIZE - 2, NULL);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "set dec nonce len failed.";
+    SetAead(CCM_MIN_AEAD_SIZE - 2);
     ret = InitParamSet(&decParamSet, g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksAesCcmCipherTestDecrypt(&keyAlias, decParamSet, &cipherText, &plainText, &inData,
         CCM_MIN_AEAD_SIZE - 2);
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
-    EXPECT_EQ(ret, HKS_ERROR_CRYPTO_ENGINE_ERROR) << "not HKS_ERROR_CRYPTO_ENGINE_ERROR error code.";
-#else
-    EXPECT_EQ(ret, HKS_FAILURE) << "not HKS_FAILURE error code.";
-#endif
+    EXPECT_EQ(ret, HKS_ERROR_CODE_AEAD_TAG_LEN_INVALID) << "not HKS_ERROR_CODE_AEAD_TAG_LEN_INVALID error code.";
     HksFreeParamSet(&decParamSet);
     
     // aead len 3
     cipherText.data = g_testCipherTextAead4Nonce7Aad20;
     cipherText.size = sizeof(g_testCipherTextAead4Nonce7Aad20);
-    ret = HksAesSetAeadLen(g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam), CCM_MIN_AEAD_SIZE - 1, NULL);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "set dec nonce len failed.";
+    SetAead(CCM_MIN_AEAD_SIZE - 1);
     ret = InitParamSet(&decParamSet, g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksAesCcmCipherTestDecrypt(&keyAlias, decParamSet, &cipherText, &plainText, &inData, CCM_MIN_AEAD_SIZE - 1);
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
-    EXPECT_EQ(ret, HKS_ERROR_CRYPTO_ENGINE_ERROR) << "not HKS_ERROR_CRYPTO_ENGINE_ERROR error code.";
-#else
-    EXPECT_EQ(ret, HKS_FAILURE) << "not HKS_FAILURE error code.";
-#endif
+    EXPECT_EQ(ret, HKS_ERROR_CODE_AEAD_TAG_LEN_INVALID) << "not HKS_ERROR_CODE_AEAD_TAG_LEN_INVALID error code.";
     HksFreeParamSet(&decParamSet);
 
     EXPECT_EQ(HksDeleteKeyForDe(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
@@ -1676,33 +1700,23 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest020, TestSize.Level0)
     // aead len 17
     cipherText.data = g_testCipherTextAead16Nonce7Aad20;
     cipherText.size = sizeof(g_testCipherTextAead16Nonce7Aad20);
-    ret = HksAesSetAeadLen(g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam), 17, NULL);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "set dec nonce len failed.";
+    SetAead(17);
     ret = InitParamSet(&decParamSet, g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksAesCcmCipherTestDecrypt(&keyAlias, decParamSet, &cipherText, &plainText, &inData, 17);
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
-    EXPECT_EQ(ret, HKS_ERROR_CRYPTO_ENGINE_ERROR) << "not HKS_ERROR_CRYPTO_ENGINE_ERROR error code.";
-#else
-    EXPECT_EQ(ret, HKS_FAILURE) << "not HKS_FAILURE error code.";
-#endif
+    EXPECT_EQ(ret, HKS_ERROR_CODE_AEAD_TAG_LEN_INVALID) << "not HKS_ERROR_CODE_AEAD_TAG_LEN_INVALID error code.";
     HksFreeParamSet(&decParamSet);
 
     // aead len 18
     cipherText.data = g_testCipherTextAead16Nonce7Aad20;
     cipherText.size = sizeof(g_testCipherTextAead16Nonce7Aad20);
-    ret = HksAesSetAeadLen(g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam), 17, NULL);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "set dec nonce len failed.";
+    SetAead(18);
     ret = InitParamSet(&decParamSet, g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
-    ret = HksAesCcmCipherTestDecrypt(&keyAlias, decParamSet, &cipherText, &plainText, &inData, 17);
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
-    EXPECT_EQ(ret, HKS_ERROR_CRYPTO_ENGINE_ERROR) << "not HKS_ERROR_CRYPTO_ENGINE_ERROR error code.";
-#else
-    EXPECT_EQ(ret, HKS_FAILURE) << "not HKS_FAILURE error code.";
-#endif
+    ret = HksAesCcmCipherTestDecrypt(&keyAlias, decParamSet, &cipherText, &plainText, &inData, 18);
+    EXPECT_EQ(ret, HKS_ERROR_CODE_AEAD_TAG_LEN_INVALID) << "not HKS_ERROR_CODE_AEAD_TAG_LEN_INVALID error code.";
     HksFreeParamSet(&decParamSet);
 
     EXPECT_EQ(HksDeleteKeyForDe(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
@@ -1729,16 +1743,14 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest021, TestSize.Level0)
     int32_t ret = InitParamSet(&genParamSet, g_genCcmParams, sizeof(g_genCcmParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     
-    ret = HksImportKeyForDe(&keyAlias, genParamSet, &keyBlob);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksImportKey failed.";
+    EXPECT_EQ(HksImportKeyForDe(&keyAlias, genParamSet, &keyBlob), HKS_SUCCESS) << "HksImportKey failed.";
 
     struct HksParamSet *decParamSet = nullptr;
 
     ret = HksAesSetAadLen(g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam),
         sizeof(g_testAad), g_testAad);
     EXPECT_EQ(ret, HKS_SUCCESS) << "set dec nonce len failed.";
-    ret = HksAesSetAeadLen(g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam), 8, NULL);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "set dec nonce len failed.";
+    SetAead(8);
 
     // nonce len 10
     cipherText.data = g_testCipherTextAead8Nonce10Aad20;
@@ -1799,8 +1811,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest022, TestSize.Level0)
     ret = HksAesSetAadLen(g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam),
         sizeof(g_testAad), g_testAad);
     EXPECT_EQ(ret, HKS_SUCCESS) << "set dec nonce len failed.";
-    ret = HksAesSetAeadLen(g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam), 8, NULL);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "set dec nonce len failed.";
+    SetAead(8);
 
     // nonce len 6
     cipherText.data = g_testCipherTextAead8Nonce10Aad20;
@@ -1920,6 +1931,8 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest024, TestSize.Level0)
     ret = InitParamSet(&encParamSet, g_encCcmParamsNoNonce,
         sizeof(g_encCcmParamsNoNonce) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
+    ret = HksAesSetAeadTagLen(g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam), HKS_AE_TAG_LEN);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "set dec aead tag len failed.";
     ret = InitParamSet(&decParamSet, g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
@@ -1976,6 +1989,8 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest025, TestSize.Level0)
     ret = InitParamSet(&encParamSet, g_encCcmParamsNoNonce,
         sizeof(g_encCcmParamsNoNonce) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
+    ret = HksAesSetAeadTagLen(g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam), HKS_AE_TAG_LEN);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "set dec aead tag len failed.";
     ret = InitParamSet(&decParamSet, g_decCcmParams, sizeof(g_decCcmParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 

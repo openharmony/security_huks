@@ -60,6 +60,11 @@ int32_t HksGetKeyCountByProcessName(const struct HksStoreFileInfo *fileInfo, uin
 int32_t HksStorageWriteFile(
     const char *path, const char *fileName, const uint8_t *buf, uint32_t len, bool isOverride);
 
+int32_t HksStorageFileSize(const char *path, const char *fileName);
+
+int32_t HksStorageReadFile(
+    const char *path, const char *fileName, uint32_t offset, struct HksBlob *blob, uint32_t *size);
+
 #endif // _STORAGE_LITE_
 #endif // _CUT_AUTHENTICATE_
 
@@ -71,6 +76,12 @@ int32_t HksStoreDestroy(const struct HksBlob *processName);
 void HksServiceDeleteUserIDKeyAliasFile(const struct HksBlob *userId);
 
 void HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo *processInfo);
+
+#ifdef L2_STANDARD
+void HksServiceDeleteGroupKeyFile(const struct HksProcessInfo *processInfo, const char *developerId, const char *group);
+
+void HksServiceDeleteAncoUIDKeyFile(const struct HksProcessInfo *processInfo);
+#endif
 
 int32_t HksListAliasesByProcessName(const struct HksStoreFileInfo *fileInfo, struct HksKeyAliasSet **outData);
 

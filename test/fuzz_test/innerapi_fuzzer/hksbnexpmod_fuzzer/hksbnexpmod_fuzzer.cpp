@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,41 +14,64 @@
  */
 #include "hksbnexpmod_fuzzer.h"
 
-#include <securec.h>
-
-#include "hks_api.h"
-#include "hks_mem.h"
-#include "hks_param.h"
-#include "hks_type.h"
-
 #include "hks_fuzz_util.h"
-
-constexpr int BN_SIZE = 10;
-constexpr int BN_COUNT = 4;
 
 namespace OHOS {
 namespace Security {
 namespace Hks {
 
-bool DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 {
-    if (data == nullptr || size < (BN_SIZE * BN_COUNT)) {
-        return -1;
+    uint32_t xSize = fdp.ConsumeIntegralInRange<uint32_t>(32, 512);
+    std::vector<uint8_t> xBuf(xSize);
+    struct HksBlob x = { static_cast<uint32_t>(xBuf.size()), xBuf.data() };
+
+    uint32_t aSize = fdp.ConsumeIntegralInRange<uint32_t>(32, 512);
+    std::vector<uint8_t> aVec = fdp.ConsumeBytes<uint8_t>(aSize);
+    if (aVec.size() == 0) {
+        aVec = std::vector<uint8_t>(1, 0);
     }
+    struct HksBlob a = { static_cast<uint32_t>(aVec.size()), aVec.data() };
 
-    struct HksBlob x = { BN_SIZE, ReadData<uint8_t *>(data, size, BN_SIZE) };
-    struct HksBlob a = { BN_SIZE, ReadData<uint8_t *>(data, size, BN_SIZE) };
-    struct HksBlob e = { BN_SIZE, ReadData<uint8_t *>(data, size, BN_SIZE) };
-    struct HksBlob n = { BN_SIZE, ReadData<uint8_t *>(data, size, BN_SIZE) };
+    uint32_t eSize = fdp.ConsumeIntegralInRange<uint32_t>(4, 64);
+    std::vector<uint8_t> eVec = fdp.ConsumeBytes<uint8_t>(eSize);
+    if (eVec.size() == 0) {
+        eVec = std::vector<uint8_t>(1, 0);
+    }
+    struct HksBlob e = { static_cast<uint32_t>(eVec.size()), eVec.data() };
 
-    [[maybe_unused]] int ret = HksBnExpMod(&x, &a, &e, &n);
+    uint32_t nSize = fdp.ConsumeIntegralInRange<uint32_t>(32, 512);
+    std::vector<uint8_t> nVec = fdp.ConsumeBytes<uint8_t>(nSize);
+    if (nVec.size() == 0) {
+        nVec = std::vector<uint8_t>(1, 0);
+    }
+    struct HksBlob n = { static_cast<uint32_t>(nVec.size()), nVec.data() };
 
-    return 0;
+    return HksBnExpMod(&x, &a, &e, &n);
 }
 }}}
 
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
+    uint8_t nBuf[64] = {0};
+    uint8_t aBuf[64] = {0};
+    uint8_t eBuf[4] = {1, 0, 0, 0};
+    uint8_t xBuf[64] = {0};
+    struct HksBlob n = { 64, nBuf };
+    struct HksBlob a = { 64, aBuf };
+    struct HksBlob e = { 4, eBuf };
+    struct HksBlob x = { 64, xBuf };
+    n.data[63] = 3;
+    a.data[0] = 2;
+    int32_t ret = HksBnExpMod(&x, &a, &e, &n);
+    printf("fuzz_bnexpmod init: HksBnExpMod ret=%d\n", ret);
+    return 0;
+}
+
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    std::vector<uint8_t> v(data, data + size);
-    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
+    FuzzedDataProvider fdp(data, size);
+    int32_t ret = OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(fdp);
+
+    OHOS::Security::Hks::FuzzStatsRecord(ret);
+    return 0;
 }

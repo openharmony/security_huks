@@ -53,6 +53,13 @@ static napi_value GenerateKeyAsUserParseParams(napi_env env, napi_callback_info 
         HKS_LOG_E("generateKey parse params failed");
         return nullptr;
     }
+
+    if (!HksCheckIsAllowAsUserApi(context->paramSetIn)) {
+        HksNapiThrowFeatureNotSupport(env);
+        HKS_LOG_E("As user api not support");
+        return nullptr;
+    }
+
     return GetInt32(env, 0);
 }
 

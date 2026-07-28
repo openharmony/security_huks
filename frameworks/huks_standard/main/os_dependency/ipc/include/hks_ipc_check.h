@@ -25,6 +25,20 @@
 extern "C" {
 #endif
 
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+int32_t HksCheckAuthStateIsValid(const int32_t state);
+
+int32_t HksCheckIpcBlobAndParamSet(const struct HksBlob *blob, const struct HksParamSet *paramSet, uint32_t maxSize);
+
+int32_t HksCheckIpcTwoBlobsParamSet(const struct HksBlob *blob1, const struct HksBlob *blob2,
+    const struct HksParamSet *paramSet, uint32_t maxSize1, uint32_t maxSize2);
+
+int32_t HksCheckIpcBlob(const struct HksBlob *blob, uint32_t maxSize);
+
+int32_t HksCheckIpcBlobAndCertInfo(const struct HksBlob *blob, const struct HksExtCertInfo *certInfo,
+    const struct HksParamSet *paramSet, uint32_t blobMaxSize);
+#endif
+
 int32_t HksCheckIpcGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn);
 
 int32_t HksCheckIpcImportKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
@@ -68,6 +82,13 @@ int32_t HksCheckIpcWrapKey(const struct HksBlob *keyAlias, const struct HksParam
 
 int32_t HksCheckIpcUnwrapKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksBlob *wrappedKey);
+
+int32_t HksCheckIpcEncapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet, uint32_t *outSize);
+
+int32_t HksCheckIpcDecapsulateConcret(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
+    struct HksBlob *encapOrsharedSecret);
 
 #ifdef __cplusplus
 }

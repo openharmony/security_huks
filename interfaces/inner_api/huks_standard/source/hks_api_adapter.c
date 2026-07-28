@@ -30,8 +30,12 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_tag.h"
 #include "hks_template.h"
 #include "securec.h"
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+#include "hks_ukey_check.h"
+#endif
 
 #ifdef _CUT_AUTHENTICATE_
 #undef HKS_SUPPORT_API_IMPORT
@@ -50,7 +54,13 @@ int32_t HksImportKeyAdapter(const struct HksBlob *keyAlias,
     if ((ret == HKS_SUCCESS) &&
         ((importKeyTypeParam->uint32Param == HKS_KEY_TYPE_PRIVATE_KEY) ||
         (importKeyTypeParam->uint32Param == HKS_KEY_TYPE_KEY_PAIR))) {
-        ret = CopyToInnerKey(key, &innerKey);
+        uint32_t alg = 0;
+        struct HksParam *algParam = NULL;
+        ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
+        if (ret == HKS_SUCCESS) {
+            alg = algParam->uint32Param;
+        }
+        ret = CopyToInnerKey(key, alg, &innerKey);
     } else {
         ret = GetHksPubKeyInnerFormat(paramSet, key, &innerKey);
     }
@@ -85,12 +95,26 @@ int32_t HksAgreeKeyAdapter(const struct HksParamSet *paramSet, const struct HksB
 int32_t HksExportPublicKeyAdapter(const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *key)
 {
-    uint8_t *buffer = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
+    uint8_t *buffer = (uint8_t *)HksMalloc(ML_DSA_MAX_KEY_SIZE);
     HKS_IF_NULL_LOGE_RETURN(buffer, HKS_ERROR_MALLOC_FAIL, "malloc failed")
-    (void)memset_s(buffer, MAX_KEY_SIZE, 0, MAX_KEY_SIZE);
-    struct HksBlob publicKey = { MAX_KEY_SIZE, buffer };
+    (void)memset_s(buffer, ML_DSA_MAX_KEY_SIZE, 0, ML_DSA_MAX_KEY_SIZE);
+    struct HksBlob publicKey = { ML_DSA_MAX_KEY_SIZE, buffer };
 
     int32_t ret = HksClientExportPublicKey(keyAlias, paramSet, &publicKey);
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    int32_t isUkeyTag;
+    if (HksCheckIsUkeyOperation(paramSet, &isUkeyTag) == HKS_SUCCESS) {
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksClientExportPublicKey in Ukey fail. ret = %" LOG_PUBLIC "d", ret)
+        if ((CheckBlob(key) != HKS_SUCCESS) ||
+            (memcpy_s(key->data, key->size, publicKey.data, publicKey.size) != EOK)) {
+            HKS_FREE_BLOB(publicKey);
+            return HKS_ERROR_COPY_FAIL;
+        }
+        key->size = publicKey.size;
+        HKS_FREE_BLOB(publicKey);
+        return ret;
+    }
+#endif
     if (ret == HKS_SUCCESS) {
         struct HksBlob x509Key = { 0, NULL };
         ret = TranslateToX509PublicKey(&publicKey, &x509Key);

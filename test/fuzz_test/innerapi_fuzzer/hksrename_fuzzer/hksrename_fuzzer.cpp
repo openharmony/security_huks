@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,42 +12,61 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "hksrename_fuzzer.h"
 
-#include <securec.h>
-
-#include "hks_api.h"
-#include "hks_mem.h"
-#include "hks_param.h"
-#include "hks_type.h"
-
 #include "hks_fuzz_util.h"
-
-constexpr int BLOB_NUM = 2;
 
 namespace OHOS {
 namespace Security {
 namespace Hks {
 
-int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 {
-    if (data == nullptr || size < (BLOB_NUM * sizeof(uint32_t))) {
-        return -1;
+    uint32_t oldAliasSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 64);
+    std::vector<uint8_t> oldAliasBuf = fdp.ConsumeBytes<uint8_t>(oldAliasSize);
+    if (oldAliasBuf.size() == 0) {
+        oldAliasBuf = std::vector<uint8_t>(1, 0);
     }
+    struct HksBlob oldKeyAlias = { static_cast<uint32_t>(oldAliasBuf.size()), oldAliasBuf.data() };
 
-    struct HksBlob oldKey = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
-    struct HksBlob newKey = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
+    (void)HksFuzzGenerateKey(fdp, oldKeyAlias);
 
-    WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
+    uint32_t newAliasSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 64);
+    std::vector<uint8_t> newAliasBuf = fdp.ConsumeBytes<uint8_t>(newAliasSize);
+    if (newAliasBuf.size() == 0) {
+        newAliasBuf = std::vector<uint8_t>(1, 0);
+    }
+    struct HksBlob newKeyAlias = { static_cast<uint32_t>(newAliasBuf.size()), newAliasBuf.data() };
 
-    [[maybe_unused]] int ret = HksRenameKeyAlias(&oldKey, ps.s, &newKey);
+    WrapParamSet ps = ConstructParamSetFromFdp(fdp);
 
+    return HksRenameKeyAlias(&oldKeyAlias, ps.s, &newKeyAlias);
+}
+
+}}}
+
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
+    struct HksBlob oldAlias = { 17, reinterpret_cast<uint8_t *>(const_cast<char *>("fuzz_rename_old")) };
+    struct HksBlob newAlias = { 17, reinterpret_cast<uint8_t *>(const_cast<char *>("fuzz_rename_new")) };
+    WrapParamSet genPs = BuildFixedParamSet({ { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
+        { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
+        { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PSS } });
+    int32_t ret = HksGenerateKey(&oldAlias, genPs.s, nullptr);
+    printf("fuzz_rename init: GenerateKey ret=%d\n", ret);
+
+    WrapParamSet renamePs = BuildFixedParamSet({});
+    ret = HksRenameKeyAlias(&oldAlias, renamePs.s, &newAlias);
+    printf("fuzz_rename init: HksRenameKeyAlias ret=%d\n", ret);
     return 0;
 }
-}}}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    std::vector<uint8_t> v(data, data + size);
-    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
+    FuzzedDataProvider fdp(data, size);
+    int32_t ret = OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(fdp);
+    OHOS::Security::Hks::FuzzStatsRecord(ret);
+    return 0;
 }

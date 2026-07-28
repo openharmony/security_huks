@@ -45,6 +45,7 @@ config("public_huks_config") {
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/at_wrapper/include",
     "//base/security/huks/utils/file_iterative_reader/include",
     "//base/security/huks/service/huks_standard/huks_service/main/ha/include",
+    "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/se/include",
   ]
   if (huks_use_rkc_in_standard) {
     include_dirs += [ "//base/security/huks/frameworks/huks_standard/main/crypto_engine/rkc/include" ]
@@ -64,7 +65,7 @@ huks_sources = [
   "//base/security/huks/frameworks/huks_standard/main/core/src/hks_local_engine.c",
   "//base/security/huks/frameworks/huks_standard/main/core/src/hks_verifier.c",
   "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_client_service_passthrough.c",
-  "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ipc_check.c",
+  "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ukey_client_service_passthrough.c",
   "//base/security/huks/frameworks/huks_standard/main/os_dependency/posix/hks_mem.c",
   "//base/security/huks/frameworks/huks_standard/main/os_dependency/sysinfo/src/hks_get_process_info_passthrough.c",
   "//base/security/huks/frameworks/huks_standard/main/os_dependency/sysinfo/src/hks_get_udid.c",
@@ -76,6 +77,7 @@ huks_sources = [
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_hitrace.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_report.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_session_manager.c",
+  "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_se_session_manager.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_upgrade_helper.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_upgrade_key_accesser.c",
   "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_lock.c",
@@ -108,6 +110,7 @@ huks_core_sources = [
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_key_attest.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_key_generate.c",
+  "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_key_extension.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_key_operate_one_stage.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_key_operate_three_stage.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_key_other.c",
@@ -183,6 +186,7 @@ ohos_static_library("libhukssdk_static") {
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",  # hks_response.h
     "//base/security/huks/services/huks_standard/huks_service/main/plugin_proxy/include",
     "//base/security/huks/services/huks_standard/huks_service/main/ha/include",
+    "//base/security/huks/services/huks_standard/huks_service/extension/ukey_client_service/inc"
   ]
   deps = []
 
@@ -196,6 +200,11 @@ ohos_static_library("libhukssdk_static") {
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
     "//base/security/huks/utils/condition:libhuks_utils_condition_static",
   ]
+
+  if (huks_enable_ukey_config == true) {
+    deps += [ "//base/security/huks/services/huks_standard/huks_service/extension/ukey_client_service:libhuks_service_ukey_standard_static" ]
+  }
+
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "bounds_checking_function:libsec_shared",

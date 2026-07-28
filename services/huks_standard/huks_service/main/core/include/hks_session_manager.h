@@ -44,7 +44,7 @@ struct HksOperation {
 extern "C" {
 #endif
 
-int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+int32_t HksCreateOperation(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     const struct HksBlob *operationHandle, bool abortable);
 
 struct HksOperation *QueryOperationAndMarkInUse(const struct HksProcessInfo *processInfo,
@@ -54,6 +54,7 @@ struct HksOperation *QueryOperationByPidAndMarkInUse(int32_t pid);
 
 void MarkOperationUnUse(struct HksOperation *operation);
 
+// An operation that is currently in use cannot be deleted. Please mark it as unused first.
 void DeleteOperation(const struct HksBlob *operationHandle);
 
 void DeleteSessionByProcessInfo(const struct HksProcessInfo *processInfo);

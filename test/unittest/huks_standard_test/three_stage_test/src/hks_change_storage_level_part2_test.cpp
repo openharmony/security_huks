@@ -14,9 +14,9 @@
  */
 
 #include "hks_api.h"
-#include "hks_apply_permission_test_common.h"
 #include "hks_change_storage_level_test_common.h"
 #include "hks_three_stage_test_common.h"
+#include "hks_mock_common.h"
 
 #include <gtest/gtest.h>
 
@@ -32,13 +32,17 @@ public:
 
     void TearDown();
 };
-
+static uint64_t g_shellTokenId = 0;
 void HksChangeStorageLevelPart2Test::SetUpTestCase(void)
 {
+    g_shellTokenId = GetSelfTokenID();
+    HksMockCommon::SetTestEvironment(g_shellTokenId);
 }
 
 void HksChangeStorageLevelPart2Test::TearDownTestCase(void)
 {
+    SetSelfTokenID(g_shellTokenId);
+    HksMockCommon::ResetTestEvironment();
 }
 
 void HksChangeStorageLevelPart2Test::SetUp()
@@ -58,13 +62,12 @@ HWTEST_F(HksChangeStorageLevelPart2Test, HksChangeStorageLevelPart2Test001, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart2Test001");
 
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksChangeStorageLevelPart2Test001";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);

@@ -84,6 +84,26 @@ static const struct GenerateKeyCaseParam POSITIVE_CASE_GEN_PARAM = {
     },
 };
 
+static const struct GenerateKeyCaseParam POSITIVE_CASE_IMPORT_PARAM = {
+    0,
+    HKS_SUCCESS,
+    {
+        {
+            .tag = HKS_TAG_ALGORITHM,
+            .uint32Param = HKS_ALG_SM2
+        }, {
+            .tag = HKS_TAG_KEY_SIZE,
+            .uint32Param = HKS_SM2_KEY_SIZE_256
+        }, {
+            .tag = HKS_TAG_PURPOSE,
+            .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
+        }, {
+            .tag = HKS_TAG_IMPORT_KEY_TYPE,
+            .uint32Param = HKS_KEY_TYPE_KEY_PAIR
+        },
+    },
+};
+
 static const struct GenerateKeyCaseParam NEGATIVE_CASE_GEN_PARAMS[] = {
     {
         1,
@@ -472,6 +492,35 @@ static int32_t HksSm2SignVerifyTestRun(const struct HksBlob *keyAlias, const Gen
     return ret;
 }
 
+static int32_t HksSm2SignVerifyTestCompatibility(const struct HksBlob *keyAlias, const GenSignVerifyParam &param,
+    const struct HksBlob *inData)
+{
+    struct HksParamSet *genParamSet = nullptr;
+    struct HksParamSet *verifyParamSet = nullptr;
+
+    struct HksBlob signData = { sizeof(g_signData), g_signData };
+    struct HksBlob keyPair = { sizeof(g_keyPair), g_keyPair };
+
+    int32_t ret = InitParamSet(&genParamSet, param.gen.params.data(), param.gen.params.size());
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+
+    ret = InitParamSet(&verifyParamSet, param.verify.params.data(), param.verify.params.size());
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+
+    ret = HksImportKeyForDe(keyAlias, genParamSet, &keyPair);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "ImportKey failed.";
+
+    ret = HksTestSignVerify(keyAlias, verifyParamSet, inData, &signData);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Verify failed.";
+
+    ret = HksDeleteKeyForDe(keyAlias, genParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Delete key failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&verifyParamSet);
+    return ret;
+}
+
 /**
  * @tc.name: HksSm2SignVerifyTest.HksSm2SignVerifyTest001
  * @tc.desc: normal parameter test case : alg-SM2, pur-Sign/Verify, keySize-256 and dig-SM3.
@@ -571,6 +620,40 @@ HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest005, TestSize.Level0)
     GenSignVerifyParam param { NON_DIGEST_CASE_GEN_PARAM, NON_DIGEST_CASE_SIGN_PARAM, NON_DIGEST_CASE_VERIFY_PARAM };
     int ret = HksSm2SignVerifyTestRun(&keyAlias, param, false, &inData);
     EXPECT_NE(ret, HKS_SUCCESS) << "sm2SignVerifyTest005 failed.";
+}
+
+/**
+ * @tc.name: HksSm2SignVerifyTest.HksSm2SignVerifyTest006
+ * @tc.desc: compatibility test case : alg-SM2, pur-Verify, keySize-256 and dig-SM3
+ * @tc.type: FUNC
+ * @tc.require:issueI611S5
+ */
+HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest006, TestSize.Level0)
+{
+    HKS_LOG_E("Enter HksSm2SignVerifyTest006");
+    const char *keyAliasString = "HksSM2SignVerifyKeyAliasTest006";
+    struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
+    struct HksBlob inData = { sizeof(g_plainData), g_plainData };
+    GenSignVerifyParam param { POSITIVE_CASE_IMPORT_PARAM, POSITIVE_CASE_SIGN_PARAM, POSITIVE_CASE_VERIFY_PARAM };
+    int ret = HksSm2SignVerifyTestCompatibility(&keyAlias, param, &inData);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "sm2SignVerifyTest006 failed.";
+}
+
+/**
+ * @tc.name: HksSm2SignVerifyTest.HksSm2SignVerifyTest007
+ * @tc.desc: compatibility test case : alg-SM2, pur-Verify, keySize-256 and dig-NONE
+ * @tc.type: FUNC
+ * @tc.require:issueI611S5
+ */
+HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest007, TestSize.Level0)
+{
+    HKS_LOG_E("Enter HksSm2SignVerifyTest007");
+    const char *keyAliasString = "HksSM2SignVerifyKeyAliasTest007";
+    struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
+    struct HksBlob inData = { sizeof(g_hashData), g_hashData };
+    GenSignVerifyParam param { POSITIVE_CASE_IMPORT_PARAM, NON_DIGEST_CASE_SIGN_PARAM, NON_DIGEST_CASE_VERIFY_PARAM };
+    int ret = HksSm2SignVerifyTestCompatibility(&keyAlias, param, &inData);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "sm2SignVerifyTest007 failed.";
 }
 #endif
 }

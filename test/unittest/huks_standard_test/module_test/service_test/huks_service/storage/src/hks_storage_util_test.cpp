@@ -128,6 +128,11 @@ HWTEST_F(HksStorageUtilTest, HksStorageUtilTest002, TestSize.Level0)
         HKS_KEY_STORE_PATH "/222/key";
     ASSERT_EQ(strlen(fileInfo.mainPath.path), strlen(expectPath)) << fileInfo.mainPath.path;
     ASSERT_EQ(EOK, HksMemCmp(fileInfo.mainPath.path, expectPath, strlen(expectPath)));
+
+    material.developerId = const_cast<char *>("test_developer");
+    material.assetAccessGroup = const_cast<char *>("test_group");
+    ret = HksGetFileInfo(&material, &fileInfo);
+    ASSERT_EQ(ret, HKS_SUCCESS);
 }
 
 /**
@@ -157,6 +162,11 @@ HWTEST_F(HksStorageUtilTest, HksStorageUtilTest003, TestSize.Level0)
         HKS_CE_ROOT_PATH "/100/" HKS_STORE_SERVICE_PATH "/333/key";
     ASSERT_EQ(strlen(fileInfo.mainPath.path), strlen(expectPath)) << fileInfo.mainPath.path;
     ASSERT_EQ(EOK, HksMemCmp(fileInfo.mainPath.path, expectPath, strlen(expectPath)));
+
+    material.developerId = const_cast<char *>("test_developer");
+    material.assetAccessGroup = const_cast<char *>("test_group");
+    ret = HksGetFileInfo(&material, &fileInfo);
+    ASSERT_EQ(ret, HKS_SUCCESS);
 }
 
 /**
@@ -186,6 +196,11 @@ HWTEST_F(HksStorageUtilTest, HksStorageUtilTest004, TestSize.Level0)
         HKS_ECE_ROOT_PATH "/100/" HKS_STORE_SERVICE_PATH "/444/key";
     ASSERT_EQ(strlen(fileInfo.mainPath.path), strlen(expectPath)) << fileInfo.mainPath.path;
     ASSERT_EQ(EOK, HksMemCmp(fileInfo.mainPath.path, expectPath, strlen(expectPath)));
+
+    material.developerId = const_cast<char *>("test_developer");
+    material.assetAccessGroup = const_cast<char *>("test_group");
+    ret = HksGetFileInfo(&material, &fileInfo);
+    ASSERT_EQ(ret, HKS_SUCCESS);
 }
 
 #ifdef HUKS_ENABLE_SKIP_UPGRADE_KEY_STORAGE_SECURE_LEVEL
@@ -216,6 +231,11 @@ HWTEST_F(HksStorageUtilTest, HksStorageUtilTest005, TestSize.Level0)
         HKS_KEY_STORE_TMP_PATH "/555/555/key";
     ASSERT_EQ(strlen(fileInfo.mainPath.path), strlen(expectPath)) << fileInfo.mainPath.path;
     ASSERT_EQ(EOK, HksMemCmp(fileInfo.mainPath.path, expectPath, strlen(expectPath)));
+
+    material.developerId = const_cast<char *>("test_developer");
+    material.assetAccessGroup = const_cast<char *>("test_group");
+    ret = HksGetFileInfo(&material, &fileInfo);
+    ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
 }
 #endif
 
@@ -246,6 +266,11 @@ HWTEST_F(HksStorageUtilTest, HksStorageUtilTest006, TestSize.Level0)
         HKS_KEY_STORE_LITE_HAP "/hks_client/key";
     ASSERT_EQ(strlen(fileInfo.mainPath.path), strlen(expectPath)) << fileInfo.mainPath.path;
     ASSERT_EQ(EOK, HksMemCmp(fileInfo.mainPath.path, expectPath, strlen(expectPath)));
+
+    material.developerId = const_cast<char *>("test_developer");
+    material.assetAccessGroup = const_cast<char *>("test_group");
+    ret = HksGetFileInfo(&material, &fileInfo);
+    ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
 }
 
 /**
@@ -275,5 +300,10 @@ HWTEST_F(HksStorageUtilTest, HksStorageUtilTest007, TestSize.Level0)
         HKS_KEY_RKC_PATH "/hks_client/key";
     ASSERT_EQ(strlen(fileInfo.mainPath.path), strlen(expectPath)) << fileInfo.mainPath.path;
     ASSERT_EQ(EOK, HksMemCmp(fileInfo.mainPath.path, expectPath, strlen(expectPath)));
+
+    material.developerId = const_cast<char *>("test_developer");
+    material.assetAccessGroup = const_cast<char *>("test_group");
+    ret = HksGetFileInfo(&material, &fileInfo);
+    ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
 }
 }

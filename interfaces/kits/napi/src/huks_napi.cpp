@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,6 +53,9 @@
 #include "huks_napi_update_finish.h"
 #include "huks_napi_update_finish_session.h"
 #include "huks_napi_wrap_key.h"
+#include "huks_napi_anon_Attest_Key_Item_Offline.h"
+#include "huks_napi_ml_kem.h"
+// UKey functions moved to separate shared library huksexternalcrypto_napi
 
 namespace HuksNapi {
 inline void AddInt32Property(napi_env env, napi_value object, const char *name, int32_t value)
@@ -76,8 +79,10 @@ static void AddHuksTagPart1(napi_env env, napi_value tag)
     AddInt32Property(env, tag, "HUKS_TAG_BLOCK_MODE", HKS_TAG_BLOCK_MODE);
     AddInt32Property(env, tag, "HUKS_TAG_KEY_TYPE", HKS_TAG_KEY_TYPE);
     AddInt32Property(env, tag, "HUKS_TAG_ASSOCIATED_DATA", HKS_TAG_ASSOCIATED_DATA);
+    AddInt32Property(env, tag, "HUKS_TAG_AAD", HKS_TAG_AAD);
     AddInt32Property(env, tag, "HUKS_TAG_NONCE", HKS_TAG_NONCE);
     AddInt32Property(env, tag, "HUKS_TAG_IV", HKS_TAG_IV);
+    AddInt32Property(env, tag, "HUKS_TAG_CONTEXT", HKS_TAG_CONTEXT);
 
     /* Key derivation TAG */
     AddInt32Property(env, tag, "HUKS_TAG_INFO", HKS_TAG_INFO);
@@ -141,6 +146,10 @@ static void AddHuksTagPart2(napi_env env, napi_value tag)
     AddInt32Property(env, tag, "HUKS_TAG_ATTESTATION_ID_UDID", HKS_TAG_ATTESTATION_ID_UDID);
     AddInt32Property(env, tag, "HUKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO", HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO);
     AddInt32Property(env, tag, "HUKS_TAG_ATTESTATION_ID_VERSION_INFO", HKS_TAG_ATTESTATION_ID_VERSION_INFO);
+    AddInt32Property(env, tag, "HUKS_TAG_KEY_OVERRIDE", HKS_TAG_KEY_OVERRIDE);
+    AddInt32Property(env, tag, "HUKS_TAG_AE_TAG_LEN", HKS_TAG_AE_TAG_LEN);
+    AddInt32Property(env, tag, "HUKS_TAG_KEY_ACCESS_GROUP", HKS_TAG_KEY_ACCESS_GROUP);
+    AddInt32Property(env, tag, "HUKS_TAG_KEY_SECURITY_LEVEL", HKS_TAG_KEY_SECURITY_LEVEL);
 
     /*
      * Other reserved TAG: 601 - 1000
@@ -159,7 +168,6 @@ static void AddHuksTagPart2(napi_env env, napi_value tag)
     AddInt32Property(env, tag, "HUKS_TAG_SECURE_KEY_UUID", HKS_TAG_SECURE_KEY_UUID);
     AddInt32Property(env, tag, "HUKS_TAG_KEY_DOMAIN", HKS_TAG_KEY_DOMAIN);
     AddInt32Property(env, tag, "HUKS_TAG_IS_DEVICE_PASSWORD_SET", HKS_TAG_IS_DEVICE_PASSWORD_SET);
-    AddInt32Property(env, tag, "HUKS_TAG_KEY_OVERRIDE", HKS_TAG_KEY_OVERRIDE);
 
     /* Inner-use TAG: 10001 - 10999 */
     AddInt32Property(env, tag, "HUKS_TAG_PROCESS_NAME", HKS_TAG_PROCESS_NAME);
@@ -199,6 +207,11 @@ static void AddHuksTagPart3(napi_env env, napi_value tag)
     AddInt32Property(env, tag, "HUKS_TAG_CHALLENGE_TYPE", HKS_TAG_CHALLENGE_TYPE);
     AddInt32Property(env, tag, "HUKS_TAG_CHALLENGE_POS", HKS_TAG_CHALLENGE_POS);
     AddInt32Property(env, tag, "HUKS_TAG_KEY_AUTH_PURPOSE", HKS_TAG_KEY_AUTH_PURPOSE);
+
+    // UKEY
+    AddInt32Property(env, tag, "HUKS_TAG_KEY_CLASS", HKS_TAG_KEY_CLASS);
+
+    /* ExtensionAbility TAGs moved to external crypto (ukey) module */
 }
 
 static napi_value CreateHuksTag(napi_env env)
@@ -248,6 +261,13 @@ static napi_value CreateHuksKeySize(napi_env env)
     AddInt32Property(env, keySize, "HUKS_3DES_KEY_SIZE_128", HKS_3DES_KEY_SIZE_128);
     AddInt32Property(env, keySize, "HUKS_3DES_KEY_SIZE_192", HKS_3DES_KEY_SIZE_192);
 
+    AddInt32Property(env, keySize, "HUKS_ML_DSA_KEY_PARAM_SET_44", HKS_ML_DSA_KEY_PARAM_SET_44);
+    AddInt32Property(env, keySize, "HUKS_ML_DSA_KEY_PARAM_SET_65", HKS_ML_DSA_KEY_PARAM_SET_65);
+    AddInt32Property(env, keySize, "HUKS_ML_DSA_KEY_PARAM_SET_87", HKS_ML_DSA_KEY_PARAM_SET_87);
+
+    AddInt32Property(env, keySize, "HUKS_ML_KEM_KEY_PARAM_SET_768", HKS_ML_KEM_KEY_PARAM_SET_768);
+    AddInt32Property(env, keySize, "HUKS_ML_KEM_KEY_PARAM_SET_1024", HKS_ML_KEM_KEY_PARAM_SET_1024);
+
     return keySize;
 }
 
@@ -277,6 +297,9 @@ static napi_value CreateHuksKeyAlg(napi_env env)
     AddInt32Property(env, keyAlg, "HUKS_ALG_DES", HKS_ALG_DES);
     AddInt32Property(env, keyAlg, "HUKS_ALG_3DES", HKS_ALG_3DES);
     AddInt32Property(env, keyAlg, "HUKS_ALG_CMAC", HKS_ALG_CMAC);
+
+    AddInt32Property(env, keyAlg, "HUKS_ALG_ML_DSA", HKS_ALG_ML_DSA);
+    AddInt32Property(env, keyAlg, "HUKS_ALG_ML_KEM", HKS_ALG_ML_KEM);
 
     return keyAlg;
 }
@@ -354,6 +377,8 @@ static napi_value CreateHuksUnwrapSuite(napi_env env)
                      HKS_UNWRAP_SUITE_X25519_AES_256_GCM_NOPADDING);
     AddInt32Property(env, huksUnwrapSuite, "HUKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING",
                      HKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING);
+    AddInt32Property(env, huksUnwrapSuite, "HUKS_UNWRAP_SUITE_SM2_SM4_ECB_NOPADDING",
+                     HKS_UNWRAP_SUITE_SM2_SM4_ECB_NOPADDING);
     return huksUnwrapSuite;
 }
 
@@ -502,6 +527,15 @@ static void AddHuksErrCodePart(napi_env env, napi_value errorCode)
     AddInt32Property(env, errorCode, "HUKS_ERR_CODE_DEVICE_PASSWORD_UNSET", HUKS_ERR_CODE_DEVICE_PASSWORD_UNSET);
     AddInt32Property(env, errorCode, "HUKS_ERR_CODE_KEY_ALREADY_EXIST", HUKS_ERR_CODE_KEY_ALREADY_EXIST);
     AddInt32Property(env, errorCode, "HUKS_ERR_CODE_INVALID_ARGUMENT", HUKS_ERR_CODE_INVALID_ARGUMENT);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_ITEM_EXISTS", HUKS_ERR_CODE_ITEM_EXISTS);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_EXTERNAL_MODULE", HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_PIN_LOCKED", HUKS_ERR_CODE_PIN_LOCKED);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_PIN_INCORRECT", HUKS_ERR_CODE_PIN_CODE_ERROR);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_PIN_NO_AUTH", HUKS_ERR_CODE_PIN_NO_AUTH);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_BUSY", HUKS_ERR_CODE_BUSY);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_EXCEED_LIMIT", HUKS_ERR_CODE_EXCEED_LIMIT);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_SE_FAULT", HUKS_ERR_CODE_SE_FAULT);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_NETWORK_UNAVAILABLE", HUKS_ERR_CODE_NETWORK_UNAVAILABLE);
 }
 
 static napi_value CreateHuksErrCode(napi_env env)
@@ -569,6 +603,17 @@ static napi_value CreateHuksTagType(napi_env env)
     AddInt32Property(env, tagType, "HUKS_TAG_TYPE_BYTES", HKS_TAG_TYPE_BYTES);
 
     return tagType;
+}
+
+static napi_value CreateHuksKeyClassType(napi_env env)
+{
+    napi_value keyClassType = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &keyClassType));
+
+    AddInt32Property(env, keyClassType, "HUKS_KEY_CLASS_DEFAULT", HKS_KEY_CLASS_DEFAULT);
+    AddInt32Property(env, keyClassType, "HUKS_KEY_CLASS_EXTENSION", HKS_KEY_CLASS_EXTENSION);
+
+    return keyClassType;
 }
 
 static napi_value CreateHuksImportKeyType(napi_env env)
@@ -696,6 +741,16 @@ static napi_value CreateHuksKeyWrapType(napi_env env)
 
     return keyWrapType;
 }
+
+static napi_value CreateHuksKeySecurityLevel(napi_env env)
+{
+    napi_value value = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &value));
+
+    AddInt32Property(env, value, "HUKS_KEY_SECURITY_LEVEL_TEE", HKS_KEY_SECURITY_LEVEL_TEE);
+    AddInt32Property(env, value, "HUKS_KEY_SECURITY_LEVEL_SE", HKS_KEY_SECURITY_LEVEL_SE);
+    return value;
+}
 }  // namespace HuksNapi
 
 using namespace HuksNapi;
@@ -734,6 +789,8 @@ napi_property_descriptor NAPI_FUNC_DESC[] = {
     DECLARE_NAPI_FUNCTION("attestKeyItemAsUser", HuksNapiAttestKeyItemAsUser),
     DECLARE_NAPI_FUNCTION("anonAttestKeyItem", HuksNapiAnonAttestKeyItem),
     DECLARE_NAPI_FUNCTION("anonAttestKeyItemAsUser", HuksNapiAnonAttestKeyItemAsUser),
+    DECLARE_NAPI_FUNCTION("anonAttestKeyItemOffline", HuksNapiAnonAttestKeyItemOffline),
+    DECLARE_NAPI_FUNCTION("anonAttestKeyItemOfflineAsUser", HuksNapiAnonAttestKeyItemOfflineAsUser),
     DECLARE_NAPI_FUNCTION("initSession", HuksNapiInitSession),
     DECLARE_NAPI_FUNCTION("initSessionAsUser", HuksNapiInitSessionAsUser),
     DECLARE_NAPI_FUNCTION("updateSession", HuksNapiUpdateSession),
@@ -742,6 +799,9 @@ napi_property_descriptor NAPI_FUNC_DESC[] = {
     DECLARE_NAPI_FUNCTION("listAliases", HuksNapiListAliases),
     DECLARE_NAPI_FUNCTION("wrapKeyItem", HuksNapiWrapKey),
     DECLARE_NAPI_FUNCTION("unwrapKeyItem", HuksNapiUnwrapKey),
+    DECLARE_NAPI_FUNCTION("encapsulate", HuksNapiMlKemEncapsulate),
+    DECLARE_NAPI_FUNCTION("decapsulate", HuksNapiMlKemDecapsulate),
+
 };
 
 static napi_value HuksNapiRegister(napi_env env, napi_value exports)
@@ -759,6 +819,7 @@ static napi_value HuksNapiRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("HuksKeyFlag", CreateHuksKeyFlag(env)),
         DECLARE_NAPI_PROPERTY("HuksKeyStorageType", CreateHuksKeyStorageType(env)),
         DECLARE_NAPI_PROPERTY("HuksTagType", CreateHuksTagType(env)),
+        DECLARE_NAPI_PROPERTY("HuksKeyClassType", CreateHuksKeyClassType(env)),
         DECLARE_NAPI_PROPERTY("HuksTag", CreateHuksTag(env)),
         DECLARE_NAPI_PROPERTY("HuksImportKeyType", CreateHuksImportKeyType(env)),
         DECLARE_NAPI_PROPERTY("HuksUnwrapSuite", CreateHuksUnwrapSuite(env)),
@@ -772,6 +833,7 @@ static napi_value HuksNapiRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("HuksRsaPssSaltLenType", CreateHuksRsaPssSaltLenType(env)),
         DECLARE_NAPI_PROPERTY("HuksAuthStorageLevel", CreateHuksAuthStorageLevel(env)),
         DECLARE_NAPI_PROPERTY("HuksKeyWrapType", CreateHuksKeyWrapType(env)),
+        DECLARE_NAPI_PROPERTY("HuksKeySecurityLevel", CreateHuksKeySecurityLevel(env)),
     };
     napi_property_descriptor desc[HKS_ARRAY_SIZE(NAPI_FUNC_DESC) + HKS_ARRAY_SIZE(propDesc)];
 

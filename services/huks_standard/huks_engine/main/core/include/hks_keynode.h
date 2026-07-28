@@ -52,25 +52,23 @@ struct HuksKeyNode {
     uint64_t handle;
     uint64_t batchOperationTimestamp;
     bool isBatchOperation;
+    bool isInUse;
 };
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-HksMutex *HksGetHuksMutex(void);
-
-int32_t HksInitHuksMutex(void);
-
-void HksDestroyHuksMutex(void);
-
 struct HuksKeyNode *HksCreateBatchKeyNode(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet);
 
 struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct HksParamSet *paramSet);
 
-struct HuksKeyNode *HksQueryKeyNode(uint64_t handle);
+struct HuksKeyNode *HksQueryKeyNodeAndMarkInUse(uint64_t handle);
 
+// A key node that is currently in use cannot be deleted. Please mark it as unused first.
 void HksDeleteKeyNode(uint64_t handle);
+
+void HksMarkKeyNodeUnuse(struct HuksKeyNode *keyNode);
 
 void HksFreeUpdateKeyNode(struct HuksKeyNode *keyNode);
 

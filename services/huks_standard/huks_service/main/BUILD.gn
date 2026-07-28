@@ -61,7 +61,7 @@ if (os_level == "standard") {
     cflags =
         [ "-DHKS_CONFIG_RKC_STORE_PATH=\"${huks_use_rkc_in_standard_path}\"" ]
     external_deps = [
-      "bounds_checking_function:libsec_static",
+      "bounds_checking_function:libsec_shared",
       "hilog:libhilog",
     ]
     install_enable = true

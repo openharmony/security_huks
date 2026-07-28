@@ -207,14 +207,31 @@ void HksDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remoteObject)
     while (HksServiceAbortByPid(callingPid_) == HKS_SUCCESS && index < MAX_OPERATIONS_EACH_PID) {
         index++;
     }
+
+    NotifyExtOnBinderDied(callingUid_);
+
     HKS_LOG_I("The death process[%" LOG_PUBLIC "d] cache has been cleared [%" LOG_PUBLIC "d] operations!",
         callingPid_, index);
 }
 
-HksDeathRecipient::HksDeathRecipient(int32_t callingPid)
+void HksDeathRecipient::NotifyExtOnBinderDied(int32_t uid)
 {
-    callingPid_ = callingPid;
+#ifdef SUPPORT_COMMON_EVENT
+    OHOS::AAFwk::Want want;
+    want.SetAction(COMMON_EVENT_HKS_BINDER_DIED);
+    want.SetParam("uid", uid);
+    
+    OHOS::EventFwk::CommonEventData eventData;
+    eventData.SetWant(want);
+    
+    HksPluginOnReceiveEvent(&eventData);
+#else
+    HKS_LOG_E("not support common event on binder died");
+#endif
 }
+
+HksDeathRecipient::HksDeathRecipient(int32_t callingPid, int32_t callingUid)
+    : callingPid_(callingPid), callingUid_(callingUid) {}
 
 static int32_t ProcessAttestOrNormalMessage(
     uint32_t code, MessageParcel &data, uint32_t outSize, const struct HksBlob &srcData, MessageParcel &reply)
@@ -236,9 +253,18 @@ static int32_t ProcessAttestOrNormalMessage(
         sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
         if (remoteObject != HKS_NULL_POINTER) {
             int32_t callingPid = IPCSkeleton::GetCallingPid();
-            remoteObject->AddDeathRecipient(new OHOS::Security::Hks::HksDeathRecipient(callingPid));
-            HKS_LOG_I("Add bundleDead for pid: %" LOG_PUBLIC "d", callingPid);
+            int32_t callingUid = IPCSkeleton::GetCallingUid();
+            remoteObject->AddDeathRecipient(
+                new (std::nothrow) OHOS::Security::Hks::HksDeathRecipient(callingPid, callingUid));
+            HKS_LOG_I("Add bundleDead for pid: %" LOG_PUBLIC "d, uid: %" LOG_PUBLIC "d", callingPid, callingUid);
         }
+    } else if (code == HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY) {
+        auto ptr = data.ReadRemoteObject();
+        // ReadRemoteObject will fail if huks_service has no selinux permission to call the client side.
+        HKS_IF_NULL_LOGE_RETURN(ptr, HKS_ERROR_IPC_INIT_FAIL, "ReadExtRemoteObject ptr failed")
+        HksIpcServiceSetOrGetRemoteProperty(reinterpret_cast<const HksBlob *>(&srcData),
+            reinterpret_cast<const uint8_t *>(&reply), reinterpret_cast<const uint8_t *>(ptr.GetRefPtr()));
+        return HKS_SUCCESS;
     }
     return ProcessMessage(code, outSize, srcData, reply);
 }
@@ -281,13 +307,24 @@ static std::string GetTimeoutMonitorMarkTag(uint32_t code, uint32_t callingUid)
     return markTag;
 }
 
+static void ReportCostTime(uint64_t enterTime, uint64_t leaveTime, uint32_t sessionId, int32_t reply)
+{
+    if (leaveTime >= enterTime) {
+        HKS_LOG_I("cost %" LOG_PUBLIC PRIu64 " ms, sessionId = %" LOG_PUBLIC "u, ret:%" LOG_PUBLIC "d",
+            leaveTime - enterTime, sessionId, reply);
+    } else {
+        HKS_LOG_E("time error. diff: %" LOG_PUBLIC PRIu64 " ms, sessionId = %" LOG_PUBLIC "u, ret:%" LOG_PUBLIC "d",
+            enterTime - leaveTime, sessionId, reply);
+    }
+}
+
 int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     HksInitMemPolicy();
 
     uint64_t enterTime = 0;
     (void)HksElapsedRealTime(&enterTime);
-    uint32_t currentSessionId = g_sessionId.fetch_add(1);
+    uint32_t currentSessionId = g_sessionId.fetch_add(1, std::memory_order_relaxed);
     auto callingUid = IPCSkeleton::GetCallingUid();
     int userId = HksGetOsAccountIdFromUid(callingUid);
 
@@ -298,7 +335,7 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         HiviewDFX::XCOLLIE_FLAG_LOG);
 #endif
 
-    HKS_LOG_I("code:%" LOG_PUBLIC "u,  callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC
+    HKS_LOG_I("code:%" LOG_PUBLIC "u, callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC
         "d, sessionId = %" LOG_PUBLIC "u", code, callingUid, userId, currentSessionId);
 
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
@@ -321,7 +358,7 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         return ret;
     }
 
-    int retSys;
+    int retSys = NO_ERROR;
     // this is the temporary version which comments the descriptor check
     if (HksService::GetDescriptor() != data.ReadInterfaceToken()) {
         HKS_LOG_E("descriptor is diff.");
@@ -330,10 +367,7 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         ProcessRemoteRequest(code, data, reply);
         uint64_t leaveTime = 0;
         (void)HksElapsedRealTime(&leaveTime);
-        HKS_LOG_I("code:%" LOG_PUBLIC "d, cost %" LOG_PUBLIC PRIu64 " ms, sessionId = %"
-            LOG_PUBLIC "u, ret:%" LOG_PUBLIC "d",
-            code, leaveTime - enterTime, currentSessionId, reply.ReadInt32());
-        retSys = NO_ERROR;
+        ReportCostTime(enterTime, leaveTime, currentSessionId, reply.ReadInt32());
     }
 
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
@@ -446,7 +480,7 @@ void HksService::OnStart()
     HKS_LOG_I("HksService start success.");
 }
 
-void HksService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
+void HksService::OnAddSystemAbility(int32_t systemAbilityId, [[maybe_unused]] const std::string &deviceId)
 {
     HKS_LOG_I("systemAbilityId is %" LOG_PUBLIC "d!", systemAbilityId);
 #ifdef SUPPORT_COMMON_EVENT
@@ -454,7 +488,7 @@ void HksService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &
 #endif
 }
 
-void HksService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
+void HksService::OnRemoveSystemAbility(int32_t systemAbilityId, [[maybe_unused]] const std::string& deviceId)
 {
     HKS_LOG_I("systemAbilityId is %" LOG_PUBLIC "d!", systemAbilityId);
 }

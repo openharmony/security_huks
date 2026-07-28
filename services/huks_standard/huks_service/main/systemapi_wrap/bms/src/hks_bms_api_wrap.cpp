@@ -18,7 +18,12 @@
 #include <cJSON.h>
 #include <cstring>
 #include <unistd.h>
+#include <string>
+#include <vector>
+#include "errors.h"
+#include "hks_error_code.h"
 #include "securec.h"
+#include "cstring"
 
 #include "accesstoken_kit.h"
 #include "ipc_skeleton.h"
@@ -31,7 +36,10 @@
 
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_param.h"
 #include "hks_template.h"
+#include "hks_type_enum.h"
+#include "hks_json_wrapper.h"
 
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
@@ -43,44 +51,38 @@
 #define SYSTEM_CORE "system_core"
 #define APP_MODE_DEBUG "debug"
 #define APP_MODE_RELEASE "release"
+const int32_t HKS_MAIN_APPLICATION = 0;
 
 using namespace OHOS;
 using namespace Security::AccessToken;
+using namespace OHOS::Security::Huks;
 
 static int32_t ConvertCallerInfoToJson(struct HksCallerInfo *callerInfo, struct HksBlob *outInfo)
 {
-    cJSON *jsonObj = cJSON_CreateObject();
-    HKS_IF_NULL_LOGE_RETURN(jsonObj, HKS_ERROR_NULL_POINTER, "create cjson object failed.")
+    auto jsonObj = CommJsonObject::CreateObject();
+    HKS_IF_TRUE_LOGE_RETURN(jsonObj.IsNull(), HKS_ERROR_NULL_POINTER, "jsonObj is null");
 
-    const char *jsonKeyId = callerInfo->isHap ? "appId" : "processName";
-    const char *jsonKeyExtend = callerInfo->isHap ? "bundleName" : "APL";
-    if ((cJSON_AddStringToObject(jsonObj, jsonKeyId, callerInfo->id.c_str()) == nullptr) ||
-        (cJSON_AddStringToObject(jsonObj, jsonKeyExtend, callerInfo->extend.c_str()) == nullptr)) {
-        HKS_LOG_E("add id and extend info to json object is failed.");
-        cJSON_Delete(jsonObj);
-        return HKS_ERROR_NULL_POINTER;
-    }
+    std::string jsonKeyId = callerInfo->isHap ? "appId" : "processName";
+    std::string jsonKeyExtend = callerInfo->isHap ? "bundleName" : "APL";
+    HKS_IF_TRUE_LOGE_RETURN(!jsonObj.SetValue(jsonKeyId, callerInfo->id),
+        HKS_ERROR_NULL_POINTER, "add id failed")
+    HKS_IF_TRUE_LOGE_RETURN(!jsonObj.SetValue(jsonKeyExtend, callerInfo->extend),
+        HKS_ERROR_NULL_POINTER, "add extend failed")
 
-    const char *jsonKeyIdentifier = "appIdentifier";
-    const char *jsonKeyMode = "appMode";
-    if (callerInfo->isHap &&
-        (cJSON_AddStringToObject(jsonObj, jsonKeyIdentifier, callerInfo->appIdentifier.c_str()) == nullptr ||
-        cJSON_AddStringToObject(jsonObj, jsonKeyMode, callerInfo->appMode.c_str()) == nullptr)) {
-        HKS_LOG_E("add appIdentifier and appMode to json object is failed.");
-        cJSON_Delete(jsonObj);
-        return HKS_ERROR_NULL_POINTER;
-    }
+    std::string jsonKeyIdentifier = "appIdentifier";
+    std::string jsonKeyMode = "appMode";
+    HKS_IF_TRUE_LOGE_RETURN(callerInfo->isHap &&
+        (!jsonObj.SetValue(jsonKeyIdentifier, callerInfo->appIdentifier) ||
+        !jsonObj.SetValue(jsonKeyMode, callerInfo->appMode)),
+        HKS_ERROR_NULL_POINTER, "add appIdentifier and appMode failed")
 
-    char *jsonStr = cJSON_PrintUnformatted(jsonObj);
-    if (jsonStr == nullptr) {
-        HKS_LOG_E("cJSON_PrintUnformatted failed.");
-        cJSON_Delete(jsonObj);
-        return HKS_ERROR_NULL_POINTER;
-    }
+    std::string jsonStr = jsonObj.Serialize();
+    HKS_IF_TRUE_LOGE_RETURN(jsonStr.empty(), HKS_ERROR_NULL_POINTER, "serialize jsonObj failed")
 
-    outInfo->size = strlen(jsonStr);
-    outInfo->data = (uint8_t *)jsonStr;
-    cJSON_Delete(jsonObj);
+    outInfo->data = static_cast<uint8_t *>(HksMalloc(jsonStr.size()));
+    HKS_IF_NULL_LOGE_RETURN(outInfo->data, HKS_ERROR_MALLOC_FAIL, "malloc outInfo->data failed")
+    outInfo->size = jsonStr.size();
+    (void)memcpy_s(outInfo->data, jsonStr.size(), jsonStr.c_str(), jsonStr.size());
     return HKS_SUCCESS;
 }
 
@@ -131,23 +133,44 @@ int32_t HksGetHapInfo(const struct HksProcessInfo *processInfo, struct HksBlob *
     return HKS_SUCCESS;
 }
 
-static int32_t HksGetBundleInfoV9(const std::string &bundleName, int32_t userId, AppExecFwk::BundleInfo &bundleInfo)
+static sptr<AppExecFwk::IBundleMgr> GetBundleMgr()
 {
     sptr<ISystemAbilityManager> systemAbilityManager =
         SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    HKS_IF_NULL_LOGE_RETURN(systemAbilityManager, HKS_ERROR_BAD_STATE, "failed to get system ability mgr")
+    HKS_IF_NULL_LOGE_RETURN(systemAbilityManager, nullptr, "failed to get system ability mgr")
 
     sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    HKS_IF_NULL_LOGE_RETURN(remoteObject, HKS_ERROR_BAD_STATE, "failed to get remoteObject")
+    HKS_IF_NULL_LOGE_RETURN(remoteObject, nullptr, "failed to get remoteObject")
 
     sptr<AppExecFwk::IBundleMgr> bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
-    HKS_IF_NULL_LOGE_RETURN(bundleMgrProxy, HKS_ERROR_BAD_STATE, "failed to get bundleMgrProxy")
+    HKS_IF_NULL_LOGE_RETURN(bundleMgrProxy, nullptr, "failed to get bundleMgrProxy")
+
+    return bundleMgrProxy;
+}
+
+static int32_t HksGetBundleInfoV9(const std::string &bundleName, int32_t userId, AppExecFwk::BundleInfo &bundleInfo)
+{
+    sptr<AppExecFwk::IBundleMgr> bundleMgrProxy = GetBundleMgr();
+    HKS_IF_NULL_LOGE_RETURN(bundleMgrProxy, HKS_ERROR_BAD_STATE, "bundleInfo failed to get bundleMgrProxy")
 
     uint32_t flag = static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO);
     int32_t ret = bundleMgrProxy->GetBundleInfoV9(bundleName, flag, bundleInfo, userId);
     HKS_IF_NOT_SUCC_LOGE(ret, "GetBundleInfoV9 fail, ret = %" LOG_PUBLIC "d", ret)
 
     return ret;
+}
+
+static int32_t HksGetApplicationInfoV9(const std::string &bundleName, int32_t userId,
+    AppExecFwk::ApplicationInfo &applicationInfo)
+{
+    sptr<AppExecFwk::IBundleMgr> bundleMgrProxy = GetBundleMgr();
+    HKS_IF_NULL_LOGE_RETURN(bundleMgrProxy, HKS_ERROR_BAD_STATE, "applicationInfo failed to get bundleMgrProxy")
+
+    uint32_t flag = static_cast<uint32_t>(AppExecFwk::GetApplicationFlag::GET_APPLICATION_INFO_DEFAULT);
+    auto ret = bundleMgrProxy->GetApplicationInfoV9(bundleName, flag, userId, applicationInfo);
+    HKS_IF_TRUE_LOGE_RETURN(ret != ERR_OK, HKS_FAILURE, "get applicationInfo failed")
+
+    return HKS_SUCCESS;
 }
 
 static int32_t HksGetHapPkgName(const struct HksProcessInfo *processInfo, struct HksBlob *hapOwnerId)
@@ -169,16 +192,15 @@ static int32_t HksGetHapPkgName(const struct HksProcessInfo *processInfo, struct
 
     const char *appIdentifier = bundleInfo.signatureInfo.appIdentifier.c_str();
     hapOwnerId->size = bundleInfo.signatureInfo.appIdentifier.size();
-    hapOwnerId->data = (uint8_t *)HksMalloc(hapOwnerId->size);
+    hapOwnerId->data = static_cast<uint8_t *>(HksMalloc(hapOwnerId->size));
     HKS_IF_NULL_LOGE_RETURN(hapOwnerId->data, HKS_ERROR_MALLOC_FAIL, "malloc hapOwnerId data fail")
 
     (void)memcpy_s(hapOwnerId->data, hapOwnerId->size, appIdentifier, hapOwnerId->size);
     return HKS_SUCCESS;
 }
 
-int32_t HksGetSaInfo(const struct HksProcessInfo *processInfo, struct HksBlob *saInfo)
+int32_t HksGetSaInfo(struct HksBlob *saInfo)
 {
-    HKS_IF_NULL_LOGE_RETURN(processInfo, HKS_ERROR_NULL_POINTER, "processInfo is nullptr.")
     HKS_IF_NULL_LOGE_RETURN(saInfo, HKS_ERROR_NULL_POINTER, "saInfo is nullptr.")
 
     auto callingTokenId = IPCSkeleton::GetCallingTokenID();
@@ -250,3 +272,147 @@ int32_t GetCallerName(const struct HksProcessInfo *processInfo, struct HksBlob *
     }
     return ret;
 }
+#ifdef L2_STANDARD
+static int32_t GetAssetAccessGroup(const struct HksProcessInfo *processInfo,
+    std::vector<std::string> &assetAccessGroups)
+{
+    HKS_IF_NULL_LOGE_RETURN(processInfo, HKS_ERROR_NULL_POINTER, "processInfo is nullptr.")
+
+    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
+    HKS_IF_TRUE_LOGE_RETURN(AccessTokenKit::GetTokenType(callingTokenId) != ATokenTypeEnum::TOKEN_HAP,
+        HKS_ERROR_NOT_SUPPORTED, "caller is not from hap, not support to get hap info.")
+
+    HapTokenInfo hapTokenInfo{};
+    int32_t callingResult = AccessTokenKit::GetHapTokenInfo(callingTokenId, hapTokenInfo);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(callingResult, HKS_ERROR_BAD_STATE, "Get hap info failed from access token kit.")
+
+    AppExecFwk::ApplicationInfo applicationInfo{};
+    int32_t ret = HksGetApplicationInfoV9(hapTokenInfo.bundleName, processInfo->userIdInt, applicationInfo);
+    assetAccessGroups = applicationInfo.assetAccessGroups;
+
+    return ret;
+}
+
+static int32_t GetAppProvisionInfo(const struct HksProcessInfo *processInfo,
+    AppExecFwk::AppProvisionInfo &appProvisionInfo)
+{
+    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
+    HKS_IF_TRUE_LOGE_RETURN(AccessTokenKit::GetTokenType(callingTokenId) != ATokenTypeEnum::TOKEN_HAP,
+        HKS_ERROR_NOT_SUPPORTED, "caller is not from hap, not support to get hap info.")
+
+    HapTokenInfo hapTokenInfo{};
+    int32_t callingResult = AccessTokenKit::GetHapTokenInfo(callingTokenId, hapTokenInfo);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(callingResult, HKS_ERROR_BAD_STATE, "Get hap info failed from access token kit.")
+
+    sptr<AppExecFwk::IBundleMgr> bundleMgrProxy = GetBundleMgr();
+    HKS_IF_NULL_LOGE_RETURN(bundleMgrProxy, HKS_ERROR_BAD_STATE, "appProversionInfo failed to get bundleMgrProxy")
+
+    auto code = bundleMgrProxy->GetAppProvisionInfo(hapTokenInfo.bundleName, processInfo->userIdInt, appProvisionInfo);
+    HKS_IF_TRUE_LOGE_RETURN(code != ERR_OK, HKS_FAILURE, "get appProvisionInfo failed")
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksGetDeveloperId(const struct HksProcessInfo *processInfo, struct HksBlob *developerId)
+{
+    HKS_IF_NULL_LOGE_RETURN(processInfo, HKS_ERROR_NULL_POINTER, "processInfo is nullptr.")
+
+    AppExecFwk::AppProvisionInfo appProvisionInfo{};
+    int32_t ret = GetAppProvisionInfo(processInfo, appProvisionInfo);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get app provision info failed.")
+
+    uint32_t developerIdSize = appProvisionInfo.developerId.size();
+    HKS_IF_TRUE_LOGE_RETURN(developerIdSize == 0, HKS_ERROR_INVALID_DEVELOPER_ID, "developerId is null")
+
+    developerId->size = developerIdSize;
+    developerId->data = static_cast<uint8_t *>(HksMalloc(developerIdSize));
+    HKS_IF_NULL_LOGE_RETURN(developerId->data, HKS_ERROR_MALLOC_FAIL, "malloc developerId failed")
+    (void)memcpy_s(developerId->data, developerIdSize, appProvisionInfo.developerId.c_str(), developerIdSize);
+    return ret;
+}
+
+static int32_t HksCheckMainApplication(const struct HksProcessInfo *processInfo, bool &isMainApplication)
+{
+    int32_t appIndex = 0;
+    std::string bundleName{};
+    sptr<AppExecFwk::IBundleMgr> bundleMgrProxy = GetBundleMgr();
+    HKS_IF_NULL_LOGE_RETURN(bundleMgrProxy, HKS_ERROR_BAD_STATE, "mainApplication failed to get bundleMgrProxy")
+
+    auto ret = bundleMgrProxy->GetNameAndIndexForUid(processInfo->uidInt, bundleName, appIndex);
+    HKS_IF_TRUE_LOGE_RETURN(ret != ERR_OK, HKS_FAILURE, "get applicationInfo failed")
+
+    isMainApplication = (appIndex == HKS_MAIN_APPLICATION);
+    return HKS_SUCCESS;
+}
+
+int32_t HksCheckAssetAccessGroup(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet)
+{
+    struct HksParam *accessGroupParam = nullptr;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_ACCESS_GROUP, &accessGroupParam);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    bool mainApplication = true;
+    ret = HksCheckMainApplication(processInfo, mainApplication);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check mainApplication failed")
+    HKS_IF_TRUE_LOGE_RETURN(mainApplication == false, HKS_ERROR_NOT_SUPPORTED, "not support for sub application")
+
+    std::vector<std::string> assetAccessGroups{};
+    ret = GetAssetAccessGroup(processInfo, assetAccessGroups);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get assetAccessGroup failed")
+
+    for (auto &groupId : assetAccessGroups) {
+        HKS_IF_TRUE_CONTINUE(groupId.size() != accessGroupParam->blob.size)
+        HKS_IF_TRUE_RETURN(
+            HksMemCmp(accessGroupParam->blob.data, groupId.c_str(), accessGroupParam->blob.size) == 0,
+            HKS_SUCCESS)
+    }
+
+    return HKS_ERROR_INVALID_ACCESS_GROUP;
+}
+
+static bool IsThisGroupExistApp(const std::string &group, const std::vector<AppExecFwk::BundleInfo> &bundleInfos)
+{
+    for (auto &bundleInfo : bundleInfos) {
+        HKS_LOG_I("app bundlename: %" LOG_PUBLIC "s", bundleInfo.applicationInfo.bundleName.c_str());
+        for (auto &assetAccessGroup : bundleInfo.applicationInfo.assetAccessGroups) {
+            HKS_IF_TRUE_LOGI_RETURN(assetAccessGroup == group, true,
+                "group is still exist: %" LOG_PUBLIC "s", group.c_str())
+        }
+    }
+    return false;
+}
+
+int32_t HksGetDeleteGroups(const struct HksProcessInfo *processInfo, const std::string &developerId,
+    const std::vector<std::string> &thisGroups, std::vector<std::string> &deleteGroups)
+{
+    sptr<AppExecFwk::IBundleMgr> bundleMgrProxy = GetBundleMgr();
+    HKS_IF_NULL_LOGE_RETURN(bundleMgrProxy, HKS_ERROR_BAD_STATE, "appProversionInfo failed to get bundleMgrProxy")
+
+    std::vector<AppExecFwk::BundleInfo> bundleInfos{};
+    auto retCode = bundleMgrProxy->GetAllBundleInfoByDeveloperId(developerId, bundleInfos,
+        processInfo->userIdInt);
+    HKS_LOG_I("get bundles ret = %" LOG_PUBLIC "d", retCode);
+
+    for (auto &group : thisGroups) {
+        HKS_LOG_I("this group: %" LOG_PUBLIC "s", group.c_str());
+        if (!IsThisGroupExistApp(group, bundleInfos)) {
+            deleteGroups.push_back(group);
+        }
+    }
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksGetBundleNameFromUid(uint32_t uid, std::string &bundleName)
+{
+    sptr<AppExecFwk::IBundleMgr> bundleMgrProxy = GetBundleMgr();
+    HKS_IF_NULL_LOGE_RETURN(bundleMgrProxy, HKS_ERROR_BAD_STATE, "HksGetBundleNameFromUid failed to get bundleMgrProxy")
+
+    int32_t appIndex = 0;
+    auto ret = bundleMgrProxy->GetNameAndIndexForUid(static_cast<int32_t>(uid), bundleName, appIndex);
+    HKS_IF_TRUE_LOGE_RETURN(ret != ERR_OK, HKS_FAILURE, "HksGetBundleNameFromUid GetNameAndIndexForUid failed,"
+        " uid=%" LOG_PUBLIC "u, ret=%" LOG_PUBLIC "d", uid, ret)
+
+    return HKS_SUCCESS;
+}
+#endif

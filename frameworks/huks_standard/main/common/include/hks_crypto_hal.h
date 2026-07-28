@@ -17,6 +17,7 @@
 #define HKS_CRYPTO_HAL_H
 
 #include "hks_type.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,6 +58,7 @@ struct HksAeadParam {
         uint32_t tagLenEnc;
     };
     uint32_t payloadLen;
+    bool hasMiniAad; /* true if HKS_TAG_AAD, false if HKS_TAG_ASSOCIATED_DATA */
 };
 
 struct HksCipherParam {
@@ -206,7 +208,12 @@ int32_t HksCryptoHalAddEntropy(const struct HksBlob *entropy);
 
 int32_t HksCryptoHalAgreeKey(const struct HksBlob *nativeKey, const struct HksBlob *pubKey,
     const struct HksKeySpec *spec, struct HksBlob *sharedKey);
+#ifdef HKS_SUPPORT_ML_KEM
+int32_t HksCryptoHalMlKemEncapsulate(const struct HksBlob *rawKey, struct HksEncapsulationResult *encapResult);
 
+int32_t HksCryptoHalMlKemDecapsulate(const struct HksBlob *rawKey, const struct HksBlob *ciphertext,
+    struct HksBlob *sharedSecret);
+#endif
 int32_t HksCryptoHalSign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *signature);
 

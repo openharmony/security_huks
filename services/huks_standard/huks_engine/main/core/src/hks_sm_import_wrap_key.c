@@ -42,6 +42,9 @@
 #include "hks_template.h"
 #include "hks_core_service_key_generate.h"
 #include "hks_core_service_key_operate_one_stage.h"
+#include "hks_openssl_sm2.h"
+#include "hks_openssl_sm4.h"
+#include "hks_error_code.h"
 
 #define HKS_PADDING_SUPPLENMENT 16
 
@@ -213,7 +216,7 @@ static int32_t DecryptKekWithSm2(const struct HksBlob *wrappedKeyData, const str
     ClearAndFreeKeyBlob(&rawKey);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get decrypt param failed!");
-        HKS_FREE(plainTextBlob.data);
+        ClearAndFreeKeyBlob(&plainTextBlob);
         return ret;
     }
     if (dataParams->signatureDataLength == 0) {
@@ -297,22 +300,11 @@ static int32_t VerifyKekBySm2(const struct HksSmWrappedKeyDataBlob *dataParams)
     }
     struct HksUsageSpec usageSpec = { 0 };
     HksFillUsageSpec(verifyParamSet, &usageSpec);
-
-    struct HksBlob message = {0, NULL};
-    message.size = MAX_HASH_SIZE;
-    message.data = (uint8_t *)HksMalloc(message.size);
-    if (message.data == NULL) {
-        HKS_LOG_E("malloc message memory failed!");
-        HksFreeParamSet(&verifyParamSet);
-        return HKS_ERROR_MALLOC_FAIL;
+    ret = HksCryptoHalVerify(&dataParams->peerPublicKey, &usageSpec, &dataParams->kekData, &dataParams->signData);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksCryptoHalVerify failed!");
     }
-    do {
-        ret = HksCryptoHalHash(HKS_DIGEST_SM3, &dataParams->kekData, &message);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCryptoHalHash failed!")
-        ret = HksCryptoHalVerify(&dataParams->peerPublicKey, &usageSpec, &message, &dataParams->signData);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCryptoHalVerify failed!")
-    } while (0);
-    HKS_FREE_BLOB(message);
+
     HksFreeParamSet(&verifyParamSet);
     return ret;
 }
@@ -598,7 +590,241 @@ int32_t HksSmImportWrappedKey(const struct HksBlob *keyAlias, const struct HksPa
     return ret;
 }
 
+static int32_t HksGetSm2RawKeyAndParm(const struct HksBlob *wrappingKey, struct HksParamSet **decryptParamSet,
+    struct HksBlob *rawKey)
+{
+    int32_t ret = HKS_SUCCESS;
+    struct HksKeyNode *wrappingKeyNode = HksGenerateKeyNode(wrappingKey);
+    HKS_IF_NULL_LOGE_RETURN(wrappingKeyNode, HKS_ERROR_CORRUPT_FILE, "envelop generate keynode failed")
+    do {
+        ret = GetSm2DecryptParamSet(wrappingKeyNode->paramSet, decryptParamSet);
+        HKS_IF_NOT_SUCC_BREAK(ret, "get envelop decrypt param failed!")
+
+        ret = HksGetRawKey(wrappingKeyNode->paramSet, rawKey);
+        HKS_IF_NOT_SUCC_BREAK(ret, "cipher get envelop raw key failed!")
+    } while (0);
+    HksFreeKeyNode(&wrappingKeyNode);
+    return ret;
+}
+
+static int32_t GetKeySize(const struct HksParamSet *paramSet, uint32_t *size)
+{
+    int32_t ret = HKS_ERROR_PARAM_NOT_EXIST;
+    struct HksParam *keySize = NULL;
+    ret = HksGetParam(paramSet, HKS_TAG_KEY_SIZE, &keySize);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Envelop Get Key Size Fail!")
+    *size = HKS_KEY_BYTES(keySize->uint32Param);
+    return ret;
+}
+
+static int32_t HksGetCipherFromEnvelop(const struct HksBlob *wrappingKey, const struct HksBlob *wrappedKeyData,
+    const struct HksParamSet *paramSet, struct HksBlob *plianCipher)
+{
+    struct HksUsageSpec CipherSM4Usage = { .algType = HKS_ALG_SM4, .mode = HKS_MODE_ECB, .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_NONE, .purpose = HKS_KEY_PURPOSE_DECRYPT, .algParam = NULL};
+    uint32_t blobIndex = 0;
+    struct HksBlob encKekData = {0, NULL};
+    int32_t ret = HksGetBlobFromWrappedData(wrappedKeyData, blobIndex++, HKS_IMPORT_ENVELOP_TOTAL_BLOBS, &encKekData);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Envelop Get enc-sm4Key Fail!")
+
+    uint32_t importKeySize = 0;
+    ret = GetKeySize(paramSet, &importKeySize);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_KEY_SIZE_FAIL, "Envelop Get Key Size Fail!!")
+
+    struct HksBlob plainImportKey = {0, NULL};
+    struct HksBlob encImportKey = {0, NULL};
+    ret = HksGetBlobFromWrappedData(wrappedKeyData, blobIndex++, HKS_IMPORT_ENVELOP_TOTAL_BLOBS, &encImportKey);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Envelop Get enc-importKey Fail!")
+    if (importKeySize != encImportKey.size) {
+        HKS_LOG_E("Envelop param: %"LOG_PUBLIC"u, wrapped size:%"LOG_PUBLIC"u", importKeySize, encImportKey.size);
+        return HKS_ERROR_INVALID_KEY_SIZE;
+    }
+    struct HksParamSet *decryptParamSet = NULL;
+    struct HksBlob rawKey = {0, NULL};
+    struct HksUsageSpec *cipherSM2Usage = NULL;
+    uint32_t plainKekSize = HKS_KEY_BYTES(HKS_SM2_KEY_SIZE_256);
+    struct HksBlob plainKek = {0, NULL};
+    do {
+        ret = HKS_ERROR_MALLOC_FAIL;
+        plainKek.size = plainKekSize,
+        plainKek.data = (uint8_t *)HksMalloc(plainKekSize);
+        HKS_IF_NULL_LOGE_BREAK(plainKek.data, "Envelop Malloc Fail!!")
+
+        plainImportKey.size = importKeySize,
+        plainImportKey.data = (uint8_t *)HksMalloc(importKeySize);
+        HKS_IF_NULL_LOGE_BREAK(plainImportKey.data, "Envelop Malloc Fail!!")
+        ret = HksGetSm2RawKeyAndParm(wrappingKey, &decryptParamSet, &rawKey);
+        HKS_IF_NOT_SUCC_BREAK(ret, "get envelp raw key faill!!")
+        ret = HksBuildCipherUsageSpec(decryptParamSet, false, &encKekData, &cipherSM2Usage);
+        HKS_IF_NOT_SUCC_BREAK(ret, "envelop build usage failed!")
+        ret = HksOpensslSm2Decrypt(&rawKey, cipherSM2Usage, &encKekData, &plainKek);
+        HKS_IF_NOT_SUCC_BREAK(ret, "envelop decrypt kek failed")
+        ret = HksOpensslSm4Decrypt(&plainKek, &CipherSM4Usage, &encImportKey, &plainImportKey);
+        HKS_IF_NOT_SUCC_BREAK(ret, "envelop derive data failed!")
+    } while (0);
+    plianCipher->size = plainImportKey.size;
+    plianCipher->data = plainImportKey.data;
+    HKS_MEMSET_FREE_BLOB(rawKey);
+    HKS_MEMSET_FREE_BLOB(plainKek);
+    HksFreeParamSet(&decryptParamSet);
+    HksFreeUsageSpec(&cipherSM2Usage);
+
+    return ret;
+}
+
+static int32_t HksBuildDhMaterial(const struct HksParam *pkData, struct HksBlob *privateKey, struct HksBlob *importKey)
+{
+    HKS_IF_TRUE_LOGE_RETURN(pkData->blob.size < sizeof(struct HksKeyMaterialDh), HKS_ERROR_INVALID_ARGUMENT,
+        "invalid public key size");
+
+    struct HksKeyMaterialDh dhData = *(struct HksKeyMaterialDh *)pkData->blob.data;
+    HKS_IF_TRUE_LOGE_RETURN(pkData->blob.size != sizeof(struct HksKeyMaterialDh) + dhData.pubKeySize,
+        HKS_ERROR_INVALID_ARGUMENT, "invalid public key struct");
+
+    dhData.priKeySize = privateKey->size;
+    uint32_t totalSize = dhData.priKeySize + dhData.pubKeySize + sizeof(struct HksKeyMaterialDh);
+
+    importKey->size = totalSize;
+    importKey->data = (uint8_t *)HksMalloc(totalSize);
+    HKS_IF_NULL_LOGE_RETURN(importKey->data, HKS_ERROR_MALLOC_FAIL, "Envelop Malloc Fail!!")
+
+    HKS_IF_TRUE_LOGE_RETURN(memcpy_s(importKey->data, totalSize, &dhData, sizeof(struct HksKeyMaterialDh)) != EOK,
+        HKS_ERROR_ENVELOP_BUILD_DH_22519_MATERIAL_FAIL, "Envelop Memcpy DH/25519 Material Fail!");
+    uint32_t pos = sizeof(struct HksKeyMaterialDh);
+    totalSize -= sizeof(struct HksKeyMaterialDh);
+
+    HKS_IF_TRUE_LOGE_RETURN(memcpy_s(importKey->data + pos, totalSize, pkData->blob.data +
+        sizeof(struct HksKeyMaterialDh), pkData->blob.size - sizeof(struct HksKeyMaterialDh)) != EOK,
+        HKS_ERROR_ENVELOP_BUILD_DH_22519_MATERIAL_FAIL, "Envelop Memcpy DH/25519 PubKey Fail!");
+    pos += pkData->blob.size - sizeof(struct HksKeyMaterialDh);
+    totalSize -= pkData->blob.size - sizeof(struct HksKeyMaterialDh);
+
+    HKS_IF_TRUE_LOGE_RETURN(memcpy_s(importKey->data + pos, totalSize, privateKey->data, privateKey->size) != EOK,
+        HKS_ERROR_ENVELOP_BUILD_DH_22519_MATERIAL_FAIL, "Envelop Memcpy DH/25519 ribKey Fail!");
+
+    return HKS_SUCCESS;
+}
+static int32_t HksBuildRsaMaterial(const struct HksParam *pkData, struct HksBlob *privateKey,
+    struct HksBlob *importKey)
+{
+    HKS_IF_TRUE_LOGE_RETURN(pkData->blob.size < sizeof(struct HksKeyMaterialRsa), HKS_ERROR_INVALID_ARGUMENT,
+        "invalid public key size");
+
+    struct HksKeyMaterialRsa rsaData = *(struct HksKeyMaterialRsa *)pkData->blob.data;
+    HKS_IF_TRUE_LOGE_RETURN(pkData->blob.size != sizeof(struct HksKeyMaterialRsa) + rsaData.eSize + rsaData.nSize,
+        HKS_ERROR_INVALID_ARGUMENT, "invalid public key struct");
+
+    rsaData.dSize = privateKey->size;
+    uint32_t totalSize = rsaData.dSize + rsaData.eSize + rsaData.nSize + sizeof(struct HksKeyMaterialRsa);
+
+    importKey->size = totalSize;
+    importKey->data = (uint8_t *)HksMalloc(totalSize);
+    HKS_IF_NULL_LOGE_RETURN(importKey->data, HKS_ERROR_MALLOC_FAIL, "Envelop Malloc Fail!!")
+
+    HKS_IF_TRUE_LOGE_RETURN(memcpy_s(importKey->data, totalSize, &rsaData, sizeof(struct HksKeyMaterialRsa)) != EOK,
+        HKS_ERROR_ENVELOP_BUILD_RSA_ECC_SM2_MATERIAL_FAIL, "Envelop Memcpy RSA/ECC/SM2 Material Fail!");
+    uint32_t pos = sizeof(struct HksKeyMaterialRsa);
+    totalSize -= sizeof(struct HksKeyMaterialRsa);
+
+    HKS_IF_TRUE_LOGE_RETURN(memcpy_s(importKey->data + pos, totalSize, pkData->blob.data +
+        sizeof(struct HksKeyMaterialRsa), pkData->blob.size - sizeof(struct HksKeyMaterialRsa)) != EOK,
+        HKS_ERROR_ENVELOP_BUILD_RSA_ECC_SM2_MATERIAL_FAIL, "Envelop Memcpy RSA/ECC/SM2 PubKey Fail!");
+    pos += pkData->blob.size - sizeof(struct HksKeyMaterialRsa);
+    totalSize -= pkData->blob.size - sizeof(struct HksKeyMaterialRsa);
+
+    HKS_IF_TRUE_LOGE_RETURN(memcpy_s(importKey->data + pos, totalSize, privateKey->data, privateKey->size) != EOK,
+        HKS_ERROR_ENVELOP_BUILD_RSA_ECC_SM2_MATERIAL_FAIL, "Envelop Memcpy RSA/ECC/SM2 ribKey Fail!");
+    return HKS_SUCCESS;
+}
+
+static int32_t HksEnvelopBuildCipherMaterial(uint32_t algTag, const struct HksParamSet *paramSet,
+    struct HksBlob *privateKey, struct HksBlob *importKey)
+{
+    struct HksParam *pkData = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pkData);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Envelop Get EnpriKey Fail!!")
+    ret = HKS_SUCCESS;
+    switch (algTag) {
+        case HKS_ALG_ECC:
+        case HKS_ALG_RSA:
+        case HKS_ALG_SM2:
+            ret = HksBuildRsaMaterial(pkData, privateKey, importKey);
+            break;
+        case HKS_ALG_DH:
+        case HKS_ALG_X25519:
+        case HKS_ALG_ED25519:
+            ret = HksBuildDhMaterial(pkData, privateKey, importKey);
+            break;
+        default:
+            return HKS_ERROR_NOT_SUPPORTED;
+    }
+    return ret;
+}
+
+int32_t HksEnvelopBuildKeyMaterial(uint32_t alg, const struct HksParamSet *paramSet,
+    struct HksBlob *plainPrivatCipher, struct HksBlob *plainImportKey)
+{
+    int32_t ret = HKS_SUCCESS;
+    switch (alg) {
+        case HKS_ALG_RSA:
+        case HKS_ALG_ECC:
+        case HKS_ALG_SM2:
+        case HKS_ALG_DH:
+        case HKS_ALG_X25519:
+        case HKS_ALG_ED25519:
+            ret = HksEnvelopBuildCipherMaterial(alg, paramSet, plainPrivatCipher, plainImportKey);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Envelop Buil Cipher Material Fail!")
+            break;
+        case HKS_ALG_DSA:
+            HKS_LOG_E("DSA Not Support!");
+            return HKS_ERROR_NOT_SUPPORTED;
+        default:
+            *plainImportKey = *plainPrivatCipher;
+            plainPrivatCipher->size = 0;
+            plainPrivatCipher->data = NULL;
+            break;
+        }
+        return ret;
+}
+
+int32_t HksEnvelopImportWrapedKey(const struct HksBlob *keyAlias, const struct HksBlob *wrappingKey,
+    const struct HksBlob *wrappedKeyData, const struct HksParamSet *paramSet, struct HksBlob *keyOut)
+{
+    int32_t ret = HKS_SUCCESS;
+    if ((CheckBlob(wrappingKey) != HKS_SUCCESS) || (CheckBlob(wrappedKeyData) != HKS_SUCCESS)) {
+        HKS_LOG_E("invalid argument!");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    struct HksBlob plainImportKey = {0, NULL};
+    struct HksBlob plainPrivatCipher = {0, NULL};
+    struct HksParam *importAlg = NULL;
+    do {
+        ret = HksGetCipherFromEnvelop(wrappingKey, wrappedKeyData, paramSet, &plainPrivatCipher);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Get Enveloped Cipher Fail!!")
+        ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &importAlg);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Get Envelop ALg Fail!!")
+        HksEnvelopBuildKeyMaterial(importAlg->uint32Param, paramSet, &plainPrivatCipher, &plainImportKey);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Build Key Material Fail!!")
+        ret = HksCoreImportKey(keyAlias, &plainImportKey, paramSet, keyOut);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "envelop import data failed!")
+    } while (0);
+    HKS_MEMSET_FREE_BLOB(plainImportKey);
+    HKS_MEMSET_FREE_BLOB(plainPrivatCipher);
+
+    return ret;
+}
 #else
+
+int32_t HksEnvelopImportWrapedKey(const struct HksBlob *keyAlias, const struct HksBlob *wrappingKey,
+    const struct HksBlob *wrappedKeyData, const struct HksParamSet *paramSet, struct HksBlob *keyOut)
+{
+    (void)keyAlias;
+    (void)paramSet;
+    (void)wrappingKey;
+    (void)wrappedKeyData;
+    (void)keyOut;
+    return HKS_ERROR_API_NOT_SUPPORTED;
+}
 
 int32_t HksSmImportWrappedKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksBlob *wrappingKey, const struct HksBlob *wrappedKeyData, struct HksBlob *keyOut)

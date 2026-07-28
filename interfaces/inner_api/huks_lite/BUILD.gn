@@ -110,6 +110,12 @@ config("soft_huks_config") {
 
 config("public_huks_config") {
   include_dirs = [ "../../../interfaces/inner_api/huks_standard/main/include" ]
+
+  defines = []
+
+  if (huks_enable_ukey_config == true) {
+    defines += [ "HKS_UKEY_EXTENSION_CRYPTO" ]
+  }
 }
 
 #begin: add
@@ -175,6 +181,7 @@ if (ohos_kernel_type == "liteos_m") {
       "../../../services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c",
       "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_key_attest.c",
       "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_key_generate.c",
+      "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_key_extension.c",
       "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_key_operate_one_stage.c",
       "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_key_operate_three_stage.c",
       "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_key_other.c",
@@ -190,6 +197,7 @@ if (ohos_kernel_type == "liteos_m") {
       "../../../services/huks_standard/huks_service/main/core/src/hks_hitrace.c",
       "../../../services/huks_standard/huks_service/main/core/src/hks_report.c",
       "../../../services/huks_standard/huks_service/main/core/src/hks_session_manager.c",
+      "../../../services/huks_standard/huks_service/main/core/src/hks_se_session_manager.c",
       "../../../services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_access.c",
       "../../../services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_core_static_hal.c",
       "../../../services/huks_standard/huks_service/main/plugin_proxy/src/hks_plugin_adapter_mock.c",
@@ -309,6 +317,7 @@ if (ohos_kernel_type == "liteos_m") {
       "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ipc_check.c",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ipc_slice.c",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_samgr_client_proxy.c",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ipc_serialization.c",
     ]
 
     configs += [ ":hilog_dir" ]

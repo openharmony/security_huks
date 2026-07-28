@@ -61,7 +61,19 @@ void HksCryptoHalHmacKey::TearDown()
  */
 HWTEST_F(HksCryptoHalHmacKey, HksCryptoHalHmacKey_001, Function | SmallTest | Level0)
 {
-    int32_t ret;
+    std::map<uint32_t, int32_t> testKeyLen = {
+        {0, HKS_ERROR_INVALID_ARGUMENT},
+        {1, HKS_ERROR_INVALID_ARGUMENT},
+        {8, HKS_SUCCESS},
+        {9, HKS_ERROR_INVALID_ARGUMENT},
+        {10, HKS_ERROR_INVALID_ARGUMENT},
+        {16, HKS_SUCCESS},
+        {24, HKS_SUCCESS},
+        {256, HKS_SUCCESS},
+        {1008, HKS_SUCCESS},
+        {1024, HKS_SUCCESS},
+        {1040, HKS_SUCCESS},
+    };
 
     HksKeySpec spec = {
         .algType = HKS_ALG_HMAC,
@@ -70,17 +82,13 @@ HWTEST_F(HksCryptoHalHmacKey, HksCryptoHalHmacKey_001, Function | SmallTest | Le
     };
 
     HksBlob key = { .size = 0, .data = nullptr };
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-#if defined(HKS_SUPPORT_HMAC_C) && defined(HKS_SUPPORT_HMAC_GENERATE_KEY)
-    ASSERT_EQ(HKS_SUCCESS, ret);
-    ASSERT_NE((uint32_t)0, key.size);
-    ASSERT_NE(nullptr, key.data);
+    for (auto &genKey : testKeyLen) {
+        spec.keyLen = genKey.first;
+        ASSERT_EQ(HksCryptoHalGenerateKey(&spec, &key), genKey.second);
+    }
     HKS_FREE(key.data);
-#else
-    ASSERT_EQ(HKS_ERROR_NOT_SUPPORTED, ret);
-#endif
 }
+
 }  // namespace UnitTest
 }  // namespace Huks
 }  // namespace Security

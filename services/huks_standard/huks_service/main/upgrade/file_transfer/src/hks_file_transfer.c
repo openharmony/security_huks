@@ -17,7 +17,7 @@
 
 #include "hks_cfi.h"
 #include "hks_config_parser.h"
-#include "hks_file_operator.h"
+#include "hks_storage.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_template.h"
@@ -177,13 +177,13 @@ static int32_t SplitPath(const char *filePath, const struct FTW *ftw, char **pat
 
 static int32_t GetFileContent(const char *path, const char *alias, struct HksBlob *fileContent)
 {
-    uint32_t size = HksFileSize(path, alias);
+    uint32_t size = HksStorageFileSize(path, alias);
     HKS_IF_TRUE_RETURN(size == 0, HKS_ERROR_FILE_SIZE_FAIL)
     fileContent->data = (uint8_t *)HksMalloc(size);
     HKS_IF_NULL_RETURN(fileContent->data, HKS_ERROR_MALLOC_FAIL)
 
     fileContent->size = size;
-    return HksFileRead(path, alias, 0, fileContent, &fileContent->size);
+    return HksStorageReadFile(path, alias, 0, fileContent, &fileContent->size);
 }
 
 static int ProcessFileUpgrade(const char *filePath, const struct stat *st, int typeFlag, struct FTW *ftw)

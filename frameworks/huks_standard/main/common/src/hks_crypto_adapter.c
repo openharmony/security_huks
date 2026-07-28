@@ -29,6 +29,7 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_template.h"
+#include "hks_check_paramset.h"
 #include "securec.h"
 
 void HksFillKeySpec(const struct HksParamSet *paramSet, struct HksKeySpec *spec)
@@ -117,32 +118,36 @@ int32_t HksFillAeadParam(
     int32_t ret = HksGetParam(paramSet, HKS_TAG_NONCE, &nonceParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksFillAeadParam get nonce param failed!")
 
-    struct HksParam emptyAadParam = {
-        .tag = HKS_TAG_ASSOCIATED_DATA,
-        .blob = {
-            .size = 0,
-            .data = NULL
-        }
-    };
+    struct HksParam emptyAadParam = { .tag = HKS_TAG_ASSOCIATED_DATA, .blob = { .size = 0, .data = NULL } };
     struct HksParam *aadParam = NULL;
-    ret = HksGetParam(paramSet, HKS_TAG_ASSOCIATED_DATA, &aadParam);
+    bool hasMiniAad = false;
+    ret = HksGetParam(paramSet, HKS_TAG_AAD, &aadParam);
     if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
-        HKS_LOG_W("HksFillAeadParam no input aad, do not use aad");
-        aadParam = &emptyAadParam;
+        ret = HksGetParam(paramSet, HKS_TAG_ASSOCIATED_DATA, &aadParam);
+        if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+            HKS_LOG_W("HksFillAeadParam no input aad, do not use aad");
+            aadParam = &emptyAadParam;
+        } else if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksFillAeadParam get aad param failed!");
+            return ret;
+        }
     } else if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksFillAeadParam get aad param failed!");
         return ret;
+    } else {
+        hasMiniAad = true;
     }
+
+    uint32_t aeadTagLen = HKS_AE_TAG_LEN;
+    ret = HksGetAeadTagLength(paramSet, usageSpec->mode, &aeadTagLen);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret);
 
     struct HksParam tagParam;
     if (!isEncrypt) {
-        if (inputText->size <= HKS_AE_TAG_LEN) {
-            HKS_LOG_E("too small inputText size");
-            return HKS_ERROR_INVALID_ARGUMENT;
-        }
-        inputText->size -= HKS_AE_TAG_LEN;
+        HKS_IF_TRUE_LOGE_RETURN(inputText->size <= aeadTagLen, HKS_ERROR_INVALID_ARGUMENT, "too small inputText size")
+        inputText->size -= aeadTagLen;
 
-        tagParam.blob.size = HKS_AE_TAG_LEN;
+        tagParam.blob.size = aeadTagLen;
         tagParam.blob.data = inputText->data + inputText->size;
     }
 
@@ -152,11 +157,12 @@ int32_t HksFillAeadParam(
     if (!isEncrypt) {
         aeadParam->tagDec = tagParam.blob;
     } else {
-        aeadParam->tagLenEnc = HKS_AE_TAG_LEN;
+        aeadParam->tagLenEnc = aeadTagLen;
     }
 
     aeadParam->nonce = nonceParam->blob;
     aeadParam->aad = aadParam->blob;
+    aeadParam->hasMiniAad = hasMiniAad;
     aeadParam->payloadLen = 0;
     usageSpec->algParam = aeadParam;
     return HKS_SUCCESS;
@@ -277,13 +283,17 @@ int32_t HksGetEncryptAeTag(
         return HKS_SUCCESS;
     }
 
-    if (outData->size < (inData->size + HKS_AE_TAG_LEN)) {
+    uint32_t aeadTagLen = HKS_AE_TAG_LEN;
+    ret = HksGetAeadTagLengthWithoutMode(paramSet, &aeadTagLen);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret);
+
+    if (outData->size < (inData->size + aeadTagLen)) {
         HKS_LOG_E("too small out buf!");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     tagAead->data = outData->data + inData->size;
-    tagAead->size = HKS_AE_TAG_LEN;
+    tagAead->size = aeadTagLen;
     return HKS_SUCCESS;
 }
 
@@ -314,6 +324,9 @@ int32_t HksGetDecryptAeTag(const struct HksParamSet *runtimeParamSet, struct Hks
         HKS_LOG_E("get aead tag failed!");
         return ret;
     }
+
+    HKS_IF_TRUE_LOGE_RETURN(tagParam->blob.size != aeadParam->tagDec.size, HKS_ERROR_CODE_AEAD_TAG_LEN_NOT_EQUAL,
+        "indicate aead %" LOG_PUBLIC "u, input aead %" LOG_PUBLIC "u", aeadParam->tagDec.size, tagParam->blob.size);
 
     aeadParam->tagDec = tagParam->blob;
     return HKS_SUCCESS;
@@ -531,7 +544,9 @@ static int32_t FormatDsaKey(const struct HksBlob *keyIn, struct HksParamSet *par
     struct KeyMaterialDsa *keyMaterial = (struct KeyMaterialDsa *)keyIn->data;
     uint32_t publicKeySize = sizeof(struct KeyMaterialDsa) + keyMaterial->ySize + keyMaterial->pSize +
                              keyMaterial->qSize + keyMaterial->gSize;
-    if (keyIn->size < publicKeySize) {
+    // publicKeySize not includes the xSize, but keyIn->size contain the xSize
+    // the size has already been verified in the previous process: DsaSaveKeyMaterial, integer overflow will not occured
+    if (keyIn->size < publicKeySize + keyMaterial->xSize) {
         HKS_LOG_E("invalid key info.");
         return HKS_ERROR_INVALID_KEY_INFO;
     }

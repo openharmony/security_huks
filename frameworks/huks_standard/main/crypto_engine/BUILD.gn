@@ -36,7 +36,10 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/huks_standard/main/crypto_engine/crypto_common/include",
     ]
 
-    external_deps = [ "c_utils:utils" ]
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "c_utils:utils",
+    ]
 
     complete_static_lib = true
 

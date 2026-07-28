@@ -18,6 +18,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "hks_type.h"
 
 #include "hks_type_inner.h"
 
@@ -29,7 +30,27 @@
 extern "C" {
 #endif
 
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+int32_t UnpackBlobFromBuffer(const struct HksBlob *srcBlob, uint32_t *offset, struct HksBlob *out);
+#endif
+
 int32_t CopyUint32ToBuffer(uint32_t value, const struct HksBlob *destBlob, uint32_t *destOffset);
+int32_t CopyInt32ToBuffer(int32_t value, const struct HksBlob *destBlob, uint32_t *destOffset);
+int32_t CopyParamSetToBuffer(const struct HksParamSet *paramSet,
+    const struct HksBlob *destBlob, uint32_t *destOffset);
+
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+int32_t HksUKeyGeneralPack(const struct HksBlob *blob, const struct HksParamSet *paramSet, struct HksBlob *destData);
+int32_t HksUKeyGeneralPackWithCertInfo(const struct HksBlob *blob, const struct HksExtCertInfo *certInfo,
+    const struct HksParamSet *paramSet, struct HksBlob *destData);
+
+int32_t HksUkeyBlob2ParamSetPack(const struct HksBlob *oldKeyAlias, const struct HksBlob *newKeyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *destData);
+int32_t HksSetOrGetRemotePropertyPack(enum HksExtPropertyOperation operation,
+    const struct HksBlob *resourceId, const struct HksBlob *propertyId,
+    const struct HksParamSet *paramSet, struct HksBlob *destData);
+int32_t HksResourceIdUnpackFromService(const struct HksBlob *srcBlob, struct HksParamSet **resourceId);
+#endif
 
 int32_t HksGenerateKeyPack(struct HksBlob *destData, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, const struct HksBlob *keyOut);
@@ -41,6 +62,8 @@ int32_t HksImportWrappedKeyPack(struct HksBlob *destData, const struct HksBlob *
     const struct HksBlob *wrappingKeyAlias, const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData);
 
 int32_t HksDeleteKeyPack(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet, struct HksBlob *destData);
+
+int32_t HksClearPinAuthStatePack(const struct HksBlob *index, struct HksBlob *destData);
 
 int32_t HksExportPublicKeyPack(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksBlob *key, struct HksBlob *destData);
@@ -78,6 +101,10 @@ int32_t HksParamsToParamSet(struct HksParam *params, uint32_t cnt, struct HksPar
 
 int32_t EncodeCertChain(const struct HksBlob *inBlob, struct HksBlob *outBlob);
 
+int32_t HksCertificatesUnpackFromService(const struct HksBlob *srcBlob, struct HksExtCertInfoSet *destData);
+
+int32_t HksRemotePropertyUnpackFromService(const struct HksBlob *srcBlob, struct HksParamSet **propertySetOut);
+
 int32_t HksListAliasesPack(const struct HksParamSet *srcParamSet, struct HksBlob *destData);
 
 int32_t HksListAliasesUnpackFromService(const struct HksBlob *srcData, struct HksKeyAliasSet **destData);
@@ -93,6 +120,19 @@ int32_t HksWrapKeyPack(struct HksBlob *inBlob, const struct HksBlob *keyAlias, c
 
 int32_t HksUnwrapKeyPack(struct HksBlob *inBlob, const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksBlob *wrappedKey);
+
+int32_t HksEncapsulatePack(struct HksBlob *destData, const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet);
+
+int32_t HksDecapsulatePack(struct HksBlob *destData, const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *sharedKeyAlias, uint32_t *offset);
+
+int32_t HksDecapsulateUnpackFromService(const struct HksBlob *srcData, struct HksBlob *sharedSecret);
+
+int32_t HksEncapsulateUnpackFromService(const struct HksBlob *srcData, struct HksEncapsulationResult *encapResult);
+
+int32_t HksQueryAbilityCopyResult(const struct HksBlob *resourceId, const struct HksAbilityInfo *abilityInfo,
+    struct HksBlob *outResourceId, struct HksAbilityInfo *outHksAbilityInfo);
 
 #ifdef __cplusplus
 }

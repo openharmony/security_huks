@@ -40,6 +40,7 @@
 #include "hks_template.h"
 #include "hks_type_inner.h"
 #include "hks_util.h"
+#include "hks_external_error_info.h"
 
 #include "hap_token_info.h"
 #ifdef HKS_SUPPORT_GET_BUNDLE_INFO
@@ -95,58 +96,101 @@ void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlo
         }
     }
 
+    const struct HksExternalErrorInfo *errInfo = HksGetThreadExtErrMsg();
+    int32_t errVal = (errInfo != nullptr) ? errInfo->errVal : 0;
+    HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(reply->WriteInt32(errVal), "WriteInt32 errVal failed");
+    uint32_t descLen = (errInfo != nullptr && errInfo->errorDesc != nullptr) ? errInfo->errorDescLen + 1 : 0;
+    HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(reply->WriteUint32(descLen), "WriteUint32 descLen failed");
+    bool hasErrorInfo = (errInfo != nullptr) ? errInfo->hasErrorInfo : false;
+    HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(reply->WriteBool(hasErrorInfo), "WriteBool hasErrorInfo failed");
+    if (descLen != 0 && errInfo->errorDesc != nullptr) {
+        if (!reply->WriteBuffer(errInfo->errorDesc, descLen)) {
+            HKS_LOG_E("WriteBuffer errorDesc failed");
+            return;
+        }
+    }
+    HksClearThreadExtErrMsg();
 #endif
 }
 
-int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *processInfo)
+static int32_t GetUidAndUserId(const struct HksParamSet *paramSet, int &uid, int &userId)
 {
-    if ((context == nullptr) || (processInfo == nullptr)) {
-        HKS_LOG_D("Don't need get process name in hosp.");
-        return HKS_SUCCESS;
-    }
-
     auto callingUid = IPCSkeleton::GetCallingUid();
-    uint8_t *name = static_cast<uint8_t *>(HksMalloc(sizeof(callingUid)));
-    HKS_IF_NULL_LOGE_RETURN(name, HKS_ERROR_MALLOC_FAIL, "GetProcessName malloc failed.")
+    uid = callingUid;
+    userId = HksGetOsAccountIdFromUid(callingUid);
+    HKS_IF_NULL_RETURN(paramSet, HKS_SUCCESS)
 
-    (void)memcpy_s(name, sizeof(callingUid), &callingUid, sizeof(callingUid));
-    processInfo->processName.size = sizeof(callingUid);
-    processInfo->processName.data = name;
-    processInfo->uidInt = callingUid;
+    struct HksParam *ancoUidParam = nullptr;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_ANCO_APP_UID, &ancoUidParam);
+    if (callingUid == HKS_ANCO_BROKER_UID) {
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get HKS_TAG_ANCO_APP_UID failed, ret: %" LOG_PUBLIC "d", ret)
+        HKS_IF_NOT_TRUE_LOGE_RETURN(ancoUidParam->blob.size == sizeof(int), HKS_ERROR_NEW_INVALID_ARGUMENT,
+            "uid size should be sizeof(int)")
+        // get anco user id
+        struct HksParam *ancoUserIdParam = nullptr;
+        ret = HksGetParam(paramSet, HKS_TAG_ANCO_USER_ID, &ancoUserIdParam);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get HKS_TAG_ANCO_USER_ID failed, ret: %" LOG_PUBLIC "d", ret)
 
-    int userId = HksGetOsAccountIdFromUid(callingUid);
-    uint32_t size;
-    if (userId == 0) {
-        size = strlen("0");
+        uid = *(int *)(ancoUidParam->blob.data);
+        userId = static_cast<int>(ancoUserIdParam->uint32Param);
     } else {
-        size = sizeof(userId);
+        HKS_IF_TRUE_LOGE_RETURN(ret != HKS_ERROR_PARAM_NOT_EXIST, HKS_ERROR_NEW_INVALID_ARGUMENT,
+            "not allowed to add anco tag for non-broker invoker, processName: %" LOG_PUBLIC "d", callingUid)
     }
+    return HKS_SUCCESS;
+}
 
-    uint8_t *name1 = static_cast<uint8_t *>(HksMalloc(size));
-    if (name1 == nullptr) {
-        HKS_LOG_E("user id malloc failed.");
-        HKS_FREE(name);
-        processInfo->processName.data = nullptr;
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+int32_t HksGetProcessInfoForIPC(const struct HksParamSet *paramSet,
+    const uint8_t *context, struct HksProcessInfo *processInfo)
+{
+    HKS_IF_NULL_RETURN(context, HKS_SUCCESS);
+    HKS_IF_NULL_RETURN(processInfo, HKS_SUCCESS);
+    
+    int uid = -1;
+    int userId = -1;
+    int32_t ret = GetUidAndUserId(paramSet, uid, userId);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get uid or user id failed")
 
-    if (userId == 0) {
-        (void)memcpy_s(name1, size, "0", size); /* ignore \0 at the end */
-    } else {
-        (void)memcpy_s(name1, size, &userId, size);
-    }
+    uint8_t *uidName = nullptr;
+    uint8_t *userName = nullptr;
+    uint32_t size = 0;
+    ret = HKS_ERROR_MALLOC_FAIL;
+    do {
+        uidName = static_cast<uint8_t *>(HksMalloc(sizeof(uid)));
+        HKS_IF_NULL_LOGE_BREAK(uidName, "malloc uid failed")
 
-    processInfo->userId.size = size;
-    processInfo->userId.data = name1;
-    processInfo->userIdInt = userId;
+        size = userId == 0 ? strlen("0") : sizeof(userId);
+        userName = static_cast<uint8_t *>(HksMalloc(size));
+        HKS_IF_NULL_LOGE_BREAK(userName, "malloc userId failed")
+
+        (void)memcpy_s(uidName, sizeof(uid), &uid, sizeof(uid));
+        processInfo->processName.size = sizeof(uid);
+        processInfo->processName.data = uidName;
+        processInfo->uidInt = static_cast<uint32_t>(uid);
+
+        if (userId == 0) {
+            (void)memcpy_s(userName, size, "0", size); /* ignore \0 at the end */
+        } else {
+            (void)memcpy_s(userName, size, &userId, size);
+        }
+
+        processInfo->userId.size = size;
+        processInfo->userId.data = userName;
+        processInfo->userIdInt = userId;
 
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
-    processInfo->accessTokenId = static_cast<uint64_t>(IPCSkeleton::GetCallingTokenID());
-    HKS_IF_TRUE_LOGE(processInfo->accessTokenId == 0, "accessTokenId is zero")
+        processInfo->accessTokenId = static_cast<uint64_t>(IPCSkeleton::GetCallingTokenID());
+        HKS_IF_TRUE_LOGE(processInfo->accessTokenId == 0, "accessTokenId is zero")
 #endif
-    processInfo->pid = static_cast<int32_t>(IPCSkeleton::GetCallingPid());
-    HKS_IF_TRUE_LOGE(processInfo->pid == 0, "GetCallingPID is zero")
-    return HKS_SUCCESS;
+        processInfo->pid = static_cast<int32_t>(IPCSkeleton::GetCallingPid());
+        HKS_IF_TRUE_LOGE(processInfo->pid == 0, "GetCallingPID is zero")
+        return HKS_SUCCESS;
+    } while (0);
+
+    HKS_FREE(uidName);
+    HKS_FREE(userName);
+    processInfo->processName.data = nullptr;
+    return ret;
 }
 
 int32_t HksCheckIsFrontUser(int32_t userId, bool *isFrontUser)

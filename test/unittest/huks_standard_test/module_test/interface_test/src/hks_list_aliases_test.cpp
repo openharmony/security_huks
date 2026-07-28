@@ -15,6 +15,7 @@
 
 #include "hks_list_aliases_test.h"
 
+#include <cstddef>
 #include <gtest/gtest.h>
 #include <thread>
 #include <unistd.h>
@@ -34,6 +35,7 @@
 
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
+#include "hks_mock_common.h"
 
 using namespace testing::ext;
 namespace Unittest::HksListAliasesTest {
@@ -86,38 +88,16 @@ static const struct HksParam INIT_COMMON_PARAMS[] = {
     { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
 };
 
-#ifdef HKS_INTERACT_ABILITY
-static int32_t SetIdsToken()
-{
-    uint64_t tokenId;
-    const char *acls[] = {
-        "ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS",
-    };
-    const char *perms[] = {
-        "ohos.permission.PLACE_CALL", // system_basic
-        "ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS",
-    };
-    NativeTokenInfoParams infoInstance = {
-        .dcapsNum = 0,
-        .permsNum = 2,
-        .dcaps = nullptr,
-        .perms = perms,
-        .aplStr = "system_basic",
-    };
-    infoInstance.acls = acls;
-    infoInstance.aclsNum = 1;
-    infoInstance.processName = "test_list_aliases";
-    tokenId = GetAccessTokenId(&infoInstance);
-    return SetSelfTokenID(tokenId);
-}
-#endif
 
+static uint64_t g_shellTokenId = 0;
+static HksMockNativeToken* g_mock = NULL;
 void HksListAliasesTest::SetUpTestCase(void)
 {
     int32_t ret = 0;
 #ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
-    ASSERT_EQ(ret, HKS_SUCCESS);
+    g_shellTokenId = GetSelfTokenID();
+    HksMockCommon::SetTestEvironment(g_shellTokenId);
+    g_mock = new (std::nothrow)HksMockNativeToken("asset_service");
 #endif
 
     struct HksParamSet *paramSet = nullptr;
@@ -135,6 +115,12 @@ void HksListAliasesTest::SetUpTestCase(void)
 
 void HksListAliasesTest::TearDownTestCase(void)
 {
+    if (g_mock != NULL) {
+        delete g_mock;
+        g_mock = NULL;
+    }
+    SetSelfTokenID(g_shellTokenId);
+    HksMockCommon::ResetTestEvironment();
 }
 
 void HksListAliasesTest::SetUp()
@@ -231,8 +217,7 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest005, TestSize.Level0)
 {
     int32_t ret = 0;
 #ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
-    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 #endif
 
     struct HksParamSet *queryParamSet = nullptr;
@@ -267,8 +252,7 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest006, TestSize.Level0)
 {
     int32_t ret = 0;
 #ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
-    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 #endif
 
     struct HksParamSet *queryParamSet = nullptr;
@@ -304,8 +288,7 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest007, TestSize.Level0)
 {
     int32_t ret = 0;
 #ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
-    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 #endif
 
     struct HksParamSet *queryParamSet = nullptr;
@@ -341,8 +324,7 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest008, TestSize.Level0)
 {
     int32_t ret = 0;
 #ifdef HKS_INTERACT_ABILITY
-    ret = SetIdsToken();
-    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 #endif
 
     struct HksParamSet *queryParamSet = nullptr;

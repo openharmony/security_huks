@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,22 @@
  */
 
 #include "hks_ipc_service.h"
+#include "hks_error_code.h"
+#include "hks_param.h"
 #include "hks_type.h"
 
+#include "hks_ipc_serialization.h"
 #include <dlfcn.h>
 #include <securec.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
+#include "hks_common_check.h"
+#include "hks_type_enum.h"
 
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
@@ -43,8 +50,53 @@
 #include "hks_response.h"
 #include "hks_service_ipc_serialization.h"
 #include "hks_template.h"
+#include "hks_util.h"
+#include "hks_report_ukey_event.h"
+#include "hks_report_common.h"
+#include "hks_external_error_info.h"
+
+#ifdef L2_STANDARD
+#include "hks_se_api_wrap.h"
+#endif
 
 #define MAX_KEY_SIZE         2048
+
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+static int32_t HksUkeyConsumeErrInfo(struct HksExternalErrorInfo *errInfo)
+{
+    int32_t errVal = 0;
+    HksClearThreadExtErrMsg();
+    if (errInfo != NULL && errInfo->hasErrorInfo) {
+        errVal = errInfo->errVal;
+        HksAppendThreadExtErrMsg(errInfo->errVal, errInfo->errorDesc);
+    }
+    HksFreeExternalErrorInfo(errInfo);
+    return errVal;
+}
+#endif
+
+#define RET_NUM    2
+#define UKEY_PERMISSION_REGISTER "ohos.permission.CRYPTO_EXTENSION_REGISTER"
+
+static const uint32_t FORBIDDEN_TAGS[] = {
+    HKS_TAG_DEVELOPER_ID,
+};
+
+static int32_t HksIpcCheckParamSetBlacklist(const struct HksParamSet *paramSet)
+{
+    if (paramSet == NULL) {
+        return HKS_SUCCESS;
+    }
+    for (uint32_t i = 0; i < paramSet->paramsCnt; i++) {
+        for (uint32_t j = 0; j < sizeof(FORBIDDEN_TAGS) / sizeof(FORBIDDEN_TAGS[0]); j++) {
+            if (paramSet->params[i].tag == FORBIDDEN_TAGS[j]) {
+                HKS_LOG_E("paramSet contains forbidden tag! 0x%" LOG_PUBLIC "x", paramSet->params[i].tag);
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+        }
+    }
+    return HKS_SUCCESS;
+}
 
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
 static enum HksTag g_idList[] = {
@@ -61,6 +113,617 @@ static enum HksTag g_idList[] = {
 };
 #endif
 
+void HksIpcServiceRegisterProvider(const struct HksBlob *srcData, const uint8_t *context)
+{
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    struct HksBlob name = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    int32_t ret;
+    uint64_t startTime = 0;
+    (void)HksElapsedRealTime(&startTime);
+    do {
+        ret = HksUKeyGeneralUnpack(srcData, &name, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceRegisterProviderUnpack Ipc fail")
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckUkeyPermission(UKEY_PERMISSION_REGISTER);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckUkeyPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcProviderRegAdapter(&processInfo, &name, paramSet);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcProviderRegAdapter fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HksSendResponse(context, ret, NULL);
+
+    struct UKeyInfo ukeyInfo = { .eventId = HKS_EVENT_UKEY_REGISTER_PROVIDER, .operation = HKS_UKEY_REPORT_REGISTER,
+        .providerName = name };
+    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret, .startTime = startTime };
+    ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, paramSet, &ukeyCommon);
+
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+#endif
+}
+
+void HksIpcServiceUnregisterProvider(const struct HksBlob *srcData, const uint8_t *context)
+{
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    struct HksBlob name = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    int32_t ret;
+    uint64_t startTime = 0;
+    (void)HksElapsedRealTime(&startTime);
+    do {
+        ret = HksUKeyGeneralUnpack(srcData, &name, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceUnregisterProviderUnpack Ipc fail")
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckUkeyPermission(UKEY_PERMISSION_REGISTER);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckUkeyPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcProviderUnregAdapter(&processInfo, &name, paramSet);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcProviderUnregAdapter fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HksSendResponse(context, ret, NULL);
+
+    struct UKeyInfo ukeyInfo = { .eventId = HKS_EVENT_UKEY_REGISTER_PROVIDER, .operation = HKS_UKEY_REPORT_UNREGISTER,
+        .providerName = name };
+    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret, .startTime = startTime };
+    ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, paramSet, &ukeyCommon);
+
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+#endif
+}
+
+void HksIpcServiceQueryAbilityInfo(const struct HksBlob *srcData, const uint8_t *context)
+{
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    struct HksBlob resourceId = { 0, NULL };
+    struct HksAbilityInfo abilityInfo;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    struct HksBlob outBlob = { 0, NULL };
+    int32_t ret;
+
+    do {
+        ret = HksBlob3Unpack(srcData, &resourceId, &abilityInfo.bundleName, &abilityInfo.abilityName);
+        HKS_IF_NOT_SUCC_BREAK(ret, "HksIpcServiceQueryAbilityInfo Ipc fail")
+
+        ret = HksGetProcessInfoForIPC(NULL, context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcQueryAbilityInfoAdapter(&processInfo, &resourceId, &abilityInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcQueryAbilityInfoAdapter fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksAllocInBlobWithThreeBlobs(&outBlob, &resourceId, &abilityInfo.bundleName, &abilityInfo.abilityName);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc outBlob fail")
+
+        ret = HksBlob3Pack(&resourceId, &abilityInfo.bundleName, &abilityInfo.abilityName, &outBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Huks service pack fail")
+    } while (0);
+
+    HksSendResponse(context, ret, &outBlob);
+    
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(outBlob);
+
+#else
+    (void)srcData;
+    (void)context;
+#endif
+}
+
+void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *context)
+{
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    struct HksBlob index = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    struct HksExtAuthPinOutParam authOutParam = {0, 0};
+    struct HksBlob outBlob = { 0, NULL };
+    struct HksExternalErrorInfo *errInfo = NULL;
+    int32_t ret;
+    int32_t errVal = 0;
+    uint64_t startTime = 0;
+    (void)HksElapsedRealTime(&startTime);
+    do {
+        ret = HksUKeyGeneralUnpack(srcData, &index, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: unpack fail");
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: get process info fail ret=%" LOG_PUBLIC "d", ret);
+
+        ret = CheckUkeyAuthPinType();
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: CheckUkeyAuthPinType fail ret=%" LOG_PUBLIC "d", ret);
+
+        ret = HksIpcAuthUkeyPinAdapter(&processInfo, &index, paramSet, &authOutParam, &errInfo);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksIpcAuthUkeyPinAdapter fail, ret = %" LOG_PUBLIC "d", ret);
+            errVal = HksUkeyConsumeErrInfo(errInfo);
+            break;
+        }
+    } while (0);
+    ret = PackAuthPinReply(&outBlob, ret, authOutParam.outStatus, authOutParam.retryCount);
+    HKS_IF_NOT_SUCC_LOGE(ret, "PackAuthPinReply fail, ret = %" LOG_PUBLIC "d", ret)
+
+    HksSendResponse(context, (ret == HKS_ERROR_BAD_STATE || ret == HKS_ERROR_MALLOC_FAIL) ? ret : HKS_SUCCESS,
+        (outBlob.data != NULL && outBlob.size == (sizeof(int32_t) * RET_NUM + sizeof(uint32_t))) ? &outBlob : NULL);
+
+    struct UKeyInfo ukeyInfo = { .eventId = HKS_EVENT_UKEY_AUTH_PIN, .resourceId = index,
+        .detailErrcode = errVal };
+    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret, .startTime = startTime };
+    ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, paramSet, &ukeyCommon);
+
+    HKS_FREE_BLOB(outBlob);
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+#endif
+}
+
+void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8_t *context)
+{
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    struct HksBlob index = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    int32_t status = 0;
+    struct HksBlob outBlob = { 0, NULL };
+    struct HksExternalErrorInfo *errInfo = NULL;
+    int32_t ret;
+    int32_t errVal = 0;
+    uint64_t startTime = 0;
+    (void)HksElapsedRealTime(&startTime);
+    do {
+        ret = HksUKeyGeneralUnpack(srcData, &index, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetUkeyPinAuthState: unpack fail");
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetUkeyPinAuthState: get process info fail ret=%" LOG_PUBLIC "d", ret);
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetUkeyPinAuthState: permission fail ret=%" LOG_PUBLIC "d", ret);
+
+        ret = HksIpcGetUkeyPinAuthStateAdapter(&processInfo, &index, paramSet, &status, &errInfo);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("GetUkeyPinAuthState: adapter ret=%" LOG_PUBLIC "d", ret);
+            errVal = HksUkeyConsumeErrInfo(errInfo);
+            break;
+        }
+
+        outBlob.size = (uint32_t)sizeof(int32_t);
+        outBlob.data = (uint8_t *)(&status);
+    } while (0);
+
+    HksSendResponse(context, ret,
+        (outBlob.data != NULL && outBlob.size == (uint32_t)sizeof(int32_t)) ? &outBlob : NULL);
+
+    struct UKeyInfo ukeyInfo = { .eventId = HKS_EVENT_UKEY_GET_AUTH_PIN_STATE, .state = status,
+        .resourceId = index, .detailErrcode = errVal };
+    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret, .startTime = startTime };
+    ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, paramSet, &ukeyCommon);
+
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+#endif
+}
+
+void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t *context)
+{
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    int32_t ret;
+    int32_t errVal = 0;
+    struct HksBlob index = { 0, NULL };
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    struct HksExternalErrorInfo *errInfo = NULL;
+
+    do {
+        ret  = HksClearPinAuthStateUnpack(srcData, &index);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceClearPinAuthStateUnpack Ipc fail")
+
+        ret = HksGetProcessInfoForIPC(NULL, context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
+
+        ret = HksIpcClearPinStatusAdapter(&processInfo, &index, &errInfo);
+        HKS_IF_TRUE_BREAK(ret == HKS_SUCCESS)
+        HKS_LOG_E("HksIpcClearPinStatusAdapter ret = %" LOG_PUBLIC "d", ret);
+        errVal = HksUkeyConsumeErrInfo(errInfo);
+    } while (0);
+
+    HksSendResponse(context, ret, NULL);
+
+    struct UKeyInfo ukeyInfo = { .eventId = HKS_EVENT_UKEY_CLEAR_PIN_STATE,
+        .resourceId = index, .detailErrcode = errVal };
+    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret };
+    ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, NULL, &ukeyCommon);
+
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+#endif
+}
+
+void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t *context)
+{
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    struct HksBlob resourceId = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    struct HksExternalErrorInfo *errInfo = NULL;
+    int32_t ret;
+    int32_t errVal = 0;
+    uint64_t startTime = 0;
+    (void)HksElapsedRealTime(&startTime);
+    do {
+        ret  = HksUKeyGeneralUnpack(srcData, &resourceId, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceOpenRemoteHandleUnpack Ipc fail")
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcCreateRemKeyHandleAdapter(&processInfo, &resourceId, paramSet, &errInfo);
+        HKS_IF_TRUE_BREAK(ret == HKS_SUCCESS)
+        HKS_LOG_E("HksIpcCreateRemKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret);
+        errVal = HksUkeyConsumeErrInfo(errInfo);
+    } while (0);
+
+    HksSendResponse(context, ret, NULL);
+
+    struct UKeyInfo ukeyInfo = { .eventId = HKS_EVENT_UKEY_OPERATE_REMOTE_HANDLE,
+        .operation = HKS_UKEY_REPORT_OPEN_HANDLE, .resourceId = resourceId, .detailErrcode = errVal };
+    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret, .startTime = startTime };
+    ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, paramSet, &ukeyCommon);
+    
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+#endif
+}
+
+void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t *context)
+{
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    struct HksBlob resourceId = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    struct HksExternalErrorInfo *errInfo = NULL;
+    int32_t ret;
+    int32_t errVal = 0;
+    uint64_t startTime = 0;
+    (void)HksElapsedRealTime(&startTime);
+    do {
+        ret  = HksUKeyGeneralUnpack(srcData, &resourceId, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceCloseRemoteHandleUnpack Ipc fail")
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcCloseRemKeyHandleAdapter(&processInfo, &resourceId, paramSet, &errInfo);
+        HKS_IF_TRUE_BREAK(ret == HKS_SUCCESS)
+        HKS_LOG_E("HksIpcCloseRemKeyHandleAdapter fail, ret = %" LOG_PUBLIC "d", ret);
+        errVal = HksUkeyConsumeErrInfo(errInfo);
+    } while (0);
+
+    HksSendResponse(context, ret, NULL);
+
+    struct UKeyInfo ukeyInfo = { .eventId = HKS_EVENT_UKEY_OPERATE_REMOTE_HANDLE,
+        .operation = HKS_UKEY_REPORT_CLOSE_HANDLE, .resourceId = resourceId, .detailErrcode = errVal };
+    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret, .startTime = startTime };
+    ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, paramSet, &ukeyCommon);
+
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+#endif
+}
+
+void HksIpcServiceExportProviderCertificates(const struct HksBlob *srcData, const uint8_t *context)
+{
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    struct HksBlob providerName = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksExtCertInfoSet certInfoSet = {0, NULL};
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    struct HksExternalErrorInfo *errInfo = NULL;
+    struct HksBlob certOut = { 0, NULL };
+    int32_t ret;
+    int32_t errVal = 0;
+    uint64_t startTime = 0;
+    (void)HksElapsedRealTime(&startTime);
+    do {
+        ret = HksUKeyGeneralUnpack(srcData, &providerName, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceExportProviderCertificatesUnpack Ipc fail")
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = CheckUkeyCertCaller(&processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckUkeyCertCaller fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcExportProvCertsAdapter(&processInfo, &providerName, paramSet, &certInfoSet, &errInfo);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksIpcExportProvCertsAdapter fail, ret = %" LOG_PUBLIC "d", ret);
+            errVal = HksUkeyConsumeErrInfo(errInfo);
+            break;
+        }
+
+        ret = HksCertificatesPackFromService(&certInfoSet, &certOut);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCertificatesPackFromService fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HksSendResponse(context, ret, ret == HKS_SUCCESS && certOut.size != 0 ? &certOut : NULL);
+
+    struct UKeyInfo ukeyInfo = { .eventId = HKS_EVENT_UKEY_EXPORT_PROVIDER_CERT,
+        .providerName = providerName, .detailErrcode = errVal };
+    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret, .startTime = startTime };
+    ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, paramSet, &ukeyCommon);
+
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+    HksFreeExtCertSet(&certInfoSet);
+    HKS_FREE_BLOB(certOut);
+#else
+    (void)srcData;
+    (void)context;
+#endif
+}
+
+void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t *context)
+{
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    struct HksBlob index = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksExtCertInfoSet certInfoSet = {0, NULL};
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    struct HksExternalErrorInfo *errInfo = NULL;
+    struct HksBlob certOut = { 0, NULL };
+    int32_t ret;
+    int32_t errVal = 0;
+    uint64_t startTime = 0;
+    (void)HksElapsedRealTime(&startTime);
+    do {
+        ret = HksUKeyGeneralUnpack(srcData, &index, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceExportCertificateUnpack Ipc fail")
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = CheckUkeyCertCaller(&processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckUkeyCertCaller fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcExportCertAdapter(&processInfo, &index, paramSet, &certInfoSet, &errInfo);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksIpcExportCertAdapter fail, ret = %" LOG_PUBLIC "d", ret);
+            errVal = HksUkeyConsumeErrInfo(errInfo);
+            break;
+        }
+
+        ret = HksCertificatesPackFromService(&certInfoSet, &certOut);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCertificatesPackFromService fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HksSendResponse(context, ret, ret == HKS_SUCCESS && certOut.size != 0 ? &certOut : NULL);
+
+    struct UKeyInfo ukeyInfo = { .eventId = HKS_EVENT_UKEY_EXPORT_CERT, .resourceId = index,
+        .detailErrcode = errVal };
+    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret, .startTime = startTime };
+    ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, paramSet, &ukeyCommon);
+
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+    HksFreeExtCertSet(&certInfoSet);
+    HKS_FREE_BLOB(certOut);
+#else
+    (void)srcData;
+    (void)context;
+#endif
+}
+
+void HksIpcServiceImportCertificate(const struct HksBlob *srcData, const uint8_t *context)
+{
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    struct HksBlob index = { 0, NULL };
+    struct HksExtCertInfo certInfo = {0};
+    struct HksParamSet *paramSet = NULL;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    struct HksExternalErrorInfo *errInfo = NULL;
+    int32_t ret;
+    int32_t errVal = 0;
+    uint64_t startTime = 0;
+    (void)HksElapsedRealTime(&startTime);
+    do {
+        ret = HksUKeyGeneralUnpackWithCertInfo(srcData, &index, &certInfo, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceImportCertificateUnpack Ipc fail")
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = CheckUkeyCertCaller(&processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckUkeyCertCaller fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcImportCertAdapter(&processInfo, &index, &certInfo, paramSet, &errInfo);
+        HKS_IF_TRUE_BREAK(ret == HKS_SUCCESS)
+        HKS_LOG_E("HksIpcImportCertAdapter fail, ret = %" LOG_PUBLIC "d", ret);
+        errVal = HksUkeyConsumeErrInfo(errInfo);
+    } while (0);
+    HksSendResponse(context, ret, NULL);
+
+    struct UKeyInfo ukeyInfo = { .eventId = HKS_EVENT_UKEY_IMPORT_CERT,
+        .resourceId = index, .detailErrcode = errVal };
+    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret, .startTime = startTime };
+    ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, paramSet, &ukeyCommon);
+
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+#endif
+}
+
+void HksIpcServiceSetOrGetRemoteProperty(const struct HksBlob *srcData,
+    const uint8_t *context, const uint8_t *remoteObject)
+{
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    int32_t ret;
+    enum HksExtPropertyOperation operation = HKS_EXT_PROPERTY_OPERATION_GET;
+    struct HksBlob resourceId = { 0, NULL };
+    struct HksBlob propertyId = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    uint64_t startTime = 0;
+    (void)HksElapsedRealTime(&startTime);
+
+    do {
+        ret = HksSetOrGetRemotePropertyUnpack(srcData, &operation, &resourceId, &propertyId, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSetOrGetRemotePropertyUnpack Ipc fail")
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        struct HksExtPropertyOperationInfo propertyInfo;
+        propertyInfo.operation = operation;
+        propertyInfo.resourceId = &resourceId;
+        propertyInfo.propertyId = &propertyId;
+
+        ret = HksIpcServiceOnSetOrGetRemotePropertyAdapter(&processInfo, &propertyInfo, paramSet, remoteObject);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceSetOrGetRemoteProperty fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    struct UKeyInfo ukeyInfo = { .eventId = (operation == HKS_EXT_PROPERTY_OPERATION_SET) ?
+        HKS_EVENT_UKEY_SET_REMOTE_PROPERTY : HKS_EVENT_UKSY_GET_REMOTE_PROPERTY,
+        .resourceId = resourceId, .propertyId = propertyId, .detailErrcode = ret };
+    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret, .startTime = startTime };
+    ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, paramSet, &ukeyCommon);
+
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+    (void)remoteObject;
+#endif
+}
+
+void HksIpcServiceGetResourceId(const struct HksBlob *srcData, const uint8_t *context)
+{
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+    int32_t ret;
+    int32_t errVal = 0;
+    struct HksBlob providerName = { 0, NULL };
+    struct HksBlob resourceId = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    struct HksExternalErrorInfo *errInfo = NULL;
+    do {
+        ret  = HksUKeyGeneralUnpack(srcData, &providerName, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksUKeyGeneralUnpack Ipc in HksIpcServiceGetResourceId fail")
+
+        ret = HksGetProcessInfoForIPC(NULL, context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksIpcServiceOnGetResourceIdAdapter(&processInfo, &providerName, paramSet, &resourceId, &errInfo);
+        HKS_IF_TRUE_BREAK(ret == HKS_SUCCESS)
+        HKS_LOG_E("HksIpcServiceOnGetResourceIdAdapter fail, ret = %" LOG_PUBLIC "d", ret);
+        errVal = HksUkeyConsumeErrInfo(errInfo);
+    } while (0);
+
+    HksSendResponse(context, ret, ret == HKS_SUCCESS && resourceId.size != 0 ? &resourceId : NULL);
+
+    struct UKeyInfo ukeyInfo = { .eventId = HKS_EVENT_UKEY_GET_RESOURCE_ID,
+        .resourceId = resourceId, .providerName = providerName, .detailErrcode = errVal };
+    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret };
+    ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, paramSet, &ukeyCommon);
+
+    HKS_FREE_BLOB(resourceId);
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+#else
+    (void)srcData;
+    (void)context;
+#endif
+}
+
+static int32_t HksAllocateMemForKey(const struct HksParamSet *paramSet, struct HksBlob *key)
+{
+    uint32_t alg = 0;
+    struct HksParam *algParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
+    if (ret == HKS_SUCCESS) {
+        alg = algParam->uint32Param;
+    }
+
+    uint32_t size = MAX_KEY_SIZE;
+    if (alg == HKS_ALG_ML_DSA || alg == HKS_ALG_ML_KEM) {
+        size = ML_DSA_MAX_KEY_SIZE;
+    }
+    key->data = (uint8_t *)HksMalloc(size);
+    if (key->data == NULL) {
+        HKS_LOG_E("malloc fail.");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+
+    key->size = size;
+    return HKS_SUCCESS;
+}
+
+static int32_t HksGenKeyCheckMlControl(struct HksParamSet *paramSet)
+{
+    struct HksParam *alg = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &alg);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_SUCCESS, "Ukey func")
+
+    if (alg->uint32Param == HKS_ALG_ML_KEM) {
+        struct HksParam *authToken = NULL;
+        ret = HksGetParam(paramSet, HKS_TAG_KEY_AUTH_ACCESS_TYPE, &authToken);
+        HKS_IF_TRUE_LOGE_RETURN(ret == HKS_SUCCESS, HKS_ERROR_NEW_INVALID_ARGUMENT,
+            "MLKEM not support Authtoken")
+
+        ret = HksGetParam(paramSet, HKS_TAG_CHALLENGE_TYPE, &authToken);
+        HKS_IF_TRUE_LOGE_RETURN(ret == HKS_SUCCESS, HKS_ERROR_NEW_INVALID_ARGUMENT,
+            "MLKEM not support Authtoken")
+    }
+
+    return HKS_SUCCESS;
+}
+
 void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob keyAlias = { 0, NULL };
@@ -74,18 +737,19 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
         ret = HksGenerateKeyUnpack(srcData, &keyAlias, &inParamSet, &keyOut);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGenerateKeyUnpack Ipc fail")
 
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
         if (keyOut.data == NULL) {
             isNoneResponse = true;
-            keyOut.data = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
-            if (keyOut.data == NULL) {
-                HKS_LOG_E("malloc fail.");
-                ret = HKS_ERROR_MALLOC_FAIL;
-                break;
-            }
-            keyOut.size = MAX_KEY_SIZE;
+            ret = HksAllocateMemForKey(inParamSet, &keyOut);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAllocateMemForKey fail, ret = %" LOG_PUBLIC "d", ret)
         }
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksGenKeyCheckMlControl(inParamSet);
+        HKS_IF_NOT_SUCC_BREAK(ret, "MLKEM not support authtoken")
+
+        ret = HksGetProcessInfoForIPC(inParamSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCheckAcrossAccountsPermission(inParamSet, processInfo.userIdInt);
@@ -128,7 +792,13 @@ void HksIpcServiceImportKey(const struct HksBlob *srcData, const uint8_t *contex
         ret  = HksImportKeyUnpack(srcData, &keyAlias, &paramSet, &key);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksImportKeyUnpack Ipc fail")
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
+        ret = HksGenKeyCheckMlControl(paramSet);
+        HKS_IF_NOT_SUCC_BREAK(ret, "MLKEM not support authtoken")
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
@@ -157,7 +827,10 @@ void HksIpcServiceImportWrappedKey(const struct HksBlob *srcData, const uint8_t 
         ret  = HksImportWrappedKeyUnpack(srcData, &keyAlias, &wrappingKeyAlias, &paramSet, &wrappedKeyData);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "unpack data for Ipc fail")
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get process info fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
@@ -185,7 +858,10 @@ void HksIpcServiceExportPublicKey(const struct HksBlob *srcData, const uint8_t *
         ret  = HksExportPublicKeyUnpack(srcData, &keyAlias, &paramSet, &key);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksExportKeyUnpack Ipc fail")
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
@@ -212,7 +888,10 @@ void HksIpcServiceDeleteKey(const struct HksBlob *srcData, const uint8_t *contex
         ret  = HksDeleteKeyUnpack(srcData, &keyAlias, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDeleteKeyUnpack Ipc fail")
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
@@ -241,7 +920,10 @@ void HksIpcServiceGetKeyParamSet(const struct HksBlob *srcData, const uint8_t *c
         ret = HksGetKeyParamSetUnpack(srcData, &keyAlias, &paramSetIn, &paramSetOut);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGenerateKeyUnpack Ipc fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksIpcCheckParamSetBlacklist(paramSetIn);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(paramSetIn, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCheckAcrossAccountsPermission(paramSetIn, processInfo.userIdInt);
@@ -272,7 +954,10 @@ void HksIpcServiceKeyExist(const struct HksBlob *srcData, const uint8_t *context
         ret  = HksKeyExistUnpack(srcData, &keyAlias, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDeleteKeyUnpack Ipc fail")
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
@@ -308,7 +993,7 @@ void HksIpcServiceGenerateRandom(const struct HksBlob *srcData, const uint8_t *c
             break;
         }
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksGetProcessInfoForIPC(NULL, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksServiceGenerateRandom(&processInfo, &random);
@@ -335,7 +1020,10 @@ void HksIpcServiceSign(const struct HksBlob *srcData, const uint8_t *context)
         ret = HksSignUnpack(srcData, &keyAlias, &inParamSet, &unsignedData, &signature);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSignUnpack Ipc fail")
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(inParamSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCheckAcrossAccountsPermission(inParamSet, processInfo.userIdInt);
@@ -365,7 +1053,10 @@ void HksIpcServiceVerify(const struct HksBlob *srcData, const uint8_t *context)
         ret = HksVerifyUnpack(srcData, &keyAlias, &inParamSet, &unsignedData, &signature);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksVerifyUnpack Ipc fail")
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(inParamSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCheckAcrossAccountsPermission(inParamSet, processInfo.userIdInt);
@@ -394,7 +1085,10 @@ void HksIpcServiceEncrypt(const struct HksBlob *srcData, const uint8_t *context)
         ret = HksEncryptDecryptUnpack(srcData, &keyAlias, &inParamSet, &plainText, &cipherText);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksEncryptDecryptUnpack Ipc fail")
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(NULL, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCheckAcrossAccountsPermission(inParamSet, processInfo.userIdInt);
@@ -424,7 +1118,10 @@ void HksIpcServiceDecrypt(const struct HksBlob *srcData, const uint8_t *context)
         ret = HksEncryptDecryptUnpack(srcData, &keyAlias, &inParamSet, &cipherText, &plainText);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksEncryptDecryptUnpack Ipc fail")
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(inParamSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCheckAcrossAccountsPermission(inParamSet, processInfo.userIdInt);
@@ -454,7 +1151,10 @@ void HksIpcServiceAgreeKey(const struct HksBlob *srcData, const uint8_t *context
         ret = HksAgreeKeyUnpack(srcData, &inParamSet, &privateKey, &peerPublicKey, &agreedKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAgreeKeyUnpack Ipc fail")
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(inParamSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCheckAcrossAccountsPermission(inParamSet, processInfo.userIdInt);
@@ -483,7 +1183,10 @@ void HksIpcServiceDeriveKey(const struct HksBlob *srcData, const uint8_t *contex
         ret = HksDeriveKeyUnpack(srcData, &inParamSet, &masterKey, &derivedKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDeriveKeyUnpack Ipc fail")
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(inParamSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCheckAcrossAccountsPermission(inParamSet, processInfo.userIdInt);
@@ -513,7 +1216,10 @@ void HksIpcServiceMac(const struct HksBlob *srcData, const uint8_t *context)
         ret = HksHmacUnpack(srcData, &key, &inParamSet, &inputData, &mac);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksHmacUnpack Ipc fail")
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(inParamSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCheckAcrossAccountsPermission(inParamSet, processInfo.userIdInt);
@@ -562,7 +1268,10 @@ void HksIpcServiceGetKeyInfoList(const struct HksBlob *srcData, const uint8_t *c
         ret = HksGetKeyInfoListUnpack(srcData, &paramSet, &inputCount, &keyInfoList);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetKeyInfoListUnpack Ipc fail")
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
@@ -627,7 +1336,10 @@ void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *contex
         ret = HksCertificateChainUnpack(srcData, &keyAlias, &inParamSet, &certChainBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCertificateChainUnpack Ipc fail")
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(inParamSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCheckAcrossAccountsPermission(inParamSet, processInfo.userIdInt);
@@ -693,6 +1405,9 @@ void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outDa
         ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetParamSet fail, ret = %" LOG_PUBLIC "d", ret)
 
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
         struct HksParamOut params[] = {
             {
                 .tag = HKS_TAG_PARAM0_BUFFER,
@@ -709,7 +1424,10 @@ void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outDa
         ret = HksGetParamSet((struct HksParamSet *)paramsBlob.data, paramsBlob.size, &inParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetParamSet fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "inParamSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(inParamSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCheckAcrossAccountsPermission(inParamSet, processInfo.userIdInt);
@@ -732,36 +1450,34 @@ void HksIpcServiceUpdOrFin(const struct HksBlob *paramSetBlob, struct HksBlob *o
 {
     int32_t ret;
     struct HksParamSet *inParamSet = NULL;
-    struct HksParamSet *paramSet   = NULL;
-    struct HksBlob paramsBlob      = { 0, NULL };
-    struct HksBlob inData          = { 0, NULL };
-    struct HksBlob handle          = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksBlob paramsBlob = { 0, NULL };
+    struct HksBlob inData = { 0, NULL };
+    struct HksBlob handle = { 0, NULL };
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
 
     do {
         ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetParamSet fail, ret = %" LOG_PUBLIC "d", ret)
 
-        struct HksParamOut params[] = {
-            {
-                .tag = HKS_TAG_PARAM0_BUFFER,
-                .blob = &paramsBlob
-            }, {
-                .tag = HKS_TAG_PARAM1_BUFFER,
-                .blob = &handle
-            }, {
-                .tag = HKS_TAG_PARAM2_BUFFER,
-                .blob = &inData
-            },
-        };
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
 
+        struct HksParamOut params[] = {
+            { .tag = HKS_TAG_PARAM0_BUFFER, .blob = &paramsBlob },
+            { .tag = HKS_TAG_PARAM1_BUFFER, .blob = &handle },
+            { .tag = HKS_TAG_PARAM2_BUFFER, .blob = &inData },
+        };
         ret = HksParamSetToParams(paramSet, params, HKS_ARRAY_SIZE(params));
         HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = HksGetParamSet((struct HksParamSet *)paramsBlob.data, paramsBlob.size, &inParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetParamSet fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "inParamSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(inParamSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = isUpdate ? HksServiceUpdate(&handle, &processInfo, inParamSet, &inData, outData) :
@@ -802,6 +1518,9 @@ void HksIpcServiceAbort(const struct HksBlob *paramSetBlob, struct HksBlob *outD
         ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetParamSet fail, ret = %" LOG_PUBLIC "d", ret)
 
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
         struct HksParamOut params[] = {
             {
                 .tag = HKS_TAG_PARAM0_BUFFER,
@@ -817,7 +1536,10 @@ void HksIpcServiceAbort(const struct HksBlob *paramSetBlob, struct HksBlob *outD
         ret = HksGetParamSet((struct HksParamSet *)paramsBlob.data, paramsBlob.size, &inParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetParamSet fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksIpcCheckParamSetBlacklist(inParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "inParamSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(inParamSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksServiceAbort(&handle, &processInfo, inParamSet);
@@ -825,6 +1547,7 @@ void HksIpcServiceAbort(const struct HksBlob *paramSetBlob, struct HksBlob *outD
     } while (0);
 
     HksSendResponse(context, ret, NULL);
+
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&inParamSet);
     HKS_FREE_BLOB(processInfo.processName);
@@ -848,7 +1571,10 @@ void HksIpcServiceListAliases(const struct HksBlob *srcData, const uint8_t *cont
         ret = HksListAliasesUnpack(srcData, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksListAliasesUnpack fail")
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
@@ -881,7 +1607,10 @@ void HksIpcServiceRenameKeyAlias(const struct HksBlob *srcData, const uint8_t *c
         ret  = HksRenameKeyAliasUnpack(srcData, &oldKeyAlias, &newKeyAlias, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRenameKeyAliasUnpack Ipc fail")
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
@@ -909,7 +1638,13 @@ void HksIpcChangeStorageLevel(const struct HksBlob *srcData, const uint8_t *cont
         ret = HksChangeStorageLevelUnpack(srcData, &keyAlias, &srcParamSet, &destParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksChangeStorageLevelUnpack Ipc fail")
 
-        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        ret = HksIpcCheckParamSetBlacklist(srcParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "srcParamSet contains forbidden tag")
+
+        ret = HksIpcCheckParamSetBlacklist(destParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "destParamSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(srcParamSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCheckAcrossAccountsPermission(srcParamSet, processInfo.userIdInt);
@@ -932,14 +1667,218 @@ void HksIpcChangeStorageLevel(const struct HksBlob *srcData, const uint8_t *cont
 
 void HksIpcWrapKey(const struct HksBlob *srcData, const uint8_t *context)
 {
-    int32_t ret = HksPluginWrapKey(srcData, context);
-    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(ret, "wrap key not support")
-    (void)HksServiceWrapKey(srcData, context);
+    struct HksBlob keyAlias = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksBlob wrappedKey = { 0, NULL };
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    int32_t ret;
+
+    do {
+        ret = HksPluginCheck();
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "api not support")
+
+        ret  = HksWrapKeyUnpack(srcData, &keyAlias, &paramSet, &wrappedKey);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "unpack data for Ipc fail")
+
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksServiceWrapKey(&processInfo, &keyAlias, paramSet, &wrappedKey);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceWrapKey fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HksSendResponse(context, ret, ret == HKS_SUCCESS ? &wrappedKey : NULL);
+
+    HKS_FREE_BLOB(wrappedKey);
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
 }
 
 void HksIpcUnwrapKey(const struct HksBlob *srcData, const uint8_t *context)
 {
-    int32_t ret = HksPluginWrapKey(srcData, context);
-    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(ret, "unwrap key not support")
-    (void)HksServiceUnwrapKey(srcData, context);
+    struct HksBlob keyAlias = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksBlob wrappedKey = { 0, NULL };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    int32_t ret;
+
+    do {
+        ret = HksPluginCheck();
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "api not support")
+
+        ret  = HksUnwrapKeyUnpack(srcData, &keyAlias, &paramSet, &wrappedKey);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "unpack data for Ipc fail")
+
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksServiceUnwrapKey(&processInfo, &keyAlias, paramSet, &wrappedKey);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceUnwrapKey, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HksSendResponse(context, ret, NULL);
+
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+}
+
+static int32_t CheckAndBuildSharedKeyParamSet(const struct HksBlob *sharedKeyAlias,
+    const struct HksParamSet *sharedKeyParamSet, struct HksParamSet **newSharedKeyParamSet)
+{
+    int32_t ret = HksCheckBlobAndParamSet(sharedKeyAlias, sharedKeyParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NEW_INVALID_ARGUMENT, "CheckAndBuildSharedKeyParamSet fail")
+
+    ret = HksCheckParamSet(sharedKeyParamSet, sharedKeyParamSet->paramSetSize);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check sharedKeyParamSet failed, ret = %" LOG_PUBLIC "d", ret)
+
+    ret = HksInitParamSet(newSharedKeyParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "init paramSet fail")
+    do {
+        ret = HksAddParams(*newSharedKeyParamSet, sharedKeyParamSet->params, sharedKeyParamSet->paramsCnt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckAndBuildSharedKeyParamSet add paramset fail")
+
+        struct HksParam keyalias = {
+            .tag = HKS_TAG_KEY_ALIAS,
+            .blob = *sharedKeyAlias,
+        };
+        ret = HksAddParams(*newSharedKeyParamSet, &keyalias, 1);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add param attestMode fail")
+
+        ret = HksBuildParamSet(newSharedKeyParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build paramSet fail")
+
+        return HKS_SUCCESS;
+    } while (false);
+
+    HksFreeParamSet(newSharedKeyParamSet);
+    return ret;
+}
+
+void HksIpcServiceEncapsulate(const struct HksBlob *srcData, const uint8_t *context)
+{
+    struct HksBlob keyAlias = { 0, NULL };
+    struct HksBlob sharedKeyAlias = { 0, NULL };
+    struct HksBlob responseBlob = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksParamSet *newParamSet = NULL;
+    struct HksParamSet *sharedKeyParamSet = NULL;
+    struct HksEncapsulationResult encapResult = { { 0, NULL }, { 0, NULL } };
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    int32_t ret;
+
+    do {
+        ret = HksEncapsulateUnpack(srcData, &keyAlias, &paramSet, &sharedKeyAlias,
+            &sharedKeyParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksEncapsulateUnpack fail")
+
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
+        ret = HksIpcCheckParamSetBlacklist(sharedKeyParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "sharedKeyParamSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = CheckAndBuildSharedKeyParamSet(&sharedKeyAlias, sharedKeyParamSet, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check keyAlias and paramSet failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksServiceEncapsulate(&processInfo, &keyAlias, paramSet, newParamSet, &encapResult);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceEncapsulate fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksEncapsulateResponsePack(&encapResult, &responseBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksEncapsulateResponsePack fail, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+    HksSendResponse(context, ret, ret == HKS_SUCCESS ? &responseBlob : NULL);
+
+    HKS_FREE_ENCAPSULATION_RESULT(&encapResult);
+    HksFreeParamSet(&newParamSet);
+    HKS_MEMSET_FREE_BLOB(responseBlob);
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+}
+
+static int32_t DecapsulateResponsePack(const struct HksBlob *encapOrsharedSecret, struct HksBlob *responseBlob)
+{
+    uint32_t responseSize = sizeof(uint32_t);
+    if (encapOrsharedSecret->size > 0) {
+        responseSize += ALIGN_SIZE(encapOrsharedSecret->size);
+    } else {
+        responseSize += DEFAULT_ALIGN_MASK_SIZE;
+    }
+    responseBlob->size = responseSize;
+    responseBlob->data = (uint8_t *)HksMalloc(responseBlob->size);
+    HKS_IF_NULL_LOGE_RETURN(responseBlob->data, HKS_ERROR_MALLOC_FAIL, "malloc responseBlob failed")
+
+    uint32_t offset = 0;
+    int32_t ret = CopyBlobToBufferForEmptyData(encapOrsharedSecret, responseBlob, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksIpcServiceDecapsulate Copy sharedSecret to responseBlob fail.")
+    return HKS_SUCCESS;
+}
+
+void HksIpcServiceDecapsulate(const struct HksBlob *srcData, const uint8_t *context)
+{
+    struct HksBlob keyAlias = { 0, NULL };
+    struct HksBlob sharedKeyAlias = { 0, NULL };
+    struct HksBlob encapOrsharedSecret = { 0, NULL };
+    struct HksParamSet *newSharedKeyParamSet = NULL;
+    struct HksParamSet *paramSet = NULL;
+    struct HksParamSet *sharedKeyParamSet = NULL;
+    struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    struct HksBlob responseBlob = { 0, NULL };
+    int32_t ret;
+
+    do {
+        uint32_t offset = 0;
+        ret = HksKeyParamUnpack(srcData, &keyAlias, &paramSet, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDecapsulateUnpack fail")
+
+        ret = HksIpcCheckParamSetBlacklist(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
+
+        ret = HksDecapsulateUnpack(srcData, &sharedKeyAlias, &sharedKeyParamSet,
+            &encapOrsharedSecret, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDecapsulateUnpack fail")
+
+        ret = HksIpcCheckParamSetBlacklist(sharedKeyParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "sharedKeyParamSet contains forbidden tag")
+
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = CheckAndBuildSharedKeyParamSet(&sharedKeyAlias, sharedKeyParamSet, &newSharedKeyParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check and build sharedKeyParamSet failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksServiceDecapsulate(&processInfo, &keyAlias, paramSet,
+            newSharedKeyParamSet, &encapOrsharedSecret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceDecapsulate fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = DecapsulateResponsePack(&encapOrsharedSecret, &responseBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "DecapsulateResponsePack fail")
+    } while (0);
+    HksSendResponse(context, ret, ret == HKS_SUCCESS ? &responseBlob : NULL);
+
+    HksFreeParamSet(&newSharedKeyParamSet);
+    HKS_MEMSET_FREE_BLOB(responseBlob);
+    HKS_MEMSET_FREE_BLOB(encapOrsharedSecret);
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
 }

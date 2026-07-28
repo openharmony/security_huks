@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@
 #include "securec.h"
 #include "hks_core_service_key_attest.h"
 #include "hks_core_service_key_generate.h"
+#include "hks_core_service_key_extension.h"
 #include "hks_core_service_key_operate_one_stage.h"
 #include "hks_core_service_key_operate_three_stage.h"
 #include "hks_core_service_key_other.h"
@@ -175,6 +176,17 @@ int32_t HuksHdiGetStatInfo(struct HksBlob *statInfo)
     (void)statInfo;
     return HKS_ERROR_API_NOT_SUPPORTED;
 }
+int32_t HuksHdiEncapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParamSet,
+    struct HksEncapsulationResult *encapResult)
+{
+    return HksCoreEncapsulate(paramSet, sharedKeyParamSet, encapResult);
+}
+
+int32_t HuksHdiDecapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParamSet,
+    const struct HksBlob *encapsulatedData, struct HksBlob *sharedSecret)
+{
+    return HksCoreDecapsulate(paramSet, sharedKeyParamSet, encapsulatedData, sharedSecret);
+}
 #ifdef _STORAGE_LITE_
 int32_t HuksHdiCalcMacHeader(const struct HksParamSet *paramSet, const struct HksBlob *salt,
     const struct HksBlob *srcData, struct HksBlob *mac)
@@ -216,6 +228,8 @@ struct HuksHdi *HuksCreateHdiDevicePtr(void)
     hdiDevicePtr->HuksHdiUpgradeKey       = HuksHdiUpgradeKey;
     hdiDevicePtr->HuksHdiGetErrorInfo     = HuksHdiGetErrorInfo;
     hdiDevicePtr->HuksHdiGetStatInfo      = HuksHdiGetStatInfo;
+    hdiDevicePtr->HuksHdiEncapsulate      = HuksHdiEncapsulate;
+    hdiDevicePtr->HuksHdiDecapsulate      = HuksHdiDecapsulate;
 #ifdef _STORAGE_LITE_
     hdiDevicePtr->HuksHdiCalcMacHeader    = HuksHdiCalcMacHeader;
 #endif

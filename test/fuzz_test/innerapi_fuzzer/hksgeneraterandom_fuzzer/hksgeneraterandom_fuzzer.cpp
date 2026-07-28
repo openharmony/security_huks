@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,37 +14,37 @@
  */
 #include "hksgeneraterandom_fuzzer.h"
 
-#include <securec.h>
-
-#include "hks_api.h"
-#include "hks_mem.h"
-#include "hks_param.h"
-#include "hks_type.h"
-
 #include "hks_fuzz_util.h"
 
 namespace OHOS {
 namespace Security {
 namespace Hks {
 
-int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
 {
-    if (data == nullptr || size < sizeof(uint32_t)) {
-        return -1;
-    }
+    uint32_t randomSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 100);
+    std::vector<uint8_t> randomBuf(randomSize);
+    struct HksBlob random = { static_cast<uint32_t>(randomBuf.size()), randomBuf.data() };
 
-    struct HksBlob random = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
-
-    WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
-
-    [[maybe_unused]] int ret = HksGenerateRandom(ps.s, &random);
-
-    return 0;
+    WrapParamSet ps = ConstructParamSetFromFdp(fdp);
+    return HksGenerateRandom(ps.s, &random);
 }
 }}}
 
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
+    uint8_t randomBuf[32] = {0};
+    struct HksBlob random = { 32, randomBuf };
+    WrapParamSet randomPs = BuildFixedParamSet({});
+    int32_t ret = HksGenerateRandom(randomPs.s, &random);
+    printf("fuzz_generaterandom init: HksGenerateRandom ret=%d\n", ret);
+    return 0;
+}
+
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    std::vector<uint8_t> v(data, data + size);
-    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
+    FuzzedDataProvider fdp(data, size);
+    int32_t ret = OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(fdp);
+
+    OHOS::Security::Hks::FuzzStatsRecord(ret);
+    return 0;
 }

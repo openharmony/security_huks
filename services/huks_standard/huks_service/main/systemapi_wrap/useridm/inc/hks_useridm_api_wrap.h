@@ -101,6 +101,8 @@ int32_t HksUserIdmGetAuthInfoNum(int32_t userId, enum HksUserAuthType hksAuthTyp
 
 int32_t HksConvertUserIamTypeToHksType(enum HksUserIamType type, uint32_t userIamValue, uint32_t *hksValue);
 
+int32_t HksConvertToHksAuthTrustLevel(uint32_t authAtlType, uint32_t *hksAuthAtlType);
+
 #ifdef __cplusplus
 }
 #endif

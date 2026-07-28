@@ -1,0 +1,119 @@
+/*
+ * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef HUKS_NAPI_UKEY_H
+#define HUKS_NAPI_UKEY_H
+
+#include "napi/native_api.h"
+#include "napi/native_node_api.h"
+#include "huks_napi_common_item.h"
+
+#include "hks_param.h"
+
+#include <vector>
+
+namespace HuksNapiItem {
+class AsyncContext {
+public:
+    virtual ~AsyncContext()
+    {
+        if (asyncWork != nullptr && env != nullptr) {
+            napi_delete_async_work(env, asyncWork);
+        }
+
+        if (callback != nullptr) {
+            napi_delete_reference(env, callback);
+            callback = nullptr;
+        }
+
+        if (paramSetIn != nullptr) {
+            HksFreeParamSet(&paramSetIn);
+        }
+        if (paramSetOut != nullptr) {
+            HksFreeParamSet(&paramSetOut);
+        }
+    }
+
+    napi_env env;
+    napi_async_work asyncWork = nullptr;
+    napi_deferred deferred = nullptr;
+    napi_ref callback = nullptr;
+    int32_t result = 0;
+
+    std::function<napi_status(napi_env, napi_callback_info, AsyncContext *)> parse;
+    napi_async_execute_callback execute;
+    std::function<void(napi_env, AsyncContext *)> resolve;
+
+    struct HksParamSet *paramSetIn = nullptr;
+    struct HksParamSet *paramSetOut = nullptr;
+};
+class GetResourceIdContext : public AsyncContext {
+public:
+    std::vector<uint8_t> providerName{};
+    std::vector<uint8_t> resourceId{};
+};
+
+class ProviderRegContext : public AsyncContext {
+public:
+    std::vector<uint8_t> name{};
+};
+
+class UkeyPinContext : public AsyncContext {
+public:
+    std::vector<uint8_t> index{};
+    int32_t outStatus = 0;
+    uint32_t retryCount = 0;
+};
+
+class UkeyPropertyContext : public AsyncContext {
+public:
+    std::vector<uint8_t> resourceId{};
+    std::vector<uint8_t> propertyId{};
+};
+
+class ResourceContext : public AsyncContext {
+public:
+    std::vector<uint8_t> resourceId{};
+    bool isOpen = false;
+    int32_t (*hksOperation)(const std::vector<uint8_t>&, struct HksParamSet*, bool) = nullptr;
+};
+
+napi_value HuksNapiRegisterProvider(napi_env env, napi_callback_info info);
+
+napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info);
+
+napi_value HuksNapiAuthUkeyPin(napi_env env, napi_callback_info info);
+
+napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info);
+
+napi_value HuksNapiGetProperty(napi_env env, napi_callback_info info);
+
+napi_value HuksNapiSetProperty(napi_env env, napi_callback_info info);
+
+napi_value HuksNapiOpenResource(napi_env env, napi_callback_info info);
+
+napi_value HuksNapiCloseResource(napi_env env, napi_callback_info info);
+
+napi_value HuksNapiClearUkeyPinAuthState(napi_env env, napi_callback_info info);
+
+napi_value HuksNapiGetResourceId(napi_env env, napi_callback_info info);
+
+napi_value HuksNapiGetErrorInfo(napi_env env, napi_callback_info info);
+
+napi_value ParseString(napi_env env, napi_value object, std::vector<uint8_t> &alias);
+
+} // namespace HuksNapiItem
+
+#endif // HUKS_NAPI_UKEY_H

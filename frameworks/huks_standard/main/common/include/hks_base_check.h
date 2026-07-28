@@ -125,7 +125,8 @@ int32_t HksCheckCipherData(uint32_t cmdId, uint32_t alg, const struct ParamsValu
 int32_t HksCheckCipherMaterialParams(uint32_t alg, const struct ParamsValues *inputParams,
     const struct HksParamSet *paramSet);
 
-int32_t HksCheckUserAuthParams(uint32_t userAuthType, uint32_t authAccessType, uint32_t challengeType);
+int32_t HksCheckUserAuthParams(struct HksParam *userAuthTypeParam, uint32_t authAccessType, uint32_t challengeType,
+    struct HksParam *userAuthTypeAtlParam);
 
 int32_t HksCheckSecureSignParams(uint32_t secureSignType);
 

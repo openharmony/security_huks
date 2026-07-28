@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -98,6 +98,11 @@ int32_t HuksAccessGetErrorInfo(struct HksBlob *errorInfo);
 
 int32_t HuksAccessGetStatInfo(struct HksBlob *statInfo);
 
+int32_t HuksAccessEncapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParam,
+    struct HksEncapsulationResult *encapResult);
+
+int32_t HuksAccessDecapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParam,
+    struct HksBlob *encapsData, struct HksBlob *hdiSharedSecret);
 #ifdef __cplusplus
 }
 #endif

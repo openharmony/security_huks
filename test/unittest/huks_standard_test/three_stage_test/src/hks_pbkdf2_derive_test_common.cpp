@@ -54,6 +54,7 @@ int32_t HksPbkdf2DeriveTestNormalCase(const struct HksBlob keyAlias,
     return ret;
 }
 
+#ifdef L2_STANDARD
 int32_t HksPbkdf2DeriveTestForOverwriteCase(const struct HksBlob keyAlias,
     const struct HksParamSet *genParamSet, struct HksParamSet *deriveParamSet, struct HksParamSet *deriveFinalParamsSet)
 {
@@ -87,7 +88,6 @@ int32_t HksPbkdf2DeriveTestForOverwriteCase(const struct HksBlob keyAlias,
     return ret;
 }
 
-#ifdef L2_STANDARD
 int32_t HksPbkdf2DeriveTestCmpCase(const struct HksBlob keyAlias,
     const struct HksParamSet *genParamSet, struct HksParamSet *deriveParamSet, struct HksParamSet *deriveFinalParamsSet)
 {

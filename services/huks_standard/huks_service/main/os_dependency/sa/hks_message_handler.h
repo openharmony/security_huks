@@ -50,6 +50,22 @@ const struct HksIpcEntryPoint HKS_IPC_MESSAGE_HANDLER[] = {
     { HKS_MSG_CHANGE_STORAGE_LEVEL, HksIpcChangeStorageLevel },
     { HKS_MSG_WRAP_KEY, HksIpcWrapKey },
     { HKS_MSG_UNWRAP_KEY, HksIpcUnwrapKey },
+    { HKS_MSG_ENCAPSULATE, HksIpcServiceEncapsulate },
+    { HKS_MSG_DECAPSULATE, HksIpcServiceDecapsulate },
+
+    { HKS_MSG_EXT_REGISTER, HksIpcServiceRegisterProvider },
+    { HKS_MSG_EXT_UNREGISTER, HksIpcServiceUnregisterProvider },
+    { HKS_MSG_EXT_QUERY_ABILITY_INFO, HksIpcServiceQueryAbilityInfo },
+    { HKS_MSG_EXT_AUTH_UKEY_PIN, HksIpcServiceAuthUkeyPin },
+    { HKS_MSG_EXT_GET_UKEY_PIN_AUTH_STATE, HksIpcServiceGetUkeyPinAuthState },
+    { HKS_MSG_EXT_CLEAR_PIN_AUTH_STATE, HksIpcServiceClearPinAuthState },
+    { HKS_MSG_EXT_OPEN_REMOTE_HANDLE, HksIpcServiceOpenRemoteHandle },
+    { HKS_MSG_EXT_CLOSE_REMOTE_HANDLE, HksIpcServiceCloseRemoteHandle },
+    { HKS_MSG_EXT_EXPORT_PROVIDER_CERTIFICATES, HksIpcServiceExportProviderCertificates },
+    { HKS_MSG_EXT_EXPORT_CERTIFICATE, HksIpcServiceExportCertificate },
+    { HKS_MSG_EXT_IMPORT_CERTIFICATE, HksIpcServiceImportCertificate },
+    { HKS_MSG_EXT_GET_RESOURCE_ID, HksIpcServiceGetResourceId },
+
 };
 
 typedef void (*HksIpcThreeStageHandlerFuncProc)(const struct HksBlob *msg, struct HksBlob *outData,

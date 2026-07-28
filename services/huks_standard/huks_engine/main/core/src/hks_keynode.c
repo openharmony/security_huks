@@ -18,6 +18,8 @@
 
 #include "hks_keynode.h"
 
+#include <inttypes.h>
+#include <pthread.h>
 #include <stdatomic.h>
 #include <stddef.h>
 
@@ -26,6 +28,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_pthread_util.h"
 #include "hks_template.h"
 #include "securec.h"
 #include "hks_util.h"
@@ -44,38 +47,7 @@
 
 static struct DoubleList g_keyNodeList = { &g_keyNodeList, &g_keyNodeList };
 static volatile atomic_uint g_keyNodeCount = 0;
-static HksMutex *g_huksMutex = NULL;  /* global mutex using in keynode */
-
-HksMutex *HksGetHuksMutex(void)
-{
-    if (g_huksMutex == NULL) {
-        HKS_LOG_E("Hks mutex init failed, reinit!");
-        g_huksMutex = HksMutexCreate();
-        HKS_IF_NULL_LOGE_RETURN(g_huksMutex, NULL, "Hks mutex reinit failed!")
-    }
-
-    return g_huksMutex;
-}
-
-int32_t HksInitHuksMutex(void)
-{
-    if (g_huksMutex == NULL) {
-        g_huksMutex = HksMutexCreate();
-        if (g_huksMutex == NULL) {
-            HKS_LOG_E("create huks mutex failed!");
-            return HKS_ERROR_NULL_POINTER;
-        }
-    }
-    return HKS_SUCCESS;
-}
-
-void HksDestroyHuksMutex(void)
-{
-    if (g_huksMutex != NULL) {
-        HksMutexClose(g_huksMutex);
-        g_huksMutex = NULL;
-    }
-}
+static pthread_mutex_t g_huksMutex = PTHREAD_MUTEX_INITIALIZER;  /* global mutex using in keynode */
 
 static void FreeKeyBlobParamSet(struct HksParamSet **paramSet)
 {
@@ -192,13 +164,14 @@ static void FreeRuntimeParamSet(struct HksParamSet **paramSet)
             return;
         }
         bool hasCalcHash = true;
-        /* If the algorithm is ed25519, the plaintext is directly cached, and if the digest is HKS_DIGEST_NONE, the
-           hash value has been passed in by the user. So the hash value does not need to be free.
+        /* If the algorithm is ed25519 or ml-dsa, the plaintext is directly cached, and if the digest is
+           HKS_DIGEST_NONE, the hash value has been passed in by the user. So the hash value does not need to be free.
         */
         if (ret == HKS_SUCCESS) {
             hasCalcHash = param3->uint32Param != HKS_DIGEST_NONE;
         }
-        hasCalcHash &= (param2->uint32Param != HKS_ALG_ED25519);
+        hasCalcHash &= (param2->uint32Param != HKS_ALG_ED25519 &&
+            param2->uint32Param != HKS_ALG_ML_DSA && param2->uint32Param != HKS_ALG_ML_KEM);
 
         bool isAesCcm = false;
         ret = SetAesCcmModeTag(*paramSet, param2->uint32Param, param1->uint32Param, &isAesCcm);
@@ -221,6 +194,10 @@ static void FreeRuntimeParamSet(struct HksParamSet **paramSet)
 
 static void DeleteKeyNodeFree(struct HuksKeyNode *keyNode)
 {
+    if (keyNode->isInUse) {
+        HKS_LOG_E("error! keyNode isInUse! can not delete! handle %" LOG_PUBLIC PRIu64, keyNode->handle);
+        return;
+    }
     RemoveDoubleListNode(&keyNode->listHead);
     FreeKeyBlobParamSet(&keyNode->keyBlobParamSet);
     FreeRuntimeParamSet(&keyNode->runtimeParamSet);
@@ -279,16 +256,17 @@ static int32_t BuildRuntimeParamSet(const struct HksParamSet *inParamSet, struct
 
 static int32_t HksCheckUniqueHandle(uint64_t handle)
 {
-    HksMutexLock(HksGetHuksMutex());
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HKS_LOCK_OR_FAIL(g_huksMutex), HKS_ERROR_PTHREAD_MUTEX_LOCK_FAIL,
+        "lock in HksCheckUniqueHandle fail");
     struct HuksKeyNode *keyNode = NULL;
     HKS_DLIST_ITER(keyNode, &g_keyNodeList) {
         if ((keyNode != NULL) && (keyNode->handle == handle)) {
             HKS_LOG_E("The handle already exists!");
-            HksMutexUnlock(HksGetHuksMutex());
+            HKS_UNLOCK_OR_FAIL(g_huksMutex);
             return HKS_FAILURE;
         }
     }
-    HksMutexUnlock(HksGetHuksMutex());
+    HKS_UNLOCK_OR_FAIL(g_huksMutex);
     return HKS_SUCCESS;
 }
 
@@ -335,6 +313,9 @@ static void DeleteFirstTimeOutBatchKeyNode(void)
         if (keyNode->batchOperationTimestamp >= curTime) {
             continue;
         }
+        if (keyNode->isInUse) {
+            continue;
+        }
         HKS_LOG_E("Batch operation timeout, delete keyNode!");
         DeleteKeyNodeFree(keyNode); // IAR iccarm can not compile `return DeleteKeyNodeFree(keyNode)`
         return; // IAR iccarm will report `a void function may not return a value`
@@ -357,6 +338,9 @@ static bool DeleteFirstKeyNodeForTokenId(uint32_t tokenId)
     struct HuksKeyNode *keyNode = NULL;
     HKS_DLIST_ITER(keyNode, &g_keyNodeList) {
         if (keyNode == NULL) {
+            continue;
+        }
+        if (keyNode->isInUse) {
             continue;
         }
         if (GetTokenIdFromParamSet(keyNode->runtimeParamSet) != tokenId) {
@@ -396,6 +380,9 @@ static bool DeleteFirstKeyNode(void)
 {
     struct HuksKeyNode *keyNode = NULL;
     HKS_DLIST_ITER(keyNode, &g_keyNodeList) {
+        if (keyNode->isInUse) {
+            continue;
+        }
         HKS_LOG_E("DeleteFirstKeyNode delete old not using key node!");
         DeleteKeyNodeFree(keyNode);
         return true;
@@ -406,7 +393,8 @@ static bool DeleteFirstKeyNode(void)
 static int32_t AddKeyNode(struct HuksKeyNode *keyNode, uint32_t tokenId)
 {
     int32_t ret = HKS_SUCCESS;
-    HksMutexLock(HksGetHuksMutex());
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HKS_LOCK_OR_FAIL(g_huksMutex), HKS_ERROR_PTHREAD_MUTEX_LOCK_FAIL,
+        "lock in AddKeyNode fail");
     do {
         DeleteFirstTimeOutBatchKeyNode();
 
@@ -427,7 +415,7 @@ static int32_t AddKeyNode(struct HuksKeyNode *keyNode, uint32_t tokenId)
         HKS_LOG_I("add keynode count:%" LOG_PUBLIC "u", atomic_load(&g_keyNodeCount));
     } while (0);
 
-    HksMutexUnlock(HksGetHuksMutex());
+    HKS_UNLOCK_OR_FAIL(g_huksMutex);
     return ret;
 }
 
@@ -568,32 +556,49 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
 }
 #endif // _STORAGE_LITE_
 
-struct HuksKeyNode *HksQueryKeyNode(uint64_t handle)
+struct HuksKeyNode *HksQueryKeyNodeAndMarkInUse(uint64_t handle)
 {
     struct HuksKeyNode *keyNode = NULL;
-    HksMutexLock(HksGetHuksMutex());
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HKS_LOCK_OR_FAIL(g_huksMutex), NULL, "lock in HksQueryKeyNodeAndMarkInUse fail");
     HKS_DLIST_ITER(keyNode, &g_keyNodeList) {
         if (keyNode != NULL && keyNode->handle == handle) {
-            HksMutexUnlock(HksGetHuksMutex());
+            if (keyNode->isInUse) {
+                HKS_LOG_E("keyNode is in progress and cannot be used in parallel!");
+                HKS_UNLOCK_OR_FAIL(g_huksMutex);
+                return NULL;
+            }
+            keyNode->isInUse = true;
+            HKS_UNLOCK_OR_FAIL(g_huksMutex);
             return keyNode;
         }
     }
-    HksMutexUnlock(HksGetHuksMutex());
+    HKS_UNLOCK_OR_FAIL(g_huksMutex);
     return NULL;
 }
 
 void HksDeleteKeyNode(uint64_t handle)
 {
     struct HuksKeyNode *keyNode = NULL;
-    HksMutexLock(HksGetHuksMutex());
+    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(HKS_LOCK_OR_FAIL(g_huksMutex), "lock in HksDeleteKeyNode fail");
     HKS_DLIST_ITER(keyNode, &g_keyNodeList) {
         if (keyNode != NULL && keyNode->handle == handle) {
             DeleteKeyNodeFree(keyNode);
-            HksMutexUnlock(HksGetHuksMutex());
+            HKS_UNLOCK_OR_FAIL(g_huksMutex);
             return;
         }
     }
-    HksMutexUnlock(HksGetHuksMutex());
+    HKS_UNLOCK_OR_FAIL(g_huksMutex);
+}
+
+void HksMarkKeyNodeUnuse(struct HuksKeyNode *keyNode)
+{
+    HKS_IF_NULL_RETURN_VOID(keyNode)
+    HKS_IF_NOT_SUCC_LOGE_RETURN_VOID(HKS_LOCK_OR_FAIL(g_huksMutex), "lock in HksMarkKeyNodeUnuse fail");
+    if (!keyNode->isInUse) {
+        HKS_LOG_E("ERROR! unexpected scene! keyNode->isInUse is false!");
+    }
+    keyNode->isInUse = false;
+    HKS_UNLOCK_OR_FAIL(g_huksMutex);
 }
 
 // free batch update keynode

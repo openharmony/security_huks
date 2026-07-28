@@ -26,6 +26,7 @@ extern "C" {
 #endif
 
 int32_t HksCoreConvertUserIamTypeToHksType(enum HksUserIamType type, uint32_t userIamValue, uint32_t *hksValue);
+int32_t HksCoreConvertToHksAuthTrustLevel(uint32_t authType, uint32_t *hksAuthAtlType);
 
 #ifdef __cplusplus
 }

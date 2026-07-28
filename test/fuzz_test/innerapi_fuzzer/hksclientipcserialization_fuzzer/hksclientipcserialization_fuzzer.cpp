@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,255 +15,237 @@
 
 #include "hksclientipcserialization_fuzzer.h"
 
-#include <cstring>
-#include <securec.h>
 #include <vector>
 
-#include "file_ex.h"
-#include "hks_api.h"
+#include <securec.h>
+
+#include "hks_client_ipc_serialization.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
-#include "hks_client_ipc_serialization.h"
 #include "hks_type.h"
 #include "hks_type_inner.h"
 
 #include "hks_fuzz_util.h"
 
-constexpr uint32_t TEST_BLOB_SIZE = 3221225431;
-constexpr uint32_t NUM = 2;
-
 namespace OHOS {
 namespace Security {
 namespace Hks {
 
-/**
- * @tc.name: HksClientIpcSerializationTest.HksClientIpcSerializationTest001
- * @tc.desc: tdd CopyUint32ToBuffer, expect HKS_ERROR_BUFFER_TOO_SMALL
- * @tc.type: FUNC
- */
-static void HksClientIpcSerializationTest001()
+// Fuzz CopyUint32ToBuffer: fuzz controls destBlob size/content, value, and index offset
+static int32_t FuzzCopyUint32ToBuffer(FuzzedDataProvider &fdp)
 {
-    HKS_LOG_I("enter HksClientIpcSerializationTest001");
-
-    uint32_t index = 15;
-    const uint32_t destBlobSize = 10;
-    uint8_t destBlobData[destBlobSize] = { 0 };
-    struct HksBlob destBlob = { .size = destBlobSize, .data = destBlobData };
-
-    CopyUint32ToBuffer(0, &destBlob, &index);
-}
-
-/**
- * @tc.name: HksClientIpcSerializationTest.HksClientIpcSerializationTest002
- * @tc.desc: tdd HksOnceParamPack CopyBlobToBuffer, expect HKS_ERROR_BUFFER_TOO_SMALL
- * @tc.type: FUNC
- */
-static void HksClientIpcSerializationTest002()
-{
-    HKS_LOG_I("enter HksClientIpcSerializationTest002");
-
-    uint32_t index = 15;
-    const uint32_t destBlobSize = 10;
-    uint8_t destBlobData[destBlobSize] = { 0 };
-    struct HksBlob destBlob = { .size = destBlobSize, .data = destBlobData };
-
-    HksOnceParamPack(&destBlob, nullptr, nullptr, &index);
-}
-
-/**
- * @tc.name: HksClientIpcSerializationTest.HksClientIpcSerializationTest003
- * @tc.desc: tdd HksAgreeKeyPack CopyParamSetToBuffer, expect HKS_ERROR_BUFFER_TOO_SMALL
- * @tc.type: FUNC
- */
-static void HksClientIpcSerializationTest003()
-{
-    HKS_LOG_I("enter HksClientIpcSerializationTest003");
-
-    const uint32_t destBlobSize = 10;
-    uint8_t destBlobData[destBlobSize] = { 0 };
-    struct HksBlob destBlob = { .size = destBlobSize, .data = destBlobData };
-    const struct HksParamSet paramSet = { .paramSetSize = 12 };
-
-    HksAgreeKeyPack(&destBlob, &paramSet, nullptr, nullptr, nullptr);
-}
-
-/**
- * @tc.name: HksClientIpcSerializationTest.HksClientIpcSerializationTest004
- * @tc.desc: tdd HksGetKeyInfoListUnpackFromService GetUint32FromBuffer, expect HKS_ERROR_BUFFER_TOO_SMALL
- * @tc.type: FUNC
- */
-static void HksClientIpcSerializationTest004()
-{
-    HKS_LOG_I("enter HksClientIpcSerializationTest004");
-
-    const uint32_t destBlobSize = 2;
-    uint8_t destBlobData[destBlobSize] = { 0 };
-    struct HksBlob destBlob = { .size = destBlobSize, .data = destBlobData };
-
-    HksGetKeyInfoListUnpackFromService(&destBlob, nullptr, nullptr);
-}
-
-/**
- * @tc.name: HksClientIpcSerializationTest.HksClientIpcSerializationTest005
- * @tc.desc: tdd HksCertificateChainUnpackFromService GetBlobFromBuffer, expect HKS_ERROR_IPC_MSG_FAIL
- * @tc.type: FUNC
- */
-static void HksClientIpcSerializationTest005()
-{
-    HKS_LOG_I("enter HksClientIpcSerializationTest005");
-
-    const uint32_t srcBlobSize = 7;
-    uint8_t srcBlobData[srcBlobSize] = { 4 };
-    struct HksBlob srcBlob = { .size = srcBlobSize, .data = srcBlobData };
-    struct HksCertChain certChain = { .certsCount = 4 };
-
-    HksCertificateChainUnpackFromService(&srcBlob, false, &certChain);
-}
-
-/**
- * @tc.name: HksClientIpcSerializationTest.HksClientIpcSerializationTest006
- * @tc.desc: tdd EncodeCertChain CheckAndCalculateSize
- * @tc.type: FUNC
- */
-static void HksClientIpcSerializationTest006()
-{
-    HKS_LOG_I("enter HksClientIpcSerializationTest006");
-
-    struct HksBlob inBlob = { .size = UINT32_MAX };
-    int32_t ret = EncodeCertChain(&inBlob, nullptr);
-
-    inBlob.size = UINT32_MAX - NUM;
-    ret = EncodeCertChain(&inBlob, nullptr);
-
-    inBlob.size = TEST_BLOB_SIZE;
-    ret = EncodeCertChain(&inBlob, nullptr);
-}
-
-/**
- * @tc.name: HksClientIpcSerializationTest.HksClientIpcSerializationTest007
- * @tc.desc: tdd EncodeCertChain CheckAndCalculateSize Base64Encode
- * @tc.type: FUNC
- */
-uint8_t inBlobData[] = {
-    0x30, 0x82, 0x03, 0x13, 0x30, 0x82, 0x02, 0xb9, 0xa0, 0x03, 0x02, 0x01, 0x02, 0x02, 0x0e, 0x63,
-    0xcb, 0x7d, 0xcd, 0xb3, 0x86, 0x85, 0x27, 0xc6, 0xbc, 0xe0, 0x4d, 0x33, 0x99, 0x30, 0x0a, 0x06,
-    0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x04, 0x03, 0x02, 0x30, 0x5d, 0x31, 0x39, 0x30, 0x37, 0x06,
-    0x03, 0x55, 0x04, 0x03, 0x0c, 0x30, 0x48, 0x75, 0x61, 0x77, 0x65, 0x69, 0x20, 0x43, 0x42, 0x47,
-    0x20, 0x45, 0x43, 0x43, 0x20, 0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x20, 0x41, 0x6e, 0x6f, 0x6e,
-    0x79, 0x6d, 0x6f, 0x75, 0x73, 0x20, 0x41, 0x74, 0x74, 0x65, 0x73, 0x74, 0x61, 0x74, 0x69, 0x6f,
-    0x6e, 0x20, 0x43, 0x41, 0x20, 0x31, 0x31, 0x13, 0x30, 0x11, 0x06, 0x03, 0x55, 0x04, 0x0a, 0x0c,
-    0x0a, 0x48, 0x75, 0x61, 0x77, 0x65, 0x69, 0x20, 0x43, 0x42, 0x47, 0x31, 0x0b, 0x30, 0x09, 0x06,
-    0x03, 0x55, 0x04, 0x06, 0x13, 0x02, 0x43, 0x4e, 0x30, 0x1e, 0x17, 0x0d, 0x32, 0x34, 0x30, 0x38,
-    0x30, 0x38, 0x30, 0x32, 0x30, 0x35, 0x35, 0x37, 0x5a, 0x17, 0x0d, 0x32, 0x34, 0x30, 0x38, 0x31,
-    0x35, 0x30, 0x32, 0x30, 0x35, 0x35, 0x37, 0x5a, 0x30, 0x2c, 0x31, 0x2a, 0x30, 0x28, 0x06, 0x03,
-    0x55, 0x04, 0x03, 0x0c, 0x21, 0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x20, 0x43, 0x65, 0x72, 0x74,
-    0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x20, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65,
-    0x6e, 0x74, 0x20, 0x4b, 0x65, 0x79, 0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86, 0x48, 0xce,
-    0x3d, 0x02, 0x01, 0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00,
-    0x04, 0xea, 0xba, 0xbf, 0x64, 0x55, 0x32, 0x59, 0x2b, 0xd6, 0xe2, 0x95, 0xea, 0x06, 0x4f, 0x35,
-    0xe9, 0x58, 0x48, 0x68, 0x68, 0x9e, 0x55, 0x1e, 0xf4, 0xad, 0x3e, 0x62, 0x39, 0xad, 0xd4, 0xba,
-    0x7b, 0x99, 0xbc, 0x0c, 0x9e, 0x8f, 0xc3, 0x77, 0x8f, 0x57, 0x01, 0xd8, 0x8a, 0xa6, 0x5d, 0x5b,
-    0xe3, 0xfd, 0x0e, 0x23, 0xff, 0x1a, 0xe5, 0xbe, 0x6e, 0xd4, 0x73, 0x1d, 0xc4, 0x00, 0xe3, 0x9a,
-    0x08, 0xa3, 0x82, 0x01, 0x8c, 0x30, 0x82, 0x01, 0x88, 0x30, 0x1d, 0x06, 0x03, 0x55, 0x1d, 0x0e,
-    0x04, 0x16, 0x04, 0x14, 0x55, 0xdc, 0x0d, 0xb0, 0x00, 0xa6, 0x36, 0x92, 0xa0, 0x9c, 0x93, 0xb5,
-    0x8f, 0xd8, 0x68, 0x17, 0x44, 0x71, 0x1b, 0x16, 0x30, 0x0c, 0x06, 0x03, 0x55, 0x1d, 0x13, 0x01,
-    0x01, 0xff, 0x04, 0x02, 0x30, 0x00, 0x30, 0x1f, 0x06, 0x03, 0x55, 0x1d, 0x23, 0x04, 0x18, 0x30,
-    0x16, 0x80, 0x14, 0xe3, 0x2c, 0xcb, 0xff, 0x76, 0x87, 0x3b, 0x12, 0xfb, 0x43, 0x22, 0x3f, 0x3f,
-    0xfb, 0x02, 0x06, 0x81, 0xdf, 0x27, 0xa7, 0x30, 0x82, 0x01, 0x36, 0x06, 0x0c, 0x2b, 0x06, 0x01,
-    0x04, 0x01, 0x8f, 0x5b, 0x02, 0x82, 0x78, 0x01, 0x03, 0x04, 0x82, 0x01, 0x24, 0x30, 0x82, 0x01,
-    0x20, 0x02, 0x01, 0x00, 0x30, 0x81, 0xcf, 0x02, 0x01, 0x02, 0x06, 0x0d, 0x2b, 0x06, 0x01, 0x04,
-    0x01, 0x8f, 0x5b, 0x02, 0x82, 0x78, 0x02, 0x01, 0x03, 0x30, 0x81, 0xba, 0x06, 0x0e, 0x2b, 0x06,
-    0x01, 0x04, 0x01, 0x8f, 0x5b, 0x02, 0x82, 0x78, 0x02, 0x01, 0x03, 0x01, 0x04, 0x81, 0xa7, 0x7b,
-    0x22, 0x61, 0x70, 0x70, 0x49, 0x64, 0x22, 0x3a, 0x22, 0x63, 0x6f, 0x6d, 0x2e, 0x65, 0x78, 0x61,
-    0x6d, 0x70, 0x6c, 0x65, 0x2e, 0x6d, 0x79, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69,
-    0x6f, 0x6e, 0x5f, 0x42, 0x4e, 0x73, 0x72, 0x6a, 0x4d, 0x73, 0x67, 0x4a, 0x54, 0x30, 0x4f, 0x61,
-    0x59, 0x50, 0x49, 0x36, 0x70, 0x75, 0x57, 0x70, 0x7a, 0x74, 0x2b, 0x67, 0x43, 0x36, 0x71, 0x44,
-    0x55, 0x73, 0x51, 0x78, 0x33, 0x78, 0x77, 0x49, 0x51, 0x67, 0x68, 0x4a, 0x4a, 0x6a, 0x7a, 0x6d,
-    0x66, 0x4d, 0x49, 0x58, 0x59, 0x38, 0x6f, 0x32, 0x2b, 0x49, 0x57, 0x56, 0x79, 0x48, 0x37, 0x43,
-    0x2f, 0x61, 0x63, 0x53, 0x2f, 0x44, 0x4a, 0x6f, 0x43, 0x57, 0x78, 0x41, 0x74, 0x44, 0x51, 0x4c,
-    0x2b, 0x51, 0x35, 0x78, 0x36, 0x2b, 0x34, 0x78, 0x2f, 0x41, 0x3d, 0x22, 0x2c, 0x22, 0x62, 0x75,
-    0x6e, 0x64, 0x6c, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x22, 0x3a, 0x22, 0x63, 0x6f, 0x6d, 0x2e, 0x65,
-    0x78, 0x61, 0x6d, 0x70, 0x6c, 0x65, 0x2e, 0x6d, 0x79, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61,
-    0x74, 0x69, 0x6f, 0x6e, 0x22, 0x7d, 0x30, 0x22, 0x02, 0x01, 0x00, 0x06, 0x0d, 0x2b, 0x06, 0x01,
-    0x04, 0x01, 0x8f, 0x5b, 0x02, 0x82, 0x78, 0x02, 0x01, 0x04, 0x04, 0x0e, 0x63, 0x68, 0x61, 0x6c,
-    0x6c, 0x65, 0x6e, 0x67, 0x65, 0x5f, 0x64, 0x61, 0x74, 0x61, 0x30, 0x25, 0x02, 0x01, 0x03, 0x06,
-    0x0e, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x8f, 0x5b, 0x02, 0x82, 0x78, 0x02, 0x02, 0x02, 0x06, 0x04,
-    0x10, 0x28, 0xc4, 0xfb, 0x49, 0x44, 0xaf, 0xec, 0x11, 0xb9, 0x09, 0x02, 0x42, 0xac, 0x12, 0x00,
-    0x02, 0x30, 0x0a, 0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x04, 0x03, 0x02, 0x03, 0x48, 0x00,
-    0x30, 0x45, 0x02, 0x21, 0x00, 0x92, 0x41, 0xa8, 0xf7, 0xb9, 0x57, 0x79, 0x78, 0x0d, 0xd8, 0xf1,
-    0x76, 0xaf, 0x10, 0x4e, 0xef, 0xce, 0xc5, 0xff, 0xbe, 0x8b, 0x04, 0x86, 0xb4, 0xd4, 0xa5, 0x11,
-    0x13, 0x16, 0xc5, 0xf8, 0xa1, 0x02, 0x20, 0x3b, 0xb2, 0x22, 0x50, 0xf5, 0x10, 0x76, 0x05, 0x98,
-    0xf7, 0x5a, 0xeb, 0xe3, 0x92, 0xfe, 0x29, 0x31, 0x0f, 0xc8, 0x3a, 0x04, 0xf1, 0x97, 0xbf, 0x39,
-    0x3a, 0x5d, 0xf5, 0xe3, 0xb7, 0x35, 0xa1
-};
-static void HksClientIpcSerializationTest007()
-{
-    HKS_LOG_I("enter HksClientIpcSerializationTest007");
-
-    uint32_t inBlobSize = sizeof(inBlobData) / sizeof(inBlobData[0]);
-    struct HksBlob inBlob = { .size = inBlobSize, .data = inBlobData };
-    uint32_t outBlobSize = 4096;
-    uint8_t outBlobData[outBlobSize];
-    for (uint32_t i = 0; i < inBlobSize; ++i) {
-    outBlobData[i] = inBlobData[i];
+    uint32_t destSize = fdp.ConsumeIntegralInRange<uint32_t>(sizeof(uint32_t), MAX_IPC_BUF_SIZE);
+    auto destData = fdp.ConsumeBytes<uint8_t>(destSize);
+    if (destData.empty()) {
+        return HKS_ERROR_INSUFFICIENT_DATA;
     }
-    struct HksBlob outBlob = { .size = outBlobSize, .data = outBlobData };
-
-    EncodeCertChain(&inBlob, &outBlob);
+    struct HksBlob destBlob = { static_cast<uint32_t>(destData.size()), destData.data() };
+    uint32_t value = fdp.ConsumeIntegral<uint32_t>();
+    uint32_t index = fdp.ConsumeIntegralInRange<uint32_t>(0, destBlob.size);
+    return CopyUint32ToBuffer(value, &destBlob, &index);
 }
 
-/**
- * @tc.name: HksClientIpcSerializationTest.HksClientIpcSerializationTest008
- * @tc.desc: tdd HksCertificateChainUnpackFromService
- * @tc.type: FUNC
- */
-static void HksClientIpcSerializationTest008()
+// Fuzz HksOnceParamPack: fuzz controls destData size, key blob, paramSet, and index offset
+static int32_t FuzzHksOnceParamPack(FuzzedDataProvider &fdp)
 {
-    HKS_LOG_I("enter HksClientIpcSerializationTest008");
+    uint32_t destSize = fdp.ConsumeIntegralInRange<uint32_t>(sizeof(uint32_t), MAX_IPC_BUF_SIZE);
+    auto destData = fdp.ConsumeBytes<uint8_t>(destSize);
+    if (destData.empty()) {
+        return HKS_ERROR_INSUFFICIENT_DATA;
+    }
+    struct HksBlob destBlob = { static_cast<uint32_t>(destData.size()), destData.data() };
 
-    const uint32_t srcBlobSize1 = 2;
-    uint8_t srcBlobData1[srcBlobSize1] = { 5 };
-    struct HksBlob srcBlob = { .size = srcBlobSize1, .data = srcBlobData1 };
-    struct HksCertChain certChain = { .certsCount = 4 };
+    // HksOnceParamPack calls CopyBlobToBuffer(key) — key must be valid
+    uint32_t keySize = fdp.ConsumeIntegralInRange<uint32_t>(1, 256);
+    auto keyData = fdp.ConsumeBytes<uint8_t>(keySize);
+    if (keyData.empty()) {
+        return HKS_ERROR_INSUFFICIENT_DATA;
+    }
+    struct HksBlob keyBlob = { static_cast<uint32_t>(keyData.size()), keyData.data() };
 
-    int32_t ret = HksCertificateChainUnpackFromService(&srcBlob, true, &certChain);
-
-    const uint32_t srcBlobSize2 = 4;
-    uint8_t srcBlobData2[srcBlobSize2] = { 5 };
-    srcBlob.size = srcBlobSize2;
-    srcBlob.data = srcBlobData2;
-    ret = HksCertificateChainUnpackFromService(&srcBlob, true, &certChain);
+    WrapParamSet ps = ConstructParamSetFromFdp(fdp);
+    if (ps.s == nullptr) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    uint32_t index = fdp.ConsumeIntegralInRange<uint32_t>(0, destBlob.size);
+    return HksOnceParamPack(&destBlob, &keyBlob, ps.s, &index);
 }
 
-/**
- * @tc.name: HksClientIpcSerializationTest.HksClientIpcSerializationTest009
- * @tc.desc: tdd HksListAliasesUnpackFromService
- * @tc.type: FUNC
- */
-static void HksClientIpcSerializationTest009()
+// Fuzz HksAgreeKeyPack: fuzz controls destData, paramSet, and key blobs
+static int32_t FuzzHksAgreeKeyPack(FuzzedDataProvider &fdp)
 {
-    HKS_LOG_I("enter HksClientIpcSerializationTest009");
+    uint32_t destSize = fdp.ConsumeIntegralInRange<uint32_t>(sizeof(uint32_t), MAX_IPC_BUF_SIZE);
+    auto destData = fdp.ConsumeBytes<uint8_t>(destSize);
+    if (destData.empty()) {
+        return HKS_ERROR_INSUFFICIENT_DATA;
+    }
+    struct HksBlob destBlob = { static_cast<uint32_t>(destData.size()), destData.data() };
 
-    struct HksBlob srcBlob = { .size = 0, .data = nullptr };
-    HksListAliasesUnpackFromService(&srcBlob, nullptr);
+    WrapParamSet ps = ConstructParamSetFromFdp(fdp);
+    if (ps.s == nullptr) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    // HksAgreeKeyPack calls CopyBlobToBuffer(privateKey/peerPublicKey) and agreedKey->size
+    uint32_t privKeySize = fdp.ConsumeIntegralInRange<uint32_t>(1, 256);
+    auto privKeyData = fdp.ConsumeBytes<uint8_t>(privKeySize);
+    if (privKeyData.empty()) {
+        return HKS_ERROR_INSUFFICIENT_DATA;
+    }
+    struct HksBlob privateKey = { static_cast<uint32_t>(privKeyData.size()), privKeyData.data() };
+
+    uint32_t peerPubKeySize = fdp.ConsumeIntegralInRange<uint32_t>(1, 256);
+    auto peerPubKeyData = fdp.ConsumeBytes<uint8_t>(peerPubKeySize);
+    if (peerPubKeyData.empty()) {
+        return HKS_ERROR_INSUFFICIENT_DATA;
+    }
+    struct HksBlob peerPublicKey = { static_cast<uint32_t>(peerPubKeyData.size()), peerPubKeyData.data() };
+
+    uint32_t agreedKeySize = fdp.ConsumeIntegralInRange<uint32_t>(1, 256);
+    auto agreedKeyData = fdp.ConsumeBytes<uint8_t>(agreedKeySize);
+    if (agreedKeyData.empty()) {
+        return HKS_ERROR_INSUFFICIENT_DATA;
+    }
+    struct HksBlob agreedKey = { static_cast<uint32_t>(agreedKeyData.size()), agreedKeyData.data() };
+
+    return HksAgreeKeyPack(&destBlob, ps.s, &privateKey, &peerPublicKey, &agreedKey);
 }
+
+// Fuzz HksGetKeyInfoListUnpackFromService: fuzz controls srcData content
+static int32_t FuzzHksGetKeyInfoListUnpackFromService(FuzzedDataProvider &fdp)
+{
+    uint32_t srcSize = fdp.ConsumeIntegralInRange<uint32_t>(1, MAX_IPC_BUF_SIZE);
+    auto srcData = fdp.ConsumeBytes<uint8_t>(srcSize);
+    if (srcData.empty()) {
+        return HKS_ERROR_INSUFFICIENT_DATA;
+    }
+    struct HksBlob srcBlob = { static_cast<uint32_t>(srcData.size()), srcData.data() };
+    uint32_t n = 1;
+    struct HksKeyInfo *keyInfoList = (struct HksKeyInfo *)HksMalloc(n * sizeof(struct HksKeyInfo));
+    if (keyInfoList == nullptr) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    (void)memset_s(keyInfoList, n * sizeof(struct HksKeyInfo), 0, n * sizeof(struct HksKeyInfo));
+    uint8_t *aliasBuf = (uint8_t *)HksMalloc(MAX_IPC_BUF_SIZE);
+    struct HksParamSet *ps = (struct HksParamSet *)HksMalloc(HKS_DEFAULT_PARAM_SET_SIZE);
+    if (aliasBuf == nullptr || ps == nullptr) {
+        HKS_FREE(aliasBuf);
+        HKS_FREE(ps);
+        HKS_FREE(keyInfoList);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    ps->paramSetSize = HKS_DEFAULT_PARAM_SET_SIZE;
+    ps->paramsCnt = 0;
+    keyInfoList[0].alias = { MAX_IPC_BUF_SIZE, aliasBuf };
+    keyInfoList[0].paramSet = ps;
+    int32_t ret = HksGetKeyInfoListUnpackFromService(&srcBlob, &n, keyInfoList);
+    HKS_FREE(aliasBuf);
+    HKS_FREE(ps);
+    HKS_FREE(keyInfoList);
+    return ret;
 }
+
+// Fuzz HksCertificateChainUnpackFromService: fuzz controls srcData, needEncode, certsCount
+static int32_t FuzzHksCertificateChainUnpackFromService(FuzzedDataProvider &fdp)
+{
+    uint32_t srcSize = fdp.ConsumeIntegralInRange<uint32_t>(1, MAX_IPC_BUF_SIZE);
+    auto srcData = fdp.ConsumeBytes<uint8_t>(srcSize);
+    if (srcData.empty()) {
+        return HKS_ERROR_INSUFFICIENT_DATA;
+    }
+    struct HksBlob srcBlob = { static_cast<uint32_t>(srcData.size()), srcData.data() };
+    bool isDeviceCert = fdp.ConsumeBool();
+    // HksCertificateChainUnpackFromService dereferences certChain->certs[i].data
+    // when certsCount from buffer > 0 — must provide valid certs array
+    uint32_t certsCount = fdp.ConsumeIntegralInRange<uint32_t>(1, 4);
+    std::vector<std::vector<uint8_t>> certBuffers(certsCount, std::vector<uint8_t>(4096, 0));
+    std::vector<struct HksBlob> certs(certsCount);
+    for (uint32_t i = 0; i < certsCount; i++) {
+        certs[i] = { 4096, certBuffers[i].data() };
+    }
+    struct HksCertChain certChain = { certs.data(), certsCount };
+    return HksCertificateChainUnpackFromService(&srcBlob, isDeviceCert, &certChain);
 }
+
+// Fuzz EncodeCertChain: fuzz controls inBlob size/content and outBlob size
+static int32_t FuzzEncodeCertChain(FuzzedDataProvider &fdp)
+{
+    uint32_t inSize = fdp.ConsumeIntegralInRange<uint32_t>(1, 4096);
+    auto inData = fdp.ConsumeBytes<uint8_t>(inSize);
+    if (inData.empty()) {
+        return HKS_ERROR_INSUFFICIENT_DATA;
+    }
+    struct HksBlob inBlob = { static_cast<uint32_t>(inData.size()), inData.data() };
+
+    // Normal path: valid outBlob
+    uint32_t outSize = 4096;
+    std::vector<uint8_t> outData(outSize, 0);
+    struct HksBlob outBlob = { outSize, outData.data() };
+    int32_t ret = EncodeCertChain(&inBlob, &outBlob);
+
+    // Edge case: oversized inBlob.size triggers CheckAndCalculateSize early return
+    // Only test the size validation path — data pointer is null since it won't be accessed
+    struct HksBlob edgeBlob = { .size = fdp.ConsumeIntegralInRange<uint32_t>(UINT32_MAX - 2, UINT32_MAX),
+                                .data = nullptr };
+    (void)EncodeCertChain(&edgeBlob, nullptr);
+
+    return ret;
+}
+
+// Fuzz HksListAliasesUnpackFromService: fuzz controls srcData (including nullptr/empty path)
+static int32_t FuzzHksListAliasesUnpackFromService(FuzzedDataProvider &fdp)
+{
+    bool useEmpty = fdp.ConsumeBool();
+    struct HksKeyAliasSet *destData = nullptr;
+    int32_t ret;
+    if (useEmpty) {
+        struct HksBlob srcBlob = { 0, nullptr };
+        ret = HksListAliasesUnpackFromService(&srcBlob, &destData);
+    } else {
+        uint32_t srcSize = fdp.ConsumeIntegralInRange<uint32_t>(1, MAX_IPC_BUF_SIZE);
+        auto srcData = fdp.ConsumeBytes<uint8_t>(srcSize);
+        if (srcData.empty()) {
+            struct HksBlob srcBlob = { 0, nullptr };
+            ret = HksListAliasesUnpackFromService(&srcBlob, &destData);
+        } else {
+            struct HksBlob srcBlob = { static_cast<uint32_t>(srcData.size()), srcData.data() };
+            ret = HksListAliasesUnpackFromService(&srcBlob, &destData);
+        }
+    }
+    HksFreeKeyAliasSet(destData);
+    return ret;
+}
+
+using FuzzFunc = int32_t (*)(FuzzedDataProvider &);
+
+static const FuzzFunc fuzzFuncs[] = {
+    FuzzCopyUint32ToBuffer,
+    FuzzHksOnceParamPack,
+    FuzzHksAgreeKeyPack,
+    FuzzHksGetKeyInfoListUnpackFromService,
+    FuzzHksCertificateChainUnpackFromService,
+    FuzzEncodeCertChain,
+    FuzzHksListAliasesUnpackFromService,
+};
+
+int32_t DoSomethingInterestingWithMyAPI(FuzzedDataProvider &fdp)
+{
+    auto func = fdp.PickValueInArray(fuzzFuncs);
+    return func(fdp);
+}
+
+}}}
+
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
+    return 0;
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    (void)data;
-    (void)size;
-    OHOS::Security::Hks::HksClientIpcSerializationTest001();
-    OHOS::Security::Hks::HksClientIpcSerializationTest002();
-    OHOS::Security::Hks::HksClientIpcSerializationTest003();
-    OHOS::Security::Hks::HksClientIpcSerializationTest004();
-    OHOS::Security::Hks::HksClientIpcSerializationTest005();
-    OHOS::Security::Hks::HksClientIpcSerializationTest006();
-    OHOS::Security::Hks::HksClientIpcSerializationTest007();
-    OHOS::Security::Hks::HksClientIpcSerializationTest008();
-    OHOS::Security::Hks::HksClientIpcSerializationTest009();
+    FuzzedDataProvider fdp(data, size);
+    int32_t ret = OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(fdp);
+
+    OHOS::Security::Hks::FuzzStatsRecord(ret);
     return 0;
 }

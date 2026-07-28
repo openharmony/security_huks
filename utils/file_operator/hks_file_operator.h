@@ -39,6 +39,7 @@
     #ifdef HKS_USE_RKC_IN_STANDARD
         #define HKS_KEY_RKC_PATH HKS_CONFIG_RKC_STORE_PATH "/maindata"
     #endif
+    #define HKS_ANCO_PATH                 "anco"
 #else
     #ifdef HKS_L1_SMALL
         #define HKS_KEY_STORE_PATH            "/storage/data/service/el1/public/huks_service/maindata"
@@ -64,7 +65,7 @@
 #define HKS_KEY_STORE_ROOT_KEY_PATH   "info"
 
 #define HKS_PROCESS_INFO_LEN    128
-#define HKS_MAX_DIRENT_FILE_LEN 128
+#define HKS_MAX_DIRENT_FILE_LEN 256
 struct HksFileDirentInfo {
     char fileName[HKS_MAX_DIRENT_FILE_LEN + 1]; /* point to dirent->d_name */
 };

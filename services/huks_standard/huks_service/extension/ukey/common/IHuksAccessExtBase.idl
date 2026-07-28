@@ -1,0 +1,37 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+sequenceable HksCppParamset..CppParamSet;
+import HksExtCertInfo;
+import HksExtErrorInfo;
+
+interface OHOS.Security.Huks.IHuksAccessExtBase {
+
+    [ipccode 1] void OpenRemoteHandle([in] String index, [in] CppParamSet params, [out] String handle, [out] HksExternalErrorInfoIdl errorInfo);
+    [ipccode 2] void CloseRemoteHandle([in] String handle, [in] CppParamSet params, [out] HksExternalErrorInfoIdl errorInfo);
+    [ipccode 3] void AuthUkeyPin([in] String handle, [in] CppParamSet params, [out] HksExternalErrorInfoIdl errorInfo, [out] int authState, [out] unsigned int retryCnt);
+    [ipccode 4] void GetUkeyPinAuthState([in] String handle, [in] CppParamSet params, [out] int state, [out] HksExternalErrorInfoIdl errorInfo);
+    [ipccode 5] void ExportCertificate([in] String index, [in] CppParamSet params, [out] String certJsonArr, [out] HksExternalErrorInfoIdl errorInfo);
+    [ipccode 6] void ExportProviderCertificates([in] CppParamSet params, [out] String certJsonArr, [out] HksExternalErrorInfoIdl errorInfo);
+    [ipccode 7] void InitSession([in] String index, [in] CppParamSet params, [out] String handle, [out] HksExternalErrorInfoIdl errorInfo);
+    [ipccode 8] void UpdateSession([in] String handle, [in] CppParamSet params, [in] unsigned char[] inData, [out] unsigned char[] outData, [out] HksExternalErrorInfoIdl errorInfo);
+    [ipccode 9] void FinishSession([in] String handle, [in] CppParamSet params, [in] unsigned char[] inData, [out] unsigned char[] outData, [out] HksExternalErrorInfoIdl errorInfo);
+    [ipccode 10] void SetOrGetProperty([in] unsigned int operation, [in] String handle, [in] String propertyId, [inout] CppParamSet params, [out] HksExternalErrorInfoIdl errorInfo);
+    [ipccode 11] void ClearUkeyPinAuthState([in] String handle, [in] CppParamSet params, [out] HksExternalErrorInfoIdl errorInfo);
+    [ipccode 12] void ImportWrappedKey([in] String newIndex, [in] String newWrappingKeyIndex, [in] CppParamSet params, [in] unsigned char[]wrappedData, [out] HksExternalErrorInfoIdl errorInfo);
+    [ipccode 13] void ExportPublicKey([in] String newIndex, [in] CppParamSet params, [out] unsigned char[] wrappedData, [out] HksExternalErrorInfoIdl errorInfo);
+    [ipccode 14] void GenerateKey([in] String handle, [in] CppParamSet params, [out] HksExternalErrorInfoIdl errorInfo);
+    [ipccode 15] void ImportCertificate([in] String index, [in] HksExtCertInfoIdl certInfo, [in] CppParamSet params, [out] HksExternalErrorInfoIdl errorInfo);
+    [ipccode 16] void GetResourceId([in] CppParamSet params, [out] String resourceId, [out] HksExternalErrorInfoIdl errorInfo);
+}

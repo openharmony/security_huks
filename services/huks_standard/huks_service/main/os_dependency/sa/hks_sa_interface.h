@@ -21,6 +21,9 @@
 #include <iremote_stub.h>
 #include <memory>
 
+#include "huks_service_ipc_interface_code.h"
+#include "hks_type.h"
+
 namespace OHOS {
 namespace Security {
 namespace Hks {
@@ -55,6 +58,47 @@ public:
 private:
     static BrokerDelegator<HksProxy> delegator_;
 };
+
+class IHksExtService : public IRemoteBroker {
+public:
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.security.hksext.service");
+    virtual void SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &sendData,
+        uint32_t sendSize, uint32_t msgCode, const struct HksExternalErrorInfo *errInfo) = 0;
+};
+
+class HksExtStub : public IRemoteStub<IHksExtService> {
+public:
+    HksExtStub() = default;
+    ~HksExtStub();
+    void SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &sendData, uint32_t sendSize,
+        uint32_t msgCode, const struct HksExternalErrorInfo *errInfo) override;
+    auto WaitForAsyncReply(int timeout)
+        -> std::tuple<uint32_t, std::unique_ptr<uint8_t[]>, uint32_t, uint32_t, HksExternalErrorInfo*>;
+
+    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+private:
+    int ProcessExtGetRemotePropertyReply(MessageParcel& data);
+    uint32_t mErrCode = 0;
+    uint32_t mSize = 0;
+    uint32_t mMsgCode = 0;
+    struct HksExternalErrorInfo *mErrInfo = nullptr;
+    std::unique_ptr<uint8_t[]> mAsyncReply {};
+    std::atomic_bool received = false;
+    std::mutex mMutex;
+    std::condition_variable mCv;
+};
+
+class HksExtProxy : public IRemoteProxy<IHksExtService> {
+public:
+    explicit HksExtProxy(const sptr<IRemoteObject> &impl);
+    ~HksExtProxy() = default;
+    void SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &sendData, uint32_t sendSize,
+        uint32_t msgCode, const struct HksExternalErrorInfo *errInfo) override;
+    void WriteErrorInfoToParcel(MessageParcel &data, const struct HksExternalErrorInfo *errInfo);
+private:
+    static BrokerDelegator<HksExtProxy> delegator_;
+};
+
 } // namespace Hks
 } // namespace Security
 } // namespace OHOS

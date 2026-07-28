@@ -129,6 +129,9 @@ extern "C" {
 int32_t CreateAttestCertChain(bool isAnonAttest, const struct HksParamSet *keyNodeParamSet,
     const struct HksParamSet *paramSet, struct HksBlob *certChain, struct HksBlob *rawKey);
 
+int32_t CreateOfflineAttestCertChain(const struct HksParamSet *keyNodeParamSet,
+    const struct HksParamSet *paramSet, struct HksBlob *certChain, struct HksBlob *rawKey);
+
 #ifdef __cplusplus
 }
 #endif

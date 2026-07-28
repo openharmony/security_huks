@@ -20,7 +20,7 @@
  * @brief Defines the macros, enumerated values, data structures,
  *    and error codes used by OpenHarmony Universal KeyStore (HUKS) APIs.
  *
- * @syscap SystemCapability.Security.Huks
+ * @syscap SystemCapability.Security.Huks.Core
  * @since 9
  * @version 1.0
  */
@@ -212,6 +212,19 @@ enum OH_Huks_KeySize {
 };
 
 /**
+ * @brief Enumerates the key classes.
+ *
+ * @since 22
+ * @version 1.0
+ */
+enum OH_Huks_KeyClassType {
+    /** Default key class. */
+    OH_HUKS_KEY_CLASS_DEFAULT = 0,
+    /** Extension key class. */
+    OH_HUKS_KEY_CLASS_EXTENSION = 1,
+};
+
+/**
  * @brief Enumerates the key algorithms.
  *
  * @since 9
@@ -277,6 +290,8 @@ enum OH_Huks_AlgSuite {
      *  |   key_material_size_len     (4 Byte) |  key_material_size  |   key_mat_enc_length (4 Byte) | key_mat_enc_data
      */
     OH_HUKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING = 2,
+
+    OH_HUKS_UNWRAP_SUITE_SM2_SM4_ECB_NOPADDING = 5,
 };
 
 /**
@@ -700,7 +715,16 @@ enum OH_Huks_Tag {
     OH_HUKS_TAG_ATTESTATION_ID_VERSION_INFO = OH_HUKS_TAG_TYPE_BYTES | 515,
     /** The tag indicates wheather to overwrite the kay with same alias. */
     OH_HUKS_TAG_KEY_OVERRIDE = OH_HUKS_TAG_TYPE_BOOL | 520,
+    /**
+     * @brief The tag indicates the length of AEAD for CCM mode.
+     *
+     * @since 22
+     */
+    OH_HUKS_TAG_AE_TAG_LEN = OH_HUKS_TAG_TYPE_UINT | 521,
 
+    /** The tag indicates the key class. */
+    OH_HUKS_TAG_KEY_CLASS = OH_HUKS_TAG_TYPE_UINT | 522,
+    OH_HUKS_TAG_KEY_ACCESS_GROUP = OH_HUKS_TAG_TYPE_BYTES | 523,
     /**
      * 601 to 1000 are reserved for other tags.
      *
@@ -813,6 +837,17 @@ struct OH_Huks_ParamSet {
     uint32_t paramsCnt;
     /** Parameter array. */
     struct OH_Huks_Param params[];
+};
+
+struct OH_Huks_ExtCertInfo {
+    int32_t purpose;
+    struct OH_Huks_Blob index;
+    struct OH_Huks_Blob cert;
+};
+
+struct OH_Huks_ExtCertInfoSet {
+    uint32_t count;
+    struct OH_Huks_ExtCertInfo *certs;
 };
 
 /**

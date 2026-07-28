@@ -54,6 +54,7 @@ ohos_static_library("huks_modify_old_version_key_util") {
     "../../../services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c",
     "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_key_attest.c",
     "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_key_generate.c",
+    "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_key_extension.c",
     "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_key_operate_one_stage.c",
     "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_key_operate_three_stage.c",
     "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_key_other.c",

@@ -47,10 +47,13 @@ if (os_level == "standard") {
       "src/hks_openssl_hash.c",
       "src/hks_openssl_hmac.c",
       "src/hks_openssl_kdf.c",
+      "src/hks_openssl_ml_dsa.c",
+      "src/hks_openssl_ml_kem.c",
       "src/hks_openssl_rsa.c",
       "src/hks_openssl_sm2.c",
       "src/hks_openssl_sm3.c",
       "src/hks_openssl_sm4.c",
+      "src/hks_openssl_mlkem.c",
     ]
     deps = []
     defines = []
@@ -78,7 +81,7 @@ if (os_level == "standard") {
       # when uks_use_rkc_in_standard and HKS_ENABLE_CLEAN_FILE are enabled at the same time, add the dependency of HDI to the engine
       if (huks_enable_hdi_in_standard) {
         sources += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_hdi_access.c" ]
-        external_deps += [ "drivers_interface_huks:libhuks_proxy_1.1" ]
+        external_deps += [ "drivers_interface_huks:libhuks_proxy_1.2" ]
       } else {
         sources += [
           "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_access.c",
@@ -95,6 +98,11 @@ if (os_level == "standard") {
       if (huks_enable_upgrade_rkc_v1tov2) {
         defines += [ "HKS_ENABLE_UPGRADE_RKC_DERIVE_ALG" ]
         sources += [ "../rkc/src/hks_rkc_v1.c" ]
+      }
+
+      if (enable_bundle_framework) {
+        deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms:libhuks_bms_systemapi_wrap_static" ]
+        include_dirs += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms/include" ]
       }
     }
 
@@ -113,6 +121,7 @@ if (os_level == "standard") {
       ubsan = true
     }
     external_deps += [
+      "bounds_checking_function:libsec_shared",
       "c_utils:utils",
       "hilog:libhilog",
     ]
@@ -142,6 +151,7 @@ if (os_level == "standard") {
       "src/hks_openssl_hash.c",
       "src/hks_openssl_hmac.c",
       "src/hks_openssl_kdf.c",
+      "src/hks_openssl_ml_kem.c",
       "src/hks_openssl_rsa.c",
       "src/hks_openssl_sm2.c",
       "src/hks_openssl_sm3.c",

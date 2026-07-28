@@ -30,6 +30,8 @@
 extern "C" {
 #endif
 
+void IfNotSuccAppendHdiErrorInfo(int32_t hdiRet);
+
 int32_t GetKeyParamSet(const struct HksBlob *key, struct HksParamSet *paramSet);
 
 #ifndef _STORAGE_LITE_
@@ -48,8 +50,8 @@ int32_t AppendStorageLevelIfNotExistInner(const struct HksProcessInfo *processIn
 
 bool CheckProcessNameTagExist(const struct HksParamSet *paramSet);
 
-int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *paramSet,
-    const struct HksProcessInfo *processInfo, const struct HksOperation *operation, struct HksParamSet **outParamSet);
+int32_t AppendProcessInfoAndDefault(const struct HksParamSet *paramSet, const struct HksProcessInfo *processInfo,
+    const struct HksOperation *operation, struct HksParamSet **outParamSet, bool checkGroup);
 
 // callback
 int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo,
@@ -60,6 +62,14 @@ int32_t AppendNewInfoForUseKeyInService(const struct HksParamSet *paramSet,
 
 int32_t AppendStorageLevelIfNotExist(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
 
+int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *key, enum HksStorageType mode);
+
+int32_t CheckKeyCondition(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet);
+
+int32_t AppendKeyBlobToParamSet(const struct HksParamSet *paramSet, const struct HksBlob *keyBlob,
+    struct HksParamSet **outParamSet);
 #ifdef __cplusplus
 }
 #endif

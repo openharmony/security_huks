@@ -17,10 +17,40 @@
 #define HKS_IPC_SERVICE_H
 
 #include "hks_type_inner.h"
+#ifdef L2_STANDARD
+#include "hks_ukey_service_provider_adapter.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+void HksIpcServiceRegisterProvider(const struct HksBlob *srcData, const uint8_t *context);
+
+void HksIpcServiceUnregisterProvider(const struct HksBlob *srcData, const uint8_t *context);
+
+void HksIpcServiceQueryAbilityInfo(const struct HksBlob *srcData, const uint8_t *context);
+
+void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *context);
+
+void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8_t *context);
+
+void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t *context);
+
+void HksIpcServiceOpenRemoteHandle(const struct HksBlob *srcData, const uint8_t *context);
+
+void HksIpcServiceCloseRemoteHandle(const struct HksBlob *srcData, const uint8_t *context);
+
+void HksIpcServiceExportProviderCertificates(const struct HksBlob *srcData, const uint8_t *context);
+
+void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t *context);
+
+void HksIpcServiceImportCertificate(const struct HksBlob *srcData, const uint8_t *context);
+
+void HksIpcServiceSetOrGetRemoteProperty(const struct HksBlob *srcData,
+    const uint8_t *context, const uint8_t *remoteObject);
+
+void HksIpcServiceGetResourceId(const struct HksBlob *srcData, const uint8_t *context);
 
 void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *context);
 
@@ -73,6 +103,10 @@ void HksIpcChangeStorageLevel(const struct HksBlob *srcData, const uint8_t *cont
 void HksIpcWrapKey(const struct HksBlob *srcData, const uint8_t *context);
 
 void HksIpcUnwrapKey(const struct HksBlob *srcData, const uint8_t *context);
+
+void HksIpcServiceEncapsulate(const struct HksBlob *srcData, const uint8_t *context);
+
+void HksIpcServiceDecapsulate(const struct HksBlob *srcData, const uint8_t *context);
 
 #ifdef __cplusplus
 }

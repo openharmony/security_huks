@@ -46,17 +46,67 @@ if (os_level == "standard") {
     include_dirs = [
       "//base/security/huks/utils/crypto_adapter",
       "../source",
+      "//base/security/huks/utils/mutex",
     ]
     sources = [
       "../source/hks_api.c",
       "../source/hks_api_adapter.c",
+      "//base/security/huks/frameworks/huks_standard/main/common/src/hks_ukey_global_errInfo.c",
     ]
 
     deps = [
       "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
       "//base/security/huks/utils/crypto_adapter:libhuks_utils_client_service_adapter_static",
+      "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
     ]
     external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+    install_images = [
+      system_base_dir,
+      updater_base_dir,
+    ]
+  }
+
+  ohos_shared_library("libhukschipsetsdk") {
+    branch_protector_ret = "pac_ret"
+
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+      cfi_cross_dso = true
+      boundary_sanitize = true
+      ubsan = true
+    }
+    subsystem_name = "security"
+    part_name = "huks"
+    innerapi_tags = [ "chipsetsdk" ]
+    version_script = "libhukschipsetsdk.map"
+    public_configs = [ ":huks_config" ]
+    configs = [
+      "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+    ]
+
+    defines = [ "HKS_CHIPSET_API" ]
+
+    include_dirs = [
+      "../source",
+      "//base/security/huks/utils/mutex",
+    ]
+    sources = [
+      "../source/hks_api.c",
+      "//base/security/huks/frameworks/huks_standard/main/common/src/hks_ukey_global_errInfo.c",
+    ]
+
+    deps = [
+      "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
+      "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
+    ]
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
       "c_utils:utils",
       "hilog:libhilog",
     ]
@@ -69,5 +119,8 @@ if (os_level == "standard") {
 
 if (os_level == "small" || os_level == "mini") {
   group("libhukssdk") {
+  }
+
+  group("libhukschipsetsdk") {
   }
 }

@@ -1,0 +1,208 @@
+/*
+ * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "hks_function_types.h"
+#include "hks_plugin_lifecycle_manager.h"
+#include "hks_plugin_loader.h"
+#include <vector>
+
+namespace OHOS {
+namespace Security {
+namespace Huks {
+
+std::string pluginSo = "libhuks_external_crypto_ext_core.z.so";
+
+std::shared_ptr<HuksPluginLoader> HuksPluginLoader::GetInstanceWrapper()
+{
+    return HuksPluginLoader::GetInstance();
+}
+
+void HuksPluginLoader::ReleaseInstance()
+{
+    HuksPluginLoader::DestroyInstance();
+}
+
+int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const std::string &providerName,
+    const CppParamSet &paramSet, OHOS::SafeMap<PluginMethodEnum, void*> &pluginProviderMap)
+{
+    std::lock_guard<std::mutex> lock(libMutex);
+    HKS_IF_TRUE_RETURN(m_pluginHandle != nullptr, HKS_SUCCESS)
+
+    m_pluginHandle = dlopen(pluginSo.c_str(), RTLD_NOW);
+    HKS_IF_NULL_LOGE_RETURN(m_pluginHandle, HKS_ERROR_OPEN_LIB_FAIL,
+        "dlopen %" LOG_PUBLIC "s failed! %" LOG_PUBLIC "s", pluginSo.c_str(), dlerror())
+
+    for (auto i = 0; i < static_cast<int32_t>(PluginMethodEnum::COUNT); ++i) {
+        std::string methodString = GetMethodByEnum(static_cast<PluginMethodEnum>(i));
+        if (methodString.empty()) {
+            HKS_LOG_E("the entry %{public}s is not include", pluginSo.c_str());
+
+            int32_t ret = dlclose(m_pluginHandle);
+            HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_DLCLOSE_FAIL,
+                "dlclose fail, error: %{public}s", dlerror())
+            
+            m_pluginHandle = nullptr;
+            pluginProviderMap.Clear();
+            return HKS_ERROR_FIND_FUNC_MAP_FAIL;
+        }
+
+        dlerror();
+        void *func = dlsym(m_pluginHandle, methodString.c_str());
+        const char *dlsym_error = dlerror();
+        if (dlsym_error != nullptr) {
+            HKS_LOG_E("failed to Find entry %{public}s in dynamic link liberary, error: %{public}s",
+                methodString.c_str(), dlsym_error);
+
+            dlsym_error = dlerror();
+            int32_t ret = dlclose(m_pluginHandle);
+            HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_DLCLOSE_FAIL,
+                "dlclose fail, error: %{public}s", dlsym_error)
+
+            m_pluginHandle= nullptr;
+            pluginProviderMap.Clear();
+            return HKS_ERROR_GET_FUNC_POINTER_FAIL;
+        }
+        pluginProviderMap.Insert(static_cast<PluginMethodEnum>(i), func);
+    }
+
+    return HKS_SUCCESS;
+}
+
+int32_t HuksPluginLoader::UnLoadPlugins(const struct HksProcessInfo &info, const std::string &providerName,
+    const CppParamSet &paramSet, OHOS::SafeMap<PluginMethodEnum, void*> &pluginProviderMap)
+{
+    std::lock_guard<std::mutex> lock(libMutex);
+    HKS_IF_TRUE_RETURN(m_pluginHandle == nullptr, HKS_SUCCESS)
+
+    pluginProviderMap.Clear();
+
+    int32_t ret = dlclose(m_pluginHandle);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_DLCLOSE_FAIL, "dlclose fail, error: %{public}s", dlerror())
+
+    m_pluginHandle = nullptr;
+    HKS_LOG_I("lib close success!");
+    return HKS_SUCCESS;
+}
+
+std::string HuksPluginLoader::GetMethodByEnum(PluginMethodEnum methodEnum)
+{
+    std::string methodString = "";
+    bool isFind = m_pluginMethodNameMap.Find(methodEnum, methodString);
+    HKS_IF_TRUE_RETURN(isFind, methodString)
+    HKS_LOG_E("enum = %{public}d can not Find string", methodEnum);
+    return "";
+}
+
+static void RegisterAuthMethodMaps(OHOS::SafeMap<PluginMethodEnum, std::string> &map)
+{
+    map.Insert(PluginMethodEnum::FUNC_ON_AUTH_UKEY_PIN,
+        "_ZN4OHOS8Security4Huks25HksExtPluginOnAuthUkeyPinERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetR21HksExtAuthPinOutParamPP20HksExternalErrorInfo");
+    map.Insert(PluginMethodEnum::FUNC_ON_GET_VERIFY_PIN_STATUS,
+        "_ZN4OHOS8Security4Huks33HksExtPluginOnGetUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRiPP20HksExternalErrorInfo");
+    map.Insert(PluginMethodEnum::FUNC_ON_CLEAR_PIN_STATUS,
+        "_ZN4OHOS8Security4Huks35HksExtPluginOnClearUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEEPP20HksExternalErrorInfo");
+}
+
+static void RegisterCertificateMethodMaps(OHOS::SafeMap<PluginMethodEnum, std::string> &map)
+{
+    map.Insert(PluginMethodEnum::FUNC_ON_LIST_INDEX_CERTIFICATE,
+        "_ZN4OHOS8Security4Huks29HksExtPluginOnExportCerticateERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_PP20HksExternalErrorInfo");
+    map.Insert(PluginMethodEnum::FUNC_ON_LIST_PROVIDER_ALL_CERTIFICATE,
+        "_ZN4OHOS8Security4Huks38HksExtPluginOnExportProviderCerticatesERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_PP20HksExternalErrorInfo");
+    map.Insert(PluginMethodEnum::FUNC_ON_IMPORT_CERTIFICATE,
+        "_ZN4OHOS8Security4Huks31HksExtPluginOnImportCertificateERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK14HksExtCertInfoRK11CppParamSetPP20HksExternalErrorInfo");
+}
+
+static void RegisterRemoteHandleMethodMaps(OHOS::SafeMap<PluginMethodEnum, std::string> &map)
+{
+    map.Insert(PluginMethodEnum::FUNC_ON_CREATE_REMOTE_KEY_HANDLE,
+        "_ZN4OHOS8Security4Huks30HksExtPluginOnOpenRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetPP20HksExternalErrorInfo");
+    map.Insert(PluginMethodEnum::FUNC_ON_CLOSE_REMOTE_KEY_HANDLE,
+        "_ZN4OHOS8Security4Huks31HksExtPluginOnCloseRemoteHandleERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetPP20HksExternalErrorInfo");
+    map.Insert(PluginMethodEnum::FUNC_ON_SET_OR_GET_REMOTE_PROPERTY,
+        "_ZN4OHOS8Security4Huks36HksExtPluginOnSetOrGetRemoteProperty"
+        "ER23HksProcessWithErrorInfo23HksExtPropertyOperationRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEESD_R11CppParamSet");
+}
+
+static void RegisterSessionMethodMaps(OHOS::SafeMap<PluginMethodEnum, std::string> &map)
+{
+    map.Insert(PluginMethodEnum::FUNC_ON_INIT_SESSION,
+        "_ZN4OHOS8Security4Huks25HksExtPluginOnInitSessionER23HksProcessWithErrorInfoRKNSt3__h12basic_string"
+        "IcNS4_11char_traitsIcEENS4_9allocatorIcEEEERK11CppParamSetRj");
+    map.Insert(PluginMethodEnum::FUNC_ON_UPDATE_SESSION,
+        "_ZN4OHOS8Security4Huks27HksExtPluginOnUpdateSessionER23HksProcessWithErrorInfoRKjRK11CppParamSet"
+        "RKNSt3__h6vectorIhNS9_9allocatorIhEEEERSD_");
+    map.Insert(PluginMethodEnum::FUNC_ON_FINISH_SESSION,
+        "_ZN4OHOS8Security4Huks27HksExtPluginOnFinishSessionER23HksProcessWithErrorInfoRKjRK11CppParamSet"
+        "RKNSt3__h6vectorIhNS9_9allocatorIhEEEERSD_");
+    map.Insert(PluginMethodEnum::FUNC_ON_ABORT_SESSION,
+        "_ZN4OHOS8Security4Huks26HksExtPluginOnAbortSessionER23HksProcessWithErrorInfoRKjRK11CppParamSet");
+}
+
+static void RegisterOtherMethodMaps(OHOS::SafeMap<PluginMethodEnum, std::string> &map)
+{
+    map.Insert(PluginMethodEnum::FUNC_ON_REGISTER_PROVIDER,
+        "_ZN4OHOS8Security4Huks30HksExtPluginOnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetNS5_8functionIFvS2_EEE");
+    map.Insert(PluginMethodEnum::FUNC_ON_UN_REGISTER_PROVIDER,
+        "_ZN4OHOS8Security4Huks32HksExtPluginOnUnRegisterProviderERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetbRi");
+    map.Insert(PluginMethodEnum::FUNC_ON_GENERATE_KEY,
+        "_ZN4OHOS8Security4Huks25HksExtPluginOnGenerateKeyER23HksProcessWithErrorInfoRKNSt3__h12basic_string"
+        "IcNS4_11char_traitsIcEENS4_9allocatorIcEEEERK11CppParamSet");
+    map.Insert(PluginMethodEnum::FUNC_ON_UNREGISTER_ALL_OBSERVERS,
+        "_ZN4OHOS8Security4Huks36HksExtPluginOnUnregisterAllObserversEv");
+    map.Insert(PluginMethodEnum::FUNC_ON_EXPORT_PUBLIC_KEY,
+        "_ZN4OHOS8Security4Huks29HksExtPluginOnExportPublicKeyER23HksProcessWithErrorInfoRKNSt3__h12basic_string"
+        "IcNS4_11char_traitsIcEENS4_9allocatorIcEEEERK11CppParamSetRNS4_6vectorIhNS8_IhEEEE");
+    map.Insert(PluginMethodEnum::FUNC_ON_IMPORT_WRAPPED_KEY,
+        "_ZN4OHOS8Security4Huks30HksExtPluginOnImportWrappedKeyER23HksProcessWithErrorInfoRKNSt3__h12basic_string"
+        "IcNS4_11char_traitsIcEENS4_9allocatorIcEEEESC_RK11CppParamSetRKNS4_6vectorIhNS8_IhEEEE");
+    map.Insert(PluginMethodEnum::FUNC_ON_QUERY_ABILITY,
+        "_ZN4OHOS8Security4Huks30HksExtPluginOnQueryAbilityInfoERK14HksProcessInfoRNSt3__h12basic_stringIcNS5_11"
+        "char_traitsIcEENS5_9allocatorIcEEEER14CppAbilityInfo");
+    map.Insert(PluginMethodEnum::FUNC_ON_GET_RESOURCE_ID,
+        "_ZN4OHOS8Security4Huks27HksExtPluginOnGetResourceIdERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_PP20HksExternalErrorInfo");
+    map.Insert(PluginMethodEnum::FUNC_ON_SET_EXTENSION_PROXY,
+        "_ZN4OHOS8Security4Huks31HksExtPluginOnSetExtensionProxyERK14HksProcessInfoRKNSt3__h12basic_string"
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetPv");
+}
+
+HuksPluginLoader::HuksPluginLoader()
+{
+    RegisterOtherMethodMaps(m_pluginMethodNameMap);
+    RegisterAuthMethodMaps(m_pluginMethodNameMap);
+    RegisterCertificateMethodMaps(m_pluginMethodNameMap);
+    RegisterRemoteHandleMethodMaps(m_pluginMethodNameMap);
+    RegisterSessionMethodMaps(m_pluginMethodNameMap);
+}
+
+HuksPluginLoader::~HuksPluginLoader()
+{
+}
+
+}
+}
+}

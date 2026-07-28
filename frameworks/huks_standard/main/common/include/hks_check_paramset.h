@@ -59,6 +59,14 @@ int32_t HksCoreCheckAgreeDeriveFinishParams(const struct HksBlob *key, const str
 
 int32_t HksCheckOptionalParam(uint32_t tag, uint32_t alg, uint32_t purpose, bool isAbsent, struct HksParam *param);
 
+int32_t HksGetAeadTagLength(const struct HksParamSet *paramSet, const uint32_t mode, uint32_t *aeadTagLen);
+
+int32_t HksGetAeadTagLengthWithoutMode(const struct HksParamSet *paramSet, uint32_t *aeadTagLen);
+
+int32_t HksCheckBlobParamIsEqual(const struct HksParamSet *paramSet, const struct HksParamSet *keyBlobParamSet,
+    enum HksTag tag);
+
+int32_t HandleKeyClassTag(const struct HksParamSet *paramSetIn, struct HksParamSet **paramSetOut);
 #ifdef __cplusplus
 }
 #endif

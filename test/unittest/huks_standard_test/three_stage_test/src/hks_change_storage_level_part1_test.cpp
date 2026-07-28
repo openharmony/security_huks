@@ -14,12 +14,12 @@
  */
 
 #include "hks_api.h"
-#include "hks_apply_permission_test_common.h"
 #include "hks_change_storage_level_test_common.h"
 #include "hks_file_operator.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_three_stage_test_common.h"
+#include "hks_mock_common.h"
 
 #include <gtest/gtest.h>
 
@@ -35,13 +35,17 @@ public:
 
     void TearDown();
 };
-
+static uint64_t g_shellTokenId = 0;
 void HksChangeStorageLevelPart1Test::SetUpTestCase(void)
 {
+    g_shellTokenId = GetSelfTokenID();
+    HksMockCommon::SetTestEvironment(g_shellTokenId);
 }
 
 void HksChangeStorageLevelPart1Test::TearDownTestCase(void)
 {
+    SetSelfTokenID(g_shellTokenId);
+    HksMockCommon::ResetTestEvironment();
 }
 
 void HksChangeStorageLevelPart1Test::SetUp()
@@ -163,13 +167,12 @@ HWTEST_F(HksChangeStorageLevelPart1Test, HksChangeStorageLevelPart1Test001, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart1Test001");
 
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksChangeStorageLevelPart1Test001";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);
@@ -225,13 +228,12 @@ HWTEST_F(HksChangeStorageLevelPart1Test, HksChangeStorageLevelPart1Test002, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart1Test002");
 
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksChangeStorageLevelPart1Test002";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);
@@ -260,13 +262,12 @@ HWTEST_F(HksChangeStorageLevelPart1Test, HksChangeStorageLevelPart1Test003, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart1Test003");
 
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksChangeStorageLevelPart1Test003";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params002, sizeof(g_params002) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params002, sizeof(g_params002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);
@@ -295,13 +296,12 @@ HWTEST_F(HksChangeStorageLevelPart1Test, HksChangeStorageLevelPart1Test004, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart1Test004");
 
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksChangeStorageLevelPart1Test004";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params004, sizeof(g_params004) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params004, sizeof(g_params004) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);
@@ -330,13 +330,12 @@ HWTEST_F(HksChangeStorageLevelPart1Test, HksChangeStorageLevelPart1Test005, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart1Test005");
 
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksChangeStorageLevelPart1Test005";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params002, sizeof(g_params002) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params002, sizeof(g_params002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);
@@ -365,13 +364,12 @@ HWTEST_F(HksChangeStorageLevelPart1Test, HksChangeStorageLevelPart1Test006, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart1Test006");
 
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksChangeStorageLevelPart1Test006";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params003, sizeof(g_params003) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params003, sizeof(g_params003) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);
@@ -400,13 +398,12 @@ HWTEST_F(HksChangeStorageLevelPart1Test, HksChangeStorageLevelPart1Test007, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart1Test007");
 
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksChangeStorageLevelPart1Test007";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params003, sizeof(g_params003) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params003, sizeof(g_params003) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);
@@ -435,13 +432,12 @@ HWTEST_F(HksChangeStorageLevelPart1Test, HksChangeStorageLevelPart1Test008, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart1Test008");
 
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksChangeStorageLevelPart1Test008";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);
@@ -470,13 +466,12 @@ HWTEST_F(HksChangeStorageLevelPart1Test, HksChangeStorageLevelPart1Test009, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart1Test009");
 
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksChangeStorageLevelPart1Test009";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params002, sizeof(g_params002) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params002, sizeof(g_params002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);
@@ -505,13 +500,12 @@ HWTEST_F(HksChangeStorageLevelPart1Test, HksChangeStorageLevelPart1Test010, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart1Test010");
 
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksChangeStorageLevelPart1Test010";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params003, sizeof(g_params003) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params003, sizeof(g_params003) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);
@@ -540,13 +534,12 @@ HWTEST_F(HksChangeStorageLevelPart1Test, HksChangeStorageLevelPart1Test011, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart1Test011");
 
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksChangeStorageLevelPart1Test011";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);
@@ -575,13 +568,12 @@ HWTEST_F(HksChangeStorageLevelPart1Test, HksChangeStorageLevelPart1Test012, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart1Test012");
 
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksChangeStorageLevelPart1Test012";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);
@@ -610,13 +602,12 @@ HWTEST_F(HksChangeStorageLevelPart1Test, HksChangeStorageLevelPart1Test013, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart1Test013");
 
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksChangeStorageLevelPart1Test013";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);
@@ -645,13 +636,12 @@ HWTEST_F(HksChangeStorageLevelPart1Test, HksChangeStorageLevelPart1Test014, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart1Test014");
 
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksChangeStorageLevelPart1Test014";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);
@@ -682,13 +672,12 @@ HWTEST_F(HksChangeStorageLevelPart1Test, HksChangeStorageLevelPart1Test015, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart1Test015");
 
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksChangeStorageLevelPart1Test015";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);
@@ -718,13 +707,12 @@ HWTEST_F(HksChangeStorageLevelPart1Test, HksChangeStorageLevelPart1Test016, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart1Test016");
 
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksChangeStorageLevelPart1Test016";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);
@@ -753,13 +741,12 @@ HWTEST_F(HksChangeStorageLevelPart1Test, HksChangeStorageLevelPart1Test017, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart1Test017");
 
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksChangeStorageLevelPart1Test017";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     struct HksParamSet *desParamSet = nullptr;
@@ -782,11 +769,10 @@ HWTEST_F(HksChangeStorageLevelPart1Test, HksChangeStorageLevelPart1Test018, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart1Test018");
 
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     
     char tmpKeyAlias[] = "HksChangeStorageLevelPart1Test018";
@@ -820,13 +806,12 @@ HWTEST_F(HksChangeStorageLevelPart1Test, HksChangeStorageLevelPart1Test019, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart1Test019");
 
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksChangeStorageLevelPart1Test019";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);
@@ -863,14 +848,13 @@ HWTEST_F(HksChangeStorageLevelPart1Test, HksChangeStorageLevelPart1Test020, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart1Test020");
 
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksMockNativeToken mock("asset_service");
 
     char tmpKeyAlias[] = "HksChangeStorageLevelPart1Test020_00";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     struct HksParamSet *desParamSet = nullptr;
@@ -903,13 +887,11 @@ HWTEST_F(HksChangeStorageLevelPart1Test, HksChangeStorageLevelPart1Test021, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart1Test021");
 
-    int32_t ret = SetIdsTokenForAcrossAccountsPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
-
+    HksMockNativeToken mock("asset_service");
     char tmpKeyAlias[] = "HksChangeStorageLevelPart1Test021";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);
@@ -940,13 +922,10 @@ HWTEST_F(HksChangeStorageLevelPart1Test, HksChangeStorageLevelPart1Test022, Test
 {
     HKS_LOG_I("Enter HksChangeStorageLevelPart1Test022");
 
-    int32_t ret = SetIdsTokenWithoutPermission();
-    EXPECT_EQ(ret, HKS_SUCCESS);
-
     char tmpKeyAlias[] = "HksChangeStorageLevelPart2Test001";
     const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *srcParamSet = nullptr;
-    ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&srcParamSet, g_params001, sizeof(g_params001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, srcParamSet, nullptr);

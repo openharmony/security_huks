@@ -23,6 +23,10 @@
 #include "hks_type_inner.h"
 #include "hks_event_info.h"
 #include "hks_type_enum.h"
+#include "hks_param.h"
+#ifdef __cplusplus
+#include "hks_report_three_stage_build.h"
+#endif
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -38,6 +42,9 @@ extern "C" {
 #define HASH_SHA256_SIZE 256
 #define KEYALIAS_HASH_SHA256_SIZE 1
 #define KEY_HASH_SHA256_SIZE 2
+#define EVENT_PROPERTY_UNKNOWN "unknown"
+
+int32_t AddGroupKey(struct HksParamSet *paramSetOut, const struct HksParamSet *paramSetIn);
 
 int32_t AddKeyHash(struct HksParamSet *paramSetOut, const struct HksBlob *keyIn);
 
@@ -49,11 +56,11 @@ int32_t PreAddCommonInfo(struct HksParamSet *paramSetOut, const struct HksBlob *
     const struct HksParamSet *paramSetIn, uint64_t startTime);
 
 int32_t ConstructReportParamSet(const char *funcName, const struct HksProcessInfo *processInfo,
-    int32_t errorCode, struct HksParamSet **reportParamSet);
+    const struct HksParamSet *paramSetIn, int32_t errorCode, struct HksParamSet **reportParamSet);
 
 void DeConstructReportParamSet(struct HksParamSet **paramSet);
 
-void FreeEventInfoSpecificPtr(struct HksEventInfo *eventInfo);
+void FreeCommonEventInfo(struct HksEventInfo *eventInfo);
 
 bool CheckEventCommon(const struct HksEventInfo *info1, const struct HksEventInfo *info2);
 
@@ -65,6 +72,27 @@ bool CheckEventCommonAndKey(const struct HksEventInfo *info1, const struct HksEv
 
 #ifdef __cplusplus
 
+struct DeleteParamSet {
+    void operator()(struct HksParamSet **paramSet)
+    {
+        HksFreeParamSet(paramSet);
+    }
+};
+
+struct DeleteEventCommonInfo {
+    void operator()(struct HksEventInfo *eventInfo)
+    {
+        FreeCommonEventInfo(eventInfo);
+    }
+};
+
+struct DeleteEventInfo {
+    void operator()(struct HksEventInfo **eventInfo)
+    {
+        HksFreeEventInfo(eventInfo);
+    }
+};
+
 static inline uint32_t HksGetHash(const struct HksBlob *blob)
 {
     if (CheckBlob(blob) != HKS_SUCCESS) {
@@ -75,7 +103,7 @@ static inline uint32_t HksGetHash(const struct HksBlob *blob)
     return static_cast<uint32_t>(hasher(data));
 }
 
-int32_t ReportGetCallerName(std::string &callerName);
+int32_t ReportGetCallerName(const struct HksProcessInfo *processInfo, std::string &callerName);
 
 int32_t GetCommonEventInfo(const struct HksParamSet *paramSetIn, struct HksEventInfo *eventInfo);
 
@@ -89,7 +117,7 @@ std::pair<std::unordered_map<std::string, std::string>::iterator, bool> EventInf
 std::pair<std::unordered_map<std::string, std::string>::iterator, bool> EventInfoToMapKeyAccessInfo(
     const struct HksEventKeyAccessInfo *eventKeyAccessInfo, std::unordered_map<std::string, std::string> &reportData);
 
-void CopyParamBlobData(char **dst, const struct HksParam *param);
+int32_t CopyParamBlobData(char **dst, const struct HksParam *param);
 
 #endif
 

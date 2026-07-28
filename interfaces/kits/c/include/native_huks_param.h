@@ -23,7 +23,7 @@
  *    a parameter set, and destroying a parameter set.
  *    They can also be used to obtain parameters, copy parameter sets, and check parameter validity.
  *
- * @syscap SystemCapability.Security.Huks
+ * @syscap SystemCapability.Security.Huks.Core
  * @since 9
  * @version 1.0
  */

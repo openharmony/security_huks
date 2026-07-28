@@ -613,6 +613,7 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive003, TestSize.Level0)
     HksFreeParamSet(&pbkdf2FinishParamSet);
 }
 
+#ifdef L2_STANDARD
 /**
  * @tc.name: HksPbkdf2DerivePart1Test.HksPbkdf2Derive004
  * @tc.desc: alg-PBKDF2 pur-Derive dig-SHA256.
@@ -668,6 +669,7 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive004, TestSize.Level0)
     HksFreeParamSet(&pbkdf2FinishParamSet0);
     HksFreeParamSet(&pbkdf2FinishParamSet1);
 }
+#endif
 
 #ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**

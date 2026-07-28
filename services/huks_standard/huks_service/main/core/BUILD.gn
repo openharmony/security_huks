@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (C) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,6 +22,10 @@ config("huks_config") {
     "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/include",
     "//base/security/huks/services/huks_standard/huks_service/main/plugin_proxy/include",
   ]
+  
+  if (huks_enable_ukey_config == true) {
+    defines = [ "HKS_UKEY_EXTENSION_CRYPTO" ]
+  }
 }
 
 if (os_level == "standard") {
@@ -37,6 +41,9 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",  # hks_osaccount_check.h
       "//base/security/huks/services/huks_standard/huks_service/main/upgrade/lock/include",
       "//base/security/huks/services/huks_standard/huks_service/main/ha/include",
+      "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/se/include",
+      "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms/include",
+      "//base/security/huks/frameworks/huks_standard/main/common/include"
     ]
 
     sources = [
@@ -49,6 +56,7 @@ if (os_level == "standard") {
       "src/hks_client_service_common.c",
       "src/hks_client_service_util.c",
       "src/hks_session_manager.c",
+      "src/hks_se_session_manager.c",
     ]
 
     defines = [ "HKS_ENABLE_CLEAN_FILE" ]
@@ -84,6 +92,10 @@ if (os_level == "standard") {
       "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
     ]
 
+    if (huks_enable_ukey_config == true) {
+      deps += [ "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static" ]
+    }
+
     if (enable_hks_mock) {
       deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_mock:libhuks_service_systemapi_mock_static" ]
     } else {
@@ -110,17 +122,23 @@ if (os_level == "standard") {
       "src/hks_report.c",
       "src/hks_report_check_key_exited.cpp",
       "src/hks_report_common.cpp",
+      "src/hks_report_data_size.cpp",
       "src/hks_report_delete_key.cpp",
       "src/hks_report_generate_key.cpp",
       "src/hks_report_import_key.cpp",
       "src/hks_report_list_aliases.cpp",
       "src/hks_report_rename_key.cpp",
-      "src/hks_report_data_size.cpp",
       "src/hks_report_three_stage.cpp",
       "src/hks_report_three_stage_build.cpp",
       "src/hks_report_three_stage_get.cpp",
     ]
 
+    if (huks_enable_ukey_config == true) { 
+       sources += [ 
+         "src/hks_ukey_three_stage_adapter.cpp", 
+         "src/hks_report_ukey_event.cpp", 
+       ] 
+     }
     deps += [
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hitrace_meter_wrapper:libhuks_utils_hitrace_meter_wrapper_static",
@@ -132,7 +150,10 @@ if (os_level == "standard") {
 
     if (enable_bundle_framework) {
       deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms:libhuks_bms_systemapi_wrap_static" ]
+      include_dirs += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms/include" ]
     }
+
+    deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/se:libhuks_se_systemapi_wrap_static" ]
 
     configs = [
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
@@ -145,6 +166,7 @@ if (os_level == "standard") {
       "hitrace:libhitracechain",
       "init:libbegetutil",
       "ipc:ipc_single",
+      "openssl:libcrypto_shared"
     ]
   }
 } else {
@@ -173,6 +195,7 @@ if (os_level == "standard") {
       "src/hks_client_service_common.c",
       "src/hks_client_service_util.c",
       "src/hks_session_manager.c",
+      "src/hks_se_session_manager.c",
     ]
     sources += [
       "src/hks_hitrace.c",

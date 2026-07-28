@@ -40,10 +40,6 @@ public:
 
     bool Dequeue(HksEventQueueItem& item);
 
-    uint32_t Size() const;
-
-    bool IsEmpty() const;
-
     void Stop();
 
 private:

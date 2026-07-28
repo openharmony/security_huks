@@ -1,0 +1,344 @@
+/*
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "hks_ukey_three_stage_adapter.h"
+#include "hilog/log_c.h"
+#include "hks_cpp_paramset.h"
+#include "hks_error_code.h"
+#include "hks_log.h"
+#include "securec.h"
+#include "hks_plugin_lifecycle_manager.h"
+#include "hks_template.h"
+#include "hks_mem.h"
+#include "hks_common_check.h"
+#include "hks_report_ukey_event.h"
+#include <string>
+#include <vector>
+#include "hks_template.h"
+#include "hks_external_error_info.h"
+
+constexpr uint32_t MAX_SESSION_INDEX_SIZE = 1024;
+
+int32_t HksServiceOnUkeyGenerateKey(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *resourceId, const struct HksParamSet *paramSet)
+{
+    int32_t ret = HksCheckBlob2(&processInfo->processName, resourceId);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "Hks check processName or resourceId fail. ret: %" LOG_PUBLIC "d", ret)
+
+    HKS_IF_TRUE_LOGE_RETURN(resourceId->size > MAX_SESSION_INDEX_SIZE, HKS_ERROR_INVALID_ARGUMENT,
+        "resourceId size too large. size: %" LOG_PUBLIC "d. maxSize: %" LOG_PUBLIC "d",
+        resourceId->size, MAX_SESSION_INDEX_SIZE)
+    std::string cppResourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
+    CppParamSet cppParamSet(paramSet);
+
+    auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
+    
+    struct HksProcessWithErrorInfo processAndError = { processInfo, nullptr };
+    ret = pluginManager->OnGenerateKey(processAndError, cppResourceId, cppParamSet);
+    HKS_IF_TRUE_RETURN(ret == HKS_SUCCESS, HKS_SUCCESS)
+    HKS_LOG_E("OnGenerateKey fail. ret: %" LOG_PUBLIC "d", ret);
+    HksClearThreadExtErrMsg();
+    int32_t errVal = 0;
+    if (processAndError.errInfo != nullptr && processAndError.errInfo->hasErrorInfo) {
+        errVal = processAndError.errInfo->errVal;
+        HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
+    }
+    HksFreeExternalErrorInfo(processAndError.errInfo);
+    struct UKeyReportErrInfo reportErr = { ret, errVal };
+    ReportUKeyKeyEvent(HKS_EVENT_UKEY_GENERATE_KEY, &reportErr, processInfo, paramSet);
+
+    return ret;
+}
+
+int32_t HksServiceOnUkeyInitSession(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
+    const struct HksParamSet *inParamSet, struct HksBlob *handle)
+{
+    int32_t ret = HksCheckBlob2(&processInfo->processName, index);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "Hks check processName or index fail. ret: %" LOG_PUBLIC "d", ret)
+
+    HKS_IF_TRUE_LOGE_RETURN(index->size > MAX_SESSION_INDEX_SIZE, HKS_ERROR_INVALID_ARGUMENT,
+        "index size too large. size: %" LOG_PUBLIC "d. maxSize: %" LOG_PUBLIC "d", index->size, MAX_SESSION_INDEX_SIZE)
+    std::string cppIndex(reinterpret_cast<const char*>(index->data), index->size);
+    CppParamSet cppParamSet(inParamSet);
+    uint32_t handleU32 = 0;
+
+    auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
+
+    struct HksProcessWithErrorInfo processAndError = { processInfo, nullptr };
+    ret = pluginManager->OnInitSession(processAndError, cppIndex, cppParamSet, handleU32);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("OnInitSession fail. ret: %" LOG_PUBLIC "d", ret);
+        HksClearThreadExtErrMsg();
+        int32_t errVal = 0;
+        if (processAndError.errInfo != nullptr && processAndError.errInfo->hasErrorInfo) {
+            errVal = processAndError.errInfo->errVal;
+            HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
+        }
+        HksFreeExternalErrorInfo(processAndError.errInfo);
+        struct UKeyReportErrInfo reportErr = { ret, errVal };
+        ReportUKeySessionEvent(HKS_EVENT_UKEY_INIT_SESSION, &reportErr, handle, processInfo, inParamSet);
+        return ret;
+    }
+
+    uint64_t handleU64 = static_cast<uint64_t>(handleU32);
+    if (handle->size < sizeof(uint64_t)) {
+        HKS_LOG_E("handle size too small. size: %" LOG_PUBLIC "u", handle->size);
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    ret = memcpy_s(handle->data, handle->size, &handleU64, sizeof(handleU64));
+    if (ret != EOK) {
+        HKS_LOG_E("memcpy in HksServiceOnUkeyInitSession fail. ret: %" LOG_PUBLIC "d", ret);
+        return HKS_ERROR_COPY_FAIL;
+    }
+    handle->size = sizeof(uint64_t);
+    struct UKeyReportErrInfo reportErr = { ret, 0 };
+    ReportUKeySessionEvent(HKS_EVENT_UKEY_INIT_SESSION, &reportErr, handle, processInfo, inParamSet);
+    return ret;
+}
+
+int32_t HksServiceOnUkeyUpdateSession(const struct HksProcessInfo *processInfo, const struct HksBlob *handle,
+    const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
+{
+    uint64_t handleU64 = 0;
+    if (handle != nullptr && handle->size == sizeof(uint64_t)) {
+        auto mcpRet = memcpy_s(&handleU64, sizeof(handleU64), handle->data, handle->size);
+        HKS_IF_TRUE_LOGE_RETURN(mcpRet != EOK, HKS_ERROR_INSUFFICIENT_MEMORY,
+        "memcpy_s faild. ret = %" LOG_PUBLIC "d", mcpRet)
+    }
+
+    uint32_t handleU32 = static_cast<uint32_t>(handleU64);
+    CppParamSet cppParamSet(paramSet);
+    std::vector<uint8_t> indata;
+    if (inData != nullptr && inData->data != nullptr) {
+        indata.assign(inData->data, inData->data + inData->size);
+    }
+    std::vector<uint8_t> outdata;
+
+    auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
+
+    struct HksProcessWithErrorInfo processAndError = { processInfo, nullptr };
+    int32_t ret = pluginManager->OnUpdateSession(processAndError, handleU32, cppParamSet, indata, outdata);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("OnUpdateSession fail. ret: %" LOG_PUBLIC "d", ret);
+        HksClearThreadExtErrMsg();
+        int32_t errVal = 0;
+        if (processAndError.errInfo != nullptr && processAndError.errInfo->hasErrorInfo) {
+            errVal = processAndError.errInfo->errVal;
+            HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
+        }
+        HksFreeExternalErrorInfo(processAndError.errInfo);
+        struct UKeyReportErrInfo reportErr = { ret, errVal };
+        ReportUKeySessionEvent(HKS_EVENT_UKEY_UPDATE_SESSION, &reportErr, handle, processInfo, paramSet);
+        return ret;
+    }
+
+    HKS_IF_TRUE_LOGI_RETURN(outData->size == 0, ret, "outData size is 0. ret: %" LOG_PUBLIC "d", ret);
+    HKS_IF_TRUE_LOGI_RETURN(outData->data == nullptr, ret, "outData data is nullptr. ret: %" LOG_PUBLIC "d", ret);
+    if (outData->size < outdata.size()) {
+        HKS_LOG_E("updateSession outData size too small. size: %" LOG_PUBLIC "u. needSize: %" LOG_PUBLIC "zu",
+        outData->size, outdata.size());
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    ret = memcpy_s(outData->data, outData->size, outdata.data(), outdata.size());
+    if (ret != EOK) {
+        HKS_LOG_E("memcpy in HksServiceOnUkeyUpdateSession fail. ret: %" LOG_PUBLIC "d", ret);
+        return HKS_ERROR_COPY_FAIL;
+    }
+    outData->size = static_cast<uint32_t>(outdata.size());
+    struct UKeyReportErrInfo reportErr = { ret, 0 };
+    ReportUKeySessionEvent(HKS_EVENT_UKEY_UPDATE_SESSION, &reportErr, handle, processInfo, paramSet);
+    return ret;
+}
+
+int32_t HksServiceOnUkeyFinishSession(const struct HksProcessInfo *processInfo, const struct HksBlob *handle,
+    const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
+{
+    uint64_t handleU64 = 0;
+    if (handle != nullptr && handle->size == sizeof(uint64_t)) {
+        auto mcpRet = memcpy_s(&handleU64, sizeof(handleU64), handle->data, handle->size);
+        HKS_IF_TRUE_LOGE_RETURN(mcpRet != EOK, HKS_ERROR_INSUFFICIENT_MEMORY,
+        "memcpy_s faild. ret = %" LOG_PUBLIC "d", mcpRet)
+    }
+    uint32_t handleU32 = static_cast<uint32_t>(handleU64);
+    CppParamSet cppParamSet(paramSet);
+    std::vector<uint8_t> indata;
+    if (inData != nullptr && inData->data != nullptr) {
+        indata.assign(inData->data, inData->data + inData->size);
+    }
+    std::vector<uint8_t> outdata;
+
+    auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
+
+    struct HksProcessWithErrorInfo processAndError = { processInfo, nullptr };
+    int32_t ret = pluginManager->OnFinishSession(processAndError, handleU32, cppParamSet, indata, outdata);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("OnFinishSession fail. ret: %" LOG_PUBLIC "d", ret);
+        HksClearThreadExtErrMsg();
+        int32_t errVal = 0;
+        if (processAndError.errInfo != nullptr && processAndError.errInfo->hasErrorInfo) {
+            errVal = processAndError.errInfo->errVal;
+            HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
+        }
+        HksFreeExternalErrorInfo(processAndError.errInfo);
+        struct UKeyReportErrInfo reportErr = { ret, errVal };
+        ReportUKeySessionEvent(HKS_EVENT_UKEY_FINISH_SESSION, &reportErr, handle, processInfo, paramSet);
+        return ret;
+    }
+
+    HKS_IF_TRUE_LOGI_RETURN(outData->size == 0, ret, "outData size is 0. ret: %" LOG_PUBLIC "d", ret);
+    HKS_IF_TRUE_LOGI_RETURN(outData->data == nullptr, ret, "outData data is nullptr. ret: %" LOG_PUBLIC "d", ret);
+    if (outData->size < outdata.size()) {
+        HKS_LOG_E("finishSession outData size too small. size: %" LOG_PUBLIC "u. needSize: %" LOG_PUBLIC "zu",
+        outData->size, outdata.size());
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    ret = memcpy_s(outData->data, outData->size, outdata.data(), outdata.size());
+    if (ret != EOK) {
+        HKS_LOG_E("memcpy in HksServiceOnUkeyFinishSession fail. ret: %" LOG_PUBLIC "d", ret);
+        return HKS_ERROR_COPY_FAIL;
+    }
+    outData->size = static_cast<uint32_t>(outdata.size());
+    struct UKeyReportErrInfo reportErr = { ret, 0 };
+    ReportUKeySessionEvent(HKS_EVENT_UKEY_FINISH_SESSION, &reportErr, handle, processInfo, paramSet);
+    return ret;
+}
+
+int32_t HksServiceOnUkeyAbortSession(const struct HksProcessInfo *processInfo, const struct HksBlob *handle,
+    const struct HksParamSet *paramSet)
+{
+    uint64_t handleU64 = 0;
+    if (handle != nullptr && handle->size == sizeof(uint64_t)) {
+        auto mcpRet = memcpy_s(&handleU64, sizeof(handleU64), handle->data, handle->size);
+        HKS_IF_TRUE_LOGE_RETURN(mcpRet != EOK, HKS_ERROR_INSUFFICIENT_MEMORY,
+            "memcpy_s faild. ret = %" LOG_PUBLIC "d", mcpRet)
+    }
+    auto handleU32 = static_cast<uint32_t>(handleU64);
+    auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
+    CppParamSet cppParamSet(paramSet);
+    struct HksProcessWithErrorInfo processAndError = { processInfo, nullptr };
+    int32_t ret = pluginManager->OnAbortSession(processAndError, handleU32, cppParamSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("OnAbortSession fail. ret: %" LOG_PUBLIC "d", ret);
+        HksClearThreadExtErrMsg();
+        int32_t errVal = 0;
+        if (processAndError.errInfo != nullptr && processAndError.errInfo->hasErrorInfo) {
+            errVal = processAndError.errInfo->errVal;
+            HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
+        }
+        HksFreeExternalErrorInfo(processAndError.errInfo);
+        struct UKeyReportErrInfo reportErr = { ret, errVal };
+        ReportUKeySessionEvent(HKS_EVENT_UKEY_ABORT_SESSION, &reportErr, handle, processInfo, paramSet);
+        return ret;
+    }
+    struct UKeyReportErrInfo reportErr = { ret, 0 };
+    ReportUKeySessionEvent(HKS_EVENT_UKEY_ABORT_SESSION, &reportErr, handle, processInfo, paramSet);
+    return ret;
+}
+
+int32_t HksServiceOnUkeyImportWrappedKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksBlob *wrappingKeyAlias, const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData)
+{
+    int32_t ret = HksCheckBlob3(&processInfo->processName, keyAlias, wrappingKeyAlias);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "Hks check processName or keyAlias or wrappingKeyAlias fail. ret: %" LOG_PUBLIC "d", ret)
+
+    HKS_IF_TRUE_LOGE_RETURN(keyAlias->size > MAX_SESSION_INDEX_SIZE, HKS_ERROR_INVALID_ARGUMENT,
+        "keyAlias size too large. size: %" LOG_PUBLIC "d. maxSize: %" LOG_PUBLIC "d",
+        keyAlias->size, MAX_SESSION_INDEX_SIZE)
+    HKS_IF_TRUE_LOGE_RETURN(wrappingKeyAlias->size > MAX_SESSION_INDEX_SIZE, HKS_ERROR_INVALID_ARGUMENT,
+        "wrappingKeyAlias size too large. size: %" LOG_PUBLIC "d. maxSize: %" LOG_PUBLIC "d",
+        wrappingKeyAlias->size, MAX_SESSION_INDEX_SIZE)
+    std::string cppIndex(reinterpret_cast<const char*>(keyAlias->data), keyAlias->size);
+    std::string cppWrappingKeyIndex(reinterpret_cast<const char*>(wrappingKeyAlias->data), wrappingKeyAlias->size);
+    CppParamSet cppParamSet(paramSet);
+    std::vector<uint8_t> wrappedData;
+    if (wrappedKeyData != nullptr && wrappedKeyData->data != nullptr && wrappedKeyData->size != 0) {
+        wrappedData.assign(wrappedKeyData->data, wrappedKeyData->data + wrappedKeyData->size);
+    }
+
+    auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
+
+    struct HksProcessWithErrorInfo processAndError = { processInfo, nullptr };
+    ret = pluginManager->OnImportWrappedKey(processAndError, cppIndex, cppWrappingKeyIndex,
+        cppParamSet, wrappedData);
+    HKS_IF_TRUE_RETURN(ret == HKS_SUCCESS, HKS_SUCCESS)
+
+    HKS_LOG_E("OnImportWrappedKey fail. ret: %" LOG_PUBLIC "d", ret);
+    HksClearThreadExtErrMsg();
+    int32_t errVal = 0;
+    if (processAndError.errInfo != nullptr && processAndError.errInfo->hasErrorInfo) {
+        errVal = processAndError.errInfo->errVal;
+        HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
+    }
+    HksFreeExternalErrorInfo(processAndError.errInfo);
+    struct UKeyReportErrInfo reportErr = { ret, errVal };
+    ReportUKeyKeyEvent(HKS_EVENT_UKEY_IMPORT_WRAPPED_KEY, &reportErr, processInfo, paramSet);
+    return ret;
+}
+
+int32_t HksServiceOnUkeyExportPublicKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *key)
+{
+    int32_t ret = HksCheckBlob3(&processInfo->processName, keyAlias, key);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret,
+        "Hks check processName or keyAlias or key fail. ret: %" LOG_PUBLIC "d", ret)
+
+    HKS_IF_TRUE_LOGE_RETURN(keyAlias->size > MAX_SESSION_INDEX_SIZE, HKS_ERROR_INVALID_ARGUMENT,
+        "keyAlias size too large. size: %" LOG_PUBLIC "d. maxSize: %" LOG_PUBLIC "d",
+        keyAlias->size, MAX_SESSION_INDEX_SIZE)
+
+    std::string cppIndex(reinterpret_cast<const char*>(keyAlias->data), keyAlias->size);
+    CppParamSet cppParamSet(paramSet);
+    std::vector<uint8_t> outdata;
+
+    auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
+
+    struct HksProcessWithErrorInfo processAndError = { processInfo, nullptr };
+    ret = pluginManager->OnExportPublicKey(processAndError, cppIndex, cppParamSet, outdata);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("OnExportPublicKey fail. ret: %" LOG_PUBLIC "d", ret);
+        HksClearThreadExtErrMsg();
+        int32_t errVal = 0;
+        if (processAndError.errInfo != nullptr && processAndError.errInfo->hasErrorInfo) {
+            errVal = processAndError.errInfo->errVal;
+            HksAppendThreadExtErrMsg(processAndError.errInfo->errVal, processAndError.errInfo->errorDesc);
+        }
+        HksFreeExternalErrorInfo(processAndError.errInfo);
+        struct UKeyReportErrInfo reportErr = { ret, errVal };
+        ReportUKeyKeyEvent(HKS_EVENT_UKEY_EXPORT_PUBLIC_KEY, &reportErr, processInfo, paramSet);
+        return ret;
+    }
+
+    if (key->size < outdata.size()) {
+        HKS_LOG_E("exportPublicKey key size too small. size: %" LOG_PUBLIC "u. needSize: %" LOG_PUBLIC "zu",
+        key->size, outdata.size());
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    ret = memcpy_s(key->data, key->size, outdata.data(), outdata.size());
+    if (ret != EOK) {
+        HKS_LOG_E("memcpy in HksServiceOnUkeyExportPublicKey fail. ret:: %" LOG_PUBLIC "d", ret);
+        return HKS_ERROR_COPY_FAIL;
+    }
+    key->size = static_cast<uint32_t>(outdata.size());
+    return ret;
+}

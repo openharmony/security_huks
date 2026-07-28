@@ -22,6 +22,8 @@
 
 #include "hks_type_enum.h"
 
+#define HKS_KEY_SECURITY_LEVEL_DEFAULT (-1)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -44,6 +46,27 @@ enum HksEventId {
     HKS_EVENT_KEY_LEVEL_CHANGE = 14,
     /* closed source event start with 15, end with 19 */
     HKS_EVENT_DATA_SIZE_STATISTICS = 30,
+    // ukey events
+    HKS_EVENT_UKEY_START = 31,
+    HKS_EVENT_UKEY_REGISTER_PROVIDER = HKS_EVENT_UKEY_START,
+    HKS_EVENT_UKEY_GET_AUTH_PIN_STATE = 32,
+    HKS_EVENT_UKEY_AUTH_PIN = 33,
+    HKS_EVENT_UKEY_OPERATE_REMOTE_HANDLE = 34,
+    HKS_EVENT_UKEY_EXPORT_PROVIDER_CERT = 35,
+    HKS_EVENT_UKEY_EXPORT_CERT = 36,
+    HKS_EVENT_UKSY_GET_REMOTE_PROPERTY = 37,
+    HKS_EVENT_UKEY_INIT_SESSION = 38,
+    HKS_EVENT_UKEY_UPDATE_SESSION = 39,
+    HKS_EVENT_UKEY_FINISH_SESSION = 40,
+    HKS_EVENT_UKEY_ABORT_SESSION = 41,
+    HKS_EVENT_UKEY_IMPORT_CERT = 42,
+    HKS_EVENT_UKEY_GET_RESOURCE_ID = 43,
+    HKS_EVENT_UKEY_CLEAR_PIN_STATE = 44,
+    HKS_EVENT_UKEY_GENERATE_KEY = 45,
+    HKS_EVENT_UKEY_EXPORT_PUBLIC_KEY = 46,
+    HKS_EVENT_UKEY_IMPORT_WRAPPED_KEY = 47,
+    HKS_EVENT_UKEY_SET_REMOTE_PROPERTY = 48,
+    HKS_EVENT_UKEY_END = HKS_EVENT_UKEY_SET_REMOTE_PROPERTY
 };
 
 // modify this please sync modify g_threeStage
@@ -59,7 +82,11 @@ enum HksReportStage {
     HKS_ONE_STAGE_AGREE = 9,
     HKS_ONE_STAGE_MAC = 10,
     HKS_ONE_STAGE_ATTEST = 11,
+    HKS_ONE_STAGE_ENCAPSULATE = 12,
+    HKS_ONE_STAGE_DECAPSULATE = 13,
 };
+
+#define IF_UKEY_EVENT(eventId) ((eventId) >= HKS_EVENT_UKEY_START && (eventId) <= HKS_EVENT_UKEY_END)
 
 typedef struct HksEventKeyAccessInfo {
     uint32_t authType;
@@ -80,6 +107,7 @@ typedef struct HksEventKeyInfo {
     uint32_t purpose;
     uint32_t keySize;
     uint32_t keyFlag;
+    int32_t keySecurityLevel;
     uint16_t keyHash;
     uint8_t aliasHash;
     bool isBatch;
@@ -122,6 +150,8 @@ typedef struct HksEventCommonInfo {
     uint32_t operation;
     uint32_t count;
     char *function;
+    char *accessGroup;
+    char *developerId;
 } HksEventCommonInfo;
 
 typedef struct HksEventCryptoInfo {
@@ -184,6 +214,22 @@ typedef struct DataSizeInfo {
     uint64_t partitionRemain;
 } DataSizeInfo;
 
+typedef struct UKeyEventInfo {
+    int32_t callAuthUid;
+    int32_t state;
+    uint32_t purpose;
+    uint32_t operation;
+    char *providerName;
+    char *abilityName;
+    char *resourceId;
+    char *propertyId;
+    char *extBundleName;
+    uint32_t alg;
+    uint32_t detailErrcode;
+    uint64_t handle;
+    char *extraData;
+} UKeyEventInfo;
+
 typedef struct HksEventInfo {
     struct HksEventCommonInfo common;
     union {
@@ -197,6 +243,7 @@ typedef struct HksEventInfo {
         ImportInfo importInfo;
         RenameInfo renameInfo;
         DataSizeInfo dataSizeInfo;
+        UKeyEventInfo ukeyInfo;
     };
 } HksEventInfo;
 

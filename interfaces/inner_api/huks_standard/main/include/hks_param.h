@@ -55,16 +55,6 @@ HKS_API_EXPORT int32_t HksAddParams(struct HksParamSet *paramSet,
     const struct HksParam *params, uint32_t paramCnt);
 
 /**
- * @brief Add parameter set and filter in black list way
- * @param paramSet required parameter set
- * @param params params need to add
- *
- * @param paramCnt numbers of params
- * @return error code, see hks_type.h
- */
-HKS_API_EXPORT int32_t HksAddParamsWithFilter(struct HksParamSet *paramSet,
-    const struct HksParam *params, uint32_t paramCnt);
-/**
  * @brief Build parameter set
  * @param paramSet required parameter set
  * @return error code, see hks_type.h
@@ -79,11 +69,39 @@ HKS_API_EXPORT int32_t HksBuildParamSet(struct HksParamSet **paramSet);
 HKS_API_EXPORT void HksFreeParamSet(struct HksParamSet **paramSet);
 
 /**
+ * @brief Get parameter
+ * @param paramSet required parameter set
+ * @param tag param's tag
+ * @param param output param
+ * @return error code, see hks_type.h
+ */
+HKS_API_EXPORT int32_t HksGetParam(const struct HksParamSet *paramSet, uint32_t tag, struct HksParam **param);
+
+#ifndef HKS_CHIPSET_API
+/**
+ * @brief Add parameter set and filter in black list way
+ * @param paramSet required parameter set
+ * @param params params need to add
+ *
+ * @param paramCnt numbers of params
+ * @return error code, see hks_type.h
+ */
+HKS_API_EXPORT int32_t HksAddParamsWithFilter(struct HksParamSet *paramSet,
+    const struct HksParam *params, uint32_t paramCnt);
+
+/**
  * @brief Free alias set
  * @param aliasSet required alias set
  * @return error code, see hks_type.h
  */
 HKS_API_EXPORT void HksFreeKeyAliasSet(struct HksKeyAliasSet *aliasSet);
+
+/**
+ * @brief Free CertInfo set
+ * @param CertInfoSet required CertInfo set
+ * @return error code, see hks_type.h
+ */
+HKS_API_EXPORT void HksFreeExtCertSet(struct HksExtCertInfoSet *certInfoSet);
 
 /**
  * @brief Get parameter set
@@ -94,15 +112,6 @@ HKS_API_EXPORT void HksFreeKeyAliasSet(struct HksKeyAliasSet *aliasSet);
  */
 HKS_API_EXPORT int32_t HksGetParamSet(const struct HksParamSet *inParamSet, uint32_t inParamSetSize,
     struct HksParamSet **outParamSet);
-
-/**
- * @brief Get parameter
- * @param paramSet required parameter set
- * @param tag param's tag
- * @param param output param
- * @return error code, see hks_type.h
- */
-HKS_API_EXPORT int32_t HksGetParam(const struct HksParamSet *paramSet, uint32_t tag, struct HksParam **param);
 
 /**
  * @brief Fresh parameter set
@@ -161,6 +170,7 @@ HKS_API_EXPORT enum HksTagType GetTagType(enum HksTag tag);
 
 HKS_API_EXPORT int32_t HksDeleteTagsFromParamSet(const uint32_t *tag, uint32_t tagCount,
     const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
+#endif
 
 #ifdef __cplusplus
 }

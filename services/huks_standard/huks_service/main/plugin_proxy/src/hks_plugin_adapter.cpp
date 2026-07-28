@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "hks_cfi.h"
 #include "hks_client_service_util.h"
 #include "hks_error_code.h"
+#include "hks_ha_plugin.h"
 #include "hks_log.h"
 #include "hks_mutex.h"
 #include "hks_response.h"
@@ -46,6 +47,10 @@ static struct HksBasicInterface g_interfaceInst = {
     .appendStorageParamsForGen = AppendNewInfoForGenKeyInService,
     .appendStorageParamsForUse = AppendNewInfoForUseKeyInService,
     .appendStorageParamsForQuery = AppendStorageLevelIfNotExist,
+
+    .hksRegisterEventProc = HksRegisterEventProcWrapper,
+    .hksRegisterEventProcs = HksRegisterEventProcs,
+    .hksEnqueueEvent = HksEnqueueEventWrapper,
 };
 
 static void HksDestoryPluginProxy(void)
@@ -136,17 +141,33 @@ void HksPluginOnReceiveEvent(const void *data)
     g_pluginProxy->hksPluginOnReceiveEvent(data);
 }
 
-int32_t HksPluginOnLocalRequestWrapKey(uint32_t code, const void *data, void *reply)
+void HksPluginSubSystemEvent(void *matchingSkills)
+{
+    HKS_IF_NOT_SUCC_RETURN_VOID(RetryLoadPlugin())
+    g_pluginProxy->hksPluginSubSystemEvent(matchingSkills);
+}
+
+int32_t HksPluginGetAncoUser(int *userId)
+{
+    int32_t ret = RetryLoadPlugin();
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "load plugin failed")
+    return g_pluginProxy->hksPluginGetAncoUser(userId);
+}
+
+int32_t HksPluginOnAccessWrapKey(uint32_t code, const void *data, void *reply)
 {
     HKS_IF_NULL_LOGE_RETURN(g_pluginProxy, HKS_ERROR_API_NOT_SUPPORTED, "wrap key not supported")
     return g_pluginProxy->hksPluginOnLocalRequest(code, data, reply);
 }
 
-int32_t HksPluginWrapKey(const struct HksBlob *srcData, const uint8_t *context)
+int32_t HksPluginCheck(void)
 {
-    if (g_pluginProxy != nullptr) {
-        return HKS_SUCCESS;
-    }
-    HksSendResponse(context, HKS_ERROR_API_NOT_SUPPORTED, nullptr);
-    return HKS_ERROR_API_NOT_SUPPORTED;
+    HKS_IF_NULL_LOGE_RETURN(g_pluginProxy, HKS_ERROR_API_NOT_SUPPORTED, "environment not supported")
+    return HKS_SUCCESS;
+}
+
+int32_t HksPluginImportWrappedKey(const struct HksImportKeyStoreArgs *data, struct HksBlob *reply)
+{
+    HKS_IF_NULL_LOGE_RETURN(g_pluginProxy, HKS_ERROR_API_NOT_SUPPORTED, "import keystore not supported")
+    return g_pluginProxy->hksPluginOnLocalRequest(CODE_IMPORT_KEY_STORE, data, reply);
 }

@@ -56,10 +56,7 @@
 
 int32_t HksCoreModuleInit(void)
 {
-    int32_t ret = HksInitHuksMutex();
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Hks mutex init failed, ret = %" LOG_PUBLIC "d", ret)
-
-    ret = HksCryptoAbilityInit();
+    int32_t ret = HksCryptoAbilityInit();
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Hks init crypto ability failed, ret = %" LOG_PUBLIC "d", ret)
 
     ret = HksCoreInitAuthTokenKey();
@@ -74,7 +71,6 @@ int32_t HksCoreModuleInit(void)
 
 int32_t HksCoreModuleDestroy(void)
 {
-    HksDestroyHuksMutex();
     HksCoreDestroyAuthTokenKey();
 #ifndef _HARDWARE_ROOT_KEY_
     HksCfgDestroy();

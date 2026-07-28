@@ -27,6 +27,28 @@
 #include "hks_type.h"
 
 namespace HuksNapiItem {
+napi_value NapiCreateError(napi_env env, int32_t errCode, const char *errMsg);
+#define NAPI_CALL_RETURN_ERR(env, ret)   \
+    if ((ret) != napi_ok)                \
+    {                                    \
+        GET_AND_THROW_LAST_ERROR((env)); \
+        return ret;                      \
+    }
+
+#define NAPI_THROW_BASE_RETURN(env, condition, ret, code, message)           \
+    if ((condition))                                                  \
+    {                                                                 \
+        HKS_LOG_E(message);                                           \
+        napi_throw((env), NapiCreateError((env), (code), (message))); \
+        return (ret);                                                 \
+    }
+
+#define NAPI_THROW(env, condition, code, message) \
+    NAPI_THROW_BASE_RETURN(env, condition, nullptr, code, message)
+
+#define NAPI_THROW_RETURN_ERR(env, condition, ret, code, message) \
+    NAPI_THROW_BASE_RETURN(env, condition, ret, code, message)
+
 struct HksSuccessReturnResult {
     bool isOnlyReturnBoolResult;
     bool boolReturned;
@@ -35,6 +57,15 @@ struct HksSuccessReturnResult {
     struct HksBlob *outData;
     HksParamSet *paramSet;
     struct HksCertChain *certChain;
+
+    // ukey features
+    struct HksBlob *index;
+    uint32_t retryCount;
+    int32_t outStatus = -1;
+
+    // ML-KEM encapsulation result
+    struct HksBlob *sharedSecret;
+    bool forceReturnObject;
 };
 
 struct HksSuccessListAliasesResult {
@@ -58,6 +89,8 @@ const std::string HKS_RESULT_PRPPERTY_PROPERTIES = "properties";
 const std::string HKS_RESULT_PRPPERTY_CERTCHAINS = "certChains";
 
 const std::string HKS_RESULT_PRPPERTY_ALIASES = "keyAliases";
+
+const std::string HKS_RESULT_PROPERTY_SHAREDSECRET = "sharedSecret";
 
 const std::string BUSINESS_ERROR_PROPERTY_CODE = "code";
 const std::string BUSINESS_ERROR_PROPERTY_MESSAGE = "message";
@@ -135,12 +168,16 @@ napi_value ParseKeyData(napi_env env, napi_value value, HksBlob *&keyDataBlob);
 
 napi_value GetPropertyFromOptions(napi_env env, napi_value value, const std::string propertyStr);
 
+napi_value GenerateHksParamArray(napi_env env, const HksParamSet &paramSet);
+
 void SuccessReturnResultInit(struct HksSuccessReturnResult &resultData);
 
 void SuccessListAliasesReturnResultInit(struct HksSuccessListAliasesResult &resultData);
 
 void HksReturnNapiResult(napi_env env, napi_ref callback, napi_deferred deferred, int32_t errorCode,
     const struct HksSuccessReturnResult resultData);
+
+void HksReturnNapiUndefined(napi_env env, napi_ref callback, napi_deferred deferred, int32_t errorCode);
 
 void HksReturnKeyExistResult(napi_env env, napi_ref callback, napi_deferred deferred, int32_t errorCode,
     const struct HksSuccessReturnResult resultData);
@@ -149,6 +186,11 @@ void HksReturnListAliasesResult(napi_env env, napi_ref callback, napi_deferred d
     const struct HksSuccessListAliasesResult resultData);
 
 napi_value CreateJsError(napi_env env, int32_t errCode, const char *errorMsg);
+
+void SetRetryCount(int32_t retryCount);
+
+napi_value ParseHuksParams(napi_env env, napi_value object, const std::vector<HksParam> &addParams,
+    HksParamSet *&paramSet);
 
 inline void HksNapiThrow(napi_env env, int32_t errCode, const char *errorMsg)
 {
@@ -167,6 +209,16 @@ inline void HksNapiThrowInvalidParamCount(napi_env env)
 inline void HksNapiThrowGetUserIdFail(napi_env env)
 {
     HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "GetUserIdValue failed");
+}
+
+void HksReturnNapiArrExtParamsResult(napi_env env, napi_deferred deferred, int32_t errorCode,
+    const struct HksParamSet *paramSetOut);
+
+bool HksCheckIsAllowAsUserApi(struct HksParamSet *paramSet);
+
+inline void HksNapiThrowFeatureNotSupport(napi_env env)
+{
+    HksNapiThrow(env, HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED, "The feature is not support.");
 }
 }  // namespace HuksNapiItem
 #endif

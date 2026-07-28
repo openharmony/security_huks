@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 #define HUKS_DISABLE_LOG_AT_FILE_TO_REDUCE_ROM_SIZE
 
 #include "hks_param.h"
+#include "hks_valid_tags.h"
 
 #include <stddef.h>
 
@@ -25,7 +26,7 @@
 
 #include "securec.h"
 
-static uint32_t g_validTags[] = {
+const uint32_t HKS_VALID_TAGS[] = {
     HKS_TAG_ALGORITHM,
     HKS_TAG_PURPOSE,
     HKS_TAG_KEY_SIZE,
@@ -34,8 +35,10 @@ static uint32_t g_validTags[] = {
     HKS_TAG_BLOCK_MODE,
     HKS_TAG_KEY_TYPE,
     HKS_TAG_ASSOCIATED_DATA,
+    HKS_TAG_AAD,
     HKS_TAG_NONCE,
     HKS_TAG_IV,
+    HKS_TAG_CONTEXT,
 
     HKS_TAG_SALT,
     HKS_TAG_PWD,
@@ -57,17 +60,23 @@ static uint32_t g_validTags[] = {
     HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG,
     HKS_TAG_RSA_PSS_SALT_LEN_TYPE,
     HKS_TAG_MGF_DIGEST,
+    HKS_TAG_AE_TAG_LEN,
+    HKS_TAG_KEY_ACCESS_GROUP,
+    HKS_TAG_DEVELOPER_ID,
 
     HKS_TAG_ACTIVE_DATETIME,
     HKS_TAG_ORIGINATION_EXPIRE_DATETIME,
     HKS_TAG_USAGE_EXPIRE_DATETIME,
     HKS_TAG_CREATION_DATETIME,
+    HKS_TAG_INCLUDE_UNIQUE_ID,
+    HKS_TAG_INVALIDATED_BY_ROOTING,
 
     HKS_TAG_ALL_USERS,
     HKS_TAG_USER_ID,
     HKS_TAG_FRONT_USER_ID,
     HKS_TAG_NO_AUTH_REQUIRED,
     HKS_TAG_USER_AUTH_TYPE,
+    HKS_TAG_USER_AUTH_TYPE_ATL,
     HKS_TAG_AUTH_TIMEOUT,
     HKS_TAG_AUTH_TOKEN,
     HKS_TAG_AUTH_STORAGE_LEVEL,
@@ -95,6 +104,7 @@ static uint32_t g_validTags[] = {
     HKS_TAG_ATTESTATION_BASE64,
     HKS_TAG_ATTESTATION_MODE,
     HKS_TAG_ATTESTATION_CERT_TYPE,
+    HKS_TAG_ANONYMOUS_ATTESTATION_MODE,
 
     HKS_TAG_IS_KEY_ALIAS,
     HKS_TAG_KEY_STORAGE_FLAG,
@@ -157,7 +167,30 @@ static uint32_t g_validTags[] = {
     HKS_TAG_WRAP_DATA_ASSET_EXTRA_AAD,
     DKS_TAG_IS_USE_DISTRIBUTED_KEY,
     DKS_TAG_IS_ALLOW_REMOTE_OPERATE,
+
+    HKS_TAG_REMOTE_DEVICE,
+    HKS_TAG_REMOTE_APP,
+    HKS_TAG_REMOTE_CONTAINER,
+    HKS_EXT_CRYPTO_TAG_UKEY_PIN,
+    HKS_EXT_CRYPTO_TAG_ABILITY_NAME,
+    HKS_TAG_REMOTE_ABILITY_SN,
+    HKS_EXT_CRYPTO_TAG_ABILITY_INFO,
+    HKS_EXT_CRYPTO_TAG_EXTRA_DATA,
+    HKS_TAG_KEY_CLASS,
+    HKS_EXT_CRYPTO_TAG_UID,
+    HKS_EXT_CRYPTO_TAG_PURPOSE,
+    HKS_EXT_CRYPTO_TAG_TIMEOUT,
+    HKS_EXT_CRYPTO_TAG_RESOURCE_INFO,
+    HKS_EXT_CRYPTO_TAG_BUNDLE_NAME,
+    HKS_TAG_KEY_SECURITY_LEVEL,
+
+    HKS_TAG_ANCO_APP_UID,
+    HKS_TAG_ANCO_CHALLENGE,
+    HKS_TAG_ANCO_USER_ID,
+    HKS_TAG_PLAIN_TEXT
 };
+
+const uint32_t HKS_VALID_TAGS_COUNT = HKS_ARRAY_SIZE(HKS_VALID_TAGS);
 
 HKS_API_EXPORT enum HksTagType GetTagType(enum HksTag tag)
 {
@@ -166,9 +199,9 @@ HKS_API_EXPORT enum HksTagType GetTagType(enum HksTag tag)
 
 static bool IsValidTag(uint32_t tag)
 {
-    uint32_t tagSize = HKS_ARRAY_SIZE(g_validTags);
+    uint32_t tagSize = HKS_ARRAY_SIZE(HKS_VALID_TAGS);
     for (uint32_t i = 0; i < tagSize; ++i) {
-        if (tag == g_validTags[i]) {
+        if (tag == HKS_VALID_TAGS[i]) {
             return true;
         }
     }
@@ -207,8 +240,7 @@ static int32_t CheckBeforeAddParams(const struct HksParamSet *paramSet, const st
     }
 
     for (uint32_t i = 0; i < paramCnt; i++) {
-        if ((GetTagType((enum HksTag)(params[i].tag)) == HKS_TAG_TYPE_BYTES) &&
-            (params[i].blob.data == NULL)) {
+        if ((GetTagType((enum HksTag)(params[i].tag)) == HKS_TAG_TYPE_BYTES) && (params[i].blob.data == NULL)) {
             HKS_LOG_E("invalid blob param!");
             return HKS_ERROR_INVALID_ARGUMENT;
         }
@@ -298,10 +330,15 @@ HKS_API_EXPORT int32_t HksAddParamsWithFilter(struct HksParamSet *paramSet,
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     for (uint32_t i = 0; i < paramCnt; i++) {
+        bool isForbidden = false;
         for (uint32_t j = 0; j < sizeof(g_dropTags) / sizeof(g_dropTags[0]); j++) {
             if (params[i].tag == g_dropTags[j]) {
-                continue;
+                isForbidden = true;
+                break;
             }
+        }
+        if (isForbidden) {
+            continue;
         }
         paramSet->paramSetSize += sizeof(struct HksParam);
         if (GetTagType((enum HksTag)(params[i].tag)) == HKS_TAG_TYPE_BYTES) {
@@ -358,6 +395,24 @@ HKS_API_EXPORT void HksFreeKeyAliasSet(struct HksKeyAliasSet *aliasSet)
     HKS_FREE(aliasSet->aliases);
     HKS_FREE(aliasSet);
     aliasSet = NULL;
+}
+
+HKS_API_EXPORT void HksFreeExtCertSet(struct HksExtCertInfoSet *certInfoSet)
+{
+    if (certInfoSet == NULL || certInfoSet->certs == NULL || certInfoSet->count == 0) {
+        return;
+    }
+
+    if (certInfoSet->count > 0 && certInfoSet->certs != NULL) {
+        for (uint32_t i = 0; i < certInfoSet->count; i++) {
+            HKS_FREE_BLOB(certInfoSet->certs[i].index);
+            HKS_FREE_BLOB(certInfoSet->certs[i].cert);
+        }
+    }
+
+    certInfoSet->count = 0;
+    HKS_FREE(certInfoSet->certs);
+    certInfoSet = NULL;
 }
 
 static int32_t FreshParamSet(struct HksParamSet *paramSet, bool isCopy)

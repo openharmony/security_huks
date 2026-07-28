@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,11 @@
 #include "hks_log.h"
 #include "hks_type.h"
 
-static const char *g_convertErrMsg = "HUKS operation failed.";
+#define CONVERT_ERR_MSG "HUKS operation failed."
+#define SE_FAULT_ERR_MSG "SE environment fault."
+
+#define HKS_SE_ERROR_CODE_MAX (-700)
+#define HKS_SE_ERROR_CODE_MIN (-799)
 
 static struct HksError g_errCodeTable[] = {
     {
@@ -383,6 +387,13 @@ static struct HksError g_errCodeTable[] = {
             .data = NULL
         }
     }, {
+        .innerErrCode = HKS_ERROR_CODE_AEAD_TAG_LEN_INVALID,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_CRYPTO_ALG_ARGUMENT,
+            .errorMsg = "Invalid aead tag length.",
+            .data = NULL
+        }
+    }, {
         .innerErrCode = HKS_ERROR_STORAGE_FAILURE,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_FILE_OPERATION_FAIL,
@@ -586,10 +597,562 @@ static struct HksError g_errCodeTable[] = {
             .data = NULL
         }
     }, {
+        .innerErrCode = HKS_ERROR_CODE_AEAD_TAG_LEN_NOT_EQUAL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "AEAD tag length mismatch.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_INVALID_ACCESS_GROUP,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "invalid access group.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_INVALID_DEVELOPER_ID,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "invalid developer id.",
+            .data = NULL
+        }
+    }, {
         .innerErrCode = HKS_ERROR_CODE_KEY_ALREADY_EXIST,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_KEY_ALREADY_EXIST,
             .errorMsg = "The key with same name is already exist.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_VECTOR_PUSH_BACK,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "push back item to vector fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_GET_ENGINE_ATTRIBUTE_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "get attribute from engine fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_GET_ENGINE_PARAM_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "get param from engine fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_KEYSTORE_DEL_JSON,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "import keystore delete json fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_KEYSTORE_DEL_DB,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "import keystore delete db fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_KEYSTORE_USERID_MAP_EMPTY,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "import keystore userid map is empty.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_KEYSTORE_USERID_NOT_FOUND,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "import keystore userid not found.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_KEYSTORE_OLD_BUNDLENAME_NOT_FOUND,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "import keystore old bundle name not found.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_KEYSTORE_OLD_APPUID_NOT_FOUND,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "import keystore old app uid not found.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_KEYSTORE_DB_QUERY_FAILED,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "import keystore db query failed.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_KEYSTORE_DB_QUERY_NOT_FOUND,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "import keystore db query not found.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_KEYSTORE_DB_QUERY_WRONG_SIZE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "import keystore db query wrong size.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_CHECK_USER_ID_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "import keystore check user id fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HUKS_ERR_CODE_PIN_CODE_ERROR,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_PIN_CODE_ERROR,
+            .errorMsg = "The auth pin is not correct.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_PROVIDER_HAS_REGISTERED,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_ITEM_EXISTS,
+            .errorMsg = "the provider is already registered.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_REMOTE_OPERATION_FAILED,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
+            .errorMsg = "an error occurred in the dependent module.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_UKY_PROVIDER_MGR_REGESTER_REACH_MAX_NUM,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXCEED_LIMIT,
+            .errorMsg = "the number of providers exceeds the limit.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_PROVIDER_ABILITY_NAME_NOT_EXIST,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_MISSING_CRYPTO_ALG_ARGUMENT,
+            .errorMsg = "the ability name param is missing.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_PROVIDER_NOT_FOUND,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_ITEM_NOT_EXIST,
+            .errorMsg = "the provider is not found.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_PROVIDER_IN_USE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_BUSY,
+            .errorMsg = "the provider or Ukey is busy",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HUKS_ERR_CODE_PIN_NO_AUTH,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_PIN_NO_AUTH,
+            .errorMsg = "the Ukey PIN not authenticated.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HUKS_ERR_CODE_PIN_LOCKED,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_PIN_LOCKED,
+            .errorMsg = "the Ukey PIN is locked.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_EXT_JS_METHOD_ERROR,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
+            .errorMsg = "an error occurred in the dependent module.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_EXT_CALL_JS_TIME_OUT,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_BUSY,
+            .errorMsg = "call js methon time out.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_EXT_RETURN_VALUE_INCRECT,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
+            .errorMsg = "extesnion return value is incorrect.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HUKS_ERR_CODE_ITEM_NOT_EXIST,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_ITEM_NOT_EXIST,
+            .errorMsg = "The handle does not exist.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HUKS_ERR_CODE_CRYPTO_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_CRYPTO_FAIL,
+            .errorMsg = "The handle is unavailable.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
+            .errorMsg = "an error occurred in the dependent module.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_ABILITY_NAME_MISSING,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_MISSING_CRYPTO_ALG_ARGUMENT,
+            .errorMsg = "the ability name param is missing.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HUKS_ERR_CODE_BUSY,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_BUSY,
+            .errorMsg = "the provider or Ukey is busy.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_OPEN_LIB_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
+            .errorMsg = "open the dynamic library fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_DLCLOSE_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
+            .errorMsg = "close the dynamic library fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_FIND_FUNC_MAP_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "method not found in map.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_GET_FUNC_POINTER_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
+            .errorMsg = "func pointer not found in dynamic library.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_LIB_REPEAT_CLOSE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "the dynamic library has closed.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_HANDLE_REACH_MAX_NUM,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXCEED_LIMIT,
+            .errorMsg = "the number of resource exceeds the limit.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_BUNDLE_NAME_MISSING,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_MISSING_CRYPTO_ALG_ARGUMENT,
+            .errorMsg = "the bundle name param is missing.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_RESOURCE_INFO_MISSING,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_MISSING_CRYPTO_ALG_ARGUMENT,
+            .errorMsg = "the resource info param is missing.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_CODE_NETWORK_UNAVAILABLE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_NETWORK_UNAVAILABLE,
+            .errorMsg = "the internet is unavaliable.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_CODE_DCM_CALLBACK_ERROR,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_EXTERNAL_ERROR,
+            .errorMsg = "the dcm callback fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_BASIC_NOT_AVAILABLE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_SE_FAULT,
+            .errorMsg = "the se basic not available.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_NOT_AVAILABLE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_SE_FAULT,
+            .errorMsg = "the secure environment not available.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_CMD_CALL_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_SE_FAULT,
+            .errorMsg = "se cmd call fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_BASIC_OUTPUT_LEN,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_SE_FAULT,
+            .errorMsg = "se basic output length error.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_SHARED_MEM_WRITE_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_SE_FAULT,
+            .errorMsg = "se shared memory write fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_SHARED_MEM_READ_FAIL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_SE_FAULT,
+            .errorMsg = "se shared memory read fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_INVALID_MSPC_OUTPUT,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_SE_FAULT,
+            .errorMsg = "se invalid mspc output.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_INVALID_HANDLE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se invalid handle.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_INVALID_SECURITY_LEVEL,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se invalid security level.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_NOT_SUPPORTED,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED,
+            .errorMsg = "the alg not supported in secure environment.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_COUNT_EXCEED_LIMIT,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_BUSY,
+            .errorMsg = "the se calling has reached the limit.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_SESSION_EXCEED_LIMIT,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_SESSION_LIMIT,
+            .errorMsg = "the se session is too busy.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_IMPORT_KEY_SE_LEVEL_MISMATCH,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "the security level in wrapping and paramset mismatch.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_UKEY_NOT_SYSTEM_APP,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "Non-system applications are not allowed to manually pass in UID.",
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_NOT_FOUND,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_ITEM_NOT_EXIST,
+            .errorMsg = "se not found.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_MSIMATCH,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se mismatch.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_INVALID_ALGORITHM,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_CRYPTO_ALG_ARGUMENT,
+            .errorMsg = "invalid se algorithm.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_PARAM_NOT_EXIST,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se param not exist.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_CHECK_PURPOSE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_CRYPTO_ALG_ARGUMENT,
+            .errorMsg = "se check purpose fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_CHECK_DIGEST,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_CRYPTO_ALG_ARGUMENT,
+            .errorMsg = "se check digest fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_CHECK_MODE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_CRYPTO_ALG_ARGUMENT,
+            .errorMsg = "se check mode fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_CHECK_AUTH_TOKEN_VERSION,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se check auth token version fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_CHECK_AUTH_TOKEN_CHALLENGE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se check auth token challenge fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_CHECK_AUTH_TOKEN_USER_TYPE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se check auth token user type fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_GET_PURPOSE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se get purpose fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_GET_ALGORITHM,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se get algorithm fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_GET_KEY_ACCESS_GROUP,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se get key access group fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_GET_DEVELOPER_ID,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se get developer id fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_GET_AUTH_TOKEN,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se get auth token fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_GET_CHALLENGE_TYPE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se get challenge type fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_GET_AUTH_TIMEOUT,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se get auth timeout fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_GET_USER_AUTH_TYPE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se get user auth type fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_GET_KEY_AUTH_PURPOSE,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se get key auth purpose fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_GET_USER_AUTH_ACCESS,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se get user auth access fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_GET_DIGEST,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_INVALID_ARGUMENT,
+            .errorMsg = "se get digest fail.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_SE_UNSUPPORT,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED,
+            .errorMsg = "SE feature is not supported.",
             .data = NULL
         }
     }
@@ -602,7 +1165,7 @@ static struct HksError g_errCodeTable[] = {
  */
 struct HksResult HksConvertErrCode(int32_t ret)
 {
-    struct HksResult result = {HUKS_ERR_CODE_EXTERNAL_ERROR, g_convertErrMsg, NULL};
+    struct HksResult result = {HUKS_ERR_CODE_EXTERNAL_ERROR, CONVERT_ERR_MSG, NULL};
     uint32_t i = 0;
     uint32_t uErrCodeCount = sizeof(g_errCodeTable) / sizeof(g_errCodeTable[0]);
     for (; i < uErrCodeCount; ++i) {
@@ -610,7 +1173,21 @@ struct HksResult HksConvertErrCode(int32_t ret)
             return g_errCodeTable[i].hksResult;
         }
     }
+    if (ret <= HKS_SE_ERROR_CODE_MAX && ret >= HKS_SE_ERROR_CODE_MIN) {
+        HKS_LOG_E("convert SE error code %" LOG_PUBLIC "d to SE_FAULT by default!", ret);
+        struct HksResult seResult = {HUKS_ERR_CODE_SE_FAULT, SE_FAULT_ERR_MSG, NULL};
+        return seResult;
+    }
     HKS_LOG_E("convert error code form %" LOG_PUBLIC "d failed!", ret);
     return result;
+}
+
+int32_t HksReplaceErrCodeIf401(int32_t ret)
+{
+    struct HksResult result = HksConvertErrCode(ret);
+    if (result.errorCode == HUKS_ERR_CODE_ILLEGAL_ARGUMENT) {
+        return HKS_ERROR_NEW_INVALID_ARGUMENT;
+    }
+    return ret;
 }
 

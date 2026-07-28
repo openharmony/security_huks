@@ -299,6 +299,6 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest012, TestSize.Level0)
     HKS_LOG_I("enter HksUpgradeKeyCTest012");
     int32_t ret = AuthUpgradeKey(nullptr, nullptr);
     CleanParamSetKey(nullptr);
-    ASSERT_EQ(HKS_ERROR_BAD_STATE, ret) << "ret is " << ret;
+    ASSERT_EQ(HKS_ERROR_INVALID_ACCESS_GROUP, ret) << "ret is " << ret;
 }
 }
