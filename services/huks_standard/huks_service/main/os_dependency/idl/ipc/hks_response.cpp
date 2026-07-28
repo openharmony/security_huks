@@ -195,9 +195,15 @@ int32_t HksGetProcessInfoForIPC(const struct HksParamSet *paramSet,
 
 int32_t HksCheckIsFrontUser(int32_t userId, bool *isFrontUser)
 {
+#ifdef HAS_OS_ACCOUNT_PART
     int32_t ret = OHOS::AccountSA::OsAccountManager::IsOsAccountForeground(userId, *isFrontUser);
     HKS_IF_TRUE_LOGE_RETURN(ret != ERR_OK, ret, "IsOsAccountForeground failed, errCode: %" LOG_PUBLIC "d", ret)
     return HKS_SUCCESS;
+#else
+    (void)userId;
+    *isFrontUser = false;
+    return HKS_SUCCESS;
+#endif
 }
 
 int32_t HksGetRelatedFrontUserId(const struct HksParamSet *paramSet, int32_t ipcCallerUserId, int32_t *outId)
