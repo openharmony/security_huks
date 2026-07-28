@@ -1276,7 +1276,7 @@ int32_t JsHksCryptoExtAbility::InitSession(const std::string &index, const CppPa
     auto ret = CallJsMethod("onInitSession", jsRuntime_, jsObj_.get(), argParser, retParser);
     HKS_EXT_IF_TRUE_LOGE_RETURN(ret != ERR_OK, ret, "CallJsMethod error, code:%d", ret);
     
-    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME_THREE_STAGE);
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     handle = std::move(dataParam->handle);
     HKS_EXT_IF_TRUE_EXCU(dataParam->errInfo != nullptr && errInfo != nullptr, *errInfo = dataParam->errInfo);
     dataParam->errInfo = nullptr;
