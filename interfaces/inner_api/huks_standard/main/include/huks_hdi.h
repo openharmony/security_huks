@@ -642,23 +642,23 @@ struct HuksHdi {
     int32_t (*HuksHdiGetStatInfo)(struct HksBlob *statInfo);
 
     /**
-    * @brief ML-KEM encapsulation operation.
-    * @param paramSet required parameter set
-    * @param sharedKeyParamSet shared key parameter set
-    * @param encapResult encapsulation result
-    * @return error code, see hks_type.h
-    */
+     * @brief ML-KEM encapsulation operation.
+     * @param paramSet required parameter set
+     * @param sharedKeyParamSet shared key parameter set
+     * @param encapResult encapsulation result
+     * @return error code, see hks_type.h
+     */
     int32_t (*HuksHdiEncapsulate)(const struct HksParamSet *paramSet,
         const struct HksParamSet *sharedKeyParamSet, struct HksEncapsulationResult *encapResult);
 
     /**
-    * @brief ML-KEM decapsulation operation.
-    * @param paramSet required parameter set for decapsulation
-    * @param sharedKeyParamSet parameter set for the output shared secret
-    * @param encapsulatedData ciphertext to decapsulate
-    * @param sharedSecret output shared secret
-    * @return error code, see hks_type.h
-    */
+     * @brief ML-KEM decapsulation operation.
+     * @param paramSet required parameter set for decapsulation
+     * @param sharedKeyParamSet parameter set for the output shared secret
+     * @param encapsulatedData ciphertext to decapsulate
+     * @param sharedSecret output shared secret
+     * @return error code, see hks_type.h
+     */
     int32_t (*HuksHdiDecapsulate)(const struct HksParamSet *paramSet,
         const struct HksParamSet *sharedKeyParamSet, const struct HksBlob *encapsulatedData,
         struct HksBlob *sharedSecret);
