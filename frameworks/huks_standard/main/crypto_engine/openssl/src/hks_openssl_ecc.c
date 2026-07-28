@@ -294,6 +294,7 @@ static EC_KEY *EccInitKey(const struct HksBlob *keyBlob, bool private)
         HKS_LOG_E("ecc key blob size too small");
         return NULL;
     }
+    
     uint8_t *keyPair = keyBlob->data;
     uint32_t publicXSize;
     uint32_t publicYSize;
