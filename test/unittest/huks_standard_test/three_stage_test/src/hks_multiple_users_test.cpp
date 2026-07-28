@@ -91,6 +91,14 @@ static const struct HksParam g_genParams002[] = {
     { .tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = 101 },
 };
 
+static const struct HksParam g_genParams003[] = {
+    { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+    { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
+    { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_CE },
+    { .tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = 199 },
+};
+
 static int32_t HksTestUpdateLoopFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData)
 {
@@ -258,6 +266,28 @@ HWTEST_F(HksMultipleUsersTest, HksMultipleUsersTest002, TestSize.Level0)
 
     struct HksParamSet *genParamSet = nullptr;
     ret = InitParamSet(&genParamSet, g_genParams002, sizeof(g_genParams002) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+
+    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    EXPECT_EQ(ret, HKS_ERROR_ACCESS_OTHER_USER_KEY) << "HksGenerateKey failed.";
+
+    HksFreeParamSet(&genParamSet);
+}
+
+/**
+ * @tc.name: HksMultipleUsersTest.HksMultipleUsersTest003
+ * @tc.desc: uid not in whilelist, specific user id is not exist
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksMultipleUsersTest, HksMultipleUsersTest003, TestSize.Level0)
+{
+    HksMockNativeToken mock("asset_service");
+
+    char tmpKeyAlias[] = "HksMultipleUsersTest002";
+    const struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);

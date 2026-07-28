@@ -96,7 +96,7 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
         if (ret == HKS_SUCCESS && accessTypeParam != NULL &&
             accessTypeParam->uint32Param == HKS_AUTH_ACCESS_ALWAYS_VALID) {
             int32_t activeFrontUserId;
-            ret = HksGetFrontUserId(&activeFrontUserId);
+            ret = HksGetRelatedFrontUserId(inParamSet, processInfo.userIdInt, &activeFrontUserId);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetFrontUserId fail! ret=%" LOG_PUBLIC "d", ret);
             struct HksParamSet *newParamSet = NULL;
             ret = BuildFrontUserIdParamSet(inParamSet, &newParamSet, activeFrontUserId);
