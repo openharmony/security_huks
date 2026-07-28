@@ -60,10 +60,6 @@ constexpr size_t ARGC_FOUR = 4;
 constexpr size_t MAX_ARG_COUNT = 5;
 constexpr size_t MAX_CERT_SIZE = 5 * 8196;
 constexpr int32_t MAX_WAIT_TIME = 3;
-constexpr int32_t MAX_WAIT_TIME_THREE_STAGE = 60;
-constexpr int32_t MAX_WAIT_TIME_AUTH_PIN = 60;
-constexpr int32_t MAX_WAIT_TIME_GEN_KEY = 10;
-constexpr int32_t MAX_WAIT_TIME_EXPORT_CERTS = 10;
 
 struct HandleInfoParam {
     std::string handle {};
@@ -1118,7 +1114,7 @@ int32_t JsHksCryptoExtAbility::AuthUkeyPin(const std::string &handle, const CppP
     auto ret = CallJsMethod("onAuthUkeyPin", jsRuntime_, jsObj_.get(), argParser, retParser);
     HKS_EXT_IF_TRUE_LOGE_RETURN(ret != ERR_OK, ret, "CallJsMethod error, code:%d", ret);
     
-    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME_AUTH_PIN);
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     authState = std::move(dataParam->authState);
     retryCnt = std::move(dataParam->retryCnt);
 
@@ -1207,7 +1203,7 @@ int32_t JsHksCryptoExtAbility::ExportProviderCertificates(const CppParamSet &par
     auto ret = CallJsMethod("onEnumCertificates", jsRuntime_, jsObj_.get(), argParser, retParser);
     HKS_EXT_IF_TRUE_LOGE_RETURN(ret != ERR_OK, ret, "CallJsMethod error, code:%d", ret);
     
-    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME_EXPORT_CERTS);
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     HksCertInfoToString(dataParam->certs, certJsonArr);
     HKS_EXT_IF_TRUE_EXCU(dataParam->errInfo != nullptr && errInfo != nullptr, *errInfo = dataParam->errInfo);
     dataParam->errInfo = nullptr;
@@ -1308,7 +1304,7 @@ int32_t JsHksCryptoExtAbility::GenerateKey(const std::string &handle, const CppP
     auto ret = CallJsMethod("onGenerateKeyItem", jsRuntime_, jsObj_.get(), argParser, retParser);
     HKS_EXT_IF_TRUE_LOGE_RETURN(ret != ERR_OK, ret, "CallJsMethod error, code:%d", ret);
     
-    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME_GEN_KEY);
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     HKS_EXT_IF_TRUE_EXCU(dataParam->errInfo != nullptr && errInfo != nullptr, *errInfo = dataParam->errInfo);
     dataParam->errInfo = nullptr;
     return dataParam->hksErrorCode;
@@ -1335,7 +1331,7 @@ int32_t JsHksCryptoExtAbility::UpdateSession(const std::string &handle, const Cp
     auto ret = CallJsMethod("onUpdateSession", jsRuntime_, jsObj_.get(), argParser, retParser);
     HKS_EXT_IF_TRUE_LOGE_RETURN(ret != ERR_OK, ret, "CallJsMethod error, code:%d", ret);
     
-    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME_THREE_STAGE);
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     outData = std::move(dataParam->outData);
     HKS_EXT_IF_TRUE_EXCU(dataParam->errInfo != nullptr && errInfo != nullptr, *errInfo = dataParam->errInfo);
     dataParam->errInfo = nullptr;
@@ -1363,7 +1359,7 @@ int32_t JsHksCryptoExtAbility::FinishSession(const std::string &handle, const Cp
     auto ret = CallJsMethod("onFinishSession", jsRuntime_, jsObj_.get(), argParser, retParser);
     HKS_EXT_IF_TRUE_LOGE_RETURN(ret != ERR_OK, ret, "CallJsMethod error, code:%d", ret);
     
-    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME_THREE_STAGE);
+    WAIT_FOR_CALL_JS_METHOD(dataParam, MAX_WAIT_TIME);
     outData = std::move(dataParam->outData);
     HKS_EXT_IF_TRUE_EXCU(dataParam->errInfo != nullptr && errInfo != nullptr, *errInfo = dataParam->errInfo);
     dataParam->errInfo = nullptr;
