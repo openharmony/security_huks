@@ -96,8 +96,6 @@ void HksFreeEventInfo(HksEventInfo **eventInfo)
         HKS_FREE((*eventInfo)->ukeyInfo.abilityName);
         HKS_FREE((*eventInfo)->ukeyInfo.resourceId);
         HKS_FREE((*eventInfo)->ukeyInfo.propertyId);
-        HKS_FREE((*eventInfo)->ukeyInfo.extBundleName);
-        HKS_FREE((*eventInfo)->ukeyInfo.extraData);
     }
 }
 
