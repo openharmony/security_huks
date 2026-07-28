@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "hks_error_code.h"
+#include "hks_type.h"
 #include "securec.h"
 #include <stdint.h>
 #define HUKS_DISABLE_LOG_AT_FILE_TO_REDUCE_ROM_SIZE
@@ -122,6 +123,36 @@ ENABLE_CFI(int32_t HuksAccessExportPublicKey(const struct HksBlob *key, const st
     int32_t ret = HandleKeyClassTag(paramSet, &paramSetInNew);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
     ret = g_hksHalDevicePtr->HuksHdiExportPublicKey(key, paramSetInNew, keyOut);
+    HksFreeParamSet(&paramSetInNew);
+    return ret;
+}
+
+ENABLE_CFI(int32_t HuksAccessWrapkey(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    struct HksBlob *wrappedKey))
+{
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiWrapKey, HKS_ERROR_NULL_POINTER,
+        "wrapKey function is null pointer")
+    struct HksParamSet *paramSetInNew = NULL;
+    int32_t ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = g_hksHalDevicePtr->HuksHdiWrapKey(key, paramSetInNew, wrappedKey);
+    HksFreeParamSet(&paramSetInNew);
+    return ret;
+}
+
+ENABLE_CFI(int32_t HuksAccessUnwrapkey(const struct HksParamSet *paramSet, const struct HksBlob *wrappedKey,
+    struct HksBlob *keyOut))
+{
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiUnwrapKey, HKS_ERROR_NULL_POINTER,
+        "wrapKey function is null pointer")
+    struct HksParamSet *paramSetInNew = NULL;
+    int32_t ret = HandleKeyClassTag(paramSet, &paramSetInNew);
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HandleKeyClassTag fail, ret = %" LOG_PUBLIC "d", ret)
+    ret = g_hksHalDevicePtr->HuksHdiUnwrapKey(paramSet, wrappedKey, keyOut);
     HksFreeParamSet(&paramSetInNew);
     return ret;
 }
@@ -401,7 +432,7 @@ ENABLE_CFI(int32_t HuksAccessEncapsulate(const struct HksParamSet *paramSet,
     HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiEncapsulate, HKS_ERROR_NULL_POINTER,
-        "Encapsulate functon is null pointer")
+        "Encapsulate function is null pointer")
     return g_hksHalDevicePtr->HuksHdiEncapsulate(paramSet, sharedKeyParamSet, encapResult);
 }
 

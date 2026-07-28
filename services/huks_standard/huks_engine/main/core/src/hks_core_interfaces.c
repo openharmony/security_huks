@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "hks_type.h"
 #define HUKS_DISABLE_LOG_AT_FILE_TO_REDUCE_ROM_SIZE
 
 #include "hks_core_interfaces.h"
@@ -67,6 +68,16 @@ int32_t HuksHdiImportWrappedKey(const struct HksBlob *keyAlias, const struct Hks
 int32_t HuksHdiExportPublicKey(const struct HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *keyOut)
 {
     return HksCoreExportPublicKey(key, paramSet, keyOut);
+}
+
+int32_t HuksHdiWrapKey(const struct HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *wrappedKey)
+{
+    return HksCoreWrapkey(NULL, key, paramSet, wrappedKey);
+}
+
+int32_t HuksHdiUnwrapKey(const struct HksParamSet *paramSet, const struct HksBlob *wrappedKey, struct HksBlob *keyOut)
+{
+    return HksCoreUnwrapKey(NULL, wrappedKey, paramSet, keyOut);
 }
 
 int32_t HuksHdiInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle,
@@ -213,6 +224,8 @@ struct HuksHdi *HuksCreateHdiDevicePtr(void)
     hdiDevicePtr->HuksHdiInit             = HuksHdiInit;
     hdiDevicePtr->HuksHdiUpdate           = HuksHdiUpdate;
     hdiDevicePtr->HuksHdiFinish           = HuksHdiFinish;
+    hdiDevicePtr->HuksHdiWrapKey          = HuksHdiWrapKey;
+    hdiDevicePtr->HuksHdiUnwrapKey        = HuksHdiUnwrapKey;
     hdiDevicePtr->HuksHdiAbort            = HuksHdiAbort;
     hdiDevicePtr->HuksHdiGetKeyProperties = HuksHdiGetKeyProperties;
     hdiDevicePtr->HuksHdiAttestKey        = HuksHdiAttestKey;
