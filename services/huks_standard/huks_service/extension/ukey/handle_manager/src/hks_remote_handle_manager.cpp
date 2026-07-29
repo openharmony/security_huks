@@ -229,8 +229,6 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
             providerInfoToNum_.EnsureInsert(providerInfo, num - 1);
         }
     }
-    HKS_LOG_I("auth map_ is %" LOG_PUBLIC "u,and%" LOG_PUBLIC "u", uidIndexToHandle_.Size(),uidIndexToHandle_.Size());
-    HKS_LOG_I("providerInfoToNum_ is %" LOG_PUBLIC "u", providerInfoToNum_.Size());
     return HKS_SUCCESS;
 }
 
