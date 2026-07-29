@@ -41,12 +41,6 @@ int32_t HuksAccessImportWrappedKey(const struct HksBlob *wrappingKeyAlias, const
 int32_t HuksAccessExportPublicKey(const struct HksBlob *key, const struct HksParamSet *paramSet,
     struct HksBlob *keyOut);
 
-int32_t HuksAccessWrapkey(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    struct HksBlob *wrappedKey);
-
-int32_t HuksAccessUnwrapkey(const struct HksParamSet *paramSet, const struct HksBlob *wrappedKey,
-    struct HksBlob *keyOut);
-
 int32_t HuksAccessInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle,
     struct HksBlob *token);
 
@@ -109,6 +103,12 @@ int32_t HuksAccessEncapsulate(const struct HksParamSet *paramSet, const struct H
 
 int32_t HuksAccessDecapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParam,
     struct HksBlob *encapsData, struct HksBlob *hdiSharedSecret);
+
+int32_t HuksAccessWrapkey(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    struct HksBlob *wrappedKey);
+
+int32_t HuksAccessUnwrapkey(const struct HksParamSet *paramSet, const struct HksBlob *wrappedKey,
+    struct HksBlob *keyOut);
 #ifdef __cplusplus
 }
 #endif
