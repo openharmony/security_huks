@@ -59,6 +59,9 @@ int32_t HksMbedtlsEcdh(const struct HksBlob *nativeKey,
     int32_t ret = EccKeyCheck(pubKey);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
+    ret = EccKeyCheck(nativeKey);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
     mbedtls_ecp_group_id mbedtlsCurveNist = MBEDTLS_ECP_DP_NONE;
     ret = HksMbedtlsEccGetKeyCurveNist((struct KeyMaterialEcc *)(nativeKey->data), &mbedtlsCurveNist);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)

@@ -183,6 +183,10 @@ static int32_t CheckLocalCipherParams(uint32_t cmdId, const struct HksBlob *key,
     if (outParam->uint32Param == HKS_ALG_AES) {
         keySize = key->size * HKS_BITS_PER_BYTE;
     } else if (outParam->uint32Param == HKS_ALG_RSA) {
+        if (key->size < sizeof(struct KeyMaterialRsa)) {
+            HKS_LOG_E("key size too small for RSA");
+            return HKS_ERROR_INVALID_KEY_INFO;
+        }
         const struct KeyMaterialRsa *keyMaterial = (struct KeyMaterialRsa *)key->data;
         keySize = keyMaterial->keySize;
     } else {
@@ -261,10 +265,22 @@ static int32_t CheckLocalSignVerifyParams(uint32_t cmdId, const struct HksBlob *
 
     uint32_t keySize = 0;
     if (algParam->uint32Param == HKS_ALG_RSA) {
+        if (key->size < sizeof(struct KeyMaterialRsa)) {
+            HKS_LOG_E("key size too small for RSA");
+            return HKS_ERROR_INVALID_KEY_INFO;
+        }
         keySize = ((struct KeyMaterialRsa *)key->data)->keySize;
     } else if (algParam->uint32Param == HKS_ALG_DSA) {
+        if (key->size < sizeof(struct KeyMaterialDsa)) {
+            HKS_LOG_E("key size too small for DSA");
+            return HKS_ERROR_INVALID_KEY_INFO;
+        }
         keySize = ((struct KeyMaterialDsa *)key->data)->keySize;
     } else if (algParam->uint32Param == HKS_ALG_ECC) {
+        if (key->size < sizeof(struct KeyMaterialEcc)) {
+            HKS_LOG_E("key size too small for ECC");
+            return HKS_ERROR_INVALID_KEY_INFO;
+        }
         keySize = ((struct KeyMaterialEcc *)key->data)->keySize;
     } else if (algParam->uint32Param == HKS_ALG_ED25519) {
         keySize = key->size * HKS_BITS_PER_BYTE;

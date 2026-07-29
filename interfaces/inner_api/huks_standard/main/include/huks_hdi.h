@@ -622,26 +622,46 @@ struct HuksHdi {
     int32_t (*HuksHdiGetStatInfo)(struct HksBlob *statInfo);
 
     /**
-    * @brief ML-KEM encapsulation operation.
-    * @param paramSet required parameter set
-    * @param sharedKeyParamSet shared key parameter set
-    * @param encapResult encapsulation result
-    * @return error code, see hks_type.h
-    */
+     * @brief ML-KEM encapsulation operation.
+     * @param paramSet required parameter set
+     * @param sharedKeyParamSet shared key parameter set
+     * @param encapResult encapsulation result
+     * @return error code, see hks_type.h
+     */
     int32_t (*HuksHdiEncapsulate)(const struct HksParamSet *paramSet,
         const struct HksParamSet *sharedKeyParamSet, struct HksEncapsulationResult *encapResult);
 
     /**
-    * @brief ML-KEM decapsulation operation.
-    * @param paramSet required parameter set for decapsulation
-    * @param sharedKeyParamSet parameter set for the output shared secret
-    * @param encapsulatedData ciphertext to decapsulate
-    * @param sharedSecret output shared secret
-    * @return error code, see hks_type.h
-    */
+     * @brief ML-KEM decapsulation operation.
+     * @param paramSet required parameter set for decapsulation
+     * @param sharedKeyParamSet parameter set for the output shared secret
+     * @param encapsulatedData ciphertext to decapsulate
+     * @param sharedSecret output shared secret
+     * @return error code, see hks_type.h
+     */
     int32_t (*HuksHdiDecapsulate)(const struct HksParamSet *paramSet,
         const struct HksParamSet *sharedKeyParamSet, const struct HksBlob *encapsulatedData,
         struct HksBlob *sharedSecret);
+
+    /**
+     * @brief wrap key
+     * @param key key need to wrap
+     * @param paramSet required parameter set
+     * @param wrappedKey wrapped key
+     * @return error code, see hks_type.h
+     */
+    int32_t (*HuksHdiWrapKey)(const struct HksBlob *key, const struct HksParamSet *paramSet,
+        struct HksBlob *wrappedKey);
+
+    /**
+     * @brief unwrap key
+     * @param paramSet required parameter set
+     * @param wrappedKey wrapped key data
+     * @param keyOut output key
+     * @return error code, see hks_type.h
+     */
+    int32_t (*HuksHdiUnwrapKey)(const struct HksParamSet *paramSet, const struct HksBlob *wrappedKey,
+        struct HksBlob *keyOut);
 };
 
 #endif /* HUKS_HDI_H */

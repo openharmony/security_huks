@@ -89,6 +89,11 @@ static int32_t EccKeyMaterialXyzSizeCheck(const struct KeyMaterialEcc *keyMateri
 
 int32_t EccKeyCheck(const struct HksBlob *key)
 {
+    if (key->size < sizeof(struct KeyMaterialEcc)) {
+        HKS_LOG_E("Ecc key blob size too small");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+    
     const struct KeyMaterialEcc *keyMaterial = (struct KeyMaterialEcc *)(key->data);
     int32_t ret = HksMbedtlsEccCheckKeySize(keyMaterial->keySize);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
