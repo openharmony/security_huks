@@ -51,6 +51,8 @@ static struct HksBasicInterface g_interfaceInst = {
     .hksRegisterEventProc = HksRegisterEventProcWrapper,
     .hksRegisterEventProcs = HksRegisterEventProcs,
     .hksEnqueueEvent = HksEnqueueEventWrapper,
+
+    .hksGetDeviceLockStatus = HksGetDeviceLockStatus,
 };
 
 static void HksDestoryPluginProxy(void)
