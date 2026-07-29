@@ -47,7 +47,7 @@ void HuksPluginLifeCycleMgr::ReleaseInstance()
 }
 
 constexpr int WAIT_CALlBACK = 20;
-constexpr int WAIT_TIME_MS = 5; 
+constexpr int WAIT_TIME_MS = 5;
 constexpr int WAIT_ITERATION = 6;
 
 static std::function<void(HksProcessInfo)> MakeDeathCallback(
@@ -55,9 +55,9 @@ static std::function<void(HksProcessInfo)> MakeDeathCallback(
     const std::string &providerName, const CppParamSet &paramSet)
 {
     return [plugin, providerName, paramSet](const HksProcessInfo &processInfo) mutable {
-        std::thread([plugin, pdrName = providerName, paramSet_ = paramSet, processInfo]() mutable {	 
-            std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long long>(WAIT_CALlBACK)));	 
-            HKS_LOG_I("UnRegisterProvider from ExtensionConnection");	 
+        std::thread([plugin, pdrName = providerName, paramSet_ = paramSet, processInfo]() mutable {
+            std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long long>(WAIT_CALlBACK)));
+            HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
             plugin->UnRegisterProvider(processInfo, pdrName, paramSet_, true);
         }).detach();
     };
