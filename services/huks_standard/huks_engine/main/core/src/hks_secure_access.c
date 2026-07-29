@@ -990,11 +990,13 @@ static int32_t HksCheckAuthType(struct HuksKeyNode *keyNode, const struct HksUse
     return HKS_SUCCESS;
 }
 
-int32_t HksGetDeviceLockStatus(int32_t userId, bool *isDeviceLocked)
+int32_t HksGetDeviceLockStatus(int32_t userId)
 {
-    HKS_IF_NULL_LOGE_RETURN(isDeviceLocked, HKS_ERROR_NULL_POINTER, "isDeviceLocked is null")
-    int32_t ret = IsDeviceLocked(userId, isDeviceLocked);
+    bool isDeviceLocked = false;
+    int32_t ret = IsDeviceLocked(userId, &isDeviceLocked);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "IsDeviceLocked failed")
+    // if device is locked, current operation will be denied.
+    HKS_IF_TRUE_LOGE_RETURN(isDeviceLocked, HKS_ERROR_NOT_SUPPORTED, "device is locked")
     return HKS_SUCCESS;
 }
 
