@@ -194,15 +194,45 @@ int32_t HksGetProcessInfoForIPC(const struct HksParamSet *paramSet,
     return ret;
 }
 
-int32_t HksGetFrontUserId(int32_t *outId)
+int32_t HksCheckIsFrontUser(int32_t userId, bool *isFrontUser)
 {
 #ifdef HAS_OS_ACCOUNT_PART
-    std::vector<int> ids;
-    int ret = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
-    HKS_IF_TRUE_LOGE_RETURN(ret != ERR_OK || ids.empty(), HKS_FAILURE,
-        "QueryActiveOsAccountIds Failed!! ret = %" LOG_PUBLIC "d", ret)
-    HKS_LOG_D("QueryActiveOsAccountIds success: FrontUserId= %" LOG_PUBLIC "d", ids[0]);
-    *outId = ids[0];
+    int32_t ret = OHOS::AccountSA::OsAccountManager::IsOsAccountForeground(userId, *isFrontUser);
+    HKS_IF_TRUE_LOGE_RETURN(ret != ERR_OK, ret, "IsOsAccountForeground failed, errCode: %" LOG_PUBLIC "d", ret)
+    return HKS_SUCCESS;
+#else
+    (void)userId;
+    *isFrontUser = false;
+    return HKS_SUCCESS;
+#endif
+}
+
+int32_t HksGetRelatedFrontUserId(const struct HksParamSet *paramSet, int32_t ipcCallerUserId, int32_t *outId)
+{
+#ifdef HAS_OS_ACCOUNT_PART
+    if (ipcCallerUserId >= HKS_ROOT_USER_UPPERBOUND) {
+        // 普通应用返回应用所属userid
+        *outId = ipcCallerUserId;
+        return HKS_SUCCESS;
+    }
+    const static int32_t INVALID_USER_ID = -1;
+    struct HksParam *specificUserId = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_SPECIFIC_USER_ID, &specificUserId);
+    if (ret == HKS_SUCCESS) {
+        *outId = specificUserId->int32Param;
+        return HKS_SUCCESS;
+    } else if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+        // 系统应用不指定userid时默认返回逻辑主屏userid
+        int32_t localId = INVALID_USER_ID;
+        ret = OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(localId);
+        HKS_IF_TRUE_LOGE_RETURN(ret != ERR_OK, ret,
+            "GetForegroundOsAccountLocalId fail, errCode : %" LOG_PUBLIC "d", ret)
+        *outId = localId;
+        HKS_LOG_I("HksGetRelatedFrontUserId: return front userid: %" LOG_PUBLIC "d", *outId);
+        return HKS_SUCCESS;
+    }
+    HKS_LOG_E("HksGetRelatedFrontUserId HksGetParam fail, ret : %" LOG_PUBLIC "d", ret);
+    return ret;
 #else // HAS_OS_ACCOUNT_PART
     *outId = -1;
     HKS_LOG_I("QueryActiveOsAccountIds, no os account part, set FrontUserId= -1");

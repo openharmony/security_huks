@@ -27,7 +27,9 @@ void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlo
 int32_t HksGetProcessInfoForIPC(const struct HksParamSet *paramSet,
     const uint8_t *context, struct HksProcessInfo *processInfo);
 
-int32_t HksGetFrontUserId(int32_t *outId);
+int32_t HksGetRelatedFrontUserId(const struct HksParamSet *paramSet, int32_t ipcCallerUserId, int32_t *outId);
+
+int32_t HksCheckIsFrontUser(int32_t userId, bool *isFrontUser);
 
 int HksGetOsAccountIdFromUid(int uid);
 
