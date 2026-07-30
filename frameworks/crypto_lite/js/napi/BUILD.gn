@@ -44,6 +44,8 @@ ohos_shared_library("cipher_napi") {
     "-Werror",
   ]
 
+  branch_protector_ret = "pac_ret"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true

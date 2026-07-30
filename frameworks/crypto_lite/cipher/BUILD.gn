@@ -19,6 +19,8 @@ ohos_shared_library("cipher_shared") {
     subsystem_name = "security"
     part_name = "huks"
 
+    branch_protector_ret = "pac_ret"
+
     sanitize = {
       cfi = true
       cfi_cross_dso = true
