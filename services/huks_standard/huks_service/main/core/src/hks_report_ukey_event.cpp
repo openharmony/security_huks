@@ -1063,19 +1063,22 @@ int32_t ReportUKeyEvent(const struct UKeyInfo* ukeyInfo, const char *funcName,
     return HKS_SUCCESS;
 }
 
-void ReportUKeySessionEvent(uint32_t eventId, int32_t ret,
+void ReportUKeySessionEvent(uint32_t eventId, const struct UKeyReportErrInfo *errInfo,
     const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet)
 {
-    struct UKeyInfo ukeyInfo = { .eventId = eventId, .detailErrcode = ret };
-    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret };
+    struct UKeyInfo ukeyInfo = { .eventId = eventId, .detailErrcode = errInfo->errVal };
+    if (handle != nullptr && handle->data != nullptr && handle->size > 0) {
+        ukeyInfo.handle = *handle;
+    }
+    struct UKeyCommonInfo ukeyCommon = { .returnCode = errInfo->ret };
     (void)ReportUKeyEvent(&ukeyInfo, __func__, processInfo, paramSet, &ukeyCommon);
 }
 
-void ReportUKeyKeyEvent(uint32_t eventId, int32_t ret,
+void ReportUKeyKeyEvent(uint32_t eventId, const struct UKeyReportErrInfo *errInfo,
     const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet)
 {
-    struct UKeyInfo ukeyInfo = { .eventId = eventId, .detailErrcode = ret };
-    struct UKeyCommonInfo ukeyCommon = { .returnCode = ret };
+    struct UKeyInfo ukeyInfo = { .eventId = eventId, .detailErrcode = errInfo->errVal };
+    struct UKeyCommonInfo ukeyCommon = { .returnCode = errInfo->ret };
     (void)ReportUKeyEvent(&ukeyInfo, __func__, processInfo, paramSet, &ukeyCommon);
 }
