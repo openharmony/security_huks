@@ -19,7 +19,7 @@ config("huks_config") {
   include_dirs = [ "include" ]
 }
 
-ohos_static_library("libhuks_se_systemapi_wrap_static") {
+ohos_static_library("libhuks_screenlock_systemapi_wrap_static") {
   sanitize = {
     integer_overflow = true
     cfi = true

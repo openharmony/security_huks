@@ -22,8 +22,6 @@
 extern "C" {
 #endif
 
-int32_t HksGetDeviceLockStatus(int32_t userId);
-
 int32_t HksCoreSecureAccessInitParams(struct HuksKeyNode *keyNode, const struct HksParamSet *initParamSet,
     struct HksBlob *token);
 

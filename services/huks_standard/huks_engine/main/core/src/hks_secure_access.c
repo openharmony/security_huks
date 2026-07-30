@@ -37,10 +37,6 @@
 #include "hks_useridm_api_wrap.h"
 #endif
 
-#ifdef THEME_SCREENLOCK_MGR_ENABLE
-#include "screen_lock_wrapper.h"
-#endif
-
 #include "securec.h"
 
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
@@ -987,16 +983,6 @@ static int32_t HksCheckAuthType(struct HuksKeyNode *keyNode, const struct HksUse
             HKS_LOG_E("invalid authMode %" LOG_PUBLIC "u", blobAuthMode);
             return HKS_ERROR_NOT_SUPPORTED;
     }
-    return HKS_SUCCESS;
-}
-
-int32_t HksGetDeviceLockStatus(int32_t userId)
-{
-    bool isDeviceLocked = false;
-    int32_t ret = IsDeviceLocked(userId, &isDeviceLocked);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "IsDeviceLocked failed")
-    // if device is locked, current operation will be denied.
-    HKS_IF_TRUE_LOGE_RETURN(isDeviceLocked, HKS_ERROR_NOT_SUPPORTED, "device is locked")
     return HKS_SUCCESS;
 }
 

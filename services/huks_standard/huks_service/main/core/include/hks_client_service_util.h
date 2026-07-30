@@ -70,6 +70,11 @@ int32_t CheckKeyCondition(const struct HksProcessInfo *processInfo, const struct
 
 int32_t AppendKeyBlobToParamSet(const struct HksParamSet *paramSet, const struct HksBlob *keyBlob,
     struct HksParamSet **outParamSet);
+
+#ifdef THEME_SCREENLOCK_MGR_ENABLE
+int32_t HksGetDeviceLockStatus(int32_t userId)
+#endif
+
 #ifdef __cplusplus
 }
 #endif
