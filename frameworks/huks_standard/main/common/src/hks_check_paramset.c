@@ -800,6 +800,7 @@ static int32_t CheckMlDsaKeyLen(uint32_t alg, uint32_t keyType, const struct Par
         HKS_LOG_E("invalid import ml-dsa key material");
         return HKS_ERROR_INVALID_KEY_INFO;
     }
+
     uint32_t expectedPubKeySize = 0;
     uint32_t expectedPriKeySize = 0;
     HKS_IF_NOT_SUCC_RETURN(GetMlDsaExpectedSize(keyMaterial->keyParamSet, &expectedPubKeySize,
@@ -818,7 +819,7 @@ static int32_t CheckMlDsaKeyLen(uint32_t alg, uint32_t keyType, const struct Par
     }
     uint32_t keySize = sizeof(struct HksKeyMaterialMlDsa) + keyMaterial->pubKeySize + keyMaterial->priKeySize;
     if (key->size < keySize) {
-        HKS_LOG_E("import ml-dsa key size[%u] smaller than keySize[%u]", key->size, keySize);
+        HKS_LOG_E("import key size[%" LOG_PUBLIC "u] smaller than keySize[%" LOG_PUBLIC "u]", key->size, keySize);
         return HKS_ERROR_INVALID_KEY_INFO;
     }
     return HKS_SUCCESS;
@@ -970,6 +971,7 @@ static int32_t CheckMlKemKeyLen(uint32_t alg, uint32_t keyType, const struct Par
         HKS_LOG_E("invalid import ml-kem key material");
         return HKS_ERROR_INVALID_KEY_INFO;
     }
+
     uint32_t expectedPubKeySize = 0;
     uint32_t expectedPriKeySize = 0;
     HKS_IF_NOT_SUCC_RETURN(GetMlKemExpectedSize(keyMaterial->keyParamSet, &expectedPubKeySize,
