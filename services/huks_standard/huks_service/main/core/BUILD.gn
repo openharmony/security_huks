@@ -97,11 +97,6 @@ if (os_level == "standard") {
       deps += [ "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static" ]
     }
 
-    if (theme_screenlock_mgr_emf_enable == true) {
-      cflags += [ "-DTHEME_SCREENLOCK_MGR_ENABLE" ]
-      deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/screen_lock_wrapper/libhuks_screenlock_systemapi_wrap_static" ]
-    }
-
     if (enable_hks_mock) {
       deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_mock:libhuks_service_systemapi_mock_static" ]
     } else {
@@ -111,6 +106,11 @@ if (os_level == "standard") {
     cflags = [
       "-DHUKS_CHANGE_STORAGE_LEVEL_CONFIG=${huks_change_storage_level_config}",
     ]
+  
+    if (theme_screenlock_mgr_emf_enable == true) {
+      cflags += [ "-DTHEME_SCREENLOCK_MGR_ENABLE" ]
+      deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/screen_lock_wrapper:libhuks_screenlock_systemapi_wrap_static" ]
+    }
     complete_static_lib = true
 
     branch_protector_ret = "pac_ret"
