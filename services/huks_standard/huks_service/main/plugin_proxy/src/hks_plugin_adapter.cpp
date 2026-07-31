@@ -53,7 +53,7 @@ static struct HksBasicInterface g_interfaceInst = {
     .hksEnqueueEvent = HksEnqueueEventWrapper,
 
 #ifdef THEME_SCREENLOCK_MGR_ENABLE
-    .hksGetDeviceLockStatus = HksGetDeviceLockStatus,
+    .hksGetScreenLockStatus = HksGetScreenLockStatus,
 #endif
 };
 

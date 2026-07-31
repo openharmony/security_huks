@@ -72,7 +72,7 @@ int32_t AppendKeyBlobToParamSet(const struct HksParamSet *paramSet, const struct
     struct HksParamSet **outParamSet);
 
 #ifdef THEME_SCREENLOCK_MGR_ENABLE
-int32_t HksGetDeviceLockStatus(int32_t userId);
+int32_t HksGetScreenLockStatus(int32_t userId);
 #endif
 
 #ifdef __cplusplus
