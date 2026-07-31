@@ -47,8 +47,8 @@ ohos_static_library("libhuks_service_systemapi_wrap_static") {
     "ipc:ipc_single",
   ]
 
-   if (enable_user_auth_framework) { 
-     external_deps += [ "user_auth_framework:userauth_client" ] 
-   }
+  if (enable_user_auth_framework) {
+    external_deps += [ "user_auth_framework:userauth_client" ]
+  }
   complete_static_lib = true
 }

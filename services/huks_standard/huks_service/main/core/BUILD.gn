@@ -107,7 +107,7 @@ if (os_level == "standard") {
       "-DHUKS_CHANGE_STORAGE_LEVEL_CONFIG=${huks_change_storage_level_config}",
     ]
   
-    if (theme_screenlock_mgr_emf_enable == true) {
+    if (theme_screenlock_mgr_emf_enable) {
       cflags += [ "-DTHEME_SCREENLOCK_MGR_ENABLE" ]
       deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/screen_lock_wrapper:libhuks_screenlock_systemapi_wrap_static" ]
     }

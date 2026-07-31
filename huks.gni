@@ -19,7 +19,7 @@ enable_user_auth_framework = true
 enable_huks_lite_hap = false
 enable_bundle_framework = true
 enable_interact_across_local_accounts = false
-  theme_screenlock_mgr_emf_enable = true
+theme_screenlock_mgr_emf_enable = true
 fuzz_module_out_path = "huks/huks"
 huks_base_path = "//base/security/huks/"
 
