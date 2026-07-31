@@ -822,4 +822,5 @@ int32_t HksGetDeviceLockStatus(int32_t userId)
     return HKS_SUCCESS;
 }
 #endif
+#endif
 #endif /* _CUT_AUTHENTICATE_ */
