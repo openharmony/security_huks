@@ -43,7 +43,8 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/main/ha/include",
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/se/include",
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms/include",
-      "//base/security/huks/frameworks/huks_standard/main/common/include"
+      "//base/security/huks/frameworks/huks_standard/main/common/include",
+      "//base/security/huks/services/huks_standard/huks_service/extension/ukey_client_service/inc",
     ]
 
     sources = [
@@ -135,7 +136,6 @@ if (os_level == "standard") {
 
     if (huks_enable_ukey_config == true) { 
        sources += [ 
-         "src/hks_ukey_three_stage_adapter.cpp", 
          "src/hks_report_ukey_event.cpp", 
        ] 
      }

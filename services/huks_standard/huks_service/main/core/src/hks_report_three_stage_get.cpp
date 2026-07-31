@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@
 #include "hks_ha_event_report.h"
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
 #include "hks_ukey_check.h"
-#include "hks_ukey_three_stage_adapter.h"
+#include "hks_ukey_service_adapter.h"
 #endif
 
 static uint32_t g_threeStageEvent[] = {
