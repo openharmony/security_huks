@@ -26,7 +26,7 @@
 int32_t IsDeviceLocked(int32_t userId, bool *isDeviceLocked)
 {
     if (isDeviceLocked == nullptr) {
-        LOGE("IsDeviceLocked: isDeviceLocked is nullptr");
+        HKS_LOG_E("IsDeviceLocked: isDeviceLocked is nullptr");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -35,14 +35,14 @@ int32_t IsDeviceLocked(int32_t userId, bool *isDeviceLocked)
 #ifdef THEME_SCREENLOCK_MGR_ENABLE
     auto screenLockMgr = OHOS::ScreenLock::ScreenLockManager::GetInstance();
     if (screenLockMgr == nullptr) {
-        LOGE("ScreenLockManager::GetInstance failed");
+        HKS_LOG_E("ScreenLockManager::GetInstance failed");
         return HKS_ERROR_NOT_SUPPORTED;
     }
 
     bool locked = false;
     int32_t ret = screenLockMgr->IsDeviceLocked(userId, locked);
     if (ret != OHOS::ScreenLock::E_SCREENLOCK_OK) {
-        LOGE("IsDeviceLocked failed, error code: %{public}d", ret);
+        HKS_LOG_E("IsDeviceLocked failed, error code: %{public}d", ret);
         return HKS_ERROR_NOT_SUPPORTED;
     }
 
