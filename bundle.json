@@ -86,6 +86,7 @@
           "os_account",
           "safwk",
           "samgr",
+          "screenlock_mgr",
           "user_auth_framework",
           "drivers_interface_user_auth",
           "drivers_interface_huks",
