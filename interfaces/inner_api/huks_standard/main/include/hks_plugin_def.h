@@ -92,9 +92,7 @@ struct HksBasicInterface {
     int32_t (*hksRegisterEventProc)(const void *procMap);
     int32_t (*hksRegisterEventProcs)(const void *procMaps, uint32_t count);
     int32_t (*hksEnqueueEvent)(uint32_t eventId, struct HksParamSet *paramSet);
-#ifdef THEME_SCREENLOCK_MGR_ENABLE
     int32_t (*hksGetScreenLockStatus)(int32_t userId);
-#endif
 };
 
 /**

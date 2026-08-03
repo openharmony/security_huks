@@ -52,9 +52,7 @@ static struct HksBasicInterface g_interfaceInst = {
     .hksRegisterEventProcs = HksRegisterEventProcs,
     .hksEnqueueEvent = HksEnqueueEventWrapper,
 
-#ifdef THEME_SCREENLOCK_MGR_ENABLE
     .hksGetScreenLockStatus = HksGetScreenLockStatus,
-#endif
 };
 
 static void HksDestoryPluginProxy(void)
