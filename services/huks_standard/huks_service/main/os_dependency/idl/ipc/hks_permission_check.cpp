@@ -158,15 +158,12 @@ int32_t HksCheckAcrossAccountsPermission(const struct HksParamSet *paramSet, int
         }
     }
 
-    int32_t frontUserId;
-    ret = HksGetFrontUserId(&frontUserId);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get front user id failed");
-
-    if (specificUserId->int32Param != frontUserId) {
-        HKS_LOG_E("specific user id %" LOG_PUBLIC "d not equal front user id %" LOG_PUBLIC "d",
-            specificUserId->int32Param, frontUserId);
-        return HKS_ERROR_ACCESS_OTHER_USER_KEY;
-    }
+    bool isFrontUser = false;
+    ret = HksCheckIsFrontUser(specificUserId->int32Param, &isFrontUser);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_ACCESS_OTHER_USER_KEY,
+        "specific userid %" LOG_PUBLIC "d not exist", specificUserId->int32Param)
+    HKS_IF_NOT_TRUE_LOGE_RETURN(isFrontUser, HKS_ERROR_ACCESS_OTHER_USER_KEY,
+        "specific userid %" LOG_PUBLIC "d isn't front user", specificUserId->int32Param)
     return HKS_SUCCESS;
 }
 #endif
