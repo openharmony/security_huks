@@ -98,6 +98,10 @@ void ExtensionConnection::AddExtDeathRecipient(const wptr<IRemoteObject>& token)
     if (callerDeathRecipient_ == nullptr) {
         callerDeathRecipient_ = new (std::nothrow) ExtensionDeathRecipient(std::bind(&ExtensionConnection::OnRemoteDied,
             this, std::placeholders::_1));
+        if (callerDeathRecipient_ == nullptr) {
+            HKS_LOG_E("Failed to allocate ExtensionDeathRecipient");
+            return;
+        }
     }
 
     if (token != nullptr) {

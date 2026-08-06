@@ -57,6 +57,10 @@ static std::function<void(HksProcessInfo)> MakeDeathCallback(
 {
     return [plugin, providerName, paramSet](const HksProcessInfo &processInfo) mutable {
         std::thread([plugin, pdrName = providerName, paramSet_ = paramSet, processInfo]() mutable {
+            if (plugin == nullptr) {
+                HKS_LOG_E("MakeDeathCallback: plugin instance is null, skip UnRegisterProvider");
+                return;
+            }
             std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long long>(WAIT_CALlBACK)));
             HKS_LOG_I("UnRegisterProvider from ExtensionConnection");
             plugin->UnRegisterProvider(processInfo, pdrName, paramSet_, true);
@@ -178,7 +182,14 @@ int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &
         HKS_IF_TRUE_LOGE_BREAK(ret != HKS_SUCCESS, "close lib failed!, ret = %{public}d", ret)
     } while (0);
 
-    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "unregist provider fail")
+    HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "unregist provider fail");
+
+    int32_t currentRefCount = m_refCount.load(std::memory_order_acq_rel);
+    if (deleteCount > currentRefCount) {
+        HKS_LOG_E("UnRegisterProvider: deleteCount %{public}d > refCount %{public}d, clamping",
+            deleteCount, currentRefCount);
+        deleteCount = currentRefCount;
+    }
     m_refCount.fetch_sub(deleteCount, std::memory_order_acq_rel);
 
     return ret;
