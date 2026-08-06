@@ -184,7 +184,7 @@ int32_t HuksPluginLifeCycleMgr::UnRegisterProvider(const struct HksProcessInfo &
 
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "unregist provider fail");
 
-    int32_t currentRefCount = m_refCount.load(std::memory_order_acq_rel);
+    int32_t currentRefCount = m_refCount.load(std::memory_order_acquire);
     if (deleteCount > currentRefCount) {
         HKS_LOG_E("UnRegisterProvider: deleteCount %{public}d > refCount %{public}d, clamping",
             deleteCount, currentRefCount);
