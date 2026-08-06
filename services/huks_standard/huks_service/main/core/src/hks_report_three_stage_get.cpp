@@ -478,7 +478,7 @@ static int32_t BuildAndSendReport(const char *funcName, const struct HksProcessI
         HksEventResultInfo result = { .code = info->errCode, .module = 0, .stage = 0, .errMsg = nullptr };
         eventInfo->common.result = result;
         std::string callerName;
-        ret = ReportGetCallerName(callerName);
+        ret = ReportGetCallerName(processInfo, callerName);
         const struct HksParam params[] = {
             { .tag = HKS_TAG_PARAM0_UINT32, .uint32Param = eventInfo->common.eventId },
             { .tag = HKS_TAG_PARAM0_BUFFER, .blob = { strlen(funcName) + 1, (uint8_t *)funcName } },

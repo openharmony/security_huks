@@ -55,7 +55,6 @@ using namespace OHOS;
 #ifndef HAS_OS_ACCOUNT_PART
 constexpr static int UID_TRANSFORM_DIVISOR = 200000;
 #endif // HAS_OS_ACCOUNT_PART
-constexpr static int HKS_ANCO_BROKER_UID = 5557;
 int HksGetOsAccountIdFromUid(int uid)
 {
 #ifdef HAS_OS_ACCOUNT_PART

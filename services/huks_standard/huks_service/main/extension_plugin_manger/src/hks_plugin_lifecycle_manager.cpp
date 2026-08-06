@@ -14,6 +14,7 @@
  */
 
 #include "hks_plugin_lifecycle_manager.h"
+#include "hks_bms_api_wrap.h"
 #include "hks_plugin_loader.h"
 #include "hks_cfi.h"
 #include "hks_ability_manager_service_connection.h"

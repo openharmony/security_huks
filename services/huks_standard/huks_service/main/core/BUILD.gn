@@ -42,6 +42,7 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/main/upgrade/lock/include",
       "//base/security/huks/services/huks_standard/huks_service/main/ha/include",
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/se/include",
+      "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms/include",
       "//base/security/huks/frameworks/huks_standard/main/common/include"
     ]
 

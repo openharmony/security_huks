@@ -14,13 +14,13 @@
  */
 
 #include "hks_provider_life_cycle_manager.h"
+#include "hks_bms_api_wrap.h"
 #include "hks_cpp_paramset.h"
 #include "bundle_mgr_client.h"
 #include "bundle_mgr_interface.h"
 #include "bundle_info.h"
 #include "ihuks_access_ext_base.h"
 #include "hks_ukey_system_adapter.h"
-#include "hks_error_code.h"
 #include "hks_log.h"
 #include "hks_plugin_def.h"
 #include "hks_template.h"
