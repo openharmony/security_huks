@@ -254,8 +254,13 @@ static int32_t ProcessAttestOrNormalMessage(
         if (remoteObject != HKS_NULL_POINTER) {
             int32_t callingPid = IPCSkeleton::GetCallingPid();
             int32_t callingUid = IPCSkeleton::GetCallingUid();
-            remoteObject->AddDeathRecipient(
-                new (std::nothrow) OHOS::Security::Hks::HksDeathRecipient(callingPid, callingUid));
+            auto deathRecipient = new (std::nothrow) OHOS::Security::Hks::HksDeathRecipient(callingPid, callingUid);
+            if (deathRecipient != nullptr) {
+                remoteObject->AddDeathRecipient(deathRecipient);
+            } else {
+                HKS_LOG_E("Failed to allocate HksDeathRecipient for pid: %" LOG_PUBLIC "d, uid: %" LOG_PUBLIC "d",
+                    callingPid, callingUid);
+            }
             HKS_LOG_I("Add bundleDead for pid: %" LOG_PUBLIC "d, uid: %" LOG_PUBLIC "d", callingPid, callingUid);
         }
     } else if (code == HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY) {

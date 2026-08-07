@@ -108,14 +108,16 @@ int32_t HksSessionManager::ExtensionInitSession(struct HksProcessWithErrorInfo &
     ProviderInfo providerInfo;
     std::string newIndex;
     std::string sIndexHandle;
-    ret = HksRemoteHandleManager::GetInstanceWrapper()->ParseAndValidateIndex(index,
+    auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
+    ret = handleMgr->ParseAndValidateIndex(index,
         processAndError.processInfo->uidInt, providerInfo, sIndexHandle);
     providerInfo.m_userid = processAndError.processInfo->userIdInt;
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ParseAndValidateIndex failed: %" LOG_PUBLIC "d", ret)
 
     std::string sessionHandle;
     OHOS::sptr<IHuksAccessExtBase> proxy;
-    ret = HksRemoteHandleManager::GetInstanceWrapper()->GetProviderProxy(providerInfo, proxy);
+    ret = handleMgr->GetProviderProxy(providerInfo, proxy);
     HKS_IF_TRUE_LOGE_RETURN(proxy == nullptr, HKS_ERROR_NOT_EXIST, "GetProviderProxy proxy is null")
 
     CppParamSet newParamSet{};
@@ -136,7 +138,9 @@ int32_t HksSessionManager::ExtensionInitSession(struct HksProcessWithErrorInfo &
 
     handle = random.second;
     HandleInfo handleInfo{sessionHandle, providerInfo, processAndError.processInfo->uidInt, index};
-    m_handlers.Insert(handle, handleInfo);
+    bool inserted = m_handlers.Insert(handle, handleInfo);
+    HKS_IF_TRUE_LOGE_RETURN(!inserted, HKS_ERROR_CODE_KEY_ALREADY_EXIST,
+        "ExtensionInitSession: handle collision, insert failed")
     return HKS_SUCCESS;
 }
 
@@ -150,7 +154,9 @@ int32_t HksSessionManager::ExtensionUpdateSession(struct HksProcessWithErrorInfo
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksGetHandleInfo ret = %" LOG_PUBLIC "d", ret)
 
     sptr<IHuksAccessExtBase> proxy{nullptr};
-    ret = HksProviderLifeCycleManager::GetInstanceWrapper()->GetExtensionProxy(handleInfo.m_providerInfo,
+    auto lifeCycleMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(lifeCycleMgr == nullptr, HKS_ERROR_NULL_POINTER, "lifeCycleMgr is null");
+    ret = lifeCycleMgr->GetExtensionProxy(handleInfo.m_providerInfo,
         proxy);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetExtensionProxy failed: %" LOG_PUBLIC "d", ret)
 
@@ -179,7 +185,9 @@ int32_t HksSessionManager::ExtensionFinishSession(struct HksProcessWithErrorInfo
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksGetHandleInfo ret = %" LOG_PUBLIC "d", ret)
 
     sptr<IHuksAccessExtBase> proxy{nullptr};
-    ret = HksProviderLifeCycleManager::GetInstanceWrapper()->GetExtensionProxy(handleInfo.m_providerInfo, proxy);
+    auto lifeCycleMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(lifeCycleMgr == nullptr, HKS_ERROR_NULL_POINTER, "lifeCycleMgr is null");
+    ret = lifeCycleMgr->GetExtensionProxy(handleInfo.m_providerInfo, proxy);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetExtensionProxy failed: %" LOG_PUBLIC "d", ret)
 
     CppParamSet newParamSet{};
@@ -207,7 +215,9 @@ int32_t HksSessionManager::ExtensionAbortSession(struct HksProcessWithErrorInfo 
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksGetHandleInfo ret = %" LOG_PUBLIC "d", ret)
 
     sptr<IHuksAccessExtBase> proxy{nullptr};
-    ret = HksProviderLifeCycleManager::GetInstanceWrapper()->GetExtensionProxy(handleInfo.m_providerInfo, proxy);
+    auto lifeCycleMgr = HksProviderLifeCycleManager::GetInstanceWrapper();
+    HKS_IF_TRUE_LOGE_RETURN(lifeCycleMgr == nullptr, HKS_ERROR_NULL_POINTER, "lifeCycleMgr is null");
+    ret = lifeCycleMgr->GetExtensionProxy(handleInfo.m_providerInfo, proxy);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetExtensionProxy failed: %" LOG_PUBLIC "d", ret)
 
     CppParamSet newParamSet{};

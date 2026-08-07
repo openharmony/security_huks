@@ -378,7 +378,7 @@ napi_value HuksNapiAuthUkeyPin(napi_env env, napi_callback_info info)
     NAPI_THROW(env, context == nullptr, HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not create context");
 
     context->parse = [](napi_env env, napi_callback_info info, AsyncContext *context) -> napi_status {
-        UkeyPinContext *asyncContext = reinterpret_cast<UkeyPinContext *>(context);
+        UkeyPinContext *asyncContext = static_cast<UkeyPinContext *>(context);
         size_t argc = HUKS_NAPI_TWO_ARGS;
         napi_value argv[HUKS_NAPI_TWO_ARGS] = { nullptr };
         NAPI_CALL_RETURN_ERR(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
@@ -425,7 +425,7 @@ napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info)
     NAPI_THROW(env, context == nullptr, HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not create context");
 
     context->parse = [](napi_env env, napi_callback_info info, AsyncContext *context) -> napi_status {
-        UkeyPinContext *asyncContext = reinterpret_cast<UkeyPinContext *>(context);
+        UkeyPinContext *asyncContext = static_cast<UkeyPinContext *>(context);
         size_t argc = HUKS_NAPI_TWO_ARGS;
         napi_value argv[HUKS_NAPI_TWO_ARGS] = { nullptr };
         NAPI_CALL_RETURN_ERR(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));

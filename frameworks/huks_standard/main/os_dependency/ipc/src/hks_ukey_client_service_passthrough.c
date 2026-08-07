@@ -94,6 +94,7 @@ int32_t HksClientExportProviderCertificates(const struct HksBlob *providerName, 
         0
     };
     int32_t ret = HksServiceExportProviderCertificates(&processInfo, providerName, paramSetIn, certSet, &errInfo);
+    HksFreeExternalErrorInfo(errInfo);
     return ret;
 }
 
@@ -115,6 +116,7 @@ int32_t HksClientExportCertificate(const struct HksBlob *index, const struct Hks
         0
     };
     int32_t ret = HksServiceExportCertificate(&processInfo, index, paramSetIn, certSet, &errInfo);
+    HksFreeExternalErrorInfo(errInfo);
     return ret;
 }
 
@@ -135,6 +137,7 @@ int32_t HksClientOpenRemoteHandle(const struct HksBlob *resourceId, const struct
         0
     };
     int32_t ret = HksServiceOpenRemoteHandle(&processInfo, resourceId, paramSetIn, &errInfo);
+    HksFreeExternalErrorInfo(errInfo);
     return ret;
 }
 
@@ -158,7 +161,9 @@ int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamS
     };
 
     struct HksExtAuthPinOutParam authOutParam = {outStatus, *retryCount};
-    return HksServiceAuthUkeyPin(&processInfo, index, paramSetIn, &authOutParam, &errInfo);
+    int32_t ret = HksServiceAuthUkeyPin(&processInfo, index, paramSetIn, &authOutParam, &errInfo);
+    HksFreeExternalErrorInfo(errInfo);
+    return ret;
 }
 
 int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
@@ -179,6 +184,7 @@ int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct H
         0
     };
     int32_t ret = HksServiceGetUkeyPinAuthState(&processInfo, index, paramSetIn, status, &errInfo);
+    HksFreeExternalErrorInfo(errInfo);
     return ret;
 }
 
@@ -199,6 +205,7 @@ int32_t HksClientCloseRemoteHandle(const struct HksBlob *resourceId, const struc
         0
     };
     int32_t ret = HksServiceCloseRemoteHandle(&processInfo, resourceId, paramSetIn, &errInfo);
+    HksFreeExternalErrorInfo(errInfo);
     return ret;
 }
 
@@ -214,6 +221,7 @@ int32_t HksClientClearPinAuthState(const struct HksBlob *index)
         0
     };
     int32_t ret = HksServiceClearPinAuthState(&processInfo, index, &errInfo);
+    HksFreeExternalErrorInfo(errInfo);
     return ret;
 }
 
@@ -261,6 +269,7 @@ int32_t HksClientGetResourceId(const struct HksBlob *providerName, const struct 
         0
     };
     int32_t ret = HksServiceGetResourceId(&processInfo, providerName, paramSetIn, resourceId, &errInfo);
+    HksFreeExternalErrorInfo(errInfo);
     return ret;
 }
 
@@ -297,5 +306,6 @@ int32_t HksClientImportCertificate(const struct HksBlob *resourceId, const struc
     };
 
     int32_t ret = HksServiceImportCert(&processInfo, resourceId, certInfo, paramSetIn, &errInfo);
+    HksFreeExternalErrorInfo(errInfo);
     return ret;
 }

@@ -27,6 +27,7 @@ void AddInt32PropertyInLite(JSIValue object, const char *name, int32_t value)
 {
     JSIValue numberProperty = JSI::CreateNumber(value);
     JSI::SetNamedProperty(object, name, numberProperty);
+    JSI::ReleaseValue(numberProperty);
 }
 
 static JSIValue CreateHuksErrCode(void)

@@ -61,7 +61,7 @@ static void Init(void)
 {
     int32_t ret = HksServiceInitialize();
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("huks service initialaize failed!");
+        HKS_LOG_E("huks service initialize failed! ret = %" LOG_PUBLIC "d", ret);
     }
     bool isRegistered = SAMGR_GetInstance()->RegisterService((Service *)&g_hksMgrService);
     if (!isRegistered) {

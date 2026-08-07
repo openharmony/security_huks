@@ -71,33 +71,40 @@ void HksAppObserver::OnAppStopped(const AppExecFwk::AppStateData &appStateData)
         return;
     }
 
-    std::lock_guard<std::mutex> lock(mutex_);
+    bool needCleanup = false;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
 
-    uint32_t diedUid = static_cast<uint32_t>(appStateData.uid);
-    auto it = uidToContextMap_.find(diedUid);
-    if (it == uidToContextMap_.end()) {
-        HKS_LOG_I("OnAppStopped No context found for died uid=%{public}u, skip", diedUid);
-        return;
+        uint32_t diedUid = static_cast<uint32_t>(appStateData.uid);
+        auto it = uidToContextMap_.find(diedUid);
+        if (it == uidToContextMap_.end()) {
+            HKS_LOG_I("OnAppStopped No context found for died uid=%{public}u, skip", diedUid);
+            return;
+        }
+
+        const HksProcessContext &context = it->second;
+
+        HksProcessInfo processInfo = {};
+        processInfo.uidInt = context.uidInt;
+
+        CppParamSet paramSet = BuildParamSet(context);
+
+        auto sessionMgr = HksSessionManager::GetInstanceWrapper();
+        HKS_IF_NULL_LOGE_RETURN_VOID(sessionMgr, "sessionMgr is null");
+        auto retBool = sessionMgr->HksClearHandle(processInfo, paramSet);
+        HKS_IF_NOT_TRUE_LOGI(retBool, "OnAppStopped HksClearHandle failed for uid=%{public}u", diedUid);
+
+        auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
+        HKS_IF_NULL_LOGE_RETURN_VOID(handleMgr, "handleMgr is null");
+        handleMgr->ClearAuthState(processInfo);
+        handleMgr->ClearMapByUid(processInfo.uidInt);
+        uidToContextMap_.erase(it);
+        if (uidToContextMap_.empty()) {
+            needCleanup = true;
+        }
     }
 
-    const HksProcessContext &context = it->second;
-
-    HksProcessInfo processInfo = {};
-    processInfo.uidInt = context.uidInt;
-
-    CppParamSet paramSet = BuildParamSet(context);
-
-    auto sessionMgr = HksSessionManager::GetInstanceWrapper();
-    HKS_IF_NULL_LOGE_RETURN_VOID(sessionMgr, "sessionMgr is null");
-    auto retBool = sessionMgr->HksClearHandle(processInfo, paramSet);
-    HKS_IF_NOT_TRUE_LOGI(retBool, "OnAppStopped HksClearHandle failed for uid=%{public}u", diedUid);
-
-    auto handleMgr = HksRemoteHandleManager::GetInstanceWrapper();
-    HKS_IF_NULL_LOGE_RETURN_VOID(handleMgr, "handleMgr is null");
-    handleMgr->ClearAuthState(processInfo);
-    handleMgr->ClearMapByUid(processInfo.uidInt);
-    uidToContextMap_.erase(it);
-    if (uidToContextMap_.empty()) {
+    if (needCleanup) {
         HksAppObserverManager::GetInstance().CleanupTriggeredObserver(targetBundleName_);
     }
 }
