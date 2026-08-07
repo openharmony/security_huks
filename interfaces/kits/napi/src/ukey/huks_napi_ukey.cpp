@@ -374,13 +374,8 @@ napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
 
 napi_value HuksNapiAuthUkeyPin(napi_env env, napi_callback_info info)
 {
-    std::unique_ptr<UkeyPinContext> context;
-    try {
-        context = std::make_unique<UkeyPinContext>();
-    } catch (const std::bad_alloc &) {
-        NAPI_THROW(env, true, HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not create context: OOM");
-        return nullptr;
-    }
+    auto context = std::make_unique<UkeyPinContext>();
+    NAPI_THROW(env, context == nullptr, HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not create context");
 
     context->parse = [](napi_env env, napi_callback_info info, AsyncContext *context) -> napi_status {
         UkeyPinContext *asyncContext = static_cast<UkeyPinContext *>(context);
