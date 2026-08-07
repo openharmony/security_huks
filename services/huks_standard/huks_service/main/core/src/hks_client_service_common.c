@@ -130,8 +130,11 @@ int32_t CheckKeySecuritySeFromKeyFile(const struct HksBlob *keyFromFile, bool *i
         return HKS_SUCCESS;
     }
     const struct HksParamSet *keyParamSet = (const struct HksParamSet *)keyFromFile->data;
+    int32_t ret = HksCheckParamSet(keyParamSet, keyFromFile->size);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckParamSet keyFromFile failed!")
+
     struct HksParam *securityLevelParam = NULL;
-    int32_t ret = HksGetParam(keyParamSet, HKS_TAG_KEY_SECURITY_LEVEL, &securityLevelParam);
+    ret = HksGetParam(keyParamSet, HKS_TAG_KEY_SECURITY_LEVEL, &securityLevelParam);
     HKS_IF_TRUE_RETURN(ret != HKS_SUCCESS, HKS_SUCCESS)
 
     HKS_IF_TRUE_LOGE_RETURN(
