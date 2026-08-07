@@ -25,6 +25,7 @@
 #define HKS_PLUGIN_DEF_H
 
 #define HKS_PROCESS_INFO_INIT_VALUE { {0, NULL}, {0, NULL}, 0, 0, 0, 0 }
+#define HKS_ANCO_BROKER_UID 5557
 
 #include "hks_type.h"
 

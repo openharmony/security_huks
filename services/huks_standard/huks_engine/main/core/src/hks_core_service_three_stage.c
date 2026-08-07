@@ -162,9 +162,13 @@ static int32_t CheckBlockCipherOther(uint32_t mode, bool isEncrypt, const struct
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
         }
-        if (outData->size < (inData->size + paddingSize + blockSize)) {
+        uint32_t needSize = inData->size + paddingSize;
+        if (mode == HKS_MODE_CBC || mode == HKS_MODE_ECB) {
+            needSize += blockSize;
+        }
+        if (outData->size < needSize) {
             HKS_LOG_E("encrypt, outData buffer too small size: %" LOG_PUBLIC "u, need: %" LOG_PUBLIC "u",
-                outData->size, inData->size + paddingSize + blockSize);
+                outData->size, needSize);
             return HKS_ERROR_BUFFER_TOO_SMALL;
         }
     } else {

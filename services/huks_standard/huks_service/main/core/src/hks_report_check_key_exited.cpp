@@ -81,14 +81,19 @@ bool HksEventInfoIsNeedReportForCheckKeyExited(const struct HksEventInfo *eventI
 
 bool HksEventInfoIsEqualForCheckKeyExited(const struct HksEventInfo *eventInfo1, const struct HksEventInfo *eventInfo2)
 {
-    return CheckEventCommon(eventInfo1, eventInfo2);
+    HKS_IF_TRUE_RETURN(eventInfo1 == nullptr || eventInfo2 == nullptr, false)
+    HKS_IF_TRUE_RETURN(eventInfo1->common.eventId != eventInfo2->common.eventId, false)
+    HKS_IF_TRUE_RETURN(eventInfo1->common.result.code != eventInfo2->common.result.code, false)
+    return eventInfo1->keyInfo.alg == eventInfo2->keyInfo.alg;
 }
 
 void HksEventInfoAddForCheckKeyExited(struct HksEventInfo *dstEventInfo, const struct HksEventInfo *srcEventInfo)
 {
-    if (HksEventInfoIsEqualForCheckKeyExited(dstEventInfo, srcEventInfo)) {
-        dstEventInfo->common.count++;
+    if (!HksEventInfoIsEqualForCheckKeyExited(dstEventInfo, srcEventInfo)) {
+        return;
     }
+    dstEventInfo->common.count++;
+    dstEventInfo->common.time = srcEventInfo->common.time;
 }
 
 int32_t HksEventInfoToMapForCheckKeyExited(const struct HksEventInfo *eventInfo,
