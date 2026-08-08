@@ -41,6 +41,7 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",  # hks_osaccount_check.h
       "//base/security/huks/services/huks_standard/huks_service/main/upgrade/lock/include",
       "//base/security/huks/services/huks_standard/huks_service/main/ha/include",
+      "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/screen_lock_wrapper/include",
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/se/include",
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms/include",
       "//base/security/huks/frameworks/huks_standard/main/common/include",
@@ -106,6 +107,11 @@ if (os_level == "standard") {
     cflags = [
       "-DHUKS_CHANGE_STORAGE_LEVEL_CONFIG=${huks_change_storage_level_config}",
     ]
+  
+    if (theme_screenlock_mgr_emf_enable) {
+      cflags += [ "-DTHEME_SCREENLOCK_MGR_ENABLE" ]
+      deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/screen_lock_wrapper:libhuks_screenlock_systemapi_wrap_static" ]
+    }
     complete_static_lib = true
 
     branch_protector_ret = "pac_ret"

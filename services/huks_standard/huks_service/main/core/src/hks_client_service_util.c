@@ -42,6 +42,10 @@
 #include "hks_useridm_api_wrap.h"
 #endif
 
+#ifdef THEME_SCREENLOCK_MGR_ENABLE
+#include "screen_lock_wrapper.h"
+#endif
+
 #include "securec.h"
 
 #ifdef _STORAGE_LITE_
@@ -806,6 +810,18 @@ int32_t AppendKeyBlobToParamSet(const struct HksParamSet *paramSet, const struct
 
     HksFreeParamSet(&newParamSet);
     return ret;
+}
+
+int32_t HksGetScreenLockStatus(int32_t userId)
+{
+    (void)userId;
+    bool isDeviceLocked = true;
+#ifdef THEME_SCREENLOCK_MGR_ENABLE
+    int32_t ret = IsDeviceLocked(userId, &isDeviceLocked);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "IsDeviceLocked failed")
+#endif
+    // if device is locked, current operation will be denied.
+    return isDeviceLocked ? HKS_ERROR_NOT_SUPPORTED : HKS_SUCCESS;
 }
 #endif
 #endif /* _CUT_AUTHENTICATE_ */
