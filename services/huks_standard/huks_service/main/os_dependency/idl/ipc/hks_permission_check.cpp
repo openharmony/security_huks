@@ -99,8 +99,7 @@ int32_t CheckUkeyCertCaller(const struct HksProcessInfo *processInfo)
     return HKS_ERROR_NO_PERMISSION;
 }
 #endif
-namespace {
-static int32_t CheckTokenType(void)
+int32_t CheckTokenType(void)
 {
     auto accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
     auto tokenType = OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(
@@ -119,7 +118,6 @@ static int32_t CheckTokenType(void)
             HKS_LOG_E("unknown tokenid, accessTokenIDEx %" LOG_PUBLIC PRIu64, accessTokenIDEx);
             return HKS_ERROR_INVALID_ACCESS_TYPE;
     }
-}
 }
 
 int32_t SystemApiPermissionCheck(int callerUserId)
@@ -168,6 +166,10 @@ int32_t HksCheckAcrossAccountsPermission(const struct HksParamSet *paramSet, int
 }
 #endif
 #else
+int32_t CheckTokenType(void)
+{
+    return HKS_SUCCESS;
+}
 int32_t HksCheckAcrossAccountsPermission(const struct HksParamSet *paramSet, int32_t callerUserId)
 {
     (void)paramSet;

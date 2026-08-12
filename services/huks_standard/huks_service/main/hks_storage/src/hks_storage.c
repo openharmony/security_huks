@@ -446,6 +446,15 @@ static int32_t GetKeyAliasByProcessName(const struct HksStoreFileInfo *fileInfo,
         ret = GetFileNameList(fileInfo->mainPath.path, fileNameList, &realFileCount);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get file name list failed, ret = %" LOG_PUBLIC "d", ret)
 
+        /* Prevent TOCTOU: if files were added between GetFileCount and GetFileNameList,
+           realFileCount may exceed the allocated buffer size, causing OOB access */
+        if (realFileCount > fileCount) {
+            HKS_LOG_E("file count changed during enumeration, expected %" LOG_PUBLIC "u, got %" LOG_PUBLIC "u",
+                fileCount, realFileCount);
+            ret = HKS_ERROR_BUFFER_TOO_SMALL;
+            break;
+        }
+
         for (uint32_t i = 0; i < realFileCount; ++i) {
             ret = ConstructBlob(fileNameList[i].fileName, &(keyInfoList[i].alias));
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "construct blob failed, ret = %" LOG_PUBLIC "d", ret)

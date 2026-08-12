@@ -24,6 +24,8 @@ extern "C" {
 
 int32_t SensitivePermissionCheck(const char *permission);
 
+int32_t CheckTokenType(void);
+
 int32_t SystemApiPermissionCheck(int callerUserId);
 
 int32_t HksCheckAcrossAccountsPermission(const struct HksParamSet *paramSet, int32_t callerUserId);
