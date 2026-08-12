@@ -38,7 +38,6 @@
 #include "hks_upgrade_lock.h"
 #include "hks_util.h"
 #include "hks_xcollie.h"
-#include "hks_permission_check.h"
 #include "huks_service_ipc_interface_code.h"
 #include "hks_ha_plugin.h"
 #include "rwlock.h"
@@ -281,10 +280,6 @@ static void ProcessRemoteRequest(uint32_t code, MessageParcel &data, MessageParc
     struct HksBlob srcData = { 0, nullptr };
     int32_t ret = HKS_ERROR_INVALID_ARGUMENT;
     do {
-        /* Restrict inner API to SA callers only; reject HAP at the central IPC entry point */
-        ret = CheckTokenType();
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckTokenType fail, not SA caller")
-
         HKS_IF_NOT_TRUE_LOGE_BREAK(data.ReadUint32(outSize), "Read outSize failed!")
 
         ret = HksPluginOnLocalRequest(CODE_UPGRADE, NULL, NULL);

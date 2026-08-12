@@ -451,7 +451,7 @@ static int32_t GetKeyAliasByProcessName(const struct HksStoreFileInfo *fileInfo,
         if (realFileCount > fileCount) {
             HKS_LOG_E("file count changed during enumeration, expected %" LOG_PUBLIC "u, got %" LOG_PUBLIC "u",
                 fileCount, realFileCount);
-            ret = HKS_ERROR_BUFFER_TOO_SMALL;
+            ret = HKS_ERROR_RETRYABLE_ERROR;
             break;
         }
 
