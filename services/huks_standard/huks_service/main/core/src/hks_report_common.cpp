@@ -152,6 +152,53 @@ int32_t AddTimeCost(struct HksParamSet *paramSetOut, uint64_t startTime)
     return ret;
 }
 
+/* Whitelist of tags from paramSetIn that are safe and needed for event reporting.
+   Only key property tags are allowed; internal PARAM* tags used by the report
+   framework itself are excluded to prevent client-side parameter injection. */
+static const uint32_t REPORT_ALLOWED_TAGS[] = {
+    HKS_TAG_ALGORITHM,
+    HKS_TAG_PURPOSE,
+    HKS_TAG_KEY_SIZE,
+    HKS_TAG_KEY_FLAG,
+    HKS_TAG_KEY_SECURITY_LEVEL,
+    HKS_TAG_AUTH_STORAGE_LEVEL,
+    HKS_TAG_SPECIFIC_USER_ID,
+    HKS_TAG_IS_BATCH_OPERATION,
+    HKS_TAG_BATCH_PURPOSE,
+    HKS_TAG_BATCH_OPERATION_TIMEOUT,
+    HKS_TAG_USER_AUTH_TYPE,
+    HKS_TAG_KEY_AUTH_ACCESS_TYPE,
+    HKS_TAG_CHALLENGE_TYPE,
+    HKS_TAG_CHALLENGE_POS,
+    HKS_TAG_AUTH_TIMEOUT,
+    HKS_TAG_KEY_AUTH_PURPOSE,
+    HKS_TAG_FRONT_USER_ID,
+    HKS_TAG_USER_AUTH_MODE,
+    HKS_TAG_IS_DEVICE_PASSWORD_SET,
+    HKS_TAG_KEY_ACCESS_GROUP,
+    HKS_TAG_DEVELOPER_ID,
+    HKS_TAG_IS_COPY_NEW_KEY,
+};
+
+static int32_t AddFilteredParams(struct HksParamSet *paramSetOut, const struct HksParamSet *paramSetIn)
+{
+    for (uint32_t i = 0; i < paramSetIn->paramsCnt; i++) {
+        bool isAllowed = false;
+        for (uint32_t j = 0; j < HKS_ARRAY_SIZE(REPORT_ALLOWED_TAGS); j++) {
+            if (paramSetIn->params[i].tag == REPORT_ALLOWED_TAGS[j]) {
+                isAllowed = true;
+                break;
+            }
+        }
+        if (!isAllowed) {
+            continue;
+        }
+        int32_t ret = HksAddParams(paramSetOut, &paramSetIn->params[i], 1);
+        HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add filtered param to paramSetOut failed!")
+    }
+    return HKS_SUCCESS;
+}
+
 int32_t PreAddCommonInfo(struct HksParamSet *paramSetOut, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, uint64_t startTime)
 {
@@ -163,8 +210,9 @@ int32_t PreAddCommonInfo(struct HksParamSet *paramSetOut, const struct HksBlob *
     ret = AddKeyAliasHash(paramSetOut, keyAlias, HKS_TAG_PARAM4_UINT32);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add kayAlias hash to paramSetOut failed!")
 
-    ret = HksAddParams(paramSetOut, paramSetIn->params, paramSetIn->paramsCnt);
-    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add paramSetIn params to paramSetOut failed!")
+    /* Only copy whitelisted key property tags, not all client params, to prevent injection */
+    ret = AddFilteredParams(paramSetOut, paramSetIn);
+    HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "add filtered paramSetIn params to paramSetOut failed!")
 
     return ret;
 }
