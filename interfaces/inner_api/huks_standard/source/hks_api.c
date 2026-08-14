@@ -571,6 +571,14 @@ HKS_API_EXPORT int32_t HksImportWrappedKey(const struct HksBlob *keyAlias, const
         ret = HksGetParam(paramSet, HKS_TAG_UNWRAP_ALGORITHM_SUITE, &unwrapItem);
         HKS_IF_NOT_SUCC_BREAK(ret)
         if (unwrapItem->int32Param == HKS_UNWRAP_SUITE_SM2_SM4_ECB_NOPADDING) {
+            struct HksParam *importKeyTypeParam = NULL;
+            ret = HksGetParam(paramSet, HKS_TAG_IMPORT_KEY_TYPE, &importKeyTypeParam);
+            if (ret == HKS_SUCCESS && importKeyTypeParam->uint32Param == HKS_KEY_TYPE_PUBLIC_KEY) {
+                struct HksParam *pkData = NULL;
+                ret = HksGetParam(paramSet, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pkData);
+                HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get public key data from paramSet failed!")
+                return HksImportKey(keyAlias, paramSet, &pkData->blob);
+            }
             struct HksParamSet *newParamSet = NULL;
             ret = HksGetEnvelopParamSet(paramSet, &newParamSet);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Get EnvelopParamSet fail")
