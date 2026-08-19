@@ -263,10 +263,6 @@ static napi_value CreateAsyncWork(napi_env env, napi_callback_info info, std::un
     status = napi_queue_async_work(env, context->asyncWork);
     NAPI_THROW(env, status != napi_ok, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not queue async work");
 
-    if (status != napi_ok) {
-        HKS_LOG_E("could not queue async work");
-        return nullptr;
-    }
     if (context->callback == nullptr) {
         context.release();
         return promise;

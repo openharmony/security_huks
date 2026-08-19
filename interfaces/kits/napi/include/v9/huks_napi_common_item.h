@@ -187,7 +187,7 @@ void HksReturnListAliasesResult(napi_env env, napi_ref callback, napi_deferred d
 
 napi_value CreateJsError(napi_env env, int32_t errCode, const char *errorMsg);
 
-void SetRetryCount(int32_t retryCount);
+void SetRetryCount(uint32_t retryCount);
 
 napi_value ParseHuksParams(napi_env env, napi_value object, const std::vector<HksParam> &addParams,
     HksParamSet *&paramSet);

@@ -35,7 +35,7 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 
-const std::map<int32_t, int32_t> g_commonErrCodeMapping = {
+inline const std::map<int32_t, int32_t> g_commonErrCodeMapping = {
     {EXTENSION_SUCCESS, HKS_SUCCESS},
     {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
     {EXTENSION_ERRCODE_UKEY_NOT_EXIST, HUKS_ERR_CODE_CRYPTO_FAIL},
@@ -48,13 +48,13 @@ const std::map<int32_t, int32_t> g_commonErrCodeMapping = {
     {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
 };
 
-const std::map<int32_t, int32_t> g_getResourceIdErrCodeMapping = {
+inline const std::map<int32_t, int32_t> g_getResourceIdErrCodeMapping = {
     {EXTENSION_SUCCESS, HKS_SUCCESS},
     {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
     {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
 };
 
-const std::map<int32_t, int32_t> g_clearPinStateErrCodeMapping = {
+inline const std::map<int32_t, int32_t> g_clearPinStateErrCodeMapping = {
     {EXTENSION_SUCCESS, HKS_SUCCESS},
     {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
     {EXTENSION_ERRCODE_UKEY_FAIL, HUKS_ERR_CODE_CRYPTO_FAIL},
@@ -63,18 +63,7 @@ const std::map<int32_t, int32_t> g_clearPinStateErrCodeMapping = {
     {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
 };
 
-const std::map<int32_t, int32_t> g_initSessionErrCodeMapping = {
-    {EXTENSION_SUCCESS, HKS_SUCCESS},
-    {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
-    {EXTENSION_ERRCODE_UKEY_FAIL, HUKS_ERR_CODE_CRYPTO_FAIL},
-    {EXTENSION_ERRCODE_PIN_NOT_AUTH, HUKS_ERR_CODE_PIN_NO_AUTH},
-    {EXTENSION_ERRCODE_HANDLE_NOT_EXIST, HUKS_ERR_CODE_ITEM_NOT_EXIST},
-    {EXTENSION_ERRCODE_HANDLE_FAIL, HUKS_ERR_CODE_ITEM_NOT_EXIST},
-    {EXTENSION_ERRCODE_PIN_LOCKED, HUKS_ERR_CODE_PIN_LOCKED},
-    {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
-};
-
-const std::map<int32_t, int32_t> g_updateSessionErrCodeMapping = {
+inline const std::map<int32_t, int32_t> g_initSessionErrCodeMapping = {
     {EXTENSION_SUCCESS, HKS_SUCCESS},
     {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
     {EXTENSION_ERRCODE_UKEY_FAIL, HUKS_ERR_CODE_CRYPTO_FAIL},
@@ -85,7 +74,7 @@ const std::map<int32_t, int32_t> g_updateSessionErrCodeMapping = {
     {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
 };
 
-const std::map<int32_t, int32_t> g_finishSessionErrCodeMapping = {
+inline const std::map<int32_t, int32_t> g_updateSessionErrCodeMapping = {
     {EXTENSION_SUCCESS, HKS_SUCCESS},
     {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
     {EXTENSION_ERRCODE_UKEY_FAIL, HUKS_ERR_CODE_CRYPTO_FAIL},
@@ -96,7 +85,18 @@ const std::map<int32_t, int32_t> g_finishSessionErrCodeMapping = {
     {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
 };
 
-const std::map<int32_t, int32_t> g_abortSessionErrCodeMapping = {
+inline const std::map<int32_t, int32_t> g_finishSessionErrCodeMapping = {
+    {EXTENSION_SUCCESS, HKS_SUCCESS},
+    {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
+    {EXTENSION_ERRCODE_UKEY_FAIL, HUKS_ERR_CODE_CRYPTO_FAIL},
+    {EXTENSION_ERRCODE_PIN_NOT_AUTH, HUKS_ERR_CODE_PIN_NO_AUTH},
+    {EXTENSION_ERRCODE_HANDLE_NOT_EXIST, HUKS_ERR_CODE_ITEM_NOT_EXIST},
+    {EXTENSION_ERRCODE_HANDLE_FAIL, HUKS_ERR_CODE_ITEM_NOT_EXIST},
+    {EXTENSION_ERRCODE_PIN_LOCKED, HUKS_ERR_CODE_PIN_LOCKED},
+    {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
+};
+
+inline const std::map<int32_t, int32_t> g_abortSessionErrCodeMapping = {
     {EXTENSION_SUCCESS, HKS_SUCCESS},
     {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
     {EXTENSION_ERRCODE_UKEY_FAIL, HUKS_ERR_CODE_CRYPTO_FAIL},
@@ -107,7 +107,7 @@ const std::map<int32_t, int32_t> g_abortSessionErrCodeMapping = {
     {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
 };
 
-const std::map<int32_t, int32_t> g_exportCertErrCodeMapping = {
+inline const std::map<int32_t, int32_t> g_exportCertErrCodeMapping = {
     {EXTENSION_SUCCESS, HKS_SUCCESS},
     {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
     {EXTENSION_ERRCODE_UKEY_NOT_EXIST, HUKS_ERR_CODE_CRYPTO_FAIL},
@@ -116,7 +116,7 @@ const std::map<int32_t, int32_t> g_exportCertErrCodeMapping = {
     {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
 };
 
-const std::map<int32_t, int32_t> g_openResourceErrCodeMapping = {
+inline const std::map<int32_t, int32_t> g_openResourceErrCodeMapping = {
     {EXTENSION_SUCCESS, HKS_SUCCESS},
     {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
     {EXTENSION_ERRCODE_UKEY_NOT_EXIST, HUKS_ERR_CODE_CRYPTO_FAIL},
@@ -125,7 +125,7 @@ const std::map<int32_t, int32_t> g_openResourceErrCodeMapping = {
     {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
 };
 
-const std::map<int32_t, int32_t> g_closeResourceErrCodeMapping = {
+inline const std::map<int32_t, int32_t> g_closeResourceErrCodeMapping = {
     {EXTENSION_SUCCESS, HKS_SUCCESS},
     {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
     {EXTENSION_ERRCODE_UKEY_FAIL, HUKS_ERR_CODE_CRYPTO_FAIL},
@@ -134,7 +134,7 @@ const std::map<int32_t, int32_t> g_closeResourceErrCodeMapping = {
     {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
 };
 
-const std::map<int32_t, int32_t> g_authPinErrCodeMapping = {
+inline const std::map<int32_t, int32_t> g_authPinErrCodeMapping = {
     {EXTENSION_SUCCESS, HKS_SUCCESS},
     {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
     {EXTENSION_ERRCODE_UKEY_FAIL, HUKS_ERR_CODE_CRYPTO_FAIL},
@@ -145,7 +145,7 @@ const std::map<int32_t, int32_t> g_authPinErrCodeMapping = {
     {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
 };
 
-const std::map<int32_t, int32_t> g_getPinAuthStateErrCodeMapping = {
+inline const std::map<int32_t, int32_t> g_getPinAuthStateErrCodeMapping = {
     {EXTENSION_SUCCESS, HKS_SUCCESS},
     {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
     {EXTENSION_ERRCODE_UKEY_FAIL, HUKS_ERR_CODE_CRYPTO_FAIL},
@@ -154,7 +154,7 @@ const std::map<int32_t, int32_t> g_getPinAuthStateErrCodeMapping = {
     {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
 };
 
-const std::map<int32_t, int32_t> g_getPropertyErrCodeMapping = {
+inline const std::map<int32_t, int32_t> g_getPropertyErrCodeMapping = {
     {EXTENSION_SUCCESS, HKS_SUCCESS},
     {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
     {EXTENSION_ERRCODE_UKEY_FAIL, HUKS_ERR_CODE_CRYPTO_FAIL},
@@ -166,7 +166,7 @@ const std::map<int32_t, int32_t> g_getPropertyErrCodeMapping = {
     {HKS_ERROR_EXT_RETURN_VALUE_INCORRECT, HKS_ERROR_EXT_RETURN_VALUE_INCORRECT}
 };
 
-const std::map<int32_t, int32_t> g_importWrappedKeyErrCodeMapping = {
+inline const std::map<int32_t, int32_t> g_importWrappedKeyErrCodeMapping = {
     {EXTENSION_SUCCESS, HKS_SUCCESS},
     {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
     {EXTENSION_ERRCODE_UKEY_FAIL, HUKS_ERR_CODE_CRYPTO_FAIL},
@@ -175,7 +175,7 @@ const std::map<int32_t, int32_t> g_importWrappedKeyErrCodeMapping = {
     {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
 };
 
-const std::map<int32_t, int32_t> g_exportPublicKeyErrCodeMapping = {
+inline const std::map<int32_t, int32_t> g_exportPublicKeyErrCodeMapping = {
     {EXTENSION_SUCCESS, HKS_SUCCESS},
     {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
     {EXTENSION_ERRCODE_UKEY_FAIL, HUKS_ERR_CODE_CRYPTO_FAIL},
@@ -184,7 +184,7 @@ const std::map<int32_t, int32_t> g_exportPublicKeyErrCodeMapping = {
     {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
 };
 
-const std::map<int32_t, int32_t> g_generateKeyErrCodeMapping = {
+inline const std::map<int32_t, int32_t> g_generateKeyErrCodeMapping = {
     {EXTENSION_SUCCESS, HKS_SUCCESS},
     {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
     {EXTENSION_ERRCODE_UKEY_FAIL, HUKS_ERR_CODE_CRYPTO_FAIL},
@@ -193,7 +193,7 @@ const std::map<int32_t, int32_t> g_generateKeyErrCodeMapping = {
     {HKS_ERROR_EXT_JS_METHOD_ERROR, HUKS_ERR_CODE_BUSY}
 };
 
-const std::map<int32_t, int32_t> g_importCertErrCodeMapping = {
+inline const std::map<int32_t, int32_t> g_importCertErrCodeMapping = {
     {EXTENSION_SUCCESS, HKS_SUCCESS},
     {EXTENSION_ERRCODE_OPERATION_FAIL, HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR},
     {EXTENSION_ERRCODE_UKEY_NOT_EXIST, HUKS_ERR_CODE_CRYPTO_FAIL},
