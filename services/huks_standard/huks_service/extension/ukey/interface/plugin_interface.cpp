@@ -157,7 +157,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnGetUkeyPinAuthState
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnExportCerticate(const HksProcessInfo &processInfo,
+__attribute__((visibility("default"))) int32_t HksExtPluginOnExportCertificate(const HksProcessInfo &processInfo,
     const std::string &index, const CppParamSet &paramSet, std::string &certsJson,
     struct HksExternalErrorInfo **errInfo)
 {
@@ -181,7 +181,7 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnImportCertificate(c
     return ret;
 }
 
-__attribute__((visibility("default"))) int32_t HksExtPluginOnExportProviderCerticates(
+__attribute__((visibility("default"))) int32_t HksExtPluginOnExportProviderCertificates(
     const HksProcessInfo &processInfo, const std::string &providerName, const CppParamSet &paramSet,
     std::string &certsJsonArr, struct HksExternalErrorInfo **errInfo)
 {

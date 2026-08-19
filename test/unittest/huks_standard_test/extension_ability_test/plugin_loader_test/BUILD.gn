@@ -25,7 +25,7 @@ if (huks_enable_ukey_config == true) {
     ]
 
     deps = [
-      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
+      "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extension_static",
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:huks_access_ext_base_include",
     ]

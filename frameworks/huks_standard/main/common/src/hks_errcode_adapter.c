@@ -793,10 +793,10 @@ static struct HksError g_errCodeTable[] = {
             .data = NULL
         }
     }, {
-        .innerErrCode = HKS_ERROR_EXT_RETURN_VALUE_INCRECT,
+        .innerErrCode = HKS_ERROR_EXT_RETURN_VALUE_INCORRECT,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
-            .errorMsg = "extesnion return value is incorrect.",
+            .errorMsg = "extension return value is incorrect.",
             .data = NULL
         }
     }, {

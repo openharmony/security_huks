@@ -90,7 +90,7 @@ struct OH_Huks_Result OH_Huks_GetUkeyPinAuthState(
     int32_t ret = HksGetUkeyPinAuthState((const struct HksBlob *)resourceId,
         (const struct HksParamSet *)paramSet, &state);
     if (!CheckAuthStateIsValid(state)) {
-        return ConvertApiResult(HKS_ERROR_EXT_RETURN_VALUE_INCRECT);
+        return ConvertApiResult(HKS_ERROR_EXT_RETURN_VALUE_INCORRECT);
     }
     if (ret == 0) {
         *authState = (OH_Huks_ExternalPinAuthState)state;

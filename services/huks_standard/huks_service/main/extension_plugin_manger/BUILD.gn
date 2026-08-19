@@ -21,7 +21,7 @@ config("huks_ext_plugin_manager_config") {
 }
 
 if (os_level == "standard") {
-  ohos_static_library("libhuks_ukey_plugin_extesnion_static") {
+  ohos_static_library("libhuks_ukey_plugin_extension_static") {
     subsystem_name = "security"
     part_name = "huks"
 

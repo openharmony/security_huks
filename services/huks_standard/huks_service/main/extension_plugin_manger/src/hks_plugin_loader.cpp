@@ -62,7 +62,7 @@ int32_t HuksPluginLoader::LoadPlugins(const struct HksProcessInfo &info, const s
         void *func = dlsym(m_pluginHandle, methodString.c_str());
         const char *dlsym_error = dlerror();
         if (dlsym_error != nullptr) {
-            HKS_LOG_E("failed to Find entry %{public}s in dynamic link liberary, error: %{public}s",
+            HKS_LOG_E("failed to Find entry %{public}s in dynamic link library, error: %{public}s",
                 methodString.c_str(), dlsym_error);
 
             dlsym_error = dlerror();
@@ -121,10 +121,10 @@ static void RegisterAuthMethodMaps(OHOS::SafeMap<PluginMethodEnum, std::string> 
 static void RegisterCertificateMethodMaps(OHOS::SafeMap<PluginMethodEnum, std::string> &map)
 {
     map.Insert(PluginMethodEnum::FUNC_ON_LIST_INDEX_CERTIFICATE,
-        "_ZN4OHOS8Security4Huks29HksExtPluginOnExportCerticateERK14HksProcessInfoRKNSt3__h12basic_string"
+        "_ZN4OHOS8Security4Huks31HksExtPluginOnExportCertificateERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_PP20HksExternalErrorInfo");
     map.Insert(PluginMethodEnum::FUNC_ON_LIST_PROVIDER_ALL_CERTIFICATE,
-        "_ZN4OHOS8Security4Huks38HksExtPluginOnExportProviderCerticatesERK14HksProcessInfoRKNSt3__h12basic_string"
+        "_ZN4OHOS8Security4Huks40HksExtPluginOnExportProviderCertificatesERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_PP20HksExternalErrorInfo");
     map.Insert(PluginMethodEnum::FUNC_ON_IMPORT_CERTIFICATE,
         "_ZN4OHOS8Security4Huks31HksExtPluginOnImportCertificateERK14HksProcessInfoRKNSt3__h12basic_string"

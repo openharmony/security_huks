@@ -23,7 +23,6 @@
 #include "hks_mem.h"
 #include <string>
 #include <vector>
-#include "hks_template.h"
 #include "hks_common_check.h"
 
 int32_t HksCheckIsUkeyOperation(const struct HksParamSet *paramSet, int32_t *outRet)

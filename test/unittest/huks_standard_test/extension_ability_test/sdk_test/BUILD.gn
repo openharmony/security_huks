@@ -40,7 +40,7 @@ ohos_unittest("ukey_sdk_test") {
     "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger:libhuks_provider_life_cycle_manager_static",
     "//base/security/huks/services/huks_standard/huks_service/extension/ukey/handle_manager:libhuks_remote_handle_manager_static",
     "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
-    "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extesnion_static",
+    "//base/security/huks/services/huks_standard/huks_service/main/extension_plugin_manger:libhuks_ukey_plugin_extension_static",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/inner_kits_passthrough:libhukssdk_static",
   ]
 

@@ -36,7 +36,6 @@
 #include "iremote_stub.h"
 #include "want.h"
 #include "ihuks_access_ext_base.h"
-#include "hks_ukey_common.h"
 
 namespace OHOS {
 namespace Security {

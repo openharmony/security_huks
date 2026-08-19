@@ -463,9 +463,9 @@ HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest017, TestSize.Level0)
     ret = HksCheckAuthStateIsValid(HKS_EXT_CRYPTO_PIN_LOCKED);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = HksCheckAuthStateIsValid(99);
-    ASSERT_TRUE(ret == HKS_ERROR_EXT_RETURN_VALUE_INCRECT);
+    ASSERT_TRUE(ret == HKS_ERROR_EXT_RETURN_VALUE_INCORRECT);
     ret = HksCheckAuthStateIsValid(-1);
-    ASSERT_TRUE(ret == HKS_ERROR_EXT_RETURN_VALUE_INCRECT);
+    ASSERT_TRUE(ret == HKS_ERROR_EXT_RETURN_VALUE_INCORRECT);
 }
 
 /**
@@ -1164,13 +1164,13 @@ HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest038, TestSize.Level0)
 {
     HKS_LOG_I("enter HksFrameworkIpcCheckTest038");
     int32_t ret = HksCheckAuthStateIsValid(3);
-    ASSERT_TRUE(ret == HKS_ERROR_EXT_RETURN_VALUE_INCRECT);
+    ASSERT_TRUE(ret == HKS_ERROR_EXT_RETURN_VALUE_INCORRECT);
     ret = HksCheckAuthStateIsValid(0);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = HksCheckAuthStateIsValid(2);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = HksCheckAuthStateIsValid(2147483647);
-    ASSERT_TRUE(ret == HKS_ERROR_EXT_RETURN_VALUE_INCRECT);
+    ASSERT_TRUE(ret == HKS_ERROR_EXT_RETURN_VALUE_INCORRECT);
 }
 
 /**
