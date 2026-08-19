@@ -962,7 +962,7 @@ static int32_t HksCheckAuthType(struct HuksKeyNode *keyNode, const struct HksUse
     // if the key blob has HKS_TAG_USER_AUTH_TYPE_ATL, it means no need to check auth token mode.
     struct HksParam *userAuthAtl = NULL;
     int32_t ret = HksGetParam(keyNode->keyBlobParamSet, HKS_TAG_USER_AUTH_TYPE_ATL, &userAuthAtl);
-    HKS_IF_TRUE_RETURN(ret == HKS_SUCCESS, HKS_SUCCESS)
+    HKS_IF_TRUE_RETURN(ret == HKS_SUCCESS, HKS_SUCCESS);
 
     uint32_t blobAuthMode;
     int32_t ret = GetAuthMode(keyNode->keyBlobParamSet, &blobAuthMode);
