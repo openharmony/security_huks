@@ -959,8 +959,13 @@ static int32_t GetAuthMode(const struct HksParamSet *paramSet, uint32_t *type)
 
 static int32_t HksCheckAuthType(struct HuksKeyNode *keyNode, const struct HksUserAuthToken *authToken)
 {
+    // if the key blob has HKS_TAG_USER_AUTH_TYPE_ATL, it means no need to check auth token mode.
+    struct HksParam *userAuthAtl = NULL;
+    int32_t ret = HksGetParam(keyNode->keyBlobParamSet, HKS_TAG_USER_AUTH_TYPE_ATL, &userAuthAtl);
+    HKS_IF_TRUE_RETURN(ret == HKS_SUCCESS, HKS_SUCCESS);
+
     uint32_t blobAuthMode;
-    int32_t ret = GetAuthMode(keyNode->keyBlobParamSet, &blobAuthMode);
+    ret = GetAuthMode(keyNode->keyBlobParamSet, &blobAuthMode);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get auth mode failed")
     
     enum {
