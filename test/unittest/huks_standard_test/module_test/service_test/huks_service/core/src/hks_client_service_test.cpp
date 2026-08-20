@@ -1273,4 +1273,80 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest027, TestSize.Level0)
     EXPECT_EQ(result, true);
     HksFreeParamSet(&paramSet);
 }
+
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest029
+ * @tc.desc: tdd AppendKeyAliasToNewParamSet appends key alias and keeps existing tags
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest029, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest029");
+    const char *alias = "HksClientServiceTest029_alias";
+    const struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam baseParam = { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP };
+    ret = HksAddParams(paramSet, &baseParam, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = AppendKeyAliasToNewParamSet(&keyAlias, &paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParam *keyAliasParam = nullptr;
+    ret = HksGetParam(paramSet, HKS_TAG_KEY_ALIAS, &keyAliasParam);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ASSERT_EQ(keyAliasParam->blob.size, keyAlias.size);
+    ASSERT_EQ(memcmp(keyAliasParam->blob.data, keyAlias.data, keyAlias.size), 0);
+
+    struct HksParam *storageFlagParam = nullptr;
+    ret = HksGetParam(paramSet, HKS_TAG_KEY_STORAGE_FLAG, &storageFlagParam);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ASSERT_EQ(storageFlagParam->uint32Param, (uint32_t)HKS_STORAGE_TEMP);
+
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest030
+ * @tc.desc: tdd AppendKeyAliasToNewParamSet replaces existing key alias
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest030, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest030");
+    const char *alias = "HksClientServiceTest030_new";
+    const struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    const char *oldAlias = "HksClientServiceTest030_old";
+    const struct HksBlob oldKeyAlias = { strlen(oldAlias), (uint8_t *)oldAlias };
+
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam oldAliasParam = {
+        .tag = HKS_TAG_KEY_ALIAS,
+        .blob = { oldKeyAlias.size, oldKeyAlias.data }
+    };
+    struct HksParam otherParam = { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP };
+    struct HksParam paramsWithOldAlias[] = { oldAliasParam, otherParam };
+    ret = HksAddParams(paramSet, paramsWithOldAlias, HKS_ARRAY_SIZE(paramsWithOldAlias));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = AppendKeyAliasToNewParamSet(&keyAlias, &paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParam *keyAliasParam = nullptr;
+    ret = HksGetParam(paramSet, HKS_TAG_KEY_ALIAS, &keyAliasParam);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ASSERT_EQ(keyAliasParam->blob.size, keyAlias.size);
+    ASSERT_EQ(memcmp(keyAliasParam->blob.data, keyAlias.data, keyAlias.size), 0);
+
+    HksFreeParamSet(&paramSet);
+}
 }
