@@ -58,6 +58,7 @@ if (os_level == "standard") {
       "ability_runtime:napi_common",
       "ability_runtime:runtime",
       "ability_runtime:service_extension",
+      "bounds_checking_function:libsec_shared",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "bundle_framework:bms_ani_common",

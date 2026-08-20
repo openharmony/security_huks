@@ -102,6 +102,7 @@ if (os_level == "standard") {
     }
 
     external_deps = [
+      "bounds_checking_function:libsec_shared",
       "hdf_core:libhdf_utils",
       "access_token:libaccesstoken_sdk",
       "access_token:libtokenid_sdk",
@@ -158,6 +159,9 @@ if (os_level == "standard") {
     complete_static_lib = true
 
     deps += [ "//foundation/systemabilitymgr/samgr_lite/samgr:samgr" ]
-    external_deps = [ "hilog_lite:hilog_shared" ]
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "hilog_lite:hilog_shared",
+    ]
   }
 }

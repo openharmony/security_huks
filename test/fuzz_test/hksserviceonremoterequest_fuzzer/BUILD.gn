@@ -37,6 +37,7 @@ ohos_fuzztest("HksServiceOnRemoteRequestFuzzTest") {
   deps = [ "../../../services/huks_standard/huks_service/main:libhuks_service_standard_static" ]
 
   external_deps = [
+    "bounds_checking_function:libsec_shared",
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_single",
