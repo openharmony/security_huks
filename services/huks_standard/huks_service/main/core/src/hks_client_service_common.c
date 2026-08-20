@@ -218,11 +218,7 @@ int32_t CheckKeySecuritySeFromParamSet(struct HksParamSet *newParamSet, bool *is
 
         *isSeCalling = true;
 
-        struct HksParam *userAuthTypeParam = NULL;
-        if (HksGetParam(newParamSet, HKS_TAG_USER_AUTH_TYPE, &userAuthTypeParam) == HKS_SUCCESS &&
-            (userAuthTypeParam->uint32Param & HKS_USER_AUTH_TYPE_TUI_PIN) != 0) {
-            securityLevelParam->uint32Param = HKS_KEY_SECURITY_LEVEL_INDEPENDENT_SE;
-        }
+        securityLevelParam->uint32Param = HKS_KEY_SECURITY_LEVEL_INDEPENDENT_SE;
     }
 
     return HKS_SUCCESS;

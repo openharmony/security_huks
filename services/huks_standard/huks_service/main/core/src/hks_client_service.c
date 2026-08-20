@@ -1791,6 +1791,53 @@ struct HksServiceInitCtx {
     int32_t ret;
 };
 
+static int32_t AppendKeyAliasToNewParamSet(const struct HksBlob *keyAlias, struct HksParamSet **paramSet)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    do {
+        // Business may pass HKS_TAG_KEY_ALIAS during init; check first and remove the existing one if present
+        struct HksParam *existingKeyAliasParam = NULL;
+        if (HksGetParam(*paramSet, HKS_TAG_KEY_ALIAS, &existingKeyAliasParam) == HKS_SUCCESS) {
+            const uint32_t tagsToDelete[] = { HKS_TAG_KEY_ALIAS };
+            struct HksParamSet *cleanedParamSet = NULL;
+            ret = HksDeleteTagsFromParamSet(tagsToDelete, HKS_ARRAY_SIZE(tagsToDelete),
+                *paramSet, &cleanedParamSet);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "delete existing key alias failed, ret = %" LOG_PUBLIC "d", ret)
+            ret = AppendToNewParamSet(cleanedParamSet, &newParamSet);
+            HksFreeParamSet(&cleanedParamSet);
+        } else {
+            ret = AppendToNewParamSet(*paramSet, &newParamSet);
+        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init new param set failed, ret = %" LOG_PUBLIC "d", ret)
+        struct HksParam paramArray[] = {
+            { .tag = HKS_TAG_KEY_ALIAS, .blob = {.size = keyAlias->size, .data = keyAlias->data} },
+        };
+        ret = HksAddParams(newParamSet, paramArray, HKS_ARRAY_SIZE(paramArray));
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add key alias, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksBuildParamSet(&newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build new param set failed, ret = %" LOG_PUBLIC "d", ret)
+
+        HksFreeParamSet(paramSet);
+        *paramSet = newParamSet;
+        return ret;
+    } while (0);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+static int32_t GetKeyAndNewParamSetForServiceInit(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *keyAlias, const struct HksParamSet *paramSet, struct HksBlob *key,
+    struct HksParamSet **outParamSet)
+{
+    int32_t ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, key, outParamSet);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    ret = AppendKeyAliasToNewParamSet(keyAlias, outParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append key alias failed, ret = %" LOG_PUBLIC "d", ret)
+    return ret;
+}
+
 static void ServiceInitCore(struct HksServiceInitCtx *ctx)
 {
     do {
@@ -1805,7 +1852,7 @@ static void ServiceInitCore(struct HksServiceInitCtx *ctx)
         HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "check ServiceInit params failed, ret = %" LOG_PUBLIC "d", ctx->ret)
         ctx->ret = RejectSeSecurityLevel(ctx->paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ctx->ret, "reject se security level, ret = %" LOG_PUBLIC "d", ctx->ret)
-        ctx->ret = GetKeyAndNewParamSet(ctx->processInfo, ctx->keyAlias, ctx->paramSet,
+        ctx->ret = GetKeyAndNewParamSetForServiceInit(ctx->processInfo, ctx->keyAlias, ctx->paramSet,
             &ctx->keyFromFile, &ctx->newParamSet);
         if (ctx->ret == HKS_SUCCESS) {
             ctx->ret = CheckKeySecuritySeFromKeyFile(&ctx->keyFromFile, &ctx->isSeCalling);
