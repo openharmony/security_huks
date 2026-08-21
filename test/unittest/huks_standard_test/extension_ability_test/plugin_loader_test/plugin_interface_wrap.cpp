@@ -52,7 +52,7 @@ int32_t VerifyCallerAndAdjustUidParam(const HksProcessInfo &processInfo, const C
 }
 
 // Mock ExtensionConnection to avoid calling real Ability Manager Service in tests.
-// These override the real implementations from libhuks_ukey_plugin_extesnion_static.
+// These override the real implementations from libhuks_ukey_plugin_extension_static.
 class HksCryptoExtStubImpl : public HuksAccessExtBaseStub {
 public:
     explicit HksCryptoExtStubImpl() = default;
@@ -342,10 +342,10 @@ extern "C" void *__wrap_dlsym(void* handle, const char* symbol)
          {"_ZN4OHOS8Security4Huks35HksExtPluginOnClearUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEEPP20HksExternalErrorInfo",
          (void*)Fake_HksExtPluginOnClearUkeyPinAuthState},
-         {"_ZN4OHOS8Security4Huks29HksExtPluginOnExportCerticateERK14HksProcessInfoRKNSt3__h12basic_string"
+         {"_ZN4OHOS8Security4Huks31HksExtPluginOnExportCertificateERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_PP20HksExternalErrorInfo",
          (void*)Fake_HksExtPluginOnExportCertificate},
-         {"_ZN4OHOS8Security4Huks38HksExtPluginOnExportProviderCerticatesERK14HksProcessInfo"
+         {"_ZN4OHOS8Security4Huks40HksExtPluginOnExportProviderCertificatesERK14HksProcessInfo"
         "RKNSt3__h12basic_stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_PP20HksExternalErrorInfo",
          (void*)Fake_HksExtPluginOnExportProviderCertificates},
          {"_ZN4OHOS8Security4Huks25HksExtPluginOnInitSessionER23HksProcessWithErrorInfoRKNSt3__h12basic_string"

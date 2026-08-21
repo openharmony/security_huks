@@ -263,10 +263,6 @@ static napi_value CreateAsyncWork(napi_env env, napi_callback_info info, std::un
     status = napi_queue_async_work(env, context->asyncWork);
     NAPI_THROW(env, status != napi_ok, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not queue async work");
 
-    if (status != napi_ok) {
-        HKS_LOG_E("could not queue async work");
-        return nullptr;
-    }
     if (context->callback == nullptr) {
         context.release();
         return promise;
@@ -342,7 +338,7 @@ napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
         if (argc < HUKS_NAPI_TWO_ARGS) {
             int32_t ret = HksInitParamSet(&context->paramSetIn);
             NAPI_THROW_RETURN_ERR(env, ret != HKS_SUCCESS, napi_generic_failure,
-                HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "unregister call HksInitParamSet for paramSetIn faild.");
+                HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "unregister call HksInitParamSet for paramSetIn failed.");
             return napi_ok;
         }
         result = ParseHksCryptoExternalParams(env, argv[1], context->paramSetIn);
@@ -439,7 +435,7 @@ napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info)
         if (argc < HUKS_NAPI_TWO_ARGS) {
             int32_t ret = HksInitParamSet(&context->paramSetIn);
             NAPI_THROW_RETURN_ERR(env, ret != HKS_SUCCESS, napi_generic_failure,
-                HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "getUkeyPinAuthState call HksInitParamSet for paramSetIn faild.");
+                HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "getUkeyPinAuthState call HksInitParamSet for paramSetIn failed.");
             return napi_ok;
         }
         result = ParseHksCryptoExternalParams(env, argv[1], context->paramSetIn);
@@ -491,7 +487,7 @@ napi_value HuksNapiGetProperty(napi_env env, napi_callback_info info)
         if (argc < HUKS_NAPI_THREE_ARGS) {
             int32_t ret = HksInitParamSet(&context->paramSetIn);
             NAPI_THROW_RETURN_ERR(env, ret != HKS_SUCCESS, napi_generic_failure,
-                HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "getProperty call HksInitParamSet for paramSetIn faild.");
+                HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "getProperty call HksInitParamSet for paramSetIn failed.");
             return napi_ok;
         }
         result = ParseHksCryptoExternalParams(env, argv[HUKS_NAPI_TWO_ARGS], context->paramSetIn);
@@ -544,7 +540,7 @@ napi_value HuksNapiSetProperty(napi_env env, napi_callback_info info)
         if (argc < HUKS_NAPI_THREE_ARGS) {
             int32_t ret = HksInitParamSet(&context->paramSetIn);
             NAPI_THROW_RETURN_ERR(env, ret != HKS_SUCCESS, napi_generic_failure,
-                HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "setProperty call HksInitParamSet for paramSetIn faild.");
+                HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "setProperty call HksInitParamSet for paramSetIn failed.");
             return napi_ok;
         }
         result = ParseHksCryptoExternalParams(env, argv[HUKS_NAPI_TWO_ARGS], context->paramSetIn);

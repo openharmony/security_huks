@@ -34,7 +34,7 @@ namespace {
 constexpr int HKS_MAX_DATA_LEN = 0x6400000; // The maximum length is 100M
 constexpr size_t ASYNCCALLBACK_ARGC = 2;
 constexpr size_t ASYNCCALLBACKVOID_ARGC = 1;
-static int32_t g_pinRetryCount = 0; //ukey retry count
+static uint32_t g_pinRetryCount = 0; //ukey retry count
 }  // namespace
 
 napi_value NapiCreateError(napi_env env, int32_t errCode, const char *errMsg)
@@ -949,10 +949,10 @@ static napi_value GenerateResult(napi_env env, const struct HksSuccessReturnResu
     return result;
 }
 
-// napi层将retryCount传递到这里
-void SetRetryCount(const int32_t retryCount)
+// Pass retryCount from the napi layer to here
+void SetRetryCount(const uint32_t retryCount)
 {
-    g_pinRetryCount = retryCount; // 错误时需打印
+    g_pinRetryCount = retryCount; // Print on error
 }
 
 static napi_value GenerateBusinessError(napi_env env, int32_t errorCode)
@@ -997,9 +997,9 @@ static napi_value GenerateBusinessError(napi_env env, int32_t errorCode)
 
     // add errorData
     napi_value data = GetNull(env);
-    // ukey报错时需要在此处需要拼接 retryCount 上报给上层
+    // On ukey error, append retryCount here and report to the upper layer
     if (errInfo.errorCode == HUKS_ERR_CODE_PIN_CODE_ERROR) {
-        if (napi_create_int32(env, g_pinRetryCount, &data) != napi_ok) {
+        if (napi_create_uint32(env, g_pinRetryCount, &data) != napi_ok) {
             data = GetNull(env);
         }
     }

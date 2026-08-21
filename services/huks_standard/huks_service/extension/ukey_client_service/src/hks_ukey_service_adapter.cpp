@@ -448,7 +448,7 @@ int32_t HksServiceOnUkeyUpdateSession(const struct HksProcessInfo *processInfo, 
     if (handle != nullptr && handle->size == sizeof(uint64_t)) {
         auto mcpRet = memcpy_s(&handleU64, sizeof(handleU64), handle->data, handle->size);
         HKS_IF_TRUE_LOGE_RETURN(mcpRet != EOK, HKS_ERROR_INSUFFICIENT_MEMORY,
-        "memcpy_s faild. ret = %" LOG_PUBLIC "d", mcpRet)
+        "memcpy_s failed. ret = %" LOG_PUBLIC "d", mcpRet)
     }
 
     uint32_t handleU32 = static_cast<uint32_t>(handleU64);
@@ -503,7 +503,7 @@ int32_t HksServiceOnUkeyFinishSession(const struct HksProcessInfo *processInfo, 
     if (handle != nullptr && handle->size == sizeof(uint64_t)) {
         auto mcpRet = memcpy_s(&handleU64, sizeof(handleU64), handle->data, handle->size);
         HKS_IF_TRUE_LOGE_RETURN(mcpRet != EOK, HKS_ERROR_INSUFFICIENT_MEMORY,
-        "memcpy_s faild. ret = %" LOG_PUBLIC "d", mcpRet)
+        "memcpy_s failed. ret = %" LOG_PUBLIC "d", mcpRet)
     }
     uint32_t handleU32 = static_cast<uint32_t>(handleU64);
     CppParamSet cppParamSet(paramSet);
@@ -557,7 +557,7 @@ int32_t HksServiceOnUkeyAbortSession(const struct HksProcessInfo *processInfo, c
     if (handle != nullptr && handle->size == sizeof(uint64_t)) {
         auto mcpRet = memcpy_s(&handleU64, sizeof(handleU64), handle->data, handle->size);
         HKS_IF_TRUE_LOGE_RETURN(mcpRet != EOK, HKS_ERROR_INSUFFICIENT_MEMORY,
-            "memcpy_s faild. ret = %" LOG_PUBLIC "d", mcpRet)
+            "memcpy_s failed. ret = %" LOG_PUBLIC "d", mcpRet)
     }
     auto handleU32 = static_cast<uint32_t>(handleU64);
     auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();

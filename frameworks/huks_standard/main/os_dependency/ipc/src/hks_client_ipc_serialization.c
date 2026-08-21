@@ -182,24 +182,24 @@ int32_t HksUKeyGeneralPackWithCertInfo(const struct HksBlob *blob, const struct 
     int32_t ret;
     
     do {
-        // 1. 复制resourceId blob
+        // 1. Copy resourceId blob
         ret = CopyBlobToBuffer(blob, destData, &offset);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy blob failed");
         
-        // 2. 复制证书信息
-        // 2.1 复制purpose (int32_t)
+        // 2. Copy certificate info
+        // 2.1 Copy purpose (int32_t)
         ret = CopyInt32ToBuffer(certInfo->purpose, destData, &offset);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy purpose failed");
         
-        // 2.2 复制index blob
+        // 2.2 Copy index blob
         ret = CopyBlobToBuffer(&certInfo->index, destData, &offset);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy index blob failed");
         
-        // 2.3 复制cert blob
+        // 2.3 Copy cert blob
         ret = CopyBlobToBuffer(&certInfo->cert, destData, &offset);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy cert blob failed");
         
-        // 3. 复制参数集
+        // 3. Copy paramSet
         ret = CopyParamSetToBuffer(paramSet, destData, &offset);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy paramSet failed");
     } while (0);

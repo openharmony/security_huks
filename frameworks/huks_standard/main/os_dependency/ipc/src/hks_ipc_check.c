@@ -36,7 +36,7 @@ int32_t HksCheckAuthStateIsValid(const int32_t state)
         state == HKS_EXT_CRYPTO_PIN_LOCKED) {
         return HKS_SUCCESS;
     }
-    return HKS_ERROR_EXT_RETURN_VALUE_INCRECT;
+    return HKS_ERROR_EXT_RETURN_VALUE_INCORRECT;
 }
 
 int32_t HksCheckIpcBlobAndParamSet(const struct HksBlob *blob, const struct HksParamSet *paramSet, uint32_t maxSize)

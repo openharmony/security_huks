@@ -23,7 +23,6 @@
 #include "hks_mem.h"
 #include <string>
 #include <vector>
-#include "hks_template.h"
 #include "hks_common_check.h"
 
 int32_t HksCheckIsUkeyOperation(const struct HksParamSet *paramSet, int32_t *outRet)
@@ -31,14 +30,14 @@ int32_t HksCheckIsUkeyOperation(const struct HksParamSet *paramSet, int32_t *out
     int32_t ret = HksCheckParamSetValidity(paramSet);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksCheckParamSetValidity fail. ret: %" LOG_PUBLIC "d", ret);
     CppParamSet paramSetCpp(paramSet);
-    auto abilityName = paramSetCpp.GetParam<HKS_TAG_KEY_CLASS>();
-    if (abilityName.first == HKS_SUCCESS) {
-        if (abilityName.second != HKS_KEY_CLASS_EXTENSION && abilityName.second != HKS_KEY_CLASS_DEFAULT) {
+    auto keyClass = paramSetCpp.GetParam<HKS_TAG_KEY_CLASS>();
+    if (keyClass.first == HKS_SUCCESS) {
+        if (keyClass.second != HKS_KEY_CLASS_EXTENSION && keyClass.second != HKS_KEY_CLASS_DEFAULT) {
             HKS_LOG_E("Invalid HKS_TAG_KEY_CLASS");
             *outRet = HKS_ERROR_INVALID_ARGUMENT;
             return HKS_ERROR_INVALID_ARGUMENT;
         }
-        if (abilityName.second == HKS_KEY_CLASS_EXTENSION) {
+        if (keyClass.second == HKS_KEY_CLASS_EXTENSION) {
             HKS_LOG_I("is ukey operation");
             return HKS_SUCCESS;
         }

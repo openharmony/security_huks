@@ -749,7 +749,7 @@ int32_t GetExportCertificateParams(const napi_env &env, const napi_value &funcRe
 
         HksCertInfo certInfo;
         auto result = GetHksCertInfoValue(env, queryResult, certInfo);
-        HKS_EXT_IF_TRUE_LOGE_RETURN(result != napi_ok, HKS_ERROR_EXT_RETURN_VALUE_INCRECT,
+        HKS_EXT_IF_TRUE_LOGE_RETURN(result != napi_ok, HKS_ERROR_EXT_RETURN_VALUE_INCORRECT,
             "Convert js certInfo fail. result:%d", result);
         resultParams.certs.emplace_back(std::move(certInfo));
     }
@@ -809,13 +809,13 @@ int32_t GetGetPropertyParams(const napi_env &env, const napi_value &funcResult, 
 
         HksParam param;
         status = GetHksParamsfromValue(env, queryResult, param);
-        HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_RETURN_VALUE_INCRECT,
+        HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_RETURN_VALUE_INCORRECT,
             "Convert js param fail.status:%d", status);
         paramVec.emplace_back(std::move(param));
     }
     CppParamSet cppParamSetTemp(paramVec);
     int32_t ret = HksCheckParamSetTag(cppParamSetTemp.GetParamSet());
-    HKS_EXT_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_EXT_RETURN_VALUE_INCRECT, "HksCheckParamSetTag failed");
+    HKS_EXT_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, HKS_ERROR_EXT_RETURN_VALUE_INCORRECT, "HksCheckParamSetTag failed");
     resultParams.paramSet = std::move(cppParamSetTemp);
     return HKS_SUCCESS;
 }

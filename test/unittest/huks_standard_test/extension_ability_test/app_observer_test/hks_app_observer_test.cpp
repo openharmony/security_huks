@@ -533,7 +533,7 @@ HWTEST_F(HksAppObserverTest, PluginInterfaceTest006, TestSize.Level0)
     struct HksExternalErrorInfo *errInfo = nullptr;
 
     std::string certs;
-    int32_t ret = HksExtPluginOnExportCerticate(processInfo, index, paramSet, certs, &errInfo);
+    int32_t ret = HksExtPluginOnExportCertificate(processInfo, index, paramSet, certs, &errInfo);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     HksExtCertInfo certInfo = {};
@@ -544,7 +544,7 @@ HWTEST_F(HksAppObserverTest, PluginInterfaceTest006, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     std::string allCerts;
-    ret = HksExtPluginOnExportProviderCerticates(processInfo, "testProvider", paramSet, allCerts, &errInfo);
+    ret = HksExtPluginOnExportProviderCertificates(processInfo, "testProvider", paramSet, allCerts, &errInfo);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     HKS_FREE_BLOB(certInfo.index);
