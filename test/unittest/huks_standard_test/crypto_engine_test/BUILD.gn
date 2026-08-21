@@ -101,6 +101,7 @@ ohos_unittest("crypto_engine_unit_test") {
     "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_util_standard_static",
   ]
   external_deps = [
+    "bounds_checking_function:libsec_shared",
     "c_utils:utils",
     "hilog:libhilog",
   ]

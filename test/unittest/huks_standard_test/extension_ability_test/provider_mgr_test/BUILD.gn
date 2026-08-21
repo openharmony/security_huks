@@ -48,6 +48,7 @@ if (huks_enable_ukey_config == true) {
       "access_token:libnativetoken_shared",
       "access_token:libtokenid_sdk",
       "access_token:libtokensetproc_shared",
+      "bounds_checking_function:libsec_shared",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "c_utils:utils",

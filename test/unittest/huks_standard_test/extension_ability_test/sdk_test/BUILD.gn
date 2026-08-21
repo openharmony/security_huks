@@ -46,6 +46,7 @@ ohos_unittest("ukey_sdk_test") {
 
   external_deps = [
     "ability_runtime:ability_manager",
+    "bounds_checking_function:libsec_shared",
     "c_utils:utils",
     "googletest:gmock",
     "googletest:gtest",

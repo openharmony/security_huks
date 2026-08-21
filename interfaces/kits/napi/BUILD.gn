@@ -93,6 +93,7 @@ ohos_shared_library("huks") {
   ]
 
   external_deps = [
+    "bounds_checking_function:libsec_shared",
     "c_utils:utils",
     "hilog:libhilog",
     "napi:ace_napi",
@@ -148,6 +149,7 @@ ohos_shared_library("huksexternalcrypto_napi") {
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
   ]
   external_deps = [
+    "bounds_checking_function:libsec_shared",
     "c_utils:utils",
     "hilog:libhilog",
     "napi:ace_napi",
