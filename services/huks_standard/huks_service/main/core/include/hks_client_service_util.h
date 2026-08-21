@@ -73,6 +73,29 @@ int32_t AppendKeyBlobToParamSet(const struct HksParamSet *paramSet, const struct
 
 int32_t HksGetScreenLockStatus(int32_t userId);
 
+// Shared helpers migrated from hks_client_service.c
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+int32_t HksCheckMultiSetTag(const struct HksParamSet *paramSet);
+#endif
+
+#ifndef _CUT_AUTHENTICATE_
+int32_t DksAppendKeyAliasAndNewParamSet(struct HksParamSet *paramSet, const struct HksBlob *keyAlias,
+    struct HksParamSet **outParamSet);
+
+int32_t GetKeyAndNewParamSet(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *key, struct HksParamSet **outParamSet);
+
+#if defined(L2_STANDARD) && defined(HKS_SUPPORT_GET_BUNDLE_INFO)
+int32_t CheckExistingDeveloperId(const struct HksParamSet *paramSet, const struct HksBlob *developerId,
+    bool *needAdd);
+
+int32_t AppendGroupKeyInfo(const struct HksProcessInfo *processInfo, struct HksParamSet **outParamSet);
+#endif
+
+int32_t StoreOrCopyKeyBlob(const struct HksParamSet *paramSet, const struct HksProcessInfo *processInfo,
+    struct HksBlob *output, struct HksBlob *outData, bool isNeedStorage);
+#endif /* _CUT_AUTHENTICATE_ */
+
 #ifdef __cplusplus
 }
 #endif

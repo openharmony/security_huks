@@ -310,3 +310,30 @@ void SetRsaPssSaltLenType(const struct HksParamSet *paramSet, struct HksUsageSpe
         usageSpec->pssSaltLenType = HKS_RSA_PSS_SALTLEN_MAX;
     }
 }
+
+int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
+{
+    HKS_IF_NULL_LOGI_RETURN(outParamSet, HKS_ERROR_NULL_POINTER, "outParamSet is null")
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+
+    do {
+        ret = HksCheckParamSet(paramSet, paramSet->paramSetSize);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check paramSet failed")
+
+        ret = HksFreshParamSet((struct HksParamSet *)paramSet, false);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append fresh paramset failed")
+
+        ret = HksInitParamSet(&newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append init operation param set failed")
+
+        ret = HksAddParams(newParamSet, paramSet->params, paramSet->paramsCnt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append params failed")
+
+        *outParamSet = newParamSet;
+        return ret;
+    } while (0);
+
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}

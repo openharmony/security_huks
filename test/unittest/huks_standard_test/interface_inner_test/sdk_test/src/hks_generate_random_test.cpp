@@ -84,4 +84,40 @@ HWTEST_F(HksGenerateRandomTest, HksGenerateRandomTest001, TestSize.Level0)
     TestFreeBlob(&random);
     ASSERT_TRUE(ret == 0);
 }
+
+/**
+ * @tc.name: HksGenerateRandomTest.HksGenerateRandomTest002
+ * @tc.desc: HksGenerateRandom with null random blob (param check fails).
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksGenerateRandomTest, HksGenerateRandomTest002, TestSize.Level0)
+{
+    int32_t ret = HksGenerateRandomRun(NULL, 1);
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksGenerateRandomTest.HksGenerateRandomTest003
+ * @tc.desc: HksGenerateRandom with random.data null (param check fails).
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksGenerateRandomTest, HksGenerateRandomTest003, TestSize.Level0)
+{
+    struct HksBlob random = { .size = HKS_MAX_RANDOM_LEN, .data = NULL };
+    int32_t ret = HksGenerateRandom(NULL, &random);
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksGenerateRandomTest.HksGenerateRandomTest004
+ * @tc.desc: HksGenerateRandom with random.size 0 (param check fails).
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksGenerateRandomTest, HksGenerateRandomTest004, TestSize.Level0)
+{
+    uint8_t buf[HKS_MAX_RANDOM_LEN] = {0};
+    struct HksBlob random = { .size = 0, .data = buf };
+    int32_t ret = HksGenerateRandom(NULL, &random);
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
 }

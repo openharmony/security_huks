@@ -75,7 +75,7 @@ huks_sources = [
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_service.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_service_util.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_hitrace.c",
-  "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_report.c",
+  "//base/security/huks/services/huks_standard/huks_service/main/ha/src/hks_report.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_session_manager.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_se_session_manager.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_upgrade_helper.c",

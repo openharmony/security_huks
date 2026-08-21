@@ -20,6 +20,7 @@
 
 #include "hks_client_check.h"
 #include "hks_client_service_common.h"
+#include "hks_common_check.h"
 #include "hks_log.h"
 #include "hks_param.h"
 #include "hks_mem.h"
@@ -824,4 +825,169 @@ int32_t HksGetScreenLockStatus(int32_t userId)
     return isDeviceLocked ? HKS_ERROR_NOT_SUPPORTED : HKS_SUCCESS;
 }
 #endif
+#endif /* _CUT_AUTHENTICATE_ */
+
+// ==================== Shared helpers migrated from hks_client_service.c ====================
+
+#ifdef HKS_UKEY_EXTENSION_CRYPTO
+int32_t HksCheckMultiSetTag(const struct HksParamSet *paramSet)
+{
+    for (uint32_t i = 0; i < paramSet->paramsCnt; ++i) {
+        uint32_t curTag = paramSet->params[i].tag;
+        for (uint32_t j = i + 1; j < paramSet->paramsCnt; ++j) {
+            if (curTag == paramSet->params[j].tag) {
+                HKS_LOG_E("paramSet contains multi-tags! 0x%" LOG_PUBLIC "x", curTag);
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+        }
+    }
+    return HKS_SUCCESS;
+}
+#endif
+
+#ifndef _CUT_AUTHENTICATE_
+int32_t DksAppendKeyAliasAndNewParamSet(struct HksParamSet *paramSet, const struct HksBlob *keyAlias,
+    struct HksParamSet **outParamSet)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    do {
+        if (paramSet != NULL) {
+            ret = AppendToNewParamSet(paramSet, &newParamSet);
+        } else {
+            ret = HksInitParamSet(&newParamSet);
+        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init new param set failed, ret = %" LOG_PUBLIC "d", ret)
+        struct HksParam paramArray[] = {
+            { .tag = HKS_TAG_KEY_ALIAS, .blob = {.size = keyAlias->size, .data = keyAlias->data} },
+        };
+        ret = HksAddParams(newParamSet, paramArray, HKS_ARRAY_SIZE(paramArray));
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add key alias, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksBuildParamSet(&newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build new param set failed, ret = %" LOG_PUBLIC "d", ret)
+
+        HksFreeParamSet(&paramSet);
+        *outParamSet = newParamSet;
+        return ret;
+    } while (false);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+int32_t GetKeyAndNewParamSet(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *key, struct HksParamSet **outParamSet)
+{
+    int32_t ret = AppendProcessInfoAndDefault(paramSet, processInfo, NULL, outParamSet, true);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+        "append process info and default strategy failed, ret = %" LOG_PUBLIC "d", ret)
+
+    struct HksParam* dksParam = NULL;
+    ret = HksGetParam(paramSet, DKS_TAG_IS_USE_DISTRIBUTED_KEY, &dksParam);
+    if (ret == HKS_SUCCESS && dksParam->boolParam) {
+        HKS_LOG_D("dks recover after use, has the DKS_TAG_IS_USE_DISTRIBUTED_KEY tag, read keyfile from Ta cache!");
+        ret = DksAppendKeyAliasAndNewParamSet(*outParamSet, keyAlias, outParamSet);
+        HKS_IF_NOT_SUCC_LOGE(ret, "dks append key alias and new param set failed, ret = %" LOG_PUBLIC "d.", ret)
+    } else if (ret == HKS_ERROR_PARAM_NOT_EXIST || (ret == HKS_SUCCESS && !dksParam->boolParam)) {
+        ret = GetKeyData(processInfo, keyAlias, *outParamSet, key, HKS_STORAGE_TYPE_KEY);
+        HKS_IF_NOT_SUCC_LOGE(ret, "get key data failed, ret = %" LOG_PUBLIC "d.", ret)
+    } else {
+        HKS_IF_NOT_SUCC_LOGE(ret, "get DKS_TAG_IS_USE_DISTRIBUTED_KEY failed, ret = %" LOG_PUBLIC "d.", ret)
+    }
+    // free outParamSet together after do-while
+    return ret;
+}
+
+#if defined(L2_STANDARD) && defined(HKS_SUPPORT_GET_BUNDLE_INFO)
+int32_t CheckExistingDeveloperId(const struct HksParamSet *paramSet, const struct HksBlob *developerId,
+    bool *needAdd)
+{
+    *needAdd = true;
+    struct HksParam *existingDevIdParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_DEVELOPER_ID, &existingDevIdParam);
+    if (ret != HKS_SUCCESS) {
+        return HKS_SUCCESS;
+    }
+    *needAdd = false;
+    if (existingDevIdParam->blob.size == developerId->size &&
+        HksMemCmp(existingDevIdParam->blob.data, developerId->data, developerId->size) == 0) {
+        return HKS_SUCCESS;
+    }
+    HKS_LOG_E("developer id is not allowed to be passed in from external!");
+    return HKS_ERROR_INVALID_ARGUMENT;
+}
+
+int32_t AppendGroupKeyInfo(const struct HksProcessInfo *processInfo, struct HksParamSet **outParamSet)
+{
+    int32_t ret = HksCheckAssetAccessGroup(processInfo, *outParamSet);
+    HKS_IF_TRUE_RETURN(ret == HKS_ERROR_PARAM_NOT_EXIST, HKS_SUCCESS)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "groupid is invalid")
+
+    struct HksParamSet *paramSet = *outParamSet;
+    struct HksParamSet *newParamSet = NULL;
+    struct HksBlob developerId = { 0, NULL };
+    do {
+        if (paramSet != NULL) {
+            ret = AppendToNewParamSet(paramSet, &newParamSet);
+        } else {
+            ret = HksInitParamSet(&newParamSet);
+        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append tag to new paramset failed")
+
+        ret = HksGetDeveloperId(processInfo, &developerId);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get developerId failed")
+
+        bool needAdd = true;
+        ret = CheckExistingDeveloperId(*outParamSet, &developerId, &needAdd);
+        HKS_IF_NOT_SUCC_BREAK(ret)
+
+        if (needAdd) {
+            struct HksParam paramArr[] = {
+                { .tag = HKS_TAG_DEVELOPER_ID, .blob = developerId },
+            };
+            ret = HksAddParams(newParamSet, paramArr, HKS_ARRAY_SIZE(paramArr));
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add developerInfo failed")
+        }
+
+        ret = HksBuildParamSet(&newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build paramset failed")
+
+        HksFreeParamSet(outParamSet);
+        *outParamSet = newParamSet;
+        HKS_FREE_BLOB(developerId);
+        return HKS_SUCCESS;
+    } while (0);
+
+    HKS_FREE_BLOB(developerId);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+#endif
+
+int32_t StoreOrCopyKeyBlob(const struct HksParamSet *paramSet, const struct HksProcessInfo *processInfo,
+    struct HksBlob *output, struct HksBlob *outData, bool isNeedStorage)
+{
+    if (!isNeedStorage) {
+        HKS_IF_TRUE_LOGE_RETURN(outData->size != 0 &&
+            memcpy_s(outData->data, outData->size, output->data, output->size) != EOK, HKS_ERROR_INSUFFICIENT_MEMORY,
+            "copy keyblob data fail")
+        outData->size = output->size;
+        return HKS_SUCCESS;
+    }
+
+    struct HksParam *keyAliasParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_ALIAS, &keyAliasParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key alias fail, ret = %" LOG_PUBLIC "d", ret)
+
+    HKS_IF_TRUE_LOGE_RETURN(keyAliasParam->blob.size > HKS_MAX_KEY_ALIAS_LEN, HKS_ERROR_INVALID_ARGUMENT,
+        "key alias size is too long, size is %" LOG_PUBLIC "u", keyAliasParam->blob.size)
+
+    ret = CheckKeyCondition(processInfo, &keyAliasParam->blob, paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CheckKeyCondition fail, ret = %" LOG_PUBLIC "d", ret)
+
+    ret = HksManageStoreKeyBlob(processInfo, paramSet, &keyAliasParam->blob, output, HKS_STORAGE_TYPE_KEY);
+    HKS_IF_NOT_SUCC_LOGE(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
+
+    return ret;
+}
 #endif /* _CUT_AUTHENTICATE_ */

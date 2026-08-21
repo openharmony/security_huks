@@ -23,8 +23,6 @@
 extern "C" {
 #endif
 
-int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
-
 int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet,
     struct HksParamSet **outParamSet, int frontUserId);
 

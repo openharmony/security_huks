@@ -1049,23 +1049,6 @@ static int32_t AddAesTag(const struct HksParamSet *paramSet, struct HksParamSet 
     return AddAeTag(newParamSet, inText, isEncrypt);
 }
 
-static int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
-{
-    struct HksParamSet *newParamSet = NULL;
-    int32_t ret = HksInitParamSet(&newParamSet);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append init operation param set fail")
-
-    ret = HksAddParams(newParamSet, paramSet->params, paramSet->paramsCnt);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("append add in params fail");
-        HksFreeParamSet(&newParamSet);
-        return ret;
-    }
-
-    *outParamSet = newParamSet;
-    return HKS_SUCCESS;
-}
-
 static int32_t AppendCipherTag(const struct HksParamSet *paramSet, const struct HksBlob *inText, bool isEncrypt,
     struct HksParamSet **outParamSet)
 {

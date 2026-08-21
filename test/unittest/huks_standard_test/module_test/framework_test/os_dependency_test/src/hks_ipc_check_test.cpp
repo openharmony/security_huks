@@ -1239,4 +1239,506 @@ HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest041, TestSize.Level0)
     HksFreeParamSet(&paramSet);
 }
 #endif
+
+/**
+ * @tc.name: HksFrameworkIpcCheckTest.HksFrameworkIpcCheckTest042
+ * @tc.desc: test HksCheckIpcGenerateKey null inputs, success and total-size overflow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest042, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    const char *alias = "alias042";
+    struct HksBlob keyAlias = { (uint32_t)strlen(alias), (uint8_t *)alias };
+
+    // null keyAlias (valid paramSet) -> blob check fails
+    EXPECT_EQ(HksCheckIpcGenerateKey(nullptr, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+    // valid keyAlias, null paramSet -> paramSet validity fails
+    EXPECT_EQ(HksCheckIpcGenerateKey(&keyAlias, nullptr), HKS_ERROR_NULL_POINTER);
+    // success
+    EXPECT_EQ(HksCheckIpcGenerateKey(&keyAlias, paramSet), HKS_SUCCESS);
+    // total-size overflow: paramSetSize forced to MAX
+    paramSet->paramSetSize = MAX_PROCESS_SIZE;
+    EXPECT_EQ(HksCheckIpcGenerateKey(&keyAlias, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksFrameworkIpcCheckTest.HksFrameworkIpcCheckTest043
+ * @tc.desc: test HksCheckIpcImportKey null inputs and success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest043, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    const char *alias = "alias043";
+    const char *key = "key043";
+    struct HksBlob keyAlias = { (uint32_t)strlen(alias), (uint8_t *)alias };
+    struct HksBlob keyBlob = { (uint32_t)strlen(key), (uint8_t *)key };
+
+    EXPECT_EQ(HksCheckIpcImportKey(nullptr, paramSet, &keyBlob), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcImportKey(&keyAlias, paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcImportKey(&keyAlias, nullptr, &keyBlob), HKS_ERROR_NULL_POINTER);
+    EXPECT_EQ(HksCheckIpcImportKey(&keyAlias, paramSet, &keyBlob), HKS_SUCCESS);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksFrameworkIpcCheckTest.HksFrameworkIpcCheckTest044
+ * @tc.desc: test HksCheckIpcImportWrappedKey null inputs and success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest044, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    const char *alias = "alias044";
+    const char *wrap = "wrap044";
+    const char *data = "data044";
+    struct HksBlob keyAlias = { (uint32_t)strlen(alias), (uint8_t *)alias };
+    struct HksBlob wrapAlias = { (uint32_t)strlen(wrap), (uint8_t *)wrap };
+    struct HksBlob wrappedData = { (uint32_t)strlen(data), (uint8_t *)data };
+
+    EXPECT_EQ(HksCheckIpcImportWrappedKey(nullptr, &wrapAlias, paramSet, &wrappedData), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcImportWrappedKey(&keyAlias, &wrapAlias, nullptr, &wrappedData), HKS_ERROR_NULL_POINTER);
+    EXPECT_EQ(HksCheckIpcImportWrappedKey(&keyAlias, &wrapAlias, paramSet, &wrappedData), HKS_SUCCESS);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksFrameworkIpcCheckTest.HksFrameworkIpcCheckTest045
+ * @tc.desc: test HksCheckIpcDeleteKey null/oversize/overflow/success (previously uncovered).
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest045, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    const char *alias = "alias045";
+    struct HksBlob keyAlias = { (uint32_t)strlen(alias), (uint8_t *)alias };
+    struct HksBlob bigAlias = { MAX_PROCESS_SIZE + 1, (uint8_t *)alias };
+
+    EXPECT_EQ(HksCheckIpcDeleteKey(nullptr, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcDeleteKey(&keyAlias, nullptr), HKS_ERROR_NULL_POINTER);
+    EXPECT_EQ(HksCheckIpcDeleteKey(&bigAlias, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcDeleteKey(&keyAlias, paramSet), HKS_SUCCESS);
+    paramSet->paramSetSize = MAX_PROCESS_SIZE; // total-size overflow
+    EXPECT_EQ(HksCheckIpcDeleteKey(&keyAlias, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksFrameworkIpcCheckTest.HksFrameworkIpcCheckTest046
+ * @tc.desc: test HksCheckIpcKeyExist null/oversize/overflow/success (previously uncovered).
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest046, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    const char *alias = "alias046";
+    struct HksBlob keyAlias = { (uint32_t)strlen(alias), (uint8_t *)alias };
+    struct HksBlob bigAlias = { MAX_PROCESS_SIZE + 1, (uint8_t *)alias };
+
+    EXPECT_EQ(HksCheckIpcKeyExist(nullptr, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcKeyExist(&keyAlias, nullptr), HKS_ERROR_NULL_POINTER);
+    EXPECT_EQ(HksCheckIpcKeyExist(&bigAlias, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcKeyExist(&keyAlias, paramSet), HKS_SUCCESS);
+    paramSet->paramSetSize = MAX_PROCESS_SIZE;
+    EXPECT_EQ(HksCheckIpcKeyExist(&keyAlias, paramSet), HKS_ERROR_INVALID_ARGUMENT);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksFrameworkIpcCheckTest.HksFrameworkIpcCheckTest047
+ * @tc.desc: test HksCheckIpcExportPublicKey null inputs and success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest047, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    const char *alias = "alias047";
+    const char *key = "key047";
+    struct HksBlob keyAlias = { (uint32_t)strlen(alias), (uint8_t *)alias };
+    struct HksBlob keyBlob = { (uint32_t)strlen(key), (uint8_t *)key };
+
+    EXPECT_EQ(HksCheckIpcExportPublicKey(nullptr, paramSet, &keyBlob), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcExportPublicKey(&keyAlias, paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcExportPublicKey(&keyAlias, nullptr, &keyBlob), HKS_ERROR_NULL_POINTER);
+    EXPECT_EQ(HksCheckIpcExportPublicKey(&keyAlias, paramSet, &keyBlob), HKS_SUCCESS);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksFrameworkIpcCheckTest.HksFrameworkIpcCheckTest048
+ * @tc.desc: test HksCheckIpcAgreeKey null inputs and success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest048, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    const char *a = "priv048";
+    const char *b = "peer048";
+    const char *c = "agree048";
+    struct HksBlob priv = { (uint32_t)strlen(a), (uint8_t *)a };
+    struct HksBlob peer = { (uint32_t)strlen(b), (uint8_t *)b };
+    struct HksBlob agree = { (uint32_t)strlen(c), (uint8_t *)c };
+
+    EXPECT_EQ(HksCheckIpcAgreeKey(paramSet, nullptr, &peer, &agree), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcAgreeKey(paramSet, &priv, &peer, nullptr), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcAgreeKey(nullptr, &priv, &peer, &agree), HKS_ERROR_NULL_POINTER);
+    EXPECT_EQ(HksCheckIpcAgreeKey(paramSet, &priv, &peer, &agree), HKS_SUCCESS);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksFrameworkIpcCheckTest.HksFrameworkIpcCheckTest049
+ * @tc.desc: test HksCheckIpcDeriveKey null inputs and success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest049, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    const char *m = "main049";
+    const char *d = "derive049";
+    struct HksBlob mainKey = { (uint32_t)strlen(m), (uint8_t *)m };
+    struct HksBlob derived = { (uint32_t)strlen(d), (uint8_t *)d };
+
+    EXPECT_EQ(HksCheckIpcDeriveKey(paramSet, nullptr, &derived), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcDeriveKey(paramSet, &mainKey, nullptr), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcDeriveKey(nullptr, &mainKey, &derived), HKS_ERROR_NULL_POINTER);
+    EXPECT_EQ(HksCheckIpcDeriveKey(paramSet, &mainKey, &derived), HKS_SUCCESS);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksFrameworkIpcCheckTest.HksFrameworkIpcCheckTest050
+ * @tc.desc: test HksCheckIpcListAliases invalid paramSet, align-overflow and success (previously uncovered).
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest050, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+
+    // invalid paramSet: corrupted paramSetSize (smaller than header) -> HksCheckParamSet fails
+    paramSet->paramSetSize = 1;
+    EXPECT_EQ(HksCheckIpcListAliases(paramSet), HKS_ERROR_INVALID_ARGUMENT);
+    // restore a valid built size for the remaining checks
+    HksFreeParamSet(&paramSet);
+    ret = HksInitParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    // success
+    EXPECT_EQ(HksCheckIpcListAliases(paramSet), HKS_SUCCESS);
+    // ALIGN_SIZE overflow: paramSetSize just over MAX (kept 4-aligned so HksCheckParamSet accepts it)
+    paramSet->paramSetSize = MAX_PROCESS_SIZE + 4;
+    EXPECT_EQ(HksCheckIpcListAliases(paramSet), HKS_ERROR_INVALID_ARGUMENT);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksFrameworkIpcCheckTest.HksFrameworkIpcCheckTest051
+ * @tc.desc: test HksCheckIpcRenameKeyAlias null/oversize/overflow/success (previously uncovered).
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest051, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    const char *o = "old051";
+    const char *n = "new051";
+    struct HksBlob oldAlias = { (uint32_t)strlen(o), (uint8_t *)o };
+    struct HksBlob newAlias = { (uint32_t)strlen(n), (uint8_t *)n };
+    struct HksBlob bigAlias = { MAX_PROCESS_SIZE + 1, (uint8_t *)o };
+
+    EXPECT_EQ(HksCheckIpcRenameKeyAlias(nullptr, paramSet, &newAlias), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcRenameKeyAlias(&oldAlias, paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcRenameKeyAlias(&oldAlias, nullptr, &newAlias), HKS_ERROR_NULL_POINTER);
+    EXPECT_EQ(HksCheckIpcRenameKeyAlias(&bigAlias, paramSet, &newAlias), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcRenameKeyAlias(&oldAlias, paramSet, &newAlias), HKS_SUCCESS);
+    paramSet->paramSetSize = MAX_PROCESS_SIZE; // total-size overflow
+    EXPECT_EQ(HksCheckIpcRenameKeyAlias(&oldAlias, paramSet, &newAlias), HKS_ERROR_INVALID_ARGUMENT);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksFrameworkIpcCheckTest.HksFrameworkIpcCheckTest052
+ * @tc.desc: test HksCheckIpcChangeStorageLevel null/oversize/overflow/success (previously uncovered).
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest052, TestSize.Level0)
+{
+    struct HksParamSet *src = nullptr;
+    struct HksParamSet *dest = nullptr;
+    int32_t ret = HksInitParamSet(&src);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&src);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksInitParamSet(&dest);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&dest);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    const char *alias = "alias052";
+    struct HksBlob keyAlias = { (uint32_t)strlen(alias), (uint8_t *)alias };
+    struct HksBlob bigAlias = { MAX_PROCESS_SIZE + 1, (uint8_t *)alias };
+
+    EXPECT_EQ(HksCheckIpcChangeStorageLevel(nullptr, src, dest), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcChangeStorageLevel(&keyAlias, nullptr, dest), HKS_ERROR_NULL_POINTER);
+    EXPECT_EQ(HksCheckIpcChangeStorageLevel(&keyAlias, src, nullptr), HKS_ERROR_NULL_POINTER);
+    EXPECT_EQ(HksCheckIpcChangeStorageLevel(&bigAlias, src, dest), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcChangeStorageLevel(&keyAlias, src, dest), HKS_SUCCESS);
+    src->paramSetSize = MAX_PROCESS_SIZE; // total-size overflow
+    EXPECT_EQ(HksCheckIpcChangeStorageLevel(&keyAlias, src, dest), HKS_ERROR_INVALID_ARGUMENT);
+    HksFreeParamSet(&src);
+    HksFreeParamSet(&dest);
+}
+
+/**
+ * @tc.name: HksFrameworkIpcCheckTest.HksFrameworkIpcCheckTest053
+ * @tc.desc: test HksCheckIpcWrapKey null/oversize/overflow/success (previously uncovered).
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest053, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    const char *alias = "alias053";
+    const char *wrap = "wrap053";
+    struct HksBlob keyAlias = { (uint32_t)strlen(alias), (uint8_t *)alias };
+    struct HksBlob wrapped = { (uint32_t)strlen(wrap), (uint8_t *)wrap };
+    struct HksBlob bigAlias = { MAX_PROCESS_SIZE + 1, (uint8_t *)alias };
+
+    EXPECT_EQ(HksCheckIpcWrapKey(nullptr, paramSet, &wrapped), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcWrapKey(&keyAlias, paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcWrapKey(&keyAlias, nullptr, &wrapped), HKS_ERROR_NULL_POINTER);
+    EXPECT_EQ(HksCheckIpcWrapKey(&bigAlias, paramSet, &wrapped), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcWrapKey(&keyAlias, paramSet, &wrapped), HKS_SUCCESS);
+    paramSet->paramSetSize = MAX_PROCESS_SIZE; // total-size overflow
+    EXPECT_EQ(HksCheckIpcWrapKey(&keyAlias, paramSet, &wrapped), HKS_ERROR_INVALID_ARGUMENT);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksFrameworkIpcCheckTest.HksFrameworkIpcCheckTest054
+ * @tc.desc: test HksCheckIpcUnwrapKey null/oversize/overflow/success (previously uncovered).
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest054, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    const char *alias = "alias054";
+    const char *wrap = "wrap054";
+    struct HksBlob keyAlias = { (uint32_t)strlen(alias), (uint8_t *)alias };
+    struct HksBlob wrapped = { (uint32_t)strlen(wrap), (uint8_t *)wrap };
+    struct HksBlob bigAlias = { MAX_PROCESS_SIZE + 1, (uint8_t *)alias };
+
+    EXPECT_EQ(HksCheckIpcUnwrapKey(nullptr, paramSet, &wrapped), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcUnwrapKey(&keyAlias, paramSet, nullptr), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcUnwrapKey(&keyAlias, nullptr, &wrapped), HKS_ERROR_NULL_POINTER);
+    EXPECT_EQ(HksCheckIpcUnwrapKey(&bigAlias, paramSet, &wrapped), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCheckIpcUnwrapKey(&keyAlias, paramSet, &wrapped), HKS_SUCCESS);
+    paramSet->paramSetSize = MAX_PROCESS_SIZE; // total-size overflow
+    EXPECT_EQ(HksCheckIpcUnwrapKey(&keyAlias, paramSet, &wrapped), HKS_ERROR_INVALID_ARGUMENT);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksFrameworkIpcCheckTest.HksFrameworkIpcCheckTest055
+ * @tc.desc: test HksCheckIpcGetKeyInfoList invalid paramSet/listCount/element and success (gap fill).
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest055, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+
+    // invalid paramSet: corrupted paramSetSize (must not pass NULL, function dereferences paramSet->paramSetSize)
+    paramSet->paramSetSize = 1;
+    EXPECT_EQ(HksCheckIpcGetKeyInfoList(nullptr, paramSet, 1), HKS_ERROR_INVALID_ARGUMENT);
+
+    HksFreeParamSet(&paramSet);
+    ret = HksInitParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+
+    // listCount exceeds HKS_GET_KEY_LIST_MAX_COUNT (2048)
+    EXPECT_EQ(HksCheckIpcGetKeyInfoList(nullptr, paramSet, 2049), HKS_ERROR_INVALID_ARGUMENT);
+
+    // valid listCount but element invalid (alias null) -> element check fails
+    struct HksKeyInfo badInfo = { { 0, nullptr }, nullptr };
+    EXPECT_EQ(HksCheckIpcGetKeyInfoList(&badInfo, paramSet, 1), HKS_ERROR_INVALID_ARGUMENT);
+
+    // success: one valid keyInfo
+    struct HksParamSet *infoParamSet = nullptr;
+    ret = HksInitParamSet(&infoParamSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&infoParamSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    const char *alias = "infoalias055";
+    struct HksKeyInfo goodInfo = { { (uint32_t)strlen(alias), (uint8_t *)alias }, infoParamSet };
+    EXPECT_EQ(HksCheckIpcGetKeyInfoList(&goodInfo, paramSet, 1), HKS_SUCCESS);
+
+    HksFreeParamSet(&infoParamSet);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksFrameworkIpcCheckTest.HksFrameworkIpcCheckTest056
+ * @tc.desc: test HksCheckIpcCertificateChain certs null / count>MAX / invalid paramSet / keyAlias null / success (gap fill).
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest056, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    const char *alias = "alias056";
+    struct HksBlob keyAlias = { (uint32_t)strlen(alias), (uint8_t *)alias };
+    const char *c0 = "cert056_0";
+    struct HksBlob certs[3] = {
+        { (uint32_t)strlen(c0), (uint8_t *)c0 },
+        { (uint32_t)strlen(c0), (uint8_t *)c0 },
+        { (uint32_t)strlen(c0), (uint8_t *)c0 },
+    };
+    struct HksCertChain chain3 = { certs, 3 };
+    struct HksCertChain chain5 = { certs, 5 }; // count > MAX_CERT_COUNT(4)
+    struct HksCertChain chainNullCerts = { nullptr, 3 };
+
+    // certs null
+    EXPECT_EQ(HksCheckIpcCertificateChain(&keyAlias, paramSet, &chainNullCerts), HKS_ERROR_INVALID_ARGUMENT);
+    // count > MAX
+    EXPECT_EQ(HksCheckIpcCertificateChain(&keyAlias, paramSet, &chain5), HKS_ERROR_INVALID_ARGUMENT);
+    // invalid paramSet (must not pass NULL: function dereferences paramSet->paramSetSize)
+    paramSet->paramSetSize = 1;
+    EXPECT_EQ(HksCheckIpcCertificateChain(&keyAlias, paramSet, &chain3), HKS_ERROR_INVALID_ARGUMENT);
+    HksFreeParamSet(&paramSet);
+    ret = HksInitParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    // keyAlias data null
+    struct HksBlob nullDataAlias = { 4, nullptr };
+    EXPECT_EQ(HksCheckIpcCertificateChain(&nullDataAlias, paramSet, &chain3), HKS_ERROR_INVALID_ARGUMENT);
+    // success
+    EXPECT_EQ(HksCheckIpcCertificateChain(&keyAlias, paramSet, &chain3), HKS_SUCCESS);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksFrameworkIpcCheckTest.HksFrameworkIpcCheckTest057
+ * @tc.desc: test HksCheckIpcEncapsulate sharedKeyAlias too long (only remaining uncovered branch).
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest057, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = nullptr;
+    struct HksParamSet *sharedParamSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksInitParamSet(&sharedParamSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&sharedParamSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+
+    const char *alias = "alias057";
+    char longShared[HKS_MAX_KEY_ALIAS_LEN + 2];
+    (void)memset_s(longShared, sizeof(longShared), 'D', HKS_MAX_KEY_ALIAS_LEN + 1);
+    longShared[HKS_MAX_KEY_ALIAS_LEN + 1] = '\0';
+    struct HksBlob keyAlias = { (uint32_t)strlen(alias), (uint8_t *)alias };
+    struct HksBlob sharedKeyAlias = { HKS_MAX_KEY_ALIAS_LEN + 1, (uint8_t *)longShared };
+    uint32_t outSize = 0;
+
+    // keyAlias valid, sharedKeyAlias too long -> sharedKeyAlias out-of-range branch
+    EXPECT_EQ(HksCheckIpcEncapsulate(&keyAlias, paramSet, &sharedKeyAlias, sharedParamSet, &outSize),
+        HKS_ERROR_NEW_INVALID_ARGUMENT);
+
+    HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&sharedParamSet);
+}
+
+/**
+ * @tc.name: HksFrameworkIpcCheckTest.HksFrameworkIpcCheckTest058
+ * @tc.desc: test HksCheckIpcGetKeyParamSet null inputs and success (gap fill).
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest058, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksFrameworkIpcCheckTest058");
+    struct HksParamSet *paramSetIn = nullptr;
+    int32_t ret = HksInitParamSet(&paramSetIn);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSetIn);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+
+    struct HksParamSet *paramSetOut = nullptr;
+    ret = HksInitParamSet(&paramSetOut);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSetOut);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+
+    const char *alias = "alias058";
+    struct HksBlob keyAlias = { (uint32_t)strlen(alias), (uint8_t *)alias };
+
+    // null keyAlias (valid paramSetIn) → HksCheckBlobAndParamSet fail
+    EXPECT_EQ(HksCheckIpcGetKeyParamSet(nullptr, paramSetIn, paramSetOut), HKS_ERROR_INVALID_ARGUMENT);
+    // valid keyAlias, null paramSetIn → HksCheckBlobAndParamSet fail
+    EXPECT_EQ(HksCheckIpcGetKeyParamSet(&keyAlias, nullptr, paramSetOut), HKS_ERROR_NULL_POINTER);
+    // success path
+    EXPECT_EQ(HksCheckIpcGetKeyParamSet(&keyAlias, paramSetIn, paramSetOut), HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSetIn);
+    HksFreeParamSet(&paramSetOut);
+}
 }

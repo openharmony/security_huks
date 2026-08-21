@@ -15,6 +15,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <memory>
 #include <string>
 
 #include "assistant.h"
@@ -26,6 +27,7 @@
 #include "hks_ext_cert_info.h"
 #include "hks_ext_error_info.h"
 #include "native_reference_mock.h"
+#include "js_runtime.h"
 
 namespace OHOS::Security::Huks {
 using namespace testing;
@@ -91,5 +93,24 @@ HWTEST_F(CryptoExtAbilityTest, HksCryptoExtAbilityTestAbilityTest_0001, testing:
         HKS_ERROR_EXT_UNDEFINED_OPERATION);
     EXPECT_EQ(HksAbility.ExportPublicKey(index, params, outData, &errInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
     EXPECT_EQ(HksAbility.GenerateKey(handle, params, &errInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+}
+
+HWTEST_F(CryptoExtAbilityTest, HksCryptoExtAbilityTestAbilityTest_0002, testing::ext::TestSize.Level0)
+{
+    HksCryptoExtAbility HksAbility;
+    CppParamSet params;
+    std::string resourceId;
+    struct HksExternalErrorInfo *errInfo = nullptr;
+    EXPECT_EQ(HksAbility.GetResourceId(params, resourceId, &errInfo), HKS_ERROR_EXT_UNDEFINED_OPERATION);
+}
+
+// Create(nullptr): runtime is null -> returns a new HksCryptoExtAbility (the null-runtime branch).
+HWTEST_F(CryptoExtAbilityTest, HksCryptoExtAbilityTestAbilityTest_0003, testing::ext::TestSize.Level0)
+{
+    std::unique_ptr<AbilityRuntime::Runtime> nullRuntime;
+    HksCryptoExtAbility *ability = HksCryptoExtAbility::Create(nullRuntime);
+    EXPECT_NE(ability, nullptr);
+    delete ability;
+    ability = nullptr;
 }
 }

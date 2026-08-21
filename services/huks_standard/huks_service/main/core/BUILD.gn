@@ -57,6 +57,7 @@ if (os_level == "standard") {
       "src/hks_client_service.c",
       "src/hks_client_service_common.c",
       "src/hks_client_service_util.c",
+      "src/hks_client_service_three_stage.c",
       "src/hks_session_manager.c",
       "src/hks_se_session_manager.c",
     ]
@@ -126,7 +127,6 @@ if (os_level == "standard") {
     }
     sources += [
       "src/hks_hitrace.c",
-      "src/hks_report.c",
       "src/hks_report_check_key_exited.cpp",
       "src/hks_report_common.cpp",
       "src/hks_report_data_size.cpp",
@@ -146,7 +146,6 @@ if (os_level == "standard") {
        ] 
      }
     deps += [
-      "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hitrace_meter_wrapper:libhuks_utils_hitrace_meter_wrapper_static",
     ]
 
@@ -200,12 +199,12 @@ if (os_level == "standard") {
       "src/hks_client_service.c",
       "src/hks_client_service_common.c",
       "src/hks_client_service_util.c",
+      "src/hks_client_service_three_stage.c",
       "src/hks_session_manager.c",
       "src/hks_se_session_manager.c",
     ]
     sources += [
       "src/hks_hitrace.c",
-      "src/hks_report.c",
     ]
 
     sources += [

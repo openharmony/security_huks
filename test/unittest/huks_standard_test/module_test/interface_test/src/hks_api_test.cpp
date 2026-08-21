@@ -551,4 +551,106 @@ HWTEST_F(HksAPITest, HksAPITest023, TestSize.Level0)
     HksFreeParamSet(&ukeyParamSet);
 #endif
 }
+
+/**
+ * @tc.name: HksAPITest.HksAPITest00507
+ * @tc.desc: tdd HksValidateCertChain with certsCount > MAX(4), expecting HKS_ERROR_INVALID_ARGUMENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksAPITest, HksAPITest00507, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksAPITest00507");
+    struct HksParamSet *paramSetOut = nullptr;
+    ASSERT_EQ(HksInitParamSet(&paramSetOut), HKS_SUCCESS);
+    uint8_t certData = 0x30;
+    struct HksBlob cert[] = {
+        { 1, &certData }, { 1, &certData }, { 1, &certData }, { 1, &certData }, { 1, &certData },
+    };
+    struct HksCertChain certChain = { cert, 5 }; /* count=5 > MAX(4) */
+    int32_t ret = HksValidateCertChain(&certChain, paramSetOut);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "certsCount>MAX failed, ret = " << ret;
+    HksFreeParamSet(&paramSetOut);
+}
+
+/**
+ * @tc.name: HksAPITest.HksAPITest00508
+ * @tc.desc: tdd HksValidateCertChain with certsCount = MIN(3), expecting error (cert data too short)
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksAPITest, HksAPITest00508, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksAPITest00508");
+    struct HksParamSet *paramSetOut = nullptr;
+    ASSERT_EQ(HksInitParamSet(&paramSetOut), HKS_SUCCESS);
+    uint8_t certData = 0x30;
+    struct HksBlob cert[] = { { 1, &certData }, { 1, &certData }, { 1, &certData } };
+    struct HksCertChain certChain = { cert, 3 }; /* count=3=MIN, passes count check but cert data too short */
+    int32_t ret = HksValidateCertChain(&certChain, paramSetOut);
+    EXPECT_NE(ret, HKS_SUCCESS) << "certsCount=MIN should fail on cert data, ret = " << ret;
+    HksFreeParamSet(&paramSetOut);
+}
+
+/**
+ * @tc.name: HksAPITest.HksAPITest00509
+ * @tc.desc: tdd HksValidateCertChain with cert blob data null (mid-chain), expecting HKS_ERROR_INVALID_ARGUMENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksAPITest, HksAPITest00509, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksAPITest00509");
+    struct HksParamSet *paramSetOut = nullptr;
+    ASSERT_EQ(HksInitParamSet(&paramSetOut), HKS_SUCCESS);
+    uint8_t certData = 0x30;
+    struct HksBlob cert[] = {
+        { 1, &certData }, { 0, nullptr }, { 0, nullptr }, { 0, nullptr },
+    };
+    struct HksCertChain certChain = { cert, DEFAULT_CERT_COUNT };
+    int32_t ret = HksValidateCertChain(&certChain, paramSetOut);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "cert blob data null failed, ret = " << ret;
+    HksFreeParamSet(&paramSetOut);
+}
+
+/**
+ * @tc.name: HksAPITest.HksAPITest00510
+ * @tc.desc: tdd HksValidateCertChain with paramSetOut paramSetSize=0, expecting HKS_ERROR_INVALID_ARGUMENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksAPITest, HksAPITest00510, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksAPITest00510");
+    struct HksParamSet *paramSetOut = nullptr;
+    ASSERT_EQ(HksInitParamSet(&paramSetOut), HKS_SUCCESS);
+    paramSetOut->paramSetSize = 0;
+    uint8_t certData = 0x30;
+    struct HksBlob cert[] = {
+        { 1, &certData }, { 1, &certData }, { 1, &certData }, { 1, &certData },
+    };
+    struct HksCertChain certChain = { cert, DEFAULT_CERT_COUNT };
+    int32_t ret = HksValidateCertChain(&certChain, paramSetOut);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "paramSetSize=0 failed, ret = " << ret;
+    HksFreeParamSet(&paramSetOut);
+}
+
+/**
+ * @tc.name: HksAPITest.HksAPITest00511
+ * @tc.desc: tdd HksValidateCertChain with PEM-format cert (data starts with '-'), expecting HKS_ERROR_VERIFICATION_FAILED
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksAPITest, HksAPITest00511, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksAPITest00511");
+    struct HksParamSet *paramSetOut = nullptr;
+    ASSERT_EQ(HksInitParamSet(&paramSetOut), HKS_SUCCESS);
+    const char *pemData = "-----BEGIN CERT-----";
+    struct HksBlob cert[] = {
+        { (uint32_t)strlen(pemData), (uint8_t *)pemData },
+        { (uint32_t)strlen(pemData), (uint8_t *)pemData },
+        { (uint32_t)strlen(pemData), (uint8_t *)pemData },
+        { (uint32_t)strlen(pemData), (uint8_t *)pemData },
+    };
+    struct HksCertChain certChain = { cert, DEFAULT_CERT_COUNT };
+    int32_t ret = HksValidateCertChain(&certChain, paramSetOut);
+    EXPECT_EQ(ret, HKS_ERROR_VERIFICATION_FAILED) << "PEM cert should fail verification, ret = " << ret;
+    HksFreeParamSet(&paramSetOut);
+}
 }

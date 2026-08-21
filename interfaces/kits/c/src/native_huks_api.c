@@ -18,8 +18,50 @@
 #include "hks_api.h"
 #include "hks_errcode_adapter.h"
 #include "hks_error_code.h"
-#include "native_huks_api_adapter.h"
 #include "stdlib.h"
+
+typedef int32_t (*HksAttestFunc)(const struct HksBlob *, const struct HksParamSet *, struct HksCertChain *);
+
+static int32_t HuksAttestAdapter(const struct OH_Huks_Blob *keyAlias, const struct OH_Huks_ParamSet *paramSet,
+    struct OH_Huks_CertChain *certChain, HksAttestFunc attestFunc)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    do {
+        if (paramSet == NULL) {
+            ret = HKS_ERROR_NULL_POINTER;
+            break;
+        }
+        ret = HksCheckParamSet((struct HksParamSet *)paramSet, paramSet->paramSetSize);
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
+        ret = HksInitParamSet(&newParamSet);
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
+        ret = HksFreshParamSet((struct HksParamSet *)paramSet, false);
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
+        ret = HksAddParams(newParamSet, (const struct HksParam *)paramSet->params, paramSet->paramsCnt);
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
+        struct HksParam isBase64Param = { .tag = HKS_TAG_ATTESTATION_BASE64, .boolParam = true };
+        ret = HksAddParams(newParamSet, &isBase64Param, 1);
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
+        ret = HksBuildParamSet(&newParamSet);
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
+        ret = attestFunc((const struct HksBlob *)keyAlias, newParamSet, (struct HksCertChain *)certChain);
+    } while (0);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
 
 static struct OH_Huks_Result ConvertApiResult(int32_t ret)
 {
@@ -118,14 +160,14 @@ struct OH_Huks_Result OH_Huks_IsKeyItemExist(const struct OH_Huks_Blob *keyAlias
 struct OH_Huks_Result OH_Huks_AttestKeyItem(const struct OH_Huks_Blob *keyAlias,
     const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_CertChain *certChain)
 {
-    int32_t result = HuksAttestAdapter(keyAlias, paramSet, certChain, false);
+    int32_t result = HuksAttestAdapter(keyAlias, paramSet, certChain, HksAttestKey);
     return ConvertApiResult(result);
 }
 
 struct OH_Huks_Result OH_Huks_AnonAttestKeyItem(const struct OH_Huks_Blob *keyAlias,
     const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_CertChain *certChain)
 {
-    int32_t result = HuksAttestAdapter(keyAlias, paramSet, certChain, true);
+    int32_t result = HuksAttestAdapter(keyAlias, paramSet, certChain, HksAnonAttestKey);
     return ConvertApiResult(result);
 }
 

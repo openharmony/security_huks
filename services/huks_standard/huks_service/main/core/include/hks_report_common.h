@@ -17,7 +17,6 @@
 #define HKS_REPORT_COMMON_H
 
 #include "hks_plugin_def.h"
-#include "hks_report.h"
 #include "hks_template.h"
 #include "hks_type.h"
 #include "hks_type_inner.h"
