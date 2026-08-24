@@ -670,14 +670,10 @@ typedef int32_t (*GetKeyParamSetExtFunc)(const struct HksBlob *keyAlias,
 
 static bool IsPrivacySearchMatch(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn)
 {
-    if (keyAlias == NULL || keyAlias->data == NULL || paramSetIn == NULL || paramSetIn->paramsCnt == 0) {
+    if (keyAlias != NULL || paramSetIn == NULL || paramSetIn->paramsCnt == 0) {
         return false;
     }
-    size_t aliasLen = strlen(PRIVACY_SEARCH_ALIAS);
-    if (keyAlias->size != aliasLen || memcmp(keyAlias->data, PRIVACY_SEARCH_ALIAS, aliasLen) != 0) {
-        return false;
-    }
-    if (paramSetIn->params[0].tag != HKS_TAG_PRIVACY_SEARCH) {
+    if (paramSetIn->params[0].tag != 1) {
         return false;
     }
     return true;
