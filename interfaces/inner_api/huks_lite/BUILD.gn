@@ -192,10 +192,10 @@ if (ohos_kernel_type == "liteos_m") {
       "../../../services/huks_standard/huks_engine/main/core/src/hks_sm_import_wrap_key.c",
       "../../../services/huks_standard/huks_service/main/core/src/hks_client_check.c",
       "../../../services/huks_standard/huks_service/main/core/src/hks_client_service.c",
+      "../../../services/huks_standard/huks_service/main/core/src/hks_client_service_three_stage.c",
       "../../../services/huks_standard/huks_service/main/core/src/hks_client_service_common.c",
       "../../../services/huks_standard/huks_service/main/core/src/hks_client_service_util.c",
       "../../../services/huks_standard/huks_service/main/core/src/hks_hitrace.c",
-      "../../../services/huks_standard/huks_service/main/core/src/hks_report.c",
       "../../../services/huks_standard/huks_service/main/core/src/hks_session_manager.c",
       "../../../services/huks_standard/huks_service/main/core/src/hks_se_session_manager.c",
       "../../../services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_access.c",
@@ -235,6 +235,7 @@ if (ohos_kernel_type == "liteos_m") {
       "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/include",
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",
       "//base/security/huks/services/huks_standard/huks_service/main/plugin_proxy/include",
+      "//base/security/huks/services/huks_standard/huks_service/main/ha/include",
     ]
 
     defines = [

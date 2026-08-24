@@ -78,6 +78,8 @@ int32_t HksCheckKeyBlobParamSetEqualRuntimeParamSet(const struct HksParamSet *ke
     const struct HksParamSet *runtimeParamSet, uint32_t tag);
 
 void SetRsaPssSaltLenType(const struct HksParamSet *paramSet, struct HksUsageSpec *usageSpec);
+
+int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
 #ifdef __cplusplus
 }
 #endif

@@ -34,6 +34,7 @@
 #include "base/security/huks/services/huks_standard/huks_service/main/plugin_proxy/src/hks_plugin_adapter.cpp"
 #include "base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_service_util.c"
 #include "base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_service.c"
+#include "base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_service_three_stage.c"
 
 using namespace testing::ext;
 using namespace Unittest::AttestKey;
@@ -979,7 +980,17 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest018, TestSize.Level0)
     struct HksBlob *certChain = nullptr;
     int32_t ret = ConstructCertChainBlob(&certChain);
     struct HksParamSet *newParamSet = NULL;
-    ret = BuildAbortParamSet(&newParamSet);
+
+    ret = HksInitParamSet(&newParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParam Param = { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP};
+    ret = HksAddParams(newParamSet, &Param, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksBuildParamSet(&newParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
     ASSERT_EQ(ret, HKS_SUCCESS);
 
     uint8_t remoteObject[] = {1, 2, 3, 4, 5};

@@ -22,7 +22,7 @@
 #include "hks_param.h"
 #include "hks_template.h"
 #include "hks_mem.h"
-#include "hks_client_service_common.h"
+#include "hks_common_check.h"
 
 void HksEventReport(const char *funcName, const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     const struct HksParamSet *reportParamSet, int32_t errorCode)

@@ -29,4 +29,4 @@ void HksReport(const char *funcName, const struct HksProcessInfo *processInfo,
 }
 #endif
 
-#endif  // HKS_RW_LOCK_H
+#endif  // HKS_REPORT_H

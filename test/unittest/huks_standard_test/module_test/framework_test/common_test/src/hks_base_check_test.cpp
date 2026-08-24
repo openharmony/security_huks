@@ -24,6 +24,8 @@
 #include "hks_mem.h"
 #include "hks_cmd_id.h"
 #include "hks_type.h"
+#include "hks_type_enum.h"
+#include "hks_param.h"
 
 #include <cstring>
 
@@ -129,6 +131,236 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest005, TestSize.Level0)
     ASSERT_EQ(ret, HKS_ERROR_INVALID_PADDING) << "HksCheckCipherMutableParams failed, ret = " << ret;
 }
 
+/**
+ * @tc.name: HksBaseCheckTest.HksBaseCheckTest020
+ * @tc.desc: tdd HksCheckValue, expecting HKS_SUCCESS and HKS_ERROR_INVALID_ARGUMENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksBaseCheckTest, HksBaseCheckTest020, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksBaseCheckTest020");
+    uint32_t expectVals[] = {1, 2, 3};
+    ASSERT_EQ(HksCheckValue(2, expectVals, HKS_ARRAY_SIZE(expectVals)), HKS_SUCCESS);
+    ASSERT_EQ(HksCheckValue(99, expectVals, HKS_ARRAY_SIZE(expectVals)), HKS_ERROR_INVALID_ARGUMENT);
+}
+
+/**
+ * @tc.name: HksBaseCheckTest.HksBaseCheckTest021
+ * @tc.desc: tdd HksCheckNeedCache, expecting HKS_SUCCESS for ed25519/sm2/ML_DSA/ML_KEM/digest_none, HKS_FAILURE otherwise
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksBaseCheckTest, HksBaseCheckTest021, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksBaseCheckTest021");
+    ASSERT_EQ(HksCheckNeedCache(HKS_ALG_ED25519, HKS_DIGEST_SHA256), HKS_SUCCESS);
+    ASSERT_EQ(HksCheckNeedCache(HKS_ALG_SM2, HKS_DIGEST_SHA256), HKS_SUCCESS);
+    ASSERT_EQ(HksCheckNeedCache(HKS_ALG_ML_DSA, HKS_DIGEST_SHA256), HKS_SUCCESS);
+    ASSERT_EQ(HksCheckNeedCache(HKS_ALG_ML_KEM, HKS_DIGEST_SHA256), HKS_SUCCESS);
+    ASSERT_EQ(HksCheckNeedCache(HKS_ALG_AES, HKS_DIGEST_NONE), HKS_SUCCESS);
+    ASSERT_EQ(HksCheckNeedCache(HKS_ALG_AES, HKS_DIGEST_SHA256), HKS_FAILURE);
+}
+
+/**
+ * @tc.name: HksBaseCheckTest.HksBaseCheckTest022
+ * @tc.desc: tdd HksCheckGenKeyPurpose, expecting HKS_SUCCESS for unique valid purpose, HKS_ERROR_INVALID_PURPOSE for multi-purpose
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksBaseCheckTest, HksBaseCheckTest022, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksBaseCheckTest022");
+    // unique purpose → success
+    ASSERT_EQ(HksCheckGenKeyPurpose(HKS_ALG_AES, HKS_KEY_PURPOSE_ENCRYPT, HKS_KEY_FLAG_GENERATE_KEY), HKS_SUCCESS);
+    // multi-purpose (encrypt + mac) → invalid
+    ASSERT_EQ(HksCheckGenKeyPurpose(HKS_ALG_AES, HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_MAC,
+        HKS_KEY_FLAG_GENERATE_KEY), HKS_ERROR_INVALID_PURPOSE);
+}
+
+/**
+ * @tc.name: HksBaseCheckTest.HksBaseCheckTest023
+ * @tc.desc: tdd HksCheckSignVerifyMutableParams, expecting HKS_ERROR_INVALID_PURPOSE / HKS_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksBaseCheckTest, HksBaseCheckTest023, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksBaseCheckTest023");
+    struct ParamsValues values = {};
+    struct Params purParam = { true, HKS_KEY_PURPOSE_SIGN };
+    values.purpose = purParam;
+    // sign with SIGN purpose → success
+    ASSERT_EQ(HksCheckSignVerifyMutableParams(HKS_CMD_ID_SIGN, HKS_ALG_ECC, &values), HKS_SUCCESS);
+    // verify without VERIFY purpose → invalid
+    values.purpose.value = HKS_KEY_PURPOSE_SIGN;
+    ASSERT_EQ(HksCheckSignVerifyMutableParams(HKS_CMD_ID_VERIFY, HKS_ALG_ECC, &values), HKS_ERROR_INVALID_PURPOSE);
+    // invalid cmdId → invalid argument
+    ASSERT_EQ(HksCheckSignVerifyMutableParams(0, HKS_ALG_ECC, &values), HKS_ERROR_INVALID_ARGUMENT);
+}
+
+/**
+ * @tc.name: HksBaseCheckTest.HksBaseCheckTest024
+ * @tc.desc: tdd InitInputParamsByAlg, expecting HKS_SUCCESS for known alg, HKS_ERROR_INVALID_ALGORITHM for unknown
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksBaseCheckTest, HksBaseCheckTest024, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksBaseCheckTest024");
+    struct ParamsValues inputParams = {};
+    ASSERT_EQ(InitInputParamsByAlg(HKS_ALG_AES, HKS_CHECK_TYPE_GEN_KEY, &inputParams), HKS_SUCCESS);
+    ASSERT_EQ(InitInputParamsByAlg(0xFFFF, HKS_CHECK_TYPE_GEN_KEY, &inputParams), HKS_ERROR_INVALID_ALGORITHM);
+}
+
+/**
+ * @tc.name: HksBaseCheckTest.HksBaseCheckTest025
+ * @tc.desc: tdd GetExpectParams, expecting HKS_SUCCESS for known alg, HKS_ERROR_INVALID_ALGORITHM for unknown
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksBaseCheckTest, HksBaseCheckTest025, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksBaseCheckTest025");
+    struct ExpectParamsValues expectValues = {};
+    ASSERT_EQ(GetExpectParams(HKS_ALG_AES, HKS_CHECK_TYPE_GEN_KEY, &expectValues), HKS_SUCCESS);
+    ASSERT_EQ(GetExpectParams(0xFFFF, HKS_CHECK_TYPE_GEN_KEY, &expectValues), HKS_ERROR_INVALID_ALGORITHM);
+}
+
+/**
+ * @tc.name: HksBaseCheckTest.HksBaseCheckTest026
+ * @tc.desc: tdd GetInputParams, expecting HKS_SUCCESS and HKS_ERROR_CHECK_GET_KEY_SIZE_FAIL
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksBaseCheckTest, HksBaseCheckTest026, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksBaseCheckTest026");
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam keySizeParam = { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 };
+    ret = HksAddParams(paramSet, &keySizeParam, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct ParamsValues inputParams = {};
+    inputParams.keyLen.needCheck = true;
+    // paramSet has KEY_SIZE → success
+    ASSERT_EQ(GetInputParams(paramSet, &inputParams), HKS_SUCCESS);
+    ASSERT_EQ(inputParams.keyLen.value, HKS_AES_KEY_SIZE_128);
+
+    // paramSet missing PURPOSE → fail
+    inputParams.purpose.needCheck = true;
+    ASSERT_EQ(GetInputParams(paramSet, &inputParams), HKS_ERROR_CHECK_GET_PURPOSE_FAIL);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksBaseCheckTest.HksBaseCheckTest027
+ * @tc.desc: tdd HksCheckCipherData, expecting HKS_SUCCESS for SM2
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksBaseCheckTest, HksBaseCheckTest027, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksBaseCheckTest027");
+    int32_t ret = HksCheckCipherData(HKS_CMD_ID_ENCRYPT, HKS_ALG_SM2, nullptr, nullptr, nullptr);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "HksCheckCipherData SM2 failed, ret = " << ret;
+}
+
+/**
+ * @tc.name: HksBaseCheckTest.HksBaseCheckTest028
+ * @tc.desc: tdd HksCheckCipherMutableParams, expecting HKS_SUCCESS for AES/CBC/PKCS7 encrypt
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksBaseCheckTest, HksBaseCheckTest028, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksBaseCheckTest028");
+    struct ParamsValues values = {};
+    values.purpose = { true, HKS_KEY_PURPOSE_ENCRYPT };
+    values.mode = { true, HKS_MODE_CBC };
+    values.padding = { true, HKS_PADDING_PKCS7 };
+    int32_t ret = HksCheckCipherMutableParams(HKS_CMD_ID_ENCRYPT, HKS_ALG_AES, &values);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "HksCheckCipherMutableParams AES CBC success failed, ret = " << ret;
+}
+
+/**
+ * @tc.name: HksBaseCheckTest.HksBaseCheckTest029
+ * @tc.desc: tdd HksCheckCipherMutableParams, expecting HKS_ERROR_INVALID_PURPOSE for wrong purpose
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksBaseCheckTest, HksBaseCheckTest029, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksBaseCheckTest029");
+    struct ParamsValues values = {};
+    values.purpose = { true, HKS_KEY_PURPOSE_SIGN };
+    int32_t ret = HksCheckCipherMutableParams(HKS_CMD_ID_ENCRYPT, HKS_ALG_AES, &values);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_PURPOSE) << "HksCheckCipherMutableParams wrong purpose, ret = " << ret;
+}
+
+/**
+ * @tc.name: HksBaseCheckTest.HksBaseCheckTest030
+ * @tc.desc: tdd CheckImportMutableParams, expecting HKS_ERROR_INVALID_PURPOSE for DSA non-verify, HKS_SUCCESS for DSA verify
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksBaseCheckTest, HksBaseCheckTest030, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksBaseCheckTest030");
+    struct ParamsValues values = {};
+    values.purpose = { true, HKS_KEY_PURPOSE_VERIFY };
+    ASSERT_EQ(CheckImportMutableParams(HKS_ALG_DSA, &values), HKS_SUCCESS);
+    values.purpose.value = HKS_KEY_PURPOSE_SIGN;
+    ASSERT_EQ(CheckImportMutableParams(HKS_ALG_DSA, &values), HKS_ERROR_INVALID_PURPOSE);
+}
+
+/**
+ * @tc.name: HksBaseCheckTest.HksBaseCheckTest031
+ * @tc.desc: tdd CheckImportMutableParams, expecting HKS_ERROR_INVALID_PURPOSE for ED25519 non-verify
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksBaseCheckTest, HksBaseCheckTest031, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksBaseCheckTest031");
+    struct ParamsValues values = {};
+    values.purpose = { true, HKS_KEY_PURPOSE_SIGN };
+    ASSERT_EQ(CheckImportMutableParams(HKS_ALG_ED25519, &values), HKS_ERROR_INVALID_PURPOSE);
+    values.purpose.value = HKS_KEY_PURPOSE_VERIFY;
+    ASSERT_EQ(CheckImportMutableParams(HKS_ALG_ED25519, &values), HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksBaseCheckTest.HksBaseCheckTest032
+ * @tc.desc: tdd CheckImportMutableParams, expecting HKS_ERROR_INVALID_PURPOSE for ECC non-verify/non-agree/non-unwrap
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksBaseCheckTest, HksBaseCheckTest032, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksBaseCheckTest032");
+    struct ParamsValues values = {};
+    values.purpose = { true, HKS_KEY_PURPOSE_ENCRYPT };
+    ASSERT_EQ(CheckImportMutableParams(HKS_ALG_ECC, &values), HKS_ERROR_INVALID_PURPOSE);
+    values.purpose.value = HKS_KEY_PURPOSE_VERIFY;
+    ASSERT_EQ(CheckImportMutableParams(HKS_ALG_ECC, &values), HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksBaseCheckTest.HksBaseCheckTest033
+ * @tc.desc: tdd HksCheckGenKeyMutableParams, expecting HKS_SUCCESS for default alg (no padding check)
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksBaseCheckTest, HksBaseCheckTest033, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksBaseCheckTest033");
+    struct ParamsValues values = {};
+    int32_t ret = HksCheckGenKeyMutableParams(HKS_ALG_HMAC, &values);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "HksCheckGenKeyMutableParams default alg failed, ret = " << ret;
+}
+
+/**
+ * @tc.name: HksBaseCheckTest.HksBaseCheckTest034
+ * @tc.desc: tdd HksCheckSecureSignParams, expecting HKS_SUCCESS or HKS_ERROR_INVALID_ARGUMENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksBaseCheckTest, HksBaseCheckTest034, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksBaseCheckTest034");
+    // invalid secureSignType → error
+    ASSERT_NE(HksCheckSecureSignParams(0xFFFF), HKS_SUCCESS);
+}
 /**
  * @tc.name: HksBaseCheckTest.HksBaseCheckTest006
  * @tc.desc: tdd HksCheckSignature, expecting HKS_ERROR_INVALID_ARGUMENT

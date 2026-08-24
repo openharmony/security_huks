@@ -44,7 +44,7 @@ config("public_huks_config") {
     "//base/security/huks/services/huks_standard/huks_service/main/upgrade/lock/include",
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/at_wrapper/include",
     "//base/security/huks/utils/file_iterative_reader/include",
-    "//base/security/huks/service/huks_standard/huks_service/main/ha/include",
+    "//base/security/huks/services/huks_standard/huks_service/main/ha/include",
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/se/include",
   ]
   if (huks_use_rkc_in_standard) {
@@ -73,9 +73,11 @@ huks_sources = [
   "//base/security/huks/interfaces/inner_api/huks_standard/source/hks_api_adapter.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_check.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_service.c",
+  "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_service_common.c",
+  "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_service_three_stage.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_service_util.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_hitrace.c",
-  "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_report.c",
+  "//base/security/huks/services/huks_standard/huks_service/main/ha/src/hks_report.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_session_manager.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_se_session_manager.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_upgrade_helper.c",

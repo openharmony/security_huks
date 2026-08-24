@@ -49,9 +49,14 @@ ohos_static_library("libhuks_service_ha_static") {
     "src/hks_ha_event_queue.cpp",
     "src/hks_ha_event_report.cpp",
     "src/hks_ha_plugin.cpp",
+    "src/hks_report.c",
   ]
 
-  deps = [ "${huks_base_path}frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
+
+  deps = [
+    "${huks_base_path}frameworks/huks_standard/main/common:libhuks_common_standard_static",
+    "${huks_base_path}services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
+  ]
 
   external_deps = [
     "bounds_checking_function:libsec_shared",

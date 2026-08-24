@@ -1373,4 +1373,36 @@ HWTEST_F(JsCryptoExtAbilityTest, BuildParam_0001, testing::ext::TestSize.Level0)
     (void)BuildParam(env, cppParamSet, argv, argc);
 }
 
+// HksCryptoExtAbility::Create — runtime non-null and a creator is registered: creator_(runtime) is returned.
+HWTEST_F(JsCryptoExtAbilityTest, Create_0000, testing::ext::TestSize.Level0)
+{
+    std::unique_ptr<AbilityRuntime::Runtime> runtime = std::make_unique<AbilityRuntime::JsRuntime>();
+    bool creatorCalled = false;
+    HksCryptoExtAbility *expected = nullptr;
+    CreatorFunc creator = [&creatorCalled, &expected, &runtime](
+        const std::unique_ptr<AbilityRuntime::Runtime> &rt) -> HksCryptoExtAbility * {
+        creatorCalled = true;
+        EXPECT_EQ(rt.get(), runtime.get());
+        expected = new HksCryptoExtAbility();
+        return expected;
+    };
+    HksCryptoExtAbility::SetCreator(creator);
+    HksCryptoExtAbility *result = HksCryptoExtAbility::Create(runtime);
+    EXPECT_TRUE(creatorCalled);
+    EXPECT_EQ(result, expected);
+    delete result;
+    HksCryptoExtAbility::SetCreator(CreatorFunc{}); // reset the static creator
+}
+
+// HksCryptoExtAbility::Create — JS-language runtime and no creator: JsHksCryptoExtAbility::Create branch.
+HWTEST_F(JsCryptoExtAbilityTest, Create_0001, testing::ext::TestSize.Level0)
+{
+    HksCryptoExtAbility::SetCreator(CreatorFunc{}); // ensure the creator branch is skipped
+    std::unique_ptr<AbilityRuntime::Runtime> runtime = std::make_unique<AbilityRuntime::JsRuntime>();
+    HksCryptoExtAbility *result = HksCryptoExtAbility::Create(runtime);
+    EXPECT_NE(result, nullptr);
+    EXPECT_NE(static_cast<JsHksCryptoExtAbility *>(result), nullptr);
+    delete result; // JsHksCryptoExtAbility destructor runs FreeNativeReference(null) under the mocked Assistant.
+}
+
 }
