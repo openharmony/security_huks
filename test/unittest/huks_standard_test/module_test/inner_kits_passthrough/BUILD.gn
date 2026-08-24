@@ -73,6 +73,8 @@ huks_sources = [
   "//base/security/huks/interfaces/inner_api/huks_standard/source/hks_api_adapter.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_check.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_service.c",
+  "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_service_common.c",
+  "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_service_three_stage.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_service_util.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_hitrace.c",
   "//base/security/huks/services/huks_standard/huks_service/main/ha/src/hks_report.c",
