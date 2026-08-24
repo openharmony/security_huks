@@ -51,6 +51,7 @@
 #include "hks_ukey_service_adapter.h"
 #endif
 #include "hks_client_check.h"
+#include "securec.h"
 
 #ifndef _CUT_AUTHENTICATE_
 
