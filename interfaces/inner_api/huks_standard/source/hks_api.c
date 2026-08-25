@@ -637,7 +637,6 @@ HKS_API_EXPORT int32_t HksDeleteKey(const struct HksBlob *keyAlias, const struct
 #endif
 }
 
-static const char PRIVACY_SEARCH_ALIAS[] = "privacySearch";
 static const char CCZ_NAPI_PATH[] = "libccz_service.z.so";
 static const char PRIVACY_SEARCH_FUNC_NAME[] = "HksPrivacySearchAdapter";
 static void *g_cczNapiHandle = NULL;
@@ -684,9 +683,6 @@ HKS_API_EXPORT int32_t HksGetKeyParamSet(const struct HksBlob *keyAlias,
 {
 #ifdef HKS_SUPPORT_API_GET_KEY_PARAM_SET
     HKS_LOG_D("enter GetKeyParamSet");
-    if ((keyAlias == NULL) || (paramSetOut == NULL)) {
-        return HKS_ERROR_NULL_POINTER;
-    }
     if (IsPrivacySearchMatch(keyAlias, paramSetIn)) {
         void *handle = GetCczNapiHandle();
         if (handle == NULL) {
@@ -698,6 +694,9 @@ HKS_API_EXPORT int32_t HksGetKeyParamSet(const struct HksBlob *keyAlias,
             return HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED;
         }
         return func(keyAlias, paramSetIn, paramSetOut);
+    }
+    if ((keyAlias == NULL) || (paramSetOut == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
     }
     int32_t ret = HksClientGetKeyParamSet(keyAlias, paramSetIn, paramSetOut);
     HKS_IF_NOT_SUCC_LOGE(ret, "leave GetKeyParamSet, result = %" LOG_PUBLIC "d", ret);
