@@ -254,46 +254,6 @@ static int32_t BuildRuntimeParamSet(const struct HksParamSet *inParamSet, struct
     return HKS_SUCCESS;
 }
 
-static int32_t HksCheckUniqueHandle(uint64_t handle)
-{
-    HKS_IF_NOT_SUCC_LOGE_RETURN(HKS_LOCK_OR_FAIL(g_huksMutex), HKS_ERROR_PTHREAD_MUTEX_LOCK_FAIL,
-        "lock in HksCheckUniqueHandle fail");
-    struct HuksKeyNode *keyNode = NULL;
-    HKS_DLIST_ITER(keyNode, &g_keyNodeList) {
-        if ((keyNode != NULL) && (keyNode->handle == handle)) {
-            HKS_LOG_E("The handle already exists!");
-            HKS_UNLOCK_OR_FAIL(g_huksMutex);
-            return HKS_FAILURE;
-        }
-    }
-    HKS_UNLOCK_OR_FAIL(g_huksMutex);
-    return HKS_SUCCESS;
-}
-
-static int32_t GenerateKeyNodeHandle(uint64_t *handle)
-{
-    uint32_t handleData = 0;
-    struct HksBlob opHandle = {
-        .size = sizeof(uint32_t),
-        .data = (uint8_t *)&handleData
-    };
-
-    int32_t ret = HKS_FAILURE;
-    for (uint32_t i = 0; i < MAX_RETRY_CHECK_UNIQUE_HANDLE_TIME; i++) {
-        ret = HksCryptoHalFillRandom(&opHandle);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("fill keyNode handle failed");
-            return ret;
-        }
-        ret = HksCheckUniqueHandle(handleData);
-        if (ret == HKS_SUCCESS) {
-            *handle = handleData; /* Temporarily only use 32 bit handle */
-            return ret;
-        }
-    }
-    return ret;
-}
-
 static void DeleteFirstTimeOutBatchKeyNode(void)
 {
     if (atomic_load(&g_keyNodeCount) < MAX_KEY_NODES_COUNT) {
@@ -390,12 +350,38 @@ static bool DeleteFirstKeyNode(void)
     return false;
 }
 
+static int32_t GenerateAndCheckUniqueHandle(struct HuksKeyNode *keyNode)
+{
+    for (uint32_t i = 0; i < MAX_RETRY_CHECK_UNIQUE_HANDLE_TIME; i++) {
+        uint32_t handleData = 0;
+        struct HksBlob opHandle = { .size = sizeof(uint32_t), .data = (uint8_t *)&handleData };
+        int32_t ret = HksCryptoHalFillRandom(&opHandle);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "fill keyNode handle failed")
+        keyNode->handle = handleData;
+        bool handleUnique = true;
+        struct HuksKeyNode *tmp = NULL;
+        HKS_DLIST_ITER(tmp, &g_keyNodeList) {
+            if ((tmp != NULL) && (tmp->handle == keyNode->handle)) {
+                HKS_LOG_E("The handle already exists!");
+                handleUnique = false;
+                break;
+            }
+        }
+        HKS_IF_TRUE_RETURN(handleUnique, HKS_SUCCESS)
+    }
+    HKS_LOG_E("generate unique handle failed after retry!");
+    return HKS_FAILURE;
+}
+
 static int32_t AddKeyNode(struct HuksKeyNode *keyNode, uint32_t tokenId)
 {
     int32_t ret = HKS_SUCCESS;
     HKS_IF_NOT_SUCC_LOGE_RETURN(HKS_LOCK_OR_FAIL(g_huksMutex), HKS_ERROR_PTHREAD_MUTEX_LOCK_FAIL,
         "lock in AddKeyNode fail");
     do {
+        ret = GenerateAndCheckUniqueHandle(keyNode);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "generate unique handle failed")
+
         DeleteFirstTimeOutBatchKeyNode();
 
         ret = DeleteKeyNodeForTokenIdIfExceedLimit(tokenId);
@@ -448,45 +434,28 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
     struct HuksKeyNode *keyNode = (struct HuksKeyNode *)HksMalloc(sizeof(struct HuksKeyNode));
     HKS_IF_NULL_LOGE_RETURN(keyNode, NULL, "malloc hks keyNode failed")
 
-    int32_t ret = GenerateKeyNodeHandle(&keyNode->handle);
-    if (ret != HKS_SUCCESS) {
-        HKS_FREE(keyNode);
-        HKS_LOG_E("get keynode handle failed");
-        return NULL;
-    }
-
+    int32_t ret;
     struct HksParamSet *runtimeParamSet = NULL;
-    ret = BuildRuntimeParamSet(paramSet, &runtimeParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_FREE(keyNode);
-        HKS_LOG_E("get runtime paramSet failed");
-        return NULL;
-    }
-
     struct HksBlob rawKey = { 0, NULL };
-    ret = HksGetRawKeyMaterial(key, &rawKey);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get raw key material failed, ret = %" LOG_PUBLIC "d", ret);
-        HksFreeParamSet(&runtimeParamSet);
-        HKS_FREE(keyNode);
-        return NULL;
-    }
-
     struct HksParamSet *keyBlobParamSet = NULL;
-    ret = HksTranslateKeyInfoBlobToParamSet(&rawKey, key, &keyBlobParamSet);
-    (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
-    HKS_FREE_BLOB(rawKey);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("translate key info to paramset failed, ret = %" LOG_PUBLIC "d", ret);
-        HksFreeParamSet(&runtimeParamSet);
-        HKS_FREE(keyNode);
-        return NULL;
-    }
+    do {
+        ret = BuildRuntimeParamSet(paramSet, &runtimeParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get runtime paramSet failed")
 
-    ret = AddKeyNode(keyNode, GetTokenIdFromParamSet(runtimeParamSet));
+        ret = HksGetRawKeyMaterial(key, &rawKey);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get raw key material failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksTranslateKeyInfoBlobToParamSet(&rawKey, key, &keyBlobParamSet);
+        HKS_MEMSET_FREE_BLOB(rawKey);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "translate key info to paramset failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = AddKeyNode(keyNode, GetTokenIdFromParamSet(runtimeParamSet));
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add keyNode failed")
+    } while (0);
+
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("add keyNode failed");
         HksFreeParamSet(&runtimeParamSet);
+        HksFreeParamSet(&keyBlobParamSet);
         HKS_FREE(keyNode);
         return NULL;
     }
@@ -526,9 +495,6 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
     struct HksParamSet *runtimeParamSet = NULL;
     struct HksParamSet *keyBlobParamSet = NULL;
     do {
-        ret = GenerateKeyNodeHandle(&keyNode->handle);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get keynode handle failed")
-
         ret = BuildRuntimeParamSet(paramSet, &runtimeParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get runtime paramSet failed")
 

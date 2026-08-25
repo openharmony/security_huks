@@ -254,9 +254,17 @@ int32_t HksSendRequest(enum HksIpcInterfaceCode type, const struct HksBlob *inBl
     bool flag = false;
     if (type == HKS_MSG_INIT && std::atomic_compare_exchange_strong(&g_isInitBundleDead, &flag, true)) {
         g_hks_callback = new (std::nothrow) Security::Hks::HksStub();
-        HKS_IF_NULL_LOGE_RETURN(g_hks_callback, HKS_ERROR_INSUFFICIENT_MEMORY, "new HksStub failed");
-        HKS_IF_NOT_TRUE_LOGE_RETURN(data.WriteRemoteObject(g_hks_callback), HKS_ERROR_IPC_MSG_FAIL,
-            "WriteRemoteObject fail");
+        if (g_hks_callback == NULL) {
+            g_isInitBundleDead = false;
+            HKS_LOG_E("new HksStub failed");
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
+        }
+        if (!data.WriteRemoteObject(g_hks_callback)) {
+            g_isInitBundleDead = false;
+            g_hks_callback = NULL;
+            HKS_LOG_E("write remote object fail");
+            return HKS_ERROR_IPC_MSG_FAIL;
+        }
     }
 
     ret = HandleSpecialAsyncTypes(type, data, paramSet, proxy, outBlob);

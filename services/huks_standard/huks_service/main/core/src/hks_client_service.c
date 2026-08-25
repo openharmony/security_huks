@@ -1118,7 +1118,7 @@ int32_t HksServiceAgreeKey(const struct HksProcessInfo *processInfo, const struc
 
 #ifdef L2_STANDARD
     HksOneStageReportInfo info = {ret, startTime, traceId.traceId.chainId, __func__, HKS_ONE_STAGE_AGREE};
-    (void)HksOneStageEventReport(agreedKey, &keyFromFile, newParamSet, processInfo, &info);
+    (void)HksOneStageEventReport(privateKey, &keyFromFile, newParamSet, processInfo, &info);
 #endif
     HksHitraceEnd(&traceId);
     HKS_FREE_BLOB(keyFromFile);
@@ -1167,7 +1167,7 @@ int32_t HksServiceDeriveKey(const struct HksProcessInfo *processInfo, const stru
 
 #ifdef L2_STANDARD
     HksOneStageReportInfo info = {ret, startTime, traceId.traceId.chainId, __func__, HKS_ONE_STAGE_DERIVE};
-    (void)HksOneStageEventReport(derivedKey, &keyFromFile, newParamSet, processInfo, &info);
+    (void)HksOneStageEventReport(mainKey, &keyFromFile, newParamSet, processInfo, &info);
 #endif
     HksHitraceEnd(&traceId);
     HKS_FREE_BLOB(keyFromFile);
@@ -1920,7 +1920,7 @@ int32_t HksServiceUnwrapKey(const struct HksProcessInfo *processInfo, const stru
     } while (0);
 
     DecrementSeCountByService(isSeCalling);
-    HKS_FREE(keyOutBuffer);
+    HKS_MEMSET_FREE_PTR(keyOutBuffer, MAX_KEY_SIZE);
     HksFreeParamSet(&newParamSet);
     return ret;
 }
@@ -2064,7 +2064,7 @@ int32_t HksServiceDecapsulate(const struct HksProcessInfo *processInfo, const st
 #ifdef L2_STANDARD
     *encapOrsharedSecret = outData;
     HksOneStageReportInfo info = {ret, startTime, traceId.traceId.chainId, __func__, HKS_ONE_STAGE_DECAPSULATE};
-    (void)HksOneStageEventReport(encapOrsharedSecret, &keyFromFile, newParamSet, processInfo, &info);
+    (void)HksOneStageEventReport(keyAlias, &keyFromFile, newParamSet, processInfo, &info);
 #endif
     HksHitraceEnd(&traceId);
     HKS_MEMSET_FREE_BLOB(keyFromFile);
