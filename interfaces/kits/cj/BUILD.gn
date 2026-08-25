@@ -32,6 +32,7 @@ ohos_shared_library("cj_huks_ffi") {
     "include",
   ]
 
+  version_script = "libcj_huks_ffi.map"
   sources = [ "src/cj_huks_ffi.c" ]
 
   deps = [ "../../inner_api/huks_standard/main:libhukssdk" ]

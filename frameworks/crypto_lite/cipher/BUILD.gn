@@ -29,6 +29,7 @@ ohos_shared_library("cipher_shared") {
   }
 
   innerapi_tags = [ "platformsdk" ]
+  version_script = "libcipher_shared.map"
   sources = [
     "src/cipher_aes.c",
     "src/cipher_rsa.c",
