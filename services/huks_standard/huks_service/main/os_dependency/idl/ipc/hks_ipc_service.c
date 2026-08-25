@@ -775,7 +775,7 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
 
     HksSendResponse(context, ret, isNoneResponse ? NULL : &keyOut);
 
-    HKS_FREE_BLOB(keyOut);
+    HKS_MEMSET_FREE_BLOB(keyOut);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
 }
@@ -1198,7 +1198,7 @@ void HksIpcServiceDeriveKey(const struct HksBlob *srcData, const uint8_t *contex
 
     HksSendResponse(context, ret, ret == HKS_SUCCESS ? &derivedKey : NULL);
 
-    HKS_FREE_BLOB(derivedKey);
+    HKS_MEMSET_FREE_BLOB(derivedKey);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
 }
@@ -1695,7 +1695,7 @@ void HksIpcWrapKey(const struct HksBlob *srcData, const uint8_t *context)
 
     HksSendResponse(context, ret, ret == HKS_SUCCESS ? &wrappedKey : NULL);
 
-    HKS_FREE_BLOB(wrappedKey);
+    HKS_MEMSET_FREE_BLOB(wrappedKey);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
 }

@@ -894,9 +894,9 @@ int32_t HksCheckGenKeyMutableParams(uint32_t alg, const struct ParamsValues *inp
     return ret;
 }
 
-int32_t CheckImportMutableParams(uint32_t alg, const struct ParamsValues *params)
+static int32_t CheckImportPurpose(uint32_t alg, const struct ParamsValues *params)
 {
-    if (((alg == HKS_ALG_DSA) || (alg == HKS_ALG_ED25519)) &&
+    if (((alg == HKS_ALG_DSA) || (alg == HKS_ALG_ED25519) || (alg == HKS_ALG_ML_DSA)) &&
         (params->purpose.value != HKS_KEY_PURPOSE_VERIFY)) {
         HKS_LOG_E("Import key check purpose failed.");
         return HKS_ERROR_INVALID_PURPOSE;
@@ -931,22 +931,36 @@ int32_t CheckImportMutableParams(uint32_t alg, const struct ParamsValues *params
         return HKS_ERROR_NOT_SUPPORTED;
 #endif
     }
-    if (alg == HKS_ALG_RSA) {
-#ifdef HKS_SUPPORT_RSA_C
-        if (params->padding.isAbsent) {
-            return HKS_SUCCESS;
-        }
-        if (params->purpose.value == HKS_KEY_PURPOSE_ENCRYPT) {
-            return HksCheckValue(params->padding.value, g_rsaCipherPadding, HKS_ARRAY_SIZE(g_rsaCipherPadding));
-        } else if (params->purpose.value == HKS_KEY_PURPOSE_VERIFY) {
-            return HksCheckValue(params->padding.value, g_rsaSignPadding, HKS_ARRAY_SIZE(g_rsaSignPadding));
-        }
-#else
-        return HKS_ERROR_NOT_SUPPORTED;
-#endif
-    }
 
     return HKS_SUCCESS;
+}
+
+static int32_t CheckImportPadding(uint32_t alg, const struct ParamsValues *params)
+{
+    if (alg != HKS_ALG_RSA) {
+        return HKS_SUCCESS;
+    }
+#ifdef HKS_SUPPORT_RSA_C
+    if (params->padding.isAbsent) {
+        return HKS_SUCCESS;
+    }
+    if (params->purpose.value == HKS_KEY_PURPOSE_ENCRYPT) {
+        return HksCheckValue(params->padding.value, g_rsaCipherPadding, HKS_ARRAY_SIZE(g_rsaCipherPadding));
+    } else if (params->purpose.value == HKS_KEY_PURPOSE_VERIFY) {
+        return HksCheckValue(params->padding.value, g_rsaSignPadding, HKS_ARRAY_SIZE(g_rsaSignPadding));
+    }
+    return HKS_SUCCESS;
+#else
+    (void)params;
+    return HKS_ERROR_NOT_SUPPORTED;
+#endif
+}
+
+int32_t CheckImportMutableParams(uint32_t alg, const struct ParamsValues *params)
+{
+    int32_t ret = CheckImportPurpose(alg, params);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret);
+    return CheckImportPadding(alg, params);
 }
 
 int32_t HksCheckSignature(uint32_t cmdId, uint32_t alg, uint32_t keySize, const struct HksBlob *signature)

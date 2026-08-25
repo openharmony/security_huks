@@ -40,6 +40,10 @@ static int32_t MlKemEncapsulateInitCtx(const struct HksBlob *rawKey, EVP_PKEY **
     HKS_IF_TRUE_LOGE_RETURN(rawKey->size < sizeof(struct HksKeyMaterialMlKem), HKS_ERROR_INVALID_ARGUMENT,
         "invalid raw key size %" LOG_PUBLIC "u", rawKey->size)
     struct HksKeyMaterialMlKem *keyMaterial = (struct HksKeyMaterialMlKem *)rawKey->data;
+    HKS_IF_TRUE_LOGE_RETURN(keyMaterial->pubKeySize > HKS_ML_KEM_PUB_KEY_SIZE_1568, HKS_ERROR_INVALID_ARGUMENT,
+        "invalid pubKeySize %" LOG_PUBLIC "u", keyMaterial->pubKeySize)
+    HKS_IF_TRUE_LOGE_RETURN(rawKey->size < sizeof(struct HksKeyMaterialMlKem) + keyMaterial->pubKeySize,
+        HKS_ERROR_INVALID_ARGUMENT, "invalid raw key size for pubKey %" LOG_PUBLIC "u", rawKey->size)
     const char *algName = HksOpensslMlKemGetAlgName(keyMaterial->keyParamSet);
     HKS_IF_NULL_LOGE_RETURN(algName, HKS_ERROR_INVALID_ALGORITHM, "get ml-kem alg name failed")
 
@@ -145,6 +149,12 @@ static int32_t MlKemDecapsulateInitCtx(const struct HksBlob *rawKey, EVP_PKEY **
     HKS_IF_TRUE_LOGE_RETURN(rawKey->size < sizeof(struct HksKeyMaterialMlKem), HKS_ERROR_INVALID_ARGUMENT, \
         "invalid raw key size %" LOG_PUBLIC "u", rawKey->size)
     struct HksKeyMaterialMlKem *keyMaterial = (struct HksKeyMaterialMlKem *)rawKey->data;
+    HKS_IF_TRUE_LOGE_RETURN(keyMaterial->pubKeySize > HKS_ML_KEM_PUB_KEY_SIZE_1568, HKS_ERROR_INVALID_ARGUMENT,
+        "invalid pubKeySize %" LOG_PUBLIC "u", keyMaterial->pubKeySize)
+    HKS_IF_TRUE_LOGE_RETURN(keyMaterial->priKeySize > HKS_ML_KEM_PRI_KEY_SIZE_3168, HKS_ERROR_INVALID_ARGUMENT,
+        "invalid priKeySize %" LOG_PUBLIC "u", keyMaterial->priKeySize)
+    HKS_IF_TRUE_LOGE_RETURN(rawKey->size < sizeof(struct HksKeyMaterialMlKem) + keyMaterial->pubKeySize +
+        keyMaterial->priKeySize, HKS_ERROR_INVALID_ARGUMENT, "invalid key pair size: %" LOG_PUBLIC "u", rawKey->size)
     const char *algName = HksOpensslMlKemGetAlgName(keyMaterial->keyParamSet);
     HKS_IF_NULL_LOGE_RETURN(algName, HKS_ERROR_INVALID_KEY_SIZE, "get ml-kem alg name failed")
 

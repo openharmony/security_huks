@@ -64,6 +64,7 @@ int32_t HksStorageWriteFile(
 {
 #ifdef HKS_SUPPORT_THREAD
     HksStorageFileLock *lock = CreateStorageFileLock(path, fileName);
+    HKS_IF_TRUE_LOGE_RETURN(lock == NULL, HKS_ERROR_MALLOC_FAIL, "Create storage file lock fail")
     HksStorageFileLockWrite(lock);
     
     if (!isOverride) {
@@ -93,6 +94,7 @@ int32_t HksStorageFileSize(const char *path, const char *fileName)
 {
 #ifdef HKS_SUPPORT_THREAD
     HksStorageFileLock *lock = CreateStorageFileLock(path, fileName);
+    HKS_IF_TRUE_LOGE_RETURN(lock == NULL, HKS_ERROR_MALLOC_FAIL, "Create storage file lock fail")
     HksStorageFileLockRead(lock);
     int32_t size = HksFileSize(path, fileName);
     HksStorageFileUnlockRead(lock);
@@ -108,6 +110,7 @@ int32_t HksStorageReadFile(
 {
 #ifdef HKS_SUPPORT_THREAD
     HksStorageFileLock *lock = CreateStorageFileLock(path, fileName);
+    HKS_IF_TRUE_LOGE_RETURN(lock == NULL, HKS_ERROR_MALLOC_FAIL, "Create storage file lock fail")
     HksStorageFileLockRead(lock);
     int32_t ret = HksFileRead(path, fileName, offset, blob, size);
     HksStorageFileUnlockRead(lock);
@@ -166,6 +169,7 @@ static int32_t HksStorageRemoveFile(const char *path, const char *fileName)
 #endif
 #ifdef HKS_SUPPORT_THREAD
     HksStorageFileLock *lock = CreateStorageFileLock(path, fileName);
+    HKS_IF_TRUE_LOGE_RETURN(lock == NULL, HKS_ERROR_MALLOC_FAIL, "Create storage file lock fail")
     HksStorageFileLockWrite(lock);
     ret = HksFileRemove(path, fileName);
     HksStorageFileUnlockWrite(lock);

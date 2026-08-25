@@ -516,38 +516,14 @@ static int32_t HksMlKemImport(const struct HksParamSet *sharedKeyParamSet, struc
     return ret;
 }
 
-int32_t HksCoreEncapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParamSet,
+static int32_t HksCoreEncapKeyOp(const struct HksParamSet *paramSet,
+    const struct HksParamSet *sharedKeyParamSet, struct HksKeyNode *keyNode,
     struct HksEncapsulationResult *encapResult)
 {
-    struct HksParam *keyParam = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY, &keyParam);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "HksCoreEncapsulate get key param fail")
-
-    struct HksParam *keyalg;
-    ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &keyalg);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL, "HksCoreEncapsulate get key alg failed")
-    HKS_IF_TRUE_LOGE_RETURN((keyalg->uint32Param != HKS_ALG_ML_KEM), HKS_ERROR_INVALID_ALGORITHM,
-        "encaps alg is not ml-kem")
-    
-    struct HksKeyNode *keyNode = HksGenerateKeyNode(&keyParam->blob);
-    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_CORRUPT_FILE, "Encapsulate generate keynode failed")
-
-    struct HksEncapsulationResult tmp = {{0, NULL}, {0, NULL}};
-    encapResult->encapsulatedData.data = (uint8_t*)HksMalloc(MAX_KEY_SIZE);
-    HKS_IF_TRUE_LOGE_RETURN((encapResult->encapsulatedData.data == NULL), HKS_ERROR_MALLOC_FAIL, "malloc cipher fail");
-
-    encapResult->sharedSecret.data = (uint8_t*)HksMalloc(MAX_KEY_SIZE);
-    if (encapResult->sharedSecret.data == NULL) {
-        HKS_LOG_E("sharedSecret malloc fail");
-        HKS_FREE_BLOB(encapResult->sharedSecret);
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-
-    encapResult->encapsulatedData.size = MAX_KEY_SIZE;
-    encapResult->sharedSecret.size = MAX_KEY_SIZE;
-
+    int32_t ret;
     struct HksBlob rawKey = { 0, NULL };
 
+    struct HksEncapsulationResult tmp = {{0, NULL}, {0, NULL}};
     do {
         ret = HksProcessIdentityVerify(keyNode->paramSet, paramSet);
         HKS_IF_NOT_SUCC_BREAK(ret)
@@ -573,9 +549,47 @@ int32_t HksCoreEncapsulate(const struct HksParamSet *paramSet, const struct HksP
         }
         encapResult->encapsulatedData.size = tmp.encapsulatedData.size;
     } while (0);
+
     HKS_FREE_ENCAPSULATION_RESULT(&tmp);
-    HksFreeKeyNode(&keyNode);
     HKS_MEMSET_FREE_BLOB(rawKey);
+    return ret;
+}
+
+int32_t HksCoreEncapsulate(const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParamSet,
+    struct HksEncapsulationResult *encapResult)
+{
+    struct HksParam *keyParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY, &keyParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "HksCoreEncapsulate get key param fail")
+
+    struct HksParam *keyalg;
+    ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &keyalg);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL, "HksCoreEncapsulate get key alg failed")
+    HKS_IF_TRUE_LOGE_RETURN((keyalg->uint32Param != HKS_ALG_ML_KEM), HKS_ERROR_INVALID_ALGORITHM,
+        "encaps alg is not ml-kem")
+
+    encapResult->encapsulatedData.data = (uint8_t*)HksMalloc(MAX_KEY_SIZE);
+    HKS_IF_TRUE_LOGE_RETURN((encapResult->encapsulatedData.data == NULL), HKS_ERROR_MALLOC_FAIL, "malloc cipher fail");
+
+    encapResult->sharedSecret.data = (uint8_t*)HksMalloc(MAX_KEY_SIZE);
+    if (encapResult->sharedSecret.data == NULL) {
+        HKS_LOG_E("sharedSecret malloc fail");
+        HKS_MEMSET_FREE_BLOB(encapResult->encapsulatedData);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+
+    encapResult->encapsulatedData.size = MAX_KEY_SIZE;
+    encapResult->sharedSecret.size = MAX_KEY_SIZE;
+
+    struct HksKeyNode *keyNode = HksGenerateKeyNode(&keyParam->blob);
+    if (keyNode == NULL) {
+        HKS_LOG_E("Encapsulate generate keynode failed");
+        HKS_FREE_ENCAPSULATION_RESULT(encapResult);
+        return HKS_ERROR_CORRUPT_FILE;
+    }
+
+    ret = HksCoreEncapKeyOp(paramSet, sharedKeyParamSet, keyNode, encapResult);
+    HksFreeKeyNode(&keyNode);
     return ret;
 }
 
