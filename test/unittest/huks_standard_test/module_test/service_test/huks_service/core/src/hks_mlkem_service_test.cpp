@@ -235,8 +235,10 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest005, TestSize.Level0)
     ret = HksBuildParamSet(&sharedParamSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
-    uint8_t encapData[HKS_ML_KEM_MAX_CIPHERTEXT_LEN] = { 0 };
-    struct HksBlob encapOrSharedSecret = { HKS_ML_KEM_MAX_CIPHERTEXT_LEN, encapData };
+    struct HksBlob encapOrSharedSecret = { HKS_ML_KEM_MAX_CIPHERTEXT_LEN,
+        (uint8_t *)HksMalloc(HKS_ML_KEM_MAX_CIPHERTEXT_LEN) };
+    ASSERT_NE(encapOrSharedSecret.data, nullptr) << "hks malloc fail";
+    (void)memset_s(encapOrSharedSecret.data, HKS_ML_KEM_MAX_CIPHERTEXT_LEN, 0, HKS_ML_KEM_MAX_CIPHERTEXT_LEN);
     ret = HksServiceDecapsulate(&g_processInfo, nullptr, paramSet, sharedParamSet, &encapOrSharedSecret);
     EXPECT_NE(ret, HKS_SUCCESS);
 
@@ -262,8 +264,10 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest006, TestSize.Level0)
     ret = HksBuildParamSet(&sharedParamSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
-    uint8_t encapData[HKS_ML_KEM_MAX_CIPHERTEXT_LEN] = { 0 };
-    struct HksBlob encapOrSharedSecret = { HKS_ML_KEM_MAX_CIPHERTEXT_LEN, encapData };
+    struct HksBlob encapOrSharedSecret = { HKS_ML_KEM_MAX_CIPHERTEXT_LEN,
+        (uint8_t *)HksMalloc(HKS_ML_KEM_MAX_CIPHERTEXT_LEN) };
+    ASSERT_NE(encapOrSharedSecret.data, nullptr) << "hks malloc fail";
+    (void)memset_s(encapOrSharedSecret.data, HKS_ML_KEM_MAX_CIPHERTEXT_LEN, 0, HKS_ML_KEM_MAX_CIPHERTEXT_LEN);
     ret = HksServiceDecapsulate(&g_processInfo, &keyAlias, nullptr, sharedParamSet, &encapOrSharedSecret);
     EXPECT_NE(ret, HKS_SUCCESS);
 
@@ -301,8 +305,10 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest007, TestSize.Level0)
     ret = HksBuildParamSet(&sharedParamSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
-    uint8_t encapData[HKS_ML_KEM_MAX_CIPHERTEXT_LEN] = { 0 };
-    struct HksBlob encapOrSharedSecret = { HKS_ML_KEM_MAX_CIPHERTEXT_LEN, encapData };
+    struct HksBlob encapOrSharedSecret = { HKS_ML_KEM_MAX_CIPHERTEXT_LEN,
+        (uint8_t *)HksMalloc(HKS_ML_KEM_MAX_CIPHERTEXT_LEN) };
+    ASSERT_NE(encapOrSharedSecret.data, nullptr) << "hks malloc fail";
+    (void)memset_s(encapOrSharedSecret.data, HKS_ML_KEM_MAX_CIPHERTEXT_LEN, 0, HKS_ML_KEM_MAX_CIPHERTEXT_LEN);
     ret = HksServiceDecapsulate(&g_processInfo, &keyAlias, paramSet, sharedParamSet, &encapOrSharedSecret);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 
@@ -346,8 +352,10 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest008, TestSize.Level0)
     ret = HksBuildParamSet(&sharedParamSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
-    uint8_t encapData[HKS_ML_KEM_MAX_CIPHERTEXT_LEN] = { 0 };
-    struct HksBlob encapOrSharedSecret = { HKS_ML_KEM_MAX_CIPHERTEXT_LEN, encapData };
+    struct HksBlob encapOrSharedSecret = { HKS_ML_KEM_MAX_CIPHERTEXT_LEN,
+        (uint8_t *)HksMalloc(HKS_ML_KEM_MAX_CIPHERTEXT_LEN) };
+    ASSERT_NE(encapOrSharedSecret.data, nullptr) << "hks malloc fail";
+    (void)memset_s(encapOrSharedSecret.data, HKS_ML_KEM_MAX_CIPHERTEXT_LEN, 0, HKS_ML_KEM_MAX_CIPHERTEXT_LEN);
     ret = HksServiceDecapsulate(&g_processInfo, &keyAlias, paramSet, sharedParamSet, &encapOrSharedSecret);
     EXPECT_NE(ret, HKS_SUCCESS);
 
@@ -603,8 +611,10 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest012, TestSize.Level0)
     ret = HksBuildParamSet(&sharedParamSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
-    uint8_t encapData[HKS_ML_KEM_MAX_CIPHERTEXT_LEN] = { 0 };
-    struct HksBlob encapOrSharedSecret = { HKS_ML_KEM_MAX_CIPHERTEXT_LEN, encapData };
+    struct HksBlob encapOrSharedSecret = { HKS_ML_KEM_MAX_CIPHERTEXT_LEN,
+        (uint8_t *)HksMalloc(HKS_ML_KEM_MAX_CIPHERTEXT_LEN) };
+    ASSERT_NE(encapOrSharedSecret.data, nullptr) << "hks malloc fail";
+    (void)memset_s(encapOrSharedSecret.data, HKS_ML_KEM_MAX_CIPHERTEXT_LEN, 0, HKS_ML_KEM_MAX_CIPHERTEXT_LEN);
     ret = HksServiceDecapsulate(&g_processInfo, &keyAlias, paramSet, sharedParamSet, &encapOrSharedSecret);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_PURPOSE);
 
@@ -650,8 +660,10 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest013, TestSize.Level0)
     ret = HksBuildParamSet(&sharedParamSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
-    uint8_t encapData[HKS_ML_KEM_MAX_CIPHERTEXT_LEN] = { 0 };
-    struct HksBlob encapOrSharedSecret = { HKS_ML_KEM_MAX_CIPHERTEXT_LEN, encapData };
+    struct HksBlob encapOrSharedSecret = { HKS_ML_KEM_MAX_CIPHERTEXT_LEN,
+        (uint8_t *)HksMalloc(HKS_ML_KEM_MAX_CIPHERTEXT_LEN) };
+    ASSERT_NE(encapOrSharedSecret.data, nullptr) << "hks malloc fail";
+    (void)memset_s(encapOrSharedSecret.data, HKS_ML_KEM_MAX_CIPHERTEXT_LEN, 0, HKS_ML_KEM_MAX_CIPHERTEXT_LEN);
     ret = HksServiceDecapsulate(&g_processInfo, &keyAlias, paramSet, sharedParamSet, &encapOrSharedSecret);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 
@@ -716,8 +728,10 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest015, TestSize.Level0)
     ret = HksBuildParamSet(&paramSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
-    uint8_t encapData[HKS_ML_KEM_MAX_CIPHERTEXT_LEN] = { 0 };
-    struct HksBlob encapOrSharedSecret = { HKS_ML_KEM_MAX_CIPHERTEXT_LEN, encapData };
+    struct HksBlob encapOrSharedSecret = { HKS_ML_KEM_MAX_CIPHERTEXT_LEN,
+        (uint8_t *)HksMalloc(HKS_ML_KEM_MAX_CIPHERTEXT_LEN) };
+    ASSERT_NE(encapOrSharedSecret.data, nullptr) << "hks malloc fail";
+    (void)memset_s(encapOrSharedSecret.data, HKS_ML_KEM_MAX_CIPHERTEXT_LEN, 0, HKS_ML_KEM_MAX_CIPHERTEXT_LEN);
     ret = HksServiceDecapsulate(&g_processInfo, &keyAlias, paramSet, nullptr, &encapOrSharedSecret);
     EXPECT_NE(ret, HKS_SUCCESS);
 
@@ -876,8 +890,10 @@ HWTEST_F(HksMlKemServiceTest, HksMlKemServiceTest018, TestSize.Level0)
     ret = HksBuildParamSet(&sharedParamSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
-    uint8_t encapData[HKS_ML_KEM_MAX_CIPHERTEXT_LEN] = { 0 };
-    struct HksBlob encapOrSharedSecret = { HKS_ML_KEM_MAX_CIPHERTEXT_LEN, encapData };
+    struct HksBlob encapOrSharedSecret = { HKS_ML_KEM_MAX_CIPHERTEXT_LEN,
+        (uint8_t *)HksMalloc(HKS_ML_KEM_MAX_CIPHERTEXT_LEN) };
+    ASSERT_NE(encapOrSharedSecret.data, nullptr) << "hks malloc fail";
+    (void)memset_s(encapOrSharedSecret.data, HKS_ML_KEM_MAX_CIPHERTEXT_LEN, 0, HKS_ML_KEM_MAX_CIPHERTEXT_LEN);
     ret = HksServiceDecapsulate(&g_processInfo, &keyAlias, paramSet, sharedParamSet, &encapOrSharedSecret);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_PURPOSE);
 
