@@ -24,7 +24,6 @@
 
 #include "hks_api.h"
 
-#include <dlfcn.h>
 #include <inttypes.h>
 #include <pthread.h>
 #include <stddef.h>
@@ -637,64 +636,11 @@ HKS_API_EXPORT int32_t HksDeleteKey(const struct HksBlob *keyAlias, const struct
 #endif
 }
 
-static const char CCZ_NAPI_PATH[] = "libccz_service.z.so";
-static const char PRIVACY_SEARCH_FUNC_NAME[] = "HksPrivacySearchAdapter";
-static void *g_cczNapiHandle = NULL;
-static pthread_mutex_t g_cczNapiMutex = PTHREAD_MUTEX_INITIALIZER;
-
-static void *GetCczNapiHandle(void)
-{
-    if (g_cczNapiHandle != NULL) {
-        return g_cczNapiHandle;
-    }
-    int32_t ret = pthread_mutex_lock(&g_cczNapiMutex);
-    if (ret != 0) {
-        HKS_LOG_E("ccz napi mutex lock fail %" LOG_PUBLIC "d", ret);
-        return NULL;
-    }
-    if (g_cczNapiHandle != NULL) {
-        (void)pthread_mutex_unlock(&g_cczNapiMutex);
-        return g_cczNapiHandle;
-    }
-    g_cczNapiHandle = dlopen(CCZ_NAPI_PATH, RTLD_NOW | RTLD_LOCAL);
-    if (g_cczNapiHandle == NULL) {
-        HKS_LOG_E("dlopen ccz napi so failed, %" LOG_PUBLIC "s!", dlerror());
-    }
-    (void)pthread_mutex_unlock(&g_cczNapiMutex);
-    return g_cczNapiHandle;
-}
-
-typedef int32_t (*GetKeyParamSetExtFunc)(const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut);
-
-static bool IsPrivacySearchMatch(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn)
-{
-    if (keyAlias != NULL || paramSetIn == NULL || paramSetIn->paramsCnt == 0) {
-        return false;
-    }
-    if (paramSetIn->params[0].tag != 1) {
-        return false;
-    }
-    return true;
-}
-
 HKS_API_EXPORT int32_t HksGetKeyParamSet(const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut)
 {
 #ifdef HKS_SUPPORT_API_GET_KEY_PARAM_SET
     HKS_LOG_D("enter GetKeyParamSet");
-    if (IsPrivacySearchMatch(keyAlias, paramSetIn)) {
-        void *handle = GetCczNapiHandle();
-        if (handle == NULL) {
-            return HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED;
-        }
-        GetKeyParamSetExtFunc func = (GetKeyParamSetExtFunc)dlsym(handle, PRIVACY_SEARCH_FUNC_NAME);
-        if (func == NULL) {
-            HKS_LOG_E("dlsym %" LOG_PUBLIC "s failed, %" LOG_PUBLIC "s!", PRIVACY_SEARCH_FUNC_NAME, dlerror());
-            return HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED;
-        }
-        return func(keyAlias, paramSetIn, paramSetOut);
-    }
     if ((keyAlias == NULL) || (paramSetOut == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
