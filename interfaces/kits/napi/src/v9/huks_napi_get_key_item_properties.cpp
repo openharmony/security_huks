@@ -15,45 +15,47 @@
 
 #include "huks_napi_get_key_item_properties.h"
 
-#include <dlfcn.h>
 #include <atomic>
+#include <dlfcn.h>
 #include <mutex>
+
 #include "securec.h"
 
 #include "hks_api.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_template.h"
 #include "hks_type.h"
 #include "huks_napi_common_item.h"
-#include "hks_template.h"
+
 
 namespace {
 constexpr const char *COMPUTATION_PATH = HUKS_ENABLE_COMPUTATION_CONFIG;
 const char PRIVACY_SEARCH_FUNC_NAME[] = "HksPrivacySearchAdapter";
-std::atomic<void*> g_cczNapiHandle{nullptr};
-std::mutex g_cczNapiMutex;
-void *GetCczNapiHandle()
+std::atomic<void*> g_computationHandle{nullptr};
+std::mutex g_computationMutex;
+void *GetComputationHandle()
 {
     if (COMPUTATION_PATH == nullptr || COMPUTATION_PATH[0] == '\0') {
         HKS_LOG_E("computation path is empty, skip dlopen");
         return nullptr;
     }
-    void *handle = g_cczNapiHandle.load(std::memory_order_acquire);
+    void *handle = g_computationHandle.load(std::memory_order_acquire);
     if (handle != nullptr) {
         return handle;
     }
-    std::lock_guard<std::mutex> lock(g_cczNapiMutex);
-    handle = g_cczNapiHandle.load(std::memory_order_relaxed);
+    std::lock_guard<std::mutex> lock(g_computationMutex);
+    handle = g_computationHandle.load(std::memory_order_relaxed);
     if (handle != nullptr) {
         return handle;
     }
     handle = dlopen(COMPUTATION_PATH, RTLD_NOW | RTLD_LOCAL);
     if (handle == nullptr) {
-        HKS_LOG_E("dlopen ccz napi so failed, %" LOG_PUBLIC "s!", dlerror());
+        HKS_LOG_E("dlopen computation so failed, %" LOG_PUBLIC "s!", dlerror());
         return nullptr;
     }
-    g_cczNapiHandle.store(handle, std::memory_order_release);
+    g_computationHandle.store(handle, std::memory_order_release);
     return handle;
 }
 
@@ -139,7 +141,7 @@ napi_value GetKeyPropertiesAsyncWork(napi_env env, GetKeyPropertiesAsyncContext 
             HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             GetKeyPropertiesAsyncContext napiContext = static_cast<GetKeyPropertiesAsyncContext>(data);
             if (IsPrivacySearchMatch(napiContext->keyAlias, napiContext->paramSetIn)) {
-                void *handle = GetCczNapiHandle();
+                void *handle = GetComputationHandle();
                 if (handle == nullptr) {
                     napiContext->result = HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED;
                     return;

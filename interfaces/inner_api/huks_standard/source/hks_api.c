@@ -25,7 +25,6 @@
 #include "hks_api.h"
 
 #include <inttypes.h>
-#include <pthread.h>
 #include <stddef.h>
 #include <string.h>
 
