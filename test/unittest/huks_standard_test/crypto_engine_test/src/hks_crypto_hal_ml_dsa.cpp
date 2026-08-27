@@ -849,6 +849,143 @@ HWTEST_F(HksCryptoHalMlDsa, HksCryptoHalMlDsa_021, Function | SmallTest | Level0
     HKS_FREE(message.data);
 #endif
 }
+HWTEST_F(HksCryptoHalMlDsa, HksCryptoHalMlDsa_022, Function | SmallTest | Level0)
+{
+#if defined(HKS_SUPPORT_ML_DSA_C) && defined(HKS_SUPPORT_ML_DSA_GENERATE_KEY) && \
+    defined(HKS_SUPPORT_ML_DSA_SIGN_VERIFY) && defined(_USE_OPENSSL_)
+    HksKeySpec spec = {
+        .algType = HKS_ALG_ML_DSA,
+        .keyLen = HKS_ML_DSA_KEY_PARAM_SET_44,
+        .algParam = nullptr,
+    };
+    HksBlob key = { .size = 0, .data = nullptr };
+    int32_t ret = HksCryptoHalGenerateKey(&spec, &key);
+    ASSERT_EQ(HKS_SUCCESS, ret);
+
+    HksBlob pubKey = { .size = 0, .data = nullptr };
+    uint32_t pubKeyOutLen = key.size;
+    pubKey.data = (uint8_t *)HksMalloc(pubKeyOutLen);
+    pubKey.size = pubKeyOutLen;
+    ASSERT_NE(pubKey.data, nullptr) << "hks malloc fail";
+    ret = HksCryptoHalGetPubKey(&key, &pubKey);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    uint8_t contextData[] = "ml-dsa-context-tdd";
+    HksBlob contextBlob = { .size = sizeof(contextData), .data = contextData };
+
+    HksUsageSpec signSpec = {
+        .algType = HKS_ALG_ML_DSA,
+        .mode = 0,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_NONE,
+        .purpose = HKS_KEY_PURPOSE_SIGN,
+        .algParam = &contextBlob,
+    };
+
+    const char *hexData = "00112233445566778899aabbccddeeff";
+    uint32_t dataLen = strlen(hexData) / HKS_COUNT_OF_HALF;
+    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
+    ASSERT_NE(message.data, nullptr) << "hks malloc fail";
+    for (uint32_t ii = 0; ii < dataLen; ii++) {
+        message.data[ii] = ReadHex((const uint8_t *)&hexData[HKS_COUNT_OF_HALF * ii]);
+    }
+
+    uint32_t sigLen = ML_DSA_MAX_KEY_SIZE;
+    struct HksBlob signature = { .size = sigLen, .data = (uint8_t *)HksMalloc(sigLen) };
+    ASSERT_NE(signature.data, nullptr) << "hks malloc fail";
+
+    ret = HksCryptoHalSign(&key, &signSpec, &message, &signature);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ASSERT_NE(signature.size, (uint32_t)0);
+
+    HksUsageSpec verifySpec = {
+        .algType = HKS_ALG_ML_DSA,
+        .mode = 0,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_NONE,
+        .purpose = HKS_KEY_PURPOSE_VERIFY,
+        .algParam = &contextBlob,
+    };
+
+    ret = HksCryptoHalVerify(&pubKey, &verifySpec, &message, &signature);
+    ASSERT_EQ(ret, HKS_SUCCESS)<< "HksCryptoHalMlDsa_022 HksCryptoHalVerify fail" << ret;
+
+    HKS_FREE_BLOB(key);
+    HKS_FREE_BLOB(pubKey);
+    HKS_FREE(message.data);
+    HKS_FREE(signature.data);
+#endif
+}
+
+HWTEST_F(HksCryptoHalMlDsa, HksCryptoHalMlDsa_023, Function | SmallTest | Level0)
+{
+#if defined(HKS_SUPPORT_ML_DSA_C) && defined(HKS_SUPPORT_ML_DSA_GENERATE_KEY) && \
+    defined(HKS_SUPPORT_ML_DSA_GET_PUBLIC_KEY) && defined(HKS_SUPPORT_ML_DSA_SIGN_VERIFY) && \
+    defined(_USE_OPENSSL_)
+    HksKeySpec spec = {
+        .algType = HKS_ALG_ML_DSA,
+        .keyLen = HKS_ML_DSA_KEY_PARAM_SET_44,
+        .algParam = nullptr,
+    };
+    HksBlob key = { .size = 0, .data = nullptr };
+    int32_t ret = HksCryptoHalGenerateKey(&spec, &key);
+    ASSERT_EQ(HKS_SUCCESS, ret);
+
+    HksBlob pubKey = { .size = 0, .data = nullptr };
+    uint32_t pubKeyOutLen = key.size;
+    pubKey.data = (uint8_t *)HksMalloc(pubKeyOutLen);
+    pubKey.size = pubKeyOutLen;
+    ASSERT_NE(pubKey.data, nullptr);
+    ret = HksCryptoHalGetPubKey(&key, &pubKey);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    uint8_t contextA[] = "context-a";
+    HksBlob contextBlobA = { .size = sizeof(contextA), .data = contextA };
+    uint8_t contextB[] = "context-b";
+    HksBlob contextBlobB = { .size = sizeof(contextB), .data = contextB };
+
+    HksUsageSpec signSpec = {
+        .algType = HKS_ALG_ML_DSA,
+        .mode = 0,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_NONE,
+        .purpose = HKS_KEY_PURPOSE_SIGN,
+        .algParam = &contextBlobA,
+    };
+
+    const char *hexData = "00112233445566778899aabbccddeeff";
+    uint32_t dataLen = strlen(hexData) / HKS_COUNT_OF_HALF;
+    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
+    ASSERT_NE(message.data, nullptr);
+    for (uint32_t ii = 0; ii < dataLen; ii++) {
+        message.data[ii] = ReadHex((const uint8_t *)&hexData[HKS_COUNT_OF_HALF * ii]);
+    }
+
+    uint32_t sigLen = ML_DSA_MAX_KEY_SIZE;
+    struct HksBlob signature = { .size = sigLen, .data = (uint8_t *)HksMalloc(sigLen) };
+    ASSERT_NE(signature.data, nullptr);
+
+    ret = HksCryptoHalSign(&key, &signSpec, &message, &signature);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    HksUsageSpec verifySpec = {
+        .algType = HKS_ALG_ML_DSA,
+        .mode = 0,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_NONE,
+        .purpose = HKS_KEY_PURPOSE_VERIFY,
+        .algParam = &contextBlobB,
+    };
+
+    ret = HksCryptoHalVerify(&pubKey, &verifySpec, &message, &signature);
+    ASSERT_NE(ret, HKS_SUCCESS);
+
+    HKS_FREE_BLOB(key);
+    HKS_FREE_BLOB(pubKey);
+    HKS_FREE(message.data);
+    HKS_FREE(signature.data);
+#endif
+}
 }  // namespace UnitTest
 }  // namespace Huks
 }  // namespace Security
