@@ -331,6 +331,11 @@ int32_t HksOpensslMlDsaVerify(const struct HksBlob *key, const struct HksUsageSp
         }
 
         struct HksBlob *context = (struct HksBlob *)usageSpec->algParam;
+        if (context->data == NULL) {
+            HKS_LOG_E("context data is nullptr");
+            ret = HKS_ERROR_NULL_POINTER;
+            break;
+        }
         OSSL_PARAM ctxParams[2];
         ctxParams[0] = OSSL_PARAM_construct_octet_string(ML_DSA_CONTEXT, context->data, context->size);
         ctxParams[1] = OSSL_PARAM_construct_end();
