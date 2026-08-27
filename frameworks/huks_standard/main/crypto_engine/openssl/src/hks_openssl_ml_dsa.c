@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "hks_error_code.h"
+#include <unistd.h>
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
 #else
@@ -268,6 +270,11 @@ int32_t HksOpensslMlDsaSign(const struct HksBlob *key, const struct HksUsageSpec
         }
 
         struct HksBlob *context = (struct HksBlob *)usageSpec->algParam;
+        if (context->data == NULL) {
+            HKS_LOG_E("context data is nullptr");
+            ret = HKS_ERROR_NULL_POINTER;
+            break;
+        }
         OSSL_PARAM ctxParams[2];
         ctxParams[0] = OSSL_PARAM_construct_octet_string(ML_DSA_CONTEXT, context->data, context->size);
         ctxParams[1] = OSSL_PARAM_construct_end();
