@@ -234,13 +234,12 @@ static napi_value CreateAsyncWork(napi_env env, napi_callback_info info, std::un
     }
 }
 
-// Parse the optional paramSet argument: if argc < paramSetThreshold, create an empty paramSet;
-// otherwise parse argv[paramSetArgIndex].
+// Parse the optional paramSet argument: if argc <= paramSetArgIndex (not provided), create an empty
+// paramSet; otherwise parse argv[paramSetArgIndex].
 static napi_status ParseOptionalParams(napi_env env, napi_value argv[], size_t argc,
-    size_t paramSetThreshold, size_t paramSetArgIndex,
-    struct HksParamSet *&paramSetIn)
+    size_t paramSetArgIndex, struct HksParamSet *&paramSetIn)
 {
-    if (argc < paramSetThreshold) {
+    if (argc <= paramSetArgIndex) {
         int32_t ret = HksInitParamSet(&paramSetIn);
         NAPI_THROW_RETURN_ERR(env, ret != HKS_SUCCESS, napi_generic_failure,
             HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "call HksInitParamSet for paramSetIn failed.");
@@ -320,7 +319,7 @@ napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get string type name");
 
-        return ParseOptionalParams(env, argv, argc, HUKS_NAPI_TWO_ARGS, 1, context->paramSetIn);
+        return ParseOptionalParams(env, argv, argc, 1, context->paramSetIn);
     };
 
     context->execute = [](napi_env env, void *data) {
@@ -395,7 +394,7 @@ napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info)
         napi_value result = ParseString(env, argv[0], asyncContext->index);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get stringname");
-        return ParseOptionalParams(env, argv, argc, HUKS_NAPI_TWO_ARGS, 1, context->paramSetIn);
+        return ParseOptionalParams(env, argv, argc, 1, context->paramSetIn);
     };
     context->execute = [](napi_env env, void *data) {
         UkeyPinContext *napiContext = static_cast<UkeyPinContext *>(data);
@@ -432,7 +431,7 @@ napi_value HuksNapiGetProperty(napi_env env, napi_callback_info info)
         result = ParseString(env, argv[1], asyncContext->propertyId);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get propertyId");
-        return ParseOptionalParams(env, argv, argc, HUKS_NAPI_THREE_ARGS, HUKS_NAPI_TWO_ARGS, context->paramSetIn);
+        return ParseOptionalParams(env, argv, argc, HUKS_NAPI_TWO_ARGS, context->paramSetIn);
     };
     context->execute = [](napi_env env, void *data) {
         auto *napiContext = static_cast<UkeyPropertyContext *>(data);
@@ -470,7 +469,7 @@ napi_value HuksNapiSetProperty(napi_env env, napi_callback_info info)
         result = ParseString(env, argv[1], asyncContext->propertyId);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get propertyId");
-        return ParseOptionalParams(env, argv, argc, HUKS_NAPI_THREE_ARGS, HUKS_NAPI_TWO_ARGS, context->paramSetIn);
+        return ParseOptionalParams(env, argv, argc, HUKS_NAPI_TWO_ARGS, context->paramSetIn);
     };
     context->execute = [](napi_env env, void *data) {
         auto *napiContext = static_cast<UkeyPropertyContext *>(data);
@@ -509,7 +508,7 @@ napi_value HandleResourceOperation(
         napi_value result = ParseString(env, argv[0], asyncContext->resourceId);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get resourceId");
-        return ParseOptionalParams(env, argv, argc, HUKS_NAPI_TWO_ARGS, 1, context->paramSetIn);
+        return ParseOptionalParams(env, argv, argc, 1, context->paramSetIn);
     };
 
     context->execute = [](napi_env env, void *data) {
