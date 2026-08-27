@@ -36,98 +36,68 @@ namespace {
     constexpr int HUKS_NAPI_THREE_ARGS = 3;
 }  // namespace
 
-// Helper: build a temporary HksBlob that references vector data (no allocation) and call HKS API
+static struct HksBlob VectorToBlob(const std::vector<uint8_t> &vec)
+{
+    if (vec.empty()) {
+        return {0, nullptr};
+    }
+    return {static_cast<uint32_t>(vec.size()), const_cast<uint8_t *>(vec.data())};
+}
+
+// Map legacy error code to the new napi error code.
+static void MapErrorCode(int32_t &result)
+{
+    if (result == HKS_ERROR_INVALID_ARGUMENT) {
+        result = HKS_ERROR_NEW_INVALID_ARGUMENT;
+    }
+}
+
 static int32_t CallHksRegisterProvider(const std::vector<uint8_t> &name, struct HksParamSet *paramSetIn)
 {
-    struct HksBlob nameBlob;
-    nameBlob.size = 0;
-    nameBlob.data = nullptr;
-    if (!name.empty()) {
-        nameBlob.size = static_cast<uint32_t>(name.size());
-        nameBlob.data = const_cast<uint8_t *>(name.data());
-    }
+    struct HksBlob nameBlob = VectorToBlob(name);
     return HksRegisterProvider(&nameBlob, paramSetIn);
 }
 
 static int32_t CallHksUnregisterProvider(const std::vector<uint8_t> &name, struct HksParamSet *paramSetIn)
 {
-    struct HksBlob nameBlob;
-    nameBlob.size = 0;
-    nameBlob.data = nullptr;
-    if (!name.empty()) {
-        nameBlob.size = static_cast<uint32_t>(name.size());
-        nameBlob.data = const_cast<uint8_t *>(name.data());
-    }
+    struct HksBlob nameBlob = VectorToBlob(name);
     return HksUnregisterProvider(&nameBlob, paramSetIn);
 }
 
 static int32_t CallHksAuthUkeyPin(const std::vector<uint8_t> &index, struct HksParamSet *paramSetIn,
     uint32_t *retryCount)
 {
-    struct HksBlob indexBlob;
-    indexBlob.size = 0;
-    indexBlob.data = nullptr;
-    if (!index.empty()) {
-        indexBlob.size = static_cast<uint32_t>(index.size());
-        indexBlob.data = const_cast<uint8_t *>(index.data());
-    }
+    struct HksBlob indexBlob = VectorToBlob(index);
     return HksAuthUkeyPin(&indexBlob, paramSetIn, retryCount);
 }
 
 static int32_t CallHksGetUkeyPinAuthState(const std::vector<uint8_t> &index, struct HksParamSet *paramSetIn,
     int32_t *status)
 {
-    struct HksBlob indexBlob;
-    indexBlob.size = 0;
-    indexBlob.data = nullptr;
-    if (!index.empty()) {
-        indexBlob.size = static_cast<uint32_t>(index.size());
-        indexBlob.data = const_cast<uint8_t *>(index.data());
-    }
+    struct HksBlob indexBlob = VectorToBlob(index);
     return HksGetUkeyPinAuthState(&indexBlob, paramSetIn, status);
 }
 
 static int32_t CallHksGetRemoteProperty(const std::vector<uint8_t> &resourceIdV,
     const std::vector<uint8_t> &propertyIdV, const struct HksParamSet *paramSetIn, struct HksParamSet **paramSetOut)
 {
-    struct HksBlob resourceId = {0, nullptr};
-    if (!resourceIdV.empty()) {
-        resourceId.size = static_cast<uint32_t>(resourceIdV.size());
-        resourceId.data = const_cast<uint8_t *>(resourceIdV.data());
-    }
-    struct HksBlob propertyId = {0, nullptr};
-    if (!propertyIdV.empty()) {
-        propertyId.size = static_cast<uint32_t>(propertyIdV.size());
-        propertyId.data = const_cast<uint8_t *>(propertyIdV.data());
-    }
-    return HksSetOrGetRemoteProperty(HKS_EXT_PROPERTY_OPERATION_GET, &resourceId, &propertyId, paramSetIn, paramSetOut);
+    struct HksBlob resourceId = VectorToBlob(resourceIdV);
+    struct HksBlob propertyId = VectorToBlob(propertyIdV);
+    return HksSetOrGetRemoteProperty(HKS_EXT_PROPERTY_OPERATION_GET, &resourceId, &propertyId, paramSetIn,
+        paramSetOut);
 }
 
 static int32_t CallHksSetRemoteProperty(const std::vector<uint8_t> &resourceIdV,
     const std::vector<uint8_t> &propertyIdV, const struct HksParamSet *paramSetIn)
 {
-    struct HksBlob resourceId = {0, nullptr};
-    if (!resourceIdV.empty()) {
-        resourceId.size = static_cast<uint32_t>(resourceIdV.size());
-        resourceId.data = const_cast<uint8_t *>(resourceIdV.data());
-    }
-    struct HksBlob propertyId = {0, nullptr};
-    if (!propertyIdV.empty()) {
-        propertyId.size = static_cast<uint32_t>(propertyIdV.size());
-        propertyId.data = const_cast<uint8_t *>(propertyIdV.data());
-    }
+    struct HksBlob resourceId = VectorToBlob(resourceIdV);
+    struct HksBlob propertyId = VectorToBlob(propertyIdV);
     return HksSetOrGetRemoteProperty(HKS_EXT_PROPERTY_OPERATION_SET, &resourceId, &propertyId, paramSetIn, nullptr);
 }
 
 static int32_t CallHksResourceOp(const std::vector<uint8_t> &resourceId, struct HksParamSet *paramSetIn, bool isOpen)
 {
-    struct HksBlob resourceIdBlob;
-    resourceIdBlob.size = 0;
-    resourceIdBlob.data = nullptr;
-    if (!resourceId.empty()) {
-        resourceIdBlob.size = static_cast<uint32_t>(resourceId.size());
-        resourceIdBlob.data = const_cast<uint8_t *>(resourceId.data());
-    }
+    struct HksBlob resourceIdBlob = VectorToBlob(resourceId);
     if (isOpen) {
         return HksOpenRemoteResource(&resourceIdBlob, paramSetIn);
     }
@@ -136,22 +106,14 @@ static int32_t CallHksResourceOp(const std::vector<uint8_t> &resourceId, struct 
 
 static int32_t CallHksClearUkeyPinAuthState(const std::vector<uint8_t> &resourceIdV)
 {
-    struct HksBlob resourceId = {0, nullptr};
-    if (!resourceIdV.empty()) {
-        resourceId.size = static_cast<uint32_t>(resourceIdV.size());
-        resourceId.data = const_cast<uint8_t *>(resourceIdV.data());
-    }
+    struct HksBlob resourceId = VectorToBlob(resourceIdV);
     return HksClearUkeyPinAuthState(&resourceId);
 }
 
 static int32_t CallHksGetResourceId(const std::vector<uint8_t> &providerName, struct HksParamSet *paramSetIn,
     struct HksBlob *resourceId)
 {
-    struct HksBlob providerNameBlob = {0, nullptr};
-    if (!providerName.empty()) {
-        providerNameBlob.size = static_cast<uint32_t>(providerName.size());
-        providerNameBlob.data = const_cast<uint8_t *>(providerName.data());
-    }
+    struct HksBlob providerNameBlob = VectorToBlob(providerName);
     return HksGetResourceId(&providerNameBlob, paramSetIn, resourceId);
 }
 
@@ -272,6 +234,35 @@ static napi_value CreateAsyncWork(napi_env env, napi_callback_info info, std::un
     }
 }
 
+// Parse the optional paramSet argument: if argc < paramSetThreshold, create an empty paramSet;
+// otherwise parse argv[paramSetArgIndex].
+static napi_status ParseOptionalParams(napi_env env, napi_value argv[], size_t argc,
+    size_t paramSetThreshold, size_t paramSetArgIndex,
+    struct HksParamSet *&paramSetIn)
+{
+    if (argc < paramSetThreshold) {
+        int32_t ret = HksInitParamSet(&paramSetIn);
+        NAPI_THROW_RETURN_ERR(env, ret != HKS_SUCCESS, napi_generic_failure,
+            HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "call HksInitParamSet for paramSetIn failed.");
+        return napi_ok;
+    }
+    napi_value result = ParseHksCryptoExternalParams(env, argv[paramSetArgIndex], paramSetIn);
+    NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
+        HUKS_ERR_CODE_INVALID_ARGUMENT, "could not get paramSet");
+    return napi_ok;
+}
+
+// Create async work, queue it, and return; logs on failure.
+static napi_value QueueAndReturn(napi_env env, napi_callback_info info,
+    std::unique_ptr<AsyncContext> context, const char *funcName)
+{
+    napi_value result = CreateAsyncWork(env, info, std::move(context), funcName);
+    if (result == nullptr) {
+        HKS_LOG_E("could not do async work");
+    }
+    return result;
+}
+
 napi_value HuksNapiRegisterProvider(napi_env env, napi_callback_info info)
 {
     std::unique_ptr<ProviderRegContext> context(new (std::nothrow) ProviderRegContext());
@@ -303,17 +294,11 @@ napi_value HuksNapiRegisterProvider(napi_env env, napi_callback_info info)
 
     context->resolve = [](napi_env env, AsyncContext *context) {
         ProviderRegContext *napiContext = static_cast<ProviderRegContext *>(context);
-        if (napiContext->result == HKS_ERROR_INVALID_ARGUMENT) {
-            napiContext->result = HKS_ERROR_NEW_INVALID_ARGUMENT;
-        }
+        MapErrorCode(napiContext->result);
         HksReturnNapiUndefined(env, napiContext->callback, napiContext->deferred, napiContext->result);
     };
 
-    napi_value result = CreateAsyncWork(env, info, std::move(context), __func__);
-    if (result == nullptr) {
-        HKS_LOG_E("could not do async work");
-    }
-    return result;
+    return QueueAndReturn(env, info, std::move(context), __func__);
 }
 
 napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
@@ -335,17 +320,7 @@ napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get string type name");
 
-        if (argc < HUKS_NAPI_TWO_ARGS) {
-            int32_t ret = HksInitParamSet(&context->paramSetIn);
-            NAPI_THROW_RETURN_ERR(env, ret != HKS_SUCCESS, napi_generic_failure,
-                HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "unregister call HksInitParamSet for paramSetIn failed.");
-            return napi_ok;
-        }
-        result = ParseHksCryptoExternalParams(env, argv[1], context->paramSetIn);
-        NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
-                              HUKS_ERR_CODE_INVALID_ARGUMENT, "could not get paramSet.");
-
-        return napi_ok;
+        return ParseOptionalParams(env, argv, argc, HUKS_NAPI_TWO_ARGS, 1, context->paramSetIn);
     };
 
     context->execute = [](napi_env env, void *data) {
@@ -355,17 +330,11 @@ napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
 
     context->resolve = [](napi_env env, AsyncContext *context) {
         ProviderRegContext *napiContext = static_cast<ProviderRegContext *>(context);
-        if (napiContext->result == HKS_ERROR_INVALID_ARGUMENT) {
-            napiContext->result = HKS_ERROR_NEW_INVALID_ARGUMENT;
-        }
+        MapErrorCode(napiContext->result);
         HksReturnNapiUndefined(env, napiContext->callback, napiContext->deferred, napiContext->result);
     };
 
-    napi_value result = CreateAsyncWork(env, info, std::move(context), __func__);
-    if (result == nullptr) {
-        HKS_LOG_E("could not do async work");
-    }
-    return result;
+    return QueueAndReturn(env, info, std::move(context), __func__);
 }
 
 napi_value HuksNapiAuthUkeyPin(napi_env env, napi_callback_info info)
@@ -402,17 +371,11 @@ napi_value HuksNapiAuthUkeyPin(napi_env env, napi_callback_info info)
     context->resolve = [](napi_env env, AsyncContext *context) {
         UkeyPinContext *napiContext = static_cast<UkeyPinContext *>(context);
         SetRetryCount(napiContext->retryCount);
-        if (napiContext->result == HKS_ERROR_INVALID_ARGUMENT) {
-            napiContext->result = HKS_ERROR_NEW_INVALID_ARGUMENT;
-        }
+        MapErrorCode(napiContext->result);
         HksReturnNapiUndefined(env, napiContext->callback, napiContext->deferred, napiContext->result);
     };
 
-    napi_value result = CreateAsyncWork(env, info, std::move(context), __func__);
-    if (result == nullptr) {
-        HKS_LOG_E("could not do async work");
-    }
-    return result;
+    return QueueAndReturn(env, info, std::move(context), __func__);
 }
 
 napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info)
@@ -432,16 +395,7 @@ napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info)
         napi_value result = ParseString(env, argv[0], asyncContext->index);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get stringname");
-        if (argc < HUKS_NAPI_TWO_ARGS) {
-            int32_t ret = HksInitParamSet(&context->paramSetIn);
-            NAPI_THROW_RETURN_ERR(env, ret != HKS_SUCCESS, napi_generic_failure,
-                HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "getUkeyPinAuthState call HksInitParamSet for paramSetIn failed.");
-            return napi_ok;
-        }
-        result = ParseHksCryptoExternalParams(env, argv[1], context->paramSetIn);
-        NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
-                              HUKS_ERR_CODE_INVALID_ARGUMENT, "could not get paramSet");
-        return napi_ok;
+        return ParseOptionalParams(env, argv, argc, HUKS_NAPI_TWO_ARGS, 1, context->paramSetIn);
     };
     context->execute = [](napi_env env, void *data) {
         UkeyPinContext *napiContext = static_cast<UkeyPinContext *>(data);
@@ -452,17 +406,11 @@ napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info)
         UkeyPinContext *napiContext = static_cast<UkeyPinContext *>(context);
         HksSuccessReturnResult resultData;
         SuccessReturnResultInit(resultData);
-        if (napiContext->result == HKS_ERROR_INVALID_ARGUMENT) {
-            napiContext->result = HKS_ERROR_NEW_INVALID_ARGUMENT;
-        }
+        MapErrorCode(napiContext->result);
         resultData.outStatus = napiContext->outStatus;
         HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
     };
-    napi_value result = CreateAsyncWork(env, info, std::move(context), __func__);
-    if (result == nullptr) {
-        HKS_LOG_E("could not do async work");
-    }
-    return result;
+    return QueueAndReturn(env, info, std::move(context), __func__);
 }
 napi_value HuksNapiGetProperty(napi_env env, napi_callback_info info)
 {
@@ -484,16 +432,7 @@ napi_value HuksNapiGetProperty(napi_env env, napi_callback_info info)
         result = ParseString(env, argv[1], asyncContext->propertyId);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get propertyId");
-        if (argc < HUKS_NAPI_THREE_ARGS) {
-            int32_t ret = HksInitParamSet(&context->paramSetIn);
-            NAPI_THROW_RETURN_ERR(env, ret != HKS_SUCCESS, napi_generic_failure,
-                HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "getProperty call HksInitParamSet for paramSetIn failed.");
-            return napi_ok;
-        }
-        result = ParseHksCryptoExternalParams(env, argv[HUKS_NAPI_TWO_ARGS], context->paramSetIn);
-        NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
-                              HUKS_ERR_CODE_INVALID_ARGUMENT, "could not get paramSet");
-        return napi_ok;
+        return ParseOptionalParams(env, argv, argc, HUKS_NAPI_THREE_ARGS, HUKS_NAPI_TWO_ARGS, context->paramSetIn);
     };
     context->execute = [](napi_env env, void *data) {
         auto *napiContext = static_cast<UkeyPropertyContext *>(data);
@@ -504,17 +443,11 @@ napi_value HuksNapiGetProperty(napi_env env, napi_callback_info info)
         auto *napiContext = static_cast<UkeyPropertyContext *>(context);
         HksSuccessReturnResult resultData;
         SuccessReturnResultInit(resultData);
-        if (napiContext->result == HKS_ERROR_INVALID_ARGUMENT) {
-            napiContext->result = HKS_ERROR_NEW_INVALID_ARGUMENT;
-        }
+        MapErrorCode(napiContext->result);
         resultData.paramSet = napiContext->paramSetOut;
         HksReturnNapiArrExtParamsResult(env, napiContext->deferred, napiContext->result, resultData.paramSet);
     };
-    napi_value result = CreateAsyncWork(env, info, std::move(context), __func__);
-    if (result == nullptr) {
-        HKS_LOG_E("could not do async work");
-    }
-    return result;
+    return QueueAndReturn(env, info, std::move(context), __func__);
 }
 
 napi_value HuksNapiSetProperty(napi_env env, napi_callback_info info)
@@ -537,16 +470,7 @@ napi_value HuksNapiSetProperty(napi_env env, napi_callback_info info)
         result = ParseString(env, argv[1], asyncContext->propertyId);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get propertyId");
-        if (argc < HUKS_NAPI_THREE_ARGS) {
-            int32_t ret = HksInitParamSet(&context->paramSetIn);
-            NAPI_THROW_RETURN_ERR(env, ret != HKS_SUCCESS, napi_generic_failure,
-                HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "setProperty call HksInitParamSet for paramSetIn failed.");
-            return napi_ok;
-        }
-        result = ParseHksCryptoExternalParams(env, argv[HUKS_NAPI_TWO_ARGS], context->paramSetIn);
-        NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
-                              HUKS_ERR_CODE_INVALID_ARGUMENT, "could not get paramSet");
-        return napi_ok;
+        return ParseOptionalParams(env, argv, argc, HUKS_NAPI_THREE_ARGS, HUKS_NAPI_TWO_ARGS, context->paramSetIn);
     };
     context->execute = [](napi_env env, void *data) {
         auto *napiContext = static_cast<UkeyPropertyContext *>(data);
@@ -555,16 +479,10 @@ napi_value HuksNapiSetProperty(napi_env env, napi_callback_info info)
     };
     context->resolve = [](napi_env env, AsyncContext *context) {
         auto *napiContext = static_cast<UkeyPropertyContext *>(context);
-        if (napiContext->result == HKS_ERROR_INVALID_ARGUMENT) {
-            napiContext->result = HKS_ERROR_NEW_INVALID_ARGUMENT;
-        }
+        MapErrorCode(napiContext->result);
         HksReturnNapiUndefined(env, napiContext->callback, napiContext->deferred, napiContext->result);
     };
-    napi_value result = CreateAsyncWork(env, info, std::move(context), __func__);
-    if (result == nullptr) {
-        HKS_LOG_E("could not do async work");
-    }
-    return result;
+    return QueueAndReturn(env, info, std::move(context), __func__);
 }
 
 template<typename ContextType>
@@ -591,18 +509,7 @@ napi_value HandleResourceOperation(
         napi_value result = ParseString(env, argv[0], asyncContext->resourceId);
         NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
                               HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get resourceId");
-
-        if (argc < HUKS_NAPI_TWO_ARGS) {
-            int32_t ret = HksInitParamSet(&context->paramSetIn);
-            NAPI_THROW_RETURN_ERR(env, ret != HKS_SUCCESS, napi_generic_failure,
-                HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "call HksInitParamSet for paramSetIn failed.");
-            return napi_ok;
-        }
-        result = ParseHksCryptoExternalParams(env, argv[1], context->paramSetIn);
-        NAPI_THROW_RETURN_ERR(env, result == nullptr, napi_generic_failure,
-                              HUKS_ERR_CODE_INVALID_ARGUMENT, "could not get paramSet");
-
-        return napi_ok;
+        return ParseOptionalParams(env, argv, argc, HUKS_NAPI_TWO_ARGS, 1, context->paramSetIn);
     };
 
     context->execute = [](napi_env env, void *data) {
@@ -613,17 +520,11 @@ napi_value HandleResourceOperation(
 
     context->resolve = [](napi_env env, AsyncContext *context) {
         auto *napiContext = static_cast<ContextType *>(context);
-        if (napiContext->result == HKS_ERROR_INVALID_ARGUMENT) {
-            napiContext->result = HKS_ERROR_NEW_INVALID_ARGUMENT;
-        }
+        MapErrorCode(napiContext->result);
         HksReturnNapiUndefined(env, napiContext->callback, napiContext->deferred, napiContext->result);
     };
 
-    napi_value result = CreateAsyncWork(env, info, std::move(context), funcName);
-    if (result == nullptr) {
-        HKS_LOG_E("could not do async work");
-    }
-    return result;
+    return QueueAndReturn(env, info, std::move(context), funcName);
 }
 
 napi_value HuksNapiClearUkeyPinAuthState(napi_env env, napi_callback_info info)
@@ -654,16 +555,10 @@ napi_value HuksNapiClearUkeyPinAuthState(napi_env env, napi_callback_info info)
         ProviderRegContext *napiContext = static_cast<ProviderRegContext *>(context);
         HksSuccessReturnResult resultData;
         SuccessReturnResultInit(resultData);
-        if (napiContext->result == HKS_ERROR_INVALID_ARGUMENT) {
-            napiContext->result = HKS_ERROR_NEW_INVALID_ARGUMENT;
-        }
+        MapErrorCode(napiContext->result);
         HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
     };
-    napi_value result = CreateAsyncWork(env, info, std::move(context), __func__);
-    if (result == nullptr) {
-        HKS_LOG_E("could not do async work");
-    }
-    return result;
+    return QueueAndReturn(env, info, std::move(context), __func__);
 }
 
 static napi_status ParseGetResourceIdParams(napi_env env, napi_callback_info info, AsyncContext *context)
@@ -699,9 +594,7 @@ static void ExecuteGetResourceId(napi_env env, void *data)
 static void ResolveGetResourceId(napi_env env, AsyncContext *context)
 {
     GetResourceIdContext *napiContext = static_cast<GetResourceIdContext *>(context);
-    if (napiContext->result == HKS_ERROR_INVALID_ARGUMENT) {
-        napiContext->result = HKS_ERROR_NEW_INVALID_ARGUMENT;
-    }
+    MapErrorCode(napiContext->result);
     if (napiContext->result != HKS_SUCCESS) {
         HksReturnNapiUndefined(env, napiContext->callback, napiContext->deferred, napiContext->result);
         return;
@@ -735,11 +628,7 @@ napi_value HuksNapiGetResourceId(napi_env env, napi_callback_info info)
     context->execute = ExecuteGetResourceId;
     context->resolve = ResolveGetResourceId;
 
-    napi_value result = CreateAsyncWork(env, info, std::move(context), __func__);
-    if (result == nullptr) {
-        HKS_LOG_E("could not do async work");
-    }
-    return result;
+    return QueueAndReturn(env, info, std::move(context), __func__);
 }
 
 napi_value HuksNapiOpenResource(napi_env env, napi_callback_info info)
