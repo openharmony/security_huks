@@ -567,7 +567,7 @@ static int32_t HksFillUsageSpecWithContext(const struct HksParamSet *paramset, s
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    usageSpec->algParam = (void *)ctxParam;
+    usageSpec->algParam = (void *)&ctxParam->blob;
     return HKS_SUCCESS;
 }
 

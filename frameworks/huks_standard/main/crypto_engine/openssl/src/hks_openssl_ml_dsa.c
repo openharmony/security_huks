@@ -31,7 +31,7 @@
 #include "hks_type.h"
 #include "hks_type_enum.h"
 
-#define ML_DSA_KEY_NUM 4
+#define ML_DSA_KEY_NUM 3
 #define ML_DSA_CONTEXT "context-string"
 
 typedef struct MlDsaParam {
@@ -185,7 +185,7 @@ int32_t HksOpensslMlDsaGetPubKey(const struct HksBlob *keyIn, struct HksBlob *ke
 #endif
 
 #ifdef HKS_SUPPORT_ML_DSA_SIGN_VERIFY
-static int32_t MlDsaSignVerifyInitCtx(const struct HksBlob *key, const struct HksUsageSpec *usageSpec, EVP_PKEY **pkey)
+static int32_t MlDsaSignVerifyInitCtx(const struct HksBlob *key, EVP_PKEY **pkey)
 {
     HKS_IF_TRUE_LOGE_RETURN(key->size < sizeof(struct HksKeyMaterialMlDsa), HKS_ERROR_INVALID_ARGUMENT,
         "invalid key size %" LOG_PUBLIC "u", key->size)
@@ -223,11 +223,8 @@ static int32_t MlDsaSignVerifyInitCtx(const struct HksBlob *key, const struct Hk
         params[index++] = OSSL_PARAM_construct_octet_string(OSSL_PKEY_PARAM_PRIV_KEY,
             key->data + offset, keyMaterial->priKeySize);
     }
-
-    struct HksBlob *context = (struct HksBlob *)usageSpec->algParam;
-    params[index++] = OSSL_PARAM_construct_octet_string(ML_DSA_CONTEXT, context->data, context->size);
     params[index++] = OSSL_PARAM_construct_end();
-    
+
     ret = EVP_PKEY_fromdata(ctx, pkey, (keyMaterial->priKeySize == 0) ? EVP_PKEY_PUBLIC_KEY : EVP_PKEY_KEYPAIR, params);
     if (ret != HKS_OPENSSL_SUCCESS) {
         HKS_LOG_E("failed to create key from data");
@@ -245,9 +242,10 @@ int32_t HksOpensslMlDsaSign(const struct HksBlob *key, const struct HksUsageSpec
 {
     EVP_PKEY *pkey = NULL;
     EVP_MD_CTX *mdCtx = NULL;
+    EVP_PKEY_CTX *signCtx = NULL;
     int32_t ret = HKS_SUCCESS;
     do {
-        ret = MlDsaSignVerifyInitCtx(key, usageSpec, &pkey);
+        ret = MlDsaSignVerifyInitCtx(key, &pkey);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("failed to init sign/verify ctx");
             HksLogOpensslError();
@@ -262,8 +260,19 @@ int32_t HksOpensslMlDsaSign(const struct HksBlob *key, const struct HksUsageSpec
             break;
         }
 
-        if (EVP_DigestSignInit(mdCtx, NULL, NULL, NULL, pkey) != HKS_OPENSSL_SUCCESS) {
+        if (EVP_DigestSignInit(mdCtx, &signCtx, NULL, NULL, pkey) != HKS_OPENSSL_SUCCESS) {
             HKS_LOG_E("evp ml-dsa signature init failed");
+            HksLogOpensslError();
+            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+            break;
+        }
+
+        struct HksBlob *context = (struct HksBlob *)usageSpec->algParam;
+        OSSL_PARAM ctxParams[2];
+        ctxParams[0] = OSSL_PARAM_construct_octet_string(ML_DSA_CONTEXT, context->data, context->size);
+        ctxParams[1] = OSSL_PARAM_construct_end();
+        if (EVP_PKEY_CTX_set_params(signCtx, ctxParams) != HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("evp ml-dsa set context failed");
             HksLogOpensslError();
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
@@ -289,9 +298,10 @@ int32_t HksOpensslMlDsaVerify(const struct HksBlob *key, const struct HksUsageSp
 {
     EVP_PKEY *pkey = NULL;
     EVP_MD_CTX *mdCtx = NULL;
+    EVP_PKEY_CTX *verifyCtx = NULL;
     int32_t ret = HKS_SUCCESS;
     do {
-        ret = MlDsaSignVerifyInitCtx(key, usageSpec, &pkey);
+        ret = MlDsaSignVerifyInitCtx(key, &pkey);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("failed to init sign/verify ctx");
             HksLogOpensslError();
@@ -306,8 +316,19 @@ int32_t HksOpensslMlDsaVerify(const struct HksBlob *key, const struct HksUsageSp
             break;
         }
 
-        if (EVP_DigestVerifyInit(mdCtx, NULL, NULL, NULL, pkey) != HKS_OPENSSL_SUCCESS) {
+        if (EVP_DigestVerifyInit(mdCtx, &verifyCtx, NULL, NULL, pkey) != HKS_OPENSSL_SUCCESS) {
             HKS_LOG_E("evp ml-dsa verification init failed");
+            HksLogOpensslError();
+            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+            break;
+        }
+
+        struct HksBlob *context = (struct HksBlob *)usageSpec->algParam;
+        OSSL_PARAM ctxParams[2];
+        ctxParams[0] = OSSL_PARAM_construct_octet_string(ML_DSA_CONTEXT, context->data, context->size);
+        ctxParams[1] = OSSL_PARAM_construct_end();
+        if (EVP_PKEY_CTX_set_params(verifyCtx, ctxParams) != HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("evp ml-dsa set context failed");
             HksLogOpensslError();
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
