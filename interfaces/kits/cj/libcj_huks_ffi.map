@@ -13,21 +13,6 @@
 
 1.0 {
   global:
-    FfiOHOSGetSdkVersion;
-    FfiOHOSInitSession;
-    FfiOHOSUpdateSession;
-    FfiOHOSFinishSession;
-    FfiOHOSAbortSession;
-    FfiOHOSIsKeyExist;
-    FfiOHOSGetKeyItemProperties;
-    FfiOHOSHAttestKey;
-    FfiOHOSHAnonAttestKey;
-    FfiOHOSExportKey;
-    FfiOHOSImportWrappedKey;
-    FfiOHOSGenerateKey;
-    FfiOHOSDeleteKey;
-    FfiOHOSImportKey;
-    FfiOHOSListAliases;
-    FfiOHOSConvertErrCode;
+    Ffi*;
   local: *;
 };
