@@ -36,6 +36,22 @@
 #define ML_DSA_KEY_NUM 3
 #define ML_DSA_CONTEXT "context-string"
 
+static int32_t MlDsaSetContextParam(EVP_PKEY_CTX *ctx, const struct HksUsageSpec *usageSpec)
+{
+    struct HksBlob *context = (struct HksBlob *)usageSpec->algParam;
+    HKS_IF_NULL_LOGE_RETURN(context->data, HKS_ERROR_NULL_POINTER, "context data is nullptr")
+
+    OSSL_PARAM ctxParams[2];
+    ctxParams[0] = OSSL_PARAM_construct_octet_string(ML_DSA_CONTEXT, context->data, context->size);
+    ctxParams[1] = OSSL_PARAM_construct_end();
+    if (EVP_PKEY_CTX_set_params(ctx, ctxParams) != HKS_OPENSSL_SUCCESS) {
+        HKS_LOG_E("evp ml-dsa set context failed");
+        HksLogOpensslError();
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+    return HKS_SUCCESS;
+}
+
 typedef struct MlDsaParam {
     uint32_t paramSetId;
     uint32_t alg;
@@ -269,21 +285,8 @@ int32_t HksOpensslMlDsaSign(const struct HksBlob *key, const struct HksUsageSpec
             break;
         }
 
-        struct HksBlob *context = (struct HksBlob *)usageSpec->algParam;
-        if (context->data == NULL) {
-            HKS_LOG_E("context data is nullptr");
-            ret = HKS_ERROR_NULL_POINTER;
-            break;
-        }
-        OSSL_PARAM ctxParams[2];
-        ctxParams[0] = OSSL_PARAM_construct_octet_string(ML_DSA_CONTEXT, context->data, context->size);
-        ctxParams[1] = OSSL_PARAM_construct_end();
-        if (EVP_PKEY_CTX_set_params(signCtx, ctxParams) != HKS_OPENSSL_SUCCESS) {
-            HKS_LOG_E("evp ml-dsa set context failed");
-            HksLogOpensslError();
-            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
-            break;
-        }
+        ret = MlDsaSetContextParam(signCtx, usageSpec);
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         size_t outSize = signature->size;
         if (EVP_DigestSign(mdCtx, signature->data, &outSize, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
@@ -316,12 +319,7 @@ int32_t HksOpensslMlDsaVerify(const struct HksBlob *key, const struct HksUsageSp
         }
 
         mdCtx = EVP_MD_CTX_new();
-        if (mdCtx == NULL) {
-            HKS_LOG_E("failed to create ml-dsa md ctx");
-            HksLogOpensslError();
-            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
-            break;
-        }
+        HKS_IF_NULL_LOGE_BREAK(mdCtx, "failed to create ml-dsa md ctx")
 
         if (EVP_DigestVerifyInit(mdCtx, &verifyCtx, NULL, NULL, pkey) != HKS_OPENSSL_SUCCESS) {
             HKS_LOG_E("evp ml-dsa verification init failed");
@@ -330,21 +328,8 @@ int32_t HksOpensslMlDsaVerify(const struct HksBlob *key, const struct HksUsageSp
             break;
         }
 
-        struct HksBlob *context = (struct HksBlob *)usageSpec->algParam;
-        if (context->data == NULL) {
-            HKS_LOG_E("context data is nullptr");
-            ret = HKS_ERROR_NULL_POINTER;
-            break;
-        }
-        OSSL_PARAM ctxParams[2];
-        ctxParams[0] = OSSL_PARAM_construct_octet_string(ML_DSA_CONTEXT, context->data, context->size);
-        ctxParams[1] = OSSL_PARAM_construct_end();
-        if (EVP_PKEY_CTX_set_params(verifyCtx, ctxParams) != HKS_OPENSSL_SUCCESS) {
-            HKS_LOG_E("evp ml-dsa set context failed");
-            HksLogOpensslError();
-            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
-            break;
-        }
+        ret = MlDsaSetContextParam(verifyCtx, usageSpec);
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         if (EVP_DigestVerify(mdCtx, signature->data, signature->size, message->data,
             message->size) != HKS_OPENSSL_SUCCESS) {
