@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "hks_error_code.h"
-#include <unistd.h>
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
 #else
@@ -25,6 +23,7 @@
 #include "securec.h"
 #include <openssl/core_names.h>
 #include <openssl/evp.h>
+#include "hks_error_code.h"
 #include "hks_openssl_engine.h"
 #include "hks_openssl_ml_dsa.h"
 #include "hks_log.h"
@@ -34,23 +33,6 @@
 #include "hks_type_enum.h"
 
 #define ML_DSA_KEY_NUM 3
-#define ML_DSA_CONTEXT "context-string"
-
-static int32_t MlDsaSetContextParam(EVP_PKEY_CTX *ctx, const struct HksUsageSpec *usageSpec)
-{
-    struct HksBlob *context = (struct HksBlob *)usageSpec->algParam;
-    HKS_IF_NULL_LOGE_RETURN(context->data, HKS_ERROR_NULL_POINTER, "context data is nullptr")
-
-    OSSL_PARAM ctxParams[2];
-    ctxParams[0] = OSSL_PARAM_construct_octet_string(ML_DSA_CONTEXT, context->data, context->size);
-    ctxParams[1] = OSSL_PARAM_construct_end();
-    if (EVP_PKEY_CTX_set_params(ctx, ctxParams) != HKS_OPENSSL_SUCCESS) {
-        HKS_LOG_E("evp ml-dsa set context failed");
-        HksLogOpensslError();
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
-    return HKS_SUCCESS;
-}
 
 typedef struct MlDsaParam {
     uint32_t paramSetId;
@@ -203,6 +185,26 @@ int32_t HksOpensslMlDsaGetPubKey(const struct HksBlob *keyIn, struct HksBlob *ke
 #endif
 
 #ifdef HKS_SUPPORT_ML_DSA_SIGN_VERIFY
+#define ML_DSA_CONTEXT "context-string"
+
+static int32_t MlDsaSetContextParam(EVP_PKEY_CTX *ctx, const struct HksUsageSpec *usageSpec)
+{
+    struct HksBlob *context = (struct HksBlob *)usageSpec->algParam;
+    HKS_IF_NULL_LOGE_RETURN(context, HKS_ERROR_NULL_POINTER, "context is nullptr")
+    HKS_IF_NULL_LOGE_RETURN(context->data, HKS_ERROR_NULL_POINTER, "context data is nullptr")
+
+    OSSL_PARAM ctxParams[] = {
+        OSSL_PARAM_construct_octet_string(ML_DSA_CONTEXT, context->data, context->size),
+        OSSL_PARAM_construct_end(),
+    };
+    if (EVP_PKEY_CTX_set_params(ctx, ctxParams) != HKS_OPENSSL_SUCCESS) {
+        HKS_LOG_E("evp ml-dsa set context failed");
+        HksLogOpensslError();
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+    return HKS_SUCCESS;
+}
+
 static int32_t MlDsaSignVerifyInitCtx(const struct HksBlob *key, EVP_PKEY **pkey)
 {
     HKS_IF_TRUE_LOGE_RETURN(key->size < sizeof(struct HksKeyMaterialMlDsa), HKS_ERROR_INVALID_ARGUMENT,
@@ -319,7 +321,12 @@ int32_t HksOpensslMlDsaVerify(const struct HksBlob *key, const struct HksUsageSp
         }
 
         mdCtx = EVP_MD_CTX_new();
-        HKS_IF_NULL_LOGE_BREAK(mdCtx, "failed to create ml-dsa md ctx")
+        if (mdCtx == NULL) {
+            HKS_LOG_E("failed to create ml-dsa md ctx");
+            HksLogOpensslError();
+            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+            break;
+        }
 
         if (EVP_DigestVerifyInit(mdCtx, &verifyCtx, NULL, NULL, pkey) != HKS_OPENSSL_SUCCESS) {
             HKS_LOG_E("evp ml-dsa verification init failed");

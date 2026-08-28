@@ -550,7 +550,12 @@ int32_t HksClientDecapsulate(const struct HksBlob *keyAlias, const struct HksPar
         0,
         0
     };
-    return HksServiceDecapsulate(&processInfo, keyAlias, paramSet, sharedKeyParamSet, encapOrsharedSecret);
+    struct HksEncapsulationResult decapResult = { *encapOrsharedSecret, { 0, NULL } };
+    int32_t ret = HksServiceDecapsulate(&processInfo, keyAlias, paramSet, sharedKeyParamSet, &decapResult);
+    if (ret == HKS_SUCCESS) {
+        *encapOrsharedSecret = decapResult.sharedSecret;
+    }
+    return ret;
 }
 #else
 int32_t HksClientEncapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
