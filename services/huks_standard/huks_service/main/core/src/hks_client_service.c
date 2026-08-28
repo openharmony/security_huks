@@ -2017,7 +2017,7 @@ int32_t HksServiceEncapsulate(const struct HksProcessInfo *processInfo, const st
 
 int32_t HksServiceDecapsulate(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParamSet,
-    struct HksBlob *encapOrsharedSecret)
+    struct HksEncapsulationResult *decapResult)
 {
     int32_t ret;
     uint64_t startTime = 0;
@@ -2027,7 +2027,6 @@ int32_t HksServiceDecapsulate(const struct HksProcessInfo *processInfo, const st
     struct HksParamSet *finalParamSet = NULL;
     struct HksBlob keyFromFile = { 0, NULL };
     struct HksHitraceId traceId = {0};
-    struct HksBlob outData = { 0, NULL };
 
 #ifdef L2_STANDARD
     traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT | HKS_HITRACE_FLAG_NO_BE_INFO);
@@ -2046,7 +2045,8 @@ int32_t HksServiceDecapsulate(const struct HksProcessInfo *processInfo, const st
         ret = AppendKeyBlobToParamSet(newParamSet, &keyFromFile, &finalParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "decapsulate: append key blob to paramSet failed, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HuksAccessDecapsulate(finalParamSet, newSharedKeyParamSet, encapOrsharedSecret, &outData);
+        ret = HuksAccessDecapsulate(finalParamSet, newSharedKeyParamSet,
+            &decapResult->encapsulatedData, &decapResult->sharedSecret);
         IfNotSuccAppendHdiErrorInfo(ret);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAccessDecapsulate fail")
 
@@ -2057,13 +2057,11 @@ int32_t HksServiceDecapsulate(const struct HksProcessInfo *processInfo, const st
             break;
         }
 
-        ret = HksKemStoreKey(processInfo, newSharedKeyParamSet, &outData);
+        ret = HksKemStoreKey(processInfo, newSharedKeyParamSet, &decapResult->sharedSecret);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "decapsulate HksKemStoreKey faile ret:%" LOG_PUBLIC "d", ret)
     } while (0);
 
 #ifdef L2_STANDARD
-    HKS_MEMSET_FREE_BLOB(*encapOrsharedSecret);
-    *encapOrsharedSecret = outData;
     HksOneStageReportInfo info = {ret, startTime, traceId.traceId.chainId, __func__, HKS_ONE_STAGE_DECAPSULATE};
     (void)HksOneStageEventReport(keyAlias, &keyFromFile, newParamSet, processInfo, &info);
 #endif

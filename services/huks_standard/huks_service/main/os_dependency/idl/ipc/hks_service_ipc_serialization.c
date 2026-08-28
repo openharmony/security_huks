@@ -830,7 +830,7 @@ int HksKeyParamUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
 }
 
 int32_t HksDecapsulateUnpack(const struct HksBlob *srcData, struct HksBlob *sharedKeyAlias,
-    struct HksParamSet **sharedKeyParamSet, struct HksBlob *encapOrsharedSecret, uint32_t *offset)
+    struct HksParamSet **sharedKeyParamSet, struct HksBlob *encapsulatedData, uint32_t *offset)
 {
     int32_t ret = GetBlobFromBuffer(sharedKeyAlias, srcData, offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get sharedKeyAlias fail")
@@ -838,15 +838,8 @@ int32_t HksDecapsulateUnpack(const struct HksBlob *srcData, struct HksBlob *shar
     ret = GetParamSetFromBuffer(sharedKeyParamSet, srcData, offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get sharedKeyParamSet fail")
 
-    struct HksBlob tmpBlob = { 0, NULL };
-    ret = GetBlobFromBuffer(&tmpBlob, srcData, offset);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get encapOrsharedSecret fail")
-
-    encapOrsharedSecret->size = tmpBlob.size;
-    encapOrsharedSecret->data = (uint8_t *)HksMalloc(encapOrsharedSecret->size);
-    HKS_IF_NULL_LOGE_RETURN(encapOrsharedSecret->data, HKS_ERROR_MALLOC_FAIL, "malloc encapOrsharedSecret fail")
-    (void)memcpy_s(encapOrsharedSecret->data, encapOrsharedSecret->size,
-        tmpBlob.data, tmpBlob.size);
+    ret = GetBlobFromBuffer(encapsulatedData, srcData, offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get encapsulatedData fail")
 
     return HKS_SUCCESS;
 }

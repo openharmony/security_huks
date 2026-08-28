@@ -110,10 +110,10 @@ static int32_t FuzzHksDecapsulateUnpack(FuzzedDataProvider &fdp)
 
     struct HksBlob sharedKeyAlias = { 0, nullptr };
     struct HksParamSet *sharedKeyParamSet = nullptr;
-    struct HksBlob encapOrsharedSecret = { 0, nullptr };
+    struct HksBlob encapsulatedData = { 0, nullptr };
     uint32_t offset = 0;
     return HksDecapsulateUnpack(&srcBlob, &sharedKeyAlias, &sharedKeyParamSet,
-        &encapOrsharedSecret, &offset);
+        &encapsulatedData, &offset);
 }
 
 static int32_t FuzzHksEncapsulateResponsePack(FuzzedDataProvider &fdp)

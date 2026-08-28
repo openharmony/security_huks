@@ -871,7 +871,7 @@ HWTEST_F(HksCryptoHalMlDsa, HksCryptoHalMlDsa_022, Function | SmallTest | Level0
     ASSERT_EQ(ret, HKS_SUCCESS);
 
     uint8_t contextData[] = "ml-dsa-context-tdd";
-    HksBlob contextBlob = { .size = sizeof(contextData), .data = contextData };
+    HksBlob contextBlob = { .size = strlen((const char *)contextData), .data = contextData };
 
     HksUsageSpec signSpec = {
         .algType = HKS_ALG_ML_DSA,
@@ -940,9 +940,9 @@ HWTEST_F(HksCryptoHalMlDsa, HksCryptoHalMlDsa_023, Function | SmallTest | Level0
     ASSERT_EQ(ret, HKS_SUCCESS);
 
     uint8_t contextA[] = "context-a";
-    HksBlob contextBlobA = { .size = sizeof(contextA), .data = contextA };
+    HksBlob contextBlobA = { .size = strlen((const char *)contextA), .data = contextA };
     uint8_t contextB[] = "context-b";
-    HksBlob contextBlobB = { .size = sizeof(contextB), .data = contextB };
+    HksBlob contextBlobB = { .size = strlen((const char *)contextB), .data = contextB };
 
     HksUsageSpec signSpec = {
         .algType = HKS_ALG_ML_DSA,
