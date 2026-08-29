@@ -70,24 +70,18 @@ bool IsPrivacySearchMatch(const struct HksBlob *keyAlias, const struct HksParamS
     return paramSetIn->params[0].tag == HKS_TAG_PURPOSE;
 }
 
-bool HandlePrivacySearch(HuksNapiItem::GetKeyPropertiesAsyncContext napiContext)
+int32_t HandlePrivacySearch(HuksNapiItem::GetKeyPropertiesAsyncContext napiContext)
 {
-    if (!IsPrivacySearchMatch(napiContext->keyAlias, napiContext->paramSetIn)) {
-        return false;
-    }
     void *handle = GetComputationHandle();
     if (handle == nullptr) {
-        napiContext->result = HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED;
-        return true;
+        return HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED;
     }
     GetKeyParamSetExtFunc func = (GetKeyParamSetExtFunc)dlsym(handle, PRIVACY_SEARCH_FUNC_NAME);
     if (func == nullptr) {
         HKS_LOG_E("dlsym %" LOG_PUBLIC "s failed, %" LOG_PUBLIC "s!", PRIVACY_SEARCH_FUNC_NAME, dlerror());
-        napiContext->result = HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED;
-        return true;
+        return HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED;
     }
-    napiContext->result = func(napiContext->keyAlias, napiContext->paramSetIn, &napiContext->paramSetOut);
-    return true;
+    return func(napiContext->keyAlias, napiContext->paramSetIn, &napiContext->paramSetOut);
 }
 } // namespace
 
@@ -160,7 +154,8 @@ napi_value GetKeyPropertiesAsyncWork(napi_env env, GetKeyPropertiesAsyncContext 
         [](napi_env env, void *data) {
             HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
             GetKeyPropertiesAsyncContext napiContext = static_cast<GetKeyPropertiesAsyncContext>(data);
-            if (HandlePrivacySearch(napiContext)) {
+            if (IsPrivacySearchMatch(napiContext->keyAlias, napiContext->paramSetIn)) {
+                napiContext->result = HandlePrivacySearch(napiContext);
                 return;
             }
             napiContext->paramSetOut = static_cast<struct HksParamSet *>(HksMalloc(HKS_DEFAULT_OUTPARAMSET_SIZE));
