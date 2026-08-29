@@ -67,7 +67,7 @@ bool IsPrivacySearchMatch(const struct HksBlob *keyAlias, const struct HksParamS
     if ((keyAlias != nullptr && keyAlias->size != 0) || paramSetIn == nullptr || paramSetIn->paramsCnt == 0) {
         return false;
     }
-    return paramSetIn->params[0].tag == HKS_TAG_KEY_AUTH_RESULT;
+    return paramSetIn->params[0].tag == HKS_TAG_PURPOSE;
 }
 
 bool HandlePrivacySearch(HuksNapiItem::GetKeyPropertiesAsyncContext napiContext)
