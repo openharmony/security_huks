@@ -497,7 +497,7 @@ HWTEST_F(HksClientIpcSerializationTest, HksClientIpcSerializationTest019, TestSi
     uint8_t destBlobData[destBlobSize] = { 0 };
     struct HksBlob destBlob = { destBlobSize, destBlobData };
 
-    int32_t ret = HksClearPinAuthStatePack(&index, &destBlob);
+    int32_t ret = HksClearPinAuthStatePack(&index, nullptr, &destBlob);
     EXPECT_EQ(ret, HKS_SUCCESS);
 }
 

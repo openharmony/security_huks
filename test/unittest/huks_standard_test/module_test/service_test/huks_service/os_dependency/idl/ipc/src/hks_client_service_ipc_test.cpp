@@ -358,7 +358,7 @@ HWTEST_F(HksClientServiceIpcTest, HksClientServiceIpcTest021, TestSize.Level0)
 HWTEST_F(HksClientServiceIpcTest, HksClientServiceIpcTest022, TestSize.Level0)
 {
     HKS_LOG_I("enter HksClientServiceIpcTest022");
-    int32_t ret = HksClientClearPinAuthState(nullptr);
+    int32_t ret = HksClientClearPinAuthState(nullptr, nullptr);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 }
 
@@ -371,7 +371,7 @@ HWTEST_F(HksClientServiceIpcTest, HksClientServiceIpcTest023, TestSize.Level0)
 {
     HKS_LOG_I("enter HksClientServiceIpcTest023");
     struct HksBlob index = MakeBlob("testIndex");
-    int32_t ret = HksClientClearPinAuthState(&index);
+    int32_t ret = HksClientClearPinAuthState(&index, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS);
 }
 
