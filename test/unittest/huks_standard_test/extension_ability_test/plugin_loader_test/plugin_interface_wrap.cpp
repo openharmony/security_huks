@@ -235,7 +235,8 @@ ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnAbo
 }
 
 ENABLE_CFI(__attribute__((visibility("default"))) int32_t Fake_HksExtPluginOnClearUkeyPinAuthState(
-    const HksProcessInfo &processInfo, const std::string &index, struct HksExternalErrorInfo **errInfo))
+    const HksProcessInfo &processInfo, const std::string &index,
+    const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo))
 {
     (void)errInfo;
     return 0;
@@ -340,7 +341,7 @@ extern "C" void *__wrap_dlsym(void* handle, const char* symbol)
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRiPP20HksExternalErrorInfo",
          (void*)Fake_HksExtPluginOnGetUkeyPinAuthState},
          {"_ZN4OHOS8Security4Huks35HksExtPluginOnClearUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_string"
-        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEEPP20HksExternalErrorInfo",
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetPP20HksExternalErrorInfo",
          (void*)Fake_HksExtPluginOnClearUkeyPinAuthState},
          {"_ZN4OHOS8Security4Huks31HksExtPluginOnExportCertificateERK14HksProcessInfoRKNSt3__h12basic_string"
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRSB_PP20HksExternalErrorInfo",

@@ -349,11 +349,16 @@ int32_t HksImportWrappedKeyUnpack(const struct HksBlob *srcData, struct HksBlob 
     return GetBlobFromBuffer(wrappedKeyData, srcData, &offset);
 }
 
-int32_t HksClearPinAuthStateUnpack(const struct HksBlob *srcData, struct HksBlob *index)
+int32_t HksClearPinAuthStateUnpack(const struct HksBlob *srcData, struct HksBlob *index,
+    struct HksParamSet **paramSet)
 {
     uint32_t offset = 0;
     int32_t ret = GetBlobFromBuffer(index, srcData, &offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get index failed")
+    HKS_IF_TRUE_RETURN(offset == srcData->size, HKS_SUCCESS)
+
+    ret = GetParamSetFromBuffer(paramSet, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get paramSet failed")
 
     return HKS_SUCCESS;
 }

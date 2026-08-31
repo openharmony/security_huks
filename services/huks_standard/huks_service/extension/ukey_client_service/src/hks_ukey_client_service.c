@@ -156,13 +156,14 @@ int32_t HksServiceCloseRemoteHandle(const struct HksProcessInfo *processInfo, co
 }
 
 int32_t HksServiceClearPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
-    struct HksExternalErrorInfo **errInfo)
+    const struct HksParamSet *paramSetIn, struct HksExternalErrorInfo **errInfo)
 {
 #ifdef L2_STANDARD
-    return HksIpcClearPinStatusAdapter(processInfo, index, errInfo);
+    return HksIpcClearPinStatusAdapter(processInfo, index, paramSetIn, errInfo);
 #else
     (void)processInfo;
     (void)index;
+    (void)paramSetIn;
     (void)errInfo;
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif

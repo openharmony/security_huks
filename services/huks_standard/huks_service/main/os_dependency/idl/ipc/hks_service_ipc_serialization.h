@@ -56,7 +56,7 @@ int32_t HksImportKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAli
 int32_t HksImportWrappedKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
     struct HksBlob *wrappingKeyAlias, struct HksParamSet **paramSet, struct HksBlob *wrappedKeyData);
 
-int32_t HksClearPinAuthStateUnpack(const struct HksBlob *srcData, struct HksBlob *index);
+int32_t HksClearPinAuthStateUnpack(const struct HksBlob *srcData, struct HksBlob *index, struct HksParamSet **paramSet);
 
 int32_t HksDeleteKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias, struct HksParamSet **paramSet);
 

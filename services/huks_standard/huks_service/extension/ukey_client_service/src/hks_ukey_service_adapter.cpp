@@ -242,16 +242,17 @@ int32_t HksIpcGetUkeyPinAuthStateAdapter(const struct HksProcessInfo *processInf
 }
 
 int32_t HksIpcClearPinStatusAdapter(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
-    struct HksExternalErrorInfo **errInfo)
+    const struct HksParamSet *paramSet, struct HksExternalErrorInfo **errInfo)
 {
     int32_t ret = HksIpcCheckBlob(resourceId, 1, HKS_EXT_MAX_RESOURCE_ID_LEN);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "HksIpcClearPinStatusAdapter invalid resourceId blob")
 
     std::string cppResourceId(reinterpret_cast<const char*>(resourceId->data), resourceId->size);
+    CppParamSet cppParamSet(paramSet);
 
     auto pluginManager = OHOS::Security::Huks::HuksPluginLifeCycleMgr::GetInstanceWrapper();
     HKS_IF_TRUE_LOGE_RETURN(pluginManager == nullptr, HKS_ERROR_NULL_POINTER, "Failed to get PluginManager instance.")
-    return pluginManager->OnClearUkeyPinAuthStatus(*processInfo, cppResourceId, errInfo);
+    return pluginManager->OnClearUkeyPinAuthStatus(*processInfo, cppResourceId, cppParamSet, errInfo);
 }
 
 static int32_t RemotePropertyPack(const CppParamSet &cppParamSet,

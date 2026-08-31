@@ -209,7 +209,7 @@ int32_t HksClientCloseRemoteHandle(const struct HksBlob *resourceId, const struc
     return ret;
 }
 
-int32_t HksClientClearPinAuthState(const struct HksBlob *index)
+int32_t HksClientClearPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn)
 {
     struct HksExternalErrorInfo *errInfo = NULL;
     struct HksProcessInfo processInfo = {
@@ -220,7 +220,7 @@ int32_t HksClientClearPinAuthState(const struct HksBlob *index)
         0,
         0
     };
-    int32_t ret = HksServiceClearPinAuthState(&processInfo, index, &errInfo);
+    int32_t ret = HksServiceClearPinAuthState(&processInfo, index, paramSetIn, &errInfo);
     HksFreeExternalErrorInfo(errInfo);
     return ret;
 }

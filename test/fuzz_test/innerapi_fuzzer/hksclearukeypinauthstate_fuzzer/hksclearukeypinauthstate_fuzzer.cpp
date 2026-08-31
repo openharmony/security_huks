@@ -35,7 +35,7 @@ int DoSomethingInterestingWithHksClearUkeyPinAuthState(uint8_t *data, size_t siz
 
     struct HksBlob resourceId = { sizeof(uint32_t), ReadData<uint8_t *>(data, size, sizeof(uint32_t)) };
 
-    [[maybe_unused]] int ret = HksClearUkeyPinAuthState(&resourceId);
+    [[maybe_unused]] int ret = HksClearUkeyPinAuthState(&resourceId, NULL);
     return 0;
 }
 
