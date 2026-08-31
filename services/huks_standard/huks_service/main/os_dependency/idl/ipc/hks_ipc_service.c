@@ -363,7 +363,6 @@ void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t
     struct UKeyCommonInfo ukeyCommon = { .returnCode = ret };
     ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, paramSet, &ukeyCommon);
 
-    HksFreeParamSet(&paramSet);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
 #else
