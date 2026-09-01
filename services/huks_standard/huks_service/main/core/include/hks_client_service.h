@@ -155,7 +155,7 @@ int32_t HksServiceEncapsulate(const struct HksProcessInfo *processInfo, const st
 
 int32_t HksServiceDecapsulate(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, const struct HksParamSet *sharedKeyParamSet,
-    struct HksBlob *encapOrsharedSecret);
+    struct HksEncapsulationResult *decapResult);
 
 #ifdef __cplusplus
 }

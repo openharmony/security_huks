@@ -122,7 +122,7 @@ int32_t HksKeyParamUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlia
     struct HksParamSet **paramSet, uint32_t *offset);
 
 int32_t HksDecapsulateUnpack(const struct HksBlob *srcData, struct HksBlob *sharedKeyAlias,
-    struct HksParamSet **sharedKeyParamSet, struct HksBlob *encapOrsharedSecret, uint32_t *offset);
+    struct HksParamSet **sharedKeyParamSet, struct HksBlob *encapsulatedData, uint32_t *offset);
 
 int32_t HksEncapsulateResponsePack(struct HksEncapsulationResult *encapResult, struct HksBlob *responseBlob);
 
