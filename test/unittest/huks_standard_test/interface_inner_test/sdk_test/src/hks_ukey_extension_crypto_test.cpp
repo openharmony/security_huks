@@ -352,7 +352,7 @@ HWTEST_F(HksUkeyExtensionCryptoTest, HksClearUkeyPinAuthStateTest001, TestSize.L
     struct HksBlob resourceId = StringToHuksBlob(index);
     EXPECT_NE(resourceId.data, nullptr);
 
-    ret = HksClearUkeyPinAuthState(&resourceId);
+    ret = HksClearUkeyPinAuthState(&resourceId, NULL);
     if (ret != HKS_SUCCESS) {
         HKS_TEST_LOG_I("HksClearUkeyPinAuthStateTest001, ret = %d", ret);
     }

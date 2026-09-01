@@ -63,7 +63,8 @@ int32_t HksServiceGetUkeyPinAuthState(const struct HksProcessInfo *processInfo, 
 int32_t HksServiceCloseRemoteHandle(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
     const struct HksParamSet *paramSetIn);
 
-int32_t HksServiceClearPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index);
+int32_t HksServiceClearPinAuthState(const struct HksProcessInfo *processInfo, const struct HksBlob *index,
+    const struct HksParamSet *paramSetIn);
 
 int32_t HksServiceGetRemoteProperty(const struct HksProcessInfo *processInfo, const struct HksBlob *resourceId,
     const struct HksBlob *propertyId, const struct HksParamSet *paramSetIn, struct HksParamSet **propertySetOut);

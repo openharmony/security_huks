@@ -104,10 +104,11 @@ static int32_t CallHksResourceOp(const std::vector<uint8_t> &resourceId, struct 
     return HksCloseRemoteResource(&resourceIdBlob, paramSetIn);
 }
 
-static int32_t CallHksClearUkeyPinAuthState(const std::vector<uint8_t> &resourceIdV)
+static int32_t CallHksClearUkeyPinAuthState(const std::vector<uint8_t> &resourceIdV,
+    struct HksParamSet *paramSetIn)
 {
     struct HksBlob resourceId = VectorToBlob(resourceIdV);
-    return HksClearUkeyPinAuthState(&resourceId);
+    return HksClearUkeyPinAuthState(&resourceId, paramSetIn);
 }
 
 static int32_t CallHksGetResourceId(const std::vector<uint8_t> &providerName, struct HksParamSet *paramSetIn,
@@ -548,7 +549,7 @@ napi_value HuksNapiClearUkeyPinAuthState(napi_env env, napi_callback_info info)
     };
     context->execute = [](napi_env env, void *data) {
         ProviderRegContext *napiContext = static_cast<ProviderRegContext *>(data);
-        napiContext->result = CallHksClearUkeyPinAuthState(napiContext->name);
+        napiContext->result = CallHksClearUkeyPinAuthState(napiContext->name, napiContext->paramSetIn);
     };
     context->resolve = [](napi_env env, AsyncContext *context) {
         ProviderRegContext *napiContext = static_cast<ProviderRegContext *>(context);

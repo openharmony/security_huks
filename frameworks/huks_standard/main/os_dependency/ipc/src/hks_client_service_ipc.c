@@ -664,26 +664,31 @@ int32_t HksClientSetOrGetRemoteProperty(enum HksExtPropertyOperation operation,
     return ret;
 }
 
-int32_t HksClientClearPinAuthState(const struct HksBlob *index)
+int32_t HksClientClearPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn)
 {
     int32_t ret;
     struct HksBlob inBlob = { 0, NULL };
+    struct HksParamSet *newParamSet = NULL;
     do {
-        ret = HksCheckIpcBlob(index, HKS_EXT_MAX_RESOURCE_ID_LEN);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksClientClearPinAuthState fail")
+        ret = BuildParamSetNotNull(paramSetIn, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "BuildParamSetNotNull fail, ret=%" LOG_PUBLIC "d", ret)
 
-        ret = HksAllocInBlob(&inBlob, index, NULL);
+        ret = HksCheckIpcBlob(index, HKS_EXT_MAX_RESOURCE_ID_LEN);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientClearPinAuthState fail")
+
+        ret = HksAllocInBlob(&inBlob, index, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "alloc inBlob fail")
 
-        ret = HksClearPinAuthStatePack(index, &inBlob);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClientClearPinAuthStatePack fail")
+        ret = HksClearPinAuthStatePack(index, newParamSet, &inBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksClearPinAuthStatePack fail")
 
-        ret = HksSendRequest(HKS_MSG_EXT_CLEAR_PIN_AUTH_STATE, &inBlob, NULL, NULL);
+        ret = HksSendRequest(HKS_MSG_EXT_CLEAR_PIN_AUTH_STATE, &inBlob, NULL, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     UpdateUkeyGlobalErrorInfo(ret);
 
+    HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);
     return ret;
 }

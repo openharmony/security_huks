@@ -62,6 +62,7 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest001, TestSize.Level0)
         {.tag = HKS_EXT_CRYPTO_TAG_ABILITY_NAME, .blob = StringToBlob("TestAbility")},
     };
     CppParamSet paramSet(g_genAesParams);
+    CppParamSet emptyParamSet;
 
     int ret = mgr->RegisterProvider(processInfo, TEST_PROVIDER, paramSet);
     EXPECT_EQ(ret, 0) << "fail: regist fail";
@@ -82,7 +83,7 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest001, TestSize.Level0)
     ret = mgr->OnGetVerifyPinStatus(processInfo, index, paramSet, state, &errInfo);
     EXPECT_EQ(ret, 0) << "fail: OnGetVerifyPinStatus fail";
 
-    ret = mgr->OnClearUkeyPinAuthStatus(processInfo, index, &errInfo);
+    ret = mgr->OnClearUkeyPinAuthStatus(processInfo, index, emptyParamSet, &errInfo);
     EXPECT_EQ(ret, 0) << "fail: OnClearUkeyPinAuthStatus fail";
 
     bool isDeath = false;
@@ -246,6 +247,7 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest005, TestSize.Level0)
     };
     CppParamSet paramSet(tmpParams);
     const std::string index = "testIndex";
+    CppParamSet emptyParamSet;
 
     // 不调用RegisterProvider，m_pluginProviderMap为空，Find应失败
     struct HksExternalErrorInfo *errInfo = nullptr;
@@ -263,7 +265,7 @@ HWTEST_F(ExtensionPluginMgrTest, ExtensionPluginMgrTest005, TestSize.Level0)
     ret = mgr->OnGetVerifyPinStatus(processInfo, index, paramSet, state, &errInfo);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
-    ret = mgr->OnClearUkeyPinAuthStatus(processInfo, index, &errInfo);
+    ret = mgr->OnClearUkeyPinAuthStatus(processInfo, index, emptyParamSet, &errInfo);
     EXPECT_EQ(ret, HKS_ERROR_FIND_FUNC_MAP_FAIL) << "fail: should fail when not registered";
 
     CppParamSet outParams(tmpParams);

@@ -316,7 +316,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnGetVerifyPinStatus(const HksProcess
 }
 
 ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnClearUkeyPinAuthStatus(const HksProcessInfo &processInfo,
-    const std::string &index, struct HksExternalErrorInfo **errInfo))
+    const std::string &index, const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo))
 {
     AutoRefCount refCnt(m_refCount, soMutex);
     void *funcPtr = nullptr;
@@ -324,7 +324,7 @@ ENABLE_CFI(int32_t HuksPluginLifeCycleMgr::OnClearUkeyPinAuthStatus(const HksPro
     HKS_IF_TRUE_LOGE_RETURN(!isFind, HKS_ERROR_FIND_FUNC_MAP_FAIL,
         "ClearPinStatus method enum not found in plugin provider map.")
     
-    int32_t ret = (*reinterpret_cast<OnClearUkeyPinAuthStatusFunc>(funcPtr))(processInfo, index, errInfo);
+    int32_t ret = (*reinterpret_cast<OnClearUkeyPinAuthStatusFunc>(funcPtr))(processInfo, index, paramSet, errInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ClearPinStatus fail, ret = %{public}d", ret)
     HKS_LOG_I("clear pin status success");
     return HKS_SUCCESS;

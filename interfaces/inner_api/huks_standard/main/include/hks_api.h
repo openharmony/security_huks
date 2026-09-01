@@ -201,9 +201,11 @@ HKS_API_EXPORT int32_t HksGetUkeyPinAuthState(const struct HksBlob *resourceId, 
 /**
  * @brief Clear PIN authentication state for a UKey
  * @param resourceId resource identifier
+ * @param paramSetIn optional parameter set, SA can pass HKS_EXT_CRYPTO_TAG_UID to specify target user; NULL for HAP
  * @return error code, see hks_type.h
  */
-HKS_API_EXPORT int32_t HksClearUkeyPinAuthState(const struct HksBlob *resourceId);
+HKS_API_EXPORT int32_t HksClearUkeyPinAuthState(const struct HksBlob *resourceId,
+    const struct HksParamSet *paramSetIn);
 
 /**
  * @brief Set or get remote properties for a UKey resource
