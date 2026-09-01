@@ -512,52 +512,6 @@ int32_t HksClientUnwrapKey(const struct HksBlob *keyAlias, const struct HksParam
     return HKS_ERROR_API_NOT_SUPPORTED;
 }
 
-#ifdef HKS_SUPPORT_ML_KEM_C
-int32_t HksClientEncapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
-    struct HksEncapsulationResult *encapResult)
-{
-    char *processName = NULL;
-    char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSet, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
-        "get process info failed")
-
-    struct HksProcessInfo processInfo = {
-        { strlen(userId), (uint8_t *)userId },
-        { strlen(processName), (uint8_t *)processName },
-        0,
-        0,
-        0,
-        0
-    };
-    return HksServiceEncapsulate(&processInfo, keyAlias, paramSet, sharedKeyParamSet, encapResult);
-}
-
-int32_t HksClientDecapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
-    struct HksBlob *encapOrsharedSecret)
-{
-    char *processName = NULL;
-    char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSet, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
-        "get process info failed")
-
-    struct HksProcessInfo processInfo = {
-        { strlen(userId), (uint8_t *)userId },
-        { strlen(processName), (uint8_t *)processName },
-        0,
-        0,
-        0,
-        0
-    };
-    struct HksEncapsulationResult decapResult = { *encapOrsharedSecret, { 0, NULL } };
-    int32_t ret = HksServiceDecapsulate(&processInfo, keyAlias, paramSet, sharedKeyParamSet, &decapResult);
-    if (ret == HKS_SUCCESS) {
-        *encapOrsharedSecret = decapResult.sharedSecret;
-    }
-    return ret;
-}
-#else
 int32_t HksClientEncapsulate(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksBlob *sharedKeyAlias, const struct HksParamSet *sharedKeyParamSet,
     struct HksEncapsulationResult *encapResult)
@@ -581,4 +535,3 @@ int32_t HksClientDecapsulate(const struct HksBlob *keyAlias, const struct HksPar
     (void)encapOrsharedSecret;
     return HKS_ERROR_NOT_SUPPORTED;
 }
-#endif
