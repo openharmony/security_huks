@@ -191,7 +191,7 @@ static int32_t MlDsaSetContextParam(EVP_PKEY_CTX *ctx, const struct HksUsageSpec
 {
     struct HksBlob *context = (struct HksBlob *)usageSpec->algParam;
     HKS_IF_NULL_LOGE_RETURN(context, HKS_ERROR_NULL_POINTER, "context is nullptr")
-    HKS_IF_NULL_LOGE_RETURN(context->data, HKS_ERROR_NULL_POINTER, "context data is nullptr")
+    HKS_IF_NULL_LOGI_RETURN(context->data, HKS_SUCCESS, "context data is null")
 
     OSSL_PARAM ctxParams[] = {
         OSSL_PARAM_construct_octet_string(ML_DSA_CONTEXT, context->data, context->size),
