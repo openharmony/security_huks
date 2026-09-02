@@ -53,6 +53,7 @@ int32_t VerifyCallerAndAdjustUidParam(const HksProcessInfo &processInfo, const C
         HKS_ERROR_UKEY_NOT_SYSTEM_APP, "VerifyCallerAndAdjustUidParam: not system hap, check permission failed.");
     
     newParamSet = CppParamSet(paramSet);
+    return HKS_SUCCESS;
 }
 
 }
