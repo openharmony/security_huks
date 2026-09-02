@@ -34,6 +34,8 @@ int32_t HksCheckUkeyPermission(const char *permission);
 int32_t CheckUkeyCertCaller(const struct HksProcessInfo *processInfo);
 
 int32_t CheckUkeyAuthPinType(void);
+
+bool HksIsTrustedUkeySaCaller(uint32_t callingUid);
 #endif
 
 #ifdef __cplusplus
