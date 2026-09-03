@@ -104,7 +104,7 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
 }
 
 static int32_t HksSendAnonAttestRequestAndWaitAsyncReply(MessageParcel &data,
-    sptr<IRemoteObject> &hksProxy, sptr<Security::Hks::HksStub> hksCallback, struct HksBlob *outBlob)
+    sptr<IRemoteObject> hksProxy, sptr<Security::Hks::HksStub> hksCallback, struct HksBlob *outBlob)
 {
     HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(outBlob), HKS_ERROR_INVALID_ARGUMENT, "invalid outBlob");
     MessageParcel reply{};
@@ -147,7 +147,7 @@ static int32_t HksSendAnonAttestRequestAndWaitAsyncReply(MessageParcel &data,
 #endif
 }
 
-static int32_t SendAttestKeyAsyncReply(MessageParcel &data, const struct HksBlob *inBlob,
+static int32_t SendAttestKeyAsyncMessage(MessageParcel &data, const struct HksBlob *inBlob,
     sptr<IRemoteObject> &proxy, struct HksBlob *outBlob)
 {
     auto hksCallback = sptr<Security::Hks::HksStub>(new (std::nothrow) Security::Hks::HksStub());
@@ -265,7 +265,7 @@ int32_t HksSendRequest(enum HksIpcInterfaceCode type, const struct HksBlob *inBl
         }
     }
     if (type == HKS_MSG_ATTEST_KEY_ASYNC_REPLY) {
-        return SendAttestKeyAsyncReply(data, inBlob, proxy, outBlob);
+        return SendAttestKeyAsyncMessage(data, inBlob, proxy, outBlob);
     }
     if (type == HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY) {
         return HksExtSendAsyncMessage(data, inBlob, paramSet, proxy, outBlob);
