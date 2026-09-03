@@ -102,7 +102,7 @@ int32_t CheckUkeyCertCaller(const struct HksProcessInfo *processInfo)
 {
     HKS_IF_NULL_RETURN(processInfo, HKS_ERROR_INVALID_ARGUMENT);
     HKS_IF_TRUE_LOGI_RETURN(HksIsTrustedUkeySaCaller(processInfo->uidInt), HKS_SUCCESS, "CheckUkeyCertCaller success");
-    HKS_LOG_E("CheckUkeyCertCaller fail, caller is not asset.");	 
+    HKS_LOG_E("CheckUkeyCertCaller fail, caller is not asset.");
     return HKS_ERROR_NO_PERMISSION;
 }
 
