@@ -47,7 +47,6 @@
 #endif
 
 #ifdef SUPPORT_COMMON_EVENT
-#include <pthread.h>
 #include <unistd.h>
 
 #include "hks_event_observer.h"
@@ -77,38 +76,6 @@ REGISTER_SYSTEM_ABILITY_BY_ID(HksService, SA_ID_KEYSTORE_SERVICE, true);
 std::mutex HksService::instanceLock;
 sptr<HksService> HksService::instance;
 const uint32_t MAX_MALLOC_LEN = 1 * 1024 * 1024; /* max malloc size 1 MB */
-
-#ifdef SUPPORT_COMMON_EVENT
-const uint32_t MAX_DELAY_TIMES = 100;
-#endif
-
-#ifdef SUPPORT_COMMON_EVENT
-static void SubscribEvent()
-{
-    for (uint32_t i = 0; i < MAX_DELAY_TIMES; ++i) {
-        if (SystemEventObserver::SubscribeEvent()) {
-            HKS_LOG_I("subscribe system event success, i = %" LOG_PUBLIC "u", i);
-            pthread_detach(pthread_self());
-            return;
-        } else {
-            HKS_LOG_E("subscribe system event failed %" LOG_PUBLIC "u times", i);
-            usleep(HKS_SLEEP_TIME_FOR_RETRY);
-        }
-    }
-    HKS_LOG_E("subscribe system event failed");
-    pthread_detach(pthread_self());
-    return;
-}
-
-static void HksSubscribeEvent()
-{
-    pthread_t subscribeThread;
-    HKS_IF_TRUE_LOGE_RETURN_VOID(pthread_create(&subscribeThread, nullptr, (void *(*)(void *))SubscribEvent,
-        nullptr) == -1, "create thread failed")
-    pthread_setname_np(subscribeThread, "HUKS_SUBSCRIBE_THREAD");
-    HKS_LOG_I("create thread success");
-}
-#endif
 
 static inline bool IsInvalidLength(uint32_t length)
 {
@@ -469,9 +436,10 @@ void HksService::OnStart()
 
         HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(Init(), "Failed to init HksService")
 
-        #ifdef SUPPORT_COMMON_EVENT
-            (void)AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
-        #endif
+#ifdef SUPPORT_COMMON_EVENT
+        HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID),
+            "Failed to add ces system ability listener")
+#endif
 
         // this should be excuted after huks published and listener added.
         HksUpgradeOnPowerOn();
@@ -489,7 +457,8 @@ void HksService::OnAddSystemAbility(int32_t systemAbilityId, [[maybe_unused]] co
 {
     HKS_LOG_I("systemAbilityId is %" LOG_PUBLIC "d!", systemAbilityId);
 #ifdef SUPPORT_COMMON_EVENT
-    HksSubscribeEvent();
+    HKS_IF_TRUE_RETURN_VOID(systemAbilityId != COMMON_EVENT_SERVICE_ID)
+    HKS_IF_TRUE_LOGI_RETURN_VOID(SystemEventObserver::SubscribeEvent(), "subscribe ces success")
 #endif
 }
 
