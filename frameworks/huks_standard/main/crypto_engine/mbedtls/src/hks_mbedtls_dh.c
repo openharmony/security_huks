@@ -140,6 +140,7 @@ int32_t HksMbedtlsDhGenerateKey(const struct HksKeySpec *spec, struct HksBlob *k
         ctx.len = keyLen;
 
         uint8_t *output = (uint8_t *)HksMalloc(keyLen);
+        ret = HKS_ERROR_MALLOC_FAIL;
         HKS_IF_NULL_BREAK(output)
         ret = mbedtls_dhm_make_public(&ctx, keyLen, output, keyLen, mbedtls_ctr_drbg_random, &ctrDrbg);
         if (ret != HKS_SUCCESS) {

@@ -747,7 +747,7 @@ int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct HksBlo
     if (ret != HKS_SUCCESS) {
         if (HksCheckNeedUpgradeForSmallToService(processInfo) == HKS_SUCCESS) {
             ret = HksChangeKeyOwnerForSmallToService(processInfo, paramSet, keyAlias, mode);
-            HKS_IF_NOT_SUCCESS_LOGE_RETURN(ret, HKS_ERROR_NOT_EXIST,
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NOT_EXIST,
                 "do upgrade operation for small to service failed, ret = %" LOG_PUBLIC "d", ret)
         }
     }

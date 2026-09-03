@@ -49,9 +49,14 @@ napi_value HuksNapiGetSdkVersion(napi_env env, napi_callback_info info)
     }
 
     napi_value version = nullptr;
-    napi_create_string_latin1(env, reinterpret_cast<const char *>(sdkVersion->data), NAPI_AUTO_LENGTH, &version);
+    napi_status status = napi_create_string_latin1(env, reinterpret_cast<const char *>(sdkVersion->data),
+        NAPI_AUTO_LENGTH, &version);
     HKS_FREE(sdkVersion->data);
     HKS_FREE(sdkVersion);
+    if (status != napi_ok) {
+        HKS_LOG_E("create string failed, status = %d", status);
+        return nullptr;
+    }
     return version;
 }
 }  // namespace HuksNapi

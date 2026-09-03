@@ -448,12 +448,6 @@ int32_t HksCryptoHalDecryptFinal(const struct HksBlob *message, void **ctx, stru
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    if ((algtype == HKS_ALG_DES) || (algtype == HKS_ALG_3DES)) {
-        DecryptFinalDes func = (DecryptFinalDes)GetAbility(HKS_CRYPTO_ABILITY_DECRYPT_FINAL(algtype));
-        HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
-        return func(ctx, message, cipherText, false);
-    }
-
     DecryptFinal func = (DecryptFinal)GetAbility(HKS_CRYPTO_ABILITY_DECRYPT_FINAL(algtype));
     HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
 

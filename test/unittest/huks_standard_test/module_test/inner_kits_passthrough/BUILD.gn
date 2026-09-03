@@ -43,7 +43,6 @@ config("public_huks_config") {
     "//base/security/huks/services/huks_standard/huks_service/main/upgrade/core/include",
     "//base/security/huks/services/huks_standard/huks_service/main/upgrade/lock/include",
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/at_wrapper/include",
-    "//base/security/huks/utils/file_iterative_reader/include",
     "//base/security/huks/services/huks_standard/huks_service/main/ha/include",
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/se/include",
   ]
@@ -101,7 +100,6 @@ huks_sources = [
   "//base/security/huks/test/unittest/huks_standard_test/module_test/mock/idl/src/huks_access_mock.c",
   "//base/security/huks/utils/crypto_adapter/hks_client_service_adapter.c",
   "//base/security/huks/utils/crypto_adapter/hks_client_service_adapter_common.c",
-  "//base/security/huks/utils/file_iterative_reader/src/hks_iterative_reader.c",
   "//base/security/huks/utils/file_operator/hks_file_operator.c",
   "//base/security/huks/utils/list/hks_double_list.c",
   "//base/security/huks/utils/mutex/hks_mutex.c",

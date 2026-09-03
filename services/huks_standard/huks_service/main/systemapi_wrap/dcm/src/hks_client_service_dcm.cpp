@@ -81,6 +81,8 @@ static int32_t ParseSeAttestKeyData(const struct HksBlob *seCert, struct HksBlob
     uint32_t seKeyBlobSize = *(static_cast<uint32_t *>(static_cast<void *>(buf + offset)));
     offset += sizeof(uint32_t);
 
+    HKS_IF_TRUE_LOGE_RETURN(IsAdditionOverflow(offset, seKeyBlobSize), HKS_ERROR_INVALID_ARGUMENT,
+        "addoverflow, offset = %" LOG_PUBLIC "u, seKeyBlobSize = %" LOG_PUBLIC "u", offset, seKeyBlobSize);
     HKS_IF_TRUE_LOGE_RETURN(offset + seKeyBlobSize > seCert->size, HKS_ERROR_INVALID_ARGUMENT,
         "seCert data too small for seKeyBlob data");
 
@@ -94,6 +96,8 @@ static int32_t ParseSeAttestKeyData(const struct HksBlob *seCert, struct HksBlob
     uint32_t paramSetSize = *(static_cast<uint32_t *>(static_cast<void *>(buf + offset)));
     offset += sizeof(uint32_t);
 
+    HKS_IF_TRUE_LOGE_RETURN(IsAdditionOverflow(offset, paramSetSize), HKS_ERROR_INVALID_ARGUMENT,
+        "addoverflow, offset = %" LOG_PUBLIC "u, paramSetSize = %" LOG_PUBLIC "u", offset, paramSetSize);
     HKS_IF_TRUE_LOGE_RETURN(offset + paramSetSize > seCert->size, HKS_ERROR_INVALID_ARGUMENT,
         "seCert data too small for paramSet data");
 
@@ -107,6 +111,8 @@ static int32_t ParseSeAttestKeyData(const struct HksBlob *seCert, struct HksBlob
     uint32_t certChainSize = *(static_cast<uint32_t *>(static_cast<void *>(buf + offset)));
     offset += sizeof(uint32_t);
 
+    HKS_IF_TRUE_LOGE_RETURN(IsAdditionOverflow(offset, certChainSize), HKS_ERROR_INVALID_ARGUMENT,
+        "addoverflow, offset = %" LOG_PUBLIC "u, certChainSize = %" LOG_PUBLIC "u", offset, certChainSize);
     HKS_IF_TRUE_LOGE_RETURN(offset + certChainSize > seCert->size, HKS_ERROR_INVALID_ARGUMENT,
         "seCert data too small for certChain data");
 

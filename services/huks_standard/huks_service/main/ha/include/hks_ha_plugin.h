@@ -423,7 +423,7 @@ private:
     void HandleStatisticEvent(struct HksEventInfo *eventInfo, uint32_t eventId, HksEventProcMap *procMap,
         bool isAncoCall);
 
-    HksEventProcMap* HksEventProcFind(uint32_t eventId);
+    bool HksEventProcFind(uint32_t eventId, struct HksEventProcMap &eventProc);
 
     void HandlerReport(HksEventQueueItem &item);
 

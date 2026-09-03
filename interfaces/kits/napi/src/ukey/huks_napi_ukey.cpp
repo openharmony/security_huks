@@ -318,7 +318,7 @@ napi_value HuksNapiRegisterProvider(napi_env env, napi_callback_info info)
 
 napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
 {
-    auto context = std::make_unique<ProviderRegContext>();
+    std::unique_ptr<ProviderRegContext> context(new (std::nothrow) ProviderRegContext());
     NAPI_THROW(env, context == nullptr, HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not create context");
 
     // parse / execute / resolve setup
@@ -370,7 +370,7 @@ napi_value HuksNapiUnregisterProvider(napi_env env, napi_callback_info info)
 
 napi_value HuksNapiAuthUkeyPin(napi_env env, napi_callback_info info)
 {
-    auto context = std::make_unique<UkeyPinContext>();
+    std::unique_ptr<UkeyPinContext> context(new (std::nothrow) UkeyPinContext());
     NAPI_THROW(env, context == nullptr, HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not create context");
 
     context->parse = [](napi_env env, napi_callback_info info, AsyncContext *context) -> napi_status {
@@ -417,7 +417,7 @@ napi_value HuksNapiAuthUkeyPin(napi_env env, napi_callback_info info)
 
 napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info)
 {
-    auto context = std::make_unique<UkeyPinContext>();
+    std::unique_ptr<UkeyPinContext> context(new (std::nothrow) UkeyPinContext());
     NAPI_THROW(env, context == nullptr, HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not create context");
 
     context->parse = [](napi_env env, napi_callback_info info, AsyncContext *context) -> napi_status {
@@ -466,7 +466,7 @@ napi_value HuksNapiGetUkeyPinAuthState(napi_env env, napi_callback_info info)
 }
 napi_value HuksNapiGetProperty(napi_env env, napi_callback_info info)
 {
-    auto context = std::make_unique<UkeyPropertyContext>();
+    std::unique_ptr<UkeyPropertyContext> context(new (std::nothrow) UkeyPropertyContext());
     NAPI_THROW(env, context == nullptr, HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not create PropertyContext");
 
     context->parse = [](napi_env env, napi_callback_info info, AsyncContext *context) -> napi_status {
@@ -519,7 +519,7 @@ napi_value HuksNapiGetProperty(napi_env env, napi_callback_info info)
 
 napi_value HuksNapiSetProperty(napi_env env, napi_callback_info info)
 {
-    auto context = std::make_unique<UkeyPropertyContext>();
+    std::unique_ptr<UkeyPropertyContext> context(new (std::nothrow) UkeyPropertyContext());
     NAPI_THROW(env, context == nullptr, HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not create PropertyContext");
 
     context->parse = [](napi_env env, napi_callback_info info, AsyncContext *context) -> napi_status {
@@ -572,7 +572,7 @@ napi_value HandleResourceOperation(
     napi_env env, napi_callback_info info,
     int32_t (*hksOperation)(const std::vector<uint8_t>&, struct HksParamSet*, bool), const char* funcName, bool isOpen)
 {
-    auto context = std::make_unique<ContextType>();
+    std::unique_ptr<ContextType> context(new (std::nothrow) ContextType());
     NAPI_THROW(env, context == nullptr, HUKS_ERR_CODE_INSUFFICIENT_MEMORY,
                "could not create ResourceContext");
 
@@ -628,7 +628,7 @@ napi_value HandleResourceOperation(
 
 napi_value HuksNapiClearUkeyPinAuthState(napi_env env, napi_callback_info info)
 {
-    auto context = std::make_unique<ProviderRegContext>();
+    std::unique_ptr<ProviderRegContext> context(new (std::nothrow) ProviderRegContext());
     NAPI_THROW(env, context == nullptr, HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not create context");
 
     context->parse = [](napi_env env, napi_callback_info info, AsyncContext *context) -> napi_status {
@@ -728,7 +728,7 @@ static void ResolveGetResourceId(napi_env env, AsyncContext *context)
 
 napi_value HuksNapiGetResourceId(napi_env env, napi_callback_info info)
 {
-    auto context = std::make_unique<GetResourceIdContext>();
+    std::unique_ptr<GetResourceIdContext> context(new (std::nothrow) GetResourceIdContext());
     NAPI_THROW(env, context == nullptr, HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "could not create context");
 
     context->parse = ParseGetResourceIdParams;

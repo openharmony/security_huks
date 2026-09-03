@@ -105,6 +105,8 @@ static int32_t BuildKeyBlobUsageSpec(const struct HksBlob *cipherKey, const stru
     usageSpec->algType = HKS_ALG_AES;
 
     struct HksStoreKeyInfo *keyInfo = (struct HksStoreKeyInfo *)cipherKey->data;
+    HKS_IF_TRUE_LOGE_RETURN(keyInfo->keySize < HKS_AE_TAG_LEN, HKS_ERROR_INVALID_KEY_SIZE,
+        "invalid key size, keySize = %" LOG_PUBLIC "u", keyInfo->keySize)
 
     /* get nonce, derive from random + tag("derive_nonce") */
     struct HksBlob nonce = { 0, NULL };

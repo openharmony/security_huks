@@ -254,23 +254,21 @@ static int32_t RkcDeleteAllKsfV1(void)
 int32_t UpgradeV1ToV2(void)
 {
     HKS_LOG_I("Rkc ksf is exist, start to load ksf");
+    // generate new materials and encrypt main key
+    struct HksKsfDataRkcWithVer *newKsfDataRkcWithVer = NULL;
+    struct HksKsfDataMkWithVer *newKsfDataMkWithVer = NULL;
+
     uint8_t mk[HKS_RKC_MK_LEN] = {0};
     struct HksBlob tempMkBlob = { HKS_RKC_MK_LEN, mk };
     int32_t ret = RkcLoadKsfV1(&tempMkBlob);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Load rkc ksf failed! ret = 0x%" LOG_PUBLIC "X", ret)
-
-    // generate new materials and encrypt main key
-    struct HksKsfDataRkcWithVer *newKsfDataRkcWithVer =
-        (struct HksKsfDataRkcWithVer *)HksMalloc(sizeof(struct HksKsfDataRkcWithVer));
-    struct HksKsfDataMkWithVer *newKsfDataMkWithVer =
-        (struct HksKsfDataMkWithVer *)HksMalloc(sizeof(struct HksKsfDataMkWithVer));
-
     do {
-        if (newKsfDataRkcWithVer == NULL || newKsfDataMkWithVer == NULL) {
-            HKS_LOG_E("Malloc rkc or mk ksf data failed!");
-            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Load rkc ksf failed! ret = 0x%" LOG_PUBLIC "X", ret)
+
+        ret = HKS_ERROR_INSUFFICIENT_MEMORY;
+        newKsfDataRkcWithVer = (struct HksKsfDataRkcWithVer *)HksMalloc(sizeof(struct HksKsfDataRkcWithVer));
+        newKsfDataMkWithVer = (struct HksKsfDataMkWithVer *)HksMalloc(sizeof(struct HksKsfDataMkWithVer));
+        HKS_IF_TRUE_LOGE_BREAK(newKsfDataRkcWithVer == NULL || newKsfDataMkWithVer == NULL,
+            "Malloc rkc or mk ksf data failed!")
 
         FillKsfDataMkWithVer(newKsfDataMkWithVer);
         ret = FillKsfDataRkcWithVer(newKsfDataRkcWithVer);

@@ -373,8 +373,10 @@ static int32_t GenerateAndCheckUniqueHandle(struct HuksKeyNode *keyNode)
     return HKS_FAILURE;
 }
 
-static int32_t AddKeyNode(struct HuksKeyNode *keyNode, uint32_t tokenId)
+static int32_t AddKeyNode(struct HuksKeyNode *keyNode, struct HksParamSet *keyBlobParamSet,
+    struct HksParamSet *runtimeParamSet)
 {
+    uint32_t tokenId = GetTokenIdFromParamSet(runtimeParamSet);
     int32_t ret = HKS_SUCCESS;
     HKS_IF_NOT_SUCC_LOGE_RETURN(HKS_LOCK_OR_FAIL(g_huksMutex), HKS_ERROR_PTHREAD_MUTEX_LOCK_FAIL,
         "lock in AddKeyNode fail");
@@ -400,6 +402,12 @@ static int32_t AddKeyNode(struct HuksKeyNode *keyNode, uint32_t tokenId)
         atomic_fetch_add(&g_keyNodeCount, 1);
         HKS_LOG_I("add keynode count:%" LOG_PUBLIC "u", atomic_load(&g_keyNodeCount));
     } while (0);
+
+    if (ret == HKS_SUCCESS) {
+        keyNode->keyBlobParamSet = keyBlobParamSet;
+        keyNode->runtimeParamSet = runtimeParamSet;
+        keyNode->authRuntimeParamSet = NULL;
+    }
 
     HKS_UNLOCK_OR_FAIL(g_huksMutex);
     return ret;
@@ -428,6 +436,26 @@ struct HuksKeyNode *HksCreateBatchKeyNode(const struct HuksKeyNode *keyNode, con
     return updateKeyNode;
 }
 
+static void FreeParamsForBuildKeyNode(struct HksBlob *aad, struct HksParamSet **runtimeParamSet,
+    struct HksParamSet **keyblobParamSet, struct HuksKeyNode *keyNode)
+{
+    if (aad != NULL && aad->data != NULL) {
+        HKS_FREE_BLOB(*aad);
+    }
+
+    if (runtimeParamSet != NULL && *runtimeParamSet != NULL) {
+        HksFreeParamSet(runtimeParamSet);
+    }
+
+    if (keyblobParamSet != NULL && *keyblobParamSet != NULL) {
+        FreeKeyBlobParamSet(keyblobParamSet);
+    }
+
+    if (keyNode != NULL) {
+        HKS_FREE(keyNode);
+    }
+}
+
 #ifdef _STORAGE_LITE_
 struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct HksParamSet *paramSet)
 {
@@ -449,42 +477,18 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
         HKS_MEMSET_FREE_BLOB(rawKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "translate key info to paramset failed, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = AddKeyNode(keyNode, GetTokenIdFromParamSet(runtimeParamSet));
+        ret = AddKeyNode(keyNode, keyBlobParamSet, runtimeParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add keyNode failed")
     } while (0);
 
     if (ret != HKS_SUCCESS) {
-        HksFreeParamSet(&runtimeParamSet);
-        HksFreeParamSet(&keyBlobParamSet);
-        HKS_FREE(keyNode);
+        FreeParamsForBuildKeyNode(NULL, &runtimeParamSet, &keyBlobParamSet, keyNode);
         return NULL;
     }
 
-    keyNode->keyBlobParamSet = keyBlobParamSet;
-    keyNode->runtimeParamSet = runtimeParamSet;
     return keyNode;
 }
 #else // _STORAGE_LITE_
-static void FreeParamsForBuildKeyNode(struct HksBlob *aad, struct HksParamSet **runtimeParamSet,
-    struct HksParamSet **keyblobParamSet, struct HuksKeyNode *keyNode)
-{
-    if (aad != NULL && aad->data != NULL) {
-        HKS_FREE_BLOB(*aad);
-    }
-
-    if (runtimeParamSet != NULL && *runtimeParamSet != NULL) {
-        HksFreeParamSet(runtimeParamSet);
-    }
-
-    if (keyblobParamSet != NULL && *keyblobParamSet != NULL) {
-        FreeKeyBlobParamSet(keyblobParamSet);
-    }
-
-    if (keyNode != NULL) {
-        HKS_FREE(keyNode);
-    }
-}
-
 struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct HksParamSet *paramSet)
 {
     struct HuksKeyNode *keyNode = (struct HuksKeyNode *)HksMalloc(sizeof(struct HuksKeyNode));
@@ -504,7 +508,7 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
         ret = HksDecryptKeyBlob(&aad, keyBlobParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "decrypt keyBlob failed")
 
-        ret = AddKeyNode(keyNode, GetTokenIdFromParamSet(runtimeParamSet));
+        ret = AddKeyNode(keyNode, keyBlobParamSet, runtimeParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add keyNode failed")
     } while (0);
 
@@ -512,10 +516,6 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
         FreeParamsForBuildKeyNode(&aad, &runtimeParamSet, &keyBlobParamSet, keyNode);
         return NULL;
     }
-
-    keyNode->keyBlobParamSet = keyBlobParamSet;
-    keyNode->runtimeParamSet = runtimeParamSet;
-    keyNode->authRuntimeParamSet = NULL;
 
     HKS_FREE_BLOB(aad);
     return keyNode;

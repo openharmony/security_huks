@@ -104,34 +104,42 @@ napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext &context)
     }
 
     napi_value resourceName = nullptr;
-    napi_create_string_latin1(env, "exportKeyAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
+    napi_status status{};
+    do {
+        status = napi_create_string_latin1(env, "exportKeyAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
+        HKS_IF_TRUE_LOGE_BREAK(status != napi_ok, "could not create string");
 
-    napi_create_async_work(env, nullptr, resourceName,
-        [](napi_env env, void *data) {
-            (void)env;
-            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
-            ExportKeyAsyncContext napiContext = static_cast<ExportKeyAsyncContext>(data);
-            int32_t ret = PrePareExportKeyContextBuffer(napiContext);
-            if (ret == HKS_SUCCESS) {
-                napiContext->result = HksExportPublicKey(napiContext->keyAlias,
-                    napiContext->paramSet, napiContext->key);
-            } else {
-                napiContext->result = ret;
-            }
-        },
-        [](napi_env env, napi_status status, void *data) {
-            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
-            ExportKeyAsyncContext napiContext = static_cast<ExportKeyAsyncContext>(data);
-            HksSuccessReturnResult resultData;
-            SuccessReturnResultInit(resultData);
-            resultData.outData = napiContext->key;
-            HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
-            DeleteExportKeyAsyncContext(env, napiContext);
-        }, static_cast<void *>(context), &context->asyncWork);
-    napi_status status = napi_queue_async_work(env, context->asyncWork);
+        status = napi_create_async_work(env, nullptr, resourceName,
+            [](napi_env env, void *data) {
+                (void)env;
+                HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
+                ExportKeyAsyncContext napiContext = static_cast<ExportKeyAsyncContext>(data);
+                int32_t ret = PrePareExportKeyContextBuffer(napiContext);
+                if (ret == HKS_SUCCESS) {
+                    napiContext->result = HksExportPublicKey(napiContext->keyAlias,
+                        napiContext->paramSet, napiContext->key);
+                } else {
+                    napiContext->result = ret;
+                }
+            },
+            [](napi_env env, napi_status status, void *data) {
+                HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
+                ExportKeyAsyncContext napiContext = static_cast<ExportKeyAsyncContext>(data);
+                HksSuccessReturnResult resultData;
+                SuccessReturnResultInit(resultData);
+                resultData.outData = napiContext->key;
+                HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+                DeleteExportKeyAsyncContext(env, napiContext);
+            },
+            static_cast<void *>(context), &context->asyncWork);
+        HKS_IF_TRUE_LOGE_BREAK(status != napi_ok, "could not create async work");
+
+        status = napi_queue_async_work(env, context->asyncWork);
+        HKS_IF_TRUE_LOGE_BREAK(status != napi_ok, "could not queue async work");
+    } while (0);
+
     if (status != napi_ok) {
         DeleteExportKeyAsyncContext(env, context);
-        HKS_LOG_E("could not queue async work");
         return nullptr;
     }
     if (context->callback == nullptr) {

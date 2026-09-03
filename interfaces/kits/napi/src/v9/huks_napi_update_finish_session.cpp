@@ -268,33 +268,41 @@ napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext &context)
     }
 
     napi_value resourceName;
-    napi_create_string_latin1(env, "UpdateAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
+    napi_status status{};
+    do {
+        status = napi_create_string_latin1(env, "UpdateAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
+        HKS_IF_TRUE_LOGE_BREAK(status != napi_ok, "could not create string");
 
-    napi_create_async_work(env, nullptr, resourceName,
-        [](napi_env env, void *data) {
-            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
-            UpdateAsyncContext napiContext = static_cast<UpdateAsyncContext>(data);
-            if (napiContext->isUpdate) {
-                napiContext->result = HksUpdate(napiContext->handle,
-                    napiContext->paramSet, napiContext->inData, napiContext->outData);
-            } else {
-                napiContext->result = HksFinish(napiContext->handle,
-                    napiContext->paramSet, napiContext->inData, napiContext->outData);
-            }
-        },
-        [](napi_env env, napi_status status, void *data) {
-            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
-            UpdateAsyncContext napiContext = static_cast<UpdateAsyncContext>(data);
-            HksSuccessReturnResult resultData;
-            SuccessReturnResultInit(resultData);
-            resultData.outData = napiContext->outData;
-            HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
-            DeleteUpdateAsyncContext(env, napiContext);
-        }, static_cast<void *>(context), &context->asyncWork);
-    napi_status status = napi_queue_async_work(env, context->asyncWork);
+        status = napi_create_async_work(env, nullptr, resourceName,
+            [](napi_env env, void *data) {
+                HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
+                UpdateAsyncContext napiContext = static_cast<UpdateAsyncContext>(data);
+                if (napiContext->isUpdate) {
+                    napiContext->result = HksUpdate(napiContext->handle,
+                        napiContext->paramSet, napiContext->inData, napiContext->outData);
+                } else {
+                    napiContext->result = HksFinish(napiContext->handle,
+                        napiContext->paramSet, napiContext->inData, napiContext->outData);
+                }
+            },
+            [](napi_env env, napi_status status, void *data) {
+                HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
+                UpdateAsyncContext napiContext = static_cast<UpdateAsyncContext>(data);
+                HksSuccessReturnResult resultData;
+                SuccessReturnResultInit(resultData);
+                resultData.outData = napiContext->outData;
+                HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+                DeleteUpdateAsyncContext(env, napiContext);
+            },
+            static_cast<void *>(context), &context->asyncWork);
+        HKS_IF_TRUE_LOGE_BREAK(status != napi_ok, "could not create async work");
+
+        status = napi_queue_async_work(env, context->asyncWork);
+        HKS_IF_TRUE_LOGE_BREAK(status != napi_ok, "could not queue async work");
+    } while (0);
+
     if (status != napi_ok) {
         DeleteUpdateAsyncContext(env, context);
-        HKS_LOG_E("could not queue async work");
         return nullptr;
     }
 

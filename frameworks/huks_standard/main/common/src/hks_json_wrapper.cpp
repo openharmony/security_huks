@@ -29,6 +29,14 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 
+struct CJsonDeleter {
+    void operator()(cJSON *ptr) const
+    {
+        cJSON_Delete(ptr);
+    }
+};
+using CJsonPtr = std::unique_ptr<cJSON, CJsonDeleter>;
+
 bool CheckJsonStructureConstraints(const std::string &jsonString)
 {
     HKS_IF_TRUE_LOGE_RETURN(jsonString.size() > static_cast<size_t>(JSON_MAX_SIZE), false,
@@ -254,7 +262,18 @@ bool CommJsonObject::SetValue(const std::string &key, CommJsonObject &value)
     if (!CheckIsValid() || !CheckIsObject()) {
         return false;
     }
-    return cJSON_AddItemToObject(mJson_.get(), key.c_str(), cJSON_Duplicate(value.mJson_.get(), true)) != 0;
+
+    CJsonPtr duplicateValue(cJSON_Duplicate(value.mJson_.get(), true));
+    if (!duplicateValue) {
+        return false;
+    }
+
+    if (!cJSON_AddItemToObject(mJson_.get(), key.c_str(), duplicateValue.get())) {
+        return false;
+    }
+
+    duplicateValue.release();
+    return true;
 }
 
 void CommJsonObject::RemoveKey(const std::string &key)
@@ -305,13 +324,40 @@ CommJsonObject CommJsonObject::GetElement(int32_t index) const
 bool CommJsonObject::SetElement(int32_t index, const CommJsonObject &value)
 {
     HKS_IF_TRUE_RETURN(!CheckIsValid() || !CheckIsArray(), false)
-    return cJSON_ReplaceItemInArray(mJson_.get(), index, cJSON_Duplicate(value.mJson_.get(), true)) != 0;
+
+    int32_t arraySize = cJSON_GetArraySize(mJson_.get());
+    if (index < 0 || index >= arraySize) {
+        return false;
+    }
+
+    CJsonPtr duplicateValue(cJSON_Duplicate(value.mJson_.get(), true));
+    if (!duplicateValue) {
+        return false;
+    }
+
+    if (!cJSON_ReplaceItemInArray(mJson_.get(), index, duplicateValue.get())) {
+        return false;
+    }
+
+    duplicateValue.release();
+    return true;
 }
 
 bool CommJsonObject::AppendElement(const CommJsonObject &value)
 {
     HKS_IF_TRUE_RETURN(!CheckIsValid() || !CheckIsArray(), false)
-    return cJSON_AddItemToArray(mJson_.get(), cJSON_Duplicate(value.mJson_.get(), true)) != 0;
+
+    CJsonPtr duplicateValue(cJSON_Duplicate(value.mJson_.get(), true));
+    if (!duplicateValue) {
+        return false;
+    }
+
+    if (!cJSON_AddItemToArray(mJson_.get(), duplicateValue.get())) {
+        return false;
+    }
+
+    duplicateValue.release();
+    return true;
 }
 
 bool CommJsonObject::AppendElement(CommJsonObject &&value)
@@ -353,7 +399,7 @@ CommJsonObject CommJsonObject::Parse(const std::string &jsonString)
     if (json == nullptr) {
         const char *errorPtr = cJSON_GetErrorPtr();
         std::string error = (errorPtr != nullptr) ? std::string(errorPtr) : "Unknown error";
-        HKS_LOG_E("cJSON parse error: %" LOG_PUBLIC "s", error.c_str());
+        HKS_LOG_E("cJSON parse error");
         return CreateNull(HKS_ERROR_JSON_PARSE_ERROR, error);
     }
     

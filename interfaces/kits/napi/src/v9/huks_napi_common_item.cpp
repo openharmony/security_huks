@@ -547,7 +547,11 @@ static napi_value GenerateStringArray(napi_env env, const struct HksBlob *blob, 
     NAPI_CALL(env, napi_create_array(env, &array));
     for (uint32_t i = 0; i < blobCount; i++) {
         napi_value element = nullptr;
-        napi_create_string_latin1(env, reinterpret_cast<const char *>(blob[i].data), blob[i].size, &element);
+        const char *str = reinterpret_cast<const char *>(blob[i].data);
+        if (napi_create_string_latin1(env, str, blob[i].size, &element) != napi_ok) {
+            HKS_LOG_E("create string %" LOG_PUBLIC "s failed", str);
+            return nullptr;
+        }
         napi_set_element(env, array, i, element);
     }
     return array;

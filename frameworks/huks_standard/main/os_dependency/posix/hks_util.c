@@ -30,11 +30,18 @@ int32_t HksElapsedRealTime(uint64_t *timestampMs)
         return ret;
     }
 
-    if ((curTime.tv_sec >= (time_t)((UINT64_MAX - S_TO_MS) / S_TO_MS)) || (curTime.tv_nsec / MS_TO_NS >= S_TO_MS)) {
+    uint64_t sec = (uint64_t)curTime.tv_sec;
+    uint64_t nsec = (uint64_t)curTime.tv_nsec;
+    if (sec > (UINT64_MAX / S_TO_MS)) {
         return -1;
     }
 
-    *timestampMs = (uint64_t)(curTime.tv_sec * S_TO_MS + curTime.tv_nsec / MS_TO_NS);
+    uint64_t ms = sec * S_TO_MS + nsec / MS_TO_NS;
+    if (ms < sec * S_TO_MS) {
+        return -1;
+    }
+
+    *timestampMs = ms;
     return ret;
 }
 

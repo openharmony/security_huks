@@ -211,6 +211,7 @@ static bool IsValidTag(uint32_t tag)
 HKS_API_EXPORT int32_t HksCheckParamSetTag(const struct HksParamSet *paramSet)
 {
     HKS_IF_NULL_RETURN(paramSet, HKS_ERROR_NULL_POINTER)
+    HKS_IF_NOT_SUCC_RETURN(HksCheckParamSet(paramSet, paramSet->paramSetSize), HKS_ERROR_INVALID_ARGUMENT)
 
     for (uint32_t i = 0; i < paramSet->paramsCnt; ++i) {
         uint32_t curTag = paramSet->params[i].tag;
