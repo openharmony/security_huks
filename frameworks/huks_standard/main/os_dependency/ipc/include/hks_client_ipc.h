@@ -42,7 +42,7 @@ int32_t HksClientImportCertificate(const struct HksBlob *resourceId,
 int32_t HksClientAuthUkeyPin(const struct HksBlob *index, const struct HksParamSet *paramSetIn, uint32_t *retryCount);
 int32_t HksClientGetUkeyPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn,
     int32_t *status);
-int32_t HksClientClearPinAuthState(const struct HksBlob *index);
+int32_t HksClientClearPinAuthState(const struct HksBlob *index, const struct HksParamSet *paramSetIn);
 
 int32_t HksClientOpenRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn);
 int32_t HksClientGetRemoteHandle(const struct HksBlob *resourceId, const struct HksParamSet *paramSetIn);

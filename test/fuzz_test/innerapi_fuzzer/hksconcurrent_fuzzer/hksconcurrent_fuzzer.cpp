@@ -856,7 +856,7 @@ static int32_t FuzzExtClearPinAuthState(FuzzedDataProvider &fdp) {
     }
     struct HksBlob resourceId = { static_cast<uint32_t>(resourceIdVec.size()), resourceIdVec.data() };
 
-    return HksClearUkeyPinAuthState(&resourceId);
+    return HksClearUkeyPinAuthState(&resourceId, NULL);
 }
 
 static int32_t FuzzExtExportProviderCertificates(FuzzedDataProvider &fdp) {

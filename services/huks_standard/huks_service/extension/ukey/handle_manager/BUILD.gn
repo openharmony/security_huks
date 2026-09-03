@@ -34,7 +34,6 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/common:libhuks_ukey_common_static",
       "//base/security/huks/services/huks_standard/huks_service/extension/ukey/ext_life_cycle_manger:libhuks_provider_life_cycle_manager_static",
     ]
-    complete_static_lib = true
     cflags = []
 
     branch_protector_ret = "pac_ret"

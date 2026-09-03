@@ -435,18 +435,20 @@ HKS_API_EXPORT int32_t HksCloseRemoteResource(const struct HksBlob *resourceId,
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }
-HKS_API_EXPORT int32_t HksClearUkeyPinAuthState(const struct HksBlob *resourceId)
+HKS_API_EXPORT int32_t HksClearUkeyPinAuthState(const struct HksBlob *resourceId,
+    const struct HksParamSet *paramSetIn)
 {
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
     HKS_LOG_D("enter ClearUkeyPinAuthState");
     if (resourceId == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
-    int32_t ret = HksClientClearPinAuthState(resourceId);
+    int32_t ret = HksClientClearPinAuthState(resourceId, paramSetIn);
     HKS_IF_NOT_SUCC_LOGE(ret, "leave ClearPinAuthState, result = %" LOG_PUBLIC "d", ret);
     return ret;
 #else
     (void)resourceId;
+    (void)paramSetIn;
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
 }

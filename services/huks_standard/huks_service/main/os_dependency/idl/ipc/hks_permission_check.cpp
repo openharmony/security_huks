@@ -94,9 +94,10 @@ int32_t HksCheckUkeyPermission(const char *permission)
 int32_t CheckUkeyCertCaller(const struct HksProcessInfo *processInfo)
 {
     HKS_IF_NULL_RETURN(processInfo, HKS_ERROR_INVALID_ARGUMENT);
-    HKS_IF_TRUE_LOGI_RETURN(processInfo->uidInt == CERT_UID_INT, HKS_SUCCESS, "CheckUkeyCertCaller success");
-    HKS_LOG_E("CheckUkeyCertCaller fail, caller is not asset.");
-    return HKS_ERROR_NO_PERMISSION;
+    auto accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
+    HKS_IF_NOT_TRUE_LOGE_RETURN(OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx),
+        HKS_ERROR_UKEY_NOT_SYSTEM_APP, "CheckUkeyCertCaller: not system hap, check caller failed.");
+    return HKS_SUCCESS;
 }
 #endif
 namespace {

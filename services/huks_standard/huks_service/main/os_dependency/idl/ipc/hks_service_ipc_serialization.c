@@ -349,11 +349,16 @@ int32_t HksImportWrappedKeyUnpack(const struct HksBlob *srcData, struct HksBlob 
     return GetBlobFromBuffer(wrappedKeyData, srcData, &offset);
 }
 
-int32_t HksClearPinAuthStateUnpack(const struct HksBlob *srcData, struct HksBlob *index)
+int32_t HksClearPinAuthStateUnpack(const struct HksBlob *srcData, struct HksBlob *index,
+    struct HksParamSet **paramSet)
 {
     uint32_t offset = 0;
     int32_t ret = GetBlobFromBuffer(index, srcData, &offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get index failed")
+    HKS_IF_TRUE_RETURN(offset == srcData->size, HKS_SUCCESS)
+
+    ret = GetParamSetFromBuffer(paramSet, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get paramSet failed")
 
     return HKS_SUCCESS;
 }
@@ -831,7 +836,7 @@ int HksKeyParamUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
 }
 
 int32_t HksDecapsulateUnpack(const struct HksBlob *srcData, struct HksBlob *sharedKeyAlias,
-    struct HksParamSet **sharedKeyParamSet, struct HksBlob *encapOrsharedSecret, uint32_t *offset)
+    struct HksParamSet **sharedKeyParamSet, struct HksBlob *encapsulatedData, uint32_t *offset)
 {
     int32_t ret = GetBlobFromBuffer(sharedKeyAlias, srcData, offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get sharedKeyAlias fail")
@@ -839,8 +844,8 @@ int32_t HksDecapsulateUnpack(const struct HksBlob *srcData, struct HksBlob *shar
     ret = GetParamSetFromBuffer(sharedKeyParamSet, srcData, offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get sharedKeyParamSet fail")
 
-    ret = GetBlobFromBuffer(encapOrsharedSecret, srcData, offset);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get encapOrsharedSecret fail")
+    ret = GetBlobFromBuffer(encapsulatedData, srcData, offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get encapsulatedData fail")
 
     return HKS_SUCCESS;
 }

@@ -108,4 +108,7 @@ declare_args() {
 
   # whether enable huks ukey in PC
   huks_enable_ukey_config = false
+
+  # the config of computation
+  huks_enable_computation_config = ""
 }

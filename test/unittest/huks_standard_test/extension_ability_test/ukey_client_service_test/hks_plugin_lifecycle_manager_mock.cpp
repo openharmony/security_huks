@@ -94,7 +94,7 @@ int32_t HuksPluginLifeCycleMgr::OnGetVerifyPinStatus(const HksProcessInfo &proce
 }
 
 int32_t HuksPluginLifeCycleMgr::OnClearUkeyPinAuthStatus(const HksProcessInfo &processInfo,
-    const std::string &index, struct HksExternalErrorInfo **errInfo)
+    const std::string &index, const CppParamSet &paramSet, struct HksExternalErrorInfo **errInfo)
 {
     (void)errInfo;
     return HKS_SUCCESS;

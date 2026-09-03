@@ -247,6 +247,9 @@ void HksIpcServiceAuthUkeyPin(const struct HksBlob *srcData, const uint8_t *cont
         ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: get process info fail ret=%" LOG_PUBLIC "d", ret);
 
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "permission fail ret=%" LOG_PUBLIC "d", ret);
+
         ret = CheckUkeyAuthPinType();
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AuthUkeyPin: CheckUkeyAuthPinType fail ret=%" LOG_PUBLIC "d", ret);
 
@@ -298,7 +301,7 @@ void HksIpcServiceGetUkeyPinAuthState(const struct HksBlob *srcData, const uint8
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetUkeyPinAuthState: get process info fail ret=%" LOG_PUBLIC "d", ret);
 
         ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetUkeyPinAuthState: permission fail ret=%" LOG_PUBLIC "d", ret);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "permission fail ret=%" LOG_PUBLIC "d", ret);
 
         ret = HksIpcGetUkeyPinAuthStateAdapter(&processInfo, &index, paramSet, &status, &errInfo);
         if (ret != HKS_SUCCESS) {
@@ -333,17 +336,21 @@ void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t
     int32_t ret;
     int32_t errVal = 0;
     struct HksBlob index = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
     struct HksExternalErrorInfo *errInfo = NULL;
 
     do {
-        ret  = HksClearPinAuthStateUnpack(srcData, &index);
+        ret  = HksClearPinAuthStateUnpack(srcData, &index, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcServiceClearPinAuthStateUnpack Ipc fail")
 
-        ret = HksGetProcessInfoForIPC(NULL, context, &processInfo);
+        ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
 
-        ret = HksIpcClearPinStatusAdapter(&processInfo, &index, &errInfo);
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "permission fail ret=%" LOG_PUBLIC "d", ret);
+
+        ret = HksIpcClearPinStatusAdapter(&processInfo, &index, paramSet, &errInfo);
         HKS_IF_TRUE_BREAK(ret == HKS_SUCCESS)
         HKS_LOG_E("HksIpcClearPinStatusAdapter ret = %" LOG_PUBLIC "d", ret);
         errVal = HksUkeyConsumeErrInfo(errInfo);
@@ -354,7 +361,7 @@ void HksIpcServiceClearPinAuthState(const struct HksBlob *srcData, const uint8_t
     struct UKeyInfo ukeyInfo = { .eventId = HKS_EVENT_UKEY_CLEAR_PIN_STATE,
         .resourceId = index, .detailErrcode = errVal };
     struct UKeyCommonInfo ukeyCommon = { .returnCode = ret };
-    ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, NULL, &ukeyCommon);
+    ReportUKeyEvent(&ukeyInfo, __func__, &processInfo, paramSet, &ukeyCommon);
 
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
@@ -468,6 +475,9 @@ void HksIpcServiceExportProviderCertificates(const struct HksBlob *srcData, cons
         ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "permission fail ret=%" LOG_PUBLIC "d", ret);
+
         ret = CheckUkeyCertCaller(&processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckUkeyCertCaller fail, ret = %" LOG_PUBLIC "d", ret)
 
@@ -519,6 +529,9 @@ void HksIpcServiceExportCertificate(const struct HksBlob *srcData, const uint8_t
         ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "permission fail ret=%" LOG_PUBLIC "d", ret);
+
         ret = CheckUkeyCertCaller(&processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckUkeyCertCaller fail, ret = %" LOG_PUBLIC "d", ret)
 
@@ -568,6 +581,9 @@ void HksIpcServiceImportCertificate(const struct HksBlob *srcData, const uint8_t
 
         ret = HksGetProcessInfoForIPC(paramSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "permission fail ret=%" LOG_PUBLIC "d", ret);
 
         ret = CheckUkeyCertCaller(&processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckUkeyCertCaller fail, ret = %" LOG_PUBLIC "d", ret)
@@ -1813,11 +1829,11 @@ void HksIpcServiceEncapsulate(const struct HksBlob *srcData, const uint8_t *cont
     HKS_FREE_BLOB(processInfo.userId);
 }
 
-static int32_t DecapsulateResponsePack(const struct HksBlob *encapOrsharedSecret, struct HksBlob *responseBlob)
+static int32_t DecapsulateResponsePack(const struct HksBlob *sharedSecret, struct HksBlob *responseBlob)
 {
     uint32_t responseSize = sizeof(uint32_t);
-    if (encapOrsharedSecret->size > 0) {
-        responseSize += ALIGN_SIZE(encapOrsharedSecret->size);
+    if (sharedSecret->size > 0) {
+        responseSize += ALIGN_SIZE(sharedSecret->size);
     } else {
         responseSize += DEFAULT_ALIGN_MASK_SIZE;
     }
@@ -1826,7 +1842,7 @@ static int32_t DecapsulateResponsePack(const struct HksBlob *encapOrsharedSecret
     HKS_IF_NULL_LOGE_RETURN(responseBlob->data, HKS_ERROR_MALLOC_FAIL, "malloc responseBlob failed")
 
     uint32_t offset = 0;
-    int32_t ret = CopyBlobToBufferForEmptyData(encapOrsharedSecret, responseBlob, &offset);
+    int32_t ret = CopyBlobToBufferForEmptyData(sharedSecret, responseBlob, &offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksIpcServiceDecapsulate Copy sharedSecret to responseBlob fail.")
     return HKS_SUCCESS;
 }
@@ -1835,11 +1851,11 @@ void HksIpcServiceDecapsulate(const struct HksBlob *srcData, const uint8_t *cont
 {
     struct HksBlob keyAlias = { 0, NULL };
     struct HksBlob sharedKeyAlias = { 0, NULL };
-    struct HksBlob encapOrsharedSecret = { 0, NULL };
     struct HksParamSet *newSharedKeyParamSet = NULL;
     struct HksParamSet *paramSet = NULL;
     struct HksParamSet *sharedKeyParamSet = NULL;
     struct HksProcessInfo processInfo = HKS_PROCESS_INFO_INIT_VALUE;
+    struct HksEncapsulationResult decapResult = { { 0, NULL }, { 0, NULL } };
     struct HksBlob responseBlob = { 0, NULL };
     int32_t ret;
 
@@ -1852,7 +1868,7 @@ void HksIpcServiceDecapsulate(const struct HksBlob *srcData, const uint8_t *cont
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
 
         ret = HksDecapsulateUnpack(srcData, &sharedKeyAlias, &sharedKeyParamSet,
-            &encapOrsharedSecret, &offset);
+            &decapResult.encapsulatedData, &offset);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDecapsulateUnpack fail")
 
         ret = HksIpcCheckParamSetBlacklist(sharedKeyParamSet);
@@ -1868,17 +1884,17 @@ void HksIpcServiceDecapsulate(const struct HksBlob *srcData, const uint8_t *cont
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check and build sharedKeyParamSet failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksServiceDecapsulate(&processInfo, &keyAlias, paramSet,
-            newSharedKeyParamSet, &encapOrsharedSecret);
+            newSharedKeyParamSet, &decapResult);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceDecapsulate fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = DecapsulateResponsePack(&encapOrsharedSecret, &responseBlob);
+        ret = DecapsulateResponsePack(&decapResult.sharedSecret, &responseBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "DecapsulateResponsePack fail")
     } while (0);
     HksSendResponse(context, ret, ret == HKS_SUCCESS ? &responseBlob : NULL);
 
     HksFreeParamSet(&newSharedKeyParamSet);
     HKS_MEMSET_FREE_BLOB(responseBlob);
-    HKS_MEMSET_FREE_BLOB(encapOrsharedSecret);
+    HKS_MEMSET_FREE_BLOB(decapResult.sharedSecret);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
 }

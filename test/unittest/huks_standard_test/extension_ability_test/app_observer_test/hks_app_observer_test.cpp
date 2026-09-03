@@ -638,7 +638,7 @@ HWTEST_F(HksAppObserverTest, PluginInterfaceTest010, TestSize.Level0)
     std::string index = CreateTestIndex();
     struct HksExternalErrorInfo *errInfo = nullptr;
 
-    int32_t ret = HksExtPluginOnClearUkeyPinAuthState(processInfo, index, &errInfo);
+    int32_t ret = HksExtPluginOnClearUkeyPinAuthState(processInfo, index, CppParamSet{}, &errInfo);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     CppParamSet paramSet = CreateParamSetWithAbilityAndUid("TestCryptoAbility", 100);

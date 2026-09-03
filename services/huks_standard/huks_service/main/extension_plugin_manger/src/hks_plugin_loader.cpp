@@ -115,7 +115,7 @@ static void RegisterAuthMethodMaps(OHOS::SafeMap<PluginMethodEnum, std::string> 
         "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetRiPP20HksExternalErrorInfo");
     map.Insert(PluginMethodEnum::FUNC_ON_CLEAR_PIN_STATUS,
         "_ZN4OHOS8Security4Huks35HksExtPluginOnClearUkeyPinAuthStateERK14HksProcessInfoRKNSt3__h12basic_string"
-        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEEPP20HksExternalErrorInfo");
+        "IcNS5_11char_traitsIcEENS5_9allocatorIcEEEERK11CppParamSetPP20HksExternalErrorInfo");
 }
 
 static void RegisterCertificateMethodMaps(OHOS::SafeMap<PluginMethodEnum, std::string> &map)

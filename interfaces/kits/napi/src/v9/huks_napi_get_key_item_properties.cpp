@@ -15,15 +15,75 @@
 
 #include "huks_napi_get_key_item_properties.h"
 
+#include <atomic>
+#include <dlfcn.h>
+#include <mutex>
+
 #include "securec.h"
 
 #include "hks_api.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_template.h"
 #include "hks_type.h"
 #include "huks_napi_common_item.h"
-#include "hks_template.h"
+
+
+namespace {
+constexpr const char *COMPUTATION_PATH = HUKS_ENABLE_COMPUTATION_CONFIG;
+const char PRIVACY_SEARCH_FUNC_NAME[] = "HksPrivacySearchAdapter";
+std::atomic<void*> g_computationHandle{nullptr};
+std::mutex g_computationMutex;
+void *GetComputationHandle()
+{
+    if (COMPUTATION_PATH == nullptr || COMPUTATION_PATH[0] == '\0') {
+        HKS_LOG_E("computation path is empty, skip dlopen");
+        return nullptr;
+    }
+    void *handle = g_computationHandle.load(std::memory_order_acquire);
+    if (handle != nullptr) {
+        return handle;
+    }
+    std::lock_guard<std::mutex> lock(g_computationMutex);
+    handle = g_computationHandle.load(std::memory_order_relaxed);
+    if (handle != nullptr) {
+        return handle;
+    }
+    handle = dlopen(COMPUTATION_PATH, RTLD_NOW | RTLD_LOCAL);
+    if (handle == nullptr) {
+        HKS_LOG_E("dlopen computation so failed, %" LOG_PUBLIC "s!", dlerror());
+        return nullptr;
+    }
+    g_computationHandle.store(handle, std::memory_order_release);
+    return handle;
+}
+
+using GetKeyParamSetExtFunc = int32_t (*)(const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSetIn, struct HksParamSet **paramSetOut);
+
+bool IsPrivacySearchMatch(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn)
+{
+    if ((keyAlias != nullptr && keyAlias->size != 0) || paramSetIn == nullptr || paramSetIn->paramsCnt == 0) {
+        return false;
+    }
+    return paramSetIn->params[0].tag == HKS_TAG_PURPOSE;
+}
+
+int32_t HandlePrivacySearch(HuksNapiItem::GetKeyPropertiesAsyncContext napiContext)
+{
+    void *handle = GetComputationHandle();
+    if (handle == nullptr) {
+        return HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED;
+    }
+    GetKeyParamSetExtFunc func = (GetKeyParamSetExtFunc)dlsym(handle, PRIVACY_SEARCH_FUNC_NAME);
+    if (func == nullptr) {
+        HKS_LOG_E("dlsym %" LOG_PUBLIC "s failed, %" LOG_PUBLIC "s!", PRIVACY_SEARCH_FUNC_NAME, dlerror());
+        return HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED;
+    }
+    return func(napiContext->keyAlias, napiContext->paramSetIn, &napiContext->paramSetOut);
+}
+} // namespace
 
 namespace HuksNapiItem {
 constexpr int HUKS_NAPI_GET_KEY_PROPERTIES_MIN_ARGS = 2;
