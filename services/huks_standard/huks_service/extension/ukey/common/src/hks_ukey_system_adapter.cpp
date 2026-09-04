@@ -21,6 +21,8 @@
 #include "tokenid_kit.h"
 #include "ipc_skeleton.h"
 
+#define CERT_UID_INT 3515
+
 namespace OHOS::Security::Huks {
 
 int32_t HksGetFrontUserId(int32_t &outId)
@@ -46,7 +48,6 @@ int32_t VerifyCallerAndAdjustUidParam(const HksProcessInfo &processInfo, const C
         HKS_IF_NULL_LOGE_RETURN(newParamSet.GetParamSet(), HKS_ERROR_NULL_POINTER, "new paramset fail.")
         return HKS_SUCCESS;
     }
-    
     auto accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
     HKS_IF_NOT_TRUE_LOGE_RETURN(OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx),
         HKS_ERROR_UKEY_NOT_SYSTEM_APP, "VerifyCallerAndAdjustUidParam: not system hap, check permission failed.");

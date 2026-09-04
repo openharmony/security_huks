@@ -26,9 +26,11 @@
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
 #include <cinttypes>
 #include <dlfcn.h>
+#include <string>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <unordered_map>
 #include "accesstoken_kit.h"
 #include "tokenid_kit.h"
 #include "ipc_skeleton.h"
@@ -41,7 +43,7 @@
 
 #include "hks_param.h"
 #include <stdint.h>
-#define CERT_UID_INT 3515
+#define ENTERPRISE_AUTH_UID 7058
 
 #ifdef L2_STANDARD
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
@@ -62,6 +64,11 @@ int32_t SensitivePermissionCheck(const char *permission)
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
 int32_t CheckUkeyAuthPinType(void)
 {
+    auto callingUid = IPCSkeleton::GetCallingUid();
+    if (callingUid == ENTERPRISE_AUTH_UID) {
+        return HKS_SUCCESS;
+    }
+
     auto accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
     auto tokenType = OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(
         static_cast<OHOS::Security::AccessToken::AccessTokenID>(accessTokenIDEx));
@@ -94,10 +101,23 @@ int32_t HksCheckUkeyPermission(const char *permission)
 int32_t CheckUkeyCertCaller(const struct HksProcessInfo *processInfo)
 {
     HKS_IF_NULL_RETURN(processInfo, HKS_ERROR_INVALID_ARGUMENT);
-    auto accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
-    HKS_IF_NOT_TRUE_LOGE_RETURN(OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx),
-        HKS_ERROR_UKEY_NOT_SYSTEM_APP, "CheckUkeyCertCaller: not system hap, check caller failed.");
-    return HKS_SUCCESS;
+    HKS_IF_TRUE_LOGI_RETURN(HksIsTrustedUkeySaCaller(processInfo->uidInt), HKS_SUCCESS, "CheckUkeyCertCaller success");
+    HKS_LOG_E("CheckUkeyCertCaller fail, caller is not asset.");
+    return HKS_ERROR_NO_PERMISSION;
+}
+
+bool HksIsTrustedUkeySaCaller(uint32_t callingUid)
+{
+    static const std::unordered_map<uint32_t, std::string> trustedUkeySaUids = {
+        { 3515, "certmanager_service" },
+        { 7058, "enterprise_account_auth_service" },
+    };
+    auto it = trustedUkeySaUids.find(callingUid);
+    if (it != trustedUkeySaUids.end()) {
+        HKS_LOG_I("trusted sa caller: %s, uid: %u", it->second.c_str(), callingUid);
+        return true;
+    }
+    return false;
 }
 #endif
 namespace {

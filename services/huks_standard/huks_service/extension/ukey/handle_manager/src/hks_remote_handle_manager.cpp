@@ -235,10 +235,6 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
 int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInfo, const std::string &index,
     const CppParamSet &paramSet, struct HksExtAuthPinOutParam &authOutParam, struct HksExternalErrorInfo **errInfo)
 {
-    auto accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
-    HKS_IF_NOT_TRUE_LOGE_RETURN(OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx),
-        HKS_ERROR_NOT_SYSTEM_APP, "RemoteVerifyPin: not system hap, check permission failed.");
-
     auto uid = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
     HKS_IF_TRUE_LOGE_RETURN(uid.first != HKS_SUCCESS, HKS_ERROR_INVALID_ARGUMENT,
         "Get uid tag failed. ret: %" LOG_PUBLIC "d", uid.first)
