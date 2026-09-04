@@ -173,8 +173,7 @@ int32_t GetRequiredStringProp(const napi_env &env, const napi_value &obj, const 
 }
 
 // Extract a required int32 property from a JS object.
-int32_t GetRequiredInt32Prop(const napi_env &env, const napi_value &obj,
-    const char *propName, int32_t &out)
+int32_t GetRequiredInt32Prop(const napi_env &env, const napi_value &obj, const char *propName, int32_t &out)
 {
     napi_value napiVal = nullptr;
     auto status = napi_get_named_property(env, obj, propName, &napiVal);
@@ -339,20 +338,16 @@ void GetErrorInfoParams(const napi_env &env, const napi_value &funcResult, Crypt
 
 int32_t GetOpenRemoteHandleParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
-    GetErrorInfoParams(env, funcResult, resultParams);
     return GetRequiredStringProp(env, funcResult, "handle", resultParams.handle);
 }
 
 int32_t GetResourceIdParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
-    GetErrorInfoParams(env, funcResult, resultParams);
     return GetRequiredStringProp(env, funcResult, "resourceId", resultParams.handle);
 }
 
 int32_t GetAuthUkeyPinParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
-    GetErrorInfoParams(env, funcResult, resultParams);
-
     // retryCount: required
     int32_t ret = GetRequiredUint32Prop(env, funcResult, "retryCount", resultParams.retryCnt);
     HKS_EXT_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetAuthUkeyPinParams: retryCount failed");
@@ -365,14 +360,11 @@ int32_t GetAuthUkeyPinParams(const napi_env &env, const napi_value &funcResult, 
 
 int32_t GetUkeyPinAuthStateParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
-    GetErrorInfoParams(env, funcResult, resultParams);
     return GetRequiredInt32Prop(env, funcResult, "authState", resultParams.authState);
 }
 
 int32_t GetExportCertificateParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
-    GetErrorInfoParams(env, funcResult, resultParams);
-
     napi_value nativeArray = nullptr;
     auto status = napi_get_named_property(env, funcResult, "certs", &nativeArray);
     HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_GET_NAME_PROPERTY_FAILED,
@@ -410,20 +402,16 @@ int32_t GetExportCertificateParams(const napi_env &env, const napi_value &funcRe
 
 int32_t GetSessionParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
-    GetErrorInfoParams(env, funcResult, resultParams);
     return GetOutDataProp(env, funcResult, resultParams.outData, false);
 }
 
 int32_t GetExportPublicKeyParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
-    GetErrorInfoParams(env, funcResult, resultParams);
     return GetOutDataProp(env, funcResult, resultParams.outData, true);
 }
 
 int32_t GetGetPropertyParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
-    GetErrorInfoParams(env, funcResult, resultParams);
-
     napi_value nativeArray = nullptr;
     auto status = napi_get_named_property(env, funcResult, "property", &nativeArray);
     HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_GET_NAME_PROPERTY_FAILED,
@@ -478,6 +466,11 @@ int32_t ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
     int32_t ret = GetRequiredInt32Prop(env, funcResult, "resultCode", resultParams.errCode);
     HKS_EXT_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ConvertFunctionResult: resultCode failed");
 
+    if (resultParams.errCode != 0) {
+        GetErrorInfoParams(env, funcResult, resultParams);
+        return HKS_SUCCESS;
+    }
+
     switch (resultParams.paramType) {
         case CryptoResultParamType::OPEN_REMOTE_HANDLE:
         case CryptoResultParamType::INIT_SESSION:
@@ -499,7 +492,6 @@ int32_t ConvertFunctionResult(const napi_env &env, const napi_value &funcResult,
         case CryptoResultParamType::SET_OR_GET_PROPERTY:
             return GetGetPropertyParams(env, funcResult, resultParams);
         default:
-            GetErrorInfoParams(env, funcResult, resultParams);
             break;
     }
     return HKS_SUCCESS;

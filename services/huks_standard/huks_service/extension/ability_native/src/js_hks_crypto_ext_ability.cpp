@@ -59,7 +59,6 @@ constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
 constexpr size_t ARGC_FOUR = 4;
 constexpr size_t MAX_ARG_COUNT = 5;
-constexpr size_t MAX_CERT_SIZE = 5 * 8196;
 constexpr int32_t MAX_WAIT_TIME = 3;
 constexpr int32_t MAX_WAIT_TIME_THREE_STAGE = 60;
 constexpr int32_t MAX_WAIT_TIME_AUTH_PIN = 60;
