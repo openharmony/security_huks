@@ -37,6 +37,7 @@ if (os_level == "standard") {
     sources = [
       "src/hks_crypto_ext_ability.cpp",
       "src/hks_crypto_ext_stub_impl.cpp",
+      "src/js_ext_param_parser.cpp",
       "src/js_hks_crypto_ext_ability.cpp",
       "src/log_utils.c",
     ]

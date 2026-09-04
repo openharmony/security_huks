@@ -21,8 +21,6 @@
 #include "tokenid_kit.h"
 #include "ipc_skeleton.h"
 
-#define CERT_UID_INT 3515
-
 namespace OHOS::Security::Huks {
 
 int32_t HksGetFrontUserId(int32_t &outId)
