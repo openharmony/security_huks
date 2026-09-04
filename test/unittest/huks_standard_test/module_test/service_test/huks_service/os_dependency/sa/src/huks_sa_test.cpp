@@ -75,9 +75,6 @@ static int32_t WriteCommonRequestData(MessageParcel &data, const struct HksBlob 
     if (!data.WriteUint32(inBlob->size)) {
         return HKS_ERROR_BAD_STATE;
     }
-    if (!data.WriteBuffer(inBlob->data, static_cast<size_t>(inBlob->size))) {
-        return HKS_ERROR_BAD_STATE;
-    }
     return HKS_SUCCESS;
 }
 
@@ -104,6 +101,29 @@ static int32_t TestRemoteRequest(uint32_t code, bool hasOutData = false)
         ret = WriteCommonRequestData(data, &inBlob, nullptr);
     }
     EXPECT_EQ(ret, HKS_SUCCESS);
+
+    bool isAsyncReply = (code == HKS_MSG_ATTEST_KEY_ASYNC_REPLY ||
+        code == HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY);
+
+    if (isAsyncReply || code == HKS_MSG_INIT) {
+        sptr<HksStub> callback = new (std::nothrow) HksStub();
+        if (callback == nullptr) {
+            HKS_FREE_BLOB(inBlob);
+            HKS_FREE_BLOB(outBlob);
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
+        }
+        if (!data.WriteRemoteObject(callback)) {
+            HKS_FREE_BLOB(inBlob);
+            HKS_FREE_BLOB(outBlob);
+            return HKS_ERROR_IPC_MSG_FAIL;
+        }
+    }
+
+    if (!data.WriteBuffer(inBlob.data, static_cast<size_t>(inBlob.size))) {
+        HKS_FREE_BLOB(inBlob);
+        HKS_FREE_BLOB(outBlob);
+        return HKS_ERROR_BAD_STATE;
+    }
 
     hksService.OnRemoteRequest(code, data, reply, option);
     HKS_FREE_BLOB(inBlob);

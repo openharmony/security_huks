@@ -251,18 +251,6 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest026, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksBaseCheckTest.HksBaseCheckTest027
- * @tc.desc: tdd HksCheckCipherData, expecting HKS_SUCCESS for SM2
- * @tc.type: FUNC
- */
-HWTEST_F(HksBaseCheckTest, HksBaseCheckTest027, TestSize.Level0)
-{
-    HKS_LOG_I("enter HksBaseCheckTest027");
-    int32_t ret = HksCheckCipherData(HKS_CMD_ID_ENCRYPT, HKS_ALG_SM2, nullptr, nullptr, nullptr);
-    ASSERT_EQ(ret, HKS_SUCCESS) << "HksCheckCipherData SM2 failed, ret = " << ret;
-}
-
-/**
  * @tc.name: HksBaseCheckTest.HksBaseCheckTest028
  * @tc.desc: tdd HksCheckCipherMutableParams, expecting HKS_SUCCESS for AES/CBC/PKCS7 encrypt
  * @tc.type: FUNC

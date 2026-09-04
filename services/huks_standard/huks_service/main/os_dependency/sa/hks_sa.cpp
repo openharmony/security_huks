@@ -200,24 +200,35 @@ void HksDeathRecipient::NotifyExtOnBinderDied(int32_t uid)
 HksDeathRecipient::HksDeathRecipient(int32_t callingPid, int32_t callingUid)
     : callingPid_(callingPid), callingUid_(callingUid) {}
 
+static int32_t ProcessAsyncReplyMessage(uint32_t code, const struct HksBlob &srcData, MessageParcel &reply,
+    const sptr<IRemoteObject> &remoteObject)
+{
+    if (code == HKS_MSG_ATTEST_KEY_ASYNC_REPLY) {
+        // ReadRemoteObject will fail if huks_service has no selinux permission to call the client side.
+        HKS_IF_NULL_LOGE_RETURN(remoteObject, HKS_ERROR_IPC_INIT_FAIL, "ReadRemoteObject ptr failed")
+        HksIpcServiceAttestKey(reinterpret_cast<const HksBlob *>(&srcData),
+            reinterpret_cast<const uint8_t *>(&reply), reinterpret_cast<const uint8_t *>(remoteObject.GetRefPtr()));
+        return HKS_SUCCESS;
+    } else if (code == HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY) {
+        // ReadRemoteObject will fail if huks_service has no selinux permission to call the client side.
+        HKS_IF_NULL_LOGE_RETURN(remoteObject, HKS_ERROR_IPC_INIT_FAIL, "ReadExtRemoteObject ptr failed")
+        HksIpcServiceSetOrGetRemoteProperty(reinterpret_cast<const HksBlob *>(&srcData),
+            reinterpret_cast<const uint8_t *>(&reply), reinterpret_cast<const uint8_t *>(remoteObject.GetRefPtr()));
+        return HKS_SUCCESS;
+    }
+    return HKS_SUCCESS;
+}
+
 static int32_t ProcessAttestOrNormalMessage(
-    uint32_t code, MessageParcel &data, uint32_t outSize, const struct HksBlob &srcData, MessageParcel &reply)
+    uint32_t code, uint32_t outSize, const struct HksBlob &srcData, MessageParcel &reply,
+    const sptr<IRemoteObject> &remoteObject)
 {
     // Since we have wrote a HksStub instance in client side, we can now read it if it is anonymous attestation.
     if (code == HKS_MSG_ATTEST_KEY) {
         HksIpcServiceAttestKey(reinterpret_cast<const HksBlob *>(&srcData),
             reinterpret_cast<const uint8_t *>(&reply), nullptr);
         return HKS_SUCCESS;
-    } else if (code == HKS_MSG_ATTEST_KEY_ASYNC_REPLY) {
-        auto ptr = data.ReadRemoteObject();
-        // ReadRemoteObject will fail if huks_service has no selinux permission to call the client side.
-        HKS_IF_NULL_LOGE_RETURN(ptr, HKS_ERROR_IPC_INIT_FAIL, "ReadRemoteObject ptr failed")
-
-        HksIpcServiceAttestKey(reinterpret_cast<const HksBlob *>(&srcData),
-            reinterpret_cast<const uint8_t *>(&reply), reinterpret_cast<const uint8_t *>(ptr.GetRefPtr()));
-        return HKS_SUCCESS;
     } else if (code == HKS_MSG_INIT) {
-        sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
         if (remoteObject != HKS_NULL_POINTER) {
             int32_t callingPid = IPCSkeleton::GetCallingPid();
             int32_t callingUid = IPCSkeleton::GetCallingUid();
@@ -230,13 +241,6 @@ static int32_t ProcessAttestOrNormalMessage(
             }
             HKS_LOG_I("Add bundleDead for pid: %" LOG_PUBLIC "d, uid: %" LOG_PUBLIC "d", callingPid, callingUid);
         }
-    } else if (code == HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY) {
-        auto ptr = data.ReadRemoteObject();
-        // ReadRemoteObject will fail if huks_service has no selinux permission to call the client side.
-        HKS_IF_NULL_LOGE_RETURN(ptr, HKS_ERROR_IPC_INIT_FAIL, "ReadExtRemoteObject ptr failed")
-        HksIpcServiceSetOrGetRemoteProperty(reinterpret_cast<const HksBlob *>(&srcData),
-            reinterpret_cast<const uint8_t *>(&reply), reinterpret_cast<const uint8_t *>(ptr.GetRefPtr()));
-        return HKS_SUCCESS;
     }
     return ProcessMessage(code, outSize, srcData, reply);
 }
@@ -256,6 +260,16 @@ static void ProcessRemoteRequest(uint32_t code, MessageParcel &data, MessageParc
         HKS_IF_TRUE_LOGE_BREAK(!data.ReadUint32(srcData.size) || IsInvalidLength(srcData.size),
             "srcData size is invalid, size:%" LOG_PUBLIC "u", srcData.size)
 
+        // Read remoteObject before buffer to avoid byte misalignment caused by variable-length buffer,
+        // which leads to ReadRemoteObject returning null and death recipient not being added.
+        sptr<IRemoteObject> remoteObject = nullptr;
+        bool isAsyncReply = (code == HKS_MSG_ATTEST_KEY_ASYNC_REPLY ||
+            code == HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY);
+        if (code == HKS_MSG_ATTEST_KEY_ASYNC_REPLY || code == HKS_MSG_EXT_SET_OR_GET_REMOTE_PROPERTY ||
+            code == HKS_MSG_INIT) {
+            remoteObject = data.ReadRemoteObject();
+        }
+
         ret = HKS_ERROR_MALLOC_FAIL;
         srcData.data = static_cast<uint8_t *>(HksMalloc(srcData.size));
         HKS_IF_NULL_LOGE_BREAK(srcData.data, "Malloc srcData failed.")
@@ -264,7 +278,11 @@ static void ProcessRemoteRequest(uint32_t code, MessageParcel &data, MessageParc
         const uint8_t *pdata = data.ReadBuffer(static_cast<size_t>(srcData.size));
         HKS_IF_NULL_BREAK(pdata)
         (void)memcpy_s(srcData.data, srcData.size, pdata, srcData.size);
-        ret = ProcessAttestOrNormalMessage(code, data, outSize, srcData, reply);
+        if (isAsyncReply) {
+            ret = ProcessAsyncReplyMessage(code, srcData, reply, remoteObject);
+        } else {
+            ret = ProcessAttestOrNormalMessage(code, outSize, srcData, reply, remoteObject);
+        }
     } while (0);
 
     HKS_FREE_BLOB(srcData);
