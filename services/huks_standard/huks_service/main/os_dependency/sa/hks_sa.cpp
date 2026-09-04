@@ -437,8 +437,7 @@ void HksService::OnStart()
         HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(Init(), "Failed to init HksService")
 
 #ifdef SUPPORT_COMMON_EVENT
-        HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID),
-            "Failed to add ces system ability listener")
+        (void)AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
 #endif
 
         // this should be excuted after huks published and listener added.
