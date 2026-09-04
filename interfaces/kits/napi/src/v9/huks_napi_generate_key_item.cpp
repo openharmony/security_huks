@@ -98,38 +98,43 @@ napi_value GenerateKeyAsyncWork(napi_env env, GenerateKeyAsyncContext &context)
     }
 
     napi_value resourceName = nullptr;
-    napi_create_string_latin1(env, "generateKeyAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
+    napi_status status{};
+    do {
+        status = napi_create_string_latin1(env, "generateKeyAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
+        HKS_IF_TRUE_LOGE_BREAK(status != napi_ok, "could not create string");
 
-    napi_create_async_work(env, nullptr, resourceName,
-        [](napi_env env, void *data) {
-            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
-            GenerateKeyAsyncContext napiContext = static_cast<GenerateKeyAsyncContext>(data);
+        status = napi_create_async_work(env, nullptr, resourceName,
+            [](napi_env env, void *data) {
+                HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
+                GenerateKeyAsyncContext napiContext = static_cast<GenerateKeyAsyncContext>(data);
 
-            // inner tag HKS_TAG_USER_AUTH_TYPE_ATL is not openning to outside
-            int32_t ret = CheckIfContainAtlTag(napiContext->paramSetIn);
-            if (ret != HKS_SUCCESS) {
-                napiContext->result = ret;
-                return;
-            }
+                // inner tag HKS_TAG_USER_AUTH_TYPE_ATL is not openning to outside
+                int32_t ret = CheckIfContainAtlTag(napiContext->paramSetIn);
+                if (ret != HKS_SUCCESS) {
+                    napiContext->result = ret;
+                    return;
+                }
 
-            napiContext->result = HksGenerateKey(napiContext->keyAlias,
-                napiContext->paramSetIn, napiContext->paramSetOut);
-        },
-        [](napi_env env, napi_status status, void *data) {
-            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
-            GenerateKeyAsyncContext napiContext = static_cast<GenerateKeyAsyncContext>(data);
-            HksSuccessReturnResult resultData;
-            SuccessReturnResultInit(resultData);
-            HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
-            DeleteGenerateKeyAsyncContext(env, napiContext);
-        },
-        static_cast<void *>(context),
-        &context->asyncWork);
+                napiContext->result = HksGenerateKey(napiContext->keyAlias,
+                    napiContext->paramSetIn, napiContext->paramSetOut);
+            },
+            [](napi_env env, napi_status status, void *data) {
+                HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
+                GenerateKeyAsyncContext napiContext = static_cast<GenerateKeyAsyncContext>(data);
+                HksSuccessReturnResult resultData;
+                SuccessReturnResultInit(resultData);
+                HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+                DeleteGenerateKeyAsyncContext(env, napiContext);
+            },
+            static_cast<void *>(context), &context->asyncWork);
+        HKS_IF_TRUE_LOGE_BREAK(status != napi_ok, "could not create async work");
 
-    napi_status status = napi_queue_async_work(env, context->asyncWork);
+        status = napi_queue_async_work(env, context->asyncWork);
+        HKS_IF_TRUE_LOGE_BREAK(status != napi_ok, "could not queue async work");
+    } while (0);
+
     if (status != napi_ok) {
         DeleteGenerateKeyAsyncContext(env, context);
-        HKS_LOG_E("could not queue async work");
         return nullptr;
     }
 

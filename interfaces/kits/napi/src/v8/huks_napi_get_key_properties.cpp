@@ -108,35 +108,44 @@ static napi_value GetKeyPropertiesAsyncWork(napi_env env, GetKeyPropertiesAsyncC
         NAPI_CALL(env, napi_create_promise(env, &context->deferred, &promise));
     }
     napi_value resourceName = nullptr;
-    napi_create_string_latin1(env, "getKeyPropertiesAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
-    napi_create_async_work(env, nullptr, resourceName,
-        [](napi_env env, void *data) {
-            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
-            GetKeyPropertiesAsyncContext napiContext = static_cast<GetKeyPropertiesAsyncContext>(data);
-            napiContext->paramSetOut = static_cast<struct HksParamSet *>(HksMalloc(HKS_DEFAULT_OUTPARAMSET_SIZE));
-            if (napiContext->paramSetOut != nullptr) {
-                napiContext->paramSetOut->paramSetSize = HKS_DEFAULT_OUTPARAMSET_SIZE;
-                napiContext->paramSetOut->paramsCnt = 0;
-            }
-            napiContext->result = HksGetKeyParamSet(napiContext->keyAlias,
-                napiContext->paramSetIn, napiContext->paramSetOut);
-        },
-        [](napi_env env, napi_status status, void *data) {
-            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
-            GetKeyPropertiesAsyncContext napiContext = static_cast<GetKeyPropertiesAsyncContext>(data);
-            napi_value result = GetKeyPropertiesWriteResult(env, napiContext);
-            if (napiContext->callback == nullptr) {
-                napi_resolve_deferred(env, napiContext->deferred, result);
-            } else if (result != nullptr) {
-                CallAsyncCallback(env, napiContext->callback, napiContext->result, result);
-            }
-            DeleteGetKeyPropertiesAsyncContext(env, napiContext);
-        }, static_cast<void *>(context), &context->asyncWork);
-    napi_status status = napi_queue_async_work(env, context->asyncWork);
+    napi_status status{};
+    do {
+        status = napi_create_string_latin1(env, "getKeyPropertiesAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
+        HKS_IF_TRUE_LOGE_BREAK(status != napi_ok, "could not create string");
+
+        status = napi_create_async_work(env, nullptr, resourceName,
+            [](napi_env env, void *data) {
+                HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
+                GetKeyPropertiesAsyncContext napiContext = static_cast<GetKeyPropertiesAsyncContext>(data);
+                napiContext->paramSetOut = static_cast<struct HksParamSet *>(HksMalloc(HKS_DEFAULT_OUTPARAMSET_SIZE));
+                if (napiContext->paramSetOut != nullptr) {
+                    napiContext->paramSetOut->paramSetSize = HKS_DEFAULT_OUTPARAMSET_SIZE;
+                    napiContext->paramSetOut->paramsCnt = 0;
+                }
+                napiContext->result = HksGetKeyParamSet(napiContext->keyAlias,
+                    napiContext->paramSetIn, napiContext->paramSetOut);
+            },
+            [](napi_env env, napi_status status, void *data) {
+                HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
+                GetKeyPropertiesAsyncContext napiContext = static_cast<GetKeyPropertiesAsyncContext>(data);
+                napi_value result = GetKeyPropertiesWriteResult(env, napiContext);
+                if (napiContext->callback == nullptr) {
+                    napi_resolve_deferred(env, napiContext->deferred, result);
+                } else if (result != nullptr) {
+                    CallAsyncCallback(env, napiContext->callback, napiContext->result, result);
+                }
+                DeleteGetKeyPropertiesAsyncContext(env, napiContext);
+            },
+            static_cast<void *>(context), &context->asyncWork);
+        HKS_IF_TRUE_LOGE_BREAK(status != napi_ok, "could not create async work");
+
+        status = napi_queue_async_work(env, context->asyncWork);
+        HKS_IF_TRUE_LOGE_BREAK(status != napi_ok, "could not queue async work");
+    } while (0);
+
     if (status != napi_ok) {
         GET_AND_THROW_LAST_ERROR((env));
         DeleteGetKeyPropertiesAsyncContext(env, context);
-        HKS_LOG_E("could not queue async work");
         return nullptr;
     }
     if (context->callback == nullptr) {

@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <limits.h>
 
 /* use product definitions temporarily */
 #define DEFAULT_FILE_PERMISSION 0700
@@ -108,10 +109,27 @@ static int32_t IsFileExist(const char *fileName)
     return HKS_SUCCESS;
 }
 
+static int32_t GetValidPath(const char *fileName, char *filePath)
+{
+    if (strstr(fileName, "../") != NULL) {
+        HKS_LOG_E("invalid filePath!");
+        return HKS_ERROR_INVALID_KEY_FILE;
+    }
+
+    if (strncpy_s(filePath, PATH_MAX + 1, fileName, strlen(fileName)) != EOK) {
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+    return HKS_SUCCESS;
+}
+
 static int32_t FileRead(const char *fileName, uint32_t offset, struct HksBlob *blob, uint32_t *size)
 {
     (void)offset;
-    int32_t fd = open(fileName, O_RDONLY);
+    char filePath[PATH_MAX + 1] = {0};
+    int32_t ret = GetValidPath(fileName, filePath);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get real path failed")
+
+    int32_t fd = open(filePath, O_RDONLY);
     if (fd < 0) {
         HKS_LOG_E("failed to open file, errno = 0x%" LOG_PUBLIC "x", errno);
 #ifdef HUKS_LOG_MINI_EXT_ENABLED
@@ -148,7 +166,11 @@ static uint32_t FileSize(const char *fileName)
 static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *buf, uint32_t len)
 {
     (void)offset;
-    int32_t fd = open(fileName, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
+    char filePath[PATH_MAX + 1] = {0};
+    int32_t ret = GetValidPath(fileName, filePath);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get real path failed")
+
+    int32_t fd = open(filePath, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
     if (fd < 0) {
         HKS_LOG_E("open file failed, errno = 0x%" LOG_PUBLIC "x", errno);
 #ifdef HUKS_LOG_MINI_EXT_ENABLED
@@ -163,6 +185,12 @@ static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *b
 #ifdef HUKS_LOG_MINI_EXT_ENABLED
         HILOG_ERROR(HILOG_MODULE_SCY, "write file size failed, errno = 0x%{public}X", errno);
 #endif
+        close(fd);
+        return HKS_ERROR_WRITE_FILE_FAIL;
+    }
+
+    if ((uint32_t)size != len) {
+        HKS_LOG_E("write file size not match, write size = %" LOG_PUBLIC "d, buf size = %" LOG_PUBLIC "u", size, len);
         close(fd);
         return HKS_ERROR_WRITE_FILE_FAIL;
     }

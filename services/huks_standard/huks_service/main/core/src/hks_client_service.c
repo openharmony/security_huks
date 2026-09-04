@@ -458,11 +458,8 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
     DeConstructReportParamSet(&reportParamSet);
 #endif
     DecrementSeCountByService(ctx.isSeCalling);
-    HKS_FREE(ctx.keyOutBuffer);
-    if (ctx.keyIn.data != NULL) {
-        (void)memset_s(ctx.keyIn.data, ctx.keyIn.size, 0, ctx.keyIn.size);
-    }
-    HKS_FREE(ctx.keyIn.data);
+    HKS_MEMSET_FREE_PTR(ctx.keyOutBuffer, ML_DSA_MAX_KEY_SIZE);
+    HKS_MEMSET_FREE_BLOB(ctx.keyIn);
     HksFreeParamSet(&ctx.newParamSet);
     HksHitraceEnd(&traceId);
     return ctx.ret;

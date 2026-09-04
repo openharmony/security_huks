@@ -893,8 +893,12 @@ int32_t HksEncapsulateUnpackFromService(const struct HksBlob *srcData, struct Hk
         uint32_t offset = 0;
         ret = GetBlobFromBuffer(&encapsulatedData, srcData, &offset);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get encapsulatedData fail")
-        HKS_IF_TRUE_LOGE_BREAK(encapsulatedData.size > HKS_ML_KEM_MAX_CIPHERTEXT_LEN,
-            "encapsulatedData size %" LOG_PUBLIC "u exceeds max", encapsulatedData.size)
+
+        if (encapsulatedData.size > HKS_ML_KEM_MAX_CIPHERTEXT_LEN) {
+            HKS_LOG_E("encapsulatedData size %" LOG_PUBLIC "u exceeds max", encapsulatedData.size);
+            ret = HKS_ERROR_INVALID_ARGUMENT;
+            break;
+        }
 
         ret = HKS_ERROR_INSUFFICIENT_MEMORY;
         HKS_IF_TRUE_LOGE_BREAK(memcpy_s(encapResult->encapsulatedData.data, HKS_ML_KEM_MAX_CIPHERTEXT_LEN,

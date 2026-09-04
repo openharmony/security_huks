@@ -391,7 +391,8 @@ int32_t HksGetDeleteGroups(const struct HksProcessInfo *processInfo, const std::
     std::vector<AppExecFwk::BundleInfo> bundleInfos{};
     auto retCode = bundleMgrProxy->GetAllBundleInfoByDeveloperId(developerId, bundleInfos,
         processInfo->userIdInt);
-    HKS_LOG_I("get bundles ret = %" LOG_PUBLIC "d", retCode);
+    HKS_IF_TRUE_LOGE_RETURN(retCode != OHOS::ERR_OK && retCode != OHOS::ERR_BUNDLE_MANAGER_INVALID_DEVELOPERID,
+        HKS_FAILURE, "get all bundle info by developerId failed, retCode = %" LOG_PUBLIC "d", retCode)
 
     for (auto &group : thisGroups) {
         HKS_LOG_I("this group: %" LOG_PUBLIC "s", group.c_str());

@@ -44,11 +44,9 @@ void HksEventReport(const char *funcName, const struct HksProcessInfo *processIn
     HKS_IF_NOT_TRUE_LOGE_RETURN(enqueueSuccess, HksFreeParamSet(&newParamSet), "Report fault event failed")
 #else
     if (eventId == HKS_EVENT_DELETE_KEY || eventId == HKS_EVENT_CHECK_KEY_EXISTED) {
-        if (ret != HKS_ERROR_NOT_EXIST) {
-            HksReport(__func__, processInfo, nullptr, ret);
-        }
-    } else {
-        HksReport(funcName, processInfo, paramSet, errorCode);
+        HKS_IF_TRUE_RETURN_VOID(errorCode == HKS_ERROR_NOT_EXIST)
+        return HksReport(funcName, processInfo, nullptr, errorCode);
     }
+    HksReport(funcName, processInfo, paramSet, errorCode);
 #endif
 }

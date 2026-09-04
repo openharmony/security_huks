@@ -114,33 +114,40 @@ static napi_value ImportKeyAsyncWork(napi_env env, ImportKeyAsyncContext &contex
     }
 
     napi_value resourceName = nullptr;
-    napi_create_string_latin1(env, "importKeyAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
+    napi_status status{};
+    do {
+        status = napi_create_string_latin1(env, "importKeyAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
+        HKS_IF_TRUE_LOGE_BREAK(status != napi_ok, "could not create string");
 
-    napi_create_async_work(env, nullptr, resourceName,
-        [](napi_env env, void *data) {
-            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
-            ImportKeyAsyncContext napiContext = static_cast<ImportKeyAsyncContext>(data);
+        status = napi_create_async_work(env, nullptr, resourceName,
+            [](napi_env env, void *data) {
+                HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
+                ImportKeyAsyncContext napiContext = static_cast<ImportKeyAsyncContext>(data);
 
-            napiContext->result = HksImportKey(napiContext->keyAlias,
-                napiContext->paramSet, napiContext->key);
-        },
-        [](napi_env env, napi_status status, void *data) {
-            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
-            ImportKeyAsyncContext napiContext = static_cast<ImportKeyAsyncContext>(data);
-            napi_value result = ImportKeyWriteResult(env, napiContext);
-            if (napiContext->callback == nullptr) {
-                napi_resolve_deferred(env, napiContext->deferred, result);
-            } else if (result != nullptr) {
-                CallAsyncCallback(env, napiContext->callback, napiContext->result, result);
-            }
-            DeleteImportKeyAsyncContext(env, napiContext);
-        }, static_cast<void *>(context), &context->asyncWork);
+                napiContext->result = HksImportKey(napiContext->keyAlias,
+                    napiContext->paramSet, napiContext->key);
+            },
+            [](napi_env env, napi_status status, void *data) {
+                HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
+                ImportKeyAsyncContext napiContext = static_cast<ImportKeyAsyncContext>(data);
+                napi_value result = ImportKeyWriteResult(env, napiContext);
+                if (napiContext->callback == nullptr) {
+                    napi_resolve_deferred(env, napiContext->deferred, result);
+                } else if (result != nullptr) {
+                    CallAsyncCallback(env, napiContext->callback, napiContext->result, result);
+                }
+                DeleteImportKeyAsyncContext(env, napiContext);
+            },
+            static_cast<void *>(context), &context->asyncWork);
+        HKS_IF_TRUE_LOGE_BREAK(status != napi_ok, "could not create async work");
 
-    napi_status status = napi_queue_async_work(env, context->asyncWork);
+        status = napi_queue_async_work(env, context->asyncWork);
+        HKS_IF_TRUE_LOGE_BREAK(status != napi_ok, "could not queue async work");
+    } while (0);
+
     if (status != napi_ok) {
         GET_AND_THROW_LAST_ERROR((env));
         DeleteImportKeyAsyncContext(env, context);
-        HKS_LOG_E("could not queue async work");
         return nullptr;
     }
 

@@ -369,7 +369,7 @@ static int32_t ConvertFieldToMap(const struct HksEventInfo *eventInfo,
             value = eventInfo->ukeyInfo.extBundleName ?
                 eventInfo->ukeyInfo.extBundleName : EVENT_PROPERTY_UNKNOWN; break;
         case FLAG_HANDLE:
-            value = eventInfo->ukeyInfo.extraData ? eventInfo->ukeyInfo.extraData : EVENT_PROPERTY_UNKNOWN; break;
+            value = std::to_string(eventInfo->ukeyInfo.handle); break;
         case FLAG_EXTRA_DATA:
             value = eventInfo->ukeyInfo.extraData ? eventInfo->ukeyInfo.extraData : EVENT_PROPERTY_UNKNOWN; break;
         case FLAG_PROPERTY_ID:

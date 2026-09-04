@@ -41,7 +41,7 @@ int32_t HksMbedtlsDesCryptoUpdate(
     void *cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText, const bool encrypt);
 
 int32_t HksMbedtlsDesCryptoFinal(void **cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText,
-    const bool encrypt);
+    struct HksBlob *tagAead, const bool encrypt);
 
 void HksMbedtlsDesHalFreeCtx(void **cryptoCtx);
 

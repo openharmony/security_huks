@@ -664,8 +664,9 @@ int32_t HksMbedtlsDesCryptoUpdate(
 }
 
 int32_t HksMbedtlsDesCryptoFinal(void **cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText,
-    const bool encrypt)
+    struct HksBlob *tagAead, const bool encrypt)
 {
+    (void)tagAead;
     if (encrypt) {
         return HksMbedtlsDesEncryptFinal(cryptoCtx, message, cipherText);
     } else {

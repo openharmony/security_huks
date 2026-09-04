@@ -85,33 +85,35 @@ napi_value DeleteKeyAsyncWork(napi_env env, DeleteKeyAsyncContext &context)
     }
 
     napi_value resourceName = nullptr;
-    napi_create_string_latin1(env, "deleteKeyAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
+    napi_status status{};
+    do {
+        status = napi_create_string_latin1(env, "deleteKeyAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
+        HKS_IF_TRUE_LOGE_BREAK(status != napi_ok, "could not create string");
 
-    napi_create_async_work(
-        env,
-        nullptr,
-        resourceName,
-        [](napi_env env, void *data) {
-            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
-            DeleteKeyAsyncContext napiContext = static_cast<DeleteKeyAsyncContext>(data);
+        status = napi_create_async_work(env, nullptr, resourceName,
+            [](napi_env env, void *data) {
+                HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
+                DeleteKeyAsyncContext napiContext = static_cast<DeleteKeyAsyncContext>(data);
 
-            napiContext->result = HksDeleteKey(napiContext->keyAlias, napiContext->paramSet);
-        },
-        [](napi_env env, napi_status status, void *data) {
-            HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
-            DeleteKeyAsyncContext napiContext = static_cast<DeleteKeyAsyncContext>(data);
-            HksSuccessReturnResult resultData;
-            SuccessReturnResultInit(resultData);
-            HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
-            DeleteDeleteKeyAsyncContext(env, napiContext);
-        },
-        static_cast<void *>(context),
-        &context->asyncWork);
+                napiContext->result = HksDeleteKey(napiContext->keyAlias, napiContext->paramSet);
+            },
+            [](napi_env env, napi_status status, void *data) {
+                HKS_IF_NULL_LOGE_RETURN_VOID(data, "the received data is nullptr.")
+                DeleteKeyAsyncContext napiContext = static_cast<DeleteKeyAsyncContext>(data);
+                HksSuccessReturnResult resultData;
+                SuccessReturnResultInit(resultData);
+                HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+                DeleteDeleteKeyAsyncContext(env, napiContext);
+            },
+            static_cast<void *>(context), &context->asyncWork);
+        HKS_IF_TRUE_LOGE_BREAK(status != napi_ok, "could not create async work");
 
-    napi_status status = napi_queue_async_work(env, context->asyncWork);
+        status = napi_queue_async_work(env, context->asyncWork);
+        HKS_IF_TRUE_LOGE_BREAK(status != napi_ok, "could not queue async work");
+    } while (0);
+
     if (status != napi_ok) {
         DeleteDeleteKeyAsyncContext(env, context);
-        HKS_LOG_E("could not queue async work");
         return nullptr;
     }
 

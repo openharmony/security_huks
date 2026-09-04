@@ -184,8 +184,6 @@ typedef int32_t (*DecryptUpdate)(void *, const struct HksBlob *, struct HksBlob 
 
 typedef int32_t (*DecryptFinal)(void **, const struct HksBlob *, struct HksBlob *, struct HksBlob *, const bool);
 
-typedef int32_t (*DecryptFinalDes)(void **, const struct HksBlob *, struct HksBlob *, const bool);
-
 typedef int32_t (*BnExpMod)(struct HksBlob *, const struct HksBlob *,
     const struct HksBlob *, const struct HksBlob *);
 

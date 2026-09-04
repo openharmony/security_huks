@@ -114,7 +114,7 @@ int32_t HksHaPlugin::RegisterEventProcs(const struct HksEventProcMap *procMaps, 
     return (successCount == count) ? HKS_SUCCESS : lastError;
 }
 
-HksEventProcMap *HksHaPlugin::HksEventProcFind(uint32_t eventId)
+bool HksHaPlugin::HksEventProcFind(uint32_t eventId, struct HksEventProcMap &eventProc)
 {
     std::lock_guard<std::mutex> lock(eventProcMutex);
 
@@ -122,8 +122,9 @@ HksEventProcMap *HksHaPlugin::HksEventProcFind(uint32_t eventId)
         [eventId](const struct HksEventProcMap &item) {
             return item.eventId == eventId;
         });
-    HKS_IF_TRUE_RETURN(it != eventProcList.end(), &(*it)) // eventProcList无删除操作，因此此处返回指针是安全的
-    return nullptr;
+    HKS_IF_TRUE_RETURN(it == eventProcList.end(), false)
+    eventProc = *it;
+    return true;
 }
 
 static void AddAncoCallTagToEventMap(const struct HksParamSet *paramSet,
@@ -143,14 +144,15 @@ void HksHaPlugin::HandlerReport(HksEventQueueItem &item)
         "null for eventId %" LOG_PUBLIC "u", item.eventId);
 
     uint32_t eventId = item.eventId;
-    auto procMap = HksEventProcFind(eventId);
-    HKS_IF_NULL_LOGE_RETURN_VOID(procMap, "HandlerReport: Event ID %" LOG_PUBLIC "u not found in"
+    struct HksEventProcMap eventProc = {};
+    bool findRet = HksEventProcFind(eventId, eventProc);
+    HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(findRet, "HandlerReport: Event ID %" LOG_PUBLIC "u not found in"
         "the eventProcMap", eventId);
 
     struct HksEventInfo *eventInfo = (struct HksEventInfo *)HksMalloc(sizeof(struct HksEventInfo));
     HKS_IF_NULL_LOGE_RETURN_VOID(eventInfo, "Failed to allocate HksEventInfo");
 
-    int32_t ret = procMap->eventInfoCreate(item.paramSet, eventInfo);
+    int32_t ret = eventProc.eventInfoCreate(item.paramSet, eventInfo);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Failed to create HksEventInfo for eventId %" LOG_PUBLIC "u", eventId);
         HksFreeEventInfo(&eventInfo);
@@ -158,17 +160,17 @@ void HksHaPlugin::HandlerReport(HksEventQueueItem &item)
         return;
     }
 
-    bool needReport = procMap->needReport(eventInfo);
+    bool needReport = eventProc.needReport(eventInfo);
     bool isAncoCall = false;
     if (item.paramSet != nullptr) {
         struct HksParam *ancoUidParam = nullptr;
         int32_t ancoRet = HksGetParam(item.paramSet, HKS_TAG_ANCO_APP_UID, &ancoUidParam);
         HKS_IF_TRUE_EXCU(ancoRet == HKS_SUCCESS, isAncoCall = true);
     }
-    HKS_IF_NOT_TRUE_RETURN(needReport, HandleStatisticEvent(eventInfo, eventId, procMap, isAncoCall))
+    HKS_IF_NOT_TRUE_RETURN(needReport, HandleStatisticEvent(eventInfo, eventId, &eventProc, isAncoCall))
 
     std::unordered_map<std::string, std::string> eventMap;
-    ret = procMap->eventInfoToMap(eventInfo, eventMap);
+    ret = eventProc.eventInfoToMap(eventInfo, eventMap);
     HKS_IF_NOT_SUCC_LOGE(ret, "Failed to convert HksEventInfo to map"
         "for eventId %" LOG_PUBLIC "u", eventId);
 
@@ -297,10 +299,11 @@ int32_t HksHaPlugin::FillEventInfos(uint32_t eventId, uint32_t reportCount, HksE
             struct HksEventInfo *eventInfo = cacheIt->data;
             eventsWithMap[count].common = eventInfo->common;
 
-            HksEventProcMap *procMap = HksEventProcFind(eventsWithMap[count].common.eventId);
-            HKS_IF_NULL_LOGI_RETURN(procMap, HKS_ERROR_NULL_POINTER, "procMap is null");
+            struct HksEventProcMap eventProc = {};
+            bool findRet = HksEventProcFind(eventsWithMap[count].common.eventId, eventProc);
+            HKS_IF_NOT_TRUE_LOGI_RETURN(findRet, HKS_ERROR_NULL_POINTER, "eventProc is null");
 
-            int32_t ret = procMap->eventInfoToMap(eventInfo, eventsWithMap[count].eventMap);
+            int32_t ret = eventProc.eventInfoToMap(eventInfo, eventsWithMap[count].eventMap);
             HKS_IF_TRUE_LOGE_CONTINUE(ret != HKS_SUCCESS,
                 "FillEventInfos: Failed to convert HksEventInfo to map for eventId %" LOG_PUBLIC "u",
                 eventsWithMap[count].common.eventId)

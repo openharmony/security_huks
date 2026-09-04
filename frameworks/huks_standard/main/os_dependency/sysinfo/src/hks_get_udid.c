@@ -53,6 +53,7 @@ int32_t HksGetHardwareUdid(uint8_t *udid, uint32_t udidLen)
     uint8_t devUdid[HKS_HARDWARE_UDID_LEN] = {0};
     struct HksBlob hashData = { HKS_HARDWARE_UDID_LEN, devUdid };
     ret = ComputeHash(devUdidString, sizeof(devUdidString), &hashData);
+    (void)memset_s(devUdidString, sizeof(devUdidString), 0, sizeof(devUdidString));
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "compute udid hash failed")
 #else
     /* simulation implementation */

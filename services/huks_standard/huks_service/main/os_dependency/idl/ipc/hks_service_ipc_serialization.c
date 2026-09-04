@@ -567,6 +567,7 @@ int32_t HksGetKeyInfoListUnpack(const struct HksBlob *srcData, struct HksParamSe
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("KeyInfoListInit failed");
         HKS_FREE(*keyInfoList);
+        return ret;
     }
     HKS_IF_TRUE_RETURN(offset == srcData->size, HKS_SUCCESS)
 

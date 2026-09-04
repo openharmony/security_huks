@@ -103,7 +103,7 @@ int32_t HksOpensslHashInit(void **cryptoCtx, uint32_t alg)
     HKS_IF_NULL_LOGE_RETURN(opensslAlg, HKS_ERROR_CRYPTO_ENGINE_ERROR, "hash_init get openssl algorithm fail")
 
     EVP_MD_CTX *tmpctx = EVP_MD_CTX_new();
-    HKS_IF_NULL_RETURN(opensslAlg, HKS_ERROR_NULL_POINTER)
+    HKS_IF_NULL_RETURN(tmpctx, HKS_ERROR_NULL_POINTER)
 
     EVP_MD_CTX_set_flags(tmpctx, EVP_MD_CTX_FLAG_ONESHOT);
     int32_t ret = EVP_DigestInit_ex(tmpctx, opensslAlg, NULL);
