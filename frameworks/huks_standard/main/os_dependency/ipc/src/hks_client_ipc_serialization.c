@@ -254,6 +254,8 @@ int32_t HksClearPinAuthStatePack(const struct HksBlob *index, const struct HksPa
     int32_t ret = CopyBlobToBuffer(index, destData, &offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy keyAlias failed")
 
+    HKS_IF_NULL_RETURN(paramSet, HKS_SUCCESS);
+
     ret = CopyParamSetToBuffer(paramSet, destData, &offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy paramSet failed")
     return HKS_SUCCESS;
