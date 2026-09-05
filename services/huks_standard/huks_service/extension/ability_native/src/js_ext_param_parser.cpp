@@ -301,10 +301,10 @@ void GetErrorInfoParams(const napi_env &env, const napi_value &funcResult, Crypt
     auto status = napi_get_named_property(env, funcResult, "errInfo", &napiErrInfo);
     napi_valuetype valueType;
     status = napi_typeof(env, napiErrInfo, &valueType);
-    if (resultParams.errCode != 0) {
-        isFailed = true;
-    }
-    HKS_EXT_IF_TRUE_LOGE_EXCU_RETURN_VOID(status != napi_ok || valueType == napi_undefined,
+
+    HKS_EXT_IF_TRUE_EXCU(resultParams.errCode != 0, isFailed = true);
+
+    HKS_EXT_IF_TRUE_LOGE_EXCU_RETURN_VOID(status != napi_ok || valueType == napi_undefined || resultParams.errCode == 0,
         resultParams.errInfo = HksCreateExternalErrorInfoWithFlag(resultParams.errCode, errMsg.c_str(), isFailed),
         "GetErrorInfoParams::errInfo not found in result");
 
