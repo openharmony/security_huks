@@ -63,6 +63,13 @@
     return; \
 } })
 
+#define HKS_EXT_IF_TRUE_LOGI_EXCU_RETURN_VOID(BOOL_FUNC, EXCU_FUNC, LOG_MESSAGE, ...) \
+({ if (BOOL_FUNC) { \
+    LOGI(LOG_MESSAGE, ##__VA_ARGS__); \
+    (EXCU_FUNC); \
+    return; \
+} })
+
 namespace OHOS {
 namespace AbilityRuntime {
 class Runtime;

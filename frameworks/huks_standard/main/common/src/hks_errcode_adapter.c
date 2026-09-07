@@ -1155,6 +1155,20 @@ static struct HksError g_errCodeTable[] = {
             .errorMsg = "SE feature is not supported.",
             .data = NULL
         }
+    }, {
+        .innerErrCode = HKS_ERROR_EXT_GET_NAME_PROPERTY_FAILED,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
+            .errorMsg = "The required field is missing from CryptoExtensionAbility return value.",
+            .data = NULL
+        }
+    }, {
+        .innerErrCode = HKS_ERROR_EXT_GET_VALUE_FAILED,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_DEPENDENT_MODULES_ERROR,
+            .errorMsg = "The field type in CryptoExtensionAbility return value does not match expected type.",
+            .data = NULL
+        }
     }
 };
 
