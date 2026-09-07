@@ -194,8 +194,7 @@ int32_t GetRequiredInt32Prop(const napi_env &env, const napi_value &obj, const c
 
 // Extract an optional int32 property from a JS object.
 // If the property does not exist (undefined), returns HKS_SUCCESS and leaves out unchanged.
-int32_t GetOptionalInt32Prop(const napi_env &env, const napi_value &obj,
-    const char *propName, int32_t &out)
+int32_t GetOptionalInt32Prop(const napi_env &env, const napi_value &obj, const char *propName, int32_t &out)
 {
     napi_value napiVal = nullptr;
     auto status = napi_get_named_property(env, obj, propName, &napiVal);
@@ -217,8 +216,7 @@ int32_t GetOptionalInt32Prop(const napi_env &env, const napi_value &obj,
 }
 
 // Extract a required uint32 property from a JS object.
-int32_t GetRequiredUint32Prop(const napi_env &env, const napi_value &obj,
-    const char *propName, uint32_t &out)
+int32_t GetRequiredUint32Prop(const napi_env &env, const napi_value &obj, const char *propName, uint32_t &out)
 {
     napi_value napiVal = nullptr;
     auto status = napi_get_named_property(env, obj, propName, &napiVal);
@@ -238,8 +236,7 @@ int32_t GetRequiredUint32Prop(const napi_env &env, const napi_value &obj,
 
 // Extract outData as Uint8Array typedarray.
 // isRequired: if true, undefined/empty data is an error; if false, it is allowed.
-int32_t GetOutDataProp(const napi_env &env, const napi_value &obj,
-    std::vector<uint8_t> &outData, bool isRequired)
+int32_t GetOutDataProp(const napi_env &env, const napi_value &obj, std::vector<uint8_t> &outData, bool isRequired)
 {
     napi_value napiOutData = nullptr;
     auto status = napi_get_named_property(env, obj, "outData", &napiOutData);
@@ -304,7 +301,7 @@ void GetErrorInfoParams(const napi_env &env, const napi_value &funcResult, Crypt
 
     HKS_EXT_IF_TRUE_EXCU(resultParams.errCode != 0, isFailed = true);
 
-    HKS_EXT_IF_TRUE_LOGE_EXCU_RETURN_VOID(status != napi_ok || valueType == napi_undefined || resultParams.errCode == 0,
+    HKS_EXT_IF_TRUE_LOGI_EXCU_RETURN_VOID(status != napi_ok || valueType == napi_undefined || resultParams.errCode == 0,
         resultParams.errInfo = HksCreateExternalErrorInfoWithFlag(resultParams.errCode, errMsg.c_str(), isFailed),
         "GetErrorInfoParams::errInfo not found in result");
 
@@ -351,8 +348,7 @@ int32_t GetResourceIdParams(const napi_env &env, const napi_value &funcResult, C
 
 int32_t GetAuthUkeyPinParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
-    HKS_EXT_IF_TRUE_RETURN(resultParams.errCode != 0 && resultParams.errCode != EXTENSION_ERRCODE_PIN_CODE_ERROR,
-        HKS_SUCCESS);
+    HKS_EXT_IF_TRUE_RETURN(resultParams.errCode != EXTENSION_ERRCODE_PIN_CODE_ERROR, HKS_SUCCESS);
     // retryCount: required
     int32_t ret = GetRequiredUint32Prop(env, funcResult, "retryCount", resultParams.retryCnt);
     HKS_EXT_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetAuthUkeyPinParams: retryCount failed");
@@ -424,7 +420,7 @@ int32_t GetGetPropertyParams(const napi_env &env, const napi_value &funcResult, 
     HKS_EXT_IF_TRUE_RETURN(resultParams.errCode != 0, HKS_SUCCESS);
     napi_value nativeArray = nullptr;
     auto status = napi_get_named_property(env, funcResult, "property", &nativeArray);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_GET_NAME_PROPERTY_FAILED,
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_SUCCESS,
         "napi_get_named_property property failed, status:%d", status);
 
     napi_valuetype valueType = napi_undefined;
