@@ -675,7 +675,7 @@ int32_t HksMbedtlsDesCryptoFinal(void **cryptoCtx, const struct HksBlob *message
 }
 
 #if defined(HKS_SUPPORT_DES_CBC_NOPADDING)
-void HksMbedtlsDesHalModecbcFreeCtx(void **cryptCtx)
+void HksMbedtlsDesHalModeCbcFreeCtx(void **cryptCtx)
 {
     if (cryptCtx == NULL || *cryptCtx == NULL) {
         HKS_LOG_E("FreeCtx cryptCtx param is null");
@@ -686,6 +686,24 @@ void HksMbedtlsDesHalModecbcFreeCtx(void **cryptCtx)
     if (mbedtlsDesCtx->padding == HKS_PADDING_NONE) {
         if (mbedtlsDesCtx->append != NULL) {
             mbedtls_des_free((mbedtls_des_context *)(mbedtlsDesCtx->append));
+            HKS_FREE(mbedtlsDesCtx->append);
+        }
+    }
+}
+#endif
+
+#if defined(HKS_SUPPORT_DES_ECB_NOPADDING)
+void HksMbedtlsDesHalModeEcbFreeCtx(void **cryptCtx)
+{
+    if (cryptCtx == NULL || *cryptCtx == NULL) {
+        HKS_LOG_E("FreeCtx cryptCtx param is null");
+        return;
+    }
+
+    struct HksMbedtlsDesCtx *mbedtlsDesCtx = (struct HksMbedtlsDesCtx *)*cryptCtx;
+    if (mbedtlsDesCtx->padding == HKS_PADDING_NONE) {
+        if (mbedtlsDesCtx->append != NULL) {
+            mbedtls_cipher_free((mbedtls_cipher_context_t *)(mbedtlsDesCtx->append));
             HKS_FREE(mbedtlsDesCtx->append);
         }
     }
@@ -703,7 +721,12 @@ void HksMbedtlsDesHalFreeCtx(void **cryptCtx)
     switch (mbedtlsDesCtx->mode) {
 #if defined(HKS_SUPPORT_DES_CBC_NOPADDING)
         case HKS_MODE_CBC:
-            HksMbedtlsDesHalModecbcFreeCtx(cryptCtx);
+            HksMbedtlsDesHalModeCbcFreeCtx(cryptCtx);
+            break;
+#endif
+#if defined(HKS_SUPPORT_DES_ECB_NOPADDING)
+        case HKS_MODE_ECB:
+            HksMbedtlsDesHalModeEcbFreeCtx(cryptCtx);
             break;
 #endif
         default:

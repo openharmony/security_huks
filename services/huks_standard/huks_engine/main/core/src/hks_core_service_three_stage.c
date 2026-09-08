@@ -58,21 +58,11 @@
 #define HKS_AES_CCM_NONCE_LEN            7
 #define HKS_ML_DSA_CONTEXT_MAX_SIZE      255
 #define HKS_ML_DSA_MESSAGE_MAX_SIZE      102400
+#define HKS_RSA_PKCS_NUM                 11
 
-static int32_t CheckRsaCipherData(bool isEncrypt, uint32_t keyLen, struct HksUsageSpec *usageSpec,
-    const struct HksBlob *outData)
+static int32_t GetPlainTextSize(uint32_t digest, uint32_t keySize, uint32_t padding, uint32_t *plainTextSize)
 {
-    uint32_t keySize = keyLen / HKS_BITS_PER_BYTE;
-    uint32_t padding = usageSpec->padding;
-    uint32_t digest = usageSpec->digest;
-
-    if (padding == HKS_PADDING_NONE) {
-        if (outData->size < keySize) {
-            HKS_LOG_E("outData buffer too small size: %" LOG_PUBLIC "u, keySize: %" LOG_PUBLIC "u",
-                outData->size, keySize);
-            return HKS_ERROR_BUFFER_TOO_SMALL;
-        }
-    } else if (padding == HKS_PADDING_OAEP) {
+    if (padding == HKS_PADDING_OAEP) {
         uint32_t digestLen;
         int32_t ret = HksGetDigestLen(digest, &digestLen);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetDigestLen failed, ret = %" LOG_PUBLIC "x", ret)
@@ -80,21 +70,45 @@ static int32_t CheckRsaCipherData(bool isEncrypt, uint32_t keyLen, struct HksUsa
         if (keySize <= (HKS_RSA_OAEP_DIGEST_NUM * digestLen + HKS_RSA_OAEP_DIGEST_NUM)) {
             return HKS_ERROR_INVALID_KEY_FILE;
         }
-
-        uint32_t size = keySize - HKS_RSA_OAEP_DIGEST_NUM * digestLen - HKS_RSA_OAEP_DIGEST_NUM;
-        if (isEncrypt) {
-            if (outData->size < keySize) {
-                HKS_LOG_E("encrypt, outData buffer too small size: %" LOG_PUBLIC "u, keySize: %" LOG_PUBLIC "u",
-                    outData->size, keySize);
-                return HKS_ERROR_BUFFER_TOO_SMALL;
-            }
-        } else {
-            if (outData->size < size) {
-                HKS_LOG_E("decrypt, outData buffer too small size: %" LOG_PUBLIC "u, keySize: %" LOG_PUBLIC "u",
-                    outData->size, keySize);
-                return HKS_ERROR_BUFFER_TOO_SMALL;
-            }
+        *plainTextSize = keySize - HKS_RSA_OAEP_DIGEST_NUM * digestLen - HKS_RSA_OAEP_DIGEST_NUM;
+    } else if (padding == HKS_PADDING_PKCS1_V1_5) {
+        if (keySize <= HKS_RSA_PKCS_NUM) {
+            HKS_LOG_E("invalid keySize: %" LOG_PUBLIC "u, keySize must be greater than 11", keySize);
+            return HKS_ERROR_INVALID_KEY_FILE;
         }
+        *plainTextSize = keySize - HKS_RSA_PKCS_NUM;
+    } else {
+        HKS_LOG_E("invalid padding: %" LOG_PUBLIC "u", padding);
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
+
+    return HKS_SUCCESS;
+}
+
+static int32_t CheckRsaCipherData(bool isEncrypt, uint32_t keyLen, struct HksUsageSpec *usageSpec,
+    const struct HksBlob *outData)
+{
+    uint32_t keySize = keyLen / HKS_BITS_PER_BYTE;
+    uint32_t padding = usageSpec->padding;
+    uint32_t digest = usageSpec->digest;
+    uint32_t size = 0;
+
+    if (padding == HKS_PADDING_NONE || isEncrypt) {
+        if (outData->size < keySize) {
+            HKS_LOG_E("outData buffer too small size: %" LOG_PUBLIC "u, keySize: %" LOG_PUBLIC "u",
+                outData->size, keySize);
+            return HKS_ERROR_BUFFER_TOO_SMALL;
+        }
+        return HKS_SUCCESS;
+    }
+
+    int32_t ret = GetPlainTextSize(digest, keySize, padding, &size);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetPlainTextSize failed, ret = %" LOG_PUBLIC "d", ret)
+
+    if (outData->size < size) {
+        HKS_LOG_E("outData too small size: %" LOG_PUBLIC "u, keySize: %" LOG_PUBLIC "u, padding: %" LOG_PUBLIC "u",
+            outData->size, keySize, padding);
+        return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
     return HKS_SUCCESS;
@@ -103,20 +117,33 @@ static int32_t CheckRsaCipherData(bool isEncrypt, uint32_t keyLen, struct HksUsa
 static int32_t CheckSm2CipherData(bool isEncrypt, const struct HksUsageSpec *usageSpec, const struct HksBlob *inData,
     const struct HksBlob *outData)
 {
-    if (!isEncrypt) {
-        return HKS_SUCCESS;
-    }
-    uint32_t digest = usageSpec->digest;
-    uint32_t digestLen;
-    int32_t ret = HksGetDigestLen(digest, &digestLen);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetDigestLen failed, ret = %" LOG_PUBLIC "x", ret)
     uint32_t lenC1 = HKS_SM2_C1_LEN_NUM * HKS_KEY_BYTES(HKS_SM2_KEY_SIZE_256) + 1;
-    uint32_t needLen = (lenC1 + digestLen + inData->size);
 
-    if (outData->size < needLen) {
-        HKS_LOG_E("encrypt, outData buffer too small size: %" LOG_PUBLIC "u, needLen: %"
-            LOG_PUBLIC "d", outData->size, needLen);
-        return HKS_ERROR_BUFFER_TOO_SMALL;
+    if (isEncrypt) {
+        uint32_t digest = usageSpec->digest;
+        uint32_t digestLen;
+        int32_t ret = HksGetDigestLen(digest, &digestLen);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetDigestLen failed, ret = %" LOG_PUBLIC "x", ret)
+        HKS_IF_TRUE_LOGE_RETURN(IsAdditionOverflow(inData->size, lenC1 + digestLen),
+            HKS_ERROR_INVALID_ARGUMENT,
+            "sm2 encrypt, inData size overflow, inData->size = %" LOG_PUBLIC "u", inData->size)
+        uint32_t needLen = (lenC1 + digestLen + inData->size);
+        HKS_IF_TRUE_LOGE_RETURN(outData->size < needLen, HKS_ERROR_BUFFER_TOO_SMALL,
+            "encrypt, outData buffer too small size: %" LOG_PUBLIC "u, needLen: %"
+            LOG_PUBLIC "u", outData->size, needLen)
+    } else {
+        uint32_t digest = usageSpec->digest;
+        uint32_t digestLen;
+        int32_t ret = HksGetDigestLen(digest, &digestLen);
+        if (ret != HKS_SUCCESS) {
+            digestLen = 0;
+        }
+        HKS_IF_TRUE_LOGE_RETURN(inData->size < (lenC1 + digestLen), HKS_ERROR_INVALID_ARGUMENT,
+            "sm2 decrypt, inData size too small, inData->size = %" LOG_PUBLIC "u", inData->size)
+        uint32_t maxPlainLen = inData->size - lenC1 - digestLen;
+        HKS_IF_TRUE_LOGE_RETURN(outData->size < maxPlainLen, HKS_ERROR_BUFFER_TOO_SMALL,
+            "decrypt, outData buffer too small size: %" LOG_PUBLIC "u, need: %"
+            LOG_PUBLIC "u", outData->size, maxPlainLen)
     }
     return HKS_SUCCESS;
 }
@@ -162,13 +189,9 @@ static int32_t CheckBlockCipherOther(uint32_t mode, bool isEncrypt, const struct
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
         }
-        uint32_t needSize = inData->size + paddingSize;
-        if (mode == HKS_MODE_CBC || mode == HKS_MODE_ECB) {
-            needSize += blockSize;
-        }
-        if (outData->size < needSize) {
+        if (outData->size < inData->size + paddingSize) {
             HKS_LOG_E("encrypt, outData buffer too small size: %" LOG_PUBLIC "u, need: %" LOG_PUBLIC "u",
-                outData->size, needSize);
+                outData->size, inData->size + paddingSize);
             return HKS_ERROR_BUFFER_TOO_SMALL;
         }
     } else {
@@ -888,9 +911,24 @@ static int32_t CoreCipherUpdate(const struct HuksKeyNode *keyNode, const struct 
 {
     HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(outData), HKS_ERROR_INVALID_ARGUMENT, "invalid outData")
 
-    if (outData->size < inData->size) {
-        HKS_LOG_E("cipher update, out buffer too small size: %" LOG_PUBLIC "u, inSize: %" LOG_PUBLIC "u",
-            outData->size, inData->size);
+    uint32_t minOutSize = inData->size;
+    struct HksParam *modeParam = NULL;
+    int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_BLOCK_MODE, &modeParam);
+    if (ret == HKS_SUCCESS && (modeParam->uint32Param == HKS_MODE_CBC || modeParam->uint32Param == HKS_MODE_ECB)) {
+        uint32_t blockSize = HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE;
+        if (alg == HKS_ALG_DES || alg == HKS_ALG_3DES) {
+            blockSize = HKS_BLOCK_CIPHER_DES_CBC_BLOCK_SIZE;
+        }
+        if (IsAdditionOverflow(inData->size, blockSize - 1)) {
+            HKS_LOG_E("cipher update, inData size overflow with blockSize");
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+        minOutSize = inData->size + blockSize - 1;
+    }
+
+    if (outData->size < minOutSize) {
+        HKS_LOG_E("cipher update, out buffer too small size: %" LOG_PUBLIC "u, need: %" LOG_PUBLIC "u",
+            outData->size, minOutSize);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
@@ -898,7 +936,7 @@ static int32_t CoreCipherUpdate(const struct HuksKeyNode *keyNode, const struct 
     HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "ctx is invalid: null!")
 
     struct HksParam *purposeParam = NULL;
-    int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_PURPOSE, &purposeParam);
+    ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_PURPOSE, &purposeParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append cipher get purpose param failed!")
 
     if (purposeParam->uint32Param == HKS_KEY_PURPOSE_ENCRYPT) {
@@ -2179,16 +2217,14 @@ int32_t HksCoreMacThreeStageFinish(const struct HuksKeyNode *keyNode, const stru
 
 int32_t HksCoreMacThreeStageAbort(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet, uint32_t alg)
 {
-    (void)alg;
+    /* Use caller-supplied alg instead of reading from attacker-controlled paramSet to prevent
+       HMAC context leak when abort paramSet contains mismatched algorithm tag */
     (void)paramSet;
 
     void *ctx = GetCryptoCtx(keyNode);
     HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "ctx invalid")
     
-    struct HksParam *algParam = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append hmac get alg param failed!")
-    if (algParam->uint32Param == HKS_ALG_CMAC) {
+    if (alg == HKS_ALG_CMAC) {
 #ifdef HKS_SUPPORT_CMAC_C
         HksCryptoHalCmacFreeCtx(&ctx);
 #endif

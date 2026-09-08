@@ -95,7 +95,7 @@ HWTEST_F(HksRsaEngineTest, HksRsaEngineTest001, TestSize.Level0)
 
 /**
  * @tc.name: HksRsaEngineTest.HksRsaEngineTest002
- * @tc.desc: tdd HksRsaEngineTest002, function is RsaCheckKeyMaterial
+ * @tc.desc: tdd HksRsaEngineTest002, function is InitRsaEvpKey key material check
  * @tc.type: FUNC
  */
 HWTEST_F(HksRsaEngineTest, HksRsaEngineTest002, TestSize.Level0)
@@ -114,17 +114,13 @@ HWTEST_F(HksRsaEngineTest, HksRsaEngineTest002, TestSize.Level0)
         .data = (uint8_t *)&data,
     };
 
-    int32_t ret = RsaCheckKeyMaterial(&key);
-    ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_INFO) << "HksRsaEngineTest002 failed, ret = " << ret;
+    /* header + nSize + eSize + dSize (80) exceeds key.size (64), InitRsaEvpKey must fail */
+    ASSERT_EQ(InitRsaEvpKey(&key, false), nullptr);
 
-    ret = RsaCheckKeyMaterial(&key);
-    ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_INFO) << "HksRsaEngineTest002 failed, ret = " << ret;
-
-    ret = RsaCheckKeyMaterial(&key);
-    ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_INFO) << "HksRsaEngineTest002 failed, ret = " << ret;
-
-    ret = RsaCheckKeyMaterial(&key);
-    ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_INFO) << "HksRsaEngineTest002 failed, ret = " << ret;
+    /* valid sizes but wrong keyAlg, InitRsaEvpKey must fail */
+    key.size = sizeof(KeyMaterialRsa) + data.nSize + data.eSize + data.dSize;
+    data.keyAlg = HKS_ALG_ECC;
+    ASSERT_EQ(InitRsaEvpKey(&key, false), nullptr);
 }
 
 /**

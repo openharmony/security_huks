@@ -43,6 +43,9 @@ struct HksKeySpec {
     void *algParam; /* for example : struct HksKeyDerivationParam */
 };
 
+/* upper bound of deriveParam->iterations accepted by every KDF engine, to prevent iteration-count DoS */
+#define HKS_MAX_PBKDF2_ITERATION 0x80000U
+
 struct HksKeyDerivationParam {
     struct HksBlob salt;
     struct HksBlob info;

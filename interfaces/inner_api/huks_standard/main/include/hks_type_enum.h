@@ -142,9 +142,14 @@ enum HksKeyDigest {
 
 /**
  * @brief hks key size
+ * The value of every entry below is in bits, except the HKS_ML_DSA_PUB/PRI_KEY_SIZE_xxx
+ * and HKS_ML_KEM_PUB/PRI_KEY_SIZE_xxx entries which are in bytes, and the
+ * HKS_ML_DSA_KEY_PARAM_SET_xxx / HKS_ML_KEM_KEY_PARAM_SET_xxx entries which are NIST
+ * parameter-set numbers (unitless).
  */
 enum HksKeySize {
 #ifndef HKS_CHIPSET_API
+    /* RSA: bits */
     HKS_RSA_KEY_SIZE_512 = 512,
     HKS_RSA_KEY_SIZE_768 = 768,
     HKS_RSA_KEY_SIZE_1024 = 1024,
@@ -152,6 +157,7 @@ enum HksKeySize {
     HKS_RSA_KEY_SIZE_3072 = 3072,
     HKS_RSA_KEY_SIZE_4096 = 4096,
 
+    /* ECC: bits */
     HKS_ECC_KEY_SIZE_224 = 224,
 #endif
     HKS_ECC_KEY_SIZE_256 = 256,
@@ -159,6 +165,7 @@ enum HksKeySize {
     HKS_ECC_KEY_SIZE_384 = 384,
     HKS_ECC_KEY_SIZE_521 = 521,
 
+    /* AES: bits */
     HKS_AES_KEY_SIZE_128 = 128,
     HKS_AES_KEY_SIZE_192 = 192,
 #endif
@@ -166,23 +173,31 @@ enum HksKeySize {
 #ifndef HKS_CHIPSET_API
     HKS_AES_KEY_SIZE_512 = 512,
 
+    /* Curve25519: bits */
     HKS_CURVE25519_KEY_SIZE_256 = 256,
 
+    /* DH: bits */
     HKS_DH_KEY_SIZE_2048 = 2048,
     HKS_DH_KEY_SIZE_3072 = 3072,
     HKS_DH_KEY_SIZE_4096 = 4096,
 
+    /* SM2: bits */
     HKS_SM2_KEY_SIZE_256 = 256,
+
+    /* SM4: bits */
     HKS_SM4_KEY_SIZE_128 = 128,
 
+    /* DES/3DES: bits */
     HKS_DES_KEY_SIZE_64 = 64,
     HKS_3DES_KEY_SIZE_128 = 128,
     HKS_3DES_KEY_SIZE_192 = 192,
 
+    /* ML-DSA: NIST parameter-set numbers (unitless) */
     HKS_ML_DSA_KEY_PARAM_SET_44 = 44,
     HKS_ML_DSA_KEY_PARAM_SET_65 = 65,
     HKS_ML_DSA_KEY_PARAM_SET_87 = 87,
 
+    /* ML-DSA: bytes */
     HKS_ML_DSA_PUB_KEY_SIZE_1312 = 1312,
     HKS_ML_DSA_PUB_KEY_SIZE_1952 = 1952,
     HKS_ML_DSA_PUB_KEY_SIZE_2592 = 2592,
@@ -190,6 +205,7 @@ enum HksKeySize {
     HKS_ML_DSA_PRI_KEY_SIZE_4032 = 4032,
     HKS_ML_DSA_PRI_KEY_SIZE_4896 = 4896,
 
+    /* ML-KEM: bytes */
     HKS_ML_KEM_PUB_KEY_SIZE_800 = 800,
     HKS_ML_KEM_PUB_KEY_SIZE_1184 = 1184,
     HKS_ML_KEM_PUB_KEY_SIZE_1568 = 1568,
@@ -197,6 +213,7 @@ enum HksKeySize {
     HKS_ML_KEM_PRI_KEY_SIZE_2400 = 2400,
     HKS_ML_KEM_PRI_KEY_SIZE_3168 = 3168,
 
+    /* ML-KEM: NIST parameter-set numbers (unitless) */
     HKS_ML_KEM_KEY_PARAM_SET_768 = 768,
     HKS_ML_KEM_KEY_PARAM_SET_1024 = 1024,
 #endif

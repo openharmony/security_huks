@@ -38,13 +38,14 @@
 #include "hks_mbedtls_common.h"
 #include "hks_mbedtls_ecc.h"
 #include "hks_template.h"
+#include "hks_common_check.h"
 
 #ifdef HKS_SUPPORT_ECDSA_SIGN_VERIFY
 /* users must ensure the input params not null */
 int32_t HksMbedtlsEcdsaSign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *signature)
 {
-    int32_t ret = EccKeyCheck(key);
+    int32_t ret = CheckAsyKeyMaterialSize(HKS_ALG_ECC, key, NULL);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_ecp_group_id curveNist = MBEDTLS_ECP_DP_NONE;
@@ -98,7 +99,7 @@ int32_t HksMbedtlsEcdsaVerify(const struct HksBlob *key, const struct HksUsageSp
     const struct HksBlob *message, const struct HksBlob *signature)
 {
     (void)usageSpec;
-    int32_t ret = EccKeyCheck(key);
+    int32_t ret = CheckAsyKeyMaterialSize(HKS_ALG_ECC, key, NULL);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_ecp_group_id curveNist = MBEDTLS_ECP_DP_NONE;

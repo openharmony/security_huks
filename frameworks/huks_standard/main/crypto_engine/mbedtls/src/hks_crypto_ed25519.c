@@ -33,6 +33,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_template.h"
+#include "hks_common_check.h"
 
 #include <crypto/ecx.h>
 #include <securec.h>
@@ -77,16 +78,6 @@ static int32_t SaveEd25519KeyMaterial(const struct HksBlob *pubKey, const struct
     return HKS_SUCCESS;
 }
 
-static bool IsBlobZero(const struct HksBlob *key)
-{
-    for (uint32_t i = 0; i < key->size; ++i) {
-        if (key->data[i] != 0) {
-            return false;
-        }
-    }
-    return true;
-}
-
 int32_t HksEd25519GenerateKey(const struct HksKeySpec *spec, struct HksBlob *keyOut)
 {
     (void)spec;
@@ -99,8 +90,10 @@ int32_t HksEd25519GenerateKey(const struct HksKeySpec *spec, struct HksBlob *key
     int32_t ret = HksCryptoHalFillPrivRandom(&tmp);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
-    ossl_ed25519_public_from_private(NULL, pubKeyBlob.data, priKeyBlob.data, NULL);
-    if (IsBlobZero(&pubKeyBlob) || IsBlobZero(&priKeyBlob)) {
+    ret = ossl_ed25519_public_from_private(NULL, pubKeyBlob.data, priKeyBlob.data, NULL);
+    if (ret != CRYPTO_SUCCESS) {
+        HKS_LOG_E("get public key failed");
+        (void)memset_s(priKeyBlob.data, ED25519_PRIVATE_KEY_LEN, 0, ED25519_PRIVATE_KEY_LEN);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
@@ -110,47 +103,10 @@ int32_t HksEd25519GenerateKey(const struct HksKeySpec *spec, struct HksBlob *key
 }
 #endif /* HKS_SUPPORT_ED25519_GENERATE_KEY */
 
-static int32_t CheckEd25519Material(const struct HksBlob *key)
-{
-    uint32_t totalSize = sizeof(struct KeyMaterial25519);
-    if (key->size < totalSize) {
-        HKS_LOG_E("Ed25519 key material too small");
-        return HKS_ERROR_INVALID_KEY_INFO;
-    }
-
-    struct KeyMaterial25519 *km = (struct KeyMaterial25519 *)key->data;
-    if (((key->size - totalSize) < km->pubKeySize) ||
-        ((key->size - totalSize) < km->priKeySize) ||
-        (km->pubKeySize > (UINT32_MAX - km->priKeySize)) ||
-        ((key->size - totalSize) < (km->pubKeySize + km->priKeySize))) {
-        HKS_LOG_E("Ed25519 key material wrong pub and pri key size %" LOG_PUBLIC "u, %" LOG_PUBLIC "u, "
-            "%" LOG_PUBLIC "u", key->size, km->pubKeySize, km->priKeySize);
-        return HKS_ERROR_INVALID_KEY_INFO;
-    }
-
-    return HKS_SUCCESS;
-}
-
 #ifdef HKS_SUPPORT_ED2519_GET_PUBLIC_KEY
-static int32_t GetEd25519PubKeyCheck(const struct HksBlob *key, const struct HksBlob *keyOut)
-{
-    int32_t ret = CheckEd25519Material(key);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    /* check keyOut */
-    struct KeyMaterial25519 *km = (struct KeyMaterial25519 *)key->data;
-    if ((km->pubKeySize > (UINT32_MAX - sizeof(struct KeyMaterial25519))) ||
-        (keyOut->size < (sizeof(struct KeyMaterial25519) + km->pubKeySize))) {
-        HKS_LOG_E("Ecc public keyOut size too small! keyOut size = 0x%" LOG_PUBLIC "X", keyOut->size);
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
-
-    return HKS_SUCCESS;
-}
-
 int32_t HksGetEd25519PubKey(const struct HksBlob *input, struct HksBlob *output)
 {
-    int32_t ret = GetEd25519PubKeyCheck(input, output);
+    int32_t ret = CheckAsyKeyMaterialSize(HKS_ALG_ED25519, input, output);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     struct KeyMaterial25519 *key = (struct KeyMaterial25519 *)input->data;
@@ -161,6 +117,7 @@ int32_t HksGetEd25519PubKey(const struct HksBlob *input, struct HksBlob *output)
     }
 
     ((struct KeyMaterial25519 *)output->data)->priKeySize = 0;
+    ((struct KeyMaterial25519 *)output->data)->reserved = 0;
     output->size = outLen;
     return HKS_SUCCESS;
 }
@@ -171,8 +128,8 @@ int32_t HksEd25519Sign(const struct HksBlob *key, const struct HksUsageSpec *usa
     const struct HksBlob *message, struct HksBlob *signature)
 {
     (void)usageSpec;
-    int32_t ret = CheckEd25519Material(key);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    int32_t ret = CheckAsyKeyMaterialSize(HKS_ALG_ED25519, key, NULL);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_KEY_INFO, "invalid ed25519 key material")
     if (signature->size < HKS_SIGNATURE_MIN_SIZE ||
         key->size <= (sizeof(struct KeyMaterial25519) + ED25519_PUBLIC_KEY_LEN)) {
         HKS_LOG_E("invalid param : signature size = %" LOG_PUBLIC "u, key size = %" LOG_PUBLIC "u",
@@ -196,8 +153,8 @@ int32_t HksEd25519Verify(const struct HksBlob *key, const struct HksUsageSpec *u
     const struct HksBlob *message, const struct HksBlob *signature)
 {
     (void)usageSpec;
-    int32_t ret = CheckEd25519Material(key);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    int32_t ret = CheckAsyKeyMaterialSize(HKS_ALG_ED25519, key, NULL);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_KEY_INFO, "invalid ed25519 key material")
     if (signature->size < HKS_SIGNATURE_MIN_SIZE) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }

@@ -29,9 +29,6 @@ int32_t GetBlobFromBuffer(struct HksBlob *blob, const struct HksBlob *srcBlob, u
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
 int32_t HksUKeyGeneralUnpack(const struct HksBlob *srcData, struct HksBlob *blob, struct HksParamSet **paramSet);
 
-int32_t HksUkeyBlob2ParamSetUnpack(const struct HksBlob *srcData, struct HksBlob *blob1,
-    struct HksBlob *blob2, struct HksParamSet **paramSet);
-
 int32_t HksSetOrGetRemotePropertyUnpack(const struct HksBlob *srcData,
     enum HksExtPropertyOperation *operation, struct HksBlob *blob1,
     struct HksBlob *blob2, struct HksParamSet **paramSet);
@@ -47,8 +44,6 @@ int32_t PackAuthPinReply(struct HksBlob *outBlob, int32_t ret, int32_t status, u
 
 int32_t HksGenerateKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
     struct HksParamSet **paramSetIn, struct HksBlob *keyOut);
-
-int32_t HksParamSetPack(struct HksBlob *inBlob, const struct HksParamSet *paramSet);
 
 int32_t HksImportKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias, struct HksParamSet **paramSet,
     struct HksBlob *key);
@@ -90,7 +85,7 @@ int32_t HksGetKeyInfoListUnpack(const struct HksBlob *srcData, struct HksParamSe
     struct HksKeyInfo **keyInfoList);
 
 int32_t HksGetKeyInfoListPackFromService(struct HksBlob *destData, uint32_t listCount,
-    const struct HksKeyInfo *keyInfoList);
+    struct HksKeyInfo *keyInfoList);
 
 int32_t HksCertificateChainUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
     struct HksParamSet **paramSet, struct HksBlob *certChainBlob);

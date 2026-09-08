@@ -104,6 +104,7 @@ int32_t HksOpensslHmac(const struct HksBlob *key, uint32_t digestAlg, const stru
 
     HKS_IF_NULL_LOGE_RETURN(opensslAlg, HKS_ERROR_CRYPTO_ENGINE_ERROR, "hmac get openssl algorithm failed")
 
+    HKS_IF_TRUE_LOGE_RETURN(key->size > INT32_MAX, HKS_ERROR_INVALID_ARGUMENT, "key size is too large")
     uint8_t *hmacData = HMAC(opensslAlg, key->data, (int32_t)key->size, msg->data, msg->size, mac->data, &mac->size);
     HKS_IF_NULL_LOGE_RETURN(hmacData, HKS_ERROR_CRYPTO_ENGINE_ERROR, "hmac process failed.")
     return HKS_SUCCESS;

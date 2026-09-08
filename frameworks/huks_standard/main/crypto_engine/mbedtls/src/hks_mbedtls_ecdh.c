@@ -39,6 +39,7 @@
 #include "hks_mbedtls_common.h"
 #include "hks_mbedtls_ecc.h"
 #include "hks_template.h"
+#include "hks_common_check.h"
 
 #ifdef HKS_SUPPORT_ECDH_AGREE_KEY
 static int32_t EccKeyMaterialToCtx(const struct HksBlob *nativeKey,
@@ -56,10 +57,13 @@ static int32_t EccKeyMaterialToCtx(const struct HksBlob *nativeKey,
 int32_t HksMbedtlsEcdh(const struct HksBlob *nativeKey,
     const struct HksBlob *pubKey, const struct HksKeySpec *spec, struct HksBlob *sharedKey)
 {
-    int32_t ret = EccKeyCheck(pubKey);
+    int32_t ret = CheckAsyKeyMaterialSize(HKS_ALG_ECC, pubKey, NULL);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
-    ret = EccKeyCheck(nativeKey);
+    ret = CheckAsyKeyMaterialSize(HKS_ALG_ECC, nativeKey, NULL);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    ret = HksEccCheckKeySize(spec->keyLen);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_ecp_group_id mbedtlsCurveNist = MBEDTLS_ECP_DP_NONE;

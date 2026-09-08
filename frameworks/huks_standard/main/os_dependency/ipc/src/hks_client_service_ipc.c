@@ -1399,7 +1399,7 @@ int32_t HksClientUpdate(const struct HksBlob *handle, const struct HksParamSet *
     };
 
     int32_t ret = HksParamsToParamSet(updateParams, HKS_ARRAY_SIZE(updateParams), &sendParamSet);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksParamSetPack fail")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksParamsToParamSet fail")
 
     struct HksBlob parcelBlob = {
         .size = sendParamSet->paramSetSize,
@@ -1436,7 +1436,7 @@ int32_t HksClientFinish(const struct HksBlob *handle, const struct HksParamSet *
     };
 
     int32_t ret = HksParamsToParamSet(finishParams, HKS_ARRAY_SIZE(finishParams), &sendParamSet);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksParamSetPack fail")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksParamsToParamSet fail")
 
     struct HksBlob parcelBlob = {
         .size = sendParamSet->paramSetSize,
@@ -1470,7 +1470,7 @@ int32_t HksClientAbort(const struct HksBlob *handle, const struct HksParamSet *p
     };
 
     int32_t ret = HksParamsToParamSet(params, HKS_ARRAY_SIZE(params), &sendParamSet);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksParamSetPack fail")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksParamsToParamSet fail")
 
     struct HksBlob parcelBlob = {
         .size = sendParamSet->paramSetSize,

@@ -239,7 +239,8 @@ HWTEST_F(HksCryptoHalMlKem, HksCryptoHalMlKem_009, Function | SmallTest | Level0
     uint8_t outBuf[sizeof(HksKeyMaterialMlKem)] = {0};
     HksBlob keyOut = { .size = sizeof(HksKeyMaterialMlKem), .data = outBuf };
     int32_t ret = HksCryptoHalGetPubKey(&fakeKeyIn, &keyOut);
-    ASSERT_EQ(ret, HKS_ERROR_INVALID_OPERATION);
+    /* keyIn material does not contain the declared pubKeySize, input check fails first */
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 #endif
 }
 

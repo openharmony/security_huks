@@ -55,8 +55,6 @@ int32_t HksMbedtlsRsaVerify(const struct HksBlob *key,
 int32_t HksMbedtlsGetRsaPubKey(const struct HksBlob *keyIn, struct HksBlob *keyOut);
 #endif
 
-int32_t RsaKeyMaterialNedSizeCheck(const struct KeyMaterialRsa *keyMaterial);
-int32_t RsaKeyCheck(const struct HksBlob *key);
 #if defined(HKS_SUPPORT_RSA_CRYPT) || defined(HKS_SUPPORT_RSA_SIGN_VERIFY)
 int32_t RsaKeyMaterialToCtx(const struct HksBlob *key, const bool needPrivateExponent, mbedtls_rsa_context *ctx);
 #endif

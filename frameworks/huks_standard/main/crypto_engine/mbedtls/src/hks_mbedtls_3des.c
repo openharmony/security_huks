@@ -713,11 +713,11 @@ void HksMbedtls3DesHalModeEcbFreeCtx(void **cryptCtx)
         return;
     }
 
-    struct HksMbedtls3DesCtx *mbedtlsDesCtx = (struct HksMbedtls3DesCtx *)*cryptCtx;
-    if (mbedtlsDesCtx->padding == HKS_PADDING_NONE) {
-        if (mbedtlsDesCtx->append != NULL) {
-            mbedtls_cipher_free((mbedtls_cipher_context_t *)mbedtlsDesCtx->append);
-            HKS_FREE(mbedtlsDesCtx->append);
+    struct HksMbedtls3DesCtx *mbedtls3DesCtx = (struct HksMbedtls3DesCtx *)*cryptCtx;
+    if (mbedtls3DesCtx->padding == HKS_PADDING_NONE) {
+        if (mbedtls3DesCtx->append != NULL) {
+            mbedtls_cipher_free((mbedtls_cipher_context_t *)mbedtls3DesCtx->append);
+            HKS_FREE(mbedtls3DesCtx->append);
         }
     }
 }

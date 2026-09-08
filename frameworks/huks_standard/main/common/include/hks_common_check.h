@@ -32,6 +32,8 @@
 
 #define HKS_DIGEST_SHA256_HEX_STRING_LEN 64
 
+#define HKS_RSA_KEYSIZE_CNT 8
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -77,9 +79,29 @@ int32_t HksCheckKeyNeedStored(const struct HksParamSet *paramSet, bool *isNeedSt
 int32_t HksCheckKeyBlobParamSetEqualRuntimeParamSet(const struct HksParamSet *keyBlobParamSet,
     const struct HksParamSet *runtimeParamSet, uint32_t tag);
 
+/*
+ * Check that the key material length, computed as headerSize plus the sum of the sizeCnt
+ * variable-length component sizes, does not exceed key->size, and that every component
+ * size does not exceed HKS_MAX_KEY_LEN. Each partial sum is bounded by key->size, so the
+ * accumulation can never overflow on any platform.
+ * Returns HKS_SUCCESS when the material fits into key, HKS_ERROR_INVALID_ARGUMENT otherwise.
+ */
+int32_t HksCheckKeyMaterialSize(uint32_t headerSize, const uint32_t *sizes, uint32_t sizeCnt,
+    const struct HksBlob *key);
+
 void SetRsaPssSaltLenType(const struct HksParamSet *paramSet, struct HksUsageSpec *usageSpec);
 
 int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
+
+/* check key size */
+int32_t HksEccCheckKeySize(const uint32_t keySize);
+
+/*
+ * Unified validation of asymmetric key material (see hks_check_paramset.c): validates
+ * the input key material blob, and when keyOut is not NULL (public key export paths)
+ * also validates the output buffer capacity the public key will be copied into.
+ */
+int32_t CheckAsyKeyMaterialSize(uint32_t alg, const struct HksBlob *keyIn, const struct HksBlob *keyOut);
 #ifdef __cplusplus
 }
 #endif

@@ -488,6 +488,13 @@ static int32_t DecryptKekWithAgreeSharedSecret(const struct HksBlob *wrappedKeyD
     }
     struct HksBlob kek = { 0, NULL };
     kek.size = HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256);
+    if (kekEncDataPart.size > kek.size) {
+        HKS_LOG_E("kekEncDataPart size %" LOG_PUBLIC "u exceeds kek buffer size %" LOG_PUBLIC "u",
+            kekEncDataPart.size, kek.size);
+        HksFreeUsageSpec(&decKekUsageSpec);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
     uint8_t *kekBuffer = (uint8_t *) HksMalloc(kek.size);
     if (kekBuffer == NULL) {
         HKS_LOG_E("malloc kek memory failed!");

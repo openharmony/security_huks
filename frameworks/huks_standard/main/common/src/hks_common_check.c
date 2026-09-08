@@ -21,6 +21,7 @@
 #include "hks_log.h"
 #include "hks_param.h"
 #include "hks_template.h"
+#include "hks_crypto_hal.h"
 #include "securec.h"
 
 int32_t HksCheckBlob4(const struct HksBlob *data1, const struct HksBlob *data2,
@@ -54,6 +55,25 @@ int32_t HksCheckBlob2(const struct HksBlob *data1, const struct HksBlob *data2)
 
     HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(data2), HKS_ERROR_INVALID_ARGUMENT, "invalid data2.")
 
+    return HKS_SUCCESS;
+}
+
+int32_t HksCheckKeyMaterialSize(uint32_t headerSize, const uint32_t *sizes, uint32_t sizeCnt,
+    const struct HksBlob *key)
+{
+    HKS_IF_NULL_LOGE_RETURN(key, HKS_ERROR_INVALID_ARGUMENT, "key is NULL!")
+    HKS_IF_TRUE_LOGE_RETURN(sizeCnt > 0 && sizes == NULL, HKS_ERROR_INVALID_ARGUMENT, "sizes is NULL!")
+    HKS_IF_TRUE_LOGE_RETURN(key->size < headerSize, HKS_ERROR_INVALID_ARGUMENT,
+        "key size %" LOG_PUBLIC "u is smaller than header size %" LOG_PUBLIC "u", key->size, headerSize)
+
+    uint32_t available = key->size - headerSize;
+    for (uint32_t i = 0; i < sizeCnt; i++) {
+        HKS_IF_TRUE_LOGE_RETURN(sizes[i] > HKS_MAX_KEY_LEN, HKS_ERROR_INVALID_ARGUMENT,
+            "key component size %" LOG_PUBLIC "u exceeds max %" LOG_PUBLIC "u", sizes[i], HKS_MAX_KEY_LEN)
+        HKS_IF_TRUE_LOGE_RETURN(sizes[i] > available, HKS_ERROR_INVALID_ARGUMENT,
+            "key component size %" LOG_PUBLIC "u exceeds remaining size %" LOG_PUBLIC "u", sizes[i], available)
+        available -= sizes[i];
+    }
     return HKS_SUCCESS;
 }
 
@@ -336,4 +356,16 @@ int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct HksParamS
 
     HksFreeParamSet(&newParamSet);
     return ret;
+}
+
+int32_t HksEccCheckKeySize(const uint32_t keySize)
+{
+    if ((keySize != HKS_ECC_KEY_SIZE_224) &&
+        (keySize != HKS_ECC_KEY_SIZE_256) &&
+        (keySize != HKS_ECC_KEY_SIZE_384) &&
+        (keySize != HKS_ECC_KEY_SIZE_521)) {
+        HKS_LOG_E("Invalid ecc keySize! keySize = 0x%" LOG_PUBLIC "X", keySize);
+        return HKS_ERROR_INVALID_KEY_SIZE;
+    }
+    return HKS_SUCCESS;
 }

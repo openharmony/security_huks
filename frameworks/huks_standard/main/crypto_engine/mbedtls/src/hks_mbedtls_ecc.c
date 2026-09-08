@@ -38,19 +38,9 @@
 #include "hks_mbedtls_common.h"
 #include "hks_mem.h"
 #include "hks_template.h"
+#include "hks_common_check.h"
 
 #define HKS_ECC_KEYPAIR_CNT 3
-
-static int32_t HksMbedtlsEccCheckKeySize(const uint32_t keySize)
-{
-    if ((keySize != HKS_ECC_KEY_SIZE_224) && (keySize != HKS_ECC_KEY_SIZE_256) && (keySize != HKS_ECC_KEY_SIZE_384) &&
-        (keySize != HKS_ECC_KEY_SIZE_521)) {
-        HKS_LOG_E("Invalid ecc keySize! keySize = 0x%" LOG_PUBLIC "X", keySize);
-        return HKS_ERROR_INVALID_KEY_SIZE;
-    }
-
-    return HKS_SUCCESS;
-}
 
 int32_t GetEccGroupId(const uint32_t keyLen, mbedtls_ecp_group_id *grpId)
 {
@@ -71,41 +61,6 @@ int32_t GetEccGroupId(const uint32_t keyLen, mbedtls_ecp_group_id *grpId)
             HKS_LOG_E("Unsupported key length! keyLen: 0x%" LOG_PUBLIC "X", keyLen);
             return HKS_ERROR_INVALID_KEY_SIZE;
     }
-    return HKS_SUCCESS;
-}
-
-static int32_t EccKeyMaterialXyzSizeCheck(const struct KeyMaterialEcc *keyMaterial)
-{
-    const uint32_t maxKeyByteLen = HKS_KEY_BYTES(HKS_ECC_KEY_SIZE_521);
-    if ((keyMaterial->xSize > maxKeyByteLen) ||
-        (keyMaterial->ySize > maxKeyByteLen) || (keyMaterial->zSize > maxKeyByteLen)) {
-        HKS_LOG_E("Invalid ecc keyMaterial! xSize = 0x%" LOG_PUBLIC "X, ySize = 0x%" LOG_PUBLIC "X, "
-            "zSize = 0x%" LOG_PUBLIC "X", keyMaterial->xSize, keyMaterial->ySize, keyMaterial->zSize);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
-    return HKS_SUCCESS;
-}
-
-int32_t EccKeyCheck(const struct HksBlob *key)
-{
-    if (key->size < sizeof(struct KeyMaterialEcc)) {
-        HKS_LOG_E("Ecc key blob size too small");
-        return HKS_ERROR_INVALID_KEY_INFO;
-    }
-    
-    const struct KeyMaterialEcc *keyMaterial = (struct KeyMaterialEcc *)(key->data);
-    int32_t ret = HksMbedtlsEccCheckKeySize(keyMaterial->keySize);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    ret = EccKeyMaterialXyzSizeCheck(keyMaterial);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    if (key->size < (sizeof(struct KeyMaterialEcc) + keyMaterial->xSize + keyMaterial->ySize + keyMaterial->zSize)) {
-        HKS_LOG_E("Ecc key size too small! key size = 0x%" LOG_PUBLIC "X", key->size);
-        return HKS_ERROR_INVALID_KEY_INFO;
-    }
-
     return HKS_SUCCESS;
 }
 
@@ -253,29 +208,9 @@ int32_t HksMbedtlsEccGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
 #endif /* HKS_SUPPORT_ECC_GENERATE_KEY */
 
 #ifdef HKS_SUPPORT_ECC_GET_PUBLIC_KEY
-static int32_t GetEccPubKeyCheckParams(const struct HksBlob *keyIn, const struct HksBlob *keyOut)
-{
-    int32_t ret = EccKeyCheck(keyIn);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    /* check keyOut size */
-    const struct KeyMaterialEcc *keyMaterial = (struct KeyMaterialEcc *)(keyIn->data);
-    if ((keyMaterial->xSize == 0) || (keyMaterial->ySize == 0)) {
-        HKS_LOG_E("not support get pubkey");
-        return HKS_ERROR_NOT_SUPPORTED;
-    }
-
-    if (keyOut->size < (sizeof(struct KeyMaterialEcc) + keyMaterial->xSize + keyMaterial->ySize)) {
-        HKS_LOG_E("Ecc public keyOut size too small! keyOut size = 0x%" LOG_PUBLIC "X", keyOut->size);
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
-
-    return HKS_SUCCESS;
-}
-
 int32_t HksMbedtlsGetEccPubKey(const struct HksBlob *keyIn, struct HksBlob *keyOut)
 {
-    int32_t ret = GetEccPubKeyCheckParams(keyIn, keyOut);
+    int32_t ret = CheckAsyKeyMaterialSize(HKS_ALG_ECC, keyIn, keyOut);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* x + y, so need size is: sizeof(struct HksPubKeyInfo) + xSize + ySize */

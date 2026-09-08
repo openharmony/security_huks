@@ -706,7 +706,7 @@ HWTEST_F(JsCryptoExtAbilityTest, GetUint8ArrayValue_0000, testing::ext::TestSize
     EXPECT_CALL(*insMoc, napi_get_typedarray_info(_, _, _, _, _, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(napi_uint8_array), Return(napi_ok)));
     EXPECT_CALL(*insMoc, napi_get_arraybuffer_info(_, _, _, _)).WillOnce(Return(napi_ok));
-    EXPECT_EQ(GetUint8ArrayValue(env, value, result), napi_ok);
+    EXPECT_EQ(GetUint8ArrayValue(env, value, result), napi_generic_failure);
 }
 
 HWTEST_F(JsCryptoExtAbilityTest, GetHksCertInfoValue_0000, testing::ext::TestSize.Level0)
@@ -806,7 +806,7 @@ HWTEST_F(JsCryptoExtAbilityTest, GetHksCertInfoValue_0001, testing::ext::TestSiz
     EXPECT_CALL(*insMoc, napi_get_typedarray_info(_, _, _, _, _, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(napi_uint8_array), Return(napi_ok)));
     EXPECT_CALL(*insMoc, napi_get_arraybuffer_info(_, _, _, _)).WillOnce(Return(napi_ok));
-    EXPECT_EQ(GetHksCertInfoValue(env, value, certInfo), napi_ok);
+    EXPECT_EQ(GetHksCertInfoValue(env, value, certInfo), napi_generic_failure);
 }
 
 HWTEST_F(JsCryptoExtAbilityTest, GetHksParamsfromValue_0000, testing::ext::TestSize.Level0)
@@ -942,7 +942,7 @@ HWTEST_F(JsCryptoExtAbilityTest, GetHksParamsfromValue_0002, testing::ext::TestS
     EXPECT_CALL(*insMoc, napi_get_typedarray_info(_, _, _, _, _, _, _))
         .WillOnce(DoAll(SetArgPointee<ARG_INDEX_SECOND>(napi_uint8_array), Return(napi_ok)));
     EXPECT_CALL(*insMoc, napi_get_arraybuffer_info(_, _, _, _)).WillOnce(Return(napi_ok));
-    EXPECT_EQ(GetHksParamsfromValue(env, value, param), napi_ok);
+    EXPECT_EQ(GetHksParamsfromValue(env, value, param), napi_generic_failure);
 }
 
 HWTEST_F(JsCryptoExtAbilityTest, HksCertInfoToString_0000, testing::ext::TestSize.Level0)

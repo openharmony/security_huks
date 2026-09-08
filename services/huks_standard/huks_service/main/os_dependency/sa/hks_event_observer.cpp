@@ -171,7 +171,7 @@ static void DealAllSystemEvent(const OHOS::EventFwk::CommonEventData &data)
         ret = GetProcessInfo(userId, uid, &processInfo);
         HKS_IF_TRUE_EXCU(ret == HKS_SUCCESS, HksServiceDeleteProcessInfo(&processInfo, anco));
 #ifdef L2_STANDARD
-        HksServiceDeleteGroupKey(&processInfo, want);
+        HKS_IF_TRUE_EXCU(ret == HKS_SUCCESS, HksServiceDeleteGroupKey(&processInfo, want));
 #endif
     } else if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED) {
         int userId = data.GetCode();

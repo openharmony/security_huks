@@ -30,21 +30,12 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "hks_common_check.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_openssl_engine.h"
 #include "hks_template.h"
 #include "securec.h"
-
-static int32_t HksOpensslEccCheckKeyLen(uint32_t keyLen)
-{
-    if ((keyLen != HKS_ECC_KEY_SIZE_224) && (keyLen != HKS_ECC_KEY_SIZE_256) && (keyLen != HKS_ECC_KEY_SIZE_384) &&
-        (keyLen != HKS_ECC_KEY_SIZE_521)) {
-        HKS_LOG_E("invalid param keyLen(0x%" LOG_PUBLIC "x)!", keyLen);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    return HKS_SUCCESS;
-}
 
 static int32_t HksOpensslGetCurveId(uint32_t keyLen, int *nid)
 {
@@ -164,7 +155,7 @@ int32_t HksOpensslEccGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
 {
     HKS_IF_TRUE_LOGE_RETURN(spec->algType != HKS_ALG_ECC, HKS_ERROR_INVALID_ARGUMENT,
         "invalid alg type %" LOG_PUBLIC "u", spec->algType)
-    HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslEccCheckKeyLen(spec->keyLen),
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksEccCheckKeySize(spec->keyLen),
         HKS_ERROR_INVALID_ARGUMENT, "Ecc Invalid Param!")
 
     int curveId = 0;
@@ -203,11 +194,11 @@ int32_t HksOpensslEccGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
 #if defined(HKS_SUPPORT_ECC_GET_PUBLIC_KEY) || defined(HKS_SUPPORT_SM2_GET_PUBLIC_KEY)
 int32_t HksOpensslGetEccPubKey(const struct HksBlob *input, struct HksBlob *output)
 {
-    struct KeyMaterialEcc *keyMaterial = (struct KeyMaterialEcc *)input->data;
-    HKS_IF_TRUE_LOGE_RETURN(keyMaterial->xSize == 0 || keyMaterial->ySize == 0, HKS_ERROR_NOT_SUPPORTED,
-        "not support get pubkey")
+    int32_t ret = CheckAsyKeyMaterialSize(HKS_ALG_ECC, input, output);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Get ecc public key check params failed!")
 
-    output->size = sizeof(struct KeyMaterialEcc) + keyMaterial->xSize + keyMaterial->ySize;
+    struct KeyMaterialEcc *keyMaterial = (struct KeyMaterialEcc *)input->data;
+    uint32_t pubKeySize = sizeof(struct KeyMaterialEcc) + keyMaterial->xSize + keyMaterial->ySize;
 
     struct KeyMaterialEcc *publickeyMaterial = (struct KeyMaterialEcc *)output->data;
     publickeyMaterial->keyAlg = keyMaterial->keyAlg;
@@ -222,6 +213,7 @@ int32_t HksOpensslGetEccPubKey(const struct HksBlob *input, struct HksBlob *outp
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
+    output->size = pubKeySize;
     return HKS_SUCCESS;
 }
 #endif
@@ -290,8 +282,8 @@ static int32_t EccInitPublicKey(EC_KEY *eccKey, const uint8_t *keyPair, uint32_t
 static EC_KEY *EccInitKey(const struct HksBlob *keyBlob, bool private)
 {
     /* get ecc pubX,pubY,pri */
-    if (keyBlob->size < sizeof(struct KeyMaterialEcc)) {
-        HKS_LOG_E("ecc key blob size too small");
+    if (CheckAsyKeyMaterialSize(HKS_ALG_ECC, keyBlob, NULL) != HKS_SUCCESS) {
+        HKS_LOG_E("ecc key check failed");
         return NULL;
     }
     
@@ -434,7 +426,7 @@ static int32_t AgreeKeyEcdh(const struct HksBlob *nativeKey, const struct HksBlo
 int32_t HksOpensslEcdhAgreeKey(const struct HksBlob *nativeKey, const struct HksBlob *pubKey,
     const struct HksKeySpec *spec, struct HksBlob *sharedKey)
 {
-    HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslEccCheckKeyLen(spec->keyLen),
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksEccCheckKeySize(spec->keyLen),
         HKS_ERROR_INVALID_ARGUMENT, "invalid param!")
     int32_t ret = AgreeKeyEcdh(nativeKey, pubKey, sharedKey);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ecdh key agreement failed!")

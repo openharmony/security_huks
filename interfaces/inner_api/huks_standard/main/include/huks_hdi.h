@@ -78,7 +78,7 @@
                  HDI_ADAPTER_PARAM(keyOut, &keyOutCore));   \
     HDI_CONVERTER_PARAM_OUT_BLOB(keyOutCore, keyOut)
 
-#define HDI_CONVERTER_FUNC_IMPORTWRAPPEDKEY(wrappedKeyAlias, key, wrappedKeyData, paramSet, keyOut, ret, func)   \
+#define HDI_CONVERTER_FUNC_IMPORTWRAPPEDKEY(wrappingKeyAlias, key, wrappedKeyData, paramSet, keyOut, ret, func)   \
     struct HuksBlob wrappingKeyAliasCore = {0};  \
     struct HuksBlob keyCore = {0};  \
     struct HuksBlob wrappedKeyDataCore = {0};  \
@@ -89,7 +89,7 @@
     HDI_CONVERTER_PARAM_IN_BLOB(key, keyCore)  \
     HDI_CONVERTER_PARAM_IN_BLOB(wrappedKeyData, wrappedKeyDataCore)  \
     HDI_CONVERTER_PARAM_IN_BLOB(keyOut, keyOutCore)  \
-    ret = (func)(HDI_ADAPTER_PARAM(wrappingKeyAlias, &wrappedKeyDataCore),  \
+    ret = (func)(HDI_ADAPTER_PARAM(wrappingKeyAlias, &wrappingKeyAliasCore),  \
                  HDI_ADAPTER_PARAM(key, &keyCore),  \
                  HDI_ADAPTER_PARAM(wrappedKeyData, &wrappedKeyDataCore),  \
                  HDI_ADAPTER_PARAM(paramSet, &paramSetCore),  \

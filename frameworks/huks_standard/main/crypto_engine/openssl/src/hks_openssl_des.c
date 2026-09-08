@@ -349,6 +349,12 @@ int32_t HksOpensslDesCryptoFinal(void **cryptoCtx, const struct HksBlob *message
 void HksOpensslDesHalFreeCtx(void **cryptCtx)
 {
     HKS_IF_TRUE_LOGE_RETURN_VOID(cryptCtx == NULL || *cryptCtx == NULL, "FreeCtx param context null")
+
+    struct HksOpensslDesCtx *desCtx = (struct HksOpensslDesCtx *)*cryptCtx;
+    if (desCtx->append != NULL) {
+        EVP_CIPHER_CTX_free((EVP_CIPHER_CTX *)desCtx->append);
+        desCtx->append = NULL;
+    }
     HKS_FREE(*cryptCtx);
 }
 #endif /* HKS_SUPPORT_DES_C */

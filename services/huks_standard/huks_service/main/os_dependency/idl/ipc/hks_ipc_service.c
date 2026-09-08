@@ -948,6 +948,11 @@ void HksIpcServiceGetKeyParamSet(const struct HksBlob *srcData, const uint8_t *c
         ret = HksServiceGetKeyParamSet(&processInfo, &keyAlias, paramSetIn, paramSetOut);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceGetKeyParamSet fail, ret = %" LOG_PUBLIC "d", ret)
 
+        for (uint32_t i = 0; i < paramSetOut->paramsCnt; ++i) {
+            if (GetTagType((enum HksTag)paramSetOut->params[i].tag) == HKS_TAG_TYPE_BYTES) {
+                paramSetOut->params[i].blob.data = NULL;
+            }
+        }
         paramSet.size = paramSetOut->paramSetSize;
         paramSet.data = (uint8_t *)paramSetOut;
     } while (0);
@@ -1104,7 +1109,7 @@ void HksIpcServiceEncrypt(const struct HksBlob *srcData, const uint8_t *context)
         ret = HksIpcCheckParamSetBlacklist(inParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "paramSet contains forbidden tag")
 
-        ret = HksGetProcessInfoForIPC(NULL, context, &processInfo);
+        ret = HksGetProcessInfoForIPC(inParamSet, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksCheckAcrossAccountsPermission(inParamSet, processInfo.userIdInt);

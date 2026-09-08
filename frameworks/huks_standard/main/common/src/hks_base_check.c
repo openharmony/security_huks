@@ -1129,6 +1129,31 @@ int32_t HksCheckCipherMutableParams(uint32_t cmdId, uint32_t alg, const struct P
     HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_INVALID_PADDING)
     return ret;
 }
+#ifdef HKS_SUPPORT_SM2_C
+#define HKS_SM2_C1_SIZE  65
+#define HKS_SM2_C3_SIZE  32
+static int32_t CheckSm2CipherDataSize(uint32_t cmdId, const struct HksBlob *inData, const struct HksBlob *outData)
+{
+    if (cmdId == HKS_CMD_ID_ENCRYPT) {
+        HKS_IF_TRUE_LOGE_RETURN(IsAdditionOverflow(inData->size, HKS_SM2_C1_SIZE + HKS_SM2_C3_SIZE),
+            HKS_ERROR_INVALID_ARGUMENT,
+            "sm2 encrypt, inData size overflow, inData->size = %" LOG_PUBLIC "u", inData->size)
+        uint32_t needLen = inData->size + HKS_SM2_C1_SIZE + HKS_SM2_C3_SIZE;
+        HKS_IF_TRUE_LOGE_RETURN(outData->size < needLen, HKS_ERROR_BUFFER_TOO_SMALL,
+            "sm2 encrypt, outData buffer too small size: %" LOG_PUBLIC "u, need: %" LOG_PUBLIC "u",
+            outData->size, needLen)
+    } else if (cmdId == HKS_CMD_ID_DECRYPT) {
+        HKS_IF_TRUE_LOGE_RETURN(inData->size < HKS_SM2_C1_SIZE + HKS_SM2_C3_SIZE,
+            HKS_ERROR_INVALID_ARGUMENT,
+            "sm2 decrypt, inData size too small, inData->size = %" LOG_PUBLIC "u", inData->size)
+        uint32_t maxPlainLen = inData->size - HKS_SM2_C1_SIZE - HKS_SM2_C3_SIZE;
+        HKS_IF_TRUE_LOGE_RETURN(outData->size < maxPlainLen, HKS_ERROR_BUFFER_TOO_SMALL,
+            "sm2 decrypt, outData buffer too small size: %" LOG_PUBLIC "u, need: %" LOG_PUBLIC "u",
+            outData->size, maxPlainLen)
+    }
+    return HKS_SUCCESS;
+}
+#endif
 
 int32_t HksCheckCipherData(uint32_t cmdId, uint32_t alg, const struct ParamsValues *inputParams,
     const struct HksBlob *inData, const struct HksBlob *outData)
@@ -1156,7 +1181,7 @@ int32_t HksCheckCipherData(uint32_t cmdId, uint32_t alg, const struct ParamsValu
 #endif
 #ifdef HKS_SUPPORT_SM2_C
         case HKS_ALG_SM2:
-            return HKS_SUCCESS;
+            return CheckSm2CipherDataSize(cmdId, inData, outData);
 #endif
         default:
             return HKS_ERROR_INVALID_ALGORITHM;

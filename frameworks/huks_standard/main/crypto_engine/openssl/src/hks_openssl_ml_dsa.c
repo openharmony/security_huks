@@ -24,6 +24,7 @@
 #include <openssl/core_names.h>
 #include <openssl/evp.h>
 #include "hks_error_code.h"
+#include "hks_common_check.h"
 #include "hks_openssl_engine.h"
 #include "hks_openssl_ml_dsa.h"
 #include "hks_log.h"
@@ -158,13 +159,14 @@ int32_t HksOpensslMlDsaGenerateKey(const struct HksKeySpec *spec, struct HksBlob
 #ifdef HKS_SUPPORT_ML_DSA_GET_PUBLIC_KEY
 int32_t HksOpensslMlDsaGetPubKey(const struct HksBlob *keyIn, struct HksBlob *keyOut)
 {
-    HKS_IF_TRUE_LOGE_RETURN(keyIn->size < sizeof(struct HksKeyMaterialMlDsa), HKS_ERROR_INVALID_ARGUMENT,
-        "invalid keyIn size %" LOG_PUBLIC "u", keyIn->size)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckAsyKeyMaterialSize(HKS_ALG_ML_DSA, keyIn, keyOut),
+        HKS_ERROR_INVALID_ARGUMENT, "invalid ml-dsa key material!")
+
     struct HksKeyMaterialMlDsa *keyMaterial = (struct HksKeyMaterialMlDsa *)keyIn->data;
-    if (keyMaterial->pubKeySize == 0 || keyOut->size < sizeof(struct HksKeyMaterialMlDsa)) {
-        HKS_LOG_E("get ml-dsa public key size or output size invalid");
-        return HKS_ERROR_INVALID_ALGORITHM;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(keyMaterial->pubKeySize == 0, HKS_ERROR_INVALID_ALGORITHM,
+        "get ml-dsa public key size invalid")
+
+    uint32_t pubKeySize = sizeof(struct HksKeyMaterialMlDsa) + keyMaterial->pubKeySize;
 
     struct HksKeyMaterialMlDsa *publickeyMaterial = (struct HksKeyMaterialMlDsa *)keyOut->data;
     publickeyMaterial->keyAlg = keyMaterial->keyAlg;
@@ -179,7 +181,7 @@ int32_t HksOpensslMlDsaGetPubKey(const struct HksBlob *keyIn, struct HksBlob *ke
         return HKS_ERROR_INVALID_OPERATION;
     }
 
-    keyOut->size = sizeof(struct HksKeyMaterialMlDsa) + keyMaterial->pubKeySize;
+    keyOut->size = pubKeySize;
     return HKS_SUCCESS;
 }
 #endif
@@ -207,9 +209,11 @@ static int32_t MlDsaSetContextParam(EVP_PKEY_CTX *ctx, const struct HksUsageSpec
 
 static int32_t MlDsaSignVerifyInitCtx(const struct HksBlob *key, EVP_PKEY **pkey)
 {
-    HKS_IF_TRUE_LOGE_RETURN(key->size < sizeof(struct HksKeyMaterialMlDsa), HKS_ERROR_INVALID_ARGUMENT,
-        "invalid key size %" LOG_PUBLIC "u", key->size)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckAsyKeyMaterialSize(HKS_ALG_ML_DSA, key, NULL),
+        HKS_ERROR_INVALID_ARGUMENT, "invalid ml-dsa key material!")
+
     struct HksKeyMaterialMlDsa *keyMaterial = (struct HksKeyMaterialMlDsa *)key->data;
+    int32_t ret;
     uint32_t alg = 0;
     for (uint32_t i = 0; i < HKS_ARRAY_SIZE(g_validMlDsaParam); i++) {
         if (g_validMlDsaParam[i].paramSetId == keyMaterial->keyParamSet) {
@@ -225,7 +229,7 @@ static int32_t MlDsaSignVerifyInitCtx(const struct HksBlob *key, EVP_PKEY **pkey
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
-    int32_t ret = EVP_PKEY_fromdata_init(ctx);
+    ret = EVP_PKEY_fromdata_init(ctx);
     if (ret != HKS_OPENSSL_SUCCESS) {
         HKS_LOG_E("failed to initialize ml-dsa ctx");
         HksLogOpensslError();

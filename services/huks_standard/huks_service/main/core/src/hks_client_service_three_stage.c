@@ -186,9 +186,13 @@ static void MarkAndDeleteOperationByUnion(HksOperationUnion *unionOp, const stru
     }
     MarkOperationUnUseWrapper(unionOp);
     if (unionOp->isSe) {
+        /* Skip delete if SE operation is NULL to prevent cross-process DoS */
+        HKS_IF_NULL_RETURN_VOID(unionOp->op.seOperation);
         HksDeleteSeOperation(handle);
         unionOp->op.seOperation = NULL;
     } else {
+        /* Skip delete if operation is NULL to prevent cross-process DoS via handle forgery */
+        HKS_IF_NULL_RETURN_VOID(unionOp->op.operation);
         DeleteOperation(handle);
         unionOp->op.operation = NULL;
     }

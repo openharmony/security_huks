@@ -124,15 +124,13 @@ void HksLog(uint32_t logLevel, const char *format, ...)
     } else {
         va_start(ap, format);
         char *funName = va_arg(ap, char *);
-        uint32_t lineNo = va_arg(ap, uint32_t);
         va_end(ap);
 
         if (funName == NULL) {
             HILOG_ERROR(LOG_ENGINE, "[HksLog] get funName fail!");
             return;
         }
-        int32_t offset = sprintf_s(g_errMsg + g_msgLen, MAX_ERROR_MESSAGE_LEN - g_msgLen, " <%s[%u]",
-            funName, lineNo);
+        int32_t offset = sprintf_s(g_errMsg + g_msgLen, MAX_ERROR_MESSAGE_LEN - g_msgLen, " <%s", funName);
         if (offset <= 0) {
             HILOG_ERROR(LOG_ENGINE, "[HksLog] append call chain fail! offset: [%{public}d]", offset);
             return;

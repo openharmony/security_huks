@@ -497,8 +497,8 @@ int32_t HksAesDecryptForBatch(const struct HksBlob *keyAlias, struct HksParamSet
 }
 
 #else
-    int32_t HksAesCipherTestCaseOther(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
-        struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet)
+int32_t HksAesCipherTestCaseOther(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
+    struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet)
 {
     struct HksBlob inData = {
         (uint32_t)g_inData.length(),
