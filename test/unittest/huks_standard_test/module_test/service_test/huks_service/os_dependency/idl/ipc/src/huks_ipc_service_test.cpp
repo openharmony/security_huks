@@ -1834,4 +1834,44 @@ HWTEST_F(HksIpcServiceTest, HksIpcServiceTest049, TestSize.Level0)
     HksFreeParamSet(&paramSet2);
 }
 
+/**
+ * @tc.name: HksIpcServiceTest.HksIpcServiceTest050
+ * @tc.desc: tdd HksIpcServiceGenerateKey with ML_KEM algorithm, expect HKS_SUCCESS
+ *           Cover HksAllocateMemForKey branch: alg == HKS_ALG_ML_KEM
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksIpcServiceTest, HksIpcServiceTest050, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksIpcServiceTest050");
+    const char *alias = "test_ml_kem_key";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+
+    struct HksParamSet *paramSet = NULL;
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&paramSet));
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ML_KEM },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ML_KEM_KEY_PARAM_SET_1024 },
+    };
+    EXPECT_EQ(HKS_SUCCESS, HksAddParams(paramSet, params, sizeof(params)/sizeof(params[0])));
+    EXPECT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet));
+
+    struct HksBlob keyOut = { 0, NULL };
+    uint32_t bufSize = sizeof(keyAlias.size) + ALIGN_SIZE(keyAlias.size) +
+                       ALIGN_SIZE(paramSet->paramSetSize) + sizeof(uint32_t);
+    uint8_t *bufData = (uint8_t *)HksMalloc(bufSize);
+    EXPECT_NE(bufData, nullptr);
+    struct HksBlob srcData = { bufSize, bufData };
+
+    EXPECT_EQ(HKS_SUCCESS, HksGenerateKeyPack(&srcData, &keyAlias, paramSet, &keyOut));
+
+    MessageParcel reply;
+    uint8_t *context = reinterpret_cast<uint8_t *>(&reply);
+    struct HksParamSet *tmpParamSetOut = NULL;
+    EXPECT_EQ(HKS_SUCCESS, HksInitParamSet(&tmpParamSetOut));
+    HksIpcServiceGenerateKey(&srcData, context);
+    HksFreeParamSet(&tmpParamSetOut);
+    HksFreeParamSet(&paramSet);
+    HKS_FREE(bufData);
+}
+
 }
