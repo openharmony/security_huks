@@ -699,6 +699,9 @@ void HksIpcServiceGetResourceId(const struct HksBlob *srcData, const uint8_t *co
 
 static int32_t HksAllocateMemForKey(const struct HksParamSet *paramSet, struct HksBlob *key)
 {
+    (void)paramSet;
+    uint32_t size = MAX_KEY_SIZE;
+#ifdef L2_STANDARD
     uint32_t alg = 0;
     struct HksParam *algParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
@@ -706,10 +709,12 @@ static int32_t HksAllocateMemForKey(const struct HksParamSet *paramSet, struct H
         alg = algParam->uint32Param;
     }
 
-    uint32_t size = MAX_KEY_SIZE;
-    if (alg == HKS_ALG_ML_DSA || alg == HKS_ALG_ML_KEM) {
+    if (alg == HKS_ALG_ML_DSA) {
         size = ML_DSA_MAX_KEY_SIZE;
+    } else if (alg == HKS_ALG_ML_KEM) {
+        size = ML_KEM_MAX_KEY_SIZE;
     }
+#endif
     key->data = (uint8_t *)HksMalloc(size);
     if (key->data == NULL) {
         HKS_LOG_E("malloc fail.");
