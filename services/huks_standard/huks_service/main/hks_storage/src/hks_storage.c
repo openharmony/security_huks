@@ -124,10 +124,12 @@ int32_t HksStorageReadFile(
 #ifdef HKS_ENABLE_CLEAN_FILE
 static int32_t CleanFile(const char *path, const char *fileName)
 {
-    uint32_t size = HksStorageFileSize(path, fileName);
-    HKS_IF_TRUE_LOGE_RETURN(size == 0 || size > HKS_MAX_FILE_SIZE, HKS_ERROR_FILE_SIZE_FAIL,
-        "get file size failed, ret = %" LOG_PUBLIC "u.", size)
+    int32_t tempSize = HksStorageFileSize(path, fileName);
+    HKS_IF_TRUE_RETURN(tempSize < 0, tempSize);
+    HKS_IF_TRUE_LOGE_RETURN(tempSize == 0 || tempSize > HKS_MAX_FILE_SIZE, HKS_ERROR_FILE_SIZE_FAIL,
+        "get file tempSize failed, ret = %" LOG_PUBLIC "u.", tempSize)
 
+    uint32_t size = (uint32_t)tempSize;
     int32_t ret = HKS_SUCCESS;
     uint8_t *buf;
     do {
@@ -183,10 +185,12 @@ static int32_t HksStorageRemoveFile(const char *path, const char *fileName)
 static int32_t CopyKeyBlobFromSrc(const char *srcPath, const char *srcFileName,
     const char *destPath, const char *destFileName)
 {
-    int32_t size = HksStorageFileSize(srcPath, srcFileName);
-    HKS_IF_TRUE_RETURN(size < 0, size);
-    HKS_IF_TRUE_LOGE_RETURN(size == 0, HKS_ERROR_FILE_SIZE_FAIL, "get file size failed, ret = %" LOG_PUBLIC "u.", size)
-
+    int32_t tempSize = HksStorageFileSize(srcPath, srcFileName);
+    HKS_IF_TRUE_RETURN(tempSize < 0, tempSize);
+    HKS_IF_TRUE_LOGE_RETURN(tempSize == 0, HKS_ERROR_FILE_SIZE_FAIL,
+        "get file tempSize failed, ret = %" LOG_PUBLIC "u.", tempSize)
+    
+    uint32_t size = (uint32_t)tempSize;
     uint8_t *buffer = (uint8_t *)HksMalloc(size);
     HKS_IF_NULL_RETURN(buffer, HKS_ERROR_MALLOC_FAIL)
 
@@ -215,11 +219,12 @@ static int32_t CopyKeyBlobFromSrc(const char *srcPath, const char *srcFileName,
 
 static int32_t GetKeyBlobFromFile(const char *path, const char *fileName, struct HksBlob *keyBlob)
 {
-    int32_t size = HksStorageFileSize(path, fileName);
-    HKS_IF_TRUE_RETURN(size < 0, size);
-    HKS_IF_TRUE_RETURN(size == 0, HKS_ERROR_FILE_SIZE_FAIL)
-    HKS_IF_TRUE_RETURN(keyBlob->size < size, HKS_ERROR_INSUFFICIENT_DATA)
+    int32_t tempSize = HksStorageFileSize(path, fileName);
+    HKS_IF_TRUE_RETURN(tempSize < 0, tempSize);
+    HKS_IF_TRUE_RETURN(tempSize == 0, HKS_ERROR_FILE_SIZE_FAIL)
+    HKS_IF_TRUE_RETURN(keyBlob->size < tempSize, HKS_ERROR_INSUFFICIENT_DATA)
 
+    uint32_t size = (uint32_t)tempSize;
     int32_t ret = HksStorageReadFile(path, fileName, 0, keyBlob, &size);
     HKS_IF_TRUE_LOGE_RETURN(ret == HKS_ERROR_NO_PERMISSION, ret,
         "Check Permission failed, ret = %" LOG_PUBLIC "d.", ret)
