@@ -191,6 +191,7 @@ typedef struct GenerateInfo {
     struct HksEventKeyAccessInfo keyAccessInfo;
     uint32_t agreeAlg;
     uint32_t pubKeyIsAlias;
+    uint32_t keyCount;
 } GenerateInfo;
 
 typedef struct ImportInfo {
