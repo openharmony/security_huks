@@ -23,6 +23,7 @@
 #include "securec.h"
 #include <openssl/core_names.h>
 #include <openssl/evp.h>
+#include "hks_common_check.h"
 #include "hks_openssl_engine.h"
 #include "hks_openssl_ml_kem.h"
 #include "hks_log.h"
@@ -132,13 +133,14 @@ int32_t HksOpensslMlKemGenerateKey(const struct HksKeySpec *spec, struct HksBlob
 #ifdef HKS_SUPPORT_ML_KEM_GET_PUBLIC_KEY
 int32_t HksOpensslMlKemGetPubKey(const struct HksBlob *keyIn, struct HksBlob *keyOut)
 {
-    HKS_IF_TRUE_LOGE_RETURN(keyIn->size < sizeof(struct HksKeyMaterialMlKem), HKS_ERROR_INVALID_ARGUMENT,
-        "invalid keyIn size %" LOG_PUBLIC "u", keyIn->size)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckAsyKeyMaterialSize(HKS_ALG_ML_KEM, keyIn, keyOut),
+        HKS_ERROR_INVALID_ARGUMENT, "invalid ml-kem key material!")
+
     struct HksKeyMaterialMlKem *keyMaterial = (struct HksKeyMaterialMlKem *)keyIn->data;
-    if (keyMaterial->pubKeySize == 0 || keyOut->size < sizeof(struct HksKeyMaterialMlKem)) {
-        HKS_LOG_E("get ml-kem public key size or output size invalid");
-        return HKS_ERROR_INVALID_ALGORITHM;
-    }
+    HKS_IF_TRUE_LOGE_RETURN(keyMaterial->pubKeySize == 0, HKS_ERROR_INVALID_ALGORITHM,
+        "get ml-kem public key size invalid")
+
+    uint32_t pubKeySize = sizeof(struct HksKeyMaterialMlKem) + keyMaterial->pubKeySize;
 
     struct HksKeyMaterialMlKem *publickeyMaterial = (struct HksKeyMaterialMlKem *)keyOut->data;
     publickeyMaterial->keyAlg = keyMaterial->keyAlg;
@@ -155,7 +157,7 @@ int32_t HksOpensslMlKemGetPubKey(const struct HksBlob *keyIn, struct HksBlob *ke
         return HKS_ERROR_INVALID_OPERATION;
     }
 
-    keyOut->size = sizeof(struct HksKeyMaterialMlKem) + keyMaterial->pubKeySize;
+    keyOut->size = pubKeySize;
     return HKS_SUCCESS;
 }
 #endif

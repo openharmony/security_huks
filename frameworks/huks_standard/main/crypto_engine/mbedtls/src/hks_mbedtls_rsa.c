@@ -44,7 +44,6 @@
 #define HKS_RSA_KEYPAIR_CNT 3
 #define MBEDTLS_RSA_PUBLIC	0
 #define MBEDTLS_RSA_PRIVATE	1
-#define HKS_RSA_KEYSIZE_CNT 8
 #define MBEDTLS_RSA_PSS_DIGEST_NUM 2
 
 typedef struct HksMbedtlsSignVerifyParam {
@@ -52,65 +51,6 @@ typedef struct HksMbedtlsSignVerifyParam {
     int32_t padding;
     uint32_t pssSaltLen;
 } HksMbedtlsSignVerifyParam;
-
-static int32_t RsaCheckKeySize(const uint32_t keySize)
-{
-#ifdef HKS_SUPPORT_RSA_C_FLEX_KEYSIZE
-    if ((keySize >= HKS_RSA_KEY_SIZE_1024) && (keySize <= HKS_RSA_KEY_SIZE_2048)) {
-        if ((keySize % HKS_RSA_KEYSIZE_CNT) == 0) {
-            return HKS_SUCCESS;
-        }
-    }
-#endif
-    switch (keySize) {
-        case HKS_RSA_KEY_SIZE_512:
-        case HKS_RSA_KEY_SIZE_768:
-        case HKS_RSA_KEY_SIZE_1024:
-        case HKS_RSA_KEY_SIZE_2048:
-        case HKS_RSA_KEY_SIZE_3072:
-        case HKS_RSA_KEY_SIZE_4096:
-            break;
-        default:
-            HKS_LOG_E("Invalid rsa key size! keySize = 0x%" LOG_PUBLIC "X", keySize);
-            return HKS_ERROR_INVALID_KEY_SIZE;
-    }
-
-    return HKS_SUCCESS;
-}
-
-int32_t RsaKeyMaterialNedSizeCheck(const struct KeyMaterialRsa *keyMaterial)
-{
-    const uint32_t maxKeyByteLen = HKS_RSA_KEY_SIZE_4096 / HKS_BITS_PER_BYTE;
-    if ((keyMaterial->nSize > maxKeyByteLen) || (keyMaterial->eSize > maxKeyByteLen) ||
-        (keyMaterial->dSize > maxKeyByteLen)) {
-        HKS_LOG_E("Invalid rsa keyMaterial! nSize = 0x%" LOG_PUBLIC "X, eSize = 0x%" LOG_PUBLIC "X, "
-            "dSize = 0x%" LOG_PUBLIC "X",
-            keyMaterial->nSize,
-            keyMaterial->eSize,
-            keyMaterial->dSize);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
-    return HKS_SUCCESS;
-}
-
-int32_t RsaKeyCheck(const struct HksBlob *key)
-{
-    const struct KeyMaterialRsa *keyMaterial = (struct KeyMaterialRsa *)(key->data);
-
-    int32_t ret = RsaCheckKeySize(keyMaterial->keySize);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    ret = RsaKeyMaterialNedSizeCheck(keyMaterial);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    if (key->size < (sizeof(struct KeyMaterialRsa) + keyMaterial->nSize + keyMaterial->eSize + keyMaterial->dSize)) {
-        HKS_LOG_E("Rsa key size too small! key size = 0x%" LOG_PUBLIC "X", key->size);
-        return HKS_ERROR_INVALID_KEY_INFO;
-    }
-
-    return HKS_SUCCESS;
-}
 
 #ifdef HKS_SUPPORT_RSA_GENERATE_KEY
 static int32_t RsaSaveKeyMaterial(const mbedtls_rsa_context *ctx, const uint32_t keySize, struct HksBlob *key)
@@ -334,7 +274,7 @@ static int32_t HksMbedtlsRsaCryptMbedtls(const struct HksBlob *key, const struct
 static int32_t HksMbedtlsRsaCrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const bool encrypt, struct HksBlob *cipherText)
 {
-    int32_t ret = RsaKeyCheck(key);
+    int32_t ret = CheckAsyKeyMaterialSize(HKS_ALG_RSA, key, NULL);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     int32_t padding = MBEDTLS_RSA_PKCS_V15;
@@ -618,7 +558,7 @@ static int32_t HksMbedtlsRsaSignVerifyForNoPadding(const struct HksBlob *key, co
 int32_t HksMbedtlsRsaSign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *signature)
 {
-    int32_t ret = RsaKeyCheck(key);
+    int32_t ret = CheckAsyKeyMaterialSize(HKS_ALG_RSA, key, NULL);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     if (usageSpec->padding != HKS_PADDING_NONE) {
         ret = HksMbedtlsRsaSignVerify(key, usageSpec, message, true, signature);
@@ -635,7 +575,7 @@ int32_t HksMbedtlsRsaSign(const struct HksBlob *key, const struct HksUsageSpec *
 int32_t HksMbedtlsRsaVerify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const struct HksBlob *signature)
 {
-    int32_t ret = RsaKeyCheck(key);
+    int32_t ret = CheckAsyKeyMaterialSize(HKS_ALG_RSA, key, NULL);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     if (usageSpec->padding != HKS_PADDING_NONE) {
         ret = HksMbedtlsRsaSignVerify(key, usageSpec, message, false, (struct HksBlob *)signature);
@@ -651,24 +591,9 @@ int32_t HksMbedtlsRsaVerify(const struct HksBlob *key, const struct HksUsageSpec
 #endif /* HKS_SUPPORT_RSA_SIGN_VERIFY */
 
 #ifdef HKS_SUPPORT_RSA_GET_PUBLIC_KEY
-static int32_t GetRsaPubKeyCheckParams(const struct HksBlob *keyIn, const struct HksBlob *keyOut)
-{
-    int32_t ret = RsaKeyCheck(keyIn);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    /* check keyOut size */
-    const struct KeyMaterialRsa *keyMaterial = (struct KeyMaterialRsa *)(keyIn->data);
-    if (keyOut->size < (sizeof(struct HksPubKeyInfo) + keyMaterial->nSize + keyMaterial->eSize)) {
-        HKS_LOG_E("Rsa public keyOut size too small! keyOut size = 0x%" LOG_PUBLIC "X", keyOut->size);
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
-
-    return HKS_SUCCESS;
-}
-
 int32_t HksMbedtlsGetRsaPubKey(const struct HksBlob *keyIn, struct HksBlob *keyOut)
 {
-    int32_t ret = GetRsaPubKeyCheckParams(keyIn, keyOut);
+    int32_t ret = CheckAsyKeyMaterialSize(HKS_ALG_RSA, keyIn, keyOut);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* n + e, so need size is: sizeof(struct HksPubKeyInfo) + nSize + eSize */

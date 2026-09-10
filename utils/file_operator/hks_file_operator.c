@@ -126,10 +126,11 @@ static void UnixToString(char *outTime, time_t unixTime, char *format)
 {
     HKS_IF_TRUE_LOGE_RETURN_VOID(outTime == NULL || format == NULL, "outTime or format is NULL");
 
-    struct tm* localTime = localtime(&unixTime);
+    struct tm localTimeInfo;
+    struct tm *localTime = localtime_r(&unixTime, &localTimeInfo);
     HKS_IF_NULL_LOGE_RETURN_VOID(localTime, "localTime is NULL");
 
-    size_t size = strftime(outTime, FILE_TIME_LEN, format, localTime);
+    size_t size = strftime(outTime, FILE_TIME_LEN, format, &localTimeInfo);
     HKS_IF_TRUE_LOGE_RETURN_VOID(size == 0, "create format time failed");
 }
 

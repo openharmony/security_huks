@@ -109,10 +109,14 @@ int32_t HksExportPublicKeyAdapter(const struct HksBlob *keyAlias,
     struct HksBlob publicKey = { size, buffer };
 
     int32_t ret = HksClientExportPublicKey(keyAlias, paramSet, &publicKey);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksClientExportPublicKey failed, ret = %" LOG_PUBLIC "d", ret);
+        HKS_FREE_BLOB(publicKey);
+        return ret;
+    }
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
     int32_t isUkeyTag;
     if (HksCheckIsUkeyOperation(paramSet, &isUkeyTag) == HKS_SUCCESS) {
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksClientExportPublicKey in Ukey fail. ret = %" LOG_PUBLIC "d", ret)
         if ((CheckBlob(key) != HKS_SUCCESS) ||
             (memcpy_s(key->data, key->size, publicKey.data, publicKey.size) != EOK)) {
             HKS_FREE_BLOB(publicKey);
@@ -123,23 +127,21 @@ int32_t HksExportPublicKeyAdapter(const struct HksBlob *keyAlias,
         return ret;
     }
 #endif
-    if (ret == HKS_SUCCESS) {
-        struct HksBlob x509Key = { 0, NULL };
-        ret = TranslateToX509PublicKey(&publicKey, &x509Key);
-        if (ret != HKS_SUCCESS) {
-            HKS_FREE(buffer);
-            return ret;
-        }
-
-        if ((CheckBlob(key) != HKS_SUCCESS) || (memcpy_s(key->data, key->size, x509Key.data, x509Key.size) != EOK)) {
-            ret = HKS_ERROR_INSUFFICIENT_DATA;
-            HKS_LOG_E("x509 format memcpy failed");
-        } else {
-            key->size = x509Key.size;
-        }
-
-        HKS_FREE_BLOB(x509Key);
+    struct HksBlob x509Key = { 0, NULL };
+    ret = TranslateToX509PublicKey(&publicKey, &x509Key);
+    if (ret != HKS_SUCCESS) {
+        HKS_FREE_BLOB(publicKey);
+        return ret;
     }
+
+    if ((CheckBlob(key) != HKS_SUCCESS) || (memcpy_s(key->data, key->size, x509Key.data, x509Key.size) != EOK)) {
+        ret = HKS_ERROR_INSUFFICIENT_DATA;
+        HKS_LOG_E("x509 format memcpy failed");
+    } else {
+        key->size = x509Key.size;
+    }
+
+    HKS_FREE_BLOB(x509Key);
     HKS_FREE_BLOB(publicKey);
     return ret;
 }

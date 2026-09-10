@@ -252,6 +252,7 @@ static int32_t HksParseParamsToParamSet(const std::vector<HksParam> &paramsVecto
             }
         }
         ret = HksBuildParamSet(&paramSet);
+        HKS_IF_NOT_SUCC_BREAK(ret)
         *outParamSet = paramSet;
     } while (0);
     if (ret != HKS_SUCCESS) {
@@ -303,6 +304,17 @@ int32_t HksParseParamSetWithAdd(const JSIValue* args, uint32_t index, struct Hks
                 HKS_LOG_E("parse params to vector failed");
                 break;
             }
+        }
+
+        for (auto &param : paramsVector) {
+            if (param.tag == HKS_TAG_BUNDLE_NAME) {
+                HKS_LOG_E("bundle name param is not allowed to be set by user");
+                ret = HKS_ERROR_INVALID_ARGUMENT;
+                break;
+            }
+        }
+        if (ret != HKS_SUCCESS) {
+            break;
         }
 
         ret = GetAndPushBundleNameToVector(paramsVector);

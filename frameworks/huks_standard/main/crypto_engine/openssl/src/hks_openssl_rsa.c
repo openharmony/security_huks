@@ -30,6 +30,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "hks_common_check.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_openssl_engine.h"
@@ -69,18 +70,6 @@ static int32_t GetRsaPssSaltLen(const struct HksUsageSpec *usageSpec)
             HKS_LOG_E("Invalid rsa salt len type %" LOG_PUBLIC "x!", usageSpec->pssSaltLenType);
             return HKS_ERROR_NOT_SUPPORTED;
     }
-}
-
-static int32_t RsaCheckKeyMaterial(const struct HksBlob *key)
-{
-    const struct KeyMaterialRsa *keyMaterial = (struct KeyMaterialRsa *)(key->data);
-    if (keyMaterial->keyAlg != HKS_ALG_RSA) {
-        return HKS_ERROR_INVALID_KEY_INFO;
-    }
-    if (key->size != sizeof(struct KeyMaterialRsa) + keyMaterial->nSize + keyMaterial->eSize + keyMaterial->dSize) {
-        return HKS_ERROR_INVALID_KEY_INFO;
-    }
-    return HKS_SUCCESS;
 }
 
 int32_t InitRsaKeyBuf(const struct KeyMaterialRsa *keyMaterial, struct HksBlob *bufBlob)
@@ -227,8 +216,11 @@ int32_t HksOpensslRsaGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
 #ifdef HKS_SUPPORT_RSA_GET_PUBLIC_KEY
 int32_t HksOpensslGetRsaPubKey(const struct HksBlob *input, struct HksBlob *output)
 {
+    int32_t ret = CheckAsyKeyMaterialSize(HKS_ALG_RSA, input, output);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check rsa public key params failed")
+
     struct KeyMaterialRsa *keyMaterial = (struct KeyMaterialRsa *)input->data;
-    output->size = sizeof(struct KeyMaterialRsa) + keyMaterial->nSize + keyMaterial->eSize;
+    uint32_t pubKeySize = sizeof(struct KeyMaterialRsa) + keyMaterial->nSize + keyMaterial->eSize;
 
     struct KeyMaterialRsa *publickeyMaterial = (struct KeyMaterialRsa *)output->data;
     publickeyMaterial->keyAlg = keyMaterial->keyAlg;
@@ -243,6 +235,7 @@ int32_t HksOpensslGetRsaPubKey(const struct HksBlob *input, struct HksBlob *outp
             return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
 
+    output->size = pubKeySize;
     return HKS_SUCCESS;
 }
 #endif /* HKS_SUPPORT_RSA_GET_PUBLIC_KEY */
@@ -275,7 +268,7 @@ static int32_t GetRsaCryptPadding(uint32_t padding, uint32_t *rsaPadding)
 
 static EVP_PKEY_CTX *InitEvpPkeyCtx(const struct HksBlob *key, bool encrypt)
 {
-    int32_t ret = RsaCheckKeyMaterial(key);
+    int32_t ret = CheckAsyKeyMaterialSize(HKS_ALG_RSA, key, NULL);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, NULL, "check key material failed")
 
     RSA *rsa = InitRsaStruct(key, !encrypt);
@@ -450,6 +443,9 @@ static int32_t SetRsaPadding(EVP_PKEY_CTX *ctx, const struct HksUsageSpec *usage
 
 static EVP_PKEY *InitRsaEvpKey(const struct HksBlob *key, bool signing)
 {
+    int32_t ret = CheckAsyKeyMaterialSize(HKS_ALG_RSA, key, NULL);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, NULL, "check rsa key material fail")
+
     RSA *rsa = InitRsaStruct(key, signing);
     HKS_IF_NULL_LOGE_RETURN(rsa, NULL, "initialize rsa key failed")
 
@@ -534,8 +530,8 @@ static int32_t RsaCheckNoPadding(const struct HksBlob *key, const struct HksUsag
 static int32_t HksOpensslRsaSignForNoPadding(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *signature)
 {
-    int32_t ret = RsaCheckKeyMaterial(key);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check rsa key material fail")
+    int32_t ret = CheckAsyKeyMaterialSize(HKS_ALG_RSA, key, NULL);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_KEY_INFO, "check rsa key material fail")
 
     ret = RsaCheckNoPadding(key, usageSpec, message);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check rsa no padding fail")
@@ -592,8 +588,8 @@ int32_t HksOpensslRsaSign(const struct HksBlob *key, const struct HksUsageSpec *
 static int32_t HksOpensslRsaVerifyForNoPadding(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const struct HksBlob *signature)
 {
-    int32_t ret = RsaCheckKeyMaterial(key);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check rsa key material fail")
+    int32_t ret = CheckAsyKeyMaterialSize(HKS_ALG_RSA, key, NULL);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_KEY_INFO, "check rsa key material fail")
 
     ret = RsaCheckNoPadding(key, usageSpec, message);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check rsa no padding fail")

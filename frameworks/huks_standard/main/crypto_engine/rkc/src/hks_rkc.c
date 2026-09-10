@@ -79,7 +79,9 @@ static int32_t ReadAllKsfRkc(struct HksKsfDataRkcWithVer *validKsfData)
             break;
         }
     }
+
     if (validIndex == HKS_KSF_NUM) {
+        (void)memset_s(allRkcData, sizeof(allRkcData), 0, sizeof(allRkcData));
         return HKS_ERROR_INVALID_KEY_FILE;
     }
 
@@ -92,6 +94,7 @@ static int32_t ReadAllKsfRkc(struct HksKsfDataRkcWithVer *validKsfData)
 
     (void)memcpy_s(validKsfData, sizeof(struct HksKsfDataRkcWithVer),
         &allRkcData[validIndex], sizeof(struct HksKsfDataRkcWithVer));
+    (void)memset_s(allRkcData, sizeof(allRkcData), 0, sizeof(allRkcData));
     return HKS_SUCCESS;
 }
 

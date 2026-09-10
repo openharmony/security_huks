@@ -407,6 +407,7 @@ int32_t HksMbedtlsGetX25519PubKey(const struct HksBlob *keyIn, struct HksBlob *k
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     ((struct KeyMaterial25519 *)(keyOut->data))->priKeySize = 0;
+    ((struct KeyMaterial25519 *)(keyOut->data))->reserved = 0;
     keyOut->size = outLen;
 
     return HKS_SUCCESS;

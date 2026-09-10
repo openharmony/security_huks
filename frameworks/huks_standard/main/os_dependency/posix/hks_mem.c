@@ -45,7 +45,13 @@ void *HksMalloc(size_t size)
 
 int32_t HksMemCmp(const void *ptr1, const void *ptr2, uint32_t size)
 {
-    return memcmp(ptr1, ptr2, size);
+    const uint8_t *a = (const uint8_t *)ptr1;
+    const uint8_t *b = (const uint8_t *)ptr2;
+    uint8_t diff = 0;
+    for (uint32_t i = 0; i < size; ++i) {
+        diff |= a[i] ^ b[i];
+    }
+    return (int32_t)diff;
 }
 
 void HksFreeImpl(void *addr)

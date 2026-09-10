@@ -132,6 +132,12 @@ static int InitDsaStructParameter(const struct HksBlob *key, const bool needPriv
 
 static DSA *InitDsaStruct(const struct HksBlob *key, const bool needPrivateExponent)
 {
+    int ret = CheckAsyKeyMaterialSize(HKS_ALG_DSA, key, NULL);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("check dsa key len failed, ret = %" LOG_PUBLIC "d", ret);
+        return NULL;
+    }
+
     DSA *dsa = DSA_new();
     HKS_IF_NULL_RETURN(dsa, NULL)
 
@@ -306,10 +312,12 @@ int32_t HksOpensslDsaGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
 #ifdef HKS_SUPPORT_DSA_GET_PUBLIC_KEY
 int32_t HksOpensslGetDsaPubKey(const struct HksBlob *input, struct HksBlob *output)
 {
-    struct KeyMaterialDsa *keyMaterial = (struct KeyMaterialDsa *)input->data;
+    int32_t ret = CheckAsyKeyMaterialSize(HKS_ALG_DSA, input, output);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check dsa key material failed")
 
-    output->size = sizeof(struct KeyMaterialDsa) + keyMaterial->ySize + keyMaterial->pSize + keyMaterial->qSize +
-                   keyMaterial->gSize;
+    struct KeyMaterialDsa *keyMaterial = (struct KeyMaterialDsa *)input->data;
+    uint32_t pubKeySize = sizeof(struct KeyMaterialDsa) + keyMaterial->ySize + keyMaterial->pSize +
+                          keyMaterial->qSize + keyMaterial->gSize;
 
     struct KeyMaterialDsa *publickeyMaterial = (struct KeyMaterialDsa *)output->data;
     publickeyMaterial->keyAlg = keyMaterial->keyAlg;
@@ -320,13 +328,13 @@ int32_t HksOpensslGetDsaPubKey(const struct HksBlob *input, struct HksBlob *outp
     publickeyMaterial->qSize = keyMaterial->qSize;
     publickeyMaterial->gSize = keyMaterial->gSize;
 
-    if (memcpy_s(output->data + sizeof(struct KeyMaterialDsa) + publickeyMaterial->xSize,
-        output->size - (sizeof(struct KeyMaterialDsa) + publickeyMaterial->xSize),
+    if (memcpy_s(output->data + sizeof(struct KeyMaterialDsa), output->size - sizeof(struct KeyMaterialDsa),
         input->data + sizeof(struct KeyMaterialDsa) + keyMaterial->xSize,
         keyMaterial->ySize + keyMaterial->pSize + keyMaterial->qSize + keyMaterial->gSize) != EOK) {
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
+    output->size = pubKeySize;
     return HKS_SUCCESS;
 }
 #endif

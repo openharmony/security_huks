@@ -466,6 +466,7 @@ int32_t HksGetRawKey(const struct HksParamSet *paramSet, struct HksBlob *rawKey)
 int32_t HksBuildKeyBlob(const struct HksBlob *keyAlias, uint8_t keyFlag, const struct HksBlob *key,
     const struct HksParamSet *paramSet, struct HksBlob *keyOut)
 {
+    HKS_IF_NULL_LOGE_RETURN(keyAlias, HKS_ERROR_NULL_POINTER, "keyAlias is null")
     struct HksBlob adjustedKey = { 0, NULL };
     int32_t ret = AdjustKey(keyFlag, paramSet, key, &adjustedKey);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "adjust key failed, ret = %" LOG_PUBLIC "d", ret)

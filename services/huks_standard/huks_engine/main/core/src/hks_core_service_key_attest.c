@@ -70,9 +70,9 @@ static int32_t CheckAttestKeyParams(const struct HksBlob *key, const struct HksP
 }
 #endif
 
-int32_t HksCoreAttestKey(const struct HksBlob *key, const  struct HksParamSet *paramSet, struct HksBlob *certChain)
-{
 #ifdef HKS_SUPPORT_API_ATTEST_KEY
+int32_t HksCoreAttestKey(const struct HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *certChain)
+{
     int32_t ret = CheckAttestKeyParams(key, paramSet, certChain);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
@@ -96,13 +96,21 @@ int32_t HksCoreAttestKey(const struct HksBlob *key, const  struct HksParamSet *p
         return ret;
     }
 
-    struct HksBlob rawKey;
-    HksGetRawKey(keyNode->paramSet, &rawKey);
+    struct HksBlob rawKey = { 0, NULL };
+    ret = HksGetRawKey(keyNode->paramSet, &rawKey);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get raw key failed");
+        HksFreeKeyNode(&keyNode);
+        HKS_FREE_BLOB(rawKey);
+        return ret;
+    }
+
     struct HksParam *attestParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_ATTESTATION_MODE, &attestParam);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get attestation mode failed");
         HksFreeKeyNode(&keyNode);
+        HKS_FREE_BLOB(rawKey);
         return ret;
     }
  
@@ -114,12 +122,15 @@ int32_t HksCoreAttestKey(const struct HksBlob *key, const  struct HksParamSet *p
     HksFreeKeyNode(&keyNode);
     HKS_FREE_BLOB(rawKey);
     return ret;
+}
 #else
+int32_t HksCoreAttestKey(const struct HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *certChain)
+{
     (void)key;
     (void)paramSet;
     (void)certChain;
     return HKS_ERROR_NOT_SUPPORTED;
-#endif
 }
+#endif
 
 #endif /* _CUT_AUTHENTICATE_ */

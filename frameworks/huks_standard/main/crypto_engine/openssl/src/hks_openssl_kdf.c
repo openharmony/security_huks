@@ -34,6 +34,15 @@
 #define HKS_BYTE_PER_INT 4
 #define HKS_START_NUM 1
 #endif
+static int32_t CheckKdfIteration(const struct HksKeyDerivationParam *deriveParam)
+{
+    HKS_IF_TRUE_LOGE_RETURN(deriveParam->iterations > HKS_MAX_PBKDF2_ITERATION, HKS_ERROR_INVALID_ARGUMENT,
+        "invalid kdf iteration count %" LOG_PUBLIC "u, max is %" LOG_PUBLIC "u",
+        deriveParam->iterations, HKS_MAX_PBKDF2_ITERATION)
+
+    return HKS_SUCCESS;
+}
+
 static const EVP_MD *GetDeriveDigestType(uint32_t digestAlg)
 {
     switch (digestAlg) {
@@ -52,6 +61,9 @@ int32_t HksOpensslPbkdf2(const struct HksBlob *mainKey, const struct HksKeySpec 
     struct HksBlob *derivedKey)
 {
     struct HksKeyDerivationParam *deriveParam = (struct HksKeyDerivationParam *)derivationSpec->algParam;
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckKdfIteration(deriveParam), HKS_ERROR_INVALID_ARGUMENT,
+        "pbkdf2 derive check iteration failed")
+
     const EVP_MD *md = GetDeriveDigestType(deriveParam->digestAlg);
     if (PKCS5_PBKDF2_HMAC((char *)mainKey->data, mainKey->size, deriveParam->salt.data, deriveParam->salt.size,
         deriveParam->iterations, md, derivedKey->size, derivedKey->data) != 1) {
@@ -65,6 +77,9 @@ int32_t HksOpensslHkdf(const struct HksBlob *mainKey, const struct HksKeySpec *d
     struct HksBlob *derivedKey)
 {
     struct HksKeyDerivationParam *deriveParam = (struct HksKeyDerivationParam *)derivationSpec->algParam;
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckKdfIteration(deriveParam), HKS_ERROR_INVALID_ARGUMENT,
+        "hkdf derive check iteration failed")
+
     const EVP_MD *md = GetDeriveDigestType(deriveParam->digestAlg);
     EVP_PKEY_CTX *pctx;
     pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_HKDF, NULL);
@@ -127,6 +142,9 @@ int32_t HksOpensslSmKdf(const struct HksBlob *mainKey, const struct HksKeySpec *
     HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslCheckBlob(derivedKey),
         HKS_ERROR_INVALID_ARGUMENT, "Invalid param derivedKey!");
     struct HksKeyDerivationParam *deriveParam = (struct HksKeyDerivationParam *)derivationSpec->algParam;
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckKdfIteration(deriveParam), HKS_ERROR_INVALID_ARGUMENT,
+        "smkdf derive check iteration failed")
+
     struct HksBlob appendedKeyData = { 0, NULL };
     int32_t ret = AppendKekAndFactor(mainKey, &deriveParam->info, &appendedKeyData);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "append data failed!")

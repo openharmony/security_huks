@@ -435,6 +435,13 @@ static int32_t OpensslAesAeadDecryptFinal(
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
+    if (plainText->size < message->size) {
+        HKS_LOG_E("aes aead decrypt, plainText buffer too small size: %" LOG_PUBLIC "u, message size: %"
+            LOG_PUBLIC "u", plainText->size, message->size);
+        EVP_CIPHER_CTX_free(ctx);
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
+
     if (EVP_DecryptUpdate(ctx, plainText->data, &outLen, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
         EVP_CIPHER_CTX_free(ctx);
@@ -550,9 +557,9 @@ static int32_t OpensslAesAeadEnryptUpdate(void *cryptoCtx, const struct HksBlob 
 {
     struct HksOpensslBlockCipherCtx *aesCtx = (struct HksOpensslBlockCipherCtx *)cryptoCtx;
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)aesCtx->append;
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "EVP_CIPHER_CTX is null!")
 
     int32_t outLen = 0;
-
     if (EVP_EncryptUpdate(ctx, cipherText->data, &outLen, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
@@ -567,8 +574,9 @@ static int32_t OpensslAesAeadDecryptUpdate(void *cryptoCtx,
 {
     struct HksOpensslBlockCipherCtx *aesCtx = (struct HksOpensslBlockCipherCtx *)cryptoCtx;
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)aesCtx->append;
-    int32_t outLen = 0;
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "EVP_CIPHER_CTX is null!")
 
+    int32_t outLen = 0;
     if (EVP_DecryptUpdate(ctx, plainText->data, &outLen, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
@@ -641,6 +649,12 @@ static int32_t OpensslAesAeadDecryptFinalGCM(void **cryptoCtx, const struct HksB
     do {
         int32_t outLen = 0;
         if (message->size != 0) {
+            if (plainText->size < message->size) {
+                HKS_LOG_E("aes aead gcm decrypt, plainText buffer too small size: %" LOG_PUBLIC "u, message size: %"
+                    LOG_PUBLIC "u", plainText->size, message->size);
+                ret = HKS_ERROR_BUFFER_TOO_SMALL;
+                break;
+            }
             if (EVP_DecryptUpdate(ctx, plainText->data, &outLen, message->data, message->size) !=
                 HKS_OPENSSL_SUCCESS) {
                 HksLogOpensslError();

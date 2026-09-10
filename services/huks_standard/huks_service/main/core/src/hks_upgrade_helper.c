@@ -143,7 +143,7 @@ int32_t HksDeleteOldKeyForSmallToService(const struct HksBlob *keyAlias)
         HksMarkOldKeyClearedIfEmpty();
 #endif
     } while (0);
-    HKS_FREE_BLOB(oldKey);
+    HKS_MEMSET_FREE_BLOB(oldKey);
 
     return ret;
 }

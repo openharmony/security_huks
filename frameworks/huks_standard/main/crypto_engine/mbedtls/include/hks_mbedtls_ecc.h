@@ -34,8 +34,6 @@ extern "C" {
 
 int32_t GetEccGroupId(const uint32_t keyLen, mbedtls_ecp_group_id *grpId);
 
-int32_t EccKeyCheck(const struct HksBlob *key);
-
 #if defined(HKS_SUPPORT_ECDH_C) || defined(HKS_SUPPORT_ECDSA_C)
 int32_t HksMbedtlsEccGetKeyCurveNist(const struct KeyMaterialEcc *keyMaterial, mbedtls_ecp_group_id *curve);
 

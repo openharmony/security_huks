@@ -38,6 +38,15 @@
 #undef HKS_SUPPORT_KDF_PBKDF2
 #endif
 
+static int32_t CheckKdfIteration(const struct HksKeyDerivationParam *deriveParam)
+{
+    HKS_IF_TRUE_LOGE_RETURN(deriveParam->iterations > HKS_MAX_PBKDF2_ITERATION, HKS_ERROR_INVALID_ARGUMENT,
+        "invalid kdf iteration count %" LOG_PUBLIC "u, max is %" LOG_PUBLIC "u",
+        deriveParam->iterations, HKS_MAX_PBKDF2_ITERATION)
+
+    return HKS_SUCCESS;
+}
+
 #ifdef HKS_SUPPORT_KDF_PBKDF2
 #ifdef USE_HISI_MBED
 static int32_t DeriveKeyPbkdf2(const struct HksBlob *mainKey, const struct HksKeyDerivationParam *derParam,
@@ -96,6 +105,8 @@ int32_t HksMbedtlsDeriveKey(const struct HksBlob *mainKey,
     const struct HksKeySpec *derivationSpec, struct HksBlob *derivedKey)
 {
     const struct HksKeyDerivationParam *derParam = (struct HksKeyDerivationParam *)(derivationSpec->algParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckKdfIteration(derParam), HKS_ERROR_INVALID_ARGUMENT,
+        "mbedtls derive check iteration failed")
 
     uint32_t mbedtlsAlg;
     int32_t ret = HksToMbedtlsDigestAlg(derParam->digestAlg, &mbedtlsAlg);

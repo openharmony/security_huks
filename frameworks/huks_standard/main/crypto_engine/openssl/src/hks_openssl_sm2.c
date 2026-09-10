@@ -588,7 +588,18 @@ int HksOpensslSm2Encrypt(const struct HksBlob *keyPair, const struct HksUsageSpe
     EVP_PKEY_CTX *ctx = InitSm2Ctx(keyPair, usageSpec->digest, HKS_KEY_PURPOSE_ENCRYPT, NULL);
     HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_KEY_INFO, "initialize sm2 context when encrypt failed!")
     // cipherLength equals c1||c2||c3 which c1 and c3 is fixed length and c2 is equals to the plainText.
+    if (IsAdditionOverflow(plainBlob->size, SM2_C1_SIZE + SM2_C3_SIZE)) {
+        HKS_LOG_E("sm2 encrypt, plainBlob size overflow");
+        SELF_FREE_PTR(ctx, EVP_PKEY_CTX_free)
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
     size_t cipherSize = plainBlob->size + SM2_C1_SIZE + SM2_C3_SIZE;
+    if (cipherBlob->size < cipherSize) {
+        HKS_LOG_E("sm2 encrypt, cipherBlob buffer too small size: %" LOG_PUBLIC "u, need: %" LOG_PUBLIC "zu",
+            cipherBlob->size, cipherSize);
+        SELF_FREE_PTR(ctx, EVP_PKEY_CTX_free)
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
     if (EVP_PKEY_encrypt(ctx, cipherBlob->data, &cipherSize, plainBlob->data,
         (size_t)plainBlob->size) != HKS_OPENSSL_SUCCESS) {
         HKS_LOG_E("encrypt data failed");

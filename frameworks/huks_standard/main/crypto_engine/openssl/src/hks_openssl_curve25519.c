@@ -20,6 +20,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "hks_common_check.h"
 #include "hks_crypto_adapter.h"
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -58,6 +59,7 @@ static int32_t SaveCurve25519KeyMaterial(uint32_t algType, const EVP_PKEY *pKey,
     keyMaterial->keySize = CURVE25519_KEY_BITS;
     keyMaterial->pubKeySize = pubKeyLen;
     keyMaterial->priKeySize = priKeyLen;
+    keyMaterial->reserved = 0;
 
     keyOut->data = buffer;
     keyOut->size = totalSize;
@@ -142,6 +144,11 @@ int32_t HksOpensslX25519AgreeKey(const struct HksBlob *nativeKey, const struct H
     const struct HksKeySpec *spec, struct HksBlob *sharedKey)
 {
     (void)spec;
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckAsyKeyMaterialSize(HKS_ALG_X25519, pubKey, NULL), HKS_ERROR_INVALID_ARGUMENT,
+        "invalid peer pubKey material!")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckAsyKeyMaterialSize(HKS_ALG_X25519, nativeKey, NULL), HKS_ERROR_INVALID_ARGUMENT,
+        "invalid native key material!")
+
     EVP_PKEY *ours = NULL;
     EVP_PKEY *theirs = NULL;
     EVP_PKEY_CTX *ctx = NULL;
@@ -306,6 +313,9 @@ int32_t HksOpensslEd25519Verify(const struct HksBlob *key, const struct HksUsage
 
 int32_t HksOpensslGetEd25519PubKey(const struct HksBlob *input, struct HksBlob *output)
 {
+    int32_t ret = CheckAsyKeyMaterialSize(HKS_ALG_ED25519, input, output);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
     struct KeyMaterial25519 *key = (struct KeyMaterial25519 *)input->data;
     uint32_t outLen = sizeof(struct KeyMaterial25519) + key->pubKeySize;
     if (memcpy_s(output->data, output->size, key, outLen) != EOK) {
@@ -314,6 +324,7 @@ int32_t HksOpensslGetEd25519PubKey(const struct HksBlob *input, struct HksBlob *
     }
 
     ((struct KeyMaterial25519 *)output->data)->priKeySize = 0;
+    ((struct KeyMaterial25519 *)output->data)->reserved = 0;
     output->size = outLen;
     return HKS_SUCCESS;
 }

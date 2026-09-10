@@ -28,6 +28,8 @@
 
 #include "hks_client_service.h"
 #include "hks_storage_manager.h"
+#include "hks_core_service_three_stage.h"
+#include "hks_keynode.h"
 
 #include "base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_key_attest.c"
 #include "base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_key_generate.c"
@@ -720,5 +722,119 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest019, TestSize.Level0)
     struct HksBlob blob = {HKS_ATTEST_CERT_SIZE, buffer};
     int32_t ret = HksCoreAttestKeyForDe(&blob, nullptr, &blob);
     ASSERT_NE(ret, HKS_SUCCESS) << "HksCoreAttestKey not null pointer" << ret;
+}
+
+/**
+ * @tc.name: HksCoreServiceTest.HksCoreServiceTest020
+ * @tc.desc: tdd HksCoreMacThreeStageAbort, verify that abort uses the alg from keyNode->runtimeParamSet
+ *           (passed via caller-supplied alg parameter) instead of the attacker-controlled abort paramSet.
+ *           Scenario: Init with HMAC, then abort with a paramSet containing HKS_TAG_ALGORITHM=CMAC.
+ *           The fix ensures HMAC free path is used (matching the Init algorithm), preventing ctx leak.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksCoreServiceTest, HksCoreServiceTest020, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksCoreServiceTest020");
+
+    struct HksParam runtimeParams[] = {
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_MAC },
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_HMAC },
+        { .tag = HKS_TAG_CRYPTO_CTX, .uint64Param = 0 },
+    };
+    struct HksParamSet *runtimeParamSet = nullptr;
+    int32_t ret = GenerateParamSet(&runtimeParamSet, runtimeParams, sizeof(runtimeParams) / sizeof(runtimeParams[0]));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *keyBlobParamSet = nullptr;
+    ret = GenerateParamSet(&keyBlobParamSet, nullptr, 0);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParam attackParams[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_CMAC },
+    };
+    struct HksParamSet *attackParamSet = nullptr;
+    ret = GenerateParamSet(&attackParamSet, attackParams, sizeof(attackParams) / sizeof(attackParams[0]));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HuksKeyNode keyNode = {{0}};
+    keyNode.runtimeParamSet = runtimeParamSet;
+    keyNode.keyBlobParamSet = keyBlobParamSet;
+    ret = HksCoreMacThreeStageAbort(&keyNode, attackParamSet, HKS_ALG_HMAC);
+    ASSERT_EQ(ret, HKS_ERROR_NULL_POINTER);
+
+    struct HksParam *ctxParam = nullptr;
+    ret = HksGetParam(runtimeParamSet, HKS_TAG_CRYPTO_CTX, &ctxParam);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    uint8_t *dummyCtx = (uint8_t *)HksMalloc(sizeof(uint32_t));
+    ASSERT_NE(dummyCtx, nullptr);
+    ctxParam->uint64Param = reinterpret_cast<uint64_t>(dummyCtx);
+
+    ret = HksCoreMacThreeStageAbort(&keyNode, attackParamSet, HKS_ALG_HMAC);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksGetParam(runtimeParamSet, HKS_TAG_CRYPTO_CTX, &ctxParam);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ASSERT_EQ(ctxParam->uint64Param, 0);
+
+    HKS_FREE(dummyCtx);
+
+    HksFreeParamSet(&runtimeParamSet);
+    HksFreeParamSet(&keyBlobParamSet);
+    HksFreeParamSet(&attackParamSet);
+}
+
+/**
+ * @tc.name: HksCoreServiceTest.HksCoreServiceTest021
+ * @tc.desc: tdd HksCoreMacThreeStageAbort, verify abort with correct HMAC alg and no mismatch attack.
+ *           Normal HMAC abort path: Init with HMAC, abort with HMAC. Should succeed and clear ctx.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksCoreServiceTest, HksCoreServiceTest021, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksCoreServiceTest021");
+    struct HksParam runtimeParams[] = {
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_MAC },
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_HMAC },
+        { .tag = HKS_TAG_CRYPTO_CTX, .uint64Param = 0 },
+    };
+    struct HksParamSet *runtimeParamSet = nullptr;
+    int32_t ret = GenerateParamSet(&runtimeParamSet, runtimeParams, sizeof(runtimeParams) / sizeof(runtimeParams[0]));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *keyBlobParamSet = nullptr;
+    ret = GenerateParamSet(&keyBlobParamSet, nullptr, 0);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParam normalParams[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_HMAC },
+    };
+    struct HksParamSet *normalParamSet = nullptr;
+    ret = GenerateParamSet(&normalParamSet, normalParams, sizeof(normalParams) / sizeof(normalParams[0]));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HuksKeyNode keyNode = {{0}};
+    keyNode.runtimeParamSet = runtimeParamSet;
+    keyNode.keyBlobParamSet = keyBlobParamSet;
+
+    struct HksParam *ctxParam = nullptr;
+    ret = HksGetParam(runtimeParamSet, HKS_TAG_CRYPTO_CTX, &ctxParam);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    uint8_t *dummyCtx = (uint8_t *)HksMalloc(sizeof(uint32_t));
+    ASSERT_NE(dummyCtx, nullptr);
+    ctxParam->uint64Param = reinterpret_cast<uint64_t>(dummyCtx);
+
+    ret = HksCoreMacThreeStageAbort(&keyNode, normalParamSet, HKS_ALG_HMAC);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksGetParam(runtimeParamSet, HKS_TAG_CRYPTO_CTX, &ctxParam);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ASSERT_EQ(ctxParam->uint64Param, 0);
+
+    HKS_FREE(dummyCtx);
+
+    HksFreeParamSet(&runtimeParamSet);
+    HksFreeParamSet(&keyBlobParamSet);
+    HksFreeParamSet(&normalParamSet);
 }
 }

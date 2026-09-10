@@ -71,10 +71,10 @@ int32_t HksParamSetToEventInfoForKeyGen(const struct HksParamSet *paramSetIn, st
     int32_t ret = GetCommonEventInfo(paramSetIn, eventInfo);
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetCommonEventInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
-    ret = GetEventKeyInfo(paramSetIn, &(eventInfo->keyInfo));
+    ret = GetEventKeyInfo(paramSetIn, &(eventInfo->generateInfo.keyInfo));
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetEventKeyInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
-    ret = GetEventKeyAccessInfo(paramSetIn, &(eventInfo->keyAccessInfo));
+    ret = GetEventKeyAccessInfo(paramSetIn, &(eventInfo->generateInfo.keyAccessInfo));
     HKS_IF_NOT_SUCC_LOGI_RETURN(ret, ret, "report GetEventKeyAccessInfo failed!  ret = %" LOG_PUBLIC "d", ret);
 
     struct HksParam *paramToEventInfo = nullptr;

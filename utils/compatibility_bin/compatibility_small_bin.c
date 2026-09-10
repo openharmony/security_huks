@@ -147,14 +147,22 @@ static int ConstructSrcAndTargetPath(char *curPath, char *desPath, struct dirent
 
 static void MoveOldFolderToNew(const char *srcPath, const char *tarPath)
 {
-    if (!opendir(tarPath)) {
+    DIR *dirTarget = opendir(tarPath);
+    if (dirTarget == NULL) {
         if (mkdir(tarPath, DEFAULT_HUKS_PATH_PERMISSION) != 0) {
             printf("mkdir failed! errno = 0x%x \n", errno);
             return;
         }
+    } else {
+        (void)closedir(dirTarget);
     }
+
     struct dirent *ptr;
     DIR *dir = opendir(srcPath);
+    if (dir == NULL) {
+        printf("open source path failed !\n");
+        return;
+    }
     int ret = EOK;
     while ((ptr = readdir(dir)) != NULL) {
         if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0) {

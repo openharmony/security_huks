@@ -50,7 +50,6 @@
 #endif /* _CUT_AUTHENTICATE_ */
 
 #define HKS_DEFAULT_PBKDF2_ITERATION 1000
-#define HKS_MAX_PBKDF2_ITERATION 0x80000U
 #define HKS_DEFAULT_PBKDF2_SALT_SIZE 16
 
 #ifndef _CUT_AUTHENTICATE_
@@ -1083,6 +1082,201 @@ static int32_t CheckImportSymmetricKeySize(const struct ParamsValues *params, co
     return HKS_SUCCESS;
 }
 
+static int32_t RsaCheckKeySize(const uint32_t keySize)
+{
+#ifdef HKS_SUPPORT_RSA_C_FLEX_KEYSIZE
+    if ((keySize >= HKS_RSA_KEY_SIZE_1024) && (keySize <= HKS_RSA_KEY_SIZE_2048)) {
+        if ((keySize % HKS_RSA_KEYSIZE_CNT) == 0) {
+            return HKS_SUCCESS;
+        }
+    }
+#endif
+    switch (keySize) {
+        case HKS_RSA_KEY_SIZE_512:
+        case HKS_RSA_KEY_SIZE_768:
+        case HKS_RSA_KEY_SIZE_1024:
+        case HKS_RSA_KEY_SIZE_2048:
+        case HKS_RSA_KEY_SIZE_3072:
+        case HKS_RSA_KEY_SIZE_4096:
+            break;
+        default:
+            HKS_LOG_E("Invalid rsa key size! keySize = 0x%" LOG_PUBLIC "X", keySize);
+            return HKS_ERROR_INVALID_KEY_SIZE;
+    }
+    return HKS_SUCCESS;
+}
+
+/* header + 3 size fields: nSize/eSize/dSize */
+static int32_t CheckRsaKeyMaterial(const struct HksBlob *keyIn, const struct HksBlob *keyOut)
+{
+    HKS_IF_TRUE_LOGE_RETURN(keyIn->size < sizeof(struct HksKeyMaterialRsa), HKS_ERROR_INVALID_KEY_INFO,
+        "Rsa key blob size too small")
+    const struct HksKeyMaterialRsa *m = (const struct HksKeyMaterialRsa *)keyIn->data;
+    HKS_IF_TRUE_LOGE_RETURN(m->keyAlg != HKS_ALG_RSA, HKS_ERROR_INVALID_KEY_INFO,
+        "invalid rsa key material keyAlg %" LOG_PUBLIC "u", (uint32_t)m->keyAlg)
+    HKS_IF_NOT_SUCC_RETURN(RsaCheckKeySize(m->keySize), HKS_ERROR_INVALID_KEY_SIZE)
+
+    HKS_IF_TRUE_LOGE_RETURN((m->nSize > HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_4096)) ||
+        (m->eSize > HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_4096)) ||
+        (m->dSize > HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_4096)),
+        HKS_ERROR_INVALID_ARGUMENT,
+        "Invalid rsa keyMaterial! nSize = 0x%" LOG_PUBLIC "X, eSize = 0x%" LOG_PUBLIC "X, "
+        "dSize = 0x%" LOG_PUBLIC "X", m->nSize, m->eSize, m->dSize)
+
+    const uint32_t sizes[] = { m->nSize, m->eSize, m->dSize };
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksCheckKeyMaterialSize(sizeof(struct HksKeyMaterialRsa), sizes,
+        HKS_ARRAY_SIZE(sizes), keyIn), HKS_ERROR_INVALID_KEY_INFO,
+        "invalid rsa key material, key size = 0x%" LOG_PUBLIC "X", keyIn->size)
+
+    if (keyOut != NULL) {
+        /* public key = n + e */
+        const uint32_t pubSizes[] = { m->nSize, m->eSize };
+        HKS_IF_NOT_SUCC_RETURN(HksCheckKeyMaterialSize(sizeof(struct HksKeyMaterialRsa), pubSizes,
+            HKS_ARRAY_SIZE(pubSizes), keyOut), HKS_ERROR_BUFFER_TOO_SMALL)
+    }
+    return HKS_SUCCESS;
+}
+
+/* header + 3 size fields: xSize/ySize/zSize */
+static int32_t CheckEccKeyMaterial(const struct HksBlob *keyIn, const struct HksBlob *keyOut)
+{
+    HKS_IF_TRUE_LOGE_RETURN(keyIn->size < sizeof(struct HksKeyMaterialEcc), HKS_ERROR_INVALID_KEY_INFO,
+        "Ecc key blob size too small")
+    const struct HksKeyMaterialEcc *m = (const struct HksKeyMaterialEcc *)keyIn->data;
+    HKS_IF_TRUE_LOGE_RETURN((m->keyAlg != HKS_ALG_ECC) && (m->keyAlg != HKS_ALG_SM2) && (m->keyAlg != HKS_ALG_ECDH),
+        HKS_ERROR_INVALID_KEY_INFO, "invalid ecc key material keyAlg %" LOG_PUBLIC "u",
+        (uint32_t)m->keyAlg)
+    HKS_IF_NOT_SUCC_RETURN(HksEccCheckKeySize(m->keySize), HKS_ERROR_INVALID_KEY_SIZE)
+
+    HKS_IF_TRUE_LOGE_RETURN((m->xSize > HKS_KEY_BYTES(HKS_ECC_KEY_SIZE_521)) ||
+        (m->ySize > HKS_KEY_BYTES(HKS_ECC_KEY_SIZE_521)) ||
+        (m->zSize > HKS_KEY_BYTES(HKS_ECC_KEY_SIZE_521)),
+        HKS_ERROR_INVALID_ARGUMENT,
+        "Invalid ecc keyMaterial! xSize = 0x%" LOG_PUBLIC "X, ySize = 0x%" LOG_PUBLIC "X, "
+        "zSize = 0x%" LOG_PUBLIC "X", m->xSize, m->ySize, m->zSize)
+
+    const uint32_t sizes[] = { m->xSize, m->ySize, m->zSize };
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksCheckKeyMaterialSize(sizeof(struct HksKeyMaterialEcc), sizes,
+        HKS_ARRAY_SIZE(sizes), keyIn), HKS_ERROR_INVALID_KEY_INFO,
+        "invalid ecc key material, key size = 0x%" LOG_PUBLIC "X", keyIn->size)
+
+    if (keyOut != NULL) {
+        /* public key = x + y */
+        HKS_IF_TRUE_LOGE_RETURN((m->xSize == 0) || (m->ySize == 0), HKS_ERROR_NOT_SUPPORTED,
+            "not support get pubkey")
+        const uint32_t pubSizes[] = { m->xSize, m->ySize };
+        HKS_IF_NOT_SUCC_RETURN(HksCheckKeyMaterialSize(sizeof(struct HksKeyMaterialEcc), pubSizes,
+            HKS_ARRAY_SIZE(pubSizes), keyOut), HKS_ERROR_BUFFER_TOO_SMALL)
+    }
+    return HKS_SUCCESS;
+}
+
+/* header + 5 size fields: xSize/ySize/pSize/qSize/gSize */
+static int32_t CheckDsaKeyMaterial(const struct HksBlob *keyIn, const struct HksBlob *keyOut)
+{
+    HKS_IF_TRUE_LOGE_RETURN(keyIn->size < sizeof(struct HksKeyMaterialDsa), HKS_ERROR_INVALID_ARGUMENT,
+        "Dsa key blob size too small")
+    const struct HksKeyMaterialDsa *m = (const struct HksKeyMaterialDsa *)keyIn->data;
+    HKS_IF_TRUE_LOGE_RETURN(m->keyAlg != HKS_ALG_DSA, HKS_ERROR_INVALID_ARGUMENT,
+        "invalid dsa key material keyAlg %" LOG_PUBLIC "u", (uint32_t)m->keyAlg)
+    HKS_IF_TRUE_LOGE_RETURN(
+        (m->xSize > MAX_KEY_SIZE) || (m->ySize > MAX_KEY_SIZE) ||
+        (m->pSize > MAX_KEY_SIZE) || (m->qSize > MAX_KEY_SIZE) ||
+        (m->gSize > MAX_KEY_SIZE),
+        HKS_ERROR_INVALID_ARGUMENT,
+        "invalid key material x/y/p/q/g size, bigger than 2048")
+
+    const uint32_t sizes[] = { m->xSize, m->ySize, m->pSize, m->qSize, m->gSize };
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksCheckKeyMaterialSize(sizeof(struct HksKeyMaterialDsa), sizes,
+        HKS_ARRAY_SIZE(sizes), keyIn), HKS_ERROR_INVALID_ARGUMENT,
+        "invalid dsa key material, key size = 0x%" LOG_PUBLIC "X", keyIn->size)
+
+    if (keyOut != NULL) {
+        /* public key = y + p + q + g (x is private) */
+        const uint32_t pubSizes[] = { m->ySize, m->pSize, m->qSize, m->gSize };
+        HKS_IF_NOT_SUCC_RETURN(HksCheckKeyMaterialSize(sizeof(struct HksKeyMaterialDsa), pubSizes,
+            HKS_ARRAY_SIZE(pubSizes), keyOut), HKS_ERROR_BUFFER_TOO_SMALL)
+    }
+    return HKS_SUCCESS;
+}
+
+/*
+ * header + 2 size fields: pubKeySize/priKeySize (25519/DH/ML_DSA/ML_KEM share the layout;
+ * the second field of ML_DSA/ML_KEM is keyParamSet instead of keySize, hence no keySize
+ * validation here). The openssl engine serves X25519 public key export through the
+ * Ed25519 entry, so ED25519 and X25519 tags are interchangeable here.
+ */
+static int32_t Check25519KeyMaterial(uint32_t alg, const struct HksBlob *keyIn, const struct HksBlob *keyOut)
+{
+    HKS_IF_TRUE_LOGE_RETURN(keyIn->size < sizeof(struct HksKeyMaterial25519), HKS_ERROR_INVALID_KEY_INFO,
+        "key material too small")
+    const struct HksKeyMaterial25519 *m = (const struct HksKeyMaterial25519 *)keyIn->data;
+    HKS_IF_TRUE_LOGE_RETURN(((uint32_t)m->keyAlg != alg) &&
+        !(((alg == HKS_ALG_ED25519) && (m->keyAlg == HKS_ALG_X25519)) ||
+        ((alg == HKS_ALG_X25519) && (m->keyAlg == HKS_ALG_ED25519))),
+        HKS_ERROR_INVALID_KEY_INFO,
+        "invalid key material keyAlg %" LOG_PUBLIC "u", (uint32_t)m->keyAlg)
+    HKS_IF_TRUE_LOGE_RETURN(m->reserved != 0, HKS_ERROR_INVALID_KEY_INFO,
+        "invalid key material reserved field")
+
+    const uint32_t sizes[] = { m->pubKeySize, m->priKeySize };
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksCheckKeyMaterialSize(sizeof(struct HksKeyMaterial25519), sizes,
+        HKS_ARRAY_SIZE(sizes), keyIn), HKS_ERROR_INVALID_KEY_INFO,
+        "invalid key material, key size = 0x%" LOG_PUBLIC "X", keyIn->size)
+
+    if (keyOut != NULL) {
+        /* public key = pubKeySize */
+        const uint32_t pubSizes[] = { m->pubKeySize };
+        HKS_IF_NOT_SUCC_RETURN(HksCheckKeyMaterialSize(sizeof(struct HksKeyMaterial25519), pubSizes,
+            HKS_ARRAY_SIZE(pubSizes), keyOut), HKS_ERROR_BUFFER_TOO_SMALL)
+    }
+    return HKS_SUCCESS;
+}
+
+/*
+ * Unified validation of asymmetric key material. Every key material check in the
+ * code base goes through this single function: it validates an input key material
+ * blob, and, when keyOut is not NULL (public key export paths), the capacity of
+ * the output buffer the public key will be copied into.
+ *
+ * alg: expected algorithm. The ECC engine also serves SM2 key material (identical
+ *      layout), so HKS_ALG_ECC additionally accepts a material tagged HKS_ALG_SM2
+ *      and vice versa; likewise HKS_ALG_ED25519 also accepts X25519 material, whose
+ *      public key export is served through the Ed25519 engine entry.
+ *
+ * Error codes: structural problems (invalid blob, header too small, keyAlg mismatch,
+ * component sizes do not fit) return HKS_ERROR_INVALID_KEY_INFO; an unsupported
+ * keySize returns HKS_ERROR_INVALID_KEY_SIZE; per-component upper bound violations
+ * return HKS_ERROR_INVALID_ARGUMENT (DSA input problems return
+ * HKS_ERROR_INVALID_ARGUMENT for historical compatibility). Output buffer problems
+ * return HKS_ERROR_BUFFER_TOO_SMALL, and a public key with zero-sized components
+ * returns HKS_ERROR_NOT_SUPPORTED.
+ */
+int32_t CheckAsyKeyMaterialSize(uint32_t alg, const struct HksBlob *keyIn, const struct HksBlob *keyOut)
+{
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(keyIn), HKS_ERROR_INVALID_KEY_INFO, "invalid keyIn!")
+
+    switch (alg) {
+        case HKS_ALG_RSA:
+            return CheckRsaKeyMaterial(keyIn, keyOut);
+        case HKS_ALG_ECC:
+        case HKS_ALG_SM2:
+        case HKS_ALG_ECDH:
+            return CheckEccKeyMaterial(keyIn, keyOut);
+        case HKS_ALG_DSA:
+            return CheckDsaKeyMaterial(keyIn, keyOut);
+        case HKS_ALG_ED25519:
+        case HKS_ALG_X25519:
+        case HKS_ALG_DH:
+        case HKS_ALG_ML_DSA:
+        case HKS_ALG_ML_KEM:
+            return Check25519KeyMaterial(alg, keyIn, keyOut);
+        default:
+            /* symmetric or unknown algorithms do not carry a material header, skip validation */
+            return HKS_SUCCESS;
+    }
+}
+
 int32_t HksCoreCheckImportKeyParams(const struct HksBlob *keyAlias, const struct HksBlob *key,
     const struct HksParamSet *paramSet, const struct HksBlob *keyOut)
 {
@@ -1105,6 +1299,8 @@ int32_t HksCoreCheckImportKeyParams(const struct HksBlob *keyAlias, const struct
 
     struct HksParam *importKeyTypeParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_IMPORT_KEY_TYPE, &importKeyTypeParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckAsyKeyMaterialSize(alg, key, NULL), HKS_ERROR_INVALID_KEY_INFO,
+        "import asymmetric key material size invalid")
     bool needCheckLater = true;
     if (ret == HKS_SUCCESS && importKeyTypeParam->uint32Param != HKS_KEY_TYPE_PUBLIC_KEY) {
         needCheckLater = false;

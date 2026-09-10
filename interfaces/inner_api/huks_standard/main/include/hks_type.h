@@ -381,7 +381,8 @@ struct SecInfoWrap {
 #define HKS_DEFAULT_RANDOM_LEN 16
 #define HKS_MAX_KEY_AUTH_ID_LEN 64
 #define HKS_KEY_MATERIAL_NUM 3
-#define HKS_MAX_KEY_LEN (HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_4096) * HKS_KEY_MATERIAL_NUM)
+/* Unlike the other HKS_xxx_KEY_SIZE constants (bits), the HKS_ML_DSA_xxx sizes are already in bytes. */
+#define HKS_MAX_KEY_LEN (HKS_ML_DSA_PRI_KEY_SIZE_4896 * HKS_KEY_MATERIAL_NUM)
 #define HKS_MAX_KEY_MATERIAL_LEN (sizeof(struct HksPubKeyInfo) + HKS_MAX_KEY_LEN + HKS_AE_TAG_LEN)
 #define COMMON_EVENT_HKS_BINDER_DIED "ohos.hks.action.BINDER_DIED"
 

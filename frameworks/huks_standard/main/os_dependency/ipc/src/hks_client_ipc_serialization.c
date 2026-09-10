@@ -80,7 +80,10 @@ static int32_t GetUint32FromBuffer(uint32_t *value, const struct HksBlob *srcBlo
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    *value = *((uint32_t *)(srcBlob->data + *srcOffset));
+    if (memcpy_s(value, sizeof(*value), srcBlob->data + *srcOffset, sizeof(uint32_t)) != EOK) {
+        HKS_LOG_E("copy value failed");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
     *srcOffset += sizeof(*value);
     return HKS_SUCCESS;
 }

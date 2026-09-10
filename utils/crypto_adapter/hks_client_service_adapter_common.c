@@ -25,6 +25,7 @@
 #include <stddef.h>
 
 #include "hks_client_service_adapter.h"
+#include "hks_common_check.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
@@ -49,6 +50,11 @@ int32_t CopyToInnerKey(const struct HksBlob *key, uint32_t alg, struct HksBlob *
     if ((key->size == 0) || (key->size > maxSize)) {
         HKS_LOG_E("invalid input key size: %" LOG_PUBLIC "u", key->size);
         return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    if ((alg == HKS_ALG_ML_DSA) || (alg == HKS_ALG_ML_KEM)) {
+        HKS_IF_NOT_SUCC_LOGE_RETURN(CheckAsyKeyMaterialSize(alg, key, NULL), HKS_ERROR_INVALID_ARGUMENT,
+            "key material header inconsistent with blob size")
     }
 
     uint8_t *outData = (uint8_t *)HksMalloc(key->size);

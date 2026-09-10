@@ -29,6 +29,7 @@
 #include "hks_mbedtls_common.h"
 #include "hks_mem.h"
 #include "hks_template.h"
+#include "hks_common_check.h"
 
 #define HKS_DH_KEYPAIR_CNT 2
 
@@ -231,6 +232,9 @@ int32_t HksMbedtlsDhAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
     if (HKS_KEY_BYTES(spec->keyLen) > sharedKey->size) {
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
+
+    int32_t ret = CheckAsyKeyMaterialSize(HKS_ALG_DH, nativeKey, pubKey);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "invalid dh key material!")
 
     struct KeyMaterialDh *pubKeyMaterial = (struct KeyMaterialDh *)pubKey->data;
 
