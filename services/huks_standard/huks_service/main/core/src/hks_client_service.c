@@ -2762,7 +2762,7 @@ int32_t HksServiceDecapsulate(const struct HksProcessInfo *processInfo, const st
 
 #ifdef L2_STANDARD
     HksOneStageReportInfo info = {ret, startTime, traceId.traceId.chainId, __func__, HKS_ONE_STAGE_DECAPSULATE};
-    (void)HksOneStageEventReport(encapOrsharedSecret, &keyFromFile, newParamSet, processInfo, &info);
+    (void)HksOneStageEventReport(keyAlias, &keyFromFile, newParamSet, processInfo, &info);
 #endif
     HksHitraceEnd(&traceId);
     HKS_MEMSET_FREE_BLOB(keyFromFile);
