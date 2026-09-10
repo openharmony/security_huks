@@ -459,7 +459,11 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
     ServiceGenerateKeyCore(&ctx);
 #ifdef L2_STANDARD
     struct HksParamSet *reportParamSet = NULL;
-    struct InfoPair infoPair = { .startTime = enterTime, .traceId = traceId.traceId.chainId };
+    uint32_t keyCount = 0;
+    if (ctx.ret == HKS_SUCCESS) {
+        (void)HksManageGetKeyCountByProcessName(ctx.processInfo, ctx.newParamSet, &keyCount);
+    }
+    struct InfoPair infoPair = { .startTime = enterTime, .traceId = traceId.traceId.chainId, .keyCount = keyCount };
     (void)PreConstructGenKeyReportParamSet(ctx.keyAlias, ctx.paramSetIn, infoPair, &ctx.output, &reportParamSet);
     (void)ConstructReportParamSet(__func__, ctx.processInfo, ctx.newParamSet, ctx.ret, &reportParamSet);
     HksEventReport(__func__, ctx.processInfo, ctx.paramSetIn, reportParamSet, ctx.ret);

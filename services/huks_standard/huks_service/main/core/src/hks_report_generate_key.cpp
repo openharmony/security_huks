@@ -53,6 +53,10 @@ int32_t PreConstructGenKeyReportParamSet(const struct HksBlob *keyAlias, const s
         {
             .tag = HKS_TAG_TRACE_ID,
             .uint64Param = infoPair.traceId
+        },
+        {
+            .tag = HKS_TAG_PARAM6_UINT32,
+            .uint32Param = infoPair.keyCount
         }
     };
     ret = HksAddParams(*paramSetOut, params, HKS_ARRAY_SIZE(params));
@@ -86,6 +90,10 @@ int32_t HksParamSetToEventInfoForKeyGen(const struct HksParamSet *paramSetIn, st
         eventInfo->generateInfo.pubKeyIsAlias = static_cast<uint32_t>(paramToEventInfo->boolParam);
     }
 
+    if (HksGetParam(paramSetIn, HKS_TAG_PARAM6_UINT32, &paramToEventInfo) == HKS_SUCCESS) {
+        eventInfo->generateInfo.keyCount = paramToEventInfo->uint32Param;
+    }
+
     (void)commEventInfo.release();
     return HKS_SUCCESS;
 }
@@ -104,6 +112,7 @@ void HksEventInfoAddForKeyGen(struct HksEventInfo *dstEventInfo, const struct Hk
 {
     if (HksEventInfoIsEqualForKeyGen(dstEventInfo, srcEventInfo)) {
         dstEventInfo->common.count++;
+        dstEventInfo->generateInfo.keyCount = srcEventInfo->generateInfo.keyCount;
     }
 }
 
@@ -117,6 +126,9 @@ int32_t HksEventInfoToMapForKeyGen(const struct HksEventInfo *eventInfo,
 
     ret = reportData.insert_or_assign("agree_pubkey_is_alias", std::to_string(eventInfo->generateInfo.pubKeyIsAlias));
     HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert agree_pubkey_is_alias failed!");
+
+    ret = reportData.insert_or_assign("key_count", std::to_string(eventInfo->generateInfo.keyCount));
+    HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData insert key_count failed!");
 
     ret = EventInfoToMapKeyInfo(&(eventInfo->generateInfo.keyInfo), reportData);
     HKS_IF_NOT_TRUE_LOGI(ret.second, "reportData EventInfoToMapKeyInfo failed!");

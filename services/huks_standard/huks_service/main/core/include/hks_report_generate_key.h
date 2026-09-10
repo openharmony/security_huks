@@ -35,6 +35,7 @@ extern "C" {
 struct InfoPair {
     uint64_t startTime;
     uint64_t traceId;
+    uint32_t keyCount;
 };
 
 int32_t PreConstructGenKeyReportParamSet(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
