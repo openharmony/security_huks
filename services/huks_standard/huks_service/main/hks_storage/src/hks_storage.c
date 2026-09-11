@@ -96,13 +96,15 @@ int32_t HksStorageFileSize(const char *path, const char *fileName)
     HksStorageFileLock *lock = CreateStorageFileLock(path, fileName);
     HKS_IF_TRUE_LOGE_RETURN(lock == NULL, HKS_ERROR_MALLOC_FAIL, "Create storage file lock fail")
     HksStorageFileLockRead(lock);
-    int32_t size = HksFileSize(path, fileName);
+    uint32_t size = HksFileSize(path, fileName);
     HksStorageFileUnlockRead(lock);
     HksStorageFileLockRelease(lock);
 #else
-    int32_t size = HksFileSize(path, fileName);
+    uint32_t size = HksFileSize(path, fileName);
 #endif
-    return size;
+    HKS_IF_TRUE_LOGE_RETURN(size == 0 || size > INT32_MAX, HKS_ERROR_FILE_SIZE_FAIL,
+        "get file size failed, size = %" LOG_PUBLIC "u", size)
+    return (int32_t)size;
 }
 
 int32_t HksStorageReadFile(
