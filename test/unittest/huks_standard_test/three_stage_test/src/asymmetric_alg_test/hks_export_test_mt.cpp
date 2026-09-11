@@ -215,4 +215,30 @@ HWTEST_F(HksExportTestMt, HksExportTestMt0090, TestSize.Level0)
     EXPECT_EQ(HksDeleteKeyForDe(&authId, nullptr), HKS_ERROR_NOT_EXIST);
     HKS_FREE(publicKey.data);
 }
+
+const TestCaseParams g_huksExportKeyMtMlDsaParams = {
+    .params = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ML_DSA },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ML_DSA_KEY_PARAM_SET_87 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
+    },
+};
+
+/**
+ * @tc.number    : HksExportTestMt01000
+ * @tc.name      : HksExportTestMt01000
+ * @tc.desc      : Test huks export ml-dsa public key, expect success
+ */
+HWTEST_F(HksExportTestMt, HksExportTestMt01000, TestSize.Level0)
+{
+    EXPECT_EQ(RunTestCase(g_huksExportKeyMtMlDsaParams), HKS_SUCCESS);
+    struct HksBlob testAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
+    HksBlob publicKey = { .size = ML_DSA_MAX_KEY_SIZE, .data = (uint8_t *)HksMalloc(ML_DSA_MAX_KEY_SIZE) };
+    if (publicKey.data != nullptr) {
+        EXPECT_EQ(HksExportPublicKeyForDe(&testAlias, nullptr, &publicKey), HKS_SUCCESS);
+        EXPECT_NE(publicKey.size, 0);
+    }
+    EXPECT_EQ(HksDeleteKeyForDe(&authId, nullptr), HKS_SUCCESS);
+    HKS_FREE(publicKey.data);
+}
 }

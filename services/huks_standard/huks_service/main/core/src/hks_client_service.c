@@ -563,7 +563,11 @@ struct HksServiceGenKeyCtx {
 
 static void ServiceGenerateKeyCore(struct HksServiceGenKeyCtx *ctx)
 {
-    ctx->output = (struct HksBlob){ ML_DSA_MAX_KEY_SIZE, ctx->keyOutBuffer };
+    uint32_t size = MAX_KEY_SIZE;
+#ifdef L2_STANDARD
+    size = (size < ML_DSA_MAX_KEY_SIZE) ? ML_DSA_MAX_KEY_SIZE : size;
+#endif
+    ctx->output = (struct HksBlob){ size, ctx->keyOutBuffer };
     ctx->keyIn = (struct HksBlob){ 0, NULL };
     do {
         if ((ctx->keyOut != NULL) && (ctx->keyOut->data != NULL) && (ctx->keyOut->size != 0)) {
@@ -602,7 +606,11 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
         .output = { 0, NULL }, .keyIn = { 0, NULL },
         .isSeCalling = false, .ret = 0
     };
-    ctx.keyOutBuffer = (uint8_t *)HksMalloc(ML_DSA_MAX_KEY_SIZE);
+    uint32_t size = MAX_KEY_SIZE;
+#ifdef L2_STANDARD
+    size = (size < ML_DSA_MAX_KEY_SIZE) ? ML_DSA_MAX_KEY_SIZE : size;
+#endif
+    ctx.keyOutBuffer = (uint8_t *)HksMalloc(size);
     HKS_IF_NULL_RETURN(ctx.keyOutBuffer, HKS_ERROR_MALLOC_FAIL)
     struct HksHitraceId traceId = {0};
 #ifdef L2_STANDARD
@@ -982,9 +990,13 @@ int32_t HksServiceImportKey(const struct HksProcessInfo *processInfo, const stru
 {
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
-    uint8_t *keyOutBuffer = (uint8_t *)HksMalloc(ML_DSA_MAX_KEY_SIZE);
+    uint32_t size = MAX_KEY_SIZE;
+#ifdef L2_STANDARD
+    size = (size < ML_DSA_MAX_KEY_SIZE) ? ML_DSA_MAX_KEY_SIZE : size;
+#endif
+    uint8_t *keyOutBuffer = (uint8_t *)HksMalloc(size);
     HKS_IF_NULL_LOGE_RETURN(keyOutBuffer, HKS_ERROR_MALLOC_FAIL, "malloc keyOutBuffer failed.")
-    struct HksBlob keyOut = { ML_DSA_MAX_KEY_SIZE, keyOutBuffer };
+    struct HksBlob keyOut = { size, keyOutBuffer };
 #ifdef L2_STANDARD
     struct HksParamSet *reportParamSet = NULL;
     uint64_t enterTime = 0;
