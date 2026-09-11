@@ -95,10 +95,18 @@ int32_t HksAgreeKeyAdapter(const struct HksParamSet *paramSet, const struct HksB
 int32_t HksExportPublicKeyAdapter(const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *key)
 {
-    uint8_t *buffer = (uint8_t *)HksMalloc(ML_DSA_MAX_KEY_SIZE);
+    uint32_t size = MAX_KEY_SIZE;
+#ifdef L2_STANDARD
+    /*
+     * L0 devices have limited memory and do not support ML-DSA or ML-KEM; thus, only 2048 bytes are pre-allocated.
+     * The 10,000-byte allocation applies solely to L2 devices.
+     */
+    size = (size < ML_DSA_MAX_KEY_SIZE) ? ML_DSA_MAX_KEY_SIZE : size;
+#endif
+    uint8_t *buffer = (uint8_t *)HksMalloc(size);
     HKS_IF_NULL_LOGE_RETURN(buffer, HKS_ERROR_MALLOC_FAIL, "malloc failed")
-    (void)memset_s(buffer, ML_DSA_MAX_KEY_SIZE, 0, ML_DSA_MAX_KEY_SIZE);
-    struct HksBlob publicKey = { ML_DSA_MAX_KEY_SIZE, buffer };
+    (void)memset_s(buffer, size, 0, size);
+    struct HksBlob publicKey = { size, buffer };
 
     int32_t ret = HksClientExportPublicKey(keyAlias, paramSet, &publicKey);
 #ifdef HKS_UKEY_EXTENSION_CRYPTO
