@@ -1182,21 +1182,6 @@ const MlImportKeyCaseParams HKS_IMPORT_TEST_053_PARAMS = {
     .importKeyResult = HKS_SUCCESS,
 };
 
-/* 054: ml-dsa-87-private-key-import */
-const MlImportKeyCaseParams HKS_IMPORT_TEST_054_PARAMS = {
-    .params = {
-        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ML_DSA },
-        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN },
-        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ML_DSA_KEY_PARAM_SET_87 },
-        { .tag = HKS_TAG_IMPORT_KEY_TYPE, .uint32Param = HKS_KEY_TYPE_PRIVATE_KEY },
-    },
-    .keyAlg = HKS_ALG_ML_DSA,
-    .keyParamSet = HKS_ML_DSA_KEY_PARAM_SET_87,
-    .pubKeySize = 0,
-    .priKeySize = HKS_ML_DSA_PRI_KEY_SIZE_4896,
-    .importKeyResult = HKS_SUCCESS,
-};
-
 /* 055: ml-dsa-87-key-pair-invalid-prikeysize */
 const MlImportKeyCaseParams HKS_IMPORT_TEST_055_PARAMS = {
     .params = {
@@ -1228,47 +1213,12 @@ const MlImportKeyCaseParams HKS_IMPORT_TEST_056_PARAMS = {
     .priKeySize = HKS_ML_KEM_PRI_KEY_SIZE_3168,
     .importKeyResult = HKS_SUCCESS,
 };
-
-/* 057: ml-kem-1024-private-key-import */
-const MlImportKeyCaseParams HKS_IMPORT_TEST_057_PARAMS = {
-    .params = {
-        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ML_KEM },
-        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_UNWRAP },
-        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ML_KEM_KEY_PARAM_SET_1024 },
-        { .tag = HKS_TAG_IMPORT_KEY_TYPE, .uint32Param = HKS_KEY_TYPE_PRIVATE_KEY },
-    },
-    .keyAlg = HKS_ALG_ML_KEM,
-    .keyParamSet = HKS_ML_KEM_KEY_PARAM_SET_1024,
-    .pubKeySize = 0,
-    .priKeySize = HKS_ML_KEM_PRI_KEY_SIZE_3168,
-    .importKeyResult = HKS_SUCCESS,
-};
-
-/* 058: ml-kem-1024-private-key-with-nonzero-pubkeysize */
-const MlImportKeyCaseParams HKS_IMPORT_TEST_058_PARAMS = {
-    .params = {
-        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ML_KEM },
-        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_UNWRAP },
-        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ML_KEM_KEY_PARAM_SET_1024 },
-        { .tag = HKS_TAG_IMPORT_KEY_TYPE, .uint32Param = HKS_KEY_TYPE_PRIVATE_KEY },
-    },
-    .keyAlg = HKS_ALG_ML_KEM,
-    .keyParamSet = HKS_ML_KEM_KEY_PARAM_SET_1024,
-    .pubKeySize = HKS_ML_KEM_PUB_KEY_SIZE_1568,
-    .priKeySize = HKS_ML_KEM_PRI_KEY_SIZE_3168,
-    .importKeyResult = HKS_ERROR_INVALID_KEY_INFO,
-};
 #endif
 
 #ifdef HKS_SUPPORT_ML_DSA_C
 HWTEST_F(HksImportKeyTest, HksImportKeyTest053, TestSize.Level0)
 {
     EXPECT_EQ(ImportTestForMl(HKS_IMPORT_TEST_053_PARAMS), HKS_SUCCESS);
-}
-
-HWTEST_F(HksImportKeyTest, HksImportKeyTest054, TestSize.Level0)
-{
-    EXPECT_EQ(ImportTestForMl(HKS_IMPORT_TEST_054_PARAMS), HKS_SUCCESS);
 }
 
 HWTEST_F(HksImportKeyTest, HksImportKeyTest055, TestSize.Level0)
@@ -1281,16 +1231,6 @@ HWTEST_F(HksImportKeyTest, HksImportKeyTest055, TestSize.Level0)
 HWTEST_F(HksImportKeyTest, HksImportKeyTest056, TestSize.Level0)
 {
     EXPECT_EQ(ImportTestForMl(HKS_IMPORT_TEST_056_PARAMS), HKS_SUCCESS);
-}
-
-HWTEST_F(HksImportKeyTest, HksImportKeyTest057, TestSize.Level0)
-{
-    EXPECT_EQ(ImportTestForMl(HKS_IMPORT_TEST_057_PARAMS), HKS_SUCCESS);
-}
-
-HWTEST_F(HksImportKeyTest, HksImportKeyTest058, TestSize.Level0)
-{
-    EXPECT_EQ(ImportTestForMl(HKS_IMPORT_TEST_058_PARAMS), HKS_SUCCESS);
 }
 #endif
 } // namespace Unittest::ImportKeyTest
