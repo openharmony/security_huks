@@ -224,9 +224,9 @@ static int32_t GetKeyBlobFromFile(const char *path, const char *fileName, struct
     int32_t tempSize = HksStorageFileSize(path, fileName);
     HKS_IF_TRUE_RETURN(tempSize < 0, tempSize);
     HKS_IF_TRUE_RETURN(tempSize == 0, HKS_ERROR_FILE_SIZE_FAIL)
-    HKS_IF_TRUE_RETURN(keyBlob->size < tempSize, HKS_ERROR_INSUFFICIENT_DATA)
-
     uint32_t size = (uint32_t)tempSize;
+    HKS_IF_TRUE_RETURN(keyBlob->size < size, HKS_ERROR_INSUFFICIENT_DATA)
+
     int32_t ret = HksStorageReadFile(path, fileName, 0, keyBlob, &size);
     HKS_IF_TRUE_LOGE_RETURN(ret == HKS_ERROR_NO_PERMISSION, ret,
         "Check Permission failed, ret = %" LOG_PUBLIC "d.", ret)
