@@ -766,7 +766,7 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest020, TestSize.Level0)
     ret = HksGetParam(runtimeParamSet, HKS_TAG_CRYPTO_CTX, &ctxParam);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
-    uint8_t *dummyCtx = (uint8_t *)HksMalloc(sizeof(uint32_t));
+    uint8_t *dummyCtx = (uint8_t *)HksMalloc(sizeof(uint64_t) * 2);
     ASSERT_NE(dummyCtx, nullptr);
     ctxParam->uint64Param = reinterpret_cast<uint64_t>(dummyCtx);
 
@@ -776,8 +776,6 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest020, TestSize.Level0)
     ret = HksGetParam(runtimeParamSet, HKS_TAG_CRYPTO_CTX, &ctxParam);
     ASSERT_EQ(ret, HKS_SUCCESS);
     ASSERT_EQ(ctxParam->uint64Param, 0);
-
-    HKS_FREE(dummyCtx);
 
     HksFreeParamSet(&runtimeParamSet);
     HksFreeParamSet(&keyBlobParamSet);
@@ -820,7 +818,7 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest021, TestSize.Level0)
     struct HksParam *ctxParam = nullptr;
     ret = HksGetParam(runtimeParamSet, HKS_TAG_CRYPTO_CTX, &ctxParam);
     ASSERT_EQ(ret, HKS_SUCCESS);
-    uint8_t *dummyCtx = (uint8_t *)HksMalloc(sizeof(uint32_t));
+    uint8_t *dummyCtx = (uint8_t *)HksMalloc(sizeof(uint64_t) * 2);
     ASSERT_NE(dummyCtx, nullptr);
     ctxParam->uint64Param = reinterpret_cast<uint64_t>(dummyCtx);
 
@@ -830,8 +828,6 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest021, TestSize.Level0)
     ret = HksGetParam(runtimeParamSet, HKS_TAG_CRYPTO_CTX, &ctxParam);
     ASSERT_EQ(ret, HKS_SUCCESS);
     ASSERT_EQ(ctxParam->uint64Param, 0);
-
-    HKS_FREE(dummyCtx);
 
     HksFreeParamSet(&runtimeParamSet);
     HksFreeParamSet(&keyBlobParamSet);
