@@ -1290,4 +1290,43 @@ HWTEST_F(HksKemTest, HKS_FREE_ENCAPSULATION_RESULT_002, TestSize.Level0)
     EXPECT_EQ(encapResult.encapsulatedData.size, 0);
     EXPECT_EQ(encapResult.sharedSecret.size, 0);
 }
+
+// decapsulate with forbidden tag in sharedKeyParamSet, trigger IPC blacklist failure path
+// verifies deep-copied encapOrsharedSecret can be safely freed without double-free
+HWTEST_F(HksKemTest, HksDecapsulate_DoubleFree_001, TestSize.Level0)
+{
+    struct HksBlob keyAlias = g_keyAlias;
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ML_KEM },
+    };
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildParamSet(&paramSet, params, sizeof(params) / sizeof(params[0]));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = GenerateMlKemKey(&keyAlias, HKS_ML_KEM_KEY_PARAM_SET_768);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksEncapsulationResult encapResult;
+    (void)memset_s(&encapResult, sizeof(encapResult), 0, sizeof(encapResult));
+
+    ret = HksEncapsulate(&keyAlias, paramSet, nullptr, nullptr, &encapResult);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    uint8_t devIdData[] = "test_developer_id";
+    struct HksParam forbiddenParams[] = {
+        { .tag = HKS_TAG_DEVELOPER_ID, .blob = { sizeof(devIdData), devIdData } },
+    };
+    struct HksParamSet *forbiddenParamSet = nullptr;
+    ret = BuildParamSet(&forbiddenParamSet, forbiddenParams, sizeof(forbiddenParams) / sizeof(forbiddenParams[0]));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksDecapsulate(&keyAlias, paramSet, &g_sharedKeyAlias, forbiddenParamSet,
+        &encapResult.encapsulatedData);
+    EXPECT_NE(ret, HKS_SUCCESS);
+
+    HKS_FREE_ENCAPSULATION_RESULT(&encapResult);
+    (void)HksDeleteKey(&keyAlias, nullptr);
+    HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&forbiddenParamSet);
+}
 }

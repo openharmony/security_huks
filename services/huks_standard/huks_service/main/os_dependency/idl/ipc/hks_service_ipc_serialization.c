@@ -830,7 +830,7 @@ int HksKeyParamUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
 }
 
 int32_t HksDecapsulateUnpack(const struct HksBlob *srcData, struct HksBlob *sharedKeyAlias,
-    struct HksParamSet **sharedKeyParamSet, struct HksBlob *encapOrsharedSecret, uint32_t *offset)
+    struct HksParamSet **sharedKeyParamSet, struct HksBlob *encapsulatedData, uint32_t *offset)
 {
     int32_t ret = GetBlobFromBuffer(sharedKeyAlias, srcData, offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get sharedKeyAlias fail")
@@ -838,8 +838,8 @@ int32_t HksDecapsulateUnpack(const struct HksBlob *srcData, struct HksBlob *shar
     ret = GetParamSetFromBuffer(sharedKeyParamSet, srcData, offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get sharedKeyParamSet fail")
 
-    ret = GetBlobFromBuffer(encapOrsharedSecret, srcData, offset);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get encapOrsharedSecret fail")
+    ret = GetBlobFromBuffer(encapsulatedData, srcData, offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get encapsulatedData fail")
 
     return HKS_SUCCESS;
 }
