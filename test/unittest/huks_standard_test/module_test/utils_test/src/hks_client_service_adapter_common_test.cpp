@@ -134,4 +134,83 @@ HWTEST_F(HksClientServiceAdapterCommonTest, HksClientServiceAdapterCommonTest004
     HksFreeParamSet(&paramSet);
     HKS_FREE(key.data);
 }
+
+#ifdef HKS_SUPPORT_ML_DSA_C
+/**
+ * @tc.name: HksClientServiceAdapterCommonTest.HksClientServiceAdapterCommonTest005
+ * @tc.desc: tdd HksClientServiceAdapterCommonTest005, function is CopyToInnerKey with ML_DSA key
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceAdapterCommonTest, HksClientServiceAdapterCommonTest005, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceAdapterCommonTest005");
+    uint8_t *keyData = (uint8_t *)HksMalloc(ML_DSA_MAX_KEY_SIZE + 1);
+    ASSERT_NE(keyData, nullptr);
+    (void)memset_s(keyData, ML_DSA_MAX_KEY_SIZE + 1, 0xAB, ML_DSA_MAX_KEY_SIZE + 1);
+
+    /* key size exceeds ML_DSA_MAX_KEY_SIZE, expect failed */
+    HksBlob key = { ML_DSA_MAX_KEY_SIZE + 1, keyData };
+    HksBlob outKey = { 0, nullptr };
+    int32_t ret = CopyToInnerKey(&key, HKS_ALG_ML_DSA, &outKey);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksClientServiceAdapterCommonTest005 failed, ret = " << ret;
+
+    /* key size between MAX_KEY_SIZE and ML_DSA_MAX_KEY_SIZE, expect success */
+    key.size = MAX_KEY_SIZE + 1;
+    ret = CopyToInnerKey(&key, HKS_ALG_ML_DSA, &outKey);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "HksClientServiceAdapterCommonTest005 failed, ret = " << ret;
+    EXPECT_EQ(outKey.size, key.size);
+    EXPECT_EQ(memcmp(outKey.data, keyData, key.size), 0);
+    HKS_FREE_BLOB(outKey);
+
+    /* key size equals ML_DSA_MAX_KEY_SIZE, expect success */
+    key.size = ML_DSA_MAX_KEY_SIZE;
+    ret = CopyToInnerKey(&key, HKS_ALG_ML_DSA, &outKey);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "HksClientServiceAdapterCommonTest005 failed, ret = " << ret;
+    EXPECT_EQ(outKey.size, ML_DSA_MAX_KEY_SIZE);
+    EXPECT_EQ(memcmp(outKey.data, keyData, ML_DSA_MAX_KEY_SIZE), 0);
+    HKS_FREE_BLOB(outKey);
+
+    HKS_FREE(keyData);
+}
+#endif
+
+#ifdef HKS_SUPPORT_ML_KEM_C
+/**
+ * @tc.name: HksClientServiceAdapterCommonTest.HksClientServiceAdapterCommonTest006
+ * @tc.desc: tdd HksClientServiceAdapterCommonTest006, function is CopyToInnerKey with ML_KEM key
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceAdapterCommonTest, HksClientServiceAdapterCommonTest006, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceAdapterCommonTest006");
+    uint8_t *keyData = (uint8_t *)HksMalloc(ML_KEM_MAX_KEY_SIZE + 1);
+    ASSERT_NE(keyData, nullptr);
+    (void)memset_s(keyData, ML_KEM_MAX_KEY_SIZE + 1, 0xAB, ML_KEM_MAX_KEY_SIZE + 1);
+
+    /* key size exceeds ML_KEM_MAX_KEY_SIZE, expect failed */
+    HksBlob key = { ML_KEM_MAX_KEY_SIZE + 1, keyData };
+    HksBlob outKey = { 0, nullptr };
+    int32_t ret = CopyToInnerKey(&key, HKS_ALG_ML_KEM, &outKey);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksClientServiceAdapterCommonTest006 failed, ret = " << ret;
+
+    /* key size between MAX_KEY_SIZE and ML_KEM_MAX_KEY_SIZE, expect success */
+    key.size = MAX_KEY_SIZE + 1;
+    ret = CopyToInnerKey(&key, HKS_ALG_ML_KEM, &outKey);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "HksClientServiceAdapterCommonTest006 failed, ret = " << ret;
+    EXPECT_EQ(outKey.size, key.size);
+    EXPECT_EQ(memcmp(outKey.data, keyData, key.size), 0);
+    HKS_FREE_BLOB(outKey);
+
+    /* key size equals ML_KEM_MAX_KEY_SIZE, expect success */
+    key.size = ML_KEM_MAX_KEY_SIZE;
+    ret = CopyToInnerKey(&key, HKS_ALG_ML_KEM, &outKey);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "HksClientServiceAdapterCommonTest006 failed, ret = " << ret;
+    EXPECT_EQ(outKey.size, ML_KEM_MAX_KEY_SIZE);
+    EXPECT_EQ(memcmp(outKey.data, keyData, ML_KEM_MAX_KEY_SIZE), 0);
+    HKS_FREE_BLOB(outKey);
+
+    HKS_FREE(keyData);
+}
+#endif
+
 }
