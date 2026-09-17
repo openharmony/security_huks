@@ -211,9 +211,6 @@ void HksIpcServiceQueryAbilityInfo(const struct HksBlob *srcData, const uint8_t 
         ret = HksGetProcessInfoForIPC(NULL, context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
-
         ret = HksIpcQueryAbilityInfoAdapter(&processInfo, &resourceId, &abilityInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksIpcQueryAbilityInfoAdapter fail, ret = %" LOG_PUBLIC "d", ret)
 
