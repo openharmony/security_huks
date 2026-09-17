@@ -182,6 +182,14 @@ int32_t HksGetUserIdFromUid(const uint32_t &uid)
     return static_cast<int32_t>(uid / USERID_FACTOR);
 }
 
+int32_t GetEffectiveUserId(const CppParamSet &paramSet, int32_t processInfoUid)
+{
+    auto userIdParam = paramSet.GetParam<HKS_TAG_SPECIFIC_USER_ID>();
+    HKS_IF_TRUE_RETURN(userIdParam.first != HKS_SUCCESS, HksGetUserIdFromUid(processInfoUid));
+
+    return userIdParam.second;
+}
+
 bool ProviderInfo::operator==(const ProviderInfo &other) const
 {
     return m_bundleName == other.m_bundleName && m_providerName == other.m_providerName &&

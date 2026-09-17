@@ -27,7 +27,6 @@ namespace Huks {
     int32_t HksGetFrontUserId(int32_t &outId);
     int32_t VerifyCallerAndAdjustUidParam(const HksProcessInfo &processInfo, const CppParamSet &paramSet,
         CppParamSet &newParamSet);
-    int32_t GetEffectiveUserId(const CppParamSet &paramSet, int32_t processInfoUid);
 
 }
 }
