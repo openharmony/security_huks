@@ -148,6 +148,14 @@ HWTEST_F(HksClientServiceAdapterCommonTest, HksClientServiceAdapterCommonTest005
     ASSERT_NE(keyData, nullptr);
     (void)memset_s(keyData, ML_DSA_MAX_KEY_SIZE + 1, 0xAB, ML_DSA_MAX_KEY_SIZE + 1);
 
+    /* CopyToInnerKey checks the ML_DSA key material header, build a valid one */
+    struct HksKeyMaterialMlDsa *material = (struct HksKeyMaterialMlDsa *)keyData;
+    material->keyAlg = HKS_ALG_ML_DSA;
+    material->keyParamSet = HKS_ML_DSA_KEY_PARAM_SET_44;
+    material->pubKeySize = 0;
+    material->priKeySize = 0;
+    material->reserved = 0;
+
     /* key size exceeds ML_DSA_MAX_KEY_SIZE, expect failed */
     HksBlob key = { ML_DSA_MAX_KEY_SIZE + 1, keyData };
     HksBlob outKey = { 0, nullptr };
@@ -156,6 +164,7 @@ HWTEST_F(HksClientServiceAdapterCommonTest, HksClientServiceAdapterCommonTest005
 
     /* key size between MAX_KEY_SIZE and ML_DSA_MAX_KEY_SIZE, expect success */
     key.size = MAX_KEY_SIZE + 1;
+    material->priKeySize = key.size - sizeof(struct HksKeyMaterialMlDsa);
     ret = CopyToInnerKey(&key, HKS_ALG_ML_DSA, &outKey);
     ASSERT_EQ(ret, HKS_SUCCESS) << "HksClientServiceAdapterCommonTest005 failed, ret = " << ret;
     EXPECT_EQ(outKey.size, key.size);
@@ -164,6 +173,7 @@ HWTEST_F(HksClientServiceAdapterCommonTest, HksClientServiceAdapterCommonTest005
 
     /* key size equals ML_DSA_MAX_KEY_SIZE, expect success */
     key.size = ML_DSA_MAX_KEY_SIZE;
+    material->priKeySize = key.size - sizeof(struct HksKeyMaterialMlDsa);
     ret = CopyToInnerKey(&key, HKS_ALG_ML_DSA, &outKey);
     ASSERT_EQ(ret, HKS_SUCCESS) << "HksClientServiceAdapterCommonTest005 failed, ret = " << ret;
     EXPECT_EQ(outKey.size, ML_DSA_MAX_KEY_SIZE);
@@ -187,6 +197,14 @@ HWTEST_F(HksClientServiceAdapterCommonTest, HksClientServiceAdapterCommonTest006
     ASSERT_NE(keyData, nullptr);
     (void)memset_s(keyData, ML_KEM_MAX_KEY_SIZE + 1, 0xAB, ML_KEM_MAX_KEY_SIZE + 1);
 
+    /* CopyToInnerKey checks the ML_KEM key material header, build a valid one */
+    struct HksKeyMaterialMlKem *material = (struct HksKeyMaterialMlKem *)keyData;
+    material->keyAlg = HKS_ALG_ML_KEM;
+    material->keyParamSet = HKS_ML_KEM_KEY_PARAM_SET_768;
+    material->pubKeySize = 0;
+    material->priKeySize = 0;
+    material->reserved = 0;
+
     /* key size exceeds ML_KEM_MAX_KEY_SIZE, expect failed */
     HksBlob key = { ML_KEM_MAX_KEY_SIZE + 1, keyData };
     HksBlob outKey = { 0, nullptr };
@@ -195,6 +213,7 @@ HWTEST_F(HksClientServiceAdapterCommonTest, HksClientServiceAdapterCommonTest006
 
     /* key size between MAX_KEY_SIZE and ML_KEM_MAX_KEY_SIZE, expect success */
     key.size = MAX_KEY_SIZE + 1;
+    material->priKeySize = key.size - sizeof(struct HksKeyMaterialMlKem);
     ret = CopyToInnerKey(&key, HKS_ALG_ML_KEM, &outKey);
     ASSERT_EQ(ret, HKS_SUCCESS) << "HksClientServiceAdapterCommonTest006 failed, ret = " << ret;
     EXPECT_EQ(outKey.size, key.size);
@@ -203,6 +222,7 @@ HWTEST_F(HksClientServiceAdapterCommonTest, HksClientServiceAdapterCommonTest006
 
     /* key size equals ML_KEM_MAX_KEY_SIZE, expect success */
     key.size = ML_KEM_MAX_KEY_SIZE;
+    material->priKeySize = key.size - sizeof(struct HksKeyMaterialMlKem);
     ret = CopyToInnerKey(&key, HKS_ALG_ML_KEM, &outKey);
     ASSERT_EQ(ret, HKS_SUCCESS) << "HksClientServiceAdapterCommonTest006 failed, ret = " << ret;
     EXPECT_EQ(outKey.size, ML_KEM_MAX_KEY_SIZE);
