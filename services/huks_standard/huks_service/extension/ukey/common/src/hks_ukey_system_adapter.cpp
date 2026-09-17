@@ -54,12 +54,4 @@ int32_t VerifyCallerAndAdjustUidParam(const HksProcessInfo &processInfo, const C
     return HKS_SUCCESS;
 }
 
-int32_t GetEffectiveUserId(const CppParamSet &paramSet, int32_t processInfoUid)
-{
-    auto userIdParam = paramSet.GetParam<HKS_TAG_SPECIFIC_USER_ID>();
-    HKS_IF_TRUE_RETURN(userIdParam.first != HKS_SUCCESS, static_cast<int32_t>(processInfoUid / USERID_FACTOR));
-
-    return userIdParam.second;
-}
-
 }

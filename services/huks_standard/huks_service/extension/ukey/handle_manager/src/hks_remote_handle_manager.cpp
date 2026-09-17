@@ -612,7 +612,7 @@ int32_t HksRemoteHandleManager::GetResourceId(const HksProcessInfo &processInfo,
     HKS_IF_TRUE_LOGE_RETURN(resourceInfo.second.size() < 1, HKS_ERROR_INVALID_ARGUMENT,
         "the resourceInfo is too short. size: %" LOG_PUBLIC "zu", resourceInfo.second.size())
 
-    providerInfo.m_userid = GetEffectiveUserId(paramSet, processAndError.processInfo->uidInt);
+    providerInfo.m_userid = GetEffectiveUserId(paramSet, processInfo.uidInt);
     providerInfo.m_abilityName = std::string(abilityName.second.begin(), abilityName.second.end());
     providerInfo.m_bundleName = std::string(bundleName.second.begin(), bundleName.second.end());
     providerInfo.m_providerName = providerName;
