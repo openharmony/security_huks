@@ -135,6 +135,7 @@ if (os_level == "standard") {
       "src/hks_report_import_key.cpp",
       "src/hks_report_list_aliases.cpp",
       "src/hks_report_rename_key.cpp",
+      "src/hks_report_sa_event.cpp",
       "src/hks_report_three_stage.cpp",
       "src/hks_report_three_stage_build.cpp",
       "src/hks_report_three_stage_get.cpp",
