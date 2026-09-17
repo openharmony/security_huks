@@ -37,6 +37,8 @@ int32_t HksGetFrontUserId(int32_t &outId)
 int32_t VerifyCallerAndAdjustUidParam(const HksProcessInfo &processInfo, const CppParamSet &paramSet,
     CppParamSet &newParamSet)
 {
+    processInfo.userIdInt = GetEffectiveUserId(paramSet, processInfo.uidInt);
+
     auto uidParam = paramSet.GetParam<HKS_EXT_CRYPTO_TAG_UID>();
     if (uidParam.first != HKS_SUCCESS) {
         std::vector<HksParam> params = {
@@ -52,6 +54,14 @@ int32_t VerifyCallerAndAdjustUidParam(const HksProcessInfo &processInfo, const C
     
     newParamSet = CppParamSet(paramSet);
     return HKS_SUCCESS;
+}
+
+int32_t GetEffectiveUserId(const CppParamSet &paramSet, int32_t processInfoUid)
+{
+    auto userIdParam = paramSet.GetParam<HKS_TAG_SPECIFIC_USER_ID>();
+    HKS_IF_TRUE_RETURN(userIdParam.first != HKS_SUCCESS, static_cast<int32_t>(processInfoUid / USERID_FACTOR));
+
+    return userIdParam.second;
 }
 
 }
