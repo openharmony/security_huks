@@ -30,6 +30,7 @@
 #include "hks_report_three_stage.h"
 #include "hks_report_list_aliases.h"
 #include "hks_report_data_size.h"
+#include "hks_report_sa_event.h"
 #include "hks_report_three_stage_build.h"
 #include "hks_report_ukey_event.h"
 #include "hks_param.h"
@@ -401,6 +402,14 @@ private:
             HksEventInfoIsEqualForDataSize,
             HksEventInfoAddForDataSize,
             HksEventInfoToMapForDataSize
+        },
+        {
+            HKS_EVENT_SUBSCRIBE_SYSTEM_EVENT_FAIL,
+            HksParamSetToEventInfoForSaEvent,
+            HksEventInfoIsNeedReportForSaEvent,
+            HksEventInfoIsEqualForSaEvent,
+            HksEventInfoAddForSaEvent,
+            HksEventInfoToMapForSaEvent
         }
     };
 
