@@ -221,6 +221,7 @@ uint32_t HksHaPlugin::GetCacheWeightByEventId(uint32_t eventId) const
         case HKS_EVENT_IMPORT_KEY:
             return CACHE_WEIGHT_MID;
         case HKS_EVENT_DATA_SIZE_STATISTICS:
+        case HKS_EVENT_SUBSCRIBE_SYSTEM_EVENT_FAIL:
             return CACHE_WEIGHT_SYSTEM;
         default:
             return CACHE_WEIGHT_LOW;

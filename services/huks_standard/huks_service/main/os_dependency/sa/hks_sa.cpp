@@ -50,6 +50,7 @@
 #include <unistd.h>
 
 #include "hks_event_observer.h"
+#include "hks_report_sa_event.h"
 #endif
 
 #include <array>
@@ -455,7 +456,10 @@ void HksService::OnStart()
         HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(Init(), "Failed to init HksService")
 
 #ifdef SUPPORT_COMMON_EVENT
-        (void)AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
+        if (!AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID)) {
+            HKS_LOG_E("AddSystemAbilityListener COMMON_EVENT_SERVICE_ID failed");
+            ReportSubscribeSystemEventFail("AddSystemAbilityListener", HKS_FAILURE);
+        }
 #endif
 
         // this should be excuted after huks published and listener added.
@@ -475,7 +479,12 @@ void HksService::OnAddSystemAbility(int32_t systemAbilityId, [[maybe_unused]] co
     HKS_LOG_I("systemAbilityId is %" LOG_PUBLIC "d!", systemAbilityId);
 #ifdef SUPPORT_COMMON_EVENT
     HKS_IF_TRUE_RETURN_VOID(systemAbilityId != COMMON_EVENT_SERVICE_ID)
-    HKS_IF_TRUE_LOGI_RETURN_VOID(SystemEventObserver::SubscribeEvent(), "subscribe ces success")
+    if (SystemEventObserver::SubscribeEvent()) {
+        HKS_LOG_I("subscribe ces success");
+    } else {
+        HKS_LOG_E("subscribe ces failed");
+        ReportSubscribeSystemEventFail("SubscribeEvent", HKS_FAILURE);
+    }
 #endif
 }
 
