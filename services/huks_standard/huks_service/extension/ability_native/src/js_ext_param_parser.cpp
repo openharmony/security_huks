@@ -82,8 +82,12 @@ int32_t GetHksCertInfoValue(napi_env env, napi_value value, HksCertInfo &certInf
     napi_value napiPurpose = nullptr;
     auto status = napi_get_named_property(env, value, "purpose", &napiPurpose);
     HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, status, "napi_get_named_property failed, status %d", status);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(napiPurpose == nullptr,
-        napi_invalid_arg, "napi_get_named_property get napiPurpose is nullptr.");
+    napi_valuetype valueType = napi_undefined;
+    status = napi_typeof(env, napiPurpose, &valueType);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok || valueType == napi_undefined, HKS_ERROR_EXT_GET_VALUE_FAILED,
+        "purpose is undefined, status %d", status);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(valueType != napi_number, HKS_ERROR_EXT_GET_VALUE_FAILED,
+        "purpose is not a number, type:%d", valueType);
     status = napi_get_value_int32(env, napiPurpose, &certInfo.purpose);
     HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, status,
         "GetHksCertInfoValue js value napiPurpose failed, status %d", status);
@@ -91,22 +95,25 @@ int32_t GetHksCertInfoValue(napi_env env, napi_value value, HksCertInfo &certInf
     napi_value napiIndex = nullptr;
     status = napi_get_named_property(env, value, "resourceId", &napiIndex);
     HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, status, "napi_get_named_property failed, status %d", status);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(napiIndex == nullptr,
-        napi_invalid_arg, "napi_get_named_property get napiIndex is nullptr.");
+    status = napi_typeof(env, napiIndex, &valueType);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok || valueType == napi_undefined, HKS_ERROR_EXT_GET_VALUE_FAILED,
+        "resourceId is undefined, status %d", status);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(valueType != napi_string, HKS_ERROR_EXT_GET_VALUE_FAILED,
+        "resourceId is not a string, type:%d", valueType);
     auto result = GetStringValue(env, napiIndex, certInfo.index);
     HKS_EXT_IF_TRUE_LOGE_RETURN(result != HKS_SUCCESS, result,
         "GetHksCertInfoValue js value napiIndex failed, result %d", result);
 
     napi_value napiCerts = nullptr;
     status = napi_get_named_property(env, value, "cert", &napiCerts);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, status,
-        "napi_get_named_property failed, status %d", status);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(napiCerts == nullptr,
-        napi_invalid_arg, "napi_get_named_property get napiCerts is nullptr.");
-    status = GetUint8ArrayValue(env, napiCerts, certInfo.certsArray);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, status,
-        "GetHksCertInfoValue js value napiCerts failed, status %d", status);
-    return napi_ok;
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, status, "napi_get_named_property failed, status %d", status);
+    status = napi_typeof(env, napiCerts, &valueType);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok || valueType == napi_undefined, HKS_ERROR_EXT_GET_VALUE_FAILED,
+        "cert is undefined, status %d", status);
+    napi_status arrStatus = GetUint8ArrayValue(env, napiCerts, certInfo.certsArray);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(arrStatus != napi_ok, status,
+        "GetHksCertInfoValue js value napiCerts failed, status %d", arrStatus);
+    return HKS_SUCCESS;
 }
 
 napi_status GetHksParamsfromValue(napi_env env, napi_value value, HksParam &param)
@@ -114,16 +121,21 @@ napi_status GetHksParamsfromValue(napi_env env, napi_value value, HksParam &para
     napi_value napiTag = nullptr;
     auto status = napi_get_named_property(env, value, "tag", &napiTag);
     HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, status, "tag get failed, status %d", status);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(napiTag == nullptr,
-        napi_invalid_arg, "napi_get_named_property get napiTag is nullptr.");
+    napi_valuetype valueType = napi_undefined;
+    status = napi_typeof(env, napiTag, &valueType);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok || valueType == napi_undefined, status,
+        "tag is undefined, status %d", status);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(valueType != napi_number, napi_invalid_arg,
+        "tag is not a number, type:%d", valueType);
     status = napi_get_value_uint32(env, napiTag, &param.tag);
     HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, status, "tag get failed, status %d", status);
 
     napi_value napiValue = nullptr;
     status = napi_get_named_property(env, value, "value", &napiValue);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, status, "napi_get_named_property failed, status %d", status);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(napiValue == nullptr,
-        napi_invalid_arg, "napi_get_named_property get napiValue is nullptr.");
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, status, "napi_get_named_property value failed, status %d", status);
+    status = napi_typeof(env, napiValue, &valueType);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok || valueType == napi_undefined, napi_invalid_arg,
+        "value is undefined, status %d", status);
     bool lossLess = true;
     switch (param.tag & HKS_TAG_TYPE_MASK) {
         case HKS_TAG_TYPE_INT:
@@ -154,26 +166,8 @@ napi_status GetHksParamsfromValue(napi_env env, napi_value value, HksParam &para
 // Generic property extraction helpers (reduce duplication)
 // ============================================================
 
-// Extract a required string property from a JS object.
-int32_t GetRequiredStringProp(const napi_env &env, const napi_value &obj, const char *propName, std::string &out)
-{
-    napi_value napiVal = nullptr;
-    auto status = napi_get_named_property(env, obj, propName, &napiVal);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_GET_NAME_PROPERTY_FAILED,
-        "napi_get_named_property %s failed, status:%d", propName, status);
-
-    napi_valuetype valueType = napi_undefined;
-    status = napi_typeof(env, napiVal, &valueType);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok || valueType != napi_string,
-        HKS_ERROR_EXT_GET_NAME_PROPERTY_FAILED, "%s is not a string, type:%d", propName, valueType);
-
-    auto result = GetStringValue(env, napiVal, out);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(result != HKS_SUCCESS, result,
-        "Convert js %s fail, result:%d", propName, result);
-    return HKS_SUCCESS;
-}
-
 // Extract a required int32 property from a JS object.
+// Returns error if the property is missing, undefined, or not a number.
 int32_t GetRequiredInt32Prop(const napi_env &env, const napi_value &obj, const char *propName, int32_t &out)
 {
     napi_value napiVal = nullptr;
@@ -198,7 +192,7 @@ int32_t GetOptionalInt32Prop(const napi_env &env, const napi_value &obj, const c
 {
     napi_value napiVal = nullptr;
     auto status = napi_get_named_property(env, obj, propName, &napiVal);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_SUCCESS,
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_GET_NAME_PROPERTY_FAILED,
         "napi_get_named_property %s failed, status:%d", propName, status);
 
     napi_valuetype valueType = napi_undefined;
@@ -215,8 +209,9 @@ int32_t GetOptionalInt32Prop(const napi_env &env, const napi_value &obj, const c
     return HKS_SUCCESS;
 }
 
-// Extract a required uint32 property from a JS object.
-int32_t GetRequiredUint32Prop(const napi_env &env, const napi_value &obj, const char *propName, uint32_t &out)
+// Extract an optional string property from a JS object.
+// If the property does not exist (undefined), returns HKS_SUCCESS and leaves out unchanged.
+int32_t GetOptionalStringProp(const napi_env &env, const napi_value &obj, const char *propName, std::string &out)
 {
     napi_value napiVal = nullptr;
     auto status = napi_get_named_property(env, obj, propName, &napiVal);
@@ -225,33 +220,58 @@ int32_t GetRequiredUint32Prop(const napi_env &env, const napi_value &obj, const 
 
     napi_valuetype valueType = napi_undefined;
     status = napi_typeof(env, napiVal, &valueType);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok || valueType != napi_number,
-        HKS_ERROR_EXT_GET_NAME_PROPERTY_FAILED, "%s is not a number, type:%d", propName, valueType);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok || valueType == napi_undefined, HKS_SUCCESS,
+        "napi_typeof %s failed or undefined, status:%d", propName, status);
 
-    status = napi_get_value_uint32(env, napiVal, &out);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_GET_VALUE_FAILED,
-        "Convert js %s failed, status:%d", propName, status);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(valueType != napi_string, HKS_ERROR_EXT_GET_NAME_PROPERTY_FAILED,
+        "%s is not a string, type:%d", propName, valueType);
+
+    auto result = GetStringValue(env, napiVal, out);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(result != HKS_SUCCESS, result,
+        "Convert js %s fail, result:%d", propName, result);
     return HKS_SUCCESS;
 }
 
-// Extract outData as Uint8Array typedarray.
-// isRequired: if true, undefined/empty data is an error; if false, it is allowed.
-int32_t GetOutDataProp(const napi_env &env, const napi_value &obj, std::vector<uint8_t> &outData, bool isRequired)
+// Extract an optional uint32 property from a JS object.
+// If the property does not exist (undefined), returns HKS_SUCCESS and leaves out unchanged.
+int32_t GetOptionalUint32Prop(const napi_env &env, const napi_value &obj, const char *propName, uint32_t &out)
+{
+    napi_value napiVal = nullptr;
+    auto status = napi_get_named_property(env, obj, propName, &napiVal);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_GET_NAME_PROPERTY_FAILED,
+        "napi_get_named_property %s failed, status:%d", propName, status);
+
+    napi_valuetype valueType = napi_undefined;
+    status = napi_typeof(env, napiVal, &valueType);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok || valueType == napi_undefined, HKS_SUCCESS,
+        "napi_typeof %s failed or undefined, status:%d", propName, status);
+
+    HKS_EXT_IF_TRUE_LOGE_RETURN(valueType != napi_number, HKS_ERROR_EXT_GET_NAME_PROPERTY_FAILED,
+        "%s is not a number, type:%d", propName, valueType);
+
+    int32_t intVal = 0;
+    status = napi_get_value_int32(env, napiVal, &intVal);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_GET_VALUE_FAILED,
+        "Convert js %s failed, status:%d", propName, status);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(intVal < 0, HKS_ERROR_EXT_GET_VALUE_FAILED,
+        "%s is negative, value:%d", propName, intVal);
+    out = static_cast<uint32_t>(intVal);
+    return HKS_SUCCESS;
+}
+
+// Extract outData as Uint8Array typedarray (optional).
+int32_t GetOutDataProp(const napi_env &env, const napi_value &obj, std::vector<uint8_t> &outData)
 {
     napi_value napiOutData = nullptr;
     auto status = napi_get_named_property(env, obj, "outData", &napiOutData);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok,
-        isRequired ? HKS_ERROR_EXT_GET_NAME_PROPERTY_FAILED : HKS_SUCCESS,
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_GET_NAME_PROPERTY_FAILED,
         "napi_get_named_property outData failed, status:%d", status);
 
     napi_valuetype valueType = napi_undefined;
     status = napi_typeof(env, napiOutData, &valueType);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_GET_VALUE_FAILED,
-        "napi_typeof outData failed, status:%d", status);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_SUCCESS, "napi_typeof outData failed, status:%d", status);
 
     if (valueType == napi_undefined) {
-        HKS_EXT_IF_TRUE_LOGE_RETURN(isRequired, HKS_ERROR_EXT_GET_VALUE_FAILED,
-            "outData is required but not provided");
         return HKS_SUCCESS;
     }
 
@@ -273,8 +293,6 @@ int32_t GetOutDataProp(const napi_env &env, const napi_value &obj, std::vector<u
         "outData is not uint8 array, type:%d", type);
 
     if (length == 0 || data == nullptr) {
-        HKS_EXT_IF_TRUE_LOGE_RETURN(isRequired, HKS_ERROR_EXT_GET_VALUE_FAILED,
-            "outData is empty or data is null");
         return HKS_SUCCESS;
     }
 
@@ -336,38 +354,29 @@ void GetErrorInfoParams(const napi_env &env, const napi_value &funcResult, Crypt
 
 int32_t GetOpenRemoteHandleParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
-    HKS_EXT_IF_TRUE_RETURN(resultParams.errCode != 0, HKS_SUCCESS);
-    return GetRequiredStringProp(env, funcResult, "handle", resultParams.handle);
+    return GetOptionalStringProp(env, funcResult, "handle", resultParams.handle);
 }
 
 int32_t GetResourceIdParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
-    HKS_EXT_IF_TRUE_RETURN(resultParams.errCode != 0, HKS_SUCCESS);
-    return GetRequiredStringProp(env, funcResult, "resourceId", resultParams.handle);
+    return GetOptionalStringProp(env, funcResult, "resourceId", resultParams.handle);
 }
 
 int32_t GetAuthUkeyPinParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
-    HKS_EXT_IF_TRUE_RETURN(resultParams.errCode != EXTENSION_ERRCODE_PIN_CODE_ERROR, HKS_SUCCESS);
-    // retryCount: required
-    int32_t ret = GetRequiredUint32Prop(env, funcResult, "retryCount", resultParams.retryCnt);
+    int32_t ret = GetOptionalUint32Prop(env, funcResult, "retryCount", resultParams.retryCnt);
     HKS_EXT_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetAuthUkeyPinParams: retryCount failed");
-    // Convert retryCnt via int32 path for consistency with original code
-    resultParams.retryCnt = static_cast<uint32_t>(resultParams.retryCnt);
 
-    // authState: optional
     return GetOptionalInt32Prop(env, funcResult, "authState", resultParams.authState);
 }
 
 int32_t GetUkeyPinAuthStateParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
-    HKS_EXT_IF_TRUE_RETURN(resultParams.errCode != 0, HKS_SUCCESS);
-    return GetRequiredInt32Prop(env, funcResult, "authState", resultParams.authState);
+    return GetOptionalInt32Prop(env, funcResult, "authState", resultParams.authState);
 }
 
 int32_t GetExportCertificateParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
-    HKS_EXT_IF_TRUE_RETURN(resultParams.errCode != 0, HKS_SUCCESS);
     napi_value nativeArray = nullptr;
     auto status = napi_get_named_property(env, funcResult, "certs", &nativeArray);
     HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok, HKS_ERROR_EXT_GET_NAME_PROPERTY_FAILED,
@@ -375,8 +384,11 @@ int32_t GetExportCertificateParams(const napi_env &env, const napi_value &funcRe
 
     napi_valuetype valueType = napi_undefined;
     status = napi_typeof(env, nativeArray, &valueType);
-    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok || valueType != napi_object,
-        HKS_ERROR_EXT_GET_VALUE_FAILED, "certs is not an object(array), type:%d", valueType);
+    HKS_EXT_IF_TRUE_LOGE_RETURN(status != napi_ok || valueType == napi_undefined, HKS_SUCCESS,
+        "certs is undefined, status:%d", status);
+
+    HKS_EXT_IF_TRUE_LOGE_RETURN(valueType != napi_object, HKS_ERROR_EXT_GET_VALUE_FAILED,
+        "certs is not an object(array), type:%d", valueType);
 
     bool isArray = false;
     status = napi_is_array(env, nativeArray, &isArray);
@@ -396,7 +408,7 @@ int32_t GetExportCertificateParams(const napi_env &env, const napi_value &funcRe
 
         HksCertInfo certInfo;
         auto result = GetHksCertInfoValue(env, queryResult, certInfo);
-        HKS_EXT_IF_TRUE_LOGE_RETURN(result != napi_ok, HKS_ERROR_EXT_RETURN_VALUE_INCORRECT,
+        HKS_EXT_IF_TRUE_LOGE_RETURN(result != HKS_SUCCESS, HKS_SUCCESS,
             "Convert js certInfo fail, index:%d, result:%d", i, result);
         resultParams.certs.emplace_back(std::move(certInfo));
     }
@@ -412,7 +424,7 @@ int32_t GetSessionParams(const napi_env &env, const napi_value &funcResult, Cryp
 int32_t GetExportPublicKeyParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
     HKS_EXT_IF_TRUE_RETURN(resultParams.errCode != 0, HKS_SUCCESS);
-    return GetOutDataProp(env, funcResult, resultParams.outData, true);
+    return GetOutDataProp(env, funcResult, resultParams.outData);
 }
 
 int32_t GetGetPropertyParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
