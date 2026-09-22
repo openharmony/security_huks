@@ -418,7 +418,7 @@ int32_t GetExportCertificateParams(const napi_env &env, const napi_value &funcRe
 int32_t GetSessionParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
 {
     HKS_EXT_IF_TRUE_RETURN(resultParams.errCode != 0, HKS_SUCCESS);
-    return GetOutDataProp(env, funcResult, resultParams.outData, false);
+    return GetOutDataProp(env, funcResult, resultParams.outData);
 }
 
 int32_t GetExportPublicKeyParams(const napi_env &env, const napi_value &funcResult, CryptoResultParam &resultParams)
