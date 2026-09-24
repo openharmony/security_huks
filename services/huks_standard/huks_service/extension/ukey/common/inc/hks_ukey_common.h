@@ -23,6 +23,7 @@
 #include <hks_type.h>
 #include "hks_external_error_info.h"
 #include "hks_ext_error_info.h"
+#include "hks_cpp_paramset.h"
 
 namespace OHOS {
 namespace Security {
@@ -74,6 +75,7 @@ namespace Huks {
     int32_t ConvertExtensionToHksErrorCode(const int32_t extensionErrorCode,
         const std::map<int32_t, int32_t> &errorMapping);
     int32_t HksGetUserIdFromUid(const uint32_t &uid);
+    int32_t GetEffectiveUserId(const CppParamSet &paramSet, int32_t processInfoUid);
 
     void HksExtRecordErrInfo(HksExternalErrorInfoIdl &errorInfo, struct HksExternalErrorInfo **errInfo);
 

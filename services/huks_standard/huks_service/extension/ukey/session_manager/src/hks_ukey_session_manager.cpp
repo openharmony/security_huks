@@ -112,7 +112,7 @@ int32_t HksSessionManager::ExtensionInitSession(struct HksProcessWithErrorInfo &
     HKS_IF_TRUE_LOGE_RETURN(handleMgr == nullptr, HKS_ERROR_NULL_POINTER, "handleMgr is null");
     ret = handleMgr->ParseAndValidateIndex(index,
         processAndError.processInfo->uidInt, providerInfo, sIndexHandle);
-    providerInfo.m_userid = processAndError.processInfo->userIdInt;
+    providerInfo.m_userid = GetEffectiveUserId(paramSet, processAndError.processInfo->uidInt);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "ParseAndValidateIndex failed: %" LOG_PUBLIC "d", ret)
 
     std::string sessionHandle;
