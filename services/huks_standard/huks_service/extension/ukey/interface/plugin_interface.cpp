@@ -86,6 +86,8 @@ __attribute__((visibility("default"))) int32_t HksExtPluginOnUnRegisterProvider(
     ProviderInfo providerInfo;
     ret = GetProviderInfo(processInfo, providerName, paramSet, providerInfo);
     HKS_IF_TRUE_LOGE_RETURN(ret != HKS_SUCCESS, ret, "GetProviderInfo failed. ret: %" LOG_PUBLIC "d", ret)
+
+    providerInfo.m_userid = GetEffectiveUserId(paramSet, processInfo.uidInt);
     ret = handleMgr->ClearUidIndexMap(providerInfo);
     HKS_IF_TRUE_LOGE(ret != HKS_SUCCESS, "clear index map fail");
 

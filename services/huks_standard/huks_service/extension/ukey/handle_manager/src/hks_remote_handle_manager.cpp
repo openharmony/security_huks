@@ -165,7 +165,7 @@ int32_t HksRemoteHandleManager::CreateRemoteHandle(const HksProcessInfo &process
     ret = GetProviderInfoAndIndex(index, providerInfo, newIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
         "Parse index and provider info failed: %" LOG_PUBLIC "d", ret)
-    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
+    providerInfo.m_userid = GetEffectiveUserId(paramSet, processInfo.uidInt);
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -204,7 +204,7 @@ int32_t HksRemoteHandleManager::CloseRemoteHandle(const HksProcessInfo &processI
     ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
     HKS_IF_TRUE_RETURN(ret == HKS_ERROR_NOT_EXIST, HKS_SUCCESS)
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
-    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
+    providerInfo.m_userid = GetEffectiveUserId(paramSet, processInfo.uidInt);
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, HKS_SUCCESS)
@@ -245,8 +245,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPin(const HksProcessInfo &processInf
     std::string handle = "";
     int32_t ret = ParseAndValidateIndex(index, uid.second, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
-    int32_t userId = HksGetUserIdFromUid(uid.second);
-    providerInfo.m_userid = userId;
+    providerInfo.m_userid = GetEffectiveUserId(paramSet, processInfo.uidInt);
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -281,8 +280,7 @@ int32_t HksRemoteHandleManager::RemoteVerifyPinStatus(const HksProcessInfo &proc
     std::string handle;
     ret = ParseAndValidateIndex(index, uid, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
-    int32_t userId = HksGetUserIdFromUid(uid);
-    providerInfo.m_userid = userId;
+    providerInfo.m_userid = GetEffectiveUserId(paramSet, processInfo.uidInt);
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -309,7 +307,7 @@ int32_t HksRemoteHandleManager::RemoteClearPinStatus(const HksProcessInfo &proce
     std::string handle = "";
     ret = ParseAndValidateIndex(index, processInfo.uidInt, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
-    providerInfo.m_userid = HksGetUserIdFromUid(processInfo.uidInt);
+    providerInfo.m_userid = GetEffectiveUserId(paramSet, processInfo.uidInt);
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -467,7 +465,7 @@ int32_t HksRemoteHandleManager::SetOrGetRemoteProperty(struct HksProcessWithErro
     std::string handle;
     ret = ParseAndValidateIndex(index, uid, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
-    providerInfo.m_userid = HksGetUserIdFromUid(uid);
+    providerInfo.m_userid = GetEffectiveUserId(paramSet, uid);
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
     HKS_IF_NULL_RETURN(proxy, ret)
@@ -499,7 +497,7 @@ int32_t HksRemoteHandleManager::RemoteImportWrappedKey(struct HksProcessWithErro
     ProviderInfo providerInfo{};
     ret = ParseAndValidateIndex(index, processAndError.processInfo->uidInt, providerInfo, newIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ParseIndexAndProviderInfo failed, ret = %" LOG_PUBLIC "d", ret)
-    providerInfo.m_userid = HksGetUserIdFromUid(processAndError.processInfo->uidInt);
+    providerInfo.m_userid = GetEffectiveUserId(paramSet, processAndError.processInfo->uidInt);
 
     std::string newWrappingKeyIndex;
     ProviderInfo wrappingKeyProviderInfo;
@@ -540,7 +538,7 @@ int32_t HksRemoteHandleManager::RemoteExportPublicKey(struct HksProcessWithError
 
     ret = ParseAndValidateIndex(index, processAndError.processInfo->uidInt, providerInfo, newIndex);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ParseIndexAndProviderInfo failed, ret = %" LOG_PUBLIC "d", ret)
-    providerInfo.m_userid = HksGetUserIdFromUid(processAndError.processInfo->uidInt);
+    providerInfo.m_userid = GetEffectiveUserId(paramSet, processAndError.processInfo->uidInt);
 
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
@@ -569,8 +567,7 @@ int32_t HksRemoteHandleManager::ExtensionGenerateKey(struct HksProcessWithErrorI
     std::string handle;
     ret = ParseAndValidateIndex(index, processAndError.processInfo->uidInt, providerInfo, handle);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
-    int32_t userId = HksGetUserIdFromUid(processAndError.processInfo->uidInt);
-    providerInfo.m_userid = userId;
+    providerInfo.m_userid = GetEffectiveUserId(paramSet, processAndError.processInfo->uidInt);
 
     OHOS::sptr<IHuksAccessExtBase> proxy;
     ret = GetProviderProxy(providerInfo, proxy);
@@ -615,8 +612,7 @@ int32_t HksRemoteHandleManager::GetResourceId(const HksProcessInfo &processInfo,
     HKS_IF_TRUE_LOGE_RETURN(resourceInfo.second.size() < 1, HKS_ERROR_INVALID_ARGUMENT,
         "the resourceInfo is too short. size: %" LOG_PUBLIC "zu", resourceInfo.second.size())
 
-    int32_t userId = HksGetUserIdFromUid(processInfo.uidInt);
-    providerInfo.m_userid = userId;
+    providerInfo.m_userid = GetEffectiveUserId(paramSet, processInfo.uidInt);
     providerInfo.m_abilityName = std::string(abilityName.second.begin(), abilityName.second.end());
     providerInfo.m_bundleName = std::string(bundleName.second.begin(), bundleName.second.end());
     providerInfo.m_providerName = providerName;
@@ -641,6 +637,11 @@ int32_t HksRemoteHandleManager::GetResourceId(const HksProcessInfo &processInfo,
     return HKS_SUCCESS;
 }
 
+// Clear all handle mappings and reference counts belonging to the specified Provider.
+// Called during UnregisterProvider. Iterates uidIndexToHandle_ to find all {uid, index}
+// entries whose parsed ProviderInfo matches (providerName + bundleName + userid, and
+// abilityName if non-empty), then removes them from uidIndexToHandle_ and decrements
+// the corresponding entry in providerInfoToNum_.
 int32_t HksRemoteHandleManager::ClearUidIndexMap(const ProviderInfo &providerInfo)
 {
     std::vector<std::pair<uint32_t, std::string>> indicesToRemove;
@@ -695,6 +696,11 @@ bool HksRemoteHandleManager::IsProviderNumExceedLimit(const ProviderInfo &provid
     return false;
 }
 
+// Remove stale handle mappings after a remote operation fails with CRYPTO_FAIL or
+// ITEM_NOT_EXIST, indicating the remote key/resource no longer exists. Finds all
+// {uid, index} entries in uidIndexToHandle_ whose mapped handle matches, removes
+// them from uidIndexToHandle_ and decrements the corresponding providerInfoToNum_
+// reference count.
 void HksRemoteHandleManager::ClearMapByHandle(const int32_t &ret, const std::string &handle)
 {
     if (ret != HUKS_ERR_CODE_CRYPTO_FAIL && ret != HUKS_ERR_CODE_ITEM_NOT_EXIST) {
